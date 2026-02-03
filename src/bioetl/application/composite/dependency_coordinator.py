@@ -4,6 +4,9 @@ Application Service that coordinates dependency pipeline execution.
 Dependencies run after the seed but before enrichers to populate
 Silver tables that enrichers will read from.
 
+Supports chained dependencies where one dependency provides keys
+for another via the key_source configuration field.
+
 See ADR-026 for architectural decisions.
 """
 
@@ -21,7 +24,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 
 
 class DependencyCoordinator:
@@ -30,14 +33,19 @@ class DependencyCoordinator:
     Dependencies run sequentially after the seed but before enrichers.
     They populate Silver tables that enrichers will read from.
 
+    Supports chained dependencies where one dependency's output provides
+    keys for another. The key_source field in DependencyConfig specifies
+    which dependency's Silver table to read keys from.
+
     Unlike enrichers which run in parallel, dependencies run sequentially
     to avoid overwhelming APIs and ensure predictable ordering.
 
     Attributes:
         logger: Structured logger.
+        delta_reader: Reader for Silver tables (for chained dependencies).
 
     Example:
-        >>> coordinator = DependencyCoordinator(logger=logger)
+        >>> coordinator = DependencyCoordinator(logger=logger, delta_reader=reader)
         >>> results = await coordinator.run_dependencies(
         ...     keys=keys_df,
         ...     dependencies=dependency_configs,
@@ -46,13 +54,19 @@ class DependencyCoordinator:
         ... )
     """
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(
+        self,
+        logger: LoggerPort,
+        delta_reader: DeltaReaderPort | None = None,
+    ) -> None:
         """Initialize dependency coordinator.
 
         Args:
             logger: Structured logger.
+            delta_reader: Reader for Silver tables (required for chained dependencies).
         """
         self._logger = logger
+        self._delta_reader = delta_reader
 
     async def run_dependencies(
         self,
@@ -60,17 +74,23 @@ class DependencyCoordinator:
         dependencies: Sequence[DependencyConfig],
         completed: frozenset[str],
         runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+        dependency_configs: dict[str, DependencyConfig] | None = None,
     ) -> dict[str, DependencyResult]:
         """Run all dependencies sequentially.
 
         Dependencies run after seed to have access to seed's keys for filtering.
         They populate Silver tables before enrichers run.
 
+        Supports chained dependencies where key_source points to another
+        dependency. In this case, keys are read from the source dependency's
+        Silver table instead of using seed keys.
+
         Args:
             keys: DataFrame with join keys from seed.
             dependencies: Dependency configurations.
             completed: Set of already-completed dependencies (for resume).
             runner_factory: Factory to create PipelineRunner for each dependency.
+            dependency_configs: All dependency configs for looking up key_source.
 
         Returns:
             Mapping of dependency name to result.
@@ -86,6 +106,8 @@ class DependencyCoordinator:
             True
         """
         results: dict[str, DependencyResult] = {}
+        # Build lookup if not provided
+        dep_config_lookup = dependency_configs or {d.pipeline: d for d in dependencies}
 
         if not dependencies:
             self._logger.debug(
@@ -111,9 +133,16 @@ class DependencyCoordinator:
                 )
                 continue
 
+            # Determine effective keys for this dependency
+            effective_keys = await self._get_effective_keys(
+                dependency=dependency,
+                seed_keys=keys,
+                dep_config_lookup=dep_config_lookup,
+            )
+
             result = await self._run_single_dependency(
                 dependency=dependency,
-                keys=keys,
+                keys=effective_keys,
                 runner_factory=runner_factory,
             )
             results[dependency.pipeline] = result
@@ -129,6 +158,70 @@ class DependencyCoordinator:
                 break
 
         return results
+
+    async def _get_effective_keys(
+        self,
+        dependency: DependencyConfig,
+        seed_keys: pl.DataFrame,
+        dep_config_lookup: dict[str, DependencyConfig],
+    ) -> pl.DataFrame:
+        """Get effective keys for a dependency.
+
+        For standard dependencies (uses_seed_keys=True), returns seed keys.
+        For chained dependencies, reads keys from the key_source's Silver table.
+
+        Args:
+            dependency: Current dependency configuration.
+            seed_keys: Keys from seed pipeline.
+            dep_config_lookup: All dependency configs for finding source tables.
+
+        Returns:
+            DataFrame with keys for this dependency.
+        """
+        # Standard dependency: use seed keys
+        if dependency.uses_seed_keys:
+            return seed_keys
+
+        # Chained dependency: read from key_source's Silver table
+        if self._delta_reader is None:
+            self._logger.warning(
+                "No delta_reader for chained dependency, falling back to seed keys",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+            )
+            return seed_keys
+
+        source_config = dep_config_lookup.get(dependency.key_source or "")
+        if not source_config or not source_config.silver_table:
+            self._logger.warning(
+                "Key source not found or has no Silver table, using seed keys",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+            )
+            return seed_keys
+
+        try:
+            source_keys = await self._delta_reader.read_table(
+                source_config.silver_table
+            )
+            if source_keys is not None and len(source_keys) > 0:
+                self._logger.info(
+                    "Using chained dependency keys",
+                    dependency=dependency.pipeline,
+                    key_source=dependency.key_source,
+                    source_table=source_config.silver_table,
+                    key_count=len(source_keys),
+                )
+                return source_keys
+        except Exception as e:
+            self._logger.warning(
+                "Failed to read chained keys, falling back to seed",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+                error=str(e),
+            )
+
+        return seed_keys
 
     async def _run_single_dependency(
         self,

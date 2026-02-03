@@ -57,38 +57,17 @@ class TargetTransformer(BaseChemblTransformer):
             "component_ids": None,
             "component_types": None,
             "component_relationships": None,
-            "component_descriptions": None,
-            "component_organisms": None,
-            # Standardized to 'taxonomy_ids' for NCBI consistency
-            "component_taxonomy_ids": None,
         }
 
     def _extract_basic_component_fields(
         self, components: list[dict[str, Any]]
     ) -> dict[str, list[Any] | None]:
         """Extract basic fields from component list via transform_utils."""
-        # Extract taxonomy IDs and validate using TaxonomyId Value Object
-        raw_tax_ids = extract_list_field(components, "tax_id", safe_int)
-        validated_tax_ids: list[int] | None = None
-        if raw_tax_ids:
-            validated_list: list[int] = []
-            for tid in raw_tax_ids:
-                vo = TaxonomyId.from_raw(tid)
-                if vo is not None:
-                    validated_list.append(vo.value)
-            validated_tax_ids = validated_list if validated_list else None
-
         return {
             "component_accessions": extract_list_field(components, "accession"),
             "component_ids": extract_list_field(components, "component_id", safe_int),
             "component_types": extract_list_field(components, "component_type"),
             "component_relationships": extract_list_field(components, "relationship"),
-            "component_descriptions": extract_list_field(
-                components, "component_description"
-            ),
-            "component_organisms": extract_list_field(components, "organism"),
-            # Standardized to 'taxonomy_ids' for NCBI consistency
-            "component_taxonomy_ids": validated_tax_ids,
         }
 
     def _aggregate_synonyms(
@@ -150,6 +129,10 @@ class TargetTransformer(BaseChemblTransformer):
         # Extract flattened components
         flattened_components = self._flatten_target_components(target_components)
 
+        # Extract primary component_id (first element) for enricher join key
+        component_ids = flattened_components.get("component_ids")
+        primary_component_id = component_ids[0] if component_ids else None
+
         # Handle downgraded field: convert to bool if it's 0/1
         # Use safe_int to handle "0"/"1" strings correctly
         downgraded_val = safe_int(record.get("downgraded"))
@@ -166,6 +149,8 @@ class TargetTransformer(BaseChemblTransformer):
         return {
             # Primary identifier
             "target_chembl_id": str(primary_id),
+            # Primary component ID (for target_component enricher join)
+            "component_id": primary_component_id,
             # Core metadata
             "pref_name": record.get("pref_name"),
             "target_type": record.get("target_type"),
@@ -173,12 +158,8 @@ class TargetTransformer(BaseChemblTransformer):
             # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
             "taxonomy_id": taxonomy_id,
             "species_group_flag": record.get("species_group_flag"),
-            "description": record.get("description"),
             "downgraded": downgraded,
-            # Optional fields (present for specific target types)
-            "dap_id": safe_int(record.get("dap_id")),
             "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
-            "target_constraints": self.serialize_json(record.get("target_constraints")),
             # Complex fields (JSON serialized)
             "target_components": self.serialize_json(target_components),
             "target_component_synonyms": self._aggregate_synonyms(target_components),

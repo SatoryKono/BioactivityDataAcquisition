@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.15 (Field Group Registry), 2026-01-29* 
+*Версия: 5.16 (ADR Registry Update + Doc Sync), 2026-02-02* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -1273,8 +1273,10 @@ fields:
 | [ADR-029](02-architecture/decisions/ADR-029-output-metadata-unification.md) | Output Metadata Unification | Accepted | 2026-01-23 |
 | [ADR-030](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | Accepted | 2026-01-26 |
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | 2026-01-26 |
+| [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | Accepted | 2026-01-28 |
 
 ## История Изменений (Changelog)
+- **5.16** (2026-02-02): ADR Registry Update + Doc Sync. Добавлен ADR-032 в реестр (Приложение F): Unified HTTP Client Pattern. Синхронизация метрик с кодовой базой.
 - **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composite/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
 - **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve_all_sources` feature, column groups и merge strategies. Ссылка на ADR-026.
 - **5.13** (2026-01-28): ADR Registry Update. Добавлены ADR-029..031 в реестр (Приложение F): Output Metadata Unification, Publication Pagination Strategy, Loading Strategy Formalization.

@@ -77,9 +77,18 @@ class TargetComponentTransformer(BaseChemblTransformer):
             # JSON serialization using helper method
             **self.serialize_json_fields(rec, _JSON_FIELDS),
             # Flattened fields (extracted from protein_classifications)
-            "protein_classification_ids": extract_list_field(
-                cast("list[dict[str, Any]] | None", rec.get("protein_classifications")),
-                "protein_classification_id",
-                safe_int,
+            "protein_classification_ids": (
+                classification_ids := extract_list_field(
+                    cast(
+                        "list[dict[str, Any]] | None",
+                        rec.get("protein_classifications"),
+                    ),
+                    "protein_classification_id",
+                    safe_int,
+                )
+            ),
+            # Primary classification ID (for enricher join key)
+            "protein_classification_id": (
+                classification_ids[0] if classification_ids else None
             ),
         }

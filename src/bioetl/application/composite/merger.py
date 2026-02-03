@@ -214,6 +214,9 @@ class MergeService:
             sources_used=sources_used,
         )
 
+        # Step 5b: Drop excluded fields from merged output
+        merged_df = self._drop_excluded_fields(merged_df)
+
         # Step 6: Order columns by semantic groups
         merged_df = self._orderer.order_columns(merged_df)
         self._logger.info(
@@ -1372,6 +1375,28 @@ class MergeService:
                 pl.lit(datetime.now(tz=UTC).isoformat()).alias("_lineage_created_at"),
             ]
         )
+
+    def _drop_excluded_fields(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Drop columns configured for exclusion in merge config."""
+        if not self._config.exclude_fields:
+            return df
+
+        from fnmatch import fnmatch
+
+        excluded = [
+            col
+            for col in df.columns
+            if any(fnmatch(col, pattern) for pattern in self._config.exclude_fields)
+        ]
+        if not excluded:
+            return df
+
+        self._logger.info(
+            "Dropping excluded fields from merged output",
+            excluded_count=len(excluded),
+            excluded_fields=excluded[:10],
+        )
+        return df.drop(excluded)
 
     def _count_enriched_records(
         self,

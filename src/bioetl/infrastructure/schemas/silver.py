@@ -198,7 +198,7 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
 )
 
 # Schema for UniProt ID Mapping
-# Maps ChEMBL target IDs to UniProt accessions
+# Maps ChEMBL target IDs to UniProt accessions with entry metadata
 UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
@@ -210,12 +210,23 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Mapping status: 'found', 'not_found', 'error'
+        pa.field("all_mappings", pa.string()),  # JSON array for multiple mappings
+        pa.field("annotation_score", pa.int64()),  # Quality score 1-5
+        pa.field("gene_primary", pa.string()),  # Primary gene name
+        # Mapping status: 'found', 'not_found', 'error', 'multiple'
         pa.field("mapping_status", pa.string()),
+        pa.field("organism_common", pa.string()),  # Common organism name
+        pa.field("organism_scientific", pa.string()),  # Scientific organism name
+        pa.field("protein_name", pa.string()),  # Recommended protein name
+        pa.field("reviewed", pa.bool_()),  # Swiss-Prot (true) vs TrEMBL (false)
+        pa.field("sequence_length", pa.int64()),  # Protein sequence length
+        pa.field("sequence_mass", pa.int64()),  # Molecular weight in Daltons
         # Primary key (source identifier)
         pa.field("target_chembl_id", pa.string()),
+        pa.field("taxonomy_id", pa.int64()),  # NCBI Taxonomy ID
         # Mapped identifier (nullable - None if not found)
         pa.field("uniprot_accession", pa.string()),
+        pa.field("uniprot_entry_name", pa.string()),  # Entry name (e.g., FA10_HUMAN)
         # === DQ suffix (MUST be last, if present) ===
         # DQ warning flag (True for not_found)
         pa.field("_dq_error", pa.bool_()),
@@ -375,17 +386,12 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         # Flattened component fields
         pa.field("component_accessions", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
+        pa.field("component_id", pa.int64()),
         pa.field("component_ids", pa.list_(pa.int64())),
-        pa.field("component_organisms", pa.list_(pa.string())),
         pa.field("component_relationships", pa.list_(pa.string())),
-        pa.field(
-            "component_taxonomy_ids", pa.list_(pa.int64())
-        ),  # Standardized name (was component_tax_ids)
         pa.field("component_types", pa.list_(pa.string())),
         # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
-        pa.field("dap_id", pa.int64()),
-        pa.field("description", pa.string()),
         pa.field("downgraded", pa.bool_()),
         pa.field("organism", pa.string()),
         pa.field("pipeline_stages", pa.string()),
@@ -394,7 +400,6 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_chembl_id", pa.string()),
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_components", pa.string()),
-        pa.field("target_constraints", pa.string()),
         pa.field("target_type", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # Note: protein_classifications not available in /target endpoint
@@ -424,6 +429,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("description", pa.string()),
         pa.field("organism", pa.string()),
         # Flattened fields (extracted from protein_classifications)
+        pa.field("protein_classification_id", pa.int64()),
         pa.field("protein_classification_ids", pa.list_(pa.int64())),
         pa.field("protein_classifications", pa.string()),  # Forensic JSON
         # Complex fields (JSON strings)

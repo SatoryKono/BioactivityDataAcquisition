@@ -261,14 +261,17 @@ def bootstrap_composite_runner(
         Dependencies run after the seed to populate Silver tables before enrichers.
         Unlike enrichers which read from Silver, dependencies call APIs to fetch data.
 
+        Note: Chained dependencies (key_source) are handled by DependencyCoordinator
+        which provides the correct keys from the source dependency's Silver table.
+
         Configuration:
-        - Extracts join key values from seed results DataFrame
+        - Extracts join key values from provided keys DataFrame
         - Passes extracted IDs as filter_ids to limit API calls
-        - Does NOT use ignore_yaml_filter (dependencies may have their own configs)
+        - Uses filter_field from config if set (for field name mapping)
 
         Args:
             pipeline_name: Name of the dependency pipeline to instantiate.
-            keys: DataFrame containing seed results with join key columns.
+            keys: DataFrame containing keys for filtering (from seed or chained source).
 
         Returns:
             PipelineRunner configured for dependency pipeline execution.
@@ -278,7 +281,7 @@ def bootstrap_composite_runner(
         filter_field: str | None = None
 
         if dep_cfg and keys is not None and len(keys) > 0:
-            # Extract filter IDs from seed keys
+            # Extract filter IDs from keys
             for key in dep_cfg.join_keys:
                 if key in keys.columns:
                     key_values = (
@@ -286,12 +289,13 @@ def bootstrap_composite_runner(
                     )
                     if key_values:
                         filter_ids = tuple(str(v) for v in key_values)
-                        filter_field = key
+                        # Use filter_field from config if set, otherwise use join_key
+                        filter_field = dep_cfg.filter_field or key
                         break
 
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if filter_ids else None,
+            limit=len(keys) if filter_ids and keys is not None else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
         )
@@ -315,6 +319,7 @@ def bootstrap_composite_runner(
 
     dependency_coordinator = DependencyCoordinator(
         logger=logger,
+        delta_reader=delta_reader,
     )
 
     coordinator = EnrichmentCoordinator(

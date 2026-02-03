@@ -17,6 +17,7 @@ Rate Limits:
 from __future__ import annotations
 
 import asyncio
+import json
 import re
 from collections.abc import AsyncIterator, Mapping
 from typing import TYPE_CHECKING, Any
@@ -66,13 +67,14 @@ class UniProtIDMappingClient(BaseHttpAdapter):
     """UniProt ID Mapping API client.
 
     Supports mapping between ChEMBL and UniProtKB identifiers using
-    UniProt's job-based ID Mapping REST API.
+    UniProt's job-based ID Mapping REST API. Extracts comprehensive
+    entry metadata when mapping to UniProtKB.
 
     Example:
         >>> client = UniProtIDMappingClient(http_client, logger)
         >>> results = await client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
-        >>> results
-        {"CHEMBL204": "P00742"}
+        >>> results["CHEMBL204"]
+        {"uniprot_accession": "P00742", "uniprot_entry_name": "FA10_HUMAN", ...}
     """
 
     provider_name: str = "uniprot_idmapping"
@@ -108,7 +110,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> Mapping[str, str | None]:
+    ) -> Mapping[str, dict[str, Any] | None]:
         """Map identifiers using UniProt ID Mapping API.
 
         Args:
@@ -117,7 +119,11 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             ids: List of source identifiers
 
         Returns:
-            Dict mapping source IDs to target IDs (None if not found)
+            Dict mapping source IDs to entry data dicts (None if not found).
+            Each entry dict contains: uniprot_accession, uniprot_entry_name,
+            organism_scientific, organism_common, taxonomy_id, protein_name,
+            gene_primary, sequence_length, sequence_mass, reviewed, annotation_score,
+            and optionally all_mappings (JSON) if multiple mappings found.
 
         Raises:
             IDMappingJobError: If the mapping job fails.
@@ -126,7 +132,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         if not ids:
             return {}
 
-        results: dict[str, str | None] = dict.fromkeys(ids, None)
+        results: dict[str, dict[str, Any] | None] = dict.fromkeys(ids, None)
 
         # Process in batches
         for batch_start in range(0, len(ids), self.MAX_IDS_PER_BATCH):
@@ -141,7 +147,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> dict[str, str | None]:
+    ) -> dict[str, dict[str, Any] | None]:
         """Map a batch of IDs.
 
         Args:
@@ -150,7 +156,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             ids: Batch of source identifiers.
 
         Returns:
-            Dict mapping source IDs to target IDs.
+            Dict mapping source IDs to entry data dicts.
         """
         # Step 1: Submit job
         job_id = await self._submit_job(from_db, to_db, ids)
@@ -311,22 +317,26 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         self,
         job_id: str,
         original_ids: list[str],
-    ) -> dict[str, str | None]:
-        """Fetch mapping results.
+    ) -> dict[str, dict[str, Any] | None]:
+        """Fetch mapping results with full entry metadata.
 
         GET /idmapping/results/{jobId}
-        Response: {"results": [{"from": "CHEMBL204", "to": "P00742"}, ...]}
+        Response: {"results": [{"from": "CHEMBL204", "to": {...}}, ...]}
 
         Note: Results may be paginated. Handle Link header for pagination.
+        Multiple mappings for same ID are aggregated with primary selection.
 
         Args:
             job_id: Job ID to fetch results for.
             original_ids: Original list of IDs for initializing results dict.
 
         Returns:
-            Dict mapping source IDs to target IDs (None if not found).
+            Dict mapping source IDs to entry data dicts (None if not found).
         """
-        results: dict[str, str | None] = dict.fromkeys(original_ids, None)
+        # Collect all entries per source ID (for multiple mappings)
+        entries_by_id: dict[str, list[dict[str, Any]]] = {
+            id_: [] for id_ in original_ids
+        }
         url: str | None = f"{self.base_url}/idmapping/results/{job_id}"
 
         while url:
@@ -343,22 +353,46 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
             data = response.json()
 
-            # Process results
+            # Process results - collect all entries per source ID
             for mapping in data.get("results", []):
-                from_id, to_id = self._parse_mapping_entry(mapping)
-                if from_id in results and to_id:
-                    results[from_id] = to_id
+                from_id, entry_data = self._parse_mapping_entry(mapping)
+                if from_id in entries_by_id and entry_data:
+                    entries_by_id[from_id].append(entry_data)
 
             # Check for pagination (Link header)
             url = self._get_next_page_url(response.headers)
 
+        # Select primary entry for each ID, handle multiple mappings
+        results: dict[str, dict[str, Any] | None] = {}
+        for id_, entries in entries_by_id.items():
+            if not entries:
+                results[id_] = None
+            elif len(entries) == 1:
+                results[id_] = entries[0]
+            else:
+                # Multiple mappings: sort by reviewed (desc), annotation_score (desc)
+                sorted_entries = sorted(
+                    entries,
+                    key=lambda e: (
+                        -int(e.get("reviewed") or False),
+                        -int(e.get("annotation_score") or 0),
+                    ),
+                )
+                primary = dict(sorted_entries[0])  # Copy to avoid mutation
+                # Store all accessions as JSON array
+                all_accessions = [e["uniprot_accession"] for e in sorted_entries]
+                primary["all_mappings"] = json.dumps(all_accessions)
+                results[id_] = primary
+
         found_count = sum(1 for v in results.values() if v is not None)
+        multiple_count = sum(1 for v in results.values() if v and v.get("all_mappings"))
         self.logger.info(
             "idmapping_results_fetched",
             job_id=job_id,
             total=len(original_ids),
             found=found_count,
             not_found=len(original_ids) - found_count,
+            multiple_mappings=multiple_count,
         )
 
         return results
@@ -381,31 +415,85 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         return match.group(1) if match else None
 
     @staticmethod
-    def _parse_mapping_entry(mapping: dict[str, Any]) -> tuple[str | None, str | None]:
+    def _parse_mapping_entry(
+        mapping: dict[str, Any],
+    ) -> tuple[str | None, dict[str, Any] | None]:
         """Parse a single mapping entry from API response.
 
-        Handles both direct string mappings and entry-based responses
-        where UniProtKB returns full entry objects with primaryAccession.
+        Extracts comprehensive entry metadata from UniProtKB responses.
+        Handles both direct string mappings and full entry objects.
 
         Args:
             mapping: Single mapping entry from results array.
 
         Returns:
-            Tuple of (from_id, to_id), either may be None if not found.
+            Tuple of (from_id, entry_data_dict), either may be None if not found.
         """
         from_id = mapping.get("from")
         to_entry = mapping.get("to", {})
 
-        # Handle both direct mapping and entry-based response
+        # Handle direct string mapping (simple database mapping)
         if isinstance(to_entry, str):
-            return from_id, to_entry
+            return from_id, {"uniprot_accession": to_entry}
 
-        if isinstance(to_entry, dict):
-            # UniProtKB returns full entry with primaryAccession
-            accession = to_entry.get("primaryAccession")
-            return from_id, str(accession) if accession else None
+        if not isinstance(to_entry, dict):
+            return from_id, None
 
-        return from_id, None
+        # Extract primary accession (required)
+        accession = to_entry.get("primaryAccession")
+        if not accession:
+            return from_id, None
+
+        # Extract organism info
+        organism = to_entry.get("organism", {})
+
+        # Extract protein description
+        protein_desc = to_entry.get("proteinDescription", {})
+        recommended_name = protein_desc.get("recommendedName", {})
+        full_name = recommended_name.get("fullName", {})
+
+        # Extract gene info
+        genes = to_entry.get("genes", [])
+        gene_primary = None
+        if genes and isinstance(genes, list) and len(genes) > 0:
+            first_gene = genes[0]
+            if isinstance(first_gene, dict):
+                gene_name_obj = first_gene.get("geneName", {})
+                if isinstance(gene_name_obj, dict):
+                    gene_primary = gene_name_obj.get("value")
+
+        # Extract sequence info
+        sequence = to_entry.get("sequence", {})
+
+        # Determine reviewed status from entryType
+        entry_type = to_entry.get("entryType", "")
+        reviewed = "Swiss-Prot" in entry_type if entry_type else None
+
+        return from_id, {
+            "uniprot_accession": str(accession),
+            "uniprot_entry_name": to_entry.get("uniProtkbId"),
+            "organism_scientific": organism.get("scientificName")
+            if isinstance(organism, dict)
+            else None,
+            "organism_common": organism.get("commonName")
+            if isinstance(organism, dict)
+            else None,
+            "taxonomy_id": organism.get("taxonId")
+            if isinstance(organism, dict)
+            else None,
+            "protein_name": full_name.get("value")
+            if isinstance(full_name, dict)
+            else None,
+            "gene_primary": gene_primary,
+            "sequence_length": sequence.get("length")
+            if isinstance(sequence, dict)
+            else None,
+            "sequence_mass": sequence.get("molWeight")
+            if isinstance(sequence, dict)
+            else None,
+            "reviewed": reviewed,
+            "annotation_score": to_entry.get("annotationScore"),
+        }
 
     async def _probe_health(self) -> HealthStatus:
         """Perform health probe for ID Mapping API.

@@ -100,7 +100,7 @@ class TestFileSizeLimits:
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
         "pipeline_factory.py": 735,  # 731 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation
-        "pipeline_factories.py": 520,  # 505 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping)
+        "pipeline_factories.py": 530,  # 525 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + data_source_provider override)
         "services_factory.py": 690,  # 687 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030)
         # Infrastructure layer exemptions
         "silver_writer.py": 1155,  # 1151 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
@@ -571,7 +571,7 @@ class TestClassSize:
         "BatchWriter": 500,  # 494 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults + column_order + layer config filtering
         # Application core classes
         "FilteredDataSource": 330,  # 320 lines - decorator with fallback mapping support
-        "ColumnOrderer": 380,  # 373 lines - Column ordering service with layer config filtering
+        "ColumnOrderer": 390,  # 388 lines - Column ordering service with layer config filtering
         # CrossRef adapter classes (similar to ChEMBL/PubMed adapters)
         "CrossRefAdapter": 610,  # 603 lines - HTTP adapter with batch DOI resolution + title fallback
         # PubChem adapter (similar to ChEMBL adapter)
