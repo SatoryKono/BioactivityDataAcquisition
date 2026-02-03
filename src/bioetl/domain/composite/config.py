@@ -826,11 +826,17 @@ class CompositeConfig:
     def _validate_unique_enrichers(self) -> None:
         """Validate that enricher pipeline names are unique."""
         if not self.enrichers:
-            return  # Skip if no enrichers
-        names = [e.pipeline for e in self.enrichers]
-        if len(names) != len(set(names)):
-            duplicates = [n for n in names if names.count(n) > 1]
-            raise ValueError(f"Duplicate enricher pipelines: {set(duplicates)}")
+            return
+
+        seen = set()
+        duplicates = set()
+        for e in self.enrichers:
+            if e.pipeline in seen:
+                duplicates.add(e.pipeline)
+            seen.add(e.pipeline)
+
+        if duplicates:
+            raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
 
     def _validate_dependency_join_keys(self) -> None:
         """Validate that dependency join keys exist in seed output_keys.
@@ -853,10 +859,15 @@ class CompositeConfig:
 
     def _validate_unique_dependencies(self) -> None:
         """Validate that dependency pipeline names are unique."""
-        names = [d.pipeline for d in self.dependencies]
-        if len(names) != len(set(names)):
-            duplicates = [n for n in names if names.count(n) > 1]
-            raise ValueError(f"Duplicate dependency pipelines: {set(duplicates)}")
+        seen = set()
+        duplicates = set()
+        for d in self.dependencies:
+            if d.pipeline in seen:
+                duplicates.add(d.pipeline)
+            seen.add(d.pipeline)
+
+        if duplicates:
+            raise ValueError(f"Duplicate dependency pipelines: {duplicates}")
 
     @property
     def required_enrichers(self) -> tuple[str, ...]:
