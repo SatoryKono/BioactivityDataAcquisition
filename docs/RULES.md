@@ -1,5 +1,5 @@
 # BioETL: Правила Проекта
-*Версия: 5.16 (ADR Registry Update + Doc Sync), 2026-02-02* 
+*Версия: 5.17 (Chained Dependencies), 2026-02-03* 
  
 ## Введение (Quick Reference) 
 | Задача | Раздел | Инструмент | 
@@ -287,10 +287,54 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 Composite Pipeline объединяет данные из нескольких источников в единую обогащённую сущность:
 1. **Seed Pipeline** — извлекает первичные сущности (напр., публикации из ChEMBL)
-2. **Enricher Pipelines** — обогащают данными из других источников (CrossRef, OpenAlex, PubMed)
-3. **Merge Step** — объединяет все обогащения в единую Gold-сущность
+2. **Dependency Pipelines** — заполняют Silver-таблицы перед обогащением (опционально)
+3. **Enricher Pipelines** — обогащают данными из других источников (CrossRef, OpenAlex, PubMed)
+4. **Merge Step** — объединяет все обогащения в единую Gold-сущность
 
-#### 2.9.1. Merge Configuration
+#### 2.9.1. Dependency Pipelines (Chained Dependencies)
+
+Dependencies — пайплайны, которые запускаются **после seed, но до enrichers**. В отличие от enrichers (читают из Silver), dependencies выполняют полный цикл API→Bronze→Silver.
+
+**Конфигурация dependency:**
+```yaml
+dependencies:
+  - pipeline: chembl_target_component
+    join_keys: [component_id]       # Ключ из seed
+    silver_table: silver/chembl/target_component
+```
+
+**Chained Dependencies (цепочечные зависимости):**
+
+Когда один dependency предоставляет ключи для другого:
+
+```yaml
+dependencies:
+  # 1. Стандартный: ключи из seed
+  - pipeline: chembl_target_component
+    join_keys: [component_id]
+    silver_table: silver/chembl/target_component
+
+  # 2. Цепочечный: ключи из предыдущего dependency
+  - pipeline: chembl_protein_class
+    join_keys: [protein_classification_id]  # Колонка в source таблице
+    filter_field: protein_class_id          # Поле API (если отличается)
+    key_source: chembl_target_component     # Читать ключи отсюда
+    silver_table: silver/chembl/protein_class
+```
+
+**Поля DependencyConfig:**
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `pipeline` | string | Имя пайплайна |
+| `join_keys` | list | Колонки для извлечения ключей |
+| `key_source` | string? | `null`/`"seed"` = seed, иначе имя dependency |
+| `filter_field` | string? | Поле API для фильтрации (если ≠ join_key) |
+| `required` | bool | При `true` — ошибка останавливает composite |
+| `timeout_seconds` | int | Таймаут выполнения |
+| `silver_table` | string? | Путь к Silver-таблице |
+
+#### 2.9.2. Merge Configuration
 
 | Параметр | Описание | Значения |
 |----------|----------|----------|
@@ -298,7 +342,7 @@ Composite Pipeline объединяет данные из нескольких �
 | `conflict_resolution` | Разрешение конфликтов полей | `seed_priority`, `enricher_priority`, `coalesce`, `explicit_rules` |
 | `preserve_all_sources` | Сохранение всех колонок провайдеров | `true` / `false` (default) |
 
-#### 2.9.2. preserve_all_sources Feature
+#### 2.9.3. preserve_all_sources Feature
 
 Опция `preserve_all_sources` в `MergeConfig` контролирует обработку колонок при слиянии:
 
@@ -337,7 +381,7 @@ pubmed.publication.title        # Значение из PubMed
 - **`preserve_all_sources: true`**: Анализ качества данных, сравнение источников, ML-фичи из нескольких провайдеров
 - **`preserve_all_sources: false`**: Продакшн-витрины с единственной "лучшей" версией каждого поля
 
-#### 2.9.3. Column Groups
+#### 2.9.4. Column Groups
 
 Для контроля порядка колонок в output используется конфигурация `column_groups`:
 
@@ -352,7 +396,7 @@ merge:
       provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 ```
 
-#### 2.9.4. Field Group Registry
+#### 2.9.5. Field Group Registry
 
 `FieldGroupRegistry` обеспечивает семантическую группировку полей для:
 - **Упорядочивание колонок** в merged output (группы отсортированы по приоритету enum)
@@ -381,7 +425,7 @@ merge:
 
 **Интеграция:** Bootstrap загружает реестр из YAML и инжектит в `MergeService`. При записи Gold trash-колонки фильтруются автоматически. При отсутствии конфигурации — graceful degradation (фильтрация не применяется).
 
-#### 2.9.5. Column Renames (Layer-Specific)
+#### 2.9.6. Column Renames (Layer-Specific)
 
 `rename_fields` в `data_schema` конфигурации позволяет переименовывать колонки на уровне Silver и Gold слоёв.
 
@@ -1276,6 +1320,7 @@ fields:
 | [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | Accepted | 2026-01-28 |
 
 ## История Изменений (Changelog)
+- **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key_source` и `filter_field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
 - **5.16** (2026-02-02): ADR Registry Update + Doc Sync. Добавлен ADR-032 в реестр (Приложение F): Unified HTTP Client Pattern. Синхронизация метрик с кодовой базой.
 - **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composite/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
 - **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve_all_sources` feature, column groups и merge strategies. Ссылка на ADR-026.
