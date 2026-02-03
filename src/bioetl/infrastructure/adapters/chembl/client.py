@@ -513,6 +513,61 @@ class ChemblAdapter(BaseHttpAdapter):
             error_class=type(e).__name__,
         )
 
+    async def _fetch_single_record_direct(
+        self, entity_type: str, record_id: str
+    ) -> dict[str, Any] | None:
+        """Fetch a single record using direct endpoint as fallback.
+
+        ChEMBL API has two code paths:
+        1. Filter endpoint: /target?target_chembl_id__in=CHEMBL123 (may fail with 500)
+        2. Direct endpoint: /target/CHEMBL123 (often works when filter fails)
+
+        This method is used as a fallback when the filter endpoint fails for a single ID.
+
+        Args:
+            entity_type: Entity type to fetch.
+            record_id: The ChEMBL ID of the record.
+
+        Returns:
+            Record dict if successful, None if failed.
+        """
+        direct_url = self._mapper.get_direct_record_url(entity_type, record_id)
+        params = {"format": "json"}
+
+        try:
+            start_time = time.perf_counter()
+            with self._adapter_metrics.measure_request(f"/{entity_type}/{record_id}"):
+                response = await self.http_client.get(direct_url, params=params)
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
+            # Direct endpoint returns single record, not wrapped in plural key
+            data = response.json()
+
+            # ChEMBL direct endpoint returns the record directly (not in a list)
+            if isinstance(data, dict) and not data.get("page_meta"):
+                self.logger.info(
+                    "direct_endpoint_fallback_success",
+                    entity_type=entity_type,
+                    record_id=record_id,
+                )
+                return data
+
+            return None
+
+        except Exception as e:
+            self.logger.warning(
+                "direct_endpoint_fallback_failed",
+                entity_type=entity_type,
+                record_id=record_id,
+                error=str(e),
+                error_class=type(e).__name__,
+            )
+            return None
+
     async def _retry_with_split_batches(
         self,
         entity_type: str,
@@ -603,7 +658,30 @@ class ChemblAdapter(BaseHttpAdapter):
                 ):
                     yield record
             else:
-                self._log_single_id_failure(entity_type, filter_field, id_batch, e)
+                # Filter endpoint failed for single ID - try direct endpoint fallback
+                # ChEMBL filter and direct endpoints use different server code paths
+                single_id = id_batch[0]
+                direct_record = await self._fetch_single_record_direct(
+                    entity_type, single_id
+                )
+                if direct_record is not None:
+                    # Deduplicate and yield
+                    if use_composite:
+                        assert pk_fields is not None
+                        composite_key = self._compute_composite_key(
+                            direct_record, pk_fields
+                        )
+                        if composite_key and composite_key not in seen_ids:
+                            seen_ids.add(composite_key)
+                            yield direct_record
+                    else:
+                        record_pk = str(direct_record.get(pk_field, ""))
+                        if record_pk and record_pk not in seen_ids:
+                            seen_ids.add(record_pk)
+                            yield direct_record
+                else:
+                    # Both filter and direct endpoints failed
+                    self._log_single_id_failure(entity_type, filter_field, id_batch, e)
 
     async def _fetch_filtered(
         self,
