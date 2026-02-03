@@ -120,6 +120,8 @@ jobs:
               "_write_silver_metadata": 15,  # Metadata assembly with coordinator path + fallback (CC=12)
               "_write_gold_metadata": 15,  # Metadata assembly with coordinator path + fallback (CC=12)
               "load_filter_with_fallback": 15,  # CSV filter loading with multiple fallback strategies (CC=12)
+              "_apply_system_prefix_order": 15, # BatchWriter column ordering logic (CC=12)
+              "_fetch_results": 15, # UniProt pagination and retry logic (CC=13)
           }
 
           violations = []
