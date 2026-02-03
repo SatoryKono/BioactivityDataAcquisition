@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl/composite-pipeline-config-schema-v1",
+  "title": "BioETL Composite Pipeline Configuration Schema v1.0",
+  "description": "Schema for composite pipelines that combine data from multiple providers (ADR-026)",
+  "type": "object",
+  "required": ["composite"],
+  "properties": {
+    "composite": {
+      "type": "object",
+      "required": ["name", "version", "seed", "enrichers", "merge"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^composite_[a-z_]+$",
+          "description": "Composite pipeline name (format: composite_{entity})"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semantic version of composite config"
+        },
+        "seed": {
+          "type": "object",
+          "required": ["pipeline", "output_keys"],
+          "description": "Seed pipeline provides the base dataset for enrichment",
+          "properties": {
+            "pipeline": {
+              "type": "string",
+              "description": "Reference to seed pipeline (e.g., chembl_publication)"
+            },
+            "output_keys": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1,
+              "description": "Keys extracted from seed for joining with enrichers"
+            },
+            "silver_table": {
+              "type": "string",
+              "description": "Path to seed's Silver table"
+            }
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "Pipelines that run after seed but before enrichers",
+          "items": {
+            "type": "object",
+            "required": ["pipeline"],
+            "properties": {
+              "pipeline": {"type": "string"},
+              "required": {"type": "boolean", "default": false}
+            }
+          }
+        },
+        "enrichers": {
+          "type": "array",
+          "description": "Enricher pipelines that supplement seed data",
+          "items": {
+            "type": "object",
+            "required": ["pipeline", "join_keys"],
+            "properties": {
+              "pipeline": {
+                "type": "string",
+                "description": "Reference to enricher pipeline"
+              },
+              "join_keys": {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": 1,
+                "description": "Keys for joining enricher data with seed"
+              },
+              "required": {
+                "type": "boolean",
+                "default": false,
+                "description": "If true, composite fails when enricher fails"
+              },
+              "filter_condition": {
+                "type": "string",
+                "description": "SQL-like condition to filter seed records for this enricher"
+              },
+              "timeout_seconds": {
+                "type": "integer",
+                "minimum": 60,
+                "default": 600,
+                "description": "Timeout for enricher execution"
+              },
+              "silver_table": {
+                "type": "string",
+                "description": "Path to enricher's Silver table"
+              }
+            }
+          }
+        },
+        "merge": {
+          "type": "object",
+          "required": ["strategy"],
+          "description": "Configuration for merging seed and enricher data",
+          "properties": {
+            "strategy": {
+              "type": "string",
+              "enum": ["left_outer", "inner", "full_outer"],
+              "default": "left_outer",
+              "description": "Join strategy for combining data"
+            },
+            "conflict_resolution": {
+              "type": "string",
+              "enum": ["seed_priority", "enricher_priority", "explicit_rules"],
+              "default": "seed_priority",
+              "description": "How to resolve conflicts when same field exists in multiple sources"
+            },
+            "preserve_all_sources": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, keep provider-qualified columns (e.g., chembl.publication.title)"
+            },
+            "field_priorities": {
+              "type": "object",
+              "description": "Per-field priority list of providers",
+              "additionalProperties": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            },
+            "column_groups": {
+              "type": "array",
+              "description": "Column ordering groups for merged output",
+              "items": {
+                "type": "object",
+                "required": ["name", "fields"],
+                "properties": {
+                  "name": {"type": "string"},
+                  "fields": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                  },
+                  "pattern": {"type": "string"},
+                  "provider_order": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                  }
+                }
+              }
+            },
+            "output": {
+              "type": "object",
+              "properties": {
+                "silver": {"type": "string"},
+                "gold": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "dq_rules": {
+      "type": "object",
+      "description": "Composite-level DQ configuration",
+      "properties": {
+        "soft_fail_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.10
+        },
+        "hard_fail_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.30
+        },
+        "enricher_overrides": {
+          "type": "object",
+          "description": "Per-enricher threshold overrides",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "soft_fail_threshold": {"type": "number"},
+              "hard_fail_threshold": {"type": "number"}
+            }
+          }
+        },
+        "required_fields": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Required fields in final Gold output"
+        },
+        "field_validations": {
+          "type": "object",
+          "description": "Field-level validation rules",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["string", "integer", "float", "boolean", "json_array", "json_object"]
+              },
+              "nullable": {"type": "boolean"},
+              "min_value": {"type": "number"},
+              "max_value": {"type": "number"},
+              "description": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "gold_filters": {
+      "type": "object",
+      "description": "Filters applied to merged output",
+      "properties": {
+        "required_fields": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "filter_config_file": {
+      "type": "string",
+      "description": "Reference to filter configuration file"
+    },
+    "execution": {
+      "type": "object",
+      "description": "Execution options for composite pipeline",
+      "properties": {
+        "max_concurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 4,
+          "description": "Maximum concurrent enrichers"
+        },
+        "checkpoint_enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "retry": {
+          "type": "object",
+          "properties": {
+            "max_attempts": {"type": "integer", "default": 3},
+            "backoff_multiplier": {"type": "number", "default": 2.0}
+          }
+        }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "description": "Lineage tracking configuration",
+      "properties": {
+        "track_field_sources": {"type": "boolean", "default": true},
+        "track_timestamps": {"type": "boolean", "default": true},
+        "track_status": {"type": "boolean", "default": true},
+        "provider_lookup_fields": {
+          "type": "object",
+          "description": "Per-provider lookup field mappings"
+        },
+        "track_source_for_fields": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}
