@@ -275,12 +275,16 @@ composite:
       - chembl.target.cross_references
       # --- ChEMBL target_component exclusions ---
       - chembl.target_component.accession
+      - chembl.target_component.component_id
       - chembl.target_component.component_type
       - chembl.target_component.description
       - chembl.target_component.organism
+      - chembl.target_component.protein_classifications
       - chembl.target_component.taxonomy_id
       - chembl.target_component.target_component_synonyms
       - chembl.target_component.target_component_xrefs
+      # --- ChEMBL protein_class exclusions ---
+      - chembl.protein_class.protein_class_id
       # --- UniProt idmapping exclusions (data comes from protein) ---
       - uniprot.idmapping.all_mappings
       - uniprot.idmapping.annotation_score
@@ -291,6 +295,8 @@ composite:
       - uniprot.idmapping.reviewed
       - uniprot.idmapping.sequence_length
       - uniprot.idmapping.sequence_mass
+      - uniprot.idmapping.target_chembl_id
+      - uniprot.idmapping.taxonomy_id
       - uniprot.idmapping.uniprot_entry_name
       # --- UniProt protein exclusions (redundant or too large) ---
       - uniprot.protein.accession           # Already have uniprot_accession from idmapping
