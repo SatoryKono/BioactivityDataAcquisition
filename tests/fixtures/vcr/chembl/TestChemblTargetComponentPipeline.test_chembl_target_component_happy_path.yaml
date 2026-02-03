@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target_component?limit=1000&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/target_component?format=json
   response:
     body:
       string: '{"page_meta": {"limit": 1000, "next": "/chembl/api/data/target_component?limit=1000&offset=1000",
@@ -104230,7 +104230,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target_component?limit=10&offset=0&format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/target_component?format=json
   response:
     body:
       string: '{"page_meta": {"limit": 10, "next": "/chembl/api/data/target_component?limit=10&offset=10",

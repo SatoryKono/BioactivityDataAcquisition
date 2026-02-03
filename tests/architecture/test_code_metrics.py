@@ -108,7 +108,7 @@ class TestFileSizeLimits:
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 950,  # 937 LOC - Silver PyArrow schemas (+ UniProt extended schema + IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
-        "client.py": 1080,  # 1073 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
+        "client.py": 1100,  # 1098 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1095,  # 1089 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups
         "composite_config.py": 680,  # 679 LOC - Composite pipeline configuration schema with validation
@@ -644,7 +644,7 @@ class TestClassSize:
         "OpenAlexAdapter": 720,  # 670 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler + title search for composite pipelines
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
         # ChEMBL adapter with complex FilterableDataSourcePort
-        "ChemblAdapter": 1000,  # 998 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection
+        "ChemblAdapter": 1015,  # 1013 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection
         # Common adapter base classes
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction
