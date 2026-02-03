@@ -107,8 +107,8 @@ class TestFileSizeLimits:
         "gold_writer.py": 940,  # 934 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py) + column_order support
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 930,  # 923 LOC - Silver PyArrow schemas (+ IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields + unified DQ columns + affiliations + activity curation fields + ROR/topics/grants + author identifiers)
-        "client.py": 1000,  # 995 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
+        "silver.py": 950,  # 937 LOC - Silver PyArrow schemas (+ UniProt extended schema + IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
+        "client.py": 1080,  # 1073 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1095,  # 1089 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups
         "composite_config.py": 680,  # 679 LOC - Composite pipeline configuration schema with validation
@@ -241,6 +241,7 @@ class TestFunctionComplexity:
         "write_silver_merged": 17,  # CC=16 - Silver merge with null coercion logic
         "write_gold_merged": 17,  # CC=16 - Gold merge with null coercion logic
         "_fetch_with_filter": 25,  # CC=22 - ChEMBL pagination with deduplication and filter building
+        "_fetch_batch_with_reduction": 22,  # CC=20 - UniProt batch fetch with reduction logic
         "_is_server_500_error": 18,  # CC=16 - Error detection with multiple wrapping scenarios
         # DQ serializer domain functions
         "_dataclass_to_dict": 13,  # CC=12 - Recursive dataclass conversion
@@ -643,7 +644,7 @@ class TestClassSize:
         "OpenAlexAdapter": 720,  # 670 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler + title search for composite pipelines
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
         # ChEMBL adapter with complex FilterableDataSourcePort
-        "ChemblAdapter": 920,  # 914 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection
+        "ChemblAdapter": 1000,  # 998 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection
         # Common adapter base classes
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction

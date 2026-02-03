@@ -808,9 +808,9 @@ class TestUniProtProteinTransformerExtendedFields:
         assert result is not None
         assert result["feature_count"] == 1
         # Compact JSON format per centralized serialization
-        assert '"type":"Chain"' in result["features"]
-        assert '"start":1' in result["features"]
-        assert '"end":480' in result["features"]
+        assert '"type":"Chain"' in result["features_json"]
+        assert '"start":1' in result["features_json"]
+        assert '"end":480' in result["features_json"]
 
     @pytest.mark.asyncio
     async def test_extract_keywords(self, transformer, mock_context):
