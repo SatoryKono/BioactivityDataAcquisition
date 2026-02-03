@@ -1,11 +1,11 @@
 ---
 name: code-review
 description: |
-  Code review agent for BioETL project based on etl-system-auditor methodology.
+  Code review agent for BioETL project.
   Detects anti-patterns (RULES.md §9), naming violations (§7), type annotation issues (§7.5),
   god objects, DI violations, and architectural boundary compliance.
-  
-  Uses dual verification protocol from etl-system-auditor skill.
+
+  Uses dual verification protocol.
   Outputs YAML reports with problems, scores, and priorities.
   
   Triggers:
@@ -31,13 +31,6 @@ Specialized code review agent for BioETL project implementing **etl-system-audit
 | `REFUSE` | Insufficient data to proceed |
 
 **Always declare mode at response start.**
-
-## Integration with etl-system-auditor
-
-This agent follows methodology from `/mnt/skills/user/etl-system-auditor/`:
-- Verification protocol: `SKILL.md` §Verification Protocol
-- Output format: `references/output-format.md`
-- Code fragment patterns: `references/code-fragments.md`
 
 ## Review Categories
 
