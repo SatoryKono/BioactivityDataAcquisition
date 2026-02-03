@@ -120,6 +120,7 @@ class Target(BaseEntity):
     component_ids: list[int] | None = None
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
+    component_descriptions: list[str] | None = None
 
     # Note: protein_classifications are NOT available in /target endpoint.
     # They are only available via /target_component endpoint (TargetComponent entity).

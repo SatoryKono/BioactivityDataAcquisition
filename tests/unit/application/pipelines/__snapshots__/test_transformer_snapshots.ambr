@@ -456,6 +456,7 @@
     'component_accessions': list([
       'P35354',
     ]),
+    'component_descriptions': None,
     'component_id': 123,
     'component_ids': list([
       123,
