@@ -71,6 +71,14 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
     "protein_class": ProteinClassRecord,
 }
 
+# Entity types that don't support limit/offset pagination
+# These endpoints return all records in a single response
+_NO_PAGINATION_ENTITIES: frozenset[str] = frozenset({
+    "target",
+    "target_component",
+    "protein_class",
+})
+
 
 @dataclass
 class ChemblAdapter(BaseHttpAdapter):
@@ -146,13 +154,25 @@ class ChemblAdapter(BaseHttpAdapter):
             return reduced
         return self._page_size
 
-    def _build_params(self, offset: int) -> dict[str, Any]:
-        """Build API request parameters with health-aware batch size."""
-        return {
-            "limit": self._get_effective_batch_size(),
-            "offset": offset,
-            "format": "json",
-        }
+    def _build_params(self, offset: int, entity_type: str | None = None) -> dict[str, Any]:
+        """Build API request parameters with health-aware batch size.
+
+        Args:
+            offset: Pagination offset.
+            entity_type: Entity type for determining pagination support.
+                        If in _NO_PAGINATION_ENTITIES, limit/offset are excluded.
+
+        Returns:
+            Dictionary of query parameters.
+        """
+        params: dict[str, Any] = {"format": "json"}
+
+        # Some endpoints don't support limit/offset pagination
+        if entity_type not in _NO_PAGINATION_ENTITIES:
+            params["limit"] = self._get_effective_batch_size()
+            params["offset"] = offset
+
+        return params
 
     def _process_response(
         self, response: Response, entity_type: str
@@ -294,9 +314,10 @@ class ChemblAdapter(BaseHttpAdapter):
         url = self._mapper.get_resource_url(entity_type)
         offset = 0
         while True:
-            params = self._build_params(offset)
+            params = self._build_params(offset, entity_type)
             # Optimize limit: if we have a global limit and it's smaller than effective batch size
-            if limit is not None:
+            # Skip for entities that don't support pagination
+            if limit is not None and "limit" in params:
                 remaining = limit - offset
                 if remaining > 0:
                     params["limit"] = min(params["limit"], remaining)
@@ -403,7 +424,7 @@ class ChemblAdapter(BaseHttpAdapter):
         while True:
             if limit and offset >= limit:
                 break
-            params = self._build_params(offset)
+            params = self._build_params(offset, entity_type)
             params[f"{filter_field}__in"] = ",".join(id_batch)
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
@@ -441,7 +462,7 @@ class ChemblAdapter(BaseHttpAdapter):
         pk_field = self._mapper.get_primary_key_field(entity_type)
         pk_fields = self._mapper.get_dedup_key_fields(entity_type)
 
-        params = self._build_params(0)
+        params = self._build_params(0, entity_type)
         params[f"{filter_field}__in"] = ",".join(id_batch)
 
         records, has_next = await self._fetch_page(url, params, entity_type)
@@ -860,7 +881,7 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str] = set()
 
         while True:
-            params = self._build_params(offset)
+            params = self._build_params(offset, entity_type)
             params.update(filter_params)
 
             records, has_next = await self._fetch_page(url, params, entity_type)
