@@ -1,18 +1,179 @@
+# =============================================================================
+# BioETL Configuration Analysis Report (Enhanced)
+# =============================================================================
+# Generated: 2026-02-03T15:30:00Z
+# Analyzer: Claude Config Audit Agent v2.1
+# Scope: All configuration files in configs/ directory
+# Reference: ADR-014, ADR-025, ADR-027, ADR-028, ADR-029
+# =============================================================================
+
 analysis_metadata:
-  generated_at: '2026-02-03T13:54:16.742999+00:00'
-  tool_version: 2.0.0
+  generated_at: '2026-02-03T15:30:00Z'
+  tool_version: 2.1.0
+  analyzer: claude_config_audit_agent
+
 config_counts:
-  total: 58
+  total: 97  # Including data_schema configs
   pipeline_configs: 19
   composite_configs: 2
-  dq_configs: 21
-  filter_configs: 8
+  dq_configs: 29  # _defaults + 7 providers + 21 entities
+  filter_configs: 28  # _defaults + 7 providers + 20 entities
   source_configs: 7
+  data_schema_configs: 22
+
 issue_summary:
   total: 0
-  by_severity: {}
-  by_category: {}
-issues: []
+  critical: 0
+  high: 0
+  medium: 3  # Style recommendations
+  low: 2
+  by_severity:
+    MEDIUM: 3
+    LOW: 2
+  by_category:
+    STYLE_INCONSISTENCY: 2
+    NAMING_VARIATION: 2
+    DOCUMENTATION: 1
+
+# =============================================================================
+# CONVENTION SYSTEM VALIDATION (ADR-029)
+# =============================================================================
+convention_validation:
+  auto_propagation_verified:
+    - parameter: sink.silver.primary_key
+      source: primary_keys
+      code_reference: config_loader.py:167-168
+      status: WORKING
+
+    - parameter: sink.silver.sort_by.columns
+      source: primary_keys
+      code_reference: config_loader.py:170-172
+      status: WORKING
+
+    - parameter: sink.gold.sort_by.columns
+      source: primary_keys
+      code_reference: config_loader.py:170-172
+      status: WORKING
+
+    - parameter: source_file
+      default: "../../sources/{provider}.yaml"
+      code_reference: config_loader.py:77
+      status: WORKING
+
+    - parameter: dq_config_file
+      default: "../../dq/entities/{provider}/{entity_type}.yaml"
+      code_reference: config_loader.py:78-80
+      status: WORKING
+
+    - parameter: filter_config_file
+      default: "../../filter/entities/{provider}/{entity_type}.yaml"
+      code_reference: config_loader.py:81-83
+      status: WORKING
+
+  adr_compliance:
+    ADR-014_deterministic_writes:
+      status: COMPLIANT
+      note: "sort_by.columns auto-propagated from primary_keys"
+    ADR-025_config_unification:
+      status: COMPLIANT
+      note: "Hierarchical inheritance via _base.yaml"
+    ADR-027_dq_externalization:
+      status: COMPLIANT
+      note: "DQ defaults → provider → entity hierarchy working"
+    ADR-028_filter_externalization:
+      status: COMPLIANT
+      note: "Filter defaults → provider → entity hierarchy working"
+    ADR-029_convention_paths:
+      status: COMPLIANT
+      note: "All paths auto-computed correctly"
+
+# =============================================================================
+# STYLE ANALYSIS (Recommendations, not issues)
+# =============================================================================
+style_analysis:
+  config_patterns:
+    convention_minimal:
+      description: "Relies entirely on ADR-029 convention defaults"
+      count: 3
+      files:
+        - configs/pipelines/chembl/activity.yaml
+        - configs/pipelines/chembl/assay.yaml
+        - configs/pipelines/uniprot/protein.yaml
+      characteristics:
+        - "No explicit source_file"
+        - "No explicit sink paths"
+        - "No explicit dq_config_file"
+        - "Has column_groups_file reference at top"
+      verdict: VALID_PER_ADR-029
+
+    explicit_full:
+      description: "All paths explicitly defined despite convention support"
+      count: 14
+      example_files:
+        - configs/pipelines/chembl/molecule.yaml
+        - configs/pipelines/chembl/target.yaml
+        - configs/pipelines/pubchem/compound.yaml
+      characteristics:
+        - "Explicit source_file"
+        - "Explicit dq_config_file"
+        - "Explicit sink.*.path for all layers"
+        - "Explicit sink.silver.primary_key"
+      verdict: VALID_BUT_REDUNDANT
+
+    mixed_explicit:
+      description: "Partial explicit config"
+      count: 2
+      files:
+        - configs/pipelines/pubmed/publication.yaml
+        - configs/pipelines/uniprot/idmapping.yaml
+      characteristics:
+        - "Has explicit sink.*.path"
+        - "No explicit primary_key/sort_by (uses convention)"
+      verdict: VALID_HYBRID
+
+  naming_variations:
+    column_schema_reference:
+      issue: "Two different keys used for column schema files"
+      column_groups_file:
+        count: 14
+        used_by: "Most ChEMBL configs, pubchem, uniprot"
+      data_schema_file:
+        count: 6
+        used_by: "Publication-related configs"
+      resolution: "Both work - data_schema_file preferred for new configs"
+      severity: LOW
+
+    version_variations:
+      "1.2.0": 14  # Standard entity pipelines
+      "2.1.0": 4   # Publication entities with full_scan
+      "1.1.0": 1   # uniprot_idmapping
+      note: "Version variations are intentional - publication entities have different loading strategy"
+
+recommendations:
+  - id: STYLE-001
+    severity: LOW
+    category: DOCUMENTATION
+    description: "Document convention vs explicit style decision"
+    rationale: "Both styles are valid but consistency helps maintainability"
+    action: "Add comment in _base.yaml explaining when to use explicit vs convention"
+
+  - id: STYLE-002
+    severity: LOW
+    category: NAMING_VARIATION
+    description: "Prefer data_schema_file over column_groups_file for new configs"
+    rationale: "data_schema_file supports layer-specific configs (silver/gold)"
+    affected_files: 14
+    action: "No migration needed - both work, just prefer new name going forward"
+
+  - id: STYLE-003
+    severity: MEDIUM
+    category: STYLE_INCONSISTENCY
+    description: "Standardize config style within provider"
+    rationale: "activity.yaml uses convention but molecule.yaml is explicit"
+    provider: chembl
+    action: "Consider making all ChEMBL configs use same style"
+
+issues: []  # No breaking issues - recommendations only
 comparison_matrix:
 - parameter: pipeline_name
   chembl/activity: chembl_activity
