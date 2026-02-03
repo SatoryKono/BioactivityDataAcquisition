@@ -825,12 +825,9 @@ class CompositeConfig:
 
     def _validate_unique_enrichers(self) -> None:
         """Validate that enricher pipeline names are unique."""
-        if not self.enrichers:
-            return
         names = [e.pipeline for e in self.enrichers]
         if len(names) != len(set(names)):
-            dups = {n for n in names if names.count(n) > 1}
-            raise ValueError(f"Duplicate enricher pipelines: {dups}")
+            raise ValueError(f"Duplicate enricher pipelines: {names}")
 
     def _validate_dependency_join_keys(self) -> None:
         """Validate that dependency join keys exist in seed output_keys.
@@ -855,8 +852,7 @@ class CompositeConfig:
         """Validate that dependency pipeline names are unique."""
         names = [d.pipeline for d in self.dependencies]
         if len(names) != len(set(names)):
-            dups = {n for n in names if names.count(n) > 1}
-            raise ValueError(f"Duplicate dependency pipelines: {dups}")
+            raise ValueError(f"Duplicate dependency pipelines: {names}")
 
     @property
     def required_enrichers(self) -> tuple[str, ...]:
@@ -962,8 +958,8 @@ def _validate_positive(value: int | float, field_name: str) -> None:
 
 def _validate_positive_limit(limit: int | None, context: str) -> None:
     """Validate that an optional limit is positive if provided."""
-    if limit is not None and limit <= 0:
-        raise ValueError(f"{context} limit must be positive, got {limit}")
+    if limit is not None:
+        _validate_positive(limit, f"{context} limit")
 
 
 def _validate_optional_threshold(value: float | None, name: str) -> None:
