@@ -134,11 +134,18 @@ class MemoryMonitor:
         return self._get_stats_estimate()
 
     def _get_stats_resource(self) -> MemoryStats:
-        """Get memory stats using resource module (Unix only)."""
+        """Get memory stats using resource module (Unix only).
+
+        Note:
+            This method is only called on Unix platforms (guarded by
+            sys.platform check in _get_stats_fallback). The type: ignore
+            comments suppress mypy errors on Windows where these attributes
+            don't exist in the resource module stub.
+        """
         import resource
 
         # Get process memory usage (Unix-only attributes)
-        rusage = resource.getrusage(resource.RUSAGE_SELF)
+        rusage = resource.getrusage(resource.RUSAGE_SELF)  # type: ignore[attr-defined]
         process_mb = rusage.ru_maxrss / 1024  # Convert KB to MB on Linux
 
         # Try to read system memory from /proc/meminfo

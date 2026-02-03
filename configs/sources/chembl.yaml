@@ -28,7 +28,7 @@ source:
     # ChEMBL has no official rate limit but recommends reasonable usage.
     # Conservative defaults to be a good API citizen.
     rate_limit:
-        requests_per_second: 5
+        requests_per_second: 3
         burst: 10
 
     health_check:

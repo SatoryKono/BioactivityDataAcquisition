@@ -27,22 +27,23 @@ configs/
 │   ├── chembl/              # ChEMBL provider configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
-│   │   └── ...              # 10 entity configs
+│   │   └── ...              # 12 entity configs
 │   ├── pubchem/
 │   │   └── compound.yaml
 │   ├── uniprot/
 │   │   ├── protein.yaml
 │   │   └── idmapping.yaml
 │   ├── pubmed/
-│   │   └── publications.yaml
+│   │   └── publication.yaml
 │   ├── crossref/
 │   │   └── publication.yaml
 │   ├── openalex/
 │   │   └── publication.yaml
 │   ├── semanticscholar/
 │   │   └── publication.yaml
-│   └── composite/
-│       └── publication.yaml
+│   └── composite/           # Composite pipelines (ADR-026)
+│       ├── publication.yaml
+│       └── target.yaml
 ├── sources/
 │   └── <provider>.yaml      # Provider-level API settings (7 файлов)
 └── dq/
@@ -94,7 +95,7 @@ sink:
       ascending: true
 ```
 
-**Статус**: Все 20 entity configs содержат `sort_by` для обоих слоёв (верифицировано 2026-01-19).
+**Статус**: Все 19 entity configs содержат `sort_by` для обоих слоёв (верифицировано 2026-02-03). Composite pipelines (2) используют отдельную схему (ADR-026).
 
 **Rationale**: Детерминизм выходных данных, воспроизводимость результатов.
 
@@ -123,7 +124,7 @@ Schema проверяет:
 | `gold_table` | `<provider>_<entity>` | `chembl_activity` |
 | Config path | `configs/pipelines/<provider>/<entity>.yaml` | `configs/pipelines/chembl/activity.yaml` |
 
-**Статус**: Консистентность по всем 20 entity configs (верифицировано 2026-01-19).
+**Статус**: Консистентность по всем 19 entity configs + 2 composite (верифицировано 2026-02-03).
 
 ### 6. Source Config Separation
 
@@ -187,7 +188,7 @@ dq_rules:
 ### Positive
 
 1. **Единый источник defaults**: `_base.yaml` v2.0.0 — нет дублирования
-2. **Детерминизм выходных данных**: `sort_by` во всех 20 entity configs (ADR-014)
+2. **Детерминизм выходных данных**: `sort_by` во всех 19 entity configs (ADR-014)
 3. **Автоматическая валидация**: JSON Schema (`_schema.json`) валидирует структуру
 4. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
 5. **Provider knowledge captured**: API limits, auth requirements в source configs
@@ -201,7 +202,7 @@ dq_rules:
 
 ### Neutral
 
-1. **20 entity configs**: Все используют единый формат и наследование от `_base.yaml`
+1. **19 entity configs + 2 composite**: Все используют единый формат и наследование от `_base.yaml`
 2. **7 source configs**: Один на провайдера, DRY для API settings
 
 ## Alternatives Considered
@@ -220,7 +221,7 @@ pipeline_name: chembl_activity
 
 Оставить пути вида `data/output/bronze/` без `{provider}/{entity}`.
 
-**Rejected**: Сложно навигировать при 20+ pipelines, нет группировки по провайдерам.
+**Rejected**: Сложно навигировать при 21 pipelines, нет группировки по провайдерам.
 
 ### C. Inline DQ rules only
 
@@ -239,9 +240,9 @@ pipeline_name: chembl_activity
 | Requirement | Status | Notes |
 |-------------|--------|-------|
 | `sink.silver.format: delta` | ✅ PASS | All configs inherit from `_base.yaml` |
-| `sink.silver.primary_key` | ✅ PASS | All 20 entity configs specify |
-| `sink.silver.sort_by` | ✅ PASS | All 20 entity configs specify (ADR-014) |
-| `sink.gold.sort_by` | ✅ PASS | All 20 entity configs specify (ADR-014) |
+| `sink.silver.primary_key` | ✅ PASS | All 19 entity configs specify (auto-propagated) |
+| `sink.silver.sort_by` | ✅ PASS | All 19 entity configs (ADR-014, auto-propagated from primary_keys) |
+| `sink.gold.sort_by` | ✅ PASS | All 19 entity configs (ADR-014, auto-propagated from primary_keys) |
 | `dq_rules` thresholds | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults |
 | `circuit_breaker` settings | ✅ PASS | 5/300 in `_base.yaml` and source configs |
 | `rate_limit` per provider | ✅ PASS | In 7 source configs |
@@ -271,3 +272,6 @@ pipeline_name: chembl_activity
 | 2026-01-19 | Claude Code | Added: Source config separation (`configs/sources/`) |
 | 2026-01-19 | Claude Code | Added: Hierarchical DQ configuration reference (ADR-027) |
 | 2026-01-19 | Claude Code | Updated: Compliance matrix with verification status |
+| 2026-02-03 | Claude Code | Fixed: Config counts (19 entity + 2 composite = 21 total) |
+| 2026-02-03 | Claude Code | Added: Reference to ADR-026 for composite pipelines |
+| 2026-02-03 | Claude Code | Fixed: ChEMBL has 12 entity configs, pubmed uses publication.yaml |

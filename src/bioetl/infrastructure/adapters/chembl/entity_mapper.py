@@ -142,6 +142,31 @@ class ChemblEntityMapper:
         return f"{CHEMBL_API_BASE}/{resource}"
 
     @staticmethod
+    def get_direct_record_url(entity_type: str, record_id: str) -> str:
+        """Get direct URL for fetching a single record by ID.
+
+        ChEMBL API supports two ways to fetch records:
+        1. Filter endpoint: /target?target_chembl_id__in=CHEMBL123
+        2. Direct endpoint: /target/CHEMBL123
+
+        The direct endpoint uses different server-side code paths and may work
+        when the filter endpoint fails with 500 errors.
+
+        Args:
+            entity_type: Entity type (e.g., 'target', 'molecule').
+            record_id: The ChEMBL ID of the record (e.g., 'CHEMBL1075105').
+
+        Returns:
+            Direct API URL for the single record.
+
+        Example:
+            >>> ChemblEntityMapper.get_direct_record_url("target", "CHEMBL1075105")
+            'https://www.ebi.ac.uk/chembl/api/data/target/CHEMBL1075105'
+        """
+        base_url = ChemblEntityMapper.get_resource_url(entity_type)
+        return f"{base_url}/{record_id}"
+
+    @staticmethod
     def get_plural_key(entity_type: str) -> str:
         """Get the plural form key for API response parsing.
 
