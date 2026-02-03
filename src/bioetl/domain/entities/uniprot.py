@@ -199,7 +199,10 @@ class UniprotTarget(BaseEntity):
     reactome_xrefs: str | None = None  # JSON array of Reactome pathway entries
 
     # Features & Keywords (JSON arrays)
-    features: str | None = None
+    features_json: str | None = None  # All features combined (forensic)
+    domains: str | None = None  # ft_domain features
+    binding_sites: str | None = None  # ft_binding features
+    active_sites: str | None = None  # ft_act_site features
     keywords: str | None = None
 
     # Counts

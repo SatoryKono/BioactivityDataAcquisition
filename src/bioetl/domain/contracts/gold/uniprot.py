@@ -17,16 +17,61 @@ from pandera.typing import Series
 
 
 class UniProtProteinGoldSchema(pa.DataFrameModel):
-    """Schema for UniProt Protein in Gold layer."""
+    """Schema for UniProt Protein in Gold layer.
 
+    Extended schema with functional annotations, cross-references, and quality metrics.
+    See Silver schema in infrastructure/schemas/silver.py for field descriptions.
+    """
+
+    # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Core identifiers
     accession: Series[str] = pa.Field(nullable=False)
     entry_name: Series[str] = pa.Field(nullable=True)
-    protein_name: Series[str] = pa.Field(nullable=True)
+
+    # Structural features (JSON)
+    active_sites: Series[str] = pa.Field(nullable=True)  # ft_act_site features
+    binding_sites: Series[str] = pa.Field(nullable=True)  # ft_binding features
+    domains: Series[str] = pa.Field(nullable=True)  # ft_domain features
+    features_json: Series[str] = pa.Field(nullable=True)  # All features (forensic)
+
+    # Functional annotations
+    activity_regulation: Series[str] = pa.Field(nullable=True)
+    catalytic_activity: Series[str] = pa.Field(nullable=True)
+    disease_involvement: Series[str] = pa.Field(nullable=True)
+    function_comment: Series[str] = pa.Field(nullable=True)
+    pathway: Series[str] = pa.Field(nullable=True)
+    similarity_comment: Series[str] = pa.Field(nullable=True)
+    subcellular_location: Series[str] = pa.Field(nullable=True)
+    tissue_specificity: Series[str] = pa.Field(nullable=True)
+
+    # Cross-references (JSON arrays)
+    chembl_ids: Series[str] = pa.Field(nullable=True)
+    drugbank_ids: Series[str] = pa.Field(nullable=True)
+    go_terms: Series[str] = pa.Field(nullable=True)
+    interpro_xrefs: Series[str] = pa.Field(nullable=True)
+    pdb_xrefs: Series[str] = pa.Field(nullable=True)
+    pfam_xrefs: Series[str] = pa.Field(nullable=True)
+    reactome_xrefs: Series[str] = pa.Field(nullable=True)
+
+    # Basic protein data
     gene_names: Series[object] = pa.Field(nullable=True)  # list[str]
-    organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    sequence_length: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    content_hash: Series[str] = pa.Field(nullable=False)
+    organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 → float
+    protein_name: Series[str] = pa.Field(nullable=True)
+    sequence_length: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 → float
+
+    # Quality metrics
+    annotation_score: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 → float
+    protein_existence: Series[str] = pa.Field(nullable=True)  # Evidence level string
+    reviewed: Series[bool] = pa.Field(
+        nullable=True, coerce=True
+    )  # Swiss-Prot vs TrEMBL
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")

@@ -327,7 +327,14 @@ class UniProtProteinTransformer(BaseTransformer):
         self, record: BronzeRecord, data: dict[str, Any]
     ) -> None:
         """Add feature and keyword fields."""
-        data["features"] = FeatureExtractor.extract_features(record.get("features"))
+        features = record.get("features")
+        # All features combined (forensic)
+        data["features_json"] = FeatureExtractor.extract_features(features)
+        # Specific feature types for analysis
+        data["domains"] = FeatureExtractor.extract_domains(features)
+        data["binding_sites"] = FeatureExtractor.extract_binding_sites(features)
+        data["active_sites"] = FeatureExtractor.extract_active_sites(features)
+        # Keywords
         data["keywords"] = FeatureExtractor.extract_keywords(record.get("keywords"))
 
     def _add_counts(self, record: BronzeRecord, data: dict[str, Any]) -> None:
