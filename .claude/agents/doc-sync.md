@@ -15,7 +15,7 @@ description: |
   - Test count/coverage changed → update §8 Testing statistics
   - Documentation validation requested → full sync analysis
   - Cross-reference validation needed
-model: opus
+model: sonnet
 color: green
 ---
 
