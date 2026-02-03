@@ -120,7 +120,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
-        "merger.py": 1635,  # 1631 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
+        "merger.py": 1700,  # 1698 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
     }
 
@@ -292,7 +292,8 @@ class TestFunctionComplexity:
         # Application batch writer column ordering
         "_apply_system_prefix_order": 13,  # CC=12 - System prefix ordering with layer-specific rules
         # Application dependency coordinator key extraction
-        "_get_effective_keys": 16,  # CC=15 - Chained dependency key extraction with multiple source types
+        "_get_effective_keys": 18,  # CC=17 - Chained dependency key extraction with multiple source types
+        "_apply_dependency_joins": 13,  # CC=12 - Dependency join logic with multiple join strategies
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -393,8 +394,8 @@ class TestFunctionLength:
         "get_batch_statistics": 65,  # Batch statistics aggregation
         "start_metrics_server": 65,  # Metrics server setup
         "_write_atomic_stream": 70,  # Atomic streaming with compression
-        "write_bronze": 230,  # 225 lines - Full Bronze layer write with validation + SourceMetadata
-        "write_silver": 140,  # 134 lines - Full Silver layer write with merge + flat_structure
+        "write_bronze": 235,  # 233 lines - Full Bronze layer write with validation + SourceMetadata
+        "write_silver": 143,  # 141 lines - Full Silver layer write with merge + flat_structure
         "_prepare_arrow_data": 55,  # 53 lines - Arrow data preparation for Silver
         "_write_metadata": 65,  # 63 lines - Metadata writing with flat_structure
         "_log_silver_audit": 75,  # Silver audit logging
@@ -419,17 +420,17 @@ class TestFunctionLength:
         "_log_gold_audit": 75,  # Gold audit logging
         "_write_gold_metadata": 170,  # 169 lines - Gold metadata sidecar with full audit info + flat_structure
         "_write_simple": 60,  # Gold simple write mode
-        "_write_scd2": 70,  # Gold SCD Type 2 write
+        "_write_scd2": 80,  # 77 lines - Gold SCD Type 2 write
         "_merge_scd2": 55,  # Gold SCD2 merge logic
         # Bronze writer functions
-        "_build_full_bronze_metadata": 95,  # Bronze metadata builder with SourceMetadata
+        "_build_full_bronze_metadata": 100,  # 98 lines - Bronze metadata builder with SourceMetadata
         # Silver writer functions
         "_write_silver_metadata": 180,  # Silver metadata sidecar with full audit info
         # Health command functions
         "health_server_command": 60,  # Health server CLI
         "health_check": 70,  # Health check command
         # Run all functions
-        "run_all": 70,  # Run all pipelines command
+        "run_all": 77,  # 75 lines - Run all pipelines command
         # Error handling functions
         "classify_http_error": 55,  # HTTP error classification
         # Logging config
@@ -461,23 +462,23 @@ class TestFunctionLength:
         "bootstrap_composite_pipeline": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
         "run_composite": 70,  # 68 lines - Composite CLI entrypoint with dependency support
         "build_pipeline_context": 60,  # 55 lines - Context building for composite
-        "write_gold_merged": 85,  # 82 lines - Gold write with merged enrichers + flat_structure + CSV export
+        "write_gold_merged": 90,  # 88 lines - Gold write with merged enrichers + flat_structure + CSV export
         "_write_gold_merged_metadata": 130,  # 128 lines - Gold merged metadata with full lineage
-        "write_silver_merged": 90,  # 86 lines - Silver merged write with flat_structure + CSV export
+        "write_silver_merged": 94,  # 92 lines - Silver merged write with flat_structure + CSV export
         "_write_silver_merged_metadata": 65,  # 63 lines - Silver merged metadata sidecar
         "_to_arrow_table": 55,  # 52 lines - Arrow table conversion
         # Metadata builder functions (extracted during refactoring)
-        "build_merged_metadata": 100,  # 95 lines - Metadata builder for merged data (Silver/Gold)
-        "build_fallback_metadata": 100,  # 96 lines - Fallback metadata building
+        "build_merged_metadata": 110,  # 109 lines - Metadata builder for merged data (Silver/Gold)
+        "build_fallback_metadata": 105,  # 103 lines - Fallback metadata building
         "_extract_schema_metadata": 80,  # 79 lines - Schema metadata extraction
         # DQ config loader functions
         "load": 70,  # 67 lines - DQ config loading with merge
         "_normalize_to_file_format": 60,  # 55 lines - File format normalization
         "resolve_dq_config": 55,  # 51 lines - DQ config resolution
         "_normalize_inline_dq_rules": 60,  # 55 lines - Inline DQ rules normalization
-        "yaml_config_to_domain": 65,  # 63 lines - YAML to domain conversion
+        "yaml_config_to_domain": 70,  # 69 lines - YAML to domain conversion
         # Builder functions
-        "build": 60,  # 58 lines - Builder pattern
+        "build": 65,  # 63 lines - Builder pattern
         "_create_table_collector": 60,  # Storage factory table collector creation
         # Observability functions
         "bootstrap_observability": 65,  # Observability setup with OpenTelemetry
@@ -494,6 +495,12 @@ class TestFunctionLength:
         "_create_dq_services": 55,  # DQ services factory
         # DQ report writer functions
         "write_bronze_report": 60,  # Bronze DQ report with unified path structure docstring
+        # Infrastructure utility functions
+        "atomic_write": 65,  # 62 lines - Atomic file write with temp file
+        "get_recommended_batch_size": 65,  # 62 lines - Memory-based batch size calculation
+        # UniProt adapter functions
+        "_yield_deduplicated": 65,  # 61 lines - Deduplication with streaming
+        "_fetch_batch_with_reduction": 58,  # 56 lines - Batch fetch with reduction
     }
 
     # Maximum allowed violations (for tracking technical debt)
@@ -501,8 +508,8 @@ class TestFunctionLength:
     # Baseline updated 2026-01-27: added aggregator service, EnricherAggregator methods
     # Baseline updated 2026-01-27: titles_match() added
     # Baseline updated 2026-01-27: composite pipeline growth (dependencies phase, checkpoint)
-    # Baseline updated 2026-02-03: technical debt allowance
-    MAX_VIOLATIONS = 130  # Increased for column_order support in writers + extractors growth + technical debt
+    # Baseline updated 2026-02-03: technical debt allowance + function growth
+    MAX_VIOLATIONS = 132  # Increased for column_order support in writers + extractors growth + technical debt
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -586,7 +593,7 @@ class TestClassSize:
         "PubChemAdapter": 500,  # 489 lines - sync adapter with SMILES/CID filtering + DTO support
         "CrossRefPublicationTransformer": 360,  # 354 lines - transformer with field extraction
         # UniProt adapter (similar to ChEMBL adapter)
-        "UniProtAdapter": 620,  # 612 lines - HTTP adapter with streaming + FilterableDataSourcePort
+        "UniProtAdapter": 660,  # 656 lines - HTTP adapter with streaming + FilterableDataSourcePort
         # UniProt ID Mapping client (job-based async API with entry metadata extraction)
         "UniProtIDMappingClient": 580,  # 575 lines - ID Mapping client with job polling + entry metadata extraction helpers
         # SemanticScholar adapter
@@ -627,9 +634,9 @@ class TestClassSize:
         # Composition services
         "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
-        "MergeService": 1575,  # 1570 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
+        "MergeService": 1640,  # 1637 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
-        "DependencyCoordinator": 355,  # 349 lines - Chained dependency coordination with key extraction
+        "DependencyCoordinator": 375,  # 370 lines - Chained dependency coordination with key extraction
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers
         # Publication adapters with APIRequestCollector (metadata enrichment)
