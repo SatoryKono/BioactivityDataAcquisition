@@ -1,11 +1,11 @@
 ---
 name: doc-sync
 description: |
-  Documentation synchronization agent for BioETL project based on etl-system-auditor methodology.
+  Documentation synchronization agent for BioETL project.
   Maintains documentation consistency: RULES.md statistics, glossary.md terms, docstrings,
   cross-references, ADR compliance.
-  
-  Uses dual verification protocol from etl-system-auditor skill.
+
+  Uses dual verification protocol.
   Outputs YAML reports with problems, scores, and priorities.
   
   Triggers:
@@ -32,13 +32,6 @@ Specialized documentation synchronization agent for BioETL project implementing 
 | `REFUSE` | Insufficient data to proceed |
 
 **Always declare mode at response start.**
-
-## Integration with etl-system-auditor
-
-This agent follows methodology from `/mnt/skills/user/etl-system-auditor/`:
-- Verification protocol: `SKILL.md` §Verification Protocol
-- Output format: `references/output-format.md`
-- Configuration patterns: `references/configurations.md`
 
 ## Documentation Structure
 
