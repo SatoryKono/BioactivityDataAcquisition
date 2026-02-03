@@ -10,7 +10,11 @@ from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicator
-from bioetl.domain.composite.result import EnrichmentResult, MergeResult
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    EnrichmentResult,
+    MergeResult,
+)
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
@@ -18,7 +22,11 @@ JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "ou
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import EnricherConfig, MergeConfig
+    from bioetl.domain.composite.config import (
+        DependencyConfig,
+        EnricherConfig,
+        MergeConfig,
+    )
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
 
@@ -108,8 +116,10 @@ class MergeService:
         enrichment_results: dict[str, EnrichmentResult],
         run_id: str,
         seed_pipeline: str | None = None,
+        dependencies: Sequence[DependencyConfig] | None = None,
+        dependency_results: dict[str, DependencyResult] | None = None,
     ) -> MergeResult:
-        """Merge seed and enricher data into unified output.
+        """Merge seed, dependency, and enricher data into unified output.
 
         Args:
             seed_table: Path to seed Silver table (e.g., "silver/chembl/publication").
@@ -119,6 +129,8 @@ class MergeService:
             seed_pipeline: Seed pipeline name (e.g., "chembl_publication").
                 If None, will be inferred from seed_table path.
                 Used for intelligent column renaming during merge.
+            dependencies: Sequence of dependency configurations (optional).
+            dependency_results: Results from dependency execution (optional).
 
         Returns:
             MergeResult with statistics and output paths.
@@ -190,6 +202,35 @@ class MergeService:
                     error=str(e),
                 )
 
+        # Step 2b: Read successful dependency tables
+        dependency_dfs: dict[str, pl.DataFrame] = {}
+        if dependencies and dependency_results:
+            for dep in dependencies:
+                dep_result = dependency_results.get(dep.pipeline)
+                if dep_result is None or not dep_result.is_success:
+                    continue
+
+                dep_table = dep.silver_table
+                if not dep_table:
+                    continue
+
+                self._logger.info(
+                    "Reading dependency table",
+                    dependency=dep.pipeline,
+                    table=dep_table,
+                )
+
+                try:
+                    dep_df = await self._read_silver_table(dep_table)
+                    dependency_dfs[dep.pipeline] = dep_df
+                    sources_used.append(dep.pipeline)
+                except Exception as e:
+                    self._logger.warning(
+                        "Failed to read dependency table",
+                        dependency=dep.pipeline,
+                        error=str(e),
+                    )
+
         # Step 3: Apply joins with intelligent column renaming
         merged_df = await self._apply_joins(
             seed_df=seed_df,
@@ -197,6 +238,20 @@ class MergeService:
             enrichers=enrichers,
             seed_pipeline=effective_seed_pipeline,
         )
+
+        # Step 3b: Apply dependency joins (if any)
+        if dependencies and dependency_dfs:
+            merged_df = await self._apply_dependency_joins(
+                merged_df=merged_df,
+                dependency_dfs=dependency_dfs,
+                dependencies=[d for d in dependencies if d.pipeline in dependency_dfs],
+                seed_pipeline=effective_seed_pipeline,
+            )
+            self._logger.info(
+                "Applied dependency joins",
+                dependencies_joined=len(dependency_dfs),
+                total_columns=len(merged_df.columns),
+            )
 
         # Step 4: Resolve conflicts
         merged_df = self._resolve_conflicts(
@@ -732,41 +787,179 @@ class MergeService:
                 merged, enricher_df, join_key_set
             )
 
-            # Apply join based on strategy using left_on/right_on for qualified keys
-            how = self._get_polars_join_type()
-
-            if (
-                seed_join_key in merged.columns
-                and enricher_join_key in enricher_df.columns
-            ):
-                if seed_join_key != enricher_join_key:
-                    # Polars drops right_on column when left_on != right_on.
-                    # Use a disposable temp column as right_on so the enricher's
-                    # qualified join key (e.g. crossref.publication.doi) survives
-                    # as a regular data column in the result.
-                    import polars as pl
-
-                    temp_join_col = f"__temp_join_{enricher.pipeline}"
-                    enricher_df = enricher_df.with_columns(
-                        pl.col(enricher_join_key).alias(temp_join_col)
-                    )
-                    merged = merged.join(
-                        enricher_df,
-                        left_on=seed_join_key,
-                        right_on=temp_join_col,
-                        how=how,
-                        suffix=f"_{enricher.pipeline}",
-                    )
-                else:
-                    merged = merged.join(
-                        enricher_df,
-                        left_on=seed_join_key,
-                        right_on=enricher_join_key,
-                        how=how,
-                        suffix=f"_{enricher.pipeline}",
-                    )
+            # Apply join using shared helper
+            merged = self._execute_polars_join(
+                merged, enricher_df, seed_join_key, enricher_join_key, enricher.pipeline
+            )
 
         return merged
+
+    def _execute_polars_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_key: str,
+        right_key: str,
+        pipeline_name: str,
+    ) -> pl.DataFrame:
+        """Execute a Polars join with temp column handling.
+
+        When left_key != right_key, Polars drops the right_on column.
+        This method uses a temp column to preserve the qualified join key.
+
+        Args:
+            left_df: Left DataFrame (seed/merged).
+            right_df: Right DataFrame (enricher/dependency).
+            left_key: Column name in left_df for join.
+            right_key: Column name in right_df for join.
+            pipeline_name: Pipeline name for suffix and temp column naming.
+
+        Returns:
+            Joined DataFrame.
+        """
+        how = self._get_polars_join_type()
+
+        if left_key not in left_df.columns or right_key not in right_df.columns:
+            return left_df
+
+        if left_key != right_key:
+            # Use temp column to preserve qualified join key in right_df
+            import polars as pl
+
+            temp_join_col = f"__temp_join_{pipeline_name}"
+            right_df = right_df.with_columns(pl.col(right_key).alias(temp_join_col))
+            return left_df.join(
+                right_df,
+                left_on=left_key,
+                right_on=temp_join_col,
+                how=how,
+                suffix=f"_{pipeline_name}",
+            )
+
+        return left_df.join(
+            right_df,
+            left_on=left_key,
+            right_on=right_key,
+            how=how,
+            suffix=f"_{pipeline_name}",
+        )
+
+    async def _apply_dependency_joins(
+        self,
+        merged_df: pl.DataFrame,
+        dependency_dfs: dict[str, pl.DataFrame],
+        dependencies: Sequence[DependencyConfig],
+        seed_pipeline: str | None = None,
+    ) -> pl.DataFrame:
+        """Apply joins for dependency tables.
+
+        Dependencies are simpler than enrichers:
+        - Always 1:1 cardinality (no aggregation)
+        - Single join key (first in join_keys)
+        - No special cardinality handling
+
+        Column renaming uses ColumnRenamer to apply {provider}.{entity}.{field}
+        format to dependency columns for qualified column matching.
+
+        Args:
+            merged_df: DataFrame with seed data (possibly already enriched).
+            dependency_dfs: Mapping of dependency pipeline name to DataFrame.
+            dependencies: Sequence of dependency configurations.
+            seed_pipeline: Seed pipeline name for join key resolution.
+
+        Returns:
+            DataFrame with dependency data joined.
+        """
+        result = merged_df
+
+        for dep in dependencies:
+            if dep.pipeline not in dependency_dfs:
+                continue
+
+            dep_df = dependency_dfs[dep.pipeline]
+            join_keys_list = list(dep.join_keys)
+            primary_key = join_keys_list[0]
+
+            # For dependencies with filter_field, use it for right-side operations
+            # (e.g., protein_classification_id -> protein_class_id)
+            right_key = dep.filter_field if dep.filter_field else primary_key
+            right_keys_list = [right_key] if dep.filter_field else join_keys_list
+
+            # Deduplicate dependency before join to prevent fan-out
+            dep_df = self._deduplicator.deduplicate(
+                enricher_df=dep_df,
+                join_keys=right_keys_list,  # Use right-side key for dedup
+                enricher_name=dep.pipeline,
+            )
+
+            # Normalize join key columns for case-insensitive matching
+            result = self._normalize_join_key_columns(
+                result, join_keys_list, pipeline=seed_pipeline
+            )
+            dep_df = self._normalize_join_key_columns(
+                dep_df,
+                right_keys_list,
+                pipeline=None,  # Use right-side key
+            )
+
+            # Rename dependency columns to qualified format: {provider}.{entity}.{field}
+            dep_df = self._renamer.rename_dataframe(
+                dep_df, dep.pipeline, exclude_join_keys=False
+            )
+
+            self._logger.debug(
+                "Renamed dependency columns to qualified format",
+                dependency=dep.pipeline,
+                qualified_count=len(
+                    [c for c in dep_df.columns if "." in c and not c.startswith("_")]
+                ),
+            )
+
+            # Drop system columns from dependency to prevent duplicates
+            dep_df = self._drop_system_columns(dep_df)
+
+            # Calculate qualified join key names
+            # For chained dependencies, use key_source pipeline for left-side key resolution
+            left_pipeline = (
+                dep.key_source
+                if dep.key_source and dep.key_source != "seed"
+                else seed_pipeline
+            )
+
+            # right_key already defined above for dedup/normalize
+
+            seed_join_key, dep_join_key, seed_join_key_qualified = (
+                self._resolve_join_key_names_asymmetric(
+                    left_key=primary_key,
+                    right_key=right_key,
+                    left_pipeline=left_pipeline,
+                    right_pipeline=dep.pipeline,
+                    merged_columns=result.columns,
+                )
+            )
+
+            # Detect and resolve conflicts
+            join_key_set = {seed_join_key, dep_join_key}
+            if seed_join_key_qualified and seed_join_key_qualified != seed_join_key:
+                join_key_set.add(seed_join_key_qualified)
+            result, dep_df = self._detect_and_resolve_conflicts(
+                result, dep_df, join_key_set
+            )
+
+            # Apply join using shared helper
+            result = self._execute_polars_join(
+                result, dep_df, seed_join_key, dep_join_key, dep.pipeline
+            )
+
+            self._logger.debug(
+                "Joined dependency",
+                dependency=dep.pipeline,
+                seed_join_key=seed_join_key,
+                dep_join_key=dep_join_key,
+                result_rows=len(result),
+            )
+
+        return result
 
     def _get_polars_join_type(self) -> JoinHow:
         """Convert MergeStrategy to Polars join type."""
@@ -845,6 +1038,51 @@ class MergeService:
             enricher_join_key = primary_key
 
         return seed_join_key, enricher_join_key, seed_join_key_qualified
+
+    def _resolve_join_key_names_asymmetric(
+        self,
+        left_key: str,
+        right_key: str,
+        left_pipeline: str | None,
+        right_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[str, str, str | None]:
+        """Resolve qualified join key names with different keys for left/right.
+
+        Used when join key has different names in source and target tables.
+        E.g., protein_classification_id (in target_component) -> protein_class_id (in protein_class).
+
+        Args:
+            left_key: Unqualified join key name in left (merged) DataFrame.
+            right_key: Unqualified join key name in right (dependency) DataFrame.
+            left_pipeline: Pipeline name for left-side qualification (key_source or seed).
+            right_pipeline: Pipeline name for right-side qualification.
+            merged_columns: Current merged DataFrame columns.
+
+        Returns:
+            Tuple of (left_join_key, right_join_key, left_join_key_qualified).
+        """
+        left_join_key_qualified: str | None = None
+        left_join_key = left_key
+
+        # Resolve left-side key (from key_source or seed)
+        if left_pipeline is not None:
+            try:
+                left_provider, left_entity = self._parse_pipeline_name(left_pipeline)
+                left_join_key_qualified = f"{left_provider}.{left_entity}.{left_key}"
+                if left_join_key_qualified in merged_columns:
+                    left_join_key = left_join_key_qualified
+            except ValueError:
+                pass
+
+        # Resolve right-side key (from dependency)
+        try:
+            right_provider, right_entity = self._parse_pipeline_name(right_pipeline)
+            right_join_key = f"{right_provider}.{right_entity}.{right_key}"
+        except ValueError:
+            right_join_key = right_key
+
+        return left_join_key, right_join_key, left_join_key_qualified
 
     def _get_enricher_prefix(
         self,

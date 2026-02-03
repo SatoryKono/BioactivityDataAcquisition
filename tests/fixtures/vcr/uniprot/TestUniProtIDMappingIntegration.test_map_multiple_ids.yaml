@@ -66,7 +66,7 @@ interactions:
     uri: https://rest.uniprot.org/idmapping/results/test_job_002
   response:
     body:
-      string: '{"results":[{"from":"CHEMBL204","to":{"primaryAccession":"P00742"}},{"from":"CHEMBL205","to":{"primaryAccession":"P00749"}},{"from":"CHEMBL206","to":{"primaryAccession":"P00750"}}]}'
+      string: '{"results":[{"from":"CHEMBL204","to":{"primaryAccession":"P00742","uniProtkbId":"FA10_HUMAN","entryType":"UniProtKB reviewed (Swiss-Prot)","organism":{"scientificName":"Homo sapiens","commonName":"Human","taxonId":9606},"proteinDescription":{"recommendedName":{"fullName":{"value":"Coagulation factor X"}}},"genes":[{"geneName":{"value":"F10"}}],"sequence":{"length":488,"molWeight":54724},"annotationScore":5}},{"from":"CHEMBL205","to":{"primaryAccession":"P00749","uniProtkbId":"UROK_HUMAN","entryType":"UniProtKB reviewed (Swiss-Prot)","organism":{"scientificName":"Homo sapiens","commonName":"Human","taxonId":9606},"proteinDescription":{"recommendedName":{"fullName":{"value":"Urokinase-type plasminogen activator"}}},"genes":[{"geneName":{"value":"PLAU"}}],"sequence":{"length":431,"molWeight":48512},"annotationScore":5}},{"from":"CHEMBL206","to":{"primaryAccession":"P00750","uniProtkbId":"TPA_HUMAN","entryType":"UniProtKB reviewed (Swiss-Prot)","organism":{"scientificName":"Homo sapiens","commonName":"Human","taxonId":9606},"proteinDescription":{"recommendedName":{"fullName":{"value":"Tissue-type plasminogen activator"}}},"genes":[{"geneName":{"value":"PLAT"}}],"sequence":{"length":562,"molWeight":61832},"annotationScore":5}}]}'
     headers:
       content-type:
       - application/json

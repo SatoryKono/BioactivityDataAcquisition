@@ -414,18 +414,65 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     ) -> dict[str, Any]:
         """Build the parameter dictionary for a protein fetch request."""
         fields = [
+            # Core identifiers
             "accession",
             "id",
+            "protein_name",
             "gene_names",
+            # Organism
             "organism_name",
             "organism_id",
-            "protein_name",
-            "length",
+            "lineage",
+            # Sequence
             "sequence",
+            "length",
+            "mass",
+            # Evidence & quality
+            "protein_existence",
+            "annotation_score",
+            "reviewed",
+            # Entry metadata
+            "date_created",
+            "date_modified",
+            "version",
+            # Comments (functional annotations)
             "cc_function",
+            "cc_catalytic_activity",
+            "cc_activity_regulation",
+            "cc_subunit",
+            "cc_pathway",
+            "cc_subcellular_location",
+            "cc_tissue_specificity",
+            "cc_alternative_products",
+            "cc_disease",
+            "cc_cofactor",
+            # Biophysicochemical properties (separate fields)
+            "ph_dependence",
+            "temp_dependence",
+            "kinetics",
+            "absorption",
+            "redox_potential",
+            "cc_induction",
+            "cc_caution",
+            "cc_similarity",
+            "cc_pharmaceutical",
+            # Features
             "ft_domain",
+            "ft_binding",
+            "ft_site",
+            "ft_act_site",
+            "ft_mod_res",
+            # Cross-references
             "xref_pdb",
             "xref_chembl",
+            "xref_drugbank",
+            "xref_guidetopharmacology",
+            "go_id",
+            "xref_interpro",
+            "xref_pfam",
+            "xref_reactome",
+            # Keywords
+            "keyword",
         ]
         params = {
             "query": query,

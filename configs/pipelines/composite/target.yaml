@@ -9,15 +9,19 @@
 #   1. chembl_target_component: fetches component data using component_id from seed
 #   2. chembl_protein_class: fetches protein classifications using
 #      protein_classification_id from target_component Silver table (chained dep)
-# - Enrichers:
-#   - UniProt ID mapping (ChEMBL -> UniProt accessions)
+#   3. uniprot_idmapping: maps ChEMBL target IDs to UniProt accessions
+#   4. uniprot_protein: fetches detailed protein data using uniprot_accession
+#      from idmapping Silver table (chained dep)
 #
 # Dependency chaining (key_source):
 # - chembl_target_component uses component_id from seed (standard)
 # - chembl_protein_class uses protein_classification_id from target_component
 #   Silver table via key_source field (chained dependency)
+# - uniprot_idmapping uses target_chembl_id from seed (standard)
+# - uniprot_protein uses uniprot_accession from idmapping Silver table
+#   via key_source field (chained dependency)
 #
-# Version: 1.1.0
+# Version: 1.2.0
 # Reference: ADR-026 Composite Pipeline Pattern
 # Last Updated: 2026-02-03
 #
@@ -28,7 +32,7 @@
 # -----------------------------------------------------------------------------
 composite:
   name: composite_target
-  version: "1.1.0"
+  version: "1.2.0"
 
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
@@ -54,6 +58,9 @@ composite:
   # 1. chembl_target_component runs first (uses component_id from seed)
   # 2. chembl_protein_class runs second (uses protein_classification_id from
   #    target_component Silver table via key_source)
+  # 3. uniprot_idmapping runs third (uses target_chembl_id from seed)
+  # 4. uniprot_protein runs fourth (uses uniprot_accession from idmapping
+  #    Silver table via key_source - CHAINED)
   dependencies:
     # ChEMBL Target Component: detailed per-component data
     # Fetches protein_classifications, xrefs for each component.
@@ -79,21 +86,39 @@ composite:
       timeout_seconds: 300
       silver_table: silver/chembl/protein_class
 
-  # ---------------------------------------------------------------------------
-  # Enricher Pipelines
-  # ---------------------------------------------------------------------------
-  # Enrichers read from pre-populated Silver tables and join with seed data.
-  # Note: chembl_target_component moved to dependencies for chained key extraction.
-  enrichers:
-    # UniProt: Maps ChEMBL target IDs to UniProt accessions
-    # OPTIONAL: Many non-protein targets lack UniProt mappings
+    # UniProt ID Mapping: maps ChEMBL target IDs to UniProt accessions
+    # This MUST run before uniprot_protein to provide uniprot_accession keys.
+    # OPTIONAL: Many non-protein targets lack UniProt mappings.
     - pipeline: uniprot_idmapping
       join_keys:
-        - target_chembl_id  # Direct 1:1 join
+        - target_chembl_id  # Direct join key from seed
       required: false       # Optional - many targets lack UniProt accessions
       filter_condition: "target_chembl_id IS NOT NULL"
       timeout_seconds: 600
       silver_table: silver/uniprot/idmapping
+
+    # UniProt Protein: detailed protein functional data
+    # Uses uniprot_accession from idmapping Silver table.
+    # This is a CHAINED DEPENDENCY: reads keys from uniprot_idmapping output.
+    # Only fetches proteins where mapping_status = 'found'.
+    # Provides: function, GO terms, disease associations, subcellular location,
+    # pathway, catalytic activity, PDB cross-references, and more.
+    - pipeline: uniprot_protein
+      join_keys:
+        - uniprot_accession  # Source column in idmapping Silver
+      filter_field: accession  # Target API filter field (UniProt uses 'accession')
+      key_source: uniprot_idmapping  # Read keys from idmapping Silver table
+      key_filter: "mapping_status = 'found'"  # Only fetch successfully mapped IDs
+      required: false       # Optional - not all targets have UniProt data
+      timeout_seconds: 900  # Longer timeout due to rich data
+      silver_table: silver/uniprot/protein
+
+  # ---------------------------------------------------------------------------
+  # Enricher Pipelines
+  # ---------------------------------------------------------------------------
+  # Enrichers read from pre-populated Silver tables and join with seed data.
+  # All UniProt pipelines moved to dependencies for proper chaining.
+  enrichers: []
 
   # ---------------------------------------------------------------------------
   # Merge Configuration
@@ -107,8 +132,7 @@ composite:
     conflict_resolution: seed_priority
 
     # preserve_all_sources: false
-    # Two enrichers with some field overlap (target_chembl_id, component_id,
-    # description, organism, taxonomy_id). Seed values take priority.
+    # Multiple sources with field overlap. Seed values take priority.
     preserve_all_sources: false
 
     # Field-level priority for overlapping fields
@@ -118,6 +142,10 @@ composite:
         - chembl  # Seed is authoritative for PK
       component_id:
         - chembl  # Seed component_id (from component_ids[0]) is authoritative
+      taxonomy_id:
+        - chembl  # ChEMBL taxonomy_id takes priority over UniProt
+      organism:
+        - chembl  # ChEMBL organism name is authoritative
 
     # -------------------------------------------------------------------------
     # Column Ordering by Semantic Categories
@@ -182,12 +210,56 @@ composite:
           - target_component_synonyms
         provider_order: [chembl]
 
-      # === Enriched component data (from target_component enricher) ===
+      # === Enriched component data (from target_component dependency) ===
       - name: enriched_components
         fields:
           - protein_classification_id
           - protein_classification_ids
         provider_order: [chembl]
+
+      # === UniProt protein functional annotations ===
+      - name: protein_function
+        fields:
+          - function_comment
+          - catalytic_activity
+          - activity_regulation
+          - pathway
+          - subcellular_location
+          - tissue_specificity
+          - subunit
+        provider_order: [uniprot]
+
+      # === UniProt disease and pharmacology ===
+      - name: disease_pharma
+        fields:
+          - disease_involvement
+          - drugbank_ids
+          - guidetopharmacology_ids
+          - chembl_ids
+        provider_order: [uniprot]
+
+      # === UniProt ontology and structure ===
+      - name: ontology_structure
+        fields:
+          - go_terms
+          - pdb_xrefs
+          - interpro_xrefs      # InterPro domain families (NEW)
+          - pfam_xrefs          # Pfam protein families (NEW)
+          - reactome_xrefs      # Reactome pathway entries (NEW)
+          - keywords
+        provider_order: [uniprot]
+
+      # === UniProt protein properties ===
+      - name: protein_properties
+        fields:
+          - protein_name
+          - gene_primary
+          - protein_existence
+          - annotation_score
+          - reviewed
+          - sequence_length
+          - sequence_mass
+        provider_order: [uniprot]
 
       # === Cross-references and pipeline stages ===
       - name: references
@@ -198,17 +270,61 @@ composite:
 
     # Fields excluded from merged output (Silver + Gold)
     exclude_fields:
+      # --- ChEMBL target exclusions ---
       - chembl.target.target_components
       - chembl.target.cross_references
+      # --- ChEMBL target_component exclusions ---
       - chembl.target_component.accession
-      - chembl.target_component.component_id
       - chembl.target_component.component_type
       - chembl.target_component.description
       - chembl.target_component.organism
       - chembl.target_component.taxonomy_id
       - chembl.target_component.target_component_synonyms
       - chembl.target_component.target_component_xrefs
-      - chembl.target_component.protein_classifications
+      # --- UniProt idmapping exclusions (data comes from protein) ---
+      - uniprot.idmapping.all_mappings
+      - uniprot.idmapping.annotation_score
+      - uniprot.idmapping.gene_primary
+      - uniprot.idmapping.organism_common
+      - uniprot.idmapping.organism_scientific
+      - uniprot.idmapping.protein_name
+      - uniprot.idmapping.reviewed
+      - uniprot.idmapping.sequence_length
+      - uniprot.idmapping.sequence_mass
+      - uniprot.idmapping.uniprot_entry_name
+      # --- UniProt protein exclusions (redundant or too large) ---
+      - uniprot.protein.accession           # Already have uniprot_accession from idmapping
+      - uniprot.protein.entry_name          # Technical field, not needed
+      - uniprot.protein.entry_type          # Technical field
+      - uniprot.protein.secondary_accessions  # Rarely needed
+      - uniprot.protein.sequence            # Too large for composite table
+      - uniprot.protein.sequence_checksum   # Technical field
+      - uniprot.protein.sequence_modified   # Audit field
+      - uniprot.protein.lineage             # Redundant with taxonomy_id
+      - uniprot.protein.gene_names          # Use gene_primary instead
+      - uniprot.protein.gene_synonyms       # Too verbose
+      - uniprot.protein.gene_orf_names      # Too verbose
+      - uniprot.protein.protein_short_names  # Use protein_name instead
+      - uniprot.protein.protein_alternative_names  # Too verbose
+      - uniprot.protein.protein_ec_numbers  # Specialized
+      - uniprot.protein.flag                # Technical field
+      - uniprot.protein.entry_version       # Audit field
+      - uniprot.protein.entry_created       # Audit field
+      - uniprot.protein.entry_modified      # Audit field
+      - uniprot.protein.features            # JSON, too large
+      - uniprot.protein.alternative_products  # Specialized
+      - uniprot.protein.similarity_comment  # Low value
+      - uniprot.protein.caution             # Low value
+      - uniprot.protein.cofactors           # Specialized
+      - uniprot.protein.biophysicochemical_properties  # Specialized
+      - uniprot.protein.induction           # Specialized
+      - uniprot.protein.cross_reference_count  # Metadata
+      - uniprot.protein.feature_count       # Metadata
+      - uniprot.protein.keyword_count       # Metadata
+      - uniprot.protein.isoform_count       # Metadata
+      - uniprot.protein.organism_id         # Duplicate of taxonomy_id
+      - uniprot.protein.organism_scientific  # Use ChEMBL organism
+      - uniprot.protein.organism_common     # Use ChEMBL organism
 
     output:
       silver: data/output/silver/composite/target
@@ -222,13 +338,16 @@ composite:
     soft_fail_threshold: 0.10  # 10% errors = warning
     hard_fail_threshold: 0.30  # 30% errors = failure
 
-    # Per-enricher threshold overrides
+    # Per-dependency threshold overrides
     enricher_overrides:
       # Many non-protein targets -> UniProt mapping_status="not_found" is expected
       uniprot_idmapping:
         soft_fail_threshold: 0.30  # 30% not_found is acceptable
         hard_fail_threshold: 0.80  # Only fail if >80% errors
-      # Note: chembl_target_component moved to dependencies, no DQ override needed
+      # UniProt protein: chained from idmapping, some accessions may not resolve
+      uniprot_protein:
+        soft_fail_threshold: 0.20  # 20% missing is acceptable
+        hard_fail_threshold: 0.60  # Only fail if >60% errors
 
     # Required fields in final Gold output
     required_fields:
@@ -266,11 +385,38 @@ composite:
         min_value: 1
         description: "NCBI Taxonomy ID"
 
+      function_comment:
+        type: string
+        nullable: true
+        description: "Functional description from UniProt FUNCTION comment"
+
+      go_terms:
+        type: string
+        nullable: true
+        description: "Gene Ontology terms (JSON-serialized list)"
+
+      disease_involvement:
+        type: string
+        nullable: true
+        description: "Disease associations from UniProt DISEASE comment"
+
+      subcellular_location:
+        type: string
+        nullable: true
+        description: "Subcellular localization from UniProt"
+
+      annotation_score:
+        type: integer
+        nullable: true
+        min_value: 1
+        max_value: 5
+        description: "UniProt annotation score (1-5)"
+
   # ---------------------------------------------------------------------------
   # Execution Options
   # ---------------------------------------------------------------------------
   execution:
-    # Maximum concurrent enrichers (only 1, but keep for consistency)
+    # Maximum concurrent dependencies/enrichers
     max_concurrency: 2
 
     # Enable checkpointing for resume capability
@@ -305,8 +451,10 @@ composite:
 
     # Field-level source tracking (for fields from multiple providers)
     track_source_for_fields:
-      - target_chembl_id  # Overlapping field between seed and idmapping enricher
-      - component_id      # Overlapping field between seed and target_component enricher
+      - target_chembl_id  # Overlapping field between seed and idmapping
+      - component_id      # Overlapping field between seed and target_component
+      - taxonomy_id       # Overlapping between ChEMBL and UniProt
+      - organism          # Overlapping between ChEMBL and UniProt
 
 # -----------------------------------------------------------------------------
 # Gold Filters (applied to merged output)

@@ -70,7 +70,7 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     gene_primary: Series[str] = pa.Field(nullable=True)
     sequence_length: Series[float] = pa.Field(nullable=True, coerce=True)  # int → float
     sequence_mass: Series[float] = pa.Field(nullable=True, coerce=True)  # int → float
-    reviewed: Series[bool] = pa.Field(nullable=True)
+    reviewed: Series[bool] = pa.Field(nullable=True, coerce=True)  # nullable bool
     annotation_score: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float

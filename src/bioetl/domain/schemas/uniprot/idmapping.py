@@ -112,6 +112,7 @@ class IDMappingSchema(ETLRecordSchema):
 
     reviewed: Series[bool] | None = pa.Field(
         nullable=True,
+        coerce=True,
         description="True if Swiss-Prot (reviewed), False if TrEMBL",
     )
 

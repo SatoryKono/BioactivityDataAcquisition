@@ -144,6 +144,7 @@ class DependencyConfig:
     silver_table: str | None = None
     key_source: str | None = None  # None = seed, or pipeline name for chained deps
     filter_field: str | None = None  # API filter field (defaults to first join_key)
+    key_filter: str | None = None  # SQL-like condition to filter key_source records
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
@@ -802,8 +803,8 @@ class CompositeConfig:
             raise ValueError("composite name cannot be empty")
         if not self.version:
             raise ValueError("composite version cannot be empty")
-        if not self.enrichers:
-            raise ValueError("composite must have at least one enricher")
+        if not self.enrichers and not self.dependencies:
+            raise ValueError("composite must have at least one enricher or dependency")
         self._validate_join_keys()
         self._validate_dependency_join_keys()
         self._validate_unique_enrichers()
@@ -811,6 +812,8 @@ class CompositeConfig:
 
     def _validate_join_keys(self) -> None:
         """Validate that enricher join keys exist in seed output_keys."""
+        if not self.enrichers:
+            return  # Skip if no enrichers
         seed_keys = set(self.seed.output_keys)
         for enricher in self.enrichers:
             for key in enricher.join_keys:
@@ -822,6 +825,8 @@ class CompositeConfig:
 
     def _validate_unique_enrichers(self) -> None:
         """Validate that enricher pipeline names are unique."""
+        if not self.enrichers:
+            return  # Skip if no enrichers
         names = [e.pipeline for e in self.enrichers]
         if len(names) != len(set(names)):
             duplicates = [n for n in names if names.count(n) > 1]

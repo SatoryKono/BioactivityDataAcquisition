@@ -31,6 +31,7 @@ from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adap
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.field_group_loader import (
     FieldGroupLoadError,
@@ -46,7 +47,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -141,12 +141,25 @@ def _find_filter_key(
 def _extract_filter_ids_from_keys(
     enricher_cfg: EnricherConfig,
     keys: pl.DataFrame,
+    logger: LoggerPort | None = None,
 ) -> tuple[tuple[str, ...] | None, str | None, dict[str, str] | None]:
     """Extract filter IDs from seed keys for an enricher."""
     if keys is None or len(keys) == 0:
+        if logger:
+            logger.debug(
+                "No keys available for enricher",
+                pipeline=enricher_cfg.pipeline,
+            )
         return None, None, None
     filter_key = _find_filter_key(enricher_cfg.join_keys, keys.columns)
     if filter_key is None:
+        if logger:
+            logger.warning(
+                "Join key not found in keys columns",
+                pipeline=enricher_cfg.pipeline,
+                join_keys=list(enricher_cfg.join_keys),
+                available_columns=list(keys.columns),
+            )
         return None, None, None
     key_values = keys.select(filter_key).drop_nulls().unique().to_series().to_list()
     if not key_values:
@@ -228,8 +241,20 @@ def bootstrap_composite_runner(
 
         if enricher_cfg:
             filter_ids, filter_field, fallback_mapping = _extract_filter_ids_from_keys(
-                enricher_cfg, keys
+                enricher_cfg, keys, logger
             )
+
+        # Debug logging for enricher filter configuration
+        logger.debug(
+            "Creating enricher runner",
+            pipeline=pipeline_name,
+            keys_columns=list(keys.columns) if keys is not None else [],
+            keys_count=len(keys) if keys is not None else 0,
+            join_keys=list(enricher_cfg.join_keys) if enricher_cfg else [],
+            filter_field=filter_field,
+            filter_ids_count=len(filter_ids) if filter_ids else 0,
+            filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+        )
 
         # many_to_one: no limit; one_to_one: limit to seed count
         limit: int | None = None

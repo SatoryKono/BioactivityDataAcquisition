@@ -172,6 +172,13 @@ class DependencySchema(BaseModel):
             "from target API field (e.g., protein_classification_id vs protein_class_id)"
         ),
     )
+    key_filter: str | None = Field(
+        default=None,
+        description=(
+            "SQL-like condition to filter records from key_source before extracting join keys. "
+            "Example: \"mapping_status = 'found'\" to only fetch successfully mapped IDs."
+        ),
+    )
 
     @field_validator("join_keys")
     @classmethod
@@ -194,6 +201,7 @@ class DependencySchema(BaseModel):
             silver_table=self.silver_table,
             key_source=self.key_source,
             filter_field=self.filter_field,
+            key_filter=self.key_filter,
         )
 
 
@@ -534,7 +542,8 @@ class CompositeConfigSchema(BaseModel):
         description="List of dependency configurations (run after seed, before enrichers)",
     )
     enrichers: list[EnricherSchema] = Field(
-        ..., min_length=1, description="List of enricher configurations"
+        default_factory=list,
+        description="List of enricher configurations (optional if dependencies provided)",
     )
     merge: MergeSchema = Field(..., description="Merge step configuration")
     dq_rules: CompositeDQSchema = Field(
@@ -548,8 +557,17 @@ class CompositeConfigSchema(BaseModel):
     )
 
     @model_validator(mode="after")
+    def validate_has_enrichers_or_dependencies(self) -> CompositeConfigSchema:
+        """Validate that at least one enricher or dependency is defined."""
+        if not self.enrichers and not self.dependencies:
+            raise ValueError("At least one enricher or dependency must be defined")
+        return self
+
+    @model_validator(mode="after")
     def validate_enricher_join_keys(self) -> CompositeConfigSchema:
         """Validate that enricher join keys exist in seed output_keys."""
+        if not self.enrichers:
+            return self  # Skip if no enrichers
         seed_keys = set(self.seed.output_keys)
         for enricher in self.enrichers:
             for key in enricher.join_keys:
@@ -584,6 +602,8 @@ class CompositeConfigSchema(BaseModel):
     @model_validator(mode="after")
     def validate_unique_enricher_names(self) -> CompositeConfigSchema:
         """Validate that enricher pipeline names are unique."""
+        if not self.enrichers:
+            return self  # Skip if no enrichers
         names = [e.pipeline for e in self.enrichers]
         if len(names) != len(set(names)):
             duplicates = {n for n in names if names.count(n) > 1}

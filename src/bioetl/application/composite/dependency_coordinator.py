@@ -242,6 +242,27 @@ class DependencyCoordinator:
                     f"Available columns: {list(source_keys.columns)}"
                 )
 
+            # Apply key_filter if configured (e.g., "mapping_status = 'found'")
+            if dependency.key_filter:
+                try:
+                    original_count = len(source_keys)
+                    source_keys = source_keys.filter(pl.sql_expr(dependency.key_filter))
+                    filtered_count = len(source_keys)
+                    self._logger.info(
+                        "Applied key_filter to chained dependency",
+                        dependency=dependency.pipeline,
+                        key_filter=dependency.key_filter,
+                        original_count=original_count,
+                        filtered_count=filtered_count,
+                    )
+                except Exception as e:
+                    self._logger.warning(
+                        "Failed to apply key_filter, using all keys",
+                        dependency=dependency.pipeline,
+                        key_filter=dependency.key_filter,
+                        error=str(e),
+                    )
+
             self._logger.info(
                 "Using chained dependency keys",
                 dependency=dependency.pipeline,
