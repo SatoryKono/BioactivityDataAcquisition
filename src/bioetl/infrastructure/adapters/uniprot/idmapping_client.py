@@ -365,24 +365,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         # Select primary entry for each ID, handle multiple mappings
         results: dict[str, dict[str, Any] | None] = {}
         for id_, entries in entries_by_id.items():
-            if not entries:
-                results[id_] = None
-            elif len(entries) == 1:
-                results[id_] = entries[0]
-            else:
-                # Multiple mappings: sort by reviewed (desc), annotation_score (desc)
-                sorted_entries = sorted(
-                    entries,
-                    key=lambda e: (
-                        -int(e.get("reviewed") or False),
-                        -int(e.get("annotation_score") or 0),
-                    ),
-                )
-                primary = dict(sorted_entries[0])  # Copy to avoid mutation
-                # Store all accessions as JSON array
-                all_accessions = [e["uniprot_accession"] for e in sorted_entries]
-                primary["all_mappings"] = json.dumps(all_accessions)
-                results[id_] = primary
+            results[id_] = self._select_primary_entry(entries)
 
         found_count = sum(1 for v in results.values() if v is not None)
         multiple_count = sum(1 for v in results.values() if v and v.get("all_mappings"))
@@ -396,6 +379,41 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         )
 
         return results
+
+    @staticmethod
+    def _select_primary_entry(
+        entries: list[dict[str, Any]],
+    ) -> dict[str, Any] | None:
+        """Select primary entry from list, handling multiple mappings.
+
+        When multiple mappings exist, selects the best entry based on:
+        1. Reviewed status (Swiss-Prot preferred over TrEMBL)
+        2. Annotation score (higher is better)
+
+        Args:
+            entries: List of entry data dicts for a single source ID.
+
+        Returns:
+            Primary entry dict with optional all_mappings field, or None.
+        """
+        if not entries:
+            return None
+        if len(entries) == 1:
+            return entries[0]
+
+        # Multiple mappings: sort by reviewed (desc), annotation_score (desc)
+        sorted_entries = sorted(
+            entries,
+            key=lambda e: (
+                -int(e.get("reviewed") or False),
+                -int(e.get("annotation_score") or 0),
+            ),
+        )
+        primary = dict(sorted_entries[0])  # Copy to avoid mutation
+        # Store all accessions as JSON array
+        all_accessions = [e["uniprot_accession"] for e in sorted_entries]
+        primary["all_mappings"] = json.dumps(all_accessions)
+        return primary
 
     @staticmethod
     def _get_next_page_url(headers: Mapping[str, Any]) -> str | None:
@@ -413,6 +431,80 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
         match = re.search(r'<([^>]+)>;\s*rel="next"', str(link_header))
         return match.group(1) if match else None
+
+    @staticmethod
+    def _extract_organism_info(
+        organism: Any,
+    ) -> tuple[str | None, str | None, int | None]:
+        """Extract organism metadata from entry.
+
+        Args:
+            organism: Organism object from UniProt entry.
+
+        Returns:
+            Tuple of (scientific_name, common_name, taxonomy_id).
+        """
+        if not isinstance(organism, dict):
+            return None, None, None
+        return (
+            organism.get("scientificName"),
+            organism.get("commonName"),
+            organism.get("taxonId"),
+        )
+
+    @staticmethod
+    def _extract_protein_name(protein_desc: Any) -> str | None:
+        """Extract recommended protein name from description.
+
+        Args:
+            protein_desc: proteinDescription object from UniProt entry.
+
+        Returns:
+            Protein full name or None.
+        """
+        if not isinstance(protein_desc, dict):
+            return None
+        recommended = protein_desc.get("recommendedName", {})
+        if not isinstance(recommended, dict):
+            return None
+        full_name = recommended.get("fullName", {})
+        if not isinstance(full_name, dict):
+            return None
+        return full_name.get("value")
+
+    @staticmethod
+    def _extract_gene_primary(genes: Any) -> str | None:
+        """Extract primary gene name from genes list.
+
+        Args:
+            genes: Genes array from UniProt entry.
+
+        Returns:
+            Primary gene name or None.
+        """
+        if not isinstance(genes, list) or not genes:
+            return None
+        first_gene = genes[0]
+        if not isinstance(first_gene, dict):
+            return None
+        gene_name_obj = first_gene.get("geneName", {})
+        if not isinstance(gene_name_obj, dict):
+            return None
+        return gene_name_obj.get("value")
+
+    @staticmethod
+    def _extract_sequence_info(sequence: Any) -> tuple[int | None, int | None]:
+        """Extract sequence length and mass from entry.
+
+        Args:
+            sequence: Sequence object from UniProt entry.
+
+        Returns:
+            Tuple of (sequence_length, sequence_mass).
+        """
+        if not isinstance(sequence, dict):
+            return None, None
+        return sequence.get("length"), sequence.get("molWeight")
 
     @staticmethod
     def _parse_mapping_entry(
@@ -444,26 +536,19 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         if not accession:
             return from_id, None
 
-        # Extract organism info
-        organism = to_entry.get("organism", {})
-
-        # Extract protein description
-        protein_desc = to_entry.get("proteinDescription", {})
-        recommended_name = protein_desc.get("recommendedName", {})
-        full_name = recommended_name.get("fullName", {})
-
-        # Extract gene info
-        genes = to_entry.get("genes", [])
-        gene_primary = None
-        if genes and isinstance(genes, list) and len(genes) > 0:
-            first_gene = genes[0]
-            if isinstance(first_gene, dict):
-                gene_name_obj = first_gene.get("geneName", {})
-                if isinstance(gene_name_obj, dict):
-                    gene_primary = gene_name_obj.get("value")
-
-        # Extract sequence info
-        sequence = to_entry.get("sequence", {})
+        # Extract nested fields using helper methods
+        org_sci, org_common, tax_id = UniProtIDMappingClient._extract_organism_info(
+            to_entry.get("organism")
+        )
+        protein_name = UniProtIDMappingClient._extract_protein_name(
+            to_entry.get("proteinDescription")
+        )
+        gene_primary = UniProtIDMappingClient._extract_gene_primary(
+            to_entry.get("genes")
+        )
+        seq_len, seq_mass = UniProtIDMappingClient._extract_sequence_info(
+            to_entry.get("sequence")
+        )
 
         # Determine reviewed status from entryType
         entry_type = to_entry.get("entryType", "")
@@ -472,25 +557,13 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         return from_id, {
             "uniprot_accession": str(accession),
             "uniprot_entry_name": to_entry.get("uniProtkbId"),
-            "organism_scientific": organism.get("scientificName")
-            if isinstance(organism, dict)
-            else None,
-            "organism_common": organism.get("commonName")
-            if isinstance(organism, dict)
-            else None,
-            "taxonomy_id": organism.get("taxonId")
-            if isinstance(organism, dict)
-            else None,
-            "protein_name": full_name.get("value")
-            if isinstance(full_name, dict)
-            else None,
+            "organism_scientific": org_sci,
+            "organism_common": org_common,
+            "taxonomy_id": tax_id,
+            "protein_name": protein_name,
             "gene_primary": gene_primary,
-            "sequence_length": sequence.get("length")
-            if isinstance(sequence, dict)
-            else None,
-            "sequence_mass": sequence.get("molWeight")
-            if isinstance(sequence, dict)
-            else None,
+            "sequence_length": seq_len,
+            "sequence_mass": seq_mass,
             "reviewed": reviewed,
             "annotation_score": to_entry.get("annotationScore"),
         }

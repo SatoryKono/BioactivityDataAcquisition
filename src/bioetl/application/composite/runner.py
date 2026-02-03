@@ -460,6 +460,7 @@ class CompositePipelineRunner:
             dependencies=self._config.dependencies,
             completed=state.completed_dependencies,
             runner_factory=self._dependencies_runner_factory,
+            dependency_configs={d.pipeline: d for d in self._config.dependencies},
         )
 
         for dep_name, dep_result in dependency_results.items():

@@ -445,7 +445,8 @@ class BatchWriter:
         """Resolve explicit column order from YAML groups if configured."""
         if not self._column_orderer:
             return None
-        return self._column_orderer.order_column_names(columns)
+        ordered = self._column_orderer.order_column_names(columns)
+        return self._apply_system_prefix_order(ordered)
 
     def _apply_renames_to_records(
         self, records: list[dict[str, Any]], rename_map: dict[str, str]
@@ -512,7 +513,30 @@ class BatchWriter:
         ordered_columns = self._column_orderer.filter_by_layer_config(
             available_columns, layer_config
         )
+        ordered_columns = self._apply_system_prefix_order(ordered_columns)
         return ordered_columns, layer_config.rename_fields
+
+    def _apply_system_prefix_order(self, columns: list[str]) -> list[str]:
+        """Ensure system prefix fields are first and DQ fields are last."""
+        from bioetl.domain.schemas.column_order import (
+            DQ_FIELDS_SUFFIX,
+            LOOKUP_FIELDS_PREFIX,
+            SYSTEM_FIELDS_PREFIX,
+        )
+
+        if not columns:
+            return columns
+
+        column_set = set(columns)
+        prefix = [c for c in SYSTEM_FIELDS_PREFIX if c in column_set]
+        lookup = [c for c in LOOKUP_FIELDS_PREFIX if c in column_set]
+        suffix = [c for c in DQ_FIELDS_SUFFIX if c in column_set]
+        middle = [
+            c
+            for c in columns
+            if c not in prefix and c not in lookup and c not in suffix
+        ]
+        return prefix + lookup + middle + suffix
 
     def log_and_track_write_error(
         self, layer: str, error: Exception, batch_id: BatchID
