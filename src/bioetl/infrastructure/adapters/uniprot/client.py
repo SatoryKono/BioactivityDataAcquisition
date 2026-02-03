@@ -43,6 +43,59 @@ if TYPE_CHECKING:
 # Maximum IDs per batch for UniProt OR-query (API recommendation)
 UNIPROT_BATCH_SIZE = 100
 
+# Fields to request from UniProt protein API
+_PROTEIN_FETCH_FIELDS: tuple[str, ...] = (
+    "accession",
+    "id",
+    "protein_name",
+    "gene_names",  # identifiers
+    "organism_name",
+    "organism_id",
+    "lineage",
+    "sequence",
+    "length",
+    "mass",
+    "protein_existence",
+    "annotation_score",
+    "reviewed",  # quality
+    "date_created",
+    "date_modified",
+    "version",  # metadata
+    "cc_function",
+    "cc_catalytic_activity",
+    "cc_activity_regulation",  # comments
+    "cc_subunit",
+    "cc_pathway",
+    "cc_subcellular_location",
+    "cc_tissue_specificity",
+    "cc_alternative_products",
+    "cc_disease",
+    "cc_cofactor",
+    "ph_dependence",
+    "temp_dependence",
+    "kinetics",
+    "absorption",
+    "redox_potential",
+    "cc_induction",
+    "cc_caution",
+    "cc_similarity",
+    "cc_pharmaceutical",
+    "ft_domain",
+    "ft_binding",
+    "ft_site",
+    "ft_act_site",
+    "ft_mod_res",  # features
+    "xref_pdb",
+    "xref_chembl",
+    "xref_drugbank",
+    "xref_guidetopharmacology",
+    "go_id",
+    "xref_interpro",
+    "xref_pfam",
+    "xref_reactome",
+    "keyword",  # xrefs
+)
+
 
 class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     """UniProt API adapter implementing DataSourcePort.
@@ -51,59 +104,6 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     """
 
     provider_name: str = "uniprot"
-
-    # Fields to request from UniProt protein API
-    PROTEIN_FETCH_FIELDS: tuple[str, ...] = (
-        "accession",
-        "id",
-        "protein_name",
-        "gene_names",  # identifiers
-        "organism_name",
-        "organism_id",
-        "lineage",
-        "sequence",
-        "length",
-        "mass",
-        "protein_existence",
-        "annotation_score",
-        "reviewed",  # quality
-        "date_created",
-        "date_modified",
-        "version",  # metadata
-        "cc_function",
-        "cc_catalytic_activity",
-        "cc_activity_regulation",  # comments
-        "cc_subunit",
-        "cc_pathway",
-        "cc_subcellular_location",
-        "cc_tissue_specificity",
-        "cc_alternative_products",
-        "cc_disease",
-        "cc_cofactor",
-        "ph_dependence",
-        "temp_dependence",
-        "kinetics",
-        "absorption",
-        "redox_potential",
-        "cc_induction",
-        "cc_caution",
-        "cc_similarity",
-        "cc_pharmaceutical",
-        "ft_domain",
-        "ft_binding",
-        "ft_site",
-        "ft_act_site",
-        "ft_mod_res",  # features
-        "xref_pdb",
-        "xref_chembl",
-        "xref_drugbank",
-        "xref_guidetopharmacology",
-        "go_id",
-        "xref_interpro",
-        "xref_pfam",
-        "xref_reactome",
-        "keyword",  # xrefs
-    )
 
     def __init__(
         self,
@@ -470,7 +470,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             "query": query,
             "size": min(size, (limit - fetched) if limit else size),
             "format": "json",
-            "fields": ",".join(self.PROTEIN_FETCH_FIELDS),
+            "fields": ",".join(_PROTEIN_FETCH_FIELDS),
         }
         if cursor:
             params["cursor"] = cursor
