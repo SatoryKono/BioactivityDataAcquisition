@@ -217,6 +217,6 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
 
 
 __all__ = [
-    "CompositePublicationGoldSchema",
     "CompositeMoleculeGoldSchema",
+    "CompositePublicationGoldSchema",
 ]
