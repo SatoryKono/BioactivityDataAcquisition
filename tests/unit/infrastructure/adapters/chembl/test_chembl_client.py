@@ -6,7 +6,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.exceptions import CriticalError, ExternalServiceError, RateLimitError
+from bioetl.domain.exceptions import (
+    CriticalError,
+    ExternalServiceError,
+    RateLimitError,
+    RetryExhaustedError,
+)
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -756,3 +761,108 @@ class TestChemblAdapterBatchReduction:
         ]
         # Should have warnings for: 4->2+2, then 2->1+1 twice
         assert len(warning_calls) >= 3
+
+
+@pytest.mark.unit
+class TestChemblAdapterDirectEndpointFallback:
+    """Tests for direct endpoint fallback when filter endpoint fails."""
+
+    @pytest.mark.asyncio
+    async def test_direct_endpoint_fallback_on_filter_500(
+        self, mock_http_client, mock_logger
+    ):
+        """Test fallback to direct endpoint when filter endpoint returns 500.
+
+        ChEMBL API has two code paths:
+        1. Filter: /target?target_chembl_id__in=CHEMBL123 (may fail with 500)
+        2. Direct: /target/CHEMBL123 (often works when filter fails)
+        """
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        call_count = 0
+
+        async def mock_get(url, params=None):
+            nonlocal call_count
+            call_count += 1
+
+            # Filter endpoint (has __in param) - always fails with 500
+            if params and "target_chembl_id__in" in params:
+                raise RetryExhaustedError(
+                    url, attempts=3, last_error=Exception("500 Internal Server Error")
+                )
+
+            # Direct endpoint (no __in param, URL contains ID) - succeeds
+            if "/target/CHEMBL123" in url:
+                mock_response = MagicMock()
+                mock_response.json.return_value = {
+                    "target_chembl_id": "CHEMBL123",
+                    "target_type": "SINGLE PROTEIN",
+                    "pref_name": "Test Target",
+                }
+                return mock_response
+
+            # Unknown endpoint
+            raise Exception(f"Unexpected URL: {url}")
+
+        mock_http_client.get = mock_get
+
+        records = []
+        async for record in adapter.fetch_filtered(
+            entity_type="target",
+            filter_ids=["CHEMBL123"],
+            filter_field="target_chembl_id",
+        ):
+            records.append(record)
+
+        # Should get 1 record via direct endpoint fallback
+        assert len(records) == 1
+        assert records[0]["target_chembl_id"] == "CHEMBL123"
+
+        # Verify direct_endpoint_fallback_success was logged
+        info_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and c.args[0] == "direct_endpoint_fallback_success"
+        ]
+        assert len(info_calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_direct_endpoint_fallback_also_fails(
+        self, mock_http_client, mock_logger
+    ):
+        """Test logging when both filter and direct endpoints fail."""
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+        async def mock_get(url, params=None):
+            # Both endpoints fail
+            raise RetryExhaustedError(
+                url, attempts=3, last_error=Exception("500 Internal Server Error")
+            )
+
+        mock_http_client.get = mock_get
+
+        records = []
+        async for record in adapter.fetch_filtered(
+            entity_type="target",
+            filter_ids=["CHEMBL123"],
+            filter_field="target_chembl_id",
+        ):
+            records.append(record)
+
+        # No records returned
+        assert len(records) == 0
+
+        # Verify direct_endpoint_fallback_failed was logged
+        warning_calls = [
+            c
+            for c in mock_logger.warning.call_args_list
+            if c.args and c.args[0] == "direct_endpoint_fallback_failed"
+        ]
+        assert len(warning_calls) == 1
+
+        # Verify single_id_fetch_failed was logged (final failure)
+        error_calls = [
+            c
+            for c in mock_logger.error.call_args_list
+            if c.args and c.args[0] == "single_id_fetch_failed"
+        ]
+        assert len(error_calls) == 1

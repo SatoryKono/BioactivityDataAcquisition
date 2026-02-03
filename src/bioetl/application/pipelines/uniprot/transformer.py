@@ -318,12 +318,23 @@ class UniProtProteinTransformer(BaseTransformer):
             xrefs, "GuidetoPHARMACOLOGY"
         )
         data["pdb_xrefs"] = CrossRefExtractor.extract_pdb_xrefs(xrefs)
+        # Extended cross-references for drug discovery
+        data["interpro_xrefs"] = CrossRefExtractor.extract_interpro_xrefs(xrefs)
+        data["pfam_xrefs"] = CrossRefExtractor.extract_pfam_xrefs(xrefs)
+        data["reactome_xrefs"] = CrossRefExtractor.extract_reactome_xrefs(xrefs)
 
     def _add_features_and_keywords(
         self, record: BronzeRecord, data: dict[str, Any]
     ) -> None:
         """Add feature and keyword fields."""
-        data["features"] = FeatureExtractor.extract_features(record.get("features"))
+        features = record.get("features")
+        # All features combined (forensic)
+        data["features_json"] = FeatureExtractor.extract_features(features)
+        # Specific feature types for analysis
+        data["domains"] = FeatureExtractor.extract_domains(features)
+        data["binding_sites"] = FeatureExtractor.extract_binding_sites(features)
+        data["active_sites"] = FeatureExtractor.extract_active_sites(features)
+        # Keywords
         data["keywords"] = FeatureExtractor.extract_keywords(record.get("keywords"))
 
     def _add_counts(self, record: BronzeRecord, data: dict[str, Any]) -> None:

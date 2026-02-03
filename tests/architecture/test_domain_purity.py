@@ -244,6 +244,7 @@ class TestDomainComplexity:
             "complete": 7,  # PipelineRun state transition with validation
             "_validate": 8,  # Value object validation with multiple checks
             "_validate_enabled_fields": 8,  # CC=7 - InputFilterConfig validation with multiple modes
+            "_validate_unique_enrichers": 7,  # CC=6 - CompositeConfig enricher uniqueness validation
             "PubMedId": 9,  # Value object with multiple format validation
             "PubChemCid": 9,  # Value object with multiple format validation
             # Domain services (activity aggregation, normalization)

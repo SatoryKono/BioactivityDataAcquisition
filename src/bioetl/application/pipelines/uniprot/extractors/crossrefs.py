@@ -170,3 +170,138 @@ class CrossRefExtractor:
         ]
 
         return serialize_to_json(pdb_refs, ensure_ascii=False) if pdb_refs else None
+
+    @classmethod
+    def _build_interpro_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build an InterPro entry from a cross-reference dict."""
+        interpro_id = xref.get("id")
+        if not interpro_id:
+            return None
+
+        interpro_entry: dict[str, Any] = {"id": str(interpro_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        if props.get("EntryName"):
+            interpro_entry["name"] = props["EntryName"]
+
+        return interpro_entry
+
+    @classmethod
+    def extract_interpro_xrefs(cls, xrefs: Any) -> str | None:
+        """Extract InterPro cross-references with domain family information.
+
+        InterPro provides protein domain and family classification based on
+        predictive models. Valuable for functional annotation.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of InterPro reference objects with id and name, or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        interpro_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "InterPro"
+            for entry in [cls._build_interpro_entry(xref)]
+            if entry is not None
+        ]
+
+        return (
+            serialize_to_json(interpro_refs, ensure_ascii=False)
+            if interpro_refs
+            else None
+        )
+
+    @classmethod
+    def _build_pfam_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build a Pfam entry from a cross-reference dict."""
+        pfam_id = xref.get("id")
+        if not pfam_id:
+            return None
+
+        pfam_entry: dict[str, Any] = {"id": str(pfam_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        if props.get("EntryName"):
+            pfam_entry["name"] = props["EntryName"]
+        if props.get("MatchStatus"):
+            pfam_entry["match_status"] = props["MatchStatus"]
+
+        return pfam_entry
+
+    @classmethod
+    def extract_pfam_xrefs(cls, xrefs: Any) -> str | None:
+        """Extract Pfam cross-references with protein family information.
+
+        Pfam is a database of protein families represented by multiple
+        sequence alignments and hidden Markov models.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of Pfam reference objects with id, name, and match_status,
+            or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        pfam_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "Pfam"
+            for entry in [cls._build_pfam_entry(xref)]
+            if entry is not None
+        ]
+
+        return serialize_to_json(pfam_refs, ensure_ascii=False) if pfam_refs else None
+
+    @classmethod
+    def _build_reactome_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build a Reactome entry from a cross-reference dict."""
+        reactome_id = xref.get("id")
+        if not reactome_id:
+            return None
+
+        reactome_entry: dict[str, Any] = {"id": str(reactome_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        if props.get("PathwayName"):
+            reactome_entry["pathway_name"] = props["PathwayName"]
+
+        return reactome_entry
+
+    @classmethod
+    def extract_reactome_xrefs(cls, xrefs: Any) -> str | None:
+        """Extract Reactome cross-references with pathway information.
+
+        Reactome is a free, open-source, curated and peer-reviewed pathway
+        database. Valuable for understanding protein involvement in pathways.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of Reactome reference objects with id and pathway_name,
+            or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        reactome_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "Reactome"
+            for entry in [cls._build_reactome_entry(xref)]
+            if entry is not None
+        ]
+
+        return (
+            serialize_to_json(reactome_refs, ensure_ascii=False)
+            if reactome_refs
+            else None
+        )

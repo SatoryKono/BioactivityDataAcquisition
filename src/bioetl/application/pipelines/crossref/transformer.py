@@ -180,10 +180,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
-            # DQ flags (default: no warnings or errors)
-            "_dq_warn": False,
-            "_dq_error": False,
-            # NEW: Additional CrossRef fields
+            # Additional CrossRef fields
             "alternative_id": rec.get("alternative-id", []) or [],
             "journal_name_short": extract_first_string(
                 rec.get("short-container-title")
@@ -191,10 +188,13 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "published": published_date,
             **content_domain,
             **issn_by_type,
-            # NEW: Author and reference data (per PROMPT 3 enhancement)
+            # Author and reference data
             "author_orcid_list": serialized_orcids,
             "author_details": serialized_author_details,
             "references": serialized_references,
+            # DQ flags (MUST be last, per RULES.md §2.4)
+            "_dq_warn": False,
+            "_dq_error": False,
         }
 
     def _get_primary_id_field(self) -> str:

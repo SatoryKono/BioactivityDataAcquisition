@@ -190,7 +190,7 @@ class TestSemanticScholarPublicationTransformer:
         sample_record: dict[str, Any],
         publication_types: list[str] | None,
     ) -> None:
-        """Test that publication_type is None when publicationTypes is empty/null."""
+        """Test that publication_type defaults to PUBLICATION when publicationTypes is empty/null."""
         if publication_types is None:
             sample_record.pop("publicationTypes", None)
         else:
@@ -199,7 +199,7 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["publication_type"] is None
+        assert result["publication_type"] == "PUBLICATION"
 
     @pytest.mark.asyncio
     async def test_transform_publication_type_joined(

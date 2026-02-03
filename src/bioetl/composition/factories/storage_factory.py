@@ -260,9 +260,20 @@ class StorageFactory:
         transform_steps = tuple(config.transform.steps)
 
         # Extract flat_structure settings
-        bronze_flat_structure = bronze_config.flat_structure if bronze_config else False
-        silver_flat_structure = silver_config.flat_structure if silver_config else False
-        gold_flat_structure = gold_config.flat_structure if gold_config else False
+        # In test mode (use_yaml_paths=False), settings paths don't include
+        # provider/entity segments, so flat_structure must be False to ensure
+        # each pipeline writes to its own subdirectory (base_path/table_name).
+        # In production, YAML paths already include provider/entity per ADR-029,
+        # so flat_structure=true correctly writes directly to the configured path.
+        bronze_flat_structure = (
+            bronze_config.flat_structure if bronze_config else False
+        ) and use_yaml_paths
+        silver_flat_structure = (
+            silver_config.flat_structure if silver_config else False
+        ) and use_yaml_paths
+        gold_flat_structure = (
+            gold_config.flat_structure if gold_config else False
+        ) and use_yaml_paths
 
         adapter = StorageFactory._create_storage_adapter(
             bronze_path=bronze_path,

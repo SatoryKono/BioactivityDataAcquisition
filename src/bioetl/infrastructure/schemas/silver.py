@@ -6,7 +6,7 @@ Column Order Convention (per RULES.md §2.4 and ADR-014):
 1. System prefix fields (entity_id, content_hash, _run_id, _run_type,
    _source_batch_id, _ingestion_ts, _index) - MUST be first
 2. Business fields - sorted alphabetically
-3. DQ suffix fields (_dq_warn, _dq_error) - MUST be last (if present)
+3. DQ suffix fields (_dq_error, _dq_warn) - MUST be last (if present)
 """
 
 from __future__ import annotations
@@ -63,8 +63,8 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
         pa.field("creation_date", pa.string()),  # Record creation date (YYYY-MM-DD)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -138,8 +138,8 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("upper_value", pa.float64()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -168,12 +168,14 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
             "molecular_weight", pa.float64()
         ),  # Transformed to float by transformer
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
 # Schema for UniProt Protein
+# Extended schema with functional annotations, cross-references, and quality metrics
+# See: https://www.uniprot.org/help/return_fields
 UNIPROT_PROTEIN_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
@@ -185,20 +187,42 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("accession", pa.string()),
-        pa.field("entry_name", pa.string()),
-        pa.field("gene_names", pa.list_(pa.string())),
-        pa.field("organism_id", pa.int64()),
-        pa.field("protein_name", pa.string()),
-        pa.field("sequence_length", pa.int64()),
+        pa.field("accession", pa.string()),  # Primary UniProt accession
+        pa.field("active_sites", pa.string()),  # JSON: ft_act_site features
+        pa.field("activity_regulation", pa.string()),  # cc_activity_regulation
+        pa.field("annotation_score", pa.int64()),  # Quality score 1-5
+        pa.field("binding_sites", pa.string()),  # JSON: ft_binding features
+        pa.field("catalytic_activity", pa.string()),  # cc_catalytic_activity
+        pa.field("chembl_ids", pa.string()),  # ChEMBL target cross-refs (JSON array)
+        pa.field("disease_involvement", pa.string()),  # cc_disease
+        pa.field("domains", pa.string()),  # JSON: ft_domain features
+        pa.field("drugbank_ids", pa.string()),  # DrugBank cross-refs (JSON array)
+        pa.field("entry_name", pa.string()),  # UniProt entry name (e.g., FA10_HUMAN)
+        pa.field("features_json", pa.string()),  # All features combined (forensic)
+        pa.field("function_comment", pa.string()),  # cc_function
+        pa.field("gene_names", pa.list_(pa.string())),  # Gene name synonyms
+        pa.field("go_terms", pa.string()),  # GO annotations (JSON array)
+        pa.field("interpro_xrefs", pa.string()),  # InterPro domain IDs (JSON array)
+        pa.field("organism_id", pa.int64()),  # NCBI Taxonomy ID
+        pa.field("pathway", pa.string()),  # cc_pathway
+        pa.field("pdb_xrefs", pa.string()),  # PDB structure IDs (JSON array)
+        pa.field("pfam_xrefs", pa.string()),  # Pfam family IDs (JSON array)
+        pa.field("protein_existence", pa.string()),  # Evidence level string
+        pa.field("protein_name", pa.string()),  # Recommended protein name
+        pa.field("reactome_xrefs", pa.string()),  # Reactome pathway IDs (JSON array)
+        pa.field("reviewed", pa.bool_()),  # Swiss-Prot (true) vs TrEMBL (false)
+        pa.field("sequence_length", pa.int64()),  # Protein sequence length
+        pa.field("similarity_comment", pa.string()),  # cc_similarity
+        pa.field("subcellular_location", pa.string()),  # cc_subcellular_location
+        pa.field("tissue_specificity", pa.string()),  # cc_tissue_specificity
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
 # Schema for UniProt ID Mapping
-# Maps ChEMBL target IDs to UniProt accessions
+# Maps ChEMBL target IDs to UniProt accessions with entry metadata
 UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
@@ -210,16 +234,27 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Mapping status: 'found', 'not_found', 'error'
+        pa.field("all_mappings", pa.string()),  # JSON array for multiple mappings
+        pa.field("annotation_score", pa.int64()),  # Quality score 1-5
+        pa.field("gene_primary", pa.string()),  # Primary gene name
+        # Mapping status: 'found', 'not_found', 'error', 'multiple'
         pa.field("mapping_status", pa.string()),
+        pa.field("organism_common", pa.string()),  # Common organism name
+        pa.field("organism_scientific", pa.string()),  # Scientific organism name
+        pa.field("protein_name", pa.string()),  # Recommended protein name
+        pa.field("reviewed", pa.bool_()),  # Swiss-Prot (true) vs TrEMBL (false)
+        pa.field("sequence_length", pa.int64()),  # Protein sequence length
+        pa.field("sequence_mass", pa.int64()),  # Molecular weight in Daltons
         # Primary key (source identifier)
         pa.field("target_chembl_id", pa.string()),
+        pa.field("taxonomy_id", pa.int64()),  # NCBI Taxonomy ID
         # Mapped identifier (nullable - None if not found)
         pa.field("uniprot_accession", pa.string()),
+        pa.field("uniprot_entry_name", pa.string()),  # Entry name (e.g., FA10_HUMAN)
         # === DQ suffix (MUST be last, if present) ===
         # DQ warning flag (True for not_found)
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -293,8 +328,8 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -354,8 +389,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
             "variant_taxonomy_id", pa.int64()
         ),  # Standardized name (was variant_tax_id)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -375,17 +410,12 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         # Flattened component fields
         pa.field("component_accessions", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
+        pa.field("component_id", pa.int64()),
         pa.field("component_ids", pa.list_(pa.int64())),
-        pa.field("component_organisms", pa.list_(pa.string())),
         pa.field("component_relationships", pa.list_(pa.string())),
-        pa.field(
-            "component_taxonomy_ids", pa.list_(pa.int64())
-        ),  # Standardized name (was component_tax_ids)
         pa.field("component_types", pa.list_(pa.string())),
         # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
-        pa.field("dap_id", pa.int64()),
-        pa.field("description", pa.string()),
         pa.field("downgraded", pa.bool_()),
         pa.field("organism", pa.string()),
         pa.field("pipeline_stages", pa.string()),
@@ -394,14 +424,13 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_chembl_id", pa.string()),
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_components", pa.string()),
-        pa.field("target_constraints", pa.string()),
         pa.field("target_type", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -424,6 +453,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("description", pa.string()),
         pa.field("organism", pa.string()),
         # Flattened fields (extracted from protein_classifications)
+        pa.field("protein_classification_id", pa.int64()),
         pa.field("protein_classification_ids", pa.list_(pa.int64())),
         pa.field("protein_classifications", pa.string()),  # Forensic JSON
         # Complex fields (JSON strings)
@@ -431,8 +461,8 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("target_component_xrefs", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -462,8 +492,8 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -488,8 +518,8 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("term", pa.string()),
         pa.field("term_type", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -564,8 +594,8 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_year", pa.int64()),
         pa.field("withdrawn_flag", pa.bool_()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -593,8 +623,8 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -625,8 +655,8 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         pa.field("sim_id", pa.int64()),
         pa.field("tid_tani", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -682,8 +712,8 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("tldr", pa.string()),
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, if present) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -744,8 +774,8 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -832,8 +862,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -864,8 +894,8 @@ CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
         pa.field("short_name", pa.string()),
         pa.field("sort_order", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -901,7 +931,7 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )

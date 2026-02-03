@@ -1,6 +1,6 @@
 # CrossRef Publication Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.15*
+*Version 1.1.0 | Aligned with RULES.md v5.17*
 
 ---
 

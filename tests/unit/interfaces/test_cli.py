@@ -324,7 +324,15 @@ class TestCliCommands:
             side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
         ):
             result = cli_runner.invoke(
-                cli, ["run", "--pipeline", "chembl_activity", "--limit", "100"]
+                cli,
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--limit",
+                    "100",
+                    "--no-health-server",
+                ],
             )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
@@ -368,7 +376,14 @@ class TestCliCommands:
             side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
         ):
             result = cli_runner.invoke(
-                cli, ["run", "--pipeline", "chembl_activity", "--resume"]
+                cli,
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--resume",
+                    "--no-health-server",
+                ],
             )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"

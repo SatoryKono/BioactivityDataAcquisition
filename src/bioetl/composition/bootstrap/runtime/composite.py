@@ -30,7 +30,8 @@ from bioetl.application.composite.runner import (
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.field_group_loader import (
     FieldGroupLoadError,
@@ -46,7 +47,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
-    from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -106,6 +106,67 @@ def load_composite_config(name: str) -> CompositeConfig:
     except ValidationError as e:
         # Convert Pydantic errors to ValueError for consistent API
         raise ValueError(f"Invalid composite config '{name}': {e}") from e
+
+
+def _build_fallback_mapping(
+    keys: pl.DataFrame,
+    filter_key: str,
+    join_keys: tuple[str, ...],
+) -> dict[str, str] | None:
+    """Build ID -> Title fallback mapping if title is in join keys."""
+    if "title" not in join_keys or "title" not in keys.columns:
+        return None
+    pairs = (
+        keys.select([filter_key, "title"])
+        .drop_nulls()
+        .unique(subset=[filter_key])
+        .iter_rows()
+    )
+    return {str(k): str(t) for k, t in pairs}
+
+
+def _find_filter_key(
+    join_keys: tuple[str, ...],
+    columns: list[str],
+) -> str | None:
+    """Find the first usable join key (skip title if alternatives exist)."""
+    for key in join_keys:
+        if key == "title" and len(join_keys) > 1:
+            continue
+        if key in columns:
+            return key
+    return None
+
+
+def _extract_filter_ids_from_keys(
+    enricher_cfg: EnricherConfig,
+    keys: pl.DataFrame,
+    logger: LoggerPort | None = None,
+) -> tuple[tuple[str, ...] | None, str | None, dict[str, str] | None]:
+    """Extract filter IDs from seed keys for an enricher."""
+    if keys is None or len(keys) == 0:
+        if logger:
+            logger.debug(
+                "No keys available for enricher",
+                pipeline=enricher_cfg.pipeline,
+            )
+        return None, None, None
+    filter_key = _find_filter_key(enricher_cfg.join_keys, keys.columns)
+    if filter_key is None:
+        if logger:
+            logger.warning(
+                "Join key not found in keys columns",
+                pipeline=enricher_cfg.pipeline,
+                join_keys=list(enricher_cfg.join_keys),
+                available_columns=list(keys.columns),
+            )
+        return None, None, None
+    key_values = keys.select(filter_key).drop_nulls().unique().to_series().to_list()
+    if not key_values:
+        return None, None, None
+    filter_ids = tuple(str(v) for v in key_values)
+    fallback = _build_fallback_mapping(keys, filter_key, enricher_cfg.join_keys)
+    return filter_ids, filter_key, fallback
 
 
 def bootstrap_composite_runner(
@@ -169,87 +230,43 @@ def bootstrap_composite_runner(
     # Build enricher config lookup for fast access
     enricher_configs = {e.pipeline: e for e in config.enrichers}
 
-    # Create enricher runner factory
     def enricher_runner_factory(
         pipeline_name: str, keys: pl.DataFrame
     ) -> PipelineRunner:
-        """Create PipelineRunner for an enricher phase.
-
-        Enricher pipelines fetch supplementary data (citations, metadata) using
-        join keys extracted from seed results. This factory applies composite-specific
-        configuration per ADR-026.
-
-        Configuration adjustments:
-        - Disables YAML input_filter to prevent enrichers from using their own
-          filter files (e.g., data/input/dois.csv)
-        - Extracts join key values (DOI, PMID) from seed results DataFrame
-        - Passes extracted IDs as filter_ids to limit API calls to relevant records
-
-        Args:
-            pipeline_name: Name of the enricher pipeline to instantiate.
-            keys: DataFrame containing seed results with join key columns.
-
-        Returns:
-            PipelineRunner configured for enricher pipeline execution with
-            programmatic filtering based on seed results.
-        """
-        # For enrichers in composite mode:
-        # 1. Disable YAML input_filter - we don't want enrichers to use their
-        #    own filter files (e.g., data/input/dois.csv).
-        # 2. Extract DOIs/PMIDs from keys DataFrame based on enricher's join_keys
-        #    and pass them as filter_ids to limit API calls.
-
-        # Get enricher config to determine join keys
+        """Create PipelineRunner for an enricher phase (ADR-026)."""
         enricher_cfg = enricher_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
         fallback_mapping: dict[str, str] | None = None
 
-        if enricher_cfg and keys is not None and len(keys) > 0:
-            # Use the first join key (usually 'doi' or 'pmid')
-            join_keys = enricher_cfg.join_keys
-            for key in join_keys:
-                # Skip title as primary filter key if other keys exist
-                if key == "title" and len(join_keys) > 1:
-                    continue
+        if enricher_cfg:
+            filter_ids, filter_field, fallback_mapping = _extract_filter_ids_from_keys(
+                enricher_cfg, keys, logger
+            )
 
-                if key in keys.columns:
-                    # Extract unique non-null values from the keys DataFrame
-                    key_values = (
-                        keys.select(key).drop_nulls().unique().to_series().to_list()
-                    )
-                    if key_values:
-                        filter_ids = tuple(str(v) for v in key_values)
-                        filter_field = key
+        # Debug logging for enricher filter configuration
+        logger.debug(
+            "Creating enricher runner",
+            pipeline=pipeline_name,
+            keys_columns=list(keys.columns) if keys is not None else [],
+            keys_count=len(keys) if keys is not None else 0,
+            join_keys=list(enricher_cfg.join_keys) if enricher_cfg else [],
+            filter_field=filter_field,
+            filter_ids_count=len(filter_ids) if filter_ids else 0,
+            filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+        )
 
-                        # Build fallback mapping (ID -> Title) if configured
-                        # Only if 'title' is in join_keys and available in data
-                        if "title" in join_keys and "title" in keys.columns:
-                            # Extract pairs (id, title)
-                            # Use unique(subset=[key]) to ensure one title per ID
-                            pairs = (
-                                keys.select([key, "title"])
-                                .drop_nulls()
-                                .unique(subset=[key])
-                                .iter_rows()
-                            )
-                            fallback_mapping = {str(k): str(t) for k, t in pairs}
-
-                        break
-
-        # For many_to_one enrichers, don't limit records since they return
-        # multiple rows per seed record (e.g., publication_term returns M terms per publication).
-        # For one_to_one enrichers, limit to seed record count.
+        # many_to_one: no limit; one_to_one: limit to seed count
         limit: int | None = None
         if enricher_cfg and enricher_cfg.is_many_to_one:
-            limit = None  # No limit for 1:M enrichers
+            limit = None
         elif keys is not None:
             limit = len(keys)
 
         options = RunOptions(
             run_type="incremental",
             limit=limit,
-            ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
+            ignore_yaml_filter=True,
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
@@ -269,14 +286,17 @@ def bootstrap_composite_runner(
         Dependencies run after the seed to populate Silver tables before enrichers.
         Unlike enrichers which read from Silver, dependencies call APIs to fetch data.
 
+        Note: Chained dependencies (key_source) are handled by DependencyCoordinator
+        which provides the correct keys from the source dependency's Silver table.
+
         Configuration:
-        - Extracts join key values from seed results DataFrame
+        - Extracts join key values from provided keys DataFrame
         - Passes extracted IDs as filter_ids to limit API calls
-        - Does NOT use ignore_yaml_filter (dependencies may have their own configs)
+        - Uses filter_field from config if set (for field name mapping)
 
         Args:
             pipeline_name: Name of the dependency pipeline to instantiate.
-            keys: DataFrame containing seed results with join key columns.
+            keys: DataFrame containing keys for filtering (from seed or chained source).
 
         Returns:
             PipelineRunner configured for dependency pipeline execution.
@@ -286,7 +306,7 @@ def bootstrap_composite_runner(
         filter_field: str | None = None
 
         if dep_cfg and keys is not None and len(keys) > 0:
-            # Extract filter IDs from seed keys
+            # Extract filter IDs from keys
             for key in dep_cfg.join_keys:
                 if key in keys.columns:
                     key_values = (
@@ -294,12 +314,27 @@ def bootstrap_composite_runner(
                     )
                     if key_values:
                         filter_ids = tuple(str(v) for v in key_values)
-                        filter_field = key
+                        # Use filter_field from config if set, otherwise use join_key
+                        filter_field = dep_cfg.filter_field or key
                         break
+
+        # Debug logging for dependency filter configuration
+        logger.debug(
+            "Creating dependency runner",
+            pipeline=pipeline_name,
+            keys_columns=list(keys.columns) if keys is not None else [],
+            keys_count=len(keys) if keys is not None else 0,
+            join_keys=list(dep_cfg.join_keys) if dep_cfg else [],
+            filter_field=filter_field,
+            filter_ids_count=len(filter_ids) if filter_ids else 0,
+            filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+            is_chained=dep_cfg.key_source is not None if dep_cfg else False,
+            key_source=dep_cfg.key_source if dep_cfg else None,
+        )
 
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if filter_ids else None,
+            limit=len(keys) if filter_ids and keys is not None else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
         )
@@ -323,6 +358,7 @@ def bootstrap_composite_runner(
 
     dependency_coordinator = DependencyCoordinator(
         logger=logger,
+        delta_reader=delta_reader,
     )
 
     coordinator = EnrichmentCoordinator(

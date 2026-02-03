@@ -2,8 +2,8 @@
 
 Руководство по настройке конфигурации ETL-пайплайнов в BioETL.
 
-**Версия:** 5.9.0
-**Дата обновления:** 2026-01-26
+**Версия:** 6.0.0
+**Дата обновления:** 2026-02-03
 
 ---
 
@@ -25,33 +25,97 @@ BioETL использует **YAML-файлы** для конфигурации 
 
 ```
 configs/
-├── pipelines/                    # Конфигурации пайплайнов
-│   ├── _base.yaml               # Базовая конфигурация (472 строки)
-│   ├── chembl/
+├── pipelines/                    # Конфигурации пайплайнов (21 = 19 entity + 2 composite)
+│   ├── _base.yaml               # Базовая конфигурация v2.0.0 (474 строки)
+│   ├── _schema.json             # JSON Schema для валидации
+│   ├── chembl/                  # 12 entity configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
+│   │   ├── assay_parameters.yaml
+│   │   ├── cell_line.yaml
+│   │   ├── compound_record.yaml
 │   │   ├── molecule.yaml
-│   │   └── ...
-│   ├── pubchem/
+│   │   ├── protein_class.yaml
+│   │   ├── publication.yaml
+│   │   ├── publication_similarity.yaml
+│   │   ├── publication_term.yaml
+│   │   ├── target.yaml
+│   │   └── target_component.yaml
+│   ├── pubchem/                 # 1 entity config
 │   │   └── compound.yaml
-│   └── uniprot/
-│       └── protein.yaml
-├── dq/                           # Data Quality правила
-│   ├── _defaults.yaml           # Глобальные DQ defaults
-│   ├── providers/
-│   │   └── chembl.yaml          # Provider-specific DQ
-│   └── entities/
-│       └── chembl/
-│           └── activity.yaml    # Entity-specific DQ
-├── filter/                       # Фильтры данных
-│   ├── _defaults.yaml
-│   ├── providers/
-│   └── entities/
-└── sources/                      # Конфигурации источников
+│   ├── uniprot/                 # 2 entity configs
+│   │   ├── idmapping.yaml
+│   │   └── protein.yaml
+│   ├── pubmed/                  # 1 entity config
+│   │   └── publication.yaml
+│   ├── crossref/                # 1 entity config
+│   │   └── publication.yaml
+│   ├── openalex/                # 1 entity config
+│   │   └── publication.yaml
+│   ├── semanticscholar/         # 1 entity config
+│   │   └── publication.yaml
+│   └── composite/               # 2 composite configs (ADR-026)
+│       ├── publication.yaml     # chembl_publication + enrichers
+│       └── target.yaml          # chembl_target + enrichers
+├── dq/                           # Data Quality правила (21 файлов)
+│   ├── _defaults.yaml           # Глобальные DQ defaults (soft_fail=0.05, hard_fail=0.20)
+│   ├── providers/               # 7 provider-specific DQ
+│   │   ├── chembl.yaml
+│   │   ├── crossref.yaml
+│   │   ├── openalex.yaml
+│   │   ├── pubchem.yaml
+│   │   ├── pubmed.yaml
+│   │   ├── semanticscholar.yaml
+│   │   └── uniprot.yaml
+│   └── entities/                # 14 entity-specific DQ
+│       ├── chembl/
+│       │   ├── activity.yaml
+│       │   ├── assay.yaml
+│       │   └── ...              # 12 entity DQ configs
+│       ├── crossref/
+│       │   └── publication.yaml
+│       ├── openalex/
+│       │   └── publication.yaml
+│       ├── pubchem/
+│       │   └── compound.yaml
+│       ├── pubmed/
+│       │   └── publication.yaml
+│       ├── semanticscholar/
+│       │   └── publication.yaml
+│       └── uniprot/
+│           ├── idmapping.yaml
+│           ├── protein.yaml
+│           └── target.yaml
+├── filter/                       # Фильтры данных (8 файлов)
+│   ├── _defaults.yaml           # batch_size: 100
+│   └── providers/               # Provider-specific batch_sizes
+│       ├── chembl.yaml
+│       ├── crossref.yaml
+│       ├── openalex.yaml
+│       ├── pubchem.yaml
+│       ├── pubmed.yaml
+│       ├── semanticscholar.yaml
+│       └── uniprot.yaml
+└── sources/                      # Конфигурации источников (7 файлов)
     ├── chembl.yaml
+    ├── crossref.yaml
+    ├── openalex.yaml
     ├── pubchem.yaml
+    ├── pubmed.yaml
+    ├── semanticscholar.yaml
     └── uniprot.yaml
 ```
+
+### Статистика конфигураций
+
+| Категория | Количество | Описание |
+|-----------|------------|----------|
+| Pipeline configs (entity) | 19 | Regular ETL pipelines |
+| Composite configs | 2 | Multi-provider pipelines (ADR-026) |
+| DQ configs | 21 | 1 defaults + 7 providers + 13 entities |
+| Filter configs | 8 | 1 defaults + 7 providers |
+| Source configs | 7 | Один на провайдера |
+| **Итого** | **58** | Все конфиги валидированы |
 
 ---
 
@@ -130,6 +194,58 @@ sink:
 
 ---
 
+## Composite Pipelines (ADR-026)
+
+Composite pipelines объединяют данные из нескольких провайдеров в единый датасет.
+
+### Структура Composite конфига
+
+```yaml
+# configs/pipelines/composite/publication.yaml
+composite:
+  name: composite_publication
+  version: "1.1.0"
+
+  seed:
+    pipeline: chembl_publication     # Базовый пайплайн (источник ID)
+
+  enrichers:                          # Обогащение из других провайдеров
+    - pipeline: crossref_publication
+      join_key: doi
+      optional: true
+    - pipeline: openalex_publication
+      join_key: doi
+      optional: true
+    - pipeline: pubmed_publication
+      join_key: pmid
+      optional: true
+    - pipeline: semanticscholar_publication
+      join_key: doi
+      optional: true
+
+  merge:
+    strategy: left_outer              # Сохраняем все seed записи
+    conflict_resolution: prefer_seed  # При конфликте — seed выигрывает
+```
+
+### Доступные Composite Pipelines
+
+| Composite | Seed | Enrichers | Описание |
+|-----------|------|-----------|----------|
+| `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar | Обогащённые публикации |
+| `composite_target` | `chembl_target` | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets |
+
+### Отличия от Regular Pipelines
+
+| Аспект | Regular Pipeline | Composite Pipeline |
+|--------|------------------|-------------------|
+| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:` |
+| Source | Один провайдер | Несколько провайдеров через `enrichers` |
+| Schema | `_schema.json` | Отдельная схема (ADR-026) |
+| Пути | Auto-computed | Определяются в `merge.output` |
+
+---
+
 ## Convention-based Path Resolution (ADR-029)
 
 Пути и ссылки вычисляются автоматически из `provider` и `entity_type`:
@@ -143,7 +259,28 @@ sink:
 | `sink.silver.path` | `data/output/silver/{provider}/{entity_type}` |
 | `sink.gold.path` | `data/output/gold/{provider}/{entity_type}` |
 
-> **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения.
+### Авто-пропагация sort_by (ADR-014 compliance)
+
+Параметры `sink.silver.sort_by.columns` и `sink.gold.sort_by.columns` **автоматически вычисляются** из `primary_keys`:
+
+```python
+# config_loader.py:155-176
+if "sort_by" not in sink_silver:
+    sink_silver["sort_by"] = {
+        "columns": config["primary_keys"],
+        "ascending": True
+    }
+```
+
+Это означает, что entity configs **не должны** явно указывать `sort_by` — он пропагируется из `primary_keys`:
+
+```yaml
+# НЕ нужно указывать sort_by — он auto-computed!
+pipeline_name: chembl_activity
+primary_keys: ["activity_id"]  # → sort_by.columns = ["activity_id"]
+```
+
+> **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения. Все 19 entity configs соответствуют ADR-014 через авто-пропагацию.
 
 ---
 
@@ -339,19 +476,20 @@ entities:
   - assay
   - molecule
   - target
+  # ... и 8 других entities для ChEMBL
 ```
 
-### Rate Limits по провайдерам
+### Rate Limits по провайдерам (7 source configs)
 
-| Provider | Rate Limit | Burst |
-|----------|------------|-------|
-| ChEMBL | 5 req/sec | 10 |
-| PubChem | 5 req/sec | 10 |
-| UniProt | 100 req/sec (with API key) | 200 |
-| CrossRef | 10 req/sec | 20 |
-| OpenAlex | 10 req/sec | 20 |
-| PubMed | 3 req/sec | 5 |
-| SemanticScholar | 100 req/5min | — |
+| Provider | Source Config | Rate Limit | Burst | Batch Size |
+|----------|---------------|------------|-------|------------|
+| ChEMBL | `sources/chembl.yaml` | 5 req/sec | 10 | 20 |
+| PubChem | `sources/pubchem.yaml` | 5 req/sec | 10 | 1 |
+| UniProt | `sources/uniprot.yaml` | 100 req/sec | 200 | 100 |
+| CrossRef | `sources/crossref.yaml` | 10 req/sec | 20 | 50 |
+| OpenAlex | `sources/openalex.yaml` | 10 req/sec | 20 | 50 |
+| PubMed | `sources/pubmed.yaml` | 3 req/sec | 5 | 10 |
+| SemanticScholar | `sources/semanticscholar.yaml` | 100 req/5min | — | 100 |
 
 ---
 
@@ -605,6 +743,9 @@ python -m bioetl.main config validate chembl_activity
 - [Running Pipelines](running-pipelines.md) — запуск пайплайнов
 - [CLI Reference](../04-reference/cli.md) — команды CLI
 - [DQ Configuration](dq-configuration.md) — детальная настройка DQ
-- [ADR-029: Convention-based Path Resolution](../02-architecture/decisions/ADR-029-output-metadata-unification.md)
-- [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)
-- [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
+- [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md) — sort_by requirement
+- [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) — иерархия конфигов
+- [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) — multi-provider pipelines
+- [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — иерархическая DQ загрузка
+- [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) — иерархическая Filter загрузка
+- [ADR-029: Convention-based Path Resolution](../02-architecture/decisions/ADR-029-output-metadata-unification.md) — авто-вычисление путей

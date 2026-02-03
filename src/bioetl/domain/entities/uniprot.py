@@ -18,19 +18,49 @@ class IDMappingResult(BaseEntity):
     """Result of UniProt ID Mapping operation.
 
     Maps ChEMBL target IDs to UniProt accessions using UniProt ID Mapping REST API.
+    Extracts comprehensive metadata from UniProt entries when mapping is found.
 
     Required fields: target_chembl_id, mapping_status
-    Optional fields: uniprot_accession (None if mapping not found)
+    Optional fields: All others (None if mapping not found or data unavailable)
 
     Attributes:
         target_chembl_id: Source ChEMBL target identifier (e.g., CHEMBL204)
         uniprot_accession: Mapped UniProt accession (e.g., P00742) or None if not found
-        mapping_status: Status of mapping operation: 'found', 'not_found', 'error'
+        mapping_status: Status of mapping: 'found', 'not_found', 'error', 'multiple'
+        uniprot_entry_name: UniProt entry name (e.g., FA10_HUMAN)
+        organism_scientific: Scientific organism name (e.g., Homo sapiens)
+        organism_common: Common organism name (e.g., Human)
+        taxonomy_id: NCBI Taxonomy ID (e.g., 9606)
+        protein_name: Recommended protein name
+        gene_primary: Primary gene name
+        sequence_length: Protein sequence length
+        sequence_mass: Molecular weight in Daltons
+        reviewed: True if Swiss-Prot (reviewed), False if TrEMBL (unreviewed)
+        annotation_score: Quality score 1-5 (5 = best annotated)
+        all_mappings: JSON array of all accessions when multiple mappings found
     """
 
+    # Primary key (input)
     target_chembl_id: str
+
+    # Core mapping result
     uniprot_accession: str | None = None
-    mapping_status: Literal["found", "not_found", "error"] = "not_found"
+    mapping_status: Literal["found", "not_found", "error", "multiple"] = "not_found"
+
+    # UniProt entry metadata
+    uniprot_entry_name: str | None = None
+    organism_scientific: str | None = None
+    organism_common: str | None = None
+    taxonomy_id: int | None = None
+    protein_name: str | None = None
+    gene_primary: str | None = None
+    sequence_length: int | None = None
+    sequence_mass: int | None = None
+    reviewed: bool | None = None
+    annotation_score: int | None = None
+
+    # Multiple mappings (JSON array)
+    all_mappings: str | None = None
 
     def __post_init__(self) -> None:
         """Validate required fields."""
@@ -41,15 +71,35 @@ class IDMappingResult(BaseEntity):
         """Validate domain-specific invariants."""
         if not self.target_chembl_id:
             raise ValueError("target_chembl_id is required")
-        if self.mapping_status not in ("found", "not_found", "error"):
+        if self.mapping_status not in ("found", "not_found", "error", "multiple"):
             raise ValueError(
                 f"Invalid mapping_status: {self.mapping_status}. "
-                "Must be one of: 'found', 'not_found', 'error'"
+                "Must be one of: 'found', 'not_found', 'error', 'multiple'"
             )
-        # If status is 'found', accession should be present
-        if self.mapping_status == "found" and not self.uniprot_accession:
+        # If status is 'found' or 'multiple', accession should be present
+        if self.mapping_status in ("found", "multiple") and not self.uniprot_accession:
             raise ValueError(
-                "uniprot_accession is required when mapping_status is 'found'"
+                "uniprot_accession is required when mapping_status is 'found' or 'multiple'"
+            )
+        self._validate_annotation_score()
+        self._validate_sequence_fields()
+
+    def _validate_annotation_score(self) -> None:
+        """Validate annotation_score is 1-5 if present."""
+        if self.annotation_score is not None and not 1 <= self.annotation_score <= 5:
+            raise ValueError(
+                f"annotation_score must be 1-5, got {self.annotation_score}"
+            )
+
+    def _validate_sequence_fields(self) -> None:
+        """Validate sequence_length and sequence_mass are positive if present."""
+        if self.sequence_length is not None and self.sequence_length <= 0:
+            raise ValueError(
+                f"sequence_length must be positive, got {self.sequence_length}"
+            )
+        if self.sequence_mass is not None and self.sequence_mass <= 0:
+            raise ValueError(
+                f"sequence_mass must be positive, got {self.sequence_mass}"
             )
 
 
@@ -144,9 +194,15 @@ class UniprotTarget(BaseEntity):
     chembl_ids: str | None = None
     guidetopharmacology_ids: str | None = None
     pdb_xrefs: str | None = None  # JSON array of PDB cross-references
+    interpro_xrefs: str | None = None  # JSON array of InterPro domain entries
+    pfam_xrefs: str | None = None  # JSON array of Pfam family entries
+    reactome_xrefs: str | None = None  # JSON array of Reactome pathway entries
 
     # Features & Keywords (JSON arrays)
-    features: str | None = None
+    features_json: str | None = None  # All features combined (forensic)
+    domains: str | None = None  # ft_domain features
+    binding_sites: str | None = None  # ft_binding features
+    active_sites: str | None = None  # ft_act_site features
     keywords: str | None = None
 
     # Counts

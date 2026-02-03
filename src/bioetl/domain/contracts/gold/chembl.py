@@ -572,23 +572,18 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
         nullable=True, coerce=True
     )  # Standardized name
     species_group_flag: Series[bool] = pa.Field(nullable=True)
-    description: Series[str] = pa.Field(nullable=True)
     downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)
-    dap_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     pipeline_stages: Series[str] = pa.Field(nullable=True)
-    target_constraints: Series[str] = pa.Field(nullable=True)
     target_components: Series[str] = pa.Field(nullable=True)
     cross_references: Series[str] = pa.Field(nullable=True)
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
     component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int → float (nullable)
     component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
     component_types: Series[object] = pa.Field(nullable=True)  # list[str]
     component_relationships: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_descriptions: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_organisms: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_taxonomy_ids: Series[object] = pa.Field(
-        nullable=True
-    )  # Standardized name, list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -619,6 +614,9 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
     target_component_xrefs: Series[str] = pa.Field(nullable=True)
     protein_classifications: Series[str] = pa.Field(nullable=True)
+    protein_classification_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int → float (nullable)
     protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
 
     # Metadata

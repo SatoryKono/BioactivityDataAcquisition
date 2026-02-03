@@ -601,40 +601,32 @@ class TestTargetTransformer:
         assert result is not None
 
     @pytest.mark.asyncio
-    async def test_transform_with_new_metadata_fields(self, transformer, mock_context):
-        """Test transformation extracts new metadata fields (description, downgraded, dap_id)."""
+    async def test_transform_with_downgraded_field(self, transformer, mock_context):
+        """Test transformation extracts downgraded field."""
         record = {
             "target_chembl_id": "CHEMBL1862",
             "pref_name": "Cyclooxygenase-2",
             "target_type": "SINGLE PROTEIN",
-            "description": "Prostaglandin G/H synthase 2",
             "downgraded": 0,
-            "dap_id": 12345,
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["description"] == "Prostaglandin G/H synthase 2"
         assert result["downgraded"] is False
-        assert result["dap_id"] == 12345
 
     @pytest.mark.asyncio
-    async def test_transform_with_pipeline_stages_and_constraints(
-        self, transformer, mock_context
-    ):
-        """Test transformation handles pipeline_stages and target_constraints as JSON."""
+    async def test_transform_with_pipeline_stages(self, transformer, mock_context):
+        """Test transformation handles pipeline_stages as JSON."""
         record = {
             "target_chembl_id": "CHEMBL240",
             "pipeline_stages": [{"stage": "Phase 1", "status": "Active"}],
-            "target_constraints": [{"constraint_type": "assay"}],
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
         assert isinstance(result.get("pipeline_stages"), str)
-        assert isinstance(result.get("target_constraints"), str)
         import json
 
         stages = json.loads(result["pipeline_stages"])
@@ -643,55 +635,21 @@ class TestTargetTransformer:
         assert stages["stage"] == "Phase 1"
 
     @pytest.mark.asyncio
-    async def test_transform_extracts_component_organisms_and_taxonomy_ids(
+    async def test_transform_handles_missing_fields_gracefully(
         self, transformer, mock_context
     ):
-        """Test transformation extracts organisms and taxonomy_ids from components."""
-        record = {
-            "target_chembl_id": "CHEMBL2111431",
-            "target_components": [
-                {
-                    "accession": "P12345",
-                    "component_id": 100,
-                    "component_type": "PROTEIN",
-                    "organism": "Homo sapiens",
-                    "tax_id": 9606,  # Source API field name
-                },
-                {
-                    "accession": "P67890",
-                    "component_id": 101,
-                    "component_type": "PROTEIN",
-                    "organism": "Mus musculus",
-                    "tax_id": 10090,  # Source API field name
-                },
-            ],
-        }
-
-        result = await transformer.transform(mock_context, record, index=0)
-
-        assert result is not None
-        assert result["component_organisms"] == ["Homo sapiens", "Mus musculus"]
-        assert result["component_taxonomy_ids"] == [9606, 10090]  # Standardized output
-
-    @pytest.mark.asyncio
-    async def test_transform_handles_missing_new_fields_gracefully(
-        self, transformer, mock_context
-    ):
-        """Test transformation handles missing new fields (returns None)."""
+        """Test transformation handles missing fields (returns None/defaults)."""
         record = {
             "target_chembl_id": "CHEMBL123",
             "pref_name": "Test Target",
-            # No description, downgraded, dap_id, pipeline_stages, target_constraints
+            # No downgraded, pipeline_stages
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["description"] is None
         assert result["downgraded"] is False  # Default value
-        assert result["dap_id"] is None
         assert result["pipeline_stages"] is None
-        assert result["target_constraints"] is None
 
 
 @pytest.mark.unit

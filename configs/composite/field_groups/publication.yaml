@@ -257,9 +257,12 @@ groups:
         columns:
           - openalex.publication.author_openalex_ids
 
+      - base_name: author_orcid_list
+        columns:
+          - crossref.publication.author_orcid_list
+
       - base_name: author_orcids
         columns:
-          - crossref.publication.author_orcids
           - openalex.publication.author_orcids
           - semanticscholar.publication.author_orcids
 
