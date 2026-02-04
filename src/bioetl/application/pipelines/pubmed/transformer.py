@@ -57,7 +57,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
 
-
     def __init__(
         self,
         provider: str = "pubmed",
@@ -160,9 +159,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 citation_subset = ",".join(s for s in subsets if s)
 
         pub_status = None
-        if pubmed_data is not None:
-            if status_elem := pubmed_data.find("PublicationStatus"):
-                pub_status = get_text(status_elem)
+        if pubmed_data is not None and (
+            status_elem := pubmed_data.find("PublicationStatus")
+        ):
+            pub_status = get_text(status_elem)
 
         return {
             "nlm_unique_id": nlm_unique_id,
@@ -182,9 +182,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             grant_count = len(grant_list.findall("Grant"))
 
         reference_count = 0
-        if pubmed_data is not None:
-            if (ref_list := pubmed_data.find("ReferenceList")) is not None:
-                reference_count = len(ref_list.findall(".//Reference"))
+        if pubmed_data is not None and (
+            ref_list := pubmed_data.find("ReferenceList")
+        ) is not None:
+            reference_count = len(ref_list.findall(".//Reference"))
 
         return {"grant_count": grant_count, "citations_made": reference_count}
 
@@ -367,14 +368,16 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             if (email := aff.get("email")) and self._pii_hasher:
                 email_hash = self._pii_hasher.hash_value(email)
 
-            processed.append({
-                "text": aff.get("text"),
-                "identifier": aff.get("identifier"),
-                "identifier_source": aff.get("identifier_source"),
-                "ror_id": aff.get("ror_id"),
-                "grid_id": aff.get("grid_id"),
-                "email_hash": email_hash,
-            })
+            processed.append(
+                {
+                    "text": aff.get("text"),
+                    "identifier": aff.get("identifier"),
+                    "identifier_source": aff.get("identifier_source"),
+                    "ror_id": aff.get("ror_id"),
+                    "grid_id": aff.get("grid_id"),
+                    "email_hash": email_hash,
+                }
+            )
         return processed
 
     def _build_authors_with_affiliations(
@@ -390,7 +393,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             collective = author.get("collective_name")
 
             if last_name:
-                name = f"{last_name}, {initials}" if initials else (f"{last_name}, {fore_name}" if fore_name else last_name)
+                name = (
+                    f"{last_name}, {initials}"
+                    if initials
+                    else (f"{last_name}, {fore_name}" if fore_name else last_name)
+                )
             elif collective:
                 name = collective
             else:
@@ -409,11 +416,13 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 for aff in (author.get("structured_affiliations") or [])
             ]
 
-            result.append({
-                "name_hash": name_hash,
-                "initials": initials,
-                "affiliations": affiliations,
-            })
+            result.append(
+                {
+                    "name_hash": name_hash,
+                    "initials": initials,
+                    "affiliations": affiliations,
+                }
+            )
 
         return result
 
@@ -479,7 +488,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "journal": get_text(journal_elem.find("Title")),
             "journal_name_short": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
-            "journal_issn_type": issn_elem.get("IssnType") if issn_elem is not None else None,
+            "journal_issn_type": issn_elem.get("IssnType")
+            if issn_elem is not None
+            else None,
             "issn": get_text(issn_elem),
             "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
             "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,

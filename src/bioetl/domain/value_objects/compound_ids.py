@@ -10,14 +10,14 @@ These Value Objects encapsulate source-specific validation and normalization.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Literal, Self
 
 from bioetl.domain.value_objects.base import ValueObject
 from bioetl.domain.value_objects.identifiers import ChemblId, PubChemCid
 
 
-class CompoundSource(str, Enum):
+class CompoundSource(StrEnum):
     """Source database for compound identifiers.
 
     Represents the origin database of a compound identifier.

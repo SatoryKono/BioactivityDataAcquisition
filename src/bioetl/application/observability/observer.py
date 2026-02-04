@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import time
 from contextlib import AbstractContextManager
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.shutdown import PipelineShutdownError
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID, RunType
 
 
-class LifecyclePhase(str, Enum):
+class LifecyclePhase(StrEnum):
     """Pipeline lifecycle phases for structured observability.
 
     Each phase represents a distinct stage in pipeline execution

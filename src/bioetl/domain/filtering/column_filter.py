@@ -12,10 +12,10 @@ Provides filtering by column values using multiple operators:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 
 
-class FilterOperator(str, Enum):
+class FilterOperator(StrEnum):
     """Операторы сравнения для column filters.
 
     Attributes:

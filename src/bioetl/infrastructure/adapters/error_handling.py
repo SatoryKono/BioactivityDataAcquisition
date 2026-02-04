@@ -20,7 +20,7 @@ Structured JSON via LoggerPort with consistent fields.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class ErrorCategory(str, Enum):
+class ErrorCategory(StrEnum):
     """Error category for adapter error handling (RULES.md §4.1).
 
     Determines pipeline behavior:
