@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Architecture Review Documentation**: Comprehensive architectural review of BioETL project
+  - `docs/02-architecture/architecture-review-2026.md` - Full review in Russian
+  - `docs/02-architecture/architecture-review-summary.md` - Executive summary in English
+  - Review covers: architecture patterns, layer structure, technology stack, testing strategy, code organization
+  - Documents 32 ADRs, 5-layer architecture, Medallion data flow, DDD implementation
+  - Added references to architecture overview (`docs/02-architecture/00-overview.md`)
+
 ## [5.12.0] - 2026-02-04
 
 ### Changed

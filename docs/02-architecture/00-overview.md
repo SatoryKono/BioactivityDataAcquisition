@@ -26,6 +26,13 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 | [data-layers.md](data-layers.md) | Bronze/Silver/Gold details | - |
 | [observability-layers.md](observability-layers.md) | Metrics, Tracing, Logging | - |
 
+### Architecture Reviews
+
+| Document | Language | Description |
+|----------|----------|-------------|
+| [architecture-review-summary.md](architecture-review-summary.md) | English | Executive summary of 2026 architecture review |
+| [architecture-review-2026.md](architecture-review-2026.md) | Russian | Comprehensive architecture review (2026) |
+
 ### Diagrams
 
 - [diagrams/](diagrams/) — 35 Mermaid diagram files
