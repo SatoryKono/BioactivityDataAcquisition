@@ -87,6 +87,11 @@ composite:
     # molecule_chembl_id appears in both sources, keep both for lineage
     preserve_all_sources: false
 
+    # Output paths for merged data
+    output:
+      silver: data/output/silver/composite/activity
+      gold: data/output/gold/composite/activity
+
     # Field-level priority for overlapping fields
     field_priorities:
       molecule_chembl_id:
