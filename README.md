@@ -311,11 +311,12 @@ Please review our **[Security Policy](SECURITY.md)** for:
 
 ## Contributing
 
-Please read **[RULES.md](docs/RULES.md)** before contributing.
+Please read **[RULES.md](docs/RULES.md)** and **[COMMIT_GUIDELINES.md](COMMIT_GUIDELINES.md)** before contributing.
 
 1. Ensure all tests pass: `make test`
 2. Check types and linting: `make lint`
-3. Follow the **RFC 2119** keywords in requirements.
+3. Follow the **RFC 2119** keywords in requirements
+4. Use [Conventional Commits](https://www.conventionalcommits.org/) format for all commit messages (see [COMMIT_GUIDELINES.md](COMMIT_GUIDELINES.md))
 
 ## License
 
