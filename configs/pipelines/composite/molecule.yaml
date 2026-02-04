@@ -80,6 +80,11 @@ composite:
     # When true, keeps columns like chembl.molecule.canonical_smiles, pubchem.compound.canonical_smiles
     preserve_all_sources: true
 
+    # Output paths for merged data
+    output:
+      silver: data/output/silver/composite/molecule
+      gold: data/output/gold/composite/molecule
+
     # Field-level priority overrides
     # Maps field name to ordered list of source preferences
     field_priorities:
