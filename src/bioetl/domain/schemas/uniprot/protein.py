@@ -301,11 +301,120 @@ class UniprotTargetSchema(ETLRecordSchema):
     )
 
     # === Features & Keywords ===
-    features: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of sequence features"
+    features_json: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of all sequence features"
+    )
+    domains: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of protein domain features"
+    )
+    binding_sites: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of binding site features"
+    )
+    active_sites: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of active site features"
     )
     keywords: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of UniProt keywords"
+    )
+
+    # === Taxonomy Components ===
+    superkingdom: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Superkingdom/Domain (Bacteria, Archaea, Eukaryota, Viruses)",
+    )
+    phylum: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Phylum from taxonomic lineage",
+    )
+    genus: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Genus from taxonomic lineage",
+    )
+
+    # === GO Components ===
+    molecular_function: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of GO molecular function terms (aspect F)",
+    )
+    cellular_component: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of GO cellular component terms (aspect C)",
+    )
+
+    # === Structural Features ===
+    topology: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of topological domain features (TOPO_DOM)",
+    )
+    transmembrane: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of transmembrane regions (TRANSMEM)",
+    )
+    intramembrane: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of intramembrane regions (INTRAMEM)",
+    )
+    signal_peptide: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of signal peptide features (SIGNAL)",
+    )
+    propeptide: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of propeptide features (PROPEP)",
+    )
+
+    # === PTM Features ===
+    glycosylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of glycosylation sites (CARBOHYD)",
+    )
+    lipidation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of lipidation sites (LIPID)",
+    )
+    disulfide_bond: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of disulfide bonds (DISULFID)",
+    )
+    modified_residue: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of all modified residues (MOD_RES)",
+    )
+    phosphorylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of phosphorylation sites",
+    )
+    acetylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of acetylation sites",
+    )
+    ubiquitination: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of ubiquitination sites",
+    )
+
+    # === Isoform Details ===
+    isoform_names: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform names",
+    )
+    isoform_ids: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform IDs (e.g., P12345-2)",
+    )
+    isoform_synonyms: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform synonyms",
+    )
+
+    # === Reaction Data ===
+    reactions: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of reaction names from catalytic activity",
+    )
+    reaction_ec_numbers: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of EC numbers from catalytic activity reactions",
     )
 
     # === Counts ===

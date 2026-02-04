@@ -214,6 +214,78 @@ class PubChemFetchStrategies:
                     error=str(e),
                 )
 
+    async def _fetch_single_inchikey(self, inchikey: str) -> list[dict[str, Any]]:
+        """Fetch compounds for a single InChIKey.
+
+        PubChem supports InChIKey lookup via the 'inchikey' namespace.
+        InChIKey format: XXXXXXXXXXXXXX-YYYYYYYYYY-Z (27 characters).
+
+        Args:
+            inchikey: Standard InChIKey string.
+
+        Returns:
+            List of compound dicts (usually 0 or 1 result per InChIKey).
+        """
+        await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
+        compounds = await self._circuit_breaker.call(
+            self._run_in_executor, pcp.get_compounds, inchikey.strip(), "inchikey"
+        )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(compounds) if compounds else 0
+        self._record_request(
+            "/compound/inchikey/JSON", duration_ms, result_count=result_count
+        )
+        return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
+
+    async def fetch_by_inchikey(
+        self, inchikey_list: list[str], limit: int | None = None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds by InChIKey list.
+
+        InChIKey is the IUPAC standard chemical identifier (27 characters).
+        Each InChIKey maps to at most one compound in PubChem.
+
+        Args:
+            inchikey_list: List of InChIKey strings.
+            limit: Maximum number of records to return.
+
+        Yields:
+            Compound dicts with CID, SMILES, properties, etc.
+        """
+        fetched = 0
+        for inchikey in inchikey_list:
+            if limit and fetched >= limit:
+                return
+            if not inchikey or not inchikey.strip():
+                continue
+
+            # Basic InChIKey format validation (27 chars, XXXX-YYYY-Z pattern)
+            cleaned = inchikey.strip()
+            if len(cleaned) != 27 or cleaned.count("-") != 2:
+                self._logger.warning(
+                    "invalid_inchikey_skipped",
+                    provider=self._provider_name,
+                    inchikey=cleaned[:30],
+                    reason="invalid_format",
+                )
+                continue
+
+            try:
+                records = await self._fetch_single_inchikey(cleaned)
+                for record in records:
+                    if limit and fetched >= limit:
+                        return
+                    yield record
+                    fetched += 1
+            except Exception as e:
+                self._logger.warning(
+                    "inchikey_fetch_failed",
+                    provider=self._provider_name,
+                    inchikey=cleaned,
+                    error=str(e),
+                )
+
     async def fetch_substances(
         self, query: str | None, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:

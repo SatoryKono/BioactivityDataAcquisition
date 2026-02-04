@@ -186,6 +186,9 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         elif filter_field == "cid":
             async for record in self._strategies.fetch_by_cids(filter_ids, limit):
                 yield record
+        elif filter_field in ("inchikey", "inchi_key"):
+            async for record in self._strategies.fetch_by_inchikey(filter_ids, limit):
+                yield record
         else:
             raise ValueError(f"Unsupported filter_field: {filter_field}")
 

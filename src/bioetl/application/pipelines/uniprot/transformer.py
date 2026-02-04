@@ -23,6 +23,7 @@ from bioetl.application.pipelines.uniprot.extractors import (
     ExtractorUtils,
     FeatureExtractor,
     GeneExtractor,
+    TaxonomyExtractor,
 )
 from bioetl.domain.entities import UniprotTarget
 from bioetl.domain.services import IdentityService
@@ -158,12 +159,17 @@ class UniProtProteinTransformer(BaseTransformer):
         self._add_protein_names(record, data)
         self._add_gene_data(record, data)
         self._add_organism_data(record, data)
+        self._add_taxonomy_components(record, data)
         self._add_evidence_data(record, data)
         self._add_sequence_data(record, data)
         self._add_audit_data(record, data)
         self._add_functional_annotations(record, data)
         self._add_cross_references(record, data)
+        self._add_go_components(record, data)
         self._add_features_and_keywords(record, data)
+        self._add_ptm_features(record, data)
+        self._add_isoform_details(record, data)
+        self._add_reaction_data(record, data)
         self._add_counts(record, data)
 
         # Legacy compatibility
@@ -345,6 +351,54 @@ class UniProtProteinTransformer(BaseTransformer):
         data["feature_count"] = ExtractorUtils.count_list(record.get("features"))
         data["keyword_count"] = ExtractorUtils.count_list(record.get("keywords"))
         data["isoform_count"] = CommentExtractor.count_isoforms(comments)
+
+    def _add_taxonomy_components(
+        self, record: BronzeRecord, data: dict[str, Any]
+    ) -> None:
+        """Add parsed taxonomy lineage components."""
+        lineage = self._extract_by_path(record, self._ORGANISM_LINEAGE_PATH)
+        taxonomy = TaxonomyExtractor.extract_all(lineage)
+        data["superkingdom"] = taxonomy["superkingdom"]
+        data["phylum"] = taxonomy["phylum"]
+        data["genus"] = taxonomy["genus"]
+
+    def _add_go_components(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add GO terms separated by aspect."""
+        xrefs = record.get("uniProtKBCrossReferences")
+        data["molecular_function"] = CrossRefExtractor.extract_molecular_function(xrefs)
+        data["cellular_component"] = CrossRefExtractor.extract_cellular_component(xrefs)
+
+    def _add_ptm_features(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add PTM and structural features."""
+        features = record.get("features")
+        data["topology"] = FeatureExtractor.extract_topology(features)
+        data["transmembrane"] = FeatureExtractor.extract_transmembrane(features)
+        data["intramembrane"] = FeatureExtractor.extract_intramembrane(features)
+        data["signal_peptide"] = FeatureExtractor.extract_signal_peptide(features)
+        data["propeptide"] = FeatureExtractor.extract_propeptide(features)
+        data["glycosylation"] = FeatureExtractor.extract_glycosylation(features)
+        data["lipidation"] = FeatureExtractor.extract_lipidation(features)
+        data["disulfide_bond"] = FeatureExtractor.extract_disulfide_bonds(features)
+        data["modified_residue"] = FeatureExtractor.extract_modified_residues(features)
+        data["phosphorylation"] = FeatureExtractor.extract_phosphorylation(features)
+        data["acetylation"] = FeatureExtractor.extract_acetylation(features)
+        data["ubiquitination"] = FeatureExtractor.extract_ubiquitination(features)
+
+    def _add_isoform_details(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add detailed isoform information."""
+        comments = record.get("comments")
+        isoform_data = CommentExtractor.extract_isoform_details(comments)
+        data["isoform_names"] = isoform_data["isoform_names"]
+        data["isoform_ids"] = isoform_data["isoform_ids"]
+        data["isoform_synonyms"] = isoform_data["isoform_synonyms"]
+
+    def _add_reaction_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add reaction information from catalytic activity."""
+        comments = record.get("comments")
+        data["reactions"] = CommentExtractor.extract_reactions(comments)
+        data["reaction_ec_numbers"] = CommentExtractor.extract_reaction_ec_numbers(
+            comments
+        )
 
     def _extract_protein_name(self, record: BronzeRecord) -> str | None:
         """Extract protein name (optional field)."""

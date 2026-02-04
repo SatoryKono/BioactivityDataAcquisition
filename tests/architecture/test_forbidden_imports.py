@@ -33,13 +33,24 @@ class TestLocalOnlyPolicy:
         # List of forbidden packages/modules
         forbidden_libs = [
             # Cloud SDKs
-            "boto3", "botocore", "s3fs", "minio",
-            "azure", "azure.storage", "azure.identity",
-            "google.cloud", "google.storage",
+            "boto3",
+            "botocore",
+            "s3fs",
+            "minio",
+            "azure",
+            "azure.storage",
+            "azure.identity",
+            "google.cloud",
+            "google.storage",
             # Distributed Systems
-            "redis", "aioredis", "upstash",
-            "kafka", "confluent_kafka", "aiokafka",
-            "celery", "dask.distributed",
+            "redis",
+            "aioredis",
+            "upstash",
+            "kafka",
+            "confluent_kafka",
+            "aiokafka",
+            "celery",
+            "dask.distributed",
         ]
 
         # Scan the entire bioetl package
@@ -48,11 +59,11 @@ class TestLocalOnlyPolicy:
             pytest.skip("Source directory not found")
 
         violations = []
-        
+
         # Walk through all python files
         for py_file in source_path.rglob("*.py"):
             content = py_file.read_text(encoding="utf-8")
-            
+
             for lib in forbidden_libs:
                 # Check for various import forms:
                 # import boto3
@@ -61,13 +72,13 @@ class TestLocalOnlyPolicy:
                     f"import {lib}",
                     f"from {lib}",
                 ]
-                
+
                 for pattern in patterns:
                     # Simple check - could be improved with AST if false positives occur
                     # but these libs are distinct enough.
                     if re.search(r"^" + pattern + r"\b", content, re.MULTILINE):
-                         relative_path = py_file.relative_to(src_dir)
-                         violations.append(f"{relative_path}: imports '{lib}'")
+                        relative_path = py_file.relative_to(src_dir)
+                        violations.append(f"{relative_path}: imports '{lib}'")
 
         assert not violations, (
             "Violation of Local-Only Architecture (ADR-010).\n"
