@@ -110,6 +110,13 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             )
             raise ValueError(f"XML parse error: {e}") from e
 
+    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
+    _VALID_DATE_PATTERNS = (
+        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
+        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
+        re.compile(r"^\d{4}$"),
+    )
+
     def _is_valid_date_format(self, date_str: str | None) -> bool:
         """Validate that date string matches expected ISO format.
 
@@ -131,13 +138,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if not date_str:
             return False
 
-        # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
-        patterns = (
-            re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
-            re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
-            re.compile(r"^\d{4}$"),
-        )
-        return any(pattern.match(date_str) for pattern in patterns)
+        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
 
     def _extract_medline_metadata(
         self,
@@ -182,9 +183,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             grant_count = len(grant_list.findall("Grant"))
 
         reference_count = 0
-        if pubmed_data is not None and (
-            ref_list := pubmed_data.find("ReferenceList")
-        ) is not None:
+        if (
+            pubmed_data is not None
+            and (ref_list := pubmed_data.find("ReferenceList")) is not None
+        ):
             reference_count = len(ref_list.findall(".//Reference"))
 
         return {"grant_count": grant_count, "citations_made": reference_count}

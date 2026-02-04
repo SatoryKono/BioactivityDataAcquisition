@@ -41,7 +41,13 @@ class ConfigGaps:
 def analyze_standard_config(config: dict, gaps: ConfigGaps) -> None:
     """Analyze standard (non-composite) pipeline config."""
     # === ADR-025: Required fields (MUST) ===
-    for fld in ["pipeline_name", "provider", "entity_type", "primary_keys", "silver_table"]:
+    for fld in [
+        "pipeline_name",
+        "provider",
+        "entity_type",
+        "primary_keys",
+        "silver_table",
+    ]:
         if fld not in config:
             gaps.critical.append(f"Missing MUST field: {fld}")
 
@@ -92,7 +98,9 @@ def analyze_standard_config(config: dict, gaps: ConfigGaps) -> None:
             layer_cfg = sink.get(layer, {})
             path = layer_cfg.get("path", "")
             if path and expected_pattern not in path:
-                gaps.low.append(f"sink.{layer}.path not hierarchical ({provider}/{entity})")
+                gaps.low.append(
+                    f"sink.{layer}.path not hierarchical ({provider}/{entity})"
+                )
 
     # === ADR-027: DQ rules ===
     if "dq_rules" in config:
@@ -106,9 +114,13 @@ def analyze_standard_config(config: dict, gaps: ConfigGaps) -> None:
         if provider and entity:
             expected_dq = DQ_DIR / "entities" / provider / f"{entity}.yaml"
             if expected_dq.exists():
-                gaps.low.append(f"DQ file exists at {expected_dq.relative_to('.')} but not referenced")
+                gaps.low.append(
+                    f"DQ file exists at {expected_dq.relative_to('.')} but not referenced"
+                )
             else:
-                gaps.low.append(f"No dq_config_file and no DQ file at entities/{provider}/{entity}.yaml")
+                gaps.low.append(
+                    f"No dq_config_file and no DQ file at entities/{provider}/{entity}.yaml"
+                )
 
     # === ADR-025: gold_filters ===
     gf = config.get("gold_filters", {})
@@ -165,7 +177,9 @@ def analyze_composite_config(config: dict, gaps: ConfigGaps) -> None:
     if "dq_rules" in config:
         dq = config["dq_rules"]
         if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
-            gaps.medium.append("Inline dq_rules thresholds in composite (deprecated per ADR-027)")
+            gaps.medium.append(
+                "Inline dq_rules thresholds in composite (deprecated per ADR-027)"
+            )
 
     # Note: Composite pipelines don't have standard sink structure
     # sort_by would be defined in the individual pipelines that composite references
@@ -240,7 +254,9 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
                 lines.append(f"- ❌ {issue}")
             lines.append("")
     else:
-        lines.extend(["## Critical Issues (MUST fix)", "", "✅ No critical issues found!", ""])
+        lines.extend(
+            ["## Critical Issues (MUST fix)", "", "✅ No critical issues found!", ""]
+        )
 
     # Medium
     medium_gaps = [g for g in all_gaps if g.medium]
@@ -267,32 +283,34 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             lines.append("")
 
     # Action items
-    lines.extend([
-        "## Recommended Actions",
-        "",
-        "### Priority 0 (Critical - Blocks CI)",
-        "1. Add `sort_by` to all silver sinks (ADR-014 compliance)",
-        "2. Add `sort_by` to all gold sinks where gold.enabled=true (ADR-014)",
-        "3. Add `primary_key` to all silver sinks (ADR-025 compliance)",
-        "4. Add required fields: `pipeline_name`, `provider`, `entity_type`, `primary_keys`, `silver_table`",
-        "",
-        "### Priority 1 (Medium - Should Fix)",
-        "1. Add `version`, `description`, `gold_table` where missing (ADR-025)",
-        "2. Migrate inline `dq_rules` thresholds to `dq_config_file` (ADR-027)",
-        "3. Add missing `sink.bronze` and `sink.gold` sections",
-        "",
-        "### Priority 2 (Low - Nice to Have)",
-        "1. Unify path patterns to `{provider}/{entity}` hierarchy",
-        "2. Reference existing DQ config files via `dq_config_file`",
-        "3. Add `gold_filters.required_fields` where missing",
-        "",
-        "## ADR References",
-        "",
-        "- [ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md): Deterministic Writes",
-        "- [ADR-025](docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md): Pipeline Config Unification",
-        "- [ADR-027](docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md): DQ Rules Externalization",
-        "",
-    ])
+    lines.extend(
+        [
+            "## Recommended Actions",
+            "",
+            "### Priority 0 (Critical - Blocks CI)",
+            "1. Add `sort_by` to all silver sinks (ADR-014 compliance)",
+            "2. Add `sort_by` to all gold sinks where gold.enabled=true (ADR-014)",
+            "3. Add `primary_key` to all silver sinks (ADR-025 compliance)",
+            "4. Add required fields: `pipeline_name`, `provider`, `entity_type`, `primary_keys`, `silver_table`",
+            "",
+            "### Priority 1 (Medium - Should Fix)",
+            "1. Add `version`, `description`, `gold_table` where missing (ADR-025)",
+            "2. Migrate inline `dq_rules` thresholds to `dq_config_file` (ADR-027)",
+            "3. Add missing `sink.bronze` and `sink.gold` sections",
+            "",
+            "### Priority 2 (Low - Nice to Have)",
+            "1. Unify path patterns to `{provider}/{entity}` hierarchy",
+            "2. Reference existing DQ config files via `dq_config_file`",
+            "3. Add `gold_filters.required_fields` where missing",
+            "",
+            "## ADR References",
+            "",
+            "- [ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md): Deterministic Writes",
+            "- [ADR-025](docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md): Pipeline Config Unification",
+            "- [ADR-027](docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md): DQ Rules Externalization",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -300,9 +318,13 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
 def main() -> int:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Gap analysis for pipeline configs against ADR requirements")
+    parser = argparse.ArgumentParser(
+        description="Gap analysis for pipeline configs against ADR requirements"
+    )
     parser.add_argument("-o", "--output", help="Output file path for markdown report")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print detailed output")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Print detailed output"
+    )
     args = parser.parse_args()
 
     all_gaps: list[ConfigGaps] = []
@@ -314,8 +336,14 @@ def main() -> int:
 
         if args.verbose:
             rel = cfg.relative_to(CONFIGS_DIR)
-            status = "❌" if gaps.critical else ("⚠️" if gaps.medium else ("ℹ️" if gaps.low else "✅"))
-            print(f"{status} {rel}: {len(gaps.critical)} critical, {len(gaps.medium)} medium, {len(gaps.low)} low")
+            status = (
+                "❌"
+                if gaps.critical
+                else ("⚠️" if gaps.medium else ("ℹ️" if gaps.low else "✅"))
+            )
+            print(
+                f"{status} {rel}: {len(gaps.critical)} critical, {len(gaps.medium)} medium, {len(gaps.low)} low"
+            )
 
     report = generate_report(all_gaps)
 
@@ -331,9 +359,11 @@ def main() -> int:
     medium_count = sum(len(g.medium) for g in all_gaps)
     low_count = sum(len(g.low) for g in all_gaps)
 
-    print(f"\n{'='*60}")
-    print(f"Summary: {critical_count} critical, {medium_count} medium, {low_count} low issues")
-    print(f"{'='*60}")
+    print(f"\n{'=' * 60}")
+    print(
+        f"Summary: {critical_count} critical, {medium_count} medium, {low_count} low issues"
+    )
+    print(f"{'=' * 60}")
 
     # Exit code based on critical issues
     return 1 if critical_count else 0

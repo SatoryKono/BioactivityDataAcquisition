@@ -21,7 +21,9 @@ import yaml
 try:
     import jsonschema
 except ImportError:
-    print("ERROR: jsonschema not installed. Run: pip install jsonschema", file=sys.stderr)
+    print(
+        "ERROR: jsonschema not installed. Run: pip install jsonschema", file=sys.stderr
+    )
     sys.exit(2)
 
 
@@ -36,7 +38,8 @@ def load_schema(schema_path: Path) -> dict:
 def find_config_files(configs_dir: Path) -> List[Path]:
     """Find all entity config files (excluding base configs)."""
     return [
-        p for p in configs_dir.rglob("*.yaml")
+        p
+        for p in configs_dir.rglob("*.yaml")
         if not p.name.startswith("_") and p.parent.name != "_providers"
     ]
 
@@ -88,8 +91,9 @@ def main():
     parser = argparse.ArgumentParser(description="Validate pipeline configs")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument(
-        "--strict", action="store_true",
-        help="Treat warnings as errors (path hierarchy, sort_by)"
+        "--strict",
+        action="store_true",
+        help="Treat warnings as errors (path hierarchy, sort_by)",
     )
     args = parser.parse_args()
 
