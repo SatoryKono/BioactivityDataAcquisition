@@ -1,0 +1,27 @@
+# configs/data_schema/chembl/tissue.yaml
+# Column group definitions for ChEMBL Tissue entity
+
+version: "1.0.0"
+entity: tissue
+
+column_groups:
+  identifiers:
+    - tissue_chembl_id
+  
+  core_metadata:
+    - pref_name
+  
+  ontology_references:
+    - bto_id
+    - caloha_id
+    - efo_id
+    - uberon_id
+
+# All business fields for Gold layer
+gold_columns:
+  - tissue_chembl_id
+  - pref_name
+  - bto_id
+  - caloha_id
+  - efo_id
+  - uberon_id

@@ -1,0 +1,47 @@
+# configs/dq/entities/chembl/subcellular_fraction.yaml
+# ChEMBL Subcellular Fraction-specific DQ rules
+# Inherits from: _defaults.yaml → providers/chembl.yaml
+
+version: "1.0.0"
+provider: chembl
+entity: subcellular_fraction
+
+# Thresholds: inherit from provider
+
+# =============================================================================
+# Subcellular Fraction-Specific Field Validations
+# =============================================================================
+entity_field_validations:
+  - field: entity_id
+    type: pattern
+    pattern: '^[a-f0-9]{16}$'
+    nullable: false
+    error_message: "entity_id must be a 16-char SHA256 hash prefix"
+
+  - field: subcellular_fraction
+    type: pattern
+    pattern: '^.{1,200}$'
+    nullable: false
+    error_message: "subcellular_fraction is required and must not exceed 200 chars"
+
+  - field: assay_count
+    type: numeric_range
+    min_value: 0
+    nullable: true
+    error_message: "assay_count must be non-negative"
+
+  - field: example_assay_chembl_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: true
+    error_message: "example_assay_chembl_id must match CHEMBL format if present"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+entity_cross_field_validations: []
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+entity_conditional_validations: []

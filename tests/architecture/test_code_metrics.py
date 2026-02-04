@@ -107,7 +107,7 @@ class TestFileSizeLimits:
         "gold_writer.py": 940,  # 934 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py) + column_order support
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 960,  # 959 LOC - Silver PyArrow schemas (+ UniProt extended schema + IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
+        "silver.py": 990,  # 981 LOC - Silver PyArrow schemas (+ UniProt extended schema + IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
         "client.py": 1100,  # 1098 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1095,  # 1089 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups
@@ -662,6 +662,8 @@ class TestClassSize:
         "CommentExtractor": 350,  # 346 lines - UniProt comment extraction helper
         "CrossRefExtractor": 370,  # 366 lines - UniProt cross-reference extraction helper
         "FeatureExtractor": 330,  # 328 lines - UniProt feature extraction helper
+        # Derived entity data source wrappers
+        "SubcellularFractionDataSource": 490,  # 479 lines - Wrapper with FilterableDataSourcePort delegation (like PublicationTermDataSource)
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:

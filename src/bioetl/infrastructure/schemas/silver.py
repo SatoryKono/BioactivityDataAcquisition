@@ -542,6 +542,28 @@ CHEMBL_TISSUE_SCHEMA = pa.schema(
         pa.field("_dq_warn", pa.bool_()),
     ]
 )
+# Derived entity extracted from Assay records (assay_subcellular_fraction field)
+# Lookup table for subcellular fractions used in bioassays
+CHEMBL_SUBCELLULAR_FRACTION_SCHEMA = pa.schema(
+    [
+        # === System prefix (MUST be first, per RULES.md §2.4) ===
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+        # === Business fields (alphabetical order) ===
+        pa.field("assay_count", pa.int64()),  # Number of assays using this fraction
+        pa.field("example_assay_chembl_id", pa.string()),  # Example assay ChEMBL ID
+        pa.field("subcellular_fraction", pa.string()),  # Primary key - fraction name
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
+    ]
+)
+
 # Derived entity extracted from Document records
 # See: https://www.ebi.ac.uk/chembl/api/data/document
 CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(

@@ -48,6 +48,7 @@ from bioetl.domain.entities.chembl_structures import (
     Target,
     TargetComponent,
 )
+from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFraction
 from bioetl.domain.entities.chembl_tissue import Tissue
 
 # CrossRef DTO + Entity
@@ -108,6 +109,7 @@ __all__ = [
     "PublicationEntityBase",
     "PublicationRecord",
     "SemanticScholarPublicationEntity",
+    "SubcellularFraction",
     "Target",
     "TargetComponent",
     "TargetComponentRecord",
