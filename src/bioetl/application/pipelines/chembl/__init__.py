@@ -75,6 +75,12 @@ from bioetl.application.pipelines.chembl.publication_term_transformer import (
 from bioetl.application.pipelines.chembl.publication_transformer import (
     PublicationTransformer,
 )
+from bioetl.application.pipelines.chembl.subcellular_fraction import (
+    ChEMBLSubcellularFractionPipeline,
+)
+from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
+    SubcellularFractionTransformer,
+)
 from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
 from bioetl.application.pipelines.chembl.target_component import (
     ChEMBLTargetComponentPipeline,
@@ -83,12 +89,6 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
-from bioetl.application.pipelines.chembl.subcellular_fraction import (
-    ChEMBLSubcellularFractionPipeline,
-)
-from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
-    SubcellularFractionTransformer,
-)
 from bioetl.application.pipelines.chembl.tissue import ChEMBLTissuePipeline
 from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
 
