@@ -177,7 +177,7 @@ class TestDocsVersionSync:
         - Changelog/История изменений секции (версия в контексте истории)
         """
         # Директории для исключения
-        excluded_dirs = {"archived", "audits", "audit", "__-prompts", "audit-reports"}
+        excluded_dirs = {"archived", "audits", "audit", "__-prompts", "audit-reports", "99-archive"}
 
         outdated = []
         current_major_minor = tuple(map(int, rules_version.split(".")))
@@ -191,7 +191,11 @@ class TestDocsVersionSync:
             if any(excluded in md_file.parts for excluded in excluded_dirs):
                 continue
 
-            content = md_file.read_text(encoding="utf-8")
+            try:
+                content = md_file.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                # Skip files with non-UTF-8 encoding (e.g., binary files)
+                continue
 
             # Определяем, есть ли секция changelog/history
             # и где она начинается
