@@ -83,6 +83,12 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+from bioetl.application.pipelines.chembl.subcellular_fraction import (
+    ChEMBLSubcellularFractionPipeline,
+)
+from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
+    SubcellularFractionTransformer,
+)
 from bioetl.application.pipelines.chembl.tissue import ChEMBLTissuePipeline
 from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
 
@@ -102,6 +108,7 @@ __all__ = [
     "ChEMBLPublicationPipeline",
     "ChEMBLPublicationSimilarityPipeline",
     "ChEMBLPublicationTermPipeline",
+    "ChEMBLSubcellularFractionPipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
     "ChEMBLTissuePipeline",
@@ -111,6 +118,7 @@ __all__ = [
     "PublicationSimilarityTransformer",
     "PublicationTermTransformer",
     "PublicationTransformer",
+    "SubcellularFractionTransformer",
     "TargetComponentTransformer",
     "TargetTransformer",
     "TissueTransformer",
