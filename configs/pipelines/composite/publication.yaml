@@ -270,8 +270,9 @@ composite:
           - _original_id
         pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      # === Business identifiers ===
-      - name: id
+      
+      # === Provider identifiers ===
+      - name: provider_ids
         fields:
           - alternative_id
           - chembl_release
@@ -285,8 +286,10 @@ composite:
           - pmc_id
           - pmid
           - src_id
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: bibliography
+        provider_order: [semanticscholar, openalex, pubmed, chembl, crossref]
+
+      # === Journal / Venue information ===
+      - name: journal
         fields:
           - abstract
           - abstract_structured
@@ -300,21 +303,24 @@ composite:
           - journal_iso_abbrev
           - journal_issn_type
           - journal_name_short
+          - publisher
+          - title
+          - venue
+          - volume
+        provider_order: [pubmed, semanticscholar, chembl, crossref, openalex]
+
+      # === Pagination ===
+      - name: pagination
+        fields:
+          - medline_pgn
           - page_first
           - page_last
           - page_range
-          - published
-          - published_online
-          - published_print
-          - publisher
-          - publication_year
-          - title
-          - volume
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: author_and_affiliation
+        provider_order: [pubmed, chembl, crossref, openalex, semanticscholar]
+
+      # === Authors ===
+      - name: authors
         fields:
-          - affiliation_list
-          - affiliation_structured
           - author_count
           - author_details
           - author_h_indices
@@ -324,11 +330,20 @@ composite:
           - author_s2_ids
           - authors
           - authors_with_affiliations
-          - country
+        provider_order: [pubmed, semanticscholar, openalex, chembl, crossref]
+
+      # === Affiliations ===
+      - name: affiliations
+        fields:
+          - affiliation_list
+          - affiliation_structured
           - institution_country_codes
           - institution_ids
           - ror_ids
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+          - country
+        provider_order: [pubmed, openalex, semanticscholar, chembl, crossref]
+
+      # === Date ===
       - name: date
         fields:
           - creation_date
@@ -338,15 +353,12 @@ composite:
           - pub_day
           - pub_month
           - publication_date
+          - publication_year
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: topics_and_keywords
+
+      # === Subjects / Topics ===
+      - name: subjects
         fields:
-          - chemical_count
-          - chemicals
-          - citation_subset
-          - databanks
-          - fwci
-          - gene_symbols
           - keyword_count
           - mesh_heading_count
           - primary_topic
@@ -354,31 +366,48 @@ composite:
           - subject_keywords
           - subject_mesh
           - subject_topics
-        provider_order: [crossref, openalex, pubmed, semanticscholar, chembl]
-      - name: publication
+          - tldr
+        provider_order: [pubmed, openalex, semanticscholar, crossref, chembl]
+
+      # === Biomedical (NEW) ===
+      - name: biomedical
+        fields:
+          - chemicals
+          - chemical_count
+          - gene_symbols
+          - databanks
+          - grants
+          - grant_count
+        provider_order: [pubmed, openalex, chembl]
+
+      # === Citations / Metrics ===
+      - name: citations
         fields:
           - citation_contexts
+          - citation_subset
           - citations_made
           - citations_received
+          - fwci
+          - influential_citation_count
+          - references
+        provider_order: [semanticscholar, crossref, openalex, pubmed, chembl]
+
+      # === Document type and status ===
+      - name: doc_type
+        fields:
           - content_domain_crossmark_restriction
           - content_domain_domains
-          - grant_count
-          - grants
-          - influential_citation_count
           - is_oa
           - is_retracted
           - language
           - license_url
-          - medline_pgn
           - oa_status
           - open_access_url
           - publication_status
           - publication_type
           - publication_type_list
           - publication_types
-          - references
-          - tldr
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+        provider_order: [semanticscholar, pubmed, chembl, crossref, openalex]
 
     # Note: output paths auto-computed per ADR-029 convention-based resolution
     # silver: data/output/silver/composite/publication (auto)

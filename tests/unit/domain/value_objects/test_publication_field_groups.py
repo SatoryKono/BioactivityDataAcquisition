@@ -140,6 +140,7 @@ class TestFieldToGroupMapping:
             "corpus_id",
             "is_oa",
             "is_retracted",
+            "dblp_id",
         }
         actual_fields = {
             f
@@ -176,6 +177,8 @@ class TestFieldToGroupMapping:
             "author_count",
             "author_openalex_ids",
             "author_orcids",
+            "author_h_indices",
+            "ror_ids",
         }
         actual_fields = {
             f
@@ -192,6 +195,10 @@ class TestFieldToGroupMapping:
             "subject_topics",
             "subject_fields",
             "primary_topic",
+            "chemicals",
+            "chemical_count",
+            "gene_symbols",
+            "databanks",
         }
         actual_fields = {
             f
@@ -205,6 +212,12 @@ class TestFieldToGroupMapping:
         expected_fields = {
             "citations_received",
             "citations_made",
+            "grants",
+            "grant_count",
+            "influential_citation_count",
+            "fwci",
+            "references",
+            "citation_contexts",
         }
         actual_fields = {
             f
@@ -220,6 +233,7 @@ class TestFieldToGroupMapping:
             "publication_date",
             "country",
             "creation_date",
+            "pub_day",
         }
         actual_fields = {
             f
@@ -246,10 +260,7 @@ class TestFieldToGroupMapping:
         expected_fields = {
             "content_hash",
             "language",
-            "grants",
-            "fwci",
             "src_id",
-            "dblp_id",
         }
         actual_fields = {
             f
@@ -342,10 +353,10 @@ class TestFieldGroupConfig:
         assert "title" in gold_columns
         assert "doi" in gold_columns
         assert "authors" in gold_columns
+        assert "grants" in gold_columns
         assert "content_hash" not in gold_columns
         assert "language" not in gold_columns
-        assert "grants" not in gold_columns
-        assert len(gold_columns) == 3
+        assert len(gold_columns) == 4
 
     def test_get_trash_columns(self) -> None:
         """get_trash_columns() returns excluded columns."""
