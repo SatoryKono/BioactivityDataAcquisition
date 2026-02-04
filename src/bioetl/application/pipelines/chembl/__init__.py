@@ -83,6 +83,8 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+from bioetl.application.pipelines.chembl.tissue import ChEMBLTissuePipeline
+from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
 
 __all__ = [
     "ActivityTransformer",
@@ -102,6 +104,7 @@ __all__ = [
     "ChEMBLPublicationTermPipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
+    "ChEMBLTissuePipeline",
     "CompoundRecordTransformer",
     "MoleculeTransformer",
     "ProteinClassTransformer",
@@ -110,4 +113,5 @@ __all__ = [
     "PublicationTransformer",
     "TargetComponentTransformer",
     "TargetTransformer",
+    "TissueTransformer",
 ]

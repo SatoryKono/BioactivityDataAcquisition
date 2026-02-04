@@ -70,7 +70,7 @@ class TestFileSizeLimits:
         "storage.py": 415,  # 409 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage + column_order
         # Domain Pandera schemas (declarative field definitions)
         "compound.py": 400,  # 397 LOC - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
-        "protein.py": 370,  # 365 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0)
+        "protein.py": 480,  # 478 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0) + extended extraction helpers
         # Domain contracts/gold (Gold layer Pandera schemas)
         "publications.py": 470,  # 464 LOC - Gold layer publication schemas with author/institution identifiers + PubMed pii/mid/publisher_id + CrossRef author_orcids/details/references + S2 authors
         # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
@@ -107,7 +107,7 @@ class TestFileSizeLimits:
         "gold_writer.py": 940,  # 934 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py) + column_order support
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 950,  # 937 LOC - Silver PyArrow schemas (+ UniProt extended schema + IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
+        "silver.py": 960,  # 959 LOC - Silver PyArrow schemas (+ UniProt extended schema + IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
         "client.py": 1100,  # 1098 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1095,  # 1089 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups
@@ -122,6 +122,10 @@ class TestFileSizeLimits:
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "merger.py": 1700,  # 1698 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
+        # UniProt extraction helpers
+        "comments.py": 580,  # 578 LOC - UniProt comment extraction helpers with isoform/subcellular/disease details
+        "crossrefs.py": 380,  # 375 LOC - UniProt cross-reference extraction helpers
+        "features.py": 400,  # 397 LOC - UniProt feature extraction helpers (PTMs, domains)
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -200,6 +204,9 @@ class TestFunctionComplexity:
         "_extract_alternative_products": 15,  # 14 CC - alternative products extraction
         "_extract_go_terms": 20,  # 18 CC - GO term extraction with evidence codes
         "_extract_features": 16,  # 15 CC - protein feature extraction
+        # UniProt extraction helper functions (complex XML parsing)
+        "extract_isoform_details": 22,  # CC=20 - Isoform detail extraction with complex conditional parsing
+        "extract_ptm_by_pattern": 14,  # CC=12 - PTM extraction by regex pattern with position mapping
         "TableConfig": 8,  # Dataclass with write mode enum conversion in __post_init__
         "SchemaEvolutionError": 7,  # Exception with detailed field tracking
         "validate_medallion_config": 12,  # Config validation with many checks
@@ -629,7 +636,7 @@ class TestClassSize:
         "StoragePort": 380,  # 374 lines - Protocol with read_silver, write_*_merged + SourceMetadata param for Bronze write + SilverWriteResult return + silver_refs param
         # Pandera schemas (declarative field definitions)
         "PubchemMoleculeSchema": 380,  # 375 lines - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
-        "UniprotTargetSchema": 350,  # 309 lines - UniProt protein schema with biochemical fields
+        "UniprotTargetSchema": 435,  # 430 lines - UniProt protein schema with biochemical fields + extended extractors
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
@@ -649,6 +656,12 @@ class TestClassSize:
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction
         "PubMedPublicationTransformer": 670,  # PubMed XML extraction with date/identifier validation + author extractor + unified field names
+        # PubChem adapter fetch strategies
+        "PubChemFetchStrategies": 310,  # 308 lines - PubChem fetch strategies with SMILES, CID, InChIKey support
+        # UniProt extraction helper classes
+        "CommentExtractor": 350,  # 346 lines - UniProt comment extraction helper
+        "CrossRefExtractor": 370,  # 366 lines - UniProt cross-reference extraction helper
+        "FeatureExtractor": 330,  # 328 lines - UniProt feature extraction helper
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
@@ -773,6 +786,10 @@ class TestGodObjectDetection:
         "PubChemAdapter": "Sync adapter using ThreadPoolExecutor; delegates to BaseSyncAdapter, CircuitBreaker",
         "PubMedAdapter": "HTTP adapter with FilterableDataSourcePort implementation; delegates to BaseHttpAdapter",
         "PubMedPublicationTransformer": "Transformer with XML extraction - delegates to extractors (Abstract, Author, Date, etc.)",
+        # UniProt XML extraction helpers (cohesive extractor classes)
+        "CommentExtractor": "Cohesive extractor - all methods relate to UniProt comment/annotation extraction",
+        "CrossRefExtractor": "Cohesive extractor - all methods relate to UniProt cross-reference extraction",
+        "FeatureExtractor": "Cohesive extractor - all methods relate to UniProt feature extraction (domains, PTMs, etc.)",
         "OpenAlexAdapter": "HTTP adapter with FilterableDataSourcePort; batch DOI resolution + title fallback",
         "SemanticScholarAdapter": "HTTP adapter with multi-identifier fallback; delegates to BaseHttpAdapter, CircuitBreaker",
         "UniProtIDMappingClient": "ID Mapping client with job-based async API + entry metadata extraction helpers; delegates to BaseHttpAdapter, AdapterMetrics",

@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.11.0] - 2026-02-04
+
+### Added
+
+- **Composite Activity Pipeline** (`composite_activity`): New composite pipeline combining ChEMBL activity data with compound record metadata
+  - **Seed Pipeline**: `chembl_activity` - extracts bioactivity measurements (IC50, Ki, EC50, etc.)
+  - **Dependency**: `chembl_compound_record` - fetches compound records filtered by `molecule_chembl_id`
+  - **Join Strategy**: LEFT OUTER join preserves all activities, compound records are optional
+  - **Filter Field**: `molecule_chembl_id` used to filter compound_record API calls
+  - **Configuration**: `configs/pipelines/composite/activity.yaml`
+  - **Filter Config**: `configs/filter/entities/composite/activity.yaml`
+  - **Unit Tests**: 13 tests in `tests/unit/application/composite/test_composite_activity.py`
+  - **Reference**: ADR-026 Composite Pipeline Pattern
+
+### Technical Details
+
+- Composite pipeline structure:
+  - Seed output keys: `activity_id`, `molecule_chembl_id`, `assay_chembl_id`, `target_chembl_id`, `document_chembl_id`
+  - Dependency `required=false` (missing compound records don't block pipeline)
+  - DQ thresholds: 10% soft fail, 30% hard fail (composite level)
+  - Compound record DQ: 30% soft fail, 70% hard fail (many activities lack records)
+- Column groups organized semantically: identifiers, activity values, ligand efficiency, compound record, molecule/target/assay/document context
+
 ## [5.10.0] - 2026-02-04
 
 ### Added

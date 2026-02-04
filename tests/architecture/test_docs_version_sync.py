@@ -177,7 +177,14 @@ class TestDocsVersionSync:
         - Changelog/История изменений секции (версия в контексте истории)
         """
         # Директории для исключения
-        excluded_dirs = {"archived", "audits", "audit", "__-prompts", "audit-reports", "99-archive"}
+        excluded_dirs = {
+            "archived",
+            "audits",
+            "audit",
+            "__-prompts",
+            "audit-reports",
+            "99-archive",
+        }
 
         outdated = []
         current_major_minor = tuple(map(int, rules_version.split(".")))
