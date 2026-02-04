@@ -30,6 +30,7 @@ class TestTissueTransformer:
     def test_entity_class_is_tissue(self, transformer):
         """Test transformer uses Tissue entity class."""
         from bioetl.domain.entities.chembl_tissue import Tissue
+
         assert transformer.entity_class is Tissue
 
     def test_primary_id_field(self, transformer):
@@ -42,7 +43,7 @@ class TestTissueTransformer:
             sample_record,
             sample_record["tissue_chembl_id"],
         )
-        
+
         assert data["tissue_chembl_id"] == "CHEMBL3638177"
         assert data["pref_name"] == "Amniotic fluid"
         assert data["bto_id"] == "BTO:0000068"
@@ -58,6 +59,6 @@ class TestTissueTransformer:
             "bto_id": "  BTO:0000001  ",
         }
         data = transformer._extract_business_data(record, "CHEMBL123")
-        
+
         assert data["pref_name"] == "Test Tissue"
         assert data["bto_id"] == "BTO:0000001"

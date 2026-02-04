@@ -531,12 +531,12 @@ CHEMBL_TISSUE_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("bto_id", pa.string()),      # BRENDA Tissue Ontology
-        pa.field("caloha_id", pa.string()),   # CALIPHO ID
-        pa.field("efo_id", pa.string()),      # Experimental Factor Ontology
-        pa.field("pref_name", pa.string()),   # Preferred tissue name
+        pa.field("bto_id", pa.string()),  # BRENDA Tissue Ontology
+        pa.field("caloha_id", pa.string()),  # CALIPHO ID
+        pa.field("efo_id", pa.string()),  # Experimental Factor Ontology
+        pa.field("pref_name", pa.string()),  # Preferred tissue name
         pa.field("tissue_chembl_id", pa.string()),  # Primary key
-        pa.field("uberon_id", pa.string()),   # Uberon Ontology
+        pa.field("uberon_id", pa.string()),  # Uberon Ontology
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),

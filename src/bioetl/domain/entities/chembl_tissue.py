@@ -29,10 +29,10 @@ class Tissue(BaseEntity):
     pref_name: str
 
     # External ontology identifiers (API-OPTIONAL)
-    bto_id: str | None = None       # BRENDA Tissue Ontology
-    caloha_id: str | None = None    # CALIPHO tissue ontology
-    efo_id: str | None = None       # Experimental Factor Ontology
-    uberon_id: str | None = None    # Uberon multi-species anatomy ontology
+    bto_id: str | None = None  # BRENDA Tissue Ontology
+    caloha_id: str | None = None  # CALIPHO tissue ontology
+    efo_id: str | None = None  # Experimental Factor Ontology
+    uberon_id: str | None = None  # Uberon multi-species anatomy ontology
 
     def __post_init__(self) -> None:
         super().__post_init__()

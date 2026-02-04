@@ -238,7 +238,9 @@ class SubcellularFractionDataSource:
         return {
             "entity_id": entity_id,
             "subcellular_fraction": fraction,
-            "example_assay_chembl_id": str(assay_chembl_id) if assay_chembl_id else None,
+            "example_assay_chembl_id": str(assay_chembl_id)
+            if assay_chembl_id
+            else None,
             "assay_count": 1,  # Will be updated with actual count
         }
 
