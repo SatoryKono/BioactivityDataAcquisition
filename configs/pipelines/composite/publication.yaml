@@ -131,6 +131,11 @@ composite:
     # instead of coalescing them into a single 'title' column
     preserve_all_sources: true
 
+    # Output paths for merged data
+    output:
+      silver: data/output/silver/composite/publication
+      gold: data/output/gold/composite/publication
+
     # Field-level priority overrides (when using explicit_rules)
     # Maps field name to ordered list of source preferences
     field_priorities:
