@@ -215,16 +215,16 @@ def _check_python_locations(project_root: Path) -> Iterator[Violation]:
     """Проверка расположения Python-файлов."""
     for py_file in project_root.rglob("*.py"):
         rel_path = py_file.relative_to(project_root)
-        str_path = str(rel_path)
+        posix_path = rel_path.as_posix()
 
         # Skip technical directories
-        if any(tech in str_path for tech in TECHNICAL_DIRS):
+        if any(tech in posix_path for tech in TECHNICAL_DIRS):
             continue
-        if any(gen in str_path for gen in GENERATED_DIRS):
+        if any(gen in posix_path for gen in GENERATED_DIRS):
             continue
 
         # Check if in allowed location
-        is_allowed = any(str_path.startswith(p) for p in ALLOWED_PYTHON_PATHS)
+        is_allowed = any(posix_path.startswith(p) for p in ALLOWED_PYTHON_PATHS)
         is_root_allowed = (
             py_file.parent == project_root and py_file.name in ALLOWED_ROOT_PY_FILES
         )
@@ -232,8 +232,8 @@ def _check_python_locations(project_root: Path) -> Iterator[Violation]:
         if not is_allowed and not is_root_allowed:
             yield Violation(
                 category="PYTHON_LOCATION",
-                path=str_path,
-                message=f"Python-файл в недопустимом месте: {str_path}",
+                path=str(rel_path),
+                message=f"Python-файл в недопустимом месте: {rel_path}",
                 severity="MUST",
             )
 
