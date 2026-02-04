@@ -65,6 +65,7 @@ from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
 from bioetl.application.pipelines.crossref.transformer import (
     CrossRefPublicationTransformer,
 )
@@ -100,6 +101,7 @@ from bioetl.domain.contracts import (
     ChEMBLProteinClassGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    ChEMBLTissueGoldSchema,
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
     PubChemCompoundGoldSchema,
@@ -123,6 +125,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_PUBLICATION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
+    CHEMBL_TISSUE_SCHEMA,
     CROSSREF_PUBLICATION_SCHEMA,
     OPENALEX_PUBLICATION_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
@@ -258,6 +261,13 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=CHEMBL_PROTEIN_CLASS_SCHEMA,
         gold_schema=ChEMBLProteinClassGoldSchema,
     ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_tissue",
+        provider="chembl",
+        transformer_class=TissueTransformer,
+        silver_schema=CHEMBL_TISSUE_SCHEMA,
+        gold_schema=ChEMBLTissueGoldSchema,
+    ),
     # PubChem pipeline
     PipelineFactoryConfig(
         pipeline_name="pubchem_compound",
@@ -365,6 +375,7 @@ chembl_publication_term_factory = _factories["chembl_publication_term"]
 chembl_molecule_factory = _factories["chembl_molecule"]
 chembl_target_factory = _factories["chembl_target"]
 chembl_target_component_factory = _factories["chembl_target_component"]
+chembl_tissue_factory = _factories["chembl_tissue"]
 chembl_protein_class_factory = _factories["chembl_protein_class"]
 pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
@@ -510,6 +521,7 @@ __all__ = [
     "chembl_publication_term_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
+    "chembl_tissue_factory",
     "crossref_publication_factory",
     "get_factory",
     "is_registered",

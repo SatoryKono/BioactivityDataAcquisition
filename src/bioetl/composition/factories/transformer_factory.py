@@ -157,6 +157,9 @@ def register_all_transformers() -> None:
     from bioetl.application.pipelines.chembl.publication_transformer import (
         PublicationTransformer,
     )
+    from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
+        SubcellularFractionTransformer,
+    )
     from bioetl.application.pipelines.chembl.target_component_transformer import (
         TargetComponentTransformer,
     )
@@ -195,6 +198,7 @@ def register_all_transformers() -> None:
     )
     register_transformer("chembl", "document_term", PublicationTermTransformer)
     register_transformer("chembl", "molecule", MoleculeTransformer)
+    register_transformer("chembl", "subcellular_fraction", SubcellularFractionTransformer)
     register_transformer("chembl", "protein_class", ProteinClassTransformer)
     register_transformer("chembl", "target", TargetTransformer)
     register_transformer("chembl", "target_component", TargetComponentTransformer)

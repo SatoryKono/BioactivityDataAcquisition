@@ -43,8 +43,10 @@ from bioetl.domain.contracts.gold import (
     ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLProteinClassGoldSchema,
+    ChEMBLSubcellularFractionGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    ChEMBLTissueGoldSchema,
     # CrossRef schemas
     CrossRefPublicationGoldSchema,
     # OpenAlex schemas
@@ -77,8 +79,10 @@ __all__ = [
     "ChEMBLDocumentTermGoldSchema",
     "ChEMBLMoleculeGoldSchema",
     "ChEMBLProteinClassGoldSchema",
+    "ChEMBLSubcellularFractionGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
+    "ChEMBLTissueGoldSchema",
     # CrossRef
     "CrossRefPublicationGoldSchema",
     # OpenAlex

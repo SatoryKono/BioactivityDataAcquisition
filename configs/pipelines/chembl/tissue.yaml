@@ -1,0 +1,42 @@
+# configs/pipelines/chembl/tissue.yaml
+# Pipeline configuration for ChEMBL Tissue entity.
+#
+# Inherits defaults from ../_base.yaml
+
+pipeline_name: chembl_tissue
+provider: chembl
+entity_type: tissue
+version: "1.0.0"
+description: "Extract tissues from ChEMBL API"
+
+primary_keys: ["tissue_chembl_id"]
+silver_table: "chembl_tissue"
+gold_table: "chembl_tissue"
+
+source_file: ../../sources/chembl.yaml
+
+# -----------------------------------------------------------------------------
+# Data Quality Configuration (ADR-027)
+# -----------------------------------------------------------------------------
+dq_config_file: ../../dq/entities/chembl/tissue.yaml
+column_groups_file: ../../data_schema/chembl/tissue.yaml
+
+# Entity-specific sink overrides
+sink:
+  bronze:
+    path: "data/output/bronze/chembl/tissue"
+  silver:
+    path: "data/output/silver/chembl/tissue"
+    primary_key: ["tissue_chembl_id"]
+    sort_by:
+      columns: ["tissue_chembl_id"]
+      ascending: true
+    csv_export:
+      path: "data/output/silver/chembl/tissue"
+  gold:
+    path: "data/output/gold/chembl/tissue"
+    sort_by:
+      columns: ["tissue_chembl_id", "pref_name"]
+      ascending: true
+    csv_export:
+      path: "data/output/gold/chembl/tissue"
