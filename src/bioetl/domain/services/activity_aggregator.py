@@ -12,7 +12,7 @@ import math
 import statistics
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from bioetl.domain.value_objects.activity_values import (
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from bioetl.domain.services.normalization_config import NormalizationConfig
 
 
-class AggregationMethod(StrEnum):
+class AggregationMethod(str, Enum):
     """Supported aggregation methods for bioactivity values."""
 
     MEAN = "mean"

@@ -261,9 +261,7 @@ def extract_imports(tree: ast.AST) -> list[tuple[str, int, str | None]]:
     return imports
 
 
-def find_unused_imports(
-    paths: Iterable[Path],
-) -> tuple[list[UnusedImport], dict[Path, int]]:
+def find_unused_imports(paths: Iterable[Path]) -> tuple[list[UnusedImport], dict[Path, int]]:
     unused: list[UnusedImport] = []
     per_file: dict[Path, int] = {}
     for path in paths:

@@ -6,14 +6,14 @@ Contains enums and data classes shared across detection strategies.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum, StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-class AnomalyType(StrEnum):
+class AnomalyType(str, Enum):
     """Types of anomalies that can be detected."""
 
     SPIKE = "spike"  # Value much higher than baseline
@@ -22,7 +22,7 @@ class AnomalyType(StrEnum):
     TREND_CHANGE = "trend_change"  # Significant trend deviation
 
 
-class AnomalySeverity(StrEnum):
+class AnomalySeverity(str, Enum):
     """Severity levels for anomalies."""
 
     LOW = "low"  # Within 2-3 std deviations

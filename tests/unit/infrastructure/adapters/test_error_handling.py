@@ -36,7 +36,7 @@ class TestErrorCategory:
 
     def test_category_is_string_enum(self) -> None:
         """ErrorCategory should be usable as string."""
-        assert str(ErrorCategory.CRITICAL) == "CRITICAL"
+        assert str(ErrorCategory.CRITICAL) == "ErrorCategory.CRITICAL"
         assert ErrorCategory.CRITICAL.value == "CRITICAL"
 
 

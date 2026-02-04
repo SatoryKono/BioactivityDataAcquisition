@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum, StrEnum
+from enum import Enum
 from typing import Any
 from uuid import UUID
 
@@ -52,7 +52,7 @@ def _safe_json(val: Any) -> str | None:
     return serialize_to_json(val) if val else None
 
 
-class BioactivityState(StrEnum):
+class BioactivityState(str, Enum):
     """Processing state: RAW -> NORMALIZED -> VALIDATED."""
 
     RAW = "raw"

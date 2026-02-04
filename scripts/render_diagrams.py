@@ -31,14 +31,10 @@ def render_with_mmdc(input_path: Path, output_path: Path, width: int = 1200) -> 
         result = subprocess.run(
             [
                 "mmdc",
-                "-i",
-                str(input_path),
-                "-o",
-                str(output_path),
-                "-w",
-                str(width),
-                "-b",
-                "transparent",
+                "-i", str(input_path),
+                "-o", str(output_path),
+                "-w", str(width),
+                "-b", "transparent",
             ],
             capture_output=True,
             text=True,
@@ -49,9 +45,7 @@ def render_with_mmdc(input_path: Path, output_path: Path, width: int = 1200) -> 
             return False
         return True
     except FileNotFoundError:
-        print(
-            "  Error: mmdc not found. Install with: npm install -g @mermaid-js/mermaid-cli"
-        )
+        print("  Error: mmdc not found. Install with: npm install -g @mermaid-js/mermaid-cli")
         return False
     except subprocess.TimeoutExpired:
         print("  Error: Rendering timeout")
@@ -95,14 +89,12 @@ def main():
         help="Rendering method (default: auto)",
     )
     parser.add_argument(
-        "-f",
-        "--files",
+        "-f", "--files",
         nargs="+",
         help="Specific files to render (glob patterns supported)",
     )
     parser.add_argument(
-        "-w",
-        "--width",
+        "-w", "--width",
         type=int,
         default=1200,
         help="Output width in pixels (default: 1200)",

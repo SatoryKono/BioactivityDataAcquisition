@@ -319,8 +319,8 @@ class TestBatchExecutorDQCollection:
         # Create executor (partial mock)
         executor = MagicMock()
         executor._services = services
-        executor._should_collect_dq_data = lambda: (
-            executor._services.dq_report_service is not None
+        executor._should_collect_dq_data = (
+            lambda: executor._services.dq_report_service is not None
         )
 
         assert executor._should_collect_dq_data() is True
@@ -334,8 +334,8 @@ class TestBatchExecutorDQCollection:
 
         executor = MagicMock()
         executor._services = services
-        executor._should_collect_dq_data = lambda: (
-            executor._services.dq_report_service is not None
+        executor._should_collect_dq_data = (
+            lambda: executor._services.dq_report_service is not None
         )
 
         assert executor._should_collect_dq_data() is False
@@ -349,8 +349,8 @@ class TestBatchExecutorDQCollection:
 
         executor = MagicMock()
         executor._services = services
-        executor._should_collect_dq_data = lambda: (
-            executor._services.dq_report_service is not None
+        executor._should_collect_dq_data = (
+            lambda: executor._services.dq_report_service is not None
         )
         executor.get_dq_context = lambda: (
             None if not executor._should_collect_dq_data() else MagicMock()

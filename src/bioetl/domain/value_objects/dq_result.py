@@ -12,11 +12,11 @@ Note:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum, StrEnum
+from enum import Enum
 from typing import Any
 
 
-class DQEvaluationStatus(StrEnum):
+class DQEvaluationStatus(str, Enum):
     """Status of Data Quality evaluation.
 
     Represents the outcome of DQ threshold checks during pipeline execution.

@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum, StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import InvalidStateError
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 from bioetl.domain.types import BatchID, ContentHash, RunID
 
 
-class QuarantineStatus(StrEnum):
+class QuarantineStatus(str, Enum):
     """Status of a quarantine entry."""
 
     NEW = "new"

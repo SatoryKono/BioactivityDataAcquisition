@@ -16,10 +16,10 @@ DEPENDENCIES_COMPLETED).
 from __future__ import annotations
 
 from collections.abc import Mapping
-from enum import Enum, StrEnum
+from enum import Enum
 
 
-class CompositePipelineState(StrEnum):
+class CompositePipelineState(str, Enum):
     """State of composite pipeline execution.
 
     States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, DEPENDENCIES_RUNNING,
