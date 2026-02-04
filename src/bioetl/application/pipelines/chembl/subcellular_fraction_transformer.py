@@ -144,7 +144,9 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
             Entity ID string (first 16 chars of SHA256 hex digest).
 
         """
-        normalized = subcellular_fraction.lower().strip() if subcellular_fraction else ""
+        normalized = (
+            subcellular_fraction.lower().strip() if subcellular_fraction else ""
+        )
         composite = f"subcellular_fraction:{normalized}"
         return hashlib.sha256(composite.encode()).hexdigest()[:16]
 
@@ -177,7 +179,9 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
 
         return {
             "subcellular_fraction": fraction,
-            "example_assay_chembl_id": str(assay_chembl_id) if assay_chembl_id else None,
+            "example_assay_chembl_id": str(assay_chembl_id)
+            if assay_chembl_id
+            else None,
             "assay_count": 1,
         }
 

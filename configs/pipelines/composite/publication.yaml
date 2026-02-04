@@ -374,9 +374,10 @@ composite:
           - references
           - tldr
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-    output:
-      silver: data/output/silver/composite/publication
-      gold: data/output/gold/composite/publication
+
+    # Note: output paths auto-computed per ADR-029 convention-based resolution
+    # silver: data/output/silver/composite/publication (auto)
+    # gold: data/output/gold/composite/publication (auto)
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration

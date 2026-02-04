@@ -12,8 +12,10 @@
     - chembl_publication
     - chembl_publication_similarity
     - chembl_publication_term
+    - chembl_subcellular_fraction
     - chembl_target
     - chembl_target_component
+    - chembl_tissue
     - crossref_publication
     - openalex_publication
     - pubchem_compound
