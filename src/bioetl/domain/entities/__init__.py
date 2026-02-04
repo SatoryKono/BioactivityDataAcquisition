@@ -48,6 +48,7 @@ from bioetl.domain.entities.chembl_structures import (
     Target,
     TargetComponent,
 )
+from bioetl.domain.entities.chembl_tissue import Tissue
 
 # CrossRef DTO + Entity
 from bioetl.domain.entities.crossref import (
@@ -111,5 +112,6 @@ __all__ = [
     "TargetComponent",
     "TargetComponentRecord",
     "TargetRecord",
+    "Tissue",
     "UniprotTarget",
 ]
