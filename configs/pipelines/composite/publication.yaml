@@ -309,6 +309,7 @@ composite:
           - publisher
           - publication_year
           - title
+          - venue
           - volume
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
       - name: author_and_affiliation
@@ -341,12 +342,8 @@ composite:
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
       - name: topics_and_keywords
         fields:
-          - chemical_count
-          - chemicals
           - citation_subset
-          - databanks
           - fwci
-          - gene_symbols
           - keyword_count
           - mesh_heading_count
           - primary_topic
@@ -355,6 +352,16 @@ composite:
           - subject_mesh
           - subject_topics
         provider_order: [crossref, openalex, pubmed, semanticscholar, chembl]
+      # === Biomedical / PubMed-specific fields ===
+      - name: biomedical
+        fields:
+          - chemical_count
+          - chemicals
+          - databanks
+          - gene_symbols
+          - grant_count
+          - grants
+        provider_order: [pubmed, openalex, crossref]
       - name: publication
         fields:
           - citation_contexts
@@ -362,8 +369,6 @@ composite:
           - citations_received
           - content_domain_crossmark_restriction
           - content_domain_domains
-          - grant_count
-          - grants
           - influential_citation_count
           - is_oa
           - is_retracted

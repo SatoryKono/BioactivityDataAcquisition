@@ -246,7 +246,6 @@ class TestFieldToGroupMapping:
         expected_fields = {
             "content_hash",
             "language",
-            "grants",
             "fwci",
             "src_id",
             "dblp_id",
@@ -342,10 +341,10 @@ class TestFieldGroupConfig:
         assert "title" in gold_columns
         assert "doi" in gold_columns
         assert "authors" in gold_columns
+        assert "grants" in gold_columns  # Now in CITATIONS_AND_REFERENCE
         assert "content_hash" not in gold_columns
         assert "language" not in gold_columns
-        assert "grants" not in gold_columns
-        assert len(gold_columns) == 3
+        assert len(gold_columns) == 4
 
     def test_get_trash_columns(self) -> None:
         """get_trash_columns() returns excluded columns."""
