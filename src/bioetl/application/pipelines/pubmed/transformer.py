@@ -104,6 +104,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             data_normalizer=data_normalizer,
         )
         self._cached_xml_root = None
+        # Instantiate extractors once to avoid repeated object creation overhead
+        self._author_extractor = AuthorExtractor()
+        self._date_extractor = DateExtractor()
 
     def _pre_extract_validation(
         self,
@@ -249,7 +252,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     ) -> dict[str, Any]:
         """Extract and process author-related fields from article XML."""
         normalized_authors = (
-            AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
+            self._author_extractor.normalize(raw_author_data) if raw_author_data else []
         )
         hashed_authors = self.hash_pii_list(normalized_authors) or []
 
@@ -259,14 +262,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Unique affiliations across all authors
         affiliation_values: list[str] = []
+        # Structured affiliations deduplicated by text
+        seen_structured_texts: dict[str, StructuredAffiliation] = {}
+
         for author in raw_author_data:
-            affiliation_values.extend(
-                aff for aff in (author.get("affiliations") or []) if aff
-            )
+            # Collect simple affiliations
+            if affs := author.get("affiliations"):
+                affiliation_values.extend(aff for aff in affs if aff)
+
+            # Collect structured affiliations (already parsed in raw_author_data)
+            if struct_affs := author.get("structured_affiliations"):
+                for aff in struct_affs:
+                    text = aff.get("text", "")
+                    if text and text not in seen_structured_texts:
+                        seen_structured_texts[text] = aff
+
         unique_affiliations = sorted(set(affiliation_values))
 
-        # Structured affiliations with identifiers
-        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
+        # Sort structured affiliations by text for consistency (same as AuthorExtractor logic)
+        structured_affs = sorted(
+            seen_structured_texts.values(), key=lambda x: x.get("text", "")
+        )
+
         processed = self._process_structured_affiliations(structured_affs)
 
         return {
@@ -333,7 +350,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         medline = root.find(".//MedlineCitation")
         pubmed_data = root.find(".//PubmedData")
 
-        raw_author_data = AuthorExtractor().extract(article) or []
+        raw_author_data = self._author_extractor.extract(article) or []
 
         return {
             **identifiers,
@@ -562,6 +579,36 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         return None
 
+    def _extract_date_helper(
+        self, node: ET.Element | None
+    ) -> tuple[str | None, int | None]:
+        """Helper to extract date using the instance extractor.
+
+        Replaces DateExtractor.extract_date(node) class method call
+        to avoid repeated instantiation.
+        """
+        raw = self._date_extractor.extract(node)
+        if raw is None:
+            return None, None
+        normalized = self._date_extractor.normalize(raw)
+        return normalized["date_str"], normalized["year_int"]
+
+    def _extract_article_date_helper(
+        self, article_node: ET.Element | None, date_type: str
+    ) -> str | None:
+        """Helper to extract article date by type using the instance extractor.
+
+        Replaces DateExtractor.extract_article_date(...) to avoid overhead.
+        """
+        if article_node is None:
+            return None
+
+        for date_node in article_node.findall(".//ArticleDate"):
+            if date_node.get("DateType") == date_type:
+                date_str, _ = self._extract_date_helper(date_node)
+                return date_str
+        return None
+
     def _parse_month_day(
         self, pub_date_node: ET.Element | None
     ) -> tuple[int | None, int | None]:
@@ -574,7 +621,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             return None, None
 
         # Use DateExtractor logic to support MedlineDate parsing
-        raw_date = DateExtractor().extract(pub_date_node)
+        raw_date = self._date_extractor.extract(pub_date_node)
         if not raw_date:
             return None, None
 
@@ -634,14 +681,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         journal = article.find(".//Journal")
         journal_issue = journal.find("JournalIssue") if journal else None
         pub_date_node = journal_issue.find("PubDate") if journal_issue else None
-        raw_pub_date, raw_year = DateExtractor.extract_date(pub_date_node)
+        raw_pub_date, raw_year = self._extract_date_helper(pub_date_node)
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
 
         year_vo = PublicationYear.from_raw(raw_year)
         validated_year = year_vo.value if year_vo else None
 
-        raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
+        raw_epub_date = self._extract_article_date_helper(article, "Electronic")
 
         # Validate date formats before passing to _compute_publication_date.
         # Invalid dates (e.g., "2024-13-99", "n/a") are set to None to ensure
@@ -655,12 +702,12 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Extract MEDLINE indexing dates from MedlineCitation element
         date_completed, _ = (
-            DateExtractor.extract_date(medline.find("DateCompleted"))
+            self._extract_date_helper(medline.find("DateCompleted"))
             if medline is not None
             else (None, None)
         )
         date_revised, _ = (
-            DateExtractor.extract_date(medline.find("DateRevised"))
+            self._extract_date_helper(medline.find("DateRevised"))
             if medline is not None
             else (None, None)
         )
