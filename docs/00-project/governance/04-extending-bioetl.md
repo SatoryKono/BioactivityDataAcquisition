@@ -15,6 +15,7 @@
 
 - [ ] Создать entity config в `configs/pipelines/<provider>/<entity>.yaml`
 - [ ] Валидировать через `_schema.json`
+- [ ] Выбрать каноническое имя согласно [02-naming-policy.md](02-naming-policy.md)
 - [ ] Создать трансформер в `src/bioetl/application/pipelines/`
 - [ ] Зарегистрировать в `PipelineRegistry`
 - [ ] Добавить фабрику (при необходимости)
@@ -33,53 +34,8 @@
 #
 # Inherits defaults from ../_defaults.yaml:
 # - dq_rules, circuit_breaker, sink structure, maintenance, input_filter
-
-pipeline_name: <provider>_<entity>
-provider: <provider>
-entity_type: <entity>
-version: "1.0.0"
-description: "Extract <entity> records from <Provider> API"
-
-primary_keys: ["<entity>_id"]
-silver_table: "<provider>_<entity>"
-gold_table: "<provider>_<entity>"
-
-# Reference to source configuration file
-source_file: ../../sources/<provider>.yaml
-
-# Entity-specific gold filters (SHOULD define)
-gold_filters:
-  required_fields:
-    - <required_field_1>
-    - <required_field_2>
-  columns: {}
-  ranges: {}
-
-# Entity-specific sink overrides (paths and primary_key)
-# MUST: Include sort_by for determinism (ADR-014)
-sink:
-  bronze:
-    path: "data/output/bronze/<provider>/<entity>"
-  silver:
-    path: "data/output/silver/<provider>/<entity>"
-    primary_key: ["<entity>_id"]
-    partition_by: []
-    sort_by:
-      columns: ["<entity>_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/csv/silver/<provider>/<entity>"
-  gold:
-    path: "data/output/gold/<provider>/<entity>"
-    sort_by:
-      columns: ["<entity>_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/csv/gold/<provider>/<entity>"
-
-# Input filter (optional)
-input_filter:
-  enabled: false
+#
+# IMPORTANT: Use Canonical Terms from 02-naming-policy.md
 ```
 
 ### 2.2. Обязательные поля

@@ -332,9 +332,9 @@ composite:
       - uniprot.protein.organism_scientific  # Use ChEMBL organism
       - uniprot.protein.organism_common     # Use ChEMBL organism
 
-    output:
-      silver: data/output/silver/composite/target
-      gold: data/output/gold/composite/target
+    # Note: output paths auto-computed per ADR-029 convention-based resolution
+    # silver: data/output/silver/composite/target (auto)
+    # gold: data/output/gold/composite/target (auto)
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration

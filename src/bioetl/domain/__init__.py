@@ -93,10 +93,12 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     PublicationRecord,
     # SemanticScholar
     SemanticScholarPublicationEntity,
+    SubcellularFraction,
     Target,
     TargetComponent,
     TargetComponentRecord,
     TargetRecord,
+    Tissue,
     UniprotTarget,
 )
 
@@ -400,8 +402,10 @@ __all__ = [
     "PublicationEntityBase",
     # SemanticScholar
     "SemanticScholarPublicationEntity",
+    "SubcellularFraction",
     "Target",
     "TargetComponent",
+    "Tissue",
     "UniprotTarget",
     # Error classifier
     "ErrorClassifier",
