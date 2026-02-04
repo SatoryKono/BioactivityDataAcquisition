@@ -103,7 +103,7 @@ class FieldSpec:
     Example:
         >>> spec = FieldSpec("molecule_id", target="molecule_chembl_id", converter=str)
         >>> spec = FieldSpec("value", converter=FLOAT, required=True)
-        >>> spec = FieldSpec("description", default="N/A")
+        >>> spec = FieldSpec("description", default="Unknown")
     """
 
     source: str

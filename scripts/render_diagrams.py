@@ -108,9 +108,9 @@ def main():
     args = parser.parse_args()
 
     # Find diagram directory
-    script_dir = Path(__file__).parent
+    script_dir = Path("docs/02-architecture/diagrams/mermaid")
     if not script_dir.exists():
-        script_dir = Path("docs/architecture/diagrams")
+        script_dir = Path(__file__).parent
 
     # Find mermaid files
     if args.files:

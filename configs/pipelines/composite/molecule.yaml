@@ -36,7 +36,7 @@ composite:
     pipeline: chembl_molecule
     output_keys:
       - molecule_chembl_id  # Primary key
-      - inchi_key           # Join key 1 (IUPAC standard, preferred)
+      - inchikey            # Join key 1 (IUPAC standard, preferred)
       - canonical_smiles    # Join key 2 (fallback)
       - pref_name           # For logging/debugging
     # Note: chembl_molecule uses flat_structure, so table is in path directly
@@ -58,10 +58,10 @@ composite:
     # OPTIONAL: Failure logged, composite continues (graceful degradation)
     - pipeline: pubchem_compound
       join_keys:
-        - inchi_key          # Primary join key (IUPAC standard) - uses seed field name
+        - inchikey           # Primary join key (IUPAC standard) - uses seed field name
         - canonical_smiles   # Fallback key (less reliable)
       required: false        # Graceful degradation - seed data preserved on failure
-      filter_condition: "inchi_key IS NOT NULL"  # Only join records with structure
+      filter_condition: "inchikey IS NOT NULL"  # Only join records with structure
       timeout_seconds: 3600
       silver_table: silver/pubchem/compound
 
@@ -179,8 +179,7 @@ composite:
         fields:
           - molecule_chembl_id   # ChEMBL primary key
           - cid                  # PubChem CID
-          - inchi_key            # ChEMBL field name
-          - inchikey             # PubChem field name
+          - inchikey             # Standard InChIKey (both ChEMBL and PubChem)
           - inchi
           - standard_inchi
         provider_order: [chembl, pubchem]

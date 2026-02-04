@@ -188,33 +188,55 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         pa.field("accession", pa.string()),  # Primary UniProt accession
+        pa.field("acetylation", pa.string()),  # PTM: acetylation sites
         pa.field("active_sites", pa.string()),  # JSON: ft_act_site features
         pa.field("activity_regulation", pa.string()),  # cc_activity_regulation
         pa.field("annotation_score", pa.int64()),  # Quality score 1-5
         pa.field("binding_sites", pa.string()),  # JSON: ft_binding features
         pa.field("catalytic_activity", pa.string()),  # cc_catalytic_activity
+        pa.field("cellular_component", pa.string()),  # GO aspect C
         pa.field("chembl_ids", pa.string()),  # ChEMBL target cross-refs (JSON array)
         pa.field("disease_involvement", pa.string()),  # cc_disease
+        pa.field("disulfide_bond", pa.string()),  # PTM: disulfide bonds
         pa.field("domains", pa.string()),  # JSON: ft_domain features
         pa.field("drugbank_ids", pa.string()),  # DrugBank cross-refs (JSON array)
         pa.field("entry_name", pa.string()),  # UniProt entry name (e.g., FA10_HUMAN)
         pa.field("features_json", pa.string()),  # All features combined (forensic)
         pa.field("function_comment", pa.string()),  # cc_function
         pa.field("gene_names", pa.list_(pa.string())),  # Gene name synonyms
+        pa.field("genus", pa.string()),  # Taxonomy: genus
+        pa.field("glycosylation", pa.string()),  # PTM: glycosylation sites
         pa.field("go_terms", pa.string()),  # GO annotations (JSON array)
         pa.field("interpro_xrefs", pa.string()),  # InterPro domain IDs (JSON array)
+        pa.field("intramembrane", pa.string()),  # Structural: intramembrane regions
+        pa.field("isoform_ids", pa.string()),  # Isoform IDs (e.g., P12345-2)
+        pa.field("isoform_names", pa.string()),  # Isoform names
+        pa.field("isoform_synonyms", pa.string()),  # Isoform synonyms
+        pa.field("lipidation", pa.string()),  # PTM: lipidation sites
+        pa.field("modified_residue", pa.string()),  # PTM: all modified residues
+        pa.field("molecular_function", pa.string()),  # GO aspect F
         pa.field("organism_id", pa.int64()),  # NCBI Taxonomy ID
         pa.field("pathway", pa.string()),  # cc_pathway
         pa.field("pdb_xrefs", pa.string()),  # PDB structure IDs (JSON array)
         pa.field("pfam_xrefs", pa.string()),  # Pfam family IDs (JSON array)
+        pa.field("phosphorylation", pa.string()),  # PTM: phosphorylation sites
+        pa.field("phylum", pa.string()),  # Taxonomy: phylum
+        pa.field("propeptide", pa.string()),  # Structural: propeptide
         pa.field("protein_existence", pa.string()),  # Evidence level string
         pa.field("protein_name", pa.string()),  # Recommended protein name
+        pa.field("reaction_ec_numbers", pa.string()),  # EC numbers from reactions
+        pa.field("reactions", pa.string()),  # Reaction names from catalytic activity
         pa.field("reactome_xrefs", pa.string()),  # Reactome pathway IDs (JSON array)
         pa.field("reviewed", pa.bool_()),  # Swiss-Prot (true) vs TrEMBL (false)
         pa.field("sequence_length", pa.int64()),  # Protein sequence length
+        pa.field("signal_peptide", pa.string()),  # Structural: signal peptide
         pa.field("similarity_comment", pa.string()),  # cc_similarity
         pa.field("subcellular_location", pa.string()),  # cc_subcellular_location
+        pa.field("superkingdom", pa.string()),  # Taxonomy: superkingdom
         pa.field("tissue_specificity", pa.string()),  # cc_tissue_specificity
+        pa.field("topology", pa.string()),  # Structural: topological domains
+        pa.field("transmembrane", pa.string()),  # Structural: transmembrane regions
+        pa.field("ubiquitination", pa.string()),  # PTM: ubiquitination sites
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
@@ -552,7 +574,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("hierarchy_active_chembl_id", pa.string()),
         pa.field("hierarchy_child_chembl_id", pa.string()),
         pa.field("hierarchy_parent_chembl_id", pa.string()),
-        pa.field("inchi_key", pa.string()),
+        pa.field("inchikey", pa.string()),  # Standard InChIKey (matches domain schema)
         pa.field("inorganic_flag", pa.int64()),
         pa.field("max_phase", pa.int64()),
         pa.field("molecule_chembl_id", pa.string()),

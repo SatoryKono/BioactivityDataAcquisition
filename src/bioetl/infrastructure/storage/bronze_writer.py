@@ -56,7 +56,7 @@ class BronzeWriter:
 
     COMPRESSION_CHUNK_SIZE = 256 * 1024
     COMPRESSION_LEVEL = 3
-    COMPRESSION_THREADS = -1
+    COMPRESSION_THREADS = -1  # zstd: auto-detect available CPU cores
 
     def __init__(
         self,

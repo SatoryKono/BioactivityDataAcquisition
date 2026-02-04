@@ -77,6 +77,51 @@ entity_field_validations:
     nullable: true
     error_message: "PDB xrefs list cannot be empty if present"
 
+  # === GO Components (JSON arrays) ===
+  - field: molecular_function
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "molecular_function must be JSON array"
+
+  - field: cellular_component
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "cellular_component must be JSON array"
+
+  # === Isoform Details (JSON arrays) ===
+  - field: isoform_ids
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "isoform_ids must be JSON array"
+
+  - field: isoform_names
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "isoform_names must be JSON array"
+
+  - field: isoform_synonyms
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "isoform_synonyms must be JSON array"
+
+  # === Reaction Data (JSON arrays) ===
+  - field: reactions
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "reactions must be JSON array"
+
+  - field: reaction_ec_numbers
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "reaction_ec_numbers must be JSON array"
+
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================

@@ -29,12 +29,12 @@ DOC_VERSION_PATTERNS = [
 
 # Документы, которые MUST быть синхронизированы с RULES.md
 # Исключаем: archived/, audits/ (исторические), __-prompts/ (шаблоны)
-# Note: docs/00-project_rules/ был консолидирован в docs/quick-reference/ и docs/03-guides/
+# Note: docs restructured to 00-project, 01-requirements, etc.
 REQUIRED_SYNC_DOCS = [
-    "CLAUDE.md",
-    "docs/00-map.md",
-    "docs/REQUIREMENTS.md",
-    "docs/quick-reference/rules-summary.md",
+    "docs/00-project/agents/CLAUDE.md",
+    "docs/00-project/00-map.md",
+    "docs/01-requirements/REQUIREMENTS.md",
+    "docs/00-project/rules-summary.md",
     "docs/03-guides/cleanup-policy.md",
     "docs/02-architecture/00-overview.md",
 ]
@@ -51,8 +51,8 @@ def get_project_root() -> Path:
 
 
 def extract_rules_version(project_root: Path) -> str:
-    """Извлечь версию из docs/RULES.md."""
-    rules_path = project_root / "docs" / "RULES.md"
+    """Извлечь версию из docs/00-project/RULES.md."""
+    rules_path = project_root / "docs" / "00-project" / "RULES.md"
     if not rules_path.exists():
         raise FileNotFoundError(f"RULES.md not found at {rules_path}")
 
@@ -103,7 +103,7 @@ class TestDocsVersionSync:
 
         REQ-DOC-010: CLAUDE.md является основным справочником для агента.
         """
-        claude_md = project_root / "CLAUDE.md"
+        claude_md = project_root / "docs" / "00-project" / "agents" / "CLAUDE.md"
         assert claude_md.exists(), "CLAUDE.md not found"
 
         content = claude_md.read_text(encoding="utf-8")
@@ -272,7 +272,7 @@ class TestVersionFormat:
 
         Формат: *Версия: X.Y (описание), YYYY-MM-DD*
         """
-        rules_path = project_root / "docs" / "RULES.md"
+        rules_path = project_root / "docs" / "00-project" / "RULES.md"
         content = rules_path.read_text(encoding="utf-8")
 
         # Полный паттерн заголовка

@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.10.0] - 2026-02-04
+
+### Added
+
+- **UniProt Extended Field Extraction**: Added 22 new fields to UniProt protein pipeline:
+  - **Taxonomy Components**: `superkingdom`, `phylum`, `genus` (parsed from organism.lineage)
+  - **GO Components**: `molecular_function`, `cellular_component` (filtered by aspect F/C)
+  - **Structural Features**: `topology`, `transmembrane`, `intramembrane`, `signal_peptide`, `propeptide`
+  - **PTM Features**: `glycosylation`, `lipidation`, `disulfide_bond`, `modified_residue`, `phosphorylation`, `acetylation`, `ubiquitination`
+  - **Isoform Details**: `isoform_names`, `isoform_ids`, `isoform_synonyms` (parsed from ALTERNATIVE PRODUCTS)
+  - **Reaction Data**: `reactions`, `reaction_ec_numbers` (parsed from CATALYTIC ACTIVITY)
+
+- **New UniProt Extractors**:
+  - `TaxonomyExtractor`: Extracts taxonomy lineage components (superkingdom, phylum, genus)
+  - Extended `CrossRefExtractor`: Added `extract_go_by_aspect()`, `extract_molecular_function()`, `extract_cellular_component()`
+  - Extended `FeatureExtractor`: Added `extract_features_by_type()` with 9 structural methods + 4 PTM methods
+  - Extended `CommentExtractor`: Added `extract_isoform_details()`, `extract_reactions()`, `extract_reaction_ec_numbers()`
+
+- **DQ Validations**: Added JSON array pattern validations for new fields in `configs/dq/entities/uniprot/protein.yaml`
+
+### Changed
+
+- **Schema Updates**:
+  - `UniprotTargetSchema` (Pandera): Added 22 new nullable fields
+  - `UniprotTarget` (dataclass): Added 22 new attributes
+  - `UNIPROT_PROTEIN_SCHEMA` (PyArrow): Added 22 new `pa.string()` fields in alphabetical order
+
 ## [5.9.0] - 2026-01-06
 
 ### Changed

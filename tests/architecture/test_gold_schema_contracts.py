@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 # Path relative to project root
-CONTRACTS_DIR = Path("docs/contracts/gold")
+CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
 
 # Required Gold schema contracts with version 1.0
 # Note: Using sorted tuple for deterministic pytest-xdist test collection order

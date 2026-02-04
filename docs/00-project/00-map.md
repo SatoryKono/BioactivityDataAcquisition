@@ -39,98 +39,49 @@
 
 ```
 docs/
-├── 00-map.md                    # This file (Project Navigator)
-├── index.md                     # Welcome page
-├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.17)
-├── REQUIREMENTS.md              # 156 testable requirements
+├── 00-project/                  # Project rules & governance
+│   ├── 00-map.md                # This file (Project Navigator)
+│   ├── index.md                 # Welcome page
+│   ├── RULES.md                 # Canonical rules document (v5.17)
+│   ├── glossary.md              # Ubiquitous Language terminology
+│   ├── TOOLS.md                 # Tools & Setup
+│   ├── rules-summary.md         # TL;DR of RULES.md
+│   └── governance/              # Project governance policies
+│       ├── 03-file-policy.md
+│       └── 04-extending-bioetl.md
 │
-├── 00-project-rules/            # Project governance
-│   ├── 03-file-policy.md        # File/directory structure
-│   └── 04-extending-bioetl.md   # How to add providers/pipelines
+├── 01-requirements/             # Requirements
+│   └── REQUIREMENTS.md          # 156 testable requirements
 │
-├── quick-reference/             # Quick reference documents
-│   └── rules-summary.md         # TL;DR of RULES.md
+├── 02-architecture/             # Architecture & Decisions
+│   ├── 00-overview.md           # Architecture overview
+│   ├── decisions/               # ADRs (ADR-001..032)
+│   ├── diagrams/                # System diagrams
+│   │   └── mermaid/             # Mermaid source files
+│   └── ... (Layer docs: 01-domain, 02-application, etc.)
 │
-├── 02-architecture/             # System architecture
-│   ├── 00-overview.md           # Architecture overview & navigation
-│   ├── 01-domain-layer.md       # Domain layer architecture
-│   ├── 02-application-layer.md  # Application layer architecture
-│   ├── 03-infrastructure-layer.md # Infrastructure layer architecture
-│   ├── 04-interfaces-layer.md   # Interfaces layer architecture
-│   ├── 05-composition-layer.md  # Composition layer (DI) architecture
-│   ├── system-context.md        # C4 System Context Diagram
-│   ├── container-diagram.md     # C4 Container Diagram
-│   ├── data-flow.md             # High-level Medallion data flow
-│   ├── data-layers.md           # Bronze/Silver/Gold layer details
-│   ├── observability-layers.md  # Observability architecture
-│   ├── diagrams.md              # Mermaid diagrams collection
-│   ├── decisions/               # ADR-001..032 (32 records)
-│   └── diagrams/                # 34 диаграммы .mermaid + supporting docs (index/policy) + render_diagrams.py
+├── 03-guides/                   # Guides & Manuals
+│   ├── development/             # Developer guides (config schema, etc.)
+│   ├── quick-ref/               # Quick reference cheat sheets
+│   └── ... (User guides: getting-started, testing, etc.)
 │
-├── 03-guides/                   # How-to guides (16 guides)
-│   ├── add-new-source.md        # Adding new provider
-│   ├── add-pipeline-existing-source.md  # Adding pipeline to existing provider
-│   ├── cleanup-policy.md        # Storage cleanup policy
-│   ├── date-handling.md         # Date normalization guide
-│   ├── dq-configuration.md      # Data quality configuration
-│   ├── file-path-audit-report.md # File path audit report
-│   ├── getting-started.md       # Getting started
-│   ├── local-storage-layout.md  # Storage layout explanation
-│   ├── metrics-monitoring.md    # Metrics monitoring guide
-│   ├── pipeline-configuration.md # Pipeline configuration guide
-│   ├── pipeline-lifecycle.md    # Pipeline lifecycle
-│   ├── quick-start.md           # Quick start guide
-│   ├── registry-pattern.md      # Registry pattern guide
-│   ├── running-pipelines.md     # Running pipelines
-│   ├── testing.md               # Testing guide
-│   └── troubleshooting.md       # Troubleshooting
+├── 04-reference/                # Reference Documentation
+│   ├── api/                     # API Reference
+│   ├── cli.md                   # CLI Reference
+│   ├── providers/               # Provider documentation (ChEMBL, PubMed, etc.)
+│   ├── pipelines/               # Pipeline specifications
+│   ├── contracts/               # Data Contracts (Gold layer schemas)
+│   ├── schemas/                 # Auxiliary schemas & field maps
+│   └── templates/               # Code & doc templates
 │
-├── 03-development/              # Development notes
-│   └── config-schema-guidelines.md # Config schema guidelines
+├── 05-operations/               # Operations & Runbooks
+│   ├── runbooks/                # Incident response playbooks
+│   ├── verification/            # Data verification reports
+│   └── ... (Ops guides: vacuum, performance)
 │
-├── 03-data-contracts/           # Data contracts
-│   └── gold-schemas.md          # Gold layer schema documentation
-│
-├── 04-reference/                # Reference documentation
-│   ├── api/                     # API reference by layer
-|   │   ├── application/         # Application layer docs
-|   │   │   ├── core.md          # Core components
-|   │   │   └── services.md      # Application services
-│   ├── cli.md                   # CLI reference
-│   └── pipelines/               # Pipeline-specific reference
-│
-├── 05-operations/               # Operational runbooks
-│   ├── README.md                # Operations overview
-│   ├── runbooks/                # 16 incident response playbooks
-│   ├── performance-baselines.md # Performance metrics
-│   ├── vacuum-retention.md      # VACUUM retention policies
-│   └── RELEASE_CHECKLIST.md     # Release checklist
-│
-├── domain/schemas/              # Schema documentation
-│   └── chembl/                  # ChEMBL entity schemas (4 files)
-│
-├── providers/                   # Provider-specific documentation
-│   ├── README.md                # Provider overview
-│   ├── chembl/                  # ChEMBL (12 entities)
-│   ├── pubchem/                 # PubChem (1 entity)
-│   ├── uniprot/                 # UniProt (1 entity)
-│   ├── pubmed/                  # PubMed (1 entity)
-│   ├── crossref/                # CrossRef (1 entity)
-│   ├── openalex/                # OpenAlex (1 entity)
-│   └── semanticscholar/         # SemanticScholar (1 entity)
-│
-├── 03-pipelines/                # Legacy pipeline guides (superseded by docs/pipelines)
-│
-├── pipelines/                   # Pipeline specs and indexes (22 configs)
-│   ├── INDEX.md                 # Pipeline registry
-│   └── chembl/, crossref/, openalex/, pubchem/, pubmed/, semanticscholar/, uniprot/
-│
-├── contracts/gold/              # Gold layer JSON schemas (20 files)
-│
-├── verification/                # Data verification reports
-│
-└── templates/                   # Document & code templates
+└── 99-archive/                  # Archived / Deprecated
+    ├── reports/                 # Old project reports
+    └── ...
 ```
 
 ---
