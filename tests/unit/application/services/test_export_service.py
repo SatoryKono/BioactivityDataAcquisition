@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import pyarrow as pa
 
 from bioetl.application.services.export_service import (
-    ColumnInfo,
     ExportOptions,
-    ExportResult,
     ExportService,
-    TableInfo,
     TablePreview,
 )
 from bioetl.domain.ports import DeltaReaderPort, LoggerPort

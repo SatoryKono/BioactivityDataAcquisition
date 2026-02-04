@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 import pytest
 
@@ -68,7 +68,7 @@ def context():
     return DQReportContext(
         run_id=str(uuid4()),
         pipeline_name="test_pipeline",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         provider="test",
         entity="test",
         bronze_records=[b"record"],
