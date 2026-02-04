@@ -57,17 +57,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
 
-    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
-    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
-    # they propagate to _compute_publication_date.
-    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
-        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
-        # Partial month: YYYY-MM (with valid month 01-12)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
-        # Partial year: YYYY
-        re.compile(r"^\d{4}$"),
-    )
 
     def __init__(
         self,
@@ -104,43 +93,21 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             data_normalizer=data_normalizer,
         )
         self._cached_xml_root = None
-        # Instantiate extractors once to avoid repeated object creation overhead
         self._author_extractor = AuthorExtractor()
         self._date_extractor = DateExtractor()
 
     def _pre_extract_validation(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-        index: int,
+        self, context: PipelineContext, record: BronzeRecord, index: int
     ) -> None:
-        """Validate raw XML and parse it before extraction.
-
-        Parses the XML upfront and caches the root element. This allows
-        ET.ParseError to be caught and converted to ValueError, which
-        BaseTransformer.transform() handles gracefully.
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Raw Bronze record containing _raw_xml field.
-            index: Sequential index of the record (unused).
-
-        Raises:
-            ValueError: If _raw_xml is missing, empty, or malformed XML.
-
-        """
-        raw_xml = record.get("_raw_xml")
-        if not raw_xml or not isinstance(raw_xml, str):
+        """Validate raw XML and parse it before extraction."""
+        if not (raw_xml := record.get("_raw_xml")) or not isinstance(raw_xml, str):
             raise ValueError("Missing or invalid _raw_xml field")
 
         try:
             self._cached_xml_root = ET.fromstring(raw_xml)
         except ET.ParseError as e:
-            # Log the parse error with context
             context.logger.warning(
-                "XML_parse_error",
-                error=str(e),
-                pmid=record.get("pmid"),
+                "XML_parse_error", error=str(e), pmid=record.get("pmid")
             )
             raise ValueError(f"XML parse error: {e}") from e
 
@@ -164,7 +131,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         if not date_str:
             return False
-        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
+
+        # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
+        patterns = (
+            re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
+            re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
+            re.compile(r"^\d{4}$"),
+        )
+        return any(pattern.match(date_str) for pattern in patterns)
 
     def _extract_medline_metadata(
         self,
@@ -172,40 +146,30 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         pubmed_data: ET.Element | None,
     ) -> dict[str, Any]:
         """Extract MEDLINE-specific metadata."""
-        medline_info = medline.find("MedlineJournalInfo") if medline else None
-        citation_subsets = (
-            [get_text(cs) for cs in medline.findall("CitationSubset")]
-            if medline
-            else []
-        )
+        nlm_unique_id = None
+        country = None
+        citation_subset = None
 
-        pub_status = self._extract_publication_status(pubmed_data)
+        if medline is not None:
+            if info := medline.find("MedlineJournalInfo"):
+                nlm_unique_id = get_text(info.find("NlmUniqueID"))
+                country = get_text(info.find("Country"))
+
+            subsets = [get_text(cs) for cs in medline.findall("CitationSubset")]
+            if subsets:
+                citation_subset = ",".join(s for s in subsets if s)
+
+        pub_status = None
+        if pubmed_data is not None:
+            if status_elem := pubmed_data.find("PublicationStatus"):
+                pub_status = get_text(status_elem)
 
         return {
-            "nlm_unique_id": (
-                get_text(medline_info.find("NlmUniqueID"))
-                if medline_info is not None
-                else None
-            ),
-            "citation_subset": (
-                ",".join(cs for cs in citation_subsets if cs)
-                if citation_subsets
-                else None
-            ),
+            "nlm_unique_id": nlm_unique_id,
+            "citation_subset": citation_subset,
             "publication_status": pub_status,
-            "country": (
-                get_text(medline.find(".//MedlineJournalInfo/Country"))
-                if medline
-                else None
-            ),
+            "country": country,
         }
-
-    def _extract_publication_status(self, pubmed_data: ET.Element | None) -> str | None:
-        """Extract publication status from PubmedData."""
-        if pubmed_data is None:
-            return None
-        pub_status_elem = pubmed_data.find("PublicationStatus")
-        return get_text(pub_status_elem) if pub_status_elem is not None else None
 
     def _extract_counts(
         self,
@@ -213,15 +177,14 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         pubmed_data: ET.Element | None,
     ) -> dict[str, int]:
         """Extract grant and reference counts."""
-        grant_list = article.find(".//GrantList")
-        grant_count = len(grant_list.findall("Grant")) if grant_list is not None else 0
+        grant_count = 0
+        if (grant_list := article.find(".//GrantList")) is not None:
+            grant_count = len(grant_list.findall("Grant"))
 
-        ref_list = (
-            pubmed_data.find("ReferenceList") if pubmed_data is not None else None
-        )
-        reference_count = (
-            len(ref_list.findall(".//Reference")) if ref_list is not None else 0
-        )
+        reference_count = 0
+        if pubmed_data is not None:
+            if (ref_list := pubmed_data.find("ReferenceList")) is not None:
+                reference_count = len(ref_list.findall(".//Reference"))
 
         return {"grant_count": grant_count, "citations_made": reference_count}
 
@@ -247,22 +210,22 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "databanks": ClassificationExtractor.parse_databanks(medline),
         }
 
-    def _extract_author_block(
-        self, article: ET.Element, raw_author_data: list[RawAuthor]
-    ) -> dict[str, Any]:
-        """Extract and process author-related fields from article XML."""
-        normalized_authors = (
-            self._author_extractor.normalize(raw_author_data) if raw_author_data else []
-        )
-        hashed_authors = self.hash_pii_list(normalized_authors) or []
+    def _collect_affiliations(
+        self, raw_author_data: list[RawAuthor]
+    ) -> tuple[list[str], list[StructuredAffiliation]]:
+        """Collect and deduplicate affiliations from raw author data.
 
-        authors_with_affiliations = self._build_authors_with_affiliations(
-            raw_author_data
-        )
+        Extracts both simple string affiliations and structured affiliations.
+        Structured affiliations are deduplicated by text value.
 
-        # Unique affiliations across all authors
+        Args:
+            raw_author_data: List of raw author dicts.
+
+        Returns:
+            Tuple of (sorted list of unique affiliation strings,
+                      sorted list of unique StructuredAffiliation objects).
+        """
         affiliation_values: list[str] = []
-        # Structured affiliations deduplicated by text
         seen_structured_texts: dict[str, StructuredAffiliation] = {}
 
         for author in raw_author_data:
@@ -279,9 +242,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         unique_affiliations = sorted(set(affiliation_values))
 
-        # Sort structured affiliations by text for consistency (same as AuthorExtractor logic)
+        # Sort structured affiliations by text for consistency
         structured_affs = sorted(
             seen_structured_texts.values(), key=lambda x: x.get("text", "")
+        )
+
+        return unique_affiliations, structured_affs
+
+    def _extract_author_block(
+        self, article: ET.Element, raw_author_data: list[RawAuthor]
+    ) -> dict[str, Any]:
+        """Extract and process author-related fields from article XML."""
+        normalized_authors = (
+            self._author_extractor.normalize(raw_author_data) if raw_author_data else []
+        )
+        hashed_authors = self.hash_pii_list(normalized_authors) or []
+
+        authors_with_affiliations = self._build_authors_with_affiliations(
+            raw_author_data
+        )
+
+        unique_affiliations, structured_affs = self._collect_affiliations(
+            raw_author_data
         )
 
         processed = self._process_structured_affiliations(structured_affs)
@@ -304,11 +286,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _extract_identifiers(self, root: ET.Element) -> dict[str, Any]:
         """Extract and normalize all identifier fields from PubMed XML root."""
-        raw_pmid = get_text(root.find(".//PMID"))
-        pmid_vo = PubMedId.from_raw(raw_pmid)
-
-        raw_doi = IdentifierExtractor.extract_doi(root)
-        doi_vo = DOI.from_raw(raw_doi)
+        pmid_vo = PubMedId.from_raw(get_text(root.find(".//PMID")))
+        doi_vo = DOI.from_raw(IdentifierExtractor.extract_doi(root))
 
         return {
             "pmid": str(pmid_vo) if pmid_vo else None,
@@ -381,96 +360,60 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
     ) -> list[dict[str, Any]]:
-        """Process structured affiliations with PII handling for emails.
-
-        Email addresses in affiliations are PII and must be hashed before
-        storing in Silver layer (RULES.md §5.4).
-
-        Args:
-            affiliations: List of structured affiliation dicts.
-
-        Returns:
-            List of processed affiliation dicts with hashed emails.
-        """
+        """Process structured affiliations with PII handling for emails."""
         processed = []
         for aff in affiliations:
-            processed_aff: dict[str, Any] = {
+            email_hash = None
+            if (email := aff.get("email")) and self._pii_hasher:
+                email_hash = self._pii_hasher.hash_value(email)
+
+            processed.append({
                 "text": aff.get("text"),
                 "identifier": aff.get("identifier"),
                 "identifier_source": aff.get("identifier_source"),
                 "ror_id": aff.get("ror_id"),
                 "grid_id": aff.get("grid_id"),
-            }
-            # Hash email if present (PII protection)
-            email = aff.get("email")
-            if email and self._pii_hasher:
-                processed_aff["email_hash"] = self._pii_hasher.hash_value(email)
-            else:
-                processed_aff["email_hash"] = None
-
-            processed.append(processed_aff)
+                "email_hash": email_hash,
+            })
         return processed
 
     def _build_authors_with_affiliations(
         self, raw_authors: list[RawAuthor]
     ) -> list[dict[str, Any]]:
-        """Build structured author-affiliation mapping.
-
-        Links each author to their specific affiliations with identifiers.
-        Author names are hashed for PII compliance (RULES.md §5.4).
-
-        Args:
-            raw_authors: List of raw author dicts from AuthorExtractor.
-
-        Returns:
-            List of author objects with hashed names and affiliations.
-        """
+        """Build structured author-affiliation mapping."""
         result: list[dict[str, Any]] = []
 
         for author in raw_authors:
-            # Build author name for hashing
             last_name = author.get("last_name")
             initials = author.get("initials")
             fore_name = author.get("fore_name")
             collective = author.get("collective_name")
 
-            # Determine display name
             if last_name:
-                if initials:
-                    name = f"{last_name}, {initials}"
-                elif fore_name:
-                    name = f"{last_name}, {fore_name}"
-                else:
-                    name = last_name
+                name = f"{last_name}, {initials}" if initials else (f"{last_name}, {fore_name}" if fore_name else last_name)
             elif collective:
                 name = collective
             else:
-                continue  # Skip authors without any name
+                continue
 
-            # Hash the name for PII compliance
             name_hash = self._pii_hasher.hash_value(name) if self._pii_hasher else None
 
-            # Process affiliations for this author (use pre-computed ror_id/grid_id)
-            affiliations: list[dict[str, Any]] = []
-            structured_affs = author.get("structured_affiliations") or []
-
-            for aff in structured_affs:
-                aff_entry: dict[str, Any] = {
+            affiliations = [
+                {
                     "text": aff.get("text"),
                     "ror_id": aff.get("ror_id"),
                     "grid_id": aff.get("grid_id"),
                     "identifier": aff.get("identifier"),
                     "identifier_source": aff.get("identifier_source"),
                 }
-                affiliations.append(aff_entry)
+                for aff in (author.get("structured_affiliations") or [])
+            ]
 
-            result.append(
-                {
-                    "name_hash": name_hash,
-                    "initials": initials,
-                    "affiliations": affiliations,
-                }
-            )
+            result.append({
+                "name_hash": name_hash,
+                "initials": initials,
+                "affiliations": affiliations,
+            })
 
         return result
 
@@ -509,9 +452,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _extract_journal_data(self, article: ET.Element) -> dict[str, Any]:
         """Extract journal-related data from article XML."""
-        journal_elem = article.find(".//Journal")
         pages = get_text(article.find(".//Pagination/MedlinePgn"))
         first_page, last_page = parse_page_range(pages)
+        journal_elem = article.find(".//Journal")
 
         if not journal_elem:
             return {
@@ -529,18 +472,15 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             }
 
         journal_issue = journal_elem.find("JournalIssue")
-        journal_title = get_text(journal_elem.find("Title"))
-        journal_abbrev = get_text(journal_elem.find("ISOAbbreviation"))
         issn_elem = journal_elem.find("ISSN")
-        issn = get_text(issn_elem)
-        issn_type = issn_elem.get("IssnType") if issn_elem is not None else None
+        journal_abbrev = get_text(journal_elem.find("ISOAbbreviation"))
 
         return {
-            "journal": journal_title,
+            "journal": get_text(journal_elem.find("Title")),
             "journal_name_short": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
-            "journal_issn_type": issn_type,
-            "issn": issn,
+            "journal_issn_type": issn_elem.get("IssnType") if issn_elem is not None else None,
+            "issn": get_text(issn_elem),
             "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
             "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
             "page_range": pages,
@@ -552,19 +492,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _compute_publication_date(
         self, epub_date: str | None, pub_date: str | None, year: int | None
     ) -> str | None:
-        """Compute unified publication_date (YYYY-MM-DD).
-
-        Priority: epub_date > pub_date > year
-        All outputs normalized to full YYYY-MM-DD format using end-of-period strategy.
-
-        Args:
-            epub_date: Electronic publication date (YYYY-MM-DD or partial).
-            pub_date: Publication date (YYYY-MM-DD or partial).
-            year: Publication year.
-
-        Returns:
-            ISO date string (YYYY-MM-DD) or None.
-        """
+        """Compute unified publication_date (YYYY-MM-DD)."""
         # Priority 1: epub_date if it's a complete date
         if epub_date and len(epub_date) >= 10:
             return epub_date[:10]
@@ -582,11 +510,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _extract_date_helper(
         self, node: ET.Element | None
     ) -> tuple[str | None, int | None]:
-        """Helper to extract date using the instance extractor.
-
-        Replaces DateExtractor.extract_date(node) class method call
-        to avoid repeated instantiation.
-        """
+        """Helper to extract date using the instance extractor."""
         raw = self._date_extractor.extract(node)
         if raw is None:
             return None, None
@@ -596,10 +520,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _extract_article_date_helper(
         self, article_node: ET.Element | None, date_type: str
     ) -> str | None:
-        """Helper to extract article date by type using the instance extractor.
-
-        Replaces DateExtractor.extract_article_date(...) to avoid overhead.
-        """
+        """Helper to extract article date by type using the instance extractor."""
         if article_node is None:
             return None
 
@@ -612,11 +533,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _parse_month_day(
         self, pub_date_node: ET.Element | None
     ) -> tuple[int | None, int | None]:
-        """Extract month and day as integers from PubDate node.
-
-        Uses DateExtractor to handle both structured (Year/Month/Day)
-        and unstructured (MedlineDate) formats.
-        """
+        """Extract month and day as integers from PubDate node."""
         if pub_date_node is None:
             return None, None
 
@@ -691,8 +608,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         raw_epub_date = self._extract_article_date_helper(article, "Electronic")
 
         # Validate date formats before passing to _compute_publication_date.
-        # Invalid dates (e.g., "2024-13-99", "n/a") are set to None to ensure
-        # _compute_publication_date falls back to the next priority source.
         pub_date = raw_pub_date if self._is_valid_date_format(raw_pub_date) else None
         epub_date = raw_epub_date if self._is_valid_date_format(raw_epub_date) else None
 
