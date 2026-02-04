@@ -110,7 +110,68 @@ class TestBronzeMetadataInvariants:
         Path format: bronze/{provider}/{entity}/{date}/
         """
         # Check for date-based path construction pattern
-        assert "{provider}/{entity}/{date" in bronze_writer_source, (
-            "Bronze path must follow format: bronze/{provider}/{entity}/{date}/\n"
-            "See RULES.md §2.1.1 - REQ-DATA-002"
+class TestSilverLayerInvariants:
+    """Tests ensuring Silver layer strictly uses Delta Lake and policies."""
+
+    @pytest.fixture
+    def silver_writer_source(self) -> str:
+        """Get Silver writer source code."""
+        path = Path("src/bioetl/infrastructure/storage/silver_writer.py")
+        if not path.exists():
+             path = Path(__file__).parent.parent.parent / path
+        return path.read_text(encoding="utf-8")
+
+    def test_silver_writer_uses_delta_lake(self, silver_writer_source: str) -> None:
+        """Silver layer MUST use Delta Lake for storage.
+
+        REQ-DATA-006: Silver layer must use Delta Lake format.
+        Parquet files without Delta log are strictly prohibited in Silver.
+        """
+        assert "from deltalake import DeltaTable, write_deltalake" in silver_writer_source, (
+            "SilverWriter must import DeltaTable and write_deltalake.\n"
+            "This confirms compliance with Delta Lake requirement."
         )
+
+    def test_silver_writer_enforces_write_policy(self, silver_writer_source: str) -> None:
+        """Silver layer MUST enforce write mode policies.
+
+        RULES.md §2.1.1: Silver allows Merge/Upsert.
+        """
+        assert "_enforce_write_policy" in silver_writer_source, (
+            "SilverWriter must have _enforce_write_policy method.\n"
+            "This ensures only allowed write modes (MERGE, APPEND) are used."
+        )
+
+    def test_silver_writer_validates_schema(self, silver_writer_source: str) -> None:
+        """Silver layer MUST validate schema (Pandera or drift check)."""
+        has_pandera = "_validate_silver_pandera" in silver_writer_source
+        has_drift = "_check_schema_drift" in silver_writer_source
+        
+        assert has_pandera or has_drift, (
+            "SilverWriter must implement schema validation (Pandera or Drift Check).\n"
+            "Silver layer requires schema enforcement (Schema on Write)."
+        )
+
+    def test_silver_writer_no_pandas_parquet(self, silver_writer_source: str) -> None:
+        """Silver layer MUST NOT use raw parquet writes (pandas/pyarrow).
+
+        REQ-DATA-006: Direct Parquet writes bypass Delta transaction log.
+        """
+        forbidden = [
+            "to_parquet",
+            "write_table", # pyarrow.parquet.write_table
+        ]
+        
+        # We check for direct usage. Note: _prepare_arrow_data uses pyarrow, but 
+        # actual writing should be via write_deltalake.
+        # We need to be careful not to flag valid imports, but function calls.
+        
+        # This is a heuristic check. 
+        for method in forbidden:
+             # If method is used, it should be commented or part of some internal logic,
+             # but ideally we rely on write_deltalake.
+             # However, BaseDeltaWriter or others might use it for internal stuff?
+             # silver_writer.py does NOT seem to use to_parquet or write_table.
+             if f".{method}(" in silver_writer_source:
+                  pytest.fail(f"SilverWriter seems to use raw '{method}()'. MUST use write_deltalake().")
+

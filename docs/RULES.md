@@ -96,7 +96,7 @@ class MyAdapter:
 ### 2.1. Архитектура Medallion 
 | Уровень | Формат | Валидация | Хранение (Retention) | Идемпотентность | 
 |---------|--------|-----------|----------------------|-----------------| 
-| **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет | 90 дней hot -> Archive (S3 Lifecycle) | Path: `bronze/{provider}/{entity}/{date}/`. Append-only. | 
+| **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет | 90 дней hot -> Archive (local archive policy) | Path: `bronze/{provider}/{entity}/{date}/`. Append-only. | 
 | **Silver** (Норм.) | **Delta Lake / Iceberg** | Мягкая (учет дрейфа схемы) | Постоянно | **Merge/Upsert**. Raw Parquet в Silver **MUST NOT** использоваться. Обязателен ACID. Time Travel — для Ops, не для DR. | 
 | **Gold** (Витрины) | Delta/Iceberg/Parquet | Строгая (`strict=True`) | Постоянно | Версионированные снимки (SCD Type 2) или партиционирование по дате. |
 
@@ -133,7 +133,7 @@ class MyAdapter:
 ### 2.3. Data Lineage (Происхождение Данных) 
 Оптимизированная схема lineage: 
 - **Silver Record**: Содержит `_source_batch_id` (FK). 
-- **Lineage Log**: Таблица `sys.lineage_log` хранит маппинг `_source_batch_id` -> список файлов Bronze (S3 paths), версия трансформации, параметры запуска. 
+- **Lineage Log**: Таблица `sys.lineage_log` хранит маппинг `_source_batch_id` -> список файлов Bronze (local paths), версия трансформации, параметры запуска. 
 Полные пути к файлам в каждой строке данных хранить запрещено (избыточность). 
  
 ### 2.4. Политика Backfill / Replay 
@@ -236,7 +236,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 **Реализация**: `src/bioetl/infrastructure/schemas/gold.py`
 
 #### Жизненный цикл Карантина 
-- **Retention**: 30 дней. Старые записи удаляются автоматически (S3 Lifecycle). 
+- **Retention**: 30 дней. Старые записи удаляются автоматически (local archive policy). 
 - **Triage**: Еженедельный пересмотр (Triage) ошибок аналитиками. Если ошибка системная — правим адаптер, если разовая — игнорируем. 
 - **Source of Truth**: Карантин — это инструмент триажа, а не источник истины. Данные в карантине считаются "отсутствующими" в аналитическом слое.
 - **Linkage**: Обязательна ссылка на Bronze-файл (`bronze_file_uri` или `batch_id`) для возможности перепарсить исходник, если payload был обрезан.
@@ -810,20 +810,20 @@ from __future__ import annotations
 При получении SIGTERM/SIGINT: 
 1. Прекратить извлечение (fetch) новых записей. 
 2. Дождаться завершения записи текущего батча. 
-3. Сохранить чекпоинт в **S3** с использованием **If-Match / ETag** для обеспечения атомарности и предотвращения Lost Updates. 
+3. Сохранить чекпоинт в **local storage** с использованием **If-Match / ETag** для обеспечения атомарности и предотвращения Lost Updates. 
 4. Выйти с кодом 0. 
 
 - **Guarantees**: Система гарантирует At-Least-Once доставку + Дедупликацию в Silver (через Content Hash). Гарантия Exactly-Once на уровне транспорта не требуется.
  
 ### 5.3.1. Восстановление из Чекпоинта (Checkpoint Recovery) 
 При запуске пайплайн: 
-1. Проверяет наличие чекпоинта в S3. 
+1. Проверяет наличие чекпоинта в локальном хранилище (`data/output/checkpoints`). 
 2. Если найден и передан флаг `--resume`: 
    - Начинает с `last_processed_id + 1`. 
    - Логирует: `Resuming from checkpoint: {id}`. 
 3. Если найден без флага: 
    - Warning: "Stale checkpoint detected. Use --resume or --ignore-checkpoint." 
-4. После успешного завершения: удалить файл чекпоинта из S3.
+4. После успешного завершения: удалить локальный файл чекпоинта.
 
 ### 5.3.2. Async Resource Cleanup
 См. [ADR-013](02-architecture/decisions/ADR-013-async-storage-cleanup.md) и [ADR-015](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md).
@@ -864,7 +864,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 - **Gold**: PII исключается или агрегируется (Public/Internal).
 
 **Threat Model Scope**:
-- В фокусе: Утечка PII через логи, SQL-инъекции, несанкционированный доступ к S3.
+- В фокусе: Утечка PII через логи, SQL-инъекции, несанкционированный доступ к локальным данным.
 - Out of Scope: Физический доступ к серверам, компрометация AWS Root Account (управляемый сервис).
  
 ### 5.5. Disaster Recovery (DR) 
@@ -875,7 +875,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 #### 5.5.1. Detailed DR Procedures (Runbook) 
 | Сценарий | Действие | 
 |----------|----------| 
-| **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить S3 бакет из Backup (Point-in-Time Restore). 3. Перезапустить пайплайны с флагом `--full-rebuild` (если затронут Silver). | 
+| **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--full-rebuild` (если затронут Silver). | 
 | **Потеря чекпоинта** | Запуск с `--ignore-checkpoint` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это). | 
 | **Отказ региона AWS** | Переключение DNS на Failover Region. Развертывание Infrastructure-as-Code (Terraform) в резервном регионе. | 
  
@@ -1138,7 +1138,7 @@ make run-local    # запуск сэмплового пайплайна на ф
 - **Зависимости**: Только Python 3.11+ и pip
 
 **Для распределённого развёртывания (будущее):**
-- Docker Compose: Postgres, Redis, MinIO
+- Docker Compose (legacy, unsupported): Postgres, Redis, MinIO
 - Volumes: `./docker-data/`
 - Reset: `make docker-reset`
 
@@ -1194,7 +1194,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
  
 **Health Check Endpoints**: 
 - `GET /health` (Liveness) 
-- `GET /ready` (Readiness: DB/Redis connection) 
+- `GET /ready` (Readiness: local storage/lock health) 
  
 ## Приложение B: Политика Зависимостей 
 - **Pinning**: Точные версии в `requirements.txt` / `pyproject.toml`. 
@@ -1244,7 +1244,7 @@ transform:
  
 sink: 
   silver: 
-    path: s3://bioetl/silver/chembl/activity/ 
+    path: data/output/silver/chembl/activity 
     format: delta          # Использовать Delta Lake 
     mode: merge            # Стратегия Upsert 
     primary_key: [id]      # Ключ для merge 
@@ -1255,7 +1255,7 @@ sink:
     # forensic_retention: true 
  
   gold: 
-    path: s3://bioetl/gold/chembl/activity_aggregated/ 
+    path: data/output/gold/chembl/activity_aggregated 
     format: delta 
     mode: overwrite        # Витрины часто перезаписываются целиком или партициями 
  

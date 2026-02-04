@@ -41,10 +41,10 @@ transform:
 
 sink:
     bronze:
-        path: "s3://bioetl-bronze/chembl/target/"
+        path: "data/output/bronze/chembl/target"
         format: json
     silver:
-        path: "s3://bioetl-silver/chembl/target/"
+        path: "data/output/silver/chembl/target"
         format: delta
         mode: merge
         primary_key: ["target_chembl_id"]

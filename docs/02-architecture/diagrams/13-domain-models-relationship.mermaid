@@ -74,11 +74,11 @@ classDiagram
         +parent_molecule_id: str | None
     }
 
-    class Document {
-        +document_id: str
+    class ChemblPublication {
+        +document_chembl_id: str
         +doc_type: str
         +doi: str | None
-        +pmid: int | None
+        +pubmed_id: int | None
         +title: str | None
         +authors: list~str~ | None
         +journal: str | None
@@ -90,8 +90,8 @@ classDiagram
         +patent_id: str | None
     }
 
-    class Protein {
-        +protein_id: str
+    class UniprotTarget {
+        +target_accession: str
         +entry_name: str
         +protein_name: str
         +organism: str
@@ -104,8 +104,8 @@ classDiagram
         +subcellular_locations: list~str~ | None
     }
 
-    class Compound {
-        +compound_id: str
+    class PubchemMolecule {
+        +molecule_cid: str
         +iupac_name: str | None
         +canonical_smiles: str
         +isomeric_smiles: str | None
@@ -124,7 +124,7 @@ classDiagram
         +heavy_atom_count: int | None
     }
 
-    class Publication {
+    class PubMedPublication {
         +pubmed_id: str
         +title: str
         +abstract: str | None
@@ -165,23 +165,23 @@ classDiagram
     BaseEntity <|-- Assay : extends
     BaseEntity <|-- Target : extends
     BaseEntity <|-- Molecule : extends
-    BaseEntity <|-- Document : extends
-    BaseEntity <|-- Protein : extends
-    BaseEntity <|-- Compound : extends
-    BaseEntity <|-- Publication : extends
+    BaseEntity <|-- ChemblPublication : extends
+    BaseEntity <|-- UniprotTarget : extends
+    BaseEntity <|-- PubchemMolecule : extends
+    BaseEntity <|-- PubMedPublication : extends
 
     %% ChEMBL Entity Relationships
     Activity --> Assay : assay_id
     Activity --> Molecule : molecule_id
     Activity --> Target : target_id (nullable)
     Assay --> Target : target_id (nullable)
-    Assay --> Document : document_id (nullable)
+    Assay --> ChemblPublication : document_chembl_id (nullable)
     Molecule --> Molecule : parent_molecule_id (self-ref)
 
     %% Cross-provider relationships (conceptual)
-    Target ..> Protein : uniprot_accessions
-    Molecule ..> Compound : inchikey match
-    Document ..> Publication : pmid match
+    Target ..> UniprotTarget : uniprot_accessions
+    Molecule ..> PubchemMolecule : inchikey match
+    ChemblPublication ..> PubMedPublication : pmid match
 
     %% Notes
     note for BaseEntity "All entities inherit lineage fields:\n• entity_id (business key)\n• content_hash (SHA256)\n• run_id (correlation)\n• run_type (INCREMENTAL|BACKFILL|REBUILD)\n• ingestion_ts (timestamp)"

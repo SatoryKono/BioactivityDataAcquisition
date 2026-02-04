@@ -140,11 +140,11 @@ classDiagram
             +uniprot_accessions: list~str~?
         }
 
-        class Document {
-            +document_id: str
+        class ChemblPublication {
+            +document_chembl_id: str
             +doc_type: str
             +doi: str?
-            +pmid: int?
+            +pubmed_id: int?
             +title: str?
         }
     }
@@ -220,7 +220,7 @@ classDiagram
     BaseEntity <|-- Molecule
     BaseEntity <|-- Assay
     BaseEntity <|-- Target
-    BaseEntity <|-- Document
+    BaseEntity <|-- ChemblPublication
 
     FilterableDataSourcePort --|> DataSourcePort
 

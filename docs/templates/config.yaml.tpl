@@ -19,11 +19,11 @@ transform:
 
 sink:
     bronze:
-        path: "s3://bioetl-bronze/{{provider}}/{{entity}}/"
+        path: "data/output/bronze/{{provider}}/{{entity}}"
         format: json
 
     silver:
-        path: "s3://bioetl-silver/{{provider}}/{{entity}}/"
+        path: "data/output/silver/{{provider}}/{{entity}}"
         format: delta
         mode: merge
         primary_key: [ "{{primary_key}}" ]
@@ -31,7 +31,7 @@ sink:
 
     gold:
         enabled: false
-        # path: "s3://bioetl-gold/{{provider}}/{{entity}}/"
+        # path: "data/output/gold/{{provider}}/{{entity}}"
         # format: delta
         # mode: overwrite
 

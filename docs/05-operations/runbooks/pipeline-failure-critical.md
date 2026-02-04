@@ -11,7 +11,7 @@ This runbook describes how to handle critical pipeline failures (P1 incidents).
 - `errors_total{type="critical"}` metric increments.
 
 ## Common Causes
-1. **Infrastructure Failure**: Database down, S3 bucket inaccessible, Disk full.
+1. **Infrastructure Failure**: Local storage unavailable, disk full, filesystem errors.
 2. **Authentication Failure**: API key expired, invalid credentials.
 3. **Schema Violation**: Source data structure changed significantly (Gold layer validation failed).
 4. **Lock Acquisition Error**: Unable to acquire lock for `rebuild` or `backfill`.
@@ -26,7 +26,7 @@ This runbook describes how to handle critical pipeline failures (P1 incidents).
    - `AuthFailureError`: See [Incident Response - Auth Failure](incident-response.md#1-auth-failure-401-unauthorized).
    - `SchemaViolationError`: See [Incident Response - Schema Mismatch](incident-response.md#3-schema-mismatch-gold-layer).
    - `LockAcquisitionError`: See [Incident Response - Lock Timeout](incident-response.md#4-lock-timeout-lock-expired).
-   - `InfrastructureError`: Check external services (S3, DB).
+   - `InfrastructureError`: Check local storage and filesystem health.
 
 ## Recovery Actions
 1. **Fix the Root Cause**:

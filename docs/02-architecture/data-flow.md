@@ -29,7 +29,7 @@ flowchart LR
     direction TB
     S1["Delta Lake"]
     S2["Merge/Upsert"]
-    S3["Permanent"]
+    S_perm["Permanent"]
   end
 
   subgraph Gold["Gold Layer"]
