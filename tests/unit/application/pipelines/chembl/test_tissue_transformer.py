@@ -1,10 +1,8 @@
 """Unit tests for TissueTransformer."""
 
 import pytest
-from unittest.mock import MagicMock
 
 from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
-from bioetl.domain.context import PipelineContext
 
 
 class TestTissueTransformer:

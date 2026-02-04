@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from httpx import Response
 
 from bioetl.domain.types import CircuitBreakerState, HealthStatus
 from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter

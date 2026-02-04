@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from httpx import Response
 
 from bioetl.domain.entities.chembl import ActivityRecord
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
