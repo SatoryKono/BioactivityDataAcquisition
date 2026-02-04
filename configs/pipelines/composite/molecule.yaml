@@ -279,9 +279,9 @@ composite:
           - usan_stem_definition
         provider_order: [chembl]
 
-    output:
-      silver: data/output/silver/composite/molecule
-      gold: data/output/gold/composite/molecule
+    # Note: output paths auto-computed per ADR-029 convention-based resolution
+    # silver: data/output/silver/composite/molecule (auto)
+    # gold: data/output/gold/composite/molecule (auto)
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration

@@ -61,6 +61,9 @@ from bioetl.application.pipelines.chembl.publication_term_transformer import (
 from bioetl.application.pipelines.chembl.publication_transformer import (
     PublicationTransformer,
 )
+from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
+    SubcellularFractionTransformer,
+)
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
@@ -99,6 +102,7 @@ from bioetl.domain.contracts import (
     ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLProteinClassGoldSchema,
+    ChEMBLSubcellularFractionGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
     ChEMBLTissueGoldSchema,
@@ -123,6 +127,7 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_PROTEIN_CLASS_SCHEMA,
     CHEMBL_PUBLICATION_SCHEMA,
+    CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
     CHEMBL_TISSUE_SCHEMA,
@@ -268,6 +273,13 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         silver_schema=CHEMBL_TISSUE_SCHEMA,
         gold_schema=ChEMBLTissueGoldSchema,
     ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_subcellular_fraction",
+        provider="chembl",
+        transformer_class=SubcellularFractionTransformer,
+        silver_schema=CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
+        gold_schema=ChEMBLSubcellularFractionGoldSchema,
+    ),
     # PubChem pipeline
     PipelineFactoryConfig(
         pipeline_name="pubchem_compound",
@@ -376,6 +388,7 @@ chembl_molecule_factory = _factories["chembl_molecule"]
 chembl_target_factory = _factories["chembl_target"]
 chembl_target_component_factory = _factories["chembl_target_component"]
 chembl_tissue_factory = _factories["chembl_tissue"]
+chembl_subcellular_fraction_factory = _factories["chembl_subcellular_fraction"]
 chembl_protein_class_factory = _factories["chembl_protein_class"]
 pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
@@ -519,6 +532,7 @@ __all__ = [
     "chembl_publication_factory",
     "chembl_publication_similarity_factory",
     "chembl_publication_term_factory",
+    "chembl_subcellular_fraction_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
     "chembl_tissue_factory",

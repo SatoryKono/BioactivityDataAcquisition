@@ -47,6 +47,7 @@ docs/
 │   ├── TOOLS.md                 # Tools & Setup
 │   ├── rules-summary.md         # TL;DR of RULES.md
 │   └── governance/              # Project governance policies
+│       ├── 02-naming-policy.md  # Entity naming conventions
 │       ├── 03-file-policy.md
 │       └── 04-extending-bioetl.md
 │
