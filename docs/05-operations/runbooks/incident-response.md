@@ -6,7 +6,7 @@ This document outlines the standard operating procedures for responding to produ
 
 | Level | Description | Response SLA | Recovery SLA |
 |-------|-------------|--------------|--------------|
-| **P0** | System unavailable or critical data loss (e.g., S3 bucket deleted, DB down). | 15 min | 1 hour |
+| **P0** | System unavailable or critical data loss (e.g., local storage corrupted, disk failure). | 15 min | 1 hour |
 | **P1** | Critical pipeline failure (Core Data: ChEMBL, PubChem). | 1 hour | 4 hours |
 | **P2** | Secondary pipeline failure (e.g., enrichment sources). | 8 hours | 24 hours |
 | **P3** | Warning / Data Quality anomalies / Non-blocking bugs. | 24 hours | Next Sprint |

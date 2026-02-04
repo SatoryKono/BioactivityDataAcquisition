@@ -68,7 +68,7 @@ source:
 
 sink:
     silver:
-        path: "s3://bioetl-silver/pubmed/publication/"
+        path: "data/output/silver/pubmed/publication"
         format: delta
         primary_key: ["pmid"]
 ```

@@ -1,5 +1,7 @@
 # semanticscholar-publication
 
+> **Status**: Deprecated. This legacy guide is superseded by current pipeline specs in `docs/pipelines/` (see `docs/pipelines/INDEX.md`).
+
 Semantic Scholar Academic Graph API pipeline for publication metadata enrichment with DOI resolution and title-based fallback.
 
 ---

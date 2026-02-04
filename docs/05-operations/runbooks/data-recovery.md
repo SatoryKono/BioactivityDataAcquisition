@@ -29,19 +29,19 @@ This runbook provides procedures for recovering data in case of corruption, acci
 
 ## Scenario 2: Bronze Data Loss or Corruption
 
-*   **Symptom**: Files in the Bronze layer (S3/MinIO) are deleted or corrupted.
-*   **Cause**: Accidental deletion, S3 bucket misconfiguration, or infrastructure failure.
+*   **Symptom**: Files in the Bronze layer (local storage) are deleted or corrupted.
+*   **Cause**: Accidental deletion, filesystem errors, or infrastructure failure.
 *   **Recovery Steps**:
     1.  **Stop All Pipelines**: Immediately halt all data ingestion.
-    2.  **Restore S3 Bucket**:
-        *   Use your cloud provider's Point-in-Time Restore (PITR) feature for the S3 bucket.
-        *   Restore the bucket to a state just before the incident occurred.
+    2.  **Restore Local Backup**:
+        *   Restore `data/output/bronze` from the latest backup or snapshot.
+        *   Verify the restore point is just before the incident occurred.
     3.  **Rebuild Silver/Gold**: Once the Bronze layer is restored, follow the steps in **Scenario 1** to rebuild the downstream layers. A full rebuild is mandatory.
 
 ## Scenario 3: Lost Checkpoint
 
 *   **Symptom**: A pipeline was interrupted, but the checkpoint file was lost or corrupted. The pipeline warns about a "Stale checkpoint" on restart.
-*   **Cause**: S3 write failure, race condition, or manual error.
+*   **Cause**: Local checkpoint write failure, race condition, or manual error.
 *   **Recovery Steps**:
     1.  **Option A (Safest)**: Ignore the checkpoint and re-process a slightly larger window of data.
         ```bash

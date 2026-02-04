@@ -1,5 +1,7 @@
 # openalex-publication
 
+> **Status**: Deprecated. This legacy guide is superseded by current pipeline specs in `docs/pipelines/` (see `docs/pipelines/INDEX.md`).
+
 OpenAlex Works pipeline for scholarly publication metadata with DOI resolution and title-based fallback.
 
 ---

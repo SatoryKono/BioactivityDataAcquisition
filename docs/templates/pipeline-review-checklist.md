@@ -137,7 +137,7 @@ Use this checklist when reviewing new or modified pipelines.
 
 - [ ] SIGTERM/SIGINT handled
 - [ ] Current batch completed before exit
-- [ ] Checkpoint saved to S3 with ETag
+- [ ] Checkpoint saved to local storage (`data/output/checkpoints`)
 - [ ] Lock released on exit
 - [ ] Exit code 0 on success
 

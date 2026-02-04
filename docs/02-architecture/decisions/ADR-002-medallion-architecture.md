@@ -38,7 +38,7 @@ The Medallion Architecture provides a clear and logical separation of concerns, 
 
 ## Consequences
 
-*   **Increased Storage Costs**: Storing data in three different forms consumes more storage space. This is mitigated by using efficient storage formats (zstd-compressed JSONL, Delta Lake) and S3 lifecycle policies to archive old Bronze data.
+*   **Increased Storage Costs**: Storing data in three different forms consumes more storage space. This is mitigated by using efficient storage formats (zstd-compressed JSONL, Delta Lake) and a local archive policy for old Bronze data.
 *   **Higher Latency**: The multi-hop process (Bronze -> Silver -> Gold) introduces latency compared to a single, monolithic ETL job. This is an acceptable trade-off for the gains in reliability and maintainability.
 *   **Development Overhead**: Requires developers to think in terms of layers and manage pipelines between them. However, this structure also simplifies individual pipeline logic.
 

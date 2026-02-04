@@ -1,11 +1,11 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.17 | Last updated: 2026-02-02*
+*Synced with RULES.md v5.17 | Last updated: 2026-02-04*
 
-> **Documentation Update:** 2026-02-02
-> - Codebase metrics updated: ~500 Python files, ~109,300 LOC, ~8,330 tests
+> **Documentation Update:** 2026-02-04
+> - Codebase metrics updated: ~500 Python files, ~110,902 LOC, ~10,360 tests
 > - ADR count corrected: 32 ADRs (ADR-001 through ADR-032)
-> - Pipeline configs: 21 configurations
+> - Pipeline configs: 22 configurations
 > - Adapter listing completed (all 7 providers)
 > - Gold contract link fixed (chembl_activity_v1.0.json)
 
@@ -42,7 +42,7 @@ docs/
 ├── 00-map.md                    # This file (Project Navigator)
 ├── index.md                     # Welcome page
 ├── glossary.md                  # Ubiquitous Language terminology
-├── RULES.md                     # Canonical rules document (v5.15)
+├── RULES.md                     # Canonical rules document (v5.17)
 ├── REQUIREMENTS.md              # 156 testable requirements
 │
 ├── 00-project-rules/            # Project governance
@@ -120,9 +120,9 @@ docs/
 │   ├── openalex/                # OpenAlex (1 entity)
 │   └── semanticscholar/         # SemanticScholar (1 entity)
 │
-├── 03-pipelines/                # High-level pipeline guides (6 guides)
+├── 03-pipelines/                # Legacy pipeline guides (superseded by docs/pipelines)
 │
-├── pipelines/                   # Pipeline specifications (23 specs)
+├── pipelines/                   # Pipeline specs and indexes (22 configs)
 │   ├── INDEX.md                 # Pipeline registry
 │   └── chembl/, crossref/, openalex/, pubchem/, pubmed/, semanticscholar/, uniprot/
 │
@@ -396,14 +396,14 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-01-21   | v5.15 (ADR Registry Update)  |
-| REQUIREMENTS.md          | 2026-01-21   | v1.4 (156 requirements)      |
+| RULES.md                 | 2026-02-03   | v5.17 (Local-Only sync)      |
+| REQUIREMENTS.md          | 2026-02-04   | v1.5 (Local-Only sync)       |
 | glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-01-27   | v7.0 Metrics Update          |
-| rules-summary.md         | 2026-01-21   | v5.15 Synced                 |
+| 00-map.md                | 2026-02-03   | v7.1 Metrics Update          |
+| rules-summary.md         | 2026-02-03   | v5.17 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
-| ADR-001..031             | 2026-01-27   | All 31 ADRs documented       |
+| ADR-001..032             | 2026-01-28   | All 32 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-21   | Historical audit files       |
@@ -411,4 +411,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-01-27. Documentation sync audit completed.*
+*Last updated: 2026-02-03. Documentation sync audit completed.*

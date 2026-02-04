@@ -5,6 +5,8 @@
 **Decision makers:** @BioETL-Team
 **Relates to:** ADR-024 (Entity Naming Unification), configs/composite/field_groups/publication.yaml, configs/data_schema/composite/publication.yaml
 
+> **Note**: This is a draft outside the ADR registry. ADR-030 is reserved for the publication pagination strategy in `ADR-030-publication-pagination-strategy.md`. Track current work in `PUBLICATION_FIELD_UNIFICATION_PROGRESS.md`.
+
 ## Context
 
 Publication transformers and schemas for ChEMBL, CrossRef, OpenAlex, PubMed, and SemanticScholar expose overlapping

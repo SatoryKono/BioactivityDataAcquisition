@@ -21,6 +21,62 @@ from pathlib import Path
 import pytest
 
 
+class TestLocalOnlyPolicy:
+    """Tests enforcing the Local-Only Architecture (ADR-010)."""
+
+    def test_no_cloud_or_distributed_libs(self, src_dir: Path) -> None:
+        """Verify no usage of cloud SDKs or distributed systems clients.
+
+        REQ-ARCH-010: The system must run entirely locally without external
+        dependencies like S3, Redis, Kafka, or cloud provider APIs.
+        """
+        # List of forbidden packages/modules
+        forbidden_libs = [
+            # Cloud SDKs
+            "boto3", "botocore", "s3fs", "minio",
+            "azure", "azure.storage", "azure.identity",
+            "google.cloud", "google.storage",
+            # Distributed Systems
+            "redis", "aioredis", "upstash",
+            "kafka", "confluent_kafka", "aiokafka",
+            "celery", "dask.distributed",
+        ]
+
+        # Scan the entire bioetl package
+        source_path = src_dir / "bioetl"
+        if not source_path.exists():
+            pytest.skip("Source directory not found")
+
+        violations = []
+        
+        # Walk through all python files
+        for py_file in source_path.rglob("*.py"):
+            content = py_file.read_text(encoding="utf-8")
+            
+            for lib in forbidden_libs:
+                # Check for various import forms:
+                # import boto3
+                # from boto3 import ...
+                patterns = [
+                    f"import {lib}",
+                    f"from {lib}",
+                ]
+                
+                for pattern in patterns:
+                    # Simple check - could be improved with AST if false positives occur
+                    # but these libs are distinct enough.
+                    if re.search(r"^" + pattern + r"\b", content, re.MULTILINE):
+                         relative_path = py_file.relative_to(src_dir)
+                         violations.append(f"{relative_path}: imports '{lib}'")
+
+        assert not violations, (
+            "Violation of Local-Only Architecture (ADR-010).\n"
+            "Cloud SDKs and distributed system clients are STRICTLY PROHIBITED.\n"
+            "Use local filesystem (pathlib), SQLite, or internal memory structures.\n"
+            "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
+        )
+
+
 class TestOrchestrationIsolation:
     """Tests ensuring orchestration frameworks are properly isolated."""
 

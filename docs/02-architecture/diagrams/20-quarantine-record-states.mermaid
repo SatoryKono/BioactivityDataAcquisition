@@ -50,8 +50,8 @@ stateDiagram-v2
         }
     }
 
-    IGNORED --> PURGED: After 30 days\n(S3 Lifecycle Policy)
-    REPROCESSED --> PURGED: After 30 days\n(S3 Lifecycle Policy)
+    IGNORED --> PURGED: After 30 days\n(local retention policy)
+    REPROCESSED --> PURGED: After 30 days\n(local retention policy)
 
     state PURGED {
         [*] --> Deleted

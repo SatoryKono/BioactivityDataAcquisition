@@ -2,8 +2,8 @@
 
 Контракты данных для Gold-слоя BioETL.
 
-> **Версия**: 1.0.0
-> **Последнее обновление**: 2025-12-31
+> **Версия**: 1.1.0
+> **Последнее обновление**: 2026-02-04
 > **Связанные ADR**: [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md)
 
 ---
@@ -587,7 +587,7 @@ print(f"Added {current_count - previous_count} records")
 
 ### Pandera Schema
 
-Все Gold-схемы определены в `src/bioetl/infrastructure/schemas/gold.py`.
+Все Gold-схемы определены в `src/bioetl/domain/contracts/gold/`.
 
 ```python
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
@@ -620,13 +620,38 @@ validated = ChEMBLActivityGoldSchema.validate(df.to_pandas())
 
 ---
 
+## JSON Contracts
+
+JSON exports for Gold schemas are stored in `docs/contracts/gold/`:
+
+- `chembl_activity_v1.0.json`
+- `chembl_assay_parameters_v1.0.json`
+- `chembl_assay_v1.0.json`
+- `chembl_cell_line_v1.0.json`
+- `chembl_compound_record_v1.0.json`
+- `chembl_document_similarity_v1.0.json`
+- `chembl_document_term_v1.0.json`
+- `chembl_document_v1.0.json`
+- `chembl_molecule_v1.0.json`
+- `chembl_protein_class_v1.0.json`
+- `chembl_target_component_v1.0.json`
+- `chembl_target_v1.0.json`
+- `composite_publication_v1.0.json`
+- `crossref_publication_v1.0.json`
+- `openalex_publication_v1.0.json`
+- `pubchem_compound_v1.0.json`
+- `pubmed_publication_v1.0.json`
+- `semanticscholar_publication_v1.0.json`
+- `uniprot_idmapping_v1.0.json`
+- `uniprot_protein_v1.0.json`
+
 ## Связанные документы
 
 - [ADR-018: Gold Strict Validation](../02-architecture/decisions/ADR-018-gold-strict-validation.md)
 - [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
 - [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
 - [Data Layers](../02-architecture/data-layers.md)
-- [Existing JSON Contracts](../contracts/)
+- [Existing JSON Contracts](../contracts/gold/)
 
 ---
 
