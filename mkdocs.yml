@@ -72,6 +72,9 @@ nav:
             -   "Data Flow": 02-architecture/data-flow.md
             -   "Data Layers": 02-architecture/data-layers.md
             -   "Observability Layers": 02-architecture/observability-layers.md
+            -   "Architecture Review (2026)":
+                    -   "Summary (EN)": 02-architecture/architecture-review-summary.md
+                    -   "Full Review (RU)": 02-architecture/architecture-review-2026.md
             -   "Diagrams": 02-architecture/diagrams.md
             -   "Diagramming Policy": 02-architecture/diagrams/00-diagramming-policy.md
             -   "Decisions": 02-architecture/decisions/README.md
