@@ -235,9 +235,9 @@ composite:
           - toid
         provider_order: [chembl]
 
-    output:
-      silver: data/output/silver/composite/activity
-      gold: data/output/gold/composite/activity
+    # Note: output paths auto-computed per ADR-029 convention-based resolution
+    # silver: data/output/silver/composite/activity (auto)
+    # gold: data/output/gold/composite/activity (auto)
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration

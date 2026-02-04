@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.12.0] - 2026-02-04
+
+### Changed
+
+- **Configuration Cleanup (ADR-029)**: Removed redundant explicit output paths from 4 composite pipelines
+  - `composite/activity.yaml`, `composite/molecule.yaml`, `composite/target.yaml`, `composite/publication.yaml`
+  - Output paths now auto-computed via convention-based resolution
+
+- **Deprecated Parameter Migration**: Renamed `column_groups_file` → `data_schema_file` in 21 pipeline configs
+  - Affected providers: chembl (13), uniprot (2), pubchem (1), crossref (1), openalex (1), pubmed (1), semanticscholar (1)
+  - Aligns with data schema terminology per ADR-027
+
 ## [5.11.0] - 2026-02-04
 
 ### Added

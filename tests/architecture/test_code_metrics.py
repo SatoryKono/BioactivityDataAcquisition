@@ -39,7 +39,7 @@ class TestFileSizeLimits:
         "result.py": 460,  # 459 LOC - CompositeResult with EnrichmentResult, MergeResult, SeedResult, DependencyResult dataclasses + factory methods
         "filter_config.py": 400,  # 354 LOC
         "entities.py": 600,  # 569 LOC
-        "chembl.py": 735,  # 730 LOC - ChEMBL entity DTOs with many fields
+        "chembl.py": 760,  # 758 LOC - ChEMBL entity DTOs + SubcellularFraction Gold schema
         "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
         "validation.py": 450,  # 430 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year, molecular weight)
         "activity_aggregator.py": 400,  # 392 LOC - Activity aggregation with multiple strategies
@@ -100,14 +100,14 @@ class TestFileSizeLimits:
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
         "pipeline_factory.py": 735,  # 731 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation
-        "pipeline_factories.py": 530,  # 525 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + data_source_provider override)
+        "pipeline_factories.py": 555,  # 551 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction)
         "services_factory.py": 690,  # 687 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030)
         # Infrastructure layer exemptions
         "silver_writer.py": 1155,  # 1151 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
         "gold_writer.py": 940,  # 934 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py) + column_order support
         "bronze_writer.py": 800,  # 797 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 990,  # 981 LOC - Silver PyArrow schemas (+ UniProt extended schema + IDMapping + taxonomy_id standardization + lookup metadata + publication schemas + PubMed forensic fields)
+        "silver.py": 1005,  # 1003 LOC - Silver PyArrow schemas + SubcellularFraction schema
         "client.py": 1100,  # 1098 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1095,  # 1089 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups
@@ -120,6 +120,7 @@ class TestFileSizeLimits:
         # Application layer exemptions
         "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
+        "subcellular_fraction_data_source.py": 520,  # 518 LOC - Derived entity wrapper with FilterableDataSourcePort delegation
         "merger.py": 1700,  # 1698 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
         "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
         # UniProt extraction helpers
