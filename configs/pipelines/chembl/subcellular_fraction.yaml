@@ -43,7 +43,7 @@ dq_config_file: ../../dq/entities/chembl/subcellular_fraction.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/subcellular_fraction.yaml (entity-specific)
 filter_config_file: ../../filter/entities/chembl/subcellular_fraction.yaml
-column_groups_file: ../../data_schema/chembl/subcellular_fraction.yaml
+data_schema_file: ../../data_schema/chembl/subcellular_fraction.yaml
 
 # Entity-specific sink overrides
 sink:

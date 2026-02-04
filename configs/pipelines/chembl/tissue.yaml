@@ -19,7 +19,7 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 dq_config_file: ../../dq/entities/chembl/tissue.yaml
-column_groups_file: ../../data_schema/chembl/tissue.yaml
+data_schema_file: ../../data_schema/chembl/tissue.yaml
 
 # Entity-specific sink overrides
 sink:
