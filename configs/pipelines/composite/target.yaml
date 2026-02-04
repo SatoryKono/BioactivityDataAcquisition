@@ -135,6 +135,11 @@ composite:
     # Multiple sources with field overlap. Seed values take priority.
     preserve_all_sources: false
 
+    # Output paths for merged data
+    output:
+      silver: data/output/silver/composite/target
+      gold: data/output/gold/composite/target
+
     # Field-level priority for overlapping fields
     # seed_priority applies globally; these are explicit overrides per field.
     field_priorities:
