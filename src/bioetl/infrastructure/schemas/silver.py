@@ -513,13 +513,35 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cellosaurus_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
-        # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
-# Schema for ChEMBL Document Term
+# Schema for ChEMBL Tissue
+# See: https://www.ebi.ac.uk/chembl/api/data/tissue
+CHEMBL_TISSUE_SCHEMA = pa.schema(
+    [
+        # === System prefix (MUST be first, per RULES.md §2.4) ===
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+        # === Business fields (alphabetical order) ===
+        pa.field("bto_id", pa.string()),      # BRENDA Tissue Ontology
+        pa.field("caloha_id", pa.string()),   # CALIPHO ID
+        pa.field("efo_id", pa.string()),      # Experimental Factor Ontology
+        pa.field("pref_name", pa.string()),   # Preferred tissue name
+        pa.field("tissue_chembl_id", pa.string()),  # Primary key
+        pa.field("uberon_id", pa.string()),   # Uberon Ontology
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
+    ]
+)
 # Derived entity extracted from Document records
 # See: https://www.ebi.ac.uk/chembl/api/data/document
 CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
