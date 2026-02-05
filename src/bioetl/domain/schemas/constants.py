@@ -34,31 +34,35 @@ ISO_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
 
 STANDARD_RELATIONS: frozenset[str] = frozenset(["=", "<", "<=", ">", ">="])
 
-ACTIVITY_STANDARD_TYPES: frozenset[str] = frozenset([
-    "IC50",
-    "EC50",
-    "Ki",
-    "Kd",
-    "AC50",
-    "GI50",
-    "Potency",
-    "Inhibition",
-    "% Inhibition",
-    "Activity",
-    "Ratio",
-    "ED50",
-    "ID50",
-])
+ACTIVITY_STANDARD_TYPES: frozenset[str] = frozenset(
+    [
+        "IC50",
+        "EC50",
+        "Ki",
+        "Kd",
+        "AC50",
+        "GI50",
+        "Potency",
+        "Inhibition",
+        "% Inhibition",
+        "Activity",
+        "Ratio",
+        "ED50",
+        "ID50",
+    ]
+)
 
-DATA_VALIDITY_COMMENTS: frozenset[str] = frozenset([
-    "Potential missing data",
-    "Potential author error",
-    "Manually validated",
-    "Potential transcription error",
-    "Outside typical range",
-    "Non standard unit for type",
-    "Author confirmed error",
-])
+DATA_VALIDITY_COMMENTS: frozenset[str] = frozenset(
+    [
+        "Potential missing data",
+        "Potential author error",
+        "Manually validated",
+        "Potential transcription error",
+        "Outside typical range",
+        "Non standard unit for type",
+        "Author confirmed error",
+    ]
+)
 
 # =============================================================================
 # CHEMBL ASSAY ENUMS
@@ -68,13 +72,15 @@ ASSAY_TYPES: frozenset[str] = frozenset(["B", "F", "A", "T", "P", "U"])
 
 ASSAY_TEST_TYPES: frozenset[str] = frozenset(["In vivo", "In vitro", "Ex vivo"])
 
-ASSAY_CATEGORIES: frozenset[str] = frozenset([
-    "screening",
-    "confirmatory",
-    "panel",
-    "summary",
-    "other",
-])
+ASSAY_CATEGORIES: frozenset[str] = frozenset(
+    [
+        "screening",
+        "confirmatory",
+        "panel",
+        "summary",
+        "other",
+    ]
+)
 
 RELATIONSHIP_TYPES: frozenset[str] = frozenset(["D", "H", "M", "N", "S", "U"])
 
@@ -82,20 +88,22 @@ RELATIONSHIP_TYPES: frozenset[str] = frozenset(["D", "H", "M", "N", "S", "U"])
 # CHEMBL MOLECULE ENUMS
 # =============================================================================
 
-MOLECULE_TYPES: frozenset[str] = frozenset([
-    "Small molecule",
-    "Inorganic small molecule",
-    "Polymeric small molecule",
-    "Antibody",
-    "Antibody drug conjugate",
-    "Protein",
-    "Oligonucleotide",
-    "Oligosaccharide",
-    "Cell",
-    "Enzyme",
-    "Unknown",
-    "Unclassified",
-])
+MOLECULE_TYPES: frozenset[str] = frozenset(
+    [
+        "Small molecule",
+        "Inorganic small molecule",
+        "Polymeric small molecule",
+        "Antibody",
+        "Antibody drug conjugate",
+        "Protein",
+        "Oligonucleotide",
+        "Oligosaccharide",
+        "Cell",
+        "Enzyme",
+        "Unknown",
+        "Unclassified",
+    ]
+)
 
 STRUCTURE_TYPES: frozenset[str] = frozenset(["MOL", "SEQ", "BOTH", "NONE"])
 
@@ -106,40 +114,46 @@ MAX_PHASE_VALUES: tuple[float, ...] = (-1, 0, 0.5, 1, 2, 3, 4)
 # CHEMBL TARGET ENUMS
 # =============================================================================
 
-TARGET_TYPES: frozenset[str] = frozenset([
-    "SINGLE PROTEIN",
-    "PROTEIN FAMILY",
-    "PROTEIN COMPLEX",
-    "PROTEIN COMPLEX GROUP",
-    "SELECTIVITY GROUP",
-    "CHIMERIC PROTEIN",
-    "CELL-LINE",
-    "TISSUE",
-    "ORGANISM",
-    "MACROMOLECULE",
-    "SMALL MOLECULE",
-    "LIPID",
-    "METAL",
-    "UNKNOWN",
-])
+TARGET_TYPES: frozenset[str] = frozenset(
+    [
+        "SINGLE PROTEIN",
+        "PROTEIN FAMILY",
+        "PROTEIN COMPLEX",
+        "PROTEIN COMPLEX GROUP",
+        "SELECTIVITY GROUP",
+        "CHIMERIC PROTEIN",
+        "CELL-LINE",
+        "TISSUE",
+        "ORGANISM",
+        "MACROMOLECULE",
+        "SMALL MOLECULE",
+        "LIPID",
+        "METAL",
+        "UNKNOWN",
+    ]
+)
 
-TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset([
-    "SINGLE PROTEIN",
-    "PROTEIN SUBUNIT",
-    "RNA",
-    "INTERACTING PROTEIN",
-])
+TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset(
+    [
+        "SINGLE PROTEIN",
+        "PROTEIN SUBUNIT",
+        "RNA",
+        "INTERACTING PROTEIN",
+    ]
+)
 
 # =============================================================================
 # CHEMBL PUBLICATION ENUMS
 # =============================================================================
 
-PUBLICATION_TYPES: frozenset[str] = frozenset([
-    "PUBLICATION",
-    "PATENT",
-    "DATASET",
-    "BOOK",
-])
+PUBLICATION_TYPES: frozenset[str] = frozenset(
+    [
+        "PUBLICATION",
+        "PATENT",
+        "DATASET",
+        "BOOK",
+    ]
+)
 
 # =============================================================================
 # EXPORTS (for explicit re-export in __init__.py)
