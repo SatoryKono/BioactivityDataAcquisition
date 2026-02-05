@@ -12,6 +12,11 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import (
+    CHEMBL_ID_PATTERN,
+    ISO_DATE_PATTERN,
+    PUBLICATION_TYPES,
+)
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
@@ -38,7 +43,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # === Primary Key (ChEMBL-specific) ===
     document_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL Document ID.",
     )
 
@@ -54,7 +59,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # Note: old fields 'year' and 'doc_type' removed - replaced by unified names
     publication_type: Series[str] = pa.Field(
         nullable=True,
-        isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
+        isin=list(PUBLICATION_TYPES),
         description="Document type (unified field name).",
     )
 
@@ -75,7 +80,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     )
     creation_date: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{2}-\d{2}$",
+        str_matches=ISO_DATE_PATTERN,
         description="Record creation date in ChEMBL database (YYYY-MM-DD).",
     )
 

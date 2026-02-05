@@ -10,6 +10,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN
 
 
 class CompoundRecordSchema(ETLRecordSchema):
@@ -34,12 +35,12 @@ class CompoundRecordSchema(ETLRecordSchema):
     # === Foreign Keys ===
     molecule_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="FK → Molecule.",
     )
     document_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="FK → Publication.",
     )
     src_id: Series[int] = pa.Field(

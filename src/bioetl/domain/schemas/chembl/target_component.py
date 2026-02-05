@@ -9,6 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import TARGET_COMPONENT_RELATIONSHIPS
 
 
 class TargetComponentSchema(ETLRecordSchema):
@@ -26,7 +27,7 @@ class TargetComponentSchema(ETLRecordSchema):
     # === Metadata ===
     relationship: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["SINGLE PROTEIN", "PROTEIN SUBUNIT", "RNA", "INTERACTING PROTEIN"],
+        isin=list(TARGET_COMPONENT_RELATIONSHIPS),
         description="Relationship type.",
     )
     stoichiometry: Series[int] | None = pa.Field(
