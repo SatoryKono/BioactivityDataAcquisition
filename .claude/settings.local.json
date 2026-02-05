@@ -6,7 +6,10 @@
       "Bash(find:*)",
       "Bash(python -m lint_imports:*)",
       "Bash(python -m mypy:*)",
-      "Bash(python -m ruff check:*)"
+      "Bash(python -m ruff check:*)",
+      "Bash(ruff format:*)",
+      "Bash(pytest:*)",
+      "Bash(wc:*)"
     ]
   },
   "enabledPlugins": {
