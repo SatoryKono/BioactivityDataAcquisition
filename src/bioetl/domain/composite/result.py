@@ -7,14 +7,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.composite.lineage import LineageMetadata
 
 
-class EnrichmentStatus(StrEnum):
+class EnrichmentStatus(str, Enum):
     """Status of enrichment pipeline execution."""
 
     SUCCESS = "success"
@@ -180,7 +180,7 @@ class SeedResult:
         return self.records_silver > 0 or self.resumed
 
 
-class DependencyStatus(StrEnum):
+class DependencyStatus(str, Enum):
     """Status of dependency pipeline execution."""
 
     SUCCESS = "success"

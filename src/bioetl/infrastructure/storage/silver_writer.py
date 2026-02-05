@@ -196,14 +196,12 @@ class SilverWriter(BaseDeltaWriter):
                     # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
                     # Complex objects in Gold layer are flattened; Silver preserves
                     # JSON for forensic purposes.
-                    orjson.dumps(val, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                    if (val := rec[k]) is not None
+                    orjson.dumps(rec[k], option=orjson.OPT_SORT_KEYS).decode("utf-8")
+                    if rec[k] is not None
                     and k in string_fields
-                    and isinstance(val, (dict, list))
-                    else val
+                    and isinstance(rec[k], (dict, list))
+                    else rec[k]
                 )
-                # Iterate schema.names (O(Schema)) instead of rec.items() (O(Record))
-                # for performance when records have many extraneous fields.
                 for k in schema.names
                 if k in rec
             }

@@ -40,13 +40,13 @@ from bioetl.domain.schemas.constants import (
     UO_ID_PATTERN,
 )
 from bioetl.domain.schemas.validators import (
+    json_array_check,
+    json_check,
+    json_object_check,
     # Registered check methods (imported for side-effect registration)
     in_closed_range,
     is_non_negative,
     is_positive,
-    json_array_check,
-    json_check,
-    json_object_check,
     max_str_length,
     str_matches_pattern,
     str_starts_with,

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict
 from uuid import UUID
 
@@ -55,7 +55,7 @@ class SilverRecord(TypedDict, total=False):
     # Other fields are dynamic based on entity type
 
 
-class RunType(StrEnum):
+class RunType(str, Enum):
     """Type of pipeline run (RULES.md §2.4).
 
     Determines merge priority: REBUILD > BACKFILL > INCREMENTAL
@@ -80,7 +80,7 @@ class RunType(StrEnum):
         return priorities[self]
 
 
-class DriftLevel(StrEnum):
+class DriftLevel(str, Enum):
     """Schema drift severity levels (RULES.md §2.2).
 
     - INFO: New optional fields appear
@@ -98,7 +98,7 @@ class DriftLevel(StrEnum):
     """Critical drift (missing required fields), blocks pipeline."""
 
 
-class HealthStatus(StrEnum):
+class HealthStatus(str, Enum):
     """Provider health status (RULES.md §3.5).
 
     State transitions:
@@ -126,7 +126,7 @@ class HealthStatus(StrEnum):
         }[self]
 
 
-class CircuitBreakerState(StrEnum):
+class CircuitBreakerState(str, Enum):
     """Circuit breaker state (RULES.md §3.1.4).
 
     State machine:
@@ -153,7 +153,7 @@ class CircuitBreakerState(StrEnum):
         }[self]
 
 
-class DataClassification(StrEnum):
+class DataClassification(str, Enum):
     """Data sensitivity classification (RULES.md §5.4)."""
 
     PUBLIC = "PUBLIC"
@@ -166,7 +166,7 @@ class DataClassification(StrEnum):
     """Contains PII or sensitive data, requires encryption/hashing."""
 
 
-class ErrorType(StrEnum):
+class ErrorType(str, Enum):
     """Error classification (RULES.md §3.1.1).
 
     Determines pipeline behavior:
@@ -242,7 +242,7 @@ class ErrorType(StrEnum):
         }
 
 
-class QuarantineRecordStatus(StrEnum):
+class QuarantineRecordStatus(str, Enum):
     """Status of a quarantine record in Delta Lake storage (RULES.md §2.6).
 
     This enum represents the persisted status of quarantine records.
