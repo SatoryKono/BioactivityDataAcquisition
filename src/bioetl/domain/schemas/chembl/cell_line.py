@@ -10,6 +10,12 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    CELLOSAURUS_ID_PATTERN,
+    CHEMBL_ID_PATTERN,
+    CLO_ID_PATTERN,
+    EFO_ID_PATTERN,
+)
 
 
 class CellLineSchema(ETLRecordSchema):
@@ -22,7 +28,7 @@ class CellLineSchema(ETLRecordSchema):
     # === Primary Key ===
     cell_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         unique=True,
         description="ChEMBL ID for cell line (PK).",
     )
@@ -61,12 +67,12 @@ class CellLineSchema(ETLRecordSchema):
     # === External Identifiers ===
     cellosaurus_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CVCL_[A-Z0-9]+$",
+        str_matches=CELLOSAURUS_ID_PATTERN,
         description="Cellosaurus ID (external reference).",
     )
     clo_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CLO_\d+$",
+        str_matches=CLO_ID_PATTERN,
         description="Cell Line Ontology ID.",
     )
     cl_lincs_id: Series[str] | None = pa.Field(
@@ -75,7 +81,7 @@ class CellLineSchema(ETLRecordSchema):
     )
     efo_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^EFO_\d+$",
+        str_matches=EFO_ID_PATTERN,
         description="EFO ontology ID.",
     )
 

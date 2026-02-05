@@ -9,6 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, TARGET_TYPES
 
 
 class TargetSchema(ETLRecordSchema):
@@ -23,29 +24,14 @@ class TargetSchema(ETLRecordSchema):
     # === Identifiers ===
     target_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
 
     # === Classification ===
     target_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=[
-            "SINGLE PROTEIN",
-            "PROTEIN FAMILY",
-            "PROTEIN COMPLEX",
-            "PROTEIN COMPLEX GROUP",
-            "SELECTIVITY GROUP",
-            "CHIMERIC PROTEIN",
-            "CELL-LINE",
-            "TISSUE",
-            "ORGANISM",
-            "MACROMOLECULE",
-            "SMALL MOLECULE",
-            "LIPID",
-            "METAL",
-            "UNKNOWN",
-        ],
+        isin=list(TARGET_TYPES),
         description="Target type.",
     )
     # target_parent_type: Optional[Series[str]] = pa.Field(

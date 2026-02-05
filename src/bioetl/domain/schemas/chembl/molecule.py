@@ -151,17 +151,17 @@ class MoleculeSchema(ETLRecordSchema):
     # === Hierarchy Fields (flattened from molecule_hierarchy) ===
     hierarchy_parent_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Parent molecule ChEMBL ID in hierarchy.",
     )
     hierarchy_active_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Active molecule ChEMBL ID in hierarchy.",
     )
     hierarchy_child_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Child molecule ChEMBL ID in hierarchy.",
     )
 
