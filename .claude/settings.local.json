@@ -9,7 +9,8 @@
       "Bash(python -m ruff check:*)",
       "Bash(ruff format:*)",
       "Bash(pytest:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(echo:*)"
     ]
   },
   "enabledPlugins": {
