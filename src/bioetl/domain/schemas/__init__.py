@@ -43,6 +43,13 @@ from bioetl.domain.schemas.validators import (
     json_array_check,
     json_check,
     json_object_check,
+    # Registered check methods (imported for side-effect registration)
+    in_closed_range,
+    is_non_negative,
+    is_positive,
+    max_str_length,
+    str_matches_pattern,
+    str_starts_with,
 )
 
 __all__ = [
@@ -52,10 +59,17 @@ __all__ = [
     "LOOKUP_FIELDS_PREFIX",
     "SYSTEM_FIELDS_PREFIX",
     "canonical_column_order",
-    # Validators
+    # JSON validators
     "json_array_check",
     "json_check",
     "json_object_check",
+    # Registered check methods
+    "in_closed_range",
+    "is_non_negative",
+    "is_positive",
+    "max_str_length",
+    "str_matches_pattern",
+    "str_starts_with",
     # Regex patterns
     "CHEMBL_ID_PATTERN",
     "BAO_ID_PATTERN",
