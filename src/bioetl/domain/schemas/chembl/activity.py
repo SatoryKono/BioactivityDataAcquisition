@@ -9,6 +9,14 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    ACTIVITY_STANDARD_TYPES,
+    BAO_ID_PATTERN,
+    CHEMBL_ID_PATTERN,
+    DATA_VALIDITY_COMMENTS,
+    STANDARD_RELATIONS,
+    UO_ID_PATTERN,
+)
 
 
 class ActivitySchema(ETLRecordSchema):
@@ -20,29 +28,29 @@ class ActivitySchema(ETLRecordSchema):
     # === Foreign Keys ===
     assay_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to assay.",
     )
     molecule_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to molecule.",
     )
     target_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to target.",
     )
     document_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to document.",
     )
 
     # === Standardized Values ===
     standard_relation: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["=", "<", "<=", ">", ">="],
+        isin=list(STANDARD_RELATIONS),
         description="Standardized operator.",
     )
     standard_value: Series[float] | None = pa.Field(
@@ -55,22 +63,7 @@ class ActivitySchema(ETLRecordSchema):
     )
     standard_type: Series[str] | None = pa.Field(
         nullable=True,
-        # Expanded list to avoid false positives on valid data
-        isin=[
-            "IC50",
-            "EC50",
-            "Ki",
-            "Kd",
-            "AC50",
-            "GI50",
-            "Potency",
-            "Inhibition",
-            "% Inhibition",
-            "Activity",
-            "Ratio",
-            "ED50",
-            "ID50",
-        ],
+        isin=list(ACTIVITY_STANDARD_TYPES),
         description="Standardized measurement type.",
     )
     standard_flag: Series[int] | None = pa.Field(
@@ -90,15 +83,7 @@ class ActivitySchema(ETLRecordSchema):
     # === Comments & Quality ===
     data_validity_comment: Series[str] | None = pa.Field(
         nullable=True,
-        isin=[
-            "Potential missing data",
-            "Potential author error",
-            "Manually validated",
-            "Potential transcription error",
-            "Outside typical range",
-            "Non standard unit for type",
-            "Author confirmed error",
-        ],
+        isin=list(DATA_VALIDITY_COMMENTS),
         description="Data quality comment.",
     )
     activity_comment: Series[str] | None = pa.Field(
@@ -113,12 +98,12 @@ class ActivitySchema(ETLRecordSchema):
     # === Ontologies ===
     bao_endpoint: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^BAO:\d+$",
+        str_matches=BAO_ID_PATTERN,
         description="BAO ID.",
     )
     uo_units: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^UO:\d+$",
+        str_matches=UO_ID_PATTERN,
         description="Units Ontology ID.",
     )
     qudt_units: Series[str] | None = pa.Field(nullable=True, description="QUDT unit.")
