@@ -147,6 +147,11 @@ def bootstrap_pipeline_runner(
     pipeline_def = effective_registry.get(ctx.pipeline_name)
     factory = pipeline_def.factory
 
+    # Pass kwargs to satisfy PipelineFactoryProtocol which defines create_runner
+    # with **kwargs, but concrete factories have typed arguments.
+    # This avoids "Unexpected keyword argument" error for cached_bronze.
+    kwargs = {"cached_bronze": cached_bronze} if cached_bronze else {}
+
     return factory.create_runner(
         run_id=ctx.run_id,
         runtime=runtime_config,
@@ -154,7 +159,7 @@ def bootstrap_pipeline_runner(
         observability=observability,
         filter_config=filter_config,
         config=yaml_config,
-        cached_bronze=cached_bronze,
+        **kwargs,
     )
 
 
