@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime.assembly import (
+    assemble_cached_bronze_context,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,
@@ -132,6 +133,16 @@ def bootstrap_pipeline_runner(
             source="cli" if ctx.input_filter.enabled else "config",
         )
 
+    # Assemble cached bronze context
+    cached_bronze = assemble_cached_bronze_context(ctx)
+
+    if cached_bronze.enabled:
+        observability.logger.info(
+            "cached_bronze_mode_enabled",
+            bronze_path=cached_bronze.bronze_path,
+            bronze_date=cached_bronze.bronze_date,
+        )
+
     # Resolve pipeline factory and delegate runner creation
     pipeline_def = effective_registry.get(ctx.pipeline_name)
     factory = pipeline_def.factory
@@ -143,6 +154,7 @@ def bootstrap_pipeline_runner(
         observability=observability,
         filter_config=filter_config,
         config=yaml_config,
+        cached_bronze=cached_bronze,
     )
 
 

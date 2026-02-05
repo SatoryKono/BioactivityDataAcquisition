@@ -115,6 +115,7 @@ from bioetl.domain.exceptions import (
     BioETLError,
     BronzeValidationError,
     BucketNotFoundError,
+    CachedBronzeEmptyError,
     CheckpointConflictError,
     CircuitBreakerOpenError,
     ConfigurationError,
@@ -333,6 +334,10 @@ from bioetl.domain.value_objects import (
     UniProtId,
     ValueObject,
 )
+from bioetl.domain.value_objects.publication_field_groups import (
+    FIELD_TO_GROUP_MAPPING,
+    PublicationFieldGroup,
+)
 
 __all__ = [
     # Composite pipeline (subpackage)
@@ -416,6 +421,7 @@ __all__ = [
     "AuthFailureError",
     "BioETLError",
     "BronzeValidationError",
+    "CachedBronzeEmptyError",
     "CriticalError",
     "DataQualityError",
     "RecoverableError",
@@ -612,4 +618,6 @@ __all__ = [
     "PublicationYear",
     "UniProtId",
     "ValueObject",
+    "FIELD_TO_GROUP_MAPPING",
+    "PublicationFieldGroup",
 ]

@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
 from bioetl.domain.context import (
+    CachedBronzeContext,
     InputFilterContext,
     PipelineRunContext,
     VacuumConfig,
@@ -129,6 +130,9 @@ class RunOptions:
         vacuum_retention_days: Minimum age of files to remove during VACUUM.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
         ignore_yaml_filter: Ignore input_filter from YAML config (for composite mode).
+        use_cached_bronze: Load data from cached Bronze layer instead of API.
+        cached_bronze_path: Explicit path to Bronze cache directory.
+        cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD format).
     """
 
     run_type: str = "incremental"
@@ -145,6 +149,10 @@ class RunOptions:
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
+    # Cached Bronze mode options
+    use_cached_bronze: bool = False
+    cached_bronze_path: str | None = None
+    cached_bronze_date: str | None = None  # YYYY-MM-DD format
 
 
 class PipelineNotFoundError(ValueError):
@@ -350,6 +358,15 @@ class PipelineRunnerService:
             retention_days=options.vacuum_retention_days or 7,
         )
 
+        # Build CachedBronzeContext
+        if options.use_cached_bronze:
+            cached_bronze = CachedBronzeContext.from_options(
+                path=options.cached_bronze_path,
+                date=options.cached_bronze_date,
+            )
+        else:
+            cached_bronze = CachedBronzeContext.disabled()
+
         return PipelineRunContext(
             pipeline_name=pipeline_name,
             run_id=run_id,
@@ -360,6 +377,7 @@ class PipelineRunnerService:
             input_filter=input_filter,
             vacuum=vacuum,
             log_level=options.log_level,
+            cached_bronze=cached_bronze,
         )
 
     async def _execute_pipeline(

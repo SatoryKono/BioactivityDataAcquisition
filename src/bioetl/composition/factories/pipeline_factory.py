@@ -46,6 +46,7 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
     from bioetl.domain.ports import (
         DataSourcePort,
@@ -214,6 +215,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metrics: MetricsPort | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
         """Create pipeline instance with services and optional transformer."""
         return cast(
@@ -233,6 +235,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 tracer=tracer,
                 dq_monitor=dq_monitor,
                 metrics=metrics,
+                cached_bronze=cached_bronze,
             ),
         )
 
@@ -244,6 +247,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         observability: ObservabilityBundle,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
         """Create a fully configured PipelineRunner with all components."""
         # Load config once if not provided
@@ -261,6 +265,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             tracer=observability.tracer,
             dq_monitor=observability.dq_monitor,
             metrics=observability.metrics,
+            cached_bronze=cached_bronze,
         )
 
         # Delegate runner assembly to dedicated function
@@ -324,6 +329,60 @@ def _create_data_source(
     )
 
 
+def _create_cached_bronze_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    cached_bronze: CachedBronzeContext,
+) -> DataSourcePort:
+    """Create CachedBronzeDataSource for reading from Bronze cache.
+
+    Creates a data source that reads from existing Bronze layer files
+    instead of making API calls. Used when cached_bronze mode is enabled.
+
+    Args:
+        settings: Application settings (for resolving base paths).
+        pipeline_config: Pipeline configuration (for provider/entity).
+        logger: Structured logger.
+        cached_bronze: CachedBronzeContext with path/date settings.
+
+    Returns:
+        CachedBronzeDataSource implementing DataSourcePort.
+    """
+    from pathlib import Path
+
+    from bioetl.domain.ports import NoOpMetrics
+    from bioetl.infrastructure.adapters import CachedBronzeDataSource
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+    provider = pipeline_config.provider
+    entity_type = pipeline_config.entity_type
+
+    # Resolve Bronze path: explicit or convention-based
+    if cached_bronze.bronze_path:
+        bronze_path = Path(cached_bronze.bronze_path)
+    else:
+        # Convention: data/output/bronze/{provider}/{entity_type}
+        bronze_path = settings.bronze_path / provider / entity_type
+
+    # Create BronzeWriter as reader (reusing read_bronze/list_batches methods)
+    # flat_structure=True because convention path already includes provider/entity
+    bronze_reader = BronzeWriter(
+        base_path=bronze_path,
+        logger=logger,
+        metrics=NoOpMetrics(),
+        flat_structure=True,
+    )
+
+    return CachedBronzeDataSource(
+        bronze_reader=bronze_reader,
+        provider=provider,
+        entity_type=entity_type,
+        logger=logger,
+        bronze_date=cached_bronze.bronze_date,
+    )
+
+
 def build_pipeline_services(
     pipeline_name: str,
     create_data_source_fn: DataSourceCreator,
@@ -334,6 +393,7 @@ def build_pipeline_services(
     tracer: TracingPort | None = None,
     dq_monitor: DQMonitorPort | None = None,
     metadata_coordinator: MetadataCoordinator | None = None,
+    cached_bronze: CachedBronzeContext | None = None,
 ) -> PipelineServices:
     """Build PipelineServices from settings.
 
@@ -348,19 +408,38 @@ def build_pipeline_services(
         dq_monitor: Optional data quality monitor for anomaly detection
         metadata_coordinator: Optional MetadataCoordinator for centralized
                             metadata creation across Bronze, Silver, Gold.
+        cached_bronze: Optional CachedBronzeContext for reading from Bronze
+                      cache instead of API. When enabled, creates
+                      CachedBronzeDataSource instead of the normal data source.
 
     Returns:
         Configured PipelineServices instance
     """
     pipeline_config = config or load_pipeline_config(pipeline_name)
-    data_source = _create_data_source(
-        create_data_source_fn,
-        settings,
-        pipeline_config,
-        logger,
-        filter_config,
-        pipeline_name=pipeline_name,
-    )
+
+    # Choose data source based on cached_bronze mode
+    if cached_bronze is not None and cached_bronze.enabled:
+        data_source = _create_cached_bronze_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            cached_bronze=cached_bronze,
+        )
+        logger.info(
+            "using_cached_bronze_mode",
+            pipeline=pipeline_name,
+            bronze_path=cached_bronze.bronze_path,
+            bronze_date=cached_bronze.bronze_date,
+        )
+    else:
+        data_source = _create_data_source(
+            create_data_source_fn,
+            settings,
+            pipeline_config,
+            logger,
+            filter_config,
+            pipeline_name=pipeline_name,
+        )
 
     return BaseServicesFactory.create_common_services(
         settings=settings,
@@ -388,6 +467,7 @@ def create_pipeline_with_services(
     tracer: TracingPort | None = None,
     dq_monitor: DQMonitorPort | None = None,
     metrics: MetricsPort | None = None,
+    cached_bronze: CachedBronzeContext | None = None,
 ) -> BasePipeline:
     """Create pipeline instance with services.
 
@@ -409,6 +489,8 @@ def create_pipeline_with_services(
         tracer: Optional tracer for distributed tracing
         dq_monitor: Optional data quality monitor
         metrics: Optional metrics port for transformer observability
+        cached_bronze: Optional CachedBronzeContext for reading from Bronze
+                      cache instead of API.
 
     Returns:
         Configured pipeline instance
@@ -439,6 +521,7 @@ def create_pipeline_with_services(
         tracer=tracer,
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
+        cached_bronze=cached_bronze,
     )
 
     domain_config = yaml_config_to_domain(yaml_config)

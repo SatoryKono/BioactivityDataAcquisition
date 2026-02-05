@@ -33,6 +33,10 @@ groups:
         columns:
           - semanticscholar.publication.corpus_id
 
+      - base_name: dblp_id
+        columns:
+          - semanticscholar.publication.dblp_id
+
       - base_name: publication_type
         columns:
           - chembl.publication.publication_type
@@ -122,6 +126,10 @@ groups:
           - openalex.publication.abstract
           - pubmed.publication.abstract
           - semanticscholar.publication.abstract
+
+      - base_name: abstract_structured
+        columns:
+          - pubmed.publication.abstract_structured
 
       - base_name: page_first
         columns:
@@ -253,6 +261,10 @@ groups:
         columns:
           - pubmed.publication.author_count
 
+      - base_name: author_h_indices
+        columns:
+          - semanticscholar.publication.author_h_indices
+
       - base_name: author_openalex_ids
         columns:
           - openalex.publication.author_openalex_ids
@@ -289,11 +301,35 @@ groups:
         columns:
           - openalex.publication.institution_ids
 
+      - base_name: ror_ids
+        columns:
+          - openalex.publication.ror_ids
+
   # ===== TERMS_AND_KEYWORDS_AND_TOPICS =====
   - id: terms_and_keywords_and_topics
     display_name: "Terms & Keywords & Topics"
     include_in_gold: true
     fields:
+      - base_name: chemical_count
+        columns:
+          - pubmed.publication.chemical_count
+
+      - base_name: chemicals
+        columns:
+          - pubmed.publication.chemicals
+
+      - base_name: citation_subset
+        columns:
+          - pubmed.publication.citation_subset
+
+      - base_name: databanks
+        columns:
+          - pubmed.publication.databanks
+
+      - base_name: gene_symbols
+        columns:
+          - pubmed.publication.gene_symbols
+
       - base_name: keyword_count
         columns:
           - pubmed.publication.keyword_count
@@ -351,13 +387,9 @@ groups:
     display_name: "Citations & Reference"
     include_in_gold: true
     fields:
-      - base_name: citation_subset
+      - base_name: citation_contexts
         columns:
-          - pubmed.publication.citation_subset
-
-      - base_name: chemical_count
-        columns:
-          - pubmed.publication.chemical_count
+          - semanticscholar.publication.citation_contexts
 
       - base_name: citations_received
         columns:
@@ -372,6 +404,28 @@ groups:
           - openalex.publication.citations_made
           - pubmed.publication.citations_made
           - semanticscholar.publication.citations_made
+
+      - base_name: fwci
+        columns:
+          - openalex.publication.fwci
+
+      - base_name: grant_count
+        columns:
+          - pubmed.publication.grant_count
+          - openalex.publication.grant_count
+
+      - base_name: grants
+        columns:
+          - pubmed.publication.grants
+          - openalex.publication.grants
+
+      - base_name: influential_citation_count
+        columns:
+          - semanticscholar.publication.influential_citation_count
+
+      - base_name: references
+        columns:
+          - crossref.publication.references
 
   # ===== DATE_AND_PLACES =====
   - id: date_and_places
@@ -401,6 +455,10 @@ groups:
       - base_name: pub_date
         columns:
           - pubmed.publication.pub_date
+
+      - base_name: pub_day
+        columns:
+          - pubmed.publication.pub_day
 
       - base_name: pub_month
         columns:
@@ -461,18 +519,6 @@ groups:
     display_name: "Trash (Excluded)"
     include_in_gold: false
     fields:
-      - base_name: abstract_structured
-        columns:
-          - pubmed.publication.abstract_structured
-
-      - base_name: author_h_indices
-        columns:
-          - semanticscholar.publication.author_h_indices
-
-      - base_name: citation_contexts
-        columns:
-          - semanticscholar.publication.citation_contexts
-
       - base_name: content_domain_crossmark_restriction
         columns:
           - crossref.publication.content_domain_crossmark_restriction
@@ -489,26 +535,6 @@ groups:
           - pubmed.publication.content_hash
           - semanticscholar.publication.content_hash
 
-      - base_name: dblp_id
-        columns:
-          - semanticscholar.publication.dblp_id
-
-      - base_name: fwci
-        columns:
-          - openalex.publication.fwci
-
-      - base_name: grant_count
-        columns:
-          - openalex.publication.grant_count
-
-      - base_name: grants
-        columns:
-          - openalex.publication.grants
-
-      - base_name: influential_citation_count
-        columns:
-          - semanticscholar.publication.influential_citation_count
-
       - base_name: language
         columns:
           - crossref.publication.language
@@ -522,14 +548,6 @@ groups:
       - base_name: medline_pgn
         columns:
           - pubmed.publication.medline_pgn
-
-      - base_name: pub_day
-        columns:
-          - pubmed.publication.pub_day
-
-      - base_name: ror_ids
-        columns:
-          - openalex.publication.ror_ids
 
       - base_name: src_id
         columns:

@@ -5,6 +5,7 @@ Provides context objects for pipeline execution with strict typing:
 - PipelineRunContext: Full launch parameters from CLI/Orchestrator
 - InputFilterContext: Optional filter configuration for input-based filtering
 - VacuumConfig: Vacuum operation settings with explicit defaults
+- CachedBronzeContext: Configuration for loading from cached Bronze layer
 """
 
 from __future__ import annotations
@@ -20,6 +21,84 @@ from bioetl.domain.types import RunID, RunType
 def _now_utc() -> datetime:
     """Factory function for default started_at timestamp."""
     return datetime.now(UTC)
+
+
+@dataclass(frozen=True, slots=True)
+class CachedBronzeContext:
+    """Configuration for loading data from cached Bronze layer.
+
+    When enabled, the pipeline reads from existing Bronze files instead of
+    making API calls. This is useful for re-processing without network access
+    or for testing transformations on previously fetched data.
+
+    Attributes:
+        enabled: Whether to use cached Bronze data instead of API.
+        bronze_path: Explicit path to Bronze cache directory. If None,
+            uses convention-based path: data/output/bronze/{provider}/{entity}.
+        bronze_date: Optional date filter in YYYY-MM-DD format. When set,
+            only reads batches from that specific date directory.
+
+    Example:
+        >>> # Disabled (default - use API)
+        >>> ctx = CachedBronzeContext.disabled()
+
+        >>> # Enabled with convention-based path
+        >>> ctx = CachedBronzeContext.from_options(path=None, date=None)
+
+        >>> # Enabled with specific date
+        >>> ctx = CachedBronzeContext.from_options(path=None, date="2026-01-20")
+
+        >>> # Enabled with explicit path
+        >>> ctx = CachedBronzeContext.from_options(
+        ...     path="./data/bronze/chembl/activity",
+        ...     date="2026-01-20"
+        ... )
+    """
+
+    enabled: bool = False
+    bronze_path: str | None = None
+    bronze_date: str | None = None
+
+    @classmethod
+    def disabled(cls) -> CachedBronzeContext:
+        """Create a disabled context (use API, not cache)."""
+        return cls(enabled=False, bronze_path=None, bronze_date=None)
+
+    @classmethod
+    def from_options(
+        cls,
+        path: str | None = None,
+        date: str | None = None,
+    ) -> CachedBronzeContext:
+        """Create an enabled context from CLI/config options.
+
+        Args:
+            path: Explicit Bronze cache path, or None to use convention.
+            date: Optional date filter in YYYY-MM-DD format.
+
+        Returns:
+            Enabled CachedBronzeContext.
+        """
+        return cls(enabled=True, bronze_path=path, bronze_date=date)
+
+    def __post_init__(self) -> None:
+        """Validate cached bronze configuration."""
+        if not self.enabled:
+            return
+        # Validate date format if provided
+        if self.bronze_date is not None:
+            self._validate_date_format()
+
+    def _validate_date_format(self) -> None:
+        """Validate bronze_date is in YYYY-MM-DD format."""
+        if self.bronze_date is None:
+            return
+        try:
+            datetime.strptime(self.bronze_date, "%Y-%m-%d")
+        except ValueError as e:
+            raise ValueError(
+                f"bronze_date must be in YYYY-MM-DD format, got '{self.bronze_date}'"
+            ) from e
 
 
 @dataclass(frozen=True, slots=True)
@@ -218,6 +297,9 @@ class PipelineRunContext:
     input_filter: InputFilterContext = field(
         default_factory=InputFilterContext.disabled
     )
+    cached_bronze: CachedBronzeContext = field(
+        default_factory=CachedBronzeContext.disabled
+    )
 
     # Truly optional fields (None means "not specified, use config default")
     limit: int | None = None
@@ -233,6 +315,11 @@ class PipelineRunContext:
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""
         return self.input_filter.enabled
+
+    @property
+    def has_cached_bronze(self) -> bool:
+        """Check if cached Bronze mode is enabled."""
+        return self.cached_bronze.enabled
 
     @property
     def vacuum_enabled(self) -> bool | None:

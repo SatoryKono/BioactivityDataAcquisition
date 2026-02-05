@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
@@ -31,6 +32,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "VacuumSettings",
+    "assemble_cached_bronze_context",
     "assemble_filter_config",
     "assemble_runtime_config",
     "assemble_vacuum_settings",
@@ -211,3 +213,45 @@ def assemble_filter_config(
         direct_filter_ids=ctx.input_filter.filter_ids,
         direct_fallback_mapping=ctx.input_filter.fallback_mapping,
     )
+
+
+def assemble_cached_bronze_context(
+    ctx: PipelineRunContext,
+) -> CachedBronzeContext:
+    """Assemble CachedBronzeContext from PipelineRunContext.
+
+    Extracts cached bronze settings from the run context. The context
+    is already populated from CLI options via RunOptions.
+
+    Args:
+        ctx: Pipeline run context with cached_bronze settings.
+
+    Returns:
+        CachedBronzeContext - either disabled or enabled with path/date.
+
+    Example:
+        >>> # When cached bronze is not requested
+        >>> ctx = PipelineRunContext(
+        ...     pipeline_name="chembl_activity",
+        ...     run_id=uuid4(),
+        ...     run_type=RunType.INCREMENTAL,
+        ... )
+        >>> result = assemble_cached_bronze_context(ctx)
+        >>> result.enabled
+        False
+
+        >>> # When cached bronze is requested
+        >>> ctx = PipelineRunContext(
+        ...     pipeline_name="chembl_activity",
+        ...     run_id=uuid4(),
+        ...     run_type=RunType.INCREMENTAL,
+        ...     cached_bronze=CachedBronzeContext.from_options(
+        ...         path="/data/bronze/chembl/activity",
+        ...         date="2026-01-20"
+        ...     ),
+        ... )
+        >>> result = assemble_cached_bronze_context(ctx)
+        >>> result.enabled
+        True
+    """
+    return ctx.cached_bronze

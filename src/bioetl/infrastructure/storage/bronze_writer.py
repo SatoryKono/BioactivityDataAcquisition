@@ -710,19 +710,38 @@ class BronzeWriter:
         entity: str,
         date: datetime | None = None,
     ) -> list[str]:
-        """List all batch files for a given provider/entity."""
-        # Path format: {provider}/{entity}/{date}/
-        prefix = f"{provider}/{entity}/"
-        if date:
-            prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
+        """List all batch files for a given provider/entity.
 
-        search_path = self.base_path / prefix
+        Path resolution depends on flat_structure setting:
+        - flat_structure=False: {base_path}/{provider}/{entity}/{date}/
+        - flat_structure=True: {base_path}/{date}/ (provider/entity in base_path)
+
+        When flat_structure=True and provider/entity are empty strings,
+        searches directly from base_path (used by CachedBronzeDataSource).
+
+        Results are sorted lexicographically for deterministic ordering (ADR-014).
+        """
+        # Handle flat_structure mode (provider/entity already in base_path)
+        if self._flat_structure and not provider and not entity:
+            # Search directly from base_path
+            if date:
+                search_path = self.base_path / date.strftime("%Y-%m-%d")
+            else:
+                search_path = self.base_path
+        else:
+            # Standard path format: {provider}/{entity}/{date}/
+            prefix = f"{provider}/{entity}/"
+            if date:
+                prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
+            search_path = self.base_path / prefix
+
         if not search_path.exists():
             return []
 
         pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
         files = list(search_path.glob(pattern))
-        return [str(p.relative_to(self.base_path)) for p in files]
+        # Sort for deterministic ordering (ADR-014)
+        return sorted(str(p.relative_to(self.base_path)) for p in files)
 
     def _find_old_date_dirs(
         self,

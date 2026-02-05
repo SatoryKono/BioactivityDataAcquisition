@@ -182,7 +182,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "date_completed": PublicationFieldGroup.DATE_AND_PLACES,
     "date_revised": PublicationFieldGroup.DATE_AND_PLACES,
     "pub_date": PublicationFieldGroup.DATE_AND_PLACES,
-    "pub_day": PublicationFieldGroup.TRASH,
+    "pub_day": PublicationFieldGroup.DATE_AND_PLACES,
     "pub_month": PublicationFieldGroup.DATE_AND_PLACES,
     "publication_date": PublicationFieldGroup.DATE_AND_PLACES,
     # ===== canonical: topics_and_keywords (115-130) =====
