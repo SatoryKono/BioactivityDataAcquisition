@@ -184,6 +184,7 @@ class SilverWriter(BaseDeltaWriter):
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
+        schema_fields = set(schema.names)
         string_fields = {
             field.name
             for field in schema
@@ -196,11 +197,11 @@ class SilverWriter(BaseDeltaWriter):
                     # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
                     # Complex objects in Gold layer are flattened; Silver preserves
                     # JSON for forensic purposes.
-                    orjson.dumps(rec[k], option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                    if rec[k] is not None
+                    orjson.dumps(val, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+                    if (val := rec.get(k)) is not None
                     and k in string_fields
-                    and isinstance(rec[k], (dict, list))
-                    else rec[k]
+                    and isinstance(val, (dict, list))
+                    else val
                 )
                 for k in schema.names
                 if k in rec
