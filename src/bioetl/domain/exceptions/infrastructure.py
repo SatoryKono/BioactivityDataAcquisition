@@ -348,6 +348,59 @@ class BronzeValidationError(StorageError):
         super().__init__(", ".join(parts))
 
 
+class CachedBronzeEmptyError(StorageError):
+    """Raised when cached Bronze data is requested but not found.
+
+    This error indicates that no Bronze batch files exist for the requested
+    provider/entity combination, or the specified date filter matches no data.
+    Used in cached Bronze mode when the pipeline attempts to read from
+    previously saved Bronze files instead of making API calls.
+
+    Attributes:
+        provider: Provider name (e.g., 'chembl').
+        entity_type: Entity type (e.g., 'activity').
+        bronze_path: Path that was searched for Bronze files.
+        date_filter: Optional date filter that was applied.
+
+    Example:
+        >>> raise CachedBronzeEmptyError(
+        ...     provider="chembl",
+        ...     entity_type="activity",
+        ...     bronze_path="/data/bronze/chembl/activity",
+        ...     date_filter="2026-01-20"
+        ... )
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        provider: str,
+        entity_type: str,
+        bronze_path: str,
+        date_filter: str | None = None,
+    ) -> None:
+        """Initialize CachedBronzeEmptyError.
+
+        Args:
+            provider: Provider name (e.g., 'chembl').
+            entity_type: Entity type (e.g., 'activity').
+            bronze_path: Path that was searched for Bronze files.
+            date_filter: Optional date filter in YYYY-MM-DD format.
+        """
+        self.provider = provider
+        self.entity_type = entity_type
+        self.bronze_path = bronze_path
+        self.date_filter = date_filter
+
+        date_info = f" for date {date_filter}" if date_filter else ""
+        message = (
+            f"No Bronze data found for {provider}/{entity_type}{date_info}. "
+            f"Searched path: {bronze_path}"
+        )
+        super().__init__(message)
+
+
 # =============================================================================
 # Delta Lake Specific Errors (Granular Classification)
 # =============================================================================

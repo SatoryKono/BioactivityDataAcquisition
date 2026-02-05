@@ -201,6 +201,24 @@ def _echo_run_result(status: RunStatus, error_message: str | None, run_id: str) 
     help="Port for the HTTP health server.",
     show_default=True,
 )
+@click.option(
+    "--use-cached-bronze",
+    is_flag=True,
+    default=False,
+    help="Load data from Bronze cache instead of API",
+)
+@click.option(
+    "--cached-bronze-date",
+    type=str,
+    default=None,
+    help="Filter Bronze cache by date (YYYY-MM-DD)",
+)
+@click.option(
+    "--cached-bronze-path",
+    type=click.Path(exists=True),
+    default=None,
+    help="Explicit path to Bronze cache directory",
+)
 def run(
     pipeline: str,
     run_type: str,
@@ -216,6 +234,9 @@ def run(
     debug: bool,
     health_server: bool,
     health_port: int,
+    use_cached_bronze: bool,
+    cached_bronze_date: str | None,
+    cached_bronze_path: str | None,
 ) -> None:
     """Run an ETL pipeline."""
     # Handle confirmation for destructive operations (CLI responsibility)
@@ -234,6 +255,9 @@ def run(
         vacuum_after_run=vacuum_after_run if vacuum_after_run else None,
         vacuum_retention_days=vacuum_retention_days,
         log_level="DEBUG" if debug else "INFO",
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_path=cached_bronze_path,
+        cached_bronze_date=cached_bronze_date,
     )
 
     # Display health server info

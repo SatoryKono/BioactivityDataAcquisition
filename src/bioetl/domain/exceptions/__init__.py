@@ -55,6 +55,7 @@ from bioetl.domain.exceptions.data_quality import (
 from bioetl.domain.exceptions.infrastructure import (
     BronzeValidationError,
     BucketNotFoundError,
+    CachedBronzeEmptyError,
     ConfigurationError,
     DeltaOptimizeError,
     DeltaSchemaValidationError,
@@ -119,6 +120,7 @@ __all__ = [
     "BioETLError",
     "BronzeValidationError",
     "BucketNotFoundError",
+    "CachedBronzeEmptyError",
     "CheckpointConflictError",
     "CircuitBreakerOpenError",
     "ConfigurationError",

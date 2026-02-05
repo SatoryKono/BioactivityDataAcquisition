@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.adapters.cached_bronze_data_source import (
+    CachedBronzeDataSource,
+)
 from bioetl.infrastructure.adapters.decorators import (
     CircuitBreakerDataSourceDecorator,
     RetryingDataSourceDecorator,
@@ -16,6 +19,7 @@ from bioetl.infrastructure.adapters.validation import (
 )
 
 __all__ = [
+    "CachedBronzeDataSource",
     "CircuitBreakerDataSourceDecorator",
     "RetryingDataSourceDecorator",
     "ValidationResult",
