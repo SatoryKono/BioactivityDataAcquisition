@@ -52,7 +52,7 @@ class TestCompositePublicationColumns:
 
     def test_column_groups_count(self, column_groups: list[ColumnGroupConfig]) -> None:
         """Verify the number of semantic groups in the configuration."""
-        # system, provider_ids, journal, pagination, authors, affiliations, 
+        # system, provider_ids, journal, pagination, authors, affiliations,
         # date, subjects, biomedical, citations, doc_type
         assert len(column_groups) == 11
 
@@ -74,12 +74,14 @@ class TestCompositePublicationColumns:
         actual_names = {g.name for g in column_groups}
         assert actual_names == expected_names
 
-    def test_total_base_fields_coverage(self, column_groups: list[ColumnGroupConfig]) -> None:
+    def test_total_base_fields_coverage(
+        self, column_groups: list[ColumnGroupConfig]
+    ) -> None:
         """Verify the total number of base fields covered by groups."""
         all_fields = []
         for g in column_groups:
             all_fields.extend(g.fields)
-        
+
         # We expect around 100 base fields based on manual count
         assert len(all_fields) >= 90
         assert len(set(all_fields)) == len(all_fields), "Duplicate fields across groups"
@@ -93,7 +95,7 @@ class TestCompositePublicationColumns:
             "doi",
         ]
         ordered = orderer.order_column_names(columns)
-        
+
         assert ordered[0] == "entity_id"
         assert ordered[1] == "_run_id"
 
@@ -109,7 +111,7 @@ class TestCompositePublicationColumns:
             "openalex.publication.title",
         ]
         ordered = orderer.order_column_names(columns)
-        
+
         expected = [
             "pubmed.publication.title",
             "semanticscholar.publication.title",
@@ -123,12 +125,12 @@ class TestCompositePublicationColumns:
         """Verify that columns from different groups are ordered correctly."""
         columns = [
             "pubmed.publication.chemicals",  # biomedical
-            "chembl.publication.title",      # journal
-            "pubmed.publication.pmid",       # provider_ids
-            "entity_id",                     # system
+            "chembl.publication.title",  # journal
+            "pubmed.publication.pmid",  # provider_ids
+            "entity_id",  # system
         ]
         ordered = orderer.order_column_names(columns)
-        
+
         # Order: system -> provider_ids -> journal -> biomedical
         assert ordered == [
             "entity_id",
@@ -146,7 +148,7 @@ class TestCompositePublicationColumns:
             "_dq_warn",
         ]
         ordered = orderer.order_column_names(columns)
-        
+
         assert ordered[-2] == "_dq_error"
         assert ordered[-1] == "_dq_warn"
 
@@ -168,16 +170,16 @@ class TestCompositePublicationColumns:
             "_dq_error",
             "_dq_warn",
         ]
-        
+
         ordered = orderer.order_column_names(columns)
-        
+
         # Verify specific names exist in the output
         assert "chembl.publication.document_chembl_id" in ordered
         assert "pubmed.publication.pmid" in ordered
         assert "pubmed.publication.authors_with_affiliations" in ordered
         assert "semanticscholar.publication.influential_citation_count" in ordered
         assert "pubmed.publication.chemicals" in ordered
-        
+
         # Verify ordering of these keys
         # system -> provider_ids -> journal -> authors -> biomedical -> citations -> doc_type -> DQ
         # 1. entity_id, content_hash (system)
@@ -188,16 +190,27 @@ class TestCompositePublicationColumns:
         # 6. semanticscholar.publication.influential_citation_count (citations)
         # 7. openalex.publication.is_retracted (doc_type)
         # 8. _dq_error, _dq_warn
-        
+
         system_indices = [ordered.index("entity_id"), ordered.index("content_hash")]
-        id_indices = [ordered.index("chembl.publication.document_chembl_id"), ordered.index("pubmed.publication.pmid")]
-        journal_indices = [ordered.index("doi"), ordered.index("chembl.publication.title"), ordered.index("pubmed.publication.abstract")]
-        authors_indices = [ordered.index("pubmed.publication.authors_with_affiliations")]
+        id_indices = [
+            ordered.index("chembl.publication.document_chembl_id"),
+            ordered.index("pubmed.publication.pmid"),
+        ]
+        journal_indices = [
+            ordered.index("doi"),
+            ordered.index("chembl.publication.title"),
+            ordered.index("pubmed.publication.abstract"),
+        ]
+        authors_indices = [
+            ordered.index("pubmed.publication.authors_with_affiliations")
+        ]
         biomedical_indices = [ordered.index("pubmed.publication.chemicals")]
-        citations_indices = [ordered.index("semanticscholar.publication.influential_citation_count")]
+        citations_indices = [
+            ordered.index("semanticscholar.publication.influential_citation_count")
+        ]
         doc_type_indices = [ordered.index("openalex.publication.is_retracted")]
         dq_indices = [ordered.index("_dq_error"), ordered.index("_dq_warn")]
-        
+
         assert max(system_indices) < min(id_indices)
         assert max(id_indices) < min(journal_indices)
         assert max(journal_indices) < min(authors_indices)
