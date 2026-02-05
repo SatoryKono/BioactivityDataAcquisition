@@ -184,7 +184,6 @@ class SilverWriter(BaseDeltaWriter):
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
-        schema_fields = set(schema.names)
         string_fields = {
             field.name
             for field in schema

@@ -334,7 +334,7 @@ def _create_cached_bronze_data_source(
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     cached_bronze: CachedBronzeContext,
-) -> DataSourcePort:
+) -> Any:  # Returns CachedBronzeDataSource which implements DataSourcePort protocol
     """Create CachedBronzeDataSource for reading from Bronze cache.
 
     Creates a data source that reads from existing Bronze layer files

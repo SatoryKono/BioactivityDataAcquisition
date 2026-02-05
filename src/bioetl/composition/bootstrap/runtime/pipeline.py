@@ -147,6 +147,13 @@ def bootstrap_pipeline_runner(
     pipeline_def = effective_registry.get(ctx.pipeline_name)
     factory = pipeline_def.factory
 
+    # Note: cached_bronze is passed to create_runner if supported by factory protocol
+    # but not all factories may support it yet. We rely on factories accepting **kwargs
+    # or specific arguments. The generic factory supports it.
+    kwargs = {}
+    if cached_bronze:
+        kwargs["cached_bronze"] = cached_bronze
+
     return factory.create_runner(
         run_id=ctx.run_id,
         runtime=runtime_config,
@@ -154,7 +161,7 @@ def bootstrap_pipeline_runner(
         observability=observability,
         filter_config=filter_config,
         config=yaml_config,
-        cached_bronze=cached_bronze,
+        **kwargs,
     )
 
 

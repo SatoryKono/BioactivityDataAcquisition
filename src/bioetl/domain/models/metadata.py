@@ -16,13 +16,13 @@ Version: 1.1
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
-class LayerType(str, Enum):
+class LayerType(StrEnum):
     """Medallion architecture layer type."""
 
     BRONZE = "bronze"
@@ -30,7 +30,7 @@ class LayerType(str, Enum):
     GOLD = "gold"
 
 
-class RunTypeEnum(str, Enum):
+class RunTypeEnum(StrEnum):
     """Type of pipeline run (mirrors domain.types.RunType)."""
 
     INCREMENTAL = "incremental"
