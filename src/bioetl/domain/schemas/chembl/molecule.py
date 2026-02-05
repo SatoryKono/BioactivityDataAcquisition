@@ -9,6 +9,12 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    CHEMBL_ID_PATTERN,
+    MAX_PHASE_VALUES,
+    MOLECULE_TYPES,
+    STRUCTURE_TYPES,
+)
 from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
 
 
@@ -24,7 +30,7 @@ class MoleculeSchema(ETLRecordSchema):
     # === Identifiers ===
     molecule_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
     structure_standard_inchi_key: Series[str] | None = pa.Field(
@@ -45,30 +51,17 @@ class MoleculeSchema(ETLRecordSchema):
     )
     max_phase: Series[float] | None = pa.Field(
         nullable=True,
-        isin=[-1, 0, 0.5, 1, 2, 3, 4],
+        isin=list(MAX_PHASE_VALUES),
         description="Maximum clinical phase.",
     )
     structure_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["MOL", "SEQ", "BOTH", "NONE"],
+        isin=list(STRUCTURE_TYPES),
         description="Structure type.",
     )
     molecule_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=[
-            "Small molecule",
-            "Inorganic small molecule",
-            "Polymeric small molecule",
-            "Antibody",
-            "Antibody drug conjugate",
-            "Protein",
-            "Oligonucleotide",
-            "Oligosaccharide",
-            "Cell",
-            "Enzyme",
-            "Unknown",
-            "Unclassified",
-        ],
+        isin=list(MOLECULE_TYPES),
         description="Molecule type.",
     )
     first_approval: Series[int] | None = pa.Field(
