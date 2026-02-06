@@ -7,6 +7,7 @@ Expected: ~80 tests covering 25 structural rules from validation schema.
 import pytest
 import pandas as pd
 import pandera as pa
+from datetime import date
 
 
 @pytest.mark.unit
@@ -535,11 +536,12 @@ class TestContentHashIntegrity:
         df = minimal_pubmed_publication_df.copy()
 
         # Compute expected hash
+        pub_year = df["publication_year"].iloc[0]
         content = {
             "title": df["title"].iloc[0],
             "abstract": df["abstract"].iloc[0],
             "authors": df["authors"].iloc[0],
-            "publication_year": df["publication_year"].iloc[0],
+            "publication_year": int(pub_year) if pd.notna(pub_year) else None,
             "journal": df["journal"].iloc[0],
             "doi": df.get("doi", pd.Series([None])).iloc[0],
         }

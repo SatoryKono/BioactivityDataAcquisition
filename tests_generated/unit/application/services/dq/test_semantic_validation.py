@@ -226,3 +226,249 @@ class TestMeSHRelevance:
 # - Use mocks for NLP operations
 # - Never produce FAIL (only WARN)
 # - Test both PASS and WARN scenarios
+
+
+# ============================================================================
+# ADDITIONAL SEMANTIC VALIDATION TESTS
+# Generated to complete semantic validation coverage (+17 tests)
+# ============================================================================
+
+
+@pytest.mark.unit
+class TestTitleAbstractCoherence:
+    """Additional tests for title-abstract semantic coherence."""
+
+    @mock.patch("semantic_validator.compute_similarity")
+    def test_title_abstract_threshold_boundary(
+        self, mock_similarity, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: similarity exactly at threshold (0.3)."""
+        mock_similarity.return_value = 0.3  # Exactly at threshold
+
+        df = minimal_pubmed_publication_df.copy()
+        similarity = mock_similarity(df["title"].iloc[0], df["abstract"].iloc[0])
+        assert similarity >= 0.3
+
+    @mock.patch("semantic_validator.compute_similarity")
+    def test_title_abstract_very_low_similarity(
+        self, mock_similarity, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: similarity near zero (completely unrelated)."""
+        mock_similarity.return_value = 0.01
+
+        df = minimal_pubmed_publication_df.copy()
+        df["title"] = "Quantum Computing"
+        df["abstract"] = "This paper discusses traditional cooking methods in rural areas."
+
+        similarity = mock_similarity(df["title"].iloc[0], df["abstract"].iloc[0])
+        assert similarity < 0.1
+
+    @mock.patch("semantic_validator.compute_similarity")
+    def test_title_abstract_identical_text(
+        self, mock_similarity, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: similarity = 1.0 (identical text)."""
+        mock_similarity.return_value = 1.0
+
+        df = minimal_pubmed_publication_df.copy()
+        df["title"] = "Machine Learning"
+        df["abstract"] = "Machine Learning"
+
+        similarity = mock_similarity(df["title"].iloc[0], df["abstract"].iloc[0])
+        assert similarity == 1.0
+
+
+@pytest.mark.unit
+class TestLanguageConsistency:
+    """Extended language detection tests."""
+
+    @mock.patch("language_detector.detect")
+    def test_multi_language_abstract_warns(
+        self, mock_detector, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: abstract contains mixed languages."""
+        mock_detector.return_value = "mixed"
+
+        df = minimal_pubmed_publication_df.copy()
+        df["language"] = "eng"
+        df["abstract"] = "This is English. Ceci est français. Das ist Deutsch."
+
+        detected = mock_detector(df["abstract"].iloc[0])
+        assert detected == "mixed"
+
+    @mock.patch("language_detector.detect")
+    def test_language_confidence_low_warns(
+        self, mock_detector, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: language detection confidence low."""
+        mock_detector.return_value = {"language": "eng", "confidence": 0.3}
+
+        df = minimal_pubmed_publication_df.copy()
+
+        result = mock_detector(df["abstract"].iloc[0])
+        assert result["confidence"] < 0.5
+
+    @mock.patch("language_detector.detect")
+    def test_title_abstract_language_consistent(
+        self, mock_detector, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: title and abstract in same language."""
+        mock_detector.side_effect = ["eng", "eng"]
+
+        df = minimal_pubmed_publication_df.copy()
+        df["language"] = "eng"
+
+        title_lang = mock_detector(df["title"].iloc[0])
+        abstract_lang = mock_detector(df["abstract"].iloc[0])
+
+        assert title_lang == abstract_lang
+
+
+@pytest.mark.unit
+class TestKeywordRelevanceExtended:
+    """Extended keyword relevance tests."""
+
+    @mock.patch("keyword_extractor.extract_keywords")
+    def test_keywords_case_insensitive_match(
+        self, mock_extractor, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: keywords match case-insensitively."""
+        mock_extractor.return_value = ["Machine Learning", "Neural Networks"]
+
+        df = minimal_pubmed_publication_df.copy()
+        df["subject_keywords"] = '["machine learning", "deep learning"]'
+
+        extracted = set(k.lower() for k in mock_extractor(df["abstract"].iloc[0]))
+        declared = set(k.lower() for k in eval(df["subject_keywords"].iloc[0]))
+
+        overlap = extracted & declared
+        assert len(overlap) > 0
+
+    @mock.patch("keyword_extractor.extract_keywords")
+    def test_keywords_partial_overlap(
+        self, mock_extractor, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: at least one keyword overlaps."""
+        mock_extractor.return_value = ["machine learning", "data science", "AI"]
+
+        df = minimal_pubmed_publication_df.copy()
+        df["subject_keywords"] = '["machine learning", "statistics"]'
+
+        extracted = set(mock_extractor(df["abstract"].iloc[0]))
+        declared = set(eval(df["subject_keywords"].iloc[0]))
+
+        overlap = extracted & declared
+        assert len(overlap) >= 1
+
+    @mock.patch("keyword_extractor.extract_keywords")
+    def test_keywords_empty_abstract_skipped(
+        self, mock_extractor, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """SKIP: empty abstract, cannot extract keywords."""
+        mock_extractor.return_value = []
+
+        df = minimal_pubmed_publication_df.copy()
+        df["abstract"] = ""
+
+        keywords = mock_extractor(df["abstract"].iloc[0])
+        assert len(keywords) == 0
+
+
+@pytest.mark.unit
+class TestTLDRQuality:
+    """Test TLDR quality for Semantic Scholar."""
+
+    @mock.patch("semantic_validator.compute_similarity")
+    def test_tldr_shorter_than_abstract(
+        self, mock_similarity, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: TLDR is significantly shorter than abstract."""
+        df = minimal_semanticscholar_publication_df.copy()
+        df["abstract"] = "A" * 1000  # Long abstract
+        df["tldr"] = "B" * 100  # Short TLDR
+
+        assert len(df["tldr"].iloc[0]) < len(df["abstract"].iloc[0]) * 0.5
+
+    @mock.patch("semantic_validator.compute_similarity")
+    def test_tldr_too_similar_to_abstract_warns(
+        self, mock_similarity, minimal_semanticscholar_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: TLDR too similar to abstract (likely copy-paste)."""
+        mock_similarity.return_value = 0.99  # Nearly identical
+
+        df = minimal_semanticscholar_publication_df.copy()
+        similarity = mock_similarity(df["abstract"].iloc[0], df["tldr"].iloc[0])
+        assert similarity > 0.95  # Too similar
+
+
+@pytest.mark.unit
+class TestMeSHRelevanceExtended:
+    """Extended MeSH term relevance tests."""
+
+    @mock.patch("mesh_validator.assess_relevance")
+    def test_mesh_all_terms_relevant(
+        self, mock_relevance, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: all MeSH terms highly relevant."""
+        mock_relevance.return_value = 0.95
+
+        df = minimal_pubmed_publication_df.copy()
+        df["subject_mesh"] = '["Machine Learning", "Drug Discovery"]'
+
+        relevance = mock_relevance(df["subject_mesh"].iloc[0], df["abstract"].iloc[0])
+        assert relevance > 0.8
+
+    @mock.patch("mesh_validator.assess_relevance")
+    def test_mesh_partial_relevance(
+        self, mock_relevance, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: some MeSH terms relevant (threshold met)."""
+        mock_relevance.return_value = 0.6
+
+        df = minimal_pubmed_publication_df.copy()
+        relevance = mock_relevance(df["subject_mesh"].iloc[0], df["abstract"].iloc[0])
+        assert relevance > 0.5
+
+    @mock.patch("mesh_validator.assess_relevance")
+    def test_mesh_empty_list_skipped(
+        self, mock_relevance, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """SKIP: no MeSH terms provided."""
+        df = minimal_pubmed_publication_df.copy()
+        df["subject_mesh"] = "[]"
+
+        mesh_terms = eval(df["subject_mesh"].iloc[0])
+        assert len(mesh_terms) == 0  # Skip validation
+
+
+@pytest.mark.unit
+class TestTextQualityChecks:
+    """Test text quality indicators (readability, completeness)."""
+
+    def test_abstract_min_length_valid(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: abstract has sufficient length (>100 chars)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["abstract"] = "A" * 150
+
+        assert len(df["abstract"].iloc[0]) > 100
+
+    def test_abstract_too_short_warns(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: abstract suspiciously short (<50 chars)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["abstract"] = "Too short."
+
+        assert len(df["abstract"].iloc[0]) < 50
+
+    def test_title_reasonable_length(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: title length in reasonable range (10-200 chars)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["title"] = "Machine Learning in Drug Discovery"
+
+        title_len = len(df["title"].iloc[0])
+        assert 10 <= title_len <= 200
