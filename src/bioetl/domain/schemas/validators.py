@@ -125,9 +125,7 @@ json_object_check = pa.Check(is_valid_json_object, name="valid_json_object")
     statistics=["min_value"],
     supported_types=(pd.Series,),
 )
-def is_non_negative(
-    pandas_obj: pd.Series, *, min_value: float | bool = 0
-) -> pd.Series:
+def is_non_negative(pandas_obj: pd.Series, *, min_value: float | bool = 0) -> pd.Series:
     """Check that values are non-negative (>= 0).
 
     Usage in schema:

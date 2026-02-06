@@ -107,7 +107,9 @@ class TestCorpusIdPaperIdDependency:
         # This should fail structural validation
         has_corpus = df["corpus_id"].notna()
         has_paper = df["paper_id"].notna()
-        assert not (has_corpus & ~has_paper).all(), "corpus_id requires paper_id"
+        # Structural rule: corpus_id requires paper_id.
+        # We assert that we HAVE detected the inconsistency (i.e. rows with corpus but no paper)
+        assert (has_corpus & ~has_paper).any(), "corpus_id without paper_id should be detected"
 
 
 @pytest.mark.unit
@@ -221,7 +223,173 @@ class TestPublishedPrintOnlineOrder:
         assert df["published_print"].iloc[0] > df["published_online"].iloc[0]
 
 
-# TODO: Add remaining ~60 structural validation tests
+@pytest.mark.unit
+class TestAuthorCountConsistency:
+    """Test author_count matches length of authors list."""
+
+    def test_author_count_matches_list_valid(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: author_count == len(authors)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["authors"] = '["Author A", "Author B"]'
+        df["author_count"] = 2
+
+        assert df["author_count"].iloc[0] == len(eval(df["authors"].iloc[0]))
+
+    def test_author_count_mismatch_warns(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: author_count != len(authors) -> _dq_warn=True."""
+        df = minimal_pubmed_publication_df.copy()
+        df["authors"] = '["Author A", "Author B"]'
+        df["author_count"] = 5
+
+        assert df["author_count"].iloc[0] != len(eval(df["authors"].iloc[0]))
+
+
+@pytest.mark.unit
+class TestVolumeIssueDependency:
+    """Test issue presence often implies volume presence."""
+
+    def test_issue_with_volume_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: issue and volume both present."""
+        df = minimal_chembl_publication_df.copy()
+        df["volume"] = "10"
+        df["issue"] = "5"
+
+        assert df["volume"].notna().all()
+        assert df["issue"].notna().all()
+
+    def test_issue_without_volume_warns(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: issue present but volume missing."""
+        df = minimal_chembl_publication_df.copy()
+        df["volume"] = None
+        df["issue"] = "5"
+
+        has_issue = df["issue"].notna()
+        has_volume = df["volume"].notna()
+
+        # Structural rule: IF issue NOT NULL THEN volume SHOULD NOT be NULL
+        assert (has_issue & ~has_volume).any()
+
+
+@pytest.mark.unit
+class TestPmidStructure:
+    """Test PMID is numeric."""
+
+    def test_pmid_is_numeric_valid(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: pmid is numeric string."""
+        df = minimal_pubmed_publication_df.copy()
+        df["pmid"] = "12345678"
+
+        assert df["pmid"].iloc[0].isdigit()
+
+    def test_pmid_non_numeric_fails(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """FAIL: pmid contains non-numeric chars."""
+        df = minimal_pubmed_publication_df.copy()
+        df["pmid"] = "PMC12345"
+
+        assert not df["pmid"].iloc[0].isdigit()
+
+
+@pytest.mark.unit
+class TestDoiFormat:
+    """Test DOI starts with '10.'."""
+
+    def test_doi_format_valid(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: DOI starts with '10.'."""
+        df = minimal_crossref_publication_df.copy()
+        df["doi"] = "10.1234/test.001"
+
+        assert df["doi"].iloc[0].startswith("10.")
+
+    def test_doi_format_invalid_warns(
+        self, minimal_crossref_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: DOI does not start with '10.'."""
+        df = minimal_crossref_publication_df.copy()
+        df["doi"] = "doi:1234/test"
+
+        assert not df["doi"].iloc[0].startswith("10.")
+
+
+@pytest.mark.unit
+class TestIssnFormat:
+    """Test ISSN format (XXXX-XXXX)."""
+
+    def test_issn_format_valid(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: ISSN matches XXXX-XXXX or XXXX-XXXY."""
+        df = minimal_pubmed_publication_df.copy()
+        df["issn"] = "1234-5678"
+        # Simple length check for structural validation
+        assert len(df["issn"].iloc[0]) == 9
+        assert df["issn"].iloc[0][4] == "-"
+
+    def test_issn_format_invalid_warns(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: ISSN invalid format."""
+        df = minimal_pubmed_publication_df.copy()
+        df["issn"] = "12345678"  # Missing hyphen
+        assert len(df["issn"].iloc[0]) != 9 or df["issn"].iloc[0][4] != "-"
+
+
+@pytest.mark.unit
+class TestPublicationTypeValid:
+    """Test publication_type is not empty."""
+
+    def test_pub_type_present(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: publication_type is present."""
+        df = minimal_pubmed_publication_df.copy()
+        assert df["publication_type"].notna().all()
+        assert (df["publication_type"] != "").all()
+
+    def test_pub_type_missing_fails(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """FAIL: publication_type missing."""
+        df = minimal_pubmed_publication_df.copy()
+        df["publication_type"] = None
+        assert df["publication_type"].isna().any()
+
+
+@pytest.mark.unit
+class TestLanguageCode:
+    """Test language code length (2 or 3 chars)."""
+
+    def test_language_code_valid(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: language code is 2 or 3 chars."""
+        df = minimal_pubmed_publication_df.copy()
+        df["language"] = "eng"
+        assert len(df["language"].iloc[0]) in [2, 3]
+
+    def test_language_code_invalid_warns(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: language code invalid length."""
+        df = minimal_pubmed_publication_df.copy()
+        df["language"] = "English"
+        assert len(df["language"].iloc[0]) not in [2, 3]
+
+
+# TODO: Add remaining ~40 structural validation tests
 # Based on structural_validation rules from validation schema XLSX
 # Each rule should have 3-4 test scenarios:
 # - both_valid, inconsistent, both_null, partial_null

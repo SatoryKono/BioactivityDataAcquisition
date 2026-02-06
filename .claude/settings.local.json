@@ -17,7 +17,9 @@
       "Bash(.venvScriptspip install openpyxl)",
       "Bash(.venvScriptspip.exe install openpyxl)",
       "Bash(python -m pip install:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(code --install-extension:*)",
+      "Bash(code .)"
     ]
   },
   "enabledPlugins": {
