@@ -19,7 +19,9 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 import pandera as pa
-from pandera.extensions import register_check_method  # type: ignore[attr-defined, unused-ignore]
+from pandera.extensions import (
+    register_check_method,  # type: ignore[attr-defined, unused-ignore]
+)
 
 if TYPE_CHECKING:
     pass

@@ -1,176 +1,59 @@
-"""Utility functions for UniProt data extraction."""
-
 from __future__ import annotations
 
-from datetime import date
-from typing import Any, ClassVar
+import re
+from typing import TYPE_CHECKING, Any
 
-import orjson
+if TYPE_CHECKING:
+    from bioetl.domain.types import IsoformNote
 
 
-class ExtractorUtils:
-    """Common utility methods for UniProt data extraction."""
+def clean_text(text: str) -> str:
+    """Removes trailing periods and excessive whitespace from text."""
+    if not text:
+        return ""
+    text = text.strip()
+    if text.endswith("."):
+        text = text[:-1]
+    return text.strip()
 
-    # Mapping of UniProt protein existence values
-    EXISTENCE_MAP: ClassVar[dict[str, str]] = {
-        "1: Evidence at protein level": "Evidence at protein level",
-        "2: Evidence at transcript level": "Evidence at transcript level",
-        "3: Inferred from homology": "Inferred from homology",
-        "4: Predicted": "Predicted",
-        "5: Uncertain": "Uncertain",
-    }
 
-    @staticmethod
-    def serialize_list(value: Any) -> str | None:
-        """Serialize a list to JSON string.
+def split_semicolon(text: str) -> list[str]:
+    """Splits a semicolon-separated string into a list of strings."""
+    if not text:
+        return []
+    return [t.strip() for t in text.split(";") if t.strip()]
 
-        Args:
-            value: List to serialize, or None/non-list.
 
-        Returns:
-            JSON string or None if empty/None/not a list.
-        """
-        if not value or not isinstance(value, list):
-            return None
-        return orjson.dumps(value).decode("utf-8")
+def process_single_isoform_note(
+    note_text: str, isoform_ids: list[str], result: dict[str, list[IsoformNote]]
+) -> None:
+    """Processes a single isoform note and updates the result dictionary."""
+    if not note_text:
+        return
 
-    @staticmethod
-    def count_list(value: Any) -> int | None:
-        """Count items in a list.
+    # Extract all RefSeq IDs from the note text using regex
+    # Pattern looks for RefSeq IDs like NP_001234.1 or NM_001234.2
+    refseq_pattern = r"(N[M|P]_\d+\.\d+)"
+    refseq_ids = list(set(re.findall(refseq_pattern, note_text)))
 
-        Args:
-            value: List to count, or None/non-list.
+    if not refseq_ids:
+        return
 
-        Returns:
-            Count or None if not a list.
-        """
-        if value is None:
-            return None
-        if isinstance(value, list):
-            return len(value)
-        return None
+    # Create IsoformNote object
+    isoform_note: IsoformNote = {"note": note_text, "refseq_ids": refseq_ids}
 
-    @staticmethod
-    def is_reviewed(entry_type: Any) -> bool:
-        """Check if entry is Swiss-Prot (reviewed).
-
-        Args:
-            entry_type: Entry type string from record.
-
-        Returns:
-            True if reviewed (Swiss-Prot), False otherwise.
-        """
-        return "Swiss-Prot" in str(entry_type or "")
-
-    @classmethod
-    def extract_protein_existence(cls, existence: Any) -> str | None:
-        """Extract and normalize protein existence level.
-
-        Args:
-            existence: Raw protein existence value from API.
-
-        Returns:
-            Normalized protein existence level or None.
-        """
-        if not existence:
-            return None
-        existence_str = str(existence)
-        return cls.EXISTENCE_MAP.get(existence_str, existence_str)
-
-    @staticmethod
-    def _extract_values_from_list(
-        data: list[dict[str, Any]], key: str = "value"
-    ) -> list[str]:
-        """Extract values from a list of dictionaries.
-
-        Args:
-            data: List of dictionaries.
-            key: Key to extract from each dictionary.
-
-        Returns:
-            List of extracted values.
-        """
-        values = [item.get(key) for item in data if isinstance(item, dict)]
-        return [v for v in values if v]
-
-    @staticmethod
-    def extract_short_names(recommended_name: dict[str, Any] | None) -> str | None:
-        """Extract short names from recommended name.
-
-        Args:
-            recommended_name: proteinDescription.recommendedName dict.
-
-        Returns:
-            JSON array of short names or None.
-        """
-        if not recommended_name:
-            return None
-        short_names = recommended_name.get("shortNames")
-        if not isinstance(short_names, list):
-            return None
-        values = ExtractorUtils._extract_values_from_list(short_names)
-        return orjson.dumps(values).decode("utf-8") if values else None
-
-    @staticmethod
-    def extract_alternative_names(protein_desc: Any) -> str | None:
-        """Extract alternative protein names.
-
-        Args:
-            protein_desc: proteinDescription dict.
-
-        Returns:
-            JSON array of alternative names or None.
-        """
-        if not protein_desc or not isinstance(protein_desc, dict):
-            return None
-        alt_names = protein_desc.get("alternativeNames")
-        if not isinstance(alt_names, list):
-            return None
-
-        values = []
-        for alt in alt_names:
-            if not isinstance(alt, dict):
-                continue
-            full_name = alt.get("fullName")
-            if isinstance(full_name, dict):
-                name = full_name.get("value")
-                if name:
-                    values.append(name)
-        return orjson.dumps(values).decode("utf-8") if values else None
-
-    @staticmethod
-    def extract_ec_numbers(recommended_name: dict[str, Any] | None) -> str | None:
-        """Extract EC numbers from recommended name.
-
-        Args:
-            recommended_name: proteinDescription.recommendedName dict.
-
-        Returns:
-            JSON array of EC numbers or None.
-        """
-        if not recommended_name:
-            return None
-        ec_numbers = recommended_name.get("ecNumbers")
-        if not isinstance(ec_numbers, list):
-            return None
-        values = ExtractorUtils._extract_values_from_list(ec_numbers)
-        return orjson.dumps(values).decode("utf-8") if values else None
-
-    @staticmethod
-    def parse_uniprot_date(date_str: Any) -> date | None:
-        """Parse UniProt date string to datetime.date.
-
-        UniProt API returns dates in ISO 8601 format (YYYY-MM-DD).
-
-        Args:
-            date_str: Date string from UniProt API (e.g., "2000-12-01").
-
-        Returns:
-            Parsed date object or None if invalid/empty.
-        """
-        if not date_str or not isinstance(date_str, str):
-            return None
-        try:
-            return date.fromisoformat(date_str)
-        except ValueError:
-            return None
+    # Associate this note with each isoform ID found in the evidence
+    for isoform_id in isoform_ids:
+        if isoform_id not in result:
+            result[isoform_id] = []
+        # Avoid duplicate notes for the same isoform
+        exists = False
+        for existing in result[isoform_id]:
+            if (
+                existing["note"] == isoform_note["note"]
+                and set(existing["refseq_ids"]) == set(isoform_note["refseq_ids"])
+            ):
+                exists = True
+                break
+        if not exists:
+            result[isoform_id].append(isoform_note)
