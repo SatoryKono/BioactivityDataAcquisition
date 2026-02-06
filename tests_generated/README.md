@@ -3,7 +3,7 @@
 **Version:** 1.0.0
 **Generated:** 2026-02-06
 **Source:** `publication_validation_schema_v3.xlsx`
-**Total Tests:** 471 (of ~735 planned)
+**Total Tests:** 485 (of ~735 planned)
 
 ---
 
@@ -12,12 +12,12 @@
 | Validation Level | Expected | Generated | Status | Coverage |
 |------------------|----------|-----------|--------|----------|
 | **Base Validation** | 500 | 329 | PARTIAL | 66% |
-| **Structural Validation** | 80 | 16 | INCOMPLETE | 20% |
+| **Structural Validation** | 80 | 30 | PARTIAL | 38% |
 | **External Verification** | 40 | 16 | INCOMPLETE | 40% |
 | **Logical Validation** | 60 | 12 | INCOMPLETE | 20% |
 | **Semantic Validation** | 30 | 13 | GOOD | 43% |
 | **Contract Tests** | 25 | 10 | INCOMPLETE | 40% |
-| **TOTAL** | **735** | **471** | **PARTIAL** | **64%** |
+| **TOTAL** | **735** | **485** | **PARTIAL** | **66%** |
 
 ---
 
@@ -133,10 +133,10 @@ def test_doi_invalid_format(self, minimal_crossref_publication_df: pd.DataFrame,
 
 ---
 
-### ⚠️ Structural Validation Tests (16 tests)
+### ⚠️ Structural Validation Tests (30 tests)
 
 **What:** Cross-field consistency rules
-**Status:** INCOMPLETE (20% complete)
+**Status:** PARTIAL (38% complete)
 **Location:** `unit/application/services/dq/test_structural_validation.py`
 
 **Implemented Rules (examples):**
@@ -147,8 +147,15 @@ def test_doi_invalid_format(self, minimal_crossref_publication_df: pd.DataFrame,
 - ✅ `DOI` → `title` dependency
 - ✅ `citations_received >= influential_citation_count` (S2)
 - ✅ `published_print <= published_online` (CrossRef)
+- ✅ `author_count == len(authors)`
+- ✅ `issue` implies `volume`
+- ✅ `pmid` is numeric
+- ✅ `DOI` format starts with '10.'
+- ✅ `ISSN` format (XXXX-XXXX)
+- ✅ `publication_type` is present
+- ✅ `language` code length (2 or 3)
 
-**TODO:** Expand to cover all 25 structural rules from XLSX (remaining ~60 tests)
+**TODO:** Expand to cover all 25 structural rules from XLSX (remaining ~50 tests)
 
 ---
 
