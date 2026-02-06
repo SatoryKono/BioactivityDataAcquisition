@@ -39,6 +39,10 @@ dependencies = [
     "structlog>=24.0",
     # High-performance JSON serialization (required by batch_writer, bronze_writer, delta_writer)
     "orjson>=3.11.0,<4.0",
+    "black",
+    "ty",
+    "pyrefly",
+    "basedpyright",
 ]
 
 [project.scripts]
