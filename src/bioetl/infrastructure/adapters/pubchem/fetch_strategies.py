@@ -260,15 +260,8 @@ class PubChemFetchStrategies:
             if not inchikey or not inchikey.strip():
                 continue
 
-            # Basic InChIKey format validation (27 chars, XXXX-YYYY-Z pattern)
             cleaned = inchikey.strip()
-            if len(cleaned) != 27 or cleaned.count("-") != 2:
-                self._logger.warning(
-                    "invalid_inchikey_skipped",
-                    provider=self._provider_name,
-                    inchikey=cleaned[:30],
-                    reason="invalid_format",
-                )
+            if not self._validate_inchikey(cleaned):
                 continue
 
             try:
@@ -285,6 +278,18 @@ class PubChemFetchStrategies:
                     inchikey=cleaned,
                     error=str(e),
                 )
+
+    def _validate_inchikey(self, inchikey: str) -> bool:
+        """Validate InChIKey format."""
+        if len(inchikey) != 27 or inchikey.count("-") != 2:
+            self._logger.warning(
+                "invalid_inchikey_skipped",
+                provider=self._provider_name,
+                inchikey=inchikey[:30],
+                reason="invalid_format",
+            )
+            return False
+        return True
 
     async def fetch_substances(
         self, query: str | None, limit: int | None

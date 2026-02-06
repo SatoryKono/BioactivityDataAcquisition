@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict
 from uuid import UUID
 
@@ -55,7 +55,7 @@ class SilverRecord(TypedDict, total=False):
     # Other fields are dynamic based on entity type
 
 
-class RunType(str, Enum):
+class RunType(StrEnum):
     """Type of pipeline run (RULES.md §2.4).
 
     Determines merge priority: REBUILD > BACKFILL > INCREMENTAL
@@ -80,7 +80,7 @@ class RunType(str, Enum):
         return priorities[self]
 
 
-class DriftLevel(str, Enum):
+class DriftLevel(StrEnum):
     """Schema drift severity levels (RULES.md §2.2).
 
     - INFO: New optional fields appear
@@ -98,7 +98,7 @@ class DriftLevel(str, Enum):
     """Critical drift (missing required fields), blocks pipeline."""
 
 
-class HealthStatus(str, Enum):
+class HealthStatus(StrEnum):
     """Provider health status (RULES.md §3.5).
 
     State transitions:
@@ -126,7 +126,7 @@ class HealthStatus(str, Enum):
         }[self]
 
 
-class CircuitBreakerState(str, Enum):
+class CircuitBreakerState(StrEnum):
     """Circuit breaker state (RULES.md §3.1.4).
 
     State machine:
@@ -153,7 +153,7 @@ class CircuitBreakerState(str, Enum):
         }[self]
 
 
-class DataClassification(str, Enum):
+class DataClassification(StrEnum):
     """Data sensitivity classification (RULES.md §5.4)."""
 
     PUBLIC = "PUBLIC"
@@ -166,7 +166,7 @@ class DataClassification(str, Enum):
     """Contains PII or sensitive data, requires encryption/hashing."""
 
 
-class ErrorType(str, Enum):
+class ErrorType(StrEnum):
     """Error classification (RULES.md §3.1.1).
 
     Determines pipeline behavior:
@@ -242,7 +242,7 @@ class ErrorType(str, Enum):
         }
 
 
-class QuarantineRecordStatus(str, Enum):
+class QuarantineRecordStatus(StrEnum):
     """Status of a quarantine record in Delta Lake storage (RULES.md §2.6).
 
     This enum represents the persisted status of quarantine records.

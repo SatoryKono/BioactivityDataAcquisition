@@ -19,12 +19,16 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 import pandera as pa
-from pandera.extensions import register_check_method
+from pandera.extensions import register_check_method  # type: ignore[attr-defined, unused-ignore]
 
 if TYPE_CHECKING:
     pass
 
 __all__ = [
+    "in_closed_range",
+    # Registered check methods (use in pa.Field)
+    "is_non_negative",
+    "is_positive",
     # JSON validators
     "is_valid_json",
     "is_valid_json_array",
@@ -32,13 +36,9 @@ __all__ = [
     "json_array_check",
     "json_check",
     "json_object_check",
-    # Registered check methods (use in pa.Field)
-    "is_non_negative",
-    "is_positive",
-    "in_closed_range",
     "max_str_length",
-    "str_starts_with",
     "str_matches_pattern",
+    "str_starts_with",
 ]
 
 
@@ -121,7 +121,7 @@ json_object_check = pa.Check(is_valid_json_object, name="valid_json_object")
 # and can be used in pa.Field() as keyword arguments.
 
 
-@register_check_method(
+@register_check_method(  # type: ignore[misc]
     statistics=["min_value"],
     supported_types=(pd.Series,),
 )
@@ -140,7 +140,7 @@ def is_non_negative(pandas_obj: pd.Series, *, min_value: float | bool = 0) -> pd
     return pandas_obj.isna() | (pandas_obj >= actual_min)
 
 
-@register_check_method(
+@register_check_method(  # type: ignore[misc]
     statistics=["min_value"],
     supported_types=(pd.Series,),
 )
@@ -159,7 +159,7 @@ def is_positive(pandas_obj: pd.Series, *, min_value: int | bool = 1) -> pd.Serie
     return pandas_obj.isna() | (pandas_obj >= actual_min)
 
 
-@register_check_method(
+@register_check_method(  # type: ignore[misc]
     statistics=["min_val", "max_val"],
     supported_types=(pd.Series,),
 )
@@ -179,7 +179,7 @@ def in_closed_range(
     return pandas_obj.isna() | ((pandas_obj >= min_val) & (pandas_obj <= max_val))
 
 
-@register_check_method(
+@register_check_method(  # type: ignore[misc]
     statistics=["max_len"],
     supported_types=(pd.Series,),
 )
@@ -192,7 +192,7 @@ def max_str_length(pandas_obj: pd.Series, *, max_len: int) -> pd.Series:
     return pandas_obj.isna() | (pandas_obj.str.len() <= max_len)
 
 
-@register_check_method(
+@register_check_method(  # type: ignore[misc]
     statistics=["prefix"],
     supported_types=(pd.Series,),
 )
@@ -205,7 +205,7 @@ def str_starts_with(pandas_obj: pd.Series, *, prefix: str) -> pd.Series:
     return pandas_obj.isna() | pandas_obj.str.startswith(prefix)
 
 
-@register_check_method(
+@register_check_method(  # type: ignore[misc]
     statistics=["pattern"],
     supported_types=(pd.Series,),
 )

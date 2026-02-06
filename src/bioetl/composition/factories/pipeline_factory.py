@@ -248,6 +248,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
+        **kwargs: Any,
     ) -> PipelineRunner:
         """Create a fully configured PipelineRunner with all components."""
         # Load config once if not provided

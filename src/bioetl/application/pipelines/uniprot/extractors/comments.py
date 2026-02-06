@@ -493,28 +493,7 @@ class CommentExtractor:
             if not isinstance(isoforms, list):
                 continue
 
-            for iso in isoforms:
-                if not isinstance(iso, dict):
-                    continue
-
-                # Extract isoform IDs
-                isoform_ids = iso.get("isoformIds", [])
-                if isinstance(isoform_ids, list):
-                    for iso_id in isoform_ids:
-                        if iso_id:
-                            ids.append(str(iso_id))
-
-                # Extract isoform name
-                name = iso.get("name", {})
-                if isinstance(name, dict) and name.get("value"):
-                    names.append(str(name["value"]))
-
-                # Extract synonyms
-                iso_synonyms = iso.get("synonyms", [])
-                if isinstance(iso_synonyms, list):
-                    for syn in iso_synonyms:
-                        if isinstance(syn, dict) and syn.get("value"):
-                            synonyms.append(str(syn["value"]))
+            CommentExtractor._process_isoforms(isoforms, names, ids, synonyms)
 
         if names:
             result["isoform_names"] = serialize_to_json(names, ensure_ascii=False)
@@ -524,6 +503,37 @@ class CommentExtractor:
             result["isoform_synonyms"] = serialize_to_json(synonyms, ensure_ascii=False)
 
         return result
+
+    @staticmethod
+    def _process_isoforms(
+        isoforms: list[dict[str, Any]],
+        names: list[str],
+        ids: list[str],
+        synonyms: list[str],
+    ) -> None:
+        """Process isoform list to extract details."""
+        for iso in isoforms:
+            if not isinstance(iso, dict):
+                continue
+
+            # Extract isoform IDs
+            isoform_ids = iso.get("isoformIds", [])
+            if isinstance(isoform_ids, list):
+                for iso_id in isoform_ids:
+                    if iso_id:
+                        ids.append(str(iso_id))
+
+            # Extract isoform name
+            name = iso.get("name", {})
+            if isinstance(name, dict) and name.get("value"):
+                names.append(str(name["value"]))
+
+            # Extract synonyms
+            iso_synonyms = iso.get("synonyms", [])
+            if isinstance(iso_synonyms, list):
+                for syn in iso_synonyms:
+                    if isinstance(syn, dict) and syn.get("value"):
+                        synonyms.append(str(syn["value"]))
 
     @staticmethod
     def extract_reactions(comments: Any) -> str | None:

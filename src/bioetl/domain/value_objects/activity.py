@@ -11,14 +11,14 @@ These Value Objects encapsulate validation and comparison logic.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.value_objects.activity_values import Concentration
 
 
-class RelationOperator(str, Enum):
+class RelationOperator(StrEnum):
     """Comparison operators for activity values.
 
     Used to express the relationship between a measured value

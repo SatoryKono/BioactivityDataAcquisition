@@ -339,6 +339,14 @@ class FeatureExtractor:
         if not patterns:
             return None
 
+        extracted = cls._filter_ptm_features(features, patterns)
+        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+
+    @classmethod
+    def _filter_ptm_features(
+        cls, features: list[Any], patterns: tuple[str, ...]
+    ) -> list[dict[str, Any]]:
+        """Filter features for PTM patterns."""
         mod_res_type = cls.FEATURE_TYPES["modified_residue"]
         extracted: list[dict[str, Any]] = []
 
@@ -357,8 +365,7 @@ class FeatureExtractor:
                 feature_data = _build_feature_dict(feature)
                 if feature_data:
                     extracted.append(feature_data)
-
-        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+        return extracted
 
     @classmethod
     def extract_phosphorylation(cls, features: Any) -> str | None:
