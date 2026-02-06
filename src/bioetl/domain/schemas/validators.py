@@ -125,28 +125,40 @@ json_object_check = pa.Check(is_valid_json_object, name="valid_json_object")
     statistics=["min_value"],
     supported_types=(pd.Series,),
 )
-def is_non_negative(pandas_obj: pd.Series, *, min_value: float = 0) -> pd.Series:
-    """Check that values are non-negative (>= min_value, default 0).
+def is_non_negative(
+    pandas_obj: pd.Series, *, min_value: float | bool = 0
+) -> pd.Series:
+    """Check that values are non-negative (>= 0).
 
     Usage in schema:
         field: Series[float] = pa.Field(is_non_negative=True)
-        field: Series[float] = pa.Field(is_non_negative={"min_value": 0})
+
+    Args:
+        pandas_obj: Series to validate.
+        min_value: When True (from is_non_negative=True), defaults to 0.
     """
-    return pandas_obj.isna() | (pandas_obj >= min_value)
+    # When used as is_non_negative=True, min_value comes in as True
+    actual_min = 0 if min_value is True else min_value
+    return pandas_obj.isna() | (pandas_obj >= actual_min)
 
 
 @register_check_method(
     statistics=["min_value"],
     supported_types=(pd.Series,),
 )
-def is_positive(pandas_obj: pd.Series, *, min_value: int = 1) -> pd.Series:
-    """Check that values are positive (>= min_value, default 1).
+def is_positive(pandas_obj: pd.Series, *, min_value: int | bool = 1) -> pd.Series:
+    """Check that values are positive (>= 1).
 
     Usage in schema:
         field: Series[int] = pa.Field(is_positive=True)
-        field: Series[int] = pa.Field(is_positive={"min_value": 1})
+
+    Args:
+        pandas_obj: Series to validate.
+        min_value: When True (from is_positive=True), defaults to 1.
     """
-    return pandas_obj.isna() | (pandas_obj >= min_value)
+    # When used as is_positive=True, min_value comes in as True
+    actual_min = 1 if min_value is True else min_value
+    return pandas_obj.isna() | (pandas_obj >= actual_min)
 
 
 @register_check_method(
