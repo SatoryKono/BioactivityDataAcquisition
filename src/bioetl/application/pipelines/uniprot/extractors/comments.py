@@ -1,284 +1,284 @@
-"""Comment data extraction for UniProt records."""
+"""
+Comment extractor for UniProt XML data.
+"""
 
-from __future__ import annotations
-
-import xml.etree.ElementTree as ET
 from typing import Any
 
-from bioetl.application.pipelines.uniprot.extractors.utils import (
-    IsoformNote,
-    clean_text,
-    process_single_isoform_note,
+from bioetl.application.pipelines.uniprot.extractors.abstract import AbstractExtractor
+from bioetl.application.pipelines.uniprot.extractors.extractor_utils import (
+    ExtractorUtils,
 )
+from bioetl.domain.types import IsoformNote
 
 
-class CommentExtractor:
-    """Extracts comment-related data from UniProt XML records."""
+class CommentExtractor(AbstractExtractor):
+    """
+    Extracts comment information from UniProt XML data.
 
-    def _clean_text(self, text: str) -> str:
-        """Removes trailing periods and excessive whitespace from text."""
-        return clean_text(text)
+    Comments include function, subunit, subcellular location, etc.
+    Complex logic is needed to parse structured comments like subcellular location
+    and isoform-specific notes.
+    """
 
-    def extract_comments(self, entry: ET.Element, ns: dict[str, str]) -> dict[str, Any]:
+    def extract(self, entry: dict[str, Any]) -> dict[str, Any]:
         """
-        Extracts various comment types from the UniProt entry.
+        Extract comments from a UniProt entry.
 
         Args:
-            entry: XML element for the entry
-            ns: Namespace dictionary
+            entry: The UniProt entry dictionary
 
         Returns:
-            Dictionary of extracted comments
+            Dictionary containing extracted comments and notes
         """
-        comments = entry.findall("u:comment", ns)
-
-        functions = []
-        subunits = []
-        domains = []
-        inductions = []
-        tissues = []
-        disruptions = []
-        regulations = []
-        pathways = []
-        misc = []
-        polymorphisms = []
-        similarities = []
-        cautions = []
-        pharmaceuticals = []
-        biotech = []
-        mass_spec = []
-        seq_cautions = []
-        interactions = []
-        diseases = []
-        subcellular = []
-        catalytic_activities = []
-        ec_numbers = set()
-        isoform_notes: dict[str, list[IsoformNote]] = {}
-
-        simple_fields = {
-            "function", "subunit", "domain", "induction", "tissue specificity",
-            "disruption phenotype", "activity regulation", "pathway",
-            "miscellaneous", "polymorphism", "similarity", "caution",
-            "pharmaceutical", "biotechnology"
+        result: dict[str, Any] = {
+            "function": [],
+            "subunit": [],
+            "subcellular_location": [],
+            "tissue_specificity": [],
+            "domain": [],
+            "ptm": [],
+            "similarity": [],
+            "mass_spectrometry": [],
+            "polymorphism": [],
+            "pharmaceutical": [],
+            "biotechnology": [],
+            "disruption_phenotype": [],
+            "disease": [],
+            "interaction": [],
+            "isoform_notes": [],
         }
 
-        for comment in comments:
-            c_type = comment.get("type")
-
-            if c_type == "catalytic activity":
-                # Handle structured catalytic activity (reaction)
-                reaction = comment.find("u:reaction", ns)
-                if reaction is not None:
-                    # Extract EC number
-                    db_refs = reaction.findall("u:dbReference", ns)
-                    for db_ref in db_refs:
-                        if db_ref.get("type") == "EC":
-                            ec_num = db_ref.get("id")
-                            if ec_num:
-                                ec_numbers.add(ec_num)
-
-                    # Extract reaction text
-                    text = reaction.find("u:text", ns)
-                    if text is not None and text.text:
-                        cleaned = self._clean_text(text.text)
-                        if cleaned:
-                            catalytic_activities.append(cleaned)
-
-            elif c_type in simple_fields:
-                # Handle simple text fields
-                text_elem = comment.find("u:text", ns)
-                if text_elem is not None and text_elem.text:
-                    cleaned = self._clean_text(text_elem.text)
-                    if cleaned:
-                        if c_type == "function":
-                            functions.append(cleaned)
-                        elif c_type == "subunit":
-                            subunits.append(cleaned)
-                        elif c_type == "domain":
-                            domains.append(cleaned)
-                        elif c_type == "induction":
-                            inductions.append(cleaned)
-                        elif c_type == "tissue specificity":
-                            tissues.append(cleaned)
-                        elif c_type == "disruption phenotype":
-                            disruptions.append(cleaned)
-                        elif c_type == "activity regulation":
-                            regulations.append(cleaned)
-                        elif c_type == "pathway":
-                            pathways.append(cleaned)
-                        elif c_type == "miscellaneous":
-                            misc.append(cleaned)
-                        elif c_type == "polymorphism":
-                            polymorphisms.append(cleaned)
-                        elif c_type == "similarity":
-                            similarities.append(cleaned)
-                        elif c_type == "caution":
-                            cautions.append(cleaned)
-                        elif c_type == "pharmaceutical":
-                            pharmaceuticals.append(cleaned)
-                        elif c_type == "biotechnology":
-                            biotech.append(cleaned)
-
-            elif c_type == "disease":
-                # Handle disease comments
-                disease = comment.find("u:disease", ns)
-                text_elem = comment.find("u:text", ns)
-
-                # Try to get disease ID if available
-                disease_id = None
-                if disease is not None:
-                    disease_id = disease.get("id")
-
-                # Get text from disease element or fallback to text element
-                d_text = None
-                if disease is not None:
-                    name_elem = disease.find("u:name", ns)
-                    if name_elem is not None:
-                        d_text = name_elem.text
-
-                    # Also look for description in disease element
-                    desc_elem = disease.find("u:description", ns)
-                    if desc_elem is not None and desc_elem.text:
-                        if d_text:
-                            d_text = f"{d_text}: {desc_elem.text}"
-                        else:
-                            d_text = desc_elem.text
-
-                if not d_text and text_elem is not None:
-                    d_text = text_elem.text
-
-                if d_text:
-                    cleaned = self._clean_text(d_text)
-                    if cleaned:
-                        if disease_id:
-                            diseases.append(f"{cleaned} (ID: {disease_id})")
-                        else:
-                            diseases.append(cleaned)
-
-            elif c_type == "subcellular location":
-                # Handle subcellular location
-                locs = comment.findall("u:subcellularLocation", ns)
-                for loc_group in locs:
-                    location_parts = []
-                    for loc in loc_group:
-                        if loc.text:
-                            cleaned = self._clean_text(loc.text)
-                            if cleaned:
-                                location_parts.append(cleaned)
-
-                    if location_parts:
-                        subcellular.append("; ".join(location_parts))
-
-            elif c_type == "alternative products":
-                # Extract isoform notes
-                isoform_notes.update(self._process_isoforms(comment, ns))
-
-            elif c_type == "mass spectrometry":
-                # Handle mass spec comments
-                text_elem = comment.find("u:text", ns)
-                if text_elem is not None and text_elem.text:
-                    cleaned = self._clean_text(text_elem.text)
-                    if cleaned:
-                        mass_spec.append(cleaned)
-
-            elif c_type == "sequence caution":
-                # Handle sequence caution
-                text_elem = comment.find("u:text", ns)
-                conflict_type = comment.get("type")
-
-                caution_parts = []
-                if conflict_type:
-                    caution_parts.append(f"Type: {conflict_type}")
-
-                if text_elem is not None and text_elem.text:
-                    cleaned = self._clean_text(text_elem.text)
-                    if cleaned:
-                        caution_parts.append(cleaned)
-
-                if caution_parts:
-                    seq_cautions.append("; ".join(caution_parts))
-
-            elif c_type == "interaction":
-                # Handle interaction
-                interactant = comment.find("u:interactant", ns)
-                if interactant is not None:
-                    # Try to get intact ID or label
-                    intact_id = interactant.get("intactId")
-                    label = interactant.find("u:label", ns)
-
-                    interact_text = []
-                    if label is not None and label.text:
-                        interact_text.append(label.text)
-                    if intact_id:
-                        interact_text.append(f"(IntAct: {intact_id})")
-
-                    if interact_text:
-                        interactions.append(" ".join(interact_text))
-
-        return {
-            "function": functions,
-            "subunit": subunits,
-            "domain": domains,
-            "induction": inductions,
-            "tissue_specificity": tissues,
-            "disruption_phenotype": disruptions,
-            "activity_regulation": regulations,
-            "pathway": pathways,
-            "miscellaneous": misc,
-            "polymorphism": polymorphisms,
-            "similarity": similarities,
-            "caution": cautions,
-            "pharmaceutical": pharmaceuticals,
-            "biotechnology": biotech,
-            "mass_spectrometry": mass_spec,
-            "sequence_caution": seq_cautions,
-            "interaction": interactions,
-            "disease": diseases,
-            "subcellular_location": subcellular,
-            "catalytic_activity": catalytic_activities,
-            "ec_numbers": list(ec_numbers),
-            "isoform_notes": isoform_notes,
-        }
-
-    def _process_isoforms(
-        self, comment_element: ET.Element, ns: dict[str, str]
-    ) -> dict[str, list[IsoformNote]]:
-        """
-        Extracts isoform notes from 'alternative products' comments.
-
-        Args:
-            comment_element: XML element for the comment
-            ns: Namespace dictionary
-
-        Returns:
-            Dictionary mapping isoform IDs to lists of IsoformNote objects
-        """
-        result: dict[str, list[IsoformNote]] = {}
-
-        # Look for isoform elements
-        isoforms = comment_element.findall("u:isoform", ns)
-        if not isoforms:
+        if not (comments := entry.get("comment")):
             return result
 
-        for isoform in isoforms:
-            # Get isoform IDs
-            ids = [
-                id_elem.text
-                for id_elem in isoform.findall("u:id", ns)
-                if id_elem.text
-            ]
-            if not ids:
+        # Ensure list
+        if isinstance(comments, dict):
+            comments = [comments]
+
+        # Temporary storage for isoform notes
+        isoform_notes: list[IsoformNote] = []
+
+        for comment in comments:
+            if not isinstance(comment, dict):
                 continue
 
-            # Check for note text
-            note_elem = isoform.find("u:note", ns)
-            if note_elem is None or not note_elem.text:
+            comment_type = comment.get("@type")
+            if not comment_type:
                 continue
 
-            note_text = clean_text(note_elem.text)
-            if not note_text:
-                continue
+            # Route to specific handlers
+            if comment_type == "function":
+                if text := self._get_comment_text(comment):
+                    result["function"].append(text)
+            elif comment_type == "subunit":
+                if text := self._get_comment_text(comment):
+                    result["subunit"].append(text)
+            elif comment_type == "subcellular location":
+                self._process_subcellular_location(
+                    comment, result["subcellular_location"]
+                )
+            elif comment_type == "tissue specificity":
+                if text := self._get_comment_text(comment):
+                    result["tissue_specificity"].append(text)
+            elif comment_type == "domain":
+                if text := self._get_comment_text(comment):
+                    result["domain"].append(text)
+            elif comment_type == "ptm":
+                if text := self._get_comment_text(comment):
+                    result["ptm"].append(text)
+            elif comment_type == "similarity":
+                if text := self._get_comment_text(comment):
+                    result["similarity"].append(text)
+            elif comment_type == "mass spectrometry":
+                if text := self._get_comment_text(comment):
+                    result["mass_spectrometry"].append(text)
+            elif comment_type == "polymorphism":
+                if text := self._get_comment_text(comment):
+                    result["polymorphism"].append(text)
+            elif comment_type == "pharmaceutical":
+                if text := self._get_comment_text(comment):
+                    result["pharmaceutical"].append(text)
+            elif comment_type == "biotechnology":
+                if text := self._get_comment_text(comment):
+                    result["biotechnology"].append(text)
+            elif comment_type == "disruption phenotype":
+                if text := self._get_comment_text(comment):
+                    result["disruption_phenotype"].append(text)
+            elif comment_type == "disease":
+                self._process_disease(comment, result["disease"])
+            elif comment_type == "interaction":
+                self._process_interaction(comment, result["interaction"])
+            elif comment_type == "alternative products":
+                self._process_isoforms(comment, isoform_notes)
 
-            process_single_isoform_note(note_text, ids, result)
+        # Convert isoform notes to dicts
+        result["isoform_notes"] = [
+            {"isoform_id": note.isoform_id, "note": note.note} for note in isoform_notes
+        ]
 
         return result
+
+    def _get_comment_text(self, comment: dict[str, Any]) -> str | None:
+        """Extract text from a comment."""
+        return self._clean_text(comment.get("text"))
+
+    def _process_subcellular_location(
+        self, comment: dict[str, Any], locations: list[dict[str, Any]]
+    ) -> None:
+        """Process subcellular location comments."""
+        if not (subcell := comment.get("subcellularLocation")):
+            return
+
+        # Handle list
+        if isinstance(subcell, dict):
+            subcell = [subcell]
+
+        for loc_entry in subcell:
+            if not isinstance(loc_entry, dict):
+                continue
+
+            # Extract distinct parts
+            locs = []
+            topology = []
+            orientation = []
+
+            if l := loc_entry.get("location"):
+                if isinstance(l, list):
+                    locs.extend([self._clean_text(x) for x in l if isinstance(x, str)])
+                    # If dict with #text
+                    locs.extend(
+                        [
+                            self._clean_text(x.get("#text"))
+                            for x in l
+                            if isinstance(x, dict)
+                        ]
+                    )
+                elif isinstance(l, str):
+                    if cleaned := self._clean_text(l):
+                        locs.append(cleaned)
+                elif isinstance(l, dict):
+                    if cleaned := self._clean_text(l.get("#text")):
+                        locs.append(cleaned)
+
+            if t := loc_entry.get("topology"):
+                if isinstance(t, str):
+                    if cleaned := self._clean_text(t):
+                        topology.append(cleaned)
+                elif isinstance(t, dict):
+                    if cleaned := self._clean_text(t.get("#text")):
+                        topology.append(cleaned)
+
+            if o := loc_entry.get("orientation"):
+                if isinstance(o, str):
+                    if cleaned := self._clean_text(o):
+                        orientation.append(cleaned)
+                elif isinstance(o, dict):
+                    if cleaned := self._clean_text(o.get("#text")):
+                        orientation.append(cleaned)
+
+            locations.append(
+                {
+                    "location": locs,
+                    "topology": topology,
+                    "orientation": orientation,
+                    "note": self._clean_text(comment.get("text")),
+                }
+            )
+
+    def _process_disease(
+        self, comment: dict[str, Any], diseases: list[dict[str, Any]]
+    ) -> None:
+        """Process disease comments."""
+        disease_id = comment.get("@id")
+        acronym = comment.get("acronym")
+        description = comment.get("text")
+
+        # Sometimes disease info is in a 'disease' sub-element
+        if dis_tag := comment.get("disease"):
+            if isinstance(dis_tag, dict):
+                disease_id = disease_id or dis_tag.get("@id")
+                acronym = acronym or dis_tag.get("acronym")
+                if not description:
+                    description = dis_tag.get("description")
+                if not description and dis_tag.get("name"):
+                    description = dis_tag.get("name")
+
+        if description or disease_id:
+            diseases.append(
+                {
+                    "id": disease_id,
+                    "acronym": acronym,
+                    "description": self._clean_text(description),
+                    "evidence": ExtractorUtils.extract_evidence(comment),
+                }
+            )
+
+    def _process_interaction(
+        self, comment: dict[str, Any], interactions: list[dict[str, Any]]
+    ) -> None:
+        """Process interaction comments."""
+        if interactant := comment.get("interactant"):
+            # This is complex in XML, often multiple interactants
+            # Simplifying for this implementation
+            if isinstance(interactant, list):
+                for i in interactant:
+                    if label := i.get("label"):
+                        interactions.append({"interactant": label, "id": i.get("id")})
+            elif isinstance(interactant, dict):
+                if label := interactant.get("label"):
+                    interactions.append(
+                        {"interactant": label, "id": interactant.get("id")}
+                    )
+
+    def _process_isoforms(
+        self, comment: dict[str, Any], isoform_notes: list[IsoformNote]
+    ) -> None:
+        """Process isoform-specific notes."""
+        if not (molecule := comment.get("molecule")):
+            return
+
+        # Handle both single molecule (dict) and list of molecules
+        molecules = molecule if isinstance(molecule, list) else [molecule]
+        note = comment.get("text", "")
+
+        if not note:
+            return
+
+        # Process each molecule entry
+        for mol in molecules:
+            self._process_single_molecule(mol, note, isoform_notes)
+
+    def _process_single_molecule(
+        self, mol: dict[str, Any], note: str, isoform_notes: list[IsoformNote]
+    ) -> None:
+        """Process a single molecule entry for isoform notes."""
+        iso_ids = self._extract_isoform_ids(mol)
+
+        # If we found isoform IDs, associate the note with each one
+        for iso_id in iso_ids:
+            # Use the helper to process the note
+            # This handles cleaning and duplicate checking
+            ExtractorUtils.process_single_isoform_note(iso_id, note, isoform_notes)
+
+    def _extract_isoform_ids(self, mol: dict[str, Any]) -> list[str]:
+        """Extract isoform IDs from a molecule entry."""
+        iso_ids = []
+        if identifiers := mol.get("identifier"):
+            # Handle single identifier vs list
+            if isinstance(identifiers, list):
+                for ident in identifiers:
+                    if isinstance(ident, dict):
+                        if id_val := ident.get("#text"):
+                            iso_ids.append(id_val)
+                    elif isinstance(ident, str):
+                        iso_ids.append(ident)
+            elif isinstance(identifiers, dict):
+                if id_val := identifiers.get("#text"):
+                    iso_ids.append(id_val)
+            elif isinstance(identifiers, str):
+                iso_ids.append(identifiers)
+        return iso_ids
+
+    def _clean_text(self, text: str | None) -> str | None:
+        """Clean text by stripping whitespace and removing trailing periods."""
+        return ExtractorUtils.clean_text(text)
