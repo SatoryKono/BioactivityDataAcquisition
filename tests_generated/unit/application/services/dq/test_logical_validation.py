@@ -17,11 +17,12 @@ class TestPublicationYearRange:
         "year,expected",
         [
             (1800, "PASS"),  # min boundary
-            (2024, "PASS"),  # current year
-            (2025, "PASS"),  # current year
-            (2026, "PASS"),  # current year + 1
+            (2024, "PASS"),  # past year
+            (2025, "PASS"),  # past year
+            (2026, "PASS"),  # current year
+            (2027, "PASS"),  # current year + 1
             (1799, "WARN"),  # below min
-            (2027, "WARN"),  # far future
+            (2028, "WARN"),  # far future (current + 2)
             (0, "WARN"),  # zero
             (-1, "WARN"),  # negative
         ],
