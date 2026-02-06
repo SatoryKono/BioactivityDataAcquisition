@@ -10,7 +10,14 @@
       "Bash(ruff format:*)",
       "Bash(pytest:*)",
       "Bash(wc:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(python extract_publication_fields.py:*)",
+      "Bash(python generate_validation_schema.py:*)",
+      "Bash(.venvScriptspip install openpyxl)",
+      "Bash(.venvScriptspip.exe install openpyxl)",
+      "Bash(python -m pip install:*)",
+      "Bash(python:*)"
     ]
   },
   "enabledPlugins": {

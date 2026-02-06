@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.4 | Updated: 2026-01-29 | Created: 2025-12-29*
+*Version 2.5 | Updated: 2026-02-06 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -139,6 +139,18 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Quarantine Entry** | A single quarantined record with error metadata | `quarantine_record` (class name) |
 | **Schema** | Structure definition for data validation | `model` (when referring to schema) |
 | **Schema Drift** | Detection of changes in source data structure | `schema_change`, `schema_evolution` |
+| **Base Validation** | Level 1: Pandera schema validation (types, regex, nullable) | `schema validation`, `type checking` |
+| **Structural Validation** | Level 2: Cross-field consistency rules (page ordering, year matching) | `cross-field validation`, `field dependencies` |
+| **External Verification** | Level 3: HTTP-based ID verification with upstream providers | `API validation`, `ID lookup` |
+| **Logical Validation** | Level 4: Range constraints and business invariants | `business rules`, `constraint checking` |
+| **Semantic Validation** | Level 5: NLP-based text consistency checks (similarity, language) | `text validation`, `NLP checks` |
+| **DQ Flag** | Data Quality flag: `_dq_error` (FAIL — blocking), `_dq_warn` (WARN — accepted) | `quality flag`, `error flag` |
+| **Validation Mode** | Pipeline execution profile: STRICT, BALANCED, FAST | `validation profile`, `quality mode` |
+| **Clean Record** | Record with `_dq_warn=False` and `_dq_error=False` | `valid record`, `passed record` |
+| **Quarantine Record** | Record with `_dq_warn=True` (non-critical warnings) | `warned record`, `flagged record` |
+| **Rejected Record** | Record with `_dq_error=True` (critical errors, not written to Silver) | `failed record`, `blocked record` |
+| **Validation Level** | One of five sequential validation stages (Base → Structural → External → Logical → Semantic) | `validation stage`, `check level` |
+| **Validation Result** | Outcome of validation check: PASS, FAIL, WARN, SKIP, NOT_APPLICABLE | `check result`, `validation status` |
 
 ---
 
