@@ -19,7 +19,8 @@
       "Bash(python -m pip install:*)",
       "Bash(python:*)",
       "Bash(code --install-extension:*)",
-      "Bash(code .)"
+      "Bash(code .)",
+      "Bash(grep:*)"
     ]
   },
   "enabledPlugins": {

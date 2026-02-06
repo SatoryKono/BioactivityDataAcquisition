@@ -4,10 +4,10 @@ Tests consistency rules between related fields across all providers.
 Expected: ~80 tests covering 25 structural rules from validation schema.
 """
 
-import pytest
-import pandas as pd
-import pandera as pa
 from datetime import date
+
+import pandas as pd
+import pytest
 
 
 @pytest.mark.unit

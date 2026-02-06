@@ -12,12 +12,12 @@
 | Validation Level | Expected | Generated | Status | Coverage |
 |------------------|----------|-----------|--------|----------|
 | **Base Validation** | 500 | 329 | PARTIAL | 66% |
-| **Structural Validation** | 80 | 30 | PARTIAL | 38% |
+| **Structural Validation** | 80 | 51 | PARTIAL | 64% |
 | **External Verification** | 40 | 16 | INCOMPLETE | 40% |
 | **Logical Validation** | 60 | 12 | INCOMPLETE | 20% |
 | **Semantic Validation** | 30 | 13 | GOOD | 43% |
 | **Contract Tests** | 25 | 10 | INCOMPLETE | 40% |
-| **TOTAL** | **735** | **485** | **PARTIAL** | **66%** |
+| **TOTAL** | **735** | **506** | **PARTIAL** | **69%** |
 
 ---
 
@@ -133,10 +133,10 @@ def test_doi_invalid_format(self, minimal_crossref_publication_df: pd.DataFrame,
 
 ---
 
-### ⚠️ Structural Validation Tests (30 tests)
+### ⚠️ Structural Validation Tests (51 tests)
 
 **What:** Cross-field consistency rules
-**Status:** PARTIAL (38% complete)
+**Status:** PARTIAL (64% complete)
 **Location:** `unit/application/services/dq/test_structural_validation.py`
 
 **Implemented Rules (examples):**
@@ -155,7 +155,7 @@ def test_doi_invalid_format(self, minimal_crossref_publication_df: pd.DataFrame,
 - ✅ `publication_type` is present
 - ✅ `language` code length (2 or 3)
 
-**TODO:** Expand to cover all 25 structural rules from XLSX (remaining ~50 tests)
+**TODO:** Expand to cover all 25 structural rules from XLSX (remaining ~30 tests)
 
 ---
 
