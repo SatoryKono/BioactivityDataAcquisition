@@ -8,10 +8,10 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 
 
-class MergeStrategy(StrEnum):
+class MergeStrategy(str, Enum):
     """Strategy for merging enriched data from multiple sources.
 
     Defines how records from seed and enricher pipelines are combined.
@@ -59,7 +59,7 @@ class MergeStrategy(StrEnum):
             ) from None
 
 
-class ConflictResolution(StrEnum):
+class ConflictResolution(str, Enum):
     """Strategy for resolving field conflicts between sources.
 
     When the same field is populated by multiple sources (e.g., 'title'
@@ -112,7 +112,7 @@ class ConflictResolution(StrEnum):
             ) from None
 
 
-class FallbackStrategy(StrEnum):
+class FallbackStrategy(str, Enum):
     """Strategy for handling enricher failures.
 
     Defines behavior when an optional enricher fails or times out.

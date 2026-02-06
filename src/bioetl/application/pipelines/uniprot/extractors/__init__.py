@@ -1,20 +1,17 @@
-"""UniProt data extractors package.
+"""UniProt extraction components."""
 
-Provides specialized extractors for different aspects of UniProt data.
-"""
+from __future__ import annotations
 
 from bioetl.application.pipelines.uniprot.extractors.comments import CommentExtractor
-from bioetl.application.pipelines.uniprot.extractors.crossrefs import CrossRefExtractor
 from bioetl.application.pipelines.uniprot.extractors.features import FeatureExtractor
-from bioetl.application.pipelines.uniprot.extractors.genes import GeneExtractor
-from bioetl.application.pipelines.uniprot.extractors.taxonomy import TaxonomyExtractor
-from bioetl.application.pipelines.uniprot.extractors.utils import ExtractorUtils
+from bioetl.application.pipelines.uniprot.extractors.gene import GeneExtractor
+from bioetl.application.pipelines.uniprot.extractors.references import (
+    ReferenceExtractor,
+)
 
 __all__ = [
     "CommentExtractor",
-    "CrossRefExtractor",
-    "ExtractorUtils",
     "FeatureExtractor",
     "GeneExtractor",
-    "TaxonomyExtractor",
+    "ReferenceExtractor",
 ]

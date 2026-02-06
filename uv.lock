@@ -274,8 +274,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "bandit", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=1.7" },
-    { name = "basedpyright", specifier = ">=1.0.0" },
-    { name = "black", specifier = ">=24.0.0" },
+    { name = "basedpyright" },
+    { name = "black" },
     { name = "click", specifier = ">=8.1" },
     { name = "deltalake", specifier = ">=0.18" },
     { name = "httpx", specifier = ">=0.27" },
@@ -314,7 +314,7 @@ requires-dist = [
     { name = "pydocstyle", marker = "extra == 'dev'", specifier = ">=6.3" },
     { name = "pylint", marker = "extra == 'dev'", specifier = ">=3.0" },
     { name = "pymdown-extensions", marker = "extra == 'docs'", specifier = ">=10.8" },
-    { name = "pyrefly", specifier = ">=0.0.0" },
+    { name = "pyrefly" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest", marker = "extra == 'tests'", specifier = ">=8.0" },
     { name = "pytest-archon", marker = "extra == 'dev'", specifier = ">=0.0.6" },
@@ -338,7 +338,7 @@ requires-dist = [
     { name = "structlog", specifier = ">=24.0" },
     { name = "syrupy", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "syrupy", marker = "extra == 'tests'", specifier = ">=4.0" },
-    { name = "ty", specifier = ">=0.0.0" },
+    { name = "ty" },
     { name = "typer", specifier = ">=0.12" },
     { name = "vcrpy", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "vcrpy", marker = "extra == 'tests'", specifier = ">=6.0" },

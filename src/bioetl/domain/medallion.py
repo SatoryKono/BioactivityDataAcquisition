@@ -7,7 +7,7 @@ These are pure domain objects with no dependencies on infrastructure.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.domain.exceptions import PolicyViolationError
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunType
 
 
-class Layer(StrEnum):
+class Layer(str, Enum):
     """Medallion architecture layers.
 
     Attributes:
@@ -30,7 +30,7 @@ class Layer(StrEnum):
     GOLD = "gold"
 
 
-class WriteMode(StrEnum):
+class WriteMode(str, Enum):
     """Write mode for data operations.
 
     Attributes:
@@ -44,7 +44,7 @@ class WriteMode(StrEnum):
     OVERWRITE = "overwrite"
 
 
-class SilverWriteMode(StrEnum):
+class SilverWriteMode(str, Enum):
     """Allowed write modes for Silver layer.
 
     Domain enum consolidating Silver layer write semantics.
@@ -82,7 +82,7 @@ class SilverWriteMode(StrEnum):
             ) from None
 
 
-class GoldWriteMode(StrEnum):
+class GoldWriteMode(str, Enum):
     """Allowed write modes for Gold layer.
 
     Domain enum consolidating Gold layer write semantics.
@@ -165,7 +165,7 @@ class WriteModePolicy:
             )
 
 
-class LoadingStrategy(StrEnum):
+class LoadingStrategy(str, Enum):
     """Loading strategy for pipeline data extraction.
 
     Determines how the pipeline handles incremental vs full data loading.
@@ -245,7 +245,7 @@ class LoadingStrategy(StrEnum):
         return cls.FULL_SCAN_ONLY if force_full_scan else cls.WATERMARK_BASED
 
 
-class ClearPolicy(StrEnum):
+class ClearPolicy(str, Enum):
     """Policy for clearing medallion layers.
 
     Determines which layers should be cleared before a pipeline run.

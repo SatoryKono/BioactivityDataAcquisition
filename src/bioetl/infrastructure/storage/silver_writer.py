@@ -184,8 +184,7 @@ class SilverWriter(BaseDeltaWriter):
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
-        # schema_fields is no longer needed as we iterate over schema.names directly
-        schema_names = schema.names
+        schema_fields = set(schema.names)
         string_fields = {
             field.name
             for field in schema
@@ -199,11 +198,13 @@ class SilverWriter(BaseDeltaWriter):
                     # Complex objects in Gold layer are flattened; Silver preserves
                     # JSON for forensic purposes.
                     orjson.dumps(v, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                    if k in string_fields and isinstance(v, (dict, list))
+                    if v is not None
+                    and k in string_fields
+                    and isinstance(v, (dict, list))
                     else v
                 )
-                for k in schema_names
-                if (v := rec.get(k)) is not None
+                for k, v in rec.items()
+                if k in schema_fields
             }
             for rec in records
         ]

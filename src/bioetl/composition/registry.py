@@ -59,7 +59,6 @@ class PipelineFactoryProtocol(Protocol):
         observability: ObservabilityBundle,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
-        **kwargs: Any,
     ) -> PipelineRunner:
         """Create pipeline runner."""
         ...

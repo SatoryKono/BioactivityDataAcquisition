@@ -2,587 +2,283 @@
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from typing import Any
 
-from bioetl.domain.serialization import serialize_to_json
-
-
-def _is_comment_of_type(comment: Any, comment_type: str) -> bool:
-    """Check if comment matches the specified type.
-
-    Args:
-        comment: Comment object to check.
-        comment_type: Expected comment type.
-
-    Returns:
-        True if comment is a dict with matching commentType.
-    """
-    return isinstance(comment, dict) and comment.get("commentType") == comment_type
-
-
-def _extract_reaction_data(reaction: dict[str, Any]) -> dict[str, Any]:
-    """Extract reaction data from catalytic activity.
-
-    Args:
-        reaction: Reaction dict from comment.
-
-    Returns:
-        Activity dict with reaction and ec_number fields.
-    """
-    activity: dict[str, Any] = {}
-    if reaction.get("name"):
-        activity["reaction"] = reaction.get("name")
-    if reaction.get("ecNumber"):
-        activity["ec_number"] = reaction.get("ecNumber")
-    return activity
-
-
-def _extract_location_value(loc: dict[str, Any]) -> str | None:
-    """Extract location value from subcellular location entry.
-
-    Args:
-        loc: Location entry dict.
-
-    Returns:
-        Location value string or None.
-    """
-    location = loc.get("location", {})
-    if isinstance(location, dict):
-        value = location.get("value")
-        if value:
-            return str(value)
-    return None
-
-
-def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:
-    """Build isoform data from isoform entry.
-
-    Args:
-        iso: Isoform entry dict.
-
-    Returns:
-        Isoform data dict with ids and name.
-    """
-    isoform_data: dict[str, Any] = {}
-    isoform_ids = iso.get("isoformIds", [])
-    if isoform_ids:
-        isoform_data["ids"] = isoform_ids
-    name = iso.get("name", {})
-    if isinstance(name, dict) and name.get("value"):
-        isoform_data["name"] = name.get("value")
-    return isoform_data
-
-
-def _extract_texts_from_dict(data: dict[str, Any] | None) -> list[str]:
-    """Extract text values from a dict with 'texts' key.
-
-    Args:
-        data: Dict containing 'texts' list.
-
-    Returns:
-        List of extracted text values.
-    """
-    if not isinstance(data, dict):
-        return []
-    texts = data.get("texts", [])
-    if not isinstance(texts, list):
-        return []
-    return [
-        str(t.get("value")) for t in texts if isinstance(t, dict) and t.get("value")
-    ]
-
-
-def _extract_cofactor_entry(cofactor: dict[str, Any]) -> dict[str, Any]:
-    """Extract data from a single cofactor entry.
-
-    Args:
-        cofactor: Cofactor dict from comment.
-
-    Returns:
-        Cofactor data dict with name, chebi_id, and optional note.
-    """
-    cofactor_data: dict[str, Any] = {}
-
-    name = cofactor.get("name")
-    if name:
-        cofactor_data["name"] = str(name)
-
-    xref = cofactor.get("cofactorCrossReference")
-    if isinstance(xref, dict):
-        chebi_id = xref.get("id")
-        if chebi_id:
-            cofactor_data["chebi_id"] = str(chebi_id)
-
-    note = cofactor.get("note")
-    notes = _extract_texts_from_dict(note)
-    if notes:
-        cofactor_data["note"] = notes[0] if len(notes) == 1 else notes
-
-    return cofactor_data
-
-
-def _extract_km_entry(km: dict[str, Any]) -> dict[str, Any]:
-    """Extract Michaelis constant entry."""
-    km_entry: dict[str, Any] = {}
-    if km.get("constant"):
-        km_entry["value"] = km["constant"]
-    if km.get("unit"):
-        km_entry["unit"] = km["unit"]
-    if km.get("substrate"):
-        km_entry["substrate"] = km["substrate"]
-    return km_entry
-
-
-def _extract_vmax_entry(vmax: dict[str, Any]) -> dict[str, Any]:
-    """Extract maximum velocity entry."""
-    vmax_entry: dict[str, Any] = {}
-    if vmax.get("velocity"):
-        vmax_entry["value"] = vmax["velocity"]
-    if vmax.get("unit"):
-        vmax_entry["unit"] = vmax["unit"]
-    if vmax.get("enzyme"):
-        vmax_entry["enzyme"] = vmax["enzyme"]
-    return vmax_entry
-
-
-def _extract_list_entries(data_list: Any, extractor: Any) -> list[dict[str, Any]]:
-    """Extract entries from a list using the provided extractor function."""
-    if not isinstance(data_list, list) or not data_list:
-        return []
-    return [
-        e
-        for e in (extractor(item) for item in data_list if isinstance(item, dict))
-        if e
-    ]
-
-
-def _extract_kinetic_parameters(kinetics: dict[str, Any]) -> dict[str, Any]:
-    """Extract kinetic parameters (Km, Vmax) from kineticParameters dict."""
-    kinetic_data: dict[str, Any] = {}
-
-    km_values = _extract_list_entries(
-        kinetics.get("michaelisConstants"), _extract_km_entry
-    )
-    if km_values:
-        kinetic_data["km"] = km_values
-
-    vmax_values = _extract_list_entries(
-        kinetics.get("maximumVelocities"), _extract_vmax_entry
-    )
-    if vmax_values:
-        kinetic_data["vmax"] = vmax_values
-
-    notes = _extract_texts_from_dict(kinetics.get("note"))
-    if notes:
-        kinetic_data["note"] = notes
-
-    return kinetic_data
-
-
-def _extract_absorption_data(absorption: dict[str, Any]) -> dict[str, Any]:
-    """Extract absorption (spectroscopic) data."""
-    abs_data: dict[str, Any] = {}
-    if absorption.get("max"):
-        abs_data["max"] = absorption["max"]
-    notes = _extract_texts_from_dict(absorption.get("note"))
-    if notes:
-        abs_data["note"] = notes
-    return abs_data
-
-
-def _extract_biophys_from_comment(comment: dict[str, Any]) -> dict[str, Any]:
-    """Extract biophysicochemical data from a single comment.
-
-    Args:
-        comment: BIOPHYSICOCHEMICAL PROPERTIES comment dict.
-
-    Returns:
-        Dict with extracted properties.
-    """
-    result: dict[str, Any] = {}
-
-    # Simple text extractions
-    ph_values = _extract_texts_from_dict(comment.get("phDependence"))
-    if ph_values:
-        result["ph_dependence"] = ph_values
-
-    temp_values = _extract_texts_from_dict(comment.get("temperatureDependence"))
-    if temp_values:
-        result["temperature_dependence"] = temp_values
-
-    redox_values = _extract_texts_from_dict(comment.get("redoxPotential"))
-    if redox_values:
-        result["redox_potential"] = redox_values
-
-    # Complex extractions
-    kinetics = comment.get("kineticParameters")
-    if isinstance(kinetics, dict):
-        kinetic_data = _extract_kinetic_parameters(kinetics)
-        if kinetic_data:
-            result["kinetic_parameters"] = kinetic_data
-
-    absorption = comment.get("absorption")
-    if isinstance(absorption, dict):
-        abs_data = _extract_absorption_data(absorption)
-        if abs_data:
-            result["absorption"] = abs_data
-
-    return result
+from bioetl.application.pipelines.uniprot.extractors.utils import (
+    IsoformNote,
+    clean_text,
+    process_single_isoform_note,
+)
 
 
 class CommentExtractor:
-    """Extracts comment-related data from UniProt records.
+    """Extracts comment-related data from UniProt XML records."""
 
-    UniProt comments contain functional annotations like FUNCTION,
-    SUBUNIT, CATALYTIC ACTIVITY, SUBCELLULAR LOCATION, etc.
-    """
+    def _clean_text(self, text: str) -> str:
+        """Removes trailing periods and excessive whitespace from text."""
+        return clean_text(text)
 
-    @staticmethod
-    def extract_text_values(comments: list[Any], comment_type: str) -> list[str]:
-        """Extract text values from comments of specific type.
+    def extract_comments(self, entry: ET.Element, ns: dict[str, str]) -> dict[str, Any]:
+        """
+        Extracts various comment types from the UniProt entry.
 
         Args:
-            comments: List of comment objects.
-            comment_type: Comment type to filter by.
+            entry: XML element for the entry
+            ns: Namespace dictionary
 
         Returns:
-            List of extracted text values.
+            Dictionary of extracted comments
         """
-        extracted: list[str] = []
-        for comment in comments:
-            if not _is_comment_of_type(comment, comment_type):
-                continue
+        comments = entry.findall("u:comment", ns)
 
-            texts = comment.get("texts", [])
-            if isinstance(texts, list):
-                for text in texts:
-                    if isinstance(text, dict):
-                        value = text.get("value")
-                        if value:
-                            extracted.append(str(value))
-        return extracted
+        functions = []
+        subunits = []
+        domains = []
+        inductions = []
+        tissues = []
+        disruptions = []
+        regulations = []
+        pathways = []
+        misc = []
+        polymorphisms = []
+        similarities = []
+        cautions = []
+        pharmaceuticals = []
+        biotech = []
+        mass_spec = []
+        seq_cautions = []
+        interactions = []
+        diseases = []
+        subcellular = []
+        catalytic_activities = []
+        ec_numbers = set()
+        isoform_notes: dict[str, list[IsoformNote]] = {}
 
-    @classmethod
-    def extract_by_type(cls, comments: Any, comment_type: str) -> str | None:
-        """Extract comments of specific type as JSON string.
-
-        Args:
-            comments: List of comment objects.
-            comment_type: Comment type (FUNCTION, SUBUNIT, etc.)
-
-        Returns:
-            JSON string of comment values or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        extracted = cls.extract_text_values(comments, comment_type)
-        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
-
-    @staticmethod
-    def extract_catalytic_activity(comments: Any) -> str | None:
-        """Extract catalytic activity information.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            JSON array of catalytic activities or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        extracted: list[dict[str, Any]] = []
-        for comment in comments:
-            if not _is_comment_of_type(comment, "CATALYTIC ACTIVITY"):
-                continue
-
-            reaction = comment.get("reaction", {})
-            if isinstance(reaction, dict):
-                activity = _extract_reaction_data(reaction)
-                if activity:
-                    extracted.append(activity)
-
-        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
-
-    @staticmethod
-    def extract_subcellular_locations(comments: Any) -> str | None:
-        """Extract subcellular location information.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            JSON array of subcellular locations or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        extracted: list[str] = []
-        for comment in comments:
-            if not _is_comment_of_type(comment, "SUBCELLULAR LOCATION"):
-                continue
-
-            locations = comment.get("subcellularLocations", [])
-            if isinstance(locations, list):
-                for loc in locations:
-                    if isinstance(loc, dict):
-                        value = _extract_location_value(loc)
-                        if value:
-                            extracted.append(value)
-
-        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
-
-    @staticmethod
-    def extract_alternative_products(comments: Any) -> str | None:
-        """Extract alternative products (isoforms) information.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            JSON array of isoform information or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        extracted: list[dict[str, Any]] = []
-        for comment in comments:
-            if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
-                continue
-
-            isoforms = comment.get("isoforms", [])
-            if isinstance(isoforms, list):
-                for iso in isoforms:
-                    if isinstance(iso, dict):
-                        isoform_data = _build_isoform_data(iso)
-                        if isoform_data:
-                            extracted.append(isoform_data)
-
-        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
-
-    @staticmethod
-    def count_isoforms(comments: Any) -> int | None:
-        """Count the number of isoforms.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            Number of isoforms or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        count = 0
-        for comment in comments:
-            if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
-                continue
-
-            isoforms = comment.get("isoforms", [])
-            if isinstance(isoforms, list):
-                count += len(isoforms)
-
-        return count if count > 0 else None
-
-    @staticmethod
-    def extract_cofactors(comments: Any) -> str | None:
-        """Extract cofactor information from COFACTOR comments.
-
-        Cofactors are metal ions or organic molecules required for protein function.
-        Each cofactor includes name and optional ChEBI cross-reference.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            JSON array of cofactor objects with name and chebi_id, or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        extracted: list[dict[str, Any]] = []
-        for comment in comments:
-            if not _is_comment_of_type(comment, "COFACTOR"):
-                continue
-
-            cofactors = comment.get("cofactors", [])
-            if not isinstance(cofactors, list):
-                continue
-
-            for cofactor in cofactors:
-                if not isinstance(cofactor, dict):
-                    continue
-                cofactor_data = _extract_cofactor_entry(cofactor)
-                if cofactor_data:
-                    extracted.append(cofactor_data)
-
-        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
-
-    @staticmethod
-    def extract_biophysicochemical_properties(comments: Any) -> str | None:
-        """Extract biophysicochemical properties from comments.
-
-        Includes pH optima, temperature optima, kinetic parameters (Km, Vmax),
-        and redox potential values.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            JSON object with biophysicochemical properties, or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        extracted: dict[str, Any] = {}
-        for comment in comments:
-            if not _is_comment_of_type(comment, "BIOPHYSICOCHEMICAL PROPERTIES"):
-                continue
-            extracted.update(_extract_biophys_from_comment(comment))
-
-        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
-
-    @classmethod
-    def extract_induction(cls, comments: Any) -> str | None:
-        """Extract induction information from INDUCTION comments.
-
-        Describes conditions under which gene expression is induced.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            JSON array of induction text values, or None.
-        """
-        return cls.extract_by_type(comments, "INDUCTION")
-
-    @staticmethod
-    def extract_isoform_details(comments: Any) -> dict[str, str | None]:
-        """Extract detailed isoform information from ALTERNATIVE PRODUCTS.
-
-        Parses isoform data to extract names, IDs, and synonyms separately.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            Dict with keys:
-                - isoform_names: JSON array of isoform names
-                - isoform_ids: JSON array of isoform IDs (e.g., P12345-1)
-                - isoform_synonyms: JSON array of synonyms
-        """
-        result: dict[str, str | None] = {
-            "isoform_names": None,
-            "isoform_ids": None,
-            "isoform_synonyms": None,
+        simple_fields = {
+            "function", "subunit", "domain", "induction", "tissue specificity",
+            "disruption phenotype", "activity regulation", "pathway",
+            "miscellaneous", "polymorphism", "similarity", "caution",
+            "pharmaceutical", "biotechnology"
         }
 
-        if not comments or not isinstance(comments, list):
+        for comment in comments:
+            c_type = comment.get("type")
+
+            if c_type == "catalytic activity":
+                # Handle structured catalytic activity (reaction)
+                reaction = comment.find("u:reaction", ns)
+                if reaction is not None:
+                    # Extract EC number
+                    db_refs = reaction.findall("u:dbReference", ns)
+                    for db_ref in db_refs:
+                        if db_ref.get("type") == "EC":
+                            ec_num = db_ref.get("id")
+                            if ec_num:
+                                ec_numbers.add(ec_num)
+
+                    # Extract reaction text
+                    text = reaction.find("u:text", ns)
+                    if text is not None and text.text:
+                        cleaned = self._clean_text(text.text)
+                        if cleaned:
+                            catalytic_activities.append(cleaned)
+
+            elif c_type in simple_fields:
+                # Handle simple text fields
+                text_elem = comment.find("u:text", ns)
+                if text_elem is not None and text_elem.text:
+                    cleaned = self._clean_text(text_elem.text)
+                    if cleaned:
+                        if c_type == "function":
+                            functions.append(cleaned)
+                        elif c_type == "subunit":
+                            subunits.append(cleaned)
+                        elif c_type == "domain":
+                            domains.append(cleaned)
+                        elif c_type == "induction":
+                            inductions.append(cleaned)
+                        elif c_type == "tissue specificity":
+                            tissues.append(cleaned)
+                        elif c_type == "disruption phenotype":
+                            disruptions.append(cleaned)
+                        elif c_type == "activity regulation":
+                            regulations.append(cleaned)
+                        elif c_type == "pathway":
+                            pathways.append(cleaned)
+                        elif c_type == "miscellaneous":
+                            misc.append(cleaned)
+                        elif c_type == "polymorphism":
+                            polymorphisms.append(cleaned)
+                        elif c_type == "similarity":
+                            similarities.append(cleaned)
+                        elif c_type == "caution":
+                            cautions.append(cleaned)
+                        elif c_type == "pharmaceutical":
+                            pharmaceuticals.append(cleaned)
+                        elif c_type == "biotechnology":
+                            biotech.append(cleaned)
+
+            elif c_type == "disease":
+                # Handle disease comments
+                disease = comment.find("u:disease", ns)
+                text_elem = comment.find("u:text", ns)
+
+                # Try to get disease ID if available
+                disease_id = None
+                if disease is not None:
+                    disease_id = disease.get("id")
+
+                # Get text from disease element or fallback to text element
+                d_text = None
+                if disease is not None:
+                    name_elem = disease.find("u:name", ns)
+                    if name_elem is not None:
+                        d_text = name_elem.text
+
+                    # Also look for description in disease element
+                    desc_elem = disease.find("u:description", ns)
+                    if desc_elem is not None and desc_elem.text:
+                        if d_text:
+                            d_text = f"{d_text}: {desc_elem.text}"
+                        else:
+                            d_text = desc_elem.text
+
+                if not d_text and text_elem is not None:
+                    d_text = text_elem.text
+
+                if d_text:
+                    cleaned = self._clean_text(d_text)
+                    if cleaned:
+                        if disease_id:
+                            diseases.append(f"{cleaned} (ID: {disease_id})")
+                        else:
+                            diseases.append(cleaned)
+
+            elif c_type == "subcellular location":
+                # Handle subcellular location
+                locs = comment.findall("u:subcellularLocation", ns)
+                for loc_group in locs:
+                    location_parts = []
+                    for loc in loc_group:
+                        if loc.text:
+                            cleaned = self._clean_text(loc.text)
+                            if cleaned:
+                                location_parts.append(cleaned)
+
+                    if location_parts:
+                        subcellular.append("; ".join(location_parts))
+
+            elif c_type == "alternative products":
+                # Extract isoform notes
+                isoform_notes.update(self._process_isoforms(comment, ns))
+
+            elif c_type == "mass spectrometry":
+                # Handle mass spec comments
+                text_elem = comment.find("u:text", ns)
+                if text_elem is not None and text_elem.text:
+                    cleaned = self._clean_text(text_elem.text)
+                    if cleaned:
+                        mass_spec.append(cleaned)
+
+            elif c_type == "sequence caution":
+                # Handle sequence caution
+                text_elem = comment.find("u:text", ns)
+                conflict_type = comment.get("type")
+
+                caution_parts = []
+                if conflict_type:
+                    caution_parts.append(f"Type: {conflict_type}")
+
+                if text_elem is not None and text_elem.text:
+                    cleaned = self._clean_text(text_elem.text)
+                    if cleaned:
+                        caution_parts.append(cleaned)
+
+                if caution_parts:
+                    seq_cautions.append("; ".join(caution_parts))
+
+            elif c_type == "interaction":
+                # Handle interaction
+                interactant = comment.find("u:interactant", ns)
+                if interactant is not None:
+                    # Try to get intact ID or label
+                    intact_id = interactant.get("intactId")
+                    label = interactant.find("u:label", ns)
+
+                    interact_text = []
+                    if label is not None and label.text:
+                        interact_text.append(label.text)
+                    if intact_id:
+                        interact_text.append(f"(IntAct: {intact_id})")
+
+                    if interact_text:
+                        interactions.append(" ".join(interact_text))
+
+        return {
+            "function": functions,
+            "subunit": subunits,
+            "domain": domains,
+            "induction": inductions,
+            "tissue_specificity": tissues,
+            "disruption_phenotype": disruptions,
+            "activity_regulation": regulations,
+            "pathway": pathways,
+            "miscellaneous": misc,
+            "polymorphism": polymorphisms,
+            "similarity": similarities,
+            "caution": cautions,
+            "pharmaceutical": pharmaceuticals,
+            "biotechnology": biotech,
+            "mass_spectrometry": mass_spec,
+            "sequence_caution": seq_cautions,
+            "interaction": interactions,
+            "disease": diseases,
+            "subcellular_location": subcellular,
+            "catalytic_activity": catalytic_activities,
+            "ec_numbers": list(ec_numbers),
+            "isoform_notes": isoform_notes,
+        }
+
+    def _process_isoforms(
+        self, comment_element: ET.Element, ns: dict[str, str]
+    ) -> dict[str, list[IsoformNote]]:
+        """
+        Extracts isoform notes from 'alternative products' comments.
+
+        Args:
+            comment_element: XML element for the comment
+            ns: Namespace dictionary
+
+        Returns:
+            Dictionary mapping isoform IDs to lists of IsoformNote objects
+        """
+        result: dict[str, list[IsoformNote]] = {}
+
+        # Look for isoform elements
+        isoforms = comment_element.findall("u:isoform", ns)
+        if not isoforms:
             return result
 
-        names: list[str] = []
-        ids: list[str] = []
-        synonyms: list[str] = []
-
-        for comment in comments:
-            if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
+        for isoform in isoforms:
+            # Get isoform IDs
+            ids = [
+                id_elem.text
+                for id_elem in isoform.findall("u:id", ns)
+                if id_elem.text
+            ]
+            if not ids:
                 continue
 
-            isoforms = comment.get("isoforms", [])
-            if not isinstance(isoforms, list):
+            # Check for note text
+            note_elem = isoform.find("u:note", ns)
+            if note_elem is None or not note_elem.text:
                 continue
 
-            CommentExtractor._process_isoforms(isoforms, names, ids, synonyms)
+            note_text = clean_text(note_elem.text)
+            if not note_text:
+                continue
 
-        if names:
-            result["isoform_names"] = serialize_to_json(names, ensure_ascii=False)
-        if ids:
-            result["isoform_ids"] = serialize_to_json(ids, ensure_ascii=False)
-        if synonyms:
-            result["isoform_synonyms"] = serialize_to_json(synonyms, ensure_ascii=False)
+            process_single_isoform_note(note_text, ids, result)
 
         return result
-
-    @staticmethod
-    def _process_isoforms(
-        isoforms: list[dict[str, Any]],
-        names: list[str],
-        ids: list[str],
-        synonyms: list[str],
-    ) -> None:
-        """Process isoform list to extract details."""
-        for iso in isoforms:
-            if not isinstance(iso, dict):
-                continue
-
-            # Extract isoform IDs
-            isoform_ids = iso.get("isoformIds", [])
-            if isinstance(isoform_ids, list):
-                for iso_id in isoform_ids:
-                    if iso_id:
-                        ids.append(str(iso_id))
-
-            # Extract isoform name
-            name = iso.get("name", {})
-            if isinstance(name, dict) and name.get("value"):
-                names.append(str(name["value"]))
-
-            # Extract synonyms
-            iso_synonyms = iso.get("synonyms", [])
-            if isinstance(iso_synonyms, list):
-                for syn in iso_synonyms:
-                    if isinstance(syn, dict) and syn.get("value"):
-                        synonyms.append(str(syn["value"]))
-
-    @staticmethod
-    def extract_reactions(comments: Any) -> str | None:
-        """Extract reaction names from CATALYTIC ACTIVITY comments.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            JSON array of reaction name strings, or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        reactions: list[str] = []
-        for comment in comments:
-            if not _is_comment_of_type(comment, "CATALYTIC ACTIVITY"):
-                continue
-
-            reaction = comment.get("reaction", {})
-            if isinstance(reaction, dict):
-                name = reaction.get("name")
-                if name:
-                    reactions.append(str(name))
-
-        return serialize_to_json(reactions, ensure_ascii=False) if reactions else None
-
-    @staticmethod
-    def extract_reaction_ec_numbers(comments: Any) -> str | None:
-        """Extract EC numbers from CATALYTIC ACTIVITY comments.
-
-        Args:
-            comments: List of comment objects.
-
-        Returns:
-            JSON array of EC number strings, or None.
-        """
-        if not comments or not isinstance(comments, list):
-            return None
-
-        ec_numbers: list[str] = []
-        for comment in comments:
-            if not _is_comment_of_type(comment, "CATALYTIC ACTIVITY"):
-                continue
-
-            reaction = comment.get("reaction", {})
-            if isinstance(reaction, dict):
-                ec_number = reaction.get("ecNumber")
-                if ec_number:
-                    ec_numbers.append(str(ec_number))
-
-        return serialize_to_json(ec_numbers, ensure_ascii=False) if ec_numbers else None
