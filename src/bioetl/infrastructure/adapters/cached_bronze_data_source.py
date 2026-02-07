@@ -107,12 +107,15 @@ class CachedBronzeDataSource:
         pass
 
     async def health_check(self) -> HealthStatus:
-        """Report cached Bronze data source health status."""
+        """Check health of the cached Bronze data source.
+
+        Always returns HEALTHY since this is a local file-based source.
+        """
         return HealthStatus.HEALTHY
 
     async def aclose(self) -> None:
-        """Close cached Bronze data source resources (no-op)."""
-        return None
+        """Close the data source (no-op for file-based source)."""
+        pass
 
     def _parse_date(self, date_str: str | None) -> datetime | None:
         """Parse date string to datetime for list_batches filtering."""

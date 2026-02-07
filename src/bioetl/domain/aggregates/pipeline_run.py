@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import InvalidStateError
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from bioetl.domain.types import RunID, RunType
 
 
-class StageStatus(str, Enum):
+class StageStatus(StrEnum):
     """Status of a pipeline stage."""
 
     PENDING = "pending"
@@ -24,7 +24,7 @@ class StageStatus(str, Enum):
     SKIPPED = "skipped"
 
 
-class RunStatus(str, Enum):
+class RunStatus(StrEnum):
     """Status of a pipeline run."""
 
     PENDING = "pending"

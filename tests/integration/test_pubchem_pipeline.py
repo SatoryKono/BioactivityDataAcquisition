@@ -11,7 +11,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.pipelines.pubchem import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext

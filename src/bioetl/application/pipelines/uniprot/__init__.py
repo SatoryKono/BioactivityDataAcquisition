@@ -11,11 +11,19 @@ Main Components:
 
 from __future__ import annotations
 
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.uniprot.idmapping_transformer import (
     IDMappingTransformer,
 )
-from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
+
+
+class UniProtProteinPipeline(BasePipeline):
+    """Pipeline for processing UniProt proteins.
+
+    Transformer is injected via DI from GenericPipelineFactory.
+    """
+
 
 __all__ = [
     "IDMappingTransformer",

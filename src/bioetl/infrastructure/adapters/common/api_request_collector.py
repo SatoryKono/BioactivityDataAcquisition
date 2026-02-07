@@ -107,7 +107,7 @@ class APIRequestCollector:
         request_details = APIRequestDetails(
             endpoint=endpoint,
             base_url=base_url,
-            query_params=sanitized_params,
+            query_params=sanitized_params,  # type: ignore[arg-type]
             http_method=method.upper(),  # type: ignore[arg-type]
             response_size_bytes=response_size,
             request_duration_ms=duration_ms,
