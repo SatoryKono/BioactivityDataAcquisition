@@ -376,3 +376,8 @@ check-mermaid: ## Check that vendored mermaid files exist (fails if missing)
 	done; \
 	if [ $$missing -eq 1 ]; then echo "Mermaid vendored assets missing; run 'make vendor-mermaid' locally or add the files to the PR"; exit 1; fi; \
 	echo "Mermaid vendored assets present."
+
+schema-inventory-check: ## CI check: schema roots inventory + medallion generation map
+	@echo "$(BLUE)Running schema inventory check...$(NC)"
+	$(RUN) python scripts/check_schema_inventory.py --fail-on-orphans --report-json reports/schema_inventory_report.json
+	@echo "$(GREEN)Schema inventory check passed!$(NC)"

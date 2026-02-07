@@ -1,0 +1,15 @@
+root_schema_globs:
+  - src/bioetl/infrastructure/schemas/**/*.py
+  - src/bioetl/domain/**/*.py
+  - src/bioetl/application/**/*.py
+
+usage_globs:
+  - src/**/*.py
+  - tests/**/*.py
+
+pipeline_config_glob: configs/pipelines/**/*.yaml
+
+medallion_generators:
+  bronze_template: configs/data_schema/{provider}/{entity}.yaml
+  silver_template: src/bioetl/infrastructure/schemas/silver.py#{provider}_{entity}
+  gold_template: src/bioetl/domain/schemas/{provider}/{entity}.py
