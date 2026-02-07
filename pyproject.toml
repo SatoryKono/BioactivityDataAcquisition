@@ -39,10 +39,6 @@ dependencies = [
     "structlog>=24.0",
     # High-performance JSON serialization (required by batch_writer, bronze_writer, delta_writer)
     "orjson>=3.11.0,<4.0",
-    "black",
-    "ty",
-    "pyrefly",
-    "basedpyright",
 ]
 
 [project.scripts]
@@ -99,6 +95,10 @@ dev = [
     "respx>=0.21",
     "mypy>=1.10",
     "ruff>=0.4",
+    "black>=24.0",
+    "basedpyright>=1.0",
+    "pyrefly>=0.18",
+    "ty>=0.0.1",
     # Security tools (RULES.md - SAST)
     "pip-audit>=2.7",
     "bandit[toml]>=1.7",
