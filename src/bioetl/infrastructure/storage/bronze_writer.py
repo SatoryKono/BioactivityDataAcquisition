@@ -695,7 +695,7 @@ class BronzeWriter:
             decompressor = zstd.ZstdDecompressor()
             # Use streaming decompression since content size may not be in frame header
             with decompressor.stream_reader(compressed_data) as reader:
-                return reader.read()
+                return reader.read()  # type: ignore[no-any-return]
 
         decompressed_data = await asyncio.get_running_loop().run_in_executor(
             None, _read_and_decompress

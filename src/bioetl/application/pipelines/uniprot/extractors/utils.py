@@ -32,7 +32,7 @@ class ExtractorUtils:
         """
         if not value or not isinstance(value, list):
             return None
-        return orjson.dumps(value).decode("utf-8")
+        return orjson.dumps(value).decode("utf-8")  # type: ignore[no-any-return]
 
     @staticmethod
     def count_list(value: Any) -> int | None:

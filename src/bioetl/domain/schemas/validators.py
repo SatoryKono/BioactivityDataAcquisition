@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 import pandas as pd
 import pandera as pa
-from pandera.extensions import register_check_method  # type: ignore[attr-defined]
+from pandera.extensions import register_check_method
 
 if TYPE_CHECKING:
     pass

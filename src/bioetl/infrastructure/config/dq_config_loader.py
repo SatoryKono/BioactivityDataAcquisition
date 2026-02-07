@@ -108,7 +108,7 @@ class DQConfigLoader:
         if inline_overrides is None:
             self._cache[cache_key] = domain_config
 
-        return domain_config
+        return domain_config  # type: ignore[no-any-return]
 
     def clear_cache(self) -> None:
         """Clear the configuration cache.

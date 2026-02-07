@@ -48,7 +48,7 @@ def check_referential_integrity(
             continue
 
         if isinstance(ref_table, pa.Table):
-            ref_df: pl.DataFrame = pl.from_arrow(ref_table)  # type: ignore[assignment]
+            ref_df: pl.DataFrame = pl.from_arrow(ref_table)
         else:
             ref_df = ref_table
 
