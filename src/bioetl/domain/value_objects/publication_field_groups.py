@@ -17,7 +17,7 @@ Field naming convention: {provider}.publication.{field}
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Final
 
 __all__ = [
@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 
-class PublicationFieldGroup(str, Enum):
+class PublicationFieldGroup(StrEnum):
     """Semantic groups for publication fields.
 
     Groups are used for:
