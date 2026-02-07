@@ -106,6 +106,14 @@ class CachedBronzeDataSource:
         """Exit async context manager (no-op for file-based source)."""
         pass
 
+    async def health_check(self) -> HealthStatus:
+        """Report cached Bronze data source health status."""
+        return HealthStatus.HEALTHY
+
+    async def aclose(self) -> None:
+        """Close cached Bronze data source resources (no-op)."""
+        return None
+
     def _parse_date(self, date_str: str | None) -> datetime | None:
         """Parse date string to datetime for list_batches filtering."""
         if date_str is None:
