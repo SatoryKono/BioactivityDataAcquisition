@@ -10,8 +10,16 @@ Main Components:
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
+
+
+class PubChemCompoundPipeline(BasePipeline):
+    """Pipeline for processing PubChem compounds.
+
+    Transformer is injected via DI from GenericPipelineFactory.
+    """
+
 
 __all__ = [
     "PubChemCompoundPipeline",

@@ -243,7 +243,7 @@ disallow_incomplete_defs = true
 check_untyped_defs = true
 no_implicit_optional = true
 warn_redundant_casts = true
-warn_unused_ignores = true
+warn_unused_ignores = false  # Different envs have different type stubs; avoids CI/local mismatch
 show_error_codes = true
 # Additional strict checks
 disallow_any_generics = false  # Allow generic types for external libraries
@@ -301,8 +301,17 @@ module = [
     # Pandera DataFrameModel schemas with @pa.check decorators
     "bioetl.domain.schemas.uniprot.protein",
     "bioetl.domain.schemas.uniprot.isoform",
+    "bioetl.domain.schemas.uniprot.idmapping",
     "bioetl.domain.schemas.pubmed.article",
+    "bioetl.domain.schemas.pubmed.publication",
     "bioetl.domain.schemas.pubchem.compound",
+    # Pandera extensions @register_check_method lacks type stubs
+    "bioetl.domain.schemas.validators",
+    # Pydantic validators (@field_validator, @model_validator)
+    "bioetl.domain.models.metadata",
+    "bioetl.infrastructure.schemas.base_schemas",
+    "bioetl.infrastructure.schemas.composite_config",
+    "bioetl.infrastructure.schemas.dq_config",
 ]
 disallow_untyped_decorators = false
 

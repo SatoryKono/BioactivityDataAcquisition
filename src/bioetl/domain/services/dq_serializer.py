@@ -110,7 +110,7 @@ class DQReportSerializer:
     def _to_json(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to JSON with pretty formatting."""
         data = to_dict(report)
-        return orjson.dumps(
+        return orjson.dumps(  # type: ignore[no-any-return]
             data,
             option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
         ).decode("utf-8")

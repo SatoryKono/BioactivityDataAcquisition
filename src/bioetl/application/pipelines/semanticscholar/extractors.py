@@ -3,200 +3,34 @@
 
 Provides pure functions for extracting and normalizing fields from
 Semantic Scholar API responses.
+
+Split into submodules per audit-package-structure-2026-02-07:
+- _page_parsing: Volume/issue and page range parsing
+- _author_extractors: Author name, ID, ORCID, h-index, affiliation extraction
 """
 
 from __future__ import annotations
 
-import re
 from typing import Any
 
+# Re-export from submodules for backward compatibility
+from bioetl.application.pipelines.semanticscholar._author_extractors import (
+    extract_affiliations,
+    extract_author_h_indices,
+    extract_author_ids,
+    extract_author_orcids,
+    extract_author_s2_ids,
+    extract_authors,
+)
+from bioetl.application.pipelines.semanticscholar._page_parsing import (
+    parse_page_range,
+    parse_volume_issue,
+)
 from bioetl.domain.config import ValidationConfig
 from bioetl.domain.value_objects import PublicationYear
 
 # Semantic Scholar-specific config with min_year=1500 for historical publications
 _SS_VALIDATION_CONFIG = ValidationConfig(min_publication_year=1500)
-
-
-# =============================================================================
-# Volume/Issue Parsing
-# =============================================================================
-
-# Patterns for parsing combined volume/issue strings from S2 API.
-# The API sometimes returns both values in the volume field (e.g., "32 4").
-_VOLUME_ISSUE_PATTERNS = [
-    # "32 4" → vol=32, issue=4 (space-separated, common S2 format)
-    re.compile(r"^(\d+)\s+(\d+)$"),
-    # "32(4)" or "32 (4)" → vol=32, issue=4
-    re.compile(r"^(\d+)\s*\((\d+)\)$"),
-    # "Vol. 32, No. 4" or "Vol 32 No 4"
-    re.compile(r"^[Vv]ol\.?\s*(\d+)[,\s]+[Nn]o\.?\s*(\d+)$"),
-    # "32:4" → vol=32, issue=4
-    re.compile(r"^(\d+):(\d+)$"),
-]
-
-
-def parse_volume_issue(volume_str: str | None) -> tuple[str | None, str | None]:
-    """Parse volume string that may contain issue number.
-
-    Semantic Scholar API sometimes returns combined volume/issue in the
-    volume field (e.g., "32 4" for volume 32, issue 4).
-
-    Args:
-        volume_str: Raw volume string from S2 API.
-
-    Returns:
-        Tuple of (volume, issue). Issue is None if not embedded.
-
-    Examples:
-        >>> parse_volume_issue("32 4")
-        ('32', '4')
-        >>> parse_volume_issue("523")
-        ('523', None)
-        >>> parse_volume_issue("40(3)")
-        ('40', '3')
-        >>> parse_volume_issue(None)
-        (None, None)
-
-    """
-    if not volume_str:
-        return (None, None)
-
-    cleaned = volume_str.strip()
-    if not cleaned:
-        return (None, None)
-
-    # Try each pattern for combined volume/issue
-    for pattern in _VOLUME_ISSUE_PATTERNS:
-        match = pattern.match(cleaned)
-        if match:
-            return (match.group(1), match.group(2))
-
-    # No issue found - return volume as-is
-    return (cleaned, None)
-
-
-# =============================================================================
-# Page Range Parsing
-# =============================================================================
-
-
-def _extract_digits(s: str) -> str:
-    """Extract only digit characters from a string."""
-    return "".join(c for c in s if c.isdigit())
-
-
-def _extract_non_digits(s: str) -> str:
-    """Extract only non-digit characters from a string."""
-    return "".join(c for c in s if not c.isdigit())
-
-
-def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
-    """Expand abbreviated last page number.
-
-    Academic publishing often abbreviates page ranges:
-    - "737-9" means 737-739 (not 737-9)
-    - "737-39" means 737-739
-    - "199-3" means 199-203 (rollover case)
-
-    Algorithm:
-    1. If tmp_last_page has >= digits than first_page, return as-is
-    2. Otherwise: last_page = (first_page // 10^n2) * 10^n2 + tmp_last_page
-    3. Handle rollover: if expanded < first_page, add 10^n2
-
-    Args:
-        first_page: First page (e.g., "737")
-        tmp_last_page: Potentially abbreviated last page (e.g., "9", "39", "839")
-
-    Returns:
-        Expanded last page string.
-
-    """
-    first_digits = _extract_digits(first_page)
-    last_digits = _extract_digits(tmp_last_page)
-
-    # If either is non-numeric, return as-is (e.g., "S1-S5")
-    if not first_digits or not last_digits:
-        return tmp_last_page
-
-    # If last page has same or more digits, it's a full number
-    if len(last_digits) >= len(first_digits):
-        return tmp_last_page
-
-    # Expand abbreviated page number
-    first_num = int(first_digits)
-    last_num = int(last_digits)
-    divisor = 10 ** len(last_digits)
-
-    expanded = (first_num // divisor) * divisor + last_num
-
-    # Handle rollover case: "199-3" should be "199-203", not "199-193"
-    if expanded < first_num:
-        expanded += divisor
-
-    # Preserve any prefix from tmp_last_page (e.g., "S" in "S5")
-    prefix = _extract_non_digits(tmp_last_page)
-    return f"{prefix}{expanded}" if prefix else str(expanded)
-
-
-def parse_page_range(pages_str: str | None) -> tuple[str | None, str | None]:
-    """Parse page range with abbreviated last page expansion.
-
-    Academic publishing often abbreviates page ranges:
-    - "737-9" means 737-739 (not 737-9)
-    - "737-39" means 737-739
-    - "737-839" means 737-839 (full number, no expansion)
-
-    Also handles whitespace, en-dashes (–), and em-dashes (—).
-
-    Args:
-        pages_str: Raw pages string (e.g., "737-9", "123-145").
-
-    Returns:
-        Tuple of (first_page, last_page). Both are strings or None.
-
-    Examples:
-        >>> parse_page_range("737-9")
-        ('737', '739')
-        >>> parse_page_range("737-39")
-        ('737', '739')
-        >>> parse_page_range("737-839")
-        ('737', '839')
-        >>> parse_page_range("123")
-        ('123', None)
-        >>> parse_page_range("S1-S5")
-        ('S1', 'S5')
-
-    """
-    if not pages_str:
-        return (None, None)
-
-    cleaned = pages_str.strip()
-    if not cleaned:
-        return (None, None)
-
-    # Normalize various dash types to hyphen
-    # EN DASH (U+2013) and EM DASH (U+2014) → HYPHEN-MINUS (U+002D)
-    cleaned = cleaned.replace("\u2013", "-").replace("\u2014", "-")
-
-    # Split on "-" (only first occurrence)
-    parts = cleaned.split("-", 1)
-
-    first_page = parts[0].strip()
-    if not first_page:
-        return (None, None)
-
-    # No range separator - single page
-    if len(parts) == 1:
-        return (first_page, None)
-
-    tmp_last_page = parts[1].strip()
-    if not tmp_last_page:
-        return (first_page, None)
-
-    # Expand abbreviated page number
-    last_page = _expand_abbreviated_page(first_page, tmp_last_page)
-
-    return (first_page, last_page)
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
@@ -227,169 +61,6 @@ def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
         "dblp": external_ids.get("DBLP"),
         "acl": external_ids.get("ACL"),
     }
-
-
-def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
-    """Extract author display names from authors list.
-
-    Filters out None, empty strings, and whitespace-only names.
-
-    Args:
-        authors: List of author objects from S2.
-
-    Returns:
-        List of author names (non-empty, stripped).
-
-    Example:
-        >>> authors = [{"authorId": "123", "name": "John Doe"}]
-        >>> extract_authors(authors)
-        ['John Doe']
-        >>> authors = [{"name": "  "}, {"name": ""}, {"name": None}]
-        >>> extract_authors(authors)
-        []
-
-    """
-    if not authors:
-        return []
-
-    result = []
-    for author in authors:
-        name = author.get("name")
-        if name and name.strip():
-            result.append(name.strip())
-    return result
-
-
-def extract_author_ids(authors: list[dict[str, Any]] | None) -> list[str]:
-    """Extract author IDs from authors list.
-
-    Args:
-        authors: List of author objects from S2.
-
-    Returns:
-        List of authorId strings.
-
-    Example:
-        >>> authors = [{"authorId": "123", "name": "John"}, {"authorId": "456", "name": "Jane"}]
-        >>> extract_author_ids(authors)
-        ['123', '456']
-    """
-    if not authors:
-        return []
-
-    result = []
-    for author in authors:
-        aid = author.get("authorId")
-        if aid:
-            result.append(str(aid))
-    return result
-
-
-def extract_author_s2_ids(authors: list[dict[str, Any]] | None) -> list[str]:
-    """Extract Semantic Scholar author IDs from authors list.
-
-    Extracts the 40-character hex S2 author IDs for author-level analytics
-    and disambiguation.
-
-    Args:
-        authors: List of author objects from S2 API.
-
-    Returns:
-        List of S2 author IDs (non-empty, in order of authorship).
-
-    Example:
-        >>> authors = [
-        ...     {"authorId": "1234567890abcdef1234567890abcdef12345678", "name": "John"},
-        ...     {"authorId": None, "name": "Jane"},
-        ...     {"authorId": "abcdef1234567890abcdef1234567890abcdef12", "name": "Bob"},
-        ... ]
-        >>> extract_author_s2_ids(authors)
-        ['1234567890abcdef1234567890abcdef12345678', 'abcdef1234567890abcdef1234567890abcdef12']
-
-    """
-    if not authors:
-        return []
-
-    result = []
-    for author in authors:
-        author_id = author.get("authorId")
-        if author_id and isinstance(author_id, str) and author_id.strip():
-            result.append(author_id.strip())
-    return result
-
-
-def extract_author_orcids(authors: list[dict[str, Any]] | None) -> list[str]:
-    """Extract ORCID identifiers from authors list.
-
-    ORCID (Open Researcher and Contributor ID) provides persistent digital
-    identifiers for researchers. This extracts ORCIDs from the externalIds
-    field of each author.
-
-    Args:
-        authors: List of author objects from S2 API with externalIds.
-
-    Returns:
-        List of ORCID identifiers (non-empty, in order of authorship).
-        Empty string placeholder is used for authors without ORCID.
-
-    Example:
-        >>> authors = [
-        ...     {"name": "John", "externalIds": {"ORCID": "0000-0001-2345-6789"}},
-        ...     {"name": "Jane", "externalIds": None},
-        ...     {"name": "Bob", "externalIds": {"ORCID": "0000-0002-3456-7890"}},
-        ... ]
-        >>> extract_author_orcids(authors)
-        ['0000-0001-2345-6789', '', '0000-0002-3456-7890']
-
-    """
-    if not authors:
-        return []
-
-    result = []
-    for author in authors:
-        external_ids = author.get("externalIds")
-        orcid = ""
-        if external_ids and isinstance(external_ids, dict):
-            orcid_val = external_ids.get("ORCID")
-            if orcid_val and isinstance(orcid_val, str) and orcid_val.strip():
-                orcid = orcid_val.strip()
-        result.append(orcid)
-    return result
-
-
-def extract_author_h_indices(authors: list[dict[str, Any]] | None) -> list[int | None]:
-    """Extract h-index values from authors list.
-
-    The h-index is a metric for research impact. This extracts h-index
-    values for each author from the S2 API response.
-
-    Args:
-        authors: List of author objects from S2 API with hIndex field.
-
-    Returns:
-        List of h-index values (int or None for each author, in order).
-
-    Example:
-        >>> authors = [
-        ...     {"name": "John", "hIndex": 45},
-        ...     {"name": "Jane", "hIndex": None},
-        ...     {"name": "Bob", "hIndex": 23},
-        ... ]
-        >>> extract_author_h_indices(authors)
-        [45, None, 23]
-
-    """
-    if not authors:
-        return []
-
-    result: list[int | None] = []
-    for author in authors:
-        h_index = author.get("hIndex")
-        if h_index is not None and isinstance(h_index, int) and h_index >= 0:
-            result.append(h_index)
-        else:
-            result.append(None)
-    return result
 
 
 def extract_citation_contexts(
@@ -434,38 +105,6 @@ def extract_citation_contexts(
                 result.append(context.strip())
 
     return result
-
-
-def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
-    """Extract affiliations from authors list.
-
-    Semantic Scholar authors may have affiliations as a list of strings.
-
-    Args:
-        authors: List of author objects from S2.
-
-    Returns:
-        List of unique affiliation strings (sorted).
-
-    Example:
-        >>> authors = [{"name": "John", "affiliations": ["Univ A"]}, {"name": "Jane", "affiliations": ["Univ B", "Univ A"]}]
-        >>> extract_affiliations(authors)
-        ['Univ A', 'Univ B']
-    """
-    if not authors:
-        return []
-
-    affiliations: set[str] = set()
-    for author in authors:
-        author_affs = author.get("affiliations")
-        if not author_affs or not isinstance(author_affs, list):
-            continue
-
-        for aff in author_affs:
-            if aff and isinstance(aff, str) and aff.strip():
-                affiliations.add(aff.strip())
-
-    return sorted(affiliations)
 
 
 def extract_journal_info(
@@ -693,6 +332,7 @@ __all__ = [
     "VALID_OA_STATUS_VALUES",
     "extract_affiliations",
     "extract_author_h_indices",
+    "extract_author_ids",
     "extract_author_orcids",
     "extract_author_s2_ids",
     "extract_authors",

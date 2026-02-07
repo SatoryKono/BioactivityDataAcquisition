@@ -8,16 +8,16 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
-from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
-from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPipeline
-from bioetl.application.pipelines.chembl.publication_transformer import (
+from bioetl.application.pipelines.chembl import (
+    AssayTransformer,
+    ChEMBLAssayPipeline,
+    ChEMBLMoleculePipeline,
+    ChEMBLPublicationPipeline,
+    ChEMBLTargetPipeline,
+    MoleculeTransformer,
     PublicationTransformer,
+    TargetTransformer,
 )
-from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
-from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
-from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
-from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics

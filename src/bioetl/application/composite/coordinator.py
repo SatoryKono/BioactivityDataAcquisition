@@ -215,7 +215,7 @@ class EnrichmentCoordinator:
         column_lower = column.lower()
         for col in df.columns:
             if col.lower() == column_lower:
-                return col
+                return col  # type: ignore[no-any-return]
         return None
 
     async def _return_skipped(self, enricher: EnricherConfig) -> EnrichmentResult:
