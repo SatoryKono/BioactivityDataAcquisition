@@ -825,8 +825,6 @@ class CompositeConfig:
 
     def _validate_unique_enrichers(self) -> None:
         """Validate that enricher pipeline names are unique."""
-        if not self.enrichers:
-            return  # Skip if no enrichers
         names = [e.pipeline for e in self.enrichers]
         if len(names) != len(set(names)):
             duplicates = [n for n in names if names.count(n) > 1]
