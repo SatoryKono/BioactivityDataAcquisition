@@ -107,8 +107,8 @@ class APIRequestCollector:
         request_details = APIRequestDetails(
             endpoint=endpoint,
             base_url=base_url,
-            query_params=sanitized_params,
-            http_method=method.upper(),
+            query_params=sanitized_params,  # type: ignore[arg-type]
+            http_method=method.upper(),  # type: ignore[arg-type]
             response_size_bytes=response_size,
             request_duration_ms=duration_ms,
             status_code=status_code,
@@ -195,7 +195,7 @@ class APIRequestCollector:
             avg_duration = 0.0
 
         return SourceMetadata(
-            type=source_type,
+            type=source_type,  # type: ignore[arg-type]
             url=url,
             api_version=api_version,
             api_requests=requests_copy,
