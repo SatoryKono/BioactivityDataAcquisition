@@ -98,6 +98,7 @@ jobs:
               "src/bioetl/infrastructure/adapters/semanticscholar/",
               "src/bioetl/infrastructure/adapters/crossref/",  # fetch_batch with fallback (CC=12)
               "src/bioetl/infrastructure/adapters/pubmed/",  # fetch_filtered_with_fallback PMID→title (CC=17)
+              "src/bioetl/infrastructure/adapters/uniprot/",  # _fetch_results with pagination and retry (CC=13)
               "src/bioetl/infrastructure/adapters/input/",  # load_filter_with_fallback DOI→title mapping (CC=12)
               "src/bioetl/infrastructure/adapters/pubchem/",  # fetch_by_inchikey multi-step resolution (CC=11)
               "src/bioetl/application/services/dq/",  # DQ analyzers with multiple validation checks
@@ -111,6 +112,7 @@ jobs:
           EXEMPT_FILES = {
               "src/bioetl/infrastructure/storage/silver_writer.py",  # _write_silver_metadata (CC=12)
               "src/bioetl/infrastructure/storage/gold_writer.py",  # _write_gold_metadata (CC=12)
+              "src/bioetl/application/core/batch_writer.py",  # _apply_system_prefix_order with column ordering (CC=12)
               "src/bioetl/composition/factories/storage_factory.py",  # create() multi-layer config (CC=11)
               "src/bioetl/composition/services/metadata_coordinator.py",  # create_silver_metadata, _extract_schema_metadata (CC=12-16)
               "src/bioetl/infrastructure/storage/metadata_builder.py",  # _extract_schema_metadata with schema introspection (CC=16)

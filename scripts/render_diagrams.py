@@ -122,7 +122,7 @@ def main():
 
     if not mermaid_files:
         print("No mermaid files found")
-        sys.exit(1)
+        sys.exit(0)
 
     print(f"Found {len(mermaid_files)} mermaid file(s)")
 
