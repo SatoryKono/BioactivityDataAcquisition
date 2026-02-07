@@ -236,5 +236,3 @@ class MetadataWriter:
         No resources to release for filesystem-based writer.
         """
         pass
-
-

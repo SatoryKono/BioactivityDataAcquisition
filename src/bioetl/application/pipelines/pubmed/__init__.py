@@ -20,6 +20,7 @@ class PubMedPublicationPipeline(BasePipeline):
     Transformer is injected via DI from GenericPipelineFactory.
     """
 
+
 __all__ = [
     "PubMedPublicationPipeline",
     "PubMedPublicationTransformer",

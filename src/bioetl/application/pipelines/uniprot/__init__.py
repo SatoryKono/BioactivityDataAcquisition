@@ -24,6 +24,7 @@ class UniProtProteinPipeline(BasePipeline):
     Transformer is injected via DI from GenericPipelineFactory.
     """
 
+
 __all__ = [
     "IDMappingTransformer",
     "UniProtProteinPipeline",
