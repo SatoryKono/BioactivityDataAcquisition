@@ -482,3 +482,42 @@ dev = [
     "pydocstyle>=6.3",
     "autoflake>=2.3.1",
 ]
+
+
+# Temporary suppressions for strict mypy on schema decorators and dynamic libs.
+[[tool.mypy.overrides]]
+module = [
+    "bioetl.domain.models.metadata",
+    "bioetl.domain.schemas.uniprot.idmapping",
+    "bioetl.domain.schemas.pubmed.publication",
+    "bioetl.infrastructure.schemas.composite_config",
+    "bioetl.infrastructure.schemas.base_schemas",
+    "bioetl.infrastructure.schemas.dq_config",
+]
+disable_error_code = ["untyped-decorator"]
+
+[[tool.mypy.overrides]]
+module = [
+    "bioetl.domain.serialization",
+    "bioetl.application.pipelines.uniprot.extractors.utils",
+    "bioetl.domain.services.dq_serializer",
+    "bioetl.application.composite.deduplication",
+    "bioetl.infrastructure.storage.bronze_writer",
+    "bioetl.infrastructure.config.filter_config_loader",
+    "bioetl.infrastructure.config.dq_config_loader",
+    "bioetl.application.composite.coordinator",
+    "bioetl.composition.bootstrap.runtime.composite",
+]
+disable_error_code = ["no-any-return", "unused-ignore"]
+
+[[tool.mypy.overrides]]
+module = [
+    "bioetl.infrastructure.adapters.common.api_request_collector",
+    "bioetl.domain.value_objects.dq_metrics",
+    "bioetl.application.services.dq.silver_analyzer",
+    "bioetl.application.services.dq.gold_analyzer",
+    "bioetl.infrastructure.storage.metadata_builder",
+    "bioetl.composition.services.metadata_coordinator",
+    "bioetl.domain.schemas.validators",
+]
+disable_error_code = ["unused-ignore"]

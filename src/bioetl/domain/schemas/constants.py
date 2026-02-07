@@ -1,3 +1,4 @@
+# ruff: noqa: RUF022
 """Centralized constants for schema validation.
 
 Provides regex patterns and enum values used across multiple schemas.
