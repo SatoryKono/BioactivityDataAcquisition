@@ -157,7 +157,7 @@ class GoldDQAnalyzer:
             GoldDQReport: Complete DQ report for Gold layer.
         """
         if isinstance(data, pa.Table):
-            df: pl.DataFrame = pl.from_arrow(data)
+            df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
         else:
             df = data
 

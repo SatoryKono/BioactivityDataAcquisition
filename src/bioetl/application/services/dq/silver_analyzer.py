@@ -216,7 +216,7 @@ class SilverDQAnalyzer:
         """
         # Convert PyArrow to Polars for consistent processing
         if isinstance(data, pa.Table):
-            df: pl.DataFrame = pl.from_arrow(data)
+            df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
         else:
             df = data
 
@@ -413,11 +413,11 @@ class SilverDQAnalyzer:
                         median_val = stats.median()
                         # Type narrowing: values are numeric due to dtype check above
                         numeric_cols[col] = NumericDistribution(
-                            min=float(min_val) if min_val is not None else None,
-                            max=float(max_val) if max_val is not None else None,
-                            mean=float(mean_val) if mean_val is not None else None,
-                            std=float(std_val) if std_val is not None else None,
-                            median=float(median_val)
+                            min=float(min_val) if min_val is not None else None,  # type: ignore[arg-type]
+                            max=float(max_val) if max_val is not None else None,  # type: ignore[arg-type]
+                            mean=float(mean_val) if mean_val is not None else None,  # type: ignore[arg-type]
+                            std=float(std_val) if std_val is not None else None,  # type: ignore[arg-type]
+                            median=float(median_val)  # type: ignore[arg-type]
                             if median_val is not None
                             else None,
                         )
