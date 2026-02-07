@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.exceptions import CachedBronzeEmptyError
 from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -243,3 +244,11 @@ class CachedBronzeDataSource:
             records_yielded=count,
             batches_processed=len(batches),
         )
+
+    async def health_check(self) -> HealthStatus:
+        """Return HEALTHY for file-based cached source."""
+        return HealthStatus.HEALTHY
+
+    async def aclose(self) -> None:
+        """Close the data source (no-op for file-based reader)."""
+        return None

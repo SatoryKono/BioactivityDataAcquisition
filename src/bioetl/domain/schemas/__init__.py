@@ -1,3 +1,4 @@
+# ruff: noqa: RUF022
 """Domain schemas for ETL records.
 
 Provides:
