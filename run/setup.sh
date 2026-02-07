@@ -161,7 +161,7 @@ install_with_uv() {
 
     if [[ "$QUICK_MODE" == true ]]; then
         log "Installing runtime deps with uv"
-        uv sync
+        uv sync --no-dev
     else
         log "Installing dev/test/tracing deps with uv"
         uv sync --extra dev --extra tests --extra tracing
