@@ -89,7 +89,7 @@ class TestFileSizeLimits:
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
         "batch_executor.py": 785,  # 779 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
-        "gold_analyzer.py": 835,  # 829 LOC - Gold layer analysis with extracted helper methods
+        "gold_analyzer.py": 200,  # 192 LOC - Thin orchestrator (checks extracted to _checks_*.py modules)
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
         "dq_report_service.py": 565,  # 561 LOC - DQ report service with extracted helpers for CC reduction
         # Composition layer exemptions
@@ -260,11 +260,12 @@ class TestFunctionComplexity:
         "_serialize_value": 11,  # CC=10 - Value serialization with multiple type checks
         # Gold/Silver analyzer application functions
         "analyze": 21,  # CC=14-20 - Layer analysis with multiple checks
-        "_check_business_rules": 23,  # CC=22 - Business rule validation
-        "_check_referential_integrity": 13,  # CC=12 - FK integrity checks
-        "_check_statistical_profile": 16,  # CC=15 - Statistical analysis
-        "_check_anomaly_detection": 12,  # CC=11 - Anomaly detection
-        "_check_scd_integrity": 16,  # CC=15 - SCD Type 2 integrity
+        # Gold DQ check modules (extracted from GoldDQAnalyzer to _checks_*.py)
+        "check_business_rules": 23,  # CC=22 - Business rule validation
+        "check_referential_integrity": 13,  # CC=12 - FK integrity checks
+        "check_statistical_profile": 16,  # CC=15 - Statistical analysis
+        "check_anomaly_detection": 12,  # CC=11 - Anomaly detection
+        "check_scd_integrity": 16,  # CC=15 - SCD Type 2 integrity
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
         # Composite pipeline merge service
@@ -414,11 +415,12 @@ class TestFunctionLength:
         "fetch_multi_filtered": 60,  # Multi-field AND filtering
         # Gold/Silver analyzer functions
         "analyze": 100,  # Layer analysis with multiple DQ checks
-        "_check_business_rules": 80,  # Business rule validation
-        "_check_referential_integrity": 60,  # FK integrity checks
-        "_check_statistical_profile": 60,  # Statistical analysis
-        "_check_anomaly_detection": 60,  # Anomaly detection
-        "_check_scd_integrity": 60,  # SCD Type 2 integrity
+        # Gold DQ check modules (extracted from GoldDQAnalyzer to _checks_*.py)
+        "check_referential_integrity": 75,  # 72 LOC - FK integrity checks
+        "check_scd_integrity": 80,  # 75 LOC - SCD Type 2 integrity
+        "check_statistical_profile": 80,  # 76 LOC - Statistical profile analysis
+        "check_anomaly_detection": 90,  # 84 LOC - Anomaly detection
+        # Silver DQ analyzer functions
         "_check_value_distribution": 70,  # Value distribution analysis
         "_check_schema_drift": 60,  # Schema drift detection
         # DQ serializer functions
@@ -615,7 +617,7 @@ class TestClassSize:
         # DQ analyzers (comprehensive data quality analysis)
         "DQReportSerializer": 410,  # 403 lines - DQ report serialization with multiple formats (increased for CC reduction)
         "DQReportService": 410,  # 407 lines - DQ report orchestration with extracted helpers for CC reduction
-        "GoldDQAnalyzer": 780,  # 779 lines - Gold layer DQ analysis with business rules
+        "GoldDQAnalyzer": 150,  # 143 lines - Thin orchestrator (checks extracted to _checks_*.py)
         "SilverDQAnalyzer": 600,  # 593 lines - Silver layer DQ analysis with extracted helper methods
         # Domain services
         "NormalizationService": 370,  # 364 lines - Normalization service with validation
@@ -828,7 +830,7 @@ class TestGodObjectDetection:
         "EnrichmentCoordinator": "Cohesive service - all methods relate to enricher orchestration",
         "CompositePipelineRunner": "Thin orchestrator - delegates to coordinator, merger, checkpoint services",
         # DQ analyzers (cohesive data quality analysis with many validation methods)
-        "GoldDQAnalyzer": "Cohesive analyzer - all methods relate to Gold layer data quality analysis",
+        "GoldDQAnalyzer": "Thin orchestrator - delegates to _checks_*.py modules (143 LOC, below threshold)",
         "SilverDQAnalyzer": "Cohesive analyzer - all methods relate to Silver layer data quality analysis",
         "DQReportSerializer": "Cohesive serializer - all methods relate to DQ report serialization formats",
         "CompositeCheckpointState": "Immutable dataclass - state transitions via with_* methods, serialization helpers are cohesive",

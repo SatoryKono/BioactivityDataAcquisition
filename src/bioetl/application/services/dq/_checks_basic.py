@@ -1,0 +1,130 @@
+"""Basic Gold DQ checks: record count, completeness, data freshness.
+
+Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+
+import polars as pl
+
+from bioetl.domain.value_objects.dq_report import (
+    CompletenessResult,
+    DataFreshnessResult,
+    DQCheckStatus,
+    RecordCountResult,
+)
+
+# Freshness thresholds from RULES.md §3.4.1
+FRESHNESS_WARNING_HOURS = 24
+FRESHNESS_CRITICAL_HOURS = 72
+
+
+def check_record_count(
+    df: pl.DataFrame, baseline_stats: dict[str, object] | None
+) -> RecordCountResult:
+    """Check record count against baseline."""
+    current = len(df)
+    baseline = (
+        baseline_stats.get("record_count_ma30", current) if baseline_stats else current
+    )
+    if not isinstance(baseline, (int, float)):
+        baseline = current
+    delta = (current - baseline) / baseline if baseline > 0 else 0.0
+
+    status = DQCheckStatus.PASS
+    if delta < -0.5:
+        status = DQCheckStatus.FAIL
+    elif delta < -0.3:
+        status = DQCheckStatus.WARN
+
+    return RecordCountResult(
+        value=current,
+        status=status,
+        delta_from_last_run=int(current - baseline) if baseline else None,
+    )
+
+
+def check_completeness(
+    df: pl.DataFrame,
+    required_fields: list[str],
+    threshold: float,
+) -> CompletenessResult:
+    """Check completeness of required fields."""
+    if not required_fields:
+        return CompletenessResult(
+            required_fields={},
+            overall_completeness_score=1.0,
+            minimum_threshold=threshold,
+            status=DQCheckStatus.PASS,
+        )
+
+    field_rates: dict[str, float] = {}
+    total_rate = 0.0
+    count = 0
+
+    for field in required_fields:
+        if field in df.columns:
+            null_count = df[field].null_count()
+            rate = 1.0 - (null_count / len(df)) if len(df) > 0 else 0.0
+            field_rates[field] = round(rate, 4)
+            total_rate += rate
+            count += 1
+        else:
+            field_rates[field] = 0.0
+
+    overall_score = total_rate / count if count > 0 else 0.0
+
+    status = DQCheckStatus.PASS if overall_score >= threshold else DQCheckStatus.FAIL
+
+    return CompletenessResult(
+        required_fields=field_rates,
+        overall_completeness_score=round(overall_score, 4),
+        minimum_threshold=threshold,
+        status=status,
+    )
+
+
+def check_data_freshness(
+    df: pl.DataFrame, current_time: datetime
+) -> DataFreshnessResult:
+    """Check data freshness based on timestamp columns."""
+    timestamp_cols = ["_updated_at", "updated_at", "_ingestion_ts", "created_at"]
+    max_ts = None
+
+    for col in timestamp_cols:
+        if col in df.columns:
+            try:
+                col_max = df[col].max()
+                if col_max is not None:
+                    if isinstance(col_max, datetime):
+                        max_ts = col_max
+                    break
+            except Exception:
+                pass
+
+    if max_ts is None:
+        return DataFreshnessResult(
+            max_updated_at=None,
+            freshness_lag_seconds=0.0,
+            freshness_lag_hours=0.0,
+            status=DQCheckStatus.PASS,
+        )
+
+    lag_seconds = (current_time - max_ts).total_seconds()
+    lag_hours = lag_seconds / 3600
+
+    if lag_hours > FRESHNESS_CRITICAL_HOURS:
+        status = DQCheckStatus.FAIL
+    elif lag_hours > FRESHNESS_WARNING_HOURS:
+        status = DQCheckStatus.WARN
+    else:
+        status = DQCheckStatus.PASS
+
+    return DataFreshnessResult(
+        max_updated_at=max_ts,
+        freshness_lag_seconds=round(lag_seconds, 2),
+        freshness_lag_hours=round(lag_hours, 2),
+        status=status,
+    )

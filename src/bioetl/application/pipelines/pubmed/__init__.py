@@ -10,8 +10,15 @@ Main Components:
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
+
+
+class PubMedPublicationPipeline(BasePipeline):
+    """Пайплайн для данных о публикациях из PubMed.
+
+    Transformer is injected via DI from GenericPipelineFactory.
+    """
 
 __all__ = [
     "PubMedPublicationPipeline",

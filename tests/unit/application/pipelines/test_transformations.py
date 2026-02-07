@@ -7,9 +7,9 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.pipelines.pubchem import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
-from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
+from bioetl.application.pipelines.uniprot import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
