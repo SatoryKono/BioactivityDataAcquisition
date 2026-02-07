@@ -8,16 +8,15 @@ with other publication pipelines (CrossRef, OpenAlex, SemanticScholar).
 
 from __future__ import annotations
 
-import re
 import xml.etree.ElementTree as ET
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
+from bioetl.application.pipelines.pubmed.date_helper import PubMedDateHelper
 from bioetl.application.pipelines.pubmed.extractors import (
     AbstractExtractor,
     AuthorExtractor,
     ClassificationExtractor,
-    DateExtractor,
     IdentifierExtractor,
     RawAuthor,
     StructuredAffiliation,
@@ -26,7 +25,7 @@ from bioetl.application.pipelines.pubmed.xml_utils import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.services import IdentityService
-from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
+from bioetl.domain.value_objects import DOI, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -56,33 +55,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
-
-    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
-    # Used to filter out invalid dates like "2024-13-99" or "n/a" before
-    # they propagate to _compute_publication_date.
-    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
-        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
-        # Partial month: YYYY-MM (with valid month 01-12)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
-        # Partial year: YYYY
-        re.compile(r"^\d{4}$"),
-    )
-
-    _MONTH_MAP: ClassVar[dict[str, int]] = {
-        "jan": 1,
-        "feb": 2,
-        "mar": 3,
-        "apr": 4,
-        "may": 5,
-        "jun": 6,
-        "jul": 7,
-        "aug": 8,
-        "sep": 9,
-        "oct": 10,
-        "nov": 11,
-        "dec": 12,
-    }
 
     def __init__(
         self,
@@ -119,7 +91,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             data_normalizer=data_normalizer,
         )
         self._cached_xml_root = None
-        self._date_extractor = DateExtractor()
+        self._date_helper = PubMedDateHelper()
 
     def _pre_extract_validation(
         self,
@@ -160,24 +132,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _is_valid_date_format(self, date_str: str | None) -> bool:
         """Validate that date string matches expected ISO format.
 
-        Accepts:
-        - YYYY-MM-DD (full date with valid month 01-12 and day 01-31)
-        - YYYY-MM (partial with valid month 01-12)
-        - YYYY (year only)
-
-        This validation ensures that invalid dates like "2024-13-99", "n/a",
-        or malformed strings don't propagate to _compute_publication_date,
-        which would produce inconsistent results.
-
-        Args:
-            date_str: Date string to validate.
-
-        Returns:
-            True if date format is valid, False otherwise.
+        Delegates validation to PubMedDateHelper.
         """
-        if not date_str:
-            return False
-        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
+        return self._date_helper.is_valid_date_format(date_str)
 
     def _extract_medline_metadata(
         self,
@@ -360,7 +317,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
             **self._extract_author_block(article, raw_author_data),
             **self._extract_journal_data(article),
-            **self._extract_date_data(article, pubmed_data, medline),
+            **self._date_helper.extract_date_data(article, pubmed_data, medline),
             **self._extract_classification_data(article, medline),
             **self._extract_medline_metadata(medline, pubmed_data),
             **self._extract_counts(article, pubmed_data),
@@ -548,158 +505,15 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "page_last": last_page,
         }
 
+    # Date extraction logic moved to PubMedDateHelper to reduce class size
     def _compute_publication_date(
         self, epub_date: str | None, pub_date: str | None, year: int | None
     ) -> str | None:
         """Compute unified publication_date (YYYY-MM-DD).
 
-        Priority: epub_date > pub_date > year
-        All outputs normalized to full YYYY-MM-DD format using end-of-period strategy.
-
-        Args:
-            epub_date: Electronic publication date (YYYY-MM-DD or partial).
-            pub_date: Publication date (YYYY-MM-DD or partial).
-            year: Publication year.
-
-        Returns:
-            ISO date string (YYYY-MM-DD) or None.
+        Delegates to date helper. Used by tests.
         """
-        # Priority 1: epub_date if it's a complete date
-        if epub_date and len(epub_date) >= 10:
-            return epub_date[:10]
-
-        # Priority 2: pub_date (may be partial, normalize it)
-        if pub_date:
-            return self._normalize_partial_date(pub_date)
-
-        # Priority 3: Construct from year (end of year)
-        if year:
-            return f"{year}-12-31"
-
-        return None
-
-    def _parse_month_day(
-        self, pub_date_node: ET.Element | None
-    ) -> tuple[int | None, int | None]:
-        """Extract month and day as integers from PubDate node.
-
-        Uses DateExtractor to handle both structured (Year/Month/Day)
-        and unstructured (MedlineDate) formats.
-        """
-        if pub_date_node is None:
-            return None, None
-
-        # Use DateExtractor logic to support MedlineDate parsing
-        raw_date = self._date_extractor.extract(pub_date_node)
-        if not raw_date:
-            return None, None
-
-        month_text = raw_date.get("month")
-        day_text = raw_date.get("day")
-
-        pub_month = self._parse_month(month_text)
-        pub_day = int(day_text) if day_text and day_text.isdigit() else None
-
-        return pub_month, pub_day
-
-    def _parse_month(self, month_text: str | None) -> int | None:
-        """Convert month text (name or number) to integer."""
-        if not month_text:
-            return None
-
-        month_lower = month_text.strip().lower()[:3]
-        result = self._MONTH_MAP.get(month_lower)
-        if result is None and month_text.isdigit():
-            result = int(month_text)
-        return result
-
-    def _extract_date_helper(
-        self, date_node: ET.Element | None
-    ) -> tuple[str | None, int | None]:
-        """Extract date using reused DateExtractor instance."""
-        raw = self._date_extractor.extract(date_node)
-        if raw is None:
-            return None, None
-        normalized = self._date_extractor.normalize(raw)
-        return normalized["date_str"], normalized["year_int"]
-
-    def _extract_article_date_helper(
-        self, article_node: ET.Element | None, date_type: str
-    ) -> str | None:
-        """Extract article date using reused DateExtractor instance."""
-        if article_node is None:
-            return None
-
-        for date_node in article_node.findall(".//ArticleDate"):
-            if date_node.get("DateType") == date_type:
-                date_str, _ = self._extract_date_helper(date_node)
-                return date_str
-        return None
-
-    def _extract_date_data(
-        self,
-        article: ET.Element,
-        pubmed_data: ET.Element | None,
-        medline: ET.Element | None,
-    ) -> dict[str, Any]:
-        """Extract date-related data from article and MedlineCitation XML.
-
-        Validates date formats before use to prevent invalid dates like
-        "2024-13-99" or "n/a" from causing inconsistent publication_date
-        computation. Invalid dates are set to None.
-
-        Args:
-            article: Article XML element.
-            pubmed_data: PubmedData XML element (contains History with manuscript dates).
-            medline: MedlineCitation XML element (contains DateCompleted/DateRevised).
-
-        Returns:
-            Dictionary with all date-related fields.
-        """
-        journal = article.find(".//Journal")
-        journal_issue = journal.find("JournalIssue") if journal else None
-        pub_date_node = journal_issue.find("PubDate") if journal_issue else None
-        raw_pub_date, raw_year = self._extract_date_helper(pub_date_node)
-
-        pub_month, pub_day = self._parse_month_day(pub_date_node)
-
-        year_vo = PublicationYear.from_raw(raw_year)
-        validated_year = year_vo.value if year_vo else None
-
-        raw_epub_date = self._extract_article_date_helper(article, "Electronic")
-
-        # Validate date formats before passing to _compute_publication_date.
-        # Invalid dates (e.g., "2024-13-99", "n/a") are set to None to ensure
-        # _compute_publication_date falls back to the next priority source.
-        pub_date = raw_pub_date if self._is_valid_date_format(raw_pub_date) else None
-        epub_date = raw_epub_date if self._is_valid_date_format(raw_epub_date) else None
-
-        publication_date = self._compute_publication_date(
-            epub_date, pub_date, validated_year
-        )
-
-        # Extract MEDLINE indexing dates from MedlineCitation element
-        date_completed, _ = (
-            self._extract_date_helper(medline.find("DateCompleted"))
-            if medline is not None
-            else (None, None)
-        )
-        date_revised, _ = (
-            self._extract_date_helper(medline.find("DateRevised"))
-            if medline is not None
-            else (None, None)
-        )
-
-        return {
-            "pub_date": pub_date,
-            "pub_month": pub_month,
-            "pub_day": pub_day,
-            "publication_date": publication_date,
-            "publication_year": validated_year,
-            # Excluded per user request: accepted_date, received_date, revised_date, epub_date
-            "date_completed": date_completed,
-            "date_revised": date_revised,
-        }
+        return self._date_helper._compute_publication_date(epub_date, pub_date, year)
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
