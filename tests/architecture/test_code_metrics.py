@@ -96,8 +96,8 @@ class TestFileSizeLimits:
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "composite.py": 515,  # 512 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service
-        "entrypoints.py": 780,  # 775 LOC - pipeline entrypoints (run_pipeline expanded + services + export + ensure_metrics_server_started)
-        "registration.py": 720,  # 705 LOC - provider registration with data source creators (OpenAlex + SemanticScholar + UniProt IDMapping)
+        "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
+        "registration.py": 610,  # 604 LOC - provider registration (config helpers extracted to _config_helpers.py)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
         "pipeline_factory.py": 820,  # 814 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation
@@ -123,7 +123,7 @@ class TestFileSizeLimits:
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "subcellular_fraction_data_source.py": 520,  # 518 LOC - Derived entity wrapper with FilterableDataSourcePort delegation
         "merger.py": 1700,  # 1698 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation
-        "extractors.py": 710,  # 705 LOC - SemanticScholar extractors with volume/issue parsing + page range expansion + affiliations
+        "extractors.py": 510,  # 506 LOC OpenAlex, 413 CrossRef, 349 S2 (author + page parsing split to submodules)
         # UniProt extraction helpers
         "comments.py": 580,  # 578 LOC - UniProt comment extraction helpers with isoform/subcellular/disease details
         "crossrefs.py": 380,  # 375 LOC - UniProt cross-reference extraction helpers

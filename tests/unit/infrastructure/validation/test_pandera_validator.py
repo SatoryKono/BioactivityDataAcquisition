@@ -275,8 +275,10 @@ json_primitive = st.one_of(
 # Recursive JSON-like structure (limited depth for performance)
 json_value = st.recursive(
     json_primitive,
-    lambda children: st.lists(children, max_size=5)
-    | st.dictionaries(st.text(max_size=20), children, max_size=5),
+    lambda children: (
+        st.lists(children, max_size=5)
+        | st.dictionaries(st.text(max_size=20), children, max_size=5)
+    ),
     max_leaves=10,
 )
 
