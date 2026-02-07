@@ -1,3 +1,4 @@
+# ruff: noqa: RUF022
 """Domain schemas for ETL records.
 
 Provides:
@@ -39,8 +40,7 @@ from bioetl.domain.schemas.constants import (
     TARGET_TYPES,
     UO_ID_PATTERN,
 )
-from bioetl.domain.schemas.validators import (
-    # Registered check methods (imported for side-effect registration)
+from bioetl.domain.schemas.validators import (  # Registered check methods (imported for side-effect registration)
     in_closed_range,
     is_non_negative,
     is_positive,
