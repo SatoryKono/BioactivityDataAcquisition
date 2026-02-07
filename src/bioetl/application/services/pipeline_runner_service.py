@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     )
 
 
-class RunStatus(str, Enum):
+class RunStatus(StrEnum):
     """Pipeline run completion status.
 
     Attributes:

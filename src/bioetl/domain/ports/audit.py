@@ -12,13 +12,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Protocol, runtime_checkable
 
 from bioetl.domain.types import RunID
 
 
-class AuditOperation(str, Enum):
+class AuditOperation(StrEnum):
     """Types of auditable write operations."""
 
     WRITE = "write"
@@ -37,7 +37,7 @@ class AuditOperation(str, Enum):
     """Full overwrite operation."""
 
 
-class AuditLayer(str, Enum):
+class AuditLayer(StrEnum):
     """Medallion layers for audit tracking."""
 
     BRONZE = "bronze"
