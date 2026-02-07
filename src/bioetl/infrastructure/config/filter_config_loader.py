@@ -104,7 +104,7 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
         if inline_overrides is None:
             self._cache[cache_key] = domain_configs
 
-        return domain_configs
+        return domain_configs  # type: ignore[no-any-return]
 
     def _deep_merge(
         self,
