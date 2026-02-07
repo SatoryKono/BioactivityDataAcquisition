@@ -8,7 +8,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
+from bioetl.application.pipelines.pubmed import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, RunType
