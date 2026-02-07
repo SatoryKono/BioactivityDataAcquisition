@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
@@ -59,6 +60,7 @@ class PipelineFactoryProtocol(Protocol):
         observability: ObservabilityBundle,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
         """Create pipeline runner."""
         ...
