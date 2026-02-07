@@ -206,6 +206,43 @@ grep -r "from bioetl.application" src/bioetl/domain/
 | Нарушения слоёв | 0 | `grep` rules | Да |
 | print() в коде | 0 | `grep -r "print("` | Да |
 
+### 4.2. Scope и граф зависимостей для аудита пайплайнов
+
+При анализе архитектурной сложности и связности пайплайнов использовать **только следующий scope**:
+
+- `src/bioetl/application/pipelines/**`
+- `src/bioetl/application/core/**`
+- `src/bioetl/application/services/**`
+- `src/bioetl/infrastructure/adapters/*`
+- `src/bioetl/composition/factories/*`
+
+Провайдеры, для которых MUST выполняться явный анализ:
+
+- `chembl`
+- `pubchem`
+- `uniprot`
+- `crossref`
+- `openalex`
+- `semanticscholar`
+- `pubmed`
+
+Для каждого pipeline execution path MUST быть построен и проверен граф зависимостей между:
+
+1. `application/pipelines`
+2. `application/core`
+3. `application/services`
+4. `infrastructure/adapters/*`
+5. `composition/factories/*`
+
+Критерий сложности (кандидат на упрощение):
+
+- `>7` файлов на один `pipeline execution path`.
+
+Отчёт MUST содержать блок "было/стало" для каждого пайплайна:
+
+- количество файлов на execution path;
+- количество классов на execution path.
+
 ## Ограничения
 
 - Не выдумывай файлы или код, которых нет в проекте
