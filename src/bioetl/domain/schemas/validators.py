@@ -36,20 +36,18 @@ def _typed_register_check_method(*args: Any, **kwargs: Any) -> Callable[[F], F]:
 
 
 __all__ = [
-    # JSON validators
+    "in_closed_range",
+    "is_non_negative",
+    "is_positive",
     "is_valid_json",
     "is_valid_json_array",
     "is_valid_json_object",
     "json_array_check",
     "json_check",
     "json_object_check",
-    # Registered check methods (use in pa.Field)
-    "is_non_negative",
-    "is_positive",
-    "in_closed_range",
     "max_str_length",
-    "str_starts_with",
     "str_matches_pattern",
+    "str_starts_with",
 ]
 
 

@@ -138,9 +138,7 @@ class MemoryMonitor:
 
         Note:
             This method is only called on Unix platforms (guarded by
-            sys.platform check in _get_stats_fallback). The type: ignore
-            comments suppress mypy errors on Windows where these attributes
-            don't exist in the resource module stub.
+            sys.platform check in _get_stats_fallback).
         """
         import resource
 
