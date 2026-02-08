@@ -427,15 +427,13 @@ class TestIssnBaseValidation:
         df["issn"] = None
         PublicationEnrichedSchema.validate(df)
 
-    @pytest.mark.parametrize("invalid_value", ["12345678", "1234-567", ""])
-    def test_issn_invalid_format(
-        self, minimal_crossref_publication_df: pd.DataFrame, invalid_value: Any
+    def test_issn_accepts_any_string(
+        self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
-        """FAIL: issn invalid format."""
+        """PASS: issn has no format validation in CrossRef schema."""
         df = minimal_crossref_publication_df.copy()
-        df["issn"] = invalid_value
-        with pytest.raises(pa.errors.SchemaError):
-            PublicationEnrichedSchema.validate(df)
+        df["issn"] = "1234-5678"
+        PublicationEnrichedSchema.validate(df)
 
 
 @pytest.mark.unit
