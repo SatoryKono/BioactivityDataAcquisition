@@ -176,17 +176,21 @@ class PubMedPublicationSchema(PublicationBaseSchema):
             | ((series >= MIN_PUBLICATION_YEAR) & (series <= MAX_PUBLICATION_YEAR)),
         )
 
-    pub_month: Series[int] = pa.Field(nullable=True, description="Publication month")
+    pub_month: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True, description="Publication month"
+    )
 
     @pa.check("pub_month", name="pub_month_range")
-    def _check_pub_month(cls, series: Series[int]) -> Series[bool]:
+    def _check_pub_month(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication month range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 12)))
 
-    pub_day: Series[int] = pa.Field(nullable=True, description="Publication day")
+    pub_day: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True, description="Publication day"
+    )
 
     @pa.check("pub_day", name="pub_day_range")
-    def _check_pub_day(cls, series: Series[int]) -> Series[bool]:
+    def _check_pub_day(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication day range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 31)))
 
@@ -226,44 +230,48 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Counts (denormalized for query efficiency) ===
-    author_count: Series[int] = pa.Field(nullable=True, description="Number of authors")
+    author_count: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True, description="Number of authors"
+    )
 
     @pa.check("author_count", name="author_count_non_negative")
-    def _check_author_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_author_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate author count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    mesh_heading_count: Series[int] = pa.Field(
+    mesh_heading_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True, description="Number of MeSH headings"
     )
 
     @pa.check("mesh_heading_count", name="mesh_heading_count_non_negative")
-    def _check_mesh_heading_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_mesh_heading_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate MeSH heading count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    keyword_count: Series[int] = pa.Field(
+    keyword_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True, description="Number of keywords"
     )
 
     @pa.check("keyword_count", name="keyword_count_non_negative")
-    def _check_keyword_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_keyword_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate keyword count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    grant_count: Series[int] = pa.Field(nullable=True, description="Number of grants")
+    grant_count: Series[pd.Int64Dtype] = pa.Field(
+        nullable=True, description="Number of grants"
+    )
 
     @pa.check("grant_count", name="grant_count_non_negative")
-    def _check_grant_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_grant_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate grant count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    chemical_count: Series[int] = pa.Field(
+    chemical_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True, description="Number of chemicals"
     )
 
     @pa.check("chemical_count", name="chemical_count_non_negative")
-    def _check_chemical_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_chemical_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate chemical count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 

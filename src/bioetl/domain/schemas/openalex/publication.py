@@ -73,7 +73,8 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
         nullable=True,
-        description="ISSN-L",
+        str_matches=r"^\d{4}-\d{3}[\dX]$",
+        description="ISSN-L (format: XXXX-XXXX)",
     )
 
     publisher: Series[str] = pa.Field(

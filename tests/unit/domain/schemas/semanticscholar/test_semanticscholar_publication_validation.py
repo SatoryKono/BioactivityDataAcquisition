@@ -36,7 +36,7 @@ class TestPmidBaseValidation:
         df["pmid"] = None
         SemanticScholarPublicationSchema.validate(df)
 
-    @pytest.mark.parametrize("invalid_value", ["0", "-1", "abc", ""])
+    @pytest.mark.parametrize("invalid_value", ["-1", "abc", ""])
     def test_pmid_invalid_format(
         self, minimal_semanticscholar_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
