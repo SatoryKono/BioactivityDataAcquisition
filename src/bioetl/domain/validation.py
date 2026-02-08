@@ -87,8 +87,8 @@ def _get_default_config() -> ValidationConfig:
 
 
 # Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
-MIN_PUBLICATION_YEAR: int = 1950
-MAX_PUBLICATION_YEAR: int = datetime.now(UTC).year + 1
+MIN_PUBLICATION_YEAR: int = 1800
+MAX_PUBLICATION_YEAR: int = 2100
 
 
 # =============================================================================

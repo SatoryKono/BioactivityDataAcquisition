@@ -5,8 +5,6 @@ Tests pure validation functions per REFACTOR-004.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
-
 import pytest
 
 from bioetl.domain.validation import (
@@ -106,19 +104,19 @@ class TestValidateYearRange:
     @pytest.mark.parametrize(
         "year,expected",
         [
-            (1950, True),
+            (1800, True),
             (1990, True),
             (2024, True),
+            (2100, True),
         ],
     )
     def test_valid_year(self, year: int, expected: bool) -> None:
         """Test valid years in range are accepted."""
         assert validate_year_range(year) is expected
 
-    def test_valid_year_current_plus_one(self) -> None:
-        """Test that CURRENT_YEAR + 1 is valid."""
-        current_year = datetime.now(UTC).year
-        assert validate_year_range(current_year + 1) is True
+    def test_valid_year_current(self) -> None:
+        """Test that current year is valid."""
+        assert validate_year_range(2024) is True
 
     @pytest.mark.parametrize(
         "year",
@@ -126,16 +124,13 @@ class TestValidateYearRange:
             1799,
             0,
             -100,
+            2101,
             None,
         ],
     )
     def test_invalid_year(self, year: int | None) -> None:
         """Test invalid years are rejected."""
         assert validate_year_range(year) is False
-
-    def test_invalid_year_above_max(self) -> None:
-        """Test year above 2100 is rejected."""
-        assert validate_year_range(2101) is False
 
     def test_custom_range(self) -> None:
         """Test custom year range."""
@@ -150,13 +145,12 @@ class TestPublicationYearConstants:
     """Tests for publication year constants."""
 
     def test_min_publication_year_value(self) -> None:
-        """Test MIN_PUBLICATION_YEAR is set to 1950."""
-        assert MIN_PUBLICATION_YEAR == 1950
+        """Test MIN_PUBLICATION_YEAR is set to 1800."""
+        assert MIN_PUBLICATION_YEAR == 1800
 
     def test_max_publication_year_value(self) -> None:
-        """Test MAX_PUBLICATION_YEAR is CURRENT_YEAR + 1."""
-        current_year = datetime.now(UTC).year
-        assert MAX_PUBLICATION_YEAR == current_year + 1
+        """Test MAX_PUBLICATION_YEAR is 2100."""
+        assert MAX_PUBLICATION_YEAR == 2100
 
     def test_constants_are_valid_range(self) -> None:
         """Test that min < max for valid range."""
@@ -175,9 +169,10 @@ class TestValidatePublicationYear:
         "year,expected_warn",
         [
             (2020, False),
-            (1950, False),
-            (1949, True),
-            (1800, True),
+            (1800, False),
+            (2100, False),
+            (1799, True),
+            (2101, True),
             (1500, True),
             (None, False),
         ],
@@ -190,33 +185,20 @@ class TestValidatePublicationYear:
         assert result_year == year
         assert is_warn == expected_warn
 
-    def test_validate_publication_year_max_dynamic(self) -> None:
-        """Test that CURRENT_YEAR+1 is valid, CURRENT_YEAR+2 warns."""
-        current_year = datetime.now(UTC).year
-        assert validate_publication_year(current_year + 1) == (current_year + 1, False)
-        assert validate_publication_year(current_year + 2) == (current_year + 2, True)
+    def test_validate_publication_year_boundaries(self) -> None:
+        """Test that 2100 is valid, 2101 warns."""
+        assert validate_publication_year(2100) == (2100, False)
+        assert validate_publication_year(2101) == (2101, True)
 
     def test_boundary_values(self) -> None:
         """Test boundary values for publication year validation."""
         # At boundaries (valid)
-        assert validate_publication_year(MIN_PUBLICATION_YEAR) == (
-            MIN_PUBLICATION_YEAR,
-            False,
-        )
-        assert validate_publication_year(MAX_PUBLICATION_YEAR) == (
-            MAX_PUBLICATION_YEAR,
-            False,
-        )
+        assert validate_publication_year(1800) == (1800, False)
+        assert validate_publication_year(2100) == (2100, False)
 
         # Just outside boundaries (warning)
-        assert validate_publication_year(MIN_PUBLICATION_YEAR - 1) == (
-            MIN_PUBLICATION_YEAR - 1,
-            True,
-        )
-        assert validate_publication_year(MAX_PUBLICATION_YEAR + 1) == (
-            MAX_PUBLICATION_YEAR + 1,
-            True,
-        )
+        assert validate_publication_year(1799) == (1799, True)
+        assert validate_publication_year(2101) == (2101, True)
 
     def test_preserves_original_value(self) -> None:
         """Test that original value is preserved even when out of range."""

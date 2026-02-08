@@ -57,13 +57,13 @@ class ValidationConfig:
     Example:
         >>> config = ValidationConfig()
         >>> config.min_publication_year
-        1950
+        1800
 
     """
 
     # Publication year range
-    min_publication_year: int = 1950
-    max_publication_year: int = datetime.now(UTC).year + 1
+    min_publication_year: int = 1800
+    max_publication_year: int = 2100
 
     # Molecular properties
     min_molecular_weight: float = 10.0

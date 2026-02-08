@@ -535,6 +535,14 @@ __all__ = [
     "ValueValidatorPort",
     "WatermarkStrategyPort",
     "NoOpWatermarkStrategy",
+    # Registry (publication entity types, ADR-024)
+    "LEGACY_PUBLICATION_ALIASES",
+    "PUBLICATION_ENTITY_TYPES",
+    "PublicationMapping",
+    "get_publication_mapping",
+    "is_legacy_publication_alias",
+    "is_publication_entity",
+    "validate_publication_entity_type",
     # Resilience
     "CircuitBreakerConfig",
     "RetryConfig",
