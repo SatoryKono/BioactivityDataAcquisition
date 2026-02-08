@@ -85,7 +85,11 @@ def config_service(mock_logger: MagicMock) -> ConfigService:
             )
         ),
         _registry_accessor=MagicMock(
-            return_value=MagicMock(list_pipelines=MagicMock(return_value=["chembl_activity", "chembl_assay"]))
+            return_value=MagicMock(
+                list_pipelines=MagicMock(
+                    return_value=["chembl_activity", "chembl_assay"]
+                )
+            )
         ),
     )
 
@@ -148,7 +152,9 @@ class TestConfigServiceLoadPipelineConfig:
     def test_calls_loader_and_mapper(self, config_service: ConfigService) -> None:
         config_service.load_pipeline_config("chembl_activity")
 
-        config_service._pipeline_config_loader.assert_called_once_with("chembl_activity")
+        config_service._pipeline_config_loader.assert_called_once_with(
+            "chembl_activity"
+        )
         config_service._domain_config_mapper.assert_called_once()
 
     def test_logs_pipeline_name(
@@ -169,9 +175,7 @@ class TestConfigServiceGetPipelineYamlConfig:
         assert result["provider"] == "chembl"
         assert result["entity_type"] == "activity"
 
-    def test_fallback_to_dict_when_no_model_dump(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_fallback_to_dict_when_no_model_dump(self, mock_logger: MagicMock) -> None:
         """When yaml_config has no model_dump, falls back to dict()."""
         yaml_obj = {"provider": "pubchem", "entity_type": "compound"}
         service = ConfigService(
@@ -201,9 +205,7 @@ class TestConfigServiceValidatePipelineConfig:
         assert result.silver_table == "chembl_activity_silver"
         assert result.gold_table == "chembl_activity_gold"
 
-    def test_pipeline_info_with_no_gold_table(
-        self, mock_logger: MagicMock
-    ) -> None:
+    def test_pipeline_info_with_no_gold_table(self, mock_logger: MagicMock) -> None:
         yaml_config = _make_mock_yaml_config(gold_table=None)
         service = ConfigService(
             logger=mock_logger,
