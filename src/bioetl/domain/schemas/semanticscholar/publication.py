@@ -7,6 +7,10 @@ Includes lookup metadata fields for DOI/title resolution tracking.
 
 from __future__ import annotations
 
+import json
+import re
+from typing import cast
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -16,6 +20,7 @@ from bioetl.domain.schemas.common.publication_base import (
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ORCID_PATTERN
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
@@ -155,6 +160,24 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Citation context sentences (JSON array)",
     )
+
+    @pa.check("author_orcids", name="orcid_format")
+    def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
+        """Validate ORCID format in JSON array elements."""
+        _pattern = re.compile(ORCID_PATTERN)
+
+        def _valid(val: object) -> bool:
+            if pd.isna(val):
+                return True
+            try:
+                items = json.loads(str(val))
+                return all(
+                    not item or _pattern.match(item) is not None for item in items
+                )
+            except (json.JSONDecodeError, TypeError):
+                return False
+
+        return cast("Series[bool]", series.apply(_valid))
 
     class Config:
         """Pandera configuration."""
