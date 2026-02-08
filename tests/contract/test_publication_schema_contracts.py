@@ -13,7 +13,9 @@ from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
-from bioetl.domain.schemas.semanticscholar.publication import SemanticScholarPublicationSchema
+from bioetl.domain.schemas.semanticscholar.publication import (
+    SemanticScholarPublicationSchema,
+)
 
 
 @pytest.mark.architecture
@@ -50,7 +52,9 @@ class TestCommonFieldsPresence:
         "_original_id",
     ]
 
-    @pytest.mark.parametrize("provider", ["chembl", "pubmed", "crossref", "openalex", "semanticscholar"])
+    @pytest.mark.parametrize(
+        "provider", ["chembl", "pubmed", "crossref", "openalex", "semanticscholar"]
+    )
     def test_common_fields_present(self, provider: str) -> None:
         """All schemas have common fields from base schema."""
         schema_map = {
@@ -71,9 +75,9 @@ class TestCommonFieldsPresence:
 
         for field in self.COMMON_FIELDS:
             # Allow aliases (e.g., _lookup_method has alias lookup_method)
-            assert (
-                field in all_fields or field.lstrip("_") in all_fields
-            ), f"{provider} schema missing {field}"
+            assert field in all_fields or field.lstrip("_") in all_fields, (
+                f"{provider} schema missing {field}"
+            )
 
 
 @pytest.mark.architecture
@@ -90,7 +94,9 @@ class TestDQFieldsPresence:
             ("semanticscholar", SemanticScholarPublicationSchema),
         ],
     )
-    def test_dq_fields_present(self, provider: str, schema_class: Type[pa.DataFrameModel]) -> None:
+    def test_dq_fields_present(
+        self, provider: str, schema_class: Type[pa.DataFrameModel]
+    ) -> None:
         """DQ flags present in all schemas."""
         # Note: ChEMBL has explicit _dq_warn, _dq_error
         # Others inherit from ETLRecordSchema with aliases (dq_warn -> _dq_warn)
@@ -114,7 +120,9 @@ class TestDQFieldsPresence:
 class TestContentHashField:
     """Test content_hash field (identifier, deterministic) present in all."""
 
-    @pytest.mark.parametrize("provider", ["chembl", "pubmed", "crossref", "openalex", "semanticscholar"])
+    @pytest.mark.parametrize(
+        "provider", ["chembl", "pubmed", "crossref", "openalex", "semanticscholar"]
+    )
     def test_content_hash_present(self, provider: str) -> None:
         """content_hash field present in all schemas."""
         schema_map = {
@@ -128,8 +136,8 @@ class TestContentHashField:
         schema_class = schema_map[provider]
 
         # content_hash inherited from ETLRecordSchema
-        has_content_hash = (
-            "content_hash" in schema_class.__annotations__ or hasattr(schema_class, "content_hash")
+        has_content_hash = "content_hash" in schema_class.__annotations__ or hasattr(
+            schema_class, "content_hash"
         )
 
         assert has_content_hash, f"{provider} schema missing content_hash"
@@ -262,12 +270,14 @@ class TestFieldCountConsistency:
             "__fields__",
             "__checks__",
         }
-        field_count = len([f for f in all_fields if not f.startswith("__") and f not in exclude])
+        field_count = len(
+            [f for f in all_fields if not f.startswith("__") and f not in exclude]
+        )
 
         # Note: Allow some tolerance due to ETL system fields
-        assert (
-            abs(field_count - expected_count) <= 10
-        ), f"{provider}: expected ~{expected_count} fields, got {field_count}"
+        assert abs(field_count - expected_count) <= 10, (
+            f"{provider}: expected ~{expected_count} fields, got {field_count}"
+        )
 
 
 @pytest.mark.architecture
@@ -288,7 +298,9 @@ class TestSchemaConfigSettings:
         """All schemas have Config.coerce = True."""
         assert hasattr(schema_class, "Config")
         config = schema_class.Config
-        assert getattr(config, "coerce", False) is True, f"{schema_class.__name__} should enable coerce"
+        assert getattr(config, "coerce", False) is True, (
+            f"{schema_class.__name__} should enable coerce"
+        )
 
     @pytest.mark.parametrize(
         "schema_class",
@@ -300,13 +312,17 @@ class TestSchemaConfigSettings:
             SemanticScholarPublicationSchema,
         ],
     )
-    def test_schema_strict_disabled_silver(self, schema_class: Type[pa.DataFrameModel]) -> None:
+    def test_schema_strict_disabled_silver(
+        self, schema_class: Type[pa.DataFrameModel]
+    ) -> None:
         """Silver schemas have Config.strict = False (allow extra columns)."""
         assert hasattr(schema_class, "Config")
         config = schema_class.Config
         # Silver layer allows extra columns for flexibility
         strict = getattr(config, "strict", True)
-        assert strict is False, f"{schema_class.__name__} Silver layer should not be strict"
+        assert strict is False, (
+            f"{schema_class.__name__} Silver layer should not be strict"
+        )
 
 
 # ============================================================================
@@ -475,7 +491,9 @@ class TestRequiredFieldsStability:
 
     REQUIRED_FIELDS = ["title", "_source", "lookup_method"]
 
-    @pytest.mark.parametrize("provider", ["chembl", "pubmed", "crossref", "openalex", "semanticscholar"])
+    @pytest.mark.parametrize(
+        "provider", ["chembl", "pubmed", "crossref", "openalex", "semanticscholar"]
+    )
     def test_required_fields_remain_required(self, provider: str) -> None:
         """Core required fields MUST remain required across versions."""
         schema_map = {
@@ -516,7 +534,13 @@ class TestFieldNamingConventions:
 
     def test_system_fields_prefix_underscore(self) -> None:
         """System fields MUST start with underscore."""
-        system_fields = ["_source", "_lookup_method", "_original_id", "_dq_warn", "_dq_error"]
+        system_fields = [
+            "_source",
+            "_lookup_method",
+            "_original_id",
+            "_dq_warn",
+            "_dq_error",
+        ]
 
         for field in system_fields:
             assert field.startswith("_")

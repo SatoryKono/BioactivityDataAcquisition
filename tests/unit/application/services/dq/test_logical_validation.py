@@ -167,7 +167,9 @@ class TestCitationsRelationship:
         df["citations_received"] = 10
         df["influential_citation_count"] = 5
 
-        assert df["citations_received"].iloc[0] >= df["influential_citation_count"].iloc[0]
+        assert (
+            df["citations_received"].iloc[0] >= df["influential_citation_count"].iloc[0]
+        )
 
     def test_citations_less_than_influential_warns(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
@@ -178,7 +180,9 @@ class TestCitationsRelationship:
         df["influential_citation_count"] = 10
 
         # Logically inconsistent
-        assert df["citations_received"].iloc[0] < df["influential_citation_count"].iloc[0]
+        assert (
+            df["citations_received"].iloc[0] < df["influential_citation_count"].iloc[0]
+        )
 
 
 @pytest.mark.unit
@@ -195,7 +199,10 @@ class TestPageNumberRanges:
         ],
     )
     def test_page_first_non_negative(
-        self, minimal_pubmed_publication_df: pd.DataFrame, page_value: int, expected: str
+        self,
+        minimal_pubmed_publication_df: pd.DataFrame,
+        page_value: int,
+        expected: str,
     ) -> None:
         """Validate page_first >= 0 when numeric."""
         df = minimal_pubmed_publication_df.copy()
@@ -326,9 +333,7 @@ class TestPublicationYearEdgeCases:
 
         assert df["publication_year"].iloc[0] == current_year + 1
 
-    def test_year_1799_warns(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
+    def test_year_1799_warns(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
         """WARN: year == 1799 (below min)."""
         df = minimal_pubmed_publication_df.copy()
         df["publication_year"] = 1799
@@ -344,6 +349,7 @@ class TestPublicationYearEdgeCases:
         df["publication_year"] = current_year + 10
 
         assert df["publication_year"].iloc[0] > current_year + 1
+
 
 @pytest.mark.unit
 class TestCountFieldsNonNegative:
@@ -381,6 +387,7 @@ class TestCountFieldsNonNegative:
         else:
             assert expected == "WARN"
 
+
 @pytest.mark.unit
 class TestCitationFieldsExtended:
     """Extended tests for citation counts."""
@@ -411,6 +418,7 @@ class TestCitationFieldsExtended:
         df["citations_made"] = 0
 
         assert df["citations_made"].iloc[0] == 0
+
 
 @pytest.mark.unit
 class TestMetricFields:
@@ -450,6 +458,7 @@ class TestMetricFields:
 
         assert df["fwci"].iloc[0] == 50.0
 
+
 @pytest.mark.unit
 class TestMonthDayRanges:
     """Test month and day field ranges."""
@@ -457,10 +466,10 @@ class TestMonthDayRanges:
     @pytest.mark.parametrize(
         "month,expected",
         [
-            (1, "PASS"),   # January
-            (6, "PASS"),   # June
+            (1, "PASS"),  # January
+            (6, "PASS"),  # June
             (12, "PASS"),  # December
-            (0, "WARN"),   # Invalid
+            (0, "WARN"),  # Invalid
             (13, "WARN"),  # Invalid
             (-1, "WARN"),  # Negative
         ],
@@ -483,10 +492,10 @@ class TestMonthDayRanges:
     @pytest.mark.parametrize(
         "day,expected",
         [
-            (1, "PASS"),   # First day
+            (1, "PASS"),  # First day
             (15, "PASS"),  # Mid-month
             (31, "PASS"),  # Last day
-            (0, "WARN"),   # Invalid
+            (0, "WARN"),  # Invalid
             (32, "WARN"),  # Invalid
             (-5, "WARN"),  # Negative
         ],
@@ -505,6 +514,7 @@ class TestMonthDayRanges:
             assert expected == "PASS"
         else:
             assert expected == "WARN"
+
 
 @pytest.mark.unit
 class TestVolumeIssueFields:
@@ -536,6 +546,7 @@ class TestVolumeIssueFields:
         df["issue"] = "5"
 
         assert len(df["issue"].iloc[0]) > 0
+
 
 @pytest.mark.unit
 class TestPercentageFields:

@@ -140,13 +140,6 @@ docs = [
 [tool.setuptools.packages.find]
 where = ["src"]
 
-# ============ UV ============
-[tool.uv]
-# Include tests dependencies when using uv run
-dev-dependencies = [
-    "bioetl[tests]",
-]
-
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -458,6 +451,7 @@ skips = ["*/domain/*"]
 
 [dependency-groups]
 dev = [
+    "bioetl[tests]",
     # Core testing
     "pytest>=8.0",
     "pytest-cov>=4.0",

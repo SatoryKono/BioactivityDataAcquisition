@@ -22,19 +22,21 @@ class TestPmidBaseValidation:
         """PASS: valid pmid value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_pmid_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_pmid_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: pmid is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['pmid'] = None
+        df["pmid"] = None
         ChemblPublicationSchema.validate(df)
 
-    @pytest.mark.parametrize('invalid_value', ["0", "-1", "abc", ""])
+    @pytest.mark.parametrize("invalid_value", ["0", "-1", "abc", ""])
     def test_pmid_invalid_format(
         self, minimal_chembl_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmid invalid format."""
         df = minimal_chembl_publication_df.copy()
-        df['pmid'] = invalid_value
+        df["pmid"] = invalid_value
         with pytest.raises(pa.errors.SchemaError):
             ChemblPublicationSchema.validate(df)
 
@@ -47,19 +49,23 @@ class TestDoiBaseValidation:
         """PASS: valid doi value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_doi_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_doi_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: doi is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['doi'] = None
+        df["doi"] = None
         ChemblPublicationSchema.validate(df)
 
-    @pytest.mark.parametrize('invalid_value', ["doi:10.1234", "10.123/x", "not-a-doi", ""])
+    @pytest.mark.parametrize(
+        "invalid_value", ["doi:10.1234", "10.123/x", "not-a-doi", ""]
+    )
     def test_doi_invalid_format(
         self, minimal_chembl_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: doi invalid format."""
         df = minimal_chembl_publication_df.copy()
-        df['doi'] = invalid_value
+        df["doi"] = invalid_value
         with pytest.raises(pa.errors.SchemaError):
             ChemblPublicationSchema.validate(df)
 
@@ -72,19 +78,21 @@ class TestPmcIdBaseValidation:
         """PASS: valid pmc_id value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_pmc_id_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_pmc_id_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: pmc_id is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['pmc_id'] = None
+        df["pmc_id"] = None
         ChemblPublicationSchema.validate(df)
 
-    @pytest.mark.parametrize('invalid_value', ["pmc123", "PMC", "123", ""])
+    @pytest.mark.parametrize("invalid_value", ["pmc123", "PMC", "123", ""])
     def test_pmc_id_invalid_format(
         self, minimal_chembl_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: pmc_id invalid format."""
         df = minimal_chembl_publication_df.copy()
-        df['pmc_id'] = invalid_value
+        df["pmc_id"] = invalid_value
         with pytest.raises(pa.errors.SchemaError):
             ChemblPublicationSchema.validate(df)
 
@@ -97,10 +105,12 @@ class TestTitleBaseValidation:
         """PASS: valid title value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_title_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_title_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: title is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['title'] = None
+        df["title"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -112,10 +122,12 @@ class TestAbstractBaseValidation:
         """PASS: valid abstract value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_abstract_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_abstract_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: abstract is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['abstract'] = None
+        df["abstract"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -127,10 +139,12 @@ class TestAuthorsBaseValidation:
         """PASS: valid authors value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_authors_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_authors_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: authors is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['authors'] = None
+        df["authors"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -138,14 +152,18 @@ class TestAuthorsBaseValidation:
 class TestAffiliationListBaseValidation:
     """Base validation tests for affiliation_list."""
 
-    def test_affiliation_list_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_affiliation_list_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid affiliation_list value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_affiliation_list_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_affiliation_list_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: affiliation_list is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['affiliation_list'] = None
+        df["affiliation_list"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -157,10 +175,12 @@ class TestJournalBaseValidation:
         """PASS: valid journal value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_journal_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_journal_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: journal is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['journal'] = None
+        df["journal"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -168,14 +188,18 @@ class TestJournalBaseValidation:
 class TestPublicationYearBaseValidation:
     """Base validation tests for publication_year."""
 
-    def test_publication_year_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_publication_year_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid publication_year value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_publication_year_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_publication_year_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: publication_year is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['publication_year'] = None
+        df["publication_year"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -183,14 +207,18 @@ class TestPublicationYearBaseValidation:
 class TestPublicationDateBaseValidation:
     """Base validation tests for publication_date."""
 
-    def test_publication_date_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_publication_date_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid publication_date value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_publication_date_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_publication_date_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: publication_date is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['publication_date'] = None
+        df["publication_date"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -198,14 +226,18 @@ class TestPublicationDateBaseValidation:
 class TestPublicationTypeBaseValidation:
     """Base validation tests for publication_type."""
 
-    def test_publication_type_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_publication_type_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid publication_type value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_publication_type_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_publication_type_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: publication_type is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['publication_type'] = None
+        df["publication_type"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -217,10 +249,12 @@ class TestLanguageBaseValidation:
         """PASS: valid language value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_language_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_language_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: language is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['language'] = None
+        df["language"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -228,14 +262,18 @@ class TestLanguageBaseValidation:
 class TestPageFirstBaseValidation:
     """Base validation tests for page_first."""
 
-    def test_page_first_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_page_first_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid page_first value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_page_first_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_page_first_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: page_first is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['page_first'] = None
+        df["page_first"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -247,10 +285,12 @@ class TestPageLastBaseValidation:
         """PASS: valid page_last value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_page_last_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_page_last_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: page_last is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['page_last'] = None
+        df["page_last"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -258,14 +298,18 @@ class TestPageLastBaseValidation:
 class TestCitationsReceivedBaseValidation:
     """Base validation tests for citations_received."""
 
-    def test_citations_received_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_citations_received_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid citations_received value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_citations_received_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_citations_received_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: citations_received is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['citations_received'] = None
+        df["citations_received"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -273,14 +317,18 @@ class TestCitationsReceivedBaseValidation:
 class TestCitationsMadeBaseValidation:
     """Base validation tests for citations_made."""
 
-    def test_citations_made_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_citations_made_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid citations_made value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_citations_made_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_citations_made_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: citations_made is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['citations_made'] = None
+        df["citations_made"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -292,10 +340,12 @@ class TestIsOaBaseValidation:
         """PASS: valid is_oa value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_is_oa_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_is_oa_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: is_oa is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['is_oa'] = None
+        df["is_oa"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -303,14 +353,18 @@ class TestIsOaBaseValidation:
 class TestLookupMethodBaseValidation:
     """Base validation tests for lookup_method."""
 
-    def test_lookup_method_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_lookup_method_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid lookup_method value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_lookup_method_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_lookup_method_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: lookup_method is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['lookup_method'] = None
+        df["lookup_method"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -318,14 +372,18 @@ class TestLookupMethodBaseValidation:
 class TestOriginalIdBaseValidation:
     """Base validation tests for original_id."""
 
-    def test_original_id_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_original_id_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid original_id value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_original_id_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_original_id_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: original_id is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['original_id'] = None
+        df["original_id"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -337,10 +395,12 @@ class TestSourceBaseValidation:
         """PASS: valid _source value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test__source_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test__source_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: _source is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['_source'] = None
+        df["_source"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -348,24 +408,28 @@ class TestSourceBaseValidation:
 class TestDocumentChemblIdBaseValidation:
     """Base validation tests for document_chembl_id."""
 
-    def test_document_chembl_id_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_document_chembl_id_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid document_chembl_id value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_document_chembl_id_null_fails(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_document_chembl_id_null_fails(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """FAIL: document_chembl_id is non-nullable(PK)."""
         df = minimal_chembl_publication_df.copy()
-        df['document_chembl_id'] = None
-        with pytest.raises(pa.errors.SchemaError, match='document_chembl_id'):
+        df["document_chembl_id"] = None
+        with pytest.raises(pa.errors.SchemaError, match="document_chembl_id"):
             ChemblPublicationSchema.validate(df)
 
-    @pytest.mark.parametrize('invalid_value', ["chembl25", "CHEMBL", ""])
+    @pytest.mark.parametrize("invalid_value", ["chembl25", "CHEMBL", ""])
     def test_document_chembl_id_invalid_format(
         self, minimal_chembl_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
         """FAIL: document_chembl_id invalid format."""
         df = minimal_chembl_publication_df.copy()
-        df['document_chembl_id'] = invalid_value
+        df["document_chembl_id"] = invalid_value
         with pytest.raises(pa.errors.SchemaError):
             ChemblPublicationSchema.validate(df)
 
@@ -378,10 +442,12 @@ class TestSrcIdBaseValidation:
         """PASS: valid src_id value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_src_id_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_src_id_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: src_id is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['src_id'] = None
+        df["src_id"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -389,14 +455,18 @@ class TestSrcIdBaseValidation:
 class TestChemblReleaseBaseValidation:
     """Base validation tests for chembl_release."""
 
-    def test_chembl_release_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_chembl_release_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid chembl_release value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_chembl_release_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_chembl_release_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: chembl_release is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['chembl_release'] = None
+        df["chembl_release"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -404,14 +474,18 @@ class TestChemblReleaseBaseValidation:
 class TestCreationDateBaseValidation:
     """Base validation tests for creation_date."""
 
-    def test_creation_date_valid(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_creation_date_valid(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """PASS: valid creation_date value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_creation_date_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_creation_date_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: creation_date is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['creation_date'] = None
+        df["creation_date"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -423,10 +497,12 @@ class TestVolumeBaseValidation:
         """PASS: valid volume value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_volume_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_volume_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: volume is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['volume'] = None
+        df["volume"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -438,10 +514,12 @@ class TestIssueBaseValidation:
         """PASS: valid issue value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_issue_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test_issue_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: issue is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['issue'] = None
+        df["issue"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -453,10 +531,12 @@ class TestDqWarnBaseValidation:
         """PASS: valid _dq_warn value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test__dq_warn_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test__dq_warn_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: _dq_warn is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['_dq_warn'] = None
+        df["_dq_warn"] = None
         ChemblPublicationSchema.validate(df)
 
 
@@ -468,8 +548,10 @@ class TestDqErrorBaseValidation:
         """PASS: valid _dq_error value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test__dq_error_null_allowed(self, minimal_chembl_publication_df: pd.DataFrame) -> None:
+    def test__dq_error_null_allowed(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
         """SKIP: _dq_error is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df['_dq_error'] = None
+        df["_dq_error"] = None
         ChemblPublicationSchema.validate(df)

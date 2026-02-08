@@ -11,7 +11,7 @@ from uuid import uuid4
 import pyarrow as pa
 import pytest
 
-from tools.benchmarks.conftest import calculate_payload_size_mb
+from tests.benchmarks.conftest import calculate_payload_size_mb
 
 
 class FakeLogger:
