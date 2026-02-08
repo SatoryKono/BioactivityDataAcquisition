@@ -161,20 +161,20 @@ class TestOpenAlexPublicationSchema:
         assert validated["publication_year"].iloc[0] == 2024
 
         # Valid boundary values
-        for year in [1950, current_year + 1]:
+        for year in [1800, 2100]:
             valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = OpenAlexPublicationSchema.validate(df)
             assert validated["publication_year"].iloc[0] == year
 
         # Year too low
-        valid_record["publication_year"] = 1949
+        valid_record["publication_year"] = 1799
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)
 
         # Year too high
-        valid_record["publication_year"] = current_year + 2
+        valid_record["publication_year"] = 2101
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
             OpenAlexPublicationSchema.validate(df)

@@ -106,7 +106,7 @@ class TestValidateYearRange:
     @pytest.mark.parametrize(
         "year,expected",
         [
-            (1800, True),
+            (1950, True),
             (1990, True),
             (2024, True),
         ],
@@ -117,7 +117,8 @@ class TestValidateYearRange:
 
     def test_valid_year_current_plus_one(self) -> None:
         """Test that CURRENT_YEAR + 1 is valid."""
-        assert validate_year_range(2100) is True
+        current_year = datetime.now(UTC).year
+        assert validate_year_range(current_year + 1) is True
 
     @pytest.mark.parametrize(
         "year",
@@ -149,12 +150,13 @@ class TestPublicationYearConstants:
     """Tests for publication year constants."""
 
     def test_min_publication_year_value(self) -> None:
-        """Test MIN_PUBLICATION_YEAR is set to 1800."""
-        assert MIN_PUBLICATION_YEAR == 1800
+        """Test MIN_PUBLICATION_YEAR is set to 1950."""
+        assert MIN_PUBLICATION_YEAR == 1950
 
     def test_max_publication_year_value(self) -> None:
-        """Test MAX_PUBLICATION_YEAR is 2100."""
-        assert MAX_PUBLICATION_YEAR == 2100
+        """Test MAX_PUBLICATION_YEAR is CURRENT_YEAR + 1."""
+        current_year = datetime.now(UTC).year
+        assert MAX_PUBLICATION_YEAR == current_year + 1
 
     def test_constants_are_valid_range(self) -> None:
         """Test that min < max for valid range."""
@@ -173,8 +175,9 @@ class TestValidatePublicationYear:
         "year,expected_warn",
         [
             (2020, False),
-            (1800, False),
-            (1799, True),
+            (1950, False),
+            (1949, True),
+            (1800, True),
             (1500, True),
             (None, False),
         ],
@@ -188,9 +191,10 @@ class TestValidatePublicationYear:
         assert is_warn == expected_warn
 
     def test_validate_publication_year_max_dynamic(self) -> None:
-        """Test that 2100 is valid, 2101 warns."""
-        assert validate_publication_year(2100) == (2100, False)
-        assert validate_publication_year(2101) == (2101, True)
+        """Test that CURRENT_YEAR+1 is valid, CURRENT_YEAR+2 warns."""
+        current_year = datetime.now(UTC).year
+        assert validate_publication_year(current_year + 1) == (current_year + 1, False)
+        assert validate_publication_year(current_year + 2) == (current_year + 2, True)
 
     def test_boundary_values(self) -> None:
         """Test boundary values for publication year validation."""

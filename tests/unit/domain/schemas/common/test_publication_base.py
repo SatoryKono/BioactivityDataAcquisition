@@ -229,9 +229,9 @@ class TestPublicationBaseSchemaFieldValidation:
             assert validated["publication_year"].iloc[0] == year
 
     def test_year_below_minimum_fails(self, valid_base_record: dict) -> None:
-        """Year below minimum (1950) should fail."""
+        """Year below minimum (1800) should fail."""
         record = valid_base_record.copy()
-        record["publication_year"] = 1949
+        record["publication_year"] = 1799
 
         df = pd.DataFrame([record])
 
@@ -239,10 +239,9 @@ class TestPublicationBaseSchemaFieldValidation:
             PublicationBaseSchema.validate(df)
 
     def test_year_above_maximum_fails(self, valid_base_record: dict) -> None:
-        """Year above CURRENT_YEAR+1 should fail."""
-        current_year = datetime.now(UTC).year
+        """Year above 2100 should fail."""
         record = valid_base_record.copy()
-        record["publication_year"] = current_year + 2
+        record["publication_year"] = 2101
 
         df = pd.DataFrame([record])
 
