@@ -27,6 +27,18 @@ silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
 # -----------------------------------------------------------------------------
+# Sink Configuration (ADR-014, ADR-025)
+# -----------------------------------------------------------------------------
+sink:
+  silver:
+    primary_key: ["activity_id"]
+    sort_by:
+      columns: ["activity_id"]
+  gold:
+    sort_by:
+      columns: ["activity_id"]
+
+# -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)
 # -----------------------------------------------------------------------------
 # Only rules that EXTEND or DIFFER from configs/dq/entities/chembl/activity.yaml

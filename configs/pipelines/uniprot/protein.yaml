@@ -24,4 +24,10 @@ gold_table: "uniprot_protein"
 # Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
+    primary_key: ["accession"]
+    sort_by:
+      columns: ["accession"]
     partition_by: ["organism"]
+  gold:
+    sort_by:
+      columns: ["accession"]
