@@ -34,7 +34,10 @@ from bioetl.application.services.dq._checks_statistical import (
     check_statistical_profile,
 )
 from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
-from bioetl.application.services.dq.utils import convert_value, update_counts
+from bioetl.application.services.dq.dq_report_builders import (
+    convert_value,
+    update_counts,
+)
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     DQReportStatus,

@@ -8,13 +8,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import extract_list_field
 from bioetl.application.core.field_specs import (
     FieldGroup,
     FieldSpec,
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import extract_list_field
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
