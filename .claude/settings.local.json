@@ -55,7 +55,8 @@
       "Bash(select-string:*)",
       "Bash(python3:*)",
       "Bash(xargs:*)",
-      "Bash(sort:*)"
+      "Bash(sort:*)",
+      "Bash(E:)"
     ]
   },
   "enabledPlugins": {
