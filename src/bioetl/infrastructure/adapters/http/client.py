@@ -314,7 +314,10 @@ class UnifiedHTTPClient:
             httpx.ConnectError
             | httpx.ConnectTimeout
             | httpx.ReadTimeout
-            | httpx.ReadError,
+            | httpx.ReadError
+            | httpx.WriteError
+            | httpx.ProtocolError
+            | httpx.ProxyError,
         ):
             return True
         # Check httpx status errors using configured retryable statuses
