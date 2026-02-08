@@ -37,7 +37,20 @@
       "Bash(for f in .claude/agents/py-*.md)",
       "Bash(do wc -l \"$f\")",
       "Bash(dir /B \"E:\\\\google_drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\.claude\\\\agents\\\\ai*\")",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(__NEW_LINE_53e9681ef892ea5c__ echo \"=== TOTAL VIOLATION COUNTS ===\")",
+      "Bash(__NEW_LINE_53e9681ef892ea5c__ echo \"\")",
+      "Bash(__NEW_LINE_53e9681ef892ea5c__ echo \"Infrastructure → Domain \\(excluding TYPE_CHECKING\\):\")",
+      "Bash(__NEW_LINE_53e9681ef892ea5c__ grep -rn \"from bioetl\\\\.domain\\\\.\" src/bioetl/infrastructure/ --include=\"*.py\")",
+      "Bash(__NEW_LINE_485f28db3cd73f07__ echo \"\")",
+      "Bash(__NEW_LINE_485f28db3cd73f07__ echo \"Files affected:\")",
+      "Bash(__NEW_LINE_485f28db3cd73f07__ grep -rl \"from bioetl\\\\.domain\\\\.\" src/bioetl/infrastructure/ --include=\"*.py\")",
+      "Bash(__NEW_LINE_f9756b872f50928a__ echo \"\")",
+      "Bash(__NEW_LINE_f9756b872f50928a__ echo \"Layer boundary violations \\(all searches\\):\")",
+      "Bash(__NEW_LINE_f9756b872f50928a__ grep -rn \"from bioetl\\\\.\\\\\\(infrastructure\\\\|composition\\\\|interfaces\\\\\\)\" src/bioetl/domain/ --include=\"*.py\")",
+      "Bash(__NEW_LINE_9820e80eca058c0f__ grep -rn \"from bioetl\\\\.\\\\\\(infrastructure\\\\|composition\\\\|interfaces\\\\\\)\" src/bioetl/application/ --include=\"*.py\")",
+      "Bash(__NEW_LINE_74676e5d0144caac__ grep -rn \"from bioetl\\\\.\\\\\\(application\\\\|composition\\\\|interfaces\\\\\\)\" src/bioetl/infrastructure/ --include=\"*.py\")",
+      "Bash(__NEW_LINE_ed3f05bc6ace004d__ grep -rn \"from bioetl\\\\.interfaces\" src/bioetl/composition/ --include=\"*.py\")"
     ]
   },
   "enabledPlugins": {
