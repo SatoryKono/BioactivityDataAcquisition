@@ -48,6 +48,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "models",  # Metadata models (BronzeMetadata, etc.)
         "normalization",  # REFACTOR-004: functions are re-exported, not module
         "ports",
+        "registry",
         "resilience",
         "schemas",  # Pandera schemas (provider-specific, accessed directly)
         "serialization",

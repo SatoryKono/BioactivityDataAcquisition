@@ -54,7 +54,8 @@
       "Bash(findstr:*)",
       "Bash(select-string:*)",
       "Bash(python3:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(sort:*)"
     ]
   },
   "enabledPlugins": {
