@@ -87,8 +87,8 @@ def _get_default_config() -> ValidationConfig:
 
 
 # Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
-MIN_PUBLICATION_YEAR: int = 1800  # DEFAULT_VALIDATION_CONFIG.min_publication_year
-MAX_PUBLICATION_YEAR: int = 2100  # DEFAULT_VALIDATION_CONFIG.max_publication_year
+MIN_PUBLICATION_YEAR: int = 1950
+MAX_PUBLICATION_YEAR: int = datetime.now(UTC).year + 1
 
 
 # =============================================================================
@@ -146,9 +146,7 @@ def validate_year_range(
     Example:
         >>> validate_year_range(2024)
         True
-        >>> validate_year_range(1799)
-        False
-        >>> validate_year_range(2101)
+        >>> validate_year_range(1949)
         False
         >>> validate_year_range(None)
         False
@@ -181,16 +179,10 @@ def validate_publication_year(
     Example:
         >>> validate_publication_year(2020)
         (2020, False)
-        >>> validate_publication_year(1800)
-        (1800, False)
-        >>> validate_publication_year(2100)
-        (2100, False)
-        >>> validate_publication_year(1799)
-        (1799, True)
-        >>> validate_publication_year(2101)
-        (2101, True)
-        >>> validate_publication_year(1500)
-        (1500, True)
+        >>> validate_publication_year(1950)
+        (1950, False)
+        >>> validate_publication_year(1949)
+        (1949, True)
         >>> validate_publication_year(None)
         (None, False)
         >>> # With custom config
