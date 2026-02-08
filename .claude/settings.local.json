@@ -20,7 +20,13 @@
       "Bash(python:*)",
       "Bash(code --install-extension:*)",
       "Bash(code .)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git mv:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(uv run:*)"
     ]
   },
   "enabledPlugins": {

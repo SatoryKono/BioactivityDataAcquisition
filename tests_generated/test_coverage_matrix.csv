@@ -1,8 +1,0 @@
-Validation Level,Expected,Generated,Status
-Base Validation,500,329,PARTIAL
-Structural Validation,80,16,INCOMPLETE
-External Verification,40,16,INCOMPLETE
-Logical Validation,60,12,INCOMPLETE
-Semantic Validation,30,88,GOOD
-Contract Tests,25,10,INCOMPLETE
-TOTAL,735,471,PARTIAL

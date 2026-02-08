@@ -110,7 +110,9 @@ class TestCorpusIdPaperIdDependency:
         has_paper = df["paper_id"].notna()
         # Structural rule: corpus_id requires paper_id.
         # We assert that we HAVE detected the inconsistency (i.e. rows with corpus but no paper)
-        assert (has_corpus & ~has_paper).any(), "corpus_id without paper_id should be detected"
+        assert (has_corpus & ~has_paper).any(), (
+            "corpus_id without paper_id should be detected"
+        )
 
 
 @pytest.mark.unit
@@ -183,7 +185,9 @@ class TestCitationCountRelationship:
         df["citations_received"] = 10
         df["influential_citation_count"] = 5
 
-        assert df["citations_received"].iloc[0] >= df["influential_citation_count"].iloc[0]
+        assert (
+            df["citations_received"].iloc[0] >= df["influential_citation_count"].iloc[0]
+        )
 
     def test_citations_less_than_influential_warns(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
@@ -194,7 +198,9 @@ class TestCitationCountRelationship:
         df["influential_citation_count"] = 10
 
         # This is logically inconsistent
-        assert df["citations_received"].iloc[0] < df["influential_citation_count"].iloc[0]
+        assert (
+            df["citations_received"].iloc[0] < df["influential_citation_count"].iloc[0]
+        )
 
 
 @pytest.mark.unit
@@ -439,6 +445,7 @@ class TestPageOrderingEdgeCases:
         # NULL page_last should skip validation
         assert df["page_last"].isna().iloc[0]
 
+
 @pytest.mark.unit
 class TestYearConsistencyExtended:
     """Extended tests for publication_year and publication_date consistency."""
@@ -485,6 +492,7 @@ class TestYearConsistencyExtended:
 
         assert df["publication_year"].isna().iloc[0]
 
+
 @pytest.mark.unit
 class TestFieldDependencies:
     """Test field dependency rules (IF X THEN Y)."""
@@ -521,6 +529,7 @@ class TestFieldDependencies:
 
         # No dependency rule triggered when DOI is NULL
         assert df["doi"].isna().iloc[0]
+
 
 @pytest.mark.unit
 class TestContentHashIntegrity:
@@ -571,6 +580,7 @@ class TestContentHashIntegrity:
         hash2 = hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()
 
         assert hash1 == hash2  # Deterministic
+
 
 @pytest.mark.unit
 class TestDateOrdering:
@@ -626,6 +636,7 @@ class TestDateOrdering:
 
         assert df["published_print"].iloc[0] > df["published_online"].iloc[0]
 
+
 @pytest.mark.unit
 class TestSemanticScholarStructural:
     """Structural validation for Semantic Scholar fields."""
@@ -660,7 +671,9 @@ class TestSemanticScholarStructural:
         df["citations_received"] = 100
         df["influential_citation_count"] = 10
 
-        assert df["citations_received"].iloc[0] >= df["influential_citation_count"].iloc[0]
+        assert (
+            df["citations_received"].iloc[0] >= df["influential_citation_count"].iloc[0]
+        )
 
     def test_influential_greater_than_citations_warns(
         self, minimal_semanticscholar_publication_df: pd.DataFrame
@@ -670,4 +683,6 @@ class TestSemanticScholarStructural:
         df["citations_received"] = 10
         df["influential_citation_count"] = 100
 
-        assert df["citations_received"].iloc[0] < df["influential_citation_count"].iloc[0]
+        assert (
+            df["citations_received"].iloc[0] < df["influential_citation_count"].iloc[0]
+        )

@@ -14,8 +14,11 @@ APIs tested:
 - DBLP (DBLP ID)
 """
 
+import asyncio
+
 import pytest
 from unittest import mock
+from unittest.mock import AsyncMock
 
 
 @pytest.mark.integration
@@ -334,7 +337,10 @@ class TestISSNVerification:
     async def test_issn_invalid_format(self) -> None:
         """FAIL: ISSN format invalid."""
         verify_service = AsyncMock()
-        verify_service.verify_issn.return_value = {"status": "FAIL", "error": "Invalid format"}
+        verify_service.verify_issn.return_value = {
+            "status": "FAIL",
+            "error": "Invalid format",
+        }
 
         result = await verify_service.verify_issn("invalid-issn")
         assert result["status"] == "FAIL"
