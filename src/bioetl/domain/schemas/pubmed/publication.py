@@ -9,7 +9,7 @@ PubMedPublicationSchema replaces ArticleSchema for consistency with other provid
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import cast
 
 import pandas as pd

@@ -1,6 +1,6 @@
 import pytest
 import httpx
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.exceptions import RetryExhaustedError

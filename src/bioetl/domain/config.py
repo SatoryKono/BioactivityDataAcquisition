@@ -15,7 +15,6 @@ Consolidated configuration classes (post-refactoring):
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.composite.config import ColumnGroupConfig
