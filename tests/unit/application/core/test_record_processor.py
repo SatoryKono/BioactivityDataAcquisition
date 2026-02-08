@@ -579,9 +579,7 @@ class TestRecordProcessorTracing:
         span.set_attribute.assert_any_call("bioetl.gold_count", 1)
         span.set_attribute.assert_any_call("bioetl.quarantined_count", 0)
 
-    async def test_span_end_called_on_success(
-        self, traced_processor, mock_tracer
-    ):
+    async def test_span_end_called_on_success(self, traced_processor, mock_tracer):
         """Spans are properly closed (__exit__) on success."""
         batch_id = BatchID(uuid4())
         records = [{"id": "1", "value": 10}]
@@ -592,9 +590,15 @@ class TestRecordProcessorTracing:
         assert span.__exit__.call_count >= 3
 
     async def test_span_records_error_on_write_failure(
-        self, mock_services, mock_error_classifier, mock_context,
-        transform_callback, gold_filter_callback, gold_transform_callback,
-        mock_gold_validator, mock_tracer,
+        self,
+        mock_services,
+        mock_error_classifier,
+        mock_context,
+        transform_callback,
+        gold_filter_callback,
+        gold_transform_callback,
+        mock_gold_validator,
+        mock_tracer,
     ):
         """_end_span records exception and sets error=True on failure."""
         mock_services.storage.write_bronze = AsyncMock(
@@ -631,8 +635,13 @@ class TestRecordProcessorTracing:
         span.record_exception.assert_called()
 
     async def test_on_error_callback_invoked_on_write_failure(
-        self, mock_services, mock_error_classifier, mock_context,
-        transform_callback, gold_filter_callback, gold_transform_callback,
+        self,
+        mock_services,
+        mock_error_classifier,
+        mock_context,
+        transform_callback,
+        gold_filter_callback,
+        gold_transform_callback,
         mock_gold_validator,
     ):
         """on_error callback in _execute_with_span is called when write raises."""
