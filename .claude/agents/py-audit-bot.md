@@ -105,12 +105,14 @@ model: opus
 grep -rn "^from bioetl.infrastructure\|^from bioetl.application\|^from bioetl.composition" \
   src/bioetl/domain/ --include="*.py"
 
-# infrastructure → только domain.ports (НАРУШЕНИЕ если другое)
-grep -rn "^from bioetl.domain" src/bioetl/infrastructure/ --include="*.py" | \
-  grep -v "domain.ports\|domain.exceptions\|domain.entities"
-
 # infrastructure → application (НАРУШЕНИЕ)
 grep -rn "^from bioetl.application" src/bioetl/infrastructure/ --include="*.py"
+
+# infrastructure → composition (НАРУШЕНИЕ)
+grep -rn "^from bioetl.composition" src/bioetl/infrastructure/ --include="*.py"
+
+# infrastructure → interfaces (НАРУШЕНИЕ)
+grep -rn "^from bioetl.interfaces" src/bioetl/infrastructure/ --include="*.py"
 
 # Architecture tests
 pytest tests/architecture/ -v --tb=short
@@ -122,14 +124,17 @@ pytest tests/architecture/ -v --tb=short
 |-----------|--------|-------------|----------------|-------------|------------|
 | **domain** | OK | NO | NO | NO | NO |
 | **application** | OK | OK | NO | NO | NO |
-| **infrastructure** | OK (Ports) | NO | OK | NO | NO |
+| **infrastructure** | OK | NO | OK | NO | NO |
 | **composition** | OK | OK | OK | OK | NO |
 | **interfaces** | OK | OK | OK | OK | OK |
 
+> Infrastructure может импортировать все domain-модули (ports, types, exceptions,
+> entities, config, models, value_objects и т.д.). Domain содержит чистые value
+> objects и контракты без I/O. Ports MUST импортироваться через фасад (ARCH-008).
+
 **Allowed Exceptions:**
 - `TYPE_CHECKING` imports (type hints only)
-- `domain.ports` in infrastructure
-- `domain.types` and `domain.exceptions` everywhere
+- `domain.types` and `domain.exceptions` everywhere (including application)
 
 ### B. Code quality
 
@@ -239,7 +244,7 @@ grep -rn "status_code\|raise_for_status\|timeout" src/bioetl/infrastructure/adap
 - `Int→Float` coercion в Gold schemas (nullable integers)
 - Large files with proper delegation (size != god object)
 - `TYPE_CHECKING` imports
-- `domain.ports` in infrastructure
+- All `domain.*` imports in infrastructure (domain is pure value objects + contracts)
 - `domain.types` / `domain.exceptions` everywhere
 
 ---

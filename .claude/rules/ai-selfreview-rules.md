@@ -1,6 +1,6 @@
 # AI Self-Review Rules
 
-*Версия: 1.0.0 | Синхронизировано с RULES.md v5.17 (2026-02-03)*
+*Версия: 1.1.0 | Синхронизировано с RULES.md v5.17 (2026-02-03)*
 
 Правила для автоматической самопроверки кода в проекте BioETL.
 Использует RFC 2119 keywords: **MUST**, **SHOULD**, **MAY**.
@@ -31,9 +31,15 @@
 |-----------|--------|-------------|----------------|-------------|------------|
 | **domain** | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **application** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **infrastructure** | ✅ (Ports) | ❌ | ✅ | ❌ | ❌ |
+| **infrastructure** | ✅ | ❌ | ✅ | ❌ | ❌ |
 | **composition** | ✅ | ✅ | ✅ | ✅ | ❌ |
 | **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+> **Примечание:** Infrastructure может импортировать любые domain-модули (ports, types,
+> exceptions, entities, config, models, value_objects, serialization и т.д.).
+> Domain содержит чистую бизнес-логику без I/O — это value objects и контракты,
+> от которых infrastructure зависит by design. Ports **MUST** импортироваться
+> только через фасад `bioetl.domain.ports` (ARCH-008).
 
 **Детекция:**
 ```bash
@@ -45,6 +51,12 @@ grep -rn "from bioetl.infrastructure" src/bioetl/application/ --include="*.py" |
 
 # infrastructure → application (НАРУШЕНИЕ)
 grep -rn "from bioetl.application" src/bioetl/infrastructure/ --include="*.py" | grep -v TYPE_CHECKING
+
+# infrastructure → composition (НАРУШЕНИЕ)
+grep -rn "from bioetl.composition" src/bioetl/infrastructure/ --include="*.py"
+
+# infrastructure → interfaces (НАРУШЕНИЕ)
+grep -rn "from bioetl.interfaces" src/bioetl/infrastructure/ --include="*.py"
 ```
 
 **Исправление:** Перенести зависимость в правильный слой или использовать Port protocol.
@@ -710,19 +722,27 @@ lock = MemoryLock(key=f"lock:{provider}_{entity}")
 
 ---
 
-### EXC-012: domain.ports in Infrastructure
+### EXC-012: All domain imports in Infrastructure
 
 ```python
 # infrastructure/adapters/chembl/client.py
 from bioetl.domain.ports import DataSourcePort  # ✅ OK — Port protocols are contracts
+from bioetl.domain.entities import Molecule       # ✅ OK — domain value objects
+from bioetl.domain.config import PipelineConfig   # ✅ OK — domain configuration
+from bioetl.domain.types import HealthStatus      # ✅ OK — shared type definitions
+from bioetl.domain.exceptions import ValidationError  # ✅ OK — shared exceptions
 ```
+
+Infrastructure зависит от domain by design — domain содержит чистые value objects,
+entities, config и contracts (ports) без I/O. Это штатная зависимость по Hexagonal
+Architecture: adapters реализуют domain ports и работают с domain entities.
 
 ---
 
 ### EXC-013: domain.types and domain.exceptions Everywhere
 
 ```python
-# Anywhere in codebase
+# Anywhere in codebase (all layers)
 from bioetl.domain.types import HealthStatus  # ✅ OK — shared definitions
 from bioetl.domain.exceptions import ValidationError  # ✅ OK — shared definitions
 ```
