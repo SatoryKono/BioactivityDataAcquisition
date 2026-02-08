@@ -28,6 +28,10 @@ CELLOSAURUS_ID_PATTERN = r"^CVCL_[A-Z0-9]+$"
 # Date patterns
 ISO_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
 
+# Publication identifier patterns
+ISSN_PATTERN = r"^\d{4}-\d{3}[\dX]$"
+ORCID_PATTERN = r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$"
+
 # =============================================================================
 # CHEMBL ACTIVITY ENUMS
 # =============================================================================
@@ -173,9 +177,11 @@ __all__ = [
     "DATA_VALIDITY_COMMENTS",
     "EFO_ID_PATTERN",
     "ISO_DATE_PATTERN",
+    "ISSN_PATTERN",
     "MAX_PHASE_VALUES",
     # Molecule enums
     "MOLECULE_TYPES",
+    "ORCID_PATTERN",
     # Publication enums
     "PUBLICATION_TYPES",
     "RELATIONSHIP_TYPES",
