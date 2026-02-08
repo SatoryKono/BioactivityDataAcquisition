@@ -15,6 +15,7 @@ Consolidated configuration classes (post-refactoring):
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.domain.composite.config import ColumnGroupConfig
@@ -41,10 +42,9 @@ class ValidationConfig:
     - Single source of truth for validation rules
 
     Attributes:
-        min_publication_year: Minimum valid publication year. Default 1800
-            covers modern scientific publications. Use 1500 for historical
-            databases like Semantic Scholar.
-        max_publication_year: Maximum valid publication year. Default 2100.
+        min_publication_year: Minimum valid publication year. Default 1950
+            covers modern scientific publications.
+        max_publication_year: Maximum valid publication year. Default CURRENT_YEAR + 1.
         min_molecular_weight: Minimum molecular weight in Daltons. Default 10.0.
         max_molecular_weight: Maximum molecular weight in Daltons. Default 10000.0
             covers small molecules to large peptides.
@@ -57,17 +57,13 @@ class ValidationConfig:
     Example:
         >>> config = ValidationConfig()
         >>> config.min_publication_year
-        1800
-        >>> # Override for Semantic Scholar (older publications)
-        >>> ss_config = ValidationConfig(min_publication_year=1500)
-        >>> ss_config.min_publication_year
-        1500
+        1950
 
     """
 
     # Publication year range
-    min_publication_year: int = 1800
-    max_publication_year: int = 2100
+    min_publication_year: int = 1950
+    max_publication_year: int = datetime.now(UTC).year + 1
 
     # Molecular properties
     min_molecular_weight: float = 10.0

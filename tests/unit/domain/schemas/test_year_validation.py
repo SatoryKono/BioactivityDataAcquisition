@@ -1,6 +1,6 @@
 """Unit tests for year validation across all publication schemas.
 
-Tests unified year validation range (1800-2100) per RULES.md §2.3.2.
+Tests unified year validation range (1950-CURRENT_YEAR+1) per RULES.md §2.3.2.
 """
 
 from __future__ import annotations
@@ -101,7 +101,7 @@ class TestCrossRefYearValidation:
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
-        """Should accept year at boundaries (1800 and 2100)."""
+        """Should accept year at boundaries."""
         from bioetl.domain.schemas.crossref.publication import (
             PublicationEnrichedSchema,
         )
@@ -189,7 +189,7 @@ class TestSemanticScholarYearValidation:
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
-        """Should accept year at boundaries (1800 and 2100)."""
+        """Should accept year at boundaries."""
         from bioetl.domain.schemas.semanticscholar.publication import (
             SemanticScholarPublicationSchema,
         )
@@ -206,7 +206,7 @@ class TestSemanticScholarYearValidation:
             SemanticScholarPublicationSchema,
         )
 
-        # Year below minimum (was 1500, now 1800)
+        # Year below minimum
         valid_record["publication_year"] = MIN_PUBLICATION_YEAR - 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
@@ -268,7 +268,7 @@ class TestChemblYearValidation:
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
-        """Should accept year at boundaries (1800 and 2100)."""
+        """Should accept year at boundaries."""
         from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
@@ -379,7 +379,7 @@ class TestPubMedYearValidation:
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
-        """Should accept year at boundaries (1800 and 2100)."""
+        """Should accept year at boundaries."""
         from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
@@ -423,11 +423,10 @@ class TestYearValidationConstants:
 
     def test_constants_are_consistent(self) -> None:
         """Verify MIN and MAX publication year constants are correct."""
-        assert MIN_PUBLICATION_YEAR == 1800
-        assert MAX_PUBLICATION_YEAR == 2100
+        assert MIN_PUBLICATION_YEAR == 1950
+        current_year = datetime.now(UTC).year
+        assert MAX_PUBLICATION_YEAR == current_year + 1
 
     def test_valid_year_range(self) -> None:
         """Test that constants define a valid range."""
         assert MIN_PUBLICATION_YEAR < MAX_PUBLICATION_YEAR
-        # Range should cover reasonable scientific publication history
-        assert MAX_PUBLICATION_YEAR - MIN_PUBLICATION_YEAR == 300

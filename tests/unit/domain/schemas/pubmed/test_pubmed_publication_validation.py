@@ -716,9 +716,6 @@ class TestDateCompletedBaseValidation:
         """PASS: valid date_completed value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    @pytest.mark.xfail(
-        reason="pandera cannot coerce None to nullable Series[date] (NaT rejected)"
-    )
     def test_date_completed_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
@@ -738,9 +735,6 @@ class TestDateRevisedBaseValidation:
         """PASS: valid date_revised value."""
         PubMedPublicationSchema.validate(minimal_pubmed_publication_df)
 
-    @pytest.mark.xfail(
-        reason="pandera cannot coerce None to nullable Series[date] (NaT rejected)"
-    )
     def test_date_revised_null_allowed(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:

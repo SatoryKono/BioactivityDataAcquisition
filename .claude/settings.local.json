@@ -52,7 +52,9 @@
       "Bash(__NEW_LINE_74676e5d0144caac__ grep -rn \"from bioetl\\\\.\\\\\\(application\\\\|composition\\\\|interfaces\\\\\\)\" src/bioetl/infrastructure/ --include=\"*.py\")",
       "Bash(__NEW_LINE_ed3f05bc6ace004d__ grep -rn \"from bioetl\\\\.interfaces\" src/bioetl/composition/ --include=\"*.py\")",
       "Bash(findstr:*)",
-      "Bash(select-string:*)"
+      "Bash(select-string:*)",
+      "Bash(python3:*)",
+      "Bash(xargs:*)"
     ]
   },
   "enabledPlugins": {
