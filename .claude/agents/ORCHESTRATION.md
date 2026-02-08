@@ -1,32 +1,41 @@
 # ORCHESTRATION.md — Оркестрация команды subagent-ов BioETL
 
-*Версия: 2.2 | Дата: 2026-02-07 | Supersedes v2.1*
+*Версия: 3.0 | Дата: 2026-02-08 | Supersedes v2.2 | Платформа: Claude Code CLI*
 
 ## 1. Обзор
 
-Команда из **7 subagent-ов** обеспечивает полный жизненный цикл задачи разработки BioETL — от аудита текущего состояния до финальной верификации изменений. Codex выступает оркестратором, делегируя работу subagent-ам в определённом порядке.
+Команда из **7 субагентов** обеспечивает полный жизненный цикл задачи разработки BioETL — от аудита текущего состояния до финальной верификации изменений. Основной агент (Claude Code) выступает оркестратором, делегируя работу субагентам через `Task` tool с параметром `subagent_type`.
 
-| # | Subagent | Роль | Артефакт |
-|:-:|----------|------|----------|
-| I | **pyAuditBot** | Baseline/final аудит | `00-audit-baseline.md`, `07-audit-final.md` |
-| II | **pyPlanBot** | Планирование, декомпозиция | `01-plan-initial.md`, `03-plan-updated.md` |
-| III | **pyTestBot** | Тестирование | `02-test-baseline.md`, `05-test-final.md` |
-| IV | **pyCodeBot** | Написание production-кода | `04-refactoring-log.md` |
-| V | **pyConfigBot** | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
-| VI | **pyDebugBot** | Отладка падений | `04-refactoring-log.md` (debug-секции) |
-| VII | **pyDocBot** | Документация | `06-doc-update-log.md` |
+**Запуск субагента:**
+```
+Task(subagent_type="py-audit-bot", prompt="...", model="opus")
+```
+
+| # | Субагент (`subagent_type`) | Model | Роль | Артефакт |
+|:-:|----------------------------|-------|------|----------|
+| I | **py-audit-bot** | opus | Baseline/final аудит, code review, arch guardian, API validation | `00-audit-baseline.md`, `07-audit-final.md` |
+| II | **py-plan-bot** | opus | Планирование, декомпозиция, composite design | `01-plan-initial.md`, `03-plan-updated.md` |
+| III | **py-test-bot** | sonnet | Тестирование | `02-test-baseline.md`, `05-test-final.md` |
+| IV | **py-code-bot** | opus | Production-код, pipeline scaffolding | `04-refactoring-log.md` |
+| V | **py-config-bot** | sonnet | Конфигурации (pipeline, DQ, filter, composite) | `04a-config-log.md` |
+| VI | **py-debug-bot** | opus | Отладка падений | `04-refactoring-log.md` (debug-секции) |
+| VII | **py-doc-bot** | sonnet | Документация, ADR management | `06-doc-update-log.md` |
 
 ### Разделение ответственности (файловые зоны)
 
-| Subagent | Зона записи | Только чтение |
+| Субагент | Зона записи | Только чтение |
 |----------|-------------|---------------|
-| pyCodeBot | `src/bioetl/`, `tests/` (scaffolding) | `configs/`, `docs/` |
-| pyConfigBot | `configs/` | `src/bioetl/`, `docs/` |
-| pyDocBot | `docs/`, docstrings в `src/` | `configs/`, `tests/` |
-| pyTestBot | `tests/` | `src/bioetl/`, `configs/` |
-| pyDebugBot | `src/bioetl/`, `tests/` (fixes) | `configs/`, `docs/` |
-| pyAuditBot | — (read-only) | всё |
-| pyPlanBot | — (read-only) | всё |
+| py-code-bot | `src/bioetl/`, `tests/` (scaffolding) | `configs/`, `docs/` |
+| py-config-bot | `configs/` | `src/bioetl/`, `docs/` |
+| py-doc-bot | `docs/`, docstrings в `src/` | `configs/`, `tests/` |
+| py-test-bot | `tests/` | `src/bioetl/`, `configs/` |
+| py-debug-bot | `src/bioetl/`, `tests/` (fixes) | `configs/`, `docs/` |
+| py-audit-bot | — (read-only) | всё |
+| py-plan-bot | — (read-only) | всё |
+
+### Определения субагентов
+
+Файлы: `.claude/agents/py-*.md` — каждый содержит YAML-frontmatter (`name`, `description`, `model`) + полную спецификацию с инлайнированными знаниями. Оригинальные спецификации Codex сохранены в `.claude/agents/subagents/` как справочный материал.
 
 ---
 
@@ -40,20 +49,20 @@
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ① pyAuditBot (baseline)    │──→ 00-audit-baseline.md
+│  ① py-audit-bot (baseline)   │──→ 00-audit-baseline.md
 │  Аудит целевого фрагмента   │
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ② pyPlanBot (initial)      │──→ 01-plan-initial.md
+│  ② py-plan-bot (initial)     │──→ 01-plan-initial.md
 │  Формирование плана RF-*    │
 │  (+консолидация с user plan)│
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ③ pyTestBot (baseline)     │──→ 02-test-baseline.md
+│  ③ py-test-bot (baseline)    │──→ 02-test-baseline.md
 │  Фиксация состояния тестов  │
 └─────────────┬───────────────┘
               │
@@ -63,14 +72,14 @@
         yes   │   no
          ▼    │    │
 ┌─────────────┤    │
-│ pyDebugBot  │    │
-│ → pyTestBot │    │
+│ py-debug-bot│    │
+│→ py-test-bot│    │
 │ (цикл)      │──→ 04-refactoring-log.md (debug-секции)
 └──────┬──────┘    │
        │           │
        ▼           │
 ┌──────────────┐   │
-│ pyPlanBot    │   │
+│ py-plan-bot  │   │
 │ (update)     │──→ 03-plan-updated.md
 └──────┬───────┘   │
        │           │
@@ -80,16 +89,16 @@
 ┌─────────────────────────────────────────────────────┐
 │  ④ РЕАЛИЗАЦИЯ (параллельно по зонам ответственности) │
 │                                                       │
-│  pyCodeBot ──→ src/bioetl/  ──→ 04-refactoring-log.md │
+│  py-code-bot ─→ src/bioetl/  ──→ 04-refactoring-log.md│
 │       │                                                │
-│       ├─ (entity scaffolding?) ──→ pyConfigBot         │
+│       ├─ (entity scaffolding?) ──→ py-config-bot        │
 │       │                                                │
-│  pyConfigBot ──→ configs/  ──→ 04a-config-log.md       │
+│  py-config-bot → configs/  ──→ 04a-config-log.md       │
 └─────────────────────┬───────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────┐
-│  ⑤ pyTestBot (final)        │──→ 05-test-final.md
+│  ⑤ py-test-bot (final)       │──→ 05-test-final.md
 │  Финальный прогон тестов    │
 └─────────────┬───────────────┘
               │
@@ -99,8 +108,8 @@
         yes   │   no
          ▼    │    │
 ┌─────────────┤    │
-│ pyDebugBot  │    │
-│ → pyTestBot │    │
+│ py-debug-bot│    │
+│→ py-test-bot│    │
 │ (цикл ≤5)  │    │
 └──────┬──────┘    │
        │           │
@@ -108,13 +117,13 @@
        │
        ▼
 ┌─────────────────────────────┐
-│  ⑥ pyDocBot                 │──→ 06-doc-update-log.md
+│  ⑥ py-doc-bot                │──→ 06-doc-update-log.md
 │  Обновление docs/docstrings │
 └─────────────────┬───────────┘
                   │
                   ▼
 ┌─────────────────────────────┐
-│  ⑦ pyAuditBot (final)       │──→ 07-audit-final.md
+│  ⑦ py-audit-bot (final)      │──→ 07-audit-final.md
 │  Финальная верификация       │
 └─────────────────┬───────────┘
                   │
@@ -141,15 +150,15 @@
 
 ## 3. Матрица взаимодействий
 
-| Отправитель → | pyPlanBot | pyTestBot | pyCodeBot | pyConfigBot | pyDebugBot | pyDocBot | pyAuditBot |
+| Отправитель → | py-plan-bot | py-test-bot | py-code-bot | py-config-bot | py-debug-bot | py-doc-bot | py-audit-bot |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **pyAuditBot** | findings → RF-* | — | — | config gaps | — | drift findings | — |
-| **pyPlanBot** | — | scope RF-* | RF-* to implement | config RF-* | — | — | scope |
-| **pyTestBot** | — | — | — | — | FAIL report | — | — |
-| **pyCodeBot** | need new RF-* | — | — | entity scaffolding | — | — | — |
-| **pyConfigBot** | — | config tests | — | — | — | DQ migration docs | — |
-| **pyDebugBot** | plan update | retest trigger | fix code | fix config | — | fix → doc | fix → re-audit |
-| **pyDocBot** | — | — | — | — | — | — | terminology check |
+| **py-audit-bot** | findings → RF-* | — | — | config gaps | — | drift findings | — |
+| **py-plan-bot** | — | scope RF-* | RF-* to implement | config RF-* | — | — | scope |
+| **py-test-bot** | — | — | — | — | FAIL report | — | — |
+| **py-code-bot** | need new RF-* | — | — | entity scaffolding | — | — | — |
+| **py-config-bot** | — | config tests | — | — | — | DQ migration docs | — |
+| **py-debug-bot** | plan update | retest trigger | fix code | fix config | — | fix → doc | fix → re-audit |
+| **py-doc-bot** | — | — | — | — | — | — | terminology check |
 
 ### Ключевые потоки данных
 
