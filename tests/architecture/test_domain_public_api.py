@@ -43,6 +43,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "filter_config",
         "filtering",
         "locking",
+        "mapping",
         "medallion",
         "models",  # Metadata models (BronzeMetadata, etc.)
         "normalization",  # REFACTOR-004: functions are re-exported, not module
