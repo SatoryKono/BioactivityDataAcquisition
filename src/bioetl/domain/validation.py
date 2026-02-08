@@ -15,6 +15,7 @@ See also:
 from __future__ import annotations
 
 import re
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from .transformations import safe_int
@@ -86,8 +87,8 @@ def _get_default_config() -> ValidationConfig:
 
 
 # Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
-MIN_PUBLICATION_YEAR: int = 1800  # DEFAULT_VALIDATION_CONFIG.min_publication_year
-MAX_PUBLICATION_YEAR: int = 2100  # DEFAULT_VALIDATION_CONFIG.max_publication_year
+MIN_PUBLICATION_YEAR: int = 1950  # DEFAULT_VALIDATION_CONFIG.min_publication_year
+MAX_PUBLICATION_YEAR: int = datetime.now(UTC).year + 1  # dynamic: CURRENT_YEAR + 1
 
 
 # =============================================================================
@@ -127,17 +128,17 @@ def validate_positive_int(value: Any) -> int | None:
 
 def validate_year_range(
     year: int | None,
-    min_year: int = 1800,
-    max_year: int = 2100,
+    min_year: int = MIN_PUBLICATION_YEAR,
+    max_year: int = MAX_PUBLICATION_YEAR,
 ) -> bool:
     """Validate year is within a reasonable range.
 
-    Default range [1800, 2100] covers scientific publications.
+    Default range [1950, CURRENT_YEAR+1] covers scientific publications.
 
     Args:
         year: Year to validate.
-        min_year: Minimum valid year (inclusive). Default 1800.
-        max_year: Maximum valid year (inclusive). Default 2100.
+        min_year: Minimum valid year (inclusive). Default 1950.
+        max_year: Maximum valid year (inclusive). Default CURRENT_YEAR + 1.
 
     Returns:
         True if year is within range.
