@@ -21,7 +21,10 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
-from bioetl.application.services.dq.utils import build_summary, update_counts
+from bioetl.application.services.dq.dq_report_builders import (
+    build_summary,
+    update_counts,
+)
 from bioetl.domain.ports import SilverDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (

@@ -10,7 +10,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.application.core.transform_utils import flatten_nested_dict
+from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.pipelines.chembl.activity_transformer import (
     _ACTION_TYPE_FIELDS,
     _LIGAND_EFFICIENCY_FIELDS,

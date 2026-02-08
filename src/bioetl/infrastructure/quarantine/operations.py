@@ -14,7 +14,7 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import QuarantineRecordStatus
-from bioetl.infrastructure.quarantine.helpers import quote_literal
+from bioetl.infrastructure.quarantine.record_encoding import quote_literal
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

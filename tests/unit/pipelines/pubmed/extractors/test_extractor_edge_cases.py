@@ -16,7 +16,7 @@ from bioetl.application.pipelines.pubmed.extractors.date import DateExtractor
 from bioetl.application.pipelines.pubmed.extractors.identifier import (
     IdentifierExtractor,
 )
-from bioetl.application.pipelines.pubmed.xml_utils import get_int, get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_int, get_text
 
 
 class TestAbstractExtractorEdgeCases:
@@ -611,7 +611,7 @@ class TestClassificationExtractorEdgeCases:
 
 
 class TestXmlUtilsEdgeCases:
-    """Edge case tests for xml_utils functions."""
+    """Edge case tests for xml_parser functions."""
 
     def test_get_text_with_child_elements(self):
         """Test get_text when element has child elements."""

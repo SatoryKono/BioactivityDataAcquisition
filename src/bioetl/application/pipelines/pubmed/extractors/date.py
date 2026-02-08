@@ -19,7 +19,7 @@ from typing import ClassVar, TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 
 
 class RawDate(TypedDict):

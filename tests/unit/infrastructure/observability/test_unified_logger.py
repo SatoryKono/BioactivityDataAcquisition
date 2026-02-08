@@ -243,13 +243,15 @@ class TestSecretFiltering:
 
 @pytest.mark.unit
 class TestLoggingUtilsIntegration:
-    """Tests for logging_utils integration with Log Schema."""
+    """Tests for adapter_error_logging integration with Log Schema."""
 
     def test_log_adapter_error_with_stage(self) -> None:
         """Test that log_adapter_error accepts stage parameter."""
         from unittest.mock import MagicMock
 
-        from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
+        from bioetl.infrastructure.adapters.adapter_error_logging import (
+            log_adapter_error,
+        )
 
         mock_logger = MagicMock()
 
@@ -273,7 +275,9 @@ class TestLoggingUtilsIntegration:
         """Test that log_adapter_error has sensible default stage."""
         from unittest.mock import MagicMock
 
-        from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
+        from bioetl.infrastructure.adapters.adapter_error_logging import (
+            log_adapter_error,
+        )
 
         mock_logger = MagicMock()
 

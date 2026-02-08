@@ -1,4 +1,4 @@
-"""Tests for infrastructure/adapters/logging_utils.py.
+"""Tests for infrastructure/adapters/adapter_error_logging.py.
 
 These tests verify the standardized error logging utility.
 """
@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from unittest.mock import MagicMock
 
-from bioetl.infrastructure.adapters.logging_utils import log_adapter_error
+from bioetl.infrastructure.adapters.adapter_error_logging import log_adapter_error
 
 
 class TestLogAdapterError:

@@ -22,7 +22,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     RawAuthor,
     StructuredAffiliation,
 )
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.services import IdentityService

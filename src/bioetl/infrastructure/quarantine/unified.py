@@ -20,16 +20,16 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
-from bioetl.infrastructure.quarantine.helpers import (
-    MAX_PAYLOAD_SIZE,
-    calculate_hash,
-    quote_literal,
-)
 from bioetl.infrastructure.quarantine.operations import (
     get_statistics,
     inspect_records,
     purge_records,
     replay_records,
+)
+from bioetl.infrastructure.quarantine.record_encoding import (
+    MAX_PAYLOAD_SIZE,
+    calculate_hash,
+    quote_literal,
 )
 
 if TYPE_CHECKING:

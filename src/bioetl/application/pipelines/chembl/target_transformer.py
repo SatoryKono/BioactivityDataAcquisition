@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.transform_utils import (
+from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
     extract_list_field,
 )
@@ -63,7 +63,7 @@ class TargetTransformer(BaseChemblTransformer):
     def _extract_basic_component_fields(
         self, components: list[dict[str, Any]]
     ) -> dict[str, list[Any] | None]:
-        """Extract basic fields from component list via transform_utils."""
+        """Extract basic fields from component list via dict_transformers."""
         return {
             "component_accessions": extract_list_field(components, "accession"),
             "component_ids": extract_list_field(components, "component_id", safe_int),
@@ -79,7 +79,7 @@ class TargetTransformer(BaseChemblTransformer):
     ) -> str | int | float | bool | None:
         """Aggregate synonyms from all components into a single JSON list.
 
-        Uses aggregate_nested_lists from transform_utils.
+        Uses aggregate_nested_lists from dict_transformers.
 
         Args:
             components: List of component dicts from ChEMBL API.
@@ -96,7 +96,7 @@ class TargetTransformer(BaseChemblTransformer):
     ) -> str | int | float | bool | None:
         """Aggregate cross-references from all target components.
 
-        Uses aggregate_nested_lists from transform_utils.
+        Uses aggregate_nested_lists from dict_transformers.
         ChEMBL API stores cross-references inside each component's
         target_component_xrefs field, not at the target level.
 

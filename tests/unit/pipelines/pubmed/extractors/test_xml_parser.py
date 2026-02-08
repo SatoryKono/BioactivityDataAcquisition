@@ -1,10 +1,10 @@
-"""Unit tests for xml_utils module."""
+"""Unit tests for xml_parser module."""
 
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
-from bioetl.application.pipelines.pubmed.xml_utils import get_int, get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_int, get_text
 
 
 class TestGetText:

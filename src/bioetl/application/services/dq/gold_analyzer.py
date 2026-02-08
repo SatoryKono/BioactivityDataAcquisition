@@ -34,7 +34,10 @@ from bioetl.application.services.dq._checks_statistical import (
     check_anomaly_detection,
     check_statistical_profile,
 )
-from bioetl.application.services.dq.utils import build_summary, update_counts
+from bioetl.application.services.dq.dq_report_builders import (
+    build_summary,
+    update_counts,
+)
 from bioetl.domain.ports import GoldDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (

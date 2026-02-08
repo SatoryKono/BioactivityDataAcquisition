@@ -11,7 +11,7 @@ import pytest
 
 from bioetl.domain.types import BatchID, QuarantineRecordStatus
 from bioetl.infrastructure.quarantine import UnifiedQuarantine, quote_literal
-from bioetl.infrastructure.quarantine.helpers import calculate_hash
+from bioetl.infrastructure.quarantine.record_encoding import calculate_hash
 
 # Fixed timestamp for test reproducibility
 TEST_INGESTION_TS = datetime(2024, 1, 15, 12, 0, 0, tzinfo=UTC)
