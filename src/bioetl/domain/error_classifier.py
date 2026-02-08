@@ -42,6 +42,7 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
             "ReadError",
             "WriteError",
             "ConnectError",
+            "ProtocolError",
             "DecodingError",
             "TransportError",
             "StreamError",
