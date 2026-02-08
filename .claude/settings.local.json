@@ -28,7 +28,8 @@
       "Bash(taskkill:*)",
       "Bash(uv run:*)",
       "Bash(ls -la \"E:\\\\google_drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\.claude\"\" | grep -E \".md)",
-      "Bash(.json \")"
+      "Bash(.json \")",
+      "Bash(ls:*)"
     ]
   },
   "enabledPlugins": {
