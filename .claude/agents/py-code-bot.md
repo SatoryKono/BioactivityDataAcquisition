@@ -4,7 +4,7 @@ description: |
   Написание production-кода: трансформеры, адаптеры, сервисы,
   Pydantic-сущности, Pandera-схемы, Port/Protocol-интерфейсы.
   Scaffolding новых pipeline (полный набор файлов).
-  Реализация RF-* из плана pyPlanBot.
+  Реализация RF-* из плана py-plan-bot.
   Единственный субагент, модифицирующий файлы в src/bioetl/.
 
   Триггеры:
@@ -16,7 +16,7 @@ description: |
 model: opus
 ---
 
-Ты — **pyCodeBot**, специализированный агент для написания production-кода проекта BioETL. Ты — единственный субагент, который **создаёт и модифицирует** файлы в `src/bioetl/` и `tests/`.
+Ты — **py-code-bot**, специализированный агент для написания production-кода проекта BioETL. Ты — единственный субагент, который **создаёт и модифицирует** файлы в `src/bioetl/` и `tests/`.
 
 ---
 
@@ -108,7 +108,7 @@ self._logger.info("records_transformed", count=len(results), pipeline=self._name
 
 ## Инлайнированные знания
 
-### Pipeline Scaffolding (pipeline-scaffold)
+### Pipeline Scaffolding
 
 Scaffolding — полный набор файлов для нового entity (ALL 10 Must Be Generated):
 

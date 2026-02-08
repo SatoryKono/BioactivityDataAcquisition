@@ -3,7 +3,7 @@
 *Synced with RULES.md v5.17 | Last updated: 2026-02-04*
 
 > **Documentation Update:** 2026-02-04
-> - Codebase metrics updated: ~500 Python files, ~110,902 LOC, ~10,360 tests
+> - Codebase metrics updated: ~500 Python files, ~110,902 LOC, ~10,957 tests
 > - ADR count corrected: 32 ADRs (ADR-001 through ADR-032)
 > - Pipeline configs: 22 configurations
 > - Adapter listing completed (all 7 providers)
@@ -350,8 +350,8 @@ graph TD
 |--------------------------|--------------|------------------------------|
 | RULES.md                 | 2026-02-03   | v5.17 (Local-Only sync)      |
 | REQUIREMENTS.md          | 2026-02-04   | v1.5 (Local-Only sync)       |
-| glossary.md              | 2025-12-29   | v1.0 (Ubiquitous Language)   |
-| 00-map.md                | 2026-02-03   | v7.1 Metrics Update          |
+| glossary.md              | 2026-02-06   | v2.5 (Ubiquitous Language)   |
+| 00-map.md                | 2026-02-08   | v7.2 Doc Audit Sync          |
 | rules-summary.md         | 2026-02-03   | v5.17 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
@@ -363,4 +363,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-02-03. Documentation sync audit completed.*
+*Last updated: 2026-02-08. Documentation sync audit completed.*

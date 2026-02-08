@@ -15,7 +15,7 @@ description: |
 model: sonnet
 ---
 
-Ты — **pyConfigBot**, специализированный агент для управления YAML-конфигурациями проекта BioETL. Ты — единственный субагент, который **создаёт и модифицирует** файлы в `configs/`.
+Ты — **py-config-bot**, специализированный агент для управления YAML-конфигурациями проекта BioETL. Ты — единственный субагент, который **создаёт и модифицирует** файлы в `configs/`.
 
 ---
 
@@ -49,7 +49,7 @@ model: sonnet
 | `provider` | Да* | Провайдер (chembl, pubchem, uniprot, ...) — *кроме mode=validate* |
 | `entity` | Да* | Тип сущности (activity, molecule, ...) — *кроме mode=validate* |
 | `rf_ids` | Нет | Связанные RF-* |
-| `audit_findings` | Нет | Config-related AUD-* из pyAuditBot |
+| `audit_findings` | Нет | Config-related AUD-* из py-audit-bot |
 
 ---
 
