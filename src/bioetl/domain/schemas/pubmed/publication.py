@@ -9,7 +9,7 @@ PubMedPublicationSchema replaces ArticleSchema for consistency with other provid
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import cast
 
 import pandas as pd
@@ -208,10 +208,10 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Dates ===
-    date_completed: Series[object] = pa.Field(
+    date_completed: Series[datetime] = pa.Field(
         nullable=True, description="MEDLINE processing completion date"
     )
-    date_revised: Series[object] = pa.Field(
+    date_revised: Series[datetime] = pa.Field(
         nullable=True, description="Record revision date"
     )
 

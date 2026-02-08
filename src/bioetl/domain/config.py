@@ -42,9 +42,9 @@ class ValidationConfig:
     - Single source of truth for validation rules
 
     Attributes:
-        min_publication_year: Minimum valid publication year. Default 1950
-            covers modern scientific publications.
-        max_publication_year: Maximum valid publication year. Default CURRENT_YEAR + 1.
+        min_publication_year: Minimum valid publication year. Default 1800
+            covers historical scientific publications.
+        max_publication_year: Maximum valid publication year. Default 2100.
         min_molecular_weight: Minimum molecular weight in Daltons. Default 10.0.
         max_molecular_weight: Maximum molecular weight in Daltons. Default 10000.0
             covers small molecules to large peptides.
@@ -57,13 +57,13 @@ class ValidationConfig:
     Example:
         >>> config = ValidationConfig()
         >>> config.min_publication_year
-        1950
+        1800
 
     """
 
     # Publication year range
-    min_publication_year: int = 1950
-    max_publication_year: int = datetime.now(UTC).year + 1
+    min_publication_year: int = 1800
+    max_publication_year: int = 2100
 
     # Molecular properties
     min_molecular_weight: float = 10.0

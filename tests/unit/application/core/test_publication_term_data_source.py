@@ -529,3 +529,304 @@ class TestPublicationTermDataSourceEdgeCases:
         assert call_args["entity_type"] == "publication"
         assert call_args["filter_ids"] == ["CHEMBL1", "CHEMBL2"]
         assert call_args["filter_field"] == "document_chembl_id"
+
+
+class MockFilterableDataSource:
+    """Mock data source that implements FilterableDataSourcePort."""
+
+    provider_name = "chembl"
+
+    def __init__(self, documents: list[dict] | None = None):
+        self._documents = documents or []
+        self.__aenter__ = AsyncMock(return_value=self)
+        self.__aexit__ = AsyncMock(return_value=None)
+        self.health_check = AsyncMock(return_value=HealthStatus.HEALTHY)
+        self.aclose = AsyncMock()
+
+    async def fetch(self, entity_type: str, **kwargs):
+        for doc in self._documents:
+            yield doc
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ):
+        for doc in self._documents:
+            yield doc
+
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ):
+        for doc in self._documents:
+            yield doc
+
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ):
+        for doc in self._documents:
+            yield doc
+
+
+from bioetl.domain.ports import FilterableDataSourcePort
+
+assert isinstance(MockFilterableDataSource(), FilterableDataSourcePort)
+
+
+@pytest.mark.unit
+class TestPublicationTermFilterable:
+    """Tests for FilterableDataSourcePort methods."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_publication_term(self):
+        """Test fetch_filtered extracts terms from filtered publications."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        terms = []
+        async for term in wrapper.fetch_filtered(
+            entity_type="publication_term",
+            filter_ids=["CHEMBL1123456"],
+            filter_field="document_chembl_id",
+        ):
+            terms.append(term)
+
+        assert len(terms) == 6
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_other_entity_delegates(self):
+        """Test fetch_filtered delegates for non-term entity types."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        records = []
+        async for record in wrapper.fetch_filtered(
+            entity_type="document",
+            filter_ids=["CHEMBL1123456"],
+            filter_field="document_chembl_id",
+        ):
+            records.append(record)
+
+        assert len(records) == 1
+        assert "document_chembl_id" in records[0]
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_limit(self):
+        """Test fetch_filtered respects limit for terms."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        terms = []
+        async for term in wrapper.fetch_filtered(
+            entity_type="publication_term",
+            filter_ids=["CHEMBL1123456"],
+            filter_field="document_chembl_id",
+            limit=2,
+        ):
+            terms.append(term)
+
+        assert len(terms) == 2
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_raises_for_non_filterable(self):
+        """Test fetch_filtered raises TypeError for non-filterable adapter."""
+        source = MockDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        with pytest.raises(
+            TypeError, match="does not implement FilterableDataSourcePort"
+        ):
+            async for _ in wrapper.fetch_filtered(
+                entity_type="publication_term",
+                filter_ids=["CHEMBL1123456"],
+                filter_field="document_chembl_id",
+            ):
+                pass
+
+    @pytest.mark.asyncio
+    async def test_fetch_multi_filtered_publication_term(self):
+        """Test fetch_multi_filtered extracts terms."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        terms = []
+        async for term in wrapper.fetch_multi_filtered(
+            entity_type="publication_term",
+            filters={"document_chembl_id": ["CHEMBL1123456"]},
+        ):
+            terms.append(term)
+
+        assert len(terms) == 6
+
+    @pytest.mark.asyncio
+    async def test_fetch_multi_filtered_other_entity(self):
+        """Test fetch_multi_filtered delegates for other entities."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        records = []
+        async for record in wrapper.fetch_multi_filtered(
+            entity_type="document",
+            filters={"document_chembl_id": ["CHEMBL1123456"]},
+        ):
+            records.append(record)
+
+        assert len(records) == 1
+
+    @pytest.mark.asyncio
+    async def test_fetch_multi_filtered_with_limit(self):
+        """Test fetch_multi_filtered with limit."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        terms = []
+        async for term in wrapper.fetch_multi_filtered(
+            entity_type="publication_term",
+            filters={"document_chembl_id": ["CHEMBL1123456"]},
+            limit=3,
+        ):
+            terms.append(term)
+
+        assert len(terms) == 3
+
+    @pytest.mark.asyncio
+    async def test_fetch_multi_filtered_skips_no_chembl_id(self):
+        """Test fetch_multi_filtered skips docs without document_chembl_id."""
+        source = MockFilterableDataSource(
+            documents=[SAMPLE_DOCUMENT_NO_TERMS]  # Has no document_chembl_id field
+        )
+        # Add document_chembl_id to make it valid
+        doc = {**SAMPLE_DOCUMENT_NO_TERMS}
+        doc.pop("document_chembl_id", None)
+        source._documents = [{"title": "No ID", "keywords": ["test"], "mesh_terms": []}]
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        terms = []
+        async for term in wrapper.fetch_multi_filtered(
+            entity_type="publication_term",
+            filters={"document_chembl_id": ["CHEMBL1"]},
+        ):
+            terms.append(term)
+
+        assert len(terms) == 0
+
+    @pytest.mark.asyncio
+    async def test_fetch_multi_filtered_raises_for_non_filterable(self):
+        """Test fetch_multi_filtered raises TypeError."""
+        source = MockDataSource()
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        with pytest.raises(
+            TypeError, match="does not implement FilterableDataSourcePort"
+        ):
+            async for _ in wrapper.fetch_multi_filtered(
+                entity_type="publication_term",
+                filters={"document_chembl_id": ["CHEMBL1"]},
+            ):
+                pass
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_fallback_publication_term(self):
+        """Test fetch_filtered_with_fallback extracts terms."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        terms = []
+        async for term in wrapper.fetch_filtered_with_fallback(
+            entity_type="publication_term",
+            filter_ids=["CHEMBL1123456"],
+            filter_field="document_chembl_id",
+            fallback_mapping={"CHEMBL1123456": "Test Document"},
+        ):
+            terms.append(term)
+
+        assert len(terms) == 6
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_fallback_other_entity(self):
+        """Test fetch_filtered_with_fallback delegates for other entities."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        records = []
+        async for record in wrapper.fetch_filtered_with_fallback(
+            entity_type="document",
+            filter_ids=["CHEMBL1123456"],
+            filter_field="document_chembl_id",
+            fallback_mapping={"CHEMBL1123456": "Test"},
+        ):
+            records.append(record)
+
+        assert len(records) == 1
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_fallback_limit(self):
+        """Test fetch_filtered_with_fallback respects limit."""
+        source = MockFilterableDataSource(documents=[SAMPLE_DOCUMENT_WITH_TERMS])
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        terms = []
+        async for term in wrapper.fetch_filtered_with_fallback(
+            entity_type="publication_term",
+            filter_ids=["CHEMBL1123456"],
+            filter_field="document_chembl_id",
+            fallback_mapping={"CHEMBL1123456": "Test"},
+            limit=2,
+        ):
+            terms.append(term)
+
+        assert len(terms) == 2
+
+    @pytest.mark.asyncio
+    async def test_fetch_filtered_with_fallback_raises_for_non_filterable(self):
+        """Test fetch_filtered_with_fallback raises TypeError."""
+        source = MockDataSource()
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        with pytest.raises(
+            TypeError, match="does not implement FilterableDataSourcePort"
+        ):
+            async for _ in wrapper.fetch_filtered_with_fallback(
+                entity_type="publication_term",
+                filter_ids=["CHEMBL1"],
+                filter_field="document_chembl_id",
+                fallback_mapping={},
+            ):
+                pass
+
+
+@pytest.mark.unit
+class TestPublicationTermGetSourceMetadata:
+    """Tests for get_source_metadata delegation."""
+
+    def test_get_source_metadata_delegates(self):
+        """Test get_source_metadata delegates to wrapped adapter."""
+        from unittest.mock import MagicMock
+
+        source = MockDataSource()
+        source.get_source_metadata = MagicMock(return_value="metadata")
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        result = wrapper.get_source_metadata(api_version="v1")
+
+        assert result == "metadata"
+        source.get_source_metadata.assert_called_once_with("v1")
+
+    def test_get_source_metadata_returns_none_when_not_supported(self):
+        """Test get_source_metadata returns None if wrapped doesn't support it."""
+        source = MockDataSource()
+        wrapper = PublicationTermDataSource(data_source=source)
+
+        result = wrapper.get_source_metadata()
+
+        assert result is None

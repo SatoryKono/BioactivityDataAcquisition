@@ -102,6 +102,9 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     UniprotTarget,
 )
 
+# Domain mapping (entity relation mappings)
+from bioetl.domain import mapping
+
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
 

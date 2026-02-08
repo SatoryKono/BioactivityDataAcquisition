@@ -137,7 +137,9 @@ class TestSubcellularFractionDataSourceInit:
 
     def test_entity_type_constants(self) -> None:
         assert SubcellularFractionDataSource.SOURCE_ENTITY_TYPE == "assay"
-        assert SubcellularFractionDataSource.TARGET_ENTITY_TYPE == "subcellular_fraction"
+        assert (
+            SubcellularFractionDataSource.TARGET_ENTITY_TYPE == "subcellular_fraction"
+        )
 
 
 @pytest.mark.unit
@@ -199,7 +201,11 @@ class TestSubcellularFractionDataSourceFetch:
     @pytest.mark.asyncio
     async def test_fetch_deduplication(self) -> None:
         source = MockDataSource(
-            assays=[ASSAY_WITH_FRACTION, ASSAY_DUPLICATE_FRACTION, ASSAY_WITH_FRACTION_2]
+            assays=[
+                ASSAY_WITH_FRACTION,
+                ASSAY_DUPLICATE_FRACTION,
+                ASSAY_WITH_FRACTION_2,
+            ]
         )
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -214,9 +220,7 @@ class TestSubcellularFractionDataSourceFetch:
 
     @pytest.mark.asyncio
     async def test_fetch_with_limit(self) -> None:
-        source = MockDataSource(
-            assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2]
-        )
+        source = MockDataSource(assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
         records = []
@@ -350,9 +354,7 @@ class TestSubcellularFractionRecordFormat:
 
     @pytest.mark.asyncio
     async def test_entity_id_unique_per_fraction(self) -> None:
-        source = MockDataSource(
-            assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2]
-        )
+        source = MockDataSource(assays=[ASSAY_WITH_FRACTION, ASSAY_WITH_FRACTION_2])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
         records = []
@@ -375,9 +377,7 @@ class TestSubcellularFractionRecordFormat:
 
     @pytest.mark.asyncio
     async def test_assay_without_chembl_id(self) -> None:
-        source = MockDataSource(
-            assays=[{"assay_subcellular_fraction": "Microsomes"}]
-        )
+        source = MockDataSource(assays=[{"assay_subcellular_fraction": "Microsomes"}])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
         records = []
@@ -453,9 +453,7 @@ class TestSubcellularFractionFilterable:
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_other_entity_delegates(self) -> None:
-        source = MockFilterableDataSource(
-            assays=[ASSAY_WITH_FRACTION]
-        )
+        source = MockFilterableDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
         records = []
@@ -509,7 +507,9 @@ class TestSubcellularFractionFilterable:
         source = MockDataSource()  # Not FilterableDataSourcePort
         wrapper = SubcellularFractionDataSource(data_source=source)
 
-        with pytest.raises(TypeError, match="does not implement FilterableDataSourcePort"):
+        with pytest.raises(
+            TypeError, match="does not implement FilterableDataSourcePort"
+        ):
             async for _ in wrapper.fetch_filtered(
                 entity_type="subcellular_fraction",
                 filter_ids=["CHEMBL1000"],
@@ -535,9 +535,7 @@ class TestSubcellularFractionFilterable:
 
     @pytest.mark.asyncio
     async def test_fetch_multi_filtered_other_entity(self) -> None:
-        source = MockFilterableDataSource(
-            assays=[ASSAY_WITH_FRACTION]
-        )
+        source = MockFilterableDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
         records = []
@@ -571,7 +569,9 @@ class TestSubcellularFractionFilterable:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
-        with pytest.raises(TypeError, match="does not implement FilterableDataSourcePort"):
+        with pytest.raises(
+            TypeError, match="does not implement FilterableDataSourcePort"
+        ):
             async for _ in wrapper.fetch_multi_filtered(
                 entity_type="subcellular_fraction",
                 filters={"assay_chembl_id": ["CHEMBL1000"]},
@@ -598,9 +598,7 @@ class TestSubcellularFractionFilterable:
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_fallback_other_entity(self) -> None:
-        source = MockFilterableDataSource(
-            assays=[ASSAY_WITH_FRACTION]
-        )
+        source = MockFilterableDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
         records = []
@@ -638,7 +636,9 @@ class TestSubcellularFractionFilterable:
         source = MockDataSource()
         wrapper = SubcellularFractionDataSource(data_source=source)
 
-        with pytest.raises(TypeError, match="does not implement FilterableDataSourcePort"):
+        with pytest.raises(
+            TypeError, match="does not implement FilterableDataSourcePort"
+        ):
             async for _ in wrapper.fetch_filtered_with_fallback(
                 entity_type="subcellular_fraction",
                 filter_ids=["CHEMBL1000"],

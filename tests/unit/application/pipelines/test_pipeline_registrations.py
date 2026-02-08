@@ -17,17 +17,35 @@ from bioetl.application.core.base import BasePipeline
 _PIPELINE_MODULES: list[tuple[str, str]] = [
     ("bioetl.application.pipelines.chembl.activity", "ChEMBLActivityPipeline"),
     ("bioetl.application.pipelines.chembl.assay", "ChEMBLAssayPipeline"),
-    ("bioetl.application.pipelines.chembl.assay_parameters", "ChEMBLAssayParametersPipeline"),
+    (
+        "bioetl.application.pipelines.chembl.assay_parameters",
+        "ChEMBLAssayParametersPipeline",
+    ),
     ("bioetl.application.pipelines.chembl.cell_line", "ChEMBLCellLinePipeline"),
-    ("bioetl.application.pipelines.chembl.compound_record", "ChEMBLCompoundRecordPipeline"),
+    (
+        "bioetl.application.pipelines.chembl.compound_record",
+        "ChEMBLCompoundRecordPipeline",
+    ),
     ("bioetl.application.pipelines.chembl.molecule", "ChEMBLMoleculePipeline"),
     ("bioetl.application.pipelines.chembl.protein_class", "ChEMBLProteinClassPipeline"),
     ("bioetl.application.pipelines.chembl.publication", "ChEMBLPublicationPipeline"),
-    ("bioetl.application.pipelines.chembl.publication_similarity", "ChEMBLPublicationSimilarityPipeline"),
-    ("bioetl.application.pipelines.chembl.publication_term", "ChEMBLPublicationTermPipeline"),
-    ("bioetl.application.pipelines.chembl.subcellular_fraction", "ChEMBLSubcellularFractionPipeline"),
+    (
+        "bioetl.application.pipelines.chembl.publication_similarity",
+        "ChEMBLPublicationSimilarityPipeline",
+    ),
+    (
+        "bioetl.application.pipelines.chembl.publication_term",
+        "ChEMBLPublicationTermPipeline",
+    ),
+    (
+        "bioetl.application.pipelines.chembl.subcellular_fraction",
+        "ChEMBLSubcellularFractionPipeline",
+    ),
     ("bioetl.application.pipelines.chembl.target", "ChEMBLTargetPipeline"),
-    ("bioetl.application.pipelines.chembl.target_component", "ChEMBLTargetComponentPipeline"),
+    (
+        "bioetl.application.pipelines.chembl.target_component",
+        "ChEMBLTargetComponentPipeline",
+    ),
     ("bioetl.application.pipelines.chembl.tissue", "ChEMBLTissuePipeline"),
     ("bioetl.application.pipelines.pubchem.compound", "PubChemCompoundPipeline"),
     ("bioetl.application.pipelines.pubmed.publication", "PubMedPublicationPipeline"),
@@ -64,6 +82,5 @@ class TestPipelineRegistrations:
         mod = importlib.import_module(module_path)
         cls: Any = getattr(mod, class_name)
         assert "__init__" not in cls.__dict__, (
-            f"{class_name} should not define __init__; "
-            "it inherits from BasePipeline"
+            f"{class_name} should not define __init__; it inherits from BasePipeline"
         )
