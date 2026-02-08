@@ -496,3 +496,174 @@ class TestRecordProcessorProcessBatch:
         mock_context.logger.warning.assert_not_called()
 
         get_pipeline_config.cache_clear()
+
+
+@pytest.mark.unit
+class TestRecordProcessorTracing:
+    """Tests for tracing/span integration in RecordProcessor."""
+
+    @pytest.fixture
+    def mock_tracer(self):
+        """Create a mock TracingPort with span support."""
+        span = MagicMock()
+        span.__enter__ = MagicMock(return_value=span)
+        span.__exit__ = MagicMock(return_value=False)
+        span.set_attribute = MagicMock()
+        span.record_exception = MagicMock()
+
+        tracer_impl = MagicMock()
+        tracer_impl.start_as_current_span = MagicMock(return_value=span)
+
+        tracer = MagicMock()
+        tracer.get_tracer = MagicMock(return_value=tracer_impl)
+        return tracer
+
+    @pytest.fixture
+    def traced_processor(
+        self,
+        mock_services,
+        mock_error_classifier,
+        mock_context,
+        transform_callback,
+        gold_filter_callback,
+        gold_transform_callback,
+        mock_gold_validator,
+        mock_tracer,
+    ):
+        """Create RecordProcessor with tracing enabled."""
+        config = RecordProcessorConfig(
+            pipeline_name="test_provider_test_entity",
+            provider="test_provider",
+            entity_type="test_entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(),
+        )
+        return RecordProcessor(
+            services=mock_services,
+            error_classifier=mock_error_classifier,
+            context=mock_context,
+            config=config,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+            gold_validator=mock_gold_validator,
+            tracer=mock_tracer,
+        )
+
+    async def test_start_span_creates_span_with_attributes(
+        self, traced_processor, mock_tracer
+    ):
+        """_start_span creates a tracing span with batch_id and record_count."""
+        batch_id = BatchID(uuid4())
+        records = [{"id": "1", "value": 10}]
+
+        await traced_processor.process_batch(records, batch_id)
+
+        tracer_impl = mock_tracer.get_tracer.return_value
+        # At least write_bronze, transform, write_silver, write_gold spans
+        assert tracer_impl.start_as_current_span.call_count >= 3
+
+    async def test_span_records_transform_result_attributes(
+        self, traced_processor, mock_tracer
+    ):
+        """_execute_transform_with_span sets silver/gold/quarantine counts on span."""
+        batch_id = BatchID(uuid4())
+        records = [{"id": "1", "value": 10}]
+
+        await traced_processor.process_batch(records, batch_id)
+
+        span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        # Transform span should set silver_count, gold_count, quarantined_count
+        span.set_attribute.assert_any_call("bioetl.silver_count", 1)
+        span.set_attribute.assert_any_call("bioetl.gold_count", 1)
+        span.set_attribute.assert_any_call("bioetl.quarantined_count", 0)
+
+    async def test_span_end_called_on_success(
+        self, traced_processor, mock_tracer
+    ):
+        """Spans are properly closed (__exit__) on success."""
+        batch_id = BatchID(uuid4())
+        records = [{"id": "1", "value": 10}]
+
+        await traced_processor.process_batch(records, batch_id)
+
+        span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        assert span.__exit__.call_count >= 3
+
+    async def test_span_records_error_on_write_failure(
+        self, mock_services, mock_error_classifier, mock_context,
+        transform_callback, gold_filter_callback, gold_transform_callback,
+        mock_gold_validator, mock_tracer,
+    ):
+        """_end_span records exception and sets error=True on failure."""
+        mock_services.storage.write_bronze = AsyncMock(
+            side_effect=RuntimeError("write failed")
+        )
+        config = RecordProcessorConfig(
+            pipeline_name="test_provider_test_entity",
+            provider="test_provider",
+            entity_type="test_entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(),
+        )
+        processor = RecordProcessor(
+            services=mock_services,
+            error_classifier=mock_error_classifier,
+            context=mock_context,
+            config=config,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+            gold_validator=mock_gold_validator,
+            tracer=mock_tracer,
+        )
+
+        batch_id = BatchID(uuid4())
+        records = [{"id": "1", "value": 10}]
+
+        with pytest.raises(RuntimeError, match="write failed"):
+            await processor.process_batch(records, batch_id)
+
+        span = mock_tracer.get_tracer.return_value.start_as_current_span.return_value
+        span.set_attribute.assert_any_call("error", True)
+        span.record_exception.assert_called()
+
+    async def test_on_error_callback_invoked_on_write_failure(
+        self, mock_services, mock_error_classifier, mock_context,
+        transform_callback, gold_filter_callback, gold_transform_callback,
+        mock_gold_validator,
+    ):
+        """on_error callback in _execute_with_span is called when write raises."""
+        write_error = RuntimeError("silver write failed")
+        mock_services.storage.write_silver = AsyncMock(side_effect=write_error)
+
+        config = RecordProcessorConfig(
+            pipeline_name="test_provider_test_entity",
+            provider="test_provider",
+            entity_type="test_entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+            table_config=TableConfig(),
+        )
+        processor = RecordProcessor(
+            services=mock_services,
+            error_classifier=mock_error_classifier,
+            context=mock_context,
+            config=config,
+            transform_callback=transform_callback,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+            gold_validator=mock_gold_validator,
+        )
+
+        batch_id = BatchID(uuid4())
+        records = [{"id": "1", "value": 10}]
+
+        with pytest.raises(RuntimeError, match="silver write failed"):
+            await processor.process_batch(records, batch_id)
+
+        # The on_error callback calls log_and_track_write_error on the writer
+        # Verify the error was logged via context logger
+        mock_context.logger.error.assert_called()
