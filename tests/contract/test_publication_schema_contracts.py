@@ -6,7 +6,6 @@ Expected: ~25 tests ensuring schema consistency across providers.
 
 import pytest
 import pandera as pa
-from typing import Type
 
 from bioetl.domain.schemas.common.publication_base import PublicationBaseSchema
 from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
@@ -32,7 +31,7 @@ class TestSchemaInheritance:
             SemanticScholarPublicationSchema,
         ],
     )
-    def test_schema_inherits_base(self, schema_class: Type[pa.DataFrameModel]) -> None:
+    def test_schema_inherits_base(self, schema_class: type[pa.DataFrameModel]) -> None:
         """All schemas inherit PublicationBaseSchema."""
         assert issubclass(schema_class, PublicationBaseSchema)
 
@@ -95,7 +94,7 @@ class TestDQFieldsPresence:
         ],
     )
     def test_dq_fields_present(
-        self, provider: str, schema_class: Type[pa.DataFrameModel]
+        self, provider: str, schema_class: type[pa.DataFrameModel]
     ) -> None:
         """DQ flags present in all schemas."""
         # Note: ChEMBL has explicit _dq_warn, _dq_error
@@ -158,7 +157,7 @@ class TestSourceFieldContract:
         ],
     )
     def test_source_field_matches_provider(
-        self, provider: str, schema_class: Type[pa.DataFrameModel], request
+        self, provider: str, schema_class: type[pa.DataFrameModel], request
     ) -> None:
         """_source field should match provider name."""
         # Get fixture for this provider
@@ -294,7 +293,7 @@ class TestSchemaConfigSettings:
             SemanticScholarPublicationSchema,
         ],
     )
-    def test_schema_coerce_enabled(self, schema_class: Type[pa.DataFrameModel]) -> None:
+    def test_schema_coerce_enabled(self, schema_class: type[pa.DataFrameModel]) -> None:
         """All schemas have Config.coerce = True."""
         assert hasattr(schema_class, "Config")
         config = schema_class.Config
@@ -313,7 +312,7 @@ class TestSchemaConfigSettings:
         ],
     )
     def test_schema_strict_disabled_silver(
-        self, schema_class: Type[pa.DataFrameModel]
+        self, schema_class: type[pa.DataFrameModel]
     ) -> None:
         """Silver schemas have Config.strict = False (allow extra columns)."""
         assert hasattr(schema_class, "Config")
@@ -346,7 +345,7 @@ class TestFieldTypeConsistency:
         ],
     )
     def test_publication_year_is_integer(
-        self, provider: str, schema_class: Type[pa.DataFrameModel]
+        self, provider: str, schema_class: type[pa.DataFrameModel]
     ) -> None:
         """publication_year MUST be integer type across all schemas."""
         # Check annotation
@@ -366,7 +365,7 @@ class TestFieldTypeConsistency:
         ],
     )
     def test_title_is_string(
-        self, provider: str, schema_class: Type[pa.DataFrameModel]
+        self, provider: str, schema_class: type[pa.DataFrameModel]
     ) -> None:
         """title MUST be string type across all schemas."""
         if "title" in schema_class.__annotations__:
@@ -384,7 +383,7 @@ class TestFieldTypeConsistency:
         ],
     )
     def test_is_oa_is_boolean(
-        self, provider: str, schema_class: Type[pa.DataFrameModel]
+        self, provider: str, schema_class: type[pa.DataFrameModel]
     ) -> None:
         """is_oa MUST be boolean type across all schemas."""
         if "is_oa" in schema_class.__annotations__:
@@ -407,7 +406,7 @@ class TestSchemaVersioning:
         ],
     )
     def test_schema_has_version_or_stable(
-        self, schema_class: Type[pa.DataFrameModel]
+        self, schema_class: type[pa.DataFrameModel]
     ) -> None:
         """Schema class should document version or be marked stable."""
         # Check if __doc__ mentions version or stability

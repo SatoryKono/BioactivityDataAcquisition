@@ -5,6 +5,7 @@ Aligned with RULES.md v5.10, ChEMBL 34 schema, and Publication Schema Unificatio
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -71,7 +72,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Identifiers ===
-    src_id: Series[int] = pa.Field(nullable=True, description="Source ID.")
+    src_id: Series[pd.Int64Dtype] = pa.Field(nullable=True, description="Source ID.")
 
     # === ChEMBL Release Metadata ===
     chembl_release: Series[str] = pa.Field(
@@ -91,10 +92,10 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     page_last: Series[str] = pa.Field(nullable=True, description="Last page.")
 
     # === DQ Fields ===
-    _dq_warn: Series[bool] = pa.Field(
+    _dq_warn: Series[pd.BooleanDtype] = pa.Field(
         nullable=True, default=False, description="DQ warning flag."
     )
-    _dq_error: Series[bool] = pa.Field(
+    _dq_error: Series[pd.BooleanDtype] = pa.Field(
         nullable=True, default=False, description="DQ error flag."
     )
 

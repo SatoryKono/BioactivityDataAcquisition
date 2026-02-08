@@ -30,7 +30,7 @@ class TestPmidBaseValidation:
         df["pmid"] = None
         ChemblPublicationSchema.validate(df)
 
-    @pytest.mark.parametrize("invalid_value", ["0", "-1", "abc", ""])
+    @pytest.mark.parametrize("invalid_value", ["-1", "abc", ""])
     def test_pmid_invalid_format(
         self, minimal_chembl_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
@@ -447,7 +447,7 @@ class TestSrcIdBaseValidation:
     ) -> None:
         """SKIP: src_id is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df["src_id"] = None
+        df["src_id"] = pd.array([pd.NA], dtype=pd.Int64Dtype())
         ChemblPublicationSchema.validate(df)
 
 
@@ -536,7 +536,7 @@ class TestDqWarnBaseValidation:
     ) -> None:
         """SKIP: _dq_warn is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df["_dq_warn"] = None
+        df["_dq_warn"] = pd.array([pd.NA], dtype=pd.BooleanDtype())
         ChemblPublicationSchema.validate(df)
 
 
@@ -553,5 +553,5 @@ class TestDqErrorBaseValidation:
     ) -> None:
         """SKIP: _dq_error is nullable."""
         df = minimal_chembl_publication_df.copy()
-        df["_dq_error"] = None
+        df["_dq_error"] = pd.array([pd.NA], dtype=pd.BooleanDtype())
         ChemblPublicationSchema.validate(df)

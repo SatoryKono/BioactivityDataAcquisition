@@ -259,7 +259,7 @@ class TestRORVerification:
     async def test_ror_api_timeout(self) -> None:
         """SKIP: ROR API timeout."""
         verify_service = AsyncMock()
-        verify_service.verify_ror.side_effect = asyncio.TimeoutError()
+        verify_service.verify_ror.side_effect = TimeoutError()
 
         with pytest.raises(asyncio.TimeoutError):
             await verify_service.verify_ror("https://ror.org/02mhbdp94")
@@ -303,7 +303,7 @@ class TestDBLPVerification:
     async def test_dblp_api_timeout(self) -> None:
         """SKIP: DBLP API timeout."""
         verify_service = AsyncMock()
-        verify_service.verify_dblp.side_effect = asyncio.TimeoutError()
+        verify_service.verify_dblp.side_effect = TimeoutError()
 
         with pytest.raises(asyncio.TimeoutError):
             await verify_service.verify_dblp("conf/nips/SmithJ20")
@@ -473,14 +473,14 @@ class TestVerificationRetry:
 
         # First call times out, second succeeds
         verify_service.verify_doi.side_effect = [
-            asyncio.TimeoutError(),
+            TimeoutError(),
             {"status": "PASS", "found": True},
         ]
 
         # Assuming retry logic wraps this
         try:
             result = await verify_service.verify_doi("10.1038/nature12373")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # Retry
             result = await verify_service.verify_doi("10.1038/nature12373")
 
@@ -490,7 +490,7 @@ class TestVerificationRetry:
     async def test_retry_exhausted(self) -> None:
         """SKIP: All retry attempts exhausted."""
         verify_service = AsyncMock()
-        verify_service.verify_doi.side_effect = asyncio.TimeoutError()
+        verify_service.verify_doi.side_effect = TimeoutError()
 
         max_retries = 3
         for _ in range(max_retries):
