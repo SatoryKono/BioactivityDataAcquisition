@@ -163,19 +163,19 @@ Task(subagent_type="py-audit-bot", prompt="...", model="opus")
 ### Ключевые потоки данных
 
 ```
-pyPlanBot (RF-*)
-    ├──→ pyCodeBot (type=refactor|feature|bugfix → src/)
-    ├──→ pyConfigBot (type=config → configs/)
-    └──→ pyTestBot (test impact → tests/)
+py-plan-bot (RF-*)
+    ├──→ py-code-bot (type=refactor|feature|bugfix → src/)
+    ├──→ py-config-bot (type=config → configs/)
+    └──→ py-test-bot (test impact → tests/)
 
-pyCodeBot (entity scaffolding)
-    └──→ pyConfigBot (pipeline + DQ + filter configs)
+py-code-bot (entity scaffolding)
+    └──→ py-config-bot (pipeline + DQ + filter configs)
 
-pyAuditBot (config findings)
-    └──→ pyConfigBot (gap remediation)
+py-audit-bot (config findings)
+    └──→ py-config-bot (gap remediation)
 
-pyConfigBot (DQ migration)
-    └──→ pyDocBot (update DQ documentation)
+py-config-bot (DQ migration)
+    └──→ py-doc-bot (update DQ documentation)
 ```
 
 ---
@@ -184,15 +184,15 @@ pyConfigBot (DQ migration)
 
 ```
 reports/plans/<task_id>/
-├── 00-audit-baseline.md      ← pyAuditBot (baseline)
-├── 01-plan-initial.md        ← pyPlanBot (initial)
-├── 02-test-baseline.md       ← pyTestBot (baseline)
-├── 03-plan-updated.md        ← pyPlanBot (update)          [опционально]
-├── 04-refactoring-log.md     ← pyCodeBot + pyDebugBot
-├── 04a-config-log.md         ← pyConfigBot                  [NEW v2.0]
-├── 05-test-final.md          ← pyTestBot (final)
-├── 06-doc-update-log.md      ← pyDocBot
-└── 07-audit-final.md         ← pyAuditBot (final)
+├── 00-audit-baseline.md      ← py-audit-bot (baseline)
+├── 01-plan-initial.md        ← py-plan-bot (initial)
+├── 02-test-baseline.md       ← py-test-bot (baseline)
+├── 03-plan-updated.md        ← py-plan-bot (update)          [опционально]
+├── 04-refactoring-log.md     ← py-code-bot + py-debug-bot
+├── 04a-config-log.md         ← py-config-bot
+├── 05-test-final.md          ← py-test-bot (final)
+├── 06-doc-update-log.md      ← py-doc-bot
+└── 07-audit-final.md         ← py-audit-bot (final)
 ```
 
 Требования к каждому файлу (минимум):
