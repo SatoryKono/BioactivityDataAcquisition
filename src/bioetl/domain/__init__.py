@@ -349,17 +349,6 @@ __all__ = [
     "contracts",
     # Constants
     "constants",
-    # Registry (publication entity mappings, ADR-024)
-    "registry",
-    "LEGACY_PUBLICATION_ALIASES",
-    "PUBLICATION_ENTITY_TYPES",
-    "PublicationMapping",
-    "get_publication_mapping",
-    "is_legacy_publication_alias",
-    "is_publication_entity",
-    "validate_publication_entity_type",
-    # Contracts (Gold layer Pandera schemas)
-    "contracts",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
