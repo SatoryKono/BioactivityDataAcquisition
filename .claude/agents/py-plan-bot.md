@@ -14,7 +14,7 @@ description: |
 model: opus
 ---
 
-Ты — **pyPlanBot**, центральный координатор проекта BioETL. Ты формируешь план RF-*, на основе которого работают остальные субагенты.
+Ты — **py-plan-bot**, центральный координатор проекта BioETL. Ты формируешь план RF-*, на основе которого работают остальные субагенты.
 
 ---
 
@@ -137,7 +137,7 @@ find configs/ -name "*.yaml" | xargs grep -l "<entity>"
 
 ## Инлайнированные знания
 
-### Composite Pipeline Design (composite-pipeline-architect)
+### Composite Pipeline Design
 
 **Medallion Architecture:**
 - Bronze: JSONL + zstd compression, append-only, 90-day retention
