@@ -441,6 +441,236 @@ class TestMergeValidationLists:
         assert result[1]["field"] == "b"
 
 
+class TestPublicationBase:
+    """Tests for _publication_base.yaml integration."""
+
+    @pytest.fixture
+    def pub_configs_root(self, tmp_path: Path) -> Path:
+        """Create test config structure with publication base."""
+        dq_root = tmp_path / "dq"
+        dq_root.mkdir()
+
+        # _defaults.yaml
+        (dq_root / "_defaults.yaml").write_text(
+            """
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.20
+common_field_validations:
+  - field: _content_hash
+    type: required
+    nullable: false
+common_cross_field_validations: []
+"""
+        )
+
+        # _publication_base.yaml
+        (dq_root / "_publication_base.yaml").write_text(
+            """
+version: "1.0.0"
+publication_base_field_validations:
+  - field: doi
+    type: pattern
+    pattern: '^10\\.\\d{4,}/.*$'
+    nullable: true
+    error_message: "DOI must follow standard format"
+  - field: title
+    type: non_empty
+    nullable: true
+  - field: year
+    type: range
+    min: 1500
+    max: 2100
+    nullable: true
+publication_base_cross_field_validations: []
+"""
+        )
+
+        # providers
+        providers = dq_root / "providers"
+        providers.mkdir()
+        (providers / "prov_a.yaml").write_text(
+            """
+version: "1.0.0"
+provider: prov_a
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.15
+provider_field_validations:
+  - field: prov_field
+    type: required
+    nullable: false
+"""
+        )
+
+        # entities with publication
+        entities_a = dq_root / "entities" / "prov_a"
+        entities_a.mkdir(parents=True)
+        (entities_a / "publication.yaml").write_text(
+            """
+version: "1.0.0"
+provider: prov_a
+entity: publication
+entity_field_validations:
+  - field: prov_a_id
+    type: pattern
+    pattern: '^PA\\d+$'
+    nullable: false
+  - field: doi
+    type: pattern
+    pattern: '^10\\.\\d{4,}/.*$'
+    nullable: false
+    error_message: "DOI is required for this provider"
+entity_cross_field_validations: []
+"""
+        )
+
+        # Non-publication entity
+        (entities_a / "activity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: prov_a
+entity: activity
+entity_field_validations:
+  - field: activity_id
+    type: range
+    min: 1
+    max: 999999
+entity_cross_field_validations: []
+"""
+        )
+
+        # Second provider for publication
+        entities_b = dq_root / "entities" / "prov_b"
+        entities_b.mkdir(parents=True)
+        (entities_b / "publication.yaml").write_text(
+            """
+version: "1.0.0"
+provider: prov_b
+entity: publication
+entity_field_validations:
+  - field: prov_b_id
+    type: required
+    nullable: false
+entity_cross_field_validations: []
+"""
+        )
+
+        return tmp_path
+
+    @pytest.fixture
+    def pub_loader(self, pub_configs_root: Path) -> DQConfigLoader:
+        return DQConfigLoader(pub_configs_root)
+
+    def test_publication_base_loaded_for_publication(
+        self, pub_loader: DQConfigLoader
+    ) -> None:
+        """publication_base should be loaded for publication entity."""
+        config = pub_loader.load("prov_a", "publication")
+        field_names = [fv.field for fv in config.field_validations]
+
+        # Should have fields from: defaults + publication_base + provider + entity
+        assert "_content_hash" in field_names  # defaults
+        assert "title" in field_names  # publication_base
+        assert "year" in field_names  # publication_base
+        assert "prov_field" in field_names  # provider
+        assert "prov_a_id" in field_names  # entity
+
+    def test_publication_base_not_loaded_for_non_publication(
+        self, pub_loader: DQConfigLoader
+    ) -> None:
+        """publication_base should NOT be loaded for non-publication entity."""
+        config = pub_loader.load("prov_a", "activity")
+        field_names = [fv.field for fv in config.field_validations]
+
+        assert "title" not in field_names  # NOT from publication_base
+        assert "year" not in field_names  # NOT from publication_base
+        assert "_content_hash" in field_names  # defaults still present
+        assert "activity_id" in field_names  # entity specific
+
+    def test_entity_override_beats_publication_base(
+        self, pub_loader: DQConfigLoader
+    ) -> None:
+        """Entity-level doi override should take precedence over pub base."""
+        config = pub_loader.load("prov_a", "publication")
+
+        # Find the doi validation that's at entity level (nullable=false)
+        doi_validations = [
+            fv for fv in config.field_validations if fv.field == "doi"
+        ]
+        # There should be at least one doi validation
+        assert len(doi_validations) >= 1
+        # The entity-level one should be present (nullable=false)
+        entity_doi = [fv for fv in doi_validations if not fv.nullable]
+        assert len(entity_doi) >= 1, "Entity-level DOI override should be present"
+
+    def test_missing_publication_base_no_error(self, tmp_path: Path) -> None:
+        """Missing _publication_base.yaml should not cause an error."""
+        dq_root = tmp_path / "dq"
+        dq_root.mkdir()
+        (dq_root / "_defaults.yaml").write_text(
+            """
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.20
+common_field_validations: []
+common_cross_field_validations: []
+"""
+        )
+        # NO _publication_base.yaml created
+        loader = DQConfigLoader(tmp_path)
+        # Should not raise
+        config = loader.load("any_provider", "publication")
+        assert config.soft_fail_threshold == 0.05
+
+    def test_all_publication_providers_get_base_rules(
+        self, pub_loader: DQConfigLoader
+    ) -> None:
+        """All publication providers should get base rules."""
+        for provider in ["prov_a", "prov_b"]:
+            config = pub_loader.load(provider, "publication")
+            field_names = [fv.field for fv in config.field_validations]
+            assert "title" in field_names, (
+                f"Provider {provider} missing publication_base 'title' field"
+            )
+            assert "year" in field_names, (
+                f"Provider {provider} missing publication_base 'year' field"
+            )
+
+
+class TestNormalizePublicationBase:
+    """Tests for _normalize_publication_base logic."""
+
+    def test_renames_publication_base_keys(self) -> None:
+        """publication_base_* keys should be renamed to common_*."""
+        pub_config: dict[str, Any] = {
+            "version": "1.0.0",
+            "publication_base_field_validations": [
+                {"field": "doi", "type": "pattern"}
+            ],
+            "publication_base_cross_field_validations": [],
+        }
+
+        result = DQConfigLoader._normalize_publication_base(pub_config)
+
+        assert "publication_base_field_validations" not in result
+        assert "common_field_validations" in result
+        assert len(result["common_field_validations"]) == 1
+
+    def test_preserves_other_keys(self) -> None:
+        """Non publication_base_* keys should be preserved."""
+        pub_config: dict[str, Any] = {
+            "version": "1.0.0",
+            "publication_base_field_validations": [],
+        }
+
+        result = DQConfigLoader._normalize_publication_base(pub_config)
+
+        assert result["version"] == "1.0.0"
+
+
 class TestNormalizeToFileFormat:
     """Tests for _normalize_to_file_format logic."""
 

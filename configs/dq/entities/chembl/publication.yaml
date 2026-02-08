@@ -1,6 +1,6 @@
 # configs/dq/entities/chembl/publication.yaml
 # ChEMBL Publication (Document)-specific DQ rules
-# Inherits from: _defaults.yaml → providers/chembl.yaml
+# Inherits from: _defaults.yaml → _publication_base.yaml → providers/chembl.yaml
 
 version: "1.0.0"
 provider: chembl
@@ -12,12 +12,14 @@ entity: publication
 # Publication-Specific Field Validations
 # =============================================================================
 entity_field_validations:
+  # --- ChEMBL-specific identifier ---
   - field: document_chembl_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
     error_message: "document_chembl_id must match CHEMBL format"
 
+  # --- Document type (ChEMBL-specific enum) ---
   - field: doc_type
     type: enum
     allowed:
@@ -26,7 +28,9 @@ entity_field_validations:
       - DATASET
       - PATENT
     nullable: true
+    error_message: "doc_type must be one of: PUBLICATION, BOOK, DATASET, PATENT"
 
+  # --- Year override (narrower range than publication_base) ---
   - field: year
     type: range
     min: 1800
@@ -34,6 +38,7 @@ entity_field_validations:
     nullable: true
     error_message: "Publication year must be between 1800 and 2100"
 
+  # --- PubMed ID cross-reference ---
   - field: pubmed_id
     type: range
     min: 1
@@ -41,11 +46,30 @@ entity_field_validations:
     nullable: true
     error_message: "PubMed ID must be a positive integer"
 
+  # --- DOI (override: same pattern, add error_message) ---
   - field: doi
     type: pattern
     pattern: '^10\.\d{4,}/.*$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
+
+  # --- Title non-empty (from publication_base, override to require for ChEMBL) ---
+  - field: title
+    type: non_empty
+    nullable: true
+    error_message: "Title must not be empty when present"
+
+  # --- Journal reference ---
+  - field: journal
+    type: non_empty
+    nullable: true
+    error_message: "Journal name must not be empty when present"
+
+  # --- Volume/Issue ---
+  - field: volume
+    type: non_empty
+    nullable: true
+    error_message: "Volume must not be empty when present"
 
 # =============================================================================
 # Cross-Field Validations

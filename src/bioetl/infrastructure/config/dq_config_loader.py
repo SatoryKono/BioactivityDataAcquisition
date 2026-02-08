@@ -2,9 +2,10 @@
 
 Loads and merges DQ configurations from:
 1. configs/dq/_defaults.yaml (global defaults)
-2. configs/dq/providers/{provider}.yaml (provider-specific)
-3. configs/dq/entities/{provider}/{entity}.yaml (entity-specific)
-4. Inline overrides from pipeline config
+2. configs/dq/_publication_base.yaml (publication entities only)
+3. configs/dq/providers/{provider}.yaml (provider-specific)
+4. configs/dq/entities/{provider}/{entity}.yaml (entity-specific)
+5. Inline overrides from pipeline config
 
 Implements RULES.md §3.1.2 DQ Thresholds.
 """
@@ -52,9 +53,14 @@ class DQConfigLoader:
 
         Merge order (later wins for scalars, concatenate for lists):
         1. _defaults.yaml
-        2. providers/{provider}.yaml
-        3. entities/{provider}/{entity}.yaml
-        4. inline_overrides (from pipeline config)
+        2. _publication_base.yaml (only if entity == "publication")
+        3. providers/{provider}.yaml
+        4. entities/{provider}/{entity}.yaml
+        5. inline_overrides (from pipeline config)
+
+        For publication entities, the publication_base layer provides shared
+        validation rules common to all publication providers. Keys prefixed
+        with ``publication_base_`` are converted to ``common_`` before merge.
 
         Args:
             provider: Provider name (e.g., "chembl").
@@ -83,19 +89,27 @@ class DQConfigLoader:
             )
         merged = self._load_yaml(defaults_path)
 
-        # 2. Load provider config (optional)
+        # 2. Load publication base config (only for publication entities)
+        if entity == "publication":
+            pub_base_path = self._dq_root / "_publication_base.yaml"
+            pub_base_config = self._load_yaml(pub_base_path)
+            if pub_base_config:
+                normalized_pub = self._normalize_publication_base(pub_base_config)
+                merged = self._deep_merge(merged, normalized_pub)
+
+        # 3. Load provider config (optional)
         provider_path = self._dq_root / "providers" / f"{provider}.yaml"
         provider_config = self._load_yaml(provider_path)
         if provider_config:
             merged = self._deep_merge(merged, provider_config)
 
-        # 3. Load entity config (optional)
+        # 4. Load entity config (optional)
         entity_path = self._dq_root / "entities" / provider / f"{entity}.yaml"
         entity_config = self._load_yaml(entity_path)
         if entity_config:
             merged = self._deep_merge(merged, entity_config)
 
-        # 4. Apply inline overrides (optional)
+        # 5. Apply inline overrides (optional)
         if inline_overrides:
             merged = self._deep_merge(merged, inline_overrides)
 
@@ -207,6 +221,33 @@ class DQConfigLoader:
             result_map[key] = copy.deepcopy(item)
 
         return list(result_map.values())
+
+    @staticmethod
+    def _normalize_publication_base(
+        pub_config: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Convert publication_base_* keys to common_* for merge.
+
+        The ``_publication_base.yaml`` file uses ``publication_base_*`` prefixed
+        keys to avoid collision with ``common_*`` keys from ``_defaults.yaml``.
+        This method renames them so the deep-merge treats them as common-level
+        validations.
+
+        Args:
+            pub_config: Raw parsed publication base config.
+
+        Returns:
+            Config dict with publication_base_* keys renamed to common_*.
+        """
+        result = copy.deepcopy(pub_config)
+        renames = {
+            "publication_base_field_validations": "common_field_validations",
+            "publication_base_cross_field_validations": "common_cross_field_validations",
+        }
+        for old_key, new_key in renames.items():
+            if old_key in result:
+                result[new_key] = result.pop(old_key)
+        return result
 
     def _normalize_to_file_format(
         self,

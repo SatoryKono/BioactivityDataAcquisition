@@ -1,6 +1,6 @@
 # configs/dq/entities/pubmed/publication.yaml
 # PubMed Publication-specific DQ rules
-# Inherits from: _defaults.yaml → providers/pubmed.yaml
+# Inherits from: _defaults.yaml → _publication_base.yaml → providers/pubmed.yaml
 
 version: "1.0.0"
 provider: pubmed
@@ -12,6 +12,7 @@ entity: publication
 # Publication-Specific Field Validations
 # =============================================================================
 entity_field_validations:
+  # --- PMID (PubMed primary identifier, required) ---
   - field: pmid
     type: range
     min: 1
@@ -19,18 +20,20 @@ entity_field_validations:
     nullable: false
     error_message: "PMID is required and must be a positive integer"
 
+  # --- Title ---
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: non_empty
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not be empty when present"
 
+  # --- DOI ---
   - field: doi
     type: pattern
     pattern: '^10\.\d{4,}/.*$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
 
+  # --- Publication year override (narrower: 1800-2100) ---
   - field: pub_year
     type: range
     min: 1800
@@ -38,6 +41,7 @@ entity_field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
+  # --- Publication type (PubMed-specific enum) ---
   - field: pub_type
     type: enum
     allowed:
@@ -51,12 +55,46 @@ entity_field_validations:
       - Comparative Study
       - Evaluation Study
     nullable: true
+    error_message: "pub_type must be a valid PubMed publication type"
 
+  # --- PMC ID ---
   - field: pmc_id
     type: pattern
     pattern: '^PMC\d+$'
     nullable: true
     error_message: "PMC ID must start with PMC followed by digits"
+
+  # --- Abstract (PubMed usually provides abstracts) ---
+  - field: abstract
+    type: non_empty
+    nullable: true
+    error_message: "Abstract must not be empty when present"
+
+  # --- MeSH terms (JSON array) ---
+  - field: mesh_terms_json
+    type: json_array
+    nullable: true
+    element_type: string
+    error_message: "MeSH terms must be a valid JSON array of strings"
+
+  # --- Authors JSON ---
+  - field: authors_json
+    type: json_array
+    nullable: true
+    element_type: object
+    error_message: "Authors JSON must be a valid JSON array of objects"
+
+  # --- Journal ---
+  - field: journal
+    type: non_empty
+    nullable: true
+    error_message: "Journal name must not be empty when present"
+
+  # --- Language ---
+  - field: language
+    type: non_empty
+    nullable: true
+    error_message: "Language code must not be empty when present"
 
 # =============================================================================
 # Cross-Field Validations

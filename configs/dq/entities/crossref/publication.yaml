@@ -1,6 +1,6 @@
 # configs/dq/entities/crossref/publication.yaml
 # CrossRef Publication (Work)-specific DQ rules
-# Inherits from: _defaults.yaml → providers/crossref.yaml
+# Inherits from: _defaults.yaml → _publication_base.yaml → providers/crossref.yaml
 
 version: "1.0.0"
 provider: crossref
@@ -12,18 +12,20 @@ entity: publication
 # Publication-Specific Field Validations
 # =============================================================================
 entity_field_validations:
+  # --- DOI (CrossRef primary identifier, required) ---
   - field: doi
     type: pattern
     pattern: '^10\.\d{4,}/.*$'
     nullable: false
     error_message: "DOI is required and must start with 10. prefix"
 
+  # --- Title ---
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: non_empty
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not be empty when present"
 
+  # --- Year override (narrower range for CrossRef) ---
   - field: year
     type: range
     min: 1800
@@ -31,6 +33,7 @@ entity_field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
+  # --- Work type (CrossRef-specific enum) ---
   - field: type
     type: enum
     allowed:
@@ -43,12 +46,41 @@ entity_field_validations:
       - dataset
       - standard
     nullable: true
+    error_message: "type must be a valid CrossRef work type"
 
+  # --- Citation count ---
   - field: is_referenced_by_count
     type: range
     min: 0
     nullable: true
     error_message: "Citation count must be non-negative"
+
+  # --- Publisher (CrossRef-specific) ---
+  - field: publisher
+    type: non_empty
+    nullable: true
+    error_message: "Publisher must not be empty when present"
+
+  # --- ISSN (CrossRef provides structured ISSN) ---
+  - field: issn
+    type: pattern
+    pattern: '^\d{4}-\d{3}[\dX]$'
+    nullable: true
+    error_message: "ISSN must follow XXXX-XXXX format"
+
+  # --- References count ---
+  - field: references_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "References count must be non-negative"
+
+  # --- Subjects/Keywords (JSON array) ---
+  - field: subject
+    type: json_array
+    nullable: true
+    element_type: string
+    error_message: "Subject must be a valid JSON array of strings"
 
 # =============================================================================
 # Cross-Field Validations

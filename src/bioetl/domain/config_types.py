@@ -165,7 +165,21 @@ class FieldValidationDict(TypedDict, total=False):
     """YAML structure for field validation rule."""
 
     field: Required[str]
-    type: Required[Literal["required", "range", "pattern", "enum", "custom"]]
+    type: Required[
+        Literal[
+            "required",
+            "range",
+            "pattern",
+            "enum",
+            "custom",
+            "non_empty",
+            "json_array",
+            "json_object",
+            "url",
+            "boolean_strict",
+            "date_iso",
+        ]
+    ]
     nullable: bool
     min: float
     max: float
@@ -173,6 +187,10 @@ class FieldValidationDict(TypedDict, total=False):
     allowed: list[str]
     validator: str
     error_message: str
+    # json_array validation options
+    element_type: str
+    element_pattern: str
+    min_items: int
 
 
 class CrossFieldValidationDict(TypedDict, total=False):

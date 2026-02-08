@@ -125,10 +125,16 @@ class FieldValidation:
     - pattern: Regex pattern matching
     - enum: Allowed values validation
     - custom: Custom validator function reference
+    - non_empty: String must not be empty after strip
+    - json_array: Value must parse as JSON array
+    - json_object: Value must parse as JSON object
+    - url: Value must be a valid URL (https?://)
+    - boolean_strict: Value must be strictly bool (True/False)
+    - date_iso: Value must be YYYY-MM-DD format
 
     Attributes:
         field: Field name to validate.
-        validation_type: Type of validation (required, range, pattern, enum, custom).
+        validation_type: Type of validation.
         nullable: Whether field can be null/None. Default: True.
         min_value: Minimum value for range validation.
         max_value: Maximum value for range validation.
@@ -136,10 +142,25 @@ class FieldValidation:
         allowed: Allowed values for enum validation.
         validator: Validator function name for custom validation.
         error_message: Custom error message template.
+        element_type: Element type for json_array (string, integer, object).
+        element_pattern: Regex pattern for json_array string elements.
+        min_items: Minimum number of items for json_array.
     """
 
     field: str
-    validation_type: Literal["required", "range", "pattern", "enum", "custom"]
+    validation_type: Literal[
+        "required",
+        "range",
+        "pattern",
+        "enum",
+        "custom",
+        "non_empty",
+        "json_array",
+        "json_object",
+        "url",
+        "boolean_strict",
+        "date_iso",
+    ]
     nullable: bool = True
     # Range validation
     min_value: float | None = None
@@ -152,6 +173,10 @@ class FieldValidation:
     validator: str | None = None
     # Custom error message
     error_message: str | None = None
+    # json_array validation options
+    element_type: str | None = None  # string, integer, object
+    element_pattern: str | None = None  # regex for string elements
+    min_items: int | None = None
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""

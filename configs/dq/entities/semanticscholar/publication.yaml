@@ -1,6 +1,6 @@
 # configs/dq/entities/semanticscholar/publication.yaml
 # Semantic Scholar Publication-specific DQ rules
-# Inherits from: _defaults.yaml → providers/semanticscholar.yaml
+# Inherits from: _defaults.yaml → _publication_base.yaml → providers/semanticscholar.yaml
 
 version: "1.0.0"
 provider: semanticscholar
@@ -12,24 +12,27 @@ entity: publication
 # Publication-Specific Field Validations
 # =============================================================================
 entity_field_validations:
+  # --- Paper ID (Semantic Scholar primary identifier, required) ---
   - field: paper_id
     type: pattern
     pattern: '^[a-f0-9]{40}$'
     nullable: false
     error_message: "paper_id is required and must be a 40-char hex string"
 
+  # --- DOI ---
   - field: doi
     type: pattern
     pattern: '^10\.\d{4,}/.*$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
 
+  # --- Title ---
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: non_empty
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not be empty when present"
 
+  # --- Year (Semantic Scholar goes back to 1500) ---
   - field: year
     type: range
     min: 1500
@@ -37,23 +40,63 @@ entity_field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
+  # --- Citation count ---
   - field: citation_count
     type: range
     min: 0
     nullable: true
     error_message: "Citation count must be non-negative"
 
+  # --- Reference count ---
   - field: reference_count
     type: range
     min: 0
     nullable: true
     error_message: "Reference count must be non-negative"
 
+  # --- Influential citation count ---
   - field: influential_citation_count
     type: range
     min: 0
     nullable: true
     error_message: "Influential citation count must be non-negative"
+
+  # --- Abstract ---
+  - field: abstract
+    type: non_empty
+    nullable: true
+    error_message: "Abstract must not be empty when present"
+
+  # --- Venue ---
+  - field: venue
+    type: non_empty
+    nullable: true
+    error_message: "Venue must not be empty when present"
+
+  # --- Open Access flag ---
+  - field: is_open_access
+    type: boolean_strict
+    nullable: true
+    error_message: "is_open_access must be a boolean value"
+
+  # --- External IDs JSON (S2 provides structured external IDs) ---
+  - field: external_ids_json
+    type: json_object
+    nullable: true
+    error_message: "External IDs must be a valid JSON object"
+
+  # --- Authors JSON ---
+  - field: authors_json
+    type: json_array
+    nullable: true
+    element_type: object
+    error_message: "Authors JSON must be a valid JSON array of objects"
+
+  # --- URL ---
+  - field: url
+    type: url
+    nullable: true
+    error_message: "URL must be a valid HTTP(S) URL"
 
 # =============================================================================
 # Cross-Field Validations

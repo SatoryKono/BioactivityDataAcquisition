@@ -1,6 +1,6 @@
 # configs/dq/entities/openalex/publication.yaml
 # OpenAlex Publication-specific DQ rules
-# Inherits from: _defaults.yaml → providers/openalex.yaml
+# Inherits from: _defaults.yaml → _publication_base.yaml → providers/openalex.yaml
 
 version: "1.0.0"
 provider: openalex
@@ -12,24 +12,27 @@ entity: publication
 # Publication-Specific Field Validations
 # =============================================================================
 entity_field_validations:
+  # --- OpenAlex ID (primary identifier, required) ---
   - field: openalex_id
     type: pattern
     pattern: '^W\d+$'
     nullable: false
     error_message: "OpenAlex ID is required and must start with W followed by digits"
 
+  # --- DOI ---
   - field: doi
     type: pattern
     pattern: '^10\.\d{4,}/.*$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
 
+  # --- Title ---
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: non_empty
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not be empty when present"
 
+  # --- Year (OpenAlex goes back to 1500) ---
   - field: year
     type: range
     min: 1500
@@ -37,6 +40,7 @@ entity_field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
+  # --- Work type (OpenAlex-specific enum) ---
   - field: type
     type: enum
     allowed:
@@ -51,24 +55,72 @@ entity_field_validations:
       - preprint
       - other
     nullable: true
+    error_message: "type must be a valid OpenAlex work type"
 
+  # --- Citation count ---
   - field: cited_by_count
     type: range
     min: 0
     nullable: true
     error_message: "Citation count must be non-negative"
 
+  # --- FWCI (Field-Weighted Citation Impact) ---
   - field: fwci
     type: range
     min: 0
     nullable: true
     error_message: "FWCI must be non-negative"
 
+  # --- Reference count ---
   - field: reference_count
     type: range
     min: 0
     nullable: true
     error_message: "Reference count must be non-negative"
+
+  # --- Open Access flag ---
+  - field: is_open_access
+    type: boolean_strict
+    nullable: true
+    error_message: "is_open_access must be a boolean value"
+
+  # --- Is retracted flag ---
+  - field: is_retracted
+    type: boolean_strict
+    nullable: true
+    error_message: "is_retracted must be a boolean value"
+
+  # --- Abstract ---
+  - field: abstract
+    type: non_empty
+    nullable: true
+    error_message: "Abstract must not be empty when present"
+
+  # --- Publication date (OpenAlex provides structured date) ---
+  - field: publication_date
+    type: date_iso
+    nullable: true
+    error_message: "Publication date must be in YYYY-MM-DD format"
+
+  # --- Concepts JSON (OpenAlex concept tagging) ---
+  - field: concepts_json
+    type: json_array
+    nullable: true
+    element_type: object
+    error_message: "Concepts must be a valid JSON array of objects"
+
+  # --- Authors JSON ---
+  - field: authors_json
+    type: json_array
+    nullable: true
+    element_type: object
+    error_message: "Authors JSON must be a valid JSON array of objects"
+
+  # --- Primary location URL ---
+  - field: url
+    type: url
+    nullable: true
+    error_message: "URL must be a valid HTTP(S) URL"
 
 # =============================================================================
 # Cross-Field Validations
@@ -84,8 +136,8 @@ entity_cross_field_validations:
   - name: retracted_publication_warning
     fields:
       - is_retracted
-    condition: "is_retracted == true"
-    severity: warn
+    condition: custom
+    validator: "is_retracted == true"
     error_message: "Publication has been retracted"
 
 # =============================================================================

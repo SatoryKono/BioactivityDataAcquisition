@@ -34,6 +34,24 @@ from bioetl.infrastructure.schemas.pipeline_config import (
 )
 
 
+def _fv_config_to_domain(fv: FieldValidationConfig) -> DomainFieldValidation:
+    """Convert a FieldValidationConfig to a domain FieldValidation."""
+    return DomainFieldValidation(
+        field=fv.field,
+        validation_type=fv.type,
+        nullable=fv.nullable,
+        min_value=fv.min,
+        max_value=fv.max,
+        pattern=fv.pattern,
+        allowed=tuple(fv.allowed),
+        validator=fv.validator,
+        error_message=fv.error_message,
+        element_type=fv.element_type,
+        element_pattern=fv.element_pattern,
+        min_items=fv.min_items,
+    )
+
+
 class ThresholdsConfig(BaseModel):
     """Threshold configuration section.
 
@@ -203,18 +221,7 @@ class DQConfigFile(BaseModel):
             + self.entity_field_validations
         )
         field_validations = tuple(
-            DomainFieldValidation(
-                field=fv.field,
-                validation_type=fv.type,
-                nullable=fv.nullable,
-                min_value=fv.min,
-                max_value=fv.max,
-                pattern=fv.pattern,
-                allowed=tuple(fv.allowed),
-                validator=fv.validator,
-                error_message=fv.error_message,
-            )
-            for fv in all_field_validations
+            _fv_config_to_domain(fv) for fv in all_field_validations
         )
 
         # Merge cross-field validations (common + entity)
@@ -246,18 +253,7 @@ class DQConfigFile(BaseModel):
                 ),
                 condition_operator=cv.condition_operator,
                 then_validations=tuple(
-                    DomainFieldValidation(
-                        field=tv.field,
-                        validation_type=tv.type,
-                        nullable=tv.nullable,
-                        min_value=tv.min,
-                        max_value=tv.max,
-                        pattern=tv.pattern,
-                        allowed=tuple(tv.allowed),
-                        validator=tv.validator,
-                        error_message=tv.error_message,
-                    )
-                    for tv in cv.then_validations
+                    _fv_config_to_domain(tv) for tv in cv.then_validations
                 ),
             )
             for cv in self.entity_conditional_validations

@@ -1,0 +1,129 @@
+# configs/dq/_publication_base.yaml
+# Shared DQ rules for ALL publication entities across providers.
+#
+# Merge chain (with this file):
+#   _defaults.yaml → _publication_base.yaml → providers/{p}.yaml → entities/{p}/publication.yaml
+#
+# Applied when entity == "publication".
+# Keys are prefixed with "publication_base_" and converted to "common_" during merge.
+#
+# Coverage: chembl, pubmed, crossref, semanticscholar, openalex (5 providers)
+
+version: "1.0.0"
+
+# =============================================================================
+# Publication Base Field Validations (common to ALL publication entities)
+# =============================================================================
+publication_base_field_validations:
+  # --- DOI (all 5 providers) ---
+  # Standard DOI format: 10.{registrant}/{suffix}
+  - field: doi
+    type: pattern
+    pattern: '^10\.\d{4,}/.*$'
+    nullable: true
+    error_message: "DOI must follow standard format (10.xxxx/...)"
+
+  # --- Title (all 5 providers) ---
+  # Title must be non-empty and under 2000 characters
+  - field: title
+    type: non_empty
+    nullable: true
+    error_message: "Title must not be empty"
+
+  # --- Abstract (all 5 providers) ---
+  # Abstract, when present, should be non-empty
+  - field: abstract
+    type: non_empty
+    nullable: true
+    error_message: "Abstract, when present, must not be empty"
+
+  # --- Publication year (all 5 providers) ---
+  # Widest valid range across all providers: 1500-2100
+  # Semantic Scholar and OpenAlex go back to 1500; ChEMBL/PubMed/CrossRef to 1800.
+  # Entity configs can narrow this range.
+  - field: year
+    type: range
+    min: 1500
+    max: 2100
+    nullable: true
+    error_message: "Publication year must be between 1500 and 2100"
+
+  # --- Citation count (crossref, semanticscholar, openalex) ---
+  # Citation count must be non-negative when present
+  - field: citation_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Citation count must be non-negative"
+
+  # --- Reference count (semanticscholar, openalex) ---
+  # Reference count must be non-negative when present
+  - field: reference_count
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
+
+  # --- Authors JSON (all 5 providers, when stored as JSON) ---
+  # Authors field, when stored as JSON array, must be valid
+  - field: authors_json
+    type: json_array
+    nullable: true
+    element_type: object
+    error_message: "Authors JSON must be a valid JSON array of objects"
+
+  # --- Keywords JSON (multiple providers) ---
+  # Keywords field, when stored as JSON array, must be valid
+  - field: keywords_json
+    type: json_array
+    nullable: true
+    element_type: string
+    error_message: "Keywords JSON must be a valid JSON array of strings"
+
+  # --- URL (multiple providers) ---
+  # Publication URL must be a valid HTTP(S) URL
+  - field: url
+    type: url
+    nullable: true
+    error_message: "Publication URL must be a valid HTTP(S) URL"
+
+  # --- Open Access flag (openalex, semanticscholar) ---
+  # Open access flag must be strictly boolean
+  - field: is_open_access
+    type: boolean_strict
+    nullable: true
+    error_message: "is_open_access must be a boolean value (True/False)"
+
+  # --- Publication date (crossref, openalex) ---
+  # ISO date format YYYY-MM-DD when present
+  - field: publication_date
+    type: date_iso
+    nullable: true
+    error_message: "Publication date must be in YYYY-MM-DD format"
+
+  # --- Language (pubmed, crossref, openalex) ---
+  # Language code must be non-empty when present
+  - field: language
+    type: non_empty
+    nullable: true
+    error_message: "Language code must not be empty"
+
+  # --- Journal/Venue name (all 5 providers) ---
+  # Journal or venue name must be non-empty when present
+  - field: journal
+    type: non_empty
+    nullable: true
+    error_message: "Journal name must not be empty"
+
+  # --- ISSN (pubmed, crossref, openalex) ---
+  # ISSN format validation (XXXX-XXXX)
+  - field: issn
+    type: pattern
+    pattern: '^\d{4}-\d{3}[\dX]$'
+    nullable: true
+    error_message: "ISSN must follow XXXX-XXXX format"
+
+# =============================================================================
+# Publication Base Cross-Field Validations
+# =============================================================================
+publication_base_cross_field_validations: []

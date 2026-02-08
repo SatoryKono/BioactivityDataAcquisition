@@ -40,13 +40,24 @@ if TYPE_CHECKING:
 class FieldValidationConfig(BaseModel):
     """Configuration for a single field validation rule.
 
-    Supports: required, range, pattern, enum, custom validation types.
+    Supports: required, range, pattern, enum, custom, non_empty,
+    json_array, json_object, url, boolean_strict, date_iso validation types.
     """
 
     field: str = Field(description="Field name to validate")
-    type: Literal["required", "range", "pattern", "enum", "custom"] = Field(
-        description="Validation type"
-    )
+    type: Literal[
+        "required",
+        "range",
+        "pattern",
+        "enum",
+        "custom",
+        "non_empty",
+        "json_array",
+        "json_object",
+        "url",
+        "boolean_strict",
+        "date_iso",
+    ] = Field(description="Validation type")
     nullable: bool = Field(default=True, description="Whether field can be null")
     # Range validation
     min: float | None = Field(default=None, description="Minimum value (range)")
@@ -59,6 +70,16 @@ class FieldValidationConfig(BaseModel):
     validator: str | None = Field(default=None, description="Custom validator name")
     # Error message
     error_message: str | None = Field(default=None, description="Custom error message")
+    # json_array validation options
+    element_type: str | None = Field(
+        default=None, description="Element type for json_array (string, integer, object)"
+    )
+    element_pattern: str | None = Field(
+        default=None, description="Regex pattern for json_array string elements"
+    )
+    min_items: int | None = Field(
+        default=None, description="Minimum number of items for json_array"
+    )
 
 
 class CrossFieldValidationConfig(BaseModel):
@@ -189,6 +210,9 @@ class DQConfig(BaseModel):
                 allowed=tuple(fv.allowed),
                 validator=fv.validator,
                 error_message=fv.error_message,
+                element_type=fv.element_type,
+                element_pattern=fv.element_pattern,
+                min_items=fv.min_items,
             )
             for fv in self.field_validations
         )
@@ -229,6 +253,9 @@ class DQConfig(BaseModel):
                         allowed=tuple(tv.allowed),
                         validator=tv.validator,
                         error_message=tv.error_message,
+                        element_type=tv.element_type,
+                        element_pattern=tv.element_pattern,
+                        min_items=tv.min_items,
                     )
                     for tv in cv.then_validations
                 ),
