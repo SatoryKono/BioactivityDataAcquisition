@@ -134,7 +134,7 @@ Task(subagent_type="py-audit-bot", prompt="...", model="opus")
             ▼     │     │
 ┌───────────┤     │     │
 │ Возврат к │     │     │
-│ pyDebugBot│     │     │
+│ py-debug-bot│     │     │
 │ / pyPlan  │     │     │
 └───────────┘     │     │
                   │     │
@@ -212,42 +212,42 @@ reports/plans/<task_id>/
 
 | Шаг | Можно пропустить если |
 |-----|----------------------|
-| pyAuditBot baseline | Задача = чистый bugfix одного файла, scope очевиден |
-| pyPlanBot | Задача = single-file doc update |
-| pyTestBot baseline | Нет существующих тестов для scope (→ сразу new_tests) |
-| pyCodeBot | Задача = чистый config/doc change |
-| pyConfigBot | Задача не затрагивает configs/ |
-| pyDebugBot | Все тесты проходят |
-| pyDocBot | Задача не меняет публичный API / поведение |
-| pyAuditBot final | Задача = чистый doc update без code changes |
+| py-audit-bot baseline | Задача = чистый bugfix одного файла, scope очевиден |
+| py-plan-bot | Задача = single-file doc update |
+| py-test-bot baseline | Нет существующих тестов для scope (→ сразу new_tests) |
+| py-code-bot | Задача = чистый config/doc change |
+| py-config-bot | Задача не затрагивает configs/ |
+| py-debug-bot | Все тесты проходят |
+| py-doc-bot | Задача не меняет публичный API / поведение |
+| py-audit-bot final | Задача = чистый doc update без code changes |
 
 ### 5.2. Маршрутизация RF-* по типу
 
 | RF type | Primary subagent | Secondary |
 |---------|:---:|:---:|
-| `refactor` | pyCodeBot | pyConfigBot (если config impact) |
-| `feature` | pyCodeBot | pyConfigBot (если новый entity) |
-| `bugfix` | pyCodeBot / pyDebugBot | pyConfigBot (если config-related bug) |
-| `config` | pyConfigBot | — |
-| `doc` | pyDocBot | — |
+| `refactor` | py-code-bot | py-config-bot (если config impact) |
+| `feature` | py-code-bot | py-config-bot (если новый entity) |
+| `bugfix` | py-code-bot / py-debug-bot | py-config-bot (если config-related bug) |
+| `config` | py-config-bot | — |
+| `doc` | py-doc-bot | — |
 
 ### 5.3. Эскалация
 
 | Ситуация | Действие |
 |----------|----------|
-| pyDebugBot: 5 итераций без fix | → `Requires Manual Review`, уведомить пользователя |
-| pyAuditBot final: новый MUST | → Блокер, возврат к pyDebugBot/pyPlanBot |
-| pyTestBot: coverage < 85% | → MUST: разработка тестов (phase=new_tests) |
-| pyPlanBot: цикл зависимостей RF-* | → Пересмотр декомпозиции задачи |
-| pyConfigBot: gap_analysis critical > 0 | → Блокер, возврат к pyConfigBot/pyPlanBot |
+| py-debug-bot: 5 итераций без fix | → `Requires Manual Review`, уведомить пользователя |
+| py-audit-bot final: новый MUST | → Блокер, возврат к py-debug-bot/py-plan-bot |
+| py-test-bot: coverage < 85% | → MUST: разработка тестов (phase=new_tests) |
+| py-plan-bot: цикл зависимостей RF-* | → Пересмотр декомпозиции задачи |
+| py-config-bot: gap_analysis critical > 0 | → Блокер, возврат к py-config-bot/py-plan-bot |
 
 ### 5.4. Параллелизация
 
-В текущей модели (sequential Codex) subagent-ы работают последовательно. При наличии параллельного исполнения допустимо:
+В Claude Code субагенты могут запускаться как параллельно (`run_in_background: true`), так и последовательно. Допустимые параллельные запуски:
 
-- `pyTestBot` (baseline) ∥ `pyAuditBot` (baseline) — оба read-only
-- `pyCodeBot` ∥ `pyConfigBot` — разные файловые зоны (src/ vs configs/)
-- `pyDocBot` ∥ `pyAuditBot` (final) — если doc changes не влияют на code audit scope
+- `py-test-bot` (baseline) ∥ `py-audit-bot` (baseline) — оба read-only
+- `py-code-bot` ∥ `py-config-bot` — разные файловые зоны (src/ vs configs/)
+- `py-doc-bot` ∥ `py-audit-bot` (final) — если doc changes не влияют на code audit scope
 
 ---
 
@@ -255,12 +255,12 @@ reports/plans/<task_id>/
 
 | Prefix | Subagent | Формат | Пример | Описание |
 |--------|----------|--------|--------|----------|
-| `RF-` | pyPlanBot | `RF-001` | RF-001 | Рефакторинг / изменение |
-| `DBG-` | pyDebugBot | `DBG-001` | DBG-001 | Debug-итерация |
-| `AUD-` | pyAuditBot | `AUD-001` | AUD-001 | Audit finding |
-| `DOC-` | pyDocBot | `DOC-001` | DOC-001 | Обновление документации |
-| `FAIL-` | pyTestBot | `FAIL-001` | FAIL-001 | Упавший тест (в отчёте) |
-| `CFG-` | pyConfigBot | `CFG-001` | CFG-001 | Изменение конфигурации |
+| `RF-` | py-plan-bot | `RF-001` | RF-001 | Рефакторинг / изменение |
+| `DBG-` | py-debug-bot | `DBG-001` | DBG-001 | Debug-итерация |
+| `AUD-` | py-audit-bot | `AUD-001` | AUD-001 | Audit finding |
+| `DOC-` | py-doc-bot | `DOC-001` | DOC-001 | Обновление документации |
+| `FAIL-` | py-test-bot | `FAIL-001` | FAIL-001 | Упавший тест (в отчёте) |
+| `CFG-` | py-config-bot | `CFG-001` | CFG-001 | Изменение конфигурации |
 
 Все ID уникальны в пределах `task_id`. Cross-references: `DBG-001 → RF-002`, `DOC-003 → RF-001`, `CFG-001 → RF-003`.
 
@@ -271,10 +271,10 @@ reports/plans/<task_id>/
 1. **Traceability**: каждое изменение в коде привязано к `RF-*`, каждый fix — к `DBG-*`, каждый doc update — к `DOC-*`, каждый config change — к `CFG-*`.
 2. **Baseline/Final symmetry**: для каждого baseline-артефакта существует final-артефакт.
 3. **No blind changes**: код не меняется без предварительного плана (`RF-*`).
-4. **No untested changes**: каждый `RF-*` проверяется через `pyTestBot`.
-5. **Architecture gate**: финальный аудит (`pyAuditBot`) является обязательным gate перед завершением задачи.
-6. **Config compliance gate**: `config_gap_analysis.py` MUST иметь 0 critical findings после `pyConfigBot`.
-7. **Zone isolation**: pyCodeBot пишет только в `src/`, pyConfigBot — только в `configs/`, pyDocBot — только в `docs/` + docstrings.
+4. **No untested changes**: каждый `RF-*` проверяется через `py-test-bot`.
+5. **Architecture gate**: финальный аудит (`py-audit-bot`) является обязательным gate перед завершением задачи.
+6. **Config compliance gate**: `config_gap_analysis.py` MUST иметь 0 critical findings после `py-config-bot`.
+7. **Zone isolation**: py-code-bot пишет только в `src/`, py-config-bot — только в `configs/`, py-doc-bot — только в `docs/` + docstrings.
 
 ---
 
@@ -283,50 +283,50 @@ reports/plans/<task_id>/
 ### 8.1. Quick-fix (single bug, low risk)
 
 ```
-pyTestBot (baseline, scope=1 file)
-  → pyCodeBot (fix)
-  → pyTestBot (final)
-  → pyDocBot (docstring only)
+py-test-bot (baseline, scope=1 file)
+→ py-code-bot (fix)
+→ py-test-bot (final)
+→ py-doc-bot (docstring only)
 ```
 
 ### 8.2. Doc-only
 
 ```
-pyDocBot (создание/обновление)
-  → pyAuditBot (targeted, audit_type=docs)
+py-doc-bot (создание/обновление)
+  → py-audit-bot (targeted, audit_type=docs)
 ```
 
 ### 8.3. Config-only
 
 ```
-pyAuditBot (targeted, audit_type=config)
-  → pyPlanBot (plan)
-  → pyConfigBot (изменение configs)
-  → pyTestBot (final, scope=config-related tests)
-  → pyAuditBot (final)
+py-audit-bot (targeted, audit_type=config)
+  → py-plan-bot (plan)
+  → py-config-bot (изменение configs)
+  → py-test-bot (final, scope=config-related tests)
+  → py-audit-bot (final)
 ```
 
 ### 8.4. New entity (full scaffolding)
 
 ```
-pyPlanBot (plan)
-  → pyCodeBot (domain entity + transformer + schema + adapter)
-  → pyConfigBot (pipeline + DQ + filter + source configs)
-  → pyTestBot (new_tests + final)
-  → pyDocBot (docstrings + provider docs)
-  → pyAuditBot (final)
+py-plan-bot (plan)
+  → py-code-bot (domain entity + transformer + schema + adapter)
+  → py-config-bot (pipeline + DQ + filter + source configs)
+  → py-test-bot (new_tests + final)
+  → py-doc-bot (docstrings + provider docs)
+  → py-audit-bot (final)
 ```
 
 ### 8.5. Composite pipeline
 
 ```
-pyAuditBot (baseline, scope=seed + enricher pipelines)
-  → pyPlanBot (composite plan)
-  → pyConfigBot (composite config: seed/enrichers/merge)
-  → pyCodeBot (composite orchestrator, если требуется новый код)
-  → pyTestBot (integration tests)
-  → pyDocBot (composite pipeline docs)
-  → pyAuditBot (final)
+py-audit-bot (baseline, scope=seed + enricher pipelines)
+  → py-plan-bot (composite plan)
+  → py-config-bot (composite config: seed/enrichers/merge)
+  → py-code-bot (composite orchestrator, если требуется новый код)
+  → py-test-bot (integration tests)
+  → py-doc-bot (composite pipeline docs)
+  → py-audit-bot (final)
 ```
 
 ---
@@ -335,70 +335,44 @@ pyAuditBot (baseline, scope=seed + enricher pipelines)
 
 | Документ | Описание |
 |----------|----------|
-| `docs/00-project/agents/CODEX.md` | Основной регламент Codex |
+| `.claude/agents/py-*.md` | Спецификации субагентов для Claude Code CLI |
+| `.claude/agents/subagents/` | Оригинальные спецификации (справочный материал) |
+| `.claude/rules/ai-selfreview-rules.md` | Правила автоматической самопроверки кода |
 | `docs/00-project/RULES.md` | Архитектурные правила проекта |
-| `docs/02-architecture/decisions/` | ADR-001..ADR-028 |
+| `docs/02-architecture/decisions/` | ADR-001..ADR-032 |
 | `docs/00-project/glossary.md` | Терминология |
 | `tests/architecture/` | Автоматические проверки инвариантов |
 | `scripts/config_gap_analysis.py` | Автоматическая проверка конфигов |
 
 ---
 
-## 9a. Skill Activation Protocol
+## 9a. Инлайнированные знания
 
-### 9a.1 Маппинг навыков на субагенты
+В Claude Code CLI навыки не загружаются из внешних файлов. Вместо этого ключевые знания инлайнированы непосредственно в файлы субагентов (`.claude/agents/py-*.md`), в секцию `## Инлайнированные знания`.
 
-Каждый субагент имеет primary skill (активируется всегда) и secondary skills (активируются контекстно). Полные описания — в соответствующих `SUBAGENT.md`.
+### 9a.1 Маппинг знаний на субагенты
 
-| # | Субагент | Primary Skill | Secondary Skills |
-|:-:|----------|---------------|------------------|
-| I | pyAuditBot | `etl-system-auditor` | `python-software-architect` |
-| II | pyPlanBot | `python-software-architect` | `etl-rest-api-expert`, `data-engineering` |
-| III | pyTestBot | `senior-python-developer` | `data-engineering` |
-| IV | pyCodeBot | `senior-python-developer` | `etl-rest-api-expert`, `python-software-architect` |
-| V | pyConfigBot | `data-engineering` | `etl-rest-api-expert` |
-| VI | pyDebugBot | `senior-python-developer` | `etl-rest-api-expert` |
-| VII | pyDocBot | `python-tech-writer` | `bioinformatics-databases` |
+| # | Субагент | Основные знания | Дополнительные |
+|:-:|----------|----------------|----------------|
+| I | py-audit-bot | ETL system auditing, code review | Software architecture, REST API validation |
+| II | py-plan-bot | Software architecture | REST API, data engineering, composite pipelines |
+| III | py-test-bot | Python testing (pytest, VCR.py) | Data engineering (Pandera, DQ) |
+| IV | py-code-bot | Python development, pipeline scaffolding | REST API, composite pipelines |
+| V | py-config-bot | Data engineering, YAML configs | REST API config |
+| VI | py-debug-bot | Python debugging, RCA | REST API debugging, Pandera issues |
+| VII | py-doc-bot | Technical writing, ADR management | Bioinformatics terminology |
 
-### 9a.2 Протокол активации
+### 9a.2 Rule References
 
-**При запуске субагента оператор:**
-
-1. Открывает SUBAGENT.md целевого агента
-2. Читает секцию `## Skills` — определяет primary + релевантные secondary
-3. Загружает SKILL.md файлы (`view /mnt/skills/user/<skill>/SKILL.md`)
-4. Применяет инструкции навыка к текущей задаче
-
-**Правила активации secondary skills:**
-
-- Secondary активируется **только** если текущая задача попадает в описанные триггеры
-- При конфликте между primary и secondary — приоритет у primary
-- Навык `bioinformatics-databases` активируется при работе с domain-specific терминологией
-
-### 9a.3 Rule References
-
-Каждый SUBAGENT.md содержит секцию `## Rule References` с таблицами:
+Каждый файл субагента содержит секцию `## Rule References` с таблицами:
 
 | Тип | Формат | Пример |
 |-----|--------|--------|
 | Правило RULES.md | `[RULES-§X.Y]` | `[RULES-§2.1]` — Hexagonal Architecture |
 | ADR | `[ADR-NNN]` | `[ADR-010]` — Local-only deployment |
 | Инвариант | `[INV:name]` | `[INV:IMPORT_DOMAIN]` — domain → ничего |
-| Глоссарий | `[GLOSS:term]` | `[GLOSS:Molecule]` — ChEMBL terminology |
 
-**Verification:** каждый rule reference сопровождается командой проверки (bash). При аудите pyAuditBot обязан выполнить все verification-команды для scope задачи.
-
-### 9a.4 Навыки — пути
-
-| Навык | Путь |
-|-------|------|
-| `etl-system-auditor` | `/mnt/skills/user/etl-system-auditor/SKILL.md` |
-| `python-software-architect` | `/mnt/skills/user/python-software-architect/SKILL.md` |
-| `senior-python-developer` | `/mnt/skills/user/senior-python-developer/SKILL.md` |
-| `data-engineering` | `/mnt/skills/user/data-engineering/SKILL.md` |
-| `etl-rest-api-expert` | `/mnt/skills/user/etl-rest-api-expert/SKILL.md` |
-| `python-tech-writer` | `/mnt/skills/user/python-tech-writer/SKILL.md` |
-| `bioinformatics-databases` | `/mnt/skills/user/bioinformatics-databases/SKILL.md` |
+**Verification:** каждый rule reference сопровождается командой проверки (bash).
 
 ---
 
@@ -406,9 +380,11 @@ pyAuditBot (baseline, scope=seed + enricher pipelines)
 
 ### 10.1 Матрица MCP-серверы × Субагенты
 
-Каждый субагент имеет доступ к MCP-серверам через платформу Claude.ai. Полные описания сценариев — в соответствующих `SUBAGENT.md`, секция `## MCP Tools`.
+Каждый субагент имеет доступ к MCP-серверам через `ToolSearch`. Полные описания сценариев — в соответствующих `.claude/agents/py-*.md`, секция `## MCP Tools`.
 
-| MCP Server | pyAuditBot | pyPlanBot | pyTestBot | pyCodeBot | pyConfigBot | pyDebugBot | pyDocBot |
+> **Примечание:** Перед использованием MCP инструментов необходимо вызвать `ToolSearch("<provider>")` для загрузки.
+
+| MCP Server | py-audit-bot | py-plan-bot | py-test-bot | py-code-bot | py-config-bot | py-debug-bot | py-doc-bot |
 |------------|:----------:|:---------:|:---------:|:---------:|:-----------:|:----------:|:--------:|
 | **ChEMBL** | ✅ Schema validation | — | ✅ Golden data, contracts | ✅ API reference | ✅ Field reference | ✅ Error repro | — |
 | **PubMed** | — | ✅ Coverage eval | ✅ Test data | ✅ Publication ref | — | — | ✅ Citations |
@@ -419,21 +395,19 @@ pyAuditBot (baseline, scope=seed + enricher pipelines)
 
 ### 10.2 Матрица Platform Tools × Субагенты
 
-| Tool | pyAuditBot | pyPlanBot | pyTestBot | pyCodeBot | pyConfigBot | pyDebugBot | pyDocBot |
+| Tool | py-audit-bot | py-plan-bot | py-test-bot | py-code-bot | py-config-bot | py-debug-bot | py-doc-bot |
 |------|:----------:|:---------:|:---------:|:---------:|:-----------:|:----------:|:--------:|
-| `web_search` | ✅ Docs | ✅ Research | — | ✅ Lib docs | ✅ Schema docs | ✅ Solutions | ✅ API docs |
-| `web_fetch` | ✅ | ✅ | — | ✅ | — | ✅ | ✅ |
-| `google_drive_search` | ✅ History | ✅ Plans | ✅ Golden | — | — | — | ✅ Docs |
-| `ask_user_input` | ✅ Scope | ✅ Priority | — | — | — | ✅ Clarify | — |
-| `message_compose` | — | — | — | — | — | — | ✅ Reports |
+| `WebSearch` | Docs | Research | — | Lib docs | Schema docs | Solutions | API docs |
+| `WebFetch` | Pages | Pages | — | Pages | — | SO/GH Issues | Pages |
 
 ### 10.3 Протокол использования MCP
 
-**При запуске субагента оператор:**
+**В Claude Code CLI:**
 
-1. Определяет, нужны ли MCP-вызовы для текущей задачи (по таблице §10.1)
-2. Если да — использует соответствующий MCP tool напрямую в контексте Claude.ai
-3. Результат MCP → input для субагента (findings, reference data, test data)
+1. Субагент определяет, нужны ли MCP-вызовы для текущей задачи (по таблице §10.1)
+2. Вызывает `ToolSearch("<provider>")` для загрузки MCP инструментов
+3. Использует загруженные инструменты напрямую
+4. Результат MCP → input для анализа (findings, reference data, test data)
 
 **Правила:**
 
@@ -446,18 +420,30 @@ pyAuditBot (baseline, scope=seed + enricher pipelines)
 
 | Workflow | Агент | Trigger | MCP Tools | Output |
 |----------|-------|---------|-----------|--------|
-| Schema Drift Detection | pyAuditBot | audit ChEMBL pipeline | ChEMBL:compound_search → compare with entity | AUD-SCHEMA-* |
-| Golden Dataset Generation | pyTestBot | new_tests for ChEMBL | ChEMBL:compound_search/get_bioactivity → save | tests/golden/*.json |
-| Contract Testing | pyTestBot | final (ChEMBL scope) | ChEMBL MCP → compare with contract | FAIL-CONTRACT-* |
-| Research Context | pyPlanBot | new entity planning | bioRxiv:search_preprints → analyze | 01-plan §Research Context |
-| Documentation Diagrams | pyDocBot | DOC-* for architecture | Mermaid:validate_and_render → save | docs/diagrams/*.svg |
-| API Reference | pyCodeBot | new adapter implementation | ChEMBL/OT/PubMed → study response | Field mapping in code |
-| Config Fields Validation | pyConfigBot | new pipeline config | ChEMBL MCP → compare fields | CFG-DRIFT-* |
-| Error Reproduction | pyDebugBot | DBG-* for API failure | ChEMBL MCP → reproduce request | DBG-* root cause |
+| Schema Drift Detection | py-audit-bot | audit ChEMBL pipeline | ChEMBL:compound_search → compare with entity | AUD-SCHEMA-* |
+| Golden Dataset Generation | py-test-bot | new_tests for ChEMBL | ChEMBL:compound_search/get_bioactivity → save | tests/golden/*.json |
+| Contract Testing | py-test-bot | final (ChEMBL scope) | ChEMBL MCP → compare with contract | FAIL-CONTRACT-* |
+| Research Context | py-plan-bot | new entity planning | bioRxiv:search_preprints → analyze | 01-plan §Research Context |
+| Documentation Diagrams | py-doc-bot | DOC-* for architecture | Mermaid:validate_and_render → save | docs/diagrams/*.svg |
+| API Reference | py-code-bot | new adapter implementation | ChEMBL/OT/PubMed → study response | Field mapping in code |
+| Config Fields Validation | py-config-bot | new pipeline config | ChEMBL MCP → compare fields | CFG-DRIFT-* |
+| Error Reproduction | py-debug-bot | DBG-* for API failure | ChEMBL MCP → reproduce request | DBG-* root cause |
 
 ---
 
 ## 11. Changelog (ORCHESTRATION.md)
+
+### v3.0 (2026-02-08)
+
+- **PLATFORM**: Адаптация для Claude Code CLI (ранее Codex/Claude.ai)
+- **CHANGED**: Все субагенты переименованы: `pyXxxBot` → `py-xxx-bot` (для `subagent_type` в Task tool)
+- **CHANGED**: 8 старых Claude Code агентов заменены на 7 унифицированных: `py-audit-bot`, `py-plan-bot`, `py-test-bot`, `py-code-bot`, `py-config-bot`, `py-debug-bot`, `py-doc-bot`
+- **CHANGED**: Навыки из `/mnt/skills/` инлайнированы в файлы субагентов (секция `## Инлайнированные знания`)
+- **REMOVED**: `google_drive_search`, `message_compose`, `ask_user_input` (недоступны в CLI)
+- **CHANGED**: `web_search` / `web_fetch` → `WebSearch` / `WebFetch` (встроенные инструменты Claude Code)
+- **CHANGED**: MCP инструменты доступны через `ToolSearch` (deferred loading)
+- **CHANGED**: §9a — Skill Activation Protocol → Инлайнированные знания
+- **NEW**: Ссылки на `.claude/agents/py-*.md` вместо `SUBAGENT.md`
 
 ### v2.2 (2026-02-07)
 
@@ -477,18 +463,18 @@ pyAuditBot (baseline, scope=seed + enricher pipelines)
 
 ### v2.0 (2026-02-07)
 
-- **NEW**: `pyCodeBot` — написание production-кода (`src/bioetl/`), файловая зона `src/`
-- **NEW**: `pyConfigBot` — управление конфигурациями (`configs/`), файловая зона `configs/`
+- **NEW**: `py-code-bot` — написание production-кода (`src/bioetl/`), файловая зона `src/`
+- **NEW**: `py-config-bot` — управление конфигурациями (`configs/`), файловая зона `configs/`
 - **NEW**: ID-prefix `CFG-` для config changes
 - **NEW**: Артефакт `04a-config-log.md`
 - **NEW**: Упрощённые режимы: `new-entity` (§8.4), `composite-pipeline` (§8.5)
 - **NEW**: §5.2 — маршрутизация RF-* по типу изменения
 - **NEW**: §7.6 — config compliance gate
 - **NEW**: §7.7 — zone isolation
-- **CHANGED**: Шаг ⑤ (ранее «рефакторинг») → шаг ④ «реализация» с параллельным pyCodeBot + pyConfigBot
+- **CHANGED**: Шаг ⑤ (ранее «рефакторинг») → шаг ④ «реализация» с параллельным py-code-bot + py-config-bot
 - **CHANGED**: Матрица взаимодействий расширена до 7×7
 - **CHANGED**: Счёт subagent-ов: 5 → 7
 
 ### v1.0 (2026-02-07)
 
-- Initial release: pyAuditBot, pyPlanBot, pyTestBot, pyDebugBot, pyDocBot
+- Initial release: py-audit-bot, py-plan-bot, py-test-bot, py-debug-bot, py-doc-bot
