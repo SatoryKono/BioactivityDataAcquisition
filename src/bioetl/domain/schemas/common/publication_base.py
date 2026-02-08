@@ -48,8 +48,8 @@ class PublicationBaseSchema(ETLRecordSchema):
     # Note: PubMed overrides pmid to be int type instead of str
     pmid: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d+$",
-        description="PubMed ID (numeric string)",
+        str_matches=r"^[1-9]\d*$",
+        description="PubMed ID (positive numeric string)",
     )
     doi: Series[str] = pa.Field(
         nullable=True,

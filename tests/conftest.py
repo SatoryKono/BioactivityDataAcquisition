@@ -730,7 +730,7 @@ def minimal_pubmed_publication_df() -> Any:
                 "citations_received": 10,
                 "citations_made": 5,
                 "is_oa": True,
-                # PubMed-specific fields (all nullable)
+                # PubMed-specific fields (nullable strings)
                 "pii": None,
                 "mid": None,
                 "publisher_id": None,
@@ -740,18 +740,19 @@ def minimal_pubmed_publication_df() -> Any:
                 "nlm_unique_id": None,
                 "medline_pgn": None,
                 "page_range": None,
-                "pub_month": None,
-                "pub_day": None,
+                # PubMed int fields (use real values to avoid int64 coercion issues)
+                "pub_month": 1,
+                "pub_day": 15,
                 "publication_status": None,
                 "publication_type_list": None,
                 "date_completed": None,
                 "date_revised": None,
                 "citation_subset": None,
                 "affiliation_structured": None,
-                "mesh_heading_count": None,
-                "keyword_count": None,
-                "grant_count": None,
-                "chemical_count": None,
+                "mesh_heading_count": 0,
+                "keyword_count": 0,
+                "grant_count": 0,
+                "chemical_count": 0,
                 "subject_mesh": None,
                 "chemicals": None,
                 "subject_keywords": None,
@@ -790,6 +791,7 @@ def minimal_crossref_publication_df() -> Any:
                 "_index": 0,
                 # Cross-reference identifiers
                 "pmid": "12345678",
+                "pmc_id": None,
                 # Core content
                 "title": "Test CrossRef Publication",
                 "abstract": "Test abstract for CrossRef validation.",
