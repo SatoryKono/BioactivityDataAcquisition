@@ -11,7 +11,9 @@ async def test_unified_client_retries_on_protocol_error():
     rate_limiter = AsyncMock()
     circuit_breaker = AsyncMock()
     # Mock circuit breaker to just call the function
-    circuit_breaker.call.side_effect = lambda f, *args, **kwargs: f(*args, **kwargs)
+    async def mock_call(func, *args, **kwargs):
+        return await func(*args, **kwargs)
+    circuit_breaker.call.side_effect = mock_call
     
     retry_config = RetryConfig(max_attempts=3, base_delay=0.01)
     
@@ -24,11 +26,12 @@ async def test_unified_client_retries_on_protocol_error():
     
     # Mock httpx AsyncClient
     mock_httpx = AsyncMock()
+    request = httpx.Request("GET", "https://api.test.com")
     # Simulate RemoteProtocolError on first two attempts, success on third
     mock_httpx.request.side_effect = [
         httpx.RemoteProtocolError("Server disconnected"),
         httpx.RemoteProtocolError("Server disconnected"),
-        httpx.Response(200, content=b'{"status": "ok"}')
+        httpx.Response(200, content=b'{"status": "ok"}', request=request)
     ]
     
     client._client = mock_httpx
@@ -46,7 +49,9 @@ async def test_unified_client_exhausts_retries_on_protocol_error():
     # Setup
     rate_limiter = AsyncMock()
     circuit_breaker = AsyncMock()
-    circuit_breaker.call.side_effect = lambda f, *args, **kwargs: f(*args, **kwargs)
+    async def mock_call(func, *args, **kwargs):
+        return await func(*args, **kwargs)
+    circuit_breaker.call.side_effect = mock_call
     
     retry_config = RetryConfig(max_attempts=2, base_delay=0.01)
     
