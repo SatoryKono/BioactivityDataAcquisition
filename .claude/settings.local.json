@@ -36,7 +36,8 @@
       "Bash(git -C \"E:\\\\google_drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" log -1 --format=\"%H %ai\" -- \"docs/00-project/glossary.md\" \"README.md\" \".claude/PROJECT_CONTEXT.md\" \".claude/agents/ORCHESTRATION.md\")",
       "Bash(for f in .claude/agents/py-*.md)",
       "Bash(do wc -l \"$f\")",
-      "Bash(dir /B \"E:\\\\google_drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\.claude\\\\agents\\\\ai*\")"
+      "Bash(dir /B \"E:\\\\google_drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\.claude\\\\agents\\\\ai*\")",
+      "Bash(test:*)"
     ]
   },
   "enabledPlugins": {

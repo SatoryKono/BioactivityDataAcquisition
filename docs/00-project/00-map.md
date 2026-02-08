@@ -1,11 +1,11 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.17 | Last updated: 2026-02-04*
+*Synced with RULES.md v5.17 | Last updated: 2026-02-08*
 
-> **Documentation Update:** 2026-02-04
+> **Documentation Update:** 2026-02-08
 > - Codebase metrics updated: ~500 Python files, ~110,902 LOC, ~10,957 tests
 > - ADR count corrected: 32 ADRs (ADR-001 through ADR-032)
-> - Pipeline configs: 22 configurations
+> - Pipeline configs: 27 configurations
 > - Adapter listing completed (all 7 providers)
 > - Gold contract link fixed (chembl_activity_v1.0.json)
 
@@ -15,11 +15,11 @@
 |-------------------------|------------------------------------------------------------------------|
 | Understand the rules    | [RULES.md](RULES.md)                 |
 | Look up terminology     | [glossary.md](glossary.md)           |
-| Create a new pipeline   | [00-project-rules/04-extending-bioetl.md](00-project-rules/04-extending-bioetl.md)      |
-| Review a pipeline       | [templates/pipeline-review-checklist.md](templates/pipeline-review-checklist.md) |
-| Handle a prod error     | [05-operations/runbooks/index.md](05-operations/runbooks/index.md)                           |
-| Understand architecture | [02-architecture/00-overview.md](02-architecture/00-overview.md)                  |
-| Check data contracts    | [contracts/gold/chembl_activity_v1.0.json](contracts/gold/chembl_activity_v1.0.json)          |
+| Create a new pipeline   | [governance/04-extending-bioetl.md](governance/04-extending-bioetl.md)      |
+| Review a pipeline       | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
+| Handle a prod error     | [runbooks/index.md](../05-operations/runbooks/index.md)                           |
+| Understand architecture | [00-overview.md](../02-architecture/00-overview.md)                  |
+| Check data contracts    | [chembl_activity_v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
 
 ---
 
@@ -29,7 +29,7 @@
 |----------|----------|----------|
 | **Public-facing** | English | README.md, CONTRIBUTING.md, CHANGELOG.md |
 | **User guides** | English | docs/03-guides/*, docs/04-reference/* |
-| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project-rules/* |
+| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project/governance/* |
 | **Architecture docs** | Russian | docs/02-architecture/* |
 | **Code comments** | Russian | Docstrings, inline comments |
 
@@ -92,92 +92,92 @@ docs/
 ### Getting Started
 
 1. [RULES.md](RULES.md) - Project rules (start here)
-2. [rules-summary.md](quick-reference/rules-summary.md) - Quick reference
-3. [04-extending-bioetl.md](00-project-rules/04-extending-bioetl.md) - Adding providers/pipelines
+2. [rules-summary.md](rules-summary.md) - Quick reference
+3. [04-extending-bioetl.md](governance/04-extending-bioetl.md) - Adding providers/pipelines
 
 ### Architecture
 
 | Document                                                                                     | Covers                                   | RULES.md |
 |----------------------------------------------------------------------------------------------|------------------------------------------|----------|
-| [system-context.md](02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
-| [container-diagram.md](02-architecture/container-diagram.md)                               | C4 Container, Docker services            | §5.6     |
-| [data-flow.md](02-architecture/data-flow.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
-| [05-composition-layer.md](02-architecture/05-composition-layer.md)                           | Composition Root, DI, Factories          | §1.1     |
-| [ADR-001: Delta Lake](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Storage engine choice                    | §2.1, §3 |
-| [ADR-002: Medallion](02-architecture/decisions/ADR-002-medallion-architecture.md)            | Data layering pattern                    | §1       |
-| [ADR-003: In-Memory Locking](02-architecture/decisions/ADR-003-in-memory-locking-strategy.md) | MemoryLock strategy                      | §6       |
-| [ADR-004: Pydantic](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)            | Validation approach                      | -        |
-| [ADR-005: Composition Layer](02-architecture/decisions/ADR-005-composition-layer-separation.md) | DI and layer separation               | §1.1     |
-| [ADR-006: Logger/Metrics Ports](02-architecture/decisions/ADR-006-logger-metrics-ports.md)   | Port abstractions                        | §1.1     |
-| [ADR-007: Circuit Breaker](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) | Failure handling pattern               | §3.1.4   |
-| [ADR-008: Graceful Shutdown](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | SIGTERM/SIGINT handling                  | §5.3     |
-| [ADR-009: Paginated Fetcher](02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)   | Pagination abstraction                   | App D    |
-| [ADR-010: Local-Only Deploy](02-architecture/decisions/ADR-010-local-only-deployment.md)     | File-based deployment (no Docker)        | §5.6     |
-| [ADR-011: Watermark Removal](02-architecture/decisions/ADR-011-remove-watermark-mechanism.md) | Simplified checkpoint model             | §2.4     |
-| [ADR-012: Storage Clear Contract](02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage clear API, run_id injection | §2.1     |
-| [ADR-013: Async Storage Cleanup](02-architecture/decisions/ADR-013-async-storage-cleanup.md) | MedallionLifecycleService pattern        | §2.1     |
-| [ADR-014: Deterministic Writes](02-architecture/decisions/ADR-014-deterministic-writes.md)   | SCD2 ingestion_ts, reproducible writes   | §2.1     |
-| [ADR-015: Pipeline Services Lifecycle](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) | Port lifecycle contracts       | §1.1     |
-| [ADR-016: Error Handling Strategy](02-architecture/decisions/ADR-016-error-handling-strategy.md) | Unified error classification          | §3.1     |
-| [ADR-017: Observability Architecture](02-architecture/decisions/ADR-017-observability-architecture.md) | Metrics, tracing, logging ports    | §5.1     |
-| [ADR-018: Gold Strict Validation](02-architecture/decisions/ADR-018-gold-strict-validation.md) | Pandera Gold validation                | §2.7     |
-| [ADR-019: Observability Port Enforcement](02-architecture/decisions/ADR-019-observability-port-enforcement.md) | REQ-OBS-001 compliance       | §5.1     |
-| [ADR-020: BasePipeline Decomposition](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | God Object refactoring       | §1.1     |
-| [ADR-021: DDD Aggregates](02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) | DDD aggregates adoption       | -        |
-| [ADR-022: Tracing NoOp](02-architecture/decisions/ADR-022-tracing-noop.md) | NoOp for tracing              | -        |
-| [ADR-023: Entity Type Patterns](02-architecture/decisions/ADR-023-entity-type-patterns.md) | Entity type patterns          | -        |
-| [ADR-024: Entity Naming Unification](02-architecture/decisions/ADR-024-entity-naming-unification.md) | Entity naming unification     | -        |
-| [ADR-025: Pipeline Config Unification](02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline config unification   | -        |
-| [ADR-026: Composite Pipeline Pattern](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite pipeline pattern    | -        |
-| [ADR-027: DQ Rules Externalization](02-architecture/decisions/ADR-027-dq-rules-externalization.md) | Hierarchical DQ configuration | §3.1.2   |
-| [ADR-028: Filter Rules Externalization](02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Hierarchical filter configuration | App D   |
-| [ADR-029: Output Metadata Unification](02-architecture/decisions/ADR-029-output-metadata-unification.md) | Unified output metadata contracts | §2.4    |
-| [ADR-030: Publication Pagination Strategy](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication pagination strategy | -       |
-| [ADR-031: Loading Strategy Formalization](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading strategy formalization | -       |
-| [ADR-032: Unified HTTP Client](02-architecture/decisions/ADR-032-unified-http-client.md) | Unified HTTP client pattern | App A   |
+| [system-context.md](../02-architecture/system-context.md)                                       | Entity models, IDs, relationships        | §2.8     |
+| [container-diagram.md](../02-architecture/container-diagram.md)                               | C4 Container, Docker services            | §5.6     |
+| [data-flow.md](../02-architecture/data-flow.md)                                                 | Ports & Adapters, layer responsibilities | §1.1     |
+| [05-composition-layer.md](../02-architecture/05-composition-layer.md)                           | Composition Root, DI, Factories          | §1.1     |
+| [ADR-001: Delta Lake](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)            | Storage engine choice                    | §2.1, §3 |
+| [ADR-002: Medallion](../02-architecture/decisions/ADR-002-medallion-architecture.md)            | Data layering pattern                    | §1       |
+| [ADR-003: In-Memory Locking](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md) | MemoryLock strategy                      | §6       |
+| [ADR-004: Pydantic](../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)            | Validation approach                      | -        |
+| [ADR-005: Composition Layer](../02-architecture/decisions/ADR-005-composition-layer-separation.md) | DI and layer separation               | §1.1     |
+| [ADR-006: Logger/Metrics Ports](../02-architecture/decisions/ADR-006-logger-metrics-ports.md)   | Port abstractions                        | §1.1     |
+| [ADR-007: Circuit Breaker](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) | Failure handling pattern               | §3.1.4   |
+| [ADR-008: Graceful Shutdown](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) | SIGTERM/SIGINT handling                  | §5.3     |
+| [ADR-009: Paginated Fetcher](../02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)   | Pagination abstraction                   | App D    |
+| [ADR-010: Local-Only Deploy](../02-architecture/decisions/ADR-010-local-only-deployment.md)     | File-based deployment (no Docker)        | §5.6     |
+| [ADR-011: Watermark Removal](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md) | Simplified checkpoint model             | §2.4     |
+| [ADR-012: Storage Clear Contract](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage clear API, run_id injection | §2.1     |
+| [ADR-013: Async Storage Cleanup](../02-architecture/decisions/ADR-013-async-storage-cleanup.md) | MedallionLifecycleService pattern        | §2.1     |
+| [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)   | SCD2 ingestion_ts, reproducible writes   | §2.1     |
+| [ADR-015: Pipeline Services Lifecycle](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) | Port lifecycle contracts       | §1.1     |
+| [ADR-016: Error Handling Strategy](../02-architecture/decisions/ADR-016-error-handling-strategy.md) | Unified error classification          | §3.1     |
+| [ADR-017: Observability Architecture](../02-architecture/decisions/ADR-017-observability-architecture.md) | Metrics, tracing, logging ports    | §5.1     |
+| [ADR-018: Gold Strict Validation](../02-architecture/decisions/ADR-018-gold-strict-validation.md) | Pandera Gold validation                | §2.7     |
+| [ADR-019: Observability Port Enforcement](../02-architecture/decisions/ADR-019-observability-port-enforcement.md) | REQ-OBS-001 compliance       | §5.1     |
+| [ADR-020: BasePipeline Decomposition](../02-architecture/decisions/ADR-020-basepipeline-decomposition.md) | God Object refactoring       | §1.1     |
+| [ADR-021: DDD Aggregates](../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) | DDD aggregates adoption       | -        |
+| [ADR-022: Tracing NoOp](../02-architecture/decisions/ADR-022-tracing-noop.md) | NoOp for tracing              | -        |
+| [ADR-023: Entity Type Patterns](../02-architecture/decisions/ADR-023-entity-type-patterns.md) | Entity type patterns          | -        |
+| [ADR-024: Entity Naming Unification](../02-architecture/decisions/ADR-024-entity-naming-unification.md) | Entity naming unification     | -        |
+| [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline config unification   | -        |
+| [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite pipeline pattern    | -        |
+| [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) | Hierarchical DQ configuration | §3.1.2   |
+| [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Hierarchical filter configuration | App D   |
+| [ADR-029: Output Metadata Unification](../02-architecture/decisions/ADR-029-output-metadata-unification.md) | Unified output metadata contracts | §2.4    |
+| [ADR-030: Publication Pagination Strategy](../02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication pagination strategy | -       |
+| [ADR-031: Loading Strategy Formalization](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading strategy formalization | -       |
+| [ADR-032: Unified HTTP Client](../02-architecture/decisions/ADR-032-unified-http-client.md) | Unified HTTP client pattern | App A   |
 
 ### Data Management
 
 | Topic            | Document                                                                                            | RULES.md |
 |------------------|-----------------------------------------------------------------------------------------------------|----------|
-| Medallion Layers | [data-flow.md](02-architecture/data-flow.md)                                                        | §2.1     |
+| Medallion Layers | [data-flow.md](../02-architecture/data-flow.md)                                                        | §2.1     |
 | Schema Drift     | [RULES.md](RULES.md#22-обработка-дрейфа-схемы)   | §2.2     |
-| Data Lineage     | [system-context.md](02-architecture/system-context.md)                                              | §2.3     |
+| Data Lineage     | [system-context.md](../02-architecture/system-context.md)                                              | §2.3     |
 | Backfill/Replay  | [RULES.md](RULES.md#24-стратегия-backfill-и-replay)            | §2.4     |
 | Quarantine       | [RULES.md](RULES.md#26-dead-letter-queue--quarantine) | §2.6     |
-| Content Hash     | [system-context.md](02-architecture/system-context.md)                                              | §2.8     |
+| Content Hash     | [system-context.md](../02-architecture/system-context.md)                                              | §2.8     |
 
 ### Schema Documentation
 
 | Provider | Entity | Schema Document | RULES.md |
 |----------|--------|-----------------|----------|
-| ChEMBL | Activity | [activity-schema.md](domain/schemas/chembl/activity-schema.md) | §2.8 |
-| ChEMBL | Molecule | [molecule-schema.md](domain/schemas/chembl/molecule-schema.md) | §2.8 |
-| ChEMBL | Target | [target-schema.md](domain/schemas/chembl/target-schema.md) | §2.8 |
-| ChEMBL | Assay | [assay-schema.md](domain/schemas/chembl/assay-schema.md) | §2.8 |
+| ChEMBL | Activity | [activity-schema.md](../04-reference/schemas/domain/chembl/activity-schema.md) | §2.8 |
+| ChEMBL | Molecule | [molecule-schema.md](../04-reference/schemas/domain/chembl/molecule-schema.md) | §2.8 |
+| ChEMBL | Target | [target-schema.md](../04-reference/schemas/domain/chembl/target-schema.md) | §2.8 |
+| ChEMBL | Assay | [assay-schema.md](../04-reference/schemas/domain/chembl/assay-schema.md) | §2.8 |
 
 ### Operations
 
 | Topic             | Document                                                                                          | RULES.md |
 |-------------------|---------------------------------------------------------------------------------------------------|----------|
-| Error Handling    | [ADR-016](02-architecture/decisions/ADR-016-error-handling-strategy.md)         | §3.1     |
-| Circuit Breaker   | [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)  | §3.1.4   |
-| Locking           | [ADR-003](02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)      | §3.3     |
+| Error Handling    | [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)         | §3.1     |
+| Circuit Breaker   | [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)  | §3.1.4   |
+| Locking           | [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)      | §3.3     |
 | DQ Metrics        | [RULES.md](RULES.md#34-data-quality-метрики)                                    | §3.4     |
-| Graceful Shutdown | [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)      | §5.3     |
-| DR Procedures     | [runbooks/index.md](05-operations/runbooks/index.md)                            | §5.5     |
-| Cleanup           | [cleanup-policy.md](03-guides/cleanup-policy.md)                                | §2.1.1   |
+| Graceful Shutdown | [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)      | §5.3     |
+| DR Procedures     | [runbooks/index.md](../05-operations/runbooks/index.md)                            | §5.5     |
+| Cleanup           | [cleanup-policy.md](../03-guides/cleanup-policy.md)                                | §2.1.1   |
 
 ### Development
 
 | Topic            | Document                                                                                        | RULES.md |
 |------------------|-------------------------------------------------------------------------------------------------|----------|
-| Adding Providers | [add-new-source.md](03-guides/add-new-source.md)                                                | App D    |
-| Adding Pipelines | [add-pipeline-existing-source.md](03-guides/add-pipeline-existing-source.md)                    | App D    |
-| Pipeline Review  | [pipeline-review-checklist.md](templates/pipeline-review-checklist.md)                          | §4.2     |
-| Testing          | [testing.md](03-guides/testing.md)                                                              | §4.2     |
-| E2E Testing      | [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)                           | §4.2.3   |
-| Date Handling    | [date-handling.md](03-guides/date-handling.md)                                                  | §2.4     |
+| Adding Providers | [add-new-source.md](../03-guides/add-new-source.md)                                                | App D    |
+| Adding Pipelines | [add-pipeline-existing-source.md](../03-guides/add-pipeline-existing-source.md)                    | App D    |
+| Pipeline Review  | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md)                          | §4.2     |
+| Testing          | [testing.md](../03-guides/testing.md)                                                              | §4.2     |
+| E2E Testing      | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)                           | §4.2.3   |
+| Date Handling    | [date-handling.md](../03-guides/date-handling.md)                                                  | §2.4     |
 | Code Style       | [RULES.md §4](RULES.md#4-качество-кода-и-тестирование)                                          | §4       |
 
 ---
@@ -260,7 +260,8 @@ src/bioetl/
 │   │   └── uniprot/             # UniProt API adapter
 │   ├── storage/                 # Data persistence
 │   │   ├── bronze_writer.py     # JSONL + zstd writer
-│   │   ├── delta_writer.py      # Delta Lake merge/upsert
+│   │   ├── base_delta_writer.py  # Delta Lake merge/upsert
+│   │   ├── silver_writer.py     # Silver layer writer
 │   │   └── gold_writer.py       # SCD Type 2 writer
 │   ├── locking/                 # Distributed locking
 │   │   └── memory_lock.py       # In-memory (local-only)
@@ -324,15 +325,15 @@ graph TD
 
 | File                                               | Purpose                   |
 |----------------------------------------------------|---------------------------|
-| `docs/RULES.md`                                    | Master rules document     |
-| `docs/glossary.md`                                 | Ubiquitous Language terminology |
+| `docs/00-project/RULES.md`                         | Master rules document     |
+| `docs/00-project/glossary.md`                      | Ubiquitous Language terminology |
 | `CHANGELOG.md`                                     | Version history           |
 | `configs/pipelines/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
-| `src/bioetl/composition/bootstrap.py`              | Composition root          |
+| `src/bioetl/composition/bootstrap_contexts.py`     | Composition root          |
 | `src/bioetl/infrastructure/config.py`              | Application settings      |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
-| `docs/contracts/gold/{entity}.json`                | Gold data contracts       |
+| `docs/04-reference/contracts/gold/{entity}.json`   | Gold data contracts       |
 
 ---
 
