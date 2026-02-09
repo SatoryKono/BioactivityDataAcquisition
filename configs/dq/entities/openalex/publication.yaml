@@ -52,7 +52,7 @@ entity_field_validations:
       - other
     nullable: true
 
-  - field: cited_by_count
+  - field: citations_received
     type: range
     min: 0
     nullable: true
