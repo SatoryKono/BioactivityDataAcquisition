@@ -114,7 +114,9 @@ class ChemblAdapter(BaseHttpAdapter):
     )
 
     # Resolved extraction params (computed in __post_init__)
-    _extraction_params: ExtractionParams = field(init=False, default_factory=ExtractionParams.empty)
+    _extraction_params: ExtractionParams = field(
+        init=False, default_factory=ExtractionParams.empty
+    )
 
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
