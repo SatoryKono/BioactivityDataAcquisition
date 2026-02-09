@@ -345,8 +345,9 @@ def validate_non_empty_string(value: str | None) -> str | None:
 # Format: 10.XXXX/suffix where:
 #   - 10. is the fixed prefix
 #   - XXXX is registrant code (minimum 4 digits)
-#   - suffix is the identifier (minimum 1 character)
-DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/.+$"
+#   - suffix is the identifier (minimum 1 non-whitespace character)
+# Aligned with DOI Value Object: \S+ forbids whitespace in DOI suffix.
+DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/\S+$"
 _DOI_PATTERN = re.compile(DOI_REGEX_PATTERN)
 
 
