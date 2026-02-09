@@ -15,7 +15,6 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_page_info,
     extract_published_date,
     extract_references,
-    extract_year,
 )
 from bioetl.application.pipelines.crossref.transformer import (
     CrossRefPublicationTransformer,
@@ -34,5 +33,4 @@ __all__ = [
     "extract_page_info",
     "extract_published_date",
     "extract_references",
-    "extract_year",
 ]

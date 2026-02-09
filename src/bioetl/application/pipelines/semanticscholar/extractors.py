@@ -26,11 +26,7 @@ from bioetl.application.pipelines.semanticscholar._page_parsing import (
     parse_page_range,
     parse_volume_issue,
 )
-from bioetl.domain.config import ValidationConfig
 from bioetl.domain.value_objects import PublicationYear
-
-# Semantic Scholar-specific config with min_year=1500 for historical publications
-_SS_VALIDATION_CONFIG = ValidationConfig(min_publication_year=1500)
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
@@ -309,25 +305,6 @@ def extract_fields_of_study(
     return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 
-def validate_year(year: int | None) -> int | None:
-    """Validate publication year using PublicationYear Value Object.
-
-    Uses Semantic Scholar-specific ValidationConfig with min_year=1500
-    to support historical publications.
-
-    Args:
-        year: Year from S2 response.
-
-    Returns:
-        Year if valid (1500-2100), None otherwise.
-
-    """
-    if year is None:
-        return None
-    year_vo = PublicationYear.from_raw(year, config=_SS_VALIDATION_CONFIG)
-    return year_vo.value if year_vo else None
-
-
 __all__ = [
     "VALID_OA_STATUS_VALUES",
     "extract_affiliations",
@@ -345,5 +322,4 @@ __all__ = [
     "normalize_oa_status",
     "parse_page_range",
     "parse_volume_issue",
-    "validate_year",
 ]

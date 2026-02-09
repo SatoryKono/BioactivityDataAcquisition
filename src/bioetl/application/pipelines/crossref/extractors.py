@@ -42,7 +42,6 @@ __all__ = [
     "extract_page_info",
     "extract_published_date",
     "extract_references",
-    "extract_year",
 ]
 
 
@@ -132,39 +131,6 @@ def extract_affiliations(publication: dict[str, Any]) -> list[str]:
                 affiliations.add(name.strip())
 
     return sorted(affiliations)
-
-
-def extract_year(publication: dict[str, Any]) -> int | None:
-    """Extract publication year from date-parts.
-
-    Tries published-print, then published-online, then issued.
-    Validates using PublicationYear Value Object for consistent range checking.
-
-    Args:
-        publication: CrossRef publication record.
-
-    Returns:
-        Publication year if valid (1800-2100), None otherwise.
-
-    Example:
-        >>> extract_year({"published-print": {"date-parts": [[2023, 6, 15]]}})
-        2023
-        >>> extract_year({"issued": {"date-parts": [[2021]]}})
-        2021
-        >>> extract_year({})
-        None
-
-    """
-    for date_field in ["published-print", "published-online", "issued"]:
-        date_info = publication.get(date_field, {})
-        date_parts = date_info.get("date-parts", [[]])
-        if date_parts and date_parts[0] and len(date_parts[0]) > 0:
-            raw_year = date_parts[0][0]
-            if isinstance(raw_year, int):
-                year_vo = PublicationYear.from_raw(raw_year)
-                if year_vo:
-                    return year_vo.value
-    return None
 
 
 def extract_license_url(publication: dict[str, Any]) -> str | None:

@@ -825,7 +825,7 @@ def minimal_crossref_publication_df() -> Any:
                 "journal_name_short": None,
                 "issn_print": None,
                 "issn_electronic": None,
-                "author_orcid_list": None,
+                "author_orcids": None,
                 "author_details": None,
                 "references": None,
                 # System fields
