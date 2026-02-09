@@ -27,7 +27,6 @@ from bioetl.domain.normalization import (
     format_date_parts,
     parse_page_range,
 )
-from bioetl.domain.value_objects import PublicationYear
 
 # Re-exports for backward compatibility
 __all__ = [
