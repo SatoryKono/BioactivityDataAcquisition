@@ -285,6 +285,7 @@ groups:
           - crossref.publication.authors
           - openalex.publication.authors
           - pubmed.publication.authors
+          - semanticscholar.publication.authors
 
       - base_name: authors_with_affiliations
         columns:

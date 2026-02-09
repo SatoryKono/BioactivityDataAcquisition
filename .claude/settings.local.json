@@ -60,7 +60,8 @@
       "WebSearch",
       "Bash(set:*)",
       "Bash(UPDATE_SNAPSHOTS=1 python -m pytest:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(cd:*)"
     ]
   },
   "enabledPlugins": {
