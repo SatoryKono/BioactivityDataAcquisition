@@ -273,12 +273,9 @@ groups:
         columns:
           - openalex.publication.author_openalex_ids
 
-      - base_name: author_orcid_list
-        columns:
-          - crossref.publication.author_orcid_list
-
       - base_name: author_orcids
         columns:
+          - crossref.publication.author_orcids
           - openalex.publication.author_orcids
           - semanticscholar.publication.author_orcids
 
@@ -292,6 +289,7 @@ groups:
           - crossref.publication.authors
           - openalex.publication.authors
           - pubmed.publication.authors
+          - semanticscholar.publication.authors
 
       - base_name: authors_with_affiliations
         columns:
@@ -1749,7 +1747,7 @@ field_aliases:
   reference_count: citations_made
   subjects: subject_keywords
   source_type: publication_type
-  author_orcids: author_orcid_list
+  # author_orcids: now native field name (was: author_orcid_list)
 
 # Layer-specific column filtering
 silver:
@@ -2878,14 +2876,14 @@ entity_field_validations:
       - PATENT
     nullable: true
 
-  - field: year
+  - field: publication_year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
-    error_message: "Publication year must be between 1800 and 2100"
+    error_message: "Publication year must be between 1500 and 2100"
 
-  - field: pubmed_id
+  - field: pmid
     type: range
     min: 1
     max: 100000000
@@ -2894,9 +2892,15 @@ entity_field_validations:
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/.+$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
+
+  - field: title
+    type: max_length
+    max_length: 2000
+    nullable: true
+    error_message: "Title must not exceed 2000 characters"
 
 # =============================================================================
 # Cross-Field Validations
@@ -2904,7 +2908,7 @@ entity_field_validations:
 entity_cross_field_validations:
   - name: publication_identifiable
     fields:
-      - pubmed_id
+      - pmid
       - doi
       - title
     condition: any_present
@@ -3288,19 +3292,26 @@ entity: publication
 entity_field_validations:
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/.+$'
     nullable: false
     error_message: "DOI is required and must start with 10. prefix"
 
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: max_length
+    max_length: 2000
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not exceed 2000 characters"
 
-  - field: year
+  - field: title
+    type: pattern
+    pattern: '\S'
+    nullable: true
+    severity: warn
+    error_message: "Title should not be empty or whitespace-only"
+
+  - field: publication_year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
     error_message: "Publication year out of valid range"
@@ -3318,7 +3329,7 @@ entity_field_validations:
       - standard
     nullable: true
 
-  - field: is_referenced_by_count
+  - field: citations_received
     type: range
     min: 0
     nullable: true
@@ -3364,19 +3375,33 @@ entity_field_validations:
     nullable: false
     error_message: "OpenAlex ID is required and must start with W followed by digits"
 
+  - field: pmid
+    type: range
+    min: 1
+    max: 100000000
+    nullable: true
+    error_message: "PubMed ID must be a positive integer"
+
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/.+$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
 
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: max_length
+    max_length: 2000
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not exceed 2000 characters"
 
-  - field: year
+  - field: title
+    type: pattern
+    pattern: '\S'
+    nullable: true
+    severity: warn
+    error_message: "Title should not be empty or whitespace-only"
+
+  - field: publication_year
     type: range
     min: 1500
     max: 2100
@@ -3398,7 +3423,7 @@ entity_field_validations:
       - other
     nullable: true
 
-  - field: cited_by_count
+  - field: citations_received
     type: range
     min: 0
     nullable: true
@@ -3505,20 +3530,20 @@ entity_field_validations:
     error_message: "PMID is required and must be a positive integer"
 
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: max_length
+    max_length: 2000
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not exceed 2000 characters"
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/.+$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
 
-  - field: pub_year
+  - field: publication_year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
     error_message: "Publication year out of valid range"
@@ -3591,26 +3616,40 @@ entity_field_validations:
     nullable: false
     error_message: "paper_id is required and must be a 40-char hex string"
 
+  - field: pmid
+    type: range
+    min: 1
+    max: 100000000
+    nullable: true
+    error_message: "PubMed ID must be a positive integer"
+
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/.+$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
 
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: max_length
+    max_length: 2000
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not exceed 2000 characters"
 
-  - field: year
+  - field: title
+    type: pattern
+    pattern: '\S'
+    nullable: true
+    severity: warn
+    error_message: "Title should not be empty or whitespace-only"
+
+  - field: publication_year
     type: range
     min: 1500
     max: 2100
     nullable: true
     error_message: "Publication year out of valid range"
 
-  - field: citation_count
+  - field: citations_received
     type: range
     min: 0
     nullable: true
@@ -3970,9 +4009,9 @@ provider_field_validations:
     error_message: "Invalid DOI format (must start with 10. prefix)"
 
   # Year range validation
-  - field: year
+  - field: publication_year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
     error_message: "Publication year out of valid range"
@@ -4014,7 +4053,7 @@ provider_field_validations:
     error_message: "Invalid DOI format (must start with 10. prefix)"
 
   # Year range validation
-  - field: year
+  - field: publication_year
     type: range
     min: 1500
     max: 2100
@@ -4095,9 +4134,9 @@ provider_field_validations:
     error_message: "Invalid DOI format (must start with 10. prefix)"
 
   # Year range validation
-  - field: pub_year
+  - field: publication_year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
     error_message: "Publication year out of valid range"
@@ -4140,7 +4179,7 @@ provider_field_validations:
     error_message: "Invalid DOI format (must start with 10. prefix)"
 
   # Year range validation
-  - field: year
+  - field: publication_year
     type: range
     min: 1500
     max: 2100
@@ -4148,7 +4187,7 @@ provider_field_validations:
     error_message: "Publication year out of valid range"
 
   # Citation counts must be non-negative
-  - field: citation_count
+  - field: citations_received
     type: range
     min: 0
     nullable: true
@@ -4275,6 +4314,52 @@ input_filter:
   column_name: "activity_id"
   filter_field: "activity_id"
   batch_size: 20
+
+# ---------------------------------------------------------------------------
+# Extraction-Level Filtering (ADR-028 §3)
+# ---------------------------------------------------------------------------
+# Server-side query parameters appended to every ChEMBL Activity API request.
+# Syntax: ChEMBL django-style lookups (__in, __isnull, __gt, __lt, etc.)
+# Reference: https://chembl.gitbook.io/chembl-interface-documentation/web-services/chembl-data-web-services
+#
+# These params reduce API traffic from ~20M to ~2-5M records.
+# Does NOT affect content_hash (ADR-014).
+# Logged in SourceMetadata.query_string for audit/reproducibility.
+#
+# Resulting API URL pattern:
+#   /chembl/api/data/activity?format=json&limit=1000&offset=0
+#     &standard_type__in=IC50,Ki
+#     &standard_units=nM
+#     &standard_relation==
+#     &assay_type__in=B,F
+#     &potential_duplicate=0
+#     &data_validity_comment__isnull=true
+#     &pchembl_value__isnull=false
+#     &standard_flag=1
+extraction_params:
+  # Measurement types: IC50 (inhibitor concentration) and Ki (inhibition constant)
+  standard_type__in: "IC50,Ki"
+
+  # Standardized units: nanomolar only
+  standard_units: "nM"
+
+  # Exact measurements only (exclude censored: >, <, ~)
+  standard_relation: "="
+
+  # Assay types: Binding and Functional (exclude ADMET, Toxicity, etc.)
+  assay_type__in: "B,F"
+
+  # Exclude potential duplicate records
+  potential_duplicate: 0
+
+  # Exclude records flagged with data validity issues
+  data_validity_comment__isnull: true
+
+  # Only records with standardized pChEMBL value
+  pchembl_value__isnull: false
+
+  # Only ChEMBL-standardized values (manual curation flag)
+  standard_flag: 1
 
 # -----------------------------------------------------------------------------
 # Gold Filters
@@ -4579,9 +4664,9 @@ gold_filters:
 
   # Numeric range filters
   ranges:
-    # Reasonable year range
-    year:
-      min: 1950
+    # Scientific journals era cutoff (schema allows 1500..2100)
+    publication_year:
+      min: 1800
       include_min: false
 
   # Required fields (pubmed_id and doi are optional - not all publications have them)
@@ -5493,9 +5578,9 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Reasonable year range
-    year:
-      min: 1900
+    # Scientific journals era cutoff (schema allows 1500..2100)
+    publication_year:
+      min: 1800
       max: 2100
 
   # Required fields
@@ -5538,9 +5623,9 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Reasonable year range
-    year:
-      min: 1900
+    # Scientific journals era cutoff (schema allows 1500..2100)
+    publication_year:
+      min: 1800
       max: 2100
 
   # Required fields
@@ -5621,6 +5706,13 @@ input_filter:
 # -----------------------------------------------------------------------------
 # Criteria for valid publications
 gold_filters:
+  # Numeric range filters
+  ranges:
+    # Scientific journals era cutoff (schema allows 1500..2100)
+    publication_year:
+      min: 1800
+      max: 2100
+
   # Required fields
   required_fields:
     - pmid
@@ -5664,9 +5756,9 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Reasonable year range
-    year:
-      min: 1900
+    # Scientific journals era cutoff (schema allows 1500..2100)
+    publication_year:
+      min: 1800
       max: 2100
 
   # Required fields
@@ -6682,6 +6774,18 @@ silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
 # -----------------------------------------------------------------------------
+# Sink Configuration (ADR-014, ADR-025)
+# -----------------------------------------------------------------------------
+sink:
+  silver:
+    primary_key: ["activity_id"]
+    sort_by:
+      columns: ["activity_id"]
+  gold:
+    sort_by:
+      columns: ["activity_id"]
+
+# -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)
 # -----------------------------------------------------------------------------
 # Only rules that EXTEND or DIFFER from configs/dq/entities/chembl/activity.yaml
@@ -6785,7 +6889,13 @@ dq_rules:
 # Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
+    primary_key: ["assay_chembl_id"]
+    sort_by:
+      columns: ["assay_chembl_id"]
     partition_by: ["assay_type"]
+  gold:
+    sort_by:
+      columns: ["assay_chembl_id"]
 
 ================================================================================
 File: assay_parameters.yaml
@@ -8896,7 +9006,7 @@ composite:
         - title
       required: false    # Optional - seed may not have DOIs
       filter_condition: "doi IS NOT NULL"
-      timeout_seconds: 900
+      timeout_seconds: 3600
       silver_table: silver/crossref/publication
 
     # OpenAlex: Academic topics and institutions
@@ -8907,7 +9017,7 @@ composite:
         - title          # Fallback key if doi not found
       required: false    # Optional - needs doi or pmid
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
-      timeout_seconds: 600
+      timeout_seconds: 3600
       silver_table: silver/openalex/publication
 
     # PubMed: MeSH terms and medical metadata
@@ -8918,7 +9028,7 @@ composite:
         - doi
       required: false    # Optional - only for records with pmid
       filter_condition: "pmid IS NOT NULL"
-      timeout_seconds: 600
+      timeout_seconds: 3600
       silver_table: silver/pubmed/publication
 
     # Semantic Scholar: AI/ML embeddings and TLDR (mapped to abstract)
@@ -8929,7 +9039,7 @@ composite:
         - title
       required: false    # Optional - high rate limits, ok to skip
       filter_condition: "doi IS NOT NULL OR title IS NOT NULL"
-      timeout_seconds: 1200
+      timeout_seconds: 7200
       #fallback_strategy: skip  # Skip on failure (high rate limits)
       silver_table: silver/semanticscholar/publication
 
@@ -9143,7 +9253,6 @@ composite:
           - author_details
           - author_h_indices
           - author_openalex_ids
-          - author_orcid_list
           - author_orcids
           - author_s2_ids
           - authors
@@ -10006,6 +10115,9 @@ data_schema_file: ../../data_schema/crossref/publication.yaml
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/crossref.yaml (provider-specific)
 #   3. configs/filter/entities/crossref/publication.yaml (entity-specific)
+# Explicit path needed because entity_type is 'work' (CrossRef API term)
+# but filter file uses project entity name 'publication'.
+filter_config_file: ../../filter/entities/crossref/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
@@ -10298,12 +10410,17 @@ sink:
     flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/pubmed/publication"
+    primary_key: ["pmid"]
+    sort_by:
+      columns: ["pmid"]
     partition_by: ["pub_year"]
     csv_export:
       path: "data/output/silver/pubmed/publication"
     flat_structure: true
   gold:
     path: "data/output/gold/pubmed/publication"
+    sort_by:
+      columns: ["pmid"]
     csv_export:
       path: "data/output/gold/pubmed/publication"
     flat_structure: true
@@ -10507,7 +10624,13 @@ gold_table: "uniprot_protein"
 # Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
+    primary_key: ["accession"]
+    sort_by:
+      columns: ["accession"]
     partition_by: ["organism"]
+  gold:
+    sort_by:
+      columns: ["accession"]
 
 ================================================================================
 File: chembl.yaml
@@ -10849,9 +10972,10 @@ source:
         auth_type: api_key  # Recommended for stable access
         api_key: ${BIOETL_SEMANTICSCHOLAR_API_KEY}
         client:
-            timeout_sec: 60.0       # Increased timeout for slow responses
-            max_retries: 5          # More retries for 429 recovery
-            retry_delay_sec: 10.0   # Longer delay between retries
+            timeout_sec: 60.0          # Increased timeout for slow responses
+            max_retries: 5             # More retries for 429 recovery
+            retry_base_delay: 30.0     # 30s initial delay for rate limit cooldown
+            retry_max_delay: 300.0     # 5 min max delay between retries
         batch_size: 50  # Reduced for rate limit safety
         page_size: 100  # Minimum allowed by schema
 

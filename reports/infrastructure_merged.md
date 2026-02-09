@@ -52,6 +52,67 @@ __all__ = [
 ]
 
 ================================================================================
+File: adapter_error_logging.py
+Path: adapters\adapter_error_logging.py
+================================================================================
+"""Logging utilities for adapters.
+
+Provides standardized error logging format across all data source adapters.
+Implements RULES.md §3.2.1 Log Schema with mandatory stage field.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Literal
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
+
+# Stage type for Log Schema compliance
+StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup"]
+
+
+def log_adapter_error(
+    logger: LoggerPort,
+    provider: str,
+    operation: str,
+    *,
+    stage: StageType = "extract",
+    error_type: str = "adapter_error",
+    exc_info: bool = True,
+    **context: Any,
+) -> None:
+    """Log adapter error in standardized format with Log Schema fields.
+
+    Формат сообщения: "{provider} {operation} failed"
+
+    Implements RULES.md §3.2.1 - mandatory fields:
+    - stage: Pipeline stage (default: "extract" for adapter operations)
+    - error_type: Error classification
+
+    Args:
+        logger: LoggerPort-compatible logger instance
+        provider: Provider name (e.g., "chembl", "pubchem", "uniprot")
+        operation: Operation that failed (e.g., "fetch", "batch fetch", "health check")
+        stage: Pipeline stage for Log Schema (default: "extract")
+        error_type: Classification of error (default: "adapter_error")
+        exc_info: Include exception traceback (default: True)
+        **context: Additional context fields to include in log
+
+    """
+    message = f"{provider} {operation} failed"
+
+    logger.error(
+        message,
+        stage=stage,
+        error_type=error_type,
+        provider=provider,
+        operation=operation,
+        exc_info=exc_info,
+        **context,
+    )
+
+================================================================================
 File: base.py
 Path: adapters\base.py
 ================================================================================
@@ -657,6 +718,7 @@ from bioetl.domain.exceptions import (
     ExternalServiceError,
     RetryExhaustedError,
 )
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import HealthStatus
@@ -723,6 +785,7 @@ class ChemblAdapter(BaseHttpAdapter):
     adapter_config: AdapterConfig | None = None
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
+    extraction_params: ExtractionParams | None = None
 
     provider_name: str = field(init=False, default="chembl")
     """Provider identifier (required by DataSourcePort)."""
@@ -739,6 +802,11 @@ class ChemblAdapter(BaseHttpAdapter):
         init=False, default_factory=APIRequestCollector
     )
 
+    # Resolved extraction params (computed in __post_init__)
+    _extraction_params: ExtractionParams = field(
+        init=False, default_factory=ExtractionParams.empty
+    )
+
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         # Initialize error handler from base class
@@ -752,6 +820,17 @@ class ChemblAdapter(BaseHttpAdapter):
 
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+
+        # Resolve extraction params
+        self._extraction_params = self.extraction_params or ExtractionParams.empty()
+
+        if not self._extraction_params.is_empty:
+            self.logger.info(
+                "chembl_extraction_params_configured",
+                provider="chembl",
+                param_count=len(self._extraction_params.params),
+                query_string=self._extraction_params.to_query_string(),
+            )
 
     @property
     def effective_batch_size(self) -> int:
@@ -803,6 +882,10 @@ class ChemblAdapter(BaseHttpAdapter):
         if entity_type not in _NO_PAGINATION_ENTITIES:
             params["limit"] = self._get_effective_batch_size()
             params["offset"] = offset
+
+        # Extraction-level filtering (ADR-028 §3)
+        if not self._extraction_params.is_empty:
+            params.update(self._extraction_params.to_query_dict())
 
         return params
 
@@ -1714,6 +1797,9 @@ class ChemblAdapter(BaseHttpAdapter):
             source_type="api", url=CHEMBL_API_BASE, api_version=api_version
         )
         self._request_collector.clear()
+        # Record extraction params query string for audit trail (ADR-028 §3)
+        if not self._extraction_params.is_empty:
+            metadata.query_string = self._extraction_params.to_query_string()
         return metadata
 
     def clear_request_collector(self) -> None:
@@ -7525,7 +7611,10 @@ class UnifiedHTTPClient:
             httpx.ConnectError
             | httpx.ConnectTimeout
             | httpx.ReadTimeout
-            | httpx.ReadError,
+            | httpx.ReadError
+            | httpx.WriteError
+            | httpx.ProtocolError
+            | httpx.ProxyError,
         ):
             return True
         # Check httpx status errors using configured retryable statuses
@@ -7716,12 +7805,13 @@ from bioetl.domain.types import HealthStatus
 def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
     """Determine adapter health status from circuit breaker state.
 
-    Maps circuit breaker state and failure count to a HealthStatus value
-    for use in adapter health checks. The mapping follows these rules:
+    Maps circuit breaker state to a HealthStatus value for use in adapter
+    health checks. The mapping respects the circuit breaker's own configured
+    failure_threshold rather than using hardcoded counts:
 
     - HEALTHY: Circuit is CLOSED with zero failures (normal operation)
-    - DEGRADED: Circuit has 1-2 failures (experiencing intermittent issues)
-    - UNHEALTHY: Circuit has 3+ failures or is OPEN/HALF_OPEN
+    - DEGRADED: Circuit is CLOSED with some failures, or HALF_OPEN (recovering)
+    - UNHEALTHY: Circuit is OPEN (failure_threshold reached, blocking requests)
 
     This function expects a circuit breaker implementing CircuitBreakerPort
     with get_state() and get_failure_count() methods.
@@ -7735,15 +7825,15 @@ def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
         HealthStatus enum value:
         - HEALTHY: Adapter is fully operational
         - DEGRADED: Adapter is functional but experiencing issues
-        - UNHEALTHY: Adapter is not operational or has critical failures
+        - UNHEALTHY: Adapter is not operational (circuit breaker tripped)
 
     Example:
         >>> from bioetl.infrastructure.adapters.http import CircuitBreaker
         >>> cb = CircuitBreaker(provider="chembl", failure_threshold=5)
         >>> assess_health_from_circuit_breaker(cb)
         <HealthStatus.HEALTHY: 'healthy'>
-        >>> # After some failures:
-        >>> cb._failure_count = 2  # Simulated failures
+        >>> # After some failures (below threshold):
+        >>> cb._failure_count = 3  # Below threshold of 5
         >>> assess_health_from_circuit_breaker(cb)
         <HealthStatus.DEGRADED: 'degraded'>
 
@@ -7755,12 +7845,14 @@ def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
     cb_state = circuit_breaker.get_state()
     failure_count = circuit_breaker.get_failure_count()
 
-    if cb_state.value == "CLOSED" and failure_count == 0:
-        return HealthStatus.HEALTHY
-    elif failure_count <= 2:
-        return HealthStatus.DEGRADED
-    else:
+    if cb_state.value == "OPEN":
         return HealthStatus.UNHEALTHY
+    if cb_state.value == "HALF_OPEN":
+        return HealthStatus.DEGRADED
+    # CLOSED state
+    if failure_count == 0:
+        return HealthStatus.HEALTHY
+    return HealthStatus.DEGRADED
 
 ================================================================================
 File: health_monitor.py
@@ -8518,21 +8610,6 @@ def create_crossref_bucket(
     return TokenBucket(rate=50.0, capacity=50, provider="crossref", metrics=metrics)
 
 
-def create_semantic_scholar_bucket(
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for Semantic Scholar (100 req/5min).
-
-    Args:
-        metrics: Optional metrics port for observability
-
-    """
-    # 100 requests per 5 minutes = 0.333 req/sec
-    return TokenBucket(
-        rate=0.333, capacity=10, provider="semantic_scholar", metrics=metrics
-    )
-
-
 def create_pubmed_bucket(
     with_api_key: bool = False,
     metrics: MetricsPort | None = None,
@@ -8842,67 +8919,6 @@ class CsvFilterReader:
             valid_combinations=frozenset(valid_combinations),
             filter_fields=filter_fields,
         )
-
-================================================================================
-File: logging_utils.py
-Path: adapters\logging_utils.py
-================================================================================
-"""Logging utilities for adapters.
-
-Provides standardized error logging format across all data source adapters.
-Implements RULES.md §3.2.1 Log Schema with mandatory stage field.
-"""
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, Literal
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
-
-# Stage type for Log Schema compliance
-StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup"]
-
-
-def log_adapter_error(
-    logger: LoggerPort,
-    provider: str,
-    operation: str,
-    *,
-    stage: StageType = "extract",
-    error_type: str = "adapter_error",
-    exc_info: bool = True,
-    **context: Any,
-) -> None:
-    """Log adapter error in standardized format with Log Schema fields.
-
-    Формат сообщения: "{provider} {operation} failed"
-
-    Implements RULES.md §3.2.1 - mandatory fields:
-    - stage: Pipeline stage (default: "extract" for adapter operations)
-    - error_type: Error classification
-
-    Args:
-        logger: LoggerPort-compatible logger instance
-        provider: Provider name (e.g., "chembl", "pubchem", "uniprot")
-        operation: Operation that failed (e.g., "fetch", "batch fetch", "health check")
-        stage: Pipeline stage for Log Schema (default: "extract")
-        error_type: Classification of error (default: "adapter_error")
-        exc_info: Include exception traceback (default: True)
-        **context: Additional context fields to include in log
-
-    """
-    message = f"{provider} {operation} failed"
-
-    logger.error(
-        message,
-        stage=stage,
-        error_type=error_type,
-        provider=provider,
-        operation=operation,
-        exc_info=exc_info,
-        **context,
-    )
 
 ================================================================================
 File: __init__.py
@@ -16852,6 +16868,7 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
@@ -16859,7 +16876,9 @@ from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 _FILTER_CONCAT_KEYS = frozenset({"required_fields", "exclude_if_present"})
 
 
-class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterConfig]]):
+class FilterConfigLoader(
+    BaseConfigLoader[tuple[InputFilterConfig, GoldFilterConfig, ExtractionParams]],
+):
     """Loads and merges filter configurations from hierarchical files.
 
     Thread-safe with internal caching for performance.
@@ -16882,7 +16901,7 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
         provider: str,
         entity: str,
         inline_overrides: dict[str, Any] | None = None,
-    ) -> tuple[InputFilterConfig, GoldFilterConfig]:
+    ) -> tuple[InputFilterConfig, GoldFilterConfig, ExtractionParams]:
         """Load merged filter config for provider/entity.
 
         Merge order (later wins for scalars, special handling for collections):
@@ -16897,7 +16916,8 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
             inline_overrides: Optional inline overrides from pipeline config.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig) domain objects.
+            Tuple of (InputFilterConfig, GoldFilterConfig, ExtractionParams)
+            domain objects.
 
         Raises:
             FileNotFoundError: If _defaults.yaml doesn't exist.
@@ -16941,7 +16961,7 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
         if inline_overrides is None:
             self._cache[cache_key] = domain_configs
 
-        return domain_configs  # type: ignore[no-any-return]
+        return domain_configs
 
     def _deep_merge(
         self,
@@ -17551,7 +17571,7 @@ def _merge_filter_config(
     filter_config: dict[str, Any],
     explicit_entity_config: dict[str, Any],
 ) -> None:
-    """Merge filter config (input_filter, gold_filters) into pipeline config.
+    """Merge filter config (input_filter, gold_filters, extraction_params) into pipeline config.
 
     Merge priority (highest to lowest):
     1. Explicit entity config (from pipeline YAML file)
@@ -17593,6 +17613,16 @@ def _merge_filter_config(
             )
 
         config["gold_filters"] = merged_gold_filters
+
+    # Merge extraction_params (ADR-028 §3)
+    if "extraction_params" in filter_config:
+        merged_extraction_params = dict(filter_config["extraction_params"])
+
+        # Pipeline-level overrides take precedence
+        if "extraction_params" in explicit_entity_config:
+            merged_extraction_params.update(explicit_entity_config["extraction_params"])
+
+        config["extraction_params"] = merged_extraction_params
 
 
 def _load_column_groups_section(
@@ -19693,7 +19723,6 @@ def configure_logging(
             structlog.stdlib.PositionalArgumentsFormatter(),
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
             structlog.processors.UnicodeDecoder(),
             secret_filter_processor,  # Filter secrets before output
         ]
@@ -20948,61 +20977,10 @@ Implements RULES.md §2.6 - Quarantine Policy.
 
 from __future__ import annotations
 
-from bioetl.infrastructure.quarantine.helpers import quote_literal
+from bioetl.infrastructure.quarantine.record_encoding import quote_literal
 from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
 
 __all__ = ["UnifiedQuarantine", "quote_literal"]
-
-================================================================================
-File: helpers.py
-Path: quarantine\helpers.py
-================================================================================
-"""Helper functions for quarantine operations.
-
-Contains utility functions used across quarantine modules.
-"""
-
-from __future__ import annotations
-
-import hashlib
-from typing import Any
-
-
-def quote_literal(value: Any) -> str:
-    """Safely quote a literal value for a Delta Lake predicate.
-
-    Args:
-        value: Value to quote
-
-    Returns:
-        Quoted string safe for Delta Lake predicates
-
-    """
-    if isinstance(value, str):
-        escaped = value.replace("'", "''")
-        return f"'{escaped}'"
-    if isinstance(value, (int, float)):
-        return str(value)
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    return f"'{value!s}'"
-
-
-def calculate_hash(payload_json: str) -> str:
-    """Calculate SHA256 hash of payload for deduplication.
-
-    Args:
-        payload_json: JSON string of payload
-
-    Returns:
-        Hex digest of SHA256 hash
-
-    """
-    return hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
-
-
-# Maximum payload size (64KB per REQ-QUARANTINE-002)
-MAX_PAYLOAD_SIZE = 64 * 1024
 
 ================================================================================
 File: operations.py
@@ -21024,7 +21002,7 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import QuarantineRecordStatus
-from bioetl.infrastructure.quarantine.helpers import quote_literal
+from bioetl.infrastructure.quarantine.record_encoding import quote_literal
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -21206,6 +21184,57 @@ def purge_records(
     return count_before
 
 ================================================================================
+File: record_encoding.py
+Path: quarantine\record_encoding.py
+================================================================================
+"""Helper functions for quarantine operations.
+
+Contains utility functions used across quarantine modules.
+"""
+
+from __future__ import annotations
+
+import hashlib
+from typing import Any
+
+
+def quote_literal(value: Any) -> str:
+    """Safely quote a literal value for a Delta Lake predicate.
+
+    Args:
+        value: Value to quote
+
+    Returns:
+        Quoted string safe for Delta Lake predicates
+
+    """
+    if isinstance(value, str):
+        escaped = value.replace("'", "''")
+        return f"'{escaped}'"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return f"'{value!s}'"
+
+
+def calculate_hash(payload_json: str) -> str:
+    """Calculate SHA256 hash of payload for deduplication.
+
+    Args:
+        payload_json: JSON string of payload
+
+    Returns:
+        Hex digest of SHA256 hash
+
+    """
+    return hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
+
+
+# Maximum payload size (64KB per REQ-QUARANTINE-002)
+MAX_PAYLOAD_SIZE = 64 * 1024
+
+================================================================================
 File: unified.py
 Path: quarantine\unified.py
 ================================================================================
@@ -21231,16 +21260,16 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
-from bioetl.infrastructure.quarantine.helpers import (
-    MAX_PAYLOAD_SIZE,
-    calculate_hash,
-    quote_literal,
-)
 from bioetl.infrastructure.quarantine.operations import (
     get_statistics,
     inspect_records,
     purge_records,
     replay_records,
+)
+from bioetl.infrastructure.quarantine.record_encoding import (
+    MAX_PAYLOAD_SIZE,
+    calculate_hash,
+    quote_literal,
 )
 
 if TYPE_CHECKING:
@@ -21680,29 +21709,14 @@ class BaseRateLimitConfig(BaseModel):
 
 
 class BaseClientConfig(BaseModel):
-    """Base class for HTTP Client configuration.
-
-    Provides common HTTP client fields for both pipeline and source configs.
-
-    Attributes:
-        timeout_sec: Request timeout in seconds.
-        max_retries: Maximum number of retry attempts.
-    """
+    """Base HTTP client config for pipeline and source configs."""
 
     model_config = ConfigDict(extra="ignore")
 
-    timeout_sec: float = Field(
-        default=30.0,
-        ge=1.0,
-        le=300.0,
-        description="Request timeout in seconds",
-    )
-    max_retries: int = Field(
-        default=3,
-        ge=0,
-        le=10,
-        description="Maximum number of retry attempts",
-    )
+    timeout_sec: float = Field(default=30.0, ge=1.0, le=300.0)
+    max_retries: int = Field(default=3, ge=0, le=10)
+    retry_base_delay: float = Field(default=1.0, ge=0.1, le=120.0)
+    retry_max_delay: float = Field(default=60.0, ge=1.0, le=600.0)
 
 
 class BaseApiConfig(BaseModel):
@@ -23409,17 +23423,18 @@ Structure:
 Usage:
     >>> from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
     >>> config = FilterConfigFile.model_validate(yaml_data)
-    >>> input_filter, gold_filters = config.to_domain()
+    >>> input_filter, gold_filters, extraction_params = config.to_domain()
 """
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.domain.filtering import (
     InputFilterConfig as DomainInputFilterConfig,
 )
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
     BaseGoldColumnFilterConfig,
@@ -23538,16 +23553,42 @@ class FilterConfigFile(BaseModel):
         default_factory=GoldFiltersFileConfig,
         description="Gold layer filter configuration",
     )
+    extraction_params: dict[str, str | int | bool] = Field(
+        default_factory=dict,
+        description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
+    )
 
-    def to_domain(self) -> tuple[DomainInputFilterConfig, GoldFilterConfig]:
+    @field_validator("extraction_params")
+    @classmethod
+    def validate_extraction_params(
+        cls,
+        v: dict[str, str | int | bool],
+    ) -> dict[str, str | int | bool]:
+        """Validate extraction params keys and values."""
+        for key, value in v.items():
+            if not key or not isinstance(key, str):
+                raise ValueError(
+                    f"Extraction param key must be non-empty string, got: {key!r}"
+                )
+            if not isinstance(value, (str, int, bool)):
+                raise ValueError(
+                    f"Extraction param '{key}' value must be str|int|bool, "
+                    f"got {type(value).__name__}: {value!r}"
+                )
+        return v
+
+    def to_domain(
+        self,
+    ) -> tuple[DomainInputFilterConfig, GoldFilterConfig, ExtractionParams]:
         """Convert to domain objects.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig).
+            Tuple of (InputFilterConfig, GoldFilterConfig, ExtractionParams).
         """
         return (
             self.input_filter.to_domain(),
             self.gold_filters.to_domain(),
+            ExtractionParams(params=self.extraction_params),
         )
 
 
@@ -24551,6 +24592,11 @@ class PipelineYamlConfig(BaseModel):
         default_factory=list,
         description="Optional column ordering groups for Silver/Gold output",
     )
+    extraction_params: dict[str, str | int | bool] = Field(
+        default_factory=dict,
+        description="Server-side API query parameters for Bronze extraction (ADR-028 §3). "
+        "Merged from filter config file. Keys are provider-specific query params.",
+    )
 
     # Pagination strategy (ADR-030)
     force_full_scan: bool = Field(
@@ -25469,7 +25515,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # abstract and affiliations excluded per user request
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("author_details", pa.string()),  # JSON array of author objects
-        pa.field("author_orcid_list", pa.string()),  # Unified: from author_orcids
+        pa.field("author_orcids", pa.string()),  # ORCID IDs (JSON array)
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citations_made", pa.int64()),  # Unified: from references-count
         pa.field(
@@ -25881,6 +25927,16 @@ class SourceYamlConfig(BaseModel):
     def max_retries(self) -> int:
         """Get max retries."""
         return self.source.provider_config.client.max_retries
+
+    @property
+    def retry_base_delay(self) -> float:
+        """Get retry base delay in seconds."""
+        return self.source.provider_config.client.retry_base_delay
+
+    @property
+    def retry_max_delay(self) -> float:
+        """Get retry max delay in seconds."""
+        return self.source.provider_config.client.retry_max_delay
 
     @property
     def base_url(self) -> str | None:
@@ -29026,7 +29082,11 @@ class GoldWriter(BaseDeltaWriter):
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, schema_mode=schema_mode: (
+                    lambda table_or_uri=table_path,
+                    data=arrow_data,
+                    mode=mode,
+                    partition_by=partition_cols,
+                    schema_mode=schema_mode: (
                         write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
@@ -29116,7 +29176,10 @@ class GoldWriter(BaseDeltaWriter):
                         records, column_order=column_order
                     )
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: (
+                        lambda table_or_uri=table_path,
+                        data=arrow_data,
+                        mode="append",
+                        partition_by=partition_cols: (
                             write_deltalake(
                                 table_or_uri=table_or_uri,
                                 data=pa.RecordBatchReader.from_batches(
