@@ -423,7 +423,7 @@ class TestYearValidationConstants:
 
     def test_constants_are_consistent(self) -> None:
         """Verify MIN and MAX publication year constants are correct."""
-        assert MIN_PUBLICATION_YEAR == 1800
+        assert MIN_PUBLICATION_YEAR == 1500
         assert MAX_PUBLICATION_YEAR == 2100
 
     def test_valid_year_range(self) -> None:

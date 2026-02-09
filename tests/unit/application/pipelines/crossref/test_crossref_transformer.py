@@ -318,8 +318,8 @@ def test_extract_year_non_integer_year():
 
 def test_extract_year_out_of_range():
     """Test year extraction with year out of valid range."""
-    # Year 1799 is below min_year=1800 in validate_year_range
-    publication = {"published-print": {"date-parts": [[1799]]}}
+    # Year 1499 is below min_year=1500 in validate_year_range
+    publication = {"published-print": {"date-parts": [[1499]]}}
     assert extract_year(publication) is None
 
     # Year 2101 is above max_year=2100

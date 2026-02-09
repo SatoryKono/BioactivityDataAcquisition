@@ -237,8 +237,8 @@ class TestExtractYear:
         assert result is None
 
     def test_extract_year_out_of_range_low(self) -> None:
-        """Should return None for year below valid range (1800)."""
-        publication = {"published-print": {"date-parts": [[1799]]}}
+        """Should return None for year below valid range (1500)."""
+        publication = {"published-print": {"date-parts": [[1499]]}}
         result = extract_year(publication)
         assert result is None
 
@@ -249,10 +249,10 @@ class TestExtractYear:
         assert result is None
 
     def test_extract_year_valid_boundary_low(self) -> None:
-        """Should accept year at lower boundary (1800)."""
-        publication = {"published-print": {"date-parts": [[1800]]}}
+        """Should accept year at lower boundary (1500)."""
+        publication = {"published-print": {"date-parts": [[1500]]}}
         result = extract_year(publication)
-        assert result == 1800
+        assert result == 1500
 
     def test_extract_year_valid_boundary_high(self) -> None:
         """Should accept year at upper boundary (2100)."""
