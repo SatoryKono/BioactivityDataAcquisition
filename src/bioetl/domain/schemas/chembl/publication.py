@@ -67,7 +67,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # === System Fields ===
     _source: Series[str] = pa.Field(
         nullable=False,
-        default="chembl",
+        eq="chembl",
         description="Data source identifier.",
     )
 

@@ -26,7 +26,7 @@ class DataNormalizationConfig:
     Example:
         >>> config = DataNormalizationConfig()
         >>> config.min_publication_year
-        1800
+        1500
         >>> config.max_publication_year
         2100
 
@@ -35,7 +35,7 @@ class DataNormalizationConfig:
         1900
     """
 
-    min_publication_year: int = 1800
+    min_publication_year: int = 1500
     max_publication_year: int = 2100
     default_pii_salt: str = ""
 
@@ -50,7 +50,7 @@ class DataNormalizationConfig:
     def for_scientific_publications(cls) -> DataNormalizationConfig:
         """Create configuration for scientific publications.
 
-        Uses standard year range [1800, 2100] for scientific literature.
+        Uses standard year range [1500, 2100] for scientific literature.
 
         Returns:
             DataNormalizationConfig with scientific publication defaults.

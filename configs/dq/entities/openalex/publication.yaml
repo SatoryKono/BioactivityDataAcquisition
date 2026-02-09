@@ -20,7 +20,7 @@ entity_field_validations:
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/.+$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
 

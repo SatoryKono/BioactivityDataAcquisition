@@ -9,7 +9,7 @@ PubMedPublicationSchema replaces ArticleSchema for consistency with other provid
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import cast
 
 import pandas as pd
@@ -20,10 +20,9 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
-    MAX_PUBLICATION_YEAR,
-    MIN_PUBLICATION_YEAR,
 )
 
 # Re-export for backwards compatibility
@@ -58,7 +57,6 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     # === Primary Key (str for cross-provider consistency) ===
     pmid: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^\d+$",
         description="PubMed ID (PK, numeric string)",
     )
 
@@ -70,13 +68,9 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     # === External Identifiers (override doi for check method) ===
     doi: Series[str] = pa.Field(
         nullable=True,
+        str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier",
     )
-
-    @pa.check("doi", name="doi_format")
-    def _check_doi(cls, series: Series[str]) -> Series[bool]:
-        """Validate DOI format."""
-        return cast("Series[bool]", series.isna() | series.str.match(DOI_REGEX_PATTERN))
 
     @pa.check("pmc_id", name="pmc_id_format")
     def _check_pmc_id(cls, series: Series[str]) -> Series[bool]:
@@ -117,14 +111,6 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="MARC language code (e.g., 'eng')",
     )
 
-    @pa.check("language", name="language_length")
-    def _check_language(cls, series: Series[str]) -> Series[bool]:
-        """Validate language code length."""
-        return cast(
-            "Series[bool]",
-            series.isna() | ((series.str.len() >= 2) & (series.str.len() <= 3)),
-        )
-
     # === Journal Information (PubMed-specific) ===
     journal: Series[str] = pa.Field(
         nullable=True, description="Full journal title (unified field name)"
@@ -137,15 +123,9 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
     issn: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="ISSN (print or electronic)",
     )
-
-    @pa.check("issn", name="issn_format")
-    def _check_issn(cls, series: Series[str]) -> Series[bool]:
-        """Validate ISSN format."""
-        return cast(
-            "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{3}[\dX]$")
-        )
 
     journal_issn_type: Series[str] = pa.Field(nullable=True, description="ISSN type")
 
@@ -166,15 +146,6 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     page_range: Series[str] = pa.Field(
         nullable=True, description="Page numbers (unified field name)"
     )
-
-    @pa.check("publication_year", name="year_range")
-    def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
-        """Validate publication year range."""
-        return cast(
-            "Series[bool]",
-            series.isna()
-            | ((series >= MIN_PUBLICATION_YEAR) & (series <= MAX_PUBLICATION_YEAR)),
-        )
 
     pub_month: Series[pd.Int64Dtype] = pa.Field(
         nullable=True, description="Publication month"
@@ -304,6 +275,13 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array, e.g., Journal Article, Review)",
+    )
+
+    # === System Fields ===
+    _source: Series[str] = pa.Field(
+        nullable=False,
+        eq="pubmed",
+        description="Data source identifier",
     )
 
     # Note: accepted_date, received_date, revised_date, epub_date excluded from

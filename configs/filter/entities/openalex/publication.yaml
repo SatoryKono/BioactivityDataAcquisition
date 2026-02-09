@@ -31,7 +31,7 @@ gold_filters:
   ranges:
     # Reasonable year range
     year:
-      min: 1900
+      min: 1500
       max: 2100
 
   # Required fields

@@ -26,7 +26,7 @@ provider_field_validations:
   # Year range validation
   - field: year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
     error_message: "Publication year out of valid range"

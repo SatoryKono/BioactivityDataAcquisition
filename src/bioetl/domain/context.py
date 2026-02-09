@@ -187,7 +187,7 @@ class InputFilterContext:
 
     def _validate_csv_mode(self) -> None:
         """Validate CSV-based filter configuration.
-        
+
         Note: column_name and filter_field can be empty here; they will be
         resolved from YAML configuration during the bootstrap phase.
         """
