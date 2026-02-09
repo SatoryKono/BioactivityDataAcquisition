@@ -8,26 +8,19 @@ Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 
 from __future__ import annotations
 
-import json
-import re
-from typing import cast
-
-import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
-from bioetl.domain.schemas.constants import ORCID_PATTERN
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
 __all__ = [
     "DOI_REGEX_PATTERN",
-    "LOOKUP_METHODS",
     "OA_STATUS_VALUES",
     "OpenAlexPublicationSchema",
 ]
@@ -44,7 +37,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     - Pagination: page_first, page_last
     - Metrics: citations_received, citations_made
     - Open Access: is_oa
-    - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+    - Lookup tracking: lookup_method, original_id, source (overridden)
     """
 
     # === Primary Key (OpenAlex-specific) ===
@@ -54,13 +47,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="OpenAlex Work ID (e.g., W2148763428)",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Raw OpenAlex Type (replaces doc_type) ===
     publication_type: Series[str] = pa.Field(
@@ -73,13 +60,14 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     # === Override _source to be non-nullable ===
     _source: Series[str] = pa.Field(
         nullable=False,
+        eq="openalex",
         description="Data source identifier",
     )
 
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{3}[\dX]$",
+        str_matches=ISSN_PATTERN,
         description="ISSN-L (format: XXXX-XXXX)",
     )
 
@@ -161,10 +149,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     # Note: affiliation_list inherited from base (unified field name)
 
     # === Author Identifiers ===
-    author_orcids: Series[str] = pa.Field(
-        nullable=True,
-        description="ORCID IDs as JSON array (empty string for missing)",
-    )
+    # author_orcids: inherited from PublicationBaseSchema
 
     author_openalex_ids: Series[str] = pa.Field(
         nullable=True,
@@ -188,24 +173,6 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="ROR IDs of affiliated institutions (JSON array, full URL format). "
         "May be empty if not returned by Works API.",
     )
-
-    @pa.check("author_orcids", name="orcid_format")
-    def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
-        """Validate ORCID format in JSON array elements."""
-        _pattern = re.compile(ORCID_PATTERN)
-
-        def _valid(val: object) -> bool:
-            if pd.isna(val):
-                return True
-            try:
-                items = json.loads(str(val))
-                return all(
-                    not item or _pattern.match(item) is not None for item in items
-                )
-            except (json.JSONDecodeError, TypeError):
-                return False
-
-        return cast("Series[bool]", series.apply(_valid))
 
     class Config:
         """Pandera configuration."""

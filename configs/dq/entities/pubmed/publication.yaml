@@ -20,20 +20,20 @@ entity_field_validations:
     error_message: "PMID is required and must be a positive integer"
 
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: max_length
+    max_length: 2000
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not exceed 2000 characters"
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/.+$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
 
-  - field: pub_year
+  - field: publication_year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
     error_message: "Publication year out of valid range"

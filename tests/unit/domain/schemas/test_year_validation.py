@@ -95,7 +95,7 @@ class TestCrossRefYearValidation:
             # Author affiliations
             "affiliation_list": None,
             # Author and reference fields
-            "author_orcid_list": None,
+            "author_orcids": None,
             "author_details": None,
             "references": None,
         }
@@ -262,6 +262,8 @@ class TestChemblYearValidation:
             "issue": "1",
             "page_first": "1",
             "page_last": "10",
+            # Author identifiers
+            "author_orcids": None,
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-15",
@@ -374,6 +376,8 @@ class TestPubMedYearValidation:
             "gene_symbols": None,
             "publication_types": None,
             # Note: affiliation_list inherited from base (unified field name)
+            # Author identifiers
+            "author_orcids": None,
             # Author-affiliation mapping
             "authors_with_affiliations": None,
         }
@@ -423,7 +427,7 @@ class TestYearValidationConstants:
 
     def test_constants_are_consistent(self) -> None:
         """Verify MIN and MAX publication year constants are correct."""
-        assert MIN_PUBLICATION_YEAR == 1800
+        assert MIN_PUBLICATION_YEAR == 1500
         assert MAX_PUBLICATION_YEAR == 2100
 
     def test_valid_year_range(self) -> None:

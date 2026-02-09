@@ -47,6 +47,7 @@ def valid_base_record() -> dict:
         "abstract": "This is a test abstract for the publication.",
         "authors": '["John Doe", "Jane Smith"]',  # JSON array
         "affiliation_list": '["University of Testing"]',  # JSON array (unified)
+        "author_orcids": '["0000-0001-2345-6789"]',  # JSON array of ORCID IDs
         # === Publication metadata ===
         "journal": "Journal of Testing",
         "publication_year": 2024,
@@ -229,9 +230,9 @@ class TestPublicationBaseSchemaFieldValidation:
             assert validated["publication_year"].iloc[0] == year
 
     def test_year_below_minimum_fails(self, valid_base_record: dict) -> None:
-        """Year below minimum (1800) should fail."""
+        """Year below minimum (1500) should fail."""
         record = valid_base_record.copy()
-        record["publication_year"] = 1799
+        record["publication_year"] = 1499
 
         df = pd.DataFrame([record])
 
@@ -334,7 +335,7 @@ class TestPublicationBaseSchemaMultipleRecords:
         """Lazy validation should collect all errors."""
         record1 = valid_base_record.copy()
         record1["pmid"] = "INVALID1"  # Invalid PMID
-        record1["publication_year"] = 1799  # Invalid year
+        record1["publication_year"] = 1499  # Invalid year
 
         record2 = valid_base_record.copy()
         record2["entity_id"] = "test_pub_002"

@@ -175,9 +175,9 @@ class PublicationTransformer(BaseChemblTransformer):
 
         # Validate year using PublicationYear Value Object
         # Note: field_specs already maps year → publication_year
-        year_vo = PublicationYear.from_raw(data.get("publication_year"))
-        validated_year = year_vo.value if year_vo else None
-        data["publication_year"] = validated_year
+        data["publication_year"] = self.validate_value_object(
+            PublicationYear, data.get("publication_year"), as_string=False
+        )
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON

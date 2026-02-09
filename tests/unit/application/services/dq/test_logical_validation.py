@@ -11,17 +11,17 @@ from datetime import date
 
 @pytest.mark.unit
 class TestPublicationYearRange:
-    """Test publication_year ∈ [1800, CURRENT_YEAR + 1]."""
+    """Test publication_year ∈ [1500, CURRENT_YEAR + 1]."""
 
     @pytest.mark.parametrize(
         "year,expected",
         [
-            (1800, "PASS"),  # min boundary
+            (1500, "PASS"),  # min boundary
             (2024, "PASS"),  # past year
             (2025, "PASS"),  # past year
             (2026, "PASS"),  # current year
             (2027, "PASS"),  # current year + 1
-            (1799, "WARN"),  # below min
+            (1499, "WARN"),  # below min
             (2028, "WARN"),  # far future (current + 2)
             (0, "WARN"),  # zero
             (-1, "WARN"),  # negative
@@ -30,13 +30,13 @@ class TestPublicationYearRange:
     def test_publication_year_range(
         self, minimal_pubmed_publication_df: pd.DataFrame, year: int, expected: str
     ) -> None:
-        """Validate publication_year range [1800, CURRENT_YEAR + 1]."""
+        """Validate publication_year range [1500, CURRENT_YEAR + 1]."""
         df = minimal_pubmed_publication_df.copy()
         df["publication_year"] = year
 
         current_year = date.today().year
 
-        if 1800 <= year <= current_year + 1:
+        if 1500 <= year <= current_year + 1:
             assert expected == "PASS"
         else:
             assert expected == "WARN", f"Year {year} should warn"
@@ -314,14 +314,14 @@ class TestDateOrdering:
 class TestPublicationYearEdgeCases:
     """Edge cases for publication year range validation."""
 
-    def test_year_1800_boundary_valid(
+    def test_year_1500_boundary_valid(
         self, minimal_pubmed_publication_df: pd.DataFrame
     ) -> None:
-        """PASS: year == 1800 (min boundary)."""
+        """PASS: year == 1500 (min boundary)."""
         df = minimal_pubmed_publication_df.copy()
-        df["publication_year"] = 1800
+        df["publication_year"] = 1500
 
-        assert df["publication_year"].iloc[0] == 1800
+        assert df["publication_year"].iloc[0] == 1500
 
     def test_year_current_plus_one_valid(
         self, minimal_pubmed_publication_df: pd.DataFrame
@@ -333,12 +333,12 @@ class TestPublicationYearEdgeCases:
 
         assert df["publication_year"].iloc[0] == current_year + 1
 
-    def test_year_1799_warns(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
-        """WARN: year == 1799 (below min)."""
+    def test_year_1499_warns(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
+        """WARN: year == 1499 (below min)."""
         df = minimal_pubmed_publication_df.copy()
-        df["publication_year"] = 1799
+        df["publication_year"] = 1499
 
-        assert df["publication_year"].iloc[0] < 1800
+        assert df["publication_year"].iloc[0] < 1500
 
     def test_year_far_future_warns(
         self, minimal_pubmed_publication_df: pd.DataFrame

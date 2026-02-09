@@ -15,7 +15,6 @@ See also:
 from __future__ import annotations
 
 import re
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from .transformations import safe_int
@@ -72,8 +71,7 @@ def validate_smiles(smiles: str | None) -> bool:
 # =============================================================================
 
 # Standard publication year range for scientific publications.
-# First scientific journals appeared in XVII century, but systematic
-# publications began in XIX century.
+# covers historical scientific journals from XVII century
 #
 # These constants use DEFAULT_VALIDATION_CONFIG for the authoritative values.
 # For custom ranges, use ValidationConfig directly or PublicationYear Value Object.
@@ -87,7 +85,7 @@ def _get_default_config() -> ValidationConfig:
 
 
 # Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
-MIN_PUBLICATION_YEAR: int = 1800
+MIN_PUBLICATION_YEAR: int = 1500
 MAX_PUBLICATION_YEAR: int = 2100
 
 

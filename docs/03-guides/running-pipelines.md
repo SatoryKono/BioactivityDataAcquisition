@@ -117,6 +117,27 @@ python -m bioetl.main run --pipeline chembl_activity --resume
 python -m bioetl.main run --pipeline chembl_activity --debug
 ```
 
+### Bronze Cache (use_cached_bronze)
+
+BioETL поддерживает запуск пайплайнов на основе локального кеша Bronze-слоя вместо выполнения HTTP-запросов к API. Это полезно для быстрой отладки трансформаций и тестирования DQ-правил на ранее загруженных данных.
+
+> **Note:** С версии 5.9.0 опция `--use-cached-bronze` **включена по умолчанию**. 
+> Пайплайн сначала ищет данные в `data/output/bronze/{provider}/{entity}`.
+
+```bash
+# Использовать кеш (по умолчанию)
+python -m bioetl.main run --pipeline chembl_activity
+
+# Принудительно запросить свежие данные из API
+python -m bioetl.main run --pipeline chembl_activity --no-cached-bronze
+
+# Фильтрация кеша по дате
+python -m bioetl.main run --pipeline chembl_activity --cached-bronze-date 2026-01-20
+
+# Указание кастомного пути к кешу
+python -m bioetl.main run --pipeline chembl_activity --cached-bronze-path ./my_cache
+```
+
 ### Фильтрация по CSV
 
 Обрабатывать только записи с указанными ID:

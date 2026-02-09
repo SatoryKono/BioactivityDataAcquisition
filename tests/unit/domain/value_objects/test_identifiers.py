@@ -871,8 +871,8 @@ class TestPublicationYear:
 
     def test_minimum_year(self) -> None:
         """Test creation with minimum valid year."""
-        year = PublicationYear(1800)
-        assert year.value == 1800
+        year = PublicationYear(1500)
+        assert year.value == 1500
 
     def test_maximum_year(self) -> None:
         """Test creation with maximum valid year."""
@@ -892,7 +892,7 @@ class TestPublicationYear:
     def test_below_minimum_raises(self) -> None:
         """Test year below minimum raises ValueError."""
         with pytest.raises(ValueError, match="outside valid range"):
-            PublicationYear(1799)
+            PublicationYear(1499)
 
     def test_above_maximum_raises(self) -> None:
         """Test year above maximum raises ValueError."""
@@ -951,7 +951,7 @@ class TestPublicationYear:
     def test_from_raw_invalid(self) -> None:
         """Test from_raw with invalid value returns None."""
         assert PublicationYear.from_raw("abc") is None
-        assert PublicationYear.from_raw(1799) is None
+        assert PublicationYear.from_raw(1499) is None
         assert PublicationYear.from_raw(2101) is None
 
     def test_str(self) -> None:
@@ -1008,7 +1008,7 @@ class TestPublicationYear:
     def test_min_year_property(self) -> None:
         """Test min_year property returns config value."""
         year = PublicationYear(2020)
-        assert year.min_year == 1800
+        assert year.min_year == 1500
 
     def test_max_year_property(self) -> None:
         """Test max_year property returns config value."""

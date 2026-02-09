@@ -10,7 +10,6 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     PublicationBaseSchema,
 )
 from bioetl.domain.schemas.constants import (
@@ -21,7 +20,7 @@ from bioetl.domain.schemas.constants import (
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
-__all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "ChemblPublicationSchema"]
+__all__ = ["DOI_REGEX_PATTERN", "ChemblPublicationSchema"]
 
 
 class ChemblPublicationSchema(PublicationBaseSchema):
@@ -31,7 +30,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     - Cross-references: pmid, doi
     - Core content: title, abstract, authors
     - Metadata: journal, year, doc_type (overridden)
-    - Lookup tracking: lookup_method (overridden), original_id, source
+    - Lookup tracking: lookup_method, original_id, source
 
     Fields excluded from PyArrow/Gold schemas (not available from ChEMBL API):
     - pmc_id: ChEMBL API does not return PMC ID
@@ -48,13 +47,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="ChEMBL Document ID.",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: direct for ChEMBL ID lookup",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Unified field names (ChEMBL-specific overrides) ===
     # Note: old fields 'year' and 'doc_type' removed - replaced by unified names
@@ -67,7 +60,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # === System Fields ===
     _source: Series[str] = pa.Field(
         nullable=False,
-        default="chembl",
+        eq="chembl",
         description="Data source identifier.",
     )
 

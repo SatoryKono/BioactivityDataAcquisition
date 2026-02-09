@@ -97,7 +97,7 @@ class TestFileSizeLimits:
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "composite.py": 515,  # 512 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
-        "registration.py": 610,  # 604 LOC - provider registration (config helpers extracted to _config_helpers.py)
+        "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
         "pipeline_factory.py": 820,  # 814 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation
@@ -109,9 +109,9 @@ class TestFileSizeLimits:
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 1005,  # 1003 LOC - Silver PyArrow schemas + SubcellularFraction schema
-        "client.py": 1100,  # 1098 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication), CrossRefAdapter (DOI→title fallback)
+        "client.py": 1125,  # 1123 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication + extraction_params ADR-028), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
-        "pipeline_config.py": 1095,  # 1089 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups
+        "pipeline_config.py": 1100,  # 1098 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups + extraction_params
         "composite_config.py": 680,  # 679 LOC - Composite pipeline configuration schema with validation
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
@@ -655,7 +655,7 @@ class TestClassSize:
         "OpenAlexAdapter": 720,  # 670 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler + title search for composite pipelines
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
         # ChEMBL adapter with complex FilterableDataSourcePort
-        "ChemblAdapter": 1015,  # 1013 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection
+        "ChemblAdapter": 1040,  # 1037 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection + extraction_params (ADR-028)
         # Common adapter base classes
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction

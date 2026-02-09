@@ -6,11 +6,16 @@ Provides unified field set for cross-provider publication analysis.
 
 from __future__ import annotations
 
+import json
+import re
+from typing import cast
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import ORCID_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
     MAX_PUBLICATION_YEAR,
@@ -73,6 +78,10 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of unique affiliations (unified field name)",
     )
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
+    )
 
     # === Publication metadata (common to all providers) ===
     journal: Series[str] = pa.Field(
@@ -96,6 +105,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     )
     language: Series[str] = pa.Field(
         nullable=True,
+        str_length={"min_value": 2, "max_value": 3},
         description="Language code (ISO 639-1 or MARC)",
     )
 
@@ -132,7 +142,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     # Note: alias maps Python attribute name to DataFrame column name
     lookup_method: Series[str] = pa.Field(
         alias="_lookup_method",
-        nullable=True,
+        nullable=False,
         isin=LOOKUP_METHODS,
         description="How record was resolved: direct, doi, pmid, title_fallback, title_only",
     )
@@ -147,6 +157,29 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
+
+    @pa.check("title", name="title_not_empty")
+    def _check_title(cls, series: Series[str]) -> Series[bool]:
+        """Validate title is not empty when present (null is allowed)."""
+        return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
+
+    @pa.check("author_orcids", name="orcid_format")
+    def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
+        """Validate ORCID format in JSON array elements."""
+        _pattern = re.compile(ORCID_PATTERN)
+
+        def _valid(val: object) -> bool:
+            if pd.isna(val):
+                return True
+            try:
+                items = json.loads(str(val))
+                return all(
+                    not item or _pattern.match(item) is not None for item in items
+                )
+            except (json.JSONDecodeError, TypeError):
+                return False
+
+        return cast("Series[bool]", series.apply(_valid))
 
     class Config:
         """Pandera configuration."""

@@ -63,7 +63,7 @@ class ReferenceSchema(ETLRecordSchema):
     )
     year: Series[int] | None = pa.Field(
         nullable=True,
-        ge=1800,
+        ge=1500,
         le=2100,
         description="Publication year",
     )

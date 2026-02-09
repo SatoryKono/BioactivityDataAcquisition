@@ -803,7 +803,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # abstract and affiliations excluded per user request
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("author_details", pa.string()),  # JSON array of author objects
-        pa.field("author_orcid_list", pa.string()),  # Unified: from author_orcids
+        pa.field("author_orcids", pa.string()),  # ORCID IDs (JSON array)
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citations_made", pa.int64()),  # Unified: from references-count
         pa.field(

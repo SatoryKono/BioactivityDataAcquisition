@@ -104,7 +104,7 @@ class TestValidateYearRange:
     @pytest.mark.parametrize(
         "year,expected",
         [
-            (1800, True),
+            (1500, True),
             (1990, True),
             (2024, True),
             (2100, True),
@@ -121,7 +121,7 @@ class TestValidateYearRange:
     @pytest.mark.parametrize(
         "year",
         [
-            1799,
+            1499,
             0,
             -100,
             2101,
@@ -145,8 +145,8 @@ class TestPublicationYearConstants:
     """Tests for publication year constants."""
 
     def test_min_publication_year_value(self) -> None:
-        """Test MIN_PUBLICATION_YEAR is set to 1800."""
-        assert MIN_PUBLICATION_YEAR == 1800
+        """Test MIN_PUBLICATION_YEAR is set to 1500."""
+        assert MIN_PUBLICATION_YEAR == 1500
 
     def test_max_publication_year_value(self) -> None:
         """Test MAX_PUBLICATION_YEAR is 2100."""
@@ -169,11 +169,11 @@ class TestValidatePublicationYear:
         "year,expected_warn",
         [
             (2020, False),
-            (1800, False),
+            (1500, False),
             (2100, False),
-            (1799, True),
+            (1499, True),
             (2101, True),
-            (1500, True),
+            (1000, True),
             (None, False),
         ],
     )
@@ -193,11 +193,11 @@ class TestValidatePublicationYear:
     def test_boundary_values(self) -> None:
         """Test boundary values for publication year validation."""
         # At boundaries (valid)
-        assert validate_publication_year(1800) == (1800, False)
+        assert validate_publication_year(1500) == (1500, False)
         assert validate_publication_year(2100) == (2100, False)
 
         # Just outside boundaries (warning)
-        assert validate_publication_year(1799) == (1799, True)
+        assert validate_publication_year(1499) == (1499, True)
         assert validate_publication_year(2101) == (2101, True)
 
     def test_preserves_original_value(self) -> None:

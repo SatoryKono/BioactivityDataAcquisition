@@ -31,12 +31,11 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_page_info,
     extract_published_date,
     extract_references,
-    extract_year,
 )
 from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
-from bioetl.domain.value_objects import DOI
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -155,6 +154,15 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             dates.get("published_online"),
         )
 
+        # Extract raw year from date-parts for validation
+        raw_year = None
+        for date_field in ["published-print", "published-online", "issued"]:
+            date_info = rec.get(date_field, {})
+            date_parts = date_info.get("date-parts", [[]])
+            if date_parts and date_parts[0] and len(date_parts[0]) > 0:
+                raw_year = date_parts[0][0]
+                break
+
         return {
             "doi": doi,
             "title": extract_first_string(rec.get("title", [])),
@@ -162,7 +170,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **journal_info,
             **page_info,
             **dates,
-            "publication_year": extract_year(rec),
+            "publication_year": self.validate_value_object(
+                PublicationYear, raw_year, as_string=False
+            ),
             "publication_date": publication_date,
             "publication_type": rec.get(
                 "type"
@@ -189,7 +199,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **content_domain,
             **issn_by_type,
             # Author and reference data
-            "author_orcid_list": serialized_orcids,
+            "author_orcids": serialized_orcids,
             "author_details": serialized_author_details,
             "references": serialized_references,
             # DQ flags (MUST be last, per RULES.md §2.4)
