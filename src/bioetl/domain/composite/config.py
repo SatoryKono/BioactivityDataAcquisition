@@ -119,6 +119,11 @@ class DependencyConfig:
             If None, uses the first join_key. Useful when source column name
             differs from target API field name (e.g., protein_classification_id
             in source table vs protein_class_id in API).
+        filter_fields: Multiple field names for multi-field API filtering.
+            When set, ALL specified fields are passed as AND-filters to the API.
+            Example: ("molecule_chembl_id", "document_chembl_id") produces
+            ?molecule_chembl_id__in=...&document_chembl_id__in=...
+            Takes precedence over filter_field.
 
     Example:
         >>> # Standard dependency using seed keys
@@ -135,6 +140,13 @@ class DependencyConfig:
         ...     key_source="chembl_target_component",
         ...     silver_table="silver/chembl/protein_class",
         ... )
+        >>> # Dual-field filtering (compound_record by molecule + document)
+        >>> config = DependencyConfig(
+        ...     pipeline="chembl_compound_record",
+        ...     join_keys=("molecule_chembl_id", "document_chembl_id"),
+        ...     filter_fields=("molecule_chembl_id", "document_chembl_id"),
+        ...     silver_table="silver/chembl/compound_record",
+        ... )
     """
 
     pipeline: str
@@ -144,12 +156,17 @@ class DependencyConfig:
     silver_table: str | None = None
     key_source: str | None = None  # None = seed, or pipeline name for chained deps
     filter_field: str | None = None  # API filter field (defaults to first join_key)
+    filter_fields: tuple[str, ...] | None = (
+        None  # Multi-field API filtering (AND logic)
+    )
     key_filter: str | None = None  # SQL-like condition to filter key_source records
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.join_keys, list):
             object.__setattr__(self, "join_keys", tuple(self.join_keys))
+        if isinstance(self.filter_fields, list):
+            object.__setattr__(self, "filter_fields", tuple(self.filter_fields))
         self._validate()
 
     def _validate(self) -> None:
@@ -159,6 +176,11 @@ class DependencyConfig:
         _validate_positive(
             self.timeout_seconds, f"dependency {self.pipeline} timeout_seconds"
         )
+        if self.filter_fields and self.filter_field:
+            raise ValueError(
+                f"Dependency {self.pipeline}: filter_fields and filter_field "
+                "are mutually exclusive. Use filter_fields for multi-field filtering."
+            )
 
     @property
     def primary_join_key(self) -> str:
@@ -169,6 +191,23 @@ class DependencyConfig:
     def uses_seed_keys(self) -> bool:
         """Check if this dependency uses keys from seed (default behavior)."""
         return self.key_source is None or self.key_source == "seed"
+
+    @property
+    def effective_filter_fields(self) -> tuple[str, ...]:
+        """Resolve effective filter fields.
+
+        Priority: filter_fields > filter_field > first join_key.
+        """
+        if self.filter_fields:
+            return self.filter_fields
+        if self.filter_field:
+            return (self.filter_field,)
+        return (self.join_keys[0],)
+
+    @property
+    def is_multi_field_filter(self) -> bool:
+        """Check if this dependency uses multi-field API filtering."""
+        return len(self.effective_filter_fields) > 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -926,6 +965,11 @@ class CompositeConfig:
                     "required": d.required,
                     "timeout_seconds": d.timeout_seconds,
                     "silver_table": d.silver_table,
+                    **(
+                        {"filter_fields": list(d.filter_fields)}
+                        if d.filter_fields
+                        else {}
+                    ),
                 }
                 for d in self.dependencies
             ],
