@@ -37,7 +37,7 @@ entity_field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
-  - field: citation_count
+  - field: citations_received
     type: range
     min: 0
     nullable: true
