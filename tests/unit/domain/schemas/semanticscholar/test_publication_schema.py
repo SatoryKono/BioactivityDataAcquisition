@@ -12,8 +12,8 @@ import re
 import pandas as pd
 import pytest
 
+from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 from bioetl.domain.schemas.semanticscholar.publication import (
-    LOOKUP_METHODS,
     OA_STATUS_VALUES,
     SemanticScholarPublicationSchema,
 )
