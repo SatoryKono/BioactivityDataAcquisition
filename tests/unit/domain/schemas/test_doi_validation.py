@@ -78,12 +78,14 @@ class TestDoiRegexPattern:
 
     def test_pattern_components(self) -> None:
         """Test DOI regex pattern has correct components."""
-        # Pattern should be: ^10\.\d{4,}/.+$
+        # Pattern should be: ^10\.\d{4,}/\S+$
         assert "10\\." in DOI_REGEX_PATTERN, "Pattern should start with '10.'"
         assert "\\d{4,}" in DOI_REGEX_PATTERN, (
             "Pattern should require 4+ digit registrant"
         )
-        assert "/.+" in DOI_REGEX_PATTERN, "Pattern should require non-empty suffix"
+        assert "/\\S+" in DOI_REGEX_PATTERN, (
+            "Pattern should require non-empty suffix without whitespace"
+        )
 
 
 class TestDoiRegexEdgeCases:

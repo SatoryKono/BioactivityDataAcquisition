@@ -26,7 +26,7 @@ class FunderSchema(ETLRecordSchema):
     # === Foreign Key ===
     doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="FK to Publication.doi",
     )
 
