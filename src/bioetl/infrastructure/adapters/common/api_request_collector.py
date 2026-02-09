@@ -170,6 +170,7 @@ class APIRequestCollector:
         source_type: str = "api",
         url: str | None = None,
         api_version: str | None = None,
+        query_string: str | None = None,
     ) -> SourceMetadata:
         """Build SourceMetadata with collected request details and aggregates.
 
@@ -177,6 +178,8 @@ class APIRequestCollector:
             source_type: Source type for metadata ("api", "csv", "parquet").
             url: Optional base API URL to include.
             api_version: Optional API version string.
+            query_string: Optional query string for audit trail
+                (e.g., extraction-level filtering params from ADR-028 §3).
 
         Returns:
             SourceMetadata instance with all collected requests and statistics.
@@ -197,6 +200,7 @@ class APIRequestCollector:
         return SourceMetadata(
             type=source_type,  # type: ignore[arg-type]
             url=url,
+            query_string=query_string,
             api_version=api_version,
             api_requests=requests_copy,
             total_requests=total_requests,
