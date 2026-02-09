@@ -27,6 +27,13 @@ input_filter:
 # -----------------------------------------------------------------------------
 # Criteria for valid publications
 gold_filters:
+  # Numeric range filters
+  ranges:
+    # Scientific journals era cutoff (schema allows 1500..2100)
+    publication_year:
+      min: 1800
+      max: 2100
+
   # Required fields
   required_fields:
     - pmid

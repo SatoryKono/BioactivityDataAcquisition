@@ -209,6 +209,16 @@ class SourceYamlConfig(BaseModel):
         return self.source.provider_config.client.max_retries
 
     @property
+    def retry_base_delay(self) -> float:
+        """Get retry base delay in seconds."""
+        return self.source.provider_config.client.retry_base_delay
+
+    @property
+    def retry_max_delay(self) -> float:
+        """Get retry max delay in seconds."""
+        return self.source.provider_config.client.retry_max_delay
+
+    @property
     def base_url(self) -> str | None:
         """Get base URL."""
         return self.source.provider_config.base_url

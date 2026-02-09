@@ -209,20 +209,19 @@ def bootstrap_composite_runner(
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
 
-    # Create seed runner factory
+    # Shared cached bronze RunOptions kwargs for all runner factories
+    _bronze_opts: dict[str, object] = {
+        "use_cached_bronze": runtime.use_cached_bronze,
+        "cached_bronze_path": runtime.cached_bronze_path,
+        "cached_bronze_date": runtime.cached_bronze_date,
+    }
+
     def seed_runner_factory() -> PipelineRunner:
-        """Create PipelineRunner for the seed phase.
-
-        The seed pipeline runs first to fetch primary entities (e.g., publications)
-        which provide join keys (DOI, PMID) for subsequent enricher pipelines.
-
-        Returns:
-            PipelineRunner configured for seed pipeline execution with
-            optional limit from runtime config.
-        """
+        """Create PipelineRunner for the seed phase."""
         options = RunOptions(
             run_type="incremental",
             limit=runtime.seed_limit,
+            **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline_runner(ctx)
@@ -270,6 +269,7 @@ def bootstrap_composite_runner(
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
+            **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -337,6 +337,7 @@ def bootstrap_composite_runner(
             limit=len(keys) if filter_ids and keys is not None else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
+            **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)

@@ -29,7 +29,7 @@ from bioetl.domain import contracts
 from bioetl.domain import constants
 
 # Domain registry (publication entity mappings, ADR-024)
-from bioetl.domain import registry
+from bioetl.domain import registry  # noqa: F401
 from bioetl.domain.registry import (
     LEGACY_PUBLICATION_ALIASES,
     PUBLICATION_ENTITY_TYPES,
@@ -106,6 +106,9 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     UniprotTarget,
 )
 
+# Domain mapping (entity relation mappings)
+from bioetl.domain import mapping  # noqa: F401
+
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
 
@@ -160,6 +163,9 @@ from bioetl.domain.exceptions import (
     UploadError,
     ValidationError,
 )
+
+# Extraction filtering (ADR-028 §3)
+from bioetl.domain.models import ExtractionParams
 
 # Filter configuration
 from bioetl.domain.filtering import (
@@ -350,17 +356,6 @@ __all__ = [
     "contracts",
     # Constants
     "constants",
-    # Registry (publication entity mappings, ADR-024)
-    "registry",
-    "LEGACY_PUBLICATION_ALIASES",
-    "PUBLICATION_ENTITY_TYPES",
-    "PublicationMapping",
-    "get_publication_mapping",
-    "is_legacy_publication_alias",
-    "is_publication_entity",
-    "validate_publication_entity_type",
-    # Contracts (Gold layer Pandera schemas)
-    "contracts",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
@@ -471,6 +466,8 @@ __all__ = [
     "InvalidDataFormatError",
     "MissingRequiredFieldError",
     "SchemaViolationError",
+    # Extraction filtering (ADR-028)
+    "ExtractionParams",
     # Filters
     "FilterLoadResult",
     "GoldColumnFilter",
@@ -547,6 +544,14 @@ __all__ = [
     "ValueValidatorPort",
     "WatermarkStrategyPort",
     "NoOpWatermarkStrategy",
+    # Registry (publication entity types, ADR-024)
+    "LEGACY_PUBLICATION_ALIASES",
+    "PUBLICATION_ENTITY_TYPES",
+    "PublicationMapping",
+    "get_publication_mapping",
+    "is_legacy_publication_alias",
+    "is_publication_entity",
+    "validate_publication_entity_type",
     # Resilience
     "CircuitBreakerConfig",
     "RetryConfig",
@@ -5270,9 +5275,8 @@ class ValidationConfig:
     - Single source of truth for validation rules
 
     Attributes:
-        min_publication_year: Minimum valid publication year. Default 1800
-            covers modern scientific publications. Use 1500 for historical
-            databases like Semantic Scholar.
+        min_publication_year: Minimum valid publication year. Default 1500
+            covers historical scientific publications.
         max_publication_year: Maximum valid publication year. Default 2100.
         min_molecular_weight: Minimum molecular weight in Daltons. Default 10.0.
         max_molecular_weight: Maximum molecular weight in Daltons. Default 10000.0
@@ -5286,16 +5290,12 @@ class ValidationConfig:
     Example:
         >>> config = ValidationConfig()
         >>> config.min_publication_year
-        1800
-        >>> # Override for Semantic Scholar (older publications)
-        >>> ss_config = ValidationConfig(min_publication_year=1500)
-        >>> ss_config.min_publication_year
         1500
 
     """
 
     # Publication year range
-    min_publication_year: int = 1800
+    min_publication_year: int = 1500
     max_publication_year: int = 2100
 
     # Molecular properties
@@ -6702,13 +6702,13 @@ class InputFilterContext:
             raise ValueError("filter_field is required when filter_ids is set")
 
     def _validate_csv_mode(self) -> None:
-        """Validate CSV-based filter configuration."""
+        """Validate CSV-based filter configuration.
+
+        Note: column_name and filter_field can be empty here; they will be
+        resolved from YAML configuration during the bootstrap phase.
+        """
         if not self.source_path:
             raise ValueError("source_path is required when filter is enabled")
-        if not self.column_name:
-            raise ValueError("column_name is required when filter is enabled")
-        if not self.filter_field:
-            raise ValueError("filter_field is required when filter is enabled")
 
 
 @dataclass(frozen=True, slots=True)
@@ -8133,6 +8133,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.schemas.common.publication_base import (
+    LOOKUP_METHODS,
+    OA_STATUS_VALUES,
+)
+from bioetl.domain.validation import DOI_REGEX_PATTERN
+
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
     """Schema for PubMed Publication in Gold layer.
@@ -8144,9 +8150,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
     pmid: Series[str] = pa.Field(nullable=False)
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     pmc_id: Series[str] = pa.Field(nullable=True)
-    title: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=False)
     abstract: Series[str] = pa.Field(nullable=True)
     abstract_structured: Series[bool] = pa.Field(
         nullable=True
@@ -8194,7 +8200,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
-    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )
     # Note: accepted_date, received_date, revised_date, epub_date excluded per design
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
@@ -8234,13 +8242,12 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -8272,7 +8279,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Primary identifier
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
-    doi: Series[str] = pa.Field(nullable=False)
+    doi: Series[str] = pa.Field(nullable=False, str_matches=DOI_REGEX_PATTERN)
 
     # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
     # and transformer explicitly removes these fields from output
@@ -8291,7 +8298,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     publication_year: Series[float] = pa.Field(
-        nullable=True, ge=1900, le=2100, coerce=True
+        nullable=True, ge=1500, le=2100, coerce=True
     )
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
@@ -8328,9 +8335,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     issn_electronic: Series[str] = pa.Field(nullable=True)
 
     # Author identifiers
-    author_orcid_list: Series[str] = pa.Field(
-        nullable=True
-    )  # JSON array of ORCID identifiers (unified: was author_orcids)
+    author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCID IDs
     author_details: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of author objects (given, family, orcid, sequence, affiliations)
@@ -8340,13 +8345,12 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
         nullable=True
     )  # JSON array of cited references (DOI, title, author, year)
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -8381,7 +8385,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     # Cross-reference IDs for linking publications across providers
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
     # Note: pmc_id excluded from transformer output per design
@@ -8417,9 +8421,9 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
         nullable=True
     )  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
-    oa_status: Series[str] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True, isin=OA_STATUS_VALUES)
     is_retracted: Series[bool] = pa.Field(
-        nullable=True, coerce=True
+        nullable=False, coerce=True
     )  # Quality indicator
     # OpenAlex source field: cited_by_count
     # Unified BioETL field: citations_received (standardized across all providers)
@@ -8450,13 +8454,12 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     author_openalex_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
     author_orcids: Series[str] = pa.Field(nullable=True)  # ORCID IDs
 
-    # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -8490,7 +8493,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     paper_id: Series[str] = pa.Field(nullable=False)
 
     # External IDs
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     pmid: Series[str] = pa.Field(nullable=True)
     # Note: pmc_id and arxiv_id excluded from transformer output per design
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
@@ -8500,7 +8503,9 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     tldr: Series[str] = pa.Field(nullable=True)
-    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )  # int64
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Journal/Venue
@@ -8510,7 +8515,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     page_range: Series[str] = pa.Field(nullable=True)  # Page range: "first-last" format
     page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    venue: Series[str] = pa.Field(nullable=True)
+    # Note: venue excluded - transformer maps venue → journal via extract_journal_info
 
     # Metrics
     citations_received: Series[float] = pa.Field(
@@ -8524,7 +8529,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Open Access
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     open_access_url: Series[str] = pa.Field(nullable=True)
-    oa_status: Series[str] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True, isin=OA_STATUS_VALUES)
 
     # Classification (JSON strings)
     subject_fields: Series[str] = pa.Field(nullable=True)
@@ -8545,13 +8550,12 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # External identifiers
     dblp_id: Series[str] = pa.Field(nullable=True)  # DBLP publication key
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -11065,8 +11069,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     issn_electronic: str | None = None
 
     # Author ORCID identifiers (JSON array of ORCID IDs)
-    # Unified field name: author_orcid_list (was: author_orcids)
-    author_orcid_list: str | None = None
+    author_orcids: str | None = None
 
     # Full author details with ORCID, sequence, affiliations (JSON array)
     author_details: str | None = None
@@ -11879,7 +11882,7 @@ class ArticleRecord(BaseModel):
         default=None, description="Publication date (ISO format)"
     )
     year: int | None = PydanticField(
-        default=None, description="Publication year (1800-2100)"
+        default=None, description="Publication year (1500-2100)"
     )
     # Note: accepted_date, received_date, revised_date, epub_date excluded from
     # transformer output per design (PubMed pipeline field exclusions)
@@ -12496,6 +12499,7 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
             "ReadError",
             "WriteError",
             "ConnectError",
+            "ProtocolError",
             "DecodingError",
             "TransportError",
             "StreamError",
@@ -15819,7 +15823,7 @@ def apply_field_mapping(
 #
 # AUTHORS & AFFILIATIONS:
 #   - authors (unified)
-#   - author_orcid_list (unified structure for ORCID identifiers)
+#   - author_orcids (unified structure for ORCID identifiers)
 #   - affiliation_list (unified, was: affiliations in all)
 #   - affiliation_structured (PubMed-specific structured data)
 #
@@ -16207,6 +16211,7 @@ Contains Pydantic models for structured data that requires validation.
 These models define data contracts for metadata sidecar files.
 """
 
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     ColumnMetrics,
@@ -16233,6 +16238,7 @@ __all__ = [
     "DQSummary",
     "DeltaMetrics",
     "EnvironmentMetadata",
+    "ExtractionParams",
     "FileOutputMetadata",
     "GoldMetadata",
     "LayerType",
@@ -16246,6 +16252,71 @@ __all__ = [
     "SilverMetadata",
     "SourceMetadata",
 ]
+
+================================================================================
+File: filter.py
+Path: models\filter.py
+================================================================================
+"""Extraction filtering domain models.
+
+Provides immutable value objects for API-level extraction filtering.
+Part of ADR-028 §3: Extraction-Level Filtering.
+
+Domain layer — no infrastructure or application imports allowed.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractionParams:
+    """Server-side query parameters for API extraction filtering.
+
+    Immutable value object. Provider-agnostic container —
+    concrete syntax (__in, __isnull) is defined in YAML config.
+
+    Attributes:
+        params: Mapping of query parameter names to values.
+                Keys are provider-specific (e.g., 'standard_type__in').
+                Values are primitives only.
+
+    Example:
+        >>> ep = ExtractionParams(params={
+        ...     "standard_type__in": "IC50,Ki",
+        ...     "standard_units": "nM",
+        ...     "pchembl_value__isnull": False,
+        ... })
+        >>> ep.to_query_dict()
+        {'standard_type__in': 'IC50,Ki', 'standard_units': 'nM', ...}
+    """
+
+    params: Mapping[str, str | int | bool]
+
+    def to_query_dict(self) -> dict[str, str | int | bool]:
+        """Return params as mutable dict for adapter consumption."""
+        return dict(self.params)
+
+    def to_query_string(self) -> str:
+        """Serialize for SourceMetadata.query_string audit field.
+
+        Returns:
+            URL-encoded-like string with sorted keys for determinism.
+        """
+        parts = [f"{k}={v}" for k, v in sorted(self.params.items())]
+        return "&".join(parts)
+
+    @property
+    def is_empty(self) -> bool:
+        """Check if no extraction params are configured."""
+        return len(self.params) == 0
+
+    @classmethod
+    def empty(cls) -> ExtractionParams:
+        """Create an empty ExtractionParams instance."""
+        return cls(params={})
 
 ================================================================================
 File: metadata.py
@@ -17808,7 +17879,7 @@ class DataNormalizationPort(Protocol):
         ...
 
     def normalize_year(self, year: int | None) -> tuple[int | None, bool]:
-        """Validate publication year against range [1800, 2100].
+        """Validate publication year against range [1500, 2100].
 
         Returns (year, is_warning). Warning is True if year is outside valid range.
         """
@@ -22806,7 +22877,7 @@ PUBLICATION_FIELD_ORDER: Final[tuple[str, ...]] = (
     "crossref.publication.author_details",
     "semanticscholar.publication.author_h_indices",
     "openalex.publication.author_openalex_ids",
-    "crossref.publication.author_orcid_list",
+    "crossref.publication.author_orcids",
     "openalex.publication.author_orcids",
     "semanticscholar.publication.author_orcids",
     "semanticscholar.publication.author_s2_ids",
@@ -24035,7 +24106,6 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     PublicationBaseSchema,
 )
 from bioetl.domain.schemas.constants import (
@@ -24046,7 +24116,7 @@ from bioetl.domain.schemas.constants import (
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
-__all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "ChemblPublicationSchema"]
+__all__ = ["DOI_REGEX_PATTERN", "ChemblPublicationSchema"]
 
 
 class ChemblPublicationSchema(PublicationBaseSchema):
@@ -24056,7 +24126,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     - Cross-references: pmid, doi
     - Core content: title, abstract, authors
     - Metadata: journal, year, doc_type (overridden)
-    - Lookup tracking: lookup_method (overridden), original_id, source
+    - Lookup tracking: lookup_method, original_id, source
 
     Fields excluded from PyArrow/Gold schemas (not available from ChEMBL API):
     - pmc_id: ChEMBL API does not return PMC ID
@@ -24073,13 +24143,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="ChEMBL Document ID.",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: direct for ChEMBL ID lookup",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Unified field names (ChEMBL-specific overrides) ===
     # Note: old fields 'year' and 'doc_type' removed - replaced by unified names
@@ -24092,7 +24156,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # === System Fields ===
     _source: Series[str] = pa.Field(
         nullable=False,
-        default="chembl",
+        eq="chembl",
         description="Data source identifier.",
     )
 
@@ -24647,11 +24711,16 @@ Provides unified field set for cross-provider publication analysis.
 
 from __future__ import annotations
 
+import json
+import re
+from typing import cast
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import ORCID_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
     MAX_PUBLICATION_YEAR,
@@ -24714,6 +24783,10 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of unique affiliations (unified field name)",
     )
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
+    )
 
     # === Publication metadata (common to all providers) ===
     journal: Series[str] = pa.Field(
@@ -24737,6 +24810,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     )
     language: Series[str] = pa.Field(
         nullable=True,
+        str_length={"min_value": 2, "max_value": 3},
         description="Language code (ISO 639-1 or MARC)",
     )
 
@@ -24773,7 +24847,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     # Note: alias maps Python attribute name to DataFrame column name
     lookup_method: Series[str] = pa.Field(
         alias="_lookup_method",
-        nullable=True,
+        nullable=False,
         isin=LOOKUP_METHODS,
         description="How record was resolved: direct, doi, pmid, title_fallback, title_only",
     )
@@ -24788,6 +24862,29 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
+
+    @pa.check("title", name="title_not_empty")
+    def _check_title(cls, series: Series[str]) -> Series[bool]:
+        """Validate title is not empty when present (null is allowed)."""
+        return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
+
+    @pa.check("author_orcids", name="orcid_format")
+    def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
+        """Validate ORCID format in JSON array elements."""
+        _pattern = re.compile(ORCID_PATTERN)
+
+        def _valid(val: object) -> bool:
+            if pd.isna(val):
+                return True
+            try:
+                items = json.loads(str(val))
+                return all(
+                    not item or _pattern.match(item) is not None for item in items
+                )
+            except (json.JSONDecodeError, TypeError):
+                return False
+
+        return cast("Series[bool]", series.apply(_valid))
 
     class Config:
         """Pandera configuration."""
@@ -24829,6 +24926,10 @@ CELLOSAURUS_ID_PATTERN = r"^CVCL_[A-Z0-9]+$"
 
 # Date patterns
 ISO_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
+
+# Publication identifier patterns
+ISSN_PATTERN = r"^\d{4}-\d{3}[\dX]$"
+ORCID_PATTERN = r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$"
 
 # =============================================================================
 # CHEMBL ACTIVITY ENUMS
@@ -24975,9 +25076,11 @@ __all__ = [
     "DATA_VALIDITY_COMMENTS",
     "EFO_ID_PATTERN",
     "ISO_DATE_PATTERN",
+    "ISSN_PATTERN",
     "MAX_PHASE_VALUES",
     # Molecule enums
     "MOLECULE_TYPES",
+    "ORCID_PATTERN",
     # Publication enums
     "PUBLICATION_TYPES",
     "RELATIONSHIP_TYPES",
@@ -25197,6 +25300,7 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
@@ -25233,7 +25337,9 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
 
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
-        nullable=True, description="Primary ISSN (first from ISSN array)"
+        nullable=True,
+        str_matches=ISSN_PATTERN,
+        description="Primary ISSN (first from ISSN array)",
     )
     issn_list: Series[str] = pa.Field(
         nullable=True, description="JSON array of all ISSNs"
@@ -25297,18 +25403,17 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     # === ISSN by Type ===
     issn_print: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="Print ISSN (format: XXXX-XXXX)",
     )
     issn_electronic: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="Electronic ISSN (format: XXXX-XXXX)",
     )
 
-    # === Author ORCID Identifiers ===
-    author_orcid_list: Series[str] = pa.Field(
-        nullable=True,
-        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
-    )
+    # === Author ORCID Identifiers (inherited from base, kept for clarity) ===
+    # author_orcids: inherited from PublicationBaseSchema
 
     # === Full Author Details ===
     author_details: Series[str] = pa.Field(
@@ -25400,7 +25505,7 @@ class ReferenceSchema(ETLRecordSchema):
     )
     year: Series[int] | None = pa.Field(
         nullable=True,
-        ge=1800,
+        ge=1500,
         le=2100,
         description="Publication year",
     )
@@ -25635,16 +25740,15 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
 __all__ = [
     "DOI_REGEX_PATTERN",
-    "LOOKUP_METHODS",
     "OA_STATUS_VALUES",
     "OpenAlexPublicationSchema",
 ]
@@ -25661,7 +25765,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     - Pagination: page_first, page_last
     - Metrics: citations_received, citations_made
     - Open Access: is_oa
-    - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+    - Lookup tracking: lookup_method, original_id, source (overridden)
     """
 
     # === Primary Key (OpenAlex-specific) ===
@@ -25671,13 +25775,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="OpenAlex Work ID (e.g., W2148763428)",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Raw OpenAlex Type (replaces doc_type) ===
     publication_type: Series[str] = pa.Field(
@@ -25690,13 +25788,14 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     # === Override _source to be non-nullable ===
     _source: Series[str] = pa.Field(
         nullable=False,
+        eq="openalex",
         description="Data source identifier",
     )
 
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{3}[\dX]$",
+        str_matches=ISSN_PATTERN,
         description="ISSN-L (format: XXXX-XXXX)",
     )
 
@@ -25778,10 +25877,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     # Note: affiliation_list inherited from base (unified field name)
 
     # === Author Identifiers ===
-    author_orcids: Series[str] = pa.Field(
-        nullable=True,
-        description="ORCID IDs as JSON array (empty string for missing)",
-    )
+    # author_orcids: inherited from PublicationBaseSchema
 
     author_openalex_ids: Series[str] = pa.Field(
         nullable=True,
@@ -26229,7 +26325,7 @@ PubMedPublicationSchema replaces ArticleSchema for consistency with other provid
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import datetime
 from typing import cast
 
 import pandas as pd
@@ -26240,10 +26336,9 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
-    MAX_PUBLICATION_YEAR,
-    MIN_PUBLICATION_YEAR,
 )
 
 # Re-export for backwards compatibility
@@ -26278,25 +26373,16 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     # === Primary Key (str for cross-provider consistency) ===
     pmid: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^\d+$",
+        str_matches=r"^[1-9]\d*$",
         description="PubMed ID (PK, numeric string)",
     )
-
-    @pa.check("pmid", name="pmid_positive")
-    def _check_pmid(cls, series: Series[str]) -> Series[bool]:
-        """Validate PMID represents a positive integer."""
-        return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === External Identifiers (override doi for check method) ===
     doi: Series[str] = pa.Field(
         nullable=True,
+        str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier",
     )
-
-    @pa.check("doi", name="doi_format")
-    def _check_doi(cls, series: Series[str]) -> Series[bool]:
-        """Validate DOI format."""
-        return cast("Series[bool]", series.isna() | series.str.match(DOI_REGEX_PATTERN))
 
     @pa.check("pmc_id", name="pmc_id_format")
     def _check_pmc_id(cls, series: Series[str]) -> Series[bool]:
@@ -26323,27 +26409,13 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Article title (required)",
     )
 
-    @pa.check("title", name="title_not_empty")
-    def _check_title(cls, series: Series[str]) -> Series[bool]:
-        """Validate title is not empty."""
-        return cast("Series[bool]", series.str.len() >= 1)
+    # title_not_empty: inherited from PublicationBaseSchema
 
     abstract_structured: Series[bool] = pa.Field(
         nullable=True, description="Whether abstract has NLM sections"
     )
     # Note: vernacular_title excluded from transformer output per design
-    language: Series[str] = pa.Field(
-        nullable=True,
-        description="MARC language code (e.g., 'eng')",
-    )
-
-    @pa.check("language", name="language_length")
-    def _check_language(cls, series: Series[str]) -> Series[bool]:
-        """Validate language code length."""
-        return cast(
-            "Series[bool]",
-            series.isna() | ((series.str.len() >= 2) & (series.str.len() <= 3)),
-        )
+    # language: inherited from PublicationBaseSchema (MARC codes fit str_length 2..3)
 
     # === Journal Information (PubMed-specific) ===
     journal: Series[str] = pa.Field(
@@ -26357,15 +26429,9 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
     issn: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="ISSN (print or electronic)",
     )
-
-    @pa.check("issn", name="issn_format")
-    def _check_issn(cls, series: Series[str]) -> Series[bool]:
-        """Validate ISSN format."""
-        return cast(
-            "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{3}[\dX]$")
-        )
 
     journal_issn_type: Series[str] = pa.Field(nullable=True, description="ISSN type")
 
@@ -26386,15 +26452,6 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     page_range: Series[str] = pa.Field(
         nullable=True, description="Page numbers (unified field name)"
     )
-
-    @pa.check("publication_year", name="year_range")
-    def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
-        """Validate publication year range."""
-        return cast(
-            "Series[bool]",
-            series.isna()
-            | ((series >= MIN_PUBLICATION_YEAR) & (series <= MAX_PUBLICATION_YEAR)),
-        )
 
     pub_month: Series[pd.Int64Dtype] = pa.Field(
         nullable=True, description="Publication month"
@@ -26428,10 +26485,10 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Dates ===
-    date_completed: Series[date] = pa.Field(
+    date_completed: Series[datetime] = pa.Field(
         nullable=True, description="MEDLINE processing completion date"
     )
-    date_revised: Series[date] = pa.Field(
+    date_revised: Series[datetime] = pa.Field(
         nullable=True, description="Record revision date"
     )
 
@@ -26526,6 +26583,13 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Publication types (JSON array, e.g., Journal Article, Review)",
     )
 
+    # === System Fields ===
+    _source: Series[str] = pa.Field(
+        nullable=False,
+        eq="pubmed",
+        description="Data source identifier",
+    )
+
     # Note: accepted_date, received_date, revised_date, epub_date excluded from
     # transformer output per design (PubMed pipeline field exclusions)
 
@@ -26591,7 +26655,6 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
@@ -26600,7 +26663,6 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Re-export for backwards compatibility
 __all__ = [
     "DOI_REGEX_PATTERN",
-    "LOOKUP_METHODS",
     "OA_STATUS_VALUES",
     "SemanticScholarPublicationSchema",
 ]
@@ -26616,7 +26678,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     - Metadata: journal, year, publication_date
     - Metrics: citation_count
     - Open Access: is_oa
-    - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+    - Lookup tracking: lookup_method, original_id, source (overridden)
 
     Fields excluded from PyArrow/Gold schemas:
     - pmc_id: Excluded per design (2026-01)
@@ -26632,13 +26694,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Semantic Scholar Paper ID (40-char hex)",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Override _source to be non-nullable with fixed value ===
     _source: Series[str] = pa.Field(
@@ -26719,10 +26775,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Semantic Scholar author IDs (JSON array of 40-char hex IDs)",
     )
 
-    author_orcids: Series[str] = pa.Field(
-        nullable=True,
-        description="Author ORCID identifiers (JSON array, empty string for missing)",
-    )
+    # author_orcids: inherited from PublicationBaseSchema
 
     author_h_indices: Series[str] = pa.Field(
         nullable=True,
@@ -28459,7 +28512,7 @@ class DataNormalizationConfig:
     Example:
         >>> config = DataNormalizationConfig()
         >>> config.min_publication_year
-        1800
+        1500
         >>> config.max_publication_year
         2100
 
@@ -28468,7 +28521,7 @@ class DataNormalizationConfig:
         1900
     """
 
-    min_publication_year: int = 1800
+    min_publication_year: int = 1500
     max_publication_year: int = 2100
     default_pii_salt: str = ""
 
@@ -28483,7 +28536,7 @@ class DataNormalizationConfig:
     def for_scientific_publications(cls) -> DataNormalizationConfig:
         """Create configuration for scientific publications.
 
-        Uses standard year range [1800, 2100] for scientific literature.
+        Uses standard year range [1500, 2100] for scientific literature.
 
         Returns:
             DataNormalizationConfig with scientific publication defaults.
@@ -31474,8 +31527,7 @@ def validate_smiles(smiles: str | None) -> bool:
 # =============================================================================
 
 # Standard publication year range for scientific publications.
-# First scientific journals appeared in XVII century, but systematic
-# publications began in XIX century.
+# covers historical scientific journals from XVII century
 #
 # These constants use DEFAULT_VALIDATION_CONFIG for the authoritative values.
 # For custom ranges, use ValidationConfig directly or PublicationYear Value Object.
@@ -31489,8 +31541,8 @@ def _get_default_config() -> ValidationConfig:
 
 
 # Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
-MIN_PUBLICATION_YEAR: int = 1800  # DEFAULT_VALIDATION_CONFIG.min_publication_year
-MAX_PUBLICATION_YEAR: int = 2100  # DEFAULT_VALIDATION_CONFIG.max_publication_year
+MIN_PUBLICATION_YEAR: int = 1500
+MAX_PUBLICATION_YEAR: int = 2100
 
 
 # =============================================================================
@@ -31530,17 +31582,17 @@ def validate_positive_int(value: Any) -> int | None:
 
 def validate_year_range(
     year: int | None,
-    min_year: int = 1800,
-    max_year: int = 2100,
+    min_year: int = MIN_PUBLICATION_YEAR,
+    max_year: int = MAX_PUBLICATION_YEAR,
 ) -> bool:
     """Validate year is within a reasonable range.
 
-    Default range [1800, 2100] covers scientific publications.
+    Default range [1950, CURRENT_YEAR+1] covers scientific publications.
 
     Args:
         year: Year to validate.
-        min_year: Minimum valid year (inclusive). Default 1800.
-        max_year: Maximum valid year (inclusive). Default 2100.
+        min_year: Minimum valid year (inclusive). Default 1950.
+        max_year: Maximum valid year (inclusive). Default CURRENT_YEAR + 1.
 
     Returns:
         True if year is within range.
@@ -31548,9 +31600,7 @@ def validate_year_range(
     Example:
         >>> validate_year_range(2024)
         True
-        >>> validate_year_range(1799)
-        False
-        >>> validate_year_range(2101)
+        >>> validate_year_range(1949)
         False
         >>> validate_year_range(None)
         False
@@ -31583,16 +31633,10 @@ def validate_publication_year(
     Example:
         >>> validate_publication_year(2020)
         (2020, False)
-        >>> validate_publication_year(1800)
-        (1800, False)
-        >>> validate_publication_year(2100)
-        (2100, False)
-        >>> validate_publication_year(1799)
-        (1799, True)
-        >>> validate_publication_year(2101)
-        (2101, True)
-        >>> validate_publication_year(1500)
-        (1500, True)
+        >>> validate_publication_year(1950)
+        (1950, False)
+        >>> validate_publication_year(1949)
+        (1949, True)
         >>> validate_publication_year(None)
         (None, False)
         >>> # With custom config
@@ -33564,7 +33608,7 @@ class PublicationYear(ValueObject[int]):
     scientific publications.
 
     The validation range can be customized via ValidationConfig:
-    - Default range: [1800, 2100] for standard scientific publications
+    - Default range: [1500, 2100] for standard scientific publications
     - Semantic Scholar: [1500, 2100] for historical publications
 
     Examples: 1953 (Watson & Crick), 2020 (COVID papers)
@@ -33582,7 +33626,7 @@ class PublicationYear(ValueObject[int]):
     _config: ValidationConfig
 
     # Class-level defaults for backward compatibility
-    _DEFAULT_MIN_YEAR = 1800
+    _DEFAULT_MIN_YEAR = 1500
     _DEFAULT_MAX_YEAR = 2100
 
     def __init__(
@@ -36156,7 +36200,6 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "author_details": PublicationFieldGroup.TRASH,
     "author_h_indices": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_openalex_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
-    "author_orcid_list": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_orcids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_s2_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "authors": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,

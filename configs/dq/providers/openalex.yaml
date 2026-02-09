@@ -31,7 +31,7 @@ provider_field_validations:
     error_message: "Invalid DOI format (must start with 10. prefix)"
 
   # Year range validation
-  - field: year
+  - field: publication_year
     type: range
     min: 1500
     max: 2100

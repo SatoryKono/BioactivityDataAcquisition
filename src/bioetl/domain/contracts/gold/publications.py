@@ -18,6 +18,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.schemas.common.publication_base import (
+    LOOKUP_METHODS,
+    OA_STATUS_VALUES,
+)
+from bioetl.domain.validation import DOI_REGEX_PATTERN
+
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
     """Schema for PubMed Publication in Gold layer.
@@ -29,9 +35,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
     pmid: Series[str] = pa.Field(nullable=False)
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     pmc_id: Series[str] = pa.Field(nullable=True)
-    title: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=False)
     abstract: Series[str] = pa.Field(nullable=True)
     abstract_structured: Series[bool] = pa.Field(
         nullable=True
@@ -79,7 +85,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
-    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )
     # Note: accepted_date, received_date, revised_date, epub_date excluded per design
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
@@ -119,13 +127,12 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -157,7 +164,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Primary identifier
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
-    doi: Series[str] = pa.Field(nullable=False)
+    doi: Series[str] = pa.Field(nullable=False, str_matches=DOI_REGEX_PATTERN)
 
     # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
     # and transformer explicitly removes these fields from output
@@ -176,7 +183,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Date fields
     publication_year: Series[float] = pa.Field(
-        nullable=True, ge=1900, le=2100, coerce=True
+        nullable=True, ge=1500, le=2100, coerce=True
     )
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
@@ -213,9 +220,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     issn_electronic: Series[str] = pa.Field(nullable=True)
 
     # Author identifiers
-    author_orcid_list: Series[str] = pa.Field(
-        nullable=True
-    )  # JSON array of ORCID identifiers (unified: was author_orcids)
+    author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCID IDs
     author_details: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of author objects (given, family, orcid, sequence, affiliations)
@@ -225,13 +230,12 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
         nullable=True
     )  # JSON array of cited references (DOI, title, author, year)
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -266,7 +270,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     # Cross-reference IDs for linking publications across providers
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
     # Note: pmc_id excluded from transformer output per design
@@ -302,9 +306,9 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
         nullable=True
     )  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
-    oa_status: Series[str] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True, isin=OA_STATUS_VALUES)
     is_retracted: Series[bool] = pa.Field(
-        nullable=True, coerce=True
+        nullable=False, coerce=True
     )  # Quality indicator
     # OpenAlex source field: cited_by_count
     # Unified BioETL field: citations_received (standardized across all providers)
@@ -335,13 +339,12 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     author_openalex_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
     author_orcids: Series[str] = pa.Field(nullable=True)  # ORCID IDs
 
-    # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -375,7 +378,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     paper_id: Series[str] = pa.Field(nullable=False)
 
     # External IDs
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     pmid: Series[str] = pa.Field(nullable=True)
     # Note: pmc_id and arxiv_id excluded from transformer output per design
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
@@ -385,7 +388,9 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     tldr: Series[str] = pa.Field(nullable=True)
-    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )  # int64
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Journal/Venue
@@ -395,7 +400,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     page_range: Series[str] = pa.Field(nullable=True)  # Page range: "first-last" format
     page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    venue: Series[str] = pa.Field(nullable=True)
+    # Note: venue excluded - transformer maps venue → journal via extract_journal_info
 
     # Metrics
     citations_received: Series[float] = pa.Field(
@@ -409,7 +414,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Open Access
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     open_access_url: Series[str] = pa.Field(nullable=True)
-    oa_status: Series[str] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True, isin=OA_STATUS_VALUES)
 
     # Classification (JSON strings)
     subject_fields: Series[str] = pa.Field(nullable=True)
@@ -430,13 +435,12 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # External identifiers
     dblp_id: Series[str] = pa.Field(nullable=True)  # DBLP publication key
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields

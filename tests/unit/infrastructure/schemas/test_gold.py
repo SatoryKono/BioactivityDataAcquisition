@@ -176,11 +176,12 @@ class TestGoldPublicationSchemaCoreFields:
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
+            # SemanticScholar excluded: transformer pops raw authors,
+            # uses author_s2_ids/author_orcids instead
         ],
     )
     def test_schema_has_authors_field(self, schema_class, name):
-        """All Gold publication schemas must have authors field."""
+        """Gold publication schemas with raw authors must have authors field."""
         fields = get_schema_fields(schema_class)
         assert "authors" in fields, f"{name} missing authors field"
 

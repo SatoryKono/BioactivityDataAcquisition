@@ -5,6 +5,9 @@ flowchart LR
         PubChem["PubChem API"]
         UniProt["UniProt API"]
         PubMed["PubMed API"]
+        CrossRef["CrossRef API"]
+        OpenAlex["OpenAlex API"]
+        S2["Semantic Scholar API"]
     end
 
     subgraph Bronze_Layer["Bronze Layer"]
@@ -39,6 +42,9 @@ flowchart LR
     PubChem --> BronzeWriter
     UniProt --> BronzeWriter
     PubMed --> BronzeWriter
+    CrossRef --> BronzeWriter
+    OpenAlex --> BronzeWriter
+    S2 --> BronzeWriter
 
     BronzeWriter --> Bronze
     Bronze --> SilverWriter

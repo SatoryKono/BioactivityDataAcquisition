@@ -18,7 +18,6 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     normalize_oa_status,
     parse_page_range,
     parse_volume_issue,
-    validate_year,
 )
 
 
@@ -525,28 +524,6 @@ class TestExtractFieldsOfStudy:
 
         # Should filter first, then limit: ["A", "B", "C", "D", "E"][:3]
         assert result == ["A", "B", "C"]
-
-
-class TestValidateYear:
-    """Tests for validate_year function."""
-
-    def test_valid_year(self) -> None:
-        """Test valid year."""
-        assert validate_year(2024) == 2024
-        assert validate_year(1500) == 1500
-        assert validate_year(2100) == 2100
-
-    def test_invalid_year_too_old(self) -> None:
-        """Test year before 1500."""
-        assert validate_year(1499) is None
-
-    def test_invalid_year_too_new(self) -> None:
-        """Test year after 2100."""
-        assert validate_year(2101) is None
-
-    def test_none_year(self) -> None:
-        """Test None year."""
-        assert validate_year(None) is None
 
 
 class TestNormalizeOaStatus:

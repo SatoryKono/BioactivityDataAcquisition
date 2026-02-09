@@ -19,7 +19,12 @@ from bioetl.composition.bootstrap import (
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
-from bioetl.domain.context import InputFilterContext, PipelineRunContext, VacuumConfig
+from bioetl.domain.context import (
+    CachedBronzeContext,
+    InputFilterContext,
+    PipelineRunContext,
+    VacuumConfig,
+)
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.config import get_settings
 
@@ -107,8 +112,8 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         input_filter = InputFilterContext(
             enabled=True,
             source_path=options.input_csv,
-            column_name=options.filter_column or "",  # Empty = use YAML default
-            filter_field=options.filter_field or "",  # Empty = use YAML default
+            column_name=options.filter_column or "",
+            filter_field=options.filter_field or "",
         )
     else:
         input_filter = InputFilterContext.disabled()
@@ -125,6 +130,15 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         retention_days=options.vacuum_retention_days or 7,
     )
 
+    # Build CachedBronzeContext from CLI options
+    if options.use_cached_bronze:
+        cached_bronze = CachedBronzeContext.from_options(
+            path=options.cached_bronze_path,
+            date=options.cached_bronze_date,
+        )
+    else:
+        cached_bronze = CachedBronzeContext.disabled()
+
     return PipelineRunContext(
         pipeline_name=name,
         run_id=cast(RunID, uuid4()),
@@ -136,6 +150,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         vacuum=vacuum,
         log_level=options.log_level,
         ignore_yaml_filter=options.ignore_yaml_filter,
+        cached_bronze=cached_bronze,
     )
 
 

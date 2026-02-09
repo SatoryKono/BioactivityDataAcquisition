@@ -248,7 +248,7 @@ class PublicationYear(ValueObject[int]):
     scientific publications.
 
     The validation range can be customized via ValidationConfig:
-    - Default range: [1800, 2100] for standard scientific publications
+    - Default range: [1500, 2100] for standard scientific publications
     - Semantic Scholar: [1500, 2100] for historical publications
 
     Examples: 1953 (Watson & Crick), 2020 (COVID papers)
@@ -266,7 +266,7 @@ class PublicationYear(ValueObject[int]):
     _config: ValidationConfig
 
     # Class-level defaults for backward compatibility
-    _DEFAULT_MIN_YEAR = 1800
+    _DEFAULT_MIN_YEAR = 1500
     _DEFAULT_MAX_YEAR = 2100
 
     def __init__(

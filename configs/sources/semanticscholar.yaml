@@ -22,9 +22,10 @@ source:
         auth_type: api_key  # Recommended for stable access
         api_key: ${BIOETL_SEMANTICSCHOLAR_API_KEY}
         client:
-            timeout_sec: 60.0       # Increased timeout for slow responses
-            max_retries: 5          # More retries for 429 recovery
-            retry_delay_sec: 10.0   # Longer delay between retries
+            timeout_sec: 60.0          # Increased timeout for slow responses
+            max_retries: 5             # More retries for 429 recovery
+            retry_base_delay: 30.0     # 30s initial delay for rate limit cooldown
+            retry_max_delay: 300.0     # 5 min max delay between retries
         batch_size: 50  # Reduced for rate limit safety
         page_size: 100  # Minimum allowed by schema
 

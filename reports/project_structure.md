@@ -1,6 +1,6 @@
 # Project Structure
 
-Generated: E:\google_drive\05_AI\github\BioactivityDataAcquisition2
+Generated: E:\g-drive\05_AI\github\BioactivityDataAcquisition2
 
 ```
 BioactivityDataAcquisition2/
@@ -42,15 +42,13 @@ BioactivityDataAcquisition2/
     │   │   │   └── pyTestBot/
     │   │   │       └── SUBAGENT.md
     │   │   ├── ORCHESTRATION.md
-    │   │   ├── adr-manager.md
-    │   │   ├── ai-selfreview.md‎
-    │   │   ├── architecture-guardian.md
-    │   │   ├── code-review.md
-    │   │   ├── composite-pipeline-architect.md
-    │   │   ├── doc-sync.md
-    │   │   ├── pipeline-scaffold.md
-    │   │   ├── rest-api-query-validator.md
-    │   │   └── test-runner.md
+    │   │   ├── py-audit-bot.md
+    │   │   ├── py-code-bot.md
+    │   │   ├── py-config-bot.md
+    │   │   ├── py-debug-bot.md
+    │   │   ├── py-doc-bot.md
+    │   │   ├── py-plan-bot.md
+    │   │   └── py-test-bot.md
     │   ├── prompts/
     │   │   ├── 00-Audit/
     │   │   │   ├── 02-architecture-audit.md
@@ -122,6 +120,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 049da5d33861130f
     │   │   ├── 04a86cf2efa02e47
     │   │   ├── 0520b3a74b4c15bd
+    │   │   ├── 05cd1017975eefca
     │   │   ├── 05dc98beec81d193
     │   │   ├── 063ab2508852cb76
     │   │   ├── 064ce2e4995a0b55
@@ -138,6 +137,8 @@ BioactivityDataAcquisition2/
     │   │   ├── 083a379a2e56fba9
     │   │   ├── 084cc8b66255f9f9
     │   │   ├── 08c772ba4116926b
+    │   │   ├── 09560aa662fb5000
+    │   │   ├── 096b8ca3ee7a1973
     │   │   ├── 096e802ead190427
     │   │   ├── 09a8aba9b139c5c3
     │   │   ├── 0a06318fc8f22802
@@ -169,6 +170,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 0f30251c00e3148a
     │   │   ├── 0f8928d3afa35ec9
     │   │   ├── 1082b00d71733f92
+    │   │   ├── 10ad2f0768df757f
     │   │   ├── 113d22cb84ede695
     │   │   ├── 116e780a4f36aa4a
     │   │   ├── 11bc2f285c5c840b
@@ -182,6 +184,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 13468fc04894ea4f
     │   │   ├── 136642b989967b01
     │   │   ├── 13868a05452a0a73
+    │   │   ├── 13c8e4ebe1571ded
     │   │   ├── 13c99a7b5e588a67
     │   │   ├── 14565d89cd48d148
     │   │   ├── 153cc05a97f39505
@@ -206,6 +209,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 1964bc6c5caf63a3
     │   │   ├── 19945edc87716e85
     │   │   ├── 1aca8fd80aadb827
+    │   │   ├── 1b63de5799f071d5
     │   │   ├── 1b8b5d907d59719a
     │   │   ├── 1c46299b6707e73d
     │   │   ├── 1cb67778210116fb
@@ -228,6 +232,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 20b75b064d61b502
     │   │   ├── 21fb97b6d798b799
     │   │   ├── 21ffa8167cd55ae7
+    │   │   ├── 2326ea560e98964c
     │   │   ├── 23c1d55f481e96e5
     │   │   ├── 23f1d3a67b654e76
     │   │   ├── 240041d7b57ec46b
@@ -240,8 +245,10 @@ BioactivityDataAcquisition2/
     │   │   ├── 251a40c5eaeae8c0
     │   │   ├── 25800c550d897377
     │   │   ├── 25917451909e5254
+    │   │   ├── 264ca79b3b905f2e
     │   │   ├── 266d1644ad80cf62
     │   │   ├── 26d8198df8b4353e
+    │   │   ├── 26e3fd0137d4b708
     │   │   ├── 271d89bc236c466e
     │   │   ├── 27f278437b109411
     │   │   ├── 288fa9da6fa89ef7
@@ -260,8 +267,10 @@ BioactivityDataAcquisition2/
     │   │   ├── 2b5f0ee160866db1
     │   │   ├── 2bed416665fbadff
     │   │   ├── 2c4c7eb2994679f9
+    │   │   ├── 2cca63790c0bbf20
     │   │   ├── 2d494915fe2ff3be
     │   │   ├── 2d4dcac767fd6cfe
+    │   │   ├── 2d893470ebca06dd
     │   │   ├── 2da79997e5a17388
     │   │   ├── 2de1998afd291c6d
     │   │   ├── 2e097243797b7e9c
@@ -292,6 +301,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 33cbc6ed2a0d7eb5
     │   │   ├── 33fb51e3a7db624f
     │   │   ├── 344b71bb69289b06
+    │   │   ├── 3459226d23eb196e
     │   │   ├── 3474fe35755e4ddf
     │   │   ├── 349d30b263fa7b0b
     │   │   ├── 350413f1daf2121b
@@ -299,6 +309,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 35589c4c397d5beb
     │   │   ├── 35618869ce83732e
     │   │   ├── 357ad438a58004ca
+    │   │   ├── 36437dbe9df7d0c2
     │   │   ├── 36870587afd536c0
     │   │   ├── 36e39d1bc4c63f91
     │   │   ├── 379995172aac131b
@@ -355,6 +366,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 473a033f6d3d4283
     │   │   ├── 476d75e80915169e
     │   │   ├── 47fdcbf518d8deaf
+    │   │   ├── 4878c896442b2113
     │   │   ├── 4880c508441ae614
     │   │   ├── 48adb991ed6ec792
     │   │   ├── 49209951302a53f1
@@ -382,8 +394,10 @@ BioactivityDataAcquisition2/
     │   │   ├── 4da36df3da06a15a
     │   │   ├── 4dcbe6c59d328dcb
     │   │   ├── 4e22d3f34e440e07
+    │   │   ├── 4e5a58ad851747e4
     │   │   ├── 4e70e1f2024d9780
     │   │   ├── 4e9eb3fdb3ff506c
+    │   │   ├── 4eb1c3be9fe0ed68
     │   │   ├── 4effd043dfe92814
     │   │   ├── 4f019e3e3a02fbf9
     │   │   ├── 4f0d6c15d3d3b247
@@ -398,6 +412,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 5244a3fa5856ef35
     │   │   ├── 53072f7d604eff93
     │   │   ├── 533afdb43211adad
+    │   │   ├── 536209c0f855f5c0
     │   │   ├── 53c06fdf383d8823
     │   │   ├── 53ceedd82248d596
     │   │   ├── 5415c6e8ed0e8596
@@ -437,8 +452,10 @@ BioactivityDataAcquisition2/
     │   │   ├── 5eb12d44be150201
     │   │   ├── 5f2dd7621c7f73bb
     │   │   ├── 5f2def453202aea3
+    │   │   ├── 5f4e02b2f313550e
     │   │   ├── 5f932bcb0277e269
     │   │   ├── 5fa6e8feb9fd062b
+    │   │   ├── 5fb4184fb78bc749
     │   │   ├── 5fc01e08e41fda0f
     │   │   ├── 5fd38948000c0484
     │   │   ├── 6022cb90ccb8b6da
@@ -465,6 +482,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 64729d9417be2688
     │   │   ├── 6539e02b390c8c5e
     │   │   ├── 657130f8386f3866
+    │   │   ├── 65947b49b17d3e60
     │   │   ├── 65d196c6dc0f6c93
     │   │   ├── 65ea978a99cf85fd
     │   │   ├── 6651191964800af4
@@ -508,6 +526,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 70973efd7f2eb1c5
     │   │   ├── 70b0b71bfb34d5d8
     │   │   ├── 70f90acdee725f0f
+    │   │   ├── 70fa2aac5323c6a8
     │   │   ├── 710b3048412f57e1
     │   │   ├── 71281177ae268e08
     │   │   ├── 71d0aea7c24876f2
@@ -524,6 +543,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 75184061aad8462e
     │   │   ├── 7530e99d50fa7df7
     │   │   ├── 754c03f78ff97175
+    │   │   ├── 7555cd1813e6df46
     │   │   ├── 7572939b37c4fd82
     │   │   ├── 75a74dcaf66629e4
     │   │   ├── 75aa04d4d21025c8
@@ -546,6 +566,8 @@ BioactivityDataAcquisition2/
     │   │   ├── 78ec4382f297f09a
     │   │   ├── 78f09f861e5d3255
     │   │   ├── 7944848c3d1ccd1c
+    │   │   ├── 796023a98be5def8
+    │   │   ├── 79654f0aafb58272
     │   │   ├── 7975ace5db2cf1a5
     │   │   ├── 7980c6fad8a1a666
     │   │   ├── 79f043adbac1b3da
@@ -573,6 +595,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 800360cfdd9e54cb
     │   │   ├── 8033b424398da87d
     │   │   ├── 80d35ca6652eaab5
+    │   │   ├── 80dafe9491fcdb4c
     │   │   ├── 810717502bfa83d0
     │   │   ├── 81194b7d56750330
     │   │   ├── 81a84c07d58ec5ac
@@ -598,6 +621,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 86ee5998aeb39009
     │   │   ├── 870082e05f6fbecd
     │   │   ├── 87135ca783b3a320
+    │   │   ├── 873781fc9e560285
     │   │   ├── 8747977e3ca244ec
     │   │   ├── 87b0ac7d08e7f887
     │   │   ├── 8834d52db065b061
@@ -607,6 +631,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 89cb1ee9c6d601db
     │   │   ├── 89db8584fafe7083
     │   │   ├── 89e33d3cd63c61ab
+    │   │   ├── 8a16ae6e72baf48d
     │   │   ├── 8a800b484929466b
     │   │   ├── 8a92c14625f902cc
     │   │   ├── 8ac630f3bd0845c8
@@ -647,10 +672,12 @@ BioactivityDataAcquisition2/
     │   │   ├── 95d44d459c77bfe8
     │   │   ├── 95ea9ebcbb01c870
     │   │   ├── 96aa986adc3e781d
+    │   │   ├── 96bc8158b93ff9c3
     │   │   ├── 9739a69f3292d7d3
     │   │   ├── 9757a12ae80988ec
     │   │   ├── 978246cd49ac4ae7
     │   │   ├── 979c75ae4f18caa5
+    │   │   ├── 97b6a4b2ddb67996
     │   │   ├── 97f5c5cc5b26b04d
     │   │   ├── 98113a7762a9bc02
     │   │   ├── 985b11173d209a1a
@@ -662,6 +689,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 99cead82bbb494a1
     │   │   ├── 9a2af25c1951f588
     │   │   ├── 9a78a5ed48efd492
+    │   │   ├── 9a9cce5256bed380
     │   │   ├── 9b703a18928311d5
     │   │   ├── 9bac771bbddc2a87
     │   │   ├── 9bd7d8cecb3e67fd
@@ -684,6 +712,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 9db01ee14cbd43f5
     │   │   ├── 9dca034cdac1a27d
     │   │   ├── 9e0cb95354cf479b
+    │   │   ├── 9e6af81dffabbef5
     │   │   ├── 9e7673c92b074a10
     │   │   ├── 9e9e9373d4fa5b45
     │   │   ├── 9ea22e98e136bf99
@@ -694,6 +723,7 @@ BioactivityDataAcquisition2/
     │   │   ├── 9f65d9a4e7fcb451
     │   │   ├── a0bca092753b62a2
     │   │   ├── a0d206b589a9316a
+    │   │   ├── a0f262b4ad68c062
     │   │   ├── a121ed9a5cfb14d0
     │   │   ├── a144abc61de57a73
     │   │   ├── a19dcda4ddf927dd
@@ -712,17 +742,21 @@ BioactivityDataAcquisition2/
     │   │   ├── a6d8ae2cc0c0f389
     │   │   ├── a6e989d4f99229e6
     │   │   ├── a6ea38ca2b5d91d4
+    │   │   ├── a77a3de71f06b19c
     │   │   ├── a7885cec3dc5b8ea
+    │   │   ├── a808595105b225b2
     │   │   ├── a834bb59ebbe742b
     │   │   ├── a8d1194e01283339
     │   │   ├── a90dfa91d8e10820
     │   │   ├── a91df2332ffe4f85
     │   │   ├── a92904ee3876d073
     │   │   ├── a9c480350a6e32d5
+    │   │   ├── a9ce841437918e69
     │   │   ├── a9fe8fc490cc669b
     │   │   ├── aa0dda97c72fa4b3
     │   │   ├── aad2ccaafe5f6c2d
     │   │   ├── aad74357f6c29a03
+    │   │   ├── aad802f88a5c3686
     │   │   ├── ab01a6867b961ecf
     │   │   ├── ab512a73f3d04bb2
     │   │   ├── ab704748a638733f
@@ -731,10 +765,12 @@ BioactivityDataAcquisition2/
     │   │   ├── ac7aa5a082390d73
     │   │   ├── acbff73a70f1c768
     │   │   ├── ad58ab67b1eb5d18
+    │   │   ├── adc0ecebbec2dddf
     │   │   ├── adf53905cbfe349f
     │   │   ├── ae0dc2fac530f634
     │   │   ├── ae0e1e674253f34e
     │   │   ├── ae151bfcd13494d9
+    │   │   ├── ae272dcefb957001
     │   │   ├── ae2c80451e2f9533
     │   │   ├── ae2ced03cb7d55ae
     │   │   ├── aea3099c8b3cfa0e
@@ -747,6 +783,7 @@ BioactivityDataAcquisition2/
     │   │   ├── affa5537e9a3753f
     │   │   ├── b00c429b1ec47023
     │   │   ├── b083f584e5dd62f2
+    │   │   ├── b0d141037c2b7e73
     │   │   ├── b108d8ffb34b7b37
     │   │   ├── b150b760abea7ee7
     │   │   ├── b17ef3930a72eb85
@@ -759,7 +796,10 @@ BioactivityDataAcquisition2/
     │   │   ├── b247cf49b0a8f1f3
     │   │   ├── b37248b534671378
     │   │   ├── b38fe0bd06288f3a
+    │   │   ├── b4d724e1a6728a75
+    │   │   ├── b59e694f0a0a5358
     │   │   ├── b5ca108f4fb74393
+    │   │   ├── b5f804962672de12
     │   │   ├── b62a5c66a8318711
     │   │   ├── b659111e24e0d197
     │   │   ├── b75f028964f62c4b
@@ -772,7 +812,9 @@ BioactivityDataAcquisition2/
     │   │   ├── b987e5dc89383722
     │   │   ├── b9a438a25dba08f4
     │   │   ├── bad8ca5420701df1
+    │   │   ├── bae6fa6b3c868f1b
     │   │   ├── bb549ba8b29031ae
+    │   │   ├── bbd663f1d19c8080
     │   │   ├── bbfae8fcf1ea0ad8
     │   │   ├── bc4000df922f8a64
     │   │   ├── bc45b7113403d107
@@ -800,6 +842,8 @@ BioactivityDataAcquisition2/
     │   │   ├── c20033a9d14de75e
     │   │   ├── c26d5b579277374a
     │   │   ├── c2bd4f268ea650ba
+    │   │   ├── c4537ec090de4c5c
+    │   │   ├── c4ce82d8f68d291c
     │   │   ├── c52974e1320e77b1
     │   │   ├── c55905a032c22876
     │   │   ├── c55da1ecdedf9670
@@ -855,6 +899,7 @@ BioactivityDataAcquisition2/
     │   │   ├── d2660d8abec95268
     │   │   ├── d2d6b11e67526f91
     │   │   ├── d2f0f5408aae54d3
+    │   │   ├── d2fc55bcd6a72b0a
     │   │   ├── d3f25523d963c90f
     │   │   ├── d4011e6fd3ef00d6
     │   │   ├── d4208e4fe6008606
@@ -862,6 +907,7 @@ BioactivityDataAcquisition2/
     │   │   ├── d48fdf5ac98f96ae
     │   │   ├── d4fb3bebe4c8e598
     │   │   ├── d5085db5723ba8b5
+    │   │   ├── d520ed548019f242
     │   │   ├── d5c0f9477898705b
     │   │   ├── d64e27b19ee696de
     │   │   ├── d65daabc63eee8b8
@@ -874,10 +920,13 @@ BioactivityDataAcquisition2/
     │   │   ├── d7e71a44ab281688
     │   │   ├── d7f6f61da3436603
     │   │   ├── d835d91e0d6529a7
+    │   │   ├── d83c1dfa08bb86e1
     │   │   ├── d86a46092d786dc6
     │   │   ├── d872275471087cf7
+    │   │   ├── d8ee054381e21453
     │   │   ├── d9016fc2c0f33ff5
     │   │   ├── d99b19e60edf3bb9
+    │   │   ├── d9a91cf2e6ecce23
     │   │   ├── d9af442e56c04520
     │   │   ├── d9fa3486aea8179e
     │   │   ├── da178c52e155e1b4
@@ -918,6 +967,7 @@ BioactivityDataAcquisition2/
     │   │   ├── e0dadc79a40998f0
     │   │   ├── e0ef9ac9f93e1a04
     │   │   ├── e160086d420d4b5a
+    │   │   ├── e17274eda5592e23
     │   │   ├── e198420d34e2d0c7
     │   │   ├── e1a581363a7405c0
     │   │   ├── e1eb787dc7130dbf
@@ -958,6 +1008,7 @@ BioactivityDataAcquisition2/
     │   │   ├── ea087f7fdd2d277c
     │   │   ├── ea0c05c6ff678ad2
     │   │   ├── ea0c51d213a9da3d
+    │   │   ├── ea228b76acaeb0a6
     │   │   ├── ea4e49fae40b0415
     │   │   ├── ea8b82d291d7e362
     │   │   ├── eabfa207a6a53a1e
@@ -977,6 +1028,7 @@ BioactivityDataAcquisition2/
     │   │   ├── edfe24e7760c3ce4
     │   │   ├── ee52396b2cc57142
     │   │   ├── eee928b742dbfa0e
+    │   │   ├── ef01fd3fdf94ef35
     │   │   ├── ef45554c298ca3c0
     │   │   ├── ef7da73e1eca5d62
     │   │   ├── efe34c6d2b637143
@@ -999,10 +1051,12 @@ BioactivityDataAcquisition2/
     │   │   ├── f53d9ddc361c2cc9
     │   │   ├── f549bd7d1db6a472
     │   │   ├── f585b06196a564ff
+    │   │   ├── f5af7634c562ea02
     │   │   ├── f5d0165bea555079
     │   │   ├── f60ab13d3261ae5a
     │   │   ├── f642467501ec3553
     │   │   ├── f654154deb1fae36
+    │   │   ├── f69b513f289cf622
     │   │   ├── f6bdd4bfd1ce9e55
     │   │   ├── f6cfb6f52e2be3e0
     │   │   ├── f6d49afb0d3397e1
@@ -1025,6 +1079,7 @@ BioactivityDataAcquisition2/
     │   │   ├── fb14b314964a12ae
     │   │   ├── fb31ea37bda42d61
     │   │   ├── fb861829adc09aed
+    │   │   ├── fbfc5fe651aeb3af
     │   │   ├── fcd3a54577b06275
     │   │   ├── fcf1612df6ce4b9a
     │   │   ├── fd34f8cb463b451f
@@ -1035,7 +1090,9 @@ BioactivityDataAcquisition2/
     │   │   └── ffb7618eba2a9efc
     │   ├── tmp/
     │   │   ├── tmp022l6q1o
+    │   │   ├── tmp04iqn21n
     │   │   ├── tmp05tjv27w
+    │   │   ├── tmp0admjxcn
     │   │   ├── tmp0ayp2fdd
     │   │   ├── tmp0g40na8t
     │   │   ├── tmp0lvgdv4v
@@ -1047,14 +1104,22 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp1pkh1a03
     │   │   ├── tmp1q6yw4rr
     │   │   ├── tmp1sac3yqj
+    │   │   ├── tmp2k8pirjf
+    │   │   ├── tmp2ldyqqj5
     │   │   ├── tmp2qgqvxlg
+    │   │   ├── tmp2rvt3p8x
     │   │   ├── tmp2vlpzsmk
     │   │   ├── tmp2vyjhwfw
+    │   │   ├── tmp30_gfhqv
     │   │   ├── tmp35lapczm
+    │   │   ├── tmp36yrwkg2
     │   │   ├── tmp38mfaipt
     │   │   ├── tmp3bz8nvim
     │   │   ├── tmp3h3z6k2b
     │   │   ├── tmp3hekdoky
+    │   │   ├── tmp3trl9c5q
+    │   │   ├── tmp3w0_gv9t
+    │   │   ├── tmp3wlozpa0
     │   │   ├── tmp40zdk18y
     │   │   ├── tmp48k1a7xa
     │   │   ├── tmp49_zu3s_
@@ -1064,12 +1129,16 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp4et95rhs
     │   │   ├── tmp4gsie85u
     │   │   ├── tmp4ogqwo0k
+    │   │   ├── tmp4t9j3qo0
     │   │   ├── tmp4vl3g1jk
     │   │   ├── tmp599f7vj7
+    │   │   ├── tmp5litfm_4
     │   │   ├── tmp5mdwpf4l
     │   │   ├── tmp5tfo7yi9
     │   │   ├── tmp5ultttsu
+    │   │   ├── tmp5yl5jctk
     │   │   ├── tmp64wfuvkf
+    │   │   ├── tmp65c4wwqx
     │   │   ├── tmp67qca0va
     │   │   ├── tmp6_cvur9b
     │   │   ├── tmp6_xiygz0
@@ -1081,10 +1150,13 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp6w20bgzg
     │   │   ├── tmp6wovmh39
     │   │   ├── tmp6x5inrah
+    │   │   ├── tmp70jv4dyp
     │   │   ├── tmp72issb51
     │   │   ├── tmp74mimy6s
+    │   │   ├── tmp74z7ay0z
     │   │   ├── tmp7f56fs5n
     │   │   ├── tmp7gqgpxpb
+    │   │   ├── tmp7j6v5zbs
     │   │   ├── tmp7mt9oziu
     │   │   ├── tmp7obhul4a
     │   │   ├── tmp7rru1p48
@@ -1100,25 +1172,34 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp8c64kt9b
     │   │   ├── tmp8ik_iaml
     │   │   ├── tmp8szkjy7w
+    │   │   ├── tmp8tdp2lze
     │   │   ├── tmp8ts4b0t0
     │   │   ├── tmp8vbveq0q
     │   │   ├── tmp8xugc9w0
     │   │   ├── tmp90oky5d3
     │   │   ├── tmp91l1dqpr
     │   │   ├── tmp92l1q3bk
+    │   │   ├── tmp99qto5pg
     │   │   ├── tmp9_0_762e
     │   │   ├── tmp9aq31fff
+    │   │   ├── tmp9h6irems
     │   │   ├── tmp9olv9mia
     │   │   ├── tmp_194n6jh
+    │   │   ├── tmp_du_7p02
     │   │   ├── tmp_h2_2fb1
+    │   │   ├── tmp_lyd0udd
     │   │   ├── tmp_rf95buf
+    │   │   ├── tmp_t60k90c
     │   │   ├── tmpa2h808nh
     │   │   ├── tmpagnm86kp
+    │   │   ├── tmpagukft_r
     │   │   ├── tmpal9_a2tf
     │   │   ├── tmpamp5vwup
     │   │   ├── tmpatcrhej4
     │   │   ├── tmpb2nysu4m
+    │   │   ├── tmpb35pathv
     │   │   ├── tmpb3_xcgbi
+    │   │   ├── tmpbb3brjtp
     │   │   ├── tmpbcmmo23j
     │   │   ├── tmpbgbt1y2x
     │   │   ├── tmpblsvrutb
@@ -1131,16 +1212,26 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpbvkdg56u
     │   │   ├── tmpbwalcyhb
     │   │   ├── tmpbwk0tufy
+    │   │   ├── tmpbzamizyi
     │   │   ├── tmpc30xpuse
+    │   │   ├── tmpcd3r9pka
     │   │   ├── tmpcfrs0fsr
+    │   │   ├── tmpcis6gilx
     │   │   ├── tmpcos738rn
+    │   │   ├── tmpcuqh3ekb
     │   │   ├── tmpcyfm2c6j
     │   │   ├── tmpd06z0q6j
+    │   │   ├── tmpd2j8p93e
     │   │   ├── tmpd83mea9i
     │   │   ├── tmpdbznzdno
+    │   │   ├── tmpdesyibc1
     │   │   ├── tmpdi3vcpas
+    │   │   ├── tmpdk5gfbnz
     │   │   ├── tmpdoydcyqj
+    │   │   ├── tmpdqrw54pt
     │   │   ├── tmpdr08rz1t
+    │   │   ├── tmpdyb0n52j
+    │   │   ├── tmpe677eqpz
     │   │   ├── tmpes_w92j_
     │   │   ├── tmpexcbwdvi
     │   │   ├── tmpey5ldpm2
@@ -1148,8 +1239,11 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpf3uyxm1d
     │   │   ├── tmpfcfpurlv
     │   │   ├── tmpfjafq2x7
+    │   │   ├── tmpflmeczu8
     │   │   ├── tmpfn1tt4yi
     │   │   ├── tmpfn2mb2o4
+    │   │   ├── tmpfnfxrzuv
+    │   │   ├── tmpg1g4uex9
     │   │   ├── tmpg4unbb3g
     │   │   ├── tmpg_c8gyw5
     │   │   ├── tmpgbxsmj_g
@@ -1159,8 +1253,10 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpgqv28f8m
     │   │   ├── tmpgrgqsq0r
     │   │   ├── tmph07a4o91
+    │   │   ├── tmph07g2xhl
     │   │   ├── tmph9_hbfra
     │   │   ├── tmphb4oktko
+    │   │   ├── tmphbmud2bi
     │   │   ├── tmphi0e3tj0
     │   │   ├── tmphij_cjji
     │   │   ├── tmphn_3stl8
@@ -1172,26 +1268,39 @@ BioactivityDataAcquisition2/
     │   │   ├── tmphzt17cuy
     │   │   ├── tmpi04qd7sp
     │   │   ├── tmpi2jbn3k7
+    │   │   ├── tmpi4wcpd8f
+    │   │   ├── tmpifb2fmlf
     │   │   ├── tmpiqcjl28c
+    │   │   ├── tmpiqrays03
     │   │   ├── tmpisk2y_ob
     │   │   ├── tmpix3wr77z
     │   │   ├── tmpj38jx1ne
     │   │   ├── tmpj5o252zd
     │   │   ├── tmpj69h19j5
+    │   │   ├── tmpj732zg9t
     │   │   ├── tmpjce7im7s
+    │   │   ├── tmpjckkoeuj
     │   │   ├── tmpjhmb0ujm
     │   │   ├── tmpju4dlkyk
+    │   │   ├── tmpju_2nvc2
     │   │   ├── tmpk3vm0c1p
+    │   │   ├── tmpk8m3oh89
+    │   │   ├── tmpkafrmg6z
     │   │   ├── tmpkcadn8q1
+    │   │   ├── tmpkdg8hgmv
     │   │   ├── tmpkfm1usjg
     │   │   ├── tmpkj_xirb4
     │   │   ├── tmpkq8due9s
+    │   │   ├── tmpkquhckjf
+    │   │   ├── tmpkrgfbhau
     │   │   ├── tmpkwa1_pxo
     │   │   ├── tmpkxn0jy2l
     │   │   ├── tmpl13evlbb
     │   │   ├── tmpl4y4qei2
+    │   │   ├── tmple_o5g43
     │   │   ├── tmplgbekxu1
     │   │   ├── tmpli8__ge3
+    │   │   ├── tmplowv85n7
     │   │   ├── tmplss1muf4
     │   │   ├── tmplul6vic1
     │   │   ├── tmplyl7ng5p
@@ -1202,6 +1311,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpmldbnwck
     │   │   ├── tmpmwhqjqmp
     │   │   ├── tmpmzlnfww6
+    │   │   ├── tmpn5mx6ioo
     │   │   ├── tmpn7rx1n9c
     │   │   ├── tmpn9dfp5a5
     │   │   ├── tmpndbo3dqu
@@ -1210,18 +1320,25 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpnlyv55lo
     │   │   ├── tmpnp4j7bqu
     │   │   ├── tmpo6qc9lcq
+    │   │   ├── tmpo6xfxmvl
     │   │   ├── tmpob3c44fg
     │   │   ├── tmpogwf4r3z
     │   │   ├── tmpoh9tl6ci
+    │   │   ├── tmpokvgorhe
+    │   │   ├── tmpolq6dujv
     │   │   ├── tmpom__ahuh
+    │   │   ├── tmpopsbibgj
+    │   │   ├── tmpoqg4y83r
     │   │   ├── tmpoy2lnn4t
     │   │   ├── tmpp0kc_grp
     │   │   ├── tmpp7_js049
     │   │   ├── tmppf0rgcxn
+    │   │   ├── tmppkbu82k1
     │   │   ├── tmppqv6jxhb
     │   │   ├── tmppvmws5_v
     │   │   ├── tmppzuo201n
     │   │   ├── tmpq09epiev
+    │   │   ├── tmpq_8u_xsl
     │   │   ├── tmpqcds2mf2
     │   │   ├── tmpqhaqra6z
     │   │   ├── tmpqiapek4b
@@ -1230,6 +1347,8 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpqx_638zl
     │   │   ├── tmpr424t_t1
     │   │   ├── tmpr4n8hyac
+    │   │   ├── tmprasi6vqk
+    │   │   ├── tmprcnzvokd
     │   │   ├── tmpre0_4mjk
     │   │   ├── tmprf2h2pha
     │   │   ├── tmprm_s07aa
@@ -1242,8 +1361,11 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpsimcb71q
     │   │   ├── tmpsnp0eb2p
     │   │   ├── tmpspax5vj4
+    │   │   ├── tmpt8a_ounw
     │   │   ├── tmptb4wj3o6
+    │   │   ├── tmptg8ai5bg
     │   │   ├── tmptorduhzt
+    │   │   ├── tmptv8j3_0t
     │   │   ├── tmpu1bpkjj5
     │   │   ├── tmpu1ts1b1f
     │   │   ├── tmpu4obikc0
@@ -1251,6 +1373,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpu9y6_gbq
     │   │   ├── tmpub9929pl
     │   │   ├── tmpudappe5u
+    │   │   ├── tmpul9ad_tc
     │   │   ├── tmpurxu6_5w
     │   │   ├── tmpv45mnzkv
     │   │   ├── tmpv81nxno0
@@ -1260,26 +1383,35 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpvjwoqacw
     │   │   ├── tmpvnz0hn9o
     │   │   ├── tmpvpwn3daa
+    │   │   ├── tmpvqhzmfoc
     │   │   ├── tmpwd99gu_x
+    │   │   ├── tmpwgk2h_tt
     │   │   ├── tmpwv68cf3s
     │   │   ├── tmpx1q9f3d5
     │   │   ├── tmpx2uvuajx
     │   │   ├── tmpxcmydmy2
     │   │   ├── tmpxhshxlnq
+    │   │   ├── tmpxlsa2o6f
     │   │   ├── tmpxt2041br
+    │   │   ├── tmpxtd7gju1
     │   │   ├── tmpy0ghtp1v
     │   │   ├── tmpy0qrvph7
+    │   │   ├── tmpy5y85aie
     │   │   ├── tmpym_mnch3
     │   │   ├── tmpyvj1rz_h
+    │   │   ├── tmpyvmwwcf2
     │   │   ├── tmpyxcs8vjw
     │   │   ├── tmpyxyfb5qh
+    │   │   ├── tmpyz1tds34
     │   │   ├── tmpz0u77923
     │   │   ├── tmpz3hdvdhv
     │   │   ├── tmpz4hzng9a
     │   │   ├── tmpz5edqqh5
     │   │   ├── tmpzdupor62
     │   │   ├── tmpzmop7qfd
-    │   │   └── tmpzwingkjq
+    │   │   ├── tmpzt3r68cl
+    │   │   ├── tmpzwingkjq
+    │   │   └── tmpzz6nq6ct
     │   └── unicode_data/
     │       └── 15.1.0/
     │           ├── charmap.json.gz
@@ -1593,6 +1725,28 @@ BioactivityDataAcquisition2/
     │   │   │   ├── windows_events.meta.json
     │   │   │   ├── windows_utils.data.json
     │   │   │   └── windows_utils.meta.json
+    │   │   ├── attr/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _cmp.data.json
+    │   │   │   ├── _cmp.meta.json
+    │   │   │   ├── _typing_compat.data.json
+    │   │   │   ├── _typing_compat.meta.json
+    │   │   │   ├── _version_info.data.json
+    │   │   │   ├── _version_info.meta.json
+    │   │   │   ├── converters.data.json
+    │   │   │   ├── converters.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── filters.data.json
+    │   │   │   ├── filters.meta.json
+    │   │   │   ├── setters.data.json
+    │   │   │   ├── setters.meta.json
+    │   │   │   ├── validators.data.json
+    │   │   │   └── validators.meta.json
+    │   │   ├── attrs/
+    │   │   │   ├── __init__.data.json
+    │   │   │   └── __init__.meta.json
     │   │   ├── bioetl/
     │   │   │   ├── application/
     │   │   │   │   ├── composite/
@@ -2022,23 +2176,13 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   └── base.meta.json
     │   │   │   │   ├── contracts/
-    │   │   │   │   │   ├── gold/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── _base.data.json
-    │   │   │   │   │   │   ├── _base.meta.json
-    │   │   │   │   │   │   ├── chembl.data.json
-    │   │   │   │   │   │   ├── chembl.meta.json
-    │   │   │   │   │   │   ├── composite.data.json
-    │   │   │   │   │   │   ├── composite.meta.json
-    │   │   │   │   │   │   ├── pubchem.data.json
-    │   │   │   │   │   │   ├── pubchem.meta.json
-    │   │   │   │   │   │   ├── publications.data.json
-    │   │   │   │   │   │   ├── publications.meta.json
-    │   │   │   │   │   │   ├── uniprot.data.json
-    │   │   │   │   │   │   └── uniprot.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   └── gold/
+    │   │   │   │   │       ├── _base.data.json
+    │   │   │   │   │       ├── _base.meta.json
+    │   │   │   │   │       ├── composite.data.json
+    │   │   │   │   │       ├── composite.meta.json
+    │   │   │   │   │       ├── pubchem.data.json
+    │   │   │   │   │       └── pubchem.meta.json
     │   │   │   │   ├── entities/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -2205,10 +2349,6 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── target_relation.data.json
     │   │   │   │   │   │   └── target_relation.meta.json
     │   │   │   │   │   ├── common/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── publication_base.data.json
-    │   │   │   │   │   │   └── publication_base.meta.json
     │   │   │   │   │   ├── crossref/
     │   │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   │   ├── __init__.meta.json
@@ -2245,24 +2385,20 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── isoform.meta.json
     │   │   │   │   │   │   ├── protein.data.json
     │   │   │   │   │   │   └── protein.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── _field_orders.data.json
     │   │   │   │   │   ├── _field_orders.meta.json
-    │   │   │   │   │   ├── base.data.json
-    │   │   │   │   │   ├── base.meta.json
     │   │   │   │   │   ├── chembl.data.json
     │   │   │   │   │   ├── chembl.meta.json
     │   │   │   │   │   ├── column_order.data.json
     │   │   │   │   │   ├── column_order.meta.json
+    │   │   │   │   │   ├── constants.data.json
+    │   │   │   │   │   ├── constants.meta.json
     │   │   │   │   │   ├── pubchem.data.json
     │   │   │   │   │   ├── pubchem.meta.json
     │   │   │   │   │   ├── pubmed.data.json
     │   │   │   │   │   ├── pubmed.meta.json
     │   │   │   │   │   ├── uniprot.data.json
-    │   │   │   │   │   ├── uniprot.meta.json
-    │   │   │   │   │   ├── validators.data.json
-    │   │   │   │   │   └── validators.meta.json
+    │   │   │   │   │   └── uniprot.meta.json
     │   │   │   │   ├── services/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -2325,8 +2461,6 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── silver_result.meta.json
     │   │   │   │   │   ├── taxonomy_id.data.json
     │   │   │   │   │   └── taxonomy_id.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
     │   │   │   │   ├── config.data.json
     │   │   │   │   ├── config.meta.json
     │   │   │   │   ├── config_types.data.json
@@ -2700,6 +2834,47 @@ BioactivityDataAcquisition2/
     │   │   │   ├── __init__.meta.json
     │   │   │   ├── __main__.data.json
     │   │   │   └── __main__.meta.json
+    │   │   ├── black/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _width_table.data.json
+    │   │   │   ├── _width_table.meta.json
+    │   │   │   ├── brackets.data.json
+    │   │   │   ├── brackets.meta.json
+    │   │   │   ├── cache.data.json
+    │   │   │   ├── cache.meta.json
+    │   │   │   ├── comments.data.json
+    │   │   │   ├── comments.meta.json
+    │   │   │   ├── const.data.json
+    │   │   │   ├── const.meta.json
+    │   │   │   ├── files.data.json
+    │   │   │   ├── files.meta.json
+    │   │   │   ├── handle_ipynb_magics.data.json
+    │   │   │   ├── handle_ipynb_magics.meta.json
+    │   │   │   ├── linegen.data.json
+    │   │   │   ├── linegen.meta.json
+    │   │   │   ├── lines.data.json
+    │   │   │   ├── lines.meta.json
+    │   │   │   ├── mode.data.json
+    │   │   │   ├── mode.meta.json
+    │   │   │   ├── nodes.data.json
+    │   │   │   ├── nodes.meta.json
+    │   │   │   ├── numerics.data.json
+    │   │   │   ├── numerics.meta.json
+    │   │   │   ├── output.data.json
+    │   │   │   ├── output.meta.json
+    │   │   │   ├── parsing.data.json
+    │   │   │   ├── parsing.meta.json
+    │   │   │   ├── ranges.data.json
+    │   │   │   ├── ranges.meta.json
+    │   │   │   ├── report.data.json
+    │   │   │   ├── report.meta.json
+    │   │   │   ├── rusty.data.json
+    │   │   │   ├── rusty.meta.json
+    │   │   │   ├── strings.data.json
+    │   │   │   ├── strings.meta.json
+    │   │   │   ├── trans.data.json
+    │   │   │   └── trans.meta.json
     │   │   ├── certifi/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -2760,6 +2935,13 @@ BioactivityDataAcquisition2/
     │   │   │   ├── _endian.meta.json
     │   │   │   ├── wintypes.data.json
     │   │   │   └── wintypes.meta.json
+    │   │   ├── dateutil/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _common.data.json
+    │   │   │   ├── _common.meta.json
+    │   │   │   ├── relativedelta.data.json
+    │   │   │   └── relativedelta.meta.json
     │   │   ├── deltalake/
     │   │   │   ├── fs/
     │   │   │   │   ├── __init__.data.json
@@ -2823,6 +3005,15 @@ BioactivityDataAcquisition2/
     │   │   │   ├── message.meta.json
     │   │   │   ├── policy.data.json
     │   │   │   └── policy.meta.json
+    │   │   ├── exceptiongroup/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _catch.data.json
+    │   │   │   ├── _catch.meta.json
+    │   │   │   ├── _suppress.data.json
+    │   │   │   ├── _suppress.meta.json
+    │   │   │   ├── _version.data.json
+    │   │   │   └── _version.meta.json
     │   │   ├── h11/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -3012,6 +3203,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── choice.data.json
     │   │   │   │   │   ├── choice.meta.json
+    │   │   │   │   │   ├── choicetree.data.json
+    │   │   │   │   │   ├── choicetree.meta.json
     │   │   │   │   │   ├── data.data.json
     │   │   │   │   │   ├── data.meta.json
     │   │   │   │   │   ├── datatree.data.json
@@ -3225,6 +3418,51 @@ BioactivityDataAcquisition2/
     │   │   │   ├── _parse.meta.json
     │   │   │   ├── exceptions.data.json
     │   │   │   └── exceptions.meta.json
+    │   │   ├── jinja2/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _identifier.data.json
+    │   │   │   ├── _identifier.meta.json
+    │   │   │   ├── async_utils.data.json
+    │   │   │   ├── async_utils.meta.json
+    │   │   │   ├── bccache.data.json
+    │   │   │   ├── bccache.meta.json
+    │   │   │   ├── compiler.data.json
+    │   │   │   ├── compiler.meta.json
+    │   │   │   ├── debug.data.json
+    │   │   │   ├── debug.meta.json
+    │   │   │   ├── defaults.data.json
+    │   │   │   ├── defaults.meta.json
+    │   │   │   ├── environment.data.json
+    │   │   │   ├── environment.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── ext.data.json
+    │   │   │   ├── ext.meta.json
+    │   │   │   ├── filters.data.json
+    │   │   │   ├── filters.meta.json
+    │   │   │   ├── idtracking.data.json
+    │   │   │   ├── idtracking.meta.json
+    │   │   │   ├── lexer.data.json
+    │   │   │   ├── lexer.meta.json
+    │   │   │   ├── loaders.data.json
+    │   │   │   ├── loaders.meta.json
+    │   │   │   ├── nodes.data.json
+    │   │   │   ├── nodes.meta.json
+    │   │   │   ├── optimizer.data.json
+    │   │   │   ├── optimizer.meta.json
+    │   │   │   ├── parser.data.json
+    │   │   │   ├── parser.meta.json
+    │   │   │   ├── runtime.data.json
+    │   │   │   ├── runtime.meta.json
+    │   │   │   ├── sandbox.data.json
+    │   │   │   ├── sandbox.meta.json
+    │   │   │   ├── tests.data.json
+    │   │   │   ├── tests.meta.json
+    │   │   │   ├── utils.data.json
+    │   │   │   ├── utils.meta.json
+    │   │   │   ├── visitor.data.json
+    │   │   │   └── visitor.meta.json
     │   │   ├── json/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -3366,6 +3604,13 @@ BioactivityDataAcquisition2/
     │   │   │   ├── token.meta.json
     │   │   │   ├── utils.data.json
     │   │   │   └── utils.meta.json
+    │   │   ├── markupsafe/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _native.data.json
+    │   │   │   ├── _native.meta.json
+    │   │   │   ├── _speedups.data.json
+    │   │   │   └── _speedups.meta.json
     │   │   ├── mdurl/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -3661,6 +3906,286 @@ BioactivityDataAcquisition2/
     │   │   │   ├── matlib.meta.json
     │   │   │   ├── version.data.json
     │   │   │   └── version.meta.json
+    │   │   ├── openpyxl/
+    │   │   │   ├── cell/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── cell.data.json
+    │   │   │   │   ├── cell.meta.json
+    │   │   │   │   ├── read_only.data.json
+    │   │   │   │   ├── read_only.meta.json
+    │   │   │   │   ├── rich_text.data.json
+    │   │   │   │   ├── rich_text.meta.json
+    │   │   │   │   ├── text.data.json
+    │   │   │   │   └── text.meta.json
+    │   │   │   ├── chart/
+    │   │   │   │   ├── _3d.data.json
+    │   │   │   │   ├── _3d.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _chart.data.json
+    │   │   │   │   ├── _chart.meta.json
+    │   │   │   │   ├── area_chart.data.json
+    │   │   │   │   ├── area_chart.meta.json
+    │   │   │   │   ├── axis.data.json
+    │   │   │   │   ├── axis.meta.json
+    │   │   │   │   ├── bar_chart.data.json
+    │   │   │   │   ├── bar_chart.meta.json
+    │   │   │   │   ├── bubble_chart.data.json
+    │   │   │   │   ├── bubble_chart.meta.json
+    │   │   │   │   ├── data_source.data.json
+    │   │   │   │   ├── data_source.meta.json
+    │   │   │   │   ├── label.data.json
+    │   │   │   │   ├── label.meta.json
+    │   │   │   │   ├── layout.data.json
+    │   │   │   │   ├── layout.meta.json
+    │   │   │   │   ├── legend.data.json
+    │   │   │   │   ├── legend.meta.json
+    │   │   │   │   ├── line_chart.data.json
+    │   │   │   │   ├── line_chart.meta.json
+    │   │   │   │   ├── picture.data.json
+    │   │   │   │   ├── picture.meta.json
+    │   │   │   │   ├── pie_chart.data.json
+    │   │   │   │   ├── pie_chart.meta.json
+    │   │   │   │   ├── radar_chart.data.json
+    │   │   │   │   ├── radar_chart.meta.json
+    │   │   │   │   ├── reference.data.json
+    │   │   │   │   ├── reference.meta.json
+    │   │   │   │   ├── scatter_chart.data.json
+    │   │   │   │   ├── scatter_chart.meta.json
+    │   │   │   │   ├── shapes.data.json
+    │   │   │   │   ├── shapes.meta.json
+    │   │   │   │   ├── stock_chart.data.json
+    │   │   │   │   ├── stock_chart.meta.json
+    │   │   │   │   ├── surface_chart.data.json
+    │   │   │   │   ├── surface_chart.meta.json
+    │   │   │   │   ├── text.data.json
+    │   │   │   │   ├── text.meta.json
+    │   │   │   │   ├── title.data.json
+    │   │   │   │   ├── title.meta.json
+    │   │   │   │   ├── updown_bars.data.json
+    │   │   │   │   └── updown_bars.meta.json
+    │   │   │   ├── chartsheet/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── chartsheet.data.json
+    │   │   │   │   ├── chartsheet.meta.json
+    │   │   │   │   ├── custom.data.json
+    │   │   │   │   ├── custom.meta.json
+    │   │   │   │   ├── properties.data.json
+    │   │   │   │   ├── properties.meta.json
+    │   │   │   │   ├── protection.data.json
+    │   │   │   │   ├── protection.meta.json
+    │   │   │   │   ├── publish.data.json
+    │   │   │   │   ├── publish.meta.json
+    │   │   │   │   ├── relation.data.json
+    │   │   │   │   ├── relation.meta.json
+    │   │   │   │   ├── views.data.json
+    │   │   │   │   └── views.meta.json
+    │   │   │   ├── comments/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── comments.data.json
+    │   │   │   │   └── comments.meta.json
+    │   │   │   ├── compat/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── numbers.data.json
+    │   │   │   │   ├── numbers.meta.json
+    │   │   │   │   ├── strings.data.json
+    │   │   │   │   └── strings.meta.json
+    │   │   │   ├── descriptors/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── excel.data.json
+    │   │   │   │   ├── excel.meta.json
+    │   │   │   │   ├── nested.data.json
+    │   │   │   │   ├── nested.meta.json
+    │   │   │   │   ├── sequence.data.json
+    │   │   │   │   ├── sequence.meta.json
+    │   │   │   │   ├── serialisable.data.json
+    │   │   │   │   └── serialisable.meta.json
+    │   │   │   ├── drawing/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── colors.data.json
+    │   │   │   │   ├── colors.meta.json
+    │   │   │   │   ├── connector.data.json
+    │   │   │   │   ├── connector.meta.json
+    │   │   │   │   ├── drawing.data.json
+    │   │   │   │   ├── drawing.meta.json
+    │   │   │   │   ├── effect.data.json
+    │   │   │   │   ├── effect.meta.json
+    │   │   │   │   ├── fill.data.json
+    │   │   │   │   ├── fill.meta.json
+    │   │   │   │   ├── geometry.data.json
+    │   │   │   │   ├── geometry.meta.json
+    │   │   │   │   ├── graphic.data.json
+    │   │   │   │   ├── graphic.meta.json
+    │   │   │   │   ├── image.data.json
+    │   │   │   │   ├── image.meta.json
+    │   │   │   │   ├── line.data.json
+    │   │   │   │   ├── line.meta.json
+    │   │   │   │   ├── picture.data.json
+    │   │   │   │   ├── picture.meta.json
+    │   │   │   │   ├── properties.data.json
+    │   │   │   │   ├── properties.meta.json
+    │   │   │   │   ├── relation.data.json
+    │   │   │   │   ├── relation.meta.json
+    │   │   │   │   ├── spreadsheet_drawing.data.json
+    │   │   │   │   ├── spreadsheet_drawing.meta.json
+    │   │   │   │   ├── text.data.json
+    │   │   │   │   ├── text.meta.json
+    │   │   │   │   ├── xdr.data.json
+    │   │   │   │   └── xdr.meta.json
+    │   │   │   ├── formatting/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── formatting.data.json
+    │   │   │   │   ├── formatting.meta.json
+    │   │   │   │   ├── rule.data.json
+    │   │   │   │   └── rule.meta.json
+    │   │   │   ├── formula/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── tokenizer.data.json
+    │   │   │   │   └── tokenizer.meta.json
+    │   │   │   ├── packaging/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── manifest.data.json
+    │   │   │   │   ├── manifest.meta.json
+    │   │   │   │   ├── relationship.data.json
+    │   │   │   │   ├── relationship.meta.json
+    │   │   │   │   ├── workbook.data.json
+    │   │   │   │   └── workbook.meta.json
+    │   │   │   ├── pivot/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── cache.data.json
+    │   │   │   │   ├── cache.meta.json
+    │   │   │   │   ├── fields.data.json
+    │   │   │   │   ├── fields.meta.json
+    │   │   │   │   ├── record.data.json
+    │   │   │   │   ├── record.meta.json
+    │   │   │   │   ├── table.data.json
+    │   │   │   │   └── table.meta.json
+    │   │   │   ├── reader/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── excel.data.json
+    │   │   │   │   ├── excel.meta.json
+    │   │   │   │   ├── workbook.data.json
+    │   │   │   │   └── workbook.meta.json
+    │   │   │   ├── styles/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── alignment.data.json
+    │   │   │   │   ├── alignment.meta.json
+    │   │   │   │   ├── borders.data.json
+    │   │   │   │   ├── borders.meta.json
+    │   │   │   │   ├── cell_style.data.json
+    │   │   │   │   ├── cell_style.meta.json
+    │   │   │   │   ├── colors.data.json
+    │   │   │   │   ├── colors.meta.json
+    │   │   │   │   ├── differential.data.json
+    │   │   │   │   ├── differential.meta.json
+    │   │   │   │   ├── fills.data.json
+    │   │   │   │   ├── fills.meta.json
+    │   │   │   │   ├── fonts.data.json
+    │   │   │   │   ├── fonts.meta.json
+    │   │   │   │   ├── named_styles.data.json
+    │   │   │   │   ├── named_styles.meta.json
+    │   │   │   │   ├── numbers.data.json
+    │   │   │   │   ├── numbers.meta.json
+    │   │   │   │   ├── protection.data.json
+    │   │   │   │   ├── protection.meta.json
+    │   │   │   │   ├── proxy.data.json
+    │   │   │   │   ├── proxy.meta.json
+    │   │   │   │   ├── styleable.data.json
+    │   │   │   │   └── styleable.meta.json
+    │   │   │   ├── utils/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── bound_dictionary.data.json
+    │   │   │   │   ├── bound_dictionary.meta.json
+    │   │   │   │   ├── cell.data.json
+    │   │   │   │   ├── cell.meta.json
+    │   │   │   │   ├── formulas.data.json
+    │   │   │   │   ├── formulas.meta.json
+    │   │   │   │   ├── indexed_list.data.json
+    │   │   │   │   └── indexed_list.meta.json
+    │   │   │   ├── workbook/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── child.data.json
+    │   │   │   │   ├── child.meta.json
+    │   │   │   │   ├── defined_name.data.json
+    │   │   │   │   ├── defined_name.meta.json
+    │   │   │   │   ├── function_group.data.json
+    │   │   │   │   ├── function_group.meta.json
+    │   │   │   │   ├── properties.data.json
+    │   │   │   │   ├── properties.meta.json
+    │   │   │   │   ├── protection.data.json
+    │   │   │   │   ├── protection.meta.json
+    │   │   │   │   ├── smart_tags.data.json
+    │   │   │   │   ├── smart_tags.meta.json
+    │   │   │   │   ├── web.data.json
+    │   │   │   │   ├── web.meta.json
+    │   │   │   │   ├── workbook.data.json
+    │   │   │   │   └── workbook.meta.json
+    │   │   │   ├── worksheet/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _read_only.data.json
+    │   │   │   │   ├── _read_only.meta.json
+    │   │   │   │   ├── _write_only.data.json
+    │   │   │   │   ├── _write_only.meta.json
+    │   │   │   │   ├── cell_range.data.json
+    │   │   │   │   ├── cell_range.meta.json
+    │   │   │   │   ├── datavalidation.data.json
+    │   │   │   │   ├── datavalidation.meta.json
+    │   │   │   │   ├── dimensions.data.json
+    │   │   │   │   ├── dimensions.meta.json
+    │   │   │   │   ├── drawing.data.json
+    │   │   │   │   ├── drawing.meta.json
+    │   │   │   │   ├── filters.data.json
+    │   │   │   │   ├── filters.meta.json
+    │   │   │   │   ├── formula.data.json
+    │   │   │   │   ├── formula.meta.json
+    │   │   │   │   ├── header_footer.data.json
+    │   │   │   │   ├── header_footer.meta.json
+    │   │   │   │   ├── hyperlink.data.json
+    │   │   │   │   ├── hyperlink.meta.json
+    │   │   │   │   ├── page.data.json
+    │   │   │   │   ├── page.meta.json
+    │   │   │   │   ├── pagebreak.data.json
+    │   │   │   │   ├── pagebreak.meta.json
+    │   │   │   │   ├── properties.data.json
+    │   │   │   │   ├── properties.meta.json
+    │   │   │   │   ├── protection.data.json
+    │   │   │   │   ├── protection.meta.json
+    │   │   │   │   ├── scenario.data.json
+    │   │   │   │   ├── scenario.meta.json
+    │   │   │   │   ├── table.data.json
+    │   │   │   │   ├── table.meta.json
+    │   │   │   │   ├── views.data.json
+    │   │   │   │   ├── views.meta.json
+    │   │   │   │   ├── worksheet.data.json
+    │   │   │   │   └── worksheet.meta.json
+    │   │   │   ├── xml/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _functions_overloads.data.json
+    │   │   │   │   ├── _functions_overloads.meta.json
+    │   │   │   │   ├── functions.data.json
+    │   │   │   │   └── functions.meta.json
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _constants.data.json
+    │   │   │   └── _constants.meta.json
     │   │   ├── opentelemetry/
     │   │   │   ├── _logs/
     │   │   │   │   ├── _internal/
@@ -3979,6 +4504,360 @@ BioactivityDataAcquisition2/
     │   │   │   ├── utils.meta.json
     │   │   │   ├── version.data.json
     │   │   │   └── version.meta.json
+    │   │   ├── pandas/
+    │   │   │   ├── _config/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── config.data.json
+    │   │   │   │   └── config.meta.json
+    │   │   │   ├── _libs/
+    │   │   │   │   ├── tslibs/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── nattype.data.json
+    │   │   │   │   │   ├── nattype.meta.json
+    │   │   │   │   │   ├── np_datetime.data.json
+    │   │   │   │   │   ├── np_datetime.meta.json
+    │   │   │   │   │   ├── offsets.data.json
+    │   │   │   │   │   ├── offsets.meta.json
+    │   │   │   │   │   ├── period.data.json
+    │   │   │   │   │   ├── period.meta.json
+    │   │   │   │   │   ├── timedeltas.data.json
+    │   │   │   │   │   ├── timedeltas.meta.json
+    │   │   │   │   │   ├── timestamps.data.json
+    │   │   │   │   │   └── timestamps.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── indexing.data.json
+    │   │   │   │   ├── indexing.meta.json
+    │   │   │   │   ├── interval.data.json
+    │   │   │   │   ├── interval.meta.json
+    │   │   │   │   ├── lib.data.json
+    │   │   │   │   ├── lib.meta.json
+    │   │   │   │   ├── missing.data.json
+    │   │   │   │   ├── missing.meta.json
+    │   │   │   │   ├── properties.data.json
+    │   │   │   │   └── properties.meta.json
+    │   │   │   ├── _testing/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── api/
+    │   │   │   │   ├── extensions/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── indexers/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── interchange/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── types/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── typing/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── arrays/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── core/
+    │   │   │   │   ├── arrays/
+    │   │   │   │   │   ├── arrow/
+    │   │   │   │   │   │   ├── dtype.data.json
+    │   │   │   │   │   │   └── dtype.meta.json
+    │   │   │   │   │   ├── sparse/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── accessor.data.json
+    │   │   │   │   │   │   ├── accessor.meta.json
+    │   │   │   │   │   │   ├── array.data.json
+    │   │   │   │   │   │   ├── array.meta.json
+    │   │   │   │   │   │   ├── dtype.data.json
+    │   │   │   │   │   │   └── dtype.meta.json
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── arrow.data.json
+    │   │   │   │   │   ├── arrow.meta.json
+    │   │   │   │   │   ├── base.data.json
+    │   │   │   │   │   ├── base.meta.json
+    │   │   │   │   │   ├── boolean.data.json
+    │   │   │   │   │   ├── boolean.meta.json
+    │   │   │   │   │   ├── categorical.data.json
+    │   │   │   │   │   ├── categorical.meta.json
+    │   │   │   │   │   ├── datetimelike.data.json
+    │   │   │   │   │   ├── datetimelike.meta.json
+    │   │   │   │   │   ├── datetimes.data.json
+    │   │   │   │   │   ├── datetimes.meta.json
+    │   │   │   │   │   ├── floating.data.json
+    │   │   │   │   │   ├── floating.meta.json
+    │   │   │   │   │   ├── integer.data.json
+    │   │   │   │   │   ├── integer.meta.json
+    │   │   │   │   │   ├── interval.data.json
+    │   │   │   │   │   ├── interval.meta.json
+    │   │   │   │   │   ├── masked.data.json
+    │   │   │   │   │   ├── masked.meta.json
+    │   │   │   │   │   ├── numeric.data.json
+    │   │   │   │   │   ├── numeric.meta.json
+    │   │   │   │   │   ├── numpy_.data.json
+    │   │   │   │   │   ├── numpy_.meta.json
+    │   │   │   │   │   ├── period.data.json
+    │   │   │   │   │   ├── period.meta.json
+    │   │   │   │   │   ├── string_.data.json
+    │   │   │   │   │   ├── string_.meta.json
+    │   │   │   │   │   ├── timedeltas.data.json
+    │   │   │   │   │   └── timedeltas.meta.json
+    │   │   │   │   ├── computation/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── api.data.json
+    │   │   │   │   │   ├── api.meta.json
+    │   │   │   │   │   ├── eval.data.json
+    │   │   │   │   │   ├── eval.meta.json
+    │   │   │   │   │   ├── expr.data.json
+    │   │   │   │   │   ├── expr.meta.json
+    │   │   │   │   │   ├── ops.data.json
+    │   │   │   │   │   ├── ops.meta.json
+    │   │   │   │   │   ├── pytables.data.json
+    │   │   │   │   │   ├── pytables.meta.json
+    │   │   │   │   │   ├── scope.data.json
+    │   │   │   │   │   └── scope.meta.json
+    │   │   │   │   ├── dtypes/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── api.data.json
+    │   │   │   │   │   ├── api.meta.json
+    │   │   │   │   │   ├── base.data.json
+    │   │   │   │   │   ├── base.meta.json
+    │   │   │   │   │   ├── common.data.json
+    │   │   │   │   │   ├── common.meta.json
+    │   │   │   │   │   ├── concat.data.json
+    │   │   │   │   │   ├── concat.meta.json
+    │   │   │   │   │   ├── dtypes.data.json
+    │   │   │   │   │   ├── dtypes.meta.json
+    │   │   │   │   │   ├── inference.data.json
+    │   │   │   │   │   ├── inference.meta.json
+    │   │   │   │   │   ├── missing.data.json
+    │   │   │   │   │   └── missing.meta.json
+    │   │   │   │   ├── groupby/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── base.data.json
+    │   │   │   │   │   ├── base.meta.json
+    │   │   │   │   │   ├── generic.data.json
+    │   │   │   │   │   ├── generic.meta.json
+    │   │   │   │   │   ├── groupby.data.json
+    │   │   │   │   │   ├── groupby.meta.json
+    │   │   │   │   │   ├── grouper.data.json
+    │   │   │   │   │   ├── grouper.meta.json
+    │   │   │   │   │   ├── indexing.data.json
+    │   │   │   │   │   └── indexing.meta.json
+    │   │   │   │   ├── indexes/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── accessors.data.json
+    │   │   │   │   │   ├── accessors.meta.json
+    │   │   │   │   │   ├── api.data.json
+    │   │   │   │   │   ├── api.meta.json
+    │   │   │   │   │   ├── base.data.json
+    │   │   │   │   │   ├── base.meta.json
+    │   │   │   │   │   ├── category.data.json
+    │   │   │   │   │   ├── category.meta.json
+    │   │   │   │   │   ├── datetimelike.data.json
+    │   │   │   │   │   ├── datetimelike.meta.json
+    │   │   │   │   │   ├── datetimes.data.json
+    │   │   │   │   │   ├── datetimes.meta.json
+    │   │   │   │   │   ├── extension.data.json
+    │   │   │   │   │   ├── extension.meta.json
+    │   │   │   │   │   ├── frozen.data.json
+    │   │   │   │   │   ├── frozen.meta.json
+    │   │   │   │   │   ├── interval.data.json
+    │   │   │   │   │   ├── interval.meta.json
+    │   │   │   │   │   ├── multi.data.json
+    │   │   │   │   │   ├── multi.meta.json
+    │   │   │   │   │   ├── period.data.json
+    │   │   │   │   │   ├── period.meta.json
+    │   │   │   │   │   ├── range.data.json
+    │   │   │   │   │   ├── range.meta.json
+    │   │   │   │   │   ├── timedeltas.data.json
+    │   │   │   │   │   └── timedeltas.meta.json
+    │   │   │   │   ├── interchange/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── dataframe_protocol.data.json
+    │   │   │   │   │   ├── dataframe_protocol.meta.json
+    │   │   │   │   │   ├── from_dataframe.data.json
+    │   │   │   │   │   └── from_dataframe.meta.json
+    │   │   │   │   ├── reshape/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── api.data.json
+    │   │   │   │   │   ├── api.meta.json
+    │   │   │   │   │   ├── concat.data.json
+    │   │   │   │   │   ├── concat.meta.json
+    │   │   │   │   │   ├── encoding.data.json
+    │   │   │   │   │   ├── encoding.meta.json
+    │   │   │   │   │   ├── melt.data.json
+    │   │   │   │   │   ├── melt.meta.json
+    │   │   │   │   │   ├── merge.data.json
+    │   │   │   │   │   ├── merge.meta.json
+    │   │   │   │   │   ├── pivot.data.json
+    │   │   │   │   │   ├── pivot.meta.json
+    │   │   │   │   │   ├── tile.data.json
+    │   │   │   │   │   └── tile.meta.json
+    │   │   │   │   ├── strings/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── accessor.data.json
+    │   │   │   │   │   └── accessor.meta.json
+    │   │   │   │   ├── tools/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── datetimes.data.json
+    │   │   │   │   │   ├── datetimes.meta.json
+    │   │   │   │   │   ├── numeric.data.json
+    │   │   │   │   │   ├── numeric.meta.json
+    │   │   │   │   │   ├── timedeltas.data.json
+    │   │   │   │   │   └── timedeltas.meta.json
+    │   │   │   │   ├── util/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── hashing.data.json
+    │   │   │   │   │   └── hashing.meta.json
+    │   │   │   │   ├── window/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── ewm.data.json
+    │   │   │   │   │   ├── ewm.meta.json
+    │   │   │   │   │   ├── expanding.data.json
+    │   │   │   │   │   ├── expanding.meta.json
+    │   │   │   │   │   ├── rolling.data.json
+    │   │   │   │   │   └── rolling.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── accessor.data.json
+    │   │   │   │   ├── accessor.meta.json
+    │   │   │   │   ├── algorithms.data.json
+    │   │   │   │   ├── algorithms.meta.json
+    │   │   │   │   ├── api.data.json
+    │   │   │   │   ├── api.meta.json
+    │   │   │   │   ├── arraylike.data.json
+    │   │   │   │   ├── arraylike.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── construction.data.json
+    │   │   │   │   ├── construction.meta.json
+    │   │   │   │   ├── frame.data.json
+    │   │   │   │   ├── frame.meta.json
+    │   │   │   │   ├── generic.data.json
+    │   │   │   │   ├── generic.meta.json
+    │   │   │   │   ├── indexers.data.json
+    │   │   │   │   ├── indexers.meta.json
+    │   │   │   │   ├── indexing.data.json
+    │   │   │   │   ├── indexing.meta.json
+    │   │   │   │   ├── resample.data.json
+    │   │   │   │   ├── resample.meta.json
+    │   │   │   │   ├── series.data.json
+    │   │   │   │   └── series.meta.json
+    │   │   │   ├── errors/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── io/
+    │   │   │   │   ├── excel/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── _base.data.json
+    │   │   │   │   │   └── _base.meta.json
+    │   │   │   │   ├── formats/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── format.data.json
+    │   │   │   │   │   ├── format.meta.json
+    │   │   │   │   │   ├── style.data.json
+    │   │   │   │   │   ├── style.meta.json
+    │   │   │   │   │   ├── style_render.data.json
+    │   │   │   │   │   └── style_render.meta.json
+    │   │   │   │   ├── json/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── _json.data.json
+    │   │   │   │   │   ├── _json.meta.json
+    │   │   │   │   │   ├── _normalize.data.json
+    │   │   │   │   │   ├── _normalize.meta.json
+    │   │   │   │   │   ├── _table_schema.data.json
+    │   │   │   │   │   └── _table_schema.meta.json
+    │   │   │   │   ├── parsers/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── readers.data.json
+    │   │   │   │   │   └── readers.meta.json
+    │   │   │   │   ├── sas/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── sas7bdat.data.json
+    │   │   │   │   │   ├── sas7bdat.meta.json
+    │   │   │   │   │   ├── sas_xport.data.json
+    │   │   │   │   │   ├── sas_xport.meta.json
+    │   │   │   │   │   ├── sasreader.data.json
+    │   │   │   │   │   └── sasreader.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── api.data.json
+    │   │   │   │   ├── api.meta.json
+    │   │   │   │   ├── clipboards.data.json
+    │   │   │   │   ├── clipboards.meta.json
+    │   │   │   │   ├── feather_format.data.json
+    │   │   │   │   ├── feather_format.meta.json
+    │   │   │   │   ├── html.data.json
+    │   │   │   │   ├── html.meta.json
+    │   │   │   │   ├── orc.data.json
+    │   │   │   │   ├── orc.meta.json
+    │   │   │   │   ├── parquet.data.json
+    │   │   │   │   ├── parquet.meta.json
+    │   │   │   │   ├── pickle.data.json
+    │   │   │   │   ├── pickle.meta.json
+    │   │   │   │   ├── pytables.data.json
+    │   │   │   │   ├── pytables.meta.json
+    │   │   │   │   ├── spss.data.json
+    │   │   │   │   ├── spss.meta.json
+    │   │   │   │   ├── sql.data.json
+    │   │   │   │   ├── sql.meta.json
+    │   │   │   │   ├── stata.data.json
+    │   │   │   │   ├── stata.meta.json
+    │   │   │   │   ├── xml.data.json
+    │   │   │   │   └── xml.meta.json
+    │   │   │   ├── plotting/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _core.data.json
+    │   │   │   │   ├── _core.meta.json
+    │   │   │   │   ├── _misc.data.json
+    │   │   │   │   └── _misc.meta.json
+    │   │   │   ├── tseries/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── api.data.json
+    │   │   │   │   ├── api.meta.json
+    │   │   │   │   ├── frequencies.data.json
+    │   │   │   │   ├── frequencies.meta.json
+    │   │   │   │   ├── holiday.data.json
+    │   │   │   │   ├── holiday.meta.json
+    │   │   │   │   ├── offsets.data.json
+    │   │   │   │   └── offsets.meta.json
+    │   │   │   ├── util/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _decorators.data.json
+    │   │   │   │   ├── _decorators.meta.json
+    │   │   │   │   ├── _print_versions.data.json
+    │   │   │   │   └── _print_versions.meta.json
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _typing.data.json
+    │   │   │   ├── _typing.meta.json
+    │   │   │   ├── testing.data.json
+    │   │   │   └── testing.meta.json
     │   │   ├── pandera/
     │   │   │   ├── accessors/
     │   │   │   │   ├── __init__.data.json
@@ -4170,6 +5049,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── dtypes.meta.json
     │   │   │   ├── errors.data.json
     │   │   │   ├── errors.meta.json
+    │   │   │   ├── extensions.data.json
+    │   │   │   ├── extensions.meta.json
     │   │   │   ├── external_config.data.json
     │   │   │   ├── external_config.meta.json
     │   │   │   ├── import_utils.data.json
@@ -4189,6 +5070,33 @@ BioactivityDataAcquisition2/
     │   │   ├── pathlib/
     │   │   │   ├── __init__.data.json
     │   │   │   └── __init__.meta.json
+    │   │   ├── pathspec/
+    │   │   │   ├── patterns/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── gitwildmatch.data.json
+    │   │   │   │   └── gitwildmatch.meta.json
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _meta.data.json
+    │   │   │   ├── _meta.meta.json
+    │   │   │   ├── gitignore.data.json
+    │   │   │   ├── gitignore.meta.json
+    │   │   │   ├── pathspec.data.json
+    │   │   │   ├── pathspec.meta.json
+    │   │   │   ├── pattern.data.json
+    │   │   │   ├── pattern.meta.json
+    │   │   │   ├── util.data.json
+    │   │   │   └── util.meta.json
+    │   │   ├── platformdirs/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── api.data.json
+    │   │   │   ├── api.meta.json
+    │   │   │   ├── version.data.json
+    │   │   │   ├── version.meta.json
+    │   │   │   ├── windows.data.json
+    │   │   │   └── windows.meta.json
     │   │   ├── pluggy/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -5008,6 +5916,281 @@ BioactivityDataAcquisition2/
     │   │   │   ├── themes.meta.json
     │   │   │   ├── traceback.data.json
     │   │   │   └── traceback.meta.json
+    │   │   ├── sqlalchemy/
+    │   │   │   ├── connectors/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── asyncio.data.json
+    │   │   │   │   └── asyncio.meta.json
+    │   │   │   ├── dialects/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── engine/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _py_processors.data.json
+    │   │   │   │   ├── _py_processors.meta.json
+    │   │   │   │   ├── _py_row.data.json
+    │   │   │   │   ├── _py_row.meta.json
+    │   │   │   │   ├── _py_util.data.json
+    │   │   │   │   ├── _py_util.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── characteristics.data.json
+    │   │   │   │   ├── characteristics.meta.json
+    │   │   │   │   ├── create.data.json
+    │   │   │   │   ├── create.meta.json
+    │   │   │   │   ├── cursor.data.json
+    │   │   │   │   ├── cursor.meta.json
+    │   │   │   │   ├── default.data.json
+    │   │   │   │   ├── default.meta.json
+    │   │   │   │   ├── events.data.json
+    │   │   │   │   ├── events.meta.json
+    │   │   │   │   ├── interfaces.data.json
+    │   │   │   │   ├── interfaces.meta.json
+    │   │   │   │   ├── mock.data.json
+    │   │   │   │   ├── mock.meta.json
+    │   │   │   │   ├── processors.data.json
+    │   │   │   │   ├── processors.meta.json
+    │   │   │   │   ├── reflection.data.json
+    │   │   │   │   ├── reflection.meta.json
+    │   │   │   │   ├── result.data.json
+    │   │   │   │   ├── result.meta.json
+    │   │   │   │   ├── row.data.json
+    │   │   │   │   ├── row.meta.json
+    │   │   │   │   ├── url.data.json
+    │   │   │   │   ├── url.meta.json
+    │   │   │   │   ├── util.data.json
+    │   │   │   │   └── util.meta.json
+    │   │   │   ├── event/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── api.data.json
+    │   │   │   │   ├── api.meta.json
+    │   │   │   │   ├── attr.data.json
+    │   │   │   │   ├── attr.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── legacy.data.json
+    │   │   │   │   ├── legacy.meta.json
+    │   │   │   │   ├── registry.data.json
+    │   │   │   │   └── registry.meta.json
+    │   │   │   ├── ext/
+    │   │   │   │   ├── asyncio/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── base.data.json
+    │   │   │   │   │   ├── base.meta.json
+    │   │   │   │   │   ├── engine.data.json
+    │   │   │   │   │   ├── engine.meta.json
+    │   │   │   │   │   ├── exc.data.json
+    │   │   │   │   │   ├── exc.meta.json
+    │   │   │   │   │   ├── result.data.json
+    │   │   │   │   │   ├── result.meta.json
+    │   │   │   │   │   ├── scoping.data.json
+    │   │   │   │   │   ├── scoping.meta.json
+    │   │   │   │   │   ├── session.data.json
+    │   │   │   │   │   └── session.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── future/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── engine.data.json
+    │   │   │   │   └── engine.meta.json
+    │   │   │   ├── orm/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _orm_constructors.data.json
+    │   │   │   │   ├── _orm_constructors.meta.json
+    │   │   │   │   ├── _typing.data.json
+    │   │   │   │   ├── _typing.meta.json
+    │   │   │   │   ├── attributes.data.json
+    │   │   │   │   ├── attributes.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── bulk_persistence.data.json
+    │   │   │   │   ├── bulk_persistence.meta.json
+    │   │   │   │   ├── clsregistry.data.json
+    │   │   │   │   ├── clsregistry.meta.json
+    │   │   │   │   ├── collections.data.json
+    │   │   │   │   ├── collections.meta.json
+    │   │   │   │   ├── context.data.json
+    │   │   │   │   ├── context.meta.json
+    │   │   │   │   ├── decl_api.data.json
+    │   │   │   │   ├── decl_api.meta.json
+    │   │   │   │   ├── decl_base.data.json
+    │   │   │   │   ├── decl_base.meta.json
+    │   │   │   │   ├── dependency.data.json
+    │   │   │   │   ├── dependency.meta.json
+    │   │   │   │   ├── descriptor_props.data.json
+    │   │   │   │   ├── descriptor_props.meta.json
+    │   │   │   │   ├── dynamic.data.json
+    │   │   │   │   ├── dynamic.meta.json
+    │   │   │   │   ├── evaluator.data.json
+    │   │   │   │   ├── evaluator.meta.json
+    │   │   │   │   ├── events.data.json
+    │   │   │   │   ├── events.meta.json
+    │   │   │   │   ├── exc.data.json
+    │   │   │   │   ├── exc.meta.json
+    │   │   │   │   ├── identity.data.json
+    │   │   │   │   ├── identity.meta.json
+    │   │   │   │   ├── instrumentation.data.json
+    │   │   │   │   ├── instrumentation.meta.json
+    │   │   │   │   ├── interfaces.data.json
+    │   │   │   │   ├── interfaces.meta.json
+    │   │   │   │   ├── loading.data.json
+    │   │   │   │   ├── loading.meta.json
+    │   │   │   │   ├── mapped_collection.data.json
+    │   │   │   │   ├── mapped_collection.meta.json
+    │   │   │   │   ├── mapper.data.json
+    │   │   │   │   ├── mapper.meta.json
+    │   │   │   │   ├── path_registry.data.json
+    │   │   │   │   ├── path_registry.meta.json
+    │   │   │   │   ├── persistence.data.json
+    │   │   │   │   ├── persistence.meta.json
+    │   │   │   │   ├── properties.data.json
+    │   │   │   │   ├── properties.meta.json
+    │   │   │   │   ├── query.data.json
+    │   │   │   │   ├── query.meta.json
+    │   │   │   │   ├── relationships.data.json
+    │   │   │   │   ├── relationships.meta.json
+    │   │   │   │   ├── scoping.data.json
+    │   │   │   │   ├── scoping.meta.json
+    │   │   │   │   ├── session.data.json
+    │   │   │   │   ├── session.meta.json
+    │   │   │   │   ├── state.data.json
+    │   │   │   │   ├── state.meta.json
+    │   │   │   │   ├── state_changes.data.json
+    │   │   │   │   ├── state_changes.meta.json
+    │   │   │   │   ├── strategies.data.json
+    │   │   │   │   ├── strategies.meta.json
+    │   │   │   │   ├── strategy_options.data.json
+    │   │   │   │   ├── strategy_options.meta.json
+    │   │   │   │   ├── sync.data.json
+    │   │   │   │   ├── sync.meta.json
+    │   │   │   │   ├── unitofwork.data.json
+    │   │   │   │   ├── unitofwork.meta.json
+    │   │   │   │   ├── util.data.json
+    │   │   │   │   ├── util.meta.json
+    │   │   │   │   ├── writeonly.data.json
+    │   │   │   │   └── writeonly.meta.json
+    │   │   │   ├── pool/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── events.data.json
+    │   │   │   │   ├── events.meta.json
+    │   │   │   │   ├── impl.data.json
+    │   │   │   │   └── impl.meta.json
+    │   │   │   ├── sql/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _dml_constructors.data.json
+    │   │   │   │   ├── _dml_constructors.meta.json
+    │   │   │   │   ├── _elements_constructors.data.json
+    │   │   │   │   ├── _elements_constructors.meta.json
+    │   │   │   │   ├── _orm_types.data.json
+    │   │   │   │   ├── _orm_types.meta.json
+    │   │   │   │   ├── _py_util.data.json
+    │   │   │   │   ├── _py_util.meta.json
+    │   │   │   │   ├── _selectable_constructors.data.json
+    │   │   │   │   ├── _selectable_constructors.meta.json
+    │   │   │   │   ├── _typing.data.json
+    │   │   │   │   ├── _typing.meta.json
+    │   │   │   │   ├── annotation.data.json
+    │   │   │   │   ├── annotation.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── cache_key.data.json
+    │   │   │   │   ├── cache_key.meta.json
+    │   │   │   │   ├── coercions.data.json
+    │   │   │   │   ├── coercions.meta.json
+    │   │   │   │   ├── compiler.data.json
+    │   │   │   │   ├── compiler.meta.json
+    │   │   │   │   ├── crud.data.json
+    │   │   │   │   ├── crud.meta.json
+    │   │   │   │   ├── ddl.data.json
+    │   │   │   │   ├── ddl.meta.json
+    │   │   │   │   ├── default_comparator.data.json
+    │   │   │   │   ├── default_comparator.meta.json
+    │   │   │   │   ├── dml.data.json
+    │   │   │   │   ├── dml.meta.json
+    │   │   │   │   ├── elements.data.json
+    │   │   │   │   ├── elements.meta.json
+    │   │   │   │   ├── events.data.json
+    │   │   │   │   ├── events.meta.json
+    │   │   │   │   ├── expression.data.json
+    │   │   │   │   ├── expression.meta.json
+    │   │   │   │   ├── functions.data.json
+    │   │   │   │   ├── functions.meta.json
+    │   │   │   │   ├── lambdas.data.json
+    │   │   │   │   ├── lambdas.meta.json
+    │   │   │   │   ├── naming.data.json
+    │   │   │   │   ├── naming.meta.json
+    │   │   │   │   ├── operators.data.json
+    │   │   │   │   ├── operators.meta.json
+    │   │   │   │   ├── roles.data.json
+    │   │   │   │   ├── roles.meta.json
+    │   │   │   │   ├── schema.data.json
+    │   │   │   │   ├── schema.meta.json
+    │   │   │   │   ├── selectable.data.json
+    │   │   │   │   ├── selectable.meta.json
+    │   │   │   │   ├── sqltypes.data.json
+    │   │   │   │   ├── sqltypes.meta.json
+    │   │   │   │   ├── traversals.data.json
+    │   │   │   │   ├── traversals.meta.json
+    │   │   │   │   ├── type_api.data.json
+    │   │   │   │   ├── type_api.meta.json
+    │   │   │   │   ├── util.data.json
+    │   │   │   │   ├── util.meta.json
+    │   │   │   │   ├── visitors.data.json
+    │   │   │   │   └── visitors.meta.json
+    │   │   │   ├── util/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _collections.data.json
+    │   │   │   │   ├── _collections.meta.json
+    │   │   │   │   ├── _concurrency_py3k.data.json
+    │   │   │   │   ├── _concurrency_py3k.meta.json
+    │   │   │   │   ├── _has_cy.data.json
+    │   │   │   │   ├── _has_cy.meta.json
+    │   │   │   │   ├── _py_collections.data.json
+    │   │   │   │   ├── _py_collections.meta.json
+    │   │   │   │   ├── compat.data.json
+    │   │   │   │   ├── compat.meta.json
+    │   │   │   │   ├── concurrency.data.json
+    │   │   │   │   ├── concurrency.meta.json
+    │   │   │   │   ├── deprecations.data.json
+    │   │   │   │   ├── deprecations.meta.json
+    │   │   │   │   ├── langhelpers.data.json
+    │   │   │   │   ├── langhelpers.meta.json
+    │   │   │   │   ├── preloaded.data.json
+    │   │   │   │   ├── preloaded.meta.json
+    │   │   │   │   ├── queue.data.json
+    │   │   │   │   ├── queue.meta.json
+    │   │   │   │   ├── topological.data.json
+    │   │   │   │   ├── topological.meta.json
+    │   │   │   │   ├── typing.data.json
+    │   │   │   │   └── typing.meta.json
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── exc.data.json
+    │   │   │   ├── exc.meta.json
+    │   │   │   ├── inspection.data.json
+    │   │   │   ├── inspection.meta.json
+    │   │   │   ├── log.data.json
+    │   │   │   ├── log.meta.json
+    │   │   │   ├── schema.data.json
+    │   │   │   ├── schema.meta.json
+    │   │   │   ├── types.data.json
+    │   │   │   └── types.meta.json
+    │   │   ├── sqlite3/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── dbapi2.data.json
+    │   │   │   └── dbapi2.meta.json
     │   │   ├── string/
     │   │   │   ├── __init__.data.json
     │   │   │   └── __init__.meta.json
@@ -5161,6 +6344,43 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── __init__.meta.json
     │   │   │   ├── __init__.data.json
     │   │   │   └── __init__.meta.json
+    │   │   ├── yaml/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _yaml.data.json
+    │   │   │   ├── _yaml.meta.json
+    │   │   │   ├── composer.data.json
+    │   │   │   ├── composer.meta.json
+    │   │   │   ├── constructor.data.json
+    │   │   │   ├── constructor.meta.json
+    │   │   │   ├── cyaml.data.json
+    │   │   │   ├── cyaml.meta.json
+    │   │   │   ├── dumper.data.json
+    │   │   │   ├── dumper.meta.json
+    │   │   │   ├── emitter.data.json
+    │   │   │   ├── emitter.meta.json
+    │   │   │   ├── error.data.json
+    │   │   │   ├── error.meta.json
+    │   │   │   ├── events.data.json
+    │   │   │   ├── events.meta.json
+    │   │   │   ├── loader.data.json
+    │   │   │   ├── loader.meta.json
+    │   │   │   ├── nodes.data.json
+    │   │   │   ├── nodes.meta.json
+    │   │   │   ├── parser.data.json
+    │   │   │   ├── parser.meta.json
+    │   │   │   ├── reader.data.json
+    │   │   │   ├── reader.meta.json
+    │   │   │   ├── representer.data.json
+    │   │   │   ├── representer.meta.json
+    │   │   │   ├── resolver.data.json
+    │   │   │   ├── resolver.meta.json
+    │   │   │   ├── scanner.data.json
+    │   │   │   ├── scanner.meta.json
+    │   │   │   ├── serializer.data.json
+    │   │   │   ├── serializer.meta.json
+    │   │   │   ├── tokens.data.json
+    │   │   │   └── tokens.meta.json
     │   │   ├── zipfile/
     │   │   │   ├── __init__.data.json
     │   │   │   └── __init__.meta.json
@@ -5225,6 +6445,8 @@ BioactivityDataAcquisition2/
     │   │   ├── _sitebuiltins.meta.json
     │   │   ├── _socket.data.json
     │   │   ├── _socket.meta.json
+    │   │   ├── _sqlite3.data.json
+    │   │   ├── _sqlite3.meta.json
     │   │   ├── _ssl.data.json
     │   │   ├── _ssl.meta.json
     │   │   ├── _stat.data.json
@@ -5257,6 +6479,8 @@ BioactivityDataAcquisition2/
     │   │   ├── base64.meta.json
     │   │   ├── bdb.data.json
     │   │   ├── bdb.meta.json
+    │   │   ├── binascii.data.json
+    │   │   ├── binascii.meta.json
     │   │   ├── bisect.data.json
     │   │   ├── bisect.meta.json
     │   │   ├── builtins.data.json
@@ -5321,6 +6545,8 @@ BioactivityDataAcquisition2/
     │   │   ├── hashlib.meta.json
     │   │   ├── heapq.data.json
     │   │   ├── heapq.meta.json
+    │   │   ├── hmac.data.json
+    │   │   ├── hmac.meta.json
     │   │   ├── inspect.data.json
     │   │   ├── inspect.meta.json
     │   │   ├── io.data.json
@@ -5345,6 +6571,8 @@ BioactivityDataAcquisition2/
     │   │   ├── mmap.meta.json
     │   │   ├── msvcrt.data.json
     │   │   ├── msvcrt.meta.json
+    │   │   ├── mypy_extensions.data.json
+    │   │   ├── mypy_extensions.meta.json
     │   │   ├── netrc.data.json
     │   │   ├── netrc.meta.json
     │   │   ├── ntpath.data.json
@@ -5383,6 +6611,8 @@ BioactivityDataAcquisition2/
     │   │   ├── reprlib.meta.json
     │   │   ├── resource.data.json
     │   │   ├── resource.meta.json
+    │   │   ├── secrets.data.json
+    │   │   ├── secrets.meta.json
     │   │   ├── select.data.json
     │   │   ├── select.meta.json
     │   │   ├── selectors.data.json
@@ -5456,7 +6686,8 @@ BioactivityDataAcquisition2/
     │   │   ├── zlib.data.json
     │   │   └── zlib.meta.json
     │   ├── .gitignore
-    │   └── CACHEDIR.TAG
+    │   ├── CACHEDIR.TAG
+    │   └── missing_stubs
     ├── .pytest_cache/
     │   ├── v/
     │   │   └── cache/
@@ -5468,73 +6699,147 @@ BioactivityDataAcquisition2/
     ├── .ruff_cache/
     │   ├── 0.14.0/
     │   │   ├── .tmpUcSdoy
+    │   │   ├── 10127165128104329726
     │   │   ├── 10174458157720737915
     │   │   ├── 10240723319412775506
+    │   │   ├── 10271005428267992482
+    │   │   ├── 10430932764340773820
+    │   │   ├── 10443538885074417394
+    │   │   ├── 10448096337519293231
     │   │   ├── 10519833625617592984
     │   │   ├── 10583392479659322532
+    │   │   ├── 10616209550479959374
+    │   │   ├── 10631773154392606232
+    │   │   ├── 10694149821553099992
+    │   │   ├── 10716384485319283996
     │   │   ├── 10737179470969541566
     │   │   ├── 11090183932048423435
     │   │   ├── 11201610029818688981
     │   │   ├── 11288768874771389898
+    │   │   ├── 11311491140370857518
+    │   │   ├── 11583610188612513356
     │   │   ├── 11703741895648991886
     │   │   ├── 11835815100508096191
+    │   │   ├── 11988350530626468031
     │   │   ├── 12319386451405268825
+    │   │   ├── 12582760512591207430
     │   │   ├── 12651267595738287478
     │   │   ├── 12717528321515470593
+    │   │   ├── 12779400413225850508
+    │   │   ├── 12855452186490433823
+    │   │   ├── 12938711963796233257
+    │   │   ├── 12942371562933694241
+    │   │   ├── 12998111550178410764
     │   │   ├── 13016142145191257682
     │   │   ├── 13031162338309768723
     │   │   ├── 1307468298911543240
+    │   │   ├── 13251828721772392560
     │   │   ├── 13263916684093923630
+    │   │   ├── 13372091708824893502
+    │   │   ├── 13596647527831518876
+    │   │   ├── 14053144865803537521
+    │   │   ├── 14321335218325484337
     │   │   ├── 14428733791264019955
+    │   │   ├── 14702004972581544123
     │   │   ├── 14871224322908215790
     │   │   ├── 15060259352813521153
+    │   │   ├── 15100705498617320206
     │   │   ├── 15103540089145958799
+    │   │   ├── 15211260117308224799
     │   │   ├── 15347390924637525871
     │   │   ├── 15371334726002155906
+    │   │   ├── 15373502503302121413
     │   │   ├── 15389726157249486506
     │   │   ├── 15497847382164365988
+    │   │   ├── 15837667914868966243
+    │   │   ├── 15895444977324845683
+    │   │   ├── 16027142132407389866
+    │   │   ├── 16045405429668314348
     │   │   ├── 16112326051704409114
+    │   │   ├── 16333592488343552054
     │   │   ├── 16578303977943171765
+    │   │   ├── 16594124209667422011
     │   │   ├── 16773568358712583732
     │   │   ├── 16874533963238746116
+    │   │   ├── 16948594898159943784
+    │   │   ├── 1725206574451631753
+    │   │   ├── 17299959255425746396
     │   │   ├── 17336547259172787444
+    │   │   ├── 1736666329493782490
     │   │   ├── 1747129480420144507
+    │   │   ├── 17542454256169030416
     │   │   ├── 17546298118358618287
+    │   │   ├── 17557457250800203765
+    │   │   ├── 17649188762145923442
     │   │   ├── 18119233349441098456
+    │   │   ├── 18121233211947883376
     │   │   ├── 18216372894089358360
     │   │   ├── 18431708931127067064
     │   │   ├── 2369822912035140358
+    │   │   ├── 2432909107843375296
     │   │   ├── 25996595736537317
     │   │   ├── 2831916283196160393
     │   │   ├── 3138574805935018996
+    │   │   ├── 3208444717409315149
     │   │   ├── 3320891234365628061
     │   │   ├── 3770496907059056239
     │   │   ├── 3981432923480689875
     │   │   ├── 4082539964504100503
+    │   │   ├── 4242504275142410185
+    │   │   ├── 4379651556044748512
     │   │   ├── 4389148501220609287
+    │   │   ├── 4419939258301855535
+    │   │   ├── 4518332369068314809
+    │   │   ├── 4728429716926965747
     │   │   ├── 5040424230270371395
+    │   │   ├── 5070387107119390560
+    │   │   ├── 5346408927620799650
     │   │   ├── 535576078999896058
+    │   │   ├── 5723351041363278461
+    │   │   ├── 5807133547595483920
+    │   │   ├── 5962123863646502275
+    │   │   ├── 6151801415573919569
     │   │   ├── 6175140776455100918
     │   │   ├── 6211427671833606488
+    │   │   ├── 6317311565378903252
     │   │   ├── 6332696102254224500
     │   │   ├── 6450738764037132675
+    │   │   ├── 6544262620244672180
     │   │   ├── 6556590681958716820
+    │   │   ├── 6577658249356552484
+    │   │   ├── 6633718975341007796
+    │   │   ├── 6638584242196708163
     │   │   ├── 6777892120084726491
     │   │   ├── 697656944341982029
     │   │   ├── 7309165636515191730
     │   │   ├── 7356731340926077842
     │   │   ├── 7399948707667532764
     │   │   ├── 7482118330844108343
+    │   │   ├── 7601919797541965487
+    │   │   ├── 7705115965532620014
     │   │   ├── 774724497262777051
+    │   │   ├── 7785549844089294827
+    │   │   ├── 7856099870356827953
+    │   │   ├── 7906087205545147314
     │   │   ├── 7964601743145509466
     │   │   ├── 8167642239156314628
+    │   │   ├── 8234007676045511761
     │   │   ├── 8326386067742799947
     │   │   ├── 8382077638304606989
+    │   │   ├── 8545977513231447894
     │   │   ├── 8625470008798218740
+    │   │   ├── 8711059208902191572
+    │   │   ├── 8742676105503426620
     │   │   ├── 8771723790589894935
     │   │   ├── 8933661446095833671
+    │   │   ├── 9280186396515467699
     │   │   ├── 9339966458643047120
+    │   │   ├── 9353957730235658979
     │   │   ├── 9482922074048420572
+    │   │   ├── 963573906674086609
+    │   │   ├── 9804933104493809024
+    │   │   ├── 9899277747648322984
+    │   │   ├── 9918208920323565202
     │   │   └── 9988654969352418800
     │   ├── 0.14.9/
     │   │   ├── 10137527635201161320
@@ -5979,6 +7284,7 @@ BioactivityDataAcquisition2/
     │   ├── checkpoints/
     │   │   └── composite/
     │   │       ├── composite_composite_activity_6279a837-c445-4b58-ae47-1389a53ddddd.json
+    │   │       ├── composite_composite_assay_cc62a7a5-95fb-4307-8aa8-da207987743a.json
     │   │       ├── composite_composite_molecule_097995c4-6ea8-4e8b-b790-4d15e8ff1428.json
     │   │       ├── composite_composite_molecule_4ed101d2-0809-44ef-8cf2-2f14afe5858b.json
     │   │       ├── composite_composite_molecule_5b1cf996-854f-47d8-a128-f664faf32607.json
@@ -5990,10 +7296,16 @@ BioactivityDataAcquisition2/
     │   │       ├── composite_composite_publication_4703c922-1f16-4e2b-b54b-ff53ec766f53.json
     │   │       ├── composite_composite_publication_60c22422-3602-4b17-aa06-4d0faea627ad.json
     │   │       ├── composite_composite_publication_6ad2bc7e-1cbf-4785-88ec-3a8457e88f05.json
+    │   │       ├── composite_composite_publication_75f181dd-dd2f-4cd9-8d27-5497952cc57c.json
     │   │       ├── composite_composite_publication_959ee035-3b11-4b0b-a652-cde9bad42f19.json
     │   │       ├── composite_composite_publication_95e997da-c9da-4925-9855-52634533a33a.json
     │   │       ├── composite_composite_publication_9ff79b9b-7db2-451e-8467-bfafdeadf7c2.json
+    │   │       ├── composite_composite_publication_aed6692e-4a8a-4446-97ab-369399efd84b.json
+    │   │       ├── composite_composite_publication_bb962fd5-c6b8-4de6-a2f2-f8dd1ea05c9e.json
+    │   │       ├── composite_composite_publication_db8b1b89-00c1-4599-bc48-960c5bdfc44d.json
     │   │       ├── composite_composite_publication_ec532618-1da6-4af2-9665-bc636b001683.json
+    │   │       ├── composite_composite_publication_efff0aba-0ce5-4c87-b354-3fe68014bc63.json
+    │   │       ├── composite_composite_publication_f7b7cc70-fd35-43cb-9a6a-2c658c0d79d8.json
     │   │       ├── composite_composite_publication_fc80ebf3-dba9-4df8-99a7-6e138d29df26.json
     │   │       ├── composite_composite_target_2f63616d-77bf-4896-abb3-62fa3c92cebe.json
     │   │       ├── composite_composite_target_5c42e8ee-e9a3-4d2a-a056-8d9b5489dc20.json
@@ -6017,821 +7329,17 @@ BioactivityDataAcquisition2/
     │   │   ├── target.csv
     │   │   ├── target_component.csv
     │   │   └── tissue.csv
-    │   ├── output/
-    │   │   ├── bronze/
-    │   │   │   ├── chembl/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── 2026-02-08/
-    │   │   │   │       │   ├── batch_2026-02-08_890ee6d7-d224-4911-bc39-7272fb6e54ec.jsonl
-    │   │   │   │       │   ├── batch_2026-02-08_890ee6d7-d224-4911-bc39-7272fb6e54ec.jsonl.zst
-    │   │   │   │       │   └── batch_2026-02-08_890ee6d7-d224-4911-bc39-7272fb6e54ec.jsonl.zst.meta.json
-    │   │   │   │       ├── bronze_chembl_publication_dq_report.json
-    │   │   │   │       └── chembl_publication_metadata.yaml
-    │   │   │   ├── crossref/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── 2026-02-08/
-    │   │   │   │       │   ├── batch_2026-02-08_7015577d-06f3-4595-9bfd-0e75eed29da2.jsonl
-    │   │   │   │       │   ├── batch_2026-02-08_7015577d-06f3-4595-9bfd-0e75eed29da2.jsonl.zst
-    │   │   │   │       │   └── batch_2026-02-08_7015577d-06f3-4595-9bfd-0e75eed29da2.jsonl.zst.meta.json
-    │   │   │   │       ├── bronze_crossref_publication_dq_report.json
-    │   │   │   │       └── crossref_work_metadata.yaml
-    │   │   │   ├── openalex/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── 2026-02-08/
-    │   │   │   │       │   ├── batch_2026-02-08_25e81de3-d591-4f67-b748-a24bbb3660d4.jsonl
-    │   │   │   │       │   ├── batch_2026-02-08_25e81de3-d591-4f67-b748-a24bbb3660d4.jsonl.zst
-    │   │   │   │       │   └── batch_2026-02-08_25e81de3-d591-4f67-b748-a24bbb3660d4.jsonl.zst.meta.json
-    │   │   │   │       ├── bronze_openalex_publication_dq_report.json
-    │   │   │   │       └── openalex_publication_metadata.yaml
-    │   │   │   ├── pubmed/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── 2026-02-08/
-    │   │   │   │       │   ├── batch_2026-02-08_9e1b4b40-4a36-4055-94d5-a81c03fb271d.jsonl
-    │   │   │   │       │   ├── batch_2026-02-08_9e1b4b40-4a36-4055-94d5-a81c03fb271d.jsonl.zst
-    │   │   │   │       │   └── batch_2026-02-08_9e1b4b40-4a36-4055-94d5-a81c03fb271d.jsonl.zst.meta.json
-    │   │   │   │       ├── bronze_pubmed_publication_dq_report.json
-    │   │   │   │       └── pubmed_publication_metadata.yaml
-    │   │   │   └── semanticscholar/
-    │   │   │       └── publication/
-    │   │   │           ├── 2026-02-08/
-    │   │   │           │   ├── batch_2026-02-08_8d6cfcba-9bba-4952-a65d-ec60943e5385.jsonl
-    │   │   │           │   ├── batch_2026-02-08_8d6cfcba-9bba-4952-a65d-ec60943e5385.jsonl.zst
-    │   │   │           │   └── batch_2026-02-08_8d6cfcba-9bba-4952-a65d-ec60943e5385.jsonl.zst.meta.json
-    │   │   │           ├── bronze_semanticscholar_publication_dq_report.json
-    │   │   │           └── semanticscholar_publication_metadata.yaml
-    │   │   ├── gold/
-    │   │   │   ├── chembl/
-    │   │   │   │   └── publication/
-    │   │   │   ├── composite/
-    │   │   │   │   ├── publication/
-    │   │   │   │   │   ├── _delta_log/
-    │   │   │   │   │   │   └── 00000000000000000000.json
-    │   │   │   │   │   ├── composite_publication_metadata.yaml
-    │   │   │   │   │   └── part-00000-55d65e15-62a9-467f-87f1-05b5ab76ebec-c000.snappy.parquet
-    │   │   │   │   └── publication.csv
-    │   │   │   ├── crossref/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── _delta_log/
-    │   │   │   │       │   └── 00000000000000000000.json
-    │   │   │   │       ├── crossref_publication.csv
-    │   │   │   │       ├── crossref_publication_metadata.yaml
-    │   │   │   │       ├── gold_crossref_publication_dq_report.json
-    │   │   │   │       └── part-00000-3a189ee3-6517-47dd-b175-961088a0804e-c000.snappy.parquet
-    │   │   │   ├── openalex/
-    │   │   │   │   └── publication/
-    │   │   │   ├── pubmed/
-    │   │   │   │   └── publication/
-    │   │   │   │       ├── _delta_log/
-    │   │   │   │       │   └── 00000000000000000000.json
-    │   │   │   │       ├── gold_pubmed_publication_dq_report.json
-    │   │   │   │       ├── part-00000-5a0f6456-7cfc-4ed2-85a7-d4467bc3e1a2-c000.snappy.parquet
-    │   │   │   │       ├── pubmed_publication.csv
-    │   │   │   │       └── pubmed_publication_metadata.yaml
-    │   │   │   └── semanticscholar/
-    │   │   │       └── publication/
-    │   │   └── silver/
-    │   │       ├── chembl/
-    │   │       │   └── publication/
-    │   │       │       ├── _delta_log/
-    │   │       │       │   └── 00000000000000000000.json
-    │   │       │       ├── chembl_publication.csv
-    │   │       │       ├── chembl_publication_metadata.yaml
-    │   │       │       ├── part-00000-96530a22-aca7-4c5d-89e4-0004815f82c9-c000.snappy.parquet
-    │   │       │       └── silver_chembl_publication_dq_report.json
-    │   │       ├── composite/
-    │   │       │   ├── publication/
-    │   │       │   │   ├── _delta_log/
-    │   │       │   │   │   └── 00000000000000000000.json
-    │   │       │   │   ├── composite_publication_metadata.yaml
-    │   │       │   │   └── part-00000-d57243d8-4979-4efc-bf35-9a0336171dd3-c000.snappy.parquet
-    │   │       │   └── publication.csv
-    │   │       ├── crossref/
-    │   │       │   └── publication/
-    │   │       │       ├── _delta_log/
-    │   │       │       │   └── 00000000000000000000.json
-    │   │       │       ├── crossref_publication.csv
-    │   │       │       ├── crossref_publication_metadata.yaml
-    │   │       │       ├── part-00000-7995edcf-bc04-4a2b-a483-29bcfdef195c-c000.snappy.parquet
-    │   │       │       └── silver_crossref_publication_dq_report.json
-    │   │       ├── openalex/
-    │   │       │   └── publication/
-    │   │       │       ├── _delta_log/
-    │   │       │       │   └── 00000000000000000000.json
-    │   │       │       ├── openalex_publication.csv
-    │   │       │       ├── openalex_publication_metadata.yaml
-    │   │       │       ├── part-00000-806ca99a-74ad-4a6d-a46e-c016316eca58-c000.snappy.parquet
-    │   │       │       └── silver_openalex_publication_dq_report.json
-    │   │       ├── pubmed/
-    │   │       │   └── publication/
-    │   │       │       ├── _delta_log/
-    │   │       │       │   └── 00000000000000000000.json
-    │   │       │       ├── part-00000-d61e873b-1279-402c-9c68-d3ef8cb847ef-c000.snappy.parquet
-    │   │       │       ├── pubmed_publication.csv
-    │   │       │       ├── pubmed_publication_metadata.yaml
-    │   │       │       └── silver_pubmed_publication_dq_report.json
-    │   │       └── semanticscholar/
-    │   │           └── publication/
-    │   │               ├── _delta_log/
-    │   │               │   └── 00000000000000000000.json
-    │   │               ├── part-00000-786a75f6-03ca-46bd-ad11-7fb64b7b6ea1-c000.snappy.parquet
-    │   │               ├── semanticscholar_publication.csv
-    │   │               ├── semanticscholar_publication_metadata.yaml
-    │   │               └── silver_semanticscholar_publication_dq_report.json
-    │   └── silver/
-    │       ├── chembl/
-    │       │   └── publication/
-    │       │       ├── _delta_log/
-    │       │       │   ├── 00000000000000000000.json
-    │       │       │   ├── 00000000000000000001.json
-    │       │       │   ├── 00000000000000000002.json
-    │       │       │   ├── 00000000000000000003.json
-    │       │       │   ├── 00000000000000000004.json
-    │       │       │   ├── 00000000000000000005.json
-    │       │       │   ├── 00000000000000000006.json
-    │       │       │   ├── 00000000000000000007.json
-    │       │       │   ├── 00000000000000000008.json
-    │       │       │   ├── 00000000000000000009.json
-    │       │       │   ├── 00000000000000000010.json
-    │       │       │   ├── 00000000000000000011.json
-    │       │       │   ├── 00000000000000000012.json
-    │       │       │   ├── 00000000000000000013.json
-    │       │       │   ├── 00000000000000000014.json
-    │       │       │   ├── 00000000000000000015.json
-    │       │       │   ├── 00000000000000000016.json
-    │       │       │   ├── 00000000000000000017.json
-    │       │       │   ├── 00000000000000000018.json
-    │       │       │   ├── 00000000000000000019.json
-    │       │       │   ├── 00000000000000000020.json
-    │       │       │   ├── 00000000000000000021.json
-    │       │       │   ├── 00000000000000000022.json
-    │       │       │   ├── 00000000000000000023.json
-    │       │       │   ├── 00000000000000000024.json
-    │       │       │   ├── 00000000000000000025.json
-    │       │       │   ├── 00000000000000000026.json
-    │       │       │   ├── 00000000000000000027.json
-    │       │       │   ├── 00000000000000000028.json
-    │       │       │   ├── 00000000000000000029.json
-    │       │       │   ├── 00000000000000000030.json
-    │       │       │   ├── 00000000000000000031.json
-    │       │       │   ├── 00000000000000000032.json
-    │       │       │   ├── 00000000000000000033.json
-    │       │       │   ├── 00000000000000000034.json
-    │       │       │   ├── 00000000000000000035.json
-    │       │       │   ├── 00000000000000000036.json
-    │       │       │   ├── 00000000000000000037.json
-    │       │       │   ├── 00000000000000000038.json
-    │       │       │   ├── 00000000000000000039.json
-    │       │       │   ├── 00000000000000000040.json
-    │       │       │   ├── 00000000000000000041.json
-    │       │       │   ├── 00000000000000000042.json
-    │       │       │   ├── 00000000000000000043.json
-    │       │       │   ├── 00000000000000000044.json
-    │       │       │   ├── 00000000000000000045.json
-    │       │       │   ├── 00000000000000000046.json
-    │       │       │   ├── 00000000000000000047.json
-    │       │       │   ├── 00000000000000000048.json
-    │       │       │   ├── 00000000000000000049.json
-    │       │       │   ├── 00000000000000000050.json
-    │       │       │   ├── 00000000000000000051.json
-    │       │       │   ├── 00000000000000000052.json
-    │       │       │   ├── 00000000000000000053.json
-    │       │       │   ├── 00000000000000000054.json
-    │       │       │   ├── 00000000000000000055.json
-    │       │       │   ├── 00000000000000000056.json
-    │       │       │   ├── 00000000000000000057.json
-    │       │       │   ├── 00000000000000000058.json
-    │       │       │   ├── 00000000000000000059.json
-    │       │       │   ├── 00000000000000000060.json
-    │       │       │   ├── 00000000000000000061.json
-    │       │       │   ├── 00000000000000000062.json
-    │       │       │   ├── 00000000000000000063.json
-    │       │       │   ├── 00000000000000000064.json
-    │       │       │   ├── 00000000000000000065.json
-    │       │       │   ├── 00000000000000000066.json
-    │       │       │   ├── 00000000000000000067.json
-    │       │       │   ├── 00000000000000000068.json
-    │       │       │   ├── 00000000000000000069.json
-    │       │       │   ├── 00000000000000000070.json
-    │       │       │   ├── 00000000000000000071.json
-    │       │       │   ├── 00000000000000000072.json
-    │       │       │   ├── 00000000000000000073.json
-    │       │       │   ├── 00000000000000000074.json
-    │       │       │   ├── 00000000000000000075.json
-    │       │       │   ├── 00000000000000000076.json
-    │       │       │   ├── 00000000000000000077.json
-    │       │       │   ├── 00000000000000000078.json
-    │       │       │   ├── 00000000000000000079.json
-    │       │       │   ├── 00000000000000000080.json
-    │       │       │   ├── 00000000000000000081.json
-    │       │       │   ├── 00000000000000000082.json
-    │       │       │   ├── 00000000000000000083.json
-    │       │       │   ├── 00000000000000000084.json
-    │       │       │   ├── 00000000000000000085.json
-    │       │       │   ├── 00000000000000000086.json
-    │       │       │   ├── 00000000000000000087.json
-    │       │       │   ├── 00000000000000000088.json
-    │       │       │   ├── 00000000000000000089.json
-    │       │       │   ├── 00000000000000000090.json
-    │       │       │   ├── 00000000000000000091.json
-    │       │       │   ├── 00000000000000000092.json
-    │       │       │   ├── 00000000000000000093.json
-    │       │       │   ├── 00000000000000000094.json
-    │       │       │   ├── 00000000000000000095.json
-    │       │       │   ├── 00000000000000000096.json
-    │       │       │   ├── 00000000000000000097.json
-    │       │       │   ├── 00000000000000000098.json
-    │       │       │   ├── 00000000000000000099.checkpoint.parquet
-    │       │       │   ├── 00000000000000000099.json
-    │       │       │   ├── 00000000000000000100.json
-    │       │       │   └── _last_checkpoint
-    │       │       ├── chembl_publication.csv
-    │       │       ├── chembl_publication_metadata.yaml
-    │       │       ├── part-00000-04bb4a58-76c2-44ae-a25d-305fadc39b06-c000.snappy.parquet
-    │       │       ├── part-00000-052dba93-b90c-42ca-99d8-eab6456d1a92-c000.snappy.parquet
-    │       │       ├── part-00000-05a2aba5-a2cf-4d1a-b2aa-d27622d229be-c000.snappy.parquet
-    │       │       ├── part-00000-06cfd745-b83e-4cde-86fc-9124106a65bc-c000.snappy.parquet
-    │       │       ├── part-00000-0880fb3a-62c7-4225-bc94-a2ab381514c4-c000.snappy.parquet
-    │       │       ├── part-00000-09661971-9e81-4383-999d-ed42873c0873-c000.snappy.parquet
-    │       │       ├── part-00000-0c554339-4c14-4fa5-934e-6d161977bf90-c000.snappy.parquet
-    │       │       ├── part-00000-111378f0-ed54-407c-88b3-5be2d74c1f4d-c000.snappy.parquet
-    │       │       ├── part-00000-139a0802-b962-45ac-a8d1-fe0d1114d252-c000.snappy.parquet
-    │       │       ├── part-00000-141a5932-5c61-4472-9c13-bcbdcce1c149-c000.snappy.parquet
-    │       │       ├── part-00000-1588c21e-ebb3-4290-89ec-61afbcddeb99-c000.snappy.parquet
-    │       │       ├── part-00000-19fdf042-32bc-4320-8641-f8cbc2b249f1-c000.snappy.parquet
-    │       │       ├── part-00000-1cdcebf9-3154-46b1-9298-3066d0d74f14-c000.snappy.parquet
-    │       │       ├── part-00000-1e6e7bc9-bc75-4638-bb39-13472ccfbb18-c000.snappy.parquet
-    │       │       ├── part-00000-232a3f06-ddc0-4b13-982e-d7422f572089-c000.snappy.parquet
-    │       │       ├── part-00000-23a22138-f4c2-4fc1-bbb2-97b4ba21247d-c000.snappy.parquet
-    │       │       ├── part-00000-24d20222-8265-4a74-b13e-7f868a40b7e6-c000.snappy.parquet
-    │       │       ├── part-00000-28f6932b-f3d8-46b3-954d-f2f2a82a87b4-c000.snappy.parquet
-    │       │       ├── part-00000-2afc63fe-3f2f-49a2-b08e-5b92294b3ab7-c000.snappy.parquet
-    │       │       ├── part-00000-2beee9c0-4406-4c68-8162-5810dc3ac50c-c000.snappy.parquet
-    │       │       ├── part-00000-2d248a10-e2e3-4464-95a6-f2c1a5b02a57-c000.snappy.parquet
-    │       │       ├── part-00000-2e6bbdc0-b983-4b3e-9d10-34b8ce4c1085-c000.snappy.parquet
-    │       │       ├── part-00000-3230c2bc-cc0d-41ed-8668-f25ec1c1f3b9-c000.snappy.parquet
-    │       │       ├── part-00000-323b3198-fe50-4141-af4a-8642b318bd18-c000.snappy.parquet
-    │       │       ├── part-00000-35c8c756-77a0-4030-89f4-fe0914e78114-c000.snappy.parquet
-    │       │       ├── part-00000-3b4568c3-b6f4-4134-ac6e-9683f97c36a9-c000.snappy.parquet
-    │       │       ├── part-00000-3dfa7c73-41ed-4f12-9e28-767bfb7f6d20-c000.snappy.parquet
-    │       │       ├── part-00000-3ee668a9-cfd2-4a39-a6df-651bd9b1231f-c000.snappy.parquet
-    │       │       ├── part-00000-43aa3f27-f952-4a3c-bf62-02d08dc84c1b-c000.snappy.parquet
-    │       │       ├── part-00000-46eb1f9f-63f9-428b-baf0-1a2e21732cbf-c000.snappy.parquet
-    │       │       ├── part-00000-4ca288d8-6abe-488b-9dd9-3ada70199bcf-c000.snappy.parquet
-    │       │       ├── part-00000-4f0457c4-81a8-4602-81bf-18d174ae64af-c000.snappy.parquet
-    │       │       ├── part-00000-4f175c4e-3a18-4216-8d84-9057079f4a13-c000.snappy.parquet
-    │       │       ├── part-00000-506c9399-a3cc-4752-ac18-6a93af055835-c000.snappy.parquet
-    │       │       ├── part-00000-508f618f-28f6-4a8f-8219-b4a33005b3d7-c000.snappy.parquet
-    │       │       ├── part-00000-56323cec-dc00-46ef-8c40-09bf920d0aeb-c000.snappy.parquet
-    │       │       ├── part-00000-60a1c4ea-9154-42f9-a249-6b51d2b89020-c000.snappy.parquet
-    │       │       ├── part-00000-63ae487b-180e-4f93-88c6-5e473761ce17-c000.snappy.parquet
-    │       │       ├── part-00000-6464f9b1-8c80-488d-b29c-056c647ab399-c000.snappy.parquet
-    │       │       ├── part-00000-67cb15c2-f2ec-4e9d-b77c-59e307c01f12-c000.snappy.parquet
-    │       │       ├── part-00000-6a0d89a5-40c6-4629-adaa-52ddd527f650-c000.snappy.parquet
-    │       │       ├── part-00000-6cb156a4-3cae-419c-ac6f-d9f406361993-c000.snappy.parquet
-    │       │       ├── part-00000-6d35be53-deb3-4abf-9ac5-c42294b420d5-c000.snappy.parquet
-    │       │       ├── part-00000-726cb543-854d-44da-be19-f00314222124-c000.snappy.parquet
-    │       │       ├── part-00000-75a9adac-d9d3-481a-a972-d4ee4914f959-c000.snappy.parquet
-    │       │       ├── part-00000-7615c322-f0f1-4c9d-b844-89a2deed5144-c000.snappy.parquet
-    │       │       ├── part-00000-766dd53a-7c9e-4899-86b9-05e8877c08e7-c000.snappy.parquet
-    │       │       ├── part-00000-7676ad19-35dc-4520-8711-c04b65fd88c0-c000.snappy.parquet
-    │       │       ├── part-00000-7ac5d971-b3f8-4751-b699-9efb0bc8c561-c000.snappy.parquet
-    │       │       ├── part-00000-80ef8f30-296d-4ad8-8033-1fdf7b42fe3d-c000.snappy.parquet
-    │       │       ├── part-00000-81149372-7c18-4fb1-bce0-a222238bdbf8-c000.snappy.parquet
-    │       │       ├── part-00000-81d12153-59bd-45c0-b324-202bb61c322d-c000.snappy.parquet
-    │       │       ├── part-00000-8218f1ec-8d7c-4dc5-a730-5c8c5af0a860-c000.snappy.parquet
-    │       │       ├── part-00000-828b5837-8da2-432d-9b7c-e6ca0be5b04a-c000.snappy.parquet
-    │       │       ├── part-00000-8383bc57-aa8e-46e0-a266-aed0788e0f1a-c000.snappy.parquet
-    │       │       ├── part-00000-8641613c-1208-4707-b012-e9491b6b8da5-c000.snappy.parquet
-    │       │       ├── part-00000-86a0b742-ee84-4cc2-8c59-8f6738788bf6-c000.snappy.parquet
-    │       │       ├── part-00000-89b67190-2bfa-4df3-84eb-e8005d3eee99-c000.snappy.parquet
-    │       │       ├── part-00000-89fda535-8046-42cc-ae24-3758557d3b8d-c000.snappy.parquet
-    │       │       ├── part-00000-8e7b0fe6-a538-4762-9330-b9b5262417be-c000.snappy.parquet
-    │       │       ├── part-00000-8eb4b925-c465-4780-8836-3b1cfed58435-c000.snappy.parquet
-    │       │       ├── part-00000-951c1f4b-d320-472d-a6bd-2dbffbeadaa6-c000.snappy.parquet
-    │       │       ├── part-00000-9570668e-be13-4146-8407-02712adfcc3d-c000.snappy.parquet
-    │       │       ├── part-00000-9587c0a4-6e22-4449-ab07-b4318fae210c-c000.snappy.parquet
-    │       │       ├── part-00000-97d8ac74-fc39-4219-9d59-d16ef5a9dfa2-c000.snappy.parquet
-    │       │       ├── part-00000-994a8681-8c10-47a7-b789-70c6a4ed4a0f-c000.snappy.parquet
-    │       │       ├── part-00000-a58e08e6-0d8a-42ae-8870-f64a82229b31-c000.snappy.parquet
-    │       │       ├── part-00000-aa98e003-98e9-4f61-aa40-4529723d8837-c000.snappy.parquet
-    │       │       ├── part-00000-b1c8fc0d-7261-46d7-a091-e55052402396-c000.snappy.parquet
-    │       │       ├── part-00000-b5bbe8e0-776f-4394-87af-8d5cf4e3629e-c000.snappy.parquet
-    │       │       ├── part-00000-b791bd9d-44f9-4db9-9698-97fd0b0dc8b1-c000.snappy.parquet
-    │       │       ├── part-00000-b7bfd55b-ab04-411d-9aa9-8b352b1a7f4c-c000.snappy.parquet
-    │       │       ├── part-00000-b7d6473e-eceb-43ea-9055-a62d7b32314d-c000.snappy.parquet
-    │       │       ├── part-00000-b8ad20a6-6b6c-4f28-8c31-da5646f58898-c000.snappy.parquet
-    │       │       ├── part-00000-bde6d0a5-358f-412a-b9d2-a2dbc43bd8a9-c000.snappy.parquet
-    │       │       ├── part-00000-c1030fe3-6b33-4349-8596-34af5ec29963-c000.snappy.parquet
-    │       │       ├── part-00000-c377ea3e-01d1-4976-af9b-6b01bfeba1e7-c000.snappy.parquet
-    │       │       ├── part-00000-c3e58b1a-5579-4b3c-8983-6a02e75b850a-c000.snappy.parquet
-    │       │       ├── part-00000-c4440eb4-ff94-47bb-a3a5-bd162a7f4908-c000.snappy.parquet
-    │       │       ├── part-00000-c7ec5721-db93-4b89-a948-1475d7691d8d-c000.snappy.parquet
-    │       │       ├── part-00000-c813610f-1f5c-48eb-97ae-932ca87879e9-c000.snappy.parquet
-    │       │       ├── part-00000-cc63dcd8-de18-4488-8fa2-953a8b8f72da-c000.snappy.parquet
-    │       │       ├── part-00000-d1e90913-23d5-4177-93c5-7315e800a1dc-c000.snappy.parquet
-    │       │       ├── part-00000-d5bd3039-4e73-482d-a8f2-b47b2291585e-c000.snappy.parquet
-    │       │       ├── part-00000-d8475c59-dcb9-4cb7-a5ff-9fe22ec0b101-c000.snappy.parquet
-    │       │       ├── part-00000-db163811-55f8-4cf8-8367-b16fc742dd6f-c000.snappy.parquet
-    │       │       ├── part-00000-e07abd03-55ae-4783-8b23-f7bc2f47d161-c000.snappy.parquet
-    │       │       ├── part-00000-e225e728-1441-4345-b89d-f6bbd3533155-c000.snappy.parquet
-    │       │       ├── part-00000-e23e1663-9598-4b52-ad53-eeedaf460c8a-c000.snappy.parquet
-    │       │       ├── part-00000-e4daf35c-626d-4103-a93e-aa19178ccbd4-c000.snappy.parquet
-    │       │       ├── part-00000-e5446f1e-2bba-425f-85de-ff74f9050208-c000.snappy.parquet
-    │       │       ├── part-00000-e7122c8e-5911-4b53-b6c8-fd52ca4cb645-c000.snappy.parquet
-    │       │       ├── part-00000-edb3f3fd-2905-44d3-9d46-2c635939cbe2-c000.snappy.parquet
-    │       │       ├── part-00000-ee56f6eb-4cd4-4a60-9d8e-fea548ffe14d-c000.snappy.parquet
-    │       │       ├── part-00000-f2a07e62-323e-4c5e-83e3-149362170909-c000.snappy.parquet
-    │       │       ├── part-00000-f2b52149-fcdf-4a3c-983b-00c0ff6eccb0-c000.snappy.parquet
-    │       │       ├── part-00000-f3f3a4c6-9ce9-46ff-af00-53b23487f727-c000.snappy.parquet
-    │       │       ├── part-00000-f5cf7ad6-e4c7-475d-844a-1bfc32cc94f7-c000.snappy.parquet
-    │       │       ├── part-00000-fb4cbcf3-2f3c-4181-97dc-51b0b8aed085-c000.snappy.parquet
-    │       │       ├── part-00000-fdf29651-a4df-495e-9127-39874aa11ed4-c000.snappy.parquet
-    │       │       ├── part-00000-ffac6b8a-d16f-4e61-92f1-caffdbea3f22-c000.snappy.parquet
-    │       │       └── silver_chembl_publication_dq_report.json
-    │       ├── composite/
-    │       │   ├── publication/
-    │       │   │   ├── _delta_log/
-    │       │   │   │   ├── 00000000000000000000.json
-    │       │   │   │   └── 00000000000000000001.json
-    │       │   │   ├── composite_publication_metadata.yaml
-    │       │   │   ├── part-00000-a5e04c60-f09e-4ba6-bd95-d1103aef2539-c000.snappy.parquet
-    │       │   │   └── part-00000-ce70e9c5-440e-40cf-9e33-19cc6e5f70c5-c000.snappy.parquet
-    │       │   └── publication.csv
-    │       ├── crossref/
-    │       │   └── publication/
-    │       │       ├── _delta_log/
-    │       │       │   ├── 00000000000000000000.json
-    │       │       │   ├── 00000000000000000001.json
-    │       │       │   ├── 00000000000000000002.json
-    │       │       │   ├── 00000000000000000003.json
-    │       │       │   ├── 00000000000000000004.json
-    │       │       │   ├── 00000000000000000005.json
-    │       │       │   ├── 00000000000000000006.json
-    │       │       │   ├── 00000000000000000007.json
-    │       │       │   ├── 00000000000000000008.json
-    │       │       │   ├── 00000000000000000009.json
-    │       │       │   ├── 00000000000000000010.json
-    │       │       │   ├── 00000000000000000011.json
-    │       │       │   ├── 00000000000000000012.json
-    │       │       │   ├── 00000000000000000013.json
-    │       │       │   ├── 00000000000000000014.json
-    │       │       │   ├── 00000000000000000015.json
-    │       │       │   ├── 00000000000000000016.json
-    │       │       │   ├── 00000000000000000017.json
-    │       │       │   ├── 00000000000000000018.json
-    │       │       │   ├── 00000000000000000019.json
-    │       │       │   ├── 00000000000000000020.json
-    │       │       │   ├── 00000000000000000021.json
-    │       │       │   ├── 00000000000000000022.json
-    │       │       │   ├── 00000000000000000023.json
-    │       │       │   ├── 00000000000000000024.json
-    │       │       │   ├── 00000000000000000025.json
-    │       │       │   ├── 00000000000000000026.json
-    │       │       │   ├── 00000000000000000027.json
-    │       │       │   ├── 00000000000000000028.json
-    │       │       │   ├── 00000000000000000029.json
-    │       │       │   ├── 00000000000000000030.json
-    │       │       │   ├── 00000000000000000031.json
-    │       │       │   ├── 00000000000000000032.json
-    │       │       │   ├── 00000000000000000033.json
-    │       │       │   ├── 00000000000000000034.json
-    │       │       │   ├── 00000000000000000035.json
-    │       │       │   ├── 00000000000000000036.json
-    │       │       │   ├── 00000000000000000037.json
-    │       │       │   ├── 00000000000000000038.json
-    │       │       │   ├── 00000000000000000039.json
-    │       │       │   ├── 00000000000000000040.json
-    │       │       │   ├── 00000000000000000041.json
-    │       │       │   ├── 00000000000000000042.json
-    │       │       │   ├── 00000000000000000043.json
-    │       │       │   ├── 00000000000000000044.json
-    │       │       │   ├── 00000000000000000045.json
-    │       │       │   ├── 00000000000000000046.json
-    │       │       │   ├── 00000000000000000047.json
-    │       │       │   ├── 00000000000000000048.json
-    │       │       │   ├── 00000000000000000049.json
-    │       │       │   ├── 00000000000000000050.json
-    │       │       │   ├── 00000000000000000051.json
-    │       │       │   ├── 00000000000000000052.json
-    │       │       │   ├── 00000000000000000053.json
-    │       │       │   ├── 00000000000000000054.json
-    │       │       │   ├── 00000000000000000055.json
-    │       │       │   ├── 00000000000000000056.json
-    │       │       │   ├── 00000000000000000057.json
-    │       │       │   ├── 00000000000000000058.json
-    │       │       │   ├── 00000000000000000059.json
-    │       │       │   ├── 00000000000000000060.json
-    │       │       │   ├── 00000000000000000061.json
-    │       │       │   ├── 00000000000000000062.json
-    │       │       │   ├── 00000000000000000063.json
-    │       │       │   ├── 00000000000000000064.json
-    │       │       │   ├── 00000000000000000065.json
-    │       │       │   ├── 00000000000000000066.json
-    │       │       │   ├── 00000000000000000067.json
-    │       │       │   ├── 00000000000000000068.json
-    │       │       │   ├── 00000000000000000069.json
-    │       │       │   ├── 00000000000000000070.json
-    │       │       │   ├── 00000000000000000071.json
-    │       │       │   ├── 00000000000000000072.json
-    │       │       │   ├── 00000000000000000073.json
-    │       │       │   ├── 00000000000000000074.json
-    │       │       │   ├── 00000000000000000075.json
-    │       │       │   ├── 00000000000000000076.json
-    │       │       │   ├── 00000000000000000077.json
-    │       │       │   ├── 00000000000000000078.json
-    │       │       │   ├── 00000000000000000079.json
-    │       │       │   ├── 00000000000000000080.json
-    │       │       │   ├── 00000000000000000081.json
-    │       │       │   ├── 00000000000000000082.json
-    │       │       │   ├── 00000000000000000083.json
-    │       │       │   ├── 00000000000000000084.json
-    │       │       │   ├── 00000000000000000085.json
-    │       │       │   ├── 00000000000000000086.json
-    │       │       │   ├── 00000000000000000087.json
-    │       │       │   ├── 00000000000000000088.json
-    │       │       │   ├── 00000000000000000089.json
-    │       │       │   ├── 00000000000000000090.json
-    │       │       │   ├── 00000000000000000091.json
-    │       │       │   ├── 00000000000000000092.json
-    │       │       │   ├── 00000000000000000093.json
-    │       │       │   ├── 00000000000000000094.json
-    │       │       │   ├── 00000000000000000095.json
-    │       │       │   ├── 00000000000000000096.json
-    │       │       │   ├── 00000000000000000097.json
-    │       │       │   ├── 00000000000000000098.json
-    │       │       │   ├── 00000000000000000099.checkpoint.parquet
-    │       │       │   ├── 00000000000000000099.json
-    │       │       │   ├── 00000000000000000100.json
-    │       │       │   └── _last_checkpoint
-    │       │       ├── crossref_publication.csv
-    │       │       ├── crossref_publication_metadata.yaml
-    │       │       ├── part-00000-00d9d09c-f4f9-4f8f-ba84-9f4a4b7a5349-c000.snappy.parquet
-    │       │       ├── part-00000-04008a31-fd7b-459d-80cc-dbece4b014f2-c000.snappy.parquet
-    │       │       ├── part-00000-053323d4-d14d-4f3d-86ef-028cd15786ba-c000.snappy.parquet
-    │       │       ├── part-00000-08330167-ac59-451f-915b-ed3bd2b84342-c000.snappy.parquet
-    │       │       ├── part-00000-08dff15b-892c-48e7-98eb-d91ae78ea5da-c000.snappy.parquet
-    │       │       ├── part-00000-10533f00-839c-43ff-a682-055a4833d87a-c000.snappy.parquet
-    │       │       ├── part-00000-10db33cb-7137-4758-96e1-f8ff98c75084-c000.snappy.parquet
-    │       │       ├── part-00000-13014387-9add-44f0-93a5-124e1ed32f88-c000.snappy.parquet
-    │       │       ├── part-00000-13fd6c42-c672-4b68-9ea1-a04f727463d8-c000.snappy.parquet
-    │       │       ├── part-00000-1ac99f9f-fdd6-4bb3-8910-f0dd0ad65753-c000.snappy.parquet
-    │       │       ├── part-00000-20b7521b-dda8-4b49-8357-0a58d953d805-c000.snappy.parquet
-    │       │       ├── part-00000-216e78c0-e6e5-4aba-8c8e-04c5025f7581-c000.snappy.parquet
-    │       │       ├── part-00000-223946e6-0dce-426e-8617-ed5917393d87-c000.snappy.parquet
-    │       │       ├── part-00000-22a04a9c-cd89-4682-883a-fc8010523c58-c000.snappy.parquet
-    │       │       ├── part-00000-22ca5692-8896-4340-bafd-b50d7b96730e-c000.snappy.parquet
-    │       │       ├── part-00000-241d1160-faba-40c0-9ebf-94e9cfb30680-c000.snappy.parquet
-    │       │       ├── part-00000-268cfec7-35f9-49b8-8fcc-322b5b577aeb-c000.snappy.parquet
-    │       │       ├── part-00000-284cf6cb-87c2-47f1-9e2d-526df6f380cd-c000.snappy.parquet
-    │       │       ├── part-00000-2b5f7166-6d76-4b19-8478-ea1f66af2535-c000.snappy.parquet
-    │       │       ├── part-00000-2d84ccb8-681d-48ba-8cc9-1316faea8ca9-c000.snappy.parquet
-    │       │       ├── part-00000-2e3b642f-2fd7-4f8b-8637-a11dc19116b6-c000.snappy.parquet
-    │       │       ├── part-00000-34f201f3-9007-4d34-82d0-3dda30161924-c000.snappy.parquet
-    │       │       ├── part-00000-3b6d7190-c618-4f85-b304-684471bccedb-c000.snappy.parquet
-    │       │       ├── part-00000-3c390a4e-499c-4e47-9bb5-805f34e55ba2-c000.snappy.parquet
-    │       │       ├── part-00000-3d3903b0-5d6c-416a-996a-036756be7ba7-c000.snappy.parquet
-    │       │       ├── part-00000-426ecbdb-f35f-44a7-98cc-6c15d1cc4d23-c000.snappy.parquet
-    │       │       ├── part-00000-45b4504d-19b5-4ce5-8e6a-1ef0175c7d03-c000.snappy.parquet
-    │       │       ├── part-00000-46908ca5-bb68-4327-98c3-98cda70b8a62-c000.snappy.parquet
-    │       │       ├── part-00000-4a7ffb3c-1eb8-4e04-abb3-39ae8683e1ff-c000.snappy.parquet
-    │       │       ├── part-00000-4e48102a-467c-47c7-9f8c-e850418aeb6c-c000.snappy.parquet
-    │       │       ├── part-00000-4ea2a108-e207-4619-a0bb-f95f2e04e9ef-c000.snappy.parquet
-    │       │       ├── part-00000-4f77c4af-6cf5-4155-aa59-3f5143b8adcc-c000.snappy.parquet
-    │       │       ├── part-00000-516b2607-228e-4225-8e1e-a910c7544478-c000.snappy.parquet
-    │       │       ├── part-00000-527106d8-358e-4dd1-8dbc-446f543a82a6-c000.snappy.parquet
-    │       │       ├── part-00000-527f78d1-12ff-4210-8f93-9ec1130abcf7-c000.snappy.parquet
-    │       │       ├── part-00000-5c331872-c2db-44fa-a2fc-150a3466a026-c000.snappy.parquet
-    │       │       ├── part-00000-5e764d64-292c-40f4-ac5d-619642e97505-c000.snappy.parquet
-    │       │       ├── part-00000-5feb4444-2cec-4ef2-9c91-d484eb2b7321-c000.snappy.parquet
-    │       │       ├── part-00000-60f0c4bc-a1e2-4cfd-9bb1-48da38da0e3d-c000.snappy.parquet
-    │       │       ├── part-00000-61c355da-cafa-4d38-bff0-a60886c00e04-c000.snappy.parquet
-    │       │       ├── part-00000-643eb494-effe-4b2b-aa47-0ac7ca0ceae8-c000.snappy.parquet
-    │       │       ├── part-00000-69a2f1cd-3f4b-409d-bd43-82f1405465fb-c000.snappy.parquet
-    │       │       ├── part-00000-6db5b57d-05fe-4d76-bf18-6b15ec767780-c000.snappy.parquet
-    │       │       ├── part-00000-6dc217a5-28a7-4836-af5b-0d905f18560b-c000.snappy.parquet
-    │       │       ├── part-00000-6dc65667-6915-40c2-bac1-3b11dd0c5e84-c000.snappy.parquet
-    │       │       ├── part-00000-70666e10-151d-4796-92cc-e17f72945f1a-c000.snappy.parquet
-    │       │       ├── part-00000-7aa11275-63f6-4b9e-94e4-ec9b74f00fdc-c000.snappy.parquet
-    │       │       ├── part-00000-7b19921e-b9de-4002-9627-89a4d80b8704-c000.snappy.parquet
-    │       │       ├── part-00000-7b90693b-3c51-4028-a1ed-d51a64e1401a-c000.snappy.parquet
-    │       │       ├── part-00000-7df7be41-a30a-4c7d-affe-627693739b36-c000.snappy.parquet
-    │       │       ├── part-00000-7f2d86e0-357f-4173-a4e6-b68e9126a048-c000.snappy.parquet
-    │       │       ├── part-00000-89aa15f2-7c42-4328-99fb-0addbcc2fe84-c000.snappy.parquet
-    │       │       ├── part-00000-8afc4b88-04fe-49e0-89ce-f9e820afe824-c000.snappy.parquet
-    │       │       ├── part-00000-8b66b108-4193-468e-a8af-dfe287f51c18-c000.snappy.parquet
-    │       │       ├── part-00000-8c415c5c-92cc-49eb-9d4f-096a68d9e958-c000.snappy.parquet
-    │       │       ├── part-00000-8d14ed36-8285-462a-a6f5-3eaca521de88-c000.snappy.parquet
-    │       │       ├── part-00000-905c9812-57a4-48b4-adb6-466e05ed3904-c000.snappy.parquet
-    │       │       ├── part-00000-942fcc73-bc2e-47fd-a276-fadbf9d31128-c000.snappy.parquet
-    │       │       ├── part-00000-97a31c6e-aa9c-448c-8af3-1c5f89c0a71e-c000.snappy.parquet
-    │       │       ├── part-00000-9ad2685a-520a-4111-a4ca-bd3b1c8d1d2b-c000.snappy.parquet
-    │       │       ├── part-00000-9bd3227a-96c6-47cf-b44b-58b654baa863-c000.snappy.parquet
-    │       │       ├── part-00000-9d09aa23-8627-4b02-94dc-6bafce54e66f-c000.snappy.parquet
-    │       │       ├── part-00000-a2416417-2710-4f3a-b98e-59f21cb5a1be-c000.snappy.parquet
-    │       │       ├── part-00000-a583a37e-3ef4-4b7a-8785-d4ee9e7dfa2e-c000.snappy.parquet
-    │       │       ├── part-00000-a598d5c2-7c8b-4b7f-98de-ca2499c0c813-c000.snappy.parquet
-    │       │       ├── part-00000-ab2d2aeb-704d-4bb1-bccd-70f33b421840-c000.snappy.parquet
-    │       │       ├── part-00000-ab9e2e57-d19f-46af-bc8f-4e766956a15d-c000.snappy.parquet
-    │       │       ├── part-00000-ac16b869-c168-4e04-8903-26043284b55b-c000.snappy.parquet
-    │       │       ├── part-00000-ac633052-3406-4a08-b830-f620be086a3d-c000.snappy.parquet
-    │       │       ├── part-00000-ad8a0b98-7d6d-469e-aff0-98b5781b929f-c000.snappy.parquet
-    │       │       ├── part-00000-ae78730d-59c6-4265-aac4-cabb572f0759-c000.snappy.parquet
-    │       │       ├── part-00000-afcc1939-9870-40a6-bf6e-af7b315ef964-c000.snappy.parquet
-    │       │       ├── part-00000-b1a822b3-fddf-4995-b0f7-a916a69c2fc2-c000.snappy.parquet
-    │       │       ├── part-00000-b50331da-ba60-49c4-a600-f62e13f75470-c000.snappy.parquet
-    │       │       ├── part-00000-b632ea87-6597-4791-84f6-63ca29c50975-c000.snappy.parquet
-    │       │       ├── part-00000-be5f9516-33ca-4908-968a-ebd1f01c8b51-c000.snappy.parquet
-    │       │       ├── part-00000-bfaaa5f8-7b6b-4b16-b0da-8ad4cf8805ef-c000.snappy.parquet
-    │       │       ├── part-00000-c0a0feb2-a980-4e2b-abb8-dfa893089bc8-c000.snappy.parquet
-    │       │       ├── part-00000-c1dd4bec-2157-4e0a-8cb1-ca64bf346257-c000.snappy.parquet
-    │       │       ├── part-00000-c220f059-52bb-4c7d-9598-f3049600d430-c000.snappy.parquet
-    │       │       ├── part-00000-c3a432d9-144b-4909-967d-e09803938f75-c000.snappy.parquet
-    │       │       ├── part-00000-c89063d1-3ac8-4402-9c51-febe16e1899f-c000.snappy.parquet
-    │       │       ├── part-00000-c8b42595-c60b-4fdb-809e-19fd1464c608-c000.snappy.parquet
-    │       │       ├── part-00000-cd3dd583-5eaf-4d96-bcfa-22cbae093c5f-c000.snappy.parquet
-    │       │       ├── part-00000-cf6413c6-efa4-4b63-a821-c20f6a46d954-c000.snappy.parquet
-    │       │       ├── part-00000-d5264687-67bc-4a39-9777-46902629b8e3-c000.snappy.parquet
-    │       │       ├── part-00000-d66fa28f-23b4-4cc0-a588-b96f2267d022-c000.snappy.parquet
-    │       │       ├── part-00000-dc4a989c-9eba-4911-8004-8fb13b8af09b-c000.snappy.parquet
-    │       │       ├── part-00000-e12603d6-2e94-47b5-8d12-dfaf1564b046-c000.snappy.parquet
-    │       │       ├── part-00000-e202b020-c204-4d67-94a8-300bf5c726f5-c000.snappy.parquet
-    │       │       ├── part-00000-e212a0cb-2349-48a7-b932-39da90c9555b-c000.snappy.parquet
-    │       │       ├── part-00000-e2290a4c-d5b5-4e10-860a-475e68814175-c000.snappy.parquet
-    │       │       ├── part-00000-e5ac794d-983e-43cc-8da2-9d32b7999060-c000.snappy.parquet
-    │       │       ├── part-00000-e6c21a0d-d06e-467d-aab5-1a0ded17542e-c000.snappy.parquet
-    │       │       ├── part-00000-e7ff6933-480a-48ac-b75d-b86750306010-c000.snappy.parquet
-    │       │       ├── part-00000-f4e2023f-ec60-466e-bf37-505413b53d35-c000.snappy.parquet
-    │       │       ├── part-00000-f61454d2-0533-44ef-9511-21b68d8a8455-c000.snappy.parquet
-    │       │       ├── part-00000-f943c3a6-c31f-4649-b9ff-3df4e3a06b26-c000.snappy.parquet
-    │       │       ├── part-00000-fa23b243-3633-499f-a164-5b26e6a1bab4-c000.snappy.parquet
-    │       │       ├── part-00000-ff09e98d-462e-49a8-b56d-a2633878cfde-c000.snappy.parquet
-    │       │       ├── part-00000-ff4ed719-4041-4b88-b5e9-e9a95a9f075d-c000.snappy.parquet
-    │       │       └── silver_crossref_publication_dq_report.json
-    │       ├── openalex/
-    │       │   └── publication/
-    │       │       ├── _delta_log/
-    │       │       │   ├── 00000000000000000000.json
-    │       │       │   ├── 00000000000000000001.json
-    │       │       │   ├── 00000000000000000002.json
-    │       │       │   ├── 00000000000000000003.json
-    │       │       │   ├── 00000000000000000004.json
-    │       │       │   ├── 00000000000000000005.json
-    │       │       │   ├── 00000000000000000006.json
-    │       │       │   ├── 00000000000000000007.json
-    │       │       │   ├── 00000000000000000008.json
-    │       │       │   ├── 00000000000000000009.json
-    │       │       │   ├── 00000000000000000010.json
-    │       │       │   ├── 00000000000000000011.json
-    │       │       │   ├── 00000000000000000012.json
-    │       │       │   ├── 00000000000000000013.json
-    │       │       │   ├── 00000000000000000014.json
-    │       │       │   ├── 00000000000000000015.json
-    │       │       │   ├── 00000000000000000016.json
-    │       │       │   ├── 00000000000000000017.json
-    │       │       │   ├── 00000000000000000018.json
-    │       │       │   ├── 00000000000000000019.json
-    │       │       │   ├── 00000000000000000020.json
-    │       │       │   ├── 00000000000000000021.json
-    │       │       │   ├── 00000000000000000022.json
-    │       │       │   ├── 00000000000000000023.json
-    │       │       │   ├── 00000000000000000024.json
-    │       │       │   ├── 00000000000000000025.json
-    │       │       │   ├── 00000000000000000026.json
-    │       │       │   ├── 00000000000000000027.json
-    │       │       │   ├── 00000000000000000028.json
-    │       │       │   ├── 00000000000000000029.json
-    │       │       │   ├── 00000000000000000030.json
-    │       │       │   ├── 00000000000000000031.json
-    │       │       │   ├── 00000000000000000032.json
-    │       │       │   ├── 00000000000000000033.json
-    │       │       │   ├── 00000000000000000034.json
-    │       │       │   ├── 00000000000000000035.json
-    │       │       │   ├── 00000000000000000036.json
-    │       │       │   ├── 00000000000000000037.json
-    │       │       │   ├── 00000000000000000038.json
-    │       │       │   ├── 00000000000000000039.json
-    │       │       │   ├── 00000000000000000040.json
-    │       │       │   ├── 00000000000000000041.json
-    │       │       │   ├── 00000000000000000042.json
-    │       │       │   ├── 00000000000000000043.json
-    │       │       │   ├── 00000000000000000044.json
-    │       │       │   ├── 00000000000000000045.json
-    │       │       │   ├── 00000000000000000046.json
-    │       │       │   ├── 00000000000000000047.json
-    │       │       │   ├── 00000000000000000048.json
-    │       │       │   ├── 00000000000000000049.json
-    │       │       │   └── 00000000000000000050.json
-    │       │       ├── openalex_publication.csv
-    │       │       ├── openalex_publication_metadata.yaml
-    │       │       ├── part-00000-00db1d95-db90-4a9a-aeb0-38854e5b93a7-c000.snappy.parquet
-    │       │       ├── part-00000-0a1b8e99-8a8f-467e-a77c-52fbc7a723e4-c000.snappy.parquet
-    │       │       ├── part-00000-1509b04a-da36-4bea-b5d3-d20e2a8bee60-c000.snappy.parquet
-    │       │       ├── part-00000-1640f8a2-9799-4d81-a6f6-427a6044dc70-c000.snappy.parquet
-    │       │       ├── part-00000-1674469e-1113-466a-8af6-56f16ce7315c-c000.snappy.parquet
-    │       │       ├── part-00000-16cc3c7e-26e4-4aef-9993-eefa919666c1-c000.snappy.parquet
-    │       │       ├── part-00000-1986c52e-07ea-4435-a66e-9fe355bd922f-c000.snappy.parquet
-    │       │       ├── part-00000-1ad765ff-b75e-4a13-ace4-46f37bc342c5-c000.snappy.parquet
-    │       │       ├── part-00000-1c3c7a15-fa2d-48a6-a9fc-e6f80e76e640-c000.snappy.parquet
-    │       │       ├── part-00000-1f80e41a-be2a-40dd-96aa-61104eff3d75-c000.snappy.parquet
-    │       │       ├── part-00000-215e9fe2-5007-41a8-90c0-77343a4967cc-c000.snappy.parquet
-    │       │       ├── part-00000-275f5130-dd24-42bd-b6be-4198405774eb-c000.snappy.parquet
-    │       │       ├── part-00000-3e78e4db-4ec8-42aa-a7f1-d78d09c1b843-c000.snappy.parquet
-    │       │       ├── part-00000-415b8305-b957-45b3-afca-4c57ae067cee-c000.snappy.parquet
-    │       │       ├── part-00000-440bff4d-c527-4761-becf-eb2108ebad4e-c000.snappy.parquet
-    │       │       ├── part-00000-444b8c59-9f8c-4025-af0f-7bf58a20935b-c000.snappy.parquet
-    │       │       ├── part-00000-4fe12bb5-9f0e-43be-a6bd-b6babdad6dd0-c000.snappy.parquet
-    │       │       ├── part-00000-51ca9486-6db6-4dbb-9488-7a0418862368-c000.snappy.parquet
-    │       │       ├── part-00000-59b9620d-c696-42d5-8f56-5409653ca856-c000.snappy.parquet
-    │       │       ├── part-00000-6086654b-279e-46f8-a8f4-f8ca16a5b66b-c000.snappy.parquet
-    │       │       ├── part-00000-6542b00f-1456-440a-8a88-a93a839b644c-c000.snappy.parquet
-    │       │       ├── part-00000-6a38393e-c960-410e-acd3-7a79756ed0ad-c000.snappy.parquet
-    │       │       ├── part-00000-6c43513f-98eb-4e3a-b51d-996c9d051beb-c000.snappy.parquet
-    │       │       ├── part-00000-6caccd2a-6c6b-4fbe-be5b-559b9c77fad5-c000.snappy.parquet
-    │       │       ├── part-00000-6cd8f77e-b347-4d76-a507-50ae702afee0-c000.snappy.parquet
-    │       │       ├── part-00000-78840fcd-e722-487c-86ee-14d2d59f4215-c000.snappy.parquet
-    │       │       ├── part-00000-7ebf0019-91f3-480a-a787-915469f52680-c000.snappy.parquet
-    │       │       ├── part-00000-8b23f684-ff4e-40c2-9d74-de05f2604d0b-c000.snappy.parquet
-    │       │       ├── part-00000-913a222c-ebf7-4efb-ae76-fa1c1103854f-c000.snappy.parquet
-    │       │       ├── part-00000-9a42a977-1efd-4e2c-9ac0-4f1059e26117-c000.snappy.parquet
-    │       │       ├── part-00000-9b5e4cbe-4275-4568-ad37-b359ad01ee44-c000.snappy.parquet
-    │       │       ├── part-00000-a5512c77-c40f-465f-8a63-cb84838fbe90-c000.snappy.parquet
-    │       │       ├── part-00000-ab7a4962-d699-4a4c-90ec-b93c05cc24c1-c000.snappy.parquet
-    │       │       ├── part-00000-ad1da544-13a2-48cf-ba91-3d9490b1fc14-c000.snappy.parquet
-    │       │       ├── part-00000-af262c52-c689-41ba-a084-7dd45a0bb6ff-c000.snappy.parquet
-    │       │       ├── part-00000-b362a688-99b9-4ce1-98c9-047cde6e4c48-c000.snappy.parquet
-    │       │       ├── part-00000-b4dd9a57-8578-4fa0-bdb3-c39d24dad1cd-c000.snappy.parquet
-    │       │       ├── part-00000-b72d3394-d872-4db2-85e7-2571c4ddefa0-c000.snappy.parquet
-    │       │       ├── part-00000-b861a305-8357-40b8-af3f-10a38147b751-c000.snappy.parquet
-    │       │       ├── part-00000-bb150502-685d-4ff7-a4f3-93019a06e0f4-c000.snappy.parquet
-    │       │       ├── part-00000-bfc1d854-8be3-4afd-b07e-95e1470628a7-c000.snappy.parquet
-    │       │       ├── part-00000-c8ea520f-6026-4498-8b80-be86aa822350-c000.snappy.parquet
-    │       │       ├── part-00000-ca15f873-ea52-49bc-8087-0cf6bcea09a6-c000.snappy.parquet
-    │       │       ├── part-00000-cb52975c-bf3d-4e13-a422-640b6d08643e-c000.snappy.parquet
-    │       │       ├── part-00000-d52b36eb-9bd0-419a-aa84-9ba14887fa7b-c000.snappy.parquet
-    │       │       ├── part-00000-d739218c-c953-4ec3-86f2-4f8402274fc2-c000.snappy.parquet
-    │       │       ├── part-00000-d755c3bf-8cc1-4135-a025-c1f8611d9c24-c000.snappy.parquet
-    │       │       ├── part-00000-ebadce4e-cc32-402e-bc3f-2ac3cafc7229-c000.snappy.parquet
-    │       │       ├── part-00000-f425b1b6-d230-4809-9478-619d0f2cf0ec-c000.snappy.parquet
-    │       │       ├── part-00000-f4cab255-7df2-4664-80cb-c6c3e7921b83-c000.snappy.parquet
-    │       │       ├── part-00000-fe132fcb-2afc-4358-ad17-a6a8988f81ee-c000.snappy.parquet
-    │       │       └── silver_openalex_publication_dq_report.json
-    │       ├── pubmed/
-    │       │   └── publication/
-    │       │       ├── _delta_log/
-    │       │       │   ├── 00000000000000000000.json
-    │       │       │   ├── 00000000000000000001.json
-    │       │       │   ├── 00000000000000000002.json
-    │       │       │   ├── 00000000000000000003.json
-    │       │       │   ├── 00000000000000000004.json
-    │       │       │   ├── 00000000000000000005.json
-    │       │       │   ├── 00000000000000000006.json
-    │       │       │   ├── 00000000000000000007.json
-    │       │       │   ├── 00000000000000000008.json
-    │       │       │   ├── 00000000000000000009.json
-    │       │       │   ├── 00000000000000000010.json
-    │       │       │   ├── 00000000000000000011.json
-    │       │       │   ├── 00000000000000000012.json
-    │       │       │   ├── 00000000000000000013.json
-    │       │       │   ├── 00000000000000000014.json
-    │       │       │   ├── 00000000000000000015.json
-    │       │       │   ├── 00000000000000000016.json
-    │       │       │   ├── 00000000000000000017.json
-    │       │       │   ├── 00000000000000000018.json
-    │       │       │   ├── 00000000000000000019.json
-    │       │       │   ├── 00000000000000000020.json
-    │       │       │   ├── 00000000000000000021.json
-    │       │       │   ├── 00000000000000000022.json
-    │       │       │   ├── 00000000000000000023.json
-    │       │       │   ├── 00000000000000000024.json
-    │       │       │   ├── 00000000000000000025.json
-    │       │       │   ├── 00000000000000000026.json
-    │       │       │   ├── 00000000000000000027.json
-    │       │       │   ├── 00000000000000000028.json
-    │       │       │   ├── 00000000000000000029.json
-    │       │       │   ├── 00000000000000000030.json
-    │       │       │   ├── 00000000000000000031.json
-    │       │       │   ├── 00000000000000000032.json
-    │       │       │   ├── 00000000000000000033.json
-    │       │       │   ├── 00000000000000000034.json
-    │       │       │   ├── 00000000000000000035.json
-    │       │       │   ├── 00000000000000000036.json
-    │       │       │   ├── 00000000000000000037.json
-    │       │       │   ├── 00000000000000000038.json
-    │       │       │   ├── 00000000000000000039.json
-    │       │       │   ├── 00000000000000000040.json
-    │       │       │   ├── 00000000000000000041.json
-    │       │       │   ├── 00000000000000000042.json
-    │       │       │   ├── 00000000000000000043.json
-    │       │       │   ├── 00000000000000000044.json
-    │       │       │   ├── 00000000000000000045.json
-    │       │       │   ├── 00000000000000000046.json
-    │       │       │   ├── 00000000000000000047.json
-    │       │       │   ├── 00000000000000000048.json
-    │       │       │   ├── 00000000000000000049.json
-    │       │       │   ├── 00000000000000000050.json
-    │       │       │   ├── 00000000000000000051.json
-    │       │       │   ├── 00000000000000000052.json
-    │       │       │   ├── 00000000000000000053.json
-    │       │       │   ├── 00000000000000000054.json
-    │       │       │   ├── 00000000000000000055.json
-    │       │       │   ├── 00000000000000000056.json
-    │       │       │   ├── 00000000000000000057.json
-    │       │       │   ├── 00000000000000000058.json
-    │       │       │   ├── 00000000000000000059.json
-    │       │       │   ├── 00000000000000000060.json
-    │       │       │   ├── 00000000000000000061.json
-    │       │       │   ├── 00000000000000000062.json
-    │       │       │   ├── 00000000000000000063.json
-    │       │       │   ├── 00000000000000000064.json
-    │       │       │   ├── 00000000000000000065.json
-    │       │       │   ├── 00000000000000000066.json
-    │       │       │   ├── 00000000000000000067.json
-    │       │       │   └── 00000000000000000068.json
-    │       │       ├── part-00000-01c822ac-2942-43b4-955c-33db071a2821-c000.snappy.parquet
-    │       │       ├── part-00000-061605e0-9d22-42a5-bbd9-220e78095756-c000.snappy.parquet
-    │       │       ├── part-00000-091e41f1-897f-4d9e-a3e9-7ca2b837328e-c000.snappy.parquet
-    │       │       ├── part-00000-0c3d053d-b58f-443f-94f6-7146cd53622f-c000.snappy.parquet
-    │       │       ├── part-00000-112d3eb7-d448-4a39-acb0-5109dcd68532-c000.snappy.parquet
-    │       │       ├── part-00000-113e61f1-a946-4e34-8001-d7c9d1b7013d-c000.snappy.parquet
-    │       │       ├── part-00000-1c6ebdca-dcf4-4e72-b058-92e6bf702df9-c000.snappy.parquet
-    │       │       ├── part-00000-23068041-2178-4014-ab7e-cb031533b7af-c000.snappy.parquet
-    │       │       ├── part-00000-237ec033-386b-4cbb-8231-7ab0a798deb0-c000.snappy.parquet
-    │       │       ├── part-00000-2b84ac5d-90f2-41b2-9303-480fa9f9e659-c000.snappy.parquet
-    │       │       ├── part-00000-41706213-688a-4665-9bee-55aed000f405-c000.snappy.parquet
-    │       │       ├── part-00000-45bdc615-c737-4301-9da3-648197362f35-c000.snappy.parquet
-    │       │       ├── part-00000-45e82b86-3b88-4648-b3bd-19484f77197f-c000.snappy.parquet
-    │       │       ├── part-00000-4aaec82f-b317-4076-9466-aba6aae04fa3-c000.snappy.parquet
-    │       │       ├── part-00000-50c33c32-b811-4209-83d1-fcf358dadfd0-c000.snappy.parquet
-    │       │       ├── part-00000-55194824-f879-4f65-8bac-8a153b0fc4c9-c000.snappy.parquet
-    │       │       ├── part-00000-557ce232-e47d-49b1-a733-d9d19736d916-c000.snappy.parquet
-    │       │       ├── part-00000-56850406-f35a-4936-bfe1-5def4a0d0533-c000.snappy.parquet
-    │       │       ├── part-00000-575f5380-df29-4f2c-92ba-5e7f7fd45b11-c000.snappy.parquet
-    │       │       ├── part-00000-5799eae6-f58b-44b2-a7c1-19705f10a057-c000.snappy.parquet
-    │       │       ├── part-00000-5f2c5fca-59b8-442e-bc2c-db90996d4ac7-c000.snappy.parquet
-    │       │       ├── part-00000-61545efc-29b6-4c9e-b03d-8c3587e0dc82-c000.snappy.parquet
-    │       │       ├── part-00000-61615c03-b65a-4b51-b645-ac2526c0712c-c000.snappy.parquet
-    │       │       ├── part-00000-61d98da3-5b00-418d-a06e-ad3a63304109-c000.snappy.parquet
-    │       │       ├── part-00000-6c5651f9-2f13-462b-b756-25eee7875cb4-c000.snappy.parquet
-    │       │       ├── part-00000-6e5f83ca-d224-47ad-89a4-bcb49065aa2a-c000.snappy.parquet
-    │       │       ├── part-00000-71f90fd4-2c04-453a-818b-a5a59de83ce8-c000.snappy.parquet
-    │       │       ├── part-00000-7d0bdd76-0289-465e-bc5b-5039d797590d-c000.snappy.parquet
-    │       │       ├── part-00000-844e2e0d-00ab-4a36-b211-a328296a1072-c000.snappy.parquet
-    │       │       ├── part-00000-846c1315-e62c-4d93-ac38-5d2212d641ab-c000.snappy.parquet
-    │       │       ├── part-00000-88514e7a-d1fc-4ed2-b9df-2437dee10021-c000.snappy.parquet
-    │       │       ├── part-00000-88a1ad77-697d-4e92-bdd2-9834a85eb9f0-c000.snappy.parquet
-    │       │       ├── part-00000-93cab35c-41c0-4950-bea7-c0a614aa1668-c000.snappy.parquet
-    │       │       ├── part-00000-95354f2c-bb8e-471d-a57b-12f4b6e62f6c-c000.snappy.parquet
-    │       │       ├── part-00000-967e0a28-28f9-4fab-93d8-0c3386b78127-c000.snappy.parquet
-    │       │       ├── part-00000-97267063-5a25-4190-ae00-1d956e697b48-c000.snappy.parquet
-    │       │       ├── part-00000-9956d838-9c28-49ce-88db-8652751a127f-c000.snappy.parquet
-    │       │       ├── part-00000-9a1ca848-d797-40d6-94eb-b35df6b9b57a-c000.snappy.parquet
-    │       │       ├── part-00000-9aa0e955-d26d-4700-9aac-c58792412932-c000.snappy.parquet
-    │       │       ├── part-00000-9c24546c-69f2-4b92-8b7e-f764a7c28678-c000.snappy.parquet
-    │       │       ├── part-00000-9da3658c-ea12-4ce6-a130-5472537dd62d-c000.snappy.parquet
-    │       │       ├── part-00000-a209ac53-aac2-4895-85f7-ed348289f7a5-c000.snappy.parquet
-    │       │       ├── part-00000-a21f6aa6-be39-47e2-9c71-57565706fe2c-c000.snappy.parquet
-    │       │       ├── part-00000-a8fda2e3-b22a-472b-a3c0-899416499247-c000.snappy.parquet
-    │       │       ├── part-00000-abf15467-1d2c-4aa3-8440-18f3d4fa056c-c000.snappy.parquet
-    │       │       ├── part-00000-adb15c8e-2bb1-4497-9f30-3508d275cb92-c000.snappy.parquet
-    │       │       ├── part-00000-ae7b3513-d67e-4eba-8de7-c708b353183c-c000.snappy.parquet
-    │       │       ├── part-00000-b04bb3a2-f7f3-42e0-aacf-7e5b0db4330d-c000.snappy.parquet
-    │       │       ├── part-00000-b5c45c12-883b-48c1-8f8d-b9d72208a18d-c000.snappy.parquet
-    │       │       ├── part-00000-b87347c0-5108-4bc4-b5b3-39a0680a9e13-c000.snappy.parquet
-    │       │       ├── part-00000-c10850a7-c1ab-4d28-9266-4c3489543ba5-c000.snappy.parquet
-    │       │       ├── part-00000-c1384693-74ba-4cbd-9766-751eb428bb9c-c000.snappy.parquet
-    │       │       ├── part-00000-c2aa73c6-d33d-41ae-9b45-f1c710d0909c-c000.snappy.parquet
-    │       │       ├── part-00000-c2ae5fdb-7772-4c2f-8a18-27e33b773906-c000.snappy.parquet
-    │       │       ├── part-00000-c4f43029-081e-41cd-bcb9-92b2477dcdd0-c000.snappy.parquet
-    │       │       ├── part-00000-cbb83146-c490-46df-919b-f109083241db-c000.snappy.parquet
-    │       │       ├── part-00000-ce59f7f0-7d0b-4218-9166-f6cb2d77f6e1-c000.snappy.parquet
-    │       │       ├── part-00000-cea69db2-4c24-47e7-882e-d5b44b7a7cf7-c000.snappy.parquet
-    │       │       ├── part-00000-d2393ebd-f8f7-47ec-b623-1aa5ed0adb29-c000.snappy.parquet
-    │       │       ├── part-00000-d3939191-7f34-49d8-aeae-ed09cba32e92-c000.snappy.parquet
-    │       │       ├── part-00000-e821cc83-d338-4f93-96e8-50e3033b0021-c000.snappy.parquet
-    │       │       ├── part-00000-edc1904e-ebd6-4ab1-a35d-1cafcbbf4f04-c000.snappy.parquet
-    │       │       ├── part-00000-efb8c34f-314a-4c1e-a456-8ae8b9df0a93-c000.snappy.parquet
-    │       │       ├── part-00000-efe142f3-bc84-4839-b5f5-09ae31ec576a-c000.snappy.parquet
-    │       │       ├── part-00000-f31414ad-ea47-4976-b49a-a40ef078421b-c000.snappy.parquet
-    │       │       ├── part-00000-f6728f18-9456-4c53-9ee6-1cfe4f7a44c8-c000.snappy.parquet
-    │       │       ├── part-00000-f983dd52-b112-4875-ab4f-6fbcc91eef18-c000.snappy.parquet
-    │       │       ├── part-00000-fca83ed5-3c2b-4381-b356-62e3ca41d765-c000.snappy.parquet
-    │       │       ├── part-00000-fd264fac-3816-495e-b04b-d24a3c245283-c000.snappy.parquet
-    │       │       ├── pubmed_publication.csv
-    │       │       ├── pubmed_publication_metadata.yaml
-    │       │       └── silver_pubmed_publication_dq_report.json
-    │       └── semanticscholar/
-    │           └── publication/
-    │               ├── _delta_log/
-    │               │   ├── 00000000000000000000.json
-    │               │   └── 00000000000000000001.json
-    │               ├── part-00000-87e2a1e3-e8a9-4e37-9f83-d0ecebfa42bb-c000.snappy.parquet
-    │               ├── part-00000-fba2b47e-268d-4a3e-8ce7-bbc4eea9da8d-c000.snappy.parquet
-    │               ├── semanticscholar_publication.csv
-    │               ├── semanticscholar_publication_metadata.yaml
-    │               └── silver_semanticscholar_publication_dq_report.json
+    │   └── output/
     ├── docs/
+    │   ├── .claude/
+    │   │   └── settings.local.json
     │   ├── 00-project/
     │   │   ├── agents/
+    │   │   │   ├── orchestration/
+    │   │   │   │   ├── subagents/
+    │   │   │   │   │   ├── pyAuditBot.md
+    │   │   │   │   │   └── subagents_registry.md
+    │   │   │   │   └── ORCHESTRATION.md
     │   │   │   ├── AGENT.md
     │   │   │   ├── CLAUDE.md
     │   │   │   ├── GEMINI.md
@@ -6881,6 +7389,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── ADR-029-output-metadata-unification.md
     │   │   │   ├── ADR-030-publication-pagination-strategy.md
     │   │   │   ├── ADR-031-loading-strategy-formalization.md
+    │   │   │   ├── ADR-032-publication-validation-strategy.md
     │   │   │   ├── ADR-032-unified-http-client.md
     │   │   │   └── README.md
     │   │   ├── diagrams/
@@ -6997,6 +7506,7 @@ BioactivityDataAcquisition2/
     │   │   ├── metrics-monitoring.md
     │   │   ├── pipeline-configuration.md
     │   │   ├── pipeline-lifecycle.md
+    │   │   ├── publication-validation-guide.md
     │   │   ├── quick-start.md
     │   │   ├── registry-pattern.md
     │   │   ├── running-pipelines.md
@@ -7065,6 +7575,11 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── 10-target-component-spec.md
     │   │   │   │   ├── 11-publication-term-spec.md
     │   │   │   │   ├── 12-publication-similarity-spec.md
+    │   │   │   │   ├── 14-subcellular-fraction-spec.md
+    │   │   │   │   ├── 15-protein-class-spec.md
+    │   │   │   │   ├── 16-target-component-spec.md
+    │   │   │   │   ├── 17-publication-similarity-spec.md
+    │   │   │   │   ├── 18-publication-term-spec.md
     │   │   │   │   ├── cell-line-fields.csv
     │   │   │   │   └── protein-class-fields.csv
     │   │   │   ├── composite/
@@ -7130,7 +7645,9 @@ BioactivityDataAcquisition2/
     │   │   │   │       ├── assay-schema.md
     │   │   │   │       ├── molecule-schema.md
     │   │   │   │       └── target-schema.md
-    │   │   │   └── publication_field_order.csv
+    │   │   │   ├── publication_field_order.csv
+    │   │   │   ├── publication_validation_schema_v3.csv
+    │   │   │   └── publication_validation_schema_v3.xlsx
     │   │   ├── templates/
     │   │   │   ├── config.yaml.tpl
     │   │   │   ├── factory.py.tpl
@@ -7138,7 +7655,9 @@ BioactivityDataAcquisition2/
     │   │   │   ├── pipeline.py.tpl
     │   │   │   └── source_adapter.py.tpl
     │   │   ├── cli.md
-    │   │   └── config_comparison_matrix.csv
+    │   │   ├── config_comparison_matrix.csv
+    │   │   ├── publication-fields-reference.md
+    │   │   └── publication-validation-index.md
     │   ├── 05-operations/
     │   │   ├── runbooks/
     │   │   │   ├── README.md
@@ -7152,6 +7671,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── pipeline-failure-critical.md
     │   │   │   ├── pipeline-failure-dq.md
     │   │   │   ├── pipeline-failure-recovery.md
+    │   │   │   ├── publication-validation-runbook.md
     │   │   │   ├── quarantine-management.md
     │   │   │   ├── scaling.md
     │   │   │   ├── schema-evolution.md
@@ -7174,6 +7694,10 @@ BioactivityDataAcquisition2/
     │   │   │   ├── ADR-030-publication-field-unification.md
     │   │   │   └── ADR-031-full-scan-loading.md
     │   │   ├── reports/
+    │   │   │   ├── audit-2026-02-08/
+    │   │   │   │   ├── 00-audit-baseline.md
+    │   │   │   │   ├── 01-plan-initial.md
+    │   │   │   │   └── 07-audit-final.md
     │   │   │   ├── config-audit/
     │   │   │   │   ├── config_analysis_report.yaml
     │   │   │   │   ├── config_comparison_matrix.csv
@@ -7199,24 +7723,11 @@ BioactivityDataAcquisition2/
     │   │   │   ├── project_structure.md
     │   │   │   └── Архитектурный обзор BioETL.docx
     │   │   └── refactoring-plan.md
-    │   ├── adr/
-    │   │   └── ADR-032-publication-validation-strategy.md
     │   ├── assets/
     │   │   └── javascripts/
     │   │       └── mermaid-init.js
-    │   ├── audits/
-    │   │   └── architecture-audit-2026-02-07.md
-    │   ├── guides/
-    │   │   └── publication-validation-guide.md
-    │   ├── reference/
-    │   │   └── publication-fields-reference.md
-    │   ├── runbooks/
-    │   │   └── publication-validation-runbook.md
-    │   ├── schemas/
-    │   │   ├── publication_validation_schema_v3.csv
-    │   │   └── publication_validation_schema_v3.xlsx
-    │   └── validation/
-    │       └── README.md
+    │   └── audits/
+    │       └── architecture-audit-2026-02-07.md
     ├── grafana/
     │   ├── dashboards/
     │   │   ├── bioetl-dq.json
@@ -7234,9 +7745,8 @@ BioactivityDataAcquisition2/
     │   ├── documentation_merged.md
     │   ├── domain_merged.md
     │   ├── infrastructure_merged.md
-    │   └── interfaces_merged.md
-    ├── run/
-    │   └── setup.sh
+    │   ├── interfaces_merged.md
+    │   └── project_structure.md
     ├── scripts/
     │   ├── audit_structure.py
     │   ├── cleanup_consolidate.py
@@ -7247,6 +7757,7 @@ BioactivityDataAcquisition2/
     │   ├── naming_audit.py
     │   ├── render_diagrams.py
     │   ├── salt_rotate.py
+    │   ├── setup.sh
     │   ├── vacuum_delta.py
     │   ├── validate_pipeline_configs.py
     │   └── verify_checksums.py
@@ -7281,6 +7792,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── checkpoint_manager.py
     │   │   │   │   ├── cleanup_service.py
     │   │   │   │   ├── config.py
+    │   │   │   │   ├── dict_transformers.py
     │   │   │   │   ├── field_specs.py
     │   │   │   │   ├── filtered_data_source.py
     │   │   │   │   ├── heartbeat.py
@@ -7295,8 +7807,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── record_processor.py
     │   │   │   │   ├── runner.py
     │   │   │   │   ├── shutdown.py
-    │   │   │   │   ├── subcellular_fraction_data_source.py
-    │   │   │   │   └── transform_utils.py
+    │   │   │   │   └── subcellular_fraction_data_source.py
     │   │   │   ├── observability/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── observer.py
@@ -7364,7 +7875,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── __init__.py
     │   │   │   │   │   ├── publication.py
     │   │   │   │   │   ├── transformer.py
-    │   │   │   │   │   └── xml_utils.py
+    │   │   │   │   │   └── xml_parser.py
     │   │   │   │   ├── semanticscholar/
     │   │   │   │   │   ├── __init__.py
     │   │   │   │   │   ├── _author_extractors.py
@@ -7394,9 +7905,9 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── _checks_integrity.py
     │   │   │   │   │   ├── _checks_statistical.py
     │   │   │   │   │   ├── bronze_analyzer.py
+    │   │   │   │   │   ├── dq_report_builders.py
     │   │   │   │   │   ├── gold_analyzer.py
-    │   │   │   │   │   ├── silver_analyzer.py
-    │   │   │   │   │   └── utils.py
+    │   │   │   │   │   └── silver_analyzer.py
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── bronze_cleanup_service.py
     │   │   │   │   ├── checkpoint_service.py
@@ -7541,6 +8052,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── publication_fields.py
     │   │   │   ├── models/
     │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── filter.py
     │   │   │   │   └── metadata.py
     │   │   │   ├── ports/
     │   │   │   │   ├── __init__.py
@@ -7728,13 +8240,13 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── idmapping_client.py
     │   │   │   │   │   └── models.py
     │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── adapter_error_logging.py
     │   │   │   │   ├── base.py
     │   │   │   │   ├── base_metrics.py
     │   │   │   │   ├── cached_bronze_data_source.py
     │   │   │   │   ├── error_handling.py
     │   │   │   │   ├── filterable_mixin.py
     │   │   │   │   ├── health_check_mixin.py
-    │   │   │   │   ├── logging_utils.py
     │   │   │   │   ├── sync_base.py
     │   │   │   │   └── validation.py
     │   │   │   ├── audit/
@@ -7782,8 +8294,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── unified_logger.py
     │   │   │   ├── quarantine/
     │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── helpers.py
     │   │   │   │   ├── operations.py
+    │   │   │   │   ├── record_encoding.py
     │   │   │   │   └── unified.py
     │   │   │   ├── schemas/
     │   │   │   │   ├── __init__.py
@@ -7887,6 +8399,8 @@ BioactivityDataAcquisition2/
     │       │   └── validate_unified_configs.py
     │       ├── README.md
     │       ├── __init__.py
+    │       ├── _gen.py
+    │       ├── _gen_pydocbot.py
     │       ├── create_pipeline.py
     │       ├── file_merger.py
     │       ├── init_db.sql
@@ -8106,6 +8620,7 @@ BioactivityDataAcquisition2/
     │   ├── infrastructure/
     │   │   ├── adapters/
     │   │   │   ├── http/
+    │   │   │   │   ├── test_client_retries.py
     │   │   │   │   └── test_pagination.py
     │   │   │   ├── test_pubchem.py
     │   │   │   └── test_uniprot.py
@@ -8236,7 +8751,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── test_run_id_propagation.py
     │   │   │   │   ├── test_runner.py
     │   │   │   │   ├── test_shutdown.py
-    │   │   │   │   └── test_streaming_batch.py
+    │   │   │   │   ├── test_streaming_batch.py
+    │   │   │   │   └── test_subcellular_fraction_data_source.py
     │   │   │   ├── observability/
     │   │   │   │   ├── test_observer.py
     │   │   │   │   └── test_span_helpers.py
@@ -8280,6 +8796,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── test_date_parsing.py
     │   │   │   │   ├── test_idmapping_transformer.py
     │   │   │   │   ├── test_page_parsing.py
+    │   │   │   │   ├── test_pipeline_registrations.py
     │   │   │   │   ├── test_protein_class_transformer.py
     │   │   │   │   ├── test_pubchem_transformer.py
     │   │   │   │   ├── test_publication_similarity_transformer.py
@@ -8296,6 +8813,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_bronze_cleanup_service.py
     │   │   │   │   ├── test_checkpoint_service.py
+    │   │   │   │   ├── test_config_service.py
     │   │   │   │   ├── test_data_quality_service.py
     │   │   │   │   ├── test_dq_metrics_calculator.py
     │   │   │   │   ├── test_dq_report_service.py
@@ -8336,6 +8854,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── test_transformer_factory.py
     │   │   │   ├── providers/
     │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── test_extraction_params_registration.py
     │   │   │   │   └── test_provider_registry.py
     │   │   │   ├── __init__.py
     │   │   │   ├── test_bootstrap_logger.py
@@ -8378,6 +8897,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── test_load_result.py
     │   │   │   │   └── test_range_filter.py
     │   │   │   ├── models/
+    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── test_filter.py
     │   │   │   │   └── test_metadata_output.py
     │   │   │   ├── ports/
     │   │   │   │   ├── __init__.py
@@ -8454,6 +8975,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── test_medallion.py
     │   │   │   ├── test_normalization.py
     │   │   │   ├── test_pipeline_config.py
+    │   │   │   ├── test_publication_fields_mapping.py
     │   │   │   ├── test_runtime_config.py
     │   │   │   ├── test_serialization.py
     │   │   │   ├── test_transformations.py
@@ -8506,12 +9028,12 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── test_idmapping_client.py
     │   │   │   │   │   └── test_uniprot_client_coverage.py
     │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── test_adapter_error_logging.py
     │   │   │   │   ├── test_base_metrics.py
     │   │   │   │   ├── test_client_error_paths.py
     │   │   │   │   ├── test_csv_filter_reader.py
     │   │   │   │   ├── test_error_handling.py
     │   │   │   │   ├── test_http_base.py
-    │   │   │   │   ├── test_logging_utils.py
     │   │   │   │   ├── test_provider_names.py
     │   │   │   │   ├── test_sync_base.py
     │   │   │   │   └── test_validation.py
@@ -8553,6 +9075,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_base_schemas.py
     │   │   │   │   ├── test_dq_config.py
+    │   │   │   │   ├── test_filter_config.py
     │   │   │   │   ├── test_gold.py
     │   │   │   │   ├── test_silver.py
     │   │   │   │   └── test_sink_metadata_config.py
@@ -8635,7 +9158,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── test_date_extractor.py
     │   │   │   │   │   ├── test_extractor_edge_cases.py
     │   │   │   │   │   ├── test_identifier_extractor.py
-    │   │   │   │   │   └── test_xml_utils.py
+    │   │   │   │   │   └── test_xml_parser.py
     │   │   │   │   ├── test_pubmed_publication.py
     │   │   │   │   └── test_pubmed_transformer.py
     │   │   │   ├── uniprot/
@@ -8678,14 +9201,12 @@ BioactivityDataAcquisition2/
     ├── coverage.json
     ├── dev_setup.sh
     ├── mkdocs.yml
-    ├── nul
-    ├── publication_validation_schema_v3.csv
     ├── pyproject.toml
     ├── requirements.txt
     └── uv.lock
 ```
 
 **Statistics:**
-- Directories: 775
-- Files: 7905
-- Total items: 8680
+- Directories: 780
+- Files: 8421
+- Total items: 9201

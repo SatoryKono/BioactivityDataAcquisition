@@ -48,7 +48,7 @@ class DataNormalizationPort(Protocol):
         ...
 
     def normalize_year(self, year: int | None) -> tuple[int | None, bool]:
-        """Validate publication year against range [1800, 2100].
+        """Validate publication year against range [1500, 2100].
 
         Returns (year, is_warning). Warning is True if year is outside valid range.
         """

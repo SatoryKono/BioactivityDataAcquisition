@@ -274,7 +274,7 @@ gold_filters:
     - title
   ranges:
     year:
-      min: 1900
+      min: 1500
       max: 2100
 ```
 

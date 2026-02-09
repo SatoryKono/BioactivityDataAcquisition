@@ -5260,6 +5260,9 @@ class CompositeRuntimeConfig:
         required_only: Skip optional enrichers.
         force_enricher: Force re-run of specified enricher.
         seed_limit: Optional limit for seed pipeline.
+        use_cached_bronze: Load data from Bronze cache instead of API.
+        cached_bronze_path: Explicit path to Bronze cache directory.
+        cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD).
     """
 
     resume: bool = False
@@ -5268,6 +5271,9 @@ class CompositeRuntimeConfig:
     required_only: bool = False
     force_enricher: str | None = None
     seed_limit: int | None = None
+    use_cached_bronze: bool = True
+    cached_bronze_path: str | None = None
+    cached_bronze_date: str | None = None
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""
@@ -6602,6 +6608,15 @@ from bioetl.application.core.cleanup_service import (
     CleanupService,
     LayerInfo,
 )
+from bioetl.application.core.dict_transformers import (
+    aggregate_nested_lists,
+    extract_list_field,
+    flatten_nested_dict,
+    normalize_string,
+    parse_date_field,
+    safe_extract,
+    validate_smiles,
+)
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import (
@@ -6620,15 +6635,6 @@ from bioetl.application.core.shutdown import (
     ShutdownService,
     ShutdownSignal,
     create_shutdown_service,
-)
-from bioetl.application.core.transform_utils import (
-    aggregate_nested_lists,
-    extract_list_field,
-    flatten_nested_dict,
-    normalize_string,
-    parse_date_field,
-    safe_extract,
-    validate_smiles,
 )
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.application.services.medallion_types import (
@@ -10324,6 +10330,333 @@ class LockConfig:
             wait_timeout=wait_timeout,
             heartbeat_interval=heartbeat_interval,
         )
+
+================================================================================
+File: dict_transformers.py
+Path: core\dict_transformers.py
+================================================================================
+"""Common transformation utilities for all pipelines.
+
+Реализует общие паттерны трансформации для уменьшения дублирования
+в ChEMBL и других трансформерах.
+
+Функции:
+- flatten_nested_dict: Разворачивание вложенных словарей с префиксом
+- extract_list_field: Извлечение поля из списка словарей
+- aggregate_nested_lists: Агрегация вложенных списков
+- normalize_string: Нормализация строковых полей (delegated to domain)
+- parse_date_field: Парсинг даты с обработкой ошибок (delegated to domain)
+- validate_smiles: Валидация SMILES строки (delegated to domain)
+
+Note: Business logic functions are delegated to domain layer per REFACTOR-004.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from datetime import date
+from typing import Any, TypeVar
+
+from bioetl.domain.normalization import normalize_string as _domain_normalize_string
+from bioetl.domain.normalization import parse_date_field as _domain_parse_date_field
+from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
+
+T = TypeVar("T")
+
+
+def flatten_nested_dict(
+    data: dict[str, Any] | None,
+    prefix: str,
+    field_mapping: dict[str, Callable[[Any], Any] | None],
+    renames: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Разворачивает вложенный словарь в плоскую структуру с префиксом.
+
+    Используется для извлечения полей из вложенных структур API
+    (molecule_properties, molecule_hierarchy, ligand_efficiency и т.д.).
+
+    Args:
+        data: Вложенный словарь для разворачивания. Если None, возвращает
+              словарь с None значениями для всех ключей.
+        prefix: Префикс для результирующих ключей (e.g., "property_", "hierarchy_").
+        field_mapping: Словарь {исходный_ключ: конвертер}.
+                       Конвертер может быть safe_float, safe_int или None (без конвертация).
+        renames: Опциональный словарь {старый_ключ: новый_ключ} для переименования
+                 полей после разворачивания. Ключи должны включать префикс.
+
+    Returns:
+        Плоский словарь с префиксами и сконвертированными значениями.
+
+    Example:
+        >>> data = {"alogp": "3.5", "hba": 2}
+        >>> mapping = {"alogp": safe_float, "hba": safe_int}
+        >>> flatten_nested_dict(data, "property_", mapping)
+        {'property_alogp': 3.5, 'property_hba': 2}
+
+        >>> flatten_nested_dict(None, "property_", mapping)
+        {'property_alogp': None, 'property_hba': None}
+
+        >>> # With renames parameter
+        >>> data = {"molecule_chembl_id": "CHEMBL25"}
+        >>> mapping = {"molecule_chembl_id": None}
+        >>> renames = {"hierarchy_molecule_chembl_id": "hierarchy_child_chembl_id"}
+        >>> flatten_nested_dict(data, "hierarchy_", mapping, renames)
+        {'hierarchy_child_chembl_id': 'CHEMBL25'}
+
+    """
+    if not data or not isinstance(data, dict):
+        result = {f"{prefix}{key}": None for key in field_mapping}
+    else:
+        result = {}
+        for source_key, converter in field_mapping.items():
+            value = data.get(source_key)
+            if converter is not None and value is not None:
+                result[f"{prefix}{source_key}"] = converter(value)
+            else:
+                result[f"{prefix}{source_key}"] = value
+
+    # Apply renames if provided
+    if renames:
+        for old_key, new_key in renames.items():
+            if old_key in result:
+                result[new_key] = result.pop(old_key)
+
+    return result
+
+
+def extract_list_field(
+    items: list[dict[str, Any]] | None,
+    field: str,
+    converter: Callable[[Any], T] | None = None,
+) -> list[T] | None:
+    """Извлекает значения поля из списка словарей.
+
+    Используется для агрегации полей из компонентов, классификаций и т.д.
+
+    Args:
+        items: Список словарей для обработки.
+        field: Имя поля для извлечения.
+        converter: Опциональный конвертер (safe_int, safe_float и т.д.).
+                   Если None, значения возвращаются как есть.
+
+    Returns:
+        Список значений или None, если результат пустой.
+
+    Example:
+        >>> items = [{"id": "1"}, {"id": "2"}, {"id": None}]
+        >>> extract_list_field(items, "id")
+        ['1', '2']
+
+        >>> extract_list_field(items, "id", safe_int)
+        [1, 2]
+
+    """
+    if not items or not isinstance(items, list):
+        return None
+
+    values: list[T] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        raw_value = item.get(field)
+        if raw_value is None:
+            continue
+
+        if converter is not None:
+            converted = converter(raw_value)
+            if converted is not None:
+                values.append(converted)
+        else:
+            values.append(raw_value)
+
+    return values if values else None
+
+
+def _extract_nested_values(items: list[dict[str, Any]], field: str) -> list[Any]:
+    """Extract all nested list values from a field across items."""
+    values: list[Any] = []
+    for item in items:
+        if isinstance(item, dict):
+            nested = item.get(field)
+            if isinstance(nested, list):
+                values.extend(nested)
+    return values
+
+
+def aggregate_nested_lists(
+    items: list[dict[str, Any]] | None,
+    field: str,
+    deduplicate: bool = True,
+) -> list[Any] | None:
+    """Агрегирует вложенные списки из списка словарей.
+
+    Используется для сбора synonyms, xrefs и других вложенных списков
+    из множества компонентов в один плоский список.
+
+    Args:
+        items: Список словарей, каждый из которых может содержать вложенный список.
+        field: Имя поля со вложенным списком.
+        deduplicate: Если True, удаляет дубликаты из результирующего списка (по умолчанию True).
+
+    Returns:
+        Объединённый список или None, если результат пустой.
+
+    Example:
+        >>> items = [
+        ...     {"synonyms": ["a", "b"]},
+        ...     {"synonyms": ["c", "a"]},
+        ...     {"other": "data"}
+        ... ]
+        >>> aggregate_nested_lists(items, "synonyms")
+        ['a', 'b', 'c']
+
+    """
+    if not isinstance(items, list) or not items:
+        return None
+
+    values = _extract_nested_values(items, field)
+    if not values:
+        return None
+
+    if deduplicate:
+        seen: set[str] = set()
+        unique: list[Any] = []
+        for val in values:
+            key = str(val)
+            if key not in seen:
+                seen.add(key)
+                unique.append(val)
+        return unique if unique else None
+
+    return values
+
+
+def normalize_string(value: str | None) -> str | None:
+    """Нормализует строковое поле.
+
+    Удаляет пробельные символы по краям и возвращает None для пустых строк.
+
+    Note: Delegated to domain.normalization.normalize_string per REFACTOR-004.
+
+    Args:
+        value: Строка для нормализации.
+
+    Returns:
+        Нормализованная строка или None.
+
+    Example:
+        >>> normalize_string("  hello world  ")
+        'hello world'
+        >>> normalize_string("   ")
+        None
+        >>> normalize_string(None)
+        None
+
+    """
+    return _domain_normalize_string(value)
+
+
+def parse_date_field(
+    value: str | None,
+    fmt: str = "%Y-%m-%d",
+) -> date | None:
+    """Парсит строку даты в объект date.
+
+    Безопасный парсинг с обработкой ошибок и невалидных форматов.
+
+    Note: Delegated to domain.normalization.parse_date_field per REFACTOR-004.
+
+    Args:
+        value: Строка с датой или None.
+        fmt: Формат даты (по умолчанию ISO: YYYY-MM-DD).
+
+    Returns:
+        Объект date или None при ошибке парсинга.
+
+    Example:
+        >>> parse_date_field("2024-01-15")
+        datetime.date(2024, 1, 15)
+        >>> parse_date_field("invalid")
+        None
+        >>> parse_date_field("15/01/2024", "%d/%m/%Y")
+        datetime.date(2024, 1, 15)
+
+    """
+    return _domain_parse_date_field(value, fmt)
+
+
+def validate_smiles(smiles: str | None) -> bool:
+    """Проверяет валидность SMILES строки.
+
+    Выполняет базовую синтаксическую проверку без полного парсинга молекулы.
+    Для полной валидации используйте RDKit или другую химическую библиотеку.
+
+    Note: Delegated to domain.validation.validate_smiles per REFACTOR-004.
+
+    Args:
+        smiles: SMILES строка для проверки.
+
+    Returns:
+        True если строка соответствует базовому синтаксису SMILES.
+
+    Example:
+        >>> validate_smiles("CCO")  # Ethanol
+        True
+        >>> validate_smiles("C1=CC=CC=C1")  # Benzene
+        True
+        >>> validate_smiles("")
+        False
+        >>> validate_smiles(None)
+        False
+        >>> validate_smiles("invalid smiles with spaces")
+        False
+
+    """
+    return _domain_validate_smiles(smiles)
+
+
+def safe_extract(
+    record: dict[str, Any],
+    key: str,
+    default: T | None = None,
+) -> T | Any | None:
+    """Безопасно извлекает значение из словаря с логированием.
+
+    Обёртка над dict.get() для унифицированного извлечения полей.
+    Для использования с логированием используйте в связке с контекстом.
+
+    Args:
+        record: Словарь для извлечения.
+        key: Ключ для поиска.
+        default: Значение по умолчанию (None).
+
+    Returns:
+        Значение по ключу или default.
+
+    Example:
+        >>> record = {"name": "test", "value": 42}
+        >>> safe_extract(record, "name")
+        'test'
+        >>> safe_extract(record, "missing", "default")
+        'default'
+
+    """
+    return record.get(key, default)
+
+
+# Re-export safe_float and safe_int for convenience
+__all__ = [
+    "aggregate_nested_lists",
+    "extract_list_field",
+    "flatten_nested_dict",
+    "normalize_string",
+    "parse_date_field",
+    "safe_extract",
+    "safe_float",
+    "safe_int",
+    "validate_smiles",
+]
 
 ================================================================================
 File: field_specs.py
@@ -14874,333 +15207,6 @@ class SubcellularFractionDataSource:
 __all__ = ["SubcellularFractionDataSource"]
 
 ================================================================================
-File: transform_utils.py
-Path: core\transform_utils.py
-================================================================================
-"""Common transformation utilities for all pipelines.
-
-Реализует общие паттерны трансформации для уменьшения дублирования
-в ChEMBL и других трансформерах.
-
-Функции:
-- flatten_nested_dict: Разворачивание вложенных словарей с префиксом
-- extract_list_field: Извлечение поля из списка словарей
-- aggregate_nested_lists: Агрегация вложенных списков
-- normalize_string: Нормализация строковых полей (delegated to domain)
-- parse_date_field: Парсинг даты с обработкой ошибок (delegated to domain)
-- validate_smiles: Валидация SMILES строки (delegated to domain)
-
-Note: Business logic functions are delegated to domain layer per REFACTOR-004.
-"""
-
-from __future__ import annotations
-
-from collections.abc import Callable
-from datetime import date
-from typing import Any, TypeVar
-
-from bioetl.domain.normalization import normalize_string as _domain_normalize_string
-from bioetl.domain.normalization import parse_date_field as _domain_parse_date_field
-from bioetl.domain.transformations import safe_float, safe_int
-from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
-
-T = TypeVar("T")
-
-
-def flatten_nested_dict(
-    data: dict[str, Any] | None,
-    prefix: str,
-    field_mapping: dict[str, Callable[[Any], Any] | None],
-    renames: dict[str, str] | None = None,
-) -> dict[str, Any]:
-    """Разворачивает вложенный словарь в плоскую структуру с префиксом.
-
-    Используется для извлечения полей из вложенных структур API
-    (molecule_properties, molecule_hierarchy, ligand_efficiency и т.д.).
-
-    Args:
-        data: Вложенный словарь для разворачивания. Если None, возвращает
-              словарь с None значениями для всех ключей.
-        prefix: Префикс для результирующих ключей (e.g., "property_", "hierarchy_").
-        field_mapping: Словарь {исходный_ключ: конвертер}.
-                       Конвертер может быть safe_float, safe_int или None (без конвертация).
-        renames: Опциональный словарь {старый_ключ: новый_ключ} для переименования
-                 полей после разворачивания. Ключи должны включать префикс.
-
-    Returns:
-        Плоский словарь с префиксами и сконвертированными значениями.
-
-    Example:
-        >>> data = {"alogp": "3.5", "hba": 2}
-        >>> mapping = {"alogp": safe_float, "hba": safe_int}
-        >>> flatten_nested_dict(data, "property_", mapping)
-        {'property_alogp': 3.5, 'property_hba': 2}
-
-        >>> flatten_nested_dict(None, "property_", mapping)
-        {'property_alogp': None, 'property_hba': None}
-
-        >>> # With renames parameter
-        >>> data = {"molecule_chembl_id": "CHEMBL25"}
-        >>> mapping = {"molecule_chembl_id": None}
-        >>> renames = {"hierarchy_molecule_chembl_id": "hierarchy_child_chembl_id"}
-        >>> flatten_nested_dict(data, "hierarchy_", mapping, renames)
-        {'hierarchy_child_chembl_id': 'CHEMBL25'}
-
-    """
-    if not data or not isinstance(data, dict):
-        result = {f"{prefix}{key}": None for key in field_mapping}
-    else:
-        result = {}
-        for source_key, converter in field_mapping.items():
-            value = data.get(source_key)
-            if converter is not None and value is not None:
-                result[f"{prefix}{source_key}"] = converter(value)
-            else:
-                result[f"{prefix}{source_key}"] = value
-
-    # Apply renames if provided
-    if renames:
-        for old_key, new_key in renames.items():
-            if old_key in result:
-                result[new_key] = result.pop(old_key)
-
-    return result
-
-
-def extract_list_field(
-    items: list[dict[str, Any]] | None,
-    field: str,
-    converter: Callable[[Any], T] | None = None,
-) -> list[T] | None:
-    """Извлекает значения поля из списка словарей.
-
-    Используется для агрегации полей из компонентов, классификаций и т.д.
-
-    Args:
-        items: Список словарей для обработки.
-        field: Имя поля для извлечения.
-        converter: Опциональный конвертер (safe_int, safe_float и т.д.).
-                   Если None, значения возвращаются как есть.
-
-    Returns:
-        Список значений или None, если результат пустой.
-
-    Example:
-        >>> items = [{"id": "1"}, {"id": "2"}, {"id": None}]
-        >>> extract_list_field(items, "id")
-        ['1', '2']
-
-        >>> extract_list_field(items, "id", safe_int)
-        [1, 2]
-
-    """
-    if not items or not isinstance(items, list):
-        return None
-
-    values: list[T] = []
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-        raw_value = item.get(field)
-        if raw_value is None:
-            continue
-
-        if converter is not None:
-            converted = converter(raw_value)
-            if converted is not None:
-                values.append(converted)
-        else:
-            values.append(raw_value)
-
-    return values if values else None
-
-
-def _extract_nested_values(items: list[dict[str, Any]], field: str) -> list[Any]:
-    """Extract all nested list values from a field across items."""
-    values: list[Any] = []
-    for item in items:
-        if isinstance(item, dict):
-            nested = item.get(field)
-            if isinstance(nested, list):
-                values.extend(nested)
-    return values
-
-
-def aggregate_nested_lists(
-    items: list[dict[str, Any]] | None,
-    field: str,
-    deduplicate: bool = True,
-) -> list[Any] | None:
-    """Агрегирует вложенные списки из списка словарей.
-
-    Используется для сбора synonyms, xrefs и других вложенных списков
-    из множества компонентов в один плоский список.
-
-    Args:
-        items: Список словарей, каждый из которых может содержать вложенный список.
-        field: Имя поля со вложенным списком.
-        deduplicate: Если True, удаляет дубликаты из результирующего списка (по умолчанию True).
-
-    Returns:
-        Объединённый список или None, если результат пустой.
-
-    Example:
-        >>> items = [
-        ...     {"synonyms": ["a", "b"]},
-        ...     {"synonyms": ["c", "a"]},
-        ...     {"other": "data"}
-        ... ]
-        >>> aggregate_nested_lists(items, "synonyms")
-        ['a', 'b', 'c']
-
-    """
-    if not isinstance(items, list) or not items:
-        return None
-
-    values = _extract_nested_values(items, field)
-    if not values:
-        return None
-
-    if deduplicate:
-        seen: set[str] = set()
-        unique: list[Any] = []
-        for val in values:
-            key = str(val)
-            if key not in seen:
-                seen.add(key)
-                unique.append(val)
-        return unique if unique else None
-
-    return values
-
-
-def normalize_string(value: str | None) -> str | None:
-    """Нормализует строковое поле.
-
-    Удаляет пробельные символы по краям и возвращает None для пустых строк.
-
-    Note: Delegated to domain.normalization.normalize_string per REFACTOR-004.
-
-    Args:
-        value: Строка для нормализации.
-
-    Returns:
-        Нормализованная строка или None.
-
-    Example:
-        >>> normalize_string("  hello world  ")
-        'hello world'
-        >>> normalize_string("   ")
-        None
-        >>> normalize_string(None)
-        None
-
-    """
-    return _domain_normalize_string(value)
-
-
-def parse_date_field(
-    value: str | None,
-    fmt: str = "%Y-%m-%d",
-) -> date | None:
-    """Парсит строку даты в объект date.
-
-    Безопасный парсинг с обработкой ошибок и невалидных форматов.
-
-    Note: Delegated to domain.normalization.parse_date_field per REFACTOR-004.
-
-    Args:
-        value: Строка с датой или None.
-        fmt: Формат даты (по умолчанию ISO: YYYY-MM-DD).
-
-    Returns:
-        Объект date или None при ошибке парсинга.
-
-    Example:
-        >>> parse_date_field("2024-01-15")
-        datetime.date(2024, 1, 15)
-        >>> parse_date_field("invalid")
-        None
-        >>> parse_date_field("15/01/2024", "%d/%m/%Y")
-        datetime.date(2024, 1, 15)
-
-    """
-    return _domain_parse_date_field(value, fmt)
-
-
-def validate_smiles(smiles: str | None) -> bool:
-    """Проверяет валидность SMILES строки.
-
-    Выполняет базовую синтаксическую проверку без полного парсинга молекулы.
-    Для полной валидации используйте RDKit или другую химическую библиотеку.
-
-    Note: Delegated to domain.validation.validate_smiles per REFACTOR-004.
-
-    Args:
-        smiles: SMILES строка для проверки.
-
-    Returns:
-        True если строка соответствует базовому синтаксису SMILES.
-
-    Example:
-        >>> validate_smiles("CCO")  # Ethanol
-        True
-        >>> validate_smiles("C1=CC=CC=C1")  # Benzene
-        True
-        >>> validate_smiles("")
-        False
-        >>> validate_smiles(None)
-        False
-        >>> validate_smiles("invalid smiles with spaces")
-        False
-
-    """
-    return _domain_validate_smiles(smiles)
-
-
-def safe_extract(
-    record: dict[str, Any],
-    key: str,
-    default: T | None = None,
-) -> T | Any | None:
-    """Безопасно извлекает значение из словаря с логированием.
-
-    Обёртка над dict.get() для унифицированного извлечения полей.
-    Для использования с логированием используйте в связке с контекстом.
-
-    Args:
-        record: Словарь для извлечения.
-        key: Ключ для поиска.
-        default: Значение по умолчанию (None).
-
-    Returns:
-        Значение по ключу или default.
-
-    Example:
-        >>> record = {"name": "test", "value": 42}
-        >>> safe_extract(record, "name")
-        'test'
-        >>> safe_extract(record, "missing", "default")
-        'default'
-
-    """
-    return record.get(key, default)
-
-
-# Re-export safe_float and safe_int for convenience
-__all__ = [
-    "aggregate_nested_lists",
-    "extract_list_field",
-    "flatten_nested_dict",
-    "normalize_string",
-    "parse_date_field",
-    "safe_extract",
-    "safe_float",
-    "safe_int",
-    "validate_smiles",
-]
-
-================================================================================
 File: __init__.py
 Path: observability\__init__.py
 ================================================================================
@@ -15998,6 +16004,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
     FieldSpec,
@@ -16006,7 +16013,6 @@ from bioetl.application.core.field_specs import (
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -16458,6 +16464,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
     FieldSpec,
@@ -16465,7 +16472,6 @@ from bioetl.application.core.field_specs import (
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -17095,13 +17101,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
     int_fields,
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -18107,9 +18113,9 @@ class PublicationTransformer(BaseChemblTransformer):
 
         # Validate year using PublicationYear Value Object
         # Note: field_specs already maps year → publication_year
-        year_vo = PublicationYear.from_raw(data.get("publication_year"))
-        validated_year = year_vo.value if year_vo else None
-        data["publication_year"] = validated_year
+        data["publication_year"] = self.validate_value_object(
+            PublicationYear, data.get("publication_year"), as_string=False
+        )
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
@@ -18505,13 +18511,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import extract_list_field
 from bioetl.application.core.field_specs import (
     FieldGroup,
     FieldSpec,
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import extract_list_field
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -18603,7 +18609,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.transform_utils import (
+from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
     extract_list_field,
 )
@@ -18659,7 +18665,7 @@ class TargetTransformer(BaseChemblTransformer):
     def _extract_basic_component_fields(
         self, components: list[dict[str, Any]]
     ) -> dict[str, list[Any] | None]:
-        """Extract basic fields from component list via transform_utils."""
+        """Extract basic fields from component list via dict_transformers."""
         return {
             "component_accessions": extract_list_field(components, "accession"),
             "component_ids": extract_list_field(components, "component_id", safe_int),
@@ -18675,7 +18681,7 @@ class TargetTransformer(BaseChemblTransformer):
     ) -> str | int | float | bool | None:
         """Aggregate synonyms from all components into a single JSON list.
 
-        Uses aggregate_nested_lists from transform_utils.
+        Uses aggregate_nested_lists from dict_transformers.
 
         Args:
             components: List of component dicts from ChEMBL API.
@@ -18692,7 +18698,7 @@ class TargetTransformer(BaseChemblTransformer):
     ) -> str | int | float | bool | None:
         """Aggregate cross-references from all target components.
 
-        Uses aggregate_nested_lists from transform_utils.
+        Uses aggregate_nested_lists from dict_transformers.
         ChEMBL API stores cross-references inside each component's
         target_component_xrefs field, not at the target level.
 
@@ -19243,7 +19249,6 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_page_info,
     extract_published_date,
     extract_references,
-    extract_year,
 )
 from bioetl.application.pipelines.crossref.transformer import (
     CrossRefPublicationTransformer,
@@ -19262,7 +19267,6 @@ __all__ = [
     "extract_page_info",
     "extract_published_date",
     "extract_references",
-    "extract_year",
 ]
 
 ================================================================================
@@ -19423,7 +19427,6 @@ from bioetl.domain.normalization import (
     format_date_parts,
     parse_page_range,
 )
-from bioetl.domain.value_objects import PublicationYear
 
 # Re-exports for backward compatibility
 __all__ = [
@@ -19438,7 +19441,6 @@ __all__ = [
     "extract_page_info",
     "extract_published_date",
     "extract_references",
-    "extract_year",
 ]
 
 
@@ -19528,39 +19530,6 @@ def extract_affiliations(publication: dict[str, Any]) -> list[str]:
                 affiliations.add(name.strip())
 
     return sorted(affiliations)
-
-
-def extract_year(publication: dict[str, Any]) -> int | None:
-    """Extract publication year from date-parts.
-
-    Tries published-print, then published-online, then issued.
-    Validates using PublicationYear Value Object for consistent range checking.
-
-    Args:
-        publication: CrossRef publication record.
-
-    Returns:
-        Publication year if valid (1800-2100), None otherwise.
-
-    Example:
-        >>> extract_year({"published-print": {"date-parts": [[2023, 6, 15]]}})
-        2023
-        >>> extract_year({"issued": {"date-parts": [[2021]]}})
-        2021
-        >>> extract_year({})
-        None
-
-    """
-    for date_field in ["published-print", "published-online", "issued"]:
-        date_info = publication.get(date_field, {})
-        date_parts = date_info.get("date-parts", [[]])
-        if date_parts and date_parts[0] and len(date_parts[0]) > 0:
-            raw_year = date_parts[0][0]
-            if isinstance(raw_year, int):
-                year_vo = PublicationYear.from_raw(raw_year)
-                if year_vo:
-                    return year_vo.value
-    return None
 
 
 def extract_license_url(publication: dict[str, Any]) -> str | None:
@@ -19929,12 +19898,11 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_page_info,
     extract_published_date,
     extract_references,
-    extract_year,
 )
 from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
-from bioetl.domain.value_objects import DOI
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -20053,6 +20021,15 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             dates.get("published_online"),
         )
 
+        # Extract raw year from date-parts for validation
+        raw_year = None
+        for date_field in ["published-print", "published-online", "issued"]:
+            date_info = rec.get(date_field, {})
+            date_parts = date_info.get("date-parts", [[]])
+            if date_parts and date_parts[0] and len(date_parts[0]) > 0:
+                raw_year = date_parts[0][0]
+                break
+
         return {
             "doi": doi,
             "title": extract_first_string(rec.get("title", [])),
@@ -20060,7 +20037,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **journal_info,
             **page_info,
             **dates,
-            "publication_year": extract_year(rec),
+            "publication_year": self.validate_value_object(
+                PublicationYear, raw_year, as_string=False
+            ),
             "publication_date": publication_date,
             "publication_type": rec.get(
                 "type"
@@ -20087,7 +20066,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **content_domain,
             **issn_by_type,
             # Author and reference data
-            "author_orcid_list": serialized_orcids,
+            "author_orcids": serialized_orcids,
             "author_details": serialized_author_details,
             "references": serialized_references,
             # DQ flags (MUST be last, per RULES.md §2.4)
@@ -21652,7 +21631,7 @@ from typing import TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 
 # Email pattern for detection and extraction
 EMAIL_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
@@ -22298,7 +22277,7 @@ from typing import ClassVar, TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 
 
 class RawDate(TypedDict):
@@ -23044,7 +23023,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     RawAuthor,
     StructuredAffiliation,
 )
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.services import IdentityService
@@ -23660,8 +23639,12 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
 
-        year_vo = PublicationYear.from_raw(raw_year)
-        validated_year = year_vo.value if year_vo else None
+        _validated_year = self.validate_value_object(
+            PublicationYear, raw_year, as_string=False
+        )
+        validated_year: int | None = (
+            int(_validated_year) if _validated_year is not None else None
+        )
 
         raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
 
@@ -23728,8 +23711,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         return silver_record
 
 ================================================================================
-File: xml_utils.py
-Path: pipelines\pubmed\xml_utils.py
+File: xml_parser.py
+Path: pipelines\pubmed\xml_parser.py
 ================================================================================
 """Common XML utilities for PubMed extractors.
 
@@ -24268,11 +24251,6 @@ from bioetl.application.pipelines.semanticscholar._page_parsing import (
     parse_page_range,
     parse_volume_issue,
 )
-from bioetl.domain.config import ValidationConfig
-from bioetl.domain.value_objects import PublicationYear
-
-# Semantic Scholar-specific config with min_year=1500 for historical publications
-_SS_VALIDATION_CONFIG = ValidationConfig(min_publication_year=1500)
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
@@ -24551,25 +24529,6 @@ def extract_fields_of_study(
     return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 
-def validate_year(year: int | None) -> int | None:
-    """Validate publication year using PublicationYear Value Object.
-
-    Uses Semantic Scholar-specific ValidationConfig with min_year=1500
-    to support historical publications.
-
-    Args:
-        year: Year from S2 response.
-
-    Returns:
-        Year if valid (1500-2100), None otherwise.
-
-    """
-    if year is None:
-        return None
-    year_vo = PublicationYear.from_raw(year, config=_SS_VALIDATION_CONFIG)
-    return year_vo.value if year_vo else None
-
-
 __all__ = [
     "VALID_OA_STATUS_VALUES",
     "extract_affiliations",
@@ -24587,7 +24546,6 @@ __all__ = [
     "normalize_oa_status",
     "parse_page_range",
     "parse_volume_issue",
-    "validate_year",
 ]
 
 ================================================================================
@@ -24617,10 +24575,9 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_journal_info,
     extract_open_access_info,
     extract_tldr,
-    validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
-from bioetl.domain.value_objects import DOI, PubMedId
+from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -24798,7 +24755,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "page_range": journal_info.get("page_range"),
             "page_first": journal_info.get("page_first"),
             "page_last": journal_info.get("page_last"),
-            "publication_year": validate_year(rec.get("year")),
+            "publication_year": self.validate_value_object(
+                PublicationYear, rec.get("year"), as_string=False
+            ),
             "publication_date": self._normalize_partial_date(
                 rec.get("publicationDate")
             ),
@@ -24848,13 +24807,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without authors.
+            SilverRecord dictionary without pmc_id/arxiv_id.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
         silver_record = BaseTransformer.entity_to_silver_record(entity)
-        silver_record.pop("authors", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("arxiv_id", None)
         return silver_record
@@ -28979,7 +28937,10 @@ from typing import Any
 
 import orjson
 
-from bioetl.application.services.dq.utils import build_summary, update_counts
+from bioetl.application.services.dq.dq_report_builders import (
+    build_summary,
+    update_counts,
+)
 from bioetl.domain.ports import BronzeDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (
@@ -29210,6 +29171,121 @@ class BronzeDQAnalyzer:
 __all__ = ["BronzeDQAnalyzer"]
 
 ================================================================================
+File: dq_report_builders.py
+Path: services\dq\dq_report_builders.py
+================================================================================
+"""Common utilities for DQ analyzers.
+
+Provides shared functions used by Bronze, Silver, and Gold DQ analyzers.
+Extracted to reduce code duplication per refactoring analysis 2026-01-25.
+"""
+
+from __future__ import annotations
+
+from dataclasses import fields, is_dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any
+
+from bioetl.domain.value_objects.dq_report import (
+    DQCheckStatus,
+    DQReportStatus,
+    DQReportSummary,
+)
+
+
+def convert_value(value: Any) -> Any:
+    """Convert a value for serialization.
+
+    Handles dataclasses, enums, datetimes, and collection types.
+
+    Args:
+        value: Value to convert.
+
+    Returns:
+        Serializable representation of the value.
+    """
+    if is_dataclass(value) and not isinstance(value, type):
+        return {
+            field.name: convert_value(getattr(value, field.name))
+            for field in fields(value)
+        }
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {key: convert_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [convert_value(item) for item in value]
+    return value
+
+
+def update_counts(
+    status: DQCheckStatus,
+    passed: int,
+    failed: int,
+    warnings: int,
+) -> tuple[int, int, int]:
+    """Update check counts based on status.
+
+    Args:
+        status: Result status of the check.
+        passed: Current count of passed checks.
+        failed: Current count of failed checks.
+        warnings: Current count of warning checks.
+
+    Returns:
+        Updated tuple of (passed, failed, warnings).
+    """
+    if status == DQCheckStatus.PASS:
+        return passed + 1, failed, warnings
+    if status == DQCheckStatus.FAIL:
+        return passed, failed + 1, warnings
+    return passed, failed, warnings + 1
+
+
+def build_summary(
+    passed: int,
+    failed: int,
+    warnings: int,
+    threshold_status: DQCheckStatus | None = None,
+) -> DQReportSummary:
+    """Build DQ report summary with overall status.
+
+    Args:
+        passed: Number of passed checks.
+        failed: Number of failed checks.
+        warnings: Number of warning checks.
+        threshold_status: Optional status from threshold calculation
+            (used by Silver analyzer).
+
+    Returns:
+        DQReportSummary with overall status.
+    """
+    if failed > 0 or (threshold_status == DQCheckStatus.FAIL):
+        overall_status = DQReportStatus.FAIL
+    elif warnings > 0 or (threshold_status == DQCheckStatus.WARN):
+        overall_status = DQReportStatus.WARNING
+    else:
+        overall_status = DQReportStatus.PASS
+
+    return DQReportSummary(
+        total_checks=passed + failed + warnings,
+        passed=passed,
+        failed=failed,
+        warnings=warnings,
+        overall_status=overall_status,
+    )
+
+
+__all__ = [
+    "build_summary",
+    "convert_value",
+    "update_counts",
+]
+
+================================================================================
 File: gold_analyzer.py
 Path: services\dq\gold_analyzer.py
 ================================================================================
@@ -29249,7 +29325,10 @@ from bioetl.application.services.dq._checks_statistical import (
     check_anomaly_detection,
     check_statistical_profile,
 )
-from bioetl.application.services.dq.utils import build_summary, update_counts
+from bioetl.application.services.dq.dq_report_builders import (
+    build_summary,
+    update_counts,
+)
 from bioetl.domain.ports import GoldDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (
@@ -29433,7 +29512,10 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
-from bioetl.application.services.dq.utils import build_summary, update_counts
+from bioetl.application.services.dq.dq_report_builders import (
+    build_summary,
+    update_counts,
+)
 from bioetl.domain.ports import SilverDQConfigPort
 from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (
@@ -29985,121 +30067,6 @@ class SilverDQAnalyzer:
 
 
 __all__ = ["SilverDQAnalyzer"]
-
-================================================================================
-File: utils.py
-Path: services\dq\utils.py
-================================================================================
-"""Common utilities for DQ analyzers.
-
-Provides shared functions used by Bronze, Silver, and Gold DQ analyzers.
-Extracted to reduce code duplication per refactoring analysis 2026-01-25.
-"""
-
-from __future__ import annotations
-
-from dataclasses import fields, is_dataclass
-from datetime import datetime
-from enum import Enum
-from typing import Any
-
-from bioetl.domain.value_objects.dq_report import (
-    DQCheckStatus,
-    DQReportStatus,
-    DQReportSummary,
-)
-
-
-def convert_value(value: Any) -> Any:
-    """Convert a value for serialization.
-
-    Handles dataclasses, enums, datetimes, and collection types.
-
-    Args:
-        value: Value to convert.
-
-    Returns:
-        Serializable representation of the value.
-    """
-    if is_dataclass(value) and not isinstance(value, type):
-        return {
-            field.name: convert_value(getattr(value, field.name))
-            for field in fields(value)
-        }
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, dict):
-        return {key: convert_value(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, set, frozenset)):
-        return [convert_value(item) for item in value]
-    return value
-
-
-def update_counts(
-    status: DQCheckStatus,
-    passed: int,
-    failed: int,
-    warnings: int,
-) -> tuple[int, int, int]:
-    """Update check counts based on status.
-
-    Args:
-        status: Result status of the check.
-        passed: Current count of passed checks.
-        failed: Current count of failed checks.
-        warnings: Current count of warning checks.
-
-    Returns:
-        Updated tuple of (passed, failed, warnings).
-    """
-    if status == DQCheckStatus.PASS:
-        return passed + 1, failed, warnings
-    if status == DQCheckStatus.FAIL:
-        return passed, failed + 1, warnings
-    return passed, failed, warnings + 1
-
-
-def build_summary(
-    passed: int,
-    failed: int,
-    warnings: int,
-    threshold_status: DQCheckStatus | None = None,
-) -> DQReportSummary:
-    """Build DQ report summary with overall status.
-
-    Args:
-        passed: Number of passed checks.
-        failed: Number of failed checks.
-        warnings: Number of warning checks.
-        threshold_status: Optional status from threshold calculation
-            (used by Silver analyzer).
-
-    Returns:
-        DQReportSummary with overall status.
-    """
-    if failed > 0 or (threshold_status == DQCheckStatus.FAIL):
-        overall_status = DQReportStatus.FAIL
-    elif warnings > 0 or (threshold_status == DQCheckStatus.WARN):
-        overall_status = DQReportStatus.WARNING
-    else:
-        overall_status = DQReportStatus.PASS
-
-    return DQReportSummary(
-        total_checks=passed + failed + warnings,
-        passed=passed,
-        failed=failed,
-        warnings=warnings,
-        overall_status=overall_status,
-    )
-
-
-__all__ = [
-    "build_summary",
-    "convert_value",
-    "update_counts",
-]
 
 ================================================================================
 File: dq_metrics_calculator.py
@@ -32409,7 +32376,7 @@ class RunOptions:
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
     # Cached Bronze mode options
-    use_cached_bronze: bool = False
+    use_cached_bronze: bool = True
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None  # YYYY-MM-DD format
 

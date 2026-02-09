@@ -64,6 +64,9 @@ class CompositeRuntimeConfig:
         required_only: Skip optional enrichers.
         force_enricher: Force re-run of specified enricher.
         seed_limit: Optional limit for seed pipeline.
+        use_cached_bronze: Load data from Bronze cache instead of API.
+        cached_bronze_path: Explicit path to Bronze cache directory.
+        cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD).
     """
 
     resume: bool = False
@@ -72,6 +75,9 @@ class CompositeRuntimeConfig:
     required_only: bool = False
     force_enricher: str | None = None
     seed_limit: int | None = None
+    use_cached_bronze: bool = True
+    cached_bronze_path: str | None = None
+    cached_bronze_date: str | None = None
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""

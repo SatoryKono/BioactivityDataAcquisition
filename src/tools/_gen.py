@@ -1,11 +1,11 @@
 import pathlib
 
 target = pathlib.Path(
-    "E:/google_drive/05_AI/github/BioactivityDataAcquisition2/.claude/agents/py-doc-bot.md"
+    "E:/g-drive/05_AI/github/BioactivityDataAcquisition2/.claude/agents/py-doc-bot.md"
 )
 
 # Read source files for reference
-base = pathlib.Path("E:/google_drive/05_AI/github/BioactivityDataAcquisition2")
+base = pathlib.Path("E:/g-drive/05_AI/github/BioactivityDataAcquisition2")
 sub_path = base / ".claude/agents/subagents/pyDocBot/SUBAGENT.md"
 doc_path = base / ".claude/agents/doc-sync.md"
 adr_path = base / ".claude/agents/adr-manager.md"

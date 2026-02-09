@@ -29,9 +29,9 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Reasonable year range
-    year:
-      min: 1900
+    # Scientific journals era cutoff (schema allows 1500..2100)
+    publication_year:
+      min: 1800
       max: 2100
 
   # Required fields

@@ -168,7 +168,6 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "author_details": PublicationFieldGroup.TRASH,
     "author_h_indices": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_openalex_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
-    "author_orcid_list": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_orcids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_s2_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "authors": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,

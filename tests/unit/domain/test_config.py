@@ -193,7 +193,7 @@ class TestValidationConfig:
         """Test default validation range values."""
         config = ValidationConfig()
 
-        assert config.min_publication_year == 1800
+        assert config.min_publication_year == 1500
         assert config.max_publication_year == 2100
         assert config.min_molecular_weight == 10.0
         assert config.max_molecular_weight == 10_000.0
@@ -230,7 +230,7 @@ class TestValidationConfig:
         """Test equality between ValidationConfig instances."""
         config1 = ValidationConfig()
         config2 = ValidationConfig()
-        config3 = ValidationConfig(min_publication_year=1500)
+        config3 = ValidationConfig(min_publication_year=1600)
 
         assert config1 == config2
         assert config1 != config3
@@ -246,7 +246,7 @@ class TestValidationConfig:
     def test_invalid_year_range_raises(self) -> None:
         """Test that invalid year range (min >= max) raises ValueError."""
         with pytest.raises(ValueError, match="min_publication_year"):
-            ValidationConfig(min_publication_year=2100, max_publication_year=1800)
+            ValidationConfig(min_publication_year=2100, max_publication_year=1500)
 
     def test_invalid_year_range_equal_raises(self) -> None:
         """Test that equal year range raises ValueError."""
@@ -277,7 +277,7 @@ class TestValidationConfig:
         """Test that DEFAULT_VALIDATION_CONFIG singleton is available."""
         assert DEFAULT_VALIDATION_CONFIG is not None
         assert isinstance(DEFAULT_VALIDATION_CONFIG, ValidationConfig)
-        assert DEFAULT_VALIDATION_CONFIG.min_publication_year == 1800
+        assert DEFAULT_VALIDATION_CONFIG.min_publication_year == 1500
 
     def test_semantic_scholar_config(self) -> None:
         """Test Semantic Scholar-specific config with min_year=1500."""

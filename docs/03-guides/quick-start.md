@@ -27,7 +27,8 @@ source .venv/bin/activate  # Linux/macOS
 # .venv\Scripts\activate   # Windows
 
 # Run ChEMBL activity pipeline (limited to 100 records)
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+# Note: Use --no-cached-bronze for the very first run to fetch from API
+python -m bioetl.main run --pipeline chembl_activity --limit 100 --no-cached-bronze
 
 # Data will be stored in:
 # - data/bronze/v1/chembl/activity/
