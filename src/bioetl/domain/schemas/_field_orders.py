@@ -119,7 +119,7 @@ PUBLICATION_FIELD_ORDER: Final[tuple[str, ...]] = (
     "crossref.publication.author_details",
     "semanticscholar.publication.author_h_indices",
     "openalex.publication.author_openalex_ids",
-    "crossref.publication.author_orcid_list",
+    "crossref.publication.author_orcids",
     "openalex.publication.author_orcids",
     "semanticscholar.publication.author_orcids",
     "semanticscholar.publication.author_s2_ids",

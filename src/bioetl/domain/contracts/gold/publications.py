@@ -18,7 +18,10 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
-from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS, OA_STATUS_VALUES
+from bioetl.domain.schemas.common.publication_base import (
+    LOOKUP_METHODS,
+    OA_STATUS_VALUES,
+)
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 
@@ -124,13 +127,12 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS)
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -218,9 +220,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     issn_electronic: Series[str] = pa.Field(nullable=True)
 
     # Author identifiers
-    author_orcid_list: Series[str] = pa.Field(
-        nullable=True
-    )  # JSON array of ORCID identifiers (unified: was author_orcids)
+    author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCID IDs
     author_details: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of author objects (given, family, orcid, sequence, affiliations)
@@ -230,13 +230,12 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
         nullable=True
     )  # JSON array of cited references (DOI, title, author, year)
 
-    # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS)
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -340,13 +339,12 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     author_openalex_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
     author_orcids: Series[str] = pa.Field(nullable=True)  # ORCID IDs
 
-    # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS)
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -437,13 +435,12 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # External identifiers
     dblp_id: Series[str] = pa.Field(nullable=True)  # DBLP publication key
 
-    # Source tracking (maps to _source column in DataFrame)
     source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS)
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields

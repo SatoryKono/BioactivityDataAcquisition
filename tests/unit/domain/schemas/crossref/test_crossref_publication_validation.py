@@ -684,21 +684,21 @@ class TestIssnElectronicBaseValidation:
 
 
 @pytest.mark.unit
-class TestAuthorOrcidListBaseValidation:
-    """Base validation tests for author_orcid_list."""
+class TestAuthorOrcidsBaseValidation:
+    """Base validation tests for author_orcids."""
 
-    def test_author_orcid_list_valid(
+    def test_author_orcids_valid(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
-        """PASS: valid author_orcid_list value."""
+        """PASS: valid author_orcids value."""
         PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
 
-    def test_author_orcid_list_null_allowed(
+    def test_author_orcids_null_allowed(
         self, minimal_crossref_publication_df: pd.DataFrame
     ) -> None:
-        """SKIP: author_orcid_list is nullable."""
+        """SKIP: author_orcids is nullable."""
         df = minimal_crossref_publication_df.copy()
-        df["author_orcid_list"] = None
+        df["author_orcids"] = None
         PublicationEnrichedSchema.validate(df)
 
 

@@ -40,7 +40,7 @@ provider_field_validations:
     error_message: "Publication year out of valid range"
 
   # Citation counts must be non-negative
-  - field: citation_count
+  - field: citations_received
     type: range
     min: 0
     nullable: true

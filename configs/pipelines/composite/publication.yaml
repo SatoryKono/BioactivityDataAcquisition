@@ -325,7 +325,6 @@ composite:
           - author_details
           - author_h_indices
           - author_openalex_ids
-          - author_orcid_list
           - author_orcids
           - author_s2_ids
           - authors

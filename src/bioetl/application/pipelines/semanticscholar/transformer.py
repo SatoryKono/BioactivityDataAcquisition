@@ -21,10 +21,9 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_journal_info,
     extract_open_access_info,
     extract_tldr,
-    validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
-from bioetl.domain.value_objects import DOI, PubMedId
+from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -202,7 +201,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "page_range": journal_info.get("page_range"),
             "page_first": journal_info.get("page_first"),
             "page_last": journal_info.get("page_last"),
-            "publication_year": validate_year(rec.get("year")),
+            "publication_year": self.validate_value_object(
+                PublicationYear, rec.get("year"), as_string=False
+            ),
             "publication_date": self._normalize_partial_date(
                 rec.get("publicationDate")
             ),
