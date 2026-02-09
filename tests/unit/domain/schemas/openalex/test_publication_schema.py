@@ -152,8 +152,6 @@ class TestOpenAlexPublicationSchema:
 
     def test_year_range_validation(self, valid_record: dict) -> None:
         """Should validate publication_year range (1950-CURRENT_YEAR+1)."""
-        current_year = datetime.now(UTC).year
-
         # Valid year
         valid_record["publication_year"] = 2024
         df = pd.DataFrame([valid_record])

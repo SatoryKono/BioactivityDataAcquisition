@@ -866,3 +866,166 @@ class TestChemblAdapterDirectEndpointFallback:
             if c.args and c.args[0] == "single_id_fetch_failed"
         ]
         assert len(error_calls) == 1
+
+
+@pytest.mark.unit
+class TestChemblAdapterExtractionParams:
+    """Tests for extraction_params support in ChemblAdapter."""
+
+    def test_build_params_without_extraction_params(
+        self, mock_http_client, mock_logger
+    ):
+        """Regression: _build_params returns only format+limit+offset without extraction_params."""
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=500),
+        )
+
+        params = adapter._build_params(offset=0)
+
+        assert params == {"format": "json", "limit": 500, "offset": 0}
+
+    def test_build_params_with_extraction_params(self, mock_http_client, mock_logger):
+        """Test that extraction_params are merged into _build_params output."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50,Ki",
+                "pchembl_value__isnull": False,
+            }
+        )
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=500),
+            extraction_params=ep,
+        )
+
+        params = adapter._build_params(offset=0)
+
+        assert params["format"] == "json"
+        assert params["limit"] == 500
+        assert params["offset"] == 0
+        assert params["standard_type__in"] == "IC50,Ki"
+        assert params["pchembl_value__isnull"] is False
+
+    def test_build_params_extraction_params_merged_with_pagination(
+        self, mock_http_client, mock_logger
+    ):
+        """Test extraction_params merge with pagination for non-paginated entity."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams(params={"standard_units": "nM"})
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            extraction_params=ep,
+        )
+
+        # "target" is in _NO_PAGINATION_ENTITIES, so no limit/offset
+        params = adapter._build_params(offset=0, entity_type="target")
+
+        assert params["format"] == "json"
+        assert "limit" not in params
+        assert "offset" not in params
+        assert params["standard_units"] == "nM"
+
+    def test_build_params_empty_extraction_params_no_effect(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that empty ExtractionParams doesn't add extra keys."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams.empty()
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=500),
+            extraction_params=ep,
+        )
+
+        params = adapter._build_params(offset=0)
+
+        assert params == {"format": "json", "limit": 500, "offset": 0}
+
+    def test_init_logs_extraction_params_when_configured(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that non-empty extraction_params are logged at init."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50,Ki",
+                "pchembl_value__isnull": False,
+            }
+        )
+        ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            extraction_params=ep,
+        )
+
+        info_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and c.args[0] == "chembl_extraction_params_configured"
+        ]
+        assert len(info_calls) == 1
+        kwargs = info_calls[0].kwargs
+        assert kwargs["provider"] == "chembl"
+        assert kwargs["param_count"] == 2
+        assert "standard_type__in" in kwargs["query_string"]
+
+    def test_init_no_log_when_extraction_params_empty(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that empty extraction_params don't trigger logging."""
+        ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+        )
+
+        info_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and c.args[0] == "chembl_extraction_params_configured"
+        ]
+        assert len(info_calls) == 0
+
+    def test_get_source_metadata_includes_query_string(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that get_source_metadata sets query_string from extraction_params."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50",
+                "standard_units": "nM",
+            }
+        )
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            extraction_params=ep,
+        )
+
+        metadata = adapter.get_source_metadata()
+
+        assert metadata.query_string == "standard_type__in=IC50&standard_units=nM"
+
+    def test_get_source_metadata_no_query_string_when_empty(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that get_source_metadata has no query_string when extraction_params empty."""
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+        )
+
+        metadata = adapter.get_source_metadata()
+
+        assert metadata.query_string is None

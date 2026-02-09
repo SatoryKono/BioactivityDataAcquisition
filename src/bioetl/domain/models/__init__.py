@@ -4,6 +4,7 @@ Contains Pydantic models for structured data that requires validation.
 These models define data contracts for metadata sidecar files.
 """
 
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     ColumnMetrics,
@@ -30,6 +31,7 @@ __all__ = [
     "DQSummary",
     "DeltaMetrics",
     "EnvironmentMetadata",
+    "ExtractionParams",
     "FileOutputMetadata",
     "GoldMetadata",
     "LayerType",

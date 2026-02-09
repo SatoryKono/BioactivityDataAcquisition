@@ -176,7 +176,8 @@ class TestGoldPublicationSchemaCoreFields:
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
-            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
+            # SemanticScholar excluded: transformer pops raw authors,
+            # uses author_s2_ids/author_orcids instead
         ],
     )
     def test_schema_has_authors_field(self, schema_class, name):

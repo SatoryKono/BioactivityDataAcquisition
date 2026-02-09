@@ -25,7 +25,7 @@ from bioetl.domain import contracts
 from bioetl.domain import constants
 
 # Domain registry (publication entity mappings, ADR-024)
-from bioetl.domain import registry
+from bioetl.domain import registry  # noqa: F401
 from bioetl.domain.registry import (
     LEGACY_PUBLICATION_ALIASES,
     PUBLICATION_ENTITY_TYPES,
@@ -103,7 +103,7 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
 )
 
 # Domain mapping (entity relation mappings)
-from bioetl.domain import mapping
+from bioetl.domain import mapping  # noqa: F401
 
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -159,6 +159,9 @@ from bioetl.domain.exceptions import (
     UploadError,
     ValidationError,
 )
+
+# Extraction filtering (ADR-028 §3)
+from bioetl.domain.models import ExtractionParams
 
 # Filter configuration
 from bioetl.domain.filtering import (
@@ -459,6 +462,8 @@ __all__ = [
     "InvalidDataFormatError",
     "MissingRequiredFieldError",
     "SchemaViolationError",
+    # Extraction filtering (ADR-028)
+    "ExtractionParams",
     # Filters
     "FilterLoadResult",
     "GoldColumnFilter",
