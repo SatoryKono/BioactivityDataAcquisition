@@ -220,13 +220,14 @@ async def test_health_check_healthy(adapter, mock_http_client):
 
 @pytest.mark.asyncio
 async def test_health_check_unhealthy(adapter, mock_http_client):
-    """Test unhealthy check with circuit breaker in UNHEALTHY state.
+    """Test unhealthy check with circuit breaker in OPEN state.
 
-    Health status is now derived from circuit breaker state, not consecutive errors.
+    Health status is derived from circuit breaker state: OPEN = UNHEALTHY.
     """
     mock_http_client.get_once = AsyncMock(side_effect=Exception("Down"))
-    # Configure circuit breaker to report UNHEALTHY state (failure_count > 2)
-    mock_http_client.circuit_breaker.get_failure_count.return_value = 3
+    # Configure circuit breaker OPEN state (threshold reached)
+    mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.OPEN
+    mock_http_client.circuit_breaker.get_failure_count.return_value = 5
 
     status = await adapter.health_check()
     # Falls back to circuit breaker state when exception occurs

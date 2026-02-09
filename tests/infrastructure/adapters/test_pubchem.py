@@ -200,7 +200,7 @@ async def test_health_check_degraded_on_probe_failure(pubchem_adapter):
 
     Uses Template Method pattern: exception in _probe_health() triggers
     _fallback_health_status() which uses circuit breaker assessment.
-    With 1 failure (<=2 threshold), returns DEGRADED.
+    With circuit breaker CLOSED + failures > 0, returns DEGRADED.
     """
     with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
         status = await pubchem_adapter.health_check()
@@ -208,19 +208,19 @@ async def test_health_check_degraded_on_probe_failure(pubchem_adapter):
 
 
 async def test_health_check_unhealthy_after_multiple_failures(pubchem_adapter):
-    """Test health check returns UNHEALTHY after multiple failures.
+    """Test health check returns UNHEALTHY after circuit breaker opens.
 
-    Circuit breaker records failures, and after threshold (>2),
-    assess_health_from_circuit_breaker returns UNHEALTHY.
+    Circuit breaker records failures, and after failure_threshold (5),
+    the circuit opens and assess_health_from_circuit_breaker returns UNHEALTHY.
     """
-    # Trigger 3 failures to exceed the threshold (>2 for UNHEALTHY)
-    for _ in range(3):
+    # Trigger 5 failures to reach failure_threshold=5 and trip circuit breaker to OPEN
+    for _ in range(5):
         with patch(
             "pubchempy.get_compounds", side_effect=Exception("Connection error")
         ):
             await pubchem_adapter.health_check()
 
-    # Now health check should return UNHEALTHY
+    # Circuit breaker should be OPEN now → UNHEALTHY
     with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
         status = await pubchem_adapter.health_check()
         assert status == HealthStatus.UNHEALTHY
