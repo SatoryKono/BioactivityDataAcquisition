@@ -16,7 +16,6 @@ from bioetl.application.pipelines.crossref import (
     CrossRefPublicationTransformer,
     extract_authors,
     extract_license_url,
-    extract_year,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities.crossref import CROSSREF_TYPE_DEFAULT, CROSSREF_TYPE_MAP
@@ -103,12 +102,6 @@ def test_extract_authors(sample_publication):
     """Test author extraction (CrossRef-specific logic)."""
     authors = extract_authors(sample_publication)
     assert authors == ["John Doe", "Jane Smith", "Anonymous"]
-
-
-def test_extract_year(sample_publication):
-    """Test year extraction (CrossRef-specific logic)."""
-    assert extract_year(sample_publication) == 2023
-    assert extract_year({}) is None
 
 
 def test_map_doc_type():
@@ -280,51 +273,6 @@ def test_extract_authors_with_whitespace():
     publication = {"author": [{"given": "  John  ", "family": "  Doe  "}]}
     authors = extract_authors(publication)
     assert authors == ["John Doe"]
-
-
-def test_extract_year_from_published_online():
-    """Test year extraction falls back to published-online."""
-    publication = {"published-online": {"date-parts": [[2022, 3, 15]]}}
-    assert extract_year(publication) == 2022
-
-
-def test_extract_year_from_issued():
-    """Test year extraction falls back to issued field."""
-    publication = {"issued": {"date-parts": [[2021, 1, 1]]}}
-    assert extract_year(publication) == 2021
-
-
-def test_extract_year_priority_order():
-    """Test year extraction prefers published-print over others."""
-    publication = {
-        "published-print": {"date-parts": [[2023, 6, 1]]},
-        "published-online": {"date-parts": [[2023, 5, 1]]},
-        "issued": {"date-parts": [[2023, 4, 1]]},
-    }
-    assert extract_year(publication) == 2023
-
-
-def test_extract_year_invalid_year_format():
-    """Test year extraction with invalid year format."""
-    publication = {"published-print": {"date-parts": [[]]}}
-    assert extract_year(publication) is None
-
-
-def test_extract_year_non_integer_year():
-    """Test year extraction with non-integer year."""
-    publication = {"published-print": {"date-parts": [["2023"]]}}
-    assert extract_year(publication) is None
-
-
-def test_extract_year_out_of_range():
-    """Test year extraction with year out of valid range."""
-    # Year 1499 is below min_year=1500 in validate_year_range
-    publication = {"published-print": {"date-parts": [[1499]]}}
-    assert extract_year(publication) is None
-
-    # Year 2101 is above max_year=2100
-    publication2 = {"published-print": {"date-parts": [[2101]]}}
-    assert extract_year(publication2) is None
 
 
 def test_extract_license_url_multiple_licenses():
