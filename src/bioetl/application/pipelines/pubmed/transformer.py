@@ -638,8 +638,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
 
-        year_vo = PublicationYear.from_raw(raw_year)
-        validated_year = year_vo.value if year_vo else None
+        validated_year = self.validate_value_object(
+            PublicationYear, raw_year, as_string=False
+        )
 
         raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
 
