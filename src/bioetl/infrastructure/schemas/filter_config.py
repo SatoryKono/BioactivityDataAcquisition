@@ -16,17 +16,18 @@ Structure:
 Usage:
     >>> from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
     >>> config = FilterConfigFile.model_validate(yaml_data)
-    >>> input_filter, gold_filters = config.to_domain()
+    >>> input_filter, gold_filters, extraction_params = config.to_domain()
 """
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.domain.filtering import (
     InputFilterConfig as DomainInputFilterConfig,
 )
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
     BaseGoldColumnFilterConfig,
@@ -145,16 +146,41 @@ class FilterConfigFile(BaseModel):
         default_factory=GoldFiltersFileConfig,
         description="Gold layer filter configuration",
     )
+    extraction_params: dict[str, str | int | bool] = Field(
+        default_factory=dict,
+        description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
+    )
 
-    def to_domain(self) -> tuple[DomainInputFilterConfig, GoldFilterConfig]:
+    @field_validator("extraction_params")
+    @classmethod
+    def validate_extraction_params(
+        cls, v: dict[str, str | int | bool],
+    ) -> dict[str, str | int | bool]:
+        """Validate extraction params keys and values."""
+        for key, value in v.items():
+            if not key or not isinstance(key, str):
+                raise ValueError(
+                    f"Extraction param key must be non-empty string, got: {key!r}"
+                )
+            if not isinstance(value, (str, int, bool)):
+                raise ValueError(
+                    f"Extraction param '{key}' value must be str|int|bool, "
+                    f"got {type(value).__name__}: {value!r}"
+                )
+        return v
+
+    def to_domain(
+        self,
+    ) -> tuple[DomainInputFilterConfig, GoldFilterConfig, ExtractionParams]:
         """Convert to domain objects.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig).
+            Tuple of (InputFilterConfig, GoldFilterConfig, ExtractionParams).
         """
         return (
             self.input_filter.to_domain(),
             self.gold_filters.to_domain(),
+            ExtractionParams(params=self.extraction_params),
         )
 
 
