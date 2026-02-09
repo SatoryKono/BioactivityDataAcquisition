@@ -103,10 +103,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         nullable=True, description="Whether abstract has NLM sections"
     )
     # Note: vernacular_title excluded from transformer output per design
-    language: Series[str] = pa.Field(
-        nullable=True,
-        description="MARC language code (e.g., 'eng')",
-    )
+    # language: inherited from PublicationBaseSchema (MARC codes fit str_length 2..3)
 
     # === Journal Information (PubMed-specific) ===
     journal: Series[str] = pa.Field(
