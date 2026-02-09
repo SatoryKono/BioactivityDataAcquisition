@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Extraction-level filtering for ChEMBL Activity pipeline (ADR-028 §3)
+  - Server-side API query parameters reduce data volume by ~75-90% (~20M → ~2-5M records)
+  - Configurable via `configs/filter/entities/chembl/activity.yaml`
+  - Logged in Bronze `SourceMetadata.query_string` for audit/reproducibility
+  - `APIRequestCollector.to_source_metadata()` accepts `query_string` parameter
+  - Integration tests in `tests/integration/chembl/test_activity_extraction_params.py`
+  - Provider documentation: `docs/providers/chembl.md`
+
 ## [5.13.0] - 2026-02-06
 
 ### Added
