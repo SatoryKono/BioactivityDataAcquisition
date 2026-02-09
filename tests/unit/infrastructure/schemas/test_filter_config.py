@@ -56,7 +56,7 @@ class TestExtractionParamsValidation:
 
     def test_extraction_params_invalid_value_type_list(self) -> None:
         """List value should raise ValidationError."""
-        with pytest.raises(Exception, match="str|int|bool"):
+        with pytest.raises(Exception, match=r"extraction_params"):
             FilterConfigFile.model_validate(
                 {
                     "extraction_params": {"key": ["a", "b"]},
@@ -65,7 +65,7 @@ class TestExtractionParamsValidation:
 
     def test_extraction_params_invalid_value_type_dict(self) -> None:
         """Dict value should raise ValidationError."""
-        with pytest.raises(Exception, match="str|int|bool"):
+        with pytest.raises(Exception, match=r"extraction_params"):
             FilterConfigFile.model_validate(
                 {
                     "extraction_params": {"key": {"nested": "dict"}},
