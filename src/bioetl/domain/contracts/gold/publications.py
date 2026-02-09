@@ -386,7 +386,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
-    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    # Note: authors excluded - transformer pops raw authors, uses author_s2_ids/orcids
     tldr: Series[str] = pa.Field(nullable=True)
     publication_year: Series[float] = pa.Field(
         nullable=True, ge=1500, le=2100, coerce=True
@@ -400,7 +400,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     page_range: Series[str] = pa.Field(nullable=True)  # Page range: "first-last" format
     page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
     page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    venue: Series[str] = pa.Field(nullable=True)
+    # Note: venue excluded - transformer maps venue → journal via extract_journal_info
 
     # Metrics
     citations_received: Series[float] = pa.Field(
