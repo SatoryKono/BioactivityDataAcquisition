@@ -97,10 +97,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Article title (required)",
     )
 
-    @pa.check("title", name="title_not_empty")
-    def _check_title(cls, series: Series[str]) -> Series[bool]:
-        """Validate title is not empty."""
-        return cast("Series[bool]", series.str.len() >= 1)
+    # title_not_empty: inherited from PublicationBaseSchema
 
     abstract_structured: Series[bool] = pa.Field(
         nullable=True, description="Whether abstract has NLM sections"
