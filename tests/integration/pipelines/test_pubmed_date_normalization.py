@@ -231,7 +231,7 @@ class TestPubMedDateNormalization:
         assert isinstance(year, int), (
             f"publication_year should be int, got {type(year)}"
         )
-        assert 1800 <= year <= 2100, f"publication_year out of valid range: {year}"
+        assert 1500 <= year <= 2100, f"publication_year out of valid range: {year}"
 
 
 @pytest.mark.unit

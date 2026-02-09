@@ -89,32 +89,32 @@ class TestYearValidation:
     def test_valid_year_current(self) -> None:
         """Test current year is valid."""
         valid_year = 2024
-        assert 1800 <= valid_year <= 2100
+        assert 1500 <= valid_year <= 2100
 
     def test_valid_year_at_lower_bound(self) -> None:
-        """Test year at lower bound (1800)."""
-        valid_year = 1800
-        assert 1800 <= valid_year <= 2100
+        """Test year at lower bound (1500)."""
+        valid_year = 1500
+        assert 1500 <= valid_year <= 2100
 
     def test_valid_year_at_upper_bound(self) -> None:
         """Test year at upper bound (2100)."""
         valid_year = 2100
-        assert 1800 <= valid_year <= 2100
+        assert 1500 <= valid_year <= 2100
 
     def test_valid_year_historical(self) -> None:
         """Test historical publication year."""
         valid_year = 1950
-        assert 1800 <= valid_year <= 2100
+        assert 1500 <= valid_year <= 2100
 
     def test_invalid_year_below_lower_bound(self) -> None:
-        """Test year before 1800 fails."""
-        invalid_year = 1799
-        assert not (1800 <= invalid_year <= 2100)
+        """Test year before 1500 fails."""
+        invalid_year = 1499
+        assert not (1500 <= invalid_year <= 2100)
 
     def test_invalid_year_above_upper_bound(self) -> None:
         """Test year after 2100 fails."""
         invalid_year = 2101
-        assert not (1800 <= invalid_year <= 2100)
+        assert not (1500 <= invalid_year <= 2100)
 
 
 class TestIssnValidation:
@@ -287,9 +287,9 @@ class TestYearConstraintsWithDataFrame:
     """Tests for year constraints using pandas DataFrame."""
 
     def test_year_lower_bound_with_dataframe(self) -> None:
-        """Test year lower bound (1800) with pandas DataFrame."""
-        df = pd.DataFrame({"year": [1800, 1799, 2024]})
-        valid = df["year"] >= 1800
+        """Test year lower bound (1500) with pandas DataFrame."""
+        df = pd.DataFrame({"year": [1500, 1499, 2024]})
+        valid = df["year"] >= 1500
         assert bool(valid.iloc[0]) is True
         assert bool(valid.iloc[1]) is False
         assert bool(valid.iloc[2]) is True

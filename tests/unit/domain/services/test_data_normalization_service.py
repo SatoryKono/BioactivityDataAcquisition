@@ -22,7 +22,7 @@ class TestDefaultDataNormalizationServiceInit:
     def test_default_config(self) -> None:
         """Test service initializes with default config."""
         service = DefaultDataNormalizationService()
-        assert service.config.min_publication_year == 1800
+        assert service.config.min_publication_year == 1500
         assert service.config.max_publication_year == 2100
 
     def test_custom_config(self) -> None:
@@ -90,11 +90,11 @@ class TestNormalizeYear:
         "year,expected_year,expected_warning",
         [
             (2024, 2024, False),
-            (1800, 1800, False),
+            (1500, 1500, False),
             (2100, 2100, False),
-            (1799, 1799, True),
+            (1499, 1499, True),
             (2101, 2101, True),
-            (1500, 1500, True),
+            (1000, 1000, True),
             (None, None, False),
         ],
     )
@@ -373,7 +373,7 @@ class TestDataNormalizationConfig:
     def test_default_values(self) -> None:
         """Test default configuration values."""
         config = DataNormalizationConfig()
-        assert config.min_publication_year == 1800
+        assert config.min_publication_year == 1500
         assert config.max_publication_year == 2100
         assert config.default_pii_salt == ""
 
@@ -403,7 +403,7 @@ class TestDataNormalizationConfig:
     def test_for_scientific_publications(self) -> None:
         """Test factory method for scientific publications."""
         config = DataNormalizationConfig.for_scientific_publications()
-        assert config.min_publication_year == 1800
+        assert config.min_publication_year == 1500
         assert config.max_publication_year == 2100
 
     def test_for_modern_publications(self) -> None:
