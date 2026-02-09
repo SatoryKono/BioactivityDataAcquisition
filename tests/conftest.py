@@ -672,6 +672,8 @@ def minimal_chembl_publication_df() -> Any:
                 "citations_received": 10,
                 "citations_made": 5,
                 "is_oa": True,
+                # Author identifiers
+                "author_orcids": None,
                 # Provider-specific
                 "src_id": 123,
                 "chembl_release": "CHEMBL_34",
@@ -760,6 +762,8 @@ def minimal_pubmed_publication_df() -> Any:
                 "gene_symbols": None,
                 "publication_types": None,
                 "authors_with_affiliations": None,
+                # Author identifiers
+                "author_orcids": None,
                 # System fields
                 "content_hash": "b" * 64,
                 "_source": "pubmed",
