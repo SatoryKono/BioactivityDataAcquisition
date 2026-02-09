@@ -1103,24 +1103,13 @@ class ChemblAdapter(BaseHttpAdapter):
         return total_count
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector.
-
-        Includes extraction_params in SourceMetadata.query_string for
-        audit and reproducibility (ADR-028 §3). If query_string already
-        contains values, extraction params are appended with '&'.
-        """
-        # Build extraction query string for audit trail (ADR-028 §3)
-        extraction_qs = (
-            self._extraction_params.to_query_string()
-            if not self._extraction_params.is_empty
-            else ""
-        )
-
+        """Get API request metadata and clear collector."""
+        extraction_qs = self._extraction_params.to_query_string() or None
         metadata = self._request_collector.to_source_metadata(
             source_type="api",
             url=CHEMBL_API_BASE,
             api_version=api_version,
-            query_string=extraction_qs or None,
+            query_string=extraction_qs,
         )
         self._request_collector.clear()
         return metadata
