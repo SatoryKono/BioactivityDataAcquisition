@@ -173,6 +173,23 @@ def _extract_filter_ids_from_keys(
     return filter_ids, filter_key, fallback
 
 
+def _extract_field_values(
+    keys: pl.DataFrame,
+    field: str,
+) -> tuple[str, ...] | None:
+    """Extract unique non-null values for a single field from keys DataFrame.
+
+    Returns:
+        Tuple of string values, or None if field missing or empty.
+    """
+    if field not in keys.columns:
+        return None
+    values = keys.select(field).drop_nulls().unique().to_series().to_list()
+    if not values:
+        return None
+    return tuple(str(v) for v in values)
+
+
 def _extract_multi_filter_ids(
     dep_cfg: DependencyConfig,
     keys: pl.DataFrame,
@@ -192,34 +209,21 @@ def _extract_multi_filter_ids(
         Dict mapping field name to tuple of unique IDs, or None if extraction fails.
     """
     if keys is None or len(keys) == 0:
-        if logger:
-            logger.debug(
-                "No keys available for multi-field dependency",
-                pipeline=dep_cfg.pipeline,
-            )
         return None
 
     result: dict[str, tuple[str, ...]] = {}
     for field in dep_cfg.effective_filter_fields:
-        if field not in keys.columns:
+        values = _extract_field_values(keys, field)
+        if values is None:
             if logger:
                 logger.warning(
-                    "Multi-filter field not found in keys columns",
+                    "Multi-filter field missing or empty",
                     pipeline=dep_cfg.pipeline,
-                    missing_field=field,
+                    field=field,
                     available_columns=list(keys.columns),
                 )
             return None
-        values = keys.select(field).drop_nulls().unique().to_series().to_list()
-        if not values:
-            if logger:
-                logger.debug(
-                    "No values for multi-filter field",
-                    pipeline=dep_cfg.pipeline,
-                    field=field,
-                )
-            return None
-        result[field] = tuple(str(v) for v in values)
+        result[field] = values
 
     if logger:
         logger.info(
