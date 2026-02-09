@@ -25,7 +25,7 @@ class ReferenceSchema(ETLRecordSchema):
     # === Foreign Key ===
     source_doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="DOI of citing publication (FK to Publication.doi)",
     )
 
@@ -39,7 +39,7 @@ class ReferenceSchema(ETLRecordSchema):
     # === Target Reference ===
     target_doi: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="DOI of cited publication (if resolved)",
     )
     unstructured: Series[str] | None = pa.Field(

@@ -14,9 +14,9 @@ entity: publication
 entity_field_validations:
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.+$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: false
-    error_message: "DOI is required and must start with 10. prefix"
+    error_message: "DOI is required and must match format 10.XXXX/suffix (no whitespace)"
 
   - field: title
     type: max_length

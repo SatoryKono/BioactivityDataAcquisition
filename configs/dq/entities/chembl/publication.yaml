@@ -43,9 +43,9 @@ entity_field_validations:
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.+$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "DOI must start with 10. prefix"
+    error_message: "DOI must match format 10.XXXX/suffix (no whitespace)"
 
   - field: title
     type: max_length
