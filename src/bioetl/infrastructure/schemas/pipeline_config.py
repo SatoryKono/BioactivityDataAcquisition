@@ -983,6 +983,11 @@ class PipelineYamlConfig(BaseModel):
         default_factory=list,
         description="Optional column ordering groups for Silver/Gold output",
     )
+    extraction_params: dict[str, str | int | bool] = Field(
+        default_factory=dict,
+        description="Server-side API query parameters for Bronze extraction (ADR-028 §3). "
+        "Merged from filter config file. Keys are provider-specific query params.",
+    )
 
     # Pagination strategy (ADR-030)
     force_full_scan: bool = Field(
