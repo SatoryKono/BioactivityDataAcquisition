@@ -422,9 +422,9 @@ dq_thresholds:
 ## Ссылки
 
 **Документация:**
-- [Publication Fields Reference](../reference/publication-fields-reference.md)
-- [Validation Guide](../guides/publication-validation-guide.md)
-- [Operational Runbook](../runbooks/publication-validation-runbook.md)
+- [Publication Fields Reference](../../04-reference/publication-fields-reference.md)
+- [Validation Guide](../../03-guides/publication-validation-guide.md)
+- [Operational Runbook](../../05-operations/runbooks/publication-validation-runbook.md)
 
 **Код:**
 - Schemas: `src/bioetl/domain/schemas/{provider}/publication.py`
@@ -432,7 +432,7 @@ dq_thresholds:
 - Tests: `tests/unit/domain/schemas/`, `tests/integration/validation/`
 
 **Конфигурация:**
-- `docs/schemas/publication_validation_schema_v3.xlsx` — источник правил
+- `docs/04-reference/schemas/publication_validation_schema_v3.xlsx` — источник правил
 - `configs/validation/{provider}.yaml` — runtime конфигурация
 
 ---
