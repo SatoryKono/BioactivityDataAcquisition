@@ -386,7 +386,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
-    # Note: authors excluded - transformer pops raw authors, uses author_s2_ids/orcids
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     tldr: Series[str] = pa.Field(nullable=True)
     publication_year: Series[float] = pa.Field(
         nullable=True, ge=1500, le=2100, coerce=True
