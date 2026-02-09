@@ -18,6 +18,13 @@ entity_field_validations:
     nullable: false
     error_message: "paper_id is required and must be a 40-char hex string"
 
+  - field: pmid
+    type: range
+    min: 1
+    max: 100000000
+    nullable: true
+    error_message: "PubMed ID must be a positive integer"
+
   - field: doi
     type: pattern
     pattern: '^10\.\d{4,}/.+$'

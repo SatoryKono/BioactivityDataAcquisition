@@ -57,13 +57,9 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     # === Primary Key (str for cross-provider consistency) ===
     pmid: Series[str] = pa.Field(
         nullable=False,
+        str_matches=r"^[1-9]\d*$",
         description="PubMed ID (PK, numeric string)",
     )
-
-    @pa.check("pmid", name="pmid_positive")
-    def _check_pmid(cls, series: Series[str]) -> Series[bool]:
-        """Validate PMID represents a positive integer."""
-        return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === External Identifiers (override doi for check method) ===
     doi: Series[str] = pa.Field(

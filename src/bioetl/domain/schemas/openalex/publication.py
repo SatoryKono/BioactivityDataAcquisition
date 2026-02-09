@@ -12,7 +12,6 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
@@ -22,7 +21,6 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Re-export for backwards compatibility
 __all__ = [
     "DOI_REGEX_PATTERN",
-    "LOOKUP_METHODS",
     "OA_STATUS_VALUES",
     "OpenAlexPublicationSchema",
 ]
@@ -39,7 +37,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     - Pagination: page_first, page_last
     - Metrics: citations_received, citations_made
     - Open Access: is_oa
-    - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+    - Lookup tracking: lookup_method, original_id, source (overridden)
     """
 
     # === Primary Key (OpenAlex-specific) ===
@@ -49,13 +47,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="OpenAlex Work ID (e.g., W2148763428)",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Raw OpenAlex Type (replaces doc_type) ===
     publication_type: Series[str] = pa.Field(
