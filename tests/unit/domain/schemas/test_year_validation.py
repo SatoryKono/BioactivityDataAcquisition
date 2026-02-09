@@ -262,6 +262,8 @@ class TestChemblYearValidation:
             "issue": "1",
             "page_first": "1",
             "page_last": "10",
+            # Author identifiers
+            "author_orcids": None,
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-15",
@@ -374,6 +376,8 @@ class TestPubMedYearValidation:
             "gene_symbols": None,
             "publication_types": None,
             # Note: affiliation_list inherited from base (unified field name)
+            # Author identifiers
+            "author_orcids": None,
             # Author-affiliation mapping
             "authors_with_affiliations": None,
         }
