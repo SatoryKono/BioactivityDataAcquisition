@@ -150,7 +150,7 @@ class RunOptions:
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
     # Cached Bronze mode options
-    use_cached_bronze: bool = False
+    use_cached_bronze: bool = True
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None  # YYYY-MM-DD format
 

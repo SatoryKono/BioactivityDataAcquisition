@@ -78,7 +78,7 @@ composite:
         - title
       required: false    # Optional - seed may not have DOIs
       filter_condition: "doi IS NOT NULL"
-      timeout_seconds: 900
+      timeout_seconds: 3600
       silver_table: silver/crossref/publication
 
     # OpenAlex: Academic topics and institutions
@@ -89,7 +89,7 @@ composite:
         - title          # Fallback key if doi not found
       required: false    # Optional - needs doi or pmid
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
-      timeout_seconds: 600
+      timeout_seconds: 3600
       silver_table: silver/openalex/publication
 
     # PubMed: MeSH terms and medical metadata
@@ -100,7 +100,7 @@ composite:
         - doi
       required: false    # Optional - only for records with pmid
       filter_condition: "pmid IS NOT NULL"
-      timeout_seconds: 600
+      timeout_seconds: 3600
       silver_table: silver/pubmed/publication
 
     # Semantic Scholar: AI/ML embeddings and TLDR (mapped to abstract)
@@ -111,7 +111,7 @@ composite:
         - title
       required: false    # Optional - high rate limits, ok to skip
       filter_condition: "doi IS NOT NULL OR title IS NOT NULL"
-      timeout_seconds: 1200
+      timeout_seconds: 7200
       #fallback_strategy: skip  # Skip on failure (high rate limits)
       silver_table: silver/semanticscholar/publication
 

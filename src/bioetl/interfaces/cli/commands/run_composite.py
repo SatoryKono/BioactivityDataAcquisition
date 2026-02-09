@@ -139,6 +139,25 @@ async def _run_composite_async(
     help="Force re-run of specified enricher (ignores checkpoint)",
 )
 @click.option(
+    "--use-cached-bronze/--no-cached-bronze",
+    "use_cached_bronze",
+    default=True,
+    help="Load data from Bronze cache instead of API",
+    show_default=True,
+)
+@click.option(
+    "--cached-bronze-date",
+    type=str,
+    default=None,
+    help="Filter Bronze cache by date (YYYY-MM-DD)",
+)
+@click.option(
+    "--cached-bronze-path",
+    type=click.Path(exists=True),
+    default=None,
+    help="Explicit path to Bronze cache directory",
+)
+@click.option(
     "--debug",
     is_flag=True,
     help="Enable DEBUG level logging",
@@ -165,6 +184,9 @@ def run_composite(
     enrich_only: str | None,
     required_only: bool,
     force_enricher: str | None,
+    use_cached_bronze: bool,
+    cached_bronze_date: str | None,
+    cached_bronze_path: str | None,
     debug: bool,
     health_server: bool,
     health_port: int,
@@ -190,6 +212,9 @@ def run_composite(
         required_only=required_only,
         force_enricher=force_enricher,
         seed_limit=seed_limit,
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_path=cached_bronze_path,
+        cached_bronze_date=cached_bronze_date,
     )
 
     echo_info(f"Starting composite pipeline: {composite}")
