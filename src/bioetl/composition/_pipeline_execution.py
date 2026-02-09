@@ -96,10 +96,16 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         PipelineRunContext ready for bootstrap_pipeline.
     """
     # Build InputFilterContext from CLI options
-    # Priority: filter_ids > input_csv > disabled
+    # Priority: multi_filter_ids > filter_ids > input_csv > disabled
+    # - multi_filter_ids: Multi-field AND filtering (composite dependencies)
     # - filter_ids: Direct IDs for composite mode (no CSV file needed)
     # - input_csv: CSV file path, column_name/filter_field from YAML defaults
-    if options.filter_ids:
+    if options.multi_filter_ids:
+        # Multi-field filtering mode (composite dependencies with AND logic)
+        input_filter = InputFilterContext.from_multi_ids(
+            multi_filter_ids=options.multi_filter_ids,
+        )
+    elif options.filter_ids:
         # Direct IDs mode (composite pipelines)
         input_filter = InputFilterContext.from_ids(
             filter_ids=options.filter_ids,

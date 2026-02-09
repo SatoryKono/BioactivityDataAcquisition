@@ -53,6 +53,8 @@ class InputFilterConfig:
     fallback_column: str | None = None
     direct_filter_ids: tuple[str, ...] | None = None
     direct_fallback_mapping: dict[str, str] | None = None
+    direct_multi_filter_ids: dict[str, tuple[str, ...]] | None = None
+    direct_valid_combinations: frozenset[tuple[str, ...]] | None = None
 
     def __post_init__(self) -> None:
         """Validate configuration consistency."""
@@ -63,10 +65,17 @@ class InputFilterConfig:
         """Validate fields required when filtering is enabled."""
         if not self.enabled:
             return
-        if self.direct_filter_ids is not None:
+        if self.direct_multi_filter_ids is not None:
+            self._validate_direct_multi_ids_mode()
+        elif self.direct_filter_ids is not None:
             self._validate_direct_ids_mode()
         else:
             self._validate_csv_mode()
+
+    def _validate_direct_multi_ids_mode(self) -> None:
+        """Validate direct multi-field filter IDs mode configuration."""
+        if not self.direct_multi_filter_ids:
+            raise ValueError("direct_multi_filter_ids must be non-empty when set")
 
     def _validate_direct_ids_mode(self) -> None:
         """Validate direct filter IDs mode configuration."""
@@ -109,6 +118,11 @@ class InputFilterConfig:
     def is_direct_filter(self) -> bool:
         """Check if direct filter IDs mode is active (no CSV file)."""
         return self.direct_filter_ids is not None
+
+    @property
+    def is_direct_multi_filter(self) -> bool:
+        """Check if direct multi-field filter IDs mode is active."""
+        return self.direct_multi_filter_ids is not None
 
     def get_columns(self) -> tuple[FilterColumn, ...]:
         """Get filter columns (resolves single-column to columns format).

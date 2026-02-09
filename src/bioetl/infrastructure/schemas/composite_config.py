@@ -172,6 +172,16 @@ class DependencySchema(BaseModel):
             "from target API field (e.g., protein_classification_id vs protein_class_id)"
         ),
     )
+    filter_fields: list[str] | None = Field(
+        default=None,
+        description=(
+            "Multiple field names for multi-field API filtering (AND logic). "
+            "When set, ALL specified fields are passed as filters to the API. "
+            "Example: ['molecule_chembl_id', 'document_chembl_id'] produces "
+            "?molecule_chembl_id__in=...&document_chembl_id__in=... "
+            "Mutually exclusive with filter_field."
+        ),
+    )
     key_filter: str | None = Field(
         default=None,
         description=(
@@ -191,6 +201,16 @@ class DependencySchema(BaseModel):
                 raise ValueError("join_keys cannot contain empty strings")
         return v
 
+    @model_validator(mode="after")
+    def validate_filter_fields_exclusive(self) -> Self:
+        """Ensure filter_field and filter_fields are mutually exclusive."""
+        if self.filter_field and self.filter_fields:
+            raise ValueError(
+                "filter_field and filter_fields are mutually exclusive. "
+                "Use filter_fields for multi-field filtering."
+            )
+        return self
+
     def to_domain(self) -> DependencyConfig:
         """Convert to immutable domain DependencyConfig."""
         return DependencyConfig(
@@ -201,6 +221,7 @@ class DependencySchema(BaseModel):
             silver_table=self.silver_table,
             key_source=self.key_source,
             filter_field=self.filter_field,
+            filter_fields=tuple(self.filter_fields) if self.filter_fields else None,
             key_filter=self.key_filter,
         )
 
