@@ -25,6 +25,13 @@ entity_field_validations:
     nullable: true
     error_message: "Title must not exceed 2000 characters"
 
+  - field: title
+    type: pattern
+    pattern: '\S'
+    nullable: true
+    severity: warn
+    error_message: "Title should not be empty or whitespace-only"
+
   - field: doi
     type: pattern
     pattern: '^10\.\d{4,}/.+$'
