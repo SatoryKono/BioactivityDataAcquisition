@@ -5,6 +5,9 @@ flowchart TB
         PubChem_API["PubChem API"]
         UniProt_API["UniProt API"]
         PubMed_API["PubMed API"]
+        CrossRef_API["CrossRef API"]
+        OpenAlex_API["OpenAlex API"]
+        S2_API["Semantic Scholar API"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
@@ -50,6 +53,7 @@ flowchart TB
             Molecule["Molecule"]
             Assay["Assay"]
             Target["Target"]
+            Publication["Publication\n(5 providers)"]
         end
         subgraph Config["Configuration"]
             PipelineConfig["PipelineConfig"]
@@ -64,6 +68,9 @@ flowchart TB
             PubchemAdapter["PubchemAdapter"]
             UniprotAdapter["UniprotAdapter"]
             PubmedAdapter["PubmedAdapter"]
+            CrossRefAdapter["CrossRefAdapter"]
+            OpenAlexAdapter["OpenAlexAdapter"]
+            S2Adapter["SemanticScholarAdapter"]
         end
         subgraph HTTP["HTTP Infrastructure"]
             UnifiedHTTPClient["UnifiedHTTPClient"]
@@ -99,6 +106,9 @@ flowchart TB
     PubChem_API --> PubchemAdapter
     UniProt_API --> UniprotAdapter
     PubMed_API --> PubmedAdapter
+    CrossRef_API --> CrossRefAdapter
+    OpenAlex_API --> OpenAlexAdapter
+    S2_API --> S2Adapter
 
     %% Interface to Application
     CLI --> Bootstrap

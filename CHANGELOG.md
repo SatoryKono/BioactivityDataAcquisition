@@ -16,6 +16,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `APIRequestCollector.to_source_metadata()` accepts `query_string` parameter
   - Integration tests in `tests/integration/chembl/test_activity_extraction_params.py`
   - Provider documentation: `docs/providers/chembl.md`
+## [5.14.0] - 2026-02-09
+
+### Changed
+
+- **Publication Field Standardization**: Unified citation and author fields across all 5 providers
+  - Renamed `citation_count` → `citations_received` in `PublicationBaseSchema` for semantic clarity (incoming citations)
+  - Renamed `author_orcid_list` → `author_orcids` in `PublicationBaseSchema` for naming consistency
+  - Both fields moved from provider-specific schemas to `PublicationBaseSchema` (shared by all providers)
+  - Updated all 5 provider DQ configs (`configs/dq/entities/*/publication.yaml`)
+  - Updated all 5 provider filter configs (`configs/filter/entities/*/publication.yaml`)
+  - Updated composite field groups (`configs/composite/field_groups/publication.yaml`)
+
+- **Validation Rule Tightening**: Strengthened publication validation constraints
+  - `MIN_PUBLICATION_YEAR`: Changed from 1800 → 1500 (supports historical publications)
+  - Added ORCID format validation (`^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$`) via `@pa.check` in `PublicationBaseSchema`
+  - Added ISSN regex constant (`^\d{4}-\d{3}[\dX]$`) in `domain/schemas/constants.py`
+  - Tightened DOI regex validation in base schema
+
+- **SemanticScholar Schema Cleanup**: Excluded `raw_authors` field from schema
+  - `raw_authors` removed from SemanticScholar publication Silver schema
+  - Reduces data duplication (structured `authors` field already present)
+
+- **Package Structure Refactoring** (PR #1984, #1989):
+  - Split entrypoints, registration, and extractors into separate modules
+  - Added pipeline stub classes for DI-based pipeline registry
+  - Consolidated pipelines, split `gold_analyzer`, removed duplicates
+  - Deprecated re-export patterns in favor of direct imports
+
+### Added
+
+- **ISSN and ORCID Constants**: New regex patterns in `domain/schemas/constants.py`
+  - `ISSN_PATTERN`: `^\d{4}-\d{3}[\dX]$`
+  - `ORCID_PATTERN`: `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$`
+
+- **ProtocolError Exception**: New domain exception for protocol violation errors
+
+- **RecordProcessor Tracing Tests**: Unit tests for tracing integration in `RecordProcessor`
+
+- **ConfigService Tests**: Unit tests for configuration service
+
+- **Setup Script** (`run/setup.sh`): Environment bootstrap script for BioETL
+  - Consolidates `uv sync`, dependency validation, and environment checks
+  - Supports `--no-dev` flag for production installs
+
+### Fixed
+
+- **CI Stability** (multiple PRs):
+  - Resolved 63 mypy errors (`63→0`) and synced ruff version
+  - Fixed complexity exemptions and `render_diagrams` exit code
+  - Restored `type: ignore` comments for CI/local mypy compatibility
+  - Synced xenon exclusions for domain complexity limits
+
+### Documentation
+
+- Package structure audit report (`docs/audits/`)
+- Agent orchestration docs updated to kebab-case naming
 
 ## [5.13.0] - 2026-02-06
 
@@ -35,15 +91,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Validation Schema v3.0**: Structured validation rules inventory
   - **Format**: Excel (XLSX) + CSV export
   - **Sheets**: Validation Schema (191 rows × 19 columns), Enum Legend, Summary statistics
-  - **Location**: `docs/schemas/publication_validation_schema_v3.xlsx`
+  - **Location**: `docs/04-reference/schemas/publication_validation_schema_v3.xlsx`
   - **Columns**: field_name, source_system, data_type, is_nullable, 5 validation levels (rule + result + description), comments
   - **Results**: PASS, FAIL, WARN, SKIP, NOT_APPLICABLE
 
 - **Documentation Suite**:
-  - **ADR-032**: Architecture Decision Record for validation strategy (`docs/adr/ADR-032-publication-validation-strategy.md`)
-  - **Field Reference**: Complete inventory of 191 fields with types, regex patterns, PK markers (`docs/reference/publication-fields-reference.md`)
-  - **Validation Guide**: Implementation guide with 4 Mermaid diagrams (architecture, DQ lifecycle, config hierarchy, workflow) (`docs/guides/publication-validation-guide.md`)
-  - **Operational Runbook**: Troubleshooting procedures with bash diagnostic commands for DevOps/Support (`docs/runbooks/publication-validation-runbook.md`)
+  - **ADR-032**: Architecture Decision Record for validation strategy (`docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md`)
+  - **Field Reference**: Complete inventory of 191 fields with types, regex patterns, PK markers (`docs/04-reference/publication-fields-reference.md`)
+  - **Validation Guide**: Implementation guide with 4 Mermaid diagrams (architecture, DQ lifecycle, config hierarchy, workflow) (`docs/03-guides/publication-validation-guide.md`)
+  - **Operational Runbook**: Troubleshooting procedures with bash diagnostic commands for DevOps/Support (`docs/05-operations/runbooks/publication-validation-runbook.md`)
   - **Test README**: Coverage matrix and usage instructions (`tests_generated/README.md`)
 
 - **Test Infrastructure**:

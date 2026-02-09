@@ -253,13 +253,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without authors.
+            SilverRecord dictionary without pmc_id/arxiv_id.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
         silver_record = BaseTransformer.entity_to_silver_record(entity)
-        silver_record.pop("authors", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("arxiv_id", None)
         return silver_record

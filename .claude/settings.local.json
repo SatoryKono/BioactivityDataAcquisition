@@ -61,7 +61,10 @@
       "Bash(set:*)",
       "Bash(UPDATE_SNAPSHOTS=1 python -m pytest:*)",
       "Bash(curl:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(git status:*)",
+      "Bash(ruff check:*)",
+      "Bash(nslookup:*)"
     ]
   },
   "enabledPlugins": {
