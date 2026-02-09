@@ -212,6 +212,8 @@ def assemble_filter_config(
         test_mode=effective_test_mode,
         direct_filter_ids=ctx.input_filter.filter_ids,
         direct_fallback_mapping=ctx.input_filter.fallback_mapping,
+        direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
+        direct_valid_combinations=ctx.input_filter.valid_combinations,
     )
 
 

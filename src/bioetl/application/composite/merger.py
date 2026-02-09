@@ -855,8 +855,12 @@ class MergeService:
 
         Dependencies are simpler than enrichers:
         - Always 1:1 cardinality (no aggregation)
-        - Single join key (first in join_keys)
+        - Single or composite join keys
         - No special cardinality handling
+
+        For multi-field filter dependencies (e.g., compound_record filtered by
+        molecule_chembl_id + document_chembl_id), uses composite key join on
+        all join_keys simultaneously.
 
         Column renaming uses ColumnRenamer to apply {provider}.{entity}.{field}
         format to dependency columns for qualified column matching.
@@ -877,6 +881,14 @@ class MergeService:
                 continue
 
             dep_df = dependency_dfs[dep.pipeline]
+
+            # Multi-field filter dependencies use composite key join
+            if dep.is_multi_field_filter:
+                result = self._apply_composite_key_dependency_join(
+                    result, dep_df, dep, seed_pipeline
+                )
+                continue
+
             join_keys_list = list(dep.join_keys)
             primary_key = join_keys_list[0]
 
@@ -958,6 +970,183 @@ class MergeService:
                 dep_join_key=dep_join_key,
                 result_rows=len(result),
             )
+
+        return result
+
+    def _resolve_composite_join_keys(
+        self,
+        join_keys_list: list[str],
+        left_pipeline: str | None,
+        right_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[list[str], list[str], set[str]]:
+        """Resolve qualified join key names for composite key join.
+
+        Args:
+            join_keys_list: Raw join key names.
+            left_pipeline: Pipeline name for left-side key resolution.
+            right_pipeline: Pipeline name for right-side key resolution.
+            merged_columns: Available columns in the merged DataFrame.
+
+        Returns:
+            Tuple of (left_keys, right_keys, all_join_key_set).
+        """
+        left_keys: list[str] = []
+        right_keys: list[str] = []
+        all_join_key_set: set[str] = set()
+
+        for key in join_keys_list:
+            seed_key, dep_key, seed_key_qualified = (
+                self._resolve_join_key_names_asymmetric(
+                    left_key=key,
+                    right_key=key,
+                    left_pipeline=left_pipeline,
+                    right_pipeline=right_pipeline,
+                    merged_columns=merged_columns,
+                )
+            )
+            left_keys.append(seed_key)
+            right_keys.append(dep_key)
+            all_join_key_set.add(seed_key)
+            all_join_key_set.add(dep_key)
+            if seed_key_qualified and seed_key_qualified != seed_key:
+                all_join_key_set.add(seed_key_qualified)
+
+        return left_keys, right_keys, all_join_key_set
+
+    def _execute_composite_key_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_keys: list[str],
+        right_keys: list[str],
+        pipeline_name: str,
+    ) -> pl.DataFrame:
+        """Execute a Polars join on multiple keys.
+
+        Args:
+            left_df: Left DataFrame.
+            right_df: Right DataFrame.
+            left_keys: Column names in left_df for join.
+            right_keys: Column names in right_df for join.
+            pipeline_name: Pipeline name for suffix.
+
+        Returns:
+            Joined DataFrame.
+        """
+        import polars as pl
+
+        how = self._get_polars_join_type()
+
+        if left_keys == right_keys:
+            return left_df.join(
+                right_df,
+                on=left_keys,
+                how=how,
+                suffix=f"_{pipeline_name}",
+            )
+
+        # Different column names — use temp columns for right-side
+        temp_cols = []
+        for lk, rk in zip(left_keys, right_keys, strict=True):
+            if lk != rk:
+                temp_col = f"__temp_join_{pipeline_name}_{rk}"
+                right_df = right_df.with_columns(pl.col(rk).alias(temp_col))
+                temp_cols.append(temp_col)
+            else:
+                temp_cols.append(rk)
+
+        return left_df.join(
+            right_df,
+            left_on=left_keys,
+            right_on=temp_cols,
+            how=how,
+            suffix=f"_{pipeline_name}",
+        )
+
+    def _apply_composite_key_dependency_join(
+        self,
+        merged_df: pl.DataFrame,
+        dep_df: pl.DataFrame,
+        dep: DependencyConfig,
+        seed_pipeline: str | None = None,
+    ) -> pl.DataFrame:
+        """Apply composite key join for multi-field filter dependencies.
+
+        Used when a dependency filters by multiple fields (e.g., compound_record
+        filtered by both molecule_chembl_id and document_chembl_id). Joins on
+        all join_keys simultaneously to produce precise 1:1 matches.
+
+        Args:
+            merged_df: DataFrame with seed data.
+            dep_df: Dependency DataFrame to join.
+            dep: Dependency configuration with multiple filter_fields.
+            seed_pipeline: Seed pipeline name for join key resolution.
+
+        Returns:
+            DataFrame with dependency joined on composite key.
+        """
+        join_keys_list = list(dep.join_keys)
+
+        # Deduplicate on all join keys (composite dedup)
+        dep_df = self._deduplicator.deduplicate(
+            enricher_df=dep_df,
+            join_keys=join_keys_list,
+            enricher_name=dep.pipeline,
+        )
+
+        # Normalize join key columns
+        merged_df = self._normalize_join_key_columns(
+            merged_df, join_keys_list, pipeline=seed_pipeline
+        )
+        dep_df = self._normalize_join_key_columns(dep_df, join_keys_list, pipeline=None)
+
+        # Rename dependency columns to qualified format
+        dep_df = self._renamer.rename_dataframe(
+            dep_df, dep.pipeline, exclude_join_keys=False
+        )
+
+        # Drop system columns from dependency
+        dep_df = self._drop_system_columns(dep_df)
+
+        # Resolve qualified join key names for each key
+        left_pipeline = (
+            dep.key_source
+            if dep.key_source and dep.key_source != "seed"
+            else seed_pipeline
+        )
+        left_keys, right_keys, all_join_key_set = self._resolve_composite_join_keys(
+            join_keys_list, left_pipeline, dep.pipeline, merged_df.columns
+        )
+
+        # Detect and resolve conflicts (excluding all join keys)
+        merged_df, dep_df = self._detect_and_resolve_conflicts(
+            merged_df, dep_df, all_join_key_set
+        )
+
+        # Verify all join keys exist
+        missing_left = [k for k in left_keys if k not in merged_df.columns]
+        missing_right = [k for k in right_keys if k not in dep_df.columns]
+        if missing_left or missing_right:
+            self._logger.warning(
+                "Composite key join skipped: missing columns",
+                dependency=dep.pipeline,
+                missing_left=missing_left,
+                missing_right=missing_right,
+            )
+            return merged_df
+
+        result = self._execute_composite_key_join(
+            merged_df, dep_df, left_keys, right_keys, dep.pipeline
+        )
+
+        self._logger.debug(
+            "Joined dependency with composite key",
+            dependency=dep.pipeline,
+            left_keys=left_keys,
+            right_keys=right_keys,
+            result_rows=len(result),
+        )
 
         return result
 

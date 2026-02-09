@@ -6,15 +6,16 @@
 # Combines bioactivity data from ChEMBL with compound record metadata:
 # - Seed: ChEMBL activities (activity_id, molecule_chembl_id, ...)
 # - Dependencies:
-#   1. chembl_compound_record: compound records filtered by molecule_chembl_id
+#   1. chembl_compound_record: compound records filtered by
+#      molecule_chembl_id AND document_chembl_id (dual-key enrichment)
 #
 # This pipeline enables correlation of activity measurements with their
 # original compound names and document references from compound records.
 #
 # Join Strategy:
-# - molecule_chembl_id is the primary join key
-# - Activity → CompoundRecord is M:N (many activities per molecule,
-#   many compound records per molecule from different documents)
+# - Composite key: (molecule_chembl_id, document_chembl_id)
+# - Activity → CompoundRecord is ~1:1 with composite key
+#   (one compound record per molecule-document pair)
 # - Merge uses left_outer to preserve all activities
 #
 # Version: 1.0.0
@@ -34,15 +35,16 @@ composite:
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts bioactivity data from ChEMBL.
-  # Its output provides join keys (molecule_chembl_id) for dependency.
+  # Its output provides join keys (molecule_chembl_id, document_chembl_id)
+  # for dependency dual-key filtering and composite join.
   seed:
     pipeline: chembl_activity
     output_keys:
       - activity_id           # Primary key
-      - molecule_chembl_id    # FK for compound_record join
+      - molecule_chembl_id    # FK for compound_record join (key 1)
       - assay_chembl_id       # FK for future assay enrichment
       - target_chembl_id      # FK for future target enrichment
-      - document_chembl_id    # FK for future publication enrichment
+      - document_chembl_id    # FK for compound_record join (key 2)
     silver_table: silver/chembl/activity
 
   # ---------------------------------------------------------------------------
@@ -50,16 +52,21 @@ composite:
   # ---------------------------------------------------------------------------
   # compound_record is a dependency (not enricher) because:
   # 1. It requires API calls (not just Silver table lookup)
-  # 2. It should be filtered by molecule_chembl_id from seed
+  # 2. It should be filtered by molecule_chembl_id AND document_chembl_id
   # 3. It must complete before any merge can occur
   dependencies:
     # ChEMBL Compound Record: original compound names from publications
-    # Fetches compound records filtered by molecule_chembl_id from seed.
-    # Many compound records exist per molecule (from different documents).
+    # Fetches compound records filtered by BOTH molecule_chembl_id AND
+    # document_chembl_id from seed (dual-key enrichment).
+    # API call: /compound_record?molecule_chembl_id__in=...&document_chembl_id__in=...
+    # This produces ~1:1 mapping (one record per molecule-document pair).
     - pipeline: chembl_compound_record
       join_keys:
-        - molecule_chembl_id   # Join key from seed
-      filter_field: molecule_chembl_id  # API filter field
+        - molecule_chembl_id   # Composite join key 1
+        - document_chembl_id   # Composite join key 2
+      filter_fields:           # Multi-field API filtering (AND logic)
+        - molecule_chembl_id
+        - document_chembl_id
       required: false          # Optional - missing records don't block composite
       timeout_seconds: 600
       silver_table: silver/chembl/compound_record
