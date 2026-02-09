@@ -32,10 +32,10 @@ gold_filters:
 
   # Numeric range filters
   ranges:
-    # Scientific journals era cutoff (schema allows 1500..2100)
+    # Standardized publication year filter (1950..2050 inclusive)
     publication_year:
-      min: 1800
-      include_min: false
+      min: 1950
+      max: 2050
 
   # Required fields (pubmed_id and doi are optional - not all publications have them)
   required_fields:

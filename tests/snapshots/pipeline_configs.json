@@ -749,8 +749,8 @@
           "column": "publication_year",
           "include_max": true,
           "include_min": true,
-          "max_value": 2100.0,
-          "min_value": 1800.0
+          "max_value": 2050.0,
+          "min_value": 1950.0
         }
       ],
       "required_fields": [
