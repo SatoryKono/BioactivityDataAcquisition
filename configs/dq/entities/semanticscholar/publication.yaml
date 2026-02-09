@@ -57,7 +57,7 @@ entity_field_validations:
     nullable: true
     error_message: "Citation count must be non-negative"
 
-  - field: reference_count
+  - field: citations_made
     type: range
     min: 0
     nullable: true
