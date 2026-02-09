@@ -104,7 +104,9 @@ class TestFilterConfigLoaderBasics:
 
     def test_load_defaults_only(self, loader: FilterConfigLoader) -> None:
         """Load for unknown provider should use defaults."""
-        input_filter, gold_filters, _ = loader.load("unknown_provider", "unknown_entity")
+        input_filter, gold_filters, _ = loader.load(
+            "unknown_provider", "unknown_entity"
+        )
 
         assert input_filter.enabled is False
         assert input_filter.batch_size == 100

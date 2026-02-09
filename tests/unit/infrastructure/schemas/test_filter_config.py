@@ -82,9 +82,7 @@ class TestExtractionParamsValidation:
 
     def test_extraction_params_valid_int_value(self) -> None:
         """Integer value should be accepted."""
-        config = FilterConfigFile.model_validate(
-            {"extraction_params": {"limit": 500}}
-        )
+        config = FilterConfigFile.model_validate({"extraction_params": {"limit": 500}})
 
         assert config.extraction_params["limit"] == 500
 
