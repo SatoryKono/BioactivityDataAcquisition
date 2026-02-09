@@ -28,11 +28,13 @@ class TestExtractionParams:
 
     def test_to_query_string_sorted_deterministic(self) -> None:
         """GIVEN params with multiple keys WHEN to_query_string THEN keys are sorted."""
-        ep = ExtractionParams(params={
-            "z_param": "last",
-            "a_param": "first",
-            "m_param": "middle",
-        })
+        ep = ExtractionParams(
+            params={
+                "z_param": "last",
+                "a_param": "first",
+                "m_param": "middle",
+            }
+        )
         result = ep.to_query_string()
 
         assert result == "a_param=first&m_param=middle&z_param=last"
@@ -66,21 +68,25 @@ class TestExtractionParams:
 
     def test_to_query_string_with_bool_values(self) -> None:
         """GIVEN params with bool values WHEN to_query_string THEN serializes correctly."""
-        ep = ExtractionParams(params={
-            "pchembl_value__isnull": False,
-            "target_organism__isnull": True,
-        })
+        ep = ExtractionParams(
+            params={
+                "pchembl_value__isnull": False,
+                "target_organism__isnull": True,
+            }
+        )
         result = ep.to_query_string()
 
         assert result == "pchembl_value__isnull=False&target_organism__isnull=True"
 
     def test_to_query_dict_with_mixed_value_types(self) -> None:
         """GIVEN params with str, int, bool values WHEN to_query_dict THEN preserves types."""
-        ep = ExtractionParams(params={
-            "standard_type__in": "IC50,Ki",
-            "limit": 1000,
-            "pchembl_value__isnull": False,
-        })
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50,Ki",
+                "limit": 1000,
+                "pchembl_value__isnull": False,
+            }
+        )
         result = ep.to_query_dict()
 
         assert result["standard_type__in"] == "IC50,Ki"
