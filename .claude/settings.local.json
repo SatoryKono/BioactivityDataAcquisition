@@ -64,7 +64,9 @@
       "Bash(cd:*)",
       "Bash(git status:*)",
       "Bash(ruff check:*)",
-      "Bash(nslookup:*)"
+      "Bash(nslookup:*)",
+      "Bash(cmd /c \"set VCR_RECORD_MODE=all && python -m pytest tests/integration/pipelines/test_chembl_activity.py::TestChemblActivityPipeline::test_chembl_activity_happy_path -x --tb=short 2>&1\")",
+      "Bash(VCR_RECORD_MODE=all python -m pytest:*)"
     ]
   },
   "enabledPlugins": {

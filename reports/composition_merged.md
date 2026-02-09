@@ -48,7 +48,12 @@ from bioetl.composition.bootstrap import (
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
-from bioetl.domain.context import InputFilterContext, PipelineRunContext, VacuumConfig
+from bioetl.domain.context import (
+    CachedBronzeContext,
+    InputFilterContext,
+    PipelineRunContext,
+    VacuumConfig,
+)
 from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.config import get_settings
 
@@ -136,8 +141,8 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         input_filter = InputFilterContext(
             enabled=True,
             source_path=options.input_csv,
-            column_name=options.filter_column or "",  # Empty = use YAML default
-            filter_field=options.filter_field or "",  # Empty = use YAML default
+            column_name=options.filter_column or "",
+            filter_field=options.filter_field or "",
         )
     else:
         input_filter = InputFilterContext.disabled()
@@ -154,6 +159,15 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         retention_days=options.vacuum_retention_days or 7,
     )
 
+    # Build CachedBronzeContext from CLI options
+    if options.use_cached_bronze:
+        cached_bronze = CachedBronzeContext.from_options(
+            path=options.cached_bronze_path,
+            date=options.cached_bronze_date,
+        )
+    else:
+        cached_bronze = CachedBronzeContext.disabled()
+
     return PipelineRunContext(
         pipeline_name=name,
         run_id=cast(RunID, uuid4()),
@@ -165,6 +179,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         vacuum=vacuum,
         log_level=options.log_level,
         ignore_yaml_filter=options.ignore_yaml_filter,
+        cached_bronze=cached_bronze,
     )
 
 
@@ -2588,20 +2603,19 @@ def bootstrap_composite_runner(
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
 
-    # Create seed runner factory
+    # Shared cached bronze RunOptions kwargs for all runner factories
+    _bronze_opts: dict[str, object] = {
+        "use_cached_bronze": runtime.use_cached_bronze,
+        "cached_bronze_path": runtime.cached_bronze_path,
+        "cached_bronze_date": runtime.cached_bronze_date,
+    }
+
     def seed_runner_factory() -> PipelineRunner:
-        """Create PipelineRunner for the seed phase.
-
-        The seed pipeline runs first to fetch primary entities (e.g., publications)
-        which provide join keys (DOI, PMID) for subsequent enricher pipelines.
-
-        Returns:
-            PipelineRunner configured for seed pipeline execution with
-            optional limit from runtime config.
-        """
+        """Create PipelineRunner for the seed phase."""
         options = RunOptions(
             run_type="incremental",
             limit=runtime.seed_limit,
+            **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline_runner(ctx)
@@ -2649,6 +2663,7 @@ def bootstrap_composite_runner(
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
+            **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -2716,6 +2731,7 @@ def bootstrap_composite_runner(
             limit=len(keys) if filter_ids and keys is not None else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
+            **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -4712,6 +4728,8 @@ class HttpClientFactory:
             # Client settings (timeout and retries)
             timeout = source_config.timeout_sec
             max_retries = source_config.max_retries
+            base_delay = source_config.retry_base_delay
+            max_delay = source_config.retry_max_delay
         else:
             # Fallback to ProviderRegistry
             http_config = ProviderRegistry.get_http_config(provider)
@@ -4730,6 +4748,8 @@ class HttpClientFactory:
                 recovery_timeout = 300  # Default
                 timeout = 30.0  # Default
                 max_retries = 3  # Default
+            base_delay = 1.0  # RetryConfig default
+            max_delay = 60.0  # RetryConfig default
 
         # Apply rate overrides based on settings (API key boosts)
         http_config = ProviderRegistry.get_http_config(provider)
@@ -4748,7 +4768,11 @@ class HttpClientFactory:
                 recovery_timeout=recovery_timeout,
                 metrics=metrics,
             ),
-            retry_config=RetryConfig(max_attempts=max_retries),
+            retry_config=RetryConfig(
+                max_attempts=max_retries,
+                base_delay=base_delay,
+                max_delay=max_delay,
+            ),
             timeout=timeout,
             provider=provider,
             run_id=run_id,
@@ -9150,6 +9174,7 @@ from bioetl.composition.providers.provider_registry import (
     ProviderConfig,
     ProviderRegistry,
 )
+from bioetl.domain.models.filter import ExtractionParams
 
 # Import adapter classes from Infrastructure (allowed direction)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -9184,6 +9209,40 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
+def _validate_extraction_input_filter_overlap(
+    extraction_params: ExtractionParams,
+    input_filter: InputFilterConfig,
+    logger: LoggerPort,
+) -> None:
+    """Warn if input_filter field overlaps extraction_params keys.
+
+    Both are applied as AND in API query. Overlap means one might
+    shadow the other. Log WARNING but do not block.
+    """
+    if not input_filter.enabled or extraction_params.is_empty:
+        return
+
+    filter_field = input_filter.filter_field
+    if filter_field and filter_field in extraction_params.params:
+        logger.warning(
+            "extraction_params_input_filter_overlap",
+            overlap_field=filter_field,
+            extraction_value=str(extraction_params.params[filter_field]),
+            resolution="input_filter will override extraction_params for this field",
+        )
+
+    # Check multi-column mode
+    if input_filter.columns:
+        for col in input_filter.columns:
+            if col.filter_field in extraction_params.params:
+                logger.warning(
+                    "extraction_params_input_filter_overlap",
+                    overlap_field=col.filter_field,
+                    extraction_value=str(extraction_params.params[col.filter_field]),
+                    resolution="input_filter will override",
+                )
+
+
 def _create_chembl_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
@@ -9206,12 +9265,22 @@ def _create_chembl_data_source(
     # Load adapter configuration from YAML (single source of truth)
     adapter_config = _get_adapter_config("chembl", default_page_size=1000)
 
+    # Build ExtractionParams from pipeline config (ADR-028 §3)
+    extraction_params = ExtractionParams(params=pipeline_config.extraction_params)
+
+    # Validate overlap between extraction_params and input_filter
+    if filter_config is not None:
+        _validate_extraction_input_filter_overlap(
+            extraction_params, filter_config, logger
+        )
+
     base_adapter = DataSourceFactory.create(
         "chembl",
         http_client=http_client,
         logger=logger,
         adapter_config=adapter_config,
         metrics=metrics,
+        extraction_params=extraction_params,
     )
 
     # Wrap with PublicationTermDataSource for derived entity extraction
