@@ -886,16 +886,16 @@ class TestChemblAdapterExtractionParams:
 
         assert params == {"format": "json", "limit": 500, "offset": 0}
 
-    def test_build_params_with_extraction_params(
-        self, mock_http_client, mock_logger
-    ):
+    def test_build_params_with_extraction_params(self, mock_http_client, mock_logger):
         """Test that extraction_params are merged into _build_params output."""
         from bioetl.domain.models.filter import ExtractionParams
 
-        ep = ExtractionParams(params={
-            "standard_type__in": "IC50,Ki",
-            "pchembl_value__isnull": False,
-        })
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50,Ki",
+                "pchembl_value__isnull": False,
+            }
+        )
         adapter = ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
@@ -956,10 +956,12 @@ class TestChemblAdapterExtractionParams:
         """Test that non-empty extraction_params are logged at init."""
         from bioetl.domain.models.filter import ExtractionParams
 
-        ep = ExtractionParams(params={
-            "standard_type__in": "IC50,Ki",
-            "pchembl_value__isnull": False,
-        })
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50,Ki",
+                "pchembl_value__isnull": False,
+            }
+        )
         ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
@@ -999,10 +1001,12 @@ class TestChemblAdapterExtractionParams:
         """Test that get_source_metadata sets query_string from extraction_params."""
         from bioetl.domain.models.filter import ExtractionParams
 
-        ep = ExtractionParams(params={
-            "standard_type__in": "IC50",
-            "standard_units": "nM",
-        })
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50",
+                "standard_units": "nM",
+            }
+        )
         adapter = ChemblAdapter(
             http_client=mock_http_client,
             logger=mock_logger,
