@@ -15,7 +15,7 @@ entity_field_validations:
   - field: pmid
     type: range
     min: 1
-    max: 100000000
+    max: 10000000000
     nullable: false
     error_message: "PMID is required and must be a positive integer"
 
