@@ -160,6 +160,9 @@ from bioetl.domain.exceptions import (
     ValidationError,
 )
 
+# Extraction filtering (ADR-028 §3)
+from bioetl.domain.models import ExtractionParams
+
 # Filter configuration
 from bioetl.domain.filtering import (
     FilterLoadResult,
@@ -459,6 +462,8 @@ __all__ = [
     "InvalidDataFormatError",
     "MissingRequiredFieldError",
     "SchemaViolationError",
+    # Extraction filtering (ADR-028)
+    "ExtractionParams",
     # Filters
     "FilterLoadResult",
     "GoldColumnFilter",
