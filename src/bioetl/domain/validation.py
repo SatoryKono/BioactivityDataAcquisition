@@ -15,7 +15,6 @@ See also:
 from __future__ import annotations
 
 import re
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from .transformations import safe_int
