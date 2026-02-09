@@ -92,6 +92,31 @@ class FilterConfigBuilder:
         )
 
     @staticmethod
+    def from_direct_multi_ids(
+        multi_filter_ids: dict[str, tuple[str, ...]],
+        valid_combinations: frozenset[tuple[str, ...]] | None = None,
+        batch_size: int = 100,
+    ) -> InputFilterConfig:
+        """Build config for direct multi-field filter IDs mode.
+
+        Used for composite dependencies that filter by multiple fields
+        simultaneously (AND logic). E.g., compound_record filtered by both
+        molecule_chembl_id and document_chembl_id.
+
+        Args:
+            multi_filter_ids: Mapping of field name to tuple of IDs.
+            valid_combinations: Valid (field1, field2, ...) tuples for
+                client-side combination filtering.
+            batch_size: Number of IDs per API request.
+        """
+        return InputFilterConfig(
+            enabled=True,
+            direct_multi_filter_ids=multi_filter_ids,
+            direct_valid_combinations=valid_combinations,
+            batch_size=batch_size,
+        )
+
+    @staticmethod
     def build(
         yaml_filter: YamlInputFilter,
         cli_csv: str | None = None,
@@ -102,13 +127,16 @@ class FilterConfigBuilder:
         test_mode: bool = False,
         direct_filter_ids: tuple[str, ...] | None = None,
         direct_fallback_mapping: dict[str, str] | None = None,
+        direct_multi_filter_ids: dict[str, tuple[str, ...]] | None = None,
+        direct_valid_combinations: frozenset[tuple[str, ...]] | None = None,
     ) -> InputFilterConfig | None:
         """Build InputFilterConfig by merging YAML config and CLI overrides.
 
         Priority:
-        1. direct_filter_ids: Direct IDs (highest priority, for composite mode)
-        2. cli_csv: CSV path from CLI
-        3. yaml_filter: YAML config (disabled in test_mode)
+        1. direct_multi_filter_ids: Multi-field AND filtering (highest, composite)
+        2. direct_filter_ids: Direct IDs (composite mode)
+        3. cli_csv: CSV path from CLI
+        4. yaml_filter: YAML config (disabled in test_mode)
 
         Multi-column mode (columns list in YAML) is used as-is, CLI overrides ignored.
 
@@ -125,10 +153,21 @@ class FilterConfigBuilder:
             test_mode: If True, YAML-based filters are disabled
             direct_filter_ids: Direct filter IDs (no CSV file, for composite mode)
             direct_fallback_mapping: Direct fallback mapping (DOI->Title)
+            direct_multi_filter_ids: Multi-field filter IDs (AND logic, composite)
+            direct_valid_combinations: Valid (field1, field2) tuples for
+                client-side combination filtering
 
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
         """
+        # Direct multi-field filter IDs take highest priority
+        if direct_multi_filter_ids is not None:
+            return FilterConfigBuilder.from_direct_multi_ids(
+                multi_filter_ids=direct_multi_filter_ids,
+                valid_combinations=direct_valid_combinations,
+                batch_size=yaml_filter.batch_size,
+            )
+
         # Direct filter IDs take highest priority (composite mode)
         if direct_filter_ids is not None:
             return FilterConfigBuilder.from_direct_ids(

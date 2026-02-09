@@ -107,7 +107,9 @@ class InputFilterContext:
 
     All fields are required when filtering is enabled via CSV.
     For direct IDs, only filter_ids and filter_field are required.
-    Create via InputFilterContext.from_csv(), from_ids(), or disabled().
+    For multi-field IDs, use multi_filter_ids (dict of field -> IDs).
+    Create via InputFilterContext.from_csv(), from_ids(), from_multi_ids(),
+    or disabled().
     """
 
     enabled: bool
@@ -115,6 +117,8 @@ class InputFilterContext:
     column_name: str
     filter_field: str
     filter_ids: tuple[str, ...] | None = None
+    multi_filter_ids: dict[str, tuple[str, ...]] | None = None
+    valid_combinations: frozenset[tuple[str, ...]] | None = None
     fallback_mapping: dict[str, str] | None = None
     fallback_column: str | None = None
 
@@ -127,6 +131,8 @@ class InputFilterContext:
             column_name="",
             filter_field="",
             filter_ids=None,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=None,
             fallback_column=None,
         )
@@ -146,6 +152,8 @@ class InputFilterContext:
             column_name=column_name,
             filter_field=filter_field,
             filter_ids=None,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=None,
             fallback_column=fallback_column,
         )
@@ -167,7 +175,39 @@ class InputFilterContext:
             column_name="",
             filter_field=filter_field,
             filter_ids=filter_ids,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=fallback_mapping,
+            fallback_column=None,
+        )
+
+    @classmethod
+    def from_multi_ids(
+        cls,
+        multi_filter_ids: dict[str, tuple[str, ...]],
+        valid_combinations: frozenset[tuple[str, ...]] | None = None,
+    ) -> InputFilterContext:
+        """Create an enabled filter context from multi-field IDs.
+
+        Used for composite dependencies that filter by multiple fields
+        simultaneously (AND logic). E.g., compound_record filtered by both
+        molecule_chembl_id and document_chembl_id.
+
+        Args:
+            multi_filter_ids: Mapping of field name to tuple of IDs.
+            valid_combinations: Optional set of valid (field1, field2, ...)
+                tuples for client-side combination filtering.
+        """
+        fields = list(multi_filter_ids.keys())
+        return cls(
+            enabled=True,
+            source_path="",
+            column_name="",
+            filter_field=fields[0] if fields else "",
+            filter_ids=None,
+            multi_filter_ids=multi_filter_ids,
+            valid_combinations=valid_combinations,
+            fallback_mapping=None,
             fallback_column=None,
         )
 
@@ -175,10 +215,17 @@ class InputFilterContext:
         """Validate filter configuration."""
         if not self.enabled:
             return
-        if self.filter_ids is not None:
+        if self.multi_filter_ids is not None:
+            self._validate_multi_ids_mode()
+        elif self.filter_ids is not None:
             self._validate_direct_ids_mode()
         else:
             self._validate_csv_mode()
+
+    def _validate_multi_ids_mode(self) -> None:
+        """Validate multi-field IDs mode configuration."""
+        if not self.multi_filter_ids:
+            raise ValueError("multi_filter_ids must be non-empty when set")
 
     def _validate_direct_ids_mode(self) -> None:
         """Validate direct IDs mode configuration."""

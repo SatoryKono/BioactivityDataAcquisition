@@ -30,7 +30,11 @@ from bioetl.application.composite.runner import (
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+from bioetl.domain.composite.config import (
+    CompositeConfig,
+    DependencyConfig,
+    EnricherConfig,
+)
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.field_group_loader import (
@@ -169,6 +173,65 @@ def _extract_filter_ids_from_keys(
     return filter_ids, filter_key, fallback
 
 
+def _extract_multi_filter_ids(
+    dep_cfg: DependencyConfig,
+    keys: pl.DataFrame,
+    logger: LoggerPort | None = None,
+) -> dict[str, tuple[str, ...]] | None:
+    """Extract multi-field filter IDs from seed keys for a dependency.
+
+    For dual-key filtering (e.g., molecule_chembl_id + document_chembl_id),
+    extracts unique values for each filter field from the keys DataFrame.
+
+    Args:
+        dep_cfg: Dependency configuration with filter_fields.
+        keys: DataFrame containing seed keys.
+        logger: Optional logger.
+
+    Returns:
+        Dict mapping field name to tuple of unique IDs, or None if extraction fails.
+    """
+    if keys is None or len(keys) == 0:
+        if logger:
+            logger.debug(
+                "No keys available for multi-field dependency",
+                pipeline=dep_cfg.pipeline,
+            )
+        return None
+
+    result: dict[str, tuple[str, ...]] = {}
+    for field in dep_cfg.effective_filter_fields:
+        if field not in keys.columns:
+            if logger:
+                logger.warning(
+                    "Multi-filter field not found in keys columns",
+                    pipeline=dep_cfg.pipeline,
+                    missing_field=field,
+                    available_columns=list(keys.columns),
+                )
+            return None
+        values = keys.select(field).drop_nulls().unique().to_series().to_list()
+        if not values:
+            if logger:
+                logger.debug(
+                    "No values for multi-filter field",
+                    pipeline=dep_cfg.pipeline,
+                    field=field,
+                )
+            return None
+        result[field] = tuple(str(v) for v in values)
+
+    if logger:
+        logger.info(
+            "Extracted multi-field filter IDs",
+            pipeline=dep_cfg.pipeline,
+            fields=list(result.keys()),
+            counts={f: len(ids) for f, ids in result.items()},
+        )
+
+    return result
+
+
 def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
@@ -293,6 +356,8 @@ def bootstrap_composite_runner(
         - Extracts join key values from provided keys DataFrame
         - Passes extracted IDs as filter_ids to limit API calls
         - Uses filter_field from config if set (for field name mapping)
+        - For multi-field filtering (filter_fields), extracts all fields
+          and passes as multi_filter_ids with valid combinations
 
         Args:
             pipeline_name: Name of the dependency pipeline to instantiate.
@@ -304,19 +369,24 @@ def bootstrap_composite_runner(
         dep_cfg = dependency_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
+        multi_filter_ids: dict[str, tuple[str, ...]] | None = None
 
         if dep_cfg and keys is not None and len(keys) > 0:
-            # Extract filter IDs from keys
-            for key in dep_cfg.join_keys:
-                if key in keys.columns:
-                    key_values = (
-                        keys.select(key).drop_nulls().unique().to_series().to_list()
-                    )
-                    if key_values:
-                        filter_ids = tuple(str(v) for v in key_values)
-                        # Use filter_field from config if set, otherwise use join_key
-                        filter_field = dep_cfg.filter_field or key
-                        break
+            if dep_cfg.is_multi_field_filter:
+                # Multi-field filtering: extract all filter fields
+                multi_filter_ids = _extract_multi_filter_ids(dep_cfg, keys, logger)
+            else:
+                # Single-field filtering (existing logic)
+                for key in dep_cfg.join_keys:
+                    if key in keys.columns:
+                        key_values = (
+                            keys.select(key).drop_nulls().unique().to_series().to_list()
+                        )
+                        if key_values:
+                            filter_ids = tuple(str(v) for v in key_values)
+                            # Use filter_field from config if set, otherwise use join_key
+                            filter_field = dep_cfg.filter_field or key
+                            break
 
         # Debug logging for dependency filter configuration
         logger.debug(
@@ -328,15 +398,25 @@ def bootstrap_composite_runner(
             filter_field=filter_field,
             filter_ids_count=len(filter_ids) if filter_ids else 0,
             filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+            multi_filter_fields=list(multi_filter_ids.keys())
+            if multi_filter_ids
+            else [],
+            multi_filter_counts={f: len(ids) for f, ids in multi_filter_ids.items()}
+            if multi_filter_ids
+            else {},
             is_chained=dep_cfg.key_source is not None if dep_cfg else False,
             key_source=dep_cfg.key_source if dep_cfg else None,
         )
 
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if filter_ids and keys is not None else None,
+            limit=len(keys)
+            if (filter_ids or multi_filter_ids) and keys is not None
+            else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
+            multi_filter_ids=multi_filter_ids,
+            ignore_yaml_filter=True,
             **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)

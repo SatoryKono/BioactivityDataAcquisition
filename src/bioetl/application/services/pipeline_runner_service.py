@@ -126,6 +126,9 @@ class RunOptions:
         filter_column: Column name in CSV containing filter IDs.
         filter_field: API field name to filter by.
         filter_ids: Direct filter IDs (e.g., DOIs) without CSV file.
+        multi_filter_ids: Multi-field filter IDs for AND-logic filtering.
+            Maps field name to list of IDs. Used for composite dependencies
+            that need to filter by multiple fields simultaneously.
         vacuum_after_run: Enable automatic VACUUM after successful run.
         vacuum_retention_days: Minimum age of files to remove during VACUUM.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
@@ -143,6 +146,9 @@ class RunOptions:
     filter_column: str | None = None
     filter_field: str | None = None
     filter_ids: tuple[str, ...] | None = None  # Direct filter IDs (no CSV)
+    multi_filter_ids: dict[str, tuple[str, ...]] | None = (
+        None  # Multi-field (AND logic)
+    )
     fallback_column: str | None = None  # Column name for fallback search (CSV mode)
     fallback_mapping: dict[str, str] | None = None  # Direct mapping (composite mode)
     vacuum_after_run: bool | None = None
