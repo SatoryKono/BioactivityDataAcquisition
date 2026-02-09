@@ -112,8 +112,8 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         input_filter = InputFilterContext(
             enabled=True,
             source_path=options.input_csv,
-            column_name=options.filter_column or "",  # Empty = use YAML default
-            filter_field=options.filter_field or "",  # Empty = use YAML default
+            column_name=options.filter_column or "",
+            filter_field=options.filter_field or "",
         )
     else:
         input_filter = InputFilterContext.disabled()

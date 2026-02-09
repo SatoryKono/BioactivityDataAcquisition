@@ -186,13 +186,13 @@ class InputFilterContext:
             raise ValueError("filter_field is required when filter_ids is set")
 
     def _validate_csv_mode(self) -> None:
-        """Validate CSV-based filter configuration."""
+        """Validate CSV-based filter configuration.
+        
+        Note: column_name and filter_field can be empty here; they will be
+        resolved from YAML configuration during the bootstrap phase.
+        """
         if not self.source_path:
             raise ValueError("source_path is required when filter is enabled")
-        if not self.column_name:
-            raise ValueError("column_name is required when filter is enabled")
-        if not self.filter_field:
-            raise ValueError("filter_field is required when filter is enabled")
 
 
 @dataclass(frozen=True, slots=True)
