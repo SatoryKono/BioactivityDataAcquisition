@@ -29,6 +29,7 @@ from bioetl.domain.exceptions import (
     ExternalServiceError,
     RetryExhaustedError,
 )
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import HealthStatus
@@ -95,6 +96,7 @@ class ChemblAdapter(BaseHttpAdapter):
     adapter_config: AdapterConfig | None = None
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
+    extraction_params: ExtractionParams | None = None
 
     provider_name: str = field(init=False, default="chembl")
     """Provider identifier (required by DataSourcePort)."""
@@ -111,6 +113,11 @@ class ChemblAdapter(BaseHttpAdapter):
         init=False, default_factory=APIRequestCollector
     )
 
+    # Resolved extraction params (computed in __post_init__)
+    _extraction_params: ExtractionParams = field(
+        init=False, default_factory=ExtractionParams.empty
+    )
+
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         # Initialize error handler from base class
@@ -124,6 +131,17 @@ class ChemblAdapter(BaseHttpAdapter):
 
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+
+        # Resolve extraction params
+        self._extraction_params = self.extraction_params or ExtractionParams.empty()
+
+        if not self._extraction_params.is_empty:
+            self.logger.info(
+                "chembl_extraction_params_configured",
+                provider="chembl",
+                param_count=len(self._extraction_params.params),
+                query_string=self._extraction_params.to_query_string(),
+            )
 
     @property
     def effective_batch_size(self) -> int:
@@ -175,6 +193,10 @@ class ChemblAdapter(BaseHttpAdapter):
         if entity_type not in _NO_PAGINATION_ENTITIES:
             params["limit"] = self._get_effective_batch_size()
             params["offset"] = offset
+
+        # Extraction-level filtering (ADR-028 §3)
+        if not self._extraction_params.is_empty:
+            params.update(self._extraction_params.to_query_dict())
 
         return params
 
@@ -1086,6 +1108,9 @@ class ChemblAdapter(BaseHttpAdapter):
             source_type="api", url=CHEMBL_API_BASE, api_version=api_version
         )
         self._request_collector.clear()
+        # Record extraction params query string for audit trail (ADR-028 §3)
+        if not self._extraction_params.is_empty:
+            metadata.query_string = self._extraction_params.to_query_string()
         return metadata
 
     def clear_request_collector(self) -> None:

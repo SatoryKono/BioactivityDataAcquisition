@@ -1,7 +1,7 @@
 # ADR-028: Filter Rules Externalization
 
 **Status:** Accepted
-**Date:** 2026-01-20
+**Date:** 2026-02-09
 **Decision makers:** @BioETL-Team
 
 ## Context
@@ -133,6 +133,81 @@ filter_config_file: ../../filter/entities/chembl/activity.yaml
 | `list_contains` | dict[str, Contains] | List content filter |
 | `exclude_if_present` | list[str] | Exclude if field has value |
 
+### §3. Extraction-Level Filtering (extraction_params)
+
+#### Назначение
+
+Серверные query parameters для API-провайдеров, применяемые на этапе
+Bronze extraction. Сокращают объём трафика — API возвращает только
+релевантные записи вместо полного датасета.
+
+#### Область применения
+
+- Только Bronze extract, не влияет на transform/load
+- Provider-specific синтаксис (ChEMBL: `__in`, `__isnull`, `__gt` и др.)
+- Параметры НЕ влияют на content_hash (ADR-014)
+
+#### Конфигурация
+
+Размещается в `configs/filter/` hierarchy как секция `extraction_params`:
+
+```yaml
+# configs/filter/entities/chembl/activity.yaml
+extraction_params:
+  standard_type__in: "IC50,Ki"
+  standard_units: "nM"
+  standard_relation: "="
+  assay_type__in: "B,F"
+  potential_duplicate: 0
+  data_validity_comment__isnull: true
+  pchembl_value__isnull: false
+  standard_flag: 1
+```
+
+#### Merge order
+
+`configs/filter/_defaults.yaml` → `providers/{provider}.yaml`
+→ `entities/{provider}/{entity}.yaml`
+
+Entity-level `extraction_params` полностью заменяет provider-level
+(не merge отдельных ключей, а full override секции).
+
+#### Взаимодействие с input_filter
+
+- `extraction_params`: фильтрует по СВОЙСТВАМ записей (статические, из YAML)
+- `input_filter`: фильтрует по ID (динамические, из CSV)
+- Применяются совместно (AND семантика в API запросе)
+- При пересечении ключей — WARNING, `input_filter` override
+
+#### Взаимодействие с gold_filters
+
+- `extraction_params`: pre-extract (API-side)
+- `gold_filters`: post-load (client-side, Silver→Gold)
+- Не конфликтуют — разные точки применения
+
+#### Ограничения
+
+- НЕТ CLI override (детерминизм, ADR-014)
+- MUST логироваться в `SourceMetadata.query_string`
+- Provider-specific: не все провайдеры поддерживают серверную фильтрацию
+
+#### Domain representation
+
+`ExtractionParams` frozen dataclass в `domain/models/filter.py`
+
+### Filter Type Comparison
+
+| Aspect | `input_filter` (§1) | `gold_filters` (§2) | `extraction_params` (§3) |
+|--------|---------------------|----------------------|--------------------------|
+| Stage | Bronze extract | Silver→Gold transform | Bronze extract |
+| Side | Client-side (ID batching) | Client-side (DataFrame) | Server-side (API query) |
+| Source | CSV file (dynamic) | YAML (static) | YAML (static) |
+| Filters by | Record IDs | Field values, ranges, nulls | Record properties |
+| Merge behavior | Recursive merge | Recursive merge | Full override (section-level) |
+| CLI override | No (ADR-014) | No (ADR-014) | No (ADR-014) |
+| Affects content_hash | No (ADR-014) | No | No (ADR-014) |
+| Provider-specific | No (generic ID filter) | No (generic DataFrame filter) | Yes (API syntax) |
+
 ## Alternatives Considered
 
 ### 1. Keep Inline Only
@@ -174,6 +249,7 @@ Define filters in Python code. Rejected because:
 | Entity overrides | PASS | `entities/{provider}/{entity}.yaml` |
 | Backward compatibility | PASS | Inline `input_filter`/`gold_filters` supported |
 | Domain conversion | PASS | `FilterConfigFile.to_domain()` |
+| Extraction params | PASS | `extraction_params` section in filter YAML |
 
 ## References
 
@@ -189,3 +265,4 @@ Define filters in Python code. Rejected because:
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-01-20 | Claude Code | Initial version |
+| 2026-02-09 | Claude Code | Added §3 Extraction-Level Filtering (extraction_params) |
