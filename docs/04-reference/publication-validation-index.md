@@ -24,12 +24,12 @@
 
 | Документ | Описание | Статус |
 |----------|----------|--------|
-| **[ADR-032](../adr/ADR-032-publication-validation-strategy.md)** | Стратегия валидации публикаций: 5 уровней, DQ-флаги, карантин, конфигурация | ✅ Принят (2026-02-06) |
+| **[ADR-032](../02-architecture/decisions/ADR-032-publication-validation-strategy.md)** | Стратегия валидации публикаций: 5 уровней, DQ-флаги, карантин, конфигурация | ✅ Принят (2026-02-06) |
 
 **Связанные ADR:**
-- [ADR-002](../adr/ADR-002-architecture-hexagonal.md) — Hexagonal Architecture (validation services в application layer)
-- [ADR-014](../adr/ADR-014-architecture-medallion.md) — Medallion Architecture (Bronze → Silver → Gold)
-- [ADR-027](../adr/ADR-027-dq-framework.md) — Silver Layer DQ Framework (`_dq_warn`, `_dq_error`)
+- [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) — Hexagonal Architecture (validation services в application layer)
+- [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) — Medallion Architecture (Bronze → Silver → Gold)
+- [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — Silver Layer DQ Framework (`_dq_warn`, `_dq_error`)
 
 ---
 
@@ -37,8 +37,8 @@
 
 | Документ | Описание | Охват |
 |----------|----------|-------|
-| **[Publication Fields Reference](../reference/publication-fields-reference.md)** | Полный справочник всех 191 полей с типами, regex, PK, категориями | 191 поле |
-| **[Validation Schema v3](../schemas/publication_validation_schema_v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
+| **[Publication Fields Reference](publication-fields-reference.md)** | Полный справочник всех 191 полей с типами, regex, PK, категориями | 191 поле |
+| **[Validation Schema v3](schemas/publication_validation_schema_v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
 | **[Glossary v2.5](../00-project/glossary.md)** | Ubiquitous Language: термины валидации, DQ-флаги, режимы | 12 новых терминов |
 
 ---
@@ -47,8 +47,8 @@
 
 | Документ | Целевая аудитория | Содержание |
 |----------|-------------------|------------|
-| **[Validation Guide](../guides/publication-validation-guide.md)** | Data Engineers, Developers | Полное руководство по реализации с 4 Mermaid-диаграммами, примерами кода, best practices |
-| **[Operational Runbook](../runbooks/publication-validation-runbook.md)** | DevOps, Support, On-Call | Диагностика сбоев, bash-команды, escalation path, контакты провайдеров |
+| **[Validation Guide](../03-guides/publication-validation-guide.md)** | Data Engineers, Developers | Полное руководство по реализации с 4 Mermaid-диаграммами, примерами кода, best practices |
+| **[Operational Runbook](../05-operations/runbooks/publication-validation-runbook.md)** | DevOps, Support, On-Call | Диагностика сбоев, bash-команды, escalation path, контакты провайдеров |
 
 ---
 
@@ -79,10 +79,10 @@ tests_generated/
 
 ```bash
 # Прочитать ADR-032 (решение + обоснование)
-open docs/adr/ADR-032-publication-validation-strategy.md
+open docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md
 
 # Изучить диаграммы в Validation Guide
-open docs/guides/publication-validation-guide.md
+open docs/03-guides/publication-validation-guide.md
 ```
 
 **Диаграммы:**
@@ -97,10 +97,10 @@ open docs/guides/publication-validation-guide.md
 
 ```bash
 # Открыть Field Reference
-open docs/reference/publication-fields-reference.md
+open docs/04-reference/publication-fields-reference.md
 
 # Или поискать в валидационной схеме
-grep "pmid" docs/schemas/publication_validation_schema_v3.csv
+grep "pmid" docs/04-reference/schemas/publication_validation_schema_v3.csv
 ```
 
 **Пример записи:**
@@ -162,7 +162,7 @@ pytest tests_generated/ --cov=src/bioetl --cov-report=html
 
 ```bash
 # Открыть Operational Runbook
-open docs/runbooks/publication-validation-runbook.md
+open docs/05-operations/runbooks/publication-validation-runbook.md
 
 # Проверить последние ошибки валидации
 journalctl -u bioetl-pipeline --since "1 hour ago" | grep "validation_failed"
@@ -180,8 +180,8 @@ cat /var/log/bioetl/pipeline.log | \
 ### Data Engineer (Реализация)
 
 1. **Прочитать:**
-   - [ADR-032](../adr/ADR-032-publication-validation-strategy.md) — Архитектурное решение
-   - [Validation Guide](../guides/publication-validation-guide.md) — Примеры кода
+   - [ADR-032](../02-architecture/decisions/ADR-032-publication-validation-strategy.md) — Архитектурное решение
+   - [Validation Guide](../03-guides/publication-validation-guide.md) — Примеры кода
 
 2. **Реализовать:**
    - Добавить Pandera checks в Silver schema
@@ -193,8 +193,8 @@ cat /var/log/bioetl/pipeline.log | \
    - Добавить provider-specific tests по примерам
 
 4. **Документировать:**
-   - Обновить [Field Reference](../reference/publication-fields-reference.md) при добавлении полей
-   - Добавить правила в [Validation Schema](../schemas/publication_validation_schema_v3.xlsx)
+   - Обновить [Field Reference](publication-fields-reference.md) при добавлении полей
+   - Добавить правила в [Validation Schema](schemas/publication_validation_schema_v3.xlsx)
 
 ---
 
@@ -205,7 +205,7 @@ cat /var/log/bioetl/pipeline.log | \
    - Grafana dashboard: DQ Pass Rate, Top Failing Rules, Validation Latency
 
 2. **При алерте:**
-   - Открыть [Operational Runbook](../runbooks/publication-validation-runbook.md)
+   - Открыть [Operational Runbook](../05-operations/runbooks/publication-validation-runbook.md)
    - Следовать процедурам диагностики по уровням валидации
    - Использовать bash-команды для troubleshooting
 
@@ -244,7 +244,7 @@ cat /var/log/bioetl/pipeline.log | \
 1. Определить поля в Pandera schema (`src/bioetl/domain/schemas/{provider}/publication.py`)
 2. Добавить правила в `publication_validation_schema_v3.xlsx`
 3. Сгенерировать тесты из XLSX (скрипт: `scratchpad/generate_tests.py`)
-4. Обновить [Field Reference](../reference/publication-fields-reference.md)
+4. Обновить [Field Reference](publication-fields-reference.md)
 5. Добавить провайдера в конфигурацию External Verification
 
 ---
@@ -256,7 +256,7 @@ cat /var/log/bioetl/pipeline.log | \
 3. Интегрировать в pipeline workflow (после LogicalValidator)
 4. Добавить конфигурацию в `application/config/validation.yaml`
 5. Написать unit tests (`tests/unit/application/services/dq/`)
-6. Обновить [Validation Guide](../guides/publication-validation-guide.md) с описанием уровня
+6. Обновить [Validation Guide](../03-guides/publication-validation-guide.md) с описанием уровня
 
 ---
 

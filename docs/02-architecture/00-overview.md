@@ -1,6 +1,6 @@
 # Architecture Overview
 
-*Synced with RULES.md v5.17 (2026-01-26)*
+*Synced with RULES.md v5.17 (2026-02-09)*
 
 ## Quick Navigation
 
@@ -37,7 +37,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-31 ADRs documenting key architectural decisions:
+32 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -72,6 +72,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-029](decisions/ADR-029-output-metadata-unification.md) | Output Metadata Unification | §2.4 |
 | [ADR-030](decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | - |
 | [ADR-031](decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | - |
+| [ADR-032](decisions/ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | §3.1 |
 
 ---
 
