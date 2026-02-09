@@ -154,7 +154,8 @@ class FilterConfigFile(BaseModel):
     @field_validator("extraction_params")
     @classmethod
     def validate_extraction_params(
-        cls, v: dict[str, str | int | bool],
+        cls,
+        v: dict[str, str | int | bool],
     ) -> dict[str, str | int | bool]:
         """Validate extraction params keys and values."""
         for key, value in v.items():
