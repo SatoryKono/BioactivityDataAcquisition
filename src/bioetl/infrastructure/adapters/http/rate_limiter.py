@@ -193,21 +193,6 @@ def create_crossref_bucket(
     return TokenBucket(rate=50.0, capacity=50, provider="crossref", metrics=metrics)
 
 
-def create_semantic_scholar_bucket(
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for Semantic Scholar (100 req/5min).
-
-    Args:
-        metrics: Optional metrics port for observability
-
-    """
-    # 100 requests per 5 minutes = 0.333 req/sec
-    return TokenBucket(
-        rate=0.333, capacity=10, provider="semantic_scholar", metrics=metrics
-    )
-
-
 def create_pubmed_bucket(
     with_api_key: bool = False,
     metrics: MetricsPort | None = None,
