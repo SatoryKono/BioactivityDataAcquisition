@@ -744,7 +744,15 @@
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],
-      "range_filters": [],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2100.0,
+          "min_value": 1800.0
+        }
+      ],
       "required_fields": [
         "pmid",
         "title"

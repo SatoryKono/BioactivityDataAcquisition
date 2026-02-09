@@ -25,12 +25,12 @@ entity_field_validations:
     error_message: "DOI must start with 10. prefix"
 
   - field: title
-    type: pattern
-    pattern: '^.{1,2000}$'
+    type: max_length
+    max_length: 2000
     nullable: true
-    error_message: "Title must not exceed 2000 chars"
+    error_message: "Title must not exceed 2000 characters"
 
-  - field: year
+  - field: publication_year
     type: range
     min: 1500
     max: 2100
