@@ -252,7 +252,7 @@ def _merge_filter_config(
     filter_config: dict[str, Any],
     explicit_entity_config: dict[str, Any],
 ) -> None:
-    """Merge filter config (input_filter, gold_filters) into pipeline config.
+    """Merge filter config (input_filter, gold_filters, extraction_params) into pipeline config.
 
     Merge priority (highest to lowest):
     1. Explicit entity config (from pipeline YAML file)
@@ -294,6 +294,16 @@ def _merge_filter_config(
             )
 
         config["gold_filters"] = merged_gold_filters
+
+    # Merge extraction_params (ADR-028 §3)
+    if "extraction_params" in filter_config:
+        merged_extraction_params = dict(filter_config["extraction_params"])
+
+        # Pipeline-level overrides take precedence
+        if "extraction_params" in explicit_entity_config:
+            merged_extraction_params.update(explicit_entity_config["extraction_params"])
+
+        config["extraction_params"] = merged_extraction_params
 
 
 def _load_column_groups_section(

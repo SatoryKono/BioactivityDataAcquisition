@@ -421,6 +421,81 @@ class TestFilterConfigFile:
         assert range_filter.include_max is False
 
 
+class TestFilterConfigLoaderExtractionParams:
+    """Tests for extraction_params loading via FilterConfigLoader."""
+
+    def test_extraction_params_default_empty(self, loader: FilterConfigLoader) -> None:
+        """Extraction params should be empty when not configured."""
+        _, _, extraction_params = loader.load("test_provider", "test_entity")
+        assert extraction_params.is_empty
+
+    def test_extraction_params_from_entity_config(self, tmp_path: Path) -> None:
+        """Extraction params should be loaded from entity config."""
+        filter_root = tmp_path / "filter"
+        filter_root.mkdir()
+
+        (filter_root / "_defaults.yaml").write_text(
+            """
+version: "1.0.0"
+input_filter:
+  enabled: false
+  batch_size: 100
+gold_filters:
+  required_fields: []
+"""
+        )
+
+        entities = filter_root / "entities" / "chembl"
+        entities.mkdir(parents=True)
+        (entities / "activity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: chembl
+entity: activity
+extraction_params:
+  standard_type__in: "IC50,Ki"
+  standard_units: "nM"
+  potential_duplicate: 0
+  data_validity_comment__isnull: true
+"""
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        _, _, extraction_params = loader.load("chembl", "activity")
+
+        assert not extraction_params.is_empty
+        assert extraction_params.params["standard_type__in"] == "IC50,Ki"
+        assert extraction_params.params["standard_units"] == "nM"
+        assert extraction_params.params["potential_duplicate"] == 0
+        assert extraction_params.params["data_validity_comment__isnull"] is True
+
+    def test_extraction_params_inline_override(self, tmp_path: Path) -> None:
+        """Inline overrides should update extraction_params."""
+        filter_root = tmp_path / "filter"
+        filter_root.mkdir()
+
+        (filter_root / "_defaults.yaml").write_text(
+            """
+version: "1.0.0"
+input_filter:
+  enabled: false
+gold_filters:
+  required_fields: []
+extraction_params:
+  standard_type__in: "IC50"
+"""
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        _, _, extraction_params = loader.load(
+            "any",
+            "any",
+            inline_overrides={"extraction_params": {"standard_type__in": "Ki"}},
+        )
+
+        assert extraction_params.params["standard_type__in"] == "Ki"
+
+
 class TestFilterConfigLoaderIntegration:
     """Integration tests with actual filter config structure."""
 
