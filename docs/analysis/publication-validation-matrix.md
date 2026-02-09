@@ -1,6 +1,6 @@
 # Publication Validation Matrix
 
-*Version: 1.0.0 | Date: 2026-02-09*
+*Version: 1.1.0 | Date: 2026-02-09*
 
 Cross-provider analysis of validation rules for `publication` entity across all 5 pipelines:
 **ChEMBL**, **PubMed**, **CrossRef**, **OpenAlex**, **Semantic Scholar**.
@@ -8,7 +8,7 @@ Cross-provider analysis of validation rules for `publication` entity across all 
 Sources analysed:
 - Pandera Silver schemas (`domain/schemas/{provider}/publication.py`)
 - Pandera base schema (`domain/schemas/common/publication_base.py`)
-- Gold contracts (`domain/contracts/gold/publications.py`)
+- Gold contracts (`domain/contracts/gold/publications.py`, `domain/contracts/gold/chembl.py`)
 - DQ rules (`configs/dq/entities/{provider}/publication.yaml`)
 - Filter rules (`configs/filter/entities/{provider}/publication.yaml`)
 - Value Objects (`domain/value_objects/publications.py`)
@@ -60,7 +60,7 @@ Fields inherited by all providers from `PublicationBaseSchema`.
 | `authors` | `str` | Yes | -- (JSON array) | -- |
 | `affiliation_list` | `str` | Yes | -- (JSON array) | -- |
 | `author_orcids` | `str` | Yes | `@pa.check` orcid_format: each element matches `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$` | -- |
-| `journal` | `str` | Yes | -- | PubMed, OpenAlex: re-declare (same rules) |
+| `journal` | `str` | Yes | -- | PubMed: re-declares (same rules) |
 | `publication_year` | `Int64` | Yes | `ge=1500, le=2100` (MIN/MAX_PUBLICATION_YEAR) | -- |
 | `publication_date` | `str` | Yes | `^\d{4}-\d{2}-\d{2}$` | -- |
 | `publication_type` | `str` | Yes | -- (free text) | ChEMBL: `isin [PUBLICATION, PATENT, DATASET, BOOK]`; CrossRef: free text; OpenAlex: free text; S2: free text |
@@ -90,7 +90,11 @@ Fields inherited by all providers from `PublicationBaseSchema`.
 
 ## 4. Provider-Specific Fields
 
-### 4.1 ChEMBL-Only Fields
+Note: Some fields below (e.g. `volume`, `issue`, `issn`, `publisher`, `subject_keywords`, `oa_status`)
+appear in 2-3 providers but are NOT in `PublicationBaseSchema`. They are listed under each provider
+that defines them.
+
+### 4.1 ChEMBL Provider Fields
 
 | Field | Type | Nullable | Validation |
 |-------|------|----------|------------|
@@ -102,7 +106,7 @@ Fields inherited by all providers from `PublicationBaseSchema`.
 | `_dq_warn` | `Boolean` | Yes | default=False |
 | `_dq_error` | `Boolean` | Yes | default=False |
 
-### 4.2 PubMed-Only Fields
+### 4.2 PubMed Provider Fields
 
 | Field | Type | Nullable | Validation |
 |-------|------|----------|------------|
@@ -139,7 +143,7 @@ Fields inherited by all providers from `PublicationBaseSchema`.
 | `publisher_id` | `str` | Yes | -- |
 | `authors_with_affiliations` | `str` | Yes | -- (JSON array) |
 
-### 4.3 CrossRef-Only Fields
+### 4.3 CrossRef Provider Fields
 
 | Field | Type | Nullable | Validation |
 |-------|------|----------|------------|
@@ -160,7 +164,7 @@ Fields inherited by all providers from `PublicationBaseSchema`.
 | `author_details` | `str` | Yes | -- (JSON array) |
 | `references` | `str` | Yes | -- (JSON array) |
 
-### 4.4 OpenAlex-Only Fields
+### 4.4 OpenAlex Provider Fields
 
 | Field | Type | Nullable | Validation |
 |-------|------|----------|------------|
@@ -182,7 +186,7 @@ Fields inherited by all providers from `PublicationBaseSchema`.
 | `institution_country_codes` | `str` | Yes | -- |
 | `ror_ids` | `str` | Yes | -- (JSON array) |
 
-### 4.5 Semantic Scholar-Only Fields
+### 4.5 Semantic Scholar Provider Fields
 
 | Field | Type | Nullable | Validation |
 |-------|------|----------|------------|
@@ -248,17 +252,21 @@ Fields inherited by all providers from `PublicationBaseSchema`.
 
 ## 7. Gold Schema Matrix
 
-Key differences between providers in Gold layer contracts:
+Key differences between providers in Gold layer contracts.
+
+Note: ChEMBL Gold contract is `ChEMBLDocumentGoldSchema` in `domain/contracts/gold/chembl.py`.
 
 | Field | ChEMBL Gold | PubMed Gold | CrossRef Gold | OpenAlex Gold | S2 Gold |
 |-------|-------------|-------------|---------------|---------------|---------|
-| **publication_year** | -- (no ChEMBL Gold contract) | `float`, ge=1500, le=2100, coerce | `float`, ge=1500, le=2100, coerce | `float`, ge=1500, le=2100, coerce | `float`, ge=1500, le=2100, coerce |
-| **citations_received** | -- | -- | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce |
-| **citations_made** | -- | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce |
-| **title nullable** | -- | **No** | Yes | Yes | Yes |
-| **doi validation** | -- | DOI_REGEX_PATTERN | DOI_REGEX_PATTERN | DOI_REGEX_PATTERN | DOI_REGEX_PATTERN |
-| **strict mode** | -- | True | True | True | True |
-| **Int->Float coercion** | -- | pub_month, pub_day, year, counts | year, citations | year, citations, fwci | year, corpus_id, citations |
+| **publication_year** | `float`, coerce, **no ge/le range** | `float`, ge=1500, le=2100, coerce | `float`, ge=1500, le=2100, coerce | `float`, ge=1500, le=2100, coerce | `float`, ge=1500, le=2100, coerce |
+| **citations_received** | `float`, ge=0, coerce | -- | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce |
+| **citations_made** | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce |
+| **title nullable** | Yes | **No** | Yes | Yes | Yes |
+| **doi validation** | -- (no regex pattern) | DOI_REGEX_PATTERN | DOI_REGEX_PATTERN | DOI_REGEX_PATTERN | DOI_REGEX_PATTERN |
+| **_source nullable** | **Yes** | No | No | No | No |
+| **_lookup_method** | **nullable=True, no isin** | nullable=False, isin=LOOKUP_METHODS | nullable=False, isin=LOOKUP_METHODS | nullable=False, isin=LOOKUP_METHODS | nullable=False, isin=LOOKUP_METHODS |
+| **strict mode** | True | True | True | True | True |
+| **Int->Float coercion** | year, citations_received, citations_made, src_id | pub_month, pub_day, year, counts | year, citations | year, citations | year, corpus_id, citations, influential_citation_count |
 
 ---
 
@@ -287,9 +295,11 @@ Key differences between providers in Gold layer contracts:
 | **Pandera Silver range** | 1500..2100 | 1500..2100 | 1500..2100 | 1500..2100 | 1500..2100 |
 | **DQ range** | 1500..2100 | 1500..2100 | 1500..2100 | 1500..2100 | 1500..2100 |
 | **Filter (Gold) range** | **1950..2050** | **1950..2050** | **1950..2050** | **1950..2050** | **1950..2050** |
-| **Gold contract type** | -- (no contract) | `float` coerce, 1500..2100 | `float` coerce, 1500..2100 | `float` coerce, 1500..2100 | `float` coerce, 1500..2100 |
+| **Gold contract type** | `float` coerce, **no ge/le range** | `float` coerce, 1500..2100 | `float` coerce, 1500..2100 | `float` coerce, 1500..2100 | `float` coerce, 1500..2100 |
 
-**Discrepancy**: DQ validates 1500-2100 but Filter narrows to 1950-2050 for Gold. This is intentional: DQ flags for Silver quality, Filter selects for Gold relevance. However, ChEMBL has no Gold contract schema.
+**Discrepancies**:
+1. DQ validates 1500-2100 but Filter narrows to 1950-2050 for Gold. This is intentional: DQ flags for Silver quality, Filter selects for Gold relevance.
+2. ChEMBL Gold contract (`ChEMBLDocumentGoldSchema`) has `publication_year` with `coerce=True` but **without `ge`/`le` range constraints**, unlike all other Gold contracts that enforce 1500-2100. This means invalid years can pass through to ChEMBL Gold.
 
 ### 9.2 `publication_type` (field name / enum values)
 
@@ -309,10 +319,10 @@ Key differences between providers in Gold layer contracts:
 |--------|--------|--------|----------|----------|-----------------|
 | **Pandera Silver nullable** | Yes (from base) | **No** (overridden) | Yes (from base) | Yes (from base) | Yes (from base) |
 | **DQ nullable** | Yes | Yes | Yes | Yes | Yes |
-| **Gold nullable** | -- | **No** | Yes | Yes | Yes |
+| **Gold nullable** | Yes | **No** | Yes | Yes | Yes |
 | **Filter required** | Yes | Yes | Yes | Yes | Yes |
 
-**Discrepancy**: PubMed enforces `title` as non-nullable at Pandera Silver level, while all others allow nullable. All providers require `title` in filter config, but PubMed additionally enforces at schema level.
+**Discrepancy**: PubMed enforces `title` as non-nullable at both Pandera Silver and Gold levels, while all others (including ChEMBL Gold) allow nullable. All providers require `title` in filter config, but PubMed additionally enforces at schema level.
 
 ### 9.4 `pmid` (type and validation)
 
@@ -354,9 +364,9 @@ Key differences between providers in Gold layer contracts:
 | **Pandera Silver** | `Int64`, ge=0 (from base) | `Int64`, ge=0 (from base) | `Int64`, ge=0 (from base) | `Int64`, ge=0 (from base) | `Int64`, ge=0 (from base) |
 | **DQ error rule** | -- | -- | range >= 0 | range >= 0 | range >= 0 |
 | **DQ warn rule** | -- | -- | warn if > 10M | warn if > 10M | warn if > 10M |
-| **Gold type** | -- | -- | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce |
+| **Gold type** | `float`, ge=0, coerce | -- | `float`, ge=0, coerce | `float`, ge=0, coerce | `float`, ge=0, coerce |
 
-**Discrepancy**: ChEMBL and PubMed have **no** DQ rules for `citations_received` (ChEMBL API doesn't return citation counts; PubMed doesn't provide them natively). CrossRef, OpenAlex, and S2 share identical DQ rules with the 10M warn threshold.
+**Discrepancy**: ChEMBL and PubMed have **no** DQ rules for `citations_received`. ChEMBL Gold contract does define the field (`float`, ge=0, coerce) but without DQ-level validation. PubMed Gold has no `citations_received` field at all. CrossRef, OpenAlex, and S2 share identical DQ rules with the 10M warn threshold.
 
 ### 9.8 `citations_made` (DQ rules presence)
 
@@ -396,7 +406,23 @@ Key differences between providers in Gold layer contracts:
 
 **No discrepancy** between providers that have it -- both use the same enum from `OA_STATUS_VALUES`.
 
-### 9.12 `subject_keywords` (type in Gold)
+### 9.12 ChEMBL Gold contract gaps vs other providers
+
+| Aspect | ChEMBL Gold | PubMed/CrossRef/OpenAlex/S2 Gold |
+|--------|-------------|----------------------------------|
+| **publication_year range** | `float`, coerce, **no ge/le** | `float`, ge=1500, le=2100, coerce |
+| **doi pattern** | no regex validation | `str_matches=DOI_REGEX_PATTERN` |
+| **_source nullable** | **Yes** | No |
+| **_lookup_method nullable** | **Yes** (no isin constraint) | No (isin=LOOKUP_METHODS) |
+
+**Discrepancy**: `ChEMBLDocumentGoldSchema` (in `gold/chembl.py`) is significantly less strict than other providers' Gold contracts:
+1. No year range validation -- invalid years pass through.
+2. No DOI regex -- malformed DOIs pass through.
+3. `_source` and `_lookup_method` are nullable and lack enum constraints, while all other providers enforce `nullable=False` + enum.
+
+This likely reflects the fact that ChEMBL Gold contract was written before the Publication Schema Unification spec was applied to other providers.
+
+### 9.13 `subject_keywords` (type in Gold)
 
 | Aspect | PubMed Gold | CrossRef Gold | OpenAlex Gold |
 |--------|-------------|---------------|---------------|
@@ -457,9 +483,9 @@ Key differences between providers in Gold layer contracts:
    - Filter (1950-2050): selects relevant publications for Gold analysis
 2. **Document explicitly** in DQ YAML comments that DQ range is intentionally broader than Filter range.
 3. **Add DQ warn rule** for `publication_year < 1950` across all providers (currently only error for out-of-range). This provides a signal that the record will be filtered at Gold stage.
-4. **Verify ChEMBL Gold contract** is created (currently missing) with the same 1500-2100 range.
+4. **Add `ge=1500, le=2100` range** to `ChEMBLDocumentGoldSchema.publication_year` to align with other Gold contracts (currently has `coerce=True` but no range constraints).
 
-**Effort**: Low. Documentation + optional warn rule.
+**Effort**: Low. Documentation + optional warn rule + one-line Gold schema fix.
 
 ### 10.3 `title` -- Nullability Harmonization
 
@@ -549,4 +575,4 @@ Key differences between providers in Gold layer contracts:
 | 6 | Add S2 publication_type DQ rule | publication_type | Low | **Medium** -- gap remediation |
 | 7 | Add `title_missing` warn rule | title | Low | **Low** -- informational |
 | 8 | Add `publication_year < 1950` DQ warn | publication_year | Low | **Low** -- informational |
-| 9 | Create ChEMBL Gold contract schema | all ChEMBL fields | Medium | **Low** -- completeness |
+| 9 | Align ChEMBL Gold contract with other providers (add year range, DOI pattern, `_source`/`_lookup_method` strictness) | publication_year, doi, _source, _lookup_method | Low | **Medium** -- Gold contract inconsistency |
