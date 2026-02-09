@@ -791,9 +791,9 @@ scrape_configs:
 
 ### ADR и документация
 
-- **ADR-032:** Стратегия валидации (`docs/adr/ADR-032-publication-validation-strategy.md`)
-- **Validation Guide:** `docs/guides/publication-validation-guide.md`
-- **Field Reference:** `docs/reference/publication-fields-reference.md`
+- **ADR-032:** Стратегия валидации (`docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md`)
+- **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
+- **Field Reference:** `docs/04-reference/publication-fields-reference.md`
 - **Test Suite:** `tests_generated/` (471 тест)
 
 ---
