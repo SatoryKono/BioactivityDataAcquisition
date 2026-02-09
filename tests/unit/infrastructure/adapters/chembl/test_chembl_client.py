@@ -383,12 +383,12 @@ class TestChemblAdapterHealthAwareBatchSize:
     @pytest.mark.asyncio
     async def test_unhealthy_raises_critical_error(self, mock_http_client, mock_logger):
         """Test that UNHEALTHY status raises CriticalError."""
-        # Configure circuit breaker for UNHEALTHY state (failure_count > 2)
+        # Configure circuit breaker for UNHEALTHY state (OPEN = threshold reached)
         mock_http_client.circuit_breaker = MagicMock()
         mock_http_client.circuit_breaker.get_state.return_value = (
-            CircuitBreakerState.CLOSED
+            CircuitBreakerState.OPEN
         )
-        mock_http_client.circuit_breaker.get_failure_count.return_value = 3
+        mock_http_client.circuit_breaker.get_failure_count.return_value = 5
 
         adapter = ChemblAdapter(
             http_client=mock_http_client,
