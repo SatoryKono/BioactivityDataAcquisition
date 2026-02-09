@@ -26,7 +26,6 @@ from bioetl.application.pipelines.semanticscholar._page_parsing import (
     parse_page_range,
     parse_volume_issue,
 )
-from bioetl.domain.value_objects import PublicationYear
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
