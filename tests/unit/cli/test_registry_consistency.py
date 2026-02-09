@@ -172,7 +172,7 @@ class TestListPipelinesCommandSnapshot:
     def test_list_pipelines_command_output(
         self,
         cli_runner: CliRunner,
-        snapshot: Any,
+        request: pytest.FixtureRequest,
     ) -> None:
         """Test list-pipelines command output matches snapshot.
 
@@ -180,8 +180,8 @@ class TestListPipelinesCommandSnapshot:
         If the pipeline list changes intentionally, update the snapshot with:
             pytest tests/unit/cli/test_registry_consistency.py --snapshot-update
         """
-        # Skip if syrupy is not installed
         pytest.importorskip("syrupy", reason="syrupy required for snapshot tests")
+        snapshot = request.getfixturevalue("snapshot")
 
         from bioetl.interfaces.cli.main import cli
 

@@ -21,7 +21,7 @@ from bioetl.domain.schemas.common.publication_base import (
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
-from bioetl.domain.schemas.constants import ORCID_PATTERN
+from bioetl.domain.schemas.constants import ISSN_PATTERN, ORCID_PATTERN
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
@@ -73,13 +73,14 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     # === Override _source to be non-nullable ===
     _source: Series[str] = pa.Field(
         nullable=False,
+        eq="openalex",
         description="Data source identifier",
     )
 
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{3}[\dX]$",
+        str_matches=ISSN_PATTERN,
         description="ISSN-L (format: XXXX-XXXX)",
     )
 

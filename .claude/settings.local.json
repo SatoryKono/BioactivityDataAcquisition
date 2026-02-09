@@ -56,7 +56,8 @@
       "Bash(python3:*)",
       "Bash(xargs:*)",
       "Bash(sort:*)",
-      "Bash(E:)"
+      "Bash(E:)",
+      "WebSearch"
     ]
   },
   "enabledPlugins": {

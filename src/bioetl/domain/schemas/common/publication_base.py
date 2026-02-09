@@ -96,6 +96,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     )
     language: Series[str] = pa.Field(
         nullable=True,
+        str_length={"min_value": 2, "max_value": 3},
         description="Language code (ISO 639-1 or MARC)",
     )
 
@@ -132,7 +133,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     # Note: alias maps Python attribute name to DataFrame column name
     lookup_method: Series[str] = pa.Field(
         alias="_lookup_method",
-        nullable=True,
+        nullable=False,
         isin=LOOKUP_METHODS,
         description="How record was resolved: direct, doi, pmid, title_fallback, title_only",
     )

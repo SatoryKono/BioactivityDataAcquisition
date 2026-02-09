@@ -29,12 +29,12 @@ entity_field_validations:
 
   - field: year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
-    error_message: "Publication year must be between 1800 and 2100"
+    error_message: "Publication year must be between 1500 and 2100"
 
-  - field: pubmed_id
+  - field: pmid
     type: range
     min: 1
     max: 100000000
@@ -43,9 +43,15 @@ entity_field_validations:
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/.+$'
     nullable: true
     error_message: "DOI must start with 10. prefix"
+
+  - field: title
+    type: max_length
+    max_length: 2000
+    nullable: true
+    error_message: "Title must not exceed 2000 characters"
 
 # =============================================================================
 # Cross-Field Validations
@@ -53,7 +59,7 @@ entity_field_validations:
 entity_cross_field_validations:
   - name: publication_identifiable
     fields:
-      - pubmed_id
+      - pmid
       - doi
       - title
     condition: any_present

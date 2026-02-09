@@ -87,7 +87,7 @@ class ArticleRecord(BaseModel):
         default=None, description="Publication date (ISO format)"
     )
     year: int | None = PydanticField(
-        default=None, description="Publication year (1800-2100)"
+        default=None, description="Publication year (1500-2100)"
     )
     # Note: accepted_date, received_date, revised_date, epub_date excluded from
     # transformer output per design (PubMed pipeline field exclusions)
