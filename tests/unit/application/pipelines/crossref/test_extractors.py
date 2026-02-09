@@ -20,7 +20,6 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_page_info,
     extract_published_date,
     extract_references,
-    extract_year,
 )
 
 
@@ -180,85 +179,6 @@ class TestExtractAffiliations:
         pub = {"author": ["not_dict"]}
         result = extract_affiliations(pub)
         assert result == []
-
-
-class TestExtractYear:
-    """Tests for extract_year function."""
-
-    def test_extract_year_from_published_print(self) -> None:
-        """Should extract year from published-print field."""
-        publication = {"published-print": {"date-parts": [[2023, 6, 15]]}}
-        result = extract_year(publication)
-        assert result == 2023
-
-    def test_extract_year_from_published_online(self) -> None:
-        """Should fall back to published-online field."""
-        publication = {"published-online": {"date-parts": [[2022, 3, 1]]}}
-        result = extract_year(publication)
-        assert result == 2022
-
-    def test_extract_year_from_issued(self) -> None:
-        """Should fall back to issued field."""
-        publication = {"issued": {"date-parts": [[2021, 1, 1]]}}
-        result = extract_year(publication)
-        assert result == 2021
-
-    def test_extract_year_priority_order(self) -> None:
-        """Should prefer published-print over other date fields."""
-        publication = {
-            "published-print": {"date-parts": [[2023, 6, 1]]},
-            "published-online": {"date-parts": [[2023, 5, 1]]},
-            "issued": {"date-parts": [[2023, 4, 1]]},
-        }
-        result = extract_year(publication)
-        assert result == 2023
-
-    def test_extract_year_year_only(self) -> None:
-        """Should extract year from date-parts with only year."""
-        publication = {"published-print": {"date-parts": [[2020]]}}
-        result = extract_year(publication)
-        assert result == 2020
-
-    def test_extract_year_empty_dict(self) -> None:
-        """Should return None for empty publication dict."""
-        result = extract_year({})
-        assert result is None
-
-    def test_extract_year_empty_date_parts(self) -> None:
-        """Should return None for empty date-parts."""
-        publication = {"published-print": {"date-parts": [[]]}}
-        result = extract_year(publication)
-        assert result is None
-
-    def test_extract_year_non_integer(self) -> None:
-        """Should return None for non-integer year."""
-        publication = {"published-print": {"date-parts": [["2023"]]}}
-        result = extract_year(publication)
-        assert result is None
-
-    def test_extract_year_out_of_range_low(self) -> None:
-        """Should return None for year below valid range (1500)."""
-        publication = {"published-print": {"date-parts": [[1499]]}}
-        result = extract_year(publication)
-        assert result is None
-
-    def test_extract_year_out_of_range_high(self) -> None:
-        """Should return None for year above valid range (2100)."""
-        publication = {"published-print": {"date-parts": [[2101]]}}
-        result = extract_year(publication)
-        assert result is None
-
-    def test_extract_year_valid_boundary_low(self) -> None:
-        """Should accept year at lower boundary (1500)."""
-        publication = {"published-print": {"date-parts": [[1500]]}}
-        result = extract_year(publication)
-        assert result == 1500
-
-    def test_extract_year_valid_boundary_high(self) -> None:
-        """Should accept year at upper boundary (2100)."""
-        publication = {"published-print": {"date-parts": [[2100]]}}
-        result = extract_year(publication)
-        assert result == 2100
 
 
 class TestExtractLicenseUrl:
