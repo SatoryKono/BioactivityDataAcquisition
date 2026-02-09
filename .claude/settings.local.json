@@ -57,7 +57,9 @@
       "Bash(xargs:*)",
       "Bash(sort:*)",
       "Bash(E:)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(set:*)",
+      "Bash(UPDATE_SNAPSHOTS=1 python -m pytest:*)"
     ]
   },
   "enabledPlugins": {

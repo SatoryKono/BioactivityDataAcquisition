@@ -27,7 +27,7 @@ entity_field_validations:
       - PATENT
     nullable: true
 
-  - field: year
+  - field: publication_year
     type: range
     min: 1500
     max: 2100
