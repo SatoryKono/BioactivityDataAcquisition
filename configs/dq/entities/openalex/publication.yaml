@@ -78,7 +78,7 @@ entity_field_validations:
     nullable: true
     error_message: "FWCI must be non-negative"
 
-  - field: reference_count
+  - field: citations_made
     type: range
     min: 0
     nullable: true
