@@ -1,0 +1,53 @@
+# configs/normalization/publication_type/providers/crossref.yaml
+# ─────────────────────────────────────────────────────────────────────
+# CrossRef → Canonical publication type mapping.
+#
+# Source field: Work.type  (30 values, Feb 2026)
+# Live enum:   GET https://api.crossref.org/types
+# Docs:        https://github.com/CrossRef/rest-api-doc
+# ─────────────────────────────────────────────────────────────────────
+version: "1.0.0"
+provider: crossref
+source_field: type
+vocabulary: ../vocabulary.yaml
+
+case_sensitive: false
+default: OTHER
+
+mapping:
+  # --- EXP ----------------------------------------------------------
+  journal-article:          JOURNAL_ARTICLE
+  proceedings-article:      CONFERENCE_PAPER
+  posted-content:           PREPRINT
+  dataset:                  DATASET
+  database:                 DATASET
+  dissertation:             DISSERTATION
+  report:                   TECHNICAL_REPORT
+  report-component:         TECHNICAL_REPORT
+  component:                JOURNAL_ARTICLE  # figure/table/supplement of primary research
+
+  # --- PEER ---------------------------------------------------------
+  peer-review:              PEER_REVIEW
+
+  # --- REV ----------------------------------------------------------
+  book:                     BOOK
+  book-chapter:             BOOK_CHAPTER
+  book-section:             BOOK_CHAPTER
+  book-part:                BOOK_CHAPTER
+  book-track:               BOOK_CHAPTER
+  book-set:                 BOOK
+  book-series:              BOOK
+  edited-book:              BOOK
+  reference-book:           BOOK
+  monograph:                BOOK
+  reference-entry:          REFERENCE_ENTRY
+  standard:                 STANDARD
+  standard-series:          STANDARD
+  grant:                    GRANT
+  journal:                  PARATEXT       # journal-level metadata
+  journal-issue:            PARATEXT
+  journal-volume:           PARATEXT
+  proceedings:              PARATEXT       # proceedings container (not an article)
+  proceedings-series:       PARATEXT
+  report-series:            PARATEXT
+  other:                    OTHER

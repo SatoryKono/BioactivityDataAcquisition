@@ -1,0 +1,24 @@
+# configs/normalization/publication_type/providers/chembl.yaml
+# ─────────────────────────────────────────────────────────────────────
+# ChEMBL → Canonical publication type mapping.
+#
+# Source field: Document.doc_type  (4 values)
+# ChEMBL has the simplest type system: PUBLICATION, PATENT, DATASET, BOOK.
+# ─────────────────────────────────────────────────────────────────────
+version: "1.0.0"
+provider: chembl
+source_field: doc_type
+vocabulary: ../vocabulary.yaml
+
+# ChEMBL types are UPPER_CASE
+case_sensitive: true
+default: OTHER
+
+mapping:
+  # --- EXP ----------------------------------------------------------
+  PUBLICATION:              JOURNAL_ARTICLE
+  DATASET:                  DATASET
+  PATENT:                   PATENT
+
+  # --- REV ----------------------------------------------------------
+  BOOK:                     BOOK

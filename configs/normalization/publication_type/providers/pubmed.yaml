@@ -1,0 +1,270 @@
+# configs/normalization/publication_type/providers/pubmed.yaml
+# ─────────────────────────────────────────────────────────────────────
+# PubMed → Canonical publication type mapping.
+#
+# Source: <PublicationTypeList> XML elements (MeSH Category V)
+# A record can have MULTIPLE publication types simultaneously.
+# Strategy: map each type independently; resolver picks highest-priority.
+#
+# Priority order (when multiple types present):
+#   1. Most specific study design (CLINICAL_TRIAL > OBSERVATIONAL_STUDY > JOURNAL_ARTICLE)
+#   2. EXP wins over REV (if both Journal Article + Review, treat as REV=REVIEW)
+#
+# Docs: https://www.nlm.nih.gov/mesh/pubtypes.html (MeSH 2025)
+# ─────────────────────────────────────────────────────────────────────
+version: "1.0.0"
+provider: pubmed
+source_field: publication_types   # JSON array from <PublicationTypeList>
+vocabulary: ../vocabulary.yaml
+
+# PubMed types are Title Case with spaces
+case_sensitive: true
+default: OTHER
+
+# Priority: lower number = higher priority in multi-type resolution
+# When a PubMed record has multiple types, pick the one with lowest priority number
+priority_order:
+  - CLINICAL_TRIAL          # 1 — most specific study design
+  - OBSERVATIONAL_STUDY     # 2
+  - COMPARATIVE_STUDY       # 3
+  - VALIDATION_STUDY        # 4
+  - MULTICENTER_STUDY       # 5
+  - CASE_REPORT             # 6
+  - DATASET                 # 7
+  - PATENT                  # 8
+  - DISSERTATION            # 9
+  - TECHNICAL_REPORT        # 10
+  - SYSTEMATIC_REVIEW       # 11 — most specific review type
+  - META_ANALYSIS           # 12
+  - REVIEW                  # 13
+  - GUIDELINE               # 14
+  - JOURNAL_ARTICLE         # 15 — generic, lowest priority
+  - PREPRINT                # 16
+  - EDITORIAL               # 17
+  - LETTER                  # 18
+  - NEWS                    # 19
+  - ERRATUM                 # 20
+  - RETRACTION              # 21
+  - OTHER                   # 22
+
+mapping:
+  # --- EXP: Primary Research ----------------------------------------
+  "Journal Article":                            JOURNAL_ARTICLE
+  "Preprint":                                   PREPRINT
+  "Dataset":                                    DATASET
+  "Database":                                   DATASET
+  "Academic Dissertation":                      DISSERTATION
+  "Technical Report":                           TECHNICAL_REPORT
+  "Patent":                                     PATENT
+  "Electronic Supplementary Materials":         JOURNAL_ARTICLE
+  "Statistics":                                 JOURNAL_ARTICLE
+  "Annual Report":                              TECHNICAL_REPORT
+
+  # --- EXP: Clinical Trials (all designs → CLINICAL_TRIAL) ----------
+  "Clinical Trial":                             CLINICAL_TRIAL
+  "Clinical Trial Protocol":                    CLINICAL_TRIAL
+  "Clinical Trial, Phase I":                    CLINICAL_TRIAL
+  "Clinical Trial, Phase II":                   CLINICAL_TRIAL
+  "Clinical Trial, Phase III":                  CLINICAL_TRIAL
+  "Clinical Trial, Phase IV":                   CLINICAL_TRIAL
+  "Clinical Trial, Veterinary":                 CLINICAL_TRIAL
+  "Adaptive Clinical Trial":                    CLINICAL_TRIAL
+  "Pragmatic Clinical Trial":                   CLINICAL_TRIAL
+  "Equivalence Trial":                          CLINICAL_TRIAL
+  "Randomized Controlled Trial":                CLINICAL_TRIAL
+  "Randomized Controlled Trial, Veterinary":    CLINICAL_TRIAL
+  "Controlled Clinical Trial":                  CLINICAL_TRIAL
+
+  # --- EXP: Observational & Other Study Designs --------------------
+  "Clinical Study":                             OBSERVATIONAL_STUDY
+  "Clinical Conference":                        CONFERENCE_PAPER
+  "Observational Study":                        OBSERVATIONAL_STUDY
+  "Observational Study, Veterinary":            OBSERVATIONAL_STUDY
+  "Comparative Study":                          COMPARATIVE_STUDY
+  "Validation Study":                           VALIDATION_STUDY
+  "Evaluation Study":                           VALIDATION_STUDY
+  "Multicenter Study":                          MULTICENTER_STUDY
+  "Twin Study":                                 OBSERVATIONAL_STUDY
+  "Case Reports":                               CASE_REPORT
+  "Congress":                                   CONFERENCE_PAPER
+
+  # --- REV: Reviews & Syntheses ------------------------------------
+  "Review":                                     REVIEW
+  "Systematic Review":                          SYSTEMATIC_REVIEW
+  "Scoping Review":                             SYSTEMATIC_REVIEW
+  "Meta-Analysis":                              META_ANALYSIS
+  "Network Meta-Analysis":                      META_ANALYSIS
+  "Scientific Integrity Review":                REVIEW
+
+  # --- REV: Editorial & Commentary ---------------------------------
+  "Editorial":                                  EDITORIAL
+  "Letter":                                     LETTER
+  "Comment":                                    LETTER
+  "News":                                       NEWS
+  "Newspaper Article":                          NEWS
+  "Interview":                                  EDITORIAL
+  "Address":                                    EDITORIAL
+  "Introductory Journal Article":               EDITORIAL
+  "Meeting Abstract":                           OTHER
+  "Popular Work":                               OTHER
+  "Blog":                                       OTHER
+  "Webcast":                                    OTHER
+  "Lecture":                                    OTHER
+  "Lecture Note":                               OTHER
+
+  # --- REV: Corrections & Retractions ------------------------------
+  "Published Erratum":                          ERRATUM
+  "Corrected and Republished Article":          ERRATUM
+  "Expression of Concern":                      ERRATUM
+  "Retracted Publication":                      RETRACTION
+  "Retraction of Publication":                  RETRACTION
+  "Duplicate Publication":                      ERRATUM
+
+  # --- REV: Books & Monographs ------------------------------------
+  "Monograph":                                  BOOK
+  "Book Review":                                BOOK
+  "Book Illustrations":                         BOOK
+  "Collected Work":                             BOOK
+  "Collection":                                 BOOK
+  "Festschrift":                                BOOK
+
+  # --- REV: Reference & Encyclopedic -------------------------------
+  "Encyclopedia":                               REFERENCE_ENTRY
+  "Dictionary":                                 REFERENCE_ENTRY
+  "Dictionary, Chemical":                       REFERENCE_ENTRY
+  "Dictionary, Classical":                      REFERENCE_ENTRY
+  "Dictionary, Dental":                         REFERENCE_ENTRY
+  "Dictionary, Medical":                        REFERENCE_ENTRY
+  "Dictionary, Pharmaceutic":                   REFERENCE_ENTRY
+  "Dictionary, Polyglot":                       REFERENCE_ENTRY
+  "Terminology":                                REFERENCE_ENTRY
+  "Atlas":                                      REFERENCE_ENTRY
+  "Pharmacopoeia":                              REFERENCE_ENTRY
+  "Pharmacopoeia, Homeopathic":                 REFERENCE_ENTRY
+  "Formulary":                                  REFERENCE_ENTRY
+  "Formulary, Dental":                          REFERENCE_ENTRY
+  "Formulary, Homeopathic":                     REFERENCE_ENTRY
+  "Formulary, Hospital":                        REFERENCE_ENTRY
+  "Dispensatory":                               REFERENCE_ENTRY
+  "Herbal":                                     REFERENCE_ENTRY
+
+  # --- REV: Guidelines ---------------------------------------------
+  "Guideline":                                  GUIDELINE
+  "Practice Guideline":                         GUIDELINE
+  "Consensus Development Conference":           GUIDELINE
+  "Consensus Development Conference, NIH":      GUIDELINE
+
+  # --- REV: Grants & Funding (metadata tags, not content types) ----
+  "Research Support, American Recovery and Reinvestment Act": GRANT
+  "Research Support, N.I.H., Extramural":       GRANT
+  "Research Support, N.I.H., Intramural":       GRANT
+  "Research Support, Non-U.S. Gov't":           GRANT
+  "Research Support, U.S. Gov't, Non-P.H.S.":  GRANT
+  "Research Support, U.S. Gov't, P.H.S.":      GRANT
+  "Research Support, U.S. Government":          GRANT
+  "Support of Research":                        GRANT
+
+  # --- REV: Educational & Instructional ----------------------------
+  "Textbook":                                   BOOK
+  "Handbook":                                   BOOK
+  "Laboratory Manual":                          BOOK
+  "Study Guide":                                BOOK
+  "Resource Guide":                             BOOK
+  "Guidebook":                                  BOOK
+  "Nurses Instruction":                         OTHER
+  "Patient Education Handout":                  OTHER
+  "Interactive Tutorial":                       OTHER
+  "Programmed Instruction":                     OTHER
+  "Examination Questions":                      OTHER
+  "Problems and Exercises":                     OTHER
+  "Cookbook":                                    OTHER
+
+  # --- REV: Biographical & Historical ------------------------------
+  "Biography":                                  OTHER
+  "Autobiography":                              OTHER
+  "Biobibliography":                            OTHER
+  "Bibliography":                               REFERENCE_ENTRY
+  "Classical Article":                          JOURNAL_ARTICLE
+  "Historical Article":                         OTHER
+  "Personal Narrative":                         OTHER
+  "Eulogy":                                     OTHER
+  "Portrait":                                   OTHER
+  "Diary":                                      OTHER
+  "Collected Correspondence":                   OTHER
+
+  # --- REV: Visual / Media -----------------------------------------
+  "Photograph":                                 OTHER
+  "Drawing":                                    OTHER
+  "Pictorial Work":                             OTHER
+  "Caricature":                                 OTHER
+  "Cartoon":                                    OTHER
+  "Graphic Novel":                              OTHER
+  "Map":                                        OTHER
+  "Poster":                                     OTHER
+  "Postcard":                                   OTHER
+  "Bookplate":                                  OTHER
+  "Broadside":                                  OTHER
+  "Architectural Drawing":                      OTHER
+  "Animation":                                  OTHER
+  "Documentaries and Factual Films":            OTHER
+  "Instructional Film and Video":               OTHER
+  "Unedited Footage":                           OTHER
+  "Video-Audio Media":                          OTHER
+
+  # --- REV: Literary / Miscellaneous --------------------------------
+  "Essay":                                      OTHER
+  "Poetry":                                     OTHER
+  "Fictional Work":                             OTHER
+  "Juvenile Literature":                        OTHER
+  "Wit and Humor":                              OTHER
+  "Anecdotes":                                  OTHER
+  "Aphorisms and Proverbs":                     OTHER
+  "Phrases":                                    OTHER
+  "Sermon":                                     OTHER
+  "Funeral Sermon":                             OTHER
+  "Movable Books":                              OTHER
+
+  # --- REV: Administrative / Catalogs / Legal -----------------------
+  "Catalog":                                    OTHER
+  "Catalog, Bookseller":                        OTHER
+  "Catalog, Commercial":                        OTHER
+  "Catalog, Drug":                              OTHER
+  "Catalog, Publisher":                         OTHER
+  "Catalog, Union":                             OTHER
+  "Directory":                                  OTHER
+  "Index":                                      REFERENCE_ENTRY
+  "Union List":                                 OTHER
+  "Price List":                                 OTHER
+  "Legal Case":                                 OTHER
+  "Legislation":                                OTHER
+  "Government Publication":                     OTHER
+  "Public Service Announcement":                OTHER
+  "Advertisement":                              OTHER
+  "Prospectus":                                 OTHER
+
+  # --- REV: Format / Meta-types ------------------------------------
+  "Abbreviations":                              OTHER
+  "Abstracts":                                  OTHER
+  "English Abstract":                           OTHER
+  "Chart":                                      OTHER
+  "Chronology":                                 OTHER
+  "Tables":                                     OTHER
+  "Form":                                       OTHER
+  "Outline":                                    OTHER
+  "Almanac":                                    OTHER
+  "Calendar":                                   OTHER
+  "Ephemera":                                   OTHER
+  "Program":                                    OTHER
+  "Manuscript":                                 OTHER
+  "Manuscript, Medical":                        OTHER
+  "Incunabula":                                 OTHER
+  "Unpublished Work":                           PREPRINT
+  "Web Archive":                                OTHER
+  "Account Book":                               OTHER
+  "Overall":                                    OTHER
+  "Publication Components":                     OTHER
+  "Publication Formats":                        OTHER
+  "Study Characteristics":                      OTHER
+  "Exhibition":                                 OTHER
+  "Periodical":                                 PARATEXT
+  "Periodical Index":                           REFERENCE_ENTRY

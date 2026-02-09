@@ -1,0 +1,49 @@
+# configs/normalization/publication_type/providers/openalex.yaml
+# ─────────────────────────────────────────────────────────────────────
+# OpenAlex → Canonical publication type mapping.
+#
+# Source field: Work.type  (24 values, Feb 2026)
+# Live enum:   GET https://api.openalex.org/works?group_by=type
+# Docs:        https://docs.openalex.org/api-entities/works/work-object
+# ─────────────────────────────────────────────────────────────────────
+version: "1.0.0"
+provider: openalex
+source_field: type
+vocabulary: ../vocabulary.yaml
+
+# case_sensitive: false — provider values are lowercase kebab-case
+case_sensitive: false
+
+# Default when source_field is null or not in mapping
+default: OTHER
+
+mapping:
+  # --- EXP ----------------------------------------------------------
+  article:                  JOURNAL_ARTICLE
+  preprint:                 PREPRINT
+  dataset:                  DATASET
+  database:                 DATASET        # database ≈ dataset for unification
+  dissertation:             DISSERTATION
+  report:                   TECHNICAL_REPORT
+  report-component:         TECHNICAL_REPORT
+  software:                 SOFTWARE
+  supplementary-materials:  JOURNAL_ARTICLE  # supplements to primary research
+
+  # --- PEER ---------------------------------------------------------
+  peer-review:              PEER_REVIEW
+
+  # --- REV ----------------------------------------------------------
+  review:                   REVIEW
+  editorial:                EDITORIAL
+  letter:                   LETTER
+  erratum:                  ERRATUM
+  retraction:               RETRACTION
+  book:                     BOOK
+  book-chapter:             BOOK_CHAPTER
+  book-section:             BOOK_CHAPTER   # section ≈ chapter for unification
+  reference-entry:          REFERENCE_ENTRY
+  standard:                 STANDARD
+  grant:                    GRANT
+  paratext:                 PARATEXT
+  libguides:                OTHER          # library guides — no clear scholarly category
+  other:                    OTHER

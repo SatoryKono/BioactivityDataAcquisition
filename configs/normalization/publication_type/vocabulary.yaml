@@ -1,0 +1,195 @@
+# configs/normalization/publication_type/vocabulary.yaml
+# ─────────────────────────────────────────────────────────────────────
+# Canonical publication type vocabulary for cross-provider unification.
+#
+# Design:
+#   - Every raw provider type maps to exactly ONE canonical type
+#   - Canonical types use UPPER_SNAKE_CASE (matches existing PUBLICATION_TYPES convention)
+#   - Three-way classification: PEER / EXP / REV
+#   - Vocabulary is the single source of truth; provider mappings reference it
+#
+# Classification:
+#   PEER — peer-review (formal manuscript evaluation published as standalone record)
+#   EXP  — original experimental data (primary research, trials, datasets)
+#   REV  — review or other citation (reviews, commentary, editorial, reference material)
+#
+# Versioning: bump version on any vocabulary change.
+# ─────────────────────────────────────────────────────────────────────
+version: "1.0.0"
+
+# =====================================================================
+# Canonical types
+# =====================================================================
+types:
+
+  # --- PEER ---------------------------------------------------------
+  - id: PEER_REVIEW
+    classification: PEER
+    label: "Peer Review"
+    description: "Formal evaluation of a manuscript, published as a standalone record"
+
+  # --- EXP ----------------------------------------------------------
+  - id: JOURNAL_ARTICLE
+    classification: EXP
+    label: "Journal Article"
+    description: "Original research article in a peer-reviewed journal"
+
+  - id: CONFERENCE_PAPER
+    classification: EXP
+    label: "Conference Paper"
+    description: "Paper presented at a scientific conference / proceedings"
+
+  - id: PREPRINT
+    classification: EXP
+    label: "Preprint"
+    description: "Pre-publication manuscript (not yet peer-reviewed)"
+
+  - id: CLINICAL_TRIAL
+    classification: EXP
+    label: "Clinical Trial"
+    description: "Clinical trial report (any phase, any design)"
+
+  - id: CASE_REPORT
+    classification: EXP
+    label: "Case Report"
+    description: "Detailed report on a single patient or small group"
+
+  - id: OBSERVATIONAL_STUDY
+    classification: EXP
+    label: "Observational Study"
+    description: "Non-interventional study (cohort, cross-sectional, case-control)"
+
+  - id: COMPARATIVE_STUDY
+    classification: EXP
+    label: "Comparative Study"
+    description: "Study comparing interventions, methods, or outcomes"
+
+  - id: VALIDATION_STUDY
+    classification: EXP
+    label: "Validation Study"
+    description: "Study validating a method, assay, or measurement"
+
+  - id: MULTICENTER_STUDY
+    classification: EXP
+    label: "Multicenter Study"
+    description: "Study conducted across multiple research sites"
+
+  - id: DATASET
+    classification: EXP
+    label: "Dataset"
+    description: "Published dataset or database"
+
+  - id: DISSERTATION
+    classification: EXP
+    label: "Dissertation"
+    description: "Doctoral or master's thesis"
+
+  - id: PATENT
+    classification: EXP
+    label: "Patent"
+    description: "Patent document with experimental claims"
+
+  - id: TECHNICAL_REPORT
+    classification: EXP
+    label: "Technical Report"
+    description: "Technical or scientific report"
+
+  - id: SOFTWARE
+    classification: EXP
+    label: "Software"
+    description: "Published software or tool"
+
+  # --- REV ----------------------------------------------------------
+  - id: REVIEW
+    classification: REV
+    label: "Review"
+    description: "Narrative review article"
+
+  - id: SYSTEMATIC_REVIEW
+    classification: REV
+    label: "Systematic Review"
+    description: "Systematic review (with or without meta-analysis)"
+
+  - id: META_ANALYSIS
+    classification: REV
+    label: "Meta-Analysis"
+    description: "Quantitative synthesis of multiple studies"
+
+  - id: EDITORIAL
+    classification: REV
+    label: "Editorial"
+    description: "Editorial, opinion, or commentary by editors"
+
+  - id: LETTER
+    classification: REV
+    label: "Letter"
+    description: "Letter to the editor, correspondence, or comment"
+
+  - id: NEWS
+    classification: REV
+    label: "News"
+    description: "News article, press release, or journalistic report"
+
+  - id: ERRATUM
+    classification: REV
+    label: "Erratum"
+    description: "Correction notice or published erratum"
+
+  - id: RETRACTION
+    classification: REV
+    label: "Retraction"
+    description: "Retraction notice or retracted publication"
+
+  - id: BOOK
+    classification: REV
+    label: "Book"
+    description: "Book, monograph, or edited volume"
+
+  - id: BOOK_CHAPTER
+    classification: REV
+    label: "Book Chapter"
+    description: "Chapter or section within a book"
+
+  - id: REFERENCE_ENTRY
+    classification: REV
+    label: "Reference Entry"
+    description: "Entry in an encyclopedia, dictionary, or reference work"
+
+  - id: GUIDELINE
+    classification: REV
+    label: "Guideline"
+    description: "Clinical practice guideline or consensus statement"
+
+  - id: STANDARD
+    classification: REV
+    label: "Standard"
+    description: "Technical or regulatory standard"
+
+  - id: GRANT
+    classification: REV
+    label: "Grant"
+    description: "Grant or funding record"
+
+  - id: PARATEXT
+    classification: REV
+    label: "Paratext"
+    description: "Front matter, TOC, masthead, or journal-level metadata"
+
+  - id: OTHER
+    classification: REV
+    label: "Other"
+    description: "Unclassified or provider-specific type without clear mapping"
+
+# =====================================================================
+# Classification summary (for quick reference)
+# =====================================================================
+classifications:
+  PEER:
+    label: "Peer Review"
+    description: "Formal manuscript evaluation published as standalone record"
+  EXP:
+    label: "Original Experimental Data"
+    description: "Primary research presenting new experimental results"
+  REV:
+    label: "Review or Other Citation"
+    description: "Reviews, meta-analyses, commentary, editorial, reference material"

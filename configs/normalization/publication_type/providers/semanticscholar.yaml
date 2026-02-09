@@ -1,0 +1,54 @@
+# configs/normalization/publication_type/providers/semanticscholar.yaml
+# ─────────────────────────────────────────────────────────────────────
+# Semantic Scholar → Canonical publication type mapping.
+#
+# Source field: Paper.publicationTypes  (13 values, JSON array)
+# A paper can have MULTIPLE types (e.g., ["JournalArticle", "Review"]).
+# Strategy: map each type independently; resolver picks highest-priority.
+#
+# Docs:   https://api.semanticscholar.org/api-docs/
+# Schema: GET https://api.semanticscholar.org/graph/v1/swagger.json
+# ─────────────────────────────────────────────────────────────────────
+version: "1.0.0"
+provider: semanticscholar
+source_field: publicationTypes   # JSON array, PascalCase values
+vocabulary: ../vocabulary.yaml
+
+# S2 types are PascalCase, exact match required
+case_sensitive: true
+default: OTHER
+
+# Priority for multi-type resolution (lower = higher priority)
+priority_order:
+  - CLINICAL_TRIAL          # 1
+  - CASE_REPORT             # 2
+  - DATASET                 # 3
+  - META_ANALYSIS           # 4
+  - SYSTEMATIC_REVIEW       # 5
+  - REVIEW                  # 6
+  - JOURNAL_ARTICLE         # 7
+  - CONFERENCE_PAPER        # 8
+  - EDITORIAL               # 9
+  - LETTER                  # 10
+  - NEWS                    # 11
+  - BOOK                    # 12
+  - BOOK_CHAPTER            # 13
+  - OTHER                   # 14
+
+mapping:
+  # --- EXP ----------------------------------------------------------
+  JournalArticle:           JOURNAL_ARTICLE
+  Conference:               CONFERENCE_PAPER
+  Study:                    OBSERVATIONAL_STUDY
+  CaseReport:               CASE_REPORT
+  ClinicalTrial:            CLINICAL_TRIAL
+  Dataset:                  DATASET
+
+  # --- REV ----------------------------------------------------------
+  Review:                   REVIEW
+  MetaAnalysis:             META_ANALYSIS
+  Editorial:                EDITORIAL
+  LettersAndComments:       LETTER
+  News:                     NEWS
+  Book:                     BOOK
+  BookSection:              BOOK_CHAPTER
