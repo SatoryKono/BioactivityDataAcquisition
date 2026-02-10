@@ -19,6 +19,7 @@ from tests.contract.silver_schemas.conftest import (
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestFieldTypes:
     """Tests for field type consistency and correctness."""
 
@@ -179,6 +180,7 @@ class TestFieldTypes:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestDatetimeFields:
     """Tests for datetime field consistency."""
 
@@ -239,6 +241,7 @@ class TestDatetimeFields:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestFieldCoercion:
     """Tests for field coercion settings."""
 

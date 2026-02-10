@@ -18,6 +18,7 @@ from tests.contract.silver_schemas.conftest import (
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestRegexValidations:
     """Tests for regex pattern validations."""
 
@@ -81,6 +82,7 @@ class TestRegexValidations:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestRangeValidations:
     """Tests for numeric range validations."""
 
@@ -160,6 +162,7 @@ class TestRangeValidations:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestEnumValidations:
     """Tests for enum (isin) validations."""
 
@@ -196,6 +199,7 @@ class TestEnumValidations:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestNullabilityRules:
     """Tests for nullable field consistency."""
 
@@ -254,6 +258,7 @@ class TestNullabilityRules:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestValidationConsistency:
     """Tests for validation consistency across providers."""
 

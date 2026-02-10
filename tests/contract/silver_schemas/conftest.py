@@ -30,14 +30,18 @@ from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
 from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
-from bioetl.domain.schemas.uniprot.protein import UniProtProteinSchema
-from bioetl.domain.schemas.uniprot.idmapping import UniProtIdMappingSchema
+from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
+from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
 from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
 from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
 from bioetl.domain.schemas.semanticscholar.publication import (
     SemanticScholarPublicationSchema,
 )
+
+# Backward-compatible aliases (legacy naming in tests/docs).
+UniProtProteinSchema = UniprotTargetSchema
+UniProtIdMappingSchema = IDMappingSchema
 
 # Registry of all Silver schemas
 SILVER_SCHEMAS = {
@@ -57,8 +61,8 @@ SILVER_SCHEMAS = {
     # PubChem
     "pubchem_compound": PubchemMoleculeSchema,
     # UniProt
-    "uniprot_protein": UniProtProteinSchema,
-    "uniprot_idmapping": UniProtIdMappingSchema,
+    "uniprot_protein": UniprotTargetSchema,
+    "uniprot_idmapping": IDMappingSchema,
     # Publications
     "pubmed_publication": PubMedPublicationSchema,
     "crossref_publication": PublicationEnrichedSchema,

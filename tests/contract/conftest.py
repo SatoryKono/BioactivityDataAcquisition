@@ -19,12 +19,19 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "slow: Tests that may be slow due to rate limits"
     )
+    config.addinivalue_line(
+        "markers", "no_api: Contract tests that don't require live API access"
+    )
 
 
 def pytest_collection_modifyitems(
     config: pytest.Config, items: list[pytest.Item]
 ) -> None:
-    """Skip contract tests if BIOETL_LIVE_API_TESTS is not set."""
+    """Skip contract tests if BIOETL_LIVE_API_TESTS is not set.
+
+    Tests marked with 'no_api' are exempt from this requirement as they don't
+    require live API access (e.g., schema introspection tests).
+    """
     live_tests_enabled = os.environ.get("BIOETL_LIVE_API_TESTS", "").lower() == "true"
 
     if not live_tests_enabled:
@@ -37,7 +44,9 @@ def pytest_collection_modifyitems(
             # files like test_port_contracts.py in other directories
             fspath_str = str(item.fspath)
             if "/contract/" in fspath_str or "\\contract\\" in fspath_str:
-                item.add_marker(skip_marker)
+                # Skip tests that require live API access (not marked with no_api)
+                if "no_api" not in item.keywords:
+                    item.add_marker(skip_marker)
 
 
 @pytest.fixture
