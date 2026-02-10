@@ -69,7 +69,8 @@
       "Bash(VCR_RECORD_MODE=all python -m pytest:*)",
       "Bash(pip show:*)",
       "Bash(PYTHONPATH=src VCR_RECORD_MODE=all python -m pytest:*)",
-      "Bash(PYTHONPATH=src python -m pytest:*)"
+      "Bash(PYTHONPATH=src python -m pytest:*)",
+      "Bash(dir:*)"
     ]
   },
   "enabledPlugins": {

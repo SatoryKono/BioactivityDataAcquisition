@@ -29,7 +29,7 @@ class TestFileSizeLimits:
     # Note: ports.py was split into ports/ package in main
     EXEMPTIONS = {
         # Application layer exemptions
-        "runner.py": 1080,  # 1059 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py)
+        "runner.py": 1090,  # 1086 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py)
         "checkpoint.py": 545,  # 544 LOC - CompositeCheckpointState with immutable state transitions + CompositeCheckpointManager
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
@@ -95,7 +95,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 600,  # 593 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + _extract_multi_filter_ids
+        "composite.py": 635,  # 629 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + _extract_multi_filter_ids + _resolve_bronze_opts + skip_gold
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage

@@ -127,6 +127,8 @@ class TestRunCompositeHelp:
         assert "--debug" in result.output
         assert "--health-server" in result.output
         assert "--health-port" in result.output
+        assert "--cached-bronze-enrichers" in result.output
+        assert "--cached-bronze-dependencies" in result.output
 
 
 class TestRunCompositeInner:
@@ -505,6 +507,36 @@ class TestRunCompositeRuntimeConfig:
 
         assert result.exit_code == ExitCode.OK.value
 
+    def test_no_cached_bronze_enrichers_option(self, cli_runner: CliRunner) -> None:
+        """Test --no-cached-bronze-enrichers forces API for enrichers."""
+        with patch("asyncio.run", return_value=(True, None)):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "run-composite",
+                    "--composite",
+                    "publication",
+                    "--no-cached-bronze-enrichers",
+                ],
+            )
+
+        assert result.exit_code == ExitCode.OK.value
+
+    def test_no_cached_bronze_dependencies_option(self, cli_runner: CliRunner) -> None:
+        """Test --no-cached-bronze-dependencies forces API for dependencies."""
+        with patch("asyncio.run", return_value=(True, None)):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "run-composite",
+                    "--composite",
+                    "publication",
+                    "--no-cached-bronze-dependencies",
+                ],
+            )
+
+        assert result.exit_code == ExitCode.OK.value
+
 
 class TestRunCompositeRequiredOption:
     """Test that --composite option is required."""
@@ -555,6 +587,26 @@ class TestCompositeRuntimeConfigPostInit:
         """Test tuple enrich_only stays tuple."""
         config = CompositeRuntimeConfig(enrich_only=("crossref", "pubmed"))
         assert config.enrich_only == ("crossref", "pubmed")
+
+    def test_cached_bronze_enrichers_default_none(self) -> None:
+        """Test cached_bronze_enrichers defaults to None (follow master)."""
+        config = CompositeRuntimeConfig()
+        assert config.cached_bronze_enrichers is None
+
+    def test_cached_bronze_dependencies_default_none(self) -> None:
+        """Test cached_bronze_dependencies defaults to None (follow master)."""
+        config = CompositeRuntimeConfig()
+        assert config.cached_bronze_dependencies is None
+
+    def test_cached_bronze_enrichers_explicit_false(self) -> None:
+        """Test cached_bronze_enrichers can be set to False."""
+        config = CompositeRuntimeConfig(cached_bronze_enrichers=False)
+        assert config.cached_bronze_enrichers is False
+
+    def test_cached_bronze_dependencies_explicit_true(self) -> None:
+        """Test cached_bronze_dependencies can be set to True."""
+        config = CompositeRuntimeConfig(cached_bronze_dependencies=True)
+        assert config.cached_bronze_dependencies is True
 
 
 class TestRunCompositeAllOptionsOutput:
