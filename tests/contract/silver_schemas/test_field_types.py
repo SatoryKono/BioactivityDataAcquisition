@@ -255,8 +255,8 @@ class TestDatetimeFields:
         # Whitelist: fields that are truly calendar dates (no time component)
         date_only_fields = {
             "sequence_modified",  # UniProt sequence modification date
-            "entry_created",      # UniProt entry creation date
-            "entry_modified",     # UniProt entry modification date
+            "entry_created",  # UniProt entry creation date
+            "entry_modified",  # UniProt entry modification date
         }
 
         timestamp_fields = [

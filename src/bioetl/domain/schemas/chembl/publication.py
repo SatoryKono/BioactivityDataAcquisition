@@ -65,7 +65,9 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Identifiers ===
-    src_id: Series[pd.Int64Dtype] | None = pa.Field(nullable=True, description="Source ID.")
+    src_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Source ID."
+    )
 
     # === ChEMBL Release Metadata ===
     chembl_release: Series[str] = pa.Field(
