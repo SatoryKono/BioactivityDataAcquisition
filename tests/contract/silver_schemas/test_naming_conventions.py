@@ -164,7 +164,8 @@ class TestFieldNaming:
 
         # Exclude ETL metadata fields (underscore prefix) - they have standardized names
         boolean_fields = [
-            field for field, meta in fields.items()
+            field
+            for field, meta in fields.items()
             if "bool" in meta["dtype"].lower() and not field.startswith("_")
         ]
 
@@ -187,7 +188,9 @@ class TestFieldNaming:
             "topical",
         }
         improper_boolean_names = [
-            field for field in improper_boolean_names if field not in allowed_boolean_names
+            field
+            for field in improper_boolean_names
+            if field not in allowed_boolean_names
         ]
 
         if improper_boolean_names:
@@ -234,7 +237,9 @@ class TestMetadataFieldNaming:
         # Check that underscore fields are known metadata
         underscore_fields = {field for field in fields.keys() if field.startswith("_")}
 
-        unknown_underscore = underscore_fields - expected_metadata - provider_specific_underscore
+        unknown_underscore = (
+            underscore_fields - expected_metadata - provider_specific_underscore
+        )
 
         if unknown_underscore:
             pytest.fail(
