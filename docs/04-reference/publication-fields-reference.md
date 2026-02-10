@@ -469,7 +469,7 @@
 ## Связанная документация
 
 - **Validation Schema:** `docs/04-reference/schemas/publication_validation_schema_v3.xlsx`
-- **ADR-032:** Стратегия валидации публикаций (`docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md`)
+- **ADR-033:** Стратегия валидации публикаций (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
 - **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
 - **Тесты:** `tests_generated/` (471 тест, 64% покрытие)
 

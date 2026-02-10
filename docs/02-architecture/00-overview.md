@@ -37,7 +37,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-32 ADRs documenting key architectural decisions:
+33 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -73,6 +73,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-030](decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | - |
 | [ADR-031](decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | - |
 | [ADR-032](decisions/ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | §3.1 |
+| [ADR-033](decisions/ADR-033-publication-validation-strategy.md) | Publication Metadata Validation Strategy | - |
 
 ---
 
@@ -94,7 +95,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 1. **Dependency Injection**: Dependencies injected via constructor
 2. **Ports & Adapters**: Interfaces in `domain/ports/`, implementations in `infrastructure/`
-3. **Composition Root**: Single assembly point in `composition/bootstrap.py`
+3. **Composition Root**: Single assembly point in `composition/bootstrap/`
 4. **Medallion Architecture**: Bronze (raw) → Silver (normalized) → Gold (curated)
 5. **Composite Pipeline** (ADR-026): Multi-source data enrichment with seed → enrich (fan-out) → merge workflow
 

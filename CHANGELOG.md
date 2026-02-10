@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Publication Validation System (ADR-032)**: Implemented comprehensive 5-level validation strategy for publication data
+- **Publication Validation System (ADR-033)**: Implemented comprehensive 5-level validation strategy for publication data
   - **Base Validation**: Pandera schema validation (types, regex, nullable) — 329 tests generated
   - **Structural Validation**: Cross-field consistency rules (page ordering, year matching, field dependencies) — 16 tests
   - **External Verification**: HTTP-based ID verification with 6 upstream providers (CrossRef, PubMed, PMC, OpenAlex, S2, ChEMBL) — 16 tests
@@ -91,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **DQ Flags**: `_dq_error` (FAIL — blocking), `_dq_warn` (WARN — quarantine)
   - **Coverage**: 191 fields × 5 providers (ChEMBL, PubMed, CrossRef, OpenAlex, Semantic Scholar)
   - **Test Suite**: 471 tests (64% of target 735), organized by validation level and provider
-  - **Reference**: ADR-032 Publication Validation Strategy
+  - **Reference**: ADR-033 Publication Validation Strategy
 
 - **Validation Schema v3.0**: Structured validation rules inventory
   - **Format**: Excel (XLSX) + CSV export
@@ -101,7 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Results**: PASS, FAIL, WARN, SKIP, NOT_APPLICABLE
 
 - **Documentation Suite**:
-  - **ADR-032**: Architecture Decision Record for validation strategy (`docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md`)
+  - **ADR-033**: Architecture Decision Record for validation strategy (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
   - **Field Reference**: Complete inventory of 191 fields with types, regex patterns, PK markers (`docs/04-reference/publication-fields-reference.md`)
   - **Validation Guide**: Implementation guide with 4 Mermaid diagrams (architecture, DQ lifecycle, config hierarchy, workflow) (`docs/03-guides/publication-validation-guide.md`)
   - **Operational Runbook**: Troubleshooting procedures with bash diagnostic commands for DevOps/Support (`docs/05-operations/runbooks/publication-validation-runbook.md`)
@@ -144,7 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### References
 
-- ADR-032: Publication Validation Strategy
+- ADR-033: Publication Validation Strategy
 - ADR-027: Silver Layer DQ Framework (inherited `_dq_*` flags)
 - ADR-014: Medallion Architecture (Bronze → Silver → Gold layers)
 - ADR-002: Hexagonal Architecture (validation services in application layer)

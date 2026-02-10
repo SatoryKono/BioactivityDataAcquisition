@@ -34,7 +34,7 @@ src/bioetl/
 **Ключевые ограничения:**
 - Матрица импортов: `domain` ← `application` ← `composition` → `infrastructure`
 - **Нарушение = Блокер PR**
-- DI: Зависимости в конструктор. `composition/bootstrap.py` — единственное место сборки
+- DI: Зависимости в конструктор. `composition/bootstrap/` — единственное место сборки
 
 > **⚠️ Протокол верификации**: Перед утверждениями о компонентах проверяй код!
 > См. `docs/00-project/agents/CLAUDE.md` §0 и §2.3 для списка частых ложных выводов.
@@ -90,7 +90,7 @@ src/bioetl/
 | Domain Ports | `src/bioetl/domain/ports/` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
-| Bootstrap | `src/bioetl/composition/bootstrap.py` |
+| Bootstrap | `src/bioetl/composition/bootstrap/` |
 | Configs | `configs/pipelines/{provider}/{entity}.yaml` |
 | ADR | `docs/02-architecture/decisions/` |
 

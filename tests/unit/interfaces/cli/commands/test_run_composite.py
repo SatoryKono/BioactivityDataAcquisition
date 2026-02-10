@@ -142,6 +142,7 @@ class TestRunCompositeInner:
             side_effect=FileNotFoundError("Config not found: publication.yaml"),
         ):
             success, error = await _run_composite_inner(
+
                 "publication",
                 CompositeRuntimeConfig(),
             )

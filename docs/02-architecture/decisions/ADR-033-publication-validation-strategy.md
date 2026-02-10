@@ -1,4 +1,4 @@
-# ADR-032: Publication Metadata Validation Strategy
+# ADR-033: Publication Metadata Validation Strategy
 
 | Параметр | Значение |
 |----------|----------|

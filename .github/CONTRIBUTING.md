@@ -62,7 +62,7 @@ Before contributing, read these documents:
 ### Key Rules
 
 - **Dependency Injection**: Dependencies via constructor, not created inside classes
-- **Composition Root**: `src/bioetl/composition/bootstrap.py` is the only place for wiring
+- **Composition Root**: `src/bioetl/composition/bootstrap/` is the only place for wiring
 - **Async I/O**: Use `httpx` for HTTP, `run_in_executor` for blocking operations
 - **Logging**: Use `structlog` with `run_id`, never `print()`
 - **Secrets**: Environment variables only (`BIOETL_{PROVIDER}_{KEY}`)

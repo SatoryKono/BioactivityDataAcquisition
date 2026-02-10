@@ -667,6 +667,9 @@ def minimal_chembl_publication_df() -> Any:
                 "publication_year": 2024,
                 "publication_date": "2024-01-15",
                 "publication_type": "PUBLICATION",
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
                 "language": "eng",
                 # Metrics
                 "citations_received": 10,
@@ -727,6 +730,9 @@ def minimal_pubmed_publication_df() -> Any:
                 "publication_year": 2024,
                 "publication_date": "2024-01-15",
                 "publication_type": "PUBLICATION",
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
                 "language": "eng",
                 # Metrics
                 "citations_received": 10,
@@ -811,6 +817,9 @@ def minimal_crossref_publication_df() -> Any:
                 "publication_year": 2024,
                 "publication_date": "2024-01-15",
                 "publication_type": "journal-article",
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
                 "language": "en",
                 # Metrics
                 "citations_received": 10,
@@ -878,6 +887,9 @@ def minimal_openalex_publication_df() -> Any:
                 "publication_year": 2024,
                 "publication_date": "2024-01-15",
                 "publication_type": "article",
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
                 "language": "en",
                 # Metrics
                 "citations_received": 10,
@@ -949,6 +961,9 @@ def minimal_semanticscholar_publication_df() -> Any:
                 "publication_year": 2024,
                 "publication_date": "2024-01-15",
                 "publication_type": "JournalArticle",
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
                 "language": None,
                 # Metrics
                 "citations_received": 10,

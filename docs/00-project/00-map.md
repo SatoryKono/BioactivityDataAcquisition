@@ -1,13 +1,14 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.17 | Last updated: 2026-02-08*
+*Synced with RULES.md v5.17 | Last updated: 2026-02-10*
 
-> **Documentation Update:** 2026-02-08
-> - Codebase metrics updated: ~500 Python files, ~110,902 LOC, ~10,957 tests
-> - ADR count corrected: 32 ADRs (ADR-001 through ADR-032)
+> **Documentation Update:** 2026-02-10
+> - Codebase metrics updated: ~1,094 Python files, ~115,351 LOC, ~7,090 tests
+> - ADR count corrected: 33 ADRs (ADR-001 through ADR-033)
 > - Pipeline configs: 27 configurations
 > - Adapter listing completed (all 7 providers)
 > - Gold contract link fixed (chembl_activity_v1.0.json)
+> - ADR-032 duplicate resolved (publication-validation → ADR-033)
 
 ## Quick Links
 
@@ -356,7 +357,7 @@ graph TD
 | rules-summary.md         | 2026-02-03   | v5.17 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
-| ADR-001..032             | 2026-01-28   | All 32 ADRs documented       |
+| ADR-001..033             | 2026-02-10   | All 33 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-21   | Historical audit files       |
