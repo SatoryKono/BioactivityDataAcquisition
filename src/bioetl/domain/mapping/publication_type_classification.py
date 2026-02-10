@@ -1625,19 +1625,26 @@ def _find_best_match(
     lookup: dict[str, PublicationTypeEntry],
     raw_types: list[str],
 ) -> PublicationTypeEntry | None:
-    """Find the most specific match from a list of raw types."""
-    # Filter valid raw types and map to entries
-    candidates = (
-        lookup.get(raw.strip().lower())
-        for raw in raw_types
-        if raw
-    )
+    """Find the most specific match from a list of raw types.
 
-    # Filter valid matches
-    valid_entries = (e for e in candidates if e is not None)
+    Iterates through raw types, looks up each in the classification table,
+    and returns the entry with the highest specificity score.
+    """
+    matches = []
+    for raw in raw_types:
+        if not raw:
+            continue
+        entry = lookup.get(raw.strip().lower())
+        if entry:
+            matches.append(entry)
 
-    # Return the entry with highest specificity, or None if empty
-    return max(valid_entries, key=lambda e: e.specificity, default=None)
+    if not matches:
+        return None
+
+    # Return the entry with the highest specificity
+    # Sort in descending order of specificity and return the first one
+    matches.sort(key=lambda e: e.specificity, reverse=True)
+    return matches[0]
 
 
 def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:
