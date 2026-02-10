@@ -29,7 +29,7 @@ from bioetl.domain.schemas.chembl.publication_similarity import (
 from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
-from bioetl.domain.schemas.pubchem.compound import PubChemCompoundSchema
+from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
 from bioetl.domain.schemas.uniprot.protein import UniProtProteinSchema
 from bioetl.domain.schemas.uniprot.idmapping import UniProtIdMappingSchema
 from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
@@ -55,7 +55,7 @@ SILVER_SCHEMAS = {
     "chembl_target": TargetSchema,
     "chembl_target_component": TargetComponentSchema,
     # PubChem
-    "pubchem_compound": PubChemCompoundSchema,
+    "pubchem_compound": PubchemMoleculeSchema,
     # UniProt
     "uniprot_protein": UniProtProteinSchema,
     "uniprot_idmapping": UniProtIdMappingSchema,
