@@ -358,6 +358,9 @@ class PipelineRunContext:
     # Composite mode: ignore YAML input_filter config (use only CLI filter)
     ignore_yaml_filter: bool = False
 
+    # Composite mode: skip Gold layer writing (sub-pipelines produce merged Gold separately)
+    skip_gold: bool = False
+
     @property
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""

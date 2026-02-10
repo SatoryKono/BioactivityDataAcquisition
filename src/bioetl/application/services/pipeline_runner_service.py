@@ -133,6 +133,7 @@ class RunOptions:
         vacuum_retention_days: Minimum age of files to remove during VACUUM.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
         ignore_yaml_filter: Ignore input_filter from YAML config (for composite mode).
+        skip_gold: Skip Gold layer writing (for composite sub-pipelines).
         use_cached_bronze: Load data from cached Bronze layer instead of API.
         cached_bronze_path: Explicit path to Bronze cache directory.
         cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD format).
@@ -155,6 +156,7 @@ class RunOptions:
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
+    skip_gold: bool = False  # Skip Gold layer writing (composite sub-pipelines)
     # Cached Bronze mode options
     use_cached_bronze: bool = True
     cached_bronze_path: str | None = None

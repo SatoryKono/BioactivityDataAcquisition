@@ -118,6 +118,7 @@ def assemble_runtime_config(
     dry_run: bool,
     heartbeat_interval: int,
     vacuum: VacuumSettings,
+    skip_gold: bool = False,
 ) -> RuntimeConfig:
     """Assemble RuntimeConfig from resolved parameters.
 
@@ -162,6 +163,7 @@ def assemble_runtime_config(
         dry_run=dry_run,
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
+        skip_gold=skip_gold,
     )
 
 

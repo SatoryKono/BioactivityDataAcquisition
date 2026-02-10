@@ -594,6 +594,8 @@ class ServicesBuilder:
             Configured BatchExecutor instance.
         """
         callbacks = extract_pipeline_callbacks(pipeline)
+        skip = pipeline.runtime.skip_gold
+        gold_filter = (lambda _c, _r: False) if skip else callbacks.gold_filter
 
         # Build configuration
         error_classifier = ErrorClassifier()
@@ -633,7 +635,7 @@ class ServicesBuilder:
             config=processor_config,
             error_classifier=error_classifier,
             transform_callback=callbacks.transform,
-            gold_filter_callback=callbacks.gold_filter,
+            gold_filter_callback=gold_filter,
             gold_transform_callback=callbacks.gold_transform,
             gold_validator=gold_validator,
             checkpoint_manager=checkpoint_manager,

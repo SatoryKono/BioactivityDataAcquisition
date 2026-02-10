@@ -115,6 +115,7 @@ def bootstrap_pipeline_runner(
         dry_run=ctx.dry_run,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         vacuum=vacuum,
+        skip_gold=ctx.skip_gold,
     )
 
     # Assemble filter config (CLI/direct IDs override YAML)
