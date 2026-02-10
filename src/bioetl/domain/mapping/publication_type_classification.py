@@ -1616,18 +1616,28 @@ def classify_publication_type(
 
     # Multi-value lookup (PubMed, Semantic Scholar)
     if raw_types_list is not None:
-        best: PublicationTypeEntry | None = None
-        for raw in raw_types_list:
-            if not raw:
-                continue
-            entry = lookup.get(raw.strip().lower())
-            if entry is not None and (
-                best is None or entry.specificity > best.specificity
-            ):
-                best = entry
-        return best
+        return _find_best_match(lookup, raw_types_list)
 
     return None
+
+
+def _find_best_match(
+    lookup: dict[str, PublicationTypeEntry],
+    raw_types: list[str],
+) -> PublicationTypeEntry | None:
+    """Find the most specific match from a list of raw types."""
+    # Filter valid raw types and map to entries
+    candidates = (
+        lookup.get(raw.strip().lower())
+        for raw in raw_types
+        if raw
+    )
+
+    # Filter valid matches
+    valid_entries = (e for e in candidates if e is not None)
+
+    # Return the entry with highest specificity, or None if empty
+    return max(valid_entries, key=lambda e: e.specificity, default=None)
 
 
 def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:

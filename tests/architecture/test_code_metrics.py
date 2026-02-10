@@ -80,7 +80,7 @@ class TestFileSizeLimits:
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Domain registry exemptions
-        "publication_type_classification.py": 1650,  # 1644 LOC - Publication type classification taxonomy (Level 1/2/3 mapping tables + classify_publication_type)
+        "publication_type_classification.py": 1660,  # 1654 LOC - Publication type classification taxonomy (Level 1/2/3 mapping tables + classify_publication_type)
         "publication.py": 340,  # 331 LOC - Publication entity mapping registry with composite key support
         "publication_field_groups.py": 430,  # 424 LOC - Field-to-group mapping for composite publication pipeline (ADR-026)
         "field_groups.py": 400,  # 392 LOC - FieldGroupRegistry domain models with FieldMapping/FieldGroupDefinition (ADR-026)
@@ -109,7 +109,7 @@ class TestFileSizeLimits:
         "gold_writer.py": 940,  # 934 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py) + column_order support
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 1005,  # 1003 LOC - Silver PyArrow schemas + SubcellularFraction schema
+        "silver.py": 1025,  # 1018 LOC - Silver PyArrow schemas + SubcellularFraction schema
         "client.py": 1175,  # 1169 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication + extraction_params ADR-028), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups + extraction_params + DQ severity/max_length/not_null

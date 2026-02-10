@@ -51,10 +51,10 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pmid", pa.string()),  # Unified: from pubmed_id
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
+        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
         pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
-        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
-        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
         # === Unified citation metrics ===
@@ -342,13 +342,13 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pub_date", pa.string()),
         pa.field("pub_day", pa.int64()),  # Publication day (1-31)
         pa.field("pub_month", pa.int64()),  # Publication month (1-12)
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD format
         pa.field("publication_status", pa.string()),  # ppublish/epublish/aheadofprint
-        pa.field("publication_type", pa.string()),  # Unified: publication type
-        pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
         pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
-        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
+        pa.field("publication_type", pa.string()),  # Unified: publication type
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
+        pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),
         pa.field("subject_keywords", pa.list_(pa.string())),  # Author keywords
@@ -773,13 +773,13 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("paper_id", pa.string()),  # Primary key
         # Note: pmc_id excluded per design (2026-01)
         pa.field("pmid", pa.string()),
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
+        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
         pa.field(
             "publication_type", pa.string()
         ),  # Unified: from publicationTypes (joined)
         pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
-        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
-        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_types", pa.string()),  # Raw publicationTypes (JSON array)
         pa.field("publication_year", pa.int64()),
         pa.field("subject_fields", pa.string()),
@@ -835,13 +835,13 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
         # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
+        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
         pa.field(
             "publication_type", pa.string()
         ),  # Raw CrossRef type (journal-article, etc.)
         pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
-        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
-        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_year", pa.int64()),
         pa.field("published", pa.string()),  # Canonical publication date
         pa.field("published_online", pa.string()),  # Provider-specific
@@ -922,13 +922,13 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Primary topic (single most relevant topic for quick categorization)
         pa.field("primary_topic", pa.string()),  # JSON object
         # Date fields
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
+        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
         pa.field(
             "publication_type", pa.string()
         ),  # Raw OpenAlex type (article, book, etc.)
         pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
-        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
-        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_year", pa.int64()),
         pa.field("publisher", pa.string()),
         # ROR IDs (may be empty if not returned by Works API)
