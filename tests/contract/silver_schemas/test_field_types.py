@@ -174,7 +174,9 @@ class TestFieldTypes:
         if non_bool_booleans:
             pytest.fail(
                 f"{schema_name}: Boolean fields SHOULD use bool dtype:\n"
-                + "\n".join(f"  - {field}: {dtype}" for field, dtype in non_bool_booleans)
+                + "\n".join(
+                    f"  - {field}: {dtype}" for field, dtype in non_bool_booleans
+                )
                 + "\n\nUse Series[bool] for boolean fields."
             )
 
@@ -275,7 +277,9 @@ class TestFieldCoercion:
         suspicious_coercions = [
             f"{field} ({dtype})"
             for field, dtype, nullable in coerced_fields
-            if not any(pattern in dtype.lower() for pattern in allowed_coercion_patterns)
+            if not any(
+                pattern in dtype.lower() for pattern in allowed_coercion_patterns
+            )
         ]
 
         if suspicious_coercions:
