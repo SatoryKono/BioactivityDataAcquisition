@@ -94,7 +94,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     )
 
     # === Additional Metrics ===
-    fwci: Series[float] = pa.Field(
+    fwci: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Field-Weighted Citation Impact (must be non-negative)",

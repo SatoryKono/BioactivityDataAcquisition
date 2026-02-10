@@ -22,12 +22,14 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    cid: Series[int] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
+    cid: Series[str] = pa.Field(
+        nullable=False, description="PubChem Compound ID (PK)"
+    )
 
     @pa.check("cid", name="cid_positive")
-    def _check_cid(cls, series: Series[int]) -> Series[bool]:
-        """Validate CID is positive."""
-        return cast("Series[bool]", series >= 1)
+    def _check_cid(cls, series: Series[str]) -> Series[bool]:
+        """Validate CID is a positive integer string."""
+        return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === Structural Identifiers ===
     canonical_smiles: Series[str] | None = pa.Field(

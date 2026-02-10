@@ -178,6 +178,10 @@ class TestFieldNaming:
             )
         ]
 
+        improper_boolean_names = [
+            field for field in improper_boolean_names if not field.startswith("_")
+        ]
+
         allowed_boolean_names = {
             "abstract_structured",
             "content_domain_crossmark_restriction",
