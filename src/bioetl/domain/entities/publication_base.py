@@ -103,7 +103,9 @@ class PublicationEntityBase(BaseEntity):
     # Classification
     publication_type: str | None = None  # Raw provider type (forensic/debug)
     publication_type_unified: str | None = None  # Level 3: "Journal Article", etc.
-    publication_subclass: str | None = None  # Level 2: "Original Experimental Data", etc.
+    publication_subclass: str | None = (
+        None  # Level 2: "Original Experimental Data", etc.
+    )
     publication_class: str | None = None  # Level 1: "EXP" | "REV" | "PEER"
     language: str | None = None
 

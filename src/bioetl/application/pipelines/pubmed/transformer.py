@@ -380,7 +380,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         raw_type = "|".join(pub_types) if pub_types else None
         classification = self._classify_publication_type(
-            "pubmed", raw_types_list=pub_types,
+            "pubmed",
+            raw_types_list=pub_types,
         )
         return {"publication_type": raw_type, **classification}
 

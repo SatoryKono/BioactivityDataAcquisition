@@ -58,109 +58,453 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 1
     ("Peer Review", "Peer Review", "PEER", "peer-review", "peer-review", "—", "—"),
     # 2
-    ("Journal Article", "Original Experimental Data", "EXP", "article", "journal-article", "Journal Article", "JournalArticle"),
+    (
+        "Journal Article",
+        "Original Experimental Data",
+        "EXP",
+        "article",
+        "journal-article",
+        "Journal Article",
+        "JournalArticle",
+    ),
     # 3
-    ("Conference Paper", "Original Experimental Data", "EXP", "article*", "proceedings-article", "Congress", "Conference"),
+    (
+        "Conference Paper",
+        "Original Experimental Data",
+        "EXP",
+        "article*",
+        "proceedings-article",
+        "Congress",
+        "Conference",
+    ),
     # 4
-    ("Preprint", "Original Experimental Data", "EXP", "preprint", "posted-content", "Preprint", "—"),
+    (
+        "Preprint",
+        "Original Experimental Data",
+        "EXP",
+        "preprint",
+        "posted-content",
+        "Preprint",
+        "—",
+    ),
     # 5
-    ("Dataset", "Original Experimental Data", "EXP", "dataset", "dataset", "Dataset", "Dataset"),
+    (
+        "Dataset",
+        "Original Experimental Data",
+        "EXP",
+        "dataset",
+        "dataset",
+        "Dataset",
+        "Dataset",
+    ),
     # 6
-    ("Database", "Original Experimental Data", "EXP", "database", "database", "Database", "—"),
+    (
+        "Database",
+        "Original Experimental Data",
+        "EXP",
+        "database",
+        "database",
+        "Database",
+        "—",
+    ),
     # 7
-    ("Dissertation", "Original Experimental Data", "EXP", "dissertation", "dissertation", "Academic Dissertation", "—"),
+    (
+        "Dissertation",
+        "Original Experimental Data",
+        "EXP",
+        "dissertation",
+        "dissertation",
+        "Academic Dissertation",
+        "—",
+    ),
     # 8
-    ("Report", "Original Experimental Data", "EXP", "report", "report", "Technical Report", "—"),
+    (
+        "Report",
+        "Original Experimental Data",
+        "EXP",
+        "report",
+        "report",
+        "Technical Report",
+        "—",
+    ),
     # 9
-    ("Report Component", "Original Experimental Data", "EXP", "report-component", "report-component", "—", "—"),
+    (
+        "Report Component",
+        "Original Experimental Data",
+        "EXP",
+        "report-component",
+        "report-component",
+        "—",
+        "—",
+    ),
     # 10
-    ("Component (figure/table/suppl)", "Original Experimental Data", "EXP", "—", "component", "—", "—"),
+    (
+        "Component (figure/table/suppl)",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "component",
+        "—",
+        "—",
+    ),
     # 11
-    ("Supplementary Materials", "Original Experimental Data", "EXP", "supplementary-materials", "—", "Electronic Supplementary Materials", "—"),
+    (
+        "Supplementary Materials",
+        "Original Experimental Data",
+        "EXP",
+        "supplementary-materials",
+        "—",
+        "Electronic Supplementary Materials",
+        "—",
+    ),
     # 12
     ("Software", "Original Experimental Data", "EXP", "software", "—", "—", "—"),
     # 13
     ("Patent", "Original Experimental Data", "EXP", "—", "—", "Patent", "—"),
     # 14
-    ("Case Report", "Original Experimental Data", "EXP", "—", "—", "Case Reports", "CaseReport"),
+    (
+        "Case Report",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Case Reports",
+        "CaseReport",
+    ),
     # 15
-    ("Clinical Study", "Original Experimental Data", "EXP", "—", "—", "Clinical Study", "Study"),
+    (
+        "Clinical Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Study",
+        "Study",
+    ),
     # 16
-    ("Clinical Trial", "Original Experimental Data", "EXP", "—", "—", "Clinical Trial", "ClinicalTrial"),
+    (
+        "Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial",
+        "ClinicalTrial",
+    ),
     # 17
-    ("Clinical Trial Protocol", "Original Experimental Data", "EXP", "—", "—", "Clinical Trial Protocol", "—"),
+    (
+        "Clinical Trial Protocol",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial Protocol",
+        "—",
+    ),
     # 18
-    ("Clinical Trial, Phase I", "Original Experimental Data", "EXP", "—", "—", "Clinical Trial, Phase I", "—"),
+    (
+        "Clinical Trial, Phase I",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase I",
+        "—",
+    ),
     # 19
-    ("Clinical Trial, Phase II", "Original Experimental Data", "EXP", "—", "—", "Clinical Trial, Phase II", "—"),
+    (
+        "Clinical Trial, Phase II",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase II",
+        "—",
+    ),
     # 20
-    ("Clinical Trial, Phase III", "Original Experimental Data", "EXP", "—", "—", "Clinical Trial, Phase III", "—"),
+    (
+        "Clinical Trial, Phase III",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase III",
+        "—",
+    ),
     # 21
-    ("Clinical Trial, Phase IV", "Original Experimental Data", "EXP", "—", "—", "Clinical Trial, Phase IV", "—"),
+    (
+        "Clinical Trial, Phase IV",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase IV",
+        "—",
+    ),
     # 22
-    ("Clinical Trial, Veterinary", "Original Experimental Data", "EXP", "—", "—", "Clinical Trial, Veterinary", "—"),
+    (
+        "Clinical Trial, Veterinary",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Veterinary",
+        "—",
+    ),
     # 23
-    ("Adaptive Clinical Trial", "Original Experimental Data", "EXP", "—", "—", "Adaptive Clinical Trial", "—"),
+    (
+        "Adaptive Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Adaptive Clinical Trial",
+        "—",
+    ),
     # 24
-    ("Pragmatic Clinical Trial", "Original Experimental Data", "EXP", "—", "—", "Pragmatic Clinical Trial", "—"),
+    (
+        "Pragmatic Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Pragmatic Clinical Trial",
+        "—",
+    ),
     # 25
-    ("Equivalence Trial", "Original Experimental Data", "EXP", "—", "—", "Equivalence Trial", "—"),
+    (
+        "Equivalence Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Equivalence Trial",
+        "—",
+    ),
     # 26
-    ("Randomized Controlled Trial", "Original Experimental Data", "EXP", "—", "—", "Randomized Controlled Trial", "—"),
+    (
+        "Randomized Controlled Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Randomized Controlled Trial",
+        "—",
+    ),
     # 27
-    ("Randomized Controlled Trial, Vet", "Original Experimental Data", "EXP", "—", "—", "Randomized Controlled Trial, Veterinary", "—"),
+    (
+        "Randomized Controlled Trial, Vet",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Randomized Controlled Trial, Veterinary",
+        "—",
+    ),
     # 28
-    ("Controlled Clinical Trial", "Original Experimental Data", "EXP", "—", "—", "Controlled Clinical Trial", "—"),
+    (
+        "Controlled Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Controlled Clinical Trial",
+        "—",
+    ),
     # 29
-    ("Observational Study", "Original Experimental Data", "EXP", "—", "—", "Observational Study", "—"),
+    (
+        "Observational Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Observational Study",
+        "—",
+    ),
     # 30
-    ("Observational Study, Veterinary", "Original Experimental Data", "EXP", "—", "—", "Observational Study, Veterinary", "—"),
+    (
+        "Observational Study, Veterinary",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Observational Study, Veterinary",
+        "—",
+    ),
     # 31
-    ("Comparative Study", "Original Experimental Data", "EXP", "—", "—", "Comparative Study", "—"),
+    (
+        "Comparative Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Comparative Study",
+        "—",
+    ),
     # 32
-    ("Validation Study", "Original Experimental Data", "EXP", "—", "—", "Validation Study", "—"),
+    (
+        "Validation Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Validation Study",
+        "—",
+    ),
     # 33
-    ("Evaluation Study", "Original Experimental Data", "EXP", "—", "—", "Evaluation Study", "—"),
+    (
+        "Evaluation Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Evaluation Study",
+        "—",
+    ),
     # 34
-    ("Multicenter Study", "Original Experimental Data", "EXP", "—", "—", "Multicenter Study", "—"),
+    (
+        "Multicenter Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Multicenter Study",
+        "—",
+    ),
     # 35
     ("Twin Study", "Original Experimental Data", "EXP", "—", "—", "Twin Study", "—"),
     # 36
-    ("Clinical Conference", "Original Experimental Data", "EXP", "—", "—", "Clinical Conference", "—"),
+    (
+        "Clinical Conference",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Conference",
+        "—",
+    ),
     # 37
-    ("Annual Report", "Original Experimental Data", "EXP", "—", "—", "Annual Report", "—"),
+    (
+        "Annual Report",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Annual Report",
+        "—",
+    ),
     # 38
     ("Statistics", "Original Experimental Data", "EXP", "—", "—", "Statistics", "—"),
     # 39
     ("Review", "Reviews & Syntheses", "REV", "review", "—", "Review", "Review"),
     # 40
-    ("Systematic Review", "Reviews & Syntheses", "REV", "—", "—", "Systematic Review", "—"),
+    (
+        "Systematic Review",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Systematic Review",
+        "—",
+    ),
     # 41
-    ("Meta-Analysis", "Reviews & Syntheses", "REV", "—", "—", "Meta-Analysis", "MetaAnalysis"),
+    (
+        "Meta-Analysis",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Meta-Analysis",
+        "MetaAnalysis",
+    ),
     # 42
-    ("Network Meta-Analysis", "Reviews & Syntheses", "REV", "—", "—", "Network Meta-Analysis", "—"),
+    (
+        "Network Meta-Analysis",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Network Meta-Analysis",
+        "—",
+    ),
     # 43
     ("Scoping Review", "Reviews & Syntheses", "REV", "—", "—", "Scoping Review", "—"),
     # 44
-    ("Scientific Integrity Review", "Reviews & Syntheses", "REV", "—", "—", "Scientific Integrity Review", "—"),
+    (
+        "Scientific Integrity Review",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Scientific Integrity Review",
+        "—",
+    ),
     # 45
-    ("Editorial", "Editorial & Commentary", "REV", "editorial", "—", "Editorial", "Editorial"),
+    (
+        "Editorial",
+        "Editorial & Commentary",
+        "REV",
+        "editorial",
+        "—",
+        "Editorial",
+        "Editorial",
+    ),
     # 46
-    ("Letter", "Editorial & Commentary", "REV", "letter", "—", "Letter", "LettersAndComments"),
+    (
+        "Letter",
+        "Editorial & Commentary",
+        "REV",
+        "letter",
+        "—",
+        "Letter",
+        "LettersAndComments",
+    ),
     # 47
-    ("Comment", "Editorial & Commentary", "REV", "—", "—", "Comment", "LettersAndComments"),
+    (
+        "Comment",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Comment",
+        "LettersAndComments",
+    ),
     # 48
     ("News", "Editorial & Commentary", "REV", "—", "—", "News", "News"),
     # 49
-    ("Newspaper Article", "Editorial & Commentary", "REV", "—", "—", "Newspaper Article", "—"),
+    (
+        "Newspaper Article",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Newspaper Article",
+        "—",
+    ),
     # 50
     ("Interview", "Editorial & Commentary", "REV", "—", "—", "Interview", "—"),
     # 51
     ("Address", "Editorial & Commentary", "REV", "—", "—", "Address", "—"),
     # 52
-    ("Introductory Journal Article", "Editorial & Commentary", "REV", "—", "—", "Introductory Journal Article", "—"),
+    (
+        "Introductory Journal Article",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Introductory Journal Article",
+        "—",
+    ),
     # 53
-    ("Meeting Abstract", "Editorial & Commentary", "REV", "—", "—", "Meeting Abstract", "—"),
+    (
+        "Meeting Abstract",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Meeting Abstract",
+        "—",
+    ),
     # 54
     ("Popular Work", "Editorial & Commentary", "REV", "—", "—", "Popular Work", "—"),
     # 55
@@ -168,23 +512,87 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 56
     ("Webcast", "Editorial & Commentary", "REV", "—", "—", "Webcast", "—"),
     # 57
-    ("Erratum", "Corrections & Retractions", "REV", "erratum", "—", "Published Erratum", "—"),
+    (
+        "Erratum",
+        "Corrections & Retractions",
+        "REV",
+        "erratum",
+        "—",
+        "Published Erratum",
+        "—",
+    ),
     # 58
-    ("Retraction notice", "Corrections & Retractions", "REV", "retraction", "—", "Retraction of Publication", "—"),
+    (
+        "Retraction notice",
+        "Corrections & Retractions",
+        "REV",
+        "retraction",
+        "—",
+        "Retraction of Publication",
+        "—",
+    ),
     # 59
-    ("Retracted Publication", "Corrections & Retractions", "REV", "—", "—", "Retracted Publication", "—"),
+    (
+        "Retracted Publication",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Retracted Publication",
+        "—",
+    ),
     # 60
-    ("Corrected and Republished Article", "Corrections & Retractions", "REV", "—", "—", "Corrected and Republished Article", "—"),
+    (
+        "Corrected and Republished Article",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Corrected and Republished Article",
+        "—",
+    ),
     # 61
-    ("Expression of Concern", "Corrections & Retractions", "REV", "—", "—", "Expression of Concern", "—"),
+    (
+        "Expression of Concern",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Expression of Concern",
+        "—",
+    ),
     # 62
-    ("Duplicate Publication", "Corrections & Retractions", "REV", "—", "—", "Duplicate Publication", "—"),
+    (
+        "Duplicate Publication",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Duplicate Publication",
+        "—",
+    ),
     # 63
     ("Book", "Books & Monographs", "REV", "book", "book", "—", "Book"),
     # 64
-    ("Book Chapter", "Books & Monographs", "REV", "book-chapter", "book-chapter", "—", "BookSection"),
+    (
+        "Book Chapter",
+        "Books & Monographs",
+        "REV",
+        "book-chapter",
+        "book-chapter",
+        "—",
+        "BookSection",
+    ),
     # 65
-    ("Book Section", "Books & Monographs", "REV", "book-section", "book-section", "—", "—"),
+    (
+        "Book Section",
+        "Books & Monographs",
+        "REV",
+        "book-section",
+        "book-section",
+        "—",
+        "—",
+    ),
     # 66
     ("Book Part", "Books & Monographs", "REV", "—", "book-part", "—", "—"),
     # 67
@@ -202,7 +610,15 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 73
     ("Book Review", "Books & Monographs", "REV", "—", "—", "Book Review", "—"),
     # 74
-    ("Book Illustrations", "Books & Monographs", "REV", "—", "—", "Book Illustrations", "—"),
+    (
+        "Book Illustrations",
+        "Books & Monographs",
+        "REV",
+        "—",
+        "—",
+        "Book Illustrations",
+        "—",
+    ),
     # 75
     ("Collected Work", "Books & Monographs", "REV", "—", "—", "Collected Work", "—"),
     # 76
@@ -210,39 +626,135 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 77
     ("Festschrift", "Books & Monographs", "REV", "—", "—", "Festschrift", "—"),
     # 78
-    ("Reference Entry", "Reference & Encyclopedic", "REV", "reference-entry", "reference-entry", "—", "—"),
+    (
+        "Reference Entry",
+        "Reference & Encyclopedic",
+        "REV",
+        "reference-entry",
+        "reference-entry",
+        "—",
+        "—",
+    ),
     # 79
     ("Encyclopedia", "Reference & Encyclopedic", "REV", "—", "—", "Encyclopedia", "—"),
     # 80
     ("Dictionary", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary", "—"),
     # 81
-    ("Dictionary, Chemical", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary, Chemical", "—"),
+    (
+        "Dictionary, Chemical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Chemical",
+        "—",
+    ),
     # 82
-    ("Dictionary, Classical", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary, Classical", "—"),
+    (
+        "Dictionary, Classical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Classical",
+        "—",
+    ),
     # 83
-    ("Dictionary, Dental", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary, Dental", "—"),
+    (
+        "Dictionary, Dental",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Dental",
+        "—",
+    ),
     # 84
-    ("Dictionary, Medical", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary, Medical", "—"),
+    (
+        "Dictionary, Medical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Medical",
+        "—",
+    ),
     # 85
-    ("Dictionary, Pharmaceutic", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary, Pharmaceutic", "—"),
+    (
+        "Dictionary, Pharmaceutic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Pharmaceutic",
+        "—",
+    ),
     # 86
-    ("Dictionary, Polyglot", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary, Polyglot", "—"),
+    (
+        "Dictionary, Polyglot",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Polyglot",
+        "—",
+    ),
     # 87
     ("Terminology", "Reference & Encyclopedic", "REV", "—", "—", "Terminology", "—"),
     # 88
     ("Atlas", "Reference & Encyclopedic", "REV", "—", "—", "Atlas", "—"),
     # 89
-    ("Pharmacopoeia", "Reference & Encyclopedic", "REV", "—", "—", "Pharmacopoeia", "—"),
+    (
+        "Pharmacopoeia",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Pharmacopoeia",
+        "—",
+    ),
     # 90
-    ("Pharmacopoeia, Homeopathic", "Reference & Encyclopedic", "REV", "—", "—", "Pharmacopoeia, Homeopathic", "—"),
+    (
+        "Pharmacopoeia, Homeopathic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Pharmacopoeia, Homeopathic",
+        "—",
+    ),
     # 91
     ("Formulary", "Reference & Encyclopedic", "REV", "—", "—", "Formulary", "—"),
     # 92
-    ("Formulary, Dental", "Reference & Encyclopedic", "REV", "—", "—", "Formulary, Dental", "—"),
+    (
+        "Formulary, Dental",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Dental",
+        "—",
+    ),
     # 93
-    ("Formulary, Homeopathic", "Reference & Encyclopedic", "REV", "—", "—", "Formulary, Homeopathic", "—"),
+    (
+        "Formulary, Homeopathic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Homeopathic",
+        "—",
+    ),
     # 94
-    ("Formulary, Hospital", "Reference & Encyclopedic", "REV", "—", "—", "Formulary, Hospital", "—"),
+    (
+        "Formulary, Hospital",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Hospital",
+        "—",
+    ),
     # 95
     ("Dispensatory", "Reference & Encyclopedic", "REV", "—", "—", "Dispensatory", "—"),
     # 96
@@ -250,65 +762,273 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 97
     ("Guideline", "Guidelines & Consensus", "REV", "—", "—", "Guideline", "—"),
     # 98
-    ("Practice Guideline", "Guidelines & Consensus", "REV", "—", "—", "Practice Guideline", "—"),
+    (
+        "Practice Guideline",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Practice Guideline",
+        "—",
+    ),
     # 99
-    ("Consensus Development Conference", "Guidelines & Consensus", "REV", "—", "—", "Consensus Development Conference", "—"),
+    (
+        "Consensus Development Conference",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Consensus Development Conference",
+        "—",
+    ),
     # 100
-    ("Consensus Development Conference, NIH", "Guidelines & Consensus", "REV", "—", "—", "Consensus Development Conference, NIH", "—"),
+    (
+        "Consensus Development Conference, NIH",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Consensus Development Conference, NIH",
+        "—",
+    ),
     # 101
     ("Standard", "Standards", "REV", "standard", "standard", "—", "—"),
     # 102
-    ("Paratext", "Journal / Proceedings Infrastructure", "REV", "paratext", "—", "—", "—"),
+    (
+        "Paratext",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "paratext",
+        "—",
+        "—",
+        "—",
+    ),
     # 103
-    ("Libguides", "Journal / Proceedings Infrastructure", "REV", "libguides", "—", "—", "—"),
+    (
+        "Libguides",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "libguides",
+        "—",
+        "—",
+        "—",
+    ),
     # 104
-    ("Journal (container)", "Journal / Proceedings Infrastructure", "REV", "—", "journal", "—", "—"),
+    (
+        "Journal (container)",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal",
+        "—",
+        "—",
+    ),
     # 105
-    ("Journal Issue", "Journal / Proceedings Infrastructure", "REV", "—", "journal-issue", "—", "—"),
+    (
+        "Journal Issue",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal-issue",
+        "—",
+        "—",
+    ),
     # 106
-    ("Journal Volume", "Journal / Proceedings Infrastructure", "REV", "—", "journal-volume", "—", "—"),
+    (
+        "Journal Volume",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal-volume",
+        "—",
+        "—",
+    ),
     # 107
-    ("Proceedings (container)", "Journal / Proceedings Infrastructure", "REV", "—", "proceedings", "—", "—"),
+    (
+        "Proceedings (container)",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "proceedings",
+        "—",
+        "—",
+    ),
     # 108
-    ("Proceedings Series", "Journal / Proceedings Infrastructure", "REV", "—", "proceedings-series", "—", "—"),
+    (
+        "Proceedings Series",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "proceedings-series",
+        "—",
+        "—",
+    ),
     # 109
-    ("Report Series", "Journal / Proceedings Infrastructure", "REV", "—", "report-series", "—", "—"),
+    (
+        "Report Series",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "report-series",
+        "—",
+        "—",
+    ),
     # 110
-    ("Periodical", "Journal / Proceedings Infrastructure", "REV", "—", "—", "Periodical", "—"),
+    (
+        "Periodical",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "—",
+        "Periodical",
+        "—",
+    ),
     # 111
-    ("Periodical Index", "Journal / Proceedings Infrastructure", "REV", "—", "—", "Periodical Index", "—"),
+    (
+        "Periodical Index",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "—",
+        "Periodical Index",
+        "—",
+    ),
     # 112
     ("Grant", "Grants & Funding", "REV", "grant", "grant", "—", "—"),
     # 113
-    ("Research Support, ARRA", "Grants & Funding", "REV", "—", "—", "Research Support, American Recovery and Reinvestment Act", "—"),
+    (
+        "Research Support, ARRA",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, American Recovery and Reinvestment Act",
+        "—",
+    ),
     # 114
-    ("Research Support, NIH Extramural", "Grants & Funding", "REV", "—", "—", "Research Support, N.I.H., Extramural", "—"),
+    (
+        "Research Support, NIH Extramural",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, N.I.H., Extramural",
+        "—",
+    ),
     # 115
-    ("Research Support, NIH Intramural", "Grants & Funding", "REV", "—", "—", "Research Support, N.I.H., Intramural", "—"),
+    (
+        "Research Support, NIH Intramural",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, N.I.H., Intramural",
+        "—",
+    ),
     # 116
-    ("Research Support, Non-U.S. Gov't", "Grants & Funding", "REV", "—", "—", "Research Support, Non-U.S. Gov't", "—"),
+    (
+        "Research Support, Non-U.S. Gov't",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, Non-U.S. Gov't",
+        "—",
+    ),
     # 117
-    ("Research Support, U.S. Gov't Non-PHS", "Grants & Funding", "REV", "—", "—", "Research Support, U.S. Gov't, Non-P.H.S.", "—"),
+    (
+        "Research Support, U.S. Gov't Non-PHS",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Gov't, Non-P.H.S.",
+        "—",
+    ),
     # 118
-    ("Research Support, U.S. Gov't PHS", "Grants & Funding", "REV", "—", "—", "Research Support, U.S. Gov't, P.H.S.", "—"),
+    (
+        "Research Support, U.S. Gov't PHS",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Gov't, P.H.S.",
+        "—",
+    ),
     # 119
-    ("Research Support, U.S. Government", "Grants & Funding", "REV", "—", "—", "Research Support, U.S. Government", "—"),
+    (
+        "Research Support, U.S. Government",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Government",
+        "—",
+    ),
     # 120
-    ("Support of Research", "Grants & Funding", "REV", "—", "—", "Support of Research", "—"),
+    (
+        "Support of Research",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Support of Research",
+        "—",
+    ),
     # 121
     ("Biography", "Biographical & Historical", "REV", "—", "—", "Biography", "—"),
     # 122
-    ("Autobiography", "Biographical & Historical", "REV", "—", "—", "Autobiography", "—"),
+    (
+        "Autobiography",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Autobiography",
+        "—",
+    ),
     # 123
-    ("Biobibliography", "Biographical & Historical", "REV", "—", "—", "Biobibliography", "—"),
+    (
+        "Biobibliography",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Biobibliography",
+        "—",
+    ),
     # 124
     ("Bibliography", "Biographical & Historical", "REV", "—", "—", "Bibliography", "—"),
     # 125
-    ("Classical Article", "Biographical & Historical", "REV", "—", "—", "Classical Article", "—"),
+    (
+        "Classical Article",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Classical Article",
+        "—",
+    ),
     # 126
-    ("Historical Article", "Biographical & Historical", "REV", "—", "—", "Historical Article", "—"),
+    (
+        "Historical Article",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Historical Article",
+        "—",
+    ),
     # 127
-    ("Personal Narrative", "Biographical & Historical", "REV", "—", "—", "Personal Narrative", "—"),
+    (
+        "Personal Narrative",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Personal Narrative",
+        "—",
+    ),
     # 128
     ("Eulogy", "Biographical & Historical", "REV", "—", "—", "Eulogy", "—"),
     # 129
@@ -316,35 +1036,115 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 130
     ("Diary", "Biographical & Historical", "REV", "—", "—", "Diary", "—"),
     # 131
-    ("Collected Correspondence", "Biographical & Historical", "REV", "—", "—", "Collected Correspondence", "—"),
+    (
+        "Collected Correspondence",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Collected Correspondence",
+        "—",
+    ),
     # 132
     ("Textbook", "Educational & Instructional", "REV", "—", "—", "Textbook", "—"),
     # 133
     ("Handbook", "Educational & Instructional", "REV", "—", "—", "Handbook", "—"),
     # 134
-    ("Laboratory Manual", "Educational & Instructional", "REV", "—", "—", "Laboratory Manual", "—"),
+    (
+        "Laboratory Manual",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Laboratory Manual",
+        "—",
+    ),
     # 135
     ("Study Guide", "Educational & Instructional", "REV", "—", "—", "Study Guide", "—"),
     # 136
-    ("Resource Guide", "Educational & Instructional", "REV", "—", "—", "Resource Guide", "—"),
+    (
+        "Resource Guide",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Resource Guide",
+        "—",
+    ),
     # 137
     ("Guidebook", "Educational & Instructional", "REV", "—", "—", "Guidebook", "—"),
     # 138
     ("Lecture", "Educational & Instructional", "REV", "—", "—", "Lecture", "—"),
     # 139
-    ("Lecture Note", "Educational & Instructional", "REV", "—", "—", "Lecture Note", "—"),
+    (
+        "Lecture Note",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Lecture Note",
+        "—",
+    ),
     # 140
-    ("Nurses Instruction", "Educational & Instructional", "REV", "—", "—", "Nurses Instruction", "—"),
+    (
+        "Nurses Instruction",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Nurses Instruction",
+        "—",
+    ),
     # 141
-    ("Patient Education Handout", "Educational & Instructional", "REV", "—", "—", "Patient Education Handout", "—"),
+    (
+        "Patient Education Handout",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Patient Education Handout",
+        "—",
+    ),
     # 142
-    ("Interactive Tutorial", "Educational & Instructional", "REV", "—", "—", "Interactive Tutorial", "—"),
+    (
+        "Interactive Tutorial",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Interactive Tutorial",
+        "—",
+    ),
     # 143
-    ("Programmed Instruction", "Educational & Instructional", "REV", "—", "—", "Programmed Instruction", "—"),
+    (
+        "Programmed Instruction",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Programmed Instruction",
+        "—",
+    ),
     # 144
-    ("Examination Questions", "Educational & Instructional", "REV", "—", "—", "Examination Questions", "—"),
+    (
+        "Examination Questions",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Examination Questions",
+        "—",
+    ),
     # 145
-    ("Problems and Exercises", "Educational & Instructional", "REV", "—", "—", "Problems and Exercises", "—"),
+    (
+        "Problems and Exercises",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Problems and Exercises",
+        "—",
+    ),
     # 146
     ("Cookbook", "Educational & Instructional", "REV", "—", "—", "Cookbook", "—"),
     # 147
@@ -370,13 +1170,37 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 157
     ("Broadside", "Visual / Media", "REV", "—", "—", "Broadside", "—"),
     # 158
-    ("Architectural Drawing", "Visual / Media", "REV", "—", "—", "Architectural Drawing", "—"),
+    (
+        "Architectural Drawing",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Architectural Drawing",
+        "—",
+    ),
     # 159
     ("Animation", "Visual / Media", "REV", "—", "—", "Animation", "—"),
     # 160
-    ("Documentaries and Factual Films", "Visual / Media", "REV", "—", "—", "Documentaries and Factual Films", "—"),
+    (
+        "Documentaries and Factual Films",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Documentaries and Factual Films",
+        "—",
+    ),
     # 161
-    ("Instructional Film and Video", "Visual / Media", "REV", "—", "—", "Instructional Film and Video", "—"),
+    (
+        "Instructional Film and Video",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Instructional Film and Video",
+        "—",
+    ),
     # 162
     ("Unedited Footage", "Visual / Media", "REV", "—", "—", "Unedited Footage", "—"),
     # 163
@@ -386,55 +1210,215 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 165
     ("Poetry", "Literary / Miscellaneous", "REV", "—", "—", "Poetry", "—"),
     # 166
-    ("Fictional Work", "Literary / Miscellaneous", "REV", "—", "—", "Fictional Work", "—"),
+    (
+        "Fictional Work",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Fictional Work",
+        "—",
+    ),
     # 167
-    ("Juvenile Literature", "Literary / Miscellaneous", "REV", "—", "—", "Juvenile Literature", "—"),
+    (
+        "Juvenile Literature",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Juvenile Literature",
+        "—",
+    ),
     # 168
-    ("Wit and Humor", "Literary / Miscellaneous", "REV", "—", "—", "Wit and Humor", "—"),
+    (
+        "Wit and Humor",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Wit and Humor",
+        "—",
+    ),
     # 169
     ("Anecdotes", "Literary / Miscellaneous", "REV", "—", "—", "Anecdotes", "—"),
     # 170
-    ("Aphorisms and Proverbs", "Literary / Miscellaneous", "REV", "—", "—", "Aphorisms and Proverbs", "—"),
+    (
+        "Aphorisms and Proverbs",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Aphorisms and Proverbs",
+        "—",
+    ),
     # 171
     ("Phrases", "Literary / Miscellaneous", "REV", "—", "—", "Phrases", "—"),
     # 172
     ("Sermon", "Literary / Miscellaneous", "REV", "—", "—", "Sermon", "—"),
     # 173
-    ("Funeral Sermon", "Literary / Miscellaneous", "REV", "—", "—", "Funeral Sermon", "—"),
+    (
+        "Funeral Sermon",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Funeral Sermon",
+        "—",
+    ),
     # 174
-    ("Movable Books", "Literary / Miscellaneous", "REV", "—", "—", "Movable Books", "—"),
+    (
+        "Movable Books",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Movable Books",
+        "—",
+    ),
     # 175
     ("Catalog", "Administrative / Catalogs / Legal", "REV", "—", "—", "Catalog", "—"),
     # 176
-    ("Catalog, Bookseller", "Administrative / Catalogs / Legal", "REV", "—", "—", "Catalog, Bookseller", "—"),
+    (
+        "Catalog, Bookseller",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Bookseller",
+        "—",
+    ),
     # 177
-    ("Catalog, Commercial", "Administrative / Catalogs / Legal", "REV", "—", "—", "Catalog, Commercial", "—"),
+    (
+        "Catalog, Commercial",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Commercial",
+        "—",
+    ),
     # 178
-    ("Catalog, Drug", "Administrative / Catalogs / Legal", "REV", "—", "—", "Catalog, Drug", "—"),
+    (
+        "Catalog, Drug",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Drug",
+        "—",
+    ),
     # 179
-    ("Catalog, Publisher", "Administrative / Catalogs / Legal", "REV", "—", "—", "Catalog, Publisher", "—"),
+    (
+        "Catalog, Publisher",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Publisher",
+        "—",
+    ),
     # 180
-    ("Catalog, Union", "Administrative / Catalogs / Legal", "REV", "—", "—", "Catalog, Union", "—"),
+    (
+        "Catalog, Union",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Union",
+        "—",
+    ),
     # 181
-    ("Directory", "Administrative / Catalogs / Legal", "REV", "—", "—", "Directory", "—"),
+    (
+        "Directory",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Directory",
+        "—",
+    ),
     # 182
     ("Index", "Administrative / Catalogs / Legal", "REV", "—", "—", "Index", "—"),
     # 183
-    ("Union List", "Administrative / Catalogs / Legal", "REV", "—", "—", "Union List", "—"),
+    (
+        "Union List",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Union List",
+        "—",
+    ),
     # 184
-    ("Price List", "Administrative / Catalogs / Legal", "REV", "—", "—", "Price List", "—"),
+    (
+        "Price List",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Price List",
+        "—",
+    ),
     # 185
-    ("Legal Case", "Administrative / Catalogs / Legal", "REV", "—", "—", "Legal Case", "—"),
+    (
+        "Legal Case",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Legal Case",
+        "—",
+    ),
     # 186
-    ("Legislation", "Administrative / Catalogs / Legal", "REV", "—", "—", "Legislation", "—"),
+    (
+        "Legislation",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Legislation",
+        "—",
+    ),
     # 187
-    ("Government Publication", "Administrative / Catalogs / Legal", "REV", "—", "—", "Government Publication", "—"),
+    (
+        "Government Publication",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Government Publication",
+        "—",
+    ),
     # 188
-    ("Public Service Announcement", "Administrative / Catalogs / Legal", "REV", "—", "—", "Public Service Announcement", "—"),
+    (
+        "Public Service Announcement",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Public Service Announcement",
+        "—",
+    ),
     # 189
-    ("Advertisement", "Administrative / Catalogs / Legal", "REV", "—", "—", "Advertisement", "—"),
+    (
+        "Advertisement",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Advertisement",
+        "—",
+    ),
     # 190
-    ("Prospectus", "Administrative / Catalogs / Legal", "REV", "—", "—", "Prospectus", "—"),
+    (
+        "Prospectus",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Prospectus",
+        "—",
+    ),
     # 191
     ("Other", "Format / Meta-types", "REV", "other", "other", "—", "—"),
     # 192
@@ -442,7 +1426,15 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 193
     ("Abstracts", "Format / Meta-types", "REV", "—", "—", "Abstracts", "—"),
     # 194
-    ("English Abstract", "Format / Meta-types", "REV", "—", "—", "English Abstract", "—"),
+    (
+        "English Abstract",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "English Abstract",
+        "—",
+    ),
     # 195
     ("Chart", "Format / Meta-types", "REV", "—", "—", "Chart", "—"),
     # 196
@@ -464,11 +1456,27 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 204
     ("Manuscript", "Format / Meta-types", "REV", "—", "—", "Manuscript", "—"),
     # 205
-    ("Manuscript, Medical", "Format / Meta-types", "REV", "—", "—", "Manuscript, Medical", "—"),
+    (
+        "Manuscript, Medical",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Manuscript, Medical",
+        "—",
+    ),
     # 206
     ("Incunabula", "Format / Meta-types", "REV", "—", "—", "Incunabula", "—"),
     # 207
-    ("Unpublished Work", "Format / Meta-types", "REV", "—", "—", "Unpublished Work", "—"),
+    (
+        "Unpublished Work",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Unpublished Work",
+        "—",
+    ),
     # 208
     ("Web Archive", "Format / Meta-types", "REV", "—", "—", "Web Archive", "—"),
     # 209
@@ -476,11 +1484,35 @@ _CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
     # 210
     ("Overall", "Format / Meta-types", "REV", "—", "—", "Overall", "—"),
     # 211
-    ("Publication Components", "Format / Meta-types", "REV", "—", "—", "Publication Components", "—"),
+    (
+        "Publication Components",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Publication Components",
+        "—",
+    ),
     # 212
-    ("Publication Formats", "Format / Meta-types", "REV", "—", "—", "Publication Formats", "—"),
+    (
+        "Publication Formats",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Publication Formats",
+        "—",
+    ),
     # 213
-    ("Study Characteristics", "Format / Meta-types", "REV", "—", "—", "Study Characteristics", "—"),
+    (
+        "Study Characteristics",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Study Characteristics",
+        "—",
+    ),
     # 214
     ("Exhibition", "Format / Meta-types", "REV", "—", "—", "Exhibition", "—"),
 )
@@ -589,7 +1621,9 @@ def classify_publication_type(
             if not raw:
                 continue
             entry = lookup.get(raw.strip().lower())
-            if entry is not None and (best is None or entry.specificity > best.specificity):
+            if entry is not None and (
+                best is None or entry.specificity > best.specificity
+            ):
                 best = entry
         return best
 

@@ -61,6 +61,9 @@ class TestCrossRefYearValidation:
             "publication_year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
             "publication_type": "journal-article",  # Raw CrossRef type (unified field name)
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
             "language": "en",
             # Metrics (unified field names)
             "citations_received": 100,
@@ -154,6 +157,9 @@ class TestSemanticScholarYearValidation:
             "publication_year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
             "publication_type": "PUBLICATION",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
             "language": None,
             # Metrics (unified field names)
             "citations_received": 100,
@@ -242,6 +248,9 @@ class TestChemblYearValidation:
             "publication_year": 2020,
             "publication_date": None,  # Always NULL for ChEMBL
             "publication_type": "PUBLICATION",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
             "language": None,
             # Affiliations (unified field name)
             "affiliation_list": None,
@@ -328,6 +337,9 @@ class TestPubMedYearValidation:
             "publication_year": 2020,
             "publication_date": "2020-05-15",  # Unified date field
             "publication_type": "PUBLICATION",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
             "language": "eng",
             # Affiliations (unified field name)
             "affiliation_list": None,

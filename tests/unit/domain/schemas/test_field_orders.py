@@ -24,8 +24,8 @@ class TestPublicationFieldOrder:
     """Tests for PUBLICATION_FIELD_ORDER constant."""
 
     def test_total_field_count(self) -> None:
-        """Canonical order has exactly 167 fields."""
-        assert len(PUBLICATION_FIELD_ORDER) == 167
+        """Canonical order has exactly 179 fields."""
+        assert len(PUBLICATION_FIELD_ORDER) == 179
 
     def test_no_duplicates(self) -> None:
         """No duplicate fields in canonical order."""
@@ -97,12 +97,12 @@ class TestPublicationCanonicalCategories:
         assert set(PUBLICATION_CANONICAL_CATEGORIES.keys()) == expected
 
     def test_categories_cover_all_fields(self) -> None:
-        """Category ranges cover all 167 fields without gaps."""
+        """Category ranges cover all 179 fields without gaps."""
         ranges = sorted(PUBLICATION_CANONICAL_CATEGORIES.values())
         # First category starts at 1
         assert ranges[0][0] == 1
-        # Last category ends at 167
-        assert ranges[-1][1] == 167
+        # Last category ends at 179
+        assert ranges[-1][1] == 179
         # No gaps between consecutive categories
         for i in range(1, len(ranges)):
             assert ranges[i][0] == ranges[i - 1][1] + 1, (
@@ -118,7 +118,7 @@ class TestPublicationCanonicalCategories:
             "author_and_affiliation": 21,
             "date": 10,
             "topics_and_keywords": 16,
-            "publication": 37,
+            "publication": 49,
         }
         for cat, (start, end) in PUBLICATION_CANONICAL_CATEGORIES.items():
             actual_count = end - start + 1
