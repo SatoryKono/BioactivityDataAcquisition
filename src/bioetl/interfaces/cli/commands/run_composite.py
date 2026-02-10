@@ -229,6 +229,8 @@ def run_composite(
         use_cached_bronze=use_cached_bronze,
         cached_bronze_path=cached_bronze_path,
         cached_bronze_date=cached_bronze_date,
+        cached_bronze_enrichers=cached_bronze_enrichers,
+        cached_bronze_dependencies=cached_bronze_dependencies,
     )
 
     echo_info(f"Starting composite pipeline: {composite}")
