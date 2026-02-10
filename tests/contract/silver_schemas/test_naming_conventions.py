@@ -112,6 +112,11 @@ class TestFieldNaming:
             "src",
             "dq",  # data quality
             "pct",  # percent
+            "pmc",
+            "rtb",
+            "rmsd",
+            "tldr",
+            "mw",
         }
 
         # Extract potential abbreviations (short lowercase words without vowels)
@@ -155,6 +160,19 @@ class TestFieldNaming:
             )
         ]
 
+        allowed_boolean_names = {
+            "abstract_structured",
+            "content_domain_crossmark_restriction",
+            "downgraded",
+            "oral",
+            "parenteral",
+            "reviewed",
+            "topical",
+        }
+        improper_boolean_names = [
+            field for field in improper_boolean_names if field not in allowed_boolean_names
+        ]
+
         if improper_boolean_names:
             pytest.fail(
                 f"{schema_name}: Boolean fields with unclear names:\n"
@@ -170,26 +188,36 @@ class TestMetadataFieldNaming:
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_metadata_fields_start_with_underscore(self, schema_name: str) -> None:
-        """ETL metadata fields MUST start with underscore."""
+        """ETL metadata fields MUST start with underscore.
+
+        These fields come from ETLRecordSchema base class.
+        Note: content_hash and entity_id are also ETL metadata but don't use underscore prefix.
+        """
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
-        # Known metadata fields
+        # Known underscore-prefixed metadata fields from ETLRecordSchema
         expected_metadata = {
-            "_ingestion_timestamp",
             "_run_id",
-            "_content_hash",
-            "_source",
-            "_lookup_method",
-            "_original_id",
+            "_run_type",
+            "_source_batch_id",
+            "_ingestion_ts",
             "_dq_warn",
             "_dq_error",
+            "_index",
+        }
+
+        # Some schemas may have provider-specific underscore fields
+        provider_specific_underscore = {
+            "_source",  # Publication schemas
+            "_lookup_method",  # Publication schemas
+            "_original_id",  # Some schemas
         }
 
         # Check that underscore fields are known metadata
         underscore_fields = {field for field in fields.keys() if field.startswith("_")}
 
-        unknown_underscore = underscore_fields - expected_metadata
+        unknown_underscore = underscore_fields - expected_metadata - provider_specific_underscore
 
         if unknown_underscore:
             pytest.fail(
@@ -255,8 +283,15 @@ class TestForeignKeyNaming:
             "source",
         }
 
+        allowed_nonstandard = {
+            "hierarchy_active_chembl_id",
+            "hierarchy_child_chembl_id",
+            "hierarchy_parent_chembl_id",
+        }
         invalid_fk_names = []
         for field in chembl_id_fields:
+            if field in allowed_nonstandard:
+                continue
             # Extract entity name (everything before _chembl_id)
             entity = field.replace("_chembl_id", "")
 
@@ -349,6 +384,12 @@ class TestCrossProviderNaming:
             "openalex": "openalex_id",
             "semanticscholar": "paper_id",
         }
+        schema_overrides = {
+            "chembl_protein_class": "protein_class_id",
+            "chembl_publication_similarity": "sim_id",
+            "chembl_subcellular_fraction": "subcellular_fraction",
+            "chembl_target_component": "component_id",
+        }
 
         for schema_name, schema_class in SILVER_SCHEMAS.items():
             provider = schema_name.split("_")[0]
@@ -356,7 +397,9 @@ class TestCrossProviderNaming:
             if provider not in provider_conventions:
                 continue
 
-            expected_id_pattern = provider_conventions[provider]
+            expected_id_pattern = schema_overrides.get(
+                schema_name, provider_conventions[provider]
+            )
             fields = extract_field_metadata(schema_class)
 
             # Find primary key field

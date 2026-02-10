@@ -108,8 +108,20 @@ def extract_field_metadata(schema_class: type[pa.DataFrameModel]) -> dict[str, A
                 }
 
                 # Extract check parameters
+                regex_value = None
                 if hasattr(check, "regex_pattern"):
-                    check_meta["regex"] = str(check.regex_pattern)
+                    regex_value = check.regex_pattern
+                elif hasattr(check, "pattern"):
+                    regex_value = check.pattern
+                elif hasattr(check, "regex"):
+                    regex_value = check.regex
+                elif hasattr(check, "statistics"):
+                    stats = getattr(check, "statistics", None)
+                    if isinstance(stats, dict):
+                        regex_value = stats.get("pattern") or stats.get("regex")
+
+                if regex_value is not None:
+                    check_meta["regex"] = str(regex_value)
                 if hasattr(check, "_check_fn"):
                     # Extract range checks (ge, le, gt, lt)
                     check_fn_str = str(check._check_fn)

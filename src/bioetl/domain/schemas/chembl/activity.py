@@ -17,6 +17,7 @@ from bioetl.domain.schemas.constants import (
     STANDARD_RELATIONS,
     UO_ID_PATTERN,
 )
+from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 
 
 class ActivitySchema(ETLRecordSchema):
@@ -143,37 +144,80 @@ class ActivitySchema(ETLRecordSchema):
     )
 
     # === Flattened Fields (from JSON) ===
-    ligand_efficiency_bei: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_le: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_lle: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_sei: Series[float] | None = pa.Field(nullable=True)
+    ligand_efficiency_bei: Series[float] | None = pa.Field(
+        nullable=True, description="Binding Efficiency Index (BEI)."
+    )
+    ligand_efficiency_le: Series[float] | None = pa.Field(
+        nullable=True, description="Ligand Efficiency (LE)."
+    )
+    ligand_efficiency_lle: Series[float] | None = pa.Field(
+        nullable=True, description="Lipophilic Ligand Efficiency (LLE)."
+    )
+    ligand_efficiency_sei: Series[float] | None = pa.Field(
+        nullable=True, description="Surface Efficiency Index (SEI)."
+    )
 
-    action_type_action_type: Series[str] | None = pa.Field(nullable=True)
-    action_type_description: Series[str] | None = pa.Field(nullable=True)
-    action_type_parent_type: Series[str] | None = pa.Field(nullable=True)
+    action_type_action_type: Series[str] | None = pa.Field(
+        nullable=True, description="Action type classification."
+    )
+    action_type_description: Series[str] | None = pa.Field(
+        nullable=True, description="Action type description."
+    )
+    action_type_parent_type: Series[str] | None = pa.Field(
+        nullable=True, description="Parent action type category."
+    )
 
     activity_properties: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of activity properties."
     )
 
     # === Additional Fields from Silver Schema ===
-    canonical_smiles: Series[str] | None = pa.Field(nullable=True)
-    molecule_pref_name: Series[str] | None = pa.Field(nullable=True)
-    parent_molecule_chembl_id: Series[str] | None = pa.Field(nullable=True)
-    target_pref_name: Series[str] | None = pa.Field(nullable=True)
-    target_organism: Series[str] | None = pa.Field(nullable=True)
+    canonical_smiles: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical SMILES of molecule."
+    )
+    molecule_pref_name: Series[str] | None = pa.Field(
+        nullable=True, description="Molecule preferred name."
+    )
+    parent_molecule_chembl_id: Series[str] | None = pa.Field(
+        nullable=True, description="Parent molecule ChEMBL ID."
+    )
+    target_pref_name: Series[str] | None = pa.Field(
+        nullable=True, description="Target preferred name."
+    )
+    target_organism: Series[str] | None = pa.Field(
+        nullable=True, description="Target organism."
+    )
     target_taxonomy_id: Series[str] | None = pa.Field(
         nullable=True,
         description="Target taxonomy ID. Standardized name (was target_tax_id).",
     )
-    assay_type: Series[str] | None = pa.Field(nullable=True)
-    assay_description: Series[str] | None = pa.Field(nullable=True)
-    assay_variant_accession: Series[str] | None = pa.Field(nullable=True)
-    assay_variant_mutation: Series[str] | None = pa.Field(nullable=True)
-    bao_format: Series[str] | None = pa.Field(nullable=True)
-    bao_label: Series[str] | None = pa.Field(nullable=True)
-    document_journal: Series[str] | None = pa.Field(nullable=True)
-    document_year: Series[int] | None = pa.Field(nullable=True)
+    assay_type: Series[str] | None = pa.Field(
+        nullable=True, description="Assay type (B/F/A/T/P/U)."
+    )
+    assay_description: Series[str] | None = pa.Field(
+        nullable=True, description="Assay description text."
+    )
+    assay_variant_accession: Series[str] | None = pa.Field(
+        nullable=True, description="Assay variant protein accession."
+    )
+    assay_variant_mutation: Series[str] | None = pa.Field(
+        nullable=True, description="Assay variant mutation description."
+    )
+    bao_format: Series[str] | None = pa.Field(
+        nullable=True, description="BioAssay Ontology format ID."
+    )
+    bao_label: Series[str] | None = pa.Field(
+        nullable=True, description="BioAssay Ontology label."
+    )
+    document_journal: Series[str] | None = pa.Field(
+        nullable=True, description="Publication journal name."
+    )
+    document_year: Series[int] | None = pa.Field(
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="Publication year.",
+    )
 
     class Config:
         """Pandera configuration."""

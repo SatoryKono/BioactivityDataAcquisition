@@ -176,16 +176,28 @@ class AssaySchema(ETLRecordSchema):
     # )
 
     # === Variant Information (Flattened) ===
-    variant_accession: Series[str] | None = pa.Field(nullable=True)
-    variant_isoform: Series[str] | None = pa.Field(nullable=True)
-    variant_mutation: Series[str] | None = pa.Field(nullable=True)
-    variant_organism: Series[str] | None = pa.Field(nullable=True)
-    variant_sequence: Series[str] | None = pa.Field(nullable=True)
+    variant_accession: Series[str] | None = pa.Field(
+        nullable=True, description="Variant protein accession number."
+    )
+    variant_isoform: Series[str] | None = pa.Field(
+        nullable=True, description="Variant isoform identifier."
+    )
+    variant_mutation: Series[str] | None = pa.Field(
+        nullable=True, description="Variant mutation description."
+    )
+    variant_organism: Series[str] | None = pa.Field(
+        nullable=True, description="Variant organism name."
+    )
+    variant_sequence: Series[str] | None = pa.Field(
+        nullable=True, description="Variant amino acid sequence."
+    )
     variant_taxonomy_id: Series[int] | None = pa.Field(
         nullable=True,
         description="Variant taxonomy ID. Standardized name (was variant_tax_id).",
     )
-    variant_sequence_json: Series[str] | None = pa.Field(nullable=True)
+    variant_sequence_json: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of variant sequence details."
+    )
 
     # === Complex Fields (JSON) ===
     assay_classifications: Series[str] | None = pa.Field(

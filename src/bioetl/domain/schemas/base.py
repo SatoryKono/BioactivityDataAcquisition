@@ -29,7 +29,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
 
     # === Lineage & DQ Fields (from RULES.md §2.4) ===
-    run_id: Series[object] = pa.Field(
+    run_id: Series[str] = pa.Field(
         alias="_run_id",
         nullable=False,
         description="Correlation ID for the pipeline run.",
@@ -41,7 +41,7 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Type of pipeline run.",
     )
 
-    source_batch_id: Series[object] | None = pa.Field(
+    source_batch_id: Series[str] | None = pa.Field(
         alias="_source_batch_id",
         nullable=True,
         description="Batch context ID from the source.",

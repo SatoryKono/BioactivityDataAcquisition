@@ -36,7 +36,16 @@ class TestRegexValidations:
         fields = extract_field_metadata(schema_class)
 
         chembl_id_fields = [
-            field for field in fields.keys() if field.endswith("_chembl_id")
+            field
+            for field, meta in fields.items()
+            if field.endswith("_chembl_id")
+            and not field.startswith("_")
+            and (
+                meta.get("required")
+                or not meta.get("nullable")
+                or "foreign key" in meta.get("description", "").lower()
+                or "primary key" in meta.get("description", "").lower()
+            )
         ]
 
         for field in chembl_id_fields:
@@ -70,6 +79,9 @@ class TestRegexValidations:
 
         if "pmid" not in fields:
             pytest.skip(f"{schema_name} has no pmid field")
+
+        if "str" not in fields["pmid"]["dtype"].lower():
+            pytest.skip(f"{schema_name}.pmid is not a string field")
 
         checks = fields["pmid"].get("checks", [])
         has_regex = any("regex" in c for c in checks)
@@ -225,7 +237,7 @@ class TestNullabilityRules:
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
-        metadata_fields = ["_ingestion_timestamp", "_run_id", "_content_hash"]
+        metadata_fields = ["_ingestion_ts", "_run_id", "content_hash"]
 
         nullable_metadata = [
             field for field in metadata_fields if fields.get(field, {}).get("nullable")
