@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`skip_gold` flag for composite sub-pipelines**: Individual pipelines (seed, enrichers,
+  dependencies) running within a composite pipeline now skip their own Gold layer writing.
+  Gold output is produced only by the composite merge phase, eliminating redundant writes
+  and stale per-provider Gold tables. Flag flows through `RunOptions` → `PipelineRunContext`
+  → `RuntimeConfig`; defaults to `False` (no change for standalone pipelines).
 - Extraction-level filtering for ChEMBL Activity pipeline (ADR-028 §3)
   - Server-side API query parameters reduce data volume by ~75-90% (~20M → ~2-5M records)
   - Configurable via `configs/filter/entities/chembl/activity.yaml`
