@@ -22,9 +22,7 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    cid: Series[str] = pa.Field(
-        nullable=False, description="PubChem Compound ID (PK)"
-    )
+    cid: Series[str] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
 
     @pa.check("cid", name="cid_positive")
     def _check_cid(cls, series: Series[str]) -> Series[bool]:
