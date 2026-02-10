@@ -7,6 +7,7 @@ import pytest
 
 from bioetl.composition.factories.pipeline_factories import PIPELINE_CONFIGS
 
+# fmt: off
 PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
     "chembl_activity": [
         ("entity_id", pa.string()),
@@ -743,6 +744,7 @@ PIPELINE_PRIMARY_KEYS: dict[str, str] = {
     "openalex_publication": "openalex_id",
     "semanticscholar_publication": "paper_id",
 }
+# fmt: on
 
 
 def _pipeline_schema(pipeline_name: str) -> pa.Schema:
