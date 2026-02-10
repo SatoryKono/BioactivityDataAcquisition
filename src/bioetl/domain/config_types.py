@@ -166,7 +166,9 @@ class FieldValidationDict(TypedDict, total=False):
 
     field: Required[str]
     type: Required[
-        Literal["required", "not_null", "range", "pattern", "enum", "max_length", "custom"]
+        Literal[
+            "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+        ]
     ]
     nullable: bool
     severity: Literal["error", "warn"]
