@@ -156,6 +156,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         vacuum=vacuum,
         log_level=options.log_level,
         ignore_yaml_filter=options.ignore_yaml_filter,
+        skip_gold=options.skip_gold,
         cached_bronze=cached_bronze,
     )
 

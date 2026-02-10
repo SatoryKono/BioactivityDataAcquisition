@@ -567,6 +567,11 @@ class RuntimeConfig:
     # Use False during migration, True for production readiness
     strict_gold_validation: bool = False
 
+    # Skip Gold layer writing (composite sub-pipelines)
+    # When True, Gold filter returns False for all records,
+    # preventing individual Gold writes during composite execution
+    skip_gold: bool = False
+
     def __post_init__(self) -> None:
         """Validate runtime config."""
         self._validate_positive_values()

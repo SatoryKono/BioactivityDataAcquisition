@@ -288,6 +288,7 @@ def bootstrap_composite_runner(
         options = RunOptions(
             run_type="incremental",
             limit=runtime.seed_limit,
+            skip_gold=True,
             **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
@@ -333,6 +334,7 @@ def bootstrap_composite_runner(
             run_type="incremental",
             limit=limit,
             ignore_yaml_filter=True,
+            skip_gold=True,
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
@@ -421,6 +423,7 @@ def bootstrap_composite_runner(
             filter_field=filter_field,
             multi_filter_ids=multi_filter_ids,
             ignore_yaml_filter=True,
+            skip_gold=True,
             **_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
