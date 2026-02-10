@@ -34,7 +34,8 @@
   "_ingestion_ts": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
       }
     ],
     "coerce": false,
@@ -71,7 +72,7 @@
     "checks": [],
     "coerce": false,
     "description": "Correlation ID for the pipeline run.",
-    "dtype": "object",
+    "dtype": "str",
     "nullable": false,
     "required": true,
     "unique": false
@@ -94,7 +95,7 @@
     "checks": [],
     "coerce": false,
     "description": "Batch context ID from the source.",
-    "dtype": "object",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -177,7 +178,7 @@
     "description": "Number of references FROM this publication (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "citations_received": {
@@ -191,13 +192,14 @@
     "description": "Number of citations TO this publication (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "content_hash": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
       }
     ],
     "coerce": false,
@@ -233,7 +235,8 @@
   "doi": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^10\\.\\d{4,}/\\S+$"
       }
     ],
     "coerce": false,
@@ -351,7 +354,8 @@
   "paper_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{40}$"
       }
     ],
     "coerce": false,
@@ -364,7 +368,8 @@
   "pmc_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^PMC\\d+$"
       }
     ],
     "coerce": false,
@@ -377,7 +382,8 @@
   "pmid": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^[1-9]\\d*$"
       }
     ],
     "coerce": false,
@@ -404,7 +410,8 @@
   "publication_date": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}$"
       }
     ],
     "coerce": false,
@@ -465,7 +472,7 @@
     "description": "Publication year (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "subject_fields": {

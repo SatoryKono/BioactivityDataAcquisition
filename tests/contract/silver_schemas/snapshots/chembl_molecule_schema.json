@@ -34,7 +34,8 @@
   "_ingestion_ts": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
       }
     ],
     "coerce": false,
@@ -48,7 +49,7 @@
     "checks": [],
     "coerce": false,
     "description": "Correlation ID for the pipeline run.",
-    "dtype": "object",
+    "dtype": "str",
     "nullable": false,
     "required": true,
     "unique": false
@@ -71,7 +72,7 @@
     "checks": [],
     "coerce": false,
     "description": "Batch context ID from the source.",
-    "dtype": "object",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -139,7 +140,8 @@
   "content_hash": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
       }
     ],
     "coerce": false,
@@ -216,7 +218,8 @@
   "hierarchy_active_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -229,7 +232,8 @@
   "hierarchy_child_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -242,7 +246,8 @@
   "hierarchy_parent_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -255,7 +260,8 @@
   "inchikey": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
       }
     ],
     "coerce": false,
@@ -296,7 +302,8 @@
   "molecule_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -616,7 +623,8 @@
   "structure_standard_inchi_key": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
       }
     ],
     "coerce": false,
@@ -686,7 +694,16 @@
     "unique": false
   },
   "usan_year": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
     "coerce": false,
     "description": "USAN approval year.",
     "dtype": "int64",
