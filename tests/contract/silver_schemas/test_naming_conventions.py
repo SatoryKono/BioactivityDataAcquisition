@@ -143,12 +143,17 @@ class TestFieldNaming:
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_boolean_fields_start_with_is_has_can(self, schema_name: str) -> None:
-        """Boolean fields SHOULD start with is_, has_, can_, or _flag suffix."""
+        """Boolean fields SHOULD start with is_, has_, can_, or _flag suffix.
+
+        Note: ETL metadata fields (underscore prefix) are excluded from this check.
+        """
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
+        # Exclude ETL metadata fields (underscore prefix) - they have standardized names
         boolean_fields = [
-            field for field, meta in fields.items() if "bool" in meta["dtype"].lower()
+            field for field, meta in fields.items()
+            if "bool" in meta["dtype"].lower() and not field.startswith("_")
         ]
 
         improper_boolean_names = [
