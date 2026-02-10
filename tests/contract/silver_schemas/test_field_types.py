@@ -96,6 +96,8 @@ class TestFieldTypes:
 
         numeric_id_fields = {
             "assay_param_id",
+            "assay_taxonomy_id",
+            "cell_source_taxonomy_id",
             "component_id",
             "component_ids",
             "doc_1",
@@ -110,7 +112,10 @@ class TestFieldTypes:
             "sequence_mass",
             "sim_id",
             "src_id",
+            "targcomp_id",
             "taxonomy_id",
+            "tid",
+            "variant_taxonomy_id",
         }
         id_fields = [
             (field, meta["dtype"])

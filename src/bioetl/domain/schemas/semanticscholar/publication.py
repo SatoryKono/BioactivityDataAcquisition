@@ -68,7 +68,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="DBLP publication key",
     )
 
-    corpus_id: Series[pd.Int64Dtype] = pa.Field(
+    corpus_id: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="S2 Corpus ID",
@@ -92,7 +92,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
 
     # === Provider-specific Metrics ===
 
-    influential_citation_count: Series[pd.Int64Dtype] = pa.Field(
+    influential_citation_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of influential citations",

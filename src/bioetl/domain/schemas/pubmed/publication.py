@@ -137,7 +137,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         nullable=True, description="Page numbers (unified field name)"
     )
 
-    pub_month: Series[pd.Int64Dtype] = pa.Field(
+    pub_month: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Publication month"
     )
 
@@ -146,7 +146,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate publication month range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 12)))
 
-    pub_day: Series[pd.Int64Dtype] = pa.Field(
+    pub_day: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Publication day"
     )
 
@@ -191,7 +191,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Counts (denormalized for query efficiency) ===
-    author_count: Series[pd.Int64Dtype] = pa.Field(
+    author_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of authors"
     )
 
@@ -200,7 +200,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate author count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    mesh_heading_count: Series[pd.Int64Dtype] = pa.Field(
+    mesh_heading_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of MeSH headings"
     )
 
@@ -209,7 +209,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate MeSH heading count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    keyword_count: Series[pd.Int64Dtype] = pa.Field(
+    keyword_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of keywords"
     )
 
@@ -218,7 +218,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate keyword count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    grant_count: Series[pd.Int64Dtype] = pa.Field(
+    grant_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of grants"
     )
 
@@ -227,7 +227,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate grant count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    chemical_count: Series[pd.Int64Dtype] = pa.Field(
+    chemical_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of chemicals"
     )
 
