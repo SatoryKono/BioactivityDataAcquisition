@@ -162,7 +162,7 @@ class TestOpenAlexPublicationSchema:
         assert validated["publication_year"].iloc[0] == 2024
 
         # Valid boundary values
-        for year in [1500, 2100]:
+        for year in [1950, 2050]:
             valid_record["publication_year"] = year
             df = pd.DataFrame([valid_record])
             validated = OpenAlexPublicationSchema.validate(df)

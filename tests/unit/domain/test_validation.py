@@ -104,10 +104,10 @@ class TestValidateYearRange:
     @pytest.mark.parametrize(
         "year,expected",
         [
-            (1500, True),
+            (1500, False),
             (1990, True),
             (2024, True),
-            (2100, True),
+            (2100, False),
         ],
     )
     def test_valid_year(self, year: int, expected: bool) -> None:
@@ -145,12 +145,12 @@ class TestPublicationYearConstants:
     """Tests for publication year constants."""
 
     def test_min_publication_year_value(self) -> None:
-        """Test MIN_PUBLICATION_YEAR is set to 1500."""
-        assert MIN_PUBLICATION_YEAR == 1500
+        """Test MIN_PUBLICATION_YEAR is set to 1950."""
+        assert MIN_PUBLICATION_YEAR == 1950
 
     def test_max_publication_year_value(self) -> None:
         """Test MAX_PUBLICATION_YEAR is 2100."""
-        assert MAX_PUBLICATION_YEAR == 2100
+        assert MAX_PUBLICATION_YEAR == 2050
 
     def test_constants_are_valid_range(self) -> None:
         """Test that min < max for valid range."""
