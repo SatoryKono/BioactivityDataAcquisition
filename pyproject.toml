@@ -306,11 +306,16 @@ module = [
     "bioetl.infrastructure.schemas.base_schemas",
     "bioetl.infrastructure.schemas.composite_config",
     "bioetl.infrastructure.schemas.dq_config",
+    "bioetl.infrastructure.schemas.filter_config",
+    # Pandera @pa.check decorators
+    "bioetl.domain.schemas.common.publication_base",
 ]
 disallow_untyped_decorators = false
 
 # Disable misc errors for Pydantic/Pandera subclasses
 # These libraries export BaseModel/DataFrameModel as Any without proper stubs
+# Note: --strict CLI flag re-enables disallow_subclassing_any, so per-module
+# disable_error_code is needed to suppress [misc] for all subclass modules
 [[tool.mypy.overrides]]
 module = [
     "bioetl.domain.schemas.base",
@@ -319,6 +324,7 @@ module = [
     "bioetl.infrastructure.schemas.source_config",
     "bioetl.infrastructure.schemas.common_config",
     "bioetl.infrastructure.config",
+    "bioetl.infrastructure.config.*",
     "bioetl.infrastructure.adapters.uniprot.models",
     "bioetl.infrastructure.adapters.pubmed.models",
     "bioetl.infrastructure.adapters.chembl.models",
@@ -330,6 +336,16 @@ module = [
     "bioetl.domain.entities.openalex",
     "bioetl.domain.entities.pubchem",
     "bioetl.domain.entities.pubmed",
+    # Domain models with Pydantic BaseModel
+    "bioetl.domain.models.metadata",
+    # Pandera DataFrameModel gold contracts
+    "bioetl.domain.contracts.gold.*",
+    # Infrastructure schemas with Pydantic BaseModel
+    "bioetl.infrastructure.schemas.base_schemas",
+    "bioetl.infrastructure.schemas.composite_config",
+    "bioetl.infrastructure.schemas.dq_config",
+    "bioetl.infrastructure.schemas.dq_report_config",
+    "bioetl.infrastructure.schemas.filter_config",
 ]
 disable_error_code = ["misc"]
 
@@ -344,6 +360,8 @@ module = [
     "bioetl.domain.schemas.semanticscholar.publication",
     "bioetl.domain.schemas.pubmed.article",
     "bioetl.domain.schemas.pubchem.compound",
+    # Pydantic BaseModel.model_validate returns Any without stubs
+    "bioetl.infrastructure.config.filter_config_loader",
 ]
 disable_error_code = ["no-any-return", "return-value"]
 

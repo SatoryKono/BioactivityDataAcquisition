@@ -108,7 +108,7 @@ class APIRequestCollector:
             endpoint=endpoint,
             base_url=base_url,
             query_params=sanitized_params,
-            http_method=method.upper(),  # type: ignore[arg-type]
+            http_method=method.upper(),
             response_size_bytes=response_size,
             request_duration_ms=duration_ms,
             status_code=status_code,
@@ -198,7 +198,7 @@ class APIRequestCollector:
             avg_duration = 0.0
 
         return SourceMetadata(
-            type=source_type,  # type: ignore[arg-type]
+            type=source_type,
             url=url,
             query_string=query_string,
             api_version=api_version,
