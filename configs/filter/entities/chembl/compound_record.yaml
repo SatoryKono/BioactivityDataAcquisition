@@ -19,7 +19,7 @@ input_filter:
   source_path: "data/input/molecule.csv"
   column_name: "molecule_chembl_id"
   filter_field: "molecule_chembl_id"
-  batch_size: 20
+  batch_size: 10
 
 # -----------------------------------------------------------------------------
 # Gold Filters

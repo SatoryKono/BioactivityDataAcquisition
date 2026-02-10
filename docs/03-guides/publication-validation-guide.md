@@ -3,7 +3,7 @@
 **Версия:** 1.0.0
 **Дата:** 2026-02-06
 **Статус:** Утверждено ✅
-**Связанный ADR:** ADR-032
+**Связанный ADR:** ADR-033
 
 ---
 
@@ -830,7 +830,7 @@ pytest tests/integration/validation/ --record-mode=once
 
 ## Связанная документация
 
-- **ADR-032:** Стратегия валидации публикаций
+- **ADR-033:** Стратегия валидации публикаций
 - **Field Reference:** `docs/04-reference/publication-fields-reference.md`
 - **Validation Schema:** `docs/04-reference/schemas/publication_validation_schema_v3.xlsx`
 - **Operational Runbook:** `docs/05-operations/runbooks/publication-validation-runbook.md`

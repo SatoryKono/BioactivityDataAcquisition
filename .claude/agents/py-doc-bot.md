@@ -30,7 +30,7 @@ model: sonnet
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze->Silver->Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
-- Текущее состояние: 32 ADR (ADR-001..ADR-032), все в статусе Accepted
+- Текущее состояние: 33 ADR (ADR-001..ADR-033), все в статусе Accepted
 
 **Ключевые файлы:**
 
@@ -39,7 +39,7 @@ model: sonnet
 | Domain Ports | `src/bioetl/domain/ports/` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
-| Bootstrap | `src/bioetl/composition/bootstrap.py` |
+| Bootstrap | `src/bioetl/composition/bootstrap/` |
 | Configs | `configs/pipelines/{provider}/{entity}.yaml` |
 | ADR | `docs/02-architecture/decisions/` |
 | RULES.md | `docs/00-project/RULES.md` |
@@ -103,7 +103,7 @@ docs/
 +-- 00-map.md                    # Navigation hub
 +-- 01-getting-started/          # Onboarding guides
 +-- 02-architecture/
-|   +-- decisions/               # ADRs (ADR-001 through ADR-032)
+|   +-- decisions/               # ADRs (ADR-001 through ADR-033)
 |   +-- diagrams/                # Mermaid diagrams
 +-- 03-guides/                   # Development guides
 +-- 04-reference/                # API documentation

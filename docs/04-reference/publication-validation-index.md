@@ -24,7 +24,7 @@
 
 | Документ | Описание | Статус |
 |----------|----------|--------|
-| **[ADR-032](../02-architecture/decisions/ADR-032-publication-validation-strategy.md)** | Стратегия валидации публикаций: 5 уровней, DQ-флаги, карантин, конфигурация | ✅ Принят (2026-02-06) |
+| **[ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)** | Стратегия валидации публикаций: 5 уровней, DQ-флаги, карантин, конфигурация | ✅ Принят (2026-02-06) |
 
 **Связанные ADR:**
 - [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) — Hexagonal Architecture (validation services в application layer)
@@ -78,8 +78,8 @@ tests_generated/
 ### 1. Понять архитектуру
 
 ```bash
-# Прочитать ADR-032 (решение + обоснование)
-open docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md
+# Прочитать ADR-033 (решение + обоснование)
+open docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md
 
 # Изучить диаграммы в Validation Guide
 open docs/03-guides/publication-validation-guide.md
@@ -180,7 +180,7 @@ cat /var/log/bioetl/pipeline.log | \
 ### Data Engineer (Реализация)
 
 1. **Прочитать:**
-   - [ADR-032](../02-architecture/decisions/ADR-032-publication-validation-strategy.md) — Архитектурное решение
+   - [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md) — Архитектурное решение
    - [Validation Guide](../03-guides/publication-validation-guide.md) — Примеры кода
 
 2. **Реализовать:**
@@ -327,7 +327,7 @@ cat /var/log/bioetl/pipeline.log | \
 
 | Дата | Событие |
 |------|---------|
-| **2026-02-06** | ✅ Утверждение ADR-032 |
+| **2026-02-06** | ✅ Утверждение ADR-033 |
 | **2026-02-06** | ✅ Генерация Validation Schema v3 (191 правило) |
 | **2026-02-06** | ✅ Генерация Test Suite (471 тест, 64% покрытие) |
 | **2026-02-06** | ✅ Публикация документации (7 документов) |

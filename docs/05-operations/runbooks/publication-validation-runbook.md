@@ -3,7 +3,7 @@
 **Версия:** 1.0.0
 **Дата:** 2026-02-06
 **Для:** DevOps, Data Engineers, Support
-**Связанный ADR:** ADR-032
+**Связанный ADR:** ADR-033
 
 ---
 
@@ -791,7 +791,7 @@ scrape_configs:
 
 ### ADR и документация
 
-- **ADR-032:** Стратегия валидации (`docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md`)
+- **ADR-033:** Стратегия валидации (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
 - **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
 - **Field Reference:** `docs/04-reference/publication-fields-reference.md`
 - **Test Suite:** `tests_generated/` (471 тест)

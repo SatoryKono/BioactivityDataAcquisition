@@ -28,7 +28,7 @@ model: opus
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
-- Текущее состояние: 32 ADR (ADR-001..ADR-032), все Accepted
+- Текущее состояние: 33 ADR (ADR-001..ADR-033), все Accepted
 
 **Ключевые файлы:**
 - Domain Ports: `src/bioetl/domain/ports/`
