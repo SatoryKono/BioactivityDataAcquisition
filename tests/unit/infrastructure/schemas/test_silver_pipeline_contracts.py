@@ -829,7 +829,9 @@ class TestPipelineSchemaFields:
         ids=PIPELINE_SCHEMA_EXPECTATIONS.keys(),
     )
     def test_schema_field_names_and_types(
-        self, pipeline_name: str, expected_fields: list[tuple[str, pa.DataType]]
+        self,
+        pipeline_name: str,
+        expected_fields: list[tuple[str, pa.DataType]],
     ) -> None:
         schema = _pipeline_schema(pipeline_name)
         expected_names = [name for name, _ in expected_fields]
@@ -846,12 +848,16 @@ class TestPipelineSchemaValidation:
         ids=PIPELINE_SCHEMA_EXPECTATIONS.keys(),
     )
     def test_minimal_record_valid(
-        self, pipeline_name: str, expected_fields: list[tuple[str, pa.DataType]]
+        self,
+        pipeline_name: str,
+        expected_fields: list[tuple[str, pa.DataType]],
     ) -> None:
         schema = _pipeline_schema(pipeline_name)
         primary_key = PIPELINE_PRIMARY_KEYS[pipeline_name]
         record = _base_record(schema)
-        record[primary_key] = _valid_value(_expected_type(expected_fields, primary_key))
+        record[primary_key] = _valid_value(
+            _expected_type(expected_fields, primary_key)
+        )
         table = pa.Table.from_pylist([record], schema=schema)
         assert table.num_rows == 1
 
@@ -861,7 +867,9 @@ class TestPipelineSchemaValidation:
         ids=PIPELINE_SCHEMA_EXPECTATIONS.keys(),
     )
     def test_invalid_primary_key_type_rejected(
-        self, pipeline_name: str, expected_fields: list[tuple[str, pa.DataType]]
+        self,
+        pipeline_name: str,
+        expected_fields: list[tuple[str, pa.DataType]],
     ) -> None:
         schema = _pipeline_schema(pipeline_name)
         primary_key = PIPELINE_PRIMARY_KEYS[pipeline_name]
