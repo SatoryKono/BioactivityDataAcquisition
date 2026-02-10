@@ -65,6 +65,26 @@ entity_field_validations:
     nullable: true
     error_message: "PMC ID must start with PMC followed by digits"
 
+  - field: citations_received
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Citation count must be non-negative"
+
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: "Unusually high citation count"
+
+  - field: citations_made
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
+
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
