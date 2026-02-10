@@ -10,7 +10,10 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.schemas.constants import STANDARD_RELATIONS
+from bioetl.domain.schemas.constants import (
+    ASSAY_PARAMETER_STANDARD_TYPES,
+    STANDARD_RELATIONS,
+)
 
 
 class AssayParametersSchema(ETLRecordSchema):

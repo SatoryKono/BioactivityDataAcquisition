@@ -56,6 +56,40 @@ ACTIVITY_STANDARD_TYPES: frozenset[str] = frozenset(
     ]
 )
 
+# Assay parameter standard types (superset of activity types + parameter-specific)
+ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset(
+    [
+        # Measurement types (from ACTIVITY_STANDARD_TYPES)
+        "IC50",
+        "EC50",
+        "Ki",
+        "Kd",
+        "AC50",
+        "GI50",
+        "Potency",
+        "Inhibition",
+        "% Inhibition",
+        "Activity",
+        "Ratio",
+        "ED50",
+        "ID50",
+        # Parameter-specific types
+        "CONC",  # Concentration
+        "PH",  # pH level
+        "TEMP",  # Temperature
+        "TIME",  # Incubation time
+        "DOSE",  # Dose
+        "VOLUME",  # Volume
+        "WAVELENGTH",  # Wavelength
+        "PERCENT",  # Percentage
+        "PRESSURE",  # Pressure
+        "HUMIDITY",  # Humidity
+        "CELL_COUNT",  # Cell count
+        "CELL_DENSITY",  # Cell density
+        "SERUM",  # Serum percentage
+    ]
+)
+
 DATA_VALIDITY_COMMENTS: frozenset[str] = frozenset(
     [
         "Potential missing data",
@@ -166,6 +200,7 @@ PUBLICATION_TYPES: frozenset[str] = frozenset(
 __all__ = [
     "ACTIVITY_STANDARD_TYPES",
     "ASSAY_CATEGORIES",
+    "ASSAY_PARAMETER_STANDARD_TYPES",
     "ASSAY_TEST_TYPES",
     # Assay enums
     "ASSAY_TYPES",
