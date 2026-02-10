@@ -52,6 +52,9 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
+        pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
+        pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
         # === Unified citation metrics ===
