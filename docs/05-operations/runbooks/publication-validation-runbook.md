@@ -105,8 +105,8 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 3. Если медленный **Semantic Validation**:
    - Отключить временно:
      ```bash
-     python -m bioetl.interfaces.cli.main run-pipeline \
-       --provider pubmed --entity publication \
+     bioetl run \
+       --pipeline pubmed_publication \
        --skip-semantic
      ```
 
@@ -435,8 +435,8 @@ curl -v --connect-timeout 5 https://api.crossref.org/
 **Решение:**
 - Временно отключить External Verification:
   ```bash
-  python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider crossref --entity publication \
+  bioetl run \
+    --pipeline crossref_publication \
     --skip-external
   ```
 
@@ -644,8 +644,8 @@ lsof -i -P -n | grep bioetl
 pkill -f "bioetl.interfaces.cli.main run-pipeline"
 
 # Перезапустить без External Verification
-python -m bioetl.interfaces.cli.main run-pipeline \
-  --provider pubmed --entity publication \
+bioetl run \
+  --pipeline pubmed_publication \
   --skip-external \
   --skip-semantic
 ```
@@ -721,8 +721,8 @@ curl http://localhost:8000/metrics | grep bioetl_validation
 **Решение:**
 ```bash
 # Перезапустить pipeline с Prometheus exporter
-python -m bioetl.interfaces.cli.main run-pipeline \
-  --provider pubmed --entity publication \
+bioetl run \
+  --pipeline pubmed_publication \
   --enable-metrics \
   --metrics-port 8000
 

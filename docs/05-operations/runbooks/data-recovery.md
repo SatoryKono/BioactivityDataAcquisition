@@ -24,7 +24,7 @@ This runbook provides procedures for recovering data in case of corruption, acci
         *   Delete the corrupted data from the Silver/Gold tables.
         *   Run the pipeline with the `--full-rebuild` flag. This will re-process all data from Bronze.
         ```bash
-        python -m bioetl.main run --pipeline <pipeline_name> --full-rebuild
+        bioetl run --pipeline <pipeline_name> --full-rebuild
         ```
 
 ## Scenario 2: Bronze Data Loss or Corruption
@@ -45,7 +45,7 @@ This runbook provides procedures for recovering data in case of corruption, acci
 *   **Recovery Steps**:
     1.  **Option A (Safest)**: Ignore the checkpoint and re-process a slightly larger window of data.
         ```bash
-        python -m bioetl.main run --pipeline <pipeline_name> --ignore-checkpoint
+        bioetl run --pipeline <pipeline_name> --ignore-checkpoint
         ```
         *   **Impact**: This may create duplicate records in the Bronze layer, but the merge/upsert logic in the Silver layer will handle deduplication, ensuring correctness.
     2.  **Option B (Advanced)**: Manually determine the last successfully processed record ID or timestamp from the Silver table and create a new checkpoint file. This is faster but more error-prone.

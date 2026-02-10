@@ -3,26 +3,26 @@
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 5.9.0
-**Дата обновления:** 2026-01-26
+**Версия:** 5.14.0
+**Дата обновления:** 2026-02-10
 
 ---
 
 ## Запуск CLI
 
 ```bash
-# Рекомендуемый способ
-python -m bioetl.main <command> [options]
-
-# Или через активированное venv
+# Рекомендуемый способ (после установки)
 bioetl <command> [options]
+
+# Или во время разработки
+python -m bioetl.interfaces.cli <command> [options]
 ```
 
 Для справки по любой команде добавьте `--help`:
 
 ```bash
-python -m bioetl.main --help
-python -m bioetl.main run --help
+bioetl --help
+bioetl run --help
 ```
 
 ---
@@ -35,7 +35,7 @@ python -m bioetl.main run --help
 
 **Синтаксис:**
 ```bash
-python -m bioetl.main run --pipeline <NAME> [OPTIONS]
+bioetl run --pipeline <NAME> [OPTIONS]
 ```
 
 **Обязательные параметры:**
@@ -66,28 +66,28 @@ python -m bioetl.main run --pipeline <NAME> [OPTIONS]
 
 ```bash
 # Инкрементальный запуск (по умолчанию)
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 
 # С ограничением записей (для тестирования)
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 
 # Полная перезагрузка данных
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --yes
+bioetl run --pipeline chembl_activity --run-type rebuild --yes
 
 # Предпросмотр очистки без выполнения
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 
 # Продолжить прерванный запуск
-python -m bioetl.main run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl_activity --resume
 
 # С фильтрацией по CSV
-python -m bioetl.main run --pipeline chembl_activity \
+bioetl run --pipeline chembl_activity \
     --input-csv data/filter_ids.csv \
     --filter-column molecule_id \
     --filter-field molecule_chembl_id
 
 # С DEBUG логированием
-python -m bioetl.main run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug
 ```
 
 **Типы запуска:**
@@ -117,7 +117,7 @@ python -m bioetl.main run --pipeline chembl_activity --debug
 
 **Синтаксис:**
 ```bash
-python -m bioetl.main run-all --source <PROVIDER> [OPTIONS]
+bioetl run-all --source <PROVIDER> [OPTIONS]
 ```
 
 **Опции:**
@@ -136,16 +136,16 @@ python -m bioetl.main run-all --source <PROVIDER> [OPTIONS]
 
 ```bash
 # Запуск всех ChEMBL пайплайнов
-python -m bioetl.main run-all --source chembl
+bioetl run-all --source chembl
 
 # Только просмотр списка
-python -m bioetl.main run-all --source chembl --list-only
+bioetl run-all --source chembl --list-only
 
 # Предпросмотр
-python -m bioetl.main run-all --source pubchem --dry-run
+bioetl run-all --source pubchem --dry-run
 
 # Rebuild всех пайплайнов провайдера
-python -m bioetl.main run-all --source chembl --run-type rebuild --yes
+bioetl run-all --source chembl --run-type rebuild --yes
 ```
 
 ---
@@ -156,7 +156,7 @@ python -m bioetl.main run-all --source chembl --run-type rebuild --yes
 
 **Синтаксис:**
 ```bash
-python -m bioetl.main run-composite --composite <NAME> [OPTIONS]
+bioetl run-composite --composite <NAME> [OPTIONS]
 ```
 
 **Опции:**
@@ -176,16 +176,16 @@ python -m bioetl.main run-composite --composite <NAME> [OPTIONS]
 
 ```bash
 # Запуск композитного пайплайна публикаций
-python -m bioetl.main run-composite --composite publication
+bioetl run-composite --composite publication
 
 # С ограничением seed
-python -m bioetl.main run-composite --composite publication --seed-limit 100
+bioetl run-composite --composite publication --seed-limit 100
 
 # Только определённые enrichers
-python -m bioetl.main run-composite --composite publication --enrich-only crossref,openalex
+bioetl run-composite --composite publication --enrich-only crossref,openalex
 
 # Только обязательные enrichers
-python -m bioetl.main run-composite --composite publication --required-only
+bioetl run-composite --composite publication --required-only
 ```
 
 ---
@@ -196,7 +196,7 @@ python -m bioetl.main run-composite --composite publication --required-only
 
 **Синтаксис:**
 ```bash
-python -m bioetl.main export [TABLE] [OPTIONS]
+bioetl export [TABLE] [OPTIONS]
 ```
 
 **Аргументы:**
@@ -221,25 +221,25 @@ python -m bioetl.main export [TABLE] [OPTIONS]
 
 ```bash
 # Список всех таблиц
-python -m bioetl.main export --list
+bioetl export --list
 
 # Предпросмотр таблицы
-python -m bioetl.main export chembl.activity --preview
+bioetl export chembl.activity --preview
 
 # Экспорт в CSV (по умолчанию)
-python -m bioetl.main export chembl.activity
+bioetl export chembl.activity
 
 # Экспорт в Excel
-python -m bioetl.main export chembl.activity --format xlsx
+bioetl export chembl.activity --format xlsx
 
 # С ограничением строк и колонок
-python -m bioetl.main export chembl.activity --limit 10000 --columns id,name,value
+bioetl export chembl.activity --limit 10000 --columns id,name,value
 
 # Экспорт Gold-слоя
-python -m bioetl.main export chembl.activity --layer gold
+bioetl export chembl.activity --layer gold
 
 # В указанную директорию
-python -m bioetl.main export chembl.activity -o ./my_exports
+bioetl export chembl.activity -o ./my_exports
 ```
 
 ---
@@ -251,19 +251,19 @@ python -m bioetl.main export chembl.activity -o ./my_exports
 #### `config show` — Показать конфигурацию пайплайна
 
 ```bash
-python -m bioetl.main config show <PIPELINE> [--format yaml|json]
+bioetl config show <PIPELINE> [--format yaml|json]
 ```
 
 **Примеры:**
 ```bash
-python -m bioetl.main config show chembl_activity
-python -m bioetl.main config show chembl_activity --format json
+bioetl config show chembl_activity
+bioetl config show chembl_activity --format json
 ```
 
 #### `config validate` — Валидация конфигурации
 
 ```bash
-python -m bioetl.main config validate <PIPELINE>
+bioetl config validate <PIPELINE>
 ```
 
 Выводит: Provider, Entity type, Silver table, Gold table (если есть).
@@ -271,7 +271,7 @@ python -m bioetl.main config validate <PIPELINE>
 #### `config show-settings` — Глобальные настройки
 
 ```bash
-python -m bioetl.main config show-settings [--format yaml|json]
+bioetl config show-settings [--format yaml|json]
 ```
 
 Показывает все `BIOETL_*` переменные окружения (API-ключи маскируются).
@@ -279,7 +279,7 @@ python -m bioetl.main config show-settings [--format yaml|json]
 #### `config list-pipelines` — Список пайплайнов
 
 ```bash
-python -m bioetl.main config list-pipelines
+bioetl config list-pipelines
 ```
 
 ---
@@ -291,7 +291,7 @@ Dashboard для работы с проблемными записями.
 #### `quarantine inspect` — Просмотр записей
 
 ```bash
-python -m bioetl.main quarantine inspect --pipeline <NAME> [OPTIONS]
+bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -302,14 +302,14 @@ python -m bioetl.main quarantine inspect --pipeline <NAME> [OPTIONS]
 
 **Примеры:**
 ```bash
-python -m bioetl.main quarantine inspect --pipeline chembl_activity
-python -m bioetl.main quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
+bioetl quarantine inspect --pipeline chembl_activity
+bioetl quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
 ```
 
 #### `quarantine stats` — Статистика
 
 ```bash
-python -m bioetl.main quarantine stats --pipeline <NAME> [--json]
+bioetl quarantine stats --pipeline <NAME> [--json]
 ```
 
 Показывает: общее количество, распределение по кодам ошибок, статусы (NEW, REVIEWED, RESOLVED).
@@ -317,7 +317,7 @@ python -m bioetl.main quarantine stats --pipeline <NAME> [--json]
 #### `quarantine replay` — Повторная обработка
 
 ```bash
-python -m bioetl.main quarantine replay --pipeline <NAME> [OPTIONS]
+bioetl quarantine replay --pipeline <NAME> [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -330,7 +330,7 @@ python -m bioetl.main quarantine replay --pipeline <NAME> [OPTIONS]
 #### `quarantine purge` — Удаление старых записей
 
 ```bash
-python -m bioetl.main quarantine purge --pipeline <NAME> [OPTIONS]
+bioetl quarantine purge --pipeline <NAME> [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -342,7 +342,7 @@ python -m bioetl.main quarantine purge --pipeline <NAME> [OPTIONS]
 #### `quarantine resolve` — Пометить как решённое
 
 ```bash
-python -m bioetl.main quarantine resolve --pipeline <NAME> --payload-hash <HASH> [--status IGNORED|REPROCESSED]
+bioetl quarantine resolve --pipeline <NAME> --payload-hash <HASH> [--status IGNORED|REPROCESSED]
 ```
 
 ---
@@ -352,7 +352,7 @@ python -m bioetl.main quarantine resolve --pipeline <NAME> --payload-hash <HASH>
 #### `checkpoint list` — Список checkpoint
 
 ```bash
-python -m bioetl.main checkpoint list --pipeline <NAME>
+bioetl checkpoint list --pipeline <NAME>
 ```
 
 ---
@@ -362,7 +362,7 @@ python -m bioetl.main checkpoint list --pipeline <NAME>
 #### `health server` — HTTP health server
 
 ```bash
-python -m bioetl.main health server [--host 127.0.0.1] [--port 8080]
+bioetl health server [--host 127.0.0.1] [--port 8080]
 ```
 
 **Endpoints:**
@@ -374,16 +374,16 @@ python -m bioetl.main health server [--host 127.0.0.1] [--port 8080]
 #### `health check` — Проверка провайдеров
 
 ```bash
-python -m bioetl.main health check [--provider chembl] [--json]
+bioetl health check [--provider chembl] [--json]
 ```
 
 Проверяет connectivity и health всех или указанных провайдеров.
 
 **Примеры:**
 ```bash
-python -m bioetl.main health check
-python -m bioetl.main health check --provider chembl --provider pubchem
-python -m bioetl.main health check --json
+bioetl health check
+bioetl health check --provider chembl --provider pubchem
+bioetl health check --json
 ```
 
 ---
@@ -393,7 +393,7 @@ python -m bioetl.main health check --json
 #### `lock release` — Освобождение блокировки
 
 ```bash
-python -m bioetl.main lock release --pipeline <NAME> --run-id <UUID> [--exclusive]
+bioetl lock release --pipeline <NAME> --run-id <UUID> [--exclusive]
 ```
 
 > **Внимание:** Используйте только если уверены, что пайплайн не выполняется.
@@ -401,7 +401,7 @@ python -m bioetl.main lock release --pipeline <NAME> --run-id <UUID> [--exclusiv
 #### `lock check` — Проверка статуса блокировки
 
 ```bash
-python -m bioetl.main lock check --pipeline <NAME> --run-id <UUID>
+bioetl lock check --pipeline <NAME> --run-id <UUID>
 ```
 
 ---
@@ -411,7 +411,7 @@ python -m bioetl.main lock check --pipeline <NAME> --run-id <UUID>
 #### `maintenance vacuum` — VACUUM одной таблицы
 
 ```bash
-python -m bioetl.main maintenance vacuum <TABLE> [OPTIONS]
+bioetl maintenance vacuum <TABLE> [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -421,15 +421,15 @@ python -m bioetl.main maintenance vacuum <TABLE> [OPTIONS]
 
 **Примеры:**
 ```bash
-python -m bioetl.main maintenance vacuum chembl.activity
-python -m bioetl.main maintenance vacuum chembl.activity --dry-run
-python -m bioetl.main maintenance vacuum chembl.activity -r 30
+bioetl maintenance vacuum chembl.activity
+bioetl maintenance vacuum chembl.activity --dry-run
+bioetl maintenance vacuum chembl.activity -r 30
 ```
 
 #### `maintenance vacuum-all` — VACUUM всех таблиц
 
 ```bash
-python -m bioetl.main maintenance vacuum-all [OPTIONS]
+bioetl maintenance vacuum-all [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -441,13 +441,13 @@ python -m bioetl.main maintenance vacuum-all [OPTIONS]
 #### `maintenance archive` — Архивирование таблицы
 
 ```bash
-python -m bioetl.main maintenance archive <TABLE> <TARGET_PATH> [--remove-source]
+bioetl maintenance archive <TABLE> <TARGET_PATH> [--remove-source]
 ```
 
 #### `maintenance bronze-cleanup` — Очистка Bronze
 
 ```bash
-python -m bioetl.main maintenance bronze-cleanup [OPTIONS]
+bioetl maintenance bronze-cleanup [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
