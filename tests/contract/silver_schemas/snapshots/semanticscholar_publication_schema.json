@@ -220,7 +220,7 @@
     "description": "S2 Corpus ID",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "dblp_id": {
@@ -266,7 +266,7 @@
     "description": "Number of influential citations",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "is_oa": {
