@@ -139,11 +139,12 @@ class TestSchemaStability:
             "paper_id",  # Semantic Scholar
         ]
 
-        # Find primary key field
+        # Find primary key field (exclude ETL metadata fields starting with _)
         pk_candidates = [
             field
             for field in fields.keys()
             if any(field.endswith(pattern) for pattern in pk_patterns)
+            and not field.startswith("_")  # Exclude ETL metadata
         ]
 
         assert pk_candidates, (
