@@ -97,6 +97,7 @@ from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.shutdown import ShutdownPort
 from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
+
 __all__ = [
     "ActivityAggregatorPort",
     "AuditEntry",

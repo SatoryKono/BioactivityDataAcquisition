@@ -109,12 +109,8 @@ entity_cross_field_validations:
     condition: all_present
     error_message: "Publication must have OpenAlex ID and title"
 
-  - name: retracted_publication_warning
-    fields:
-      - is_retracted
-    condition: "is_retracted == true"
-    severity: warn
-    error_message: "Publication has been retracted"
+  # NOTE: retracted_publication_warning moved to conditional_validations
+  # (cross-field condition "is_retracted == true" was invalid syntax)
 
 # =============================================================================
 # Conditional Validations
