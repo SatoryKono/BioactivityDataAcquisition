@@ -221,7 +221,7 @@ class LoadingStrategy(StrEnum):
             ) from None
 
     @classmethod
-    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:
+    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:  # noqa: ARG003
         """Convert legacy force_full_scan flag to LoadingStrategy.
 
         Provides backward compatibility with existing configs using

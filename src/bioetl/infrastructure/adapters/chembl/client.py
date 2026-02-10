@@ -943,9 +943,7 @@ class ChemblAdapter(BaseHttpAdapter):
         # Iterate over cartesian product of batches to cover all combinations
         # ChEMBL API returns records matching ALL filters in the request (AND logic)
         for batch_combination in itertools.product(*filter_batches):
-            current_filters = {
-                k: v for k, v in zip(filter_keys, batch_combination, strict=True)
-            }
+            current_filters = dict(zip(filter_keys, batch_combination, strict=True))
             filter_params = self._build_filter_in_params(current_filters)
 
             offset = 0
