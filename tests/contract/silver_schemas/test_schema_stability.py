@@ -30,6 +30,8 @@ UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
+@pytest.mark.no_api
 class TestSchemaStability:
     """Snapshot tests for Silver schema field structure."""
 
@@ -162,17 +164,27 @@ class TestSchemaStability:
         """Silver schemas MUST have ETL metadata fields from ETLRecordSchema.
 
         Required metadata fields:
-        - _ingestion_timestamp: When record was ingested
+        - _ingestion_ts: When record was ingested (ISO 8601 timestamp)
         - _run_id: Pipeline run identifier
-        - _content_hash: Deduplication hash
+        - _run_type: Type of pipeline run (incremental/backfill/rebuild)
+        - _dq_warn: Data quality warning flag
+        - _dq_error: Data quality error flag
+        - _index: Sequential record index
+        - content_hash: SHA256 hash for deduplication
+        - entity_id: Unique business identifier
         """
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
         required_metadata = {
-            "_ingestion_timestamp": "Record ingestion timestamp",
+            "_ingestion_ts": "Record ingestion timestamp",
             "_run_id": "Pipeline run identifier for traceability",
-            "_content_hash": "SHA256 hash for deduplication (SCD Type 2)",
+            "_run_type": "Type of pipeline run",
+            "_dq_warn": "Data quality warning flag",
+            "_dq_error": "Data quality error flag",
+            "_index": "Sequential record index",
+            "content_hash": "SHA256 hash for deduplication (SCD Type 2)",
+            "entity_id": "Unique business identifier",
         }
 
         for meta_field, description in required_metadata.items():
@@ -190,6 +202,7 @@ class TestSchemaStability:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestSchemaDocumentation:
     """Tests ensuring Silver schemas have proper documentation."""
 

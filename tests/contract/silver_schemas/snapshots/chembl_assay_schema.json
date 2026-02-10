@@ -1,0 +1,470 @@
+{
+  "_dq_error": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality errors.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_dq_warn": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality warnings.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_index": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Sequential index of the record in the pipeline run.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_ingestion_ts": {
+    "checks": [
+      {
+        "name": "str_matches"
+      }
+    ],
+    "coerce": false,
+    "description": "Timestamp when the record was ingested (UTC, ISO 8601 format).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Correlation ID for the pipeline run.",
+    "dtype": "object",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Type of pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_source_batch_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Batch context ID from the source.",
+    "dtype": "object",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "aidx": {
+    "checks": [],
+    "coerce": false,
+    "description": "Assay index.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_category": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Assay category.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_cell_type": {
+    "checks": [],
+    "coerce": false,
+    "description": "Cell type.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_chembl_id": {
+    "checks": [
+      {
+        "name": "str_matches"
+      }
+    ],
+    "coerce": false,
+    "description": "ChEMBL ID.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "assay_classifications": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of assay classifications.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_group": {
+    "checks": [],
+    "coerce": false,
+    "description": "Assay group.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_organism": {
+    "checks": [],
+    "coerce": false,
+    "description": "Organism.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_parameters": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of assay parameters.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_pref_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Preferred name.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_strain": {
+    "checks": [],
+    "coerce": false,
+    "description": "Strain.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_subcellular_fraction": {
+    "checks": [],
+    "coerce": false,
+    "description": "Subcellular fraction.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_taxonomy_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "NCBI Taxonomy ID. Standardized name (was assay_tax_id).",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_test_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Assay test type.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_tissue": {
+    "checks": [],
+    "coerce": false,
+    "description": "Tissue.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "assay_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Assay type.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bao_format": {
+    "checks": [
+      {
+        "name": "str_matches"
+      }
+    ],
+    "coerce": false,
+    "description": "BAO format.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "bao_label": {
+    "checks": [],
+    "coerce": false,
+    "description": "BAO label.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cell_chembl_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "FK to cell_line.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "confidence_description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Confidence description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "confidence_score": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
+    "coerce": false,
+    "description": "Confidence score.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "content_hash": {
+    "checks": [
+      {
+        "name": "str_matches"
+      }
+    ],
+    "coerce": false,
+    "description": "SHA256 hash of canonical record representation (64 hex chars).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Assay description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "document_chembl_id": {
+    "checks": [
+      {
+        "name": "str_matches"
+      }
+    ],
+    "coerce": false,
+    "description": "Document ChEMBL ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "entity_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Unique business identifier for the entity.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "relationship_description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Relationship description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "relationship_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Relationship type.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "score": {
+    "checks": [],
+    "coerce": false,
+    "description": "Score.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "src_assay_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Source Assay ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "src_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Source ID.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_chembl_id": {
+    "checks": [
+      {
+        "name": "str_matches"
+      }
+    ],
+    "coerce": false,
+    "description": "Target ChEMBL ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "tissue_chembl_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "FK to tissue.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "variant_accession": {
+    "checks": [],
+    "coerce": false,
+    "description": "",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "variant_isoform": {
+    "checks": [],
+    "coerce": false,
+    "description": "",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "variant_mutation": {
+    "checks": [],
+    "coerce": false,
+    "description": "",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "variant_organism": {
+    "checks": [],
+    "coerce": false,
+    "description": "",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "variant_sequence": {
+    "checks": [],
+    "coerce": false,
+    "description": "",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "variant_sequence_json": {
+    "checks": [],
+    "coerce": false,
+    "description": "",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "variant_taxonomy_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Variant taxonomy ID. Standardized name (was variant_tax_id).",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  }
+}

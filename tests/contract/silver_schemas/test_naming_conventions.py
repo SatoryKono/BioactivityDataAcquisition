@@ -21,6 +21,7 @@ from tests.contract.silver_schemas.conftest import (
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestFieldNaming:
     """Tests for field naming consistency."""
 
@@ -163,6 +164,7 @@ class TestFieldNaming:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestMetadataFieldNaming:
     """Tests for ETL metadata field naming."""
 
@@ -198,6 +200,7 @@ class TestMetadataFieldNaming:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestForeignKeyNaming:
     """Tests for foreign key field naming consistency."""
 
@@ -274,6 +277,7 @@ class TestForeignKeyNaming:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestCrossProviderNaming:
     """Tests for naming consistency across providers."""
 
@@ -369,6 +373,7 @@ class TestCrossProviderNaming:
 
 
 @pytest.mark.contracts
+@pytest.mark.no_api
 class TestDeprecatedFieldNames:
     """Tests for detecting deprecated field names."""
 
