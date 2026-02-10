@@ -325,12 +325,12 @@ class TestValidationConsistency:
         # Check consistency
         if len(year_ranges) > 1:
             ge_values = {
-                name: r.get("ge")
+                name: ranges["ge"]
                 for name, ranges in year_ranges.items()
                 if "ge" in ranges
             }
             le_values = {
-                name: r.get("le")
+                name: ranges["le"]
                 for name, ranges in year_ranges.items()
                 if "le" in ranges
             }

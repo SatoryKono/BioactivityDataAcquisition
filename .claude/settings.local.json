@@ -78,7 +78,9 @@
       "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" log --oneline --follow -- \"docs/02-architecture/decisions/ADR-032-unified-http-client.md\")",
       "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" log --oneline --follow -- \"docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md\")",
       "Bash(VCR_RECORD_MODE=new_episodes python -m pytest:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git commit:*)"
     ]
   },
   "enabledPlugins": {
