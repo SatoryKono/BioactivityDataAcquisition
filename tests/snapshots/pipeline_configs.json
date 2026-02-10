@@ -115,7 +115,7 @@
     },
     "entity_type": "activity",
     "fields": [],
-    "force_full_scan": false,
+    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [
         {
@@ -177,7 +177,7 @@
     },
     "gold_table": "chembl_activity",
     "gold_write_mode": "overwrite",
-    "loading_strategy": "watermark_based",
+    "loading_strategy": "full_scan_only",
     "on_schema_mismatch": "evolve",
     "partition_cols": [],
     "pipeline_name": "chembl_activity",
@@ -438,7 +438,7 @@
     },
     "entity_type": "compound",
     "fields": [],
-    "force_full_scan": false,
+    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
@@ -452,7 +452,7 @@
     },
     "gold_table": "pubchem_compound",
     "gold_write_mode": "overwrite",
-    "loading_strategy": "watermark_based",
+    "loading_strategy": "full_scan_only",
     "on_schema_mismatch": "evolve",
     "partition_cols": [],
     "pipeline_name": "pubchem_compound",
@@ -819,7 +819,7 @@
     },
     "entity_type": "protein",
     "fields": [],
-    "force_full_scan": false,
+    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [
         {
@@ -842,7 +842,7 @@
     },
     "gold_table": "uniprot_protein",
     "gold_write_mode": "overwrite",
-    "loading_strategy": "watermark_based",
+    "loading_strategy": "full_scan_only",
     "on_schema_mismatch": "evolve",
     "partition_cols": [],
     "pipeline_name": "uniprot_protein",
