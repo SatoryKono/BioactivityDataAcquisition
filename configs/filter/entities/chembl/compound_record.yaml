@@ -7,7 +7,7 @@
 
 version: "1.0.0"
 provider: chembl
-entity: д
+entity: compound_record
 
 # -----------------------------------------------------------------------------
 # Input Filter
