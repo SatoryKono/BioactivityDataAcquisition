@@ -117,6 +117,14 @@ class TestFieldNaming:
             "rmsd",
             "tldr",
             "mw",
+            "ts",  # timestamp
+            "h",  # hydrogen (chemistry context)
+            "x",  # x-axis coordinate
+            "y",  # y-axis coordinate
+            "z",  # z-axis coordinate
+            "nlm",  # National Library of Medicine
+            "pgn",  # page number
+            "dblp",  # Digital Bibliography & Library Project
         }
 
         # Extract potential abbreviations (short lowercase words without vowels)

@@ -34,7 +34,8 @@
   "_ingestion_ts": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
       }
     ],
     "coerce": false,
@@ -48,7 +49,7 @@
     "checks": [],
     "coerce": false,
     "description": "Correlation ID for the pipeline run.",
-    "dtype": "object",
+    "dtype": "str",
     "nullable": false,
     "required": true,
     "unique": false
@@ -71,7 +72,7 @@
     "checks": [],
     "coerce": false,
     "description": "Batch context ID from the source.",
-    "dtype": "object",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -79,7 +80,7 @@
   "action_type_action_type": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Action type classification.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -88,7 +89,7 @@
   "action_type_description": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Action type description.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -97,7 +98,7 @@
   "action_type_parent_type": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Parent action type category.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -133,7 +134,8 @@
   "assay_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -146,7 +148,7 @@
   "assay_description": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Assay description text.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -155,7 +157,7 @@
   "assay_type": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Assay type (B/F/A/T/P/U).",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -164,7 +166,7 @@
   "assay_variant_accession": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Assay variant protein accession.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -173,7 +175,7 @@
   "assay_variant_mutation": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Assay variant mutation description.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -182,7 +184,8 @@
   "bao_endpoint": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^BAO:\\d+$"
       }
     ],
     "coerce": false,
@@ -195,7 +198,7 @@
   "bao_format": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "BioAssay Ontology format ID.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -204,7 +207,7 @@
   "bao_label": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "BioAssay Ontology label.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -213,7 +216,7 @@
   "canonical_smiles": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Canonical SMILES of molecule.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -222,7 +225,8 @@
   "content_hash": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
       }
     ],
     "coerce": false,
@@ -258,7 +262,8 @@
   "document_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -271,16 +276,25 @@
   "document_journal": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Publication journal name.",
     "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
   },
   "document_year": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
     "coerce": false,
-    "description": "",
+    "description": "Publication year.",
     "dtype": "int64",
     "nullable": true,
     "required": false,
@@ -298,7 +312,7 @@
   "ligand_efficiency_bei": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Binding Efficiency Index (BEI).",
     "dtype": "float64",
     "nullable": true,
     "required": false,
@@ -307,7 +321,7 @@
   "ligand_efficiency_le": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Ligand Efficiency (LE).",
     "dtype": "float64",
     "nullable": true,
     "required": false,
@@ -316,7 +330,7 @@
   "ligand_efficiency_lle": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Lipophilic Ligand Efficiency (LLE).",
     "dtype": "float64",
     "nullable": true,
     "required": false,
@@ -325,7 +339,7 @@
   "ligand_efficiency_sei": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Surface Efficiency Index (SEI).",
     "dtype": "float64",
     "nullable": true,
     "required": false,
@@ -348,7 +362,8 @@
   "molecule_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -361,7 +376,7 @@
   "molecule_pref_name": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Molecule preferred name.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -379,7 +394,7 @@
   "parent_molecule_chembl_id": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Parent molecule ChEMBL ID.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -539,7 +554,8 @@
   "target_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -552,7 +568,7 @@
   "target_organism": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Target organism.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -561,7 +577,7 @@
   "target_pref_name": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Target preferred name.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -615,7 +631,8 @@
   "uo_units": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^UO:\\d+$"
       }
     ],
     "coerce": false,

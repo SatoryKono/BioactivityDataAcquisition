@@ -34,7 +34,8 @@
   "_ingestion_ts": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
       }
     ],
     "coerce": false,
@@ -48,7 +49,7 @@
     "checks": [],
     "coerce": false,
     "description": "Correlation ID for the pipeline run.",
-    "dtype": "object",
+    "dtype": "str",
     "nullable": false,
     "required": true,
     "unique": false
@@ -71,7 +72,7 @@
     "checks": [],
     "coerce": false,
     "description": "Batch context ID from the source.",
-    "dtype": "object",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
@@ -111,7 +112,8 @@
   "assay_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -233,7 +235,8 @@
   "bao_format": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^BAO:\\d+$"
       }
     ],
     "coerce": false,
@@ -291,7 +294,8 @@
   "content_hash": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
       }
     ],
     "coerce": false,
@@ -313,7 +317,8 @@
   "document_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -385,7 +390,8 @@
   "target_chembl_id": {
     "checks": [
       {
-        "name": "str_matches"
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
       }
     ],
     "coerce": false,
@@ -407,7 +413,7 @@
   "variant_accession": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Variant protein accession number.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -416,7 +422,7 @@
   "variant_isoform": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Variant isoform identifier.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -425,7 +431,7 @@
   "variant_mutation": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Variant mutation description.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -434,7 +440,7 @@
   "variant_organism": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Variant organism name.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -443,7 +449,7 @@
   "variant_sequence": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "Variant amino acid sequence.",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -452,7 +458,7 @@
   "variant_sequence_json": {
     "checks": [],
     "coerce": false,
-    "description": "",
+    "description": "JSON string of variant sequence details.",
     "dtype": "str",
     "nullable": true,
     "required": false,
