@@ -80,6 +80,7 @@ class TestFileSizeLimits:
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Domain registry exemptions
+        "publication_type_classification.py": 1650,  # 1644 LOC - Publication type classification taxonomy (Level 1/2/3 mapping tables + classify_publication_type)
         "publication.py": 340,  # 331 LOC - Publication entity mapping registry with composite key support
         "publication_field_groups.py": 430,  # 424 LOC - Field-to-group mapping for composite publication pipeline (ADR-026)
         "field_groups.py": 400,  # 392 LOC - FieldGroupRegistry domain models with FieldMapping/FieldGroupDefinition (ADR-026)
@@ -109,7 +110,7 @@ class TestFileSizeLimits:
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 1005,  # 1003 LOC - Silver PyArrow schemas + SubcellularFraction schema
-        "client.py": 1125,  # 1123 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication + extraction_params ADR-028), CrossRefAdapter (DOI→title fallback)
+        "client.py": 1175,  # 1169 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication + extraction_params ADR-028), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups + extraction_params + DQ severity/max_length/not_null
         "composite_config.py": 705,  # 699 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields
@@ -305,6 +306,8 @@ class TestFunctionComplexity:
         # Application dependency coordinator key extraction
         "_get_effective_keys": 18,  # CC=17 - Chained dependency key extraction with multiple source types
         "_apply_dependency_joins": 13,  # CC=12 - Dependency join logic with multiple join strategies
+        # Publication type classification (domain taxonomy mapping)
+        "classify_publication_type": 10,  # CC=9 - Publication type classification with multi-level taxonomy lookup
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -655,11 +658,11 @@ class TestClassSize:
         "OpenAlexAdapter": 720,  # 670 lines - FilterableDataSourcePort + APIRequestCollector + fallback handler + title search for composite pipelines
         "PubMedAdapter": 545,  # 540 lines - FilterableDataSourcePort + APIRequestCollector + TitleFallbackHandler
         # ChEMBL adapter with complex FilterableDataSourcePort
-        "ChemblAdapter": 1040,  # 1037 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection + extraction_params (ADR-028)
+        "ChemblAdapter": 1090,  # 1081 lines - FilterableDataSourcePort + health-aware batching + pagination + composite key deduplication + 500 error detection + extraction_params (ADR-028)
         # Common adapter base classes
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction
-        "PubMedPublicationTransformer": 670,  # PubMed XML extraction with date/identifier validation + author extractor + unified field names
+        "PubMedPublicationTransformer": 700,  # 691 lines - PubMed XML extraction with date/identifier validation + author extractor + unified field names + publication type classification
         # PubChem adapter fetch strategies
         "PubChemFetchStrategies": 310,  # 308 lines - PubChem fetch strategies with SMILES, CID, InChIKey support
         # UniProt extraction helper classes

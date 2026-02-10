@@ -53,6 +53,9 @@ def valid_base_record() -> dict:
         "publication_year": 2024,
         "publication_date": "2024-06-15",
         "publication_type": "PUBLICATION",
+        "publication_type_unified": None,
+        "publication_subclass": None,
+        "publication_class": None,
         "language": "en",
         # === Pagination (unified field names) ===
         "page_first": "1",

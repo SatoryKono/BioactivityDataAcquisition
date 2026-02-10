@@ -173,6 +173,7 @@ composite:
       # === Compound record metadata (from dependency) ===
       - name: compound_record
         fields:
+          - record_id
           - compound_key
           - compound_name
           - src_compound_id

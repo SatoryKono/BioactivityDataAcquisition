@@ -478,7 +478,7 @@ class TestCrossRefPublicationEntity:
         )
         assert publication.doi == "10.1234/test.article"
         assert publication._source == "crossref"
-        assert publication.publication_type == "PUBLICATION"
+        assert publication.publication_type is None
 
     def test_publication_with_all_optional_fields(self, base_entity_kwargs):
         """Test CrossRefPublicationEntity with all optional fields."""
