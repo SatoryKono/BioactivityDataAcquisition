@@ -130,7 +130,7 @@ flowchart TB
     E1["Safety Guard<br/>(validate lock)"]
     E2["Delta Lake Write<br/>(Silver)"]
     E3["Gold Transform<br/>(exclude JSON fields)"]
-    E4["Delta Lake Write<br/>(Gold)"]
+    E4["Delta Lake Write<br/>(Gold)<br/><i>skipped if skip_gold=True</i>"]
   end
 
   subgraph Finalize

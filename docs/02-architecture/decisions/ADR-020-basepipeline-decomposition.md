@@ -87,6 +87,7 @@ class RuntimeConfig:
     run_type: RunType
     resume: bool = False
     limit: int | None = None
+    skip_gold: bool = False  # Skip Gold writes (composite sub-pipelines)
 ```
 
 #### PipelineServices (immutable dataclass with lifecycle)

@@ -236,6 +236,33 @@ def _extract_multi_filter_ids(
     return result
 
 
+def _resolve_bronze_opts(
+    runtime: CompositeRuntimeConfig,
+    phase_override: bool | None,
+) -> dict[str, object]:
+    """Resolve cached Bronze options for a specific pipeline phase.
+
+    Tri-state resolution: phase_override takes precedence over master switch.
+    - None: use master switch (runtime.use_cached_bronze)
+    - True/False: override master switch
+
+    Args:
+        runtime: Composite runtime configuration with master switch.
+        phase_override: Per-phase override (None=follow master).
+
+    Returns:
+        Dict with use_cached_bronze, cached_bronze_path, cached_bronze_date.
+    """
+    effective = (
+        phase_override if phase_override is not None else runtime.use_cached_bronze
+    )
+    return {
+        "use_cached_bronze": effective,
+        "cached_bronze_path": runtime.cached_bronze_path if effective else None,
+        "cached_bronze_date": runtime.cached_bronze_date if effective else None,
+    }
+
+
 def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
@@ -276,12 +303,14 @@ def bootstrap_composite_runner(
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
 
-    # Shared cached bronze RunOptions kwargs for all runner factories
-    _bronze_opts: dict[str, object] = {
-        "use_cached_bronze": runtime.use_cached_bronze,
-        "cached_bronze_path": runtime.cached_bronze_path,
-        "cached_bronze_date": runtime.cached_bronze_date,
-    }
+    # Per-phase cached bronze RunOptions kwargs
+    _seed_bronze_opts = _resolve_bronze_opts(runtime, phase_override=None)
+    _enricher_bronze_opts = _resolve_bronze_opts(
+        runtime, phase_override=runtime.cached_bronze_enrichers
+    )
+    _dependency_bronze_opts = _resolve_bronze_opts(
+        runtime, phase_override=runtime.cached_bronze_dependencies
+    )
 
     def seed_runner_factory() -> PipelineRunner:
         """Create PipelineRunner for the seed phase."""
@@ -289,7 +318,7 @@ def bootstrap_composite_runner(
             run_type="incremental",
             limit=runtime.seed_limit,
             skip_gold=True,
-            **_bronze_opts,  # type: ignore[arg-type]
+            **_seed_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline_runner(ctx)
@@ -338,7 +367,7 @@ def bootstrap_composite_runner(
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
-            **_bronze_opts,  # type: ignore[arg-type]
+            **_enricher_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
