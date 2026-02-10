@@ -15,7 +15,11 @@ from bioetl.domain.schemas.constants import (
     MOLECULE_TYPES,
     STRUCTURE_TYPES,
 )
-from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
+from bioetl.domain.validation import (
+    INCHI_KEY_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 
 class MoleculeSchema(ETLRecordSchema):
@@ -130,7 +134,10 @@ class MoleculeSchema(ETLRecordSchema):
         nullable=True, isin=[-2, -1, 0, 1, 2], description="Availability type."
     )
     usan_year: Series[int] | None = pa.Field(
-        nullable=True, description="USAN approval year."
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="USAN approval year.",
     )
     usan_stem: Series[str] | None = pa.Field(
         nullable=True, description="USAN stem name."
