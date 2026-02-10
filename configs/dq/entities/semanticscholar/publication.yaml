@@ -38,6 +38,12 @@ entity_field_validations:
     error_message: "Title must not exceed 2000 characters"
 
   - field: title
+    type: not_null
+    nullable: true
+    severity: warn
+    error_message: "Missing title — record will be filtered before Gold"
+
+  - field: title
     type: pattern
     pattern: '\S'
     nullable: true
@@ -91,4 +97,13 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+entity_conditional_validations:
+  - name: journal_article_requires_title
+    condition_field: publication_type
+    condition_value: JournalArticle
+    condition_operator: eq
+    then_validations:
+      - field: title
+        type: not_null
+        nullable: false
+        error_message: "Journal articles must have a title"

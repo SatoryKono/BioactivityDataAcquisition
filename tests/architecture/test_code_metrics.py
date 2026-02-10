@@ -50,7 +50,7 @@ class TestFileSizeLimits:
         "context.py": 385,  # 380 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
-        "config_types.py": 445,  # 440 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
+        "config_types.py": 450,  # 446 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
         "exceptions.py": 550,  # 513 LOC
         # Domain exceptions module reorganization (refactoring into logical categories)
         "infrastructure.py": 640,  # 632 LOC - InfrastructureErrors (storage, filesystem, environment)
@@ -111,7 +111,7 @@ class TestFileSizeLimits:
         "silver.py": 1005,  # 1003 LOC - Silver PyArrow schemas + SubcellularFraction schema
         "client.py": 1125,  # 1123 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication + extraction_params ADR-028), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
-        "pipeline_config.py": 1100,  # 1098 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups + extraction_params
+        "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups + extraction_params + DQ severity/max_length/not_null
         "composite_config.py": 705,  # 699 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
