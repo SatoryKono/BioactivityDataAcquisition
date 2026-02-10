@@ -84,13 +84,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     page_first: Series[str] = pa.Field(nullable=True, description="First page.")
     page_last: Series[str] = pa.Field(nullable=True, description="Last page.")
 
-    # === DQ Fields ===
-    _dq_warn: Series[pd.BooleanDtype] = pa.Field(
-        nullable=True, default=False, description="DQ warning flag."
-    )
-    _dq_error: Series[pd.BooleanDtype] = pa.Field(
-        nullable=True, default=False, description="DQ error flag."
-    )
+    # DQ fields (_dq_warn, _dq_error) inherited from ETLRecordSchema as bool, nullable=False
 
     class Config:
         """Pandera configuration."""
