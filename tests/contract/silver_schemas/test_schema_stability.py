@@ -116,49 +116,31 @@ class TestSchemaStability:
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_primary_key_field_exists(self, schema_name: str) -> None:
-        """Each Silver schema MUST have an identifiable primary key field.
+        """Each Silver schema MUST have entity_id as the base primary key.
 
-        Primary key conventions:
-        - ChEMBL: {entity}_chembl_id or {entity}_id
-        - PubChem: cid
-        - UniProt: accession or entry
-        - Publications: pmid, doi, openalex_id, paper_id, document_chembl_id
+        All schemas inherit from ETLRecordSchema which defines entity_id as
+        the primary business key. This test verifies:
+        1. entity_id field exists
+        2. entity_id is non-nullable (required=True, nullable=False)
+
+        NOTE: Other fields ending in _id or _chembl_id are typically foreign keys
+        or alternate identifiers, not primary keys. The actual PK is entity_id.
         """
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
-        # Define expected PK patterns
-        pk_patterns = [
-            "_id",  # activity_id, molecule_chembl_id, etc.
-            "_chembl_id",
-            "cid",  # PubChem
-            "accession",  # UniProt
-            "pmid",  # PubMed
-            "doi",  # CrossRef
-            "openalex_id",  # OpenAlex
-            "paper_id",  # Semantic Scholar
-        ]
-
-        # Find primary key field (exclude ETL metadata fields starting with _)
-        pk_candidates = [
-            field
-            for field in fields.keys()
-            if any(field.endswith(pattern) for pattern in pk_patterns)
-            and not field.startswith("_")  # Exclude ETL metadata
-        ]
-
-        assert pk_candidates, (
-            f"{schema_name}: No primary key field found.\n"
-            f"Available fields: {sorted(fields.keys())}\n"
-            f"Expected patterns: {pk_patterns}"
+        # Check entity_id exists (base PK from ETLRecordSchema)
+        assert "entity_id" in fields, (
+            f"{schema_name}: Missing entity_id field.\n"
+            "All schemas MUST inherit from ETLRecordSchema which defines entity_id."
         )
 
-        # Primary key MUST NOT be nullable
-        for pk_field in pk_candidates:
-            if fields[pk_field]["nullable"]:
-                pytest.fail(
-                    f"{schema_name}.{pk_field}: Primary key MUST NOT be nullable"
-                )
+        # entity_id MUST NOT be nullable
+        if fields["entity_id"]["nullable"]:
+            pytest.fail(
+                f"{schema_name}.entity_id: Primary key MUST NOT be nullable.\n"
+                "ETLRecordSchema defines entity_id with nullable=False."
+            )
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_etl_metadata_fields_present(self, schema_name: str) -> None:
