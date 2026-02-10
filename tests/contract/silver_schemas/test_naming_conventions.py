@@ -125,6 +125,10 @@ class TestFieldNaming:
             "nlm",  # National Library of Medicine
             "pgn",  # page number
             "dblp",  # Digital Bibliography & Library Project
+            "cl",  # cell line
+            "mwt",  # molecular weight
+            "hbd",  # hydrogen bond donor
+            "by",  # part of "replaced_by"
         }
 
         # Extract potential abbreviations (short lowercase words without vowels)

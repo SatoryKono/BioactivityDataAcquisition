@@ -200,11 +200,18 @@ class TestFieldTypes:
             "potential_duplicate",
             "standard_flag",
         }
+        # Fields with boolean-like keywords but are NOT booleans
+        non_boolean_fields = {
+            "data_validity_comment",  # Text field describing validity
+            "data_validity_description",  # Text description
+            "hierarchy_active_chembl_id",  # ID field, not boolean
+            "flag",  # Text field in uniprot_protein
+        }
         non_bool_booleans = []
         for field, dtype in likely_boolean_fields:
             if "bool" in dtype.lower():
                 continue
-            if field in allowed_int_flags:
+            if field in allowed_int_flags or field in non_boolean_fields:
                 continue
             checks = fields.get(field, {}).get("checks", [])
             has_flag_isin = any(check.get("type") == "isin" for check in checks)
