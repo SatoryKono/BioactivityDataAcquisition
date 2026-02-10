@@ -443,7 +443,6 @@ class PipelineConfig:
     # Loading strategy (ADR-031)
     # Explicit formalization of data loading approach.
     # - FULL_SCAN_ONLY: Each run performs full scan, checkpoint resume disabled
-    # - WATERMARK_BASED: Incremental loading via watermark (placeholder, not implemented)
     # If not specified, derived from force_full_scan for backward compatibility.
     loading_strategy: LoadingStrategy | str | None = None
 

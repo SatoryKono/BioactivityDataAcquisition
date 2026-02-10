@@ -255,8 +255,6 @@ from bioetl.domain.ports import (
     TracingPort,
     UnitConverterPort,
     ValueValidatorPort,
-    WatermarkStrategyPort,
-    NoOpWatermarkStrategy,
 )
 
 # Resilience (domain value objects)
@@ -538,8 +536,6 @@ __all__ = [
     "TracingPort",
     "UnitConverterPort",
     "ValueValidatorPort",
-    "WatermarkStrategyPort",
-    "NoOpWatermarkStrategy",
     # Registry (publication entity types, ADR-024)
     "LEGACY_PUBLICATION_ALIASES",
     "PUBLICATION_ENTITY_TYPES",

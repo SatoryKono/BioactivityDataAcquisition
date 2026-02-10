@@ -287,8 +287,6 @@ class SourceMetadata(BaseModel):
         file_path: File path for file sources.
         query_string: Query string used for data source filtering
             (e.g., 'assay_type=B&standard_type=IC50').
-        watermark_before: Previous watermark timestamp.
-        watermark_after: New watermark timestamp after ingestion.
         api_version: Provider API version.
         api_requests: List of detailed API request information.
         total_requests: Total number of API requests made.
@@ -304,12 +302,6 @@ class SourceMetadata(BaseModel):
     query_string: str | None = Field(
         default=None,
         description="Query string used for data source filtering (e.g., 'assay_type=B')",
-    )
-    watermark_before: datetime | None = Field(
-        default=None, description="Previous watermark"
-    )
-    watermark_after: datetime | None = Field(
-        default=None, description="New watermark after ingestion"
     )
     api_version: str | None = Field(default=None, description="Provider API version")
     api_requests: list[APIRequestDetails] = Field(
