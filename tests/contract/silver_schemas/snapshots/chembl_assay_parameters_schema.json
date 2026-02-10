@@ -170,9 +170,14 @@
     "unique": false
   },
   "standard_type": {
-    "checks": [],
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
     "coerce": true,
-    "description": "Standardized type.",
+    "description": "Standardized type (IC50, EC50, CONC, PH, TEMP, etc.).",
     "dtype": "str",
     "nullable": true,
     "required": false,

@@ -76,7 +76,8 @@ class AssayParametersSchema(ETLRecordSchema):
     standard_type: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
-        description="Standardized type.",
+        isin=list(ASSAY_PARAMETER_STANDARD_TYPES),
+        description="Standardized type (IC50, EC50, CONC, PH, TEMP, etc.).",
     )
     standard_relation: Series[str] | None = pa.Field(
         nullable=True,
