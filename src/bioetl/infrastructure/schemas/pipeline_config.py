@@ -188,10 +188,12 @@ class DQConfig(BaseModel):
                 field=fv.field,
                 validation_type=fv.type,
                 nullable=fv.nullable,
+                severity=fv.severity,
                 min_value=fv.min,
                 max_value=fv.max,
                 pattern=fv.pattern,
                 allowed=tuple(fv.allowed),
+                max_length=fv.max_length,
                 validator=fv.validator,
                 error_message=fv.error_message,
             )
