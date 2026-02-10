@@ -73,7 +73,8 @@
       "Bash(dir:*)",
       "Bash(git stash pop:*)",
       "Bash(git stash drop:*)",
-      "Bash(pushd:*)"
+      "Bash(pushd:*)",
+      "Bash(Select-String \"passed|failed|error\")"
     ]
   },
   "enabledPlugins": {
