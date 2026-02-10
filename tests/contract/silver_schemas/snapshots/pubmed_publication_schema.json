@@ -146,7 +146,7 @@
     "description": "Number of authors",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "author_orcids": {
@@ -190,7 +190,7 @@
     "description": "Number of chemicals",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "chemicals": {
@@ -331,7 +331,7 @@
     "description": "Number of grants",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "is_oa": {
@@ -407,7 +407,7 @@
     "description": "Number of keywords",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "language": {
@@ -443,7 +443,7 @@
     "description": "Number of MeSH headings",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "mid": {
@@ -541,7 +541,7 @@
     "description": "Publication day",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "pub_month": {
@@ -554,7 +554,7 @@
     "description": "Publication month",
     "dtype": "Int64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "publication_class": {

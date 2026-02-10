@@ -225,7 +225,7 @@
     "description": "Field-Weighted Citation Impact (must be non-negative)",
     "dtype": "float64",
     "nullable": true,
-    "required": true,
+    "required": false,
     "unique": false
   },
   "grants": {

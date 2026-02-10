@@ -137,7 +137,7 @@
     ],
     "coerce": false,
     "description": "PubChem Compound ID (PK)",
-    "dtype": "int64",
+    "dtype": "str",
     "nullable": false,
     "required": true,
     "unique": false
