@@ -116,26 +116,33 @@ class FieldValidation:
 
     Supports multiple validation types:
     - required: Field must be present and non-null
+    - not_null: Field should not be null (typically used with severity=warn)
     - range: Numeric range validation (min/max)
     - pattern: Regex pattern matching
     - enum: Allowed values validation
+    - max_length: Maximum string length validation
     - custom: Custom validator function reference
 
     Attributes:
         field: Field name to validate.
-        validation_type: Type of validation (required, range, pattern, enum, custom).
+        validation_type: Type of validation.
         nullable: Whether field can be null/None. Default: True.
+        severity: Severity level (error or warn). Default: error.
         min_value: Minimum value for range validation.
         max_value: Maximum value for range validation.
         pattern: Regex pattern for pattern validation.
         allowed: Allowed values for enum validation.
+        max_length: Maximum string length for max_length validation.
         validator: Validator function name for custom validation.
         error_message: Custom error message template.
     """
 
     field: str
-    validation_type: Literal["required", "range", "pattern", "enum", "custom"]
+    validation_type: Literal[
+        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+    ]
     nullable: bool = True
+    severity: Literal["error", "warn"] = "error"
     # Range validation
     min_value: float | None = None
     max_value: float | None = None
@@ -143,6 +150,8 @@ class FieldValidation:
     pattern: str | None = None
     # Enum validation
     allowed: tuple[str, ...] = ()
+    # Max length validation
+    max_length: int | None = None
     # Custom validation
     validator: str | None = None
     # Custom error message

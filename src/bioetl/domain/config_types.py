@@ -165,12 +165,16 @@ class FieldValidationDict(TypedDict, total=False):
     """YAML structure for field validation rule."""
 
     field: Required[str]
-    type: Required[Literal["required", "range", "pattern", "enum", "custom"]]
+    type: Required[
+        Literal["required", "not_null", "range", "pattern", "enum", "max_length", "custom"]
+    ]
     nullable: bool
+    severity: Literal["error", "warn"]
     min: float
     max: float
     pattern: str
     allowed: list[str]
+    max_length: int
     validator: str
     error_message: str
 
