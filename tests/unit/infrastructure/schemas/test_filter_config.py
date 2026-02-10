@@ -99,7 +99,7 @@ class TestExtractionParamsToDomain:
     """Tests for to_domain() with extraction_params."""
 
     def test_to_domain_returns_extraction_params(self) -> None:
-        """to_domain() should return ExtractionParams as third element."""
+        """to_domain() should return ExtractionParams as fourth element."""
         config = FilterConfigFile.model_validate(
             {
                 "extraction_params": {
@@ -109,7 +109,9 @@ class TestExtractionParamsToDomain:
             }
         )
 
-        input_filter, gold_filters, extraction_params = config.to_domain()
+        input_filter, silver_filters, gold_filters, extraction_params = (
+            config.to_domain()
+        )
 
         assert isinstance(extraction_params, ExtractionParams)
         assert extraction_params.params == {
@@ -121,15 +123,17 @@ class TestExtractionParamsToDomain:
         """to_domain() with no extraction_params should return empty ExtractionParams."""
         config = FilterConfigFile()
 
-        input_filter, gold_filters, extraction_params = config.to_domain()
+        input_filter, silver_filters, gold_filters, extraction_params = (
+            config.to_domain()
+        )
 
         assert isinstance(extraction_params, ExtractionParams)
         assert extraction_params.is_empty
         assert extraction_params.params == {}
 
-    def test_to_domain_returns_three_tuple(self) -> None:
-        """to_domain() should return a 3-tuple."""
+    def test_to_domain_returns_four_tuple(self) -> None:
+        """to_domain() should return a 4-tuple."""
         config = FilterConfigFile()
         result = config.to_domain()
 
-        assert len(result) == 3
+        assert len(result) == 4
