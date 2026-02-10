@@ -100,10 +100,12 @@ class TestFieldTypes:
             "cell_source_taxonomy_id",
             "component_id",
             "component_ids",
+            "corpus_id",  # Semantic Scholar internal corpus ID
             "doc_1",
             "doc_2",
             "organism_id",
             "original_activity_id",
+            "parent_id",  # Protein class parent ID - internal hierarchy
             "protein_class_id",
             "protein_classification_id",
             "protein_classification_ids",
@@ -115,6 +117,7 @@ class TestFieldTypes:
             "targcomp_id",
             "taxonomy_id",
             "tid",
+            "toid",  # Target organism ID - ChEMBL numeric taxonomy ID
             "variant_taxonomy_id",
         }
         id_fields = [
@@ -241,9 +244,20 @@ class TestDatetimeFields:
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_timestamp_fields_use_datetime(self, schema_name: str) -> None:
-        """Timestamp fields MUST use datetime64[ns] dtype."""
+        """Timestamp fields MUST use datetime64[ns] dtype.
+
+        Exception: Calendar date fields (date type) are allowed when the source
+        provides only dates without time components.
+        """
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
+
+        # Whitelist: fields that are truly calendar dates (no time component)
+        date_only_fields = {
+            "sequence_modified",  # UniProt sequence modification date
+            "entry_created",      # UniProt entry creation date
+            "entry_modified",     # UniProt entry modification date
+        }
 
         timestamp_fields = [
             (field, meta["dtype"])
@@ -261,6 +275,7 @@ class TestDatetimeFields:
                 "datetime" not in dtype.lower()
                 and "timestamp" not in dtype.lower()
                 and "str" not in dtype.lower()
+                and field not in date_only_fields  # Exclude date-only fields
             )
         ]
 
