@@ -431,12 +431,16 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
     if not ids or not isinstance(ids, dict):
         return {"pmid": None, "pmcid": None, "mag_id": None}
 
-    # Extract PMID from URL
+    # Extract PMID from URL and normalize via PubMedId Value Object
     # Format: https://pubmed.ncbi.nlm.nih.gov/12345678
+    from bioetl.domain.value_objects.publications import PubMedId
+
     pmid = None
     pmid_url = ids.get("pmid")
     if pmid_url and isinstance(pmid_url, str):
-        pmid = pmid_url.rstrip("/").split("/")[-1] if "/" in pmid_url else pmid_url
+        raw_pmid = pmid_url.rstrip("/").split("/")[-1] if "/" in pmid_url else pmid_url
+        pmid_vo = PubMedId.from_raw(raw_pmid)
+        pmid = str(pmid_vo) if pmid_vo else None
 
     # Extract PMCID from URL
     # Format: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456
