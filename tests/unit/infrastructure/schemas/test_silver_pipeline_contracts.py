@@ -857,9 +857,7 @@ class TestPipelineSchemaValidation:
         schema = _pipeline_schema(pipeline_name)
         primary_key = PIPELINE_PRIMARY_KEYS[pipeline_name]
         record = _base_record(schema)
-        record[primary_key] = _valid_value(
-            _expected_type(expected_fields, primary_key)
-        )
+        record[primary_key] = _valid_value(_expected_type(expected_fields, primary_key))
         table = pa.Table.from_pylist([record], schema=schema)
         assert table.num_rows == 1
 
