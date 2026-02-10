@@ -174,9 +174,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
                 PublicationYear, raw_year, as_string=False
             ),
             "publication_date": publication_date,
-            "publication_type": rec.get(
-                "type"
-            ),  # Raw CrossRef type (journal-article, etc.)
+            "publication_type": rec.get("type"),  # Raw CrossRef type
+            **self._classify_publication_type("crossref", raw_type=rec.get("type")),
             "citations_received": rec.get("is-referenced-by-count"),
             "citations_made": rec.get("references-count"),
             "language": rec.get("language"),

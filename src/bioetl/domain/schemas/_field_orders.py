@@ -4,13 +4,13 @@ Defines the authoritative field ordering for composite publication output.
 The order is derived from docs/schemas/publication_field_order.csv and
 used by ColumnOrderer and tests to ensure deterministic column ordering.
 
-Categories (6 groups, 167 fully-qualified fields):
+Categories (6 groups, 179 fully-qualified fields):
   - id (1-24): Identifiers, content hashes, entity IDs
   - bibliography (25-83): Title, abstract, journal, pagination, year
   - author_and_affiliation (84-104): Authors, affiliations, institutions
   - date (105-114): Publication and revision dates
   - topics_and_keywords (115-130): MeSH, topics, keywords, chemicals
-  - publication (131-167): Citations, OA, types, language, misc
+  - publication (131-179): Citations, OA, types, language, misc
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ __all__ = [
     "PUBLICATION_FIELD_ORDER",
 ]
 
-# Canonical order of all 167 fully-qualified publication fields.
+# Canonical order of all 179 fully-qualified publication fields.
 # Source of truth: docs/schemas/publication_field_order.csv
 PUBLICATION_FIELD_ORDER: Final[tuple[str, ...]] = (
     # === id (1-24) ===
@@ -193,6 +193,18 @@ PUBLICATION_FIELD_ORDER: Final[tuple[str, ...]] = (
     "openalex.publication.publication_type",
     "pubmed.publication.publication_type",
     "semanticscholar.publication.publication_type",
+    "crossref.publication.publication_type_unified",
+    "openalex.publication.publication_type_unified",
+    "pubmed.publication.publication_type_unified",
+    "semanticscholar.publication.publication_type_unified",
+    "crossref.publication.publication_subclass",
+    "openalex.publication.publication_subclass",
+    "pubmed.publication.publication_subclass",
+    "semanticscholar.publication.publication_subclass",
+    "crossref.publication.publication_class",
+    "openalex.publication.publication_class",
+    "pubmed.publication.publication_class",
+    "semanticscholar.publication.publication_class",
     "pubmed.publication.publication_type_list",
     "pubmed.publication.publication_types",
     "semanticscholar.publication.publication_types",
@@ -207,5 +219,5 @@ PUBLICATION_CANONICAL_CATEGORIES: Final[dict[str, tuple[int, int]]] = {
     "author_and_affiliation": (84, 104),
     "date": (105, 114),
     "topics_and_keywords": (115, 130),
-    "publication": (131, 167),
+    "publication": (131, 179),
 }

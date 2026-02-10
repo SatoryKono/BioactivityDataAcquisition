@@ -28,21 +28,11 @@ from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
+# DEPRECATED: Use classify_publication_type() from domain.mapping instead.
+# Kept for backward compatibility with existing tests.
+#
 # Document type mapping from CrossRef types to BioETL unified types.
 # See: https://api.crossref.org/types for complete list (30 types).
-#
-# Unified types (aligned with chembl/publication.py schema):
-# - PUBLICATION: Journal articles, conference papers, peer reviews
-# - BOOK: Books, monographs, book chapters, dissertations, reference entries
-# - PREPRINT: Pre-publication works (posted-content)
-# - DATASET: Research data and databases
-# - OTHER: Reports, standards, container types, supplementary materials, funding, unclassified
-#
-# Rationale:
-# - BOOK includes dissertations (thesis = monograph) and reference entries
-# - Reports/standards → OTHER (technical documents, not scholarly publications)
-# - "component" → OTHER (supplementary material, not standalone scholarly work)
-# - Container types → OTHER (metadata records, not scholarly content)
 CROSSREF_TYPE_MAP: dict[str, str] = {
     # === Journal/Conference Articles → PUBLICATION ===
     "journal-article": "PUBLICATION",

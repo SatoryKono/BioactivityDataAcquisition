@@ -217,6 +217,16 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
                 extract_fields_of_study(rec.get("fieldsOfStudy"))
             ),
             "publication_type": self._resolve_publication_type(publication_types),
+            **self._classify_publication_type(
+                "semanticscholar",
+                raw_types_list=[
+                    str(t).strip()
+                    for t in publication_types
+                    if t is not None and str(t).strip()
+                ]
+                if isinstance(publication_types, list)
+                else None,
+            ),
             "publication_types": self.serialize_json(publication_types),
             "_source": "semanticscholar",
             "_lookup_method": rec.get("_lookup_method", "unknown"),
