@@ -104,7 +104,7 @@ class TestFilterConfigLoaderBasics:
 
     def test_load_defaults_only(self, loader: FilterConfigLoader) -> None:
         """Load for unknown provider should use defaults."""
-        input_filter, gold_filters, _ = loader.load(
+        input_filter, _, gold_filters, _ = loader.load(
             "unknown_provider", "unknown_entity"
         )
 
@@ -115,7 +115,9 @@ class TestFilterConfigLoaderBasics:
 
     def test_load_with_provider(self, loader: FilterConfigLoader) -> None:
         """Load with provider should merge provider config."""
-        input_filter, gold_filters, _ = loader.load("test_provider", "unknown_entity")
+        input_filter, _, gold_filters, _ = loader.load(
+            "test_provider", "unknown_entity"
+        )
 
         # batch_size from provider
         assert input_filter.batch_size == 50
@@ -125,7 +127,7 @@ class TestFilterConfigLoaderBasics:
 
     def test_load_full_hierarchy(self, loader: FilterConfigLoader) -> None:
         """Load with entity should merge all levels."""
-        input_filter, gold_filters, _ = loader.load("test_provider", "test_entity")
+        input_filter, _, gold_filters, _ = loader.load("test_provider", "test_entity")
 
         # Input filter from entity
         assert input_filter.enabled is True
@@ -152,13 +154,13 @@ class TestFilterConfigLoaderMerge:
 
     def test_batch_size_override(self, loader: FilterConfigLoader) -> None:
         """Entity batch_size should override provider."""
-        input_filter, _, _ = loader.load("test_provider", "test_entity")
+        input_filter, _, _, _ = loader.load("test_provider", "test_entity")
 
         assert input_filter.batch_size == 20  # from entity, not 50 from provider
 
     def test_columns_merge(self, loader: FilterConfigLoader) -> None:
         """Column filters should merge from all levels."""
-        _, gold_filters, _ = loader.load("test_provider", "test_entity")
+        _, _, gold_filters, _ = loader.load("test_provider", "test_entity")
 
         columns = {cf.column for cf in gold_filters.column_filters}
         assert "provider_column" in columns  # from provider
@@ -166,7 +168,7 @@ class TestFilterConfigLoaderMerge:
 
     def test_required_fields_concatenate(self, loader: FilterConfigLoader) -> None:
         """Required fields should concatenate from all levels."""
-        _, gold_filters, _ = loader.load("test_provider", "test_entity")
+        _, _, gold_filters, _ = loader.load("test_provider", "test_entity")
 
         assert "field_a" in gold_filters.required_fields
         assert "field_b" in gold_filters.required_fields
@@ -177,7 +179,7 @@ class TestFilterConfigLoaderInlineOverrides:
 
     def test_inline_override_batch_size(self, loader: FilterConfigLoader) -> None:
         """Inline overrides should be applied last."""
-        input_filter, _, _ = loader.load(
+        input_filter, _, _, _ = loader.load(
             "test_provider",
             "test_entity",
             inline_overrides={"input_filter": {"batch_size": 200}},
@@ -187,7 +189,7 @@ class TestFilterConfigLoaderInlineOverrides:
 
     def test_inline_override_enabled(self, loader: FilterConfigLoader) -> None:
         """Inline override for enabled."""
-        input_filter, _, _ = loader.load(
+        input_filter, _, _, _ = loader.load(
             "test_provider",
             "test_entity",
             inline_overrides={"input_filter": {"enabled": False}},
@@ -197,7 +199,7 @@ class TestFilterConfigLoaderInlineOverrides:
 
     def test_inline_override_gold_filters(self, loader: FilterConfigLoader) -> None:
         """Inline override for gold_filters."""
-        _, gold_filters, _ = loader.load(
+        _, _, gold_filters, _ = loader.load(
             "test_provider",
             "test_entity",
             inline_overrides={
@@ -396,7 +398,7 @@ class TestFilterConfigFile:
 
     def test_to_domain_input_filter(self, loader: FilterConfigLoader) -> None:
         """Input filter should be converted correctly."""
-        input_filter, _, _ = loader.load("test_provider", "test_entity")
+        input_filter, _, _, _ = loader.load("test_provider", "test_entity")
 
         assert input_filter.enabled is True
         assert input_filter.source_path == "data/input/test.csv"
@@ -406,7 +408,7 @@ class TestFilterConfigFile:
 
     def test_to_domain_gold_filters(self, loader: FilterConfigLoader) -> None:
         """Gold filters should be converted correctly."""
-        _, gold_filters, _ = loader.load("test_provider", "test_entity")
+        _, _, gold_filters, _ = loader.load("test_provider", "test_entity")
 
         # Check required_fields
         assert "field_a" in gold_filters.required_fields
@@ -426,7 +428,7 @@ class TestFilterConfigLoaderExtractionParams:
 
     def test_extraction_params_default_empty(self, loader: FilterConfigLoader) -> None:
         """Extraction params should be empty when not configured."""
-        _, _, extraction_params = loader.load("test_provider", "test_entity")
+        _, _, _, extraction_params = loader.load("test_provider", "test_entity")
         assert extraction_params.is_empty
 
     def test_extraction_params_from_entity_config(self, tmp_path: Path) -> None:
@@ -461,7 +463,7 @@ extraction_params:
         )
 
         loader = FilterConfigLoader(tmp_path)
-        _, _, extraction_params = loader.load("chembl", "activity")
+        _, _, _, extraction_params = loader.load("chembl", "activity")
 
         assert not extraction_params.is_empty
         assert extraction_params.params["standard_type__in"] == "IC50,Ki"
@@ -487,7 +489,7 @@ extraction_params:
         )
 
         loader = FilterConfigLoader(tmp_path)
-        _, _, extraction_params = loader.load(
+        _, _, _, extraction_params = loader.load(
             "any",
             "any",
             inline_overrides={"extraction_params": {"standard_type__in": "Ki"}},
@@ -533,7 +535,7 @@ gold_filters:
         )
 
         loader = FilterConfigLoader(tmp_path)
-        _, gold_filters, _ = loader.load("test", "entity")
+        _, _, gold_filters, _ = loader.load("test", "entity")
 
         # Check list_length filter
         assert len(gold_filters.list_length_filters) == 1
