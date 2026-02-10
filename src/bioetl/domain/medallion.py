@@ -176,17 +176,11 @@ class LoadingStrategy(StrEnum):
             Checkpoint-based resume is disabled. Deduplication is handled
             on Silver layer via content_hash. Required for entities with
             unstable API pagination (e.g., publications).
-        WATERMARK_BASED: Incremental loading based on watermark field.
-            NOT YET IMPLEMENTED - placeholder for future watermark support.
-            Requires confirmed watermark field availability in source API.
 
     Example:
         >>> strategy = LoadingStrategy.FULL_SCAN_ONLY
         >>> strategy.allows_checkpoint_resume
         False
-        >>> strategy = LoadingStrategy.WATERMARK_BASED
-        >>> strategy.allows_checkpoint_resume
-        True
 
     See Also:
         ADR-030: Publication pagination strategy (force_full_scan)
@@ -196,9 +190,6 @@ class LoadingStrategy(StrEnum):
     FULL_SCAN_ONLY = "full_scan_only"
     """Full scan on each run. No checkpoint resume. Deduplication via content_hash."""
 
-    WATERMARK_BASED = "watermark_based"
-    """Incremental loading via watermark. Placeholder - NOT YET IMPLEMENTED."""
-
     @property
     def allows_checkpoint_resume(self) -> bool:
         """Check if this strategy allows checkpoint-based resume.
@@ -206,14 +197,14 @@ class LoadingStrategy(StrEnum):
         Returns:
             True if checkpoint resume is allowed, False otherwise.
         """
-        return self != LoadingStrategy.FULL_SCAN_ONLY
+        return False
 
     @classmethod
     def from_string(cls, value: str) -> LoadingStrategy:
         """Convert string to LoadingStrategy with validation.
 
         Args:
-            value: String value (e.g., "full_scan_only", "watermark_based")
+            value: String value (e.g., "full_scan_only")
 
         Returns:
             Corresponding LoadingStrategy enum value
@@ -240,9 +231,9 @@ class LoadingStrategy(StrEnum):
             force_full_scan: Legacy boolean flag
 
         Returns:
-            FULL_SCAN_ONLY if force_full_scan is True, WATERMARK_BASED otherwise
+            FULL_SCAN_ONLY (always, since watermark-based loading was removed)
         """
-        return cls.FULL_SCAN_ONLY if force_full_scan else cls.WATERMARK_BASED
+        return cls.FULL_SCAN_ONLY
 
 
 class ClearPolicy(StrEnum):

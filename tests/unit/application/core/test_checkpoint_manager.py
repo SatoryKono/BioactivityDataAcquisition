@@ -342,65 +342,6 @@ class TestCheckpointManagerLoadingStrategy:
         assert result is None
         mock_logger.warning.assert_called_once()
 
-    async def test_load_checkpoint_allowed_when_loading_strategy_watermark_based(
-        self, mock_checkpoint_port, mock_logger
-    ):
-        """Test load_checkpoint works when loading_strategy=WATERMARK_BASED."""
-        from bioetl.domain.medallion import LoadingStrategy
-
-        saved_run_id = uuid4()
-        mock_checkpoint_port.load.return_value = (
-            saved_run_id,
-            {"records_processed": 1000},
-        )
-
-        run_id = uuid4()
-        manager = CheckpointManager(
-            checkpoint_port=mock_checkpoint_port,
-            logger=mock_logger,
-            pipeline_name="chembl_activity",
-            run_id=run_id,
-            resume=True,
-            loading_strategy=LoadingStrategy.WATERMARK_BASED,
-        )
-
-        result = await manager.load_checkpoint()
-
-        mock_checkpoint_port.load.assert_called_once()
-        assert result is not None
-        mock_logger.warning.assert_not_called()
-
-    async def test_loading_strategy_takes_precedence_over_force_full_scan(
-        self, mock_checkpoint_port, mock_logger
-    ):
-        """Test that explicit loading_strategy overrides force_full_scan."""
-        from bioetl.domain.medallion import LoadingStrategy
-
-        saved_run_id = uuid4()
-        mock_checkpoint_port.load.return_value = (
-            saved_run_id,
-            {"records_processed": 1000},
-        )
-
-        run_id = uuid4()
-        # force_full_scan=True but loading_strategy=WATERMARK_BASED
-        manager = CheckpointManager(
-            checkpoint_port=mock_checkpoint_port,
-            logger=mock_logger,
-            pipeline_name="test_pipeline",
-            run_id=run_id,
-            resume=True,
-            force_full_scan=True,
-            loading_strategy=LoadingStrategy.WATERMARK_BASED,
-        )
-
-        result = await manager.load_checkpoint()
-
-        # loading_strategy takes precedence: WATERMARK_BASED allows resume
-        mock_checkpoint_port.load.assert_called_once()
-        assert result is not None
-        mock_logger.warning.assert_not_called()
-
     async def test_loading_strategy_derived_from_force_full_scan_when_none(
         self, mock_checkpoint_port, mock_logger
     ):

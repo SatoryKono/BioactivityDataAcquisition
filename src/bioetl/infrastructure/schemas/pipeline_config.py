@@ -1007,11 +1007,10 @@ class PipelineYamlConfig(BaseModel):
 
     # Loading strategy (ADR-031)
     # Explicit formalization of data loading approach.
-    loading_strategy: Literal["full_scan_only", "watermark_based"] | None = Field(
+    loading_strategy: Literal["full_scan_only"] | None = Field(
         default=None,
         description="Explicit loading strategy for the pipeline. "
         "'full_scan_only': Each run performs full scan, checkpoint resume disabled. "
-        "'watermark_based': Incremental loading via watermark (placeholder, not implemented). "
         "If not specified, derived from force_full_scan for backward compatibility. "
         "See ADR-031.",
     )
