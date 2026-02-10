@@ -875,3 +875,70 @@ class TestGoldWriterArrowConversion:
 
         expected = pa.map_(pa.string(), pa.string())
         assert result == expected
+
+
+@pytest.mark.unit
+class TestGoldWriterMergedValidation:
+    """Tests for write_gold_merged strict validation (REQ-DATA-009)."""
+
+    @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+    async def test_write_gold_merged_with_strict_schema_passes(
+        self, mock_write_deltalake, gold_writer, strict_schema, valid_records
+    ):
+        """Test write_gold_merged passes validation with strict schema."""
+        await gold_writer.write_gold_merged(
+            table_name="test.merged_table",
+            records=valid_records,
+            schema=strict_schema,
+        )
+
+        mock_write_deltalake.assert_called_once()
+
+    async def test_write_gold_merged_non_strict_schema_raises(
+        self, gold_writer, non_strict_schema, valid_records
+    ):
+        """Test write_gold_merged rejects non-strict schema (REQ-DATA-009)."""
+        with pytest.raises(ValueError, match="strict=True"):
+            await gold_writer.write_gold_merged(
+                table_name="test.merged_table",
+                records=valid_records,
+                schema=non_strict_schema,
+            )
+
+    async def test_write_gold_merged_schema_validation_failure(
+        self, gold_writer, strict_schema
+    ):
+        """Test write_gold_merged rejects records that fail schema validation."""
+        invalid_records = [
+            {"entity_id": "CHEMBL123"},  # Missing 'value' required by strict schema
+        ]
+
+        with pytest.raises(ValueError, match="Schema validation failed"):
+            await gold_writer.write_gold_merged(
+                table_name="test.merged_table",
+                records=invalid_records,
+                schema=strict_schema,
+            )
+
+    @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+    async def test_write_gold_merged_without_schema_still_works(
+        self, mock_write_deltalake, gold_writer, valid_records
+    ):
+        """Test write_gold_merged works without schema (backward compat)."""
+        await gold_writer.write_gold_merged(
+            table_name="test.merged_table",
+            records=valid_records,
+        )
+
+        mock_write_deltalake.assert_called_once()
+
+    async def test_write_gold_merged_empty_records_returns(
+        self, gold_writer, strict_schema
+    ):
+        """Test write_gold_merged returns early for empty records."""
+        # Should not raise, just return silently
+        await gold_writer.write_gold_merged(
+            table_name="test.merged_table",
+            records=[],
+            schema=strict_schema,
+        )

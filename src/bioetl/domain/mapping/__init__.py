@@ -14,8 +14,8 @@ from bioetl.domain.mapping.publication_type_classification import (
 
 __all__ = [
     "PUBLICATION_FIELD_MAPPING",
-    "PublicationTypeEntry",
     "UNIFIED_TO_PROVIDER",
+    "PublicationTypeEntry",
     "apply_field_mapping",
     "classify_publication_type",
     "get_provider_name",
