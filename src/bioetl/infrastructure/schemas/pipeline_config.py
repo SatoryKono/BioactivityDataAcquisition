@@ -40,14 +40,17 @@ if TYPE_CHECKING:
 class FieldValidationConfig(BaseModel):
     """Configuration for a single field validation rule.
 
-    Supports: required, range, pattern, enum, custom validation types.
+    Supports: required, not_null, range, pattern, enum, max_length, custom validation types.
     """
 
     field: str = Field(description="Field name to validate")
-    type: Literal["required", "range", "pattern", "enum", "custom"] = Field(
-        description="Validation type"
-    )
+    type: Literal[
+        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+    ] = Field(description="Validation type")
     nullable: bool = Field(default=True, description="Whether field can be null")
+    severity: Literal["error", "warn"] = Field(
+        default="error", description="Severity level (error or warn)"
+    )
     # Range validation
     min: float | None = Field(default=None, description="Minimum value (range)")
     max: float | None = Field(default=None, description="Maximum value (range)")
@@ -55,6 +58,8 @@ class FieldValidationConfig(BaseModel):
     pattern: str | None = Field(default=None, description="Regex pattern")
     # Enum validation
     allowed: list[str] = Field(default_factory=list, description="Allowed values")
+    # Max length validation
+    max_length: int | None = Field(default=None, description="Maximum string length")
     # Custom validation
     validator: str | None = Field(default=None, description="Custom validator name")
     # Error message
