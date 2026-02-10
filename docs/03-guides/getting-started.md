@@ -83,7 +83,7 @@ source .venv/bin/activate  # Linux/macOS
 # .venv\Scripts\activate   # Windows
 
 # Run the pipeline
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 ```
 
 This command will:

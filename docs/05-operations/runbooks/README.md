@@ -38,17 +38,17 @@ data/
 ### Useful Commands
 
 ```bash
-# Check pipeline status
-bioetl status
+# Check pipeline health
+bioetl health check
 
 # Resume from checkpoint
-bioetl run --provider chembl --entity activity --resume
+bioetl run --pipeline chembl_activity --resume
 
-# Force full refresh
-bioetl run --provider chembl --entity activity --full-refresh
+# Force full refresh (rebuild)
+bioetl run --pipeline chembl_activity --run-type rebuild
 
 # Dry run (no writes)
-bioetl run --provider chembl --entity activity --dry-run
+bioetl run --pipeline chembl_activity --dry-run
 ```
 
 ## Prerequisites

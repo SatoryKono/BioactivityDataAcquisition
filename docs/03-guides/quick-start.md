@@ -28,7 +28,7 @@ source .venv/bin/activate  # Linux/macOS
 
 # Run ChEMBL activity pipeline (limited to 100 records)
 # Note: Use --no-cached-bronze for the very first run to fetch from API
-python -m bioetl.main run --pipeline chembl_activity --limit 100 --no-cached-bronze
+bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 
 # Data will be stored in:
 # - data/bronze/v1/chembl/activity/
@@ -54,9 +54,9 @@ make lint
 | Run all tests | `make test` |
 | Run linting | `make lint` |
 | Run on fixtures | `make run-local` |
-| List pipelines | `python -m bioetl.main list` |
-| Full rebuild | `python -m bioetl.main run --pipeline <name> --full-rebuild` |
-| Resume from checkpoint | `python -m bioetl.main run --pipeline <name> --resume` |
+| List pipelines | `bioetl list` |
+| Full rebuild | `bioetl run --pipeline <name> --full-rebuild` |
+| Resume from checkpoint | `bioetl run --pipeline <name> --resume` |
 
 ## Project Structure (Data)
 

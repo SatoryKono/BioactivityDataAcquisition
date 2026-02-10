@@ -589,16 +589,16 @@ maintenance:
 
 ```bash
 # Показать конфигурацию
-python -m bioetl.main config show chembl_activity
+bioetl config show chembl_activity
 
 # Валидация
-python -m bioetl.main config validate chembl_activity
+bioetl config validate chembl_activity
 
 # Показать глобальные настройки
-python -m bioetl.main config show-settings
+bioetl config show-settings
 
 # Список всех пайплайнов
-python -m bioetl.main config list-pipelines
+bioetl config list-pipelines
 ```
 
 ### Pydantic валидация
@@ -710,7 +710,7 @@ batch_size: 100
 ### Ошибка валидации конфига
 
 ```bash
-python -m bioetl.main config validate chembl_activity
+bioetl config validate chembl_activity
 ```
 
 **Распространённые ошибки:**
@@ -733,7 +733,7 @@ python -m bioetl.main config validate chembl_activity
 
 3. Использовать CLI для просмотра resolved конфига:
    ```bash
-   python -m bioetl.main config show chembl_activity --format json
+   bioetl config show chembl_activity --format json
    ```
 
 ---

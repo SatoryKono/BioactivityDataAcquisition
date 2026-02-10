@@ -67,7 +67,7 @@ export BIOETL_METRICS_ENABLED=false
 
 ```bash
 # Запуск пайплайна
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 
 # В другом терминале
 curl http://localhost:8000/metrics | grep bioetl_
@@ -197,7 +197,7 @@ sum(rate(bioetl_records_processed_total[5m])) * 100
 export BIOETL_LOG_LEVEL=DEBUG
 
 # Via CLI флаг
-python -m bioetl.main run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug
 ```
 
 ---
@@ -258,13 +258,13 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
 
 ```bash
 # По умолчанию на порту 8080
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 
 # Кастомный порт
-python -m bioetl.main run --pipeline chembl_activity --health-port 9090
+bioetl run --pipeline chembl_activity --health-port 9090
 
 # Отключить
-python -m bioetl.main run --pipeline chembl_activity --no-health-server
+bioetl run --pipeline chembl_activity --no-health-server
 ```
 
 ### Endpoints
@@ -281,20 +281,20 @@ python -m bioetl.main run --pipeline chembl_activity --no-health-server
 Для отдельного мониторинга без запуска пайплайна:
 
 ```bash
-python -m bioetl.main health server --host 0.0.0.0 --port 8080
+bioetl health server --host 0.0.0.0 --port 8080
 ```
 
 ### CLI Health Check
 
 ```bash
 # Проверить все провайдеры
-python -m bioetl.main health check
+bioetl health check
 
 # Проверить конкретные провайдеры
-python -m bioetl.main health check --provider chembl --provider pubchem
+bioetl health check --provider chembl --provider pubchem
 
 # JSON output
-python -m bioetl.main health check --json
+bioetl health check --json
 ```
 
 ---
@@ -413,7 +413,7 @@ groups:
 
 1. Проверить connectivity к провайдеру:
    ```bash
-   python -m bioetl.main health check --provider chembl
+   bioetl health check --provider chembl
    ```
 
 2. Проверить логи на ошибки:

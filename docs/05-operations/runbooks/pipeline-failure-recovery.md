@@ -78,7 +78,7 @@ Checkpoint contains:
 For recoverable failures, simply resume:
 
 ```bash
-bioetl run --provider chembl --entity activity --resume
+bioetl run --pipeline chembl_activity --resume
 ```
 
 The pipeline will:
@@ -92,7 +92,7 @@ If checkpoint is corrupted or data inconsistent:
 
 ```bash
 # Clear checkpoint and reprocess all data
-bioetl run --provider chembl --entity activity --full-refresh
+bioetl run --pipeline chembl_activity --full-refresh
 ```
 
 **Warning**: This will reprocess all records from the beginning.
@@ -109,7 +109,7 @@ mv data/silver/chembl_activity data/silver/chembl_activity.bak
 rm data/checkpoints/chembl_activity.json
 
 # 3. Full refresh
-bioetl run --provider chembl --entity activity --full-refresh
+bioetl run --pipeline chembl_activity --full-refresh
 
 # 4. Verify data
 bioetl verify --table chembl_activity

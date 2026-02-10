@@ -49,7 +49,8 @@ Data source adapters implementing `DataSourcePort`:
 - `PubChemAdapter` - PubChem compound API
 - `UniProtAdapter` - UniProt protein database
 - `PubMedAdapter` - PubMed publication API
-- `UnifiedHTTPClient` - Shared HTTP client infrastructure
+- `UnifiedHTTPClient` - Shared HTTP client with rate limiting, circuit breaker, and retry logic ([ADR-032](../../02-architecture/decisions/ADR-032-unified-http-client.md))
+- [Common Utilities](infrastructure/adapters-common.md) - Shared adapter utilities (APIRequestCollector, title fallback, etc.)
 
 ### [Storage](infrastructure/storage.md)
 

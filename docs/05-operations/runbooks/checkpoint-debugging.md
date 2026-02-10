@@ -128,7 +128,7 @@ touch data/checkpoints/test && rm data/checkpoints/test
 If schema version mismatch is intentional:
 ```bash
 # Full refresh with new schema
-bioetl run --provider chembl --entity activity --full-refresh
+bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
 ## Manual Checkpoint Operations
