@@ -17,6 +17,9 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.mapping.publication_type_classification import (
+    classify_publication_type,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -199,6 +202,41 @@ class BasePublicationTransformer(BaseTransformer):
 
         # 8. Convert to SilverRecord
         return cast("SilverRecord", self.entity_to_silver_record(entity))
+
+    def _classify_publication_type(
+        self,
+        provider: str,
+        raw_type: str | None = None,
+        raw_types_list: list[str] | None = None,
+    ) -> dict[str, str | None]:
+        """Classify publication type using the unified 3-level hierarchy.
+
+        Delegates to domain classification module.
+
+        Args:
+            provider: Provider name ("openalex", "crossref", "pubmed", "semanticscholar").
+            raw_type: Single raw type string (for OpenAlex / CrossRef).
+            raw_types_list: List of raw type strings (for PubMed / S2).
+
+        Returns:
+            Dict with keys publication_type_unified, publication_subclass,
+            publication_class (all str | None).
+
+        """
+        entry = classify_publication_type(
+            provider, raw_type=raw_type, raw_types_list=raw_types_list
+        )
+        if entry is None:
+            return {
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
+            }
+        return {
+            "publication_type_unified": entry.unified_type,
+            "publication_subclass": entry.subclass,
+            "publication_class": entry.class_code,
+        }
 
     def _normalize_partial_date(self, date_str: str | None) -> str | None:
         """Normalize partial date to YYYY-MM-DD format (end of period).

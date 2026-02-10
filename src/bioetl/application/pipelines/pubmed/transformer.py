@@ -350,7 +350,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             **self._extract_counts(article, pubmed_data),
             "language": get_text(article.find(".//Language")),
             "_source": "pubmed",
-            "publication_type": "PUBLICATION",
+            **self._build_pubmed_classification(
+                ClassificationExtractor.parse_publication_types(article),
+            ),
             "citations_received": None,
             "is_oa": None,
             "_lookup_method": cast("dict[str, Any]", record).get(
@@ -360,6 +362,27 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "_dq_warn": False,
             "_dq_error": False,
         }
+
+    def _build_pubmed_classification(
+        self, pub_types: list[str]
+    ) -> dict[str, str | None]:
+        """Build publication_type and classification fields for PubMed.
+
+        Joins raw types with ``|`` for the raw ``publication_type`` field,
+        then uses the unified classifier to pick the most specific match.
+
+        Args:
+            pub_types: List of raw publication type strings from XML.
+
+        Returns:
+            Dict with publication_type and the 3 classification fields.
+
+        """
+        raw_type = "|".join(pub_types) if pub_types else None
+        classification = self._classify_publication_type(
+            "pubmed", raw_types_list=pub_types,
+        )
+        return {"publication_type": raw_type, **classification}
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]

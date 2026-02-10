@@ -101,7 +101,20 @@ class PublicationBaseSchema(ETLRecordSchema):
     )
     publication_type: Series[str] = pa.Field(
         nullable=True,
-        description="Document type - PUBLICATION, PREPRINT, BOOK, DATASET, OTHER (unified field name)",
+        description="Raw provider type string (preserved for forensic/debug)",
+    )
+    publication_type_unified: Series[str] = pa.Field(
+        nullable=True,
+        description="Unified type Level 3: 'Journal Article', 'Preprint', 'Clinical Trial', etc.",
+    )
+    publication_subclass: Series[str] = pa.Field(
+        nullable=True,
+        description="Subclass Level 2: 'Original Experimental Data', 'Reviews & Syntheses', etc.",
+    )
+    publication_class: Series[str] = pa.Field(
+        nullable=True,
+        isin=["EXP", "REV", "PEER"],
+        description="Class Level 1: EXP (experimental), REV (reviews/secondary), PEER (peer review)",
     )
     language: Series[str] = pa.Field(
         nullable=True,

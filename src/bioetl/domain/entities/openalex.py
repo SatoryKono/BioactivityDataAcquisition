@@ -14,7 +14,8 @@ from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-# Document type mapping from OpenAlex types to internal types
+# DEPRECATED: Use classify_publication_type() from domain.mapping instead.
+# Kept for backward compatibility with existing tests.
 OPENALEX_TYPE_MAP = {
     "article": "PUBLICATION",
     "journal-article": "PUBLICATION",
