@@ -48,6 +48,7 @@ class PipelineFactoryProtocol(Protocol):
         tracer: TracingPort | None = ...,
         dq_monitor: DQMonitorPort | None = ...,
         metrics: MetricsPort | None = ...,
+        cached_bronze: CachedBronzeContext | None = ...,
     ) -> BasePipeline:
         """Create pipeline with services."""
         ...
