@@ -1,23 +1,23 @@
 # UniProt Protein Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `uniprot_protein` |
-| **Provider** | UniProt (EBI/SIB/PIR) |
-| **Entity** | protein |
+| Parameter        | Value                                 |
+| ---------------- | ------------------------------------- |
+| **Pipeline ID**  | `uniprot_protein`                     |
+| **Provider**     | UniProt (EBI/SIB/PIR)                 |
+| **Entity**       | protein                               |
 | **API Endpoint** | `https://rest.uniprot.org/uniprotkb/` |
-| **Library** | `unipressed` (async) |
-| **Rate Limit** | 100 req/sec (with API key) |
-| **Health Check** | `/rest/beta/health` |
-| **Auth Type** | API Key (optional) |
+| **Library**      | `unipressed` (async)                  |
+| **Rate Limit**   | 100 req/sec (with API key)            |
+| **Health Check** | `/rest/beta/health`                   |
+| **Auth Type**    | API Key (optional)                    |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -34,10 +34,10 @@ UniProt proteins are **curated protein entries** with comprehensive annotations:
 ### 2.2. Use Cases
 
 1. **Target Identification**: Find drug targets with ChEMBL links
-2. **Sequence Analysis**: Access protein sequences for alignment
-3. **Functional Annotation**: Understand protein functions
-4. **Drug-Target Networks**: Build networks via cross-references
-5. **Species Translation**: Compare orthologs across organisms
+1. **Sequence Analysis**: Access protein sequences for alignment
+1. **Functional Annotation**: Understand protein functions
+1. **Drug-Target Networks**: Build networks via cross-references
+1. **Species Translation**: Compare orthologs across organisms
 
 ### 2.3. Entity Relationships
 
@@ -51,7 +51,7 @@ uniprot_protein
     └──► GO terms (via go_terms)
 ```
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
@@ -65,86 +65,95 @@ client = UniProtkbClient()
 results = await client.search(
     query="accession:P00533",
     fields=[
-        "accession", "id", "protein_name", "gene_names",
-        "organism_name", "organism_id", "sequence", "length",
-        "cc_function", "cc_pathway", "xref_chembl", "xref_drugbank"
-    ]
+        "accession",
+        "id",
+        "protein_name",
+        "gene_names",
+        "organism_name",
+        "organism_id",
+        "sequence",
+        "length",
+        "cc_function",
+        "cc_pathway",
+        "xref_chembl",
+        "xref_drugbank",
+    ],
 )
 ```
 
 ### 3.2. Complete API Fields
 
-| # | API Field | JSON Type | Nullable | Description |
-|---|-----------|-----------|----------|-------------|
-| 1 | `primaryAccession` | string | No | Primary accession (PK) |
-| 2 | `uniProtkbId` | string | No | Entry name |
-| 3 | `entryType` | string | Yes | Swiss-Prot/TrEMBL |
-| 4 | `secondaryAccessions` | array | Yes | Secondary accessions |
-| 5 | `proteinDescription` | object | Yes | Protein names |
-| 6 | `genes` | array | Yes | Gene names |
-| 7 | `organism` | object | Yes | Organism info |
-| 8 | `sequence` | object | Yes | Sequence data |
-| 9 | `features` | array | Yes | Sequence features |
-| 10 | `comments` | array | Yes | Functional annotations |
-| 11 | `dbreferences` | array | Yes | Cross-references |
-| 12 | `keywords` | array | Yes | UniProt keywords |
+| #   | API Field             | JSON Type | Nullable | Description            |
+| --- | --------------------- | --------- | -------- | ---------------------- |
+| 1   | `primaryAccession`    | string    | No       | Primary accession (PK) |
+| 2   | `uniProtkbId`         | string    | No       | Entry name             |
+| 3   | `entryType`           | string    | Yes      | Swiss-Prot/TrEMBL      |
+| 4   | `secondaryAccessions` | array     | Yes      | Secondary accessions   |
+| 5   | `proteinDescription`  | object    | Yes      | Protein names          |
+| 6   | `genes`               | array     | Yes      | Gene names             |
+| 7   | `organism`            | object    | Yes      | Organism info          |
+| 8   | `sequence`            | object    | Yes      | Sequence data          |
+| 9   | `features`            | array     | Yes      | Sequence features      |
+| 10  | `comments`            | array     | Yes      | Functional annotations |
+| 11  | `dbreferences`        | array     | Yes      | Cross-references       |
+| 12  | `keywords`            | array     | Yes      | UniProt keywords       |
 
 ### 3.3. Nested Structure: proteinDescription
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `recommendedName.fullName.value` | string | Recommended protein name |
-| `alternativeNames[*].fullName.value` | array | Alternative names |
-| `ecNumbers[*].value` | array | EC numbers |
+| Field                                | Type   | Description              |
+| ------------------------------------ | ------ | ------------------------ |
+| `recommendedName.fullName.value`     | string | Recommended protein name |
+| `alternativeNames[*].fullName.value` | array  | Alternative names        |
+| `ecNumbers[*].value`                 | array  | EC numbers               |
 
 ### 3.4. Nested Structure: organism
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `scientificName` | string | Scientific name |
-| `commonName` | string | Common name |
-| `taxonId` | integer | NCBI Taxonomy ID |
-| `lineage` | array | Taxonomic lineage |
+| Field            | Type    | Description       |
+| ---------------- | ------- | ----------------- |
+| `scientificName` | string  | Scientific name   |
+| `commonName`     | string  | Common name       |
+| `taxonId`        | integer | NCBI Taxonomy ID  |
+| `lineage`        | array   | Taxonomic lineage |
 
 ### 3.5. Nested Structure: sequence
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `value` | string | Amino acid sequence |
-| `length` | integer | Sequence length |
-| `molWeight` | integer | Molecular weight |
-| `crc64` | string | CRC64 checksum |
+| Field       | Type    | Description         |
+| ----------- | ------- | ------------------- |
+| `value`     | string  | Amino acid sequence |
+| `length`    | integer | Sequence length     |
+| `molWeight` | integer | Molecular weight    |
+| `crc64`     | string  | CRC64 checksum      |
 
----
+______________________________________________________________________
 
 ## 4. Transformation
 
 ### 4.1. Entity ID Strategy
 
-| Parameter | Value |
-|-----------|-------|
+| Parameter           | Value                          |
+| ------------------- | ------------------------------ |
 | **Entity ID Field** | `accession` (primaryAccession) |
-| **ID Source** | `from_api` |
-| **Format** | UniProt accession pattern |
+| **ID Source**       | `from_api`                     |
+| **Format**          | UniProt accession pattern      |
 
 ### 4.2. Flattening Strategy
 
-| Nested Path | Flattened Name | Strategy |
-|-------------|----------------|----------|
-| `proteinDescription.recommendedName.fullName.value` | `protein_name` | Extract scalar |
-| `proteinDescription.ecNumbers[*].value` | `protein_ec_numbers` | JSON array |
-| `genes[0].geneName.value` | `gene_primary` | Extract first |
-| `genes[*].synonyms[*].value` | `gene_synonyms` | JSON array |
-| `organism.scientificName` | `organism_scientific` | Extract scalar |
-| `organism.commonName` | `organism_common` | Extract scalar |
-| `organism.taxonId` | `taxonomy_id` | Extract scalar |
-| `sequence.value` | `sequence` | Extract scalar |
-| `sequence.length` | `sequence_length` | Extract scalar |
-| `sequence.molWeight` | `sequence_mass` | Extract scalar |
-| `dbreferences[type=ChEMBL]` | `chembl_ids` | Filter & extract |
-| `dbreferences[type=DrugBank]` | `drugbank_ids` | Filter & extract |
+| Nested Path                                         | Flattened Name        | Strategy         |
+| --------------------------------------------------- | --------------------- | ---------------- |
+| `proteinDescription.recommendedName.fullName.value` | `protein_name`        | Extract scalar   |
+| `proteinDescription.ecNumbers[*].value`             | `protein_ec_numbers`  | JSON array       |
+| `genes[0].geneName.value`                           | `gene_primary`        | Extract first    |
+| `genes[*].synonyms[*].value`                        | `gene_synonyms`       | JSON array       |
+| `organism.scientificName`                           | `organism_scientific` | Extract scalar   |
+| `organism.commonName`                               | `organism_common`     | Extract scalar   |
+| `organism.taxonId`                                  | `taxonomy_id`         | Extract scalar   |
+| `sequence.value`                                    | `sequence`            | Extract scalar   |
+| `sequence.length`                                   | `sequence_length`     | Extract scalar   |
+| `sequence.molWeight`                                | `sequence_mass`       | Extract scalar   |
+| `dbreferences[type=ChEMBL]`                         | `chembl_ids`          | Filter & extract |
+| `dbreferences[type=DrugBank]`                       | `drugbank_ids`        | Filter & extract |
 
----
+______________________________________________________________________
 
 ## 5. Validation
 
@@ -162,7 +171,9 @@ class UniprotTargetSchema(ETLRecordSchema):
 
     @pa.check("accession", name="accession_format")
     def _check_accession(cls, series):
-        pattern = r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
+        pattern = (
+            r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
+        )
         return series.str.match(pattern)
 
     entry_name: Series[str] = pa.Field(nullable=False)
@@ -230,27 +241,27 @@ class UniprotTargetSchema(ETLRecordSchema):
 
 ### 5.2. Field Validation Matrix
 
-| Field | Type | Nullable | Constraints | DQ Level |
-|-------|------|----------|-------------|----------|
-| `accession` | str | No | UniProt format | CRITICAL |
-| `entry_name` | str | No | format `XXX_SPECIES` | CRITICAL |
-| `sequence` | str | No | amino acid chars only | CRITICAL |
-| `sequence_length` | int | No | >= 1 | CRITICAL |
-| `taxonomy_id` | int | Yes | >= 1 | WARNING |
-| `reviewed` | bool | No | - | INFO |
+| Field             | Type | Nullable | Constraints           | DQ Level |
+| ----------------- | ---- | -------- | --------------------- | -------- |
+| `accession`       | str  | No       | UniProt format        | CRITICAL |
+| `entry_name`      | str  | No       | format `XXX_SPECIES`  | CRITICAL |
+| `sequence`        | str  | No       | amino acid chars only | CRITICAL |
+| `sequence_length` | int  | No       | >= 1                  | CRITICAL |
+| `taxonomy_id`     | int  | Yes      | >= 1                  | WARNING  |
+| `reviewed`        | bool | No       | -                     | INFO     |
 
----
+______________________________________________________________________
 
 ## 6. Cross-Provider Mapping
 
-| This Entity Field | Maps To | Provider | Field |
-|-------------------|---------|----------|-------|
-| `accession` | ChEMBL | ChEMBL | `target_component.accession` |
-| `chembl_ids[*]` | ChEMBL | ChEMBL | `target_chembl_id` |
-| `drugbank_ids[*]` | DrugBank | DrugBank | `drugbank_id` |
-| `taxonomy_id` | NCBI Taxonomy | NCBI | `tax_id` |
+| This Entity Field | Maps To       | Provider | Field                        |
+| ----------------- | ------------- | -------- | ---------------------------- |
+| `accession`       | ChEMBL        | ChEMBL   | `target_component.accession` |
+| `chembl_ids[*]`   | ChEMBL        | ChEMBL   | `target_chembl_id`           |
+| `drugbank_ids[*]` | DrugBank      | DrugBank | `drugbank_id`                |
+| `taxonomy_id`     | NCBI Taxonomy | NCBI     | `tax_id`                     |
 
----
+______________________________________________________________________
 
 ## 7. Pipeline Configuration
 
@@ -258,7 +269,7 @@ class UniprotTargetSchema(ETLRecordSchema):
 pipeline_name: uniprot_protein
 provider: uniprot
 entity_type: protein
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["accession"]
 silver_table: "uniprot_protein"
@@ -291,21 +302,21 @@ input_filter:
   batch_size: 100  # Higher for UniProt
 ```
 
----
+______________________________________________________________________
 
 ## 8. Dependencies
 
 ### 8.1. Upstream
 
-| Dependency | Type | Required |
-|------------|------|----------|
-| UniProt REST API | API | Yes |
+| Dependency          | Type     | Required                      |
+| ------------------- | -------- | ----------------------------- |
+| UniProt REST API    | API      | Yes                           |
 | `uniprot_idmapping` | Pipeline | Optional (for ChEMBL→UniProt) |
 
 ### 8.2. Downstream
 
-| Consumer | Impact |
-|----------|--------|
-| Target annotation | Protein function/pathway data |
-| Cross-database linking | ChEMBL/DrugBank integration |
-| Sequence analysis | Protein sequences for alignment |
+| Consumer               | Impact                          |
+| ---------------------- | ------------------------------- |
+| Target annotation      | Protein function/pathway data   |
+| Cross-database linking | ChEMBL/DrugBank integration     |
+| Sequence analysis      | Protein sequences for alignment |
