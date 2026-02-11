@@ -384,7 +384,7 @@ Mode: Overwrite
 **Gold Filters:**
 
 - `standard_type IN ('IC50', 'Ki')` — Focus on binding data
-- `standard_units = 'nM'` — Normalized units
+- `standard_units IN ('nM', 'uM', 'mM', 'pM', 'M', 'ug.mL-1', 'mg.kg-1')` — 7 standardized units
 - `standard_relation = '='` — Exact measurements
 - `target_chembl_id IS NOT NULL` — Target required
 

@@ -4,7 +4,7 @@ cell_name,cell_name,str,false,strip,not_empty,CRITICAL,quarantine,true,Cell line
 cell_description,cell_description,str,true,strip,none,INFO,log,true,Cell line description
 cell_source_tissue,cell_source_tissue,str,true,strip,none,INFO,log,true,Source tissue
 cell_source_organism,cell_source_organism,str,true,strip,none,INFO,log,true,Source organism
-cell_source_tax_id,cell_source_tax_id,int,true,cast_to_int,>= 1,WARNING,log,true,NCBI Taxonomy ID
+cell_source_taxonomy_id,cell_source_taxonomy_id,int,true,cast_to_int,>= 1,WARNING,log,true,NCBI Taxonomy ID
 cell_type,cell_type,str,true,strip,none,INFO,log,true,Cell type classification
 cellosaurus_id,cellosaurus_id,str,true,validate_regex,regex ^CVCL_[A-Z0-9]+$,WARNING,log,true,Cellosaurus ID
 clo_id,clo_id,str,true,validate_regex,regex ^CLO_\d+$,WARNING,log,true,Cell Line Ontology ID

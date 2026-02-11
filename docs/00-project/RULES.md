@@ -959,7 +959,7 @@ from __future__ import annotations
    - Начинает с `last_processed_id + 1`.
    - Логирует: `Resuming from checkpoint: {id}`.
 1. Если найден без флага:
-   - Warning: "Stale checkpoint detected. Use --resume or --ignore-checkpoint."
+   - Warning: "Stale checkpoint detected. Use --resume to continue or delete the checkpoint file to restart."
 1. После успешного завершения: удалить локальный файл чекпоинта.
 
 ### 5.3.2. Async Resource Cleanup
@@ -1020,7 +1020,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 | Сценарий                      | Действие                                                                                                                                                                         |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--run-type rebuild` (если затронут Silver). |
-| **Потеря чекпоинта**          | Запуск с `--ignore-checkpoint` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это).                                                                          |
+| **Потеря чекпоинта**          | Удалить файл чекпоинта: `data/output/checkpoints/{pipeline_name}.json`, затем запустить `--run-type rebuild` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это). |
 | **Отказ региона AWS**         | Переключение DNS на Failover Region. Развертывание Infrastructure-as-Code (Terraform) в резервном регионе.                                                                       |
 
 ### 5.6. Среды (Environments)
@@ -1388,7 +1388,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | Auth failure           | `401 Unauthorized` в логах                     | Проверить/обновить `BIOETL_{PROVIDER}_API_KEY`                    |
 | Rate limit exhausted   | `429` + пик `errors_total{type="recoverable"}` | Уменьшить `requests_per_second` в конфиге                         |
 | Schema mismatch (Gold) | Pipeline fail + `schema_violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR            |
-| Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или `--ignore-checkpoint` для рестарта |
+| Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или удалить файл `data/output/checkpoints/{pipeline_name}.json` для рестарта |
 | >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа      |
 | Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; `make release-lock PIPELINE=...`        |
 
