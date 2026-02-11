@@ -14,29 +14,6 @@ from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-# DEPRECATED: Use classify_publication_type() from domain.mapping instead.
-# Kept for backward compatibility with existing tests.
-OPENALEX_TYPE_MAP = {
-    "article": "PUBLICATION",
-    "journal-article": "PUBLICATION",
-    "book-chapter": "PUBLICATION",
-    "book": "PUBLICATION",
-    "dissertation": "PUBLICATION",
-    "dataset": "DATASET",
-    "preprint": "PREPRINT",
-    "posted-content": "PREPRINT",
-    "proceedings": "PUBLICATION",
-    "proceedings-article": "PUBLICATION",
-    "report": "PUBLICATION",
-    "standard": "PUBLICATION",
-    "peer-review": "PUBLICATION",
-    "editorial": "PUBLICATION",
-    "erratum": "PUBLICATION",
-    "letter": "PUBLICATION",
-    "review": "PUBLICATION",
-    "other": "OTHER",
-}
-
 # Lookup method values for tracking DOI resolution strategy
 LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
 
@@ -269,7 +246,6 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
 __all__ = [
     "LOOKUP_METHODS",
-    "OPENALEX_TYPE_MAP",
     "OpenAlexPublicationEntity",
     "OpenAlexPublicationRecord",
 ]
