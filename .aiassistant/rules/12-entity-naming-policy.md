@@ -1,11 +1,11 @@
----
-trigger: model_decision
-description: USE WHEN naming classes, functions, modules, pipelines, tests, or configs; enforce role suffixes and function prefixes
----
+______________________________________________________________________
+
+## trigger: model_decision description: USE WHEN naming classes, functions, modules, pipelines, tests, or configs; enforce role suffixes and function prefixes
 
 # Entity Naming Policy
 
 > Scope:
+>
 > - USE WHEN naming classes, functions, modules, pipelines, tests, or configs
 > - Use when editing files matching: `src/**/*.py`, `tests/**/*.py`, `configs/**/*.yaml`
 
@@ -53,7 +53,7 @@ description: USE WHEN naming classes, functions, modules, pipelines, tests, or c
 ## TESTS
 
 - Unit: `tests/bioetl/.../test_<module>.py`
-- Pipeline: `tests/bioetl/pipelines/<provider>/<entity>/test_<stage>.py`
+- Pipeline: `tests/unit/application/pipelines/<provider>/test_<entity>_transformer.py`
 - Integration: `tests/integration/` or suffix `_integration.py`
 - Golden: `tests/golden/test_<area>_golden.py`
 
@@ -66,6 +66,7 @@ description: USE WHEN naming classes, functions, modules, pipelines, tests, or c
 ## EXAMPLES
 
 Valid:
+
 - Class: `ChemblDataClient`, `DataClientProtocol`, `ChemblDataClientHTTPImpl`
 - Function: `fetch_one()`, `iter_pages()`, `default_chembl_data_client()`
 - Module: `data_client.py`, `factories.py`
@@ -73,6 +74,7 @@ Valid:
 - Test: `tests/bioetl/pipelines/chembl/activity/test_extract.py`
 
 Invalid:
+
 - Class: `chemblDataClient`, `Data_Client`
 - Function: `FetchOne()`, `getData()`
 - Module: `DataClient.py`, `data-client.py`
@@ -80,4 +82,3 @@ Invalid:
 ## REFERENCE
 
 See `_docs/styleguide/new/02-new-entity-naming-policy.md` for detailed policy.
-
