@@ -19,33 +19,37 @@
 
 Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через `typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
 
-**Структура пакета:**
-```
-src/bioetl/domain/ports/
-├── __init__.py          # Фасад — единая точка импорта всех портов
-├── data_source.py       # DataSourcePort, FilterableDataSourcePort
-├── storage.py           # StoragePort
-├── locking.py           # LockPort
-├── checkpoint.py        # CheckpointPort
-├── quarantine.py        # QuarantinePort
-├── observability.py     # MetricsPort, TracingPort, LoggerPort, DQMonitorPort
-├── validation.py        # GoldValidatorPort
-└── filtering.py         # InputFilterPort
-```
+**Структура пакета (26 файлов):**
 
-**Основные порты (12 шт):**
-- `DataSourcePort`: Абстракция для источников данных (API, файлы).
-- `FilterableDataSourcePort`: Расширение с server-side фильтрацией.
-- `StoragePort`: Абстракция для хранилищ данных (Bronze, Silver, Gold).
-- `LockPort`: Контракт для распределённых блокировок.
-- `CheckpointPort`: Интерфейс для сохранения и загрузки состояния пайплайнов.
-- `QuarantinePort`: Контракт для "карантина" — хранилища записей, не прошедших валидацию.
-- `MetricsPort`: Интерфейс для сбора метрик.
-- `TracingPort`: Распределённый трейсинг (OpenTelemetry).
-- `LoggerPort`: Структурированное логирование.
-- `DQMonitorPort`: Data Quality мониторинг.
-- `GoldValidatorPort`: Валидация Gold-записей.
-- `InputFilterPort`: Загрузка filter IDs.
+Пакет содержит 26 protocol-файлов, организованных по категориям:
+
+**Основные порты:**
+- `DataSourcePort`, `FilterableDataSourcePort` — абстракция для источников данных
+- `StoragePort` — хранилища данных (Bronze, Silver, Gold)
+- `LockPort` — распределённые блокировки
+- `CheckpointPort` — сохранение/загрузка состояния пайплайнов
+- `QuarantinePort` — карантин записей, не прошедших валидацию
+
+**Observability порты:**
+- `MetricsPort` — сбор метрик
+- `TracingPort` — распределённый трейсинг (OpenTelemetry)
+- `LoggerPort` — структурированное логирование
+- `DQMonitorPort` — Data Quality мониторинг
+- `PipelineObserverPort` — наблюдение за пайплайнами
+
+**Data Quality порты:**
+- `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` — DQ анализ по слоям
+- `DQReportWriterPort` — запись DQ-отчётов
+- `GoldValidatorPort` — валидация Gold-записей
+
+**Input/Output порты:**
+- `InputFilterPort` — загрузка filter IDs
+- `ExportPort` — экспорт данных
+
+**Infrastructure порты:**
+- `HealthCheckPort` — проверка здоровья адаптеров
+- `AuditPort` — аудит операций
+- `RetentionPort` — управление политиками хранения
 
 **Правило импорта (MUST):**
 ```python
@@ -70,9 +74,9 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 src/bioetl/domain/aggregates/
 ├── __init__.py
 ├── batch.py             # Batch Aggregate (530 LOC)
-├── pipeline_run.py      # PipelineRun Aggregate (350 LOC)
-├── quarantine_entry.py  # QuarantineEntry Aggregate (180 LOC)
-└── events.py            # Domain Events (200 LOC)
+├── pipeline_run.py      # PipelineRun Aggregate (566 LOC)
+├── quarantine_entry.py  # QuarantineEntry Aggregate (517 LOC)
+└── events.py            # Domain Events (260 LOC)
 ```
 
 **Ключевые агрегаты:**
@@ -101,7 +105,7 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 
 **Расположение:** `src/bioetl/domain/value_objects/`
 
-Неизменяемые доменные примитивы с типобезопасностью.
+Неизменяемые доменные примитивы с типобезопасностью (19 файлов).
 
 **Идентификаторы:**
 - `RunID(UUID)` — идентификатор запуска пайплайна
@@ -110,7 +114,16 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 - `ContentHash(str)` — SHA256 хэш содержимого
 
 **Измерения:**
-- `Measurement(value, unit, relation)` — биоактивность (IC50, EC50, Ki)
+- `ActivityValue(value, unit, relation)` (`activity.py`, 329 LOC) — составной value object для биоактивности (IC50, EC50, Ki), включает `RelationOperator` enum и `ConfidenceScore`
+
+**Data Quality:**
+- `DQMetrics` — метрики качества данных
+- `DQReport` — отчёт о качестве данных
+
+**Pipeline Results:**
+- `BronzeResult` — результат записи в Bronze
+- `Publications` — value objects для публикаций
+- `ActivityValues` — concentration & unit handling
 
 ### 2.4. `types.py` — Пользовательские Типы
 
@@ -137,6 +150,24 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 - **Recoverable**: Временные сбои, требующие повторной попытки.
 - **Data Quality**: Проблемы с данными, которые можно пропустить, отправив запись в карантин.
 
+### 2.7. Дополнительные поддиректории
+
+Domain содержит 8 дополнительных поддиректорий:
+
+| Директория | Назначение | Содержание |
+|------------|------------|------------|
+| `composite/` | Composite pipeline domain | Field groups, state, strategy |
+| `configs/` | Конфигурационные базовые классы | Базовые dataclass-ы для конфигураций |
+| `contracts/gold/` | Gold-слой контракты данных | Pandera DataFrameModel схемы |
+| `entities/` | Доменные сущности | Entity-классы для каждого провайдера |
+| `exceptions/` | Доменные исключения | 5 файлов с иерархией ошибок |
+| `filtering/` | Фильтрация данных | Конфигурации и логика фильтров |
+| `mapping/` | Маппинг полей публикаций | Publication field & type mappings |
+| `models/` | Доменные модели | Filter & metadata models |
+| `registry/` | Реестр публикаций | Publication registry |
+| `schemas/` | Pydantic/Pandera схемы | ~60 файлов для всех провайдеров |
+| `services/` | Доменные сервисы | Нормализация, агрегация |
+
 ## 3. Принципы Работы
 
 - **Никакого I/O:** В этом слое запрещены любые операции, связанные с сетью, файловой системой или базами данных.
@@ -160,8 +191,8 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 | Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации |
 | Domain DDD | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid) | DDD-структура домена |
 | Domain Models | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid) | Связи доменных моделей |
-| DDD Aggregates | [../diagrams/mermaid/09_ddd_aggregates.mmd](../diagrams/mermaid/09_ddd_aggregates.mmd) | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture | [../diagrams/mermaid/07_ports_architecture.mmd](../diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов |
+| DDD Aggregates | [diagrams/mermaid/09_ddd_aggregates.mmd](diagrams/mermaid/09_ddd_aggregates.mmd) | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
+| Ports Architecture | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов |
 
 ### Связанные ADR
 

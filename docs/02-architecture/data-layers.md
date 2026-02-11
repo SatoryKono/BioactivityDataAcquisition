@@ -10,8 +10,7 @@
 
 ### 1.1. Формат и Хранение
 *   **Формат**: `JSONL` (JSON Lines), сжатый кодеком `zstd`.
-*   **Путь**: `bronze/v1/{provider}/{entity}/{date}/`.
-    *   `v1` — версия формата хранения (версия бакета/пути).
+*   **Путь**: `data/output/bronze/{provider}/{entity}/{date}/`.
     *   `{date}` — дата выгрузки (ingestion date), формат `YYYY-MM-DD`.
 *   **Схема**: Implicit (Схема источника). Файлы сохраняются "как есть", без валидации структуры содержимого, но с добавлением технических метаданных.
 *   **Правило**: Файлы в Bronze **НИКОГДА** не перезаписываются и не удаляются (кроме политики Retention для архивации).
@@ -45,7 +44,7 @@
 ### 2.1. Формат и Технологии
 *   **Формат**: Delta Lake (Parquet + Transaction Log).
 *   **Engine**: `delta-rs` (через библиотеку `deltalake` Python binding).
-*   **Путь**: `silver/{provider}/{entity}/[{partition_cols}/]` — партиционирование опционально, настраивается через `partition_by` в YAML конфиге пайплайна.
+*   **Путь**: `data/output/silver/{provider}/{entity}/[{partition_cols}/]` — партиционирование опционально, настраивается через `partition_by` в YAML конфиге пайплайна.
 *   **Протокол**: Writer Version 2 (поддержка Column Mapping), Reader Version 1.
 
 ### 2.2. Схема и Валидация
@@ -80,7 +79,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 *   **Приоритет обновлений (Conflict Resolution)**:
     При конкурентных запусках (например, Backfill vs Incremental) используется поле `_run_type`.
     Приоритет: `rebuild` > `backfill` > `incremental`.
-    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/delta_writer.py`).
+    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/silver_writer.py`).
 
 ### 2.5. PII и Безопасность
 *   Поля, помеченные как чувствительные (PII), **ОБЯЗАНЫ** быть хэшированы перед записью в Silver.
@@ -105,7 +104,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 *   **Исключение JSON полей**: Вложенные JSON-строки, сохранённые в Silver для forensic целей, исключаются из Gold.
 *   **Плоская структура**: Gold содержит только плоские (scalar) поля для оптимизации аналитических запросов.
-*   **Реализация**: `BasePipeline.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS`.
+*   **Реализация**: `BaseTransformer.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS` в `src/bioetl/application/core/base_transformer.py`.
 
 #### Пример: ChEMBL Molecule
 
@@ -122,14 +121,14 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 ### 3.2. Формат и Оптимизация
 *   **Формат**: Delta Lake.
-*   **Путь**: `gold/{domain}/{mart_name}/` (например, `gold/discovery/target_affinity`).
+*   **Путь**: `data/output/gold/{provider}/{entity}/` (например, `data/output/gold/chembl/activity`).
 *   **Оптимизация чтения**:
     *   **Z-ORDER Clustering**: Обязательно применяется по часто используемым предикатам фильтрации (например, `target_id`, `assay_type`).
     *   **Compaction**: Регулярная (еженедельная) компрессия мелких файлов через `OPTIMIZE`.
 
 ### 3.3. Контракты Данных (Data Contracts)
 Gold слой имеет строгие публичные контракты.
-*   **Реестр**: JSON Schema файлы в `docs/contracts/gold/`.
+*   **Реестр**: JSON Schema файлы в `docs/04-reference/contracts/gold/`.
 *   **Стабильность**: Любое изменение схемы в Gold требует:
     1.  Обновления JSON-контракта.
     2.  Создания миграции или новой версии витрины (v2).

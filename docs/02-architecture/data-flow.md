@@ -172,7 +172,7 @@ flowchart TB
    - `molecule_synonyms`, `cross_references`, `atc_classifications`
 3. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
 
-**Code Reference**: `src/bioetl/application/core/base.py` → `transform_for_gold()`
+**Code Reference**: `src/bioetl/application/core/base_transformer.py` → `BaseTransformer.transform_for_gold()`
 
 ---
 
