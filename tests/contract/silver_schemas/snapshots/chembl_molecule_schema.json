@@ -94,8 +94,8 @@
       }
     ],
     "coerce": false,
-    "description": "Availability type.",
-    "dtype": "int64",
+    "description": "Availability type (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
