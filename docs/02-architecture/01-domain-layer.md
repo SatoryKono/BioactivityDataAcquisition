@@ -20,9 +20,9 @@
 
 Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через `typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
 
-**Структура пакета (26 файлов):**
+**Структура пакета (24 файла):**
 
-Пакет содержит 26 protocol-файлов (актуально на 2026-02-11), организованных по категориям:
+Пакет содержит 24 protocol-файла (актуально на 2026-02-11), организованных по категориям:
 
 **Основные порты:**
 
@@ -81,10 +81,10 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 ```
 src/bioetl/domain/aggregates/
 ├── __init__.py
-├── batch.py             # Batch Aggregate (530 LOC)
-├── pipeline_run.py      # PipelineRun Aggregate (566 LOC)
+├── batch.py             # Batch Aggregate (536 LOC)
+├── pipeline_run.py      # PipelineRun Aggregate (574 LOC)
 ├── quarantine_entry.py  # QuarantineEntry Aggregate (517 LOC)
-└── events.py            # Domain Events (260 LOC)
+└── events.py            # Domain Events (197 LOC)
 ```
 
 **Ключевые агрегаты:**
@@ -116,7 +116,7 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 
 **Расположение:** `src/bioetl/domain/value_objects/`
 
-Неизменяемые доменные примитивы с типобезопасностью (19 файлов).
+Неизменяемые доменные примитивы с типобезопасностью (18 файлов).
 
 **Идентификаторы:**
 
@@ -177,12 +177,12 @@ Domain содержит 8 дополнительных поддиректори�
 | `configs/`        | Конфигурационные базовые классы | Базовые dataclass-ы для конфигураций                     |
 | `contracts/gold/` | Gold-слой контракты данных      | Pandera DataFrameModel схемы                             |
 | `entities/`       | Доменные сущности               | Entity-классы для каждого провайдера                     |
-| `exceptions/`     | Доменные исключения             | 7 файлов с иерархией ошибок (актуально на 2026-02-11)    |
+| `exceptions/`     | Доменные исключения             | 6 файлов с иерархией ошибок (актуально на 2026-02-11)    |
 | `filtering/`      | Фильтрация данных               | Конфигурации и логика фильтров                           |
 | `mapping/`        | Маппинг полей публикаций        | Publication field & type mappings                        |
 | `models/`         | Доменные модели                 | Filter & metadata models                                 |
 | `registry/`       | Реестр публикаций               | Publication registry                                     |
-| `schemas/`        | Pydantic/Pandera схемы          | 37 файлов для всех провайдеров (актуально на 2026-02-11) |
+| `schemas/`        | Pydantic/Pandera схемы          | 25 файлов для всех провайдеров (актуально на 2026-02-11) |
 | `services/`       | Доменные сервисы                | Нормализация, агрегация                                  |
 
 ## 3. Принципы Работы
