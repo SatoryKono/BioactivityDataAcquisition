@@ -191,6 +191,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         return {
             **ids,
+            # Field from PublicationBaseSchema that Semantic Scholar doesn't provide
+            # (set to None to satisfy schema inheritance requirement)
+            "pmc_id": None,
             "title": rec.get("title"),
             "abstract": abstract,
             "tldr": tldr,
@@ -258,20 +261,27 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding unused fields.
+        """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
-        Overrides base implementation to remove fields not collected for S2.
+        Note: pmc_id is kept with None value to satisfy PublicationBaseSchema
+        inheritance requirement. arxiv_id is excluded as it's not in the base schema.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without pmc_id/arxiv_id.
+            SilverRecord dictionary with all base schema fields.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
         silver_record = BaseTransformer.entity_to_silver_record(entity)
-        silver_record.pop("pmc_id", None)
+
+        # Note: Do NOT remove pmc_id - it inherits from PublicationBaseSchema
+        # and must exist in DataFrame even if set to None (Pandera requires
+        # columns to exist, not just be nullable)
+
+        # Remove arxiv_id only (not part of base schema)
         silver_record.pop("arxiv_id", None)
+
         return silver_record
