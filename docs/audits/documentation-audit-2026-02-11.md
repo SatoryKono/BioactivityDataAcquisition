@@ -836,6 +836,693 @@
 
 ---
 
+---
+
+# ПРИЛОЖЕНИЕ A: Промты для устранения расхождений
+
+> Каждый промт — самодостаточная инструкция для AI-агента (py-doc-bot).
+> Промты сгруппированы по фазам приоритетности.
+> Перед выполнением каждого промта агент ДОЛЖЕН прочитать целевой файл и код-референс.
+
+---
+
+## A.1. Фаза 0 — Блокирующие (P0 CRITICAL)
+
+### PROMPT-P0-01: Исправить data paths в getting-started.md и quick-start.md
+
+```
+Задача: Исправить все примеры путей данных в двух guide-файлах.
+
+Файлы для редактирования:
+  - docs/03-guides/getting-started.md
+  - docs/03-guides/quick-start.md
+
+Эталон (фактический паттерн из config_loader.py:163):
+  data/output/{layer_name}/{provider}/{entity_type}/
+
+Замены (выполни find-and-replace):
+  1. «data/bronze/v1/chembl/activity/» → «data/output/bronze/chembl/activity/{date}/»
+  2. «data/silver/chembl.activity/» → «data/output/silver/chembl/activity/»
+  3. «data/gold/chembl.activity_gold/» → «data/output/gold/chembl/activity/»
+  4. Любые другие вхождения «data/bronze/», «data/silver/», «data/gold/» без «output/» → добавить «output/» после «data/»
+  5. Заменить точку-разделитель «chembl.activity» → «chembl/activity» (слеш, не точка)
+  6. Убрать суффикс «_gold» из gold-путей
+
+Проверь: в обоих файлах не должно остаться паттернов «data/bronze/», «data/silver/», «data/gold/» без «output/».
+
+Audit IDs: GS-01, GS-02, GS-03, GUIDE-40
+```
+
+### PROMPT-P0-02: Переписать конструктор UnifiedHTTPClient в API reference
+
+```
+Задача: Полностью переписать пример конструктора UnifiedHTTPClient.
+
+Файл для редактирования:
+  docs/04-reference/api/infrastructure.md
+
+Прочитай актуальную сигнатуру из:
+  src/bioetl/infrastructure/adapters/http/client.py:83-93
+
+Найди в документе секцию с конструктором UnifiedHTTPClient, содержащую
+устаревшие параметры «base_url», «rate_limit», «max_retries».
+
+Замени на актуальную сигнатуру (из кода):
+  UnifiedHTTPClient(
+      rate_limiter: RateLimiterPort,
+      circuit_breaker: CircuitBreakerPort,
+      retry_config: RetryConfig,
+      metrics: MetricsPort,
+      logger: LoggerPort,
+      tracing: TracingPort,
+  )
+
+Обнови пример использования, если он есть в документе.
+
+Audit ID: API-10
+```
+
+### PROMPT-P0-03: Удалить несуществующие CLI flags и команды из runbooks
+
+```
+Задача: Заменить несуществующие CLI flags и команды на актуальные в runbooks.
+
+Файлы для редактирования:
+  1. docs/05-operations/runbooks/pipeline-failure-recovery.md
+  2. docs/05-operations/runbooks/data-recovery.md
+  3. docs/05-operations/runbooks/backfill-rebuild.md
+
+Замены:
+
+1) В pipeline-failure-recovery.md:
+   - «--full-refresh» → «--run-type rebuild»
+   - «bioetl verify --table chembl_activity» → удалить строку целиком или
+     заменить на: «Для проверки данных используйте: bioetl run --pipeline chembl_activity --run-type rebuild --limit 10»
+
+2) В data-recovery.md:
+   - «--full-rebuild» → «--run-type rebuild»
+   - «--ignore-checkpoint» → удалить флаг. Добавить примечание:
+     «Для сброса checkpoint удалите файл: data/output/checkpoints/{pipeline_name}.json»
+
+3) В backfill-rebuild.md:
+   - «make run-pipeline PIPELINE={name} ARGS="--full-rebuild"» →
+     «bioetl run --pipeline {name} --run-type rebuild»
+   - «make run-pipeline PIPELINE={name} ARGS="--backfill ..."» →
+     «bioetl run --pipeline {name} --run-type backfill --start-date YYYY-MM-DD --end-date YYYY-MM-DD»
+
+Проверь: ни в одном runbook не должно остаться «--full-refresh», «--full-rebuild»,
+«--ignore-checkpoint», «bioetl verify», «make run-pipeline».
+
+Audit IDs: OPS-05, OPS-06, OPS-07, OPS-08, OPS-10, OPS-11
+```
+
+### PROMPT-P0-04: Исправить exit codes в runbooks
+
+```
+Задача: Заменить устаревший exit code 10 на актуальный 83.
+
+Файлы для редактирования:
+  1. docs/05-operations/runbooks/README.md
+  2. docs/05-operations/runbooks/pipeline-failure-recovery.md
+
+Эталон:
+  src/bioetl/interfaces/cli/exit_codes.py:52-57
+  DATA_QUALITY_ERROR = 83
+
+Замена: Все вхождения «exit code 10» (в контексте DQ hard threshold) → «exit code 83 (DATA_QUALITY_ERROR)»
+
+Audit IDs: OPS-03, OPS-04
+```
+
+---
+
+## A.2. Фаза 1 — Критические (P1 HIGH)
+
+### PROMPT-P1-01: Исправить QuarantineEntry states в domain-layer.md
+
+```
+Задача: Заменить устаревшую диаграмму состояний QuarantineEntry.
+
+Файл: docs/02-architecture/01-domain-layer.md
+
+Найди секцию §2.2 с описанием QuarantineEntry и состояниями:
+  «PENDING → RETRYING → RECOVERED/DEAD_LETTER»
+
+Замени на актуальные состояния из src/bioetl/domain/aggregates/quarantine_entry.py:31-55:
+  «NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED»
+
+Enum: QuarantineStatus(StrEnum) с 5 значениями:
+  NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED
+
+Обнови Mermaid-диаграмму, если она есть в секции.
+
+Audit ID: D-03
+```
+
+### PROMPT-P1-02: Исправить bootstrap_composite_pipeline в composition-layer.md
+
+```
+Задача: Исправить сигнатуру и описание bootstrap_composite_pipeline.
+
+Файл: docs/02-architecture/05-composition-layer.md
+
+Найди секцию §3.1 с описанием bootstrap_composite_pipeline.
+
+Текущее (неверное): async функция с параметрами (name: str, limit: int)
+Актуальное из src/bioetl/composition/bootstrap/runtime/composite.py:528:
+  def bootstrap_composite_pipeline(
+      config: CompositeConfig,
+      runtime: CompositeRuntimeConfig,
+  ) -> CompositePipelineRunner
+
+Ключевые отличия:
+  1. Функция sync (не async)
+  2. Принимает CompositeConfig и CompositeRuntimeConfig (не string name и int limit)
+  3. Возвращает CompositePipelineRunner
+
+Audit ID: C-09
+```
+
+### PROMPT-P1-03: Обновить orchestration/ описание в interfaces-layer.md
+
+```
+Задача: Обновить описание модуля orchestration/.
+
+Файл: docs/02-architecture/04-interfaces-layer.md
+
+Найди секцию §2.3 про orchestration/ и graceful shutdown.
+
+Текущее (неверное): описывает signal handlers и graceful shutdown в orchestration/
+Фактически: src/bioetl/interfaces/orchestration/__init__.py содержит только
+комментарий «Signal handlers were removed in 2025-12-31»
+
+Замени текст секции на:
+  «orchestration/ — модуль пуст. Signal handlers были удалены 2025-12-31.
+  Graceful shutdown обрабатывается непосредственно в CLI командах:
+  - interfaces/cli/commands/run.py
+  - interfaces/cli/commands/run_all.py
+  - interfaces/cli/commands/run_composite.py
+  Shutdown логика вынесена в application/core/shutdown.py»
+
+Audit ID: IF-05
+```
+
+### PROMPT-P1-04: Исправить имена методов портов в api/domain.md
+
+```
+Задача: Исправить все неверные имена методов в API reference для domain портов.
+
+Файл: docs/04-reference/api/domain.md
+
+Замены (проверь каждую по коду):
+
+1) LockPort (src/bioetl/domain/ports/locking.py:64):
+   «refresh()» → «heartbeat()»
+
+2) MetricsPort (src/bioetl/domain/ports/observability.py):
+   «increment()» → «increment_counter()» (строка 46)
+   «gauge()» → «set_gauge()» (строка 61)
+   «histogram()» → «observe_histogram()» (строка 76)
+
+3) Entities (src/bioetl/domain/entities/__init__.py):
+   «Activity» → «Bioactivity» (или «ActivityRecord»)
+   «Document» → «ChemblPublication» (или удалить — класс Document не существует)
+
+4) Transformations (src/bioetl/domain/transformations.py:101):
+   «compute_content_hash» → «generate_content_hash»
+
+Audit IDs: API-01, API-02, API-03, API-04, API-05, API-06, API-07
+```
+
+### PROMPT-P1-05: Удалить несуществующие классы из api/infrastructure.md
+
+```
+Задача: Удалить или заменить несуществующие классы в API infrastructure reference.
+
+Файл: docs/04-reference/api/infrastructure.md
+
+1) «MetricsExporter» → заменить на «PrometheusMetrics»
+   Источник: src/bioetl/infrastructure/observability/prometheus_metrics.py
+
+2) «LineageTracker» → полностью удалить секцию (класс не существует нигде в коде)
+
+3) «DeltaWriter» → полностью удалить секцию (класс удалён).
+   Добавить примечание: «Функциональность перенесена в SilverWriter и GoldWriter»
+
+Audit IDs: API-08, API-09, API-11
+```
+
+### PROMPT-P1-06: Исправить entity names в domain/entities.md и composition/factories.md
+
+```
+Задача: Исправить имена entity-классов и factory-классов в API sub-pages.
+
+Файлы для редактирования:
+  1. docs/04-reference/api/domain/entities.md
+  2. docs/04-reference/api/composition.md
+  3. docs/04-reference/api/application/core.md
+
+Замены:
+
+В entities.md:
+  «Activity» → «Bioactivity» (src/bioetl/domain/entities/__init__.py)
+  «Document» → «ChemblPublication»
+
+В composition.md:
+  «ServicesFactory» → «BaseServicesFactory / ServicesBuilder»
+  «@register("chembl_activity")» → «registry.register_factory("chembl_activity", factory_fn)»
+
+В core.md:
+  Удалить «StreamingBatchProcessor» как отдельный класс.
+  Добавить: «Streaming-режим интегрирован в BatchTransformer как streaming_processing mode»
+
+Audit IDs: APIREF-05, APIREF-40, APIREF-45, API-12, API-13
+```
+
+### PROMPT-P1-07: Исправить observability-checklist.md
+
+```
+Задача: Исправить тип возврата health_check и endpoint path.
+
+Файл: docs/05-operations/runbooks/observability-checklist.md
+
+1) Найди описание health_check(): «-> bool»
+   Замени на: «-> HealthStatus» (HealthStatus — это enum из domain/types.py)
+
+2) Найди ChEMBL health endpoint: «/chembl/api/data/status.json»
+   Замени на: «/chembl/api/data/status» (без .json)
+
+Audit IDs: OPS-01, OPS-02
+```
+
+### PROMPT-P1-08: Исправить quarantine command format
+
+```
+Задача: Исправить формат CLI команды quarantine purge.
+
+Файл: docs/05-operations/runbooks/dq-failure-investigation.md
+
+Найди: «bioetl quarantine-purge --older-than 30d»
+Замени на: «bioetl quarantine purge --pipeline <pipeline_name> --older-than-days 30»
+
+Обрати внимание:
+  - «quarantine-purge» → «quarantine purge» (подкоманда, не дефис)
+  - «--older-than 30d» → «--older-than-days 30» (int тип, без суффикса d)
+  - Добавлен обязательный «--pipeline <pipeline_name>»
+
+Эталон: src/bioetl/interfaces/cli/commands/quarantine.py
+
+Audit ID: OPS-09
+```
+
+---
+
+## A.3. Фаза 2 — Важные (P2 MEDIUM)
+
+### PROMPT-P2-01: Убрать Iceberg из RULES.md
+
+```
+Задача: Удалить все упоминания Iceberg как реализованного формата.
+
+Файл: docs/00-project/RULES.md
+
+1) §1.3 — Silver формат:
+   «Delta Lake / Iceberg» → «Delta Lake»
+
+2) §1.3 — Gold формат:
+   «Delta/Iceberg/Parquet» → «Delta Lake»
+
+3) Если есть другие упоминания Iceberg как реализованного — заменить на
+   «Delta Lake (Iceberg — запланирован, не реализован)» или просто удалить.
+
+Audit IDs: R-01, R-02
+```
+
+### PROMPT-P2-02: Исправить ссылки на методы/классы в RULES.md
+
+```
+Задача: Исправить неверные ссылки на код в RULES.md.
+
+Файл: docs/00-project/RULES.md
+
+1) §1.4 — «PipelineRunner._clear_exports()» → «MedallionLifecycleService.clear()»
+   (src/bioetl/application/services/medallion_lifecycle.py)
+
+2) §2.3 — QuarantineStatus: «3 значения (NEW|IGNORED|REPROCESSED)» →
+   «5 значений: NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED»
+   (src/bioetl/domain/aggregates/quarantine_entry.py:31-55)
+
+3) §2.2 — «compute_content_hash» → «generate_content_hash»
+   (src/bioetl/domain/transformations.py:101)
+
+4) §3.1 — Лог-поле «ts» → «timestamp»
+   (structlog TimeStamper default key)
+
+Audit IDs: R-03, R-04, R-05, R-06
+```
+
+### PROMPT-P2-03: Исправить имена фабрик в composition-layer.md
+
+```
+Задача: Исправить имена классов фабрик.
+
+Файл: docs/02-architecture/05-composition-layer.md
+
+Замени в секции §2.2:
+  1. «StorageAdapterFactory» → «StorageAdapter» (composition/factories/storage_adapter.py:38)
+  2. «ServicesFactory» → «BaseServicesFactory / ServicesBuilder» (services_factory.py:129,372)
+  3. «TransformerFactory» (класс) → «transformer_factory.py — модуль с функциями
+     register_transformer() и create_transformer()» (transformer_factory.py:31,47)
+  4. «DQFactory» → «DQServicesFactory» (dq_factory.py:35)
+
+В §2.3:
+  5. «DataSourceRegistry в providers/» → «DataSourceRegistry в factories/data_source_factory.py:100»
+  6. «7 зарегистрированных провайдеров» → «8 провайдеров (+uniprot_idmapping)»
+
+Audit IDs: C-03, C-04, C-05, C-06, C-07, C-08
+```
+
+### PROMPT-P2-04: Обновить версии в pipeline specs (bulk)
+
+```
+Задача: Обновить version с 1.1.0 на 1.2.0 во всех pipeline spec документах.
+
+Файлы для редактирования (8 штук):
+  1. docs/04-reference/pipelines/chembl/01-protein-class-spec.md
+  2. docs/04-reference/pipelines/chembl/02-cell-line-spec.md
+  3. docs/04-reference/pipelines/chembl/03-molecule-spec.md
+  4. docs/04-reference/pipelines/chembl/04-target-spec.md
+  5. docs/04-reference/pipelines/chembl/05-activity-spec.md
+  6. docs/04-reference/pipelines/chembl/06-assay-spec.md
+  7. docs/04-reference/pipelines/pubchem/01-compound-spec.md
+  8. docs/04-reference/pipelines/uniprot/01-protein-spec.md (если есть version)
+
+В каждом файле замени: «version: 1.1.0» → «version: 1.2.0»
+или «Version: 1.1.0» → «Version: 1.2.0» (зависит от формата).
+
+Эталон: configs/pipelines/{provider}/{entity}.yaml — все содержат version: "1.2.0"
+
+Audit ID: SPEC-01, SPEC-07, SPEC-13, SPEC-19, SPEC-24, SPEC-29, SPEC-40
+```
+
+### PROMPT-P2-05: Исправить molecule-spec расхождения
+
+```
+Задача: Исправить 3 расхождения в molecule pipeline spec.
+
+Файл: docs/04-reference/pipelines/chembl/03-molecule-spec.md
+
+1) Schema field count: «23 поля» → «59 полей»
+   Причина: Spec считает только API-level поля, но schema flattens molecule_hierarchy,
+   molecule_properties, molecule_structures, molecule_synonyms.
+   Эталон: src/bioetl/domain/schemas/chembl/molecule.py — подсчитай Series fields.
+
+2) partition_by: «[]» (нет) → «["molecule_type"]»
+   Эталон: configs/pipelines/chembl/molecule.yaml:104
+
+3) Если в spec упоминается «23 поля в API» — оставить, но добавить:
+   «После flattening Silver schema содержит 59 полей»
+
+Audit IDs: SPEC-14, SPEC-15
+```
+
+### PROMPT-P2-06: Исправить расхождения в других pipeline specs
+
+```
+Задача: Исправить точечные расхождения в pipeline specs.
+
+1) docs/04-reference/pipelines/chembl/02-cell-line-spec.md:
+   Поле «cell_source_tax_id» → «cell_source_taxonomy_id»
+   Эталон: src/bioetl/domain/schemas/chembl/cell_line.py:55
+
+2) docs/04-reference/pipelines/chembl/04-target-spec.md:
+   «14 target types» → «17 target types»
+   Прочитай полный список из configs/pipelines/chembl/target.yaml:46 и обнови таблицу.
+
+3) docs/04-reference/pipelines/chembl/05-activity-spec.md:
+   standard_units: «5 (nM, uM, mM, pM, M)» → «7 (+ ug.mL-1, mg.kg-1)»
+   Эталон: configs/pipelines/chembl/activity.yaml:63
+
+Audit IDs: SPEC-08, SPEC-21, SPEC-28
+```
+
+### PROMPT-P2-07: Обновить pipeline count в README и guides
+
+```
+Задача: Обновить подсчёт пайплайнов во всех документах.
+
+Файлы:
+  1. docs/04-reference/pipelines/README.md
+  2. docs/04-reference/pipelines/INDEX.md (если содержит count)
+  3. docs/03-guides/pipeline-configuration.md
+
+Текущее: «19 standard + 3 composite = 22 pipelines» или «19 entity + 2 composite = 21»
+Актуальное: подсчитай файлы:
+  - configs/pipelines/ (все .yaml кроме _base.yaml и _schema.json) = 21 standard
+  - configs/composite/ (все .yaml) = 5 composite
+  - Итого: 21 standard + 5 composite = 26
+
+Обнови таблицу pipelines, добавив недокументированные:
+  - ChEMBL: subcellular_fraction, tissue
+  - Composite: activity, assay
+
+Audit IDs: PL-01, PL-02, PL-03, GUIDE-33
+```
+
+### PROMPT-P2-08: Пометить ADR-008 как Superseded
+
+```
+Задача: Обновить статус ADR-008 (Graceful Shutdown Strategy).
+
+Файл: docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md
+
+В заголовке ADR:
+  Status: «Accepted» → «Superseded»
+
+Добавить в начало:
+  «> **Superseded:** Signal handlers удалены 2025-12-31.
+  > Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/shutdown.py.
+  > orchestration/ модуль пуст.»
+
+Audit ID: ADR-13
+```
+
+### PROMPT-P2-09: Исправить governance и agent docs
+
+```
+Задача: Исправить пути и naming patterns в governance и agent документах.
+
+1) .aiassistant/rules/09-etl-architecture.md:
+   Pipeline naming: «{entity}_{source}» → «{source}_{entity}»
+   Пример: «activity_chembl» → «chembl_activity»
+
+2) .claude/agents/py-code-bot.md:
+   Entity location: «domain/entities/{provider}/{entity}.py» →
+   «domain/entities/{provider}_{entity}.py» (flat structure)
+   Client file: «adapters/{provider}/{entity}_client.py» →
+   «adapters/{provider}/client.py» (generic client per provider)
+
+3) .aiassistant/rules/12-entity-naming-policy.md:
+   Test path: «tests/bioetl/pipelines/<provider>/<entity>/test_<stage>.py» →
+   «tests/unit/application/pipelines/<provider>/test_<entity>_transformer.py»
+
+Audit IDs: GOV-07, GOV-08, GOV-09, GOV-10
+```
+
+### PROMPT-P2-10: Исправить provider docs (rate limits, versions, field counts)
+
+```
+Задача: Исправить расхождения в provider reference документах.
+
+1) docs/04-reference/providers/chembl/molecule.md:
+   Schema version: «1.0.0» → «1.2.0»
+
+2) docs/04-reference/providers/chembl/activity.md:
+   Schema version: «1.0.0» → «1.2.0»
+   Field count: «55 полей» → «57 полей»
+   Gold filter: «IC50, Ki» → «IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50» (9 типов)
+
+3) docs/04-reference/providers/crossref/publication.md:
+   Rate limit: «~5 req/sec» → проверить configs/sources/crossref.yaml и обновить
+
+4) docs/04-reference/providers/openalex/publication.md:
+   Rate limit: «~5 req/sec» → проверить configs/sources/openalex.yaml и обновить
+   Batch DOI: «до 100 DOIs» → «до 50 DOIs» (config: batch_size: 50)
+
+Audit IDs: PROV-01, PROV-05, PROV-06, PROV-07, PROV-18, PROV-19, PROV-20
+```
+
+---
+
+## A.4. Фаза 3 — Косметические (P3 LOW)
+
+### PROMPT-P3-01: Исправить подсчёты файлов в architecture docs
+
+```
+Задача: Обновить все подсчёты файлов/модулей в architecture документах.
+
+1) docs/02-architecture/01-domain-layer.md:
+   §2.1 — «26 protocol-файлов» → подсчитай: ls src/bioetl/domain/ports/*.py | wc -l
+   §2.7 — «exceptions/ (5 файлов)» → подсчитай: ls src/bioetl/domain/exceptions/*.py | wc -l
+   §2.7 — «schemas/ (~60 файлов)» → подсчитай: find src/bioetl/domain/schemas -name '*.py' | wc -l
+
+2) docs/02-architecture/04-interfaces-layer.md:
+   §2.1 — «17 модулей в commands/» → подсчитай: ls src/bioetl/interfaces/cli/commands/*.py | wc -l
+
+3) docs/02-architecture/00-overview.md:
+   «Additional 26 diagrams» → подсчитай: ls docs/02-architecture/diagrams/mermaid/*.mmd | wc -l
+
+Каждое число замени на фактическое из подсчёта + добавь дату актуальности.
+
+Audit IDs: D-01, D-04, D-05, IF-01, O-03
+```
+
+### PROMPT-P3-02: Документировать недостающие модули и порты
+
+```
+Задача: Добавить недокументированные модули и порты.
+
+1) docs/02-architecture/01-domain-layer.md §2.1:
+   Удалить 3 несуществующих порта: PipelineObserverPort, ExportPort, RetentionPort
+   Добавить в список актуальные порты из src/bioetl/domain/ports/__init__.py:
+   Прочитай __all__ из __init__.py и сравни с документированным списком.
+
+2) docs/02-architecture/04-interfaces-layer.md §2.1:
+   Добавить 3 недокументированных модуля: health_server_integration,
+   metrics_server_integration, run_helpers
+
+3) docs/02-architecture/05-composition-layer.md §2.1:
+   Добавить 2 недокументированных модуля bootstrap/cli/: checkpoint.py, storage.py
+
+4) docs/02-architecture/05-composition-layer.md §2.3:
+   Добавить 8-й провайдер: uniprot_idmapping
+
+Audit IDs: D-02, IF-02, C-01, C-08
+```
+
+### PROMPT-P3-03: Исправить API sub-pages — module locations
+
+```
+Задача: Проверить и исправить расположение модулей в API sub-pages.
+
+1) docs/04-reference/api/application/core.md:
+   Проверь: существует ли LockManager в application/core/?
+   Если нет — найди фактический путь через: grep -rn "class LockManager" src/bioetl/
+   Обнови путь в документе.
+
+2) docs/04-reference/api/application/core.md:
+   Проверь расположение утилит normalize_string, safe_extract, parse_date_field:
+   grep -rn "def normalize_string\|def safe_extract\|def parse_date_field" src/bioetl/
+   Обнови пути import в документе.
+
+3) docs/04-reference/api/infrastructure/unified-http-client.md:
+   «SimpleCircuitBreaker» → проверь: grep -rn "class.*CircuitBreaker" src/bioetl/
+   Если фактическое имя «CircuitBreaker» (без Simple) — исправь.
+
+Audit IDs: APIREF-08, APIREF-10, APIREF-107
+```
+
+---
+
+## A.5. Фаза 4 — Недостающие тесты
+
+### PROMPT-T-01: Добавить architecture test для Medallion Clear Policy
+
+```
+Задача: Создать тест для ARCH-007 (Medallion Clear Policy).
+
+Файл: tests/architecture/test_medallion_invariants.py (добавить в существующий)
+
+Тест должен проверить:
+  - REBUILD run_type → clear_silver() и clear_gold() вызываются
+  - BACKFILL run_type → clear_silver() и clear_gold() вызываются
+  - INCREMENTAL run_type → clear_silver() и clear_gold() НЕ вызываются
+
+Прочитай MedallionLifecycleService.clear() для понимания логики.
+Используй mock для storage writer.
+
+Audit ID: SR-07 (ai-selfreview-rules.md ARCH-007)
+```
+
+### PROMPT-T-02: Добавить architecture tests для антипаттернов
+
+```
+Задача: Создать тесты для правил AP-004, AP-005, AP-006, AP-008.
+
+Файл: tests/architecture/test_antipatterns.py (новый файл)
+
+Тесты:
+1) test_no_sentinel_values:
+   Поиск в src/bioetl/**/*.py паттернов: = -1, "N/A", "n/a", = 9999
+   Исключения: тестовые фикстуры, комментарии
+
+2) test_no_hardcoded_secrets:
+   Поиск: password\s*=\s*["'], api_key\s*=\s*["'], secret\s*=\s*["']
+   Исключения: тесты, Port/Protocol definitions
+
+3) test_no_print_in_production:
+   Поиск: ^\s*print( в src/bioetl/**/*.py
+   Исключения: interfaces/cli/
+
+4) test_no_blocking_io_in_async:
+   AST-анализ: найти async def функции содержащие open(, requests., urllib
+   в src/bioetl/**/*.py
+
+Audit IDs: SR-11, SR-12, SR-13, SR-14
+```
+
+### PROMPT-T-03: Добавить architecture tests для naming conventions
+
+```
+Задача: Создать тесты для правил NAME-001..006.
+
+Файл: tests/architecture/test_naming_conventions.py (новый файл)
+
+Тесты:
+1) test_class_naming_suffixes:
+   Проверить что классы в application/ имеют суффиксы: Factory, Service,
+   Transformer, Error, Config, Protocol, Port (NAME-001)
+
+2) test_module_naming_snake_case:
+   Все .py файлы в src/bioetl/ используют snake_case (NAME-003)
+   Нет сокращений: dw.py, utils.py, helpers.py, misc.py
+
+3) test_constants_upper_snake_case:
+   Проверить что module-level constants используют UPPER_SNAKE_CASE (NAME-005)
+
+Audit IDs: SR-17, SR-18, SR-19
+```
+
+### PROMPT-T-04: Добавить doc-code sync test
+
+```
+Задача: Создать тест синхронизации документации с кодом.
+
+Файл: tests/architecture/test_documentation_sync.py (новый файл)
+
+Тесты:
+1) test_ports_count_matches_docs:
+   Подсчитай protocol файлы в domain/ports/ и сравни с числом в
+   docs/02-architecture/01-domain-layer.md
+
+2) test_pipeline_count_matches_docs:
+   Подсчитай .yaml в configs/pipelines/ и configs/composite/ и сравни с числом
+   в docs/04-reference/pipelines/README.md
+
+3) test_quarantine_states_match_docs:
+   Прочитай enum QuarantineStatus из domain/aggregates/quarantine_entry.py
+   и проверь что все значения упомянуты в docs/02-architecture/01-domain-layer.md
+
+4) test_exit_codes_match_docs:
+   Прочитай exit codes из interfaces/cli/exit_codes.py и проверь что
+   все упомянуты в docs/04-reference/cli.md
+
+Эти тесты предотвратят drift документации от кода в будущем.
+```
+
+---
+
 *Исчерпывающий аудит завершён. Проверено **444 утверждения** из **~145 документов** в 3 фазах.*
 *Общий результат: **314 (71%)** соответствуют, **34 (8%)** частично, **96 (22%)** не соответствуют.*
-*Отчёт сгенерирован 2026-02-11. Рекомендуется приоритетное устранение P0/P1 (28 issues).*
+*Приложение A содержит **20 промтов** для устранения **96 расхождений** по 4 фазам приоритетности.*
+*Отчёт сгенерирован 2026-02-11.*
