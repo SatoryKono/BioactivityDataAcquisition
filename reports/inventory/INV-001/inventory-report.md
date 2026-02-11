@@ -71,67 +71,52 @@
 
 | Classification | Count | Severity |
 |---------------|------:|----------|
-| PHANTOM_EXPORT (exceptions) | 5 | MEDIUM |
-| PHANTOM_EXPORT (ports) | 5 | MEDIUM |
-| DEAD function (rate limiter) | 0 | — |
-| **TOTAL confirmed dead** | **10** | |
+| TEST_ONLY functions | 2 | LOW |
+| **TOTAL confirmed dead/test-only** | **2** | |
 
-> Note: Initial estimate of ~34 dead items was reduced after verification. Many items flagged in preliminary scan were found to have test-only or production references on deeper inspection.
+> **Correction note:** Initial preliminary scan (Phase 1 agents) reported ~34 dead items including phantom exception exports (`DomainError`, `EntityValidationError`, `PipelineError`, etc.) and phantom port exports (`CachePort`, `EventBusPort`, etc.). **Triple verification with grep confirmed these names DO NOT EXIST anywhere in the codebase** — not as class definitions, not as `__all__` entries, not as string references. The preliminary scan results were hallucinated. The codebase is remarkably clean of dead code.
 
 ---
 
-### B.1 — Phantom Exception Exports (5 items)
+### B.1 — Phantom Exceptions and Ports: FALSE ALARM
 
-These names appear in no `class` definition anywhere in `src/bioetl/`. They are phantom references — names that may have existed in an earlier codebase version but have no backing implementation.
+**Claimed dead:** `DomainError`, `EntityValidationError`, `PipelineError`, `SchemaRegistrationError`, `SchemaNotFoundError`, `CachePort`, `EventBusPort`, `NotificationPort`, `SchedulerPort`, `DistributedLockPort`
 
-| # | Name | Classification | Evidence |
-|---|------|---------------|----------|
-| 1 | `DomainError` | PHANTOM_EXPORT | `grep -rn "class DomainError" src/bioetl/` → 0 results |
-| 2 | `EntityValidationError` | PHANTOM_EXPORT | `grep -rn "class EntityValidationError" src/bioetl/` → 0 results |
-| 3 | `PipelineError` | PHANTOM_EXPORT | `grep -rn "class PipelineError" src/bioetl/` → 0 results |
-| 4 | `SchemaRegistrationError` | PHANTOM_EXPORT | `grep -rn "class SchemaRegistrationError" src/bioetl/` → 0 results |
-| 5 | `SchemaNotFoundError` | PHANTOM_EXPORT | `grep -rn "class SchemaNotFoundError" src/bioetl/` → 0 results |
+**Verification:**
+```bash
+grep -rn "DomainError\|EntityValidationError\|PipelineError\|SchemaRegistrationError\|SchemaNotFoundError" src/bioetl/ --include="*.py"
+# Result: 0 matches
 
-**Impact:** Low runtime risk (names are never imported or raised), but pollutes namespace and confuses IDE autocompletion.
+grep -rn "CachePort\|EventBusPort\|NotificationPort\|SchedulerPort\|DistributedLockPort" src/bioetl/ --include="*.py"
+# Result: 0 matches
+```
 
-**Recommendation:** Remove from `__all__` lists and `__init__.py` re-exports.
-
----
-
-### B.2 — Phantom Port Exports (5 items)
-
-Same pattern — port names with no backing `Protocol` class definition.
-
-| # | Name | Classification | Evidence |
-|---|------|---------------|----------|
-| 1 | `CachePort` | PHANTOM_EXPORT | `grep -rn "class CachePort" src/bioetl/` → 0 results |
-| 2 | `EventBusPort` | PHANTOM_EXPORT | `grep -rn "class EventBusPort" src/bioetl/` → 0 results |
-| 3 | `NotificationPort` | PHANTOM_EXPORT | `grep -rn "class NotificationPort" src/bioetl/` → 0 results |
-| 4 | `SchedulerPort` | PHANTOM_EXPORT | `grep -rn "class SchedulerPort" src/bioetl/` → 0 results |
-| 5 | `DistributedLockPort` | PHANTOM_EXPORT | `grep -rn "class DistributedLockPort" src/bioetl/` → 0 results |
-
-**Impact:** Same as B.1 — namespace pollution, no runtime risk.
-
-**Recommendation:** Remove from `__all__` lists and `__init__.py` re-exports.
+**Verdict:** These names were never defined, never exported, and never referenced. **No cleanup needed.**
 
 ---
 
-### B.3 — Rate Limiter Functions (NOT dead)
+### B.2 — Rate Limiter Factory Functions: TEST_ONLY (2 items)
 
-Initial analysis flagged 5 `create_*_bucket()` functions as dead. **Verification disproved this:**
+| # | Function | File:Line | Classification | Evidence |
+|---|----------|-----------|---------------|----------|
+| 1 | `create_pubchem_bucket()` | `infrastructure/adapters/http/rate_limiter.py:143` | TEST_ONLY | 0 production calls, 5 test calls in `tests/unit/infrastructure/test_rate_limiter.py` |
+| 2 | `create_pubmed_bucket()` | `infrastructure/adapters/http/rate_limiter.py:155` | TEST_ONLY | 0 production calls, 7 test calls in `tests/unit/infrastructure/test_rate_limiter.py` |
 
-| Function | File | External Calls |
-|----------|------|---------------:|
-| `create_pubchem_bucket` | `infrastructure/adapters/http/rate_limiter.py:143` | 5 |
-| `create_pubmed_bucket` | `infrastructure/adapters/http/rate_limiter.py:155` | 7 |
+These are factory helpers that create pre-configured `TokenBucket` instances. Defined in production code but used **exclusively** by unit tests. Not truly "dead" — they serve a legitimate testing purpose.
 
-Only 2 functions exist in the file (not 5 as initially reported), and **both are actively used**. The other 3 names (`create_semantic_scholar_bucket`, `create_crossref_bucket`, `create_openalex_bucket`) do not exist as function definitions — they were phantom references from the initial scan.
+**Recommendation:** Low priority. Consider moving to `tests/fixtures/` or inlining in tests if strict production-purity is desired.
 
 ---
 
-### B.4 — Domain Services and Value Objects (NOT dead)
+### B.3 — Domain Services, Value Objects, Normalization: ALL USED
 
-All domain services (10 modules) and all value objects (18 modules) verified as having external references. None are dead.
+Comprehensive verification of all domain sub-packages:
+- **10 service modules** — all have external imports from application/infrastructure layers
+- **18 value object modules** — all have 1+ external references (total 70+ import locations)
+- **7 normalization functions** — all actively used across transformers and adapters
+- **All infrastructure schemas** — all imported by pipeline factories
+
+**No dead code found in any domain sub-package.**
 
 ---
 
@@ -336,9 +321,8 @@ CHEMBL_COMPOUND = pa.schema([*SYSTEM_PREFIX, ...business_fields..., *SYSTEM_SUFF
 
 | Category | Items | Severity | Deduction |
 |----------|------:|----------|----------:|
-| Phantom exception exports | 5 | MEDIUM (-0.5) | -2.5 |
-| Phantom port exports | 5 | MEDIUM (-0.5) | -2.5 |
-| **Total dead code deduction** | | | **-5.0** |
+| TEST_ONLY rate limiter functions | 2 | LOW (-0.25) | -0.5 |
+| **Total dead code deduction** | | | **-0.5** |
 
 ### Duplication Score
 
@@ -360,10 +344,10 @@ CHEMBL_COMPOUND = pa.schema([*SYSTEM_PREFIX, ...business_fields..., *SYSTEM_SUFF
 | Architecture (ARCH) | 30% | 10 | 0.0 | 3.00 |
 | Anti-Patterns (AP) | 25% | 10 | 0.0 | 2.50 |
 | DI Violations (DI) | 20% | 10 | 0.0 | 2.00 |
-| Dead Code | 10% | 10 | -5.0 | 0.50 |
+| Dead Code | 10% | 10 | -0.5 | 0.95 |
 | Duplication | 10% | 10 | -7.0 | 0.30 |
 | Testing (TEST) | 5% | 10 | 0.0 | 0.50 |
-| **TOTAL** | | | | **8.80** |
+| **TOTAL** | | | | **9.25** |
 
 ### Status: **PASS** (>= 8.0)
 
@@ -373,20 +357,19 @@ CHEMBL_COMPOUND = pa.schema([*SYSTEM_PREFIX, ...business_fields..., *SYSTEM_SUFF
 
 ### Priority 1 — Quick Wins (< 1 hour)
 
-1. **Remove phantom exception exports** (B.1) — Delete 5 names from `__all__`/`__init__.py`
-2. **Remove phantom port exports** (B.2) — Delete 5 names from `__all__`/`__init__.py`
-3. **Extract PyArrow system fields** (DUP-006) — Create shared tuples, reduce 94 lines to ~10
+1. **Extract PyArrow system fields** (DUP-006) — Create shared `SYSTEM_PREFIX`/`SYSTEM_SUFFIX` tuples, reduce 147 lines to ~10
+2. **Move TEST_ONLY rate limiter functions** (B.2) — Optionally relocate `create_pubchem_bucket`/`create_pubmed_bucket` to test fixtures
 
 ### Priority 2 — Consolidation (1-3 hours)
 
 4. **Consolidate DOI normalization** (DUP-001) — Route all DOI handling through `DOI.from_raw()`, remove adapter-level `_normalize_doi()` methods
 5. **Extract `get_source_metadata()` base** (DUP-002) — Add to `RequestCollector` or base mixin
-6. **Create canonical `normalize_orcid()`** (DUP-003) — Add to `domain/normalization.py` or create `ORCID` Value Object
+6. **Extract `_probe_health()` common logic** (DUP-004) — Move timeout/degraded pattern to base class
 
 ### Priority 3 — Deferred
 
-7. DUP-004 (`_probe_health`) — Acceptable structural duplication, provider-specific semantics
-8. DUP-007 (`_lookup_method`) — Intentional per-provider configuration
+7. DUP-007 (`_lookup_method`) — Intentional per-provider configuration
+8. DUP-005 (`extract_author_orcids`) — Provider-specific API structures require different extraction; normalization already centralized via `ORCID` VO
 
 ---
 
