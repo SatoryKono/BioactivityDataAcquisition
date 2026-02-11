@@ -3,6 +3,51 @@
 ## Контекст
 Прочитай RULES.md v5.14 и сопутствующие документы проекта (01-domain-objects.md, 02-etl-layers.md, 03-data-flow.md, 04-duplication-reduction.md, 05-physical-layout.md). Проведи систематический аудит кодовой базы.
 
+**Обязательный фокус аудита:**
+- Сохранить текущий фокус на устранении дублирования и соблюдении SRP.
+- Дополнительно **обязательно** провести import-audit между архитектурными слоями.
+
+## Специализированный scope для аудита HTTP-адаптеров
+
+При анализе архитектуры адаптеров **обязательно** включай расширенный scope:
+
+- `src/bioetl/infrastructure/adapters/http/**`
+- `src/bioetl/infrastructure/adapters/*/client*.py`
+- `src/bioetl/infrastructure/adapters/*/fallback*.py`
+
+Дополнительно для каждого провайдера в этом scope выполняй сравнительный анализ с общими модулями, чтобы не предлагать дублирование уже существующих решений:
+
+- `src/bioetl/infrastructure/adapters/base.py`
+- `src/bioetl/infrastructure/adapters/sync_base.py`
+- `src/bioetl/infrastructure/adapters/http/client.py`
+- `src/bioetl/infrastructure/adapters/decorators/retry.py`
+- `src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py`
+
+Цель анализа: **минимизация boilerplate при добавлении нового провайдера** через
+`BaseHttpAdapter + mixins + declarative parser mapping`.
+
+## Обязательный артефакт: матрица «провайдер × паттерн»
+
+В выходном отчёте добавь отдельную матрицу по всем провайдерам из scope выше:
+
+| Провайдер | Retry | Rate limit | Pagination | Error mapping | Timeout | Logging | Использует общий модуль | Комментарий по дублированию |
+|-----------|-------|------------|------------|---------------|---------|---------|--------------------------|------------------------------|
+| ... | ✅/⚠️/❌ | ✅/⚠️/❌ | ✅/⚠️/❌ | ✅/⚠️/❌ | ✅/⚠️/❌ | ✅/⚠️/❌ | Да/Нет + какой | Краткое обоснование |
+
+Для каждой ячейки матрицы указывай ссылку на конкретную реализацию (файл/строки) или явно помечай `[данные отсутствуют]`.
+
+## KPI для контроля уменьшения boilerplate
+
+В отчёте фиксируй и сравнивай KPI по каждому клиенту/провайдеру:
+
+| KPI | Как считать | Базовое значение | Целевое значение |
+|-----|-------------|------------------|------------------|
+| LOC/клиент | количество строк в `client*.py` (без комментариев/пустых строк) | ___ | ↓ |
+| Среднее число override-методов | `count(def)` в конкретном клиенте, исключая inherited | ___ | ↓ |
+| Время создания нового клиента | оценка от шаблона до первого успешного health-check | ___ | ↓ |
+
+В рекомендациях по рефакторингу обязательно указывай, как каждое изменение влияет на эти KPI.
+
 ## Часть 1. Сбор объективных метрик
 
 Перед оценкой собери следующие данные:
@@ -19,6 +64,30 @@
 | Использование print() | `grep -r "print(" src/bioetl --include="*.py" | wc -l` | ___ шт. |
 | Hardcoded secrets | `grep -rE "(api_key|password|secret)\s*=" src/ | wc -l` | ___ шт. |
 
+### 1.1. Обязательный import-audit между слоями
+
+Явно проверь следующие нарушения:
+
+- `domain -> infrastructure` запрещено
+- `infrastructure -> application` запрещено
+- `composition` может импортировать все слои
+
+Собери обязательный артефакт: **dependency matrix** в формате `(layer_from, layer_to) -> imports_count`.
+
+Пример требуемого представления:
+
+| layer_from | layer_to | imports_count |
+|------------|----------|---------------|
+| domain | infrastructure | 0 |
+| infrastructure | application | 0 |
+| composition | domain | N |
+
+Для **каждого** найденного нарушения import-audit укажи:
+1. файл;
+2. строку импорта;
+3. причину, почему это нарушение;
+4. способ исправления (конкретный вариант рефакторинга).
+
 ## Часть 2. Оценка по 10 категориям
 
 Для каждой категории:
@@ -30,6 +99,11 @@
 
 #### 1. Соблюдение слоистой архитектуры (вес: 15%)
 **Что проверяется**: §1.1 RULES.md — domain не импортирует infrastructure/application; application не импортирует interfaces.
+
+**Обязательные проверки в этой категории:**
+- `domain -> infrastructure` = 0
+- `infrastructure -> application` = 0
+- `composition -> *` разрешено
 
 | Балл | Критерий |
 |------|----------|
@@ -194,6 +268,16 @@ grep -r "from bioetl.application" src/bioetl/domain/
 
 Для каждой фазы укажи ожидаемое изменение общего балла.
 
+### 3.5. Приоритизация изменений по горизонту
+
+Добавь в итог отдельный блок:
+
+- **quick wins (1–2 дня)**
+- **medium**
+- **redesign**
+
+Для каждого пункта укажи: проблему, ожидаемый эффект, трудозатраты и зависимости.
+
 ## Часть 4. Метрики контроля регресса
 
 Предложи набор автоматизируемых проверок для CI:
@@ -205,6 +289,43 @@ grep -r "from bioetl.application" src/bioetl/domain/
 | Циклические импорты | 0 | custom script | Да |
 | Нарушения слоёв | 0 | `grep` rules | Да |
 | print() в коде | 0 | `grep -r "print("` | Да |
+
+### 4.2. Scope и граф зависимостей для аудита пайплайнов
+
+При анализе архитектурной сложности и связности пайплайнов использовать **только следующий scope**:
+
+- `src/bioetl/application/pipelines/**`
+- `src/bioetl/application/core/**`
+- `src/bioetl/application/services/**`
+- `src/bioetl/infrastructure/adapters/*`
+- `src/bioetl/composition/factories/*`
+
+Провайдеры, для которых MUST выполняться явный анализ:
+
+- `chembl`
+- `pubchem`
+- `uniprot`
+- `crossref`
+- `openalex`
+- `semanticscholar`
+- `pubmed`
+
+Для каждого pipeline execution path MUST быть построен и проверен граф зависимостей между:
+
+1. `application/pipelines`
+2. `application/core`
+3. `application/services`
+4. `infrastructure/adapters/*`
+5. `composition/factories/*`
+
+Критерий сложности (кандидат на упрощение):
+
+- `>7` файлов на один `pipeline execution path`.
+
+Отчёт MUST содержать блок "было/стало" для каждого пайплайна:
+
+- количество файлов на execution path;
+- количество классов на execution path.
 
 ## Ограничения
 

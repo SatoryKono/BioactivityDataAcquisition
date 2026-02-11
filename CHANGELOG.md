@@ -5,6 +5,159 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Publication Classification Fields in Silver Output**: Classification fields now present in Silver Delta tables
+  - Added 3 classification fields to all 5 publication PyArrow schemas: `publication_type_unified` (Level 3: 214 types), `publication_subclass` (Level 2: ~25 groupings), `publication_class` (Level 1: EXP/REV/PEER)
+  - Affected schemas: `CHEMBL_PUBLICATION_SCHEMA`, `PUBMED_PUBLICATION_SCHEMA`, `SEMANTICSCHOLAR_PUBLICATION_SCHEMA`, `CROSSREF_PUBLICATION_SCHEMA`, `OPENALEX_PUBLICATION_SCHEMA`
+  - Root cause: Fields were created by transformers but filtered out by `SilverWriter._prepare_arrow_data()` due to absence in PyArrow schemas
+  - Impact: Classification fields now appear in both Silver provider tables and Composite publication output
+  - Tests: Added `TestPublicationSchemaClassificationFields` in `tests/unit/infrastructure/schemas/test_silver.py`
+  - Documentation: Updated `docs/analysis/PUBLICATION_TYPE_NORMALIZATION_ANALYSIS.md` with resolution details (§10.5)
+  - File: `src/bioetl/infrastructure/schemas/silver.py` (lines 52-56, 347-351, 777-781, 839-843, 926-930)
+
+- **`skip_gold` flag for composite sub-pipelines**: Individual pipelines (seed, enrichers,
+  dependencies) running within a composite pipeline now skip their own Gold layer writing.
+  Gold output is produced only by the composite merge phase, eliminating redundant writes
+  and stale per-provider Gold tables. Flag flows through `RunOptions` → `PipelineRunContext`
+  → `RuntimeConfig`; defaults to `False` (no change for standalone pipelines).
+- Extraction-level filtering for ChEMBL Activity pipeline (ADR-028 §3)
+  - Server-side API query parameters reduce data volume by ~75-90% (~20M → ~2-5M records)
+  - Configurable via `configs/filter/entities/chembl/activity.yaml`
+  - Logged in Bronze `SourceMetadata.query_string` for audit/reproducibility
+  - `APIRequestCollector.to_source_metadata()` accepts `query_string` parameter
+  - Integration tests in `tests/integration/chembl/test_activity_extraction_params.py`
+  - Provider documentation: `docs/providers/chembl.md`
+## [5.14.0] - 2026-02-09
+
+### Changed
+
+- **Publication Field Standardization**: Unified citation and author fields across all 5 providers
+  - Renamed `citation_count` → `citations_received` in `PublicationBaseSchema` for semantic clarity (incoming citations)
+  - Renamed `author_orcid_list` → `author_orcids` in `PublicationBaseSchema` for naming consistency
+  - Both fields moved from provider-specific schemas to `PublicationBaseSchema` (shared by all providers)
+  - Updated all 5 provider DQ configs (`configs/dq/entities/*/publication.yaml`)
+  - Updated all 5 provider filter configs (`configs/filter/entities/*/publication.yaml`)
+  - Updated composite field groups (`configs/composite/field_groups/publication.yaml`)
+
+- **Validation Rule Tightening**: Strengthened publication validation constraints
+  - `MIN_PUBLICATION_YEAR`: Changed from 1800 → 1500 (supports historical publications)
+  - Added ORCID format validation (`^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$`) via `@pa.check` in `PublicationBaseSchema`
+  - Added ISSN regex constant (`^\d{4}-\d{3}[\dX]$`) in `domain/schemas/constants.py`
+  - Tightened DOI regex validation in base schema
+
+- **SemanticScholar Schema Cleanup**: Excluded `raw_authors` field from schema
+  - `raw_authors` removed from SemanticScholar publication Silver schema
+  - Reduces data duplication (structured `authors` field already present)
+
+- **Package Structure Refactoring** (PR #1984, #1989):
+  - Split entrypoints, registration, and extractors into separate modules
+  - Added pipeline stub classes for DI-based pipeline registry
+  - Consolidated pipelines, split `gold_analyzer`, removed duplicates
+  - Deprecated re-export patterns in favor of direct imports
+
+### Added
+
+- **ISSN and ORCID Constants**: New regex patterns in `domain/schemas/constants.py`
+  - `ISSN_PATTERN`: `^\d{4}-\d{3}[\dX]$`
+  - `ORCID_PATTERN`: `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$`
+
+- **ProtocolError Exception**: New domain exception for protocol violation errors
+
+- **RecordProcessor Tracing Tests**: Unit tests for tracing integration in `RecordProcessor`
+
+- **ConfigService Tests**: Unit tests for configuration service
+
+- **Setup Script** (`run/setup.sh`): Environment bootstrap script for BioETL
+  - Consolidates `uv sync`, dependency validation, and environment checks
+  - Supports `--no-dev` flag for production installs
+
+### Fixed
+
+- **CI Stability** (multiple PRs):
+  - Resolved 63 mypy errors (`63→0`) and synced ruff version
+  - Fixed complexity exemptions and `render_diagrams` exit code
+  - Restored `type: ignore` comments for CI/local mypy compatibility
+  - Synced xenon exclusions for domain complexity limits
+
+### Documentation
+
+- Package structure audit report (`docs/audits/`)
+- Agent orchestration docs updated to kebab-case naming
+
+## [5.13.0] - 2026-02-06
+
+### Added
+
+- **Publication Validation System (ADR-033)**: Implemented comprehensive 5-level validation strategy for publication data
+  - **Base Validation**: Pandera schema validation (types, regex, nullable) — 329 tests generated
+  - **Structural Validation**: Cross-field consistency rules (page ordering, year matching, field dependencies) — 16 tests
+  - **External Verification**: HTTP-based ID verification with 6 upstream providers (CrossRef, PubMed, PMC, OpenAlex, S2, ChEMBL) — 16 tests
+  - **Logical Validation**: Range constraints and invariants (year range, non-negative counts, date ordering) — 12 tests
+  - **Semantic Validation**: NLP-based text consistency checks (title-abstract similarity, language detection, keyword relevance) — 13 tests
+  - **DQ Flags**: `_dq_error` (FAIL — blocking), `_dq_warn` (WARN — quarantine)
+  - **Coverage**: 191 fields × 5 providers (ChEMBL, PubMed, CrossRef, OpenAlex, Semantic Scholar)
+  - **Test Suite**: 471 tests (64% of target 735), organized by validation level and provider
+  - **Reference**: ADR-033 Publication Validation Strategy
+
+- **Validation Schema v3.0**: Structured validation rules inventory
+  - **Format**: Excel (XLSX) + CSV export
+  - **Sheets**: Validation Schema (191 rows × 19 columns), Enum Legend, Summary statistics
+  - **Location**: `docs/04-reference/schemas/publication_validation_schema_v3.xlsx`
+  - **Columns**: field_name, source_system, data_type, is_nullable, 5 validation levels (rule + result + description), comments
+  - **Results**: PASS, FAIL, WARN, SKIP, NOT_APPLICABLE
+
+- **Documentation Suite**:
+  - **ADR-033**: Architecture Decision Record for validation strategy (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
+  - **Field Reference**: Complete inventory of 191 fields with types, regex patterns, PK markers (`docs/04-reference/publication-fields-reference.md`)
+  - **Validation Guide**: Implementation guide with 4 Mermaid diagrams (architecture, DQ lifecycle, config hierarchy, workflow) (`docs/03-guides/publication-validation-guide.md`)
+  - **Operational Runbook**: Troubleshooting procedures with bash diagnostic commands for DevOps/Support (`docs/05-operations/runbooks/publication-validation-runbook.md`)
+  - **Test README**: Coverage matrix and usage instructions (`tests_generated/README.md`)
+
+- **Test Infrastructure**:
+  - **Fixtures**: 5 provider-specific minimal DataFrames in `tests_generated/conftest.py`
+  - **Base Validation Tests**: 404 tests across 5 providers (60 ChEMBL, 108 PubMed, 78 CrossRef, 83 OpenAlex, 75 S2)
+  - **Contract Tests**: 10 schema stability tests (inheritance, common fields, DQ flags, PK presence)
+  - **Markers**: `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.contracts`
+  - **VCR Support**: Integration tests prepared for HTTP recording/replay (currently mocked)
+
+### Changed
+
+- **Silver Layer Schemas**: Enhanced all 5 publication schemas with validation metadata
+  - Added explicit `_dq_warn` and `_dq_error` boolean fields
+  - Updated field descriptions with validation rules
+  - Aligned regex patterns across providers (DOI: `^10\.\d{4,9}/.+$`, PMID: `^[1-9]\d*$`, PMC: `^PMC\d+$`)
+
+- **Validation Modes**: CLI support for three validation profiles
+  - **Strict Mode**: All 5 levels enabled, fail on warn
+  - **Balanced Mode** (default): Base + Structural + Logical (no External/Semantic)
+  - **Fast Mode**: Base only (Pandera), for REBUILD with known clean data
+
+### Technical Details
+
+- **Validation Flow**: Bronze → Transformer → Pandera → Structural → External → Logical → Semantic → Delta Lake
+- **Quarantine Strategy**: Records with `_dq_warn=True` written to separate partition for manual review
+- **Configuration Hierarchy**: Default → Provider → Pipeline → CLI (priority order)
+- **External API Rate Limits**: CrossRef (50 req/s), PubMed (3 req/s), OpenAlex (100k/day), S2 (100 req/5min)
+- **Performance**: External Verification disabled by default (expensive), Semantic Validation opt-in only
+- **Observability**: Structured logging of all DQ events with Prometheus metrics (`bioetl_validation_*`)
+
+### Metrics
+
+- **Test Coverage**: 471/735 tests (64%) — remaining tests marked as TODO with expansion instructions
+- **Field Inventory**: 191 unique fields (28 ChEMBL, 52 PubMed, 37 CrossRef, 39 OpenAlex, 35 S2)
+- **Primary Keys**: 5 provider-specific non-nullable PKs (document_chembl_id, pmid, doi, openalex_id, paper_id)
+- **Validation Rules**: 191 base rules, ~80 structural rules, ~40 external endpoints, ~60 logical rules, ~30 semantic rules
+
+### References
+
+- ADR-033: Publication Validation Strategy
+- ADR-027: Silver Layer DQ Framework (inherited `_dq_*` flags)
+- ADR-014: Medallion Architecture (Bronze → Silver → Gold layers)
+- ADR-002: Hexagonal Architecture (validation services in application layer)
+
 ## [5.12.0] - 2026-02-04
 
 ### Changed

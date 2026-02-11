@@ -37,11 +37,36 @@
 
 **Расположение:** `src/bioetl/application/core/`
 
-Содержит базовые классы и общие компоненты, используемые пайплайнами:
+Содержит базовые классы и общие компоненты, используемые пайплайнами (27 файлов):
 
+**Базовые классы:**
 - **`BasePipeline`** (`base.py`) — Базовый класс для всех пайплайнов
 - **`BaseTransformer`** (`base_transformer.py`) — Базовый класс для трансформеров (Template Method паттерн)
 - **`RecordProcessor`** (`record_processor.py`) — Обработка batch-ов записей через Bronze→Silver→Gold
+
+**Исполнение:**
+- **`BatchExecutor`** (`batch_executor.py`, 786 LOC) — Unified batch executor (extract→transform→write)
+- **`BatchTransformer`** (`batch_transformer.py`) — Координация трансформаций
+- **`BatchWriter`** (`batch_writer.py`) — Запись batch-ов в medallion слои
+- **`PipelineRunner`** (`runner.py`) — Оркестрация жизненного цикла пайплайна
+
+**Сервисы ядра:**
+- **`PipelineServices`** (`pipeline_services.py`) — DI bundle портов для пайплайна
+- **`LockManager`** (`lock_manager.py`) — Координация блокировок
+- **`PreflightService`** (`preflight_service.py`) — Pre-run health checks
+- **`PostrunService`** (`postrun_service.py`) — Post-run операции (DQ, VACUUM, cleanup)
+- **`CheckpointManager`** (`checkpoint_manager.py`) — Checkpoint I/O
+- **`QuarantineManager`** (`quarantine_manager.py`) — Quarantine record handling
+- **`CleanupService`** (`cleanup_service.py`) — Bronze cleanup
+
+**Observability:**
+- **`BatchMetricsRecorder`** (`batch_metrics.py`) — Метрики per batch
+- **`BatchTracingManager`** (`batch_tracing.py`) — Tracing span management
+- **`HeartbeatTask`** (`heartbeat.py:21`) — Heartbeat мониторинг
+
+**Data Sources:**
+- **`FilteredDataSource`** (`filtered_data_source.py`) — Filter wrapper для data sources
+- **`IDMappingDataSource`** (`idmapping_data_source.py`) — ID mapping wrapper
 
 Подробнее о компонентах исполнения пайплайнов см. [раздел 2.4](#24-core--ядро-исполнения-пайплайнов).
 
@@ -65,10 +90,10 @@ factory = GenericPipelineFactory(
 **Ключевые характеристики:**
 - **MUST**: Трансформер передаётся в конструктор `BasePipeline` через параметр `transformer`
 - **MUST NOT**: Пайплайн не создаёт трансформер внутри себя
-- **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `_extract_business_data()`
+- **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `_transform_impl()`. Примечание: `_extract_business_data()` — метод промежуточных базовых классов `BaseChemblTransformer` (`base_chembl_transformer.py:160`) и `BasePublicationTransformer` (`base_publication_transformer.py:54`), не `BaseTransformer`.
 - **Если трансформер не передан**: `transform_bronze_to_silver()` выбрасывает `NotImplementedError`
 
-**Доступные трансформеры:**
+**Доступные трансформеры (23 класса):**
 | Provider | Трансформер | Расположение |
 |----------|-------------|--------------|
 | ChEMBL | `ActivityTransformer` | `pipelines/chembl/activity_transformer.py` |
@@ -76,12 +101,24 @@ factory = GenericPipelineFactory(
 | ChEMBL | `MoleculeTransformer` | `pipelines/chembl/molecule_transformer.py` |
 | ChEMBL | `TargetTransformer` | `pipelines/chembl/target_transformer.py` |
 | ChEMBL | `PublicationTransformer` | `pipelines/chembl/publication_transformer.py` |
+| ChEMBL | `AssayParametersTransformer` | `pipelines/chembl/assay_parameters_transformer.py` |
+| ChEMBL | `CellLineTransformer` | `pipelines/chembl/cell_line_transformer.py` |
+| ChEMBL | `CompoundRecordTransformer` | `pipelines/chembl/compound_record_transformer.py` |
+| ChEMBL | `ProteinClassTransformer` | `pipelines/chembl/protein_class_transformer.py` |
+| ChEMBL | `PublicationSimilarityTransformer` | `pipelines/chembl/publication_similarity_transformer.py` |
+| ChEMBL | `PublicationTermTransformer` | `pipelines/chembl/publication_term_transformer.py` |
+| ChEMBL | `SubcellularFractionTransformer` | `pipelines/chembl/subcellular_fraction_transformer.py` |
+| ChEMBL | `TargetComponentTransformer` | `pipelines/chembl/target_component_transformer.py` |
+| ChEMBL | `TissueTransformer` | `pipelines/chembl/tissue_transformer.py` |
+| ChEMBL | `BaseChemblTransformer` | `pipelines/chembl/base_chembl_transformer.py` |
 | CrossRef | `CrossRefPublicationTransformer` | `pipelines/crossref/transformer.py` |
 | OpenAlex | `OpenAlexPublicationTransformer` | `pipelines/openalex/transformer.py` |
 | PubChem | `PubChemCompoundTransformer` | `pipelines/pubchem/transformer.py` |
 | UniProt | `UniProtProteinTransformer` | `pipelines/uniprot/transformer.py` |
+| UniProt | `IDMappingTransformer` | `pipelines/uniprot/idmapping_transformer.py` |
 | PubMed | `PubMedPublicationTransformer` | `pipelines/pubmed/transformer.py` |
 | Semantic Scholar | `SemanticScholarPublicationTransformer` | `pipelines/semanticscholar/transformer.py` |
+| Common | `BasePublicationTransformer` | `pipelines/common/base_publication_transformer.py` |
 
 ### 2.4. `core/` — Ядро Исполнения Пайплайнов
 
@@ -94,26 +131,35 @@ factory = GenericPipelineFactory(
 | Файл | Компонент | Назначение |
 |------|-----------|------------|
 | `runner.py` | `PipelineRunner` | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
-| `executor.py` | `PipelineExecutor` | Координирует data flow: извлечение → трансформация → запись |
-| `lifecycle_orchestrator.py` | `LifecycleOrchestrator` | Управляет очисткой Silver/Gold слоёв по политике |
-| `runner_services.py` | `RunnerServices` | DI bundle сервисов для PipelineRunner |
+| `batch_executor.py` | `BatchExecutor` | Координирует data flow: извлечение → трансформация → запись (786 LOC) |
+| `services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM |
+| `pipeline_services.py` | `PipelineServices` | DI bundle сервисов для PipelineRunner |
 
 **`PipelineRunner`** — координатор исполнения:
 - Делегирует блокировку через `LockManager`
 - Запускает preflight-валидацию через `PreflightService`
-- Исполняет пайплайн через `PipelineExecutor`
+- Исполняет пайплайн через `BatchExecutor`
 - Управляет postrun-операциями через `PostrunService`
-- Оркестрирует очистку слоёв через `LifecycleOrchestrator`
+- Оркестрирует очистку слоёв через `MedallionLifecycleService`
 
-**`RunnerServices`** — frozen dataclass, bundling зависимостей:
+**`PipelineServices`** — frozen dataclass, bundling зависимостей:
 ```python
 @dataclass(frozen=True)
-class RunnerServices:
-    lock_manager: LockManager
-    preflight: PreflightService
-    postrun: PostrunService
-    lifecycle_orch: LifecycleOrchestrator
-    observer: PipelineObserver
+class PipelineServices:
+    data_source: DataSourcePort
+    storage: StoragePort
+    lock: LockPort
+    checkpoint: CheckpointPort
+    quarantine: QuarantinePort
+    metrics: MetricsPort
+    tracing: TracingPort
+    logger: LoggerPort
+    dq_monitor: DQMonitorPort | None = None
+    bronze_dq_analyzer: BronzeDQAnalyzerPort | None = None
+    silver_dq_analyzer: SilverDQAnalyzerPort | None = None
+    gold_dq_analyzer: GoldDQAnalyzerPort | None = None
+    dq_report_writer: DQReportWriterPort | None = None
+    dq_report_service: DQReportService | None = None
 ```
 
 ### 2.5. `composite/` — Composite Pipeline (ADR-026)
@@ -164,9 +210,9 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 | Pipeline Execution | [06-pipeline-execution.mermaid](diagrams/06-pipeline-execution.mermaid) | Поток выполнения пайплайна |
 | Pipeline Hierarchy | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid) | Иерархия Pipeline/Transformer |
 | Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Взаимодействие слоёв (включая Composite) |
-| Composite Pipeline | [../diagrams/mermaid/26_composite_pipeline_workflow.mmd](../diagrams/mermaid/26_composite_pipeline_workflow.mmd) | Workflow Composite Pipeline |
-| Pipeline Core | [../diagrams/mermaid/10_pipeline_core_components.mmd](../diagrams/mermaid/10_pipeline_core_components.mmd) | Ядро пайплайнов |
-| BaseTransformer | [../diagrams/mermaid/19_base_transformer_template_method.mmd](../diagrams/mermaid/19_base_transformer_template_method.mmd) | Template Method паттерн |
+| Composite Pipeline | [diagrams/mermaid/26_composite_pipeline_workflow.mmd](diagrams/mermaid/26_composite_pipeline_workflow.mmd) | Workflow Composite Pipeline |
+| Pipeline Core | [diagrams/mermaid/10_pipeline_core_components.mmd](diagrams/mermaid/10_pipeline_core_components.mmd) | Ядро пайплайнов |
+| BaseTransformer | [diagrams/mermaid/19_base_transformer_template_method.mmd](diagrams/mermaid/19_base_transformer_template_method.mmd) | Template Method паттерн |
 
 ### Связанные ADR
 

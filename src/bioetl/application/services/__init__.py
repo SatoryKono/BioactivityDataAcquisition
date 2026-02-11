@@ -65,9 +65,9 @@ from bioetl.application.services.metrics_service import (
 from bioetl.application.services.pipeline_runner_service import (
     PipelineNotFoundError,
     PipelineRunnerService,
+    PipelineRunResult,
     RunOptions,
     RunResult,
-    RunStatus,
 )
 from bioetl.application.services.quarantine_service import (
     QuarantineRecord,
@@ -85,12 +85,6 @@ from bioetl.application.services.vacuum_service import (
     VacuumService,
 )
 
-# Re-export from domain for backward compatibility
-from bioetl.domain.services.dq_metrics_calculator import (
-    DQMetricsCalculator,
-    DQMetricsInput,
-)
-
 __all__ = [
     "BronzeCleanupService",
     "CheckpointInfo",
@@ -99,8 +93,6 @@ __all__ = [
     "ClearResult",
     "ColumnInfo",
     "ConfigService",
-    "DQMetricsCalculator",
-    "DQMetricsInput",
     "DQReportContext",
     "DQReportResult",
     "DQReportService",
@@ -120,13 +112,13 @@ __all__ = [
     "MetricsService",
     "PipelineInfo",
     "PipelineNotFoundError",
+    "PipelineRunResult",
     "PipelineRunnerService",
     "PipelineShutdownError",
     "QuarantineRecord",
     "QuarantineService",
     "RunOptions",
     "RunResult",
-    "RunStatus",
     "SettingsInfo",
     "ShutdownReason",
     "ShutdownService",

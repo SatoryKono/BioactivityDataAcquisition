@@ -12,7 +12,6 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
@@ -21,7 +20,6 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Re-export for backwards compatibility
 __all__ = [
     "DOI_REGEX_PATTERN",
-    "LOOKUP_METHODS",
     "OA_STATUS_VALUES",
     "SemanticScholarPublicationSchema",
 ]
@@ -37,7 +35,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     - Metadata: journal, year, publication_date
     - Metrics: citation_count
     - Open Access: is_oa
-    - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+    - Lookup tracking: lookup_method, original_id, source (overridden)
 
     Fields excluded from PyArrow/Gold schemas:
     - pmc_id: Excluded per design (2026-01)
@@ -46,6 +44,14 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     - doc_type: S2 uses publication_type (JSON array) instead
     """
 
+    # === Override inherited fields to allow missing (align with excluded fields) ===
+    # Note: pmc_id is already nullable in base schema, just re-declaring here for clarity
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central ID",
+    )
+
     # === Primary Key (SemanticScholar-specific) ===
     paper_id: Series[str] = pa.Field(
         nullable=False,
@@ -53,13 +59,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Semantic Scholar Paper ID (40-char hex)",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Override _source to be non-nullable with fixed value ===
     _source: Series[str] = pa.Field(
@@ -76,7 +76,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="DBLP publication key",
     )
 
-    corpus_id: Series[pd.Int64Dtype] = pa.Field(
+    corpus_id: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="S2 Corpus ID",
@@ -100,7 +100,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
 
     # === Provider-specific Metrics ===
 
-    influential_citation_count: Series[pd.Int64Dtype] = pa.Field(
+    influential_citation_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of influential citations",
@@ -140,10 +140,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Semantic Scholar author IDs (JSON array of 40-char hex IDs)",
     )
 
-    author_orcids: Series[str] = pa.Field(
-        nullable=True,
-        description="Author ORCID identifiers (JSON array, empty string for missing)",
-    )
+    # author_orcids: inherited from PublicationBaseSchema
 
     author_h_indices: Series[str] = pa.Field(
         nullable=True,

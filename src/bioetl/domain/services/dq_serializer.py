@@ -110,10 +110,11 @@ class DQReportSerializer:
     def _to_json(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to JSON with pretty formatting."""
         data = to_dict(report)
-        return orjson.dumps(
+        result: str = orjson.dumps(
             data,
             option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
         ).decode("utf-8")
+        return result
 
     def _to_yaml(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to YAML format (simple, no external dependencies)."""

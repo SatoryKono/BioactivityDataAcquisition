@@ -17,7 +17,7 @@ Field naming convention: {provider}.publication.{field}
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Final
 
 __all__ = [
@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 
-class PublicationFieldGroup(str, Enum):
+class PublicationFieldGroup(StrEnum):
     """Semantic groups for publication fields.
 
     Groups are used for:
@@ -126,7 +126,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "chembl_release": PublicationFieldGroup.ID_AND_STATUS,
     "content_hash": PublicationFieldGroup.TRASH,
     "corpus_id": PublicationFieldGroup.ID_AND_STATUS,
-    "dblp_id": PublicationFieldGroup.TRASH,
+    "dblp_id": PublicationFieldGroup.ID_AND_STATUS,
     "document_chembl_id": PublicationFieldGroup.ID_AND_STATUS,
     "doi": PublicationFieldGroup.ID_AND_STATUS,
     "entity_id": PublicationFieldGroup.ID_AND_STATUS,
@@ -139,7 +139,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "src_id": PublicationFieldGroup.TRASH,
     # ===== canonical: bibliography (25-83) =====
     "abstract": PublicationFieldGroup.BIBLIOGRAPHY,
-    "abstract_structured": PublicationFieldGroup.TRASH,
+    "abstract_structured": PublicationFieldGroup.BIBLIOGRAPHY,
     "issn": PublicationFieldGroup.BIBLIOGRAPHY,
     "issn_electronic": PublicationFieldGroup.BIBLIOGRAPHY,
     "issn_list": PublicationFieldGroup.BIBLIOGRAPHY,
@@ -166,9 +166,8 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "affiliation_structured": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_count": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_details": PublicationFieldGroup.TRASH,
-    "author_h_indices": PublicationFieldGroup.TRASH,
+    "author_h_indices": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_openalex_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
-    "author_orcid_list": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_orcids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_s2_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "authors": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
@@ -176,22 +175,22 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "country": PublicationFieldGroup.DATE_AND_PLACES,
     "institution_country_codes": PublicationFieldGroup.DATE_AND_PLACES,
     "institution_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
-    "ror_ids": PublicationFieldGroup.TRASH,
+    "ror_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     # ===== canonical: date (105-114) =====
     "creation_date": PublicationFieldGroup.DATE_AND_PLACES,
     "date_completed": PublicationFieldGroup.DATE_AND_PLACES,
     "date_revised": PublicationFieldGroup.DATE_AND_PLACES,
     "pub_date": PublicationFieldGroup.DATE_AND_PLACES,
-    "pub_day": PublicationFieldGroup.TRASH,
+    "pub_day": PublicationFieldGroup.DATE_AND_PLACES,
     "pub_month": PublicationFieldGroup.DATE_AND_PLACES,
     "publication_date": PublicationFieldGroup.DATE_AND_PLACES,
     # ===== canonical: topics_and_keywords (115-130) =====
-    "chemical_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
-    "chemicals": PublicationFieldGroup.TRASH,
-    "citation_subset": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
-    "databanks": PublicationFieldGroup.TRASH,
-    "fwci": PublicationFieldGroup.TRASH,
-    "gene_symbols": PublicationFieldGroup.TRASH,
+    "chemical_count": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "chemicals": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "citation_subset": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "databanks": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "fwci": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "gene_symbols": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
     "keyword_count": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
     "mesh": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
     "mesh_heading_count": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
@@ -201,14 +200,14 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "subject_mesh": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
     "subject_topics": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
     # ===== canonical: publication (131-167) =====
-    "citation_contexts": PublicationFieldGroup.TRASH,
+    "citation_contexts": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
     "citations_made": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
     "citations_received": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
     "content_domain_crossmark_restriction": PublicationFieldGroup.TRASH,
     "content_domain_domains": PublicationFieldGroup.TRASH,
-    "grant_count": PublicationFieldGroup.TRASH,
-    "grants": PublicationFieldGroup.TRASH,
-    "influential_citation_count": PublicationFieldGroup.TRASH,
+    "grant_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "grants": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "influential_citation_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
     "is_oa": PublicationFieldGroup.ID_AND_STATUS,
     "is_retracted": PublicationFieldGroup.ID_AND_STATUS,
     "language": PublicationFieldGroup.TRASH,
@@ -220,7 +219,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "publication_type": PublicationFieldGroup.ID_AND_STATUS,
     "publication_type_list": PublicationFieldGroup.PUBLICATION_TYPES,
     "publication_types": PublicationFieldGroup.PUBLICATION_TYPES,
-    "references": PublicationFieldGroup.TRASH,
+    "references": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
     "tldr": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
 }
 

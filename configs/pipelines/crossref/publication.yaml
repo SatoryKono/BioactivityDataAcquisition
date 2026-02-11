@@ -44,6 +44,9 @@ data_schema_file: ../../data_schema/crossref/publication.yaml
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/crossref.yaml (provider-specific)
 #   3. configs/filter/entities/crossref/publication.yaml (entity-specific)
+# Explicit path needed because entity_type is 'work' (CrossRef API term)
+# but filter file uses project entity name 'publication'.
+filter_config_file: ../../filter/entities/crossref/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides

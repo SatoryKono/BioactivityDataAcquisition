@@ -129,12 +129,12 @@ entity_id = f"semanticscholar:{paper_id}"
 
 Semantic Scholar API предоставляет различные лимиты:
 
-| Режим | Лимит | Стабильность |
-|-------|-------|--------------|
-| Без API key | 1000 req/sec (shared pool) | Нестабильно |
-| С API key | 1 req/sec (guaranteed) | Стабильно |
+| Режим | Лимит (API) | Операционный лимит (конфиг) | Стабильность |
+|-------|-------------|----------------------------|--------------|
+| Без API key | shared pool (нестабильный) | 0.1 req/sec (1 запрос / 10 сек) | Нестабильно |
+| С API key | 1 req/sec (guaranteed) | 1.0 req/sec, burst: 5 | Стабильно |
 
-**Рекомендация:** Всегда используйте API key для production.
+**Рекомендация:** Всегда используйте API key для production. Без ключа используется консервативный лимит 0.1 req/sec для избежания 429 ошибок.
 
 ### Batch DOI Resolution
 
@@ -255,7 +255,7 @@ gold_filters:
     - title
   ranges:
     year:
-      min: 1900
+      min: 1500
       max: 2100
 ```
 

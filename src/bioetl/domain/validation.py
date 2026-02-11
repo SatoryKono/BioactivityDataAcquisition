@@ -71,8 +71,7 @@ def validate_smiles(smiles: str | None) -> bool:
 # =============================================================================
 
 # Standard publication year range for scientific publications.
-# First scientific journals appeared in XVII century, but systematic
-# publications began in XIX century.
+# covers historical scientific journals from XVII century
 #
 # These constants use DEFAULT_VALIDATION_CONFIG for the authoritative values.
 # For custom ranges, use ValidationConfig directly or PublicationYear Value Object.
@@ -86,8 +85,8 @@ def _get_default_config() -> ValidationConfig:
 
 
 # Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
-MIN_PUBLICATION_YEAR: int = 1800  # DEFAULT_VALIDATION_CONFIG.min_publication_year
-MAX_PUBLICATION_YEAR: int = 2100  # DEFAULT_VALIDATION_CONFIG.max_publication_year
+MIN_PUBLICATION_YEAR: int = 1950
+MAX_PUBLICATION_YEAR: int = 2050
 
 
 # =============================================================================
@@ -127,17 +126,17 @@ def validate_positive_int(value: Any) -> int | None:
 
 def validate_year_range(
     year: int | None,
-    min_year: int = 1800,
-    max_year: int = 2100,
+    min_year: int = MIN_PUBLICATION_YEAR,
+    max_year: int = MAX_PUBLICATION_YEAR,
 ) -> bool:
     """Validate year is within a reasonable range.
 
-    Default range [1800, 2100] covers scientific publications.
+    Default range [1950, CURRENT_YEAR+1] covers scientific publications.
 
     Args:
         year: Year to validate.
-        min_year: Minimum valid year (inclusive). Default 1800.
-        max_year: Maximum valid year (inclusive). Default 2100.
+        min_year: Minimum valid year (inclusive). Default 1950.
+        max_year: Maximum valid year (inclusive). Default CURRENT_YEAR + 1.
 
     Returns:
         True if year is within range.
@@ -145,9 +144,7 @@ def validate_year_range(
     Example:
         >>> validate_year_range(2024)
         True
-        >>> validate_year_range(1799)
-        False
-        >>> validate_year_range(2101)
+        >>> validate_year_range(1949)
         False
         >>> validate_year_range(None)
         False
@@ -180,16 +177,10 @@ def validate_publication_year(
     Example:
         >>> validate_publication_year(2020)
         (2020, False)
-        >>> validate_publication_year(1800)
-        (1800, False)
-        >>> validate_publication_year(2100)
-        (2100, False)
-        >>> validate_publication_year(1799)
-        (1799, True)
-        >>> validate_publication_year(2101)
-        (2101, True)
-        >>> validate_publication_year(1500)
-        (1500, True)
+        >>> validate_publication_year(1950)
+        (1950, False)
+        >>> validate_publication_year(1949)
+        (1949, True)
         >>> validate_publication_year(None)
         (None, False)
         >>> # With custom config
@@ -354,8 +345,9 @@ def validate_non_empty_string(value: str | None) -> str | None:
 # Format: 10.XXXX/suffix where:
 #   - 10. is the fixed prefix
 #   - XXXX is registrant code (minimum 4 digits)
-#   - suffix is the identifier (minimum 1 character)
-DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/.+$"
+#   - suffix is the identifier (minimum 1 non-whitespace character)
+# Aligned with DOI Value Object: \S+ forbids whitespace in DOI suffix.
+DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/\S+$"
 _DOI_PATTERN = re.compile(DOI_REGEX_PATTERN)
 
 

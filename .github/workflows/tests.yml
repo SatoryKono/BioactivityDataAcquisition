@@ -3,8 +3,16 @@ name: Tests
 on:
   push:
     branches: [ main, master, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'LICENSE'
   pull_request:
     branches: [ main, master, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'LICENSE'
 
 env:
   # Use CI hypothesis profile for faster property-based tests (10 examples instead of 50)

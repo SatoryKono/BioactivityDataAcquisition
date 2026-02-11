@@ -122,17 +122,17 @@ ls tests/architecture/test_*.py
 | **Язык** | Python 3.11+ |
 | **Стиль документации** | Русский, RFC 2119 keywords |
 
-### 1.1. Метрики Кодовой Базы (2026-02-03)
+### 1.1. Метрики Кодовой Базы (2026-02-10)
 
 | Метрика | Значение |
 |---------|----------|
-| **Python-файлов** | ~500 |
-| **Строк кода** | ~109,300 |
-| **Тестов** | ~9,926 (функций test_) |
-| **ADR** | 32 |
+| **Python-файлов** | ~1,094 (522 src + 552 tests) |
+| **Строк кода** | ~115,351 (src/bioetl/) |
+| **Тестов** | ~7,090 (функций test_) |
+| **ADR** | 33 |
 | **Провайдеров** | 7 |
-| **Pipeline-конфигураций** | 21 (19 entity + 2 composite) |
-| **Конфиг-файлов всего** | 58 (pipelines, dq, filter, sources) |
+| **Pipeline-конфигураций** | 27 |
+| **Конфиг-файлов всего** | 123 (pipelines, dq, filter, sources, composite) |
 
 ---
 
@@ -162,10 +162,10 @@ src/bioetl/
 | Компонент | ❌ Ложное утверждение | ✅ Реальность |
 |-----------|----------------------|---------------|
 | **Email в config/adapters** | "PII поля (email) требуют хэширования HashService" | **НЕ PII**: `default_email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed_client.py:38-42` |
-| **PipelineRunner** | "God object, слишком много ответственностей" | **161 строка**, делегирует через `PipelineServices` bundle (`runner.py:54,89`) |
+| **PipelineRunner** | "God object, слишком много ответственностей" | **189 строк**, делегирует через `PipelineServices` bundle (`runner.py:54,89`) |
 | **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
-| **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **870 строк**, делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py`) |
-| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **818 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py`) |
+| **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **1124 строки**, делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py`) |
+| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **938 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py`) |
 | **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — **законная** ответственность interfaces слоя |
 | **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
 | **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
@@ -391,11 +391,11 @@ async def aclose() -> None                             # Graceful shutdown
 
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
-| **Unit** | `tests/unit/` | ~7,249 | In-memory fakes предпочтительны |
-| **Integration** | `tests/integration/` | ~291 | VCR.py для HTTP |
-| **Architecture** | `tests/architecture/` | ~421 | Проверка слоёв, контракты портов |
+| **Unit** | `tests/unit/` | ~6,359 | In-memory fakes предпочтительны |
+| **Integration** | `tests/integration/` | ~167 | VCR.py для HTTP |
+| **Architecture** | `tests/architecture/` | ~400 | Проверка слоёв, контракты портов |
 
-**Всего:** ~8,330 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
+**Всего:** ~7,090 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
 ### Основные команды
 
@@ -489,13 +489,13 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | Документ | Описание |
 |----------|----------|
 | `docs/RULES.md` | **Конституция проекта** — единственный источник истины для архитектурных правил |
-| `AGENT.md` | Инструкции для агента (персона, workflow, специфика работы) |
+| `docs/00-project/agent/AGENT.md` | Инструкции для агента (персона, workflow, специфика работы) |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст для быстрой справки |
-| `docs/02-architecture/decisions/` | ADR (001-031) — архитектурные решения |
+| `docs/02-architecture/decisions/` | ADR (001-033) — архитектурные решения |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 
 > **Иерархия документации**: При противоречиях приоритет имеет `docs/RULES.md`.
-> Данный файл (`CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.
+> CLAUDE файл (`docs/00-project/agent/CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.
 
 ---
 

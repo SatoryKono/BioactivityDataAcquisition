@@ -1,23 +1,23 @@
 # PubChem Compound Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `pubchem_compound` |
-| **Provider** | PubChem (NCBI) |
-| **Entity** | compound |
-| **API Endpoint** | `https://pubchem.ncbi.nlm.nih.gov/rest/pug/` |
-| **Library** | `pubchempy` (sync, requires executor) |
-| **Rate Limit** | 5 req/sec |
+| Parameter        | Value                                               |
+| ---------------- | --------------------------------------------------- |
+| **Pipeline ID**  | `pubchem_compound`                                  |
+| **Provider**     | PubChem (NCBI)                                      |
+| **Entity**       | compound                                            |
+| **API Endpoint** | `https://pubchem.ncbi.nlm.nih.gov/rest/pug/`        |
+| **Library**      | `pubchempy` (sync, requires executor)               |
+| **Rate Limit**   | 5 req/sec                                           |
 | **Health Check** | `/compound/cid/2244/property/MolecularFormula/JSON` |
-| **Auth Type** | None (public API) |
+| **Auth Type**    | None (public API)                                   |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -34,9 +34,9 @@ PubChem compounds are **chemical structures** with computed descriptors:
 ### 2.2. Use Cases
 
 1. **Structure Enrichment**: Add computed properties to ChEMBL molecules
-2. **Property Calculation**: Access pre-computed descriptors
-3. **3D Modeling**: Use 3D conformer data
-4. **Compound Search**: Find by structure or property ranges
+1. **Property Calculation**: Access pre-computed descriptors
+1. **3D Modeling**: Use 3D conformer data
+1. **Compound Search**: Find by structure or property ranges
 
 ### 2.3. Entity Relationships
 
@@ -46,7 +46,7 @@ pubchem_compound
     └──► chembl_molecule (via inchi_key)
 ```
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
@@ -63,60 +63,60 @@ compounds = pcp.get_compounds(cid_list, namespace="cid")
 
 ### 3.2. Complete API Fields
 
-| # | API Field | Type | Nullable | Description |
-|---|-----------|------|----------|-------------|
-| 1 | `CID` | int | No | Compound ID (PK) |
-| 2 | `CanonicalSMILES` | str | Yes | Canonical SMILES |
-| 3 | `IsomericSMILES` | str | Yes | SMILES with stereochemistry |
-| 4 | `InChI` | str | Yes | InChI identifier |
-| 5 | `InChIKey` | str | Yes | InChI Key (27 chars) |
-| 6 | `MolecularFormula` | str | Yes | Molecular formula |
-| 7 | `MolecularWeight` | float | Yes | Molecular weight |
-| 8 | `ExactMass` | float | Yes | Exact mass |
-| 9 | `MonoisotopicMass` | float | Yes | Monoisotopic mass |
-| 10 | `IUPACName` | str | Yes | IUPAC name |
-| 11 | `XLogP` | float | Yes | Computed LogP |
-| 12 | `TPSA` | float | Yes | Topological PSA |
-| 13 | `Complexity` | float | Yes | Complexity score |
-| 14 | `Charge` | int | Yes | Formal charge |
-| 15 | `HBondDonorCount` | int | Yes | H-bond donors |
-| 16 | `HBondAcceptorCount` | int | Yes | H-bond acceptors |
-| 17 | `RotatableBondCount` | int | Yes | Rotatable bonds |
-| 18 | `HeavyAtomCount` | int | Yes | Heavy atoms |
-| 19 | `AtomStereoCount` | int | Yes | Total stereocenters |
-| 20 | `DefinedAtomStereoCount` | int | Yes | Defined stereocenters |
-| 21 | `UndefinedAtomStereoCount` | int | Yes | Undefined stereocenters |
-| 22 | `BondStereoCount` | int | Yes | E/Z bonds |
-| 23 | `DefinedBondStereoCount` | int | Yes | Defined E/Z |
-| 24 | `UndefinedBondStereoCount` | int | Yes | Undefined E/Z |
-| 25 | `IsotopeAtomCount` | int | Yes | Isotopic atoms |
-| 26 | `CovalentUnitCount` | int | Yes | Covalent units |
-| 27 | `Volume3D` | float | Yes | 3D volume |
-| 28 | `ConformerCount3D` | int | Yes | 3D conformers |
+| #   | API Field                  | Type  | Nullable | Description                 |
+| --- | -------------------------- | ----- | -------- | --------------------------- |
+| 1   | `CID`                      | int   | No       | Compound ID (PK)            |
+| 2   | `CanonicalSMILES`          | str   | Yes      | Canonical SMILES            |
+| 3   | `IsomericSMILES`           | str   | Yes      | SMILES with stereochemistry |
+| 4   | `InChI`                    | str   | Yes      | InChI identifier            |
+| 5   | `InChIKey`                 | str   | Yes      | InChI Key (27 chars)        |
+| 6   | `MolecularFormula`         | str   | Yes      | Molecular formula           |
+| 7   | `MolecularWeight`          | float | Yes      | Molecular weight            |
+| 8   | `ExactMass`                | float | Yes      | Exact mass                  |
+| 9   | `MonoisotopicMass`         | float | Yes      | Monoisotopic mass           |
+| 10  | `IUPACName`                | str   | Yes      | IUPAC name                  |
+| 11  | `XLogP`                    | float | Yes      | Computed LogP               |
+| 12  | `TPSA`                     | float | Yes      | Topological PSA             |
+| 13  | `Complexity`               | float | Yes      | Complexity score            |
+| 14  | `Charge`                   | int   | Yes      | Formal charge               |
+| 15  | `HBondDonorCount`          | int   | Yes      | H-bond donors               |
+| 16  | `HBondAcceptorCount`       | int   | Yes      | H-bond acceptors            |
+| 17  | `RotatableBondCount`       | int   | Yes      | Rotatable bonds             |
+| 18  | `HeavyAtomCount`           | int   | Yes      | Heavy atoms                 |
+| 19  | `AtomStereoCount`          | int   | Yes      | Total stereocenters         |
+| 20  | `DefinedAtomStereoCount`   | int   | Yes      | Defined stereocenters       |
+| 21  | `UndefinedAtomStereoCount` | int   | Yes      | Undefined stereocenters     |
+| 22  | `BondStereoCount`          | int   | Yes      | E/Z bonds                   |
+| 23  | `DefinedBondStereoCount`   | int   | Yes      | Defined E/Z                 |
+| 24  | `UndefinedBondStereoCount` | int   | Yes      | Undefined E/Z               |
+| 25  | `IsotopeAtomCount`         | int   | Yes      | Isotopic atoms              |
+| 26  | `CovalentUnitCount`        | int   | Yes      | Covalent units              |
+| 27  | `Volume3D`                 | float | Yes      | 3D volume                   |
+| 28  | `ConformerCount3D`         | int   | Yes      | 3D conformers               |
 
----
+______________________________________________________________________
 
 ## 4. Transformation
 
 ### 4.1. Entity ID Strategy
 
-| Parameter | Value |
-|-----------|-------|
-| **Entity ID Field** | `cid` |
-| **ID Source** | `from_api` |
-| **Format** | Integer (positive) |
+| Parameter           | Value              |
+| ------------------- | ------------------ |
+| **Entity ID Field** | `cid`              |
+| **ID Source**       | `from_api`         |
+| **Format**          | Integer (positive) |
 
 ### 4.2. Field Normalization
 
-| Field | Normalization | Before | After |
-|-------|---------------|--------|-------|
-| `cid` | Cast to int | `2244` | `2244` |
-| `molecular_weight` | round(10) | `180.157123456789` | `180.1571234568` |
-| `xlogp` | round(2) | `1.31456` | `1.31` |
-| `canonical_smiles` | RDKit canonical | - | Normalized SMILES |
-| `inchi_key` | Validate format | `BSYNRYMUTXBXSQ...` | Validated |
+| Field              | Normalization   | Before              | After             |
+| ------------------ | --------------- | ------------------- | ----------------- |
+| `cid`              | Cast to int     | `2244`              | `2244`            |
+| `molecular_weight` | round(10)       | `180.157123456789`  | `180.1571234568`  |
+| `xlogp`            | round(2)        | `1.31456`           | `1.31`            |
+| `canonical_smiles` | RDKit canonical | -                   | Normalized SMILES |
+| `inchi_key`        | Validate format | `BSYNRYMUTXBXSQ...` | Validated         |
 
----
+______________________________________________________________________
 
 ## 5. Validation
 
@@ -184,16 +184,16 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         coerce = True
 ```
 
----
+______________________________________________________________________
 
 ## 6. Cross-Provider Mapping
 
-| This Entity Field | Maps To | Provider | Field |
-|-------------------|---------|----------|-------|
-| `inchi_key` | ChEMBL | ChEMBL | `structure_standard_inchi_key` |
-| `cid` | PubChem BioAssay | PubChem | CID |
+| This Entity Field | Maps To          | Provider | Field                          |
+| ----------------- | ---------------- | -------- | ------------------------------ |
+| `inchi_key`       | ChEMBL           | ChEMBL   | `structure_standard_inchi_key` |
+| `cid`             | PubChem BioAssay | PubChem  | CID                            |
 
----
+______________________________________________________________________
 
 ## 7. Pipeline Configuration
 
@@ -201,7 +201,7 @@ class PubchemMoleculeSchema(ETLRecordSchema):
 pipeline_name: pubchem_compound
 provider: pubchem
 entity_type: compound
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["cid"]
 silver_table: "pubchem_compound"
@@ -229,7 +229,7 @@ input_filter:
   batch_size: 100
 ```
 
----
+______________________________________________________________________
 
 ## 8. Special Considerations
 
@@ -241,9 +241,7 @@ PubChemPy is synchronous. BioETL wraps it using `BaseSyncAdapter`:
 class PubChemAdapter(BaseSyncAdapter):
     async def fetch(self, cids: list[int]) -> list[dict]:
         # Wrapped in executor
-        return await self._run_in_executor(
-            pcp.get_compounds, cids, namespace="cid"
-        )
+        return await self._run_in_executor(pcp.get_compounds, cids, namespace="cid")
 ```
 
 ### 8.2. Rate Limiting

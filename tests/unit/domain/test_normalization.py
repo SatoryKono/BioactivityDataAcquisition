@@ -250,7 +250,7 @@ class TestParsePageRange:
             ("100234", ("100234", None)),
             # Trailing/leading hyphen
             ("123-", ("123", None)),
-            ("-456", (None, "456")),
+            ("-456", (None, None)),
             # Whitespace handling
             ("  123  -  456  ", ("123", "456")),
             # Empty/None
@@ -265,6 +265,46 @@ class TestParsePageRange:
         self, page: str | None, expected: tuple[str | None, str | None]
     ) -> None:
         """Test page range parsing."""
+        assert parse_page_range(page) == expected
+
+
+class TestParsePageRangeAbbreviated:
+    """Tests for abbreviated page range expansion in parse_page_range.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    - "199-3" means 199-203 (rollover case)
+    """
+
+    @pytest.mark.parametrize(
+        "page,expected",
+        [
+            # Abbreviated single digit
+            ("737-9", ("737", "739")),
+            # Abbreviated two digits
+            ("737-39", ("737", "739")),
+            # Full range (no expansion)
+            ("737-839", ("737", "839")),
+            # Full range same digit count
+            ("123-145", ("123", "145")),
+            # Rollover case
+            ("199-3", ("199", "203")),
+            # Four-digit abbreviation
+            ("1234-56", ("1234", "1256")),
+            # En-dash (U+2013)
+            ("737\u20139", ("737", "739")),
+            # Em-dash (U+2014)
+            ("737\u20149", ("737", "739")),
+            # Whitespace with abbreviation
+            ("\n  737-9\n  ", ("737", "739")),
+            ("737 - 9", ("737", "739")),
+        ],
+    )
+    def test_abbreviated_page_expansion(
+        self, page: str, expected: tuple[str | None, str | None]
+    ) -> None:
+        """Test abbreviated page range expansion."""
         assert parse_page_range(page) == expected
 
 

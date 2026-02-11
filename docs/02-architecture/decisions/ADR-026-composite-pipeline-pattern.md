@@ -737,8 +737,8 @@ class CompositePipelineRunner:
         self,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        seed_runner_factory: Callable[[], PipelineRunner],
-        enricher_runner_factory: Callable[[str], PipelineRunner],
+        seed_runner_factory: Callable[[], PipelineRunner],  # skip_gold=True
+        enricher_runner_factory: Callable[[str], PipelineRunner],  # skip_gold=True
         key_extractor: KeyExtractorService,
         coordinator: EnrichmentCoordinator,
         merger: MergeService,
@@ -1276,6 +1276,8 @@ def run(pipeline: str, enrich_only: str | None, required_only: bool, ...):
 3. **Full lineage** - Every field traceable to source
 4. **Resume capability** - Checkpoint-based recovery from failures
 5. **Configurable flexibility** - YAML-based orchestration without code changes
+6. **No redundant Gold writes** - Sub-pipelines run with `skip_gold=True`,
+   writing only Bronze+Silver; the composite merge phase produces the unified Gold output
 
 ### Negative
 

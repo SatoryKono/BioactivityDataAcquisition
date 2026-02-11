@@ -30,7 +30,11 @@ from bioetl.application.composite.runner import (
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+from bioetl.domain.composite.config import (
+    CompositeConfig,
+    DependencyConfig,
+    EnricherConfig,
+)
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.field_group_loader import (
@@ -102,7 +106,8 @@ def load_composite_config(name: str) -> CompositeConfig:
         # Validate using Pydantic schema
         schema = CompositeConfigFileSchema.model_validate(raw)
         # Convert to immutable domain objects
-        return schema.to_domain()
+        config: CompositeConfig = schema.to_domain()
+        return config
     except ValidationError as e:
         # Convert Pydantic errors to ValueError for consistent API
         raise ValueError(f"Invalid composite config '{name}': {e}") from e
@@ -169,6 +174,96 @@ def _extract_filter_ids_from_keys(
     return filter_ids, filter_key, fallback
 
 
+def _extract_field_values(
+    keys: pl.DataFrame,
+    field: str,
+) -> tuple[str, ...] | None:
+    """Extract unique non-null values for a single field from keys DataFrame.
+
+    Returns:
+        Tuple of string values, or None if field missing or empty.
+    """
+    if field not in keys.columns:
+        return None
+    values = keys.select(field).drop_nulls().unique().to_series().to_list()
+    if not values:
+        return None
+    return tuple(str(v) for v in values)
+
+
+def _extract_multi_filter_ids(
+    dep_cfg: DependencyConfig,
+    keys: pl.DataFrame,
+    logger: LoggerPort | None = None,
+) -> dict[str, tuple[str, ...]] | None:
+    """Extract multi-field filter IDs from seed keys for a dependency.
+
+    For dual-key filtering (e.g., molecule_chembl_id + document_chembl_id),
+    extracts unique values for each filter field from the keys DataFrame.
+
+    Args:
+        dep_cfg: Dependency configuration with filter_fields.
+        keys: DataFrame containing seed keys.
+        logger: Optional logger.
+
+    Returns:
+        Dict mapping field name to tuple of unique IDs, or None if extraction fails.
+    """
+    if keys is None or len(keys) == 0:
+        return None
+
+    result: dict[str, tuple[str, ...]] = {}
+    for field in dep_cfg.effective_filter_fields:
+        values = _extract_field_values(keys, field)
+        if values is None:
+            if logger:
+                logger.warning(
+                    "Multi-filter field missing or empty",
+                    pipeline=dep_cfg.pipeline,
+                    field=field,
+                    available_columns=list(keys.columns),
+                )
+            return None
+        result[field] = values
+
+    if logger:
+        logger.info(
+            "Extracted multi-field filter IDs",
+            pipeline=dep_cfg.pipeline,
+            fields=list(result.keys()),
+            counts={f: len(ids) for f, ids in result.items()},
+        )
+
+    return result
+
+
+def _resolve_bronze_opts(
+    runtime: CompositeRuntimeConfig,
+    phase_override: bool | None,
+) -> dict[str, object]:
+    """Resolve cached Bronze options for a specific pipeline phase.
+
+    Tri-state resolution: phase_override takes precedence over master switch.
+    - None: use master switch (runtime.use_cached_bronze)
+    - True/False: override master switch
+
+    Args:
+        runtime: Composite runtime configuration with master switch.
+        phase_override: Per-phase override (None=follow master).
+
+    Returns:
+        Dict with use_cached_bronze, cached_bronze_path, cached_bronze_date.
+    """
+    effective = (
+        phase_override if phase_override is not None else runtime.use_cached_bronze
+    )
+    return {
+        "use_cached_bronze": effective,
+        "cached_bronze_path": runtime.cached_bronze_path if effective else None,
+        "cached_bronze_date": runtime.cached_bronze_date if effective else None,
+    }
+
+
 def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
@@ -209,20 +304,22 @@ def bootstrap_composite_runner(
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
 
-    # Create seed runner factory
+    # Per-phase cached bronze RunOptions kwargs
+    _seed_bronze_opts = _resolve_bronze_opts(runtime, phase_override=None)
+    _enricher_bronze_opts = _resolve_bronze_opts(
+        runtime, phase_override=runtime.cached_bronze_enrichers
+    )
+    _dependency_bronze_opts = _resolve_bronze_opts(
+        runtime, phase_override=runtime.cached_bronze_dependencies
+    )
+
     def seed_runner_factory() -> PipelineRunner:
-        """Create PipelineRunner for the seed phase.
-
-        The seed pipeline runs first to fetch primary entities (e.g., publications)
-        which provide join keys (DOI, PMID) for subsequent enricher pipelines.
-
-        Returns:
-            PipelineRunner configured for seed pipeline execution with
-            optional limit from runtime config.
-        """
+        """Create PipelineRunner for the seed phase."""
         options = RunOptions(
             run_type="incremental",
             limit=runtime.seed_limit,
+            skip_gold=True,
+            **_seed_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline_runner(ctx)
@@ -267,9 +364,11 @@ def bootstrap_composite_runner(
             run_type="incremental",
             limit=limit,
             ignore_yaml_filter=True,
+            skip_gold=True,
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
+            **_enricher_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -293,6 +392,8 @@ def bootstrap_composite_runner(
         - Extracts join key values from provided keys DataFrame
         - Passes extracted IDs as filter_ids to limit API calls
         - Uses filter_field from config if set (for field name mapping)
+        - For multi-field filtering (filter_fields), extracts all fields
+          and passes as multi_filter_ids with valid combinations
 
         Args:
             pipeline_name: Name of the dependency pipeline to instantiate.
@@ -304,19 +405,24 @@ def bootstrap_composite_runner(
         dep_cfg = dependency_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
+        multi_filter_ids: dict[str, tuple[str, ...]] | None = None
 
         if dep_cfg and keys is not None and len(keys) > 0:
-            # Extract filter IDs from keys
-            for key in dep_cfg.join_keys:
-                if key in keys.columns:
-                    key_values = (
-                        keys.select(key).drop_nulls().unique().to_series().to_list()
-                    )
-                    if key_values:
-                        filter_ids = tuple(str(v) for v in key_values)
-                        # Use filter_field from config if set, otherwise use join_key
-                        filter_field = dep_cfg.filter_field or key
-                        break
+            if dep_cfg.is_multi_field_filter:
+                # Multi-field filtering: extract all filter fields
+                multi_filter_ids = _extract_multi_filter_ids(dep_cfg, keys, logger)
+            else:
+                # Single-field filtering (existing logic)
+                for key in dep_cfg.join_keys:
+                    if key in keys.columns:
+                        key_values = (
+                            keys.select(key).drop_nulls().unique().to_series().to_list()
+                        )
+                        if key_values:
+                            filter_ids = tuple(str(v) for v in key_values)
+                            # Use filter_field from config if set, otherwise use join_key
+                            filter_field = dep_cfg.filter_field or key
+                            break
 
         # Debug logging for dependency filter configuration
         logger.debug(
@@ -328,15 +434,27 @@ def bootstrap_composite_runner(
             filter_field=filter_field,
             filter_ids_count=len(filter_ids) if filter_ids else 0,
             filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+            multi_filter_fields=list(multi_filter_ids.keys())
+            if multi_filter_ids
+            else [],
+            multi_filter_counts={f: len(ids) for f, ids in multi_filter_ids.items()}
+            if multi_filter_ids
+            else {},
             is_chained=dep_cfg.key_source is not None if dep_cfg else False,
             key_source=dep_cfg.key_source if dep_cfg else None,
         )
 
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if filter_ids and keys is not None else None,
+            limit=len(keys)
+            if (filter_ids or multi_filter_ids) and keys is not None
+            else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
+            multi_filter_ids=multi_filter_ids,
+            ignore_yaml_filter=True,
+            skip_gold=True,
+            **_dependency_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)

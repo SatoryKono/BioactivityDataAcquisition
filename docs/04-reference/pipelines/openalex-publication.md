@@ -673,6 +673,6 @@ erDiagram
 
 - [OpenAlex Works API Documentation](https://docs.openalex.org/api-entities/works)
 - [OpenAlex Data Model](https://docs.openalex.org/about-the-data)
-- [ADR-030: OpenAlex Offset Stability](../02-architecture/decisions/ADR-030-openalex-offset-stability.md)
-- [ADR-031: Full Scan Loading Strategy](../02-architecture/decisions/ADR-031-full-scan-loading.md)
+- [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+- [ADR-031: Loading Strategy Formalization](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
 - [RULES.md 5.4: PII Handling](../RULES.md#54-pii-handling)

@@ -114,6 +114,14 @@ def _extract_write_modes(
     return write_mode, gold_write_mode
 
 
+def _build_silver_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
+    """Build Silver layer filter config from YAML config.
+
+    Reuses GoldFilterConfig domain type — only the YAML section differs.
+    """
+    return yaml_config.silver_filters.to_domain()
+
+
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
     """Build GoldFilterConfig from YAML config.
 
@@ -147,6 +155,7 @@ def yaml_config_to_domain(
     """
     source_fields = _extract_source_fields(yaml_config)
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
+    silver_filters = _build_silver_filters(yaml_config)
     gold_filters = _build_gold_filters(yaml_config)
 
     # Extract on_schema_mismatch from silver sink config
@@ -179,6 +188,7 @@ def yaml_config_to_domain(
         gold_table=yaml_config.gold_table,
         write_mode=write_mode,
         gold_write_mode=gold_write_mode,
+        silver_filters=silver_filters,
         gold_filters=gold_filters,
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,

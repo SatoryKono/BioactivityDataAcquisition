@@ -27,12 +27,13 @@ source .venv/bin/activate  # Linux/macOS
 # .venv\Scripts\activate   # Windows
 
 # Run ChEMBL activity pipeline (limited to 100 records)
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+# Note: Use --no-cached-bronze for the very first run to fetch from API
+bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 
 # Data will be stored in:
-# - data/bronze/v1/chembl/activity/
-# - data/silver/chembl.activity/
-# - data/gold/chembl.activity_gold/
+# - data/output/bronze/chembl/activity/{date}/
+# - data/output/silver/chembl/activity/
+# - data/output/gold/chembl/activity/
 ```
 
 ## Verify
@@ -47,25 +48,26 @@ make lint
 
 ## Common Commands
 
-| Task | Command |
-|------|---------|
-| Install dependencies | `make install` |
-| Run all tests | `make test` |
-| Run linting | `make lint` |
-| Run on fixtures | `make run-local` |
-| List pipelines | `python -m bioetl.main list` |
-| Full rebuild | `python -m bioetl.main run --pipeline <name> --full-rebuild` |
-| Resume from checkpoint | `python -m bioetl.main run --pipeline <name> --resume` |
+| Task                   | Command                                           |
+| ---------------------- | ------------------------------------------------- |
+| Install dependencies   | `make install`                                    |
+| Run all tests          | `make test`                                       |
+| Run linting            | `make lint`                                       |
+| Run on fixtures        | `make run-local`                                  |
+| List pipelines         | `bioetl list`                                     |
+| Full rebuild           | `bioetl run --pipeline <name> --run-type rebuild` |
+| Resume from checkpoint | `bioetl run --pipeline <name> --resume`           |
 
 ## Project Structure (Data)
 
 ```
 data/
-├── bronze/          # Raw API responses (JSONL + zstd)
-├── silver/          # Cleaned Delta Lake tables
-├── gold/            # Aggregated/enriched tables
-├── checkpoints/     # Pipeline state for resume
-└── quarantine/      # Failed records for review
+└── output/
+    ├── bronze/          # Raw API responses (JSONL + zstd)
+    ├── silver/          # Cleaned Delta Lake tables
+    ├── gold/            # Aggregated/enriched tables
+    ├── checkpoints/     # Pipeline state for resume
+    └── quarantine/      # Failed records for review
 ```
 
 ## Next Steps

@@ -8,7 +8,7 @@
 source:
     type: api
     load_strategy: full
-    batch_size: 20
+    batch_size: 10
     provider_config:
         provider: chembl
         base_url: https://www.ebi.ac.uk/chembl/api/data
@@ -17,7 +17,7 @@ source:
             timeout_sec: 60.0
             max_retries: 3
         max_url_length: 2000
-        batch_size: 20
+        batch_size: 10
         page_size: 100  # Minimum allowed by schema (ge=100)
         api_version: null
 

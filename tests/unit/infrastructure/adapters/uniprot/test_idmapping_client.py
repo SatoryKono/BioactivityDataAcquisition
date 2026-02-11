@@ -318,6 +318,56 @@ class TestUniProtIDMappingClient:
 
         assert url is None
 
+    @pytest.mark.asyncio
+    async def test_poll_returns_redirect_url_used_by_fetch(
+        self, idmapping_client, mock_http_client
+    ):
+        """Test that redirect URL from polling is forwarded to fetch_results."""
+        # Mock job submission
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = {"jobId": "test-job-redirect"}
+
+        # Mock status polling with redirect URL (simulating 303 → followed)
+        status_response = MagicMock()
+        status_response.status_code = 200
+        # The real redirect URL contains /uniprotkb/results/ not /results/
+        status_response.url = (
+            "https://rest.uniprot.org/idmapping/uniprotkb/results/test-job-redirect"
+        )
+        status_response.json.return_value = {"results": []}
+
+        # Mock results fetched from the redirect URL
+        results_response = MagicMock()
+        results_response.status_code = 200
+        results_response.json.return_value = {
+            "results": [
+                {
+                    "from": "CHEMBL204",
+                    "to": {
+                        "primaryAccession": "P00742",
+                        "uniProtkbId": "FA10_HUMAN",
+                    },
+                }
+            ]
+        }
+        results_response.headers = {}
+
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+        mock_http_client.get = AsyncMock(
+            side_effect=[status_response, results_response]
+        )
+
+        result = await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
+
+        assert result["CHEMBL204"]["uniprot_accession"] == "P00742"
+
+        # Verify the second GET call used the redirect URL, not the generic one
+        get_calls = mock_http_client.get.call_args_list
+        assert len(get_calls) == 2
+        results_call_url = get_calls[1][0][0]
+        assert "/idmapping/uniprotkb/results/" in results_call_url
+
     def test_repr(self, idmapping_client):
         """Test string representation."""
         repr_str = repr(idmapping_client)

@@ -1,8 +1,8 @@
 # mkdocs.yml
 site_name: BioETL Project
-site_url: https://SatoryKono.github.io/BioactivityDataAcquisition/
-repo_url: https://github.com/SatoryKono/BioactivityDataAcquisition
-repo_name: SatoryKono/BioactivityDataAcquisition
+site_url: https://SatoryKono.github.io/BioactivityDataAcquisition2/
+repo_url: https://github.com/SatoryKono/BioactivityDataAcquisition2
+repo_name: SatoryKono/BioactivityDataAcquisition2
 edit_uri: "edit/main/docs/"
 
 theme:
@@ -57,14 +57,14 @@ extra_javascript:
 
 # Navigation structure
 nav:
-    -   Home: index.md
-    -   "Project Map": 00-map.md
+    -   Home: 00-project/index.md
+    -   "Project Map": 00-project/00-map.md
     -   "Project Rules":
-            -   "RULES": RULES.md
-            -   "Requirements": REQUIREMENTS.md
-            -   "Rules Summary": quick-reference/rules-summary.md
-            -   "File Policy": 00-project-rules/03-file-policy.md
-            -   "Extending BioETL": 00-project-rules/04-extending-bioetl.md
+            -   "RULES": 00-project/RULES.md
+            -   "Requirements": 01-requirements/REQUIREMENTS.md
+            -   "Rules Summary": 00-project/rules-summary.md
+            -   "File Policy": 00-project/governance/03-file-policy.md
+            -   "Extending BioETL": 00-project/governance/04-extending-bioetl.md
     -   Architecture:
             -   "Overview": 02-architecture/00-overview.md
             -   "System Context": 02-architecture/system-context.md
@@ -95,11 +95,11 @@ nav:
     -   Providers:
             -   "Overview": providers/README.md
     -   Pipelines:
-            -   "Overview": pipelines/README.md
-            -   "Publication Pipelines": pipelines/INDEX.md
+            -   "Overview": 04-reference/pipelines/README.md
+            -   "Publication Pipelines": 04-reference/pipelines/INDEX.md
     -   "Data Contracts":
-            -   "Gold Schemas": 03-data-contracts/gold-schemas.md
-            -   "Observability Metrics": contracts/observability.md
+            -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
+            -   "Observability Metrics": 04-reference/contracts/observability.md
     -   Reference:
             -   CLI: 04-reference/cli.md
             -   API:
@@ -126,8 +126,8 @@ nav:
                             -   Bootstrap: 04-reference/api/composition/bootstrap.md
                             -   Factories: 04-reference/api/composition/factories.md
             -   "Pipelines Reference": 04-reference/pipelines/README.md
-            -   "Config Schema Guidelines": 03-development/config-schema-guidelines.md
-            -   "Tools": TOOLS.md
+            -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
+            -   "Tools": 00-project/TOOLS.md
     -   Operations:
             -   Overview: 05-operations/README.md
             -   "Runbooks": 05-operations/runbooks/index.md

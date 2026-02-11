@@ -20,13 +20,6 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class HasProviderName(Protocol):
-    """Protocol for adapters that have a provider_name attribute."""
-
-    provider_name: str
-
-
-@runtime_checkable
 class HasFetchFiltered(Protocol):
     """Protocol for adapters that implement fetch_filtered method."""
 

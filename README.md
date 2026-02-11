@@ -4,8 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![Coverage](https://img.shields.io/badge/coverage-%3E80%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/version-5.9.0-blue)](CHANGELOG.md)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
+[![Version](https://img.shields.io/badge/version-5.14.0-blue)](CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](SECURITY.md)
 
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data
@@ -77,10 +77,10 @@ The domain layer implements Domain-Driven Design patterns:
 | Document | Description |
 |----------|-------------|
 | [API Reference](docs/04-reference/api/index.md) | Full API documentation with mkdocstrings |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 32 ADRs explaining design choices |
-| [Ubiquitous Language](docs/glossary.md) | Domain terminology and canonical naming |
-| [RULES.md](docs/RULES.md) | Project governance and requirements (v5.17) |
-| [Project Map](docs/00-map.md) | Documentation navigator and code map |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 33 ADRs explaining design choices |
+| [Ubiquitous Language](docs/00-project/glossary.md) | Domain terminology and canonical naming |
+| [RULES.md](docs/00-project/RULES.md) | Project governance and requirements (v5.17) |
+| [Project Map](docs/00-project/00-map.md) | Documentation navigator and code map |
 | [CLI Reference](docs/04-reference/cli.md) | Command-line interface documentation |
 | [Operations Runbooks](docs/05-operations/runbooks/) | Incident response and procedures |
 
@@ -247,9 +247,11 @@ Access the docs at `http://localhost:8000`.
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
-│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (32 decisions)
-│   ├── glossary.md           # Ubiquitous Language glossary
-│   └── RULES.md              # Project governance (v5.17)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (33 decisions)
+│   ├── 00-project/
+│   │   ├── glossary.md       # Ubiquitous Language glossary
+│   │   └── RULES.md          # Project governance (v5.17)
+│   └── ...
 ├── src/
 │   └── bioetl/
 │       ├── domain/           # Pure business logic (DDD), NO I/O
@@ -261,7 +263,7 @@ Access the docs at `http://localhost:8000`.
 │       │   └── exceptions/   # Classified exceptions (Critical/Recoverable/DQ)
 │       ├── application/      # Pipeline orchestration & services
 │       │   ├── core/         # PipelineRunner, Executor, BaseTransformer
-│       │   ├── pipelines/    # Concrete pipelines (ChEMBL, PubChem, UniProt, PubMed)
+│       │   ├── pipelines/    # ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, Semantic Scholar (+ common utilities)
 │       │   └── services/     # Application services (lifecycle, vacuum, cleanup)
 │       ├── composition/      # Composition Root (DI, bootstrap)
 │       │   ├── factories/    # Pipeline, storage, data source factories
@@ -273,7 +275,7 @@ Access the docs at `http://localhost:8000`.
 │       │   └── observability/ # Metrics, tracing, logging
 │       └── interfaces/       # External interfaces
 │           ├── cli/          # Click CLI commands
-│           └── orchestration/ # Signal handlers for graceful shutdown
+│           └── orchestration/ # Reserved (empty; signal handlers removed 2025-12-31, shutdown logic in application/core/shutdown.py)
 ├── tests/                    # Unit, Integration, Architecture & E2E tests
 ├── scripts/                  # Utility scripts (lint_terminology.py, etc.)
 ├── dev_setup.sh              # Automated development environment setup
@@ -311,7 +313,7 @@ Please review our **[Security Policy](SECURITY.md)** for:
 
 ## Contributing
 
-Please read **[RULES.md](docs/RULES.md)** before contributing.
+Please read **[RULES.md](docs/00-project/RULES.md)** before contributing.
 
 1. Ensure all tests pass: `make test`
 2. Check types and linting: `make lint`

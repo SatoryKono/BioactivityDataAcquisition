@@ -9,7 +9,17 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
+from bioetl.domain.schemas.constants import (
+    CHEMBL_ID_PATTERN,
+    MAX_PHASE_VALUES,
+    MOLECULE_TYPES,
+    STRUCTURE_TYPES,
+)
+from bioetl.domain.validation import (
+    INCHI_KEY_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 
 class MoleculeSchema(ETLRecordSchema):
@@ -24,7 +34,7 @@ class MoleculeSchema(ETLRecordSchema):
     # === Identifiers ===
     molecule_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
     structure_standard_inchi_key: Series[str] | None = pa.Field(
@@ -45,34 +55,21 @@ class MoleculeSchema(ETLRecordSchema):
     )
     max_phase: Series[float] | None = pa.Field(
         nullable=True,
-        isin=[-1, 0, 0.5, 1, 2, 3, 4],
+        isin=list(MAX_PHASE_VALUES),
         description="Maximum clinical phase.",
     )
     structure_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["MOL", "SEQ", "BOTH", "NONE"],
+        isin=list(STRUCTURE_TYPES),
         description="Structure type.",
     )
     molecule_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=[
-            "Small molecule",
-            "Inorganic small molecule",
-            "Polymeric small molecule",
-            "Antibody",
-            "Antibody drug conjugate",
-            "Protein",
-            "Oligonucleotide",
-            "Oligosaccharide",
-            "Cell",
-            "Enzyme",
-            "Unknown",
-            "Unclassified",
-        ],
+        isin=list(MOLECULE_TYPES),
         description="Molecule type.",
     )
-    first_approval: Series[int] | None = pa.Field(
-        nullable=True, description="Year of first approval."
+    first_approval: Series[float] | None = pa.Field(
+        nullable=True, description="Year of first approval (float for nullable int)."
     )
     # chirality: Optional[Series[int]] = pa.Field(
     #     nullable=True,
@@ -103,13 +100,13 @@ class MoleculeSchema(ETLRecordSchema):
         nullable=True, isin=[-1, 0, 1], description="Natural product flag."
     )
     first_in_class: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="First in class flag."
+        nullable=True, isin=[-1, 0, 1], description="First in class flag (-1=unknown)."
     )
     prodrug: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="Prodrug flag."
+        nullable=True, isin=[-1, 0, 1], description="Prodrug flag (-1=unknown)."
     )
     inorganic_flag: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="Inorganic flag."
+        nullable=True, isin=[-1, 0, 1], description="Inorganic flag (-1=unknown)."
     )
     polymer_flag: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Polymer flag."
@@ -133,11 +130,16 @@ class MoleculeSchema(ETLRecordSchema):
     dosed_ingredient: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Dosed ingredient flag."
     )
-    availability_type: Series[int] | None = pa.Field(
-        nullable=True, isin=[-2, -1, 0, 1, 2], description="Availability type."
+    availability_type: Series[float] | None = pa.Field(
+        nullable=True,
+        isin=[-2, -1, 0, 1, 2],
+        description="Availability type (float for nullable int).",
     )
-    usan_year: Series[int] | None = pa.Field(
-        nullable=True, description="USAN approval year."
+    usan_year: Series[float] | None = pa.Field(
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="USAN approval year (float for nullable int).",
     )
     usan_stem: Series[str] | None = pa.Field(
         nullable=True, description="USAN stem name."
@@ -158,17 +160,17 @@ class MoleculeSchema(ETLRecordSchema):
     # === Hierarchy Fields (flattened from molecule_hierarchy) ===
     hierarchy_parent_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Parent molecule ChEMBL ID in hierarchy.",
     )
     hierarchy_active_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Active molecule ChEMBL ID in hierarchy.",
     )
     hierarchy_child_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Child molecule ChEMBL ID in hierarchy.",
     )
 

@@ -422,6 +422,8 @@ class BatchWriter:
                 converted = schema.to_schema()
                 return set(converted.columns.keys())
             except Exception:
+                # Catch all: to_schema() may fail for invalid/incomplete schema definitions.
+                # Fall through to next schema type check for graceful degradation.
                 pass
 
         # Handle Pandera DataFrameSchema (instance with columns dict)

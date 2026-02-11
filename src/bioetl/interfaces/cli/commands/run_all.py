@@ -15,9 +15,9 @@ import click
 
 from bioetl.application.services import (
     PipelineNotFoundError,
+    PipelineRunResult,
     RunOptions,
     RunResult,
-    RunStatus,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.composition.registry import get_default_registry
@@ -100,18 +100,18 @@ async def _run_pipelines_batch(
             result = await _run_pipeline_async(service, pipeline, options)
             batch_result.results.append(result)
 
-            if result.status == RunStatus.SUCCESS:
+            if result.status == PipelineRunResult.SUCCESS:
                 batch_result.succeeded += 1
                 echo_info(f"[OK] {pipeline}: completed successfully")
-            elif result.status == RunStatus.DRY_RUN:
+            elif result.status == PipelineRunResult.DRY_RUN:
                 batch_result.skipped += 1
                 echo_info(f"[DRY] {pipeline}: dry-run (no changes)")
-            elif result.status == RunStatus.SHUTDOWN:
+            elif result.status == PipelineRunResult.SHUTDOWN:
                 batch_result.skipped += 1
                 echo_warning(f"[STOP] {pipeline}: gracefully shut down")
                 # Stop processing remaining pipelines on shutdown
                 break
-            elif result.status == RunStatus.FAILED:
+            elif result.status == PipelineRunResult.FAILED:
                 batch_result.failed += 1
                 batch_result.failed_pipelines.append(pipeline)
                 echo_error(

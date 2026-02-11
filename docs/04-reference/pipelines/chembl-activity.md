@@ -73,16 +73,16 @@ Records pass to Gold layer only if:
 
 ```bash
 # Incremental load (default)
-bioetl run chembl_activity
+bioetl run --pipeline chembl_activity
 
 # With record limit
-bioetl run chembl_activity --limit 1000
+bioetl run --pipeline chembl_activity --limit 1000
 
 # Backfill
-bioetl run chembl_activity --run-type backfill --start-date 2024-01-01
+bioetl run --pipeline chembl_activity --run-type backfill --start-date 2024-01-01
 
 # Full rebuild
-bioetl run chembl_activity --run-type rebuild
+bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
 ## Related Files

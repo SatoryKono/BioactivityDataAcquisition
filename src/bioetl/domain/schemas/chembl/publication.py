@@ -5,17 +5,22 @@ Aligned with RULES.md v5.10, ChEMBL 34 schema, and Publication Schema Unificatio
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     PublicationBaseSchema,
+)
+from bioetl.domain.schemas.constants import (
+    CHEMBL_ID_PATTERN,
+    ISO_DATE_PATTERN,
+    PUBLICATION_TYPES,
 )
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
-__all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "ChemblPublicationSchema"]
+__all__ = ["DOI_REGEX_PATTERN", "ChemblPublicationSchema"]
 
 
 class ChemblPublicationSchema(PublicationBaseSchema):
@@ -25,7 +30,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     - Cross-references: pmid, doi
     - Core content: title, abstract, authors
     - Metadata: journal, year, doc_type (overridden)
-    - Lookup tracking: lookup_method (overridden), original_id, source
+    - Lookup tracking: lookup_method, original_id, source
 
     Fields excluded from PyArrow/Gold schemas (not available from ChEMBL API):
     - pmc_id: ChEMBL API does not return PMC ID
@@ -38,35 +43,31 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # === Primary Key (ChEMBL-specific) ===
     document_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL Document ID.",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: direct for ChEMBL ID lookup",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Unified field names (ChEMBL-specific overrides) ===
     # Note: old fields 'year' and 'doc_type' removed - replaced by unified names
     publication_type: Series[str] = pa.Field(
         nullable=True,
-        isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
+        isin=list(PUBLICATION_TYPES),
         description="Document type (unified field name).",
     )
 
     # === System Fields ===
     _source: Series[str] = pa.Field(
         nullable=False,
-        default="chembl",
+        eq="chembl",
         description="Data source identifier.",
     )
 
     # === Provider-specific Identifiers ===
-    src_id: Series[int] = pa.Field(nullable=True, description="Source ID.")
+    src_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Source ID."
+    )
 
     # === ChEMBL Release Metadata ===
     chembl_release: Series[str] = pa.Field(
@@ -75,7 +76,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     )
     creation_date: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{2}-\d{2}$",
+        str_matches=ISO_DATE_PATTERN,
         description="Record creation date in ChEMBL database (YYYY-MM-DD).",
     )
 
@@ -85,17 +86,14 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     page_first: Series[str] = pa.Field(nullable=True, description="First page.")
     page_last: Series[str] = pa.Field(nullable=True, description="Last page.")
 
-    # === DQ Fields ===
-    _dq_warn: Series[bool] = pa.Field(
-        nullable=True, default=False, description="DQ warning flag."
-    )
-    _dq_error: Series[bool] = pa.Field(
-        nullable=True, default=False, description="DQ error flag."
-    )
+    # DQ fields (_dq_warn, _dq_error) inherited from ETLRecordSchema as bool, nullable=False
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow missing columns and extra columns
+        strict = False  # Allow extra columns beyond schema definition
         ordered = False
         coerce = True
+        # Note: Fields from PublicationBaseSchema that ChEMBL doesn't provide
+        # (pmc_id, affiliation_list, author_orcids, publication_date, language, is_oa)
+        # are set to None by the transformer to satisfy schema inheritance

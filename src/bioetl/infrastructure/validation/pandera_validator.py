@@ -91,7 +91,18 @@ class BasePanderaValidator:
         """
         assert self._schema is not None  # Guaranteed by validate()
         try:
-            self._schema.validate(df, lazy=True)
+            df_to_validate = df
+            if hasattr(self._schema, "columns"):
+                missing = [
+                    name for name in self._schema.columns if name not in df.columns
+                ]
+                if missing:
+                    df_to_validate = df.copy()
+                    for name in missing:
+                        column = self._schema.columns[name]
+                        if getattr(column, "nullable", False):
+                            df_to_validate[name] = None
+            self._schema.validate(df_to_validate, lazy=True)
             return ValidationResult(valid=True)
         except Exception as e:
             return ValidationResult(valid=False, errors=[str(e)])

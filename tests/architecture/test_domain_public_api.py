@@ -34,7 +34,6 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "aggregates",  # Aggregate submodule
         "config",
         "configs",  # Submodule for value object configs
-        "config_types",  # TypedDict definitions for YAML config (not public API)
         "context",
         "entities",
         "error_classifier",
@@ -43,10 +42,12 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "filter_config",
         "filtering",
         "locking",
+        "mapping",
         "medallion",
         "models",  # Metadata models (BronzeMetadata, etc.)
         "normalization",  # REFACTOR-004: functions are re-exported, not module
         "ports",
+        "registry",
         "resilience",
         "schemas",  # Pandera schemas (provider-specific, accessed directly)
         "serialization",

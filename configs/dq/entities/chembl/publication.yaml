@@ -18,7 +18,7 @@ entity_field_validations:
     nullable: false
     error_message: "document_chembl_id must match CHEMBL format"
 
-  - field: doc_type
+  - field: publication_type
     type: enum
     allowed:
       - PUBLICATION
@@ -27,25 +27,64 @@ entity_field_validations:
       - PATENT
     nullable: true
 
-  - field: year
+  - field: publication_year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
-    error_message: "Publication year must be between 1800 and 2100"
+    error_message: "Publication year must be between 1500 and 2100"
 
-  - field: pubmed_id
+  - field: pmid
     type: range
     min: 1
-    max: 100000000
+    max: 10000000000
     nullable: true
     error_message: "PubMed ID must be a positive integer"
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "DOI must start with 10. prefix"
+    error_message: "DOI must match format 10.XXXX/suffix (no whitespace)"
+
+  - field: title
+    type: max_length
+    max_length: 2000
+    nullable: true
+    error_message: "Title must not exceed 2000 characters"
+
+  - field: title
+    type: not_null
+    nullable: true
+    severity: warn
+    error_message: "Missing title — record will be filtered before Gold"
+
+  - field: title
+    type: pattern
+    pattern: '\S'
+    nullable: true
+    severity: warn
+    error_message: "Title should not be empty or whitespace-only"
+
+  - field: citations_received
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Citation count must be non-negative"
+
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: "Unusually high citation count"
+
+  - field: citations_made
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
 
 # =============================================================================
 # Cross-Field Validations
@@ -53,13 +92,29 @@ entity_field_validations:
 entity_cross_field_validations:
   - name: publication_identifiable
     fields:
-      - pubmed_id
-      - doi
+      - document_chembl_id
       - title
+    condition: all_present
+    error_message: "Publication must have document_chembl_id and title"
+
+  - name: has_cross_reference
+    fields:
+      - pmid
+      - doi
     condition: any_present
-    error_message: "Publication must have at least one identifier"
+    severity: warn
+    error_message: "Publication should have at least one external identifier (PMID or DOI)"
 
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+entity_conditional_validations:
+  - name: publication_requires_title
+    condition_field: publication_type
+    condition_value: PUBLICATION
+    condition_operator: eq
+    then_validations:
+      - field: title
+        type: not_null
+        nullable: false
+        error_message: "Publications of type PUBLICATION must have a title"

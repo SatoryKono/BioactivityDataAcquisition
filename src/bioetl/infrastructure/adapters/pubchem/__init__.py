@@ -10,20 +10,17 @@ from bioetl.infrastructure.adapters.pubchem.models import (
     PUBCHEM_RECORD_MODELS,
     PubChemAssayRecord,
     PubChemBioactivityRecord,
+    PubchemMoleculeApiRecord,
     PubchemMoleculeDetailRecord,
-    PubchemMoleculeRecord,
     PubChemSubstanceRecord,
 )
 
 __all__ = [
-    # Model Mappings
     "PUBCHEM_RECORD_MODELS",
-    # Adapter
     "PubChemAdapter",
-    # Record Models
     "PubChemAssayRecord",
     "PubChemBioactivityRecord",
     "PubChemSubstanceRecord",
+    "PubchemMoleculeApiRecord",
     "PubchemMoleculeDetailRecord",
-    "PubchemMoleculeRecord",
 ]
