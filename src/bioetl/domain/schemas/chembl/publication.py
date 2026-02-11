@@ -91,9 +91,9 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow missing columns and extra columns
+        strict = False  # Allow extra columns beyond schema definition
         ordered = False
         coerce = True
-        # Exclude fields from base schema that ChEMBL API doesn't provide
-        # This allows validation to pass even when these columns don't exist
-        drop_invalid_rows = False
+        # Note: Fields from PublicationBaseSchema that ChEMBL doesn't provide
+        # (pmc_id, affiliation_list, author_orcids, publication_date, language, is_oa)
+        # are set to None by the transformer to satisfy schema inheritance
