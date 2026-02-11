@@ -233,4 +233,334 @@
 
 ---
 
-*Отчёт сгенерирован автоматически. Рекомендуется ручная верификация критических несоответствий.*
+# ФАЗА 2: Расширенный Аудит
+
+**Дополнительно проверены:** RULES.md (§1-§7), API Reference (4 файла), CLI Reference, Getting Started, 14 ADR, Operations/Runbooks (20+ файлов), .aiassistant/governance (25+ файлов), Pipeline/Provider specs (41 файл)
+
+---
+
+## 12. RULES.md §1-§3 (`docs/00-project/RULES.md`)
+
+| № | Утверждение | Ссылка на код | Соответствует | План устранения |
+|---|-------------|---------------|---------------|-----------------|
+| R-01 | Silver формат: «Delta Lake / Iceberg» (§1.3) | `silver_writer.py:36`: `from deltalake import DeltaTable` | ❌ Iceberg НЕ реализован, только Delta Lake | Убрать «/ Iceberg» из RULES.md |
+| R-02 | Gold формат: «Delta/Iceberg/Parquet» (§1.3) | `gold_writer.py:27`: `from deltalake` | ❌ Только Delta Lake, нет Iceberg/Parquet | Исправить: «Delta Lake» |
+| R-03 | `PipelineRunner._clear_exports()` очищает Silver/Gold (§1.4) | `application/core/runner.py` | ❌ Метод не существует. Логика в `MedallionLifecycleService.clear()` | Исправить ссылку на `MedallionLifecycleService.clear()` |
+| R-04 | QuarantineStatus: 3 значения (NEW\|IGNORED\|REPROCESSED) (§2.3) | `domain/aggregates/quarantine_entry.py:31-55` | ❌ Фактически 5: +UNDER_REVIEW, EXPIRED | Добавить 2 недокументированных статуса |
+| R-05 | `compute_content_hash` (§2.2) | `domain/transformations.py:101` | ❌ Фактическое имя: `generate_content_hash` | Исправить имя функции |
+| R-06 | Лог-поле `ts` (§3.1) | structlog TimeStamper | ❌ Фактическое поле: `timestamp` | Исправить: `timestamp` |
+| R-07 | Bronze: JSONL + zstd (§1.3) | `bronze_writer.py:30,463` | ✅ | — |
+| R-08 | Lock TTL: 90 секунд (§5.2) | `domain/config.py:554` | ✅ | — |
+| R-09 | Heartbeat interval: 30 секунд (§5.2) | `domain/config.py:551` | ✅ | — |
+| R-10 | `from __future__ import annotations` во всех файлах (§4.1) | 100+ файлов проверено | ✅ | — |
+| R-11 | Coverage threshold: 85% (§4.3) | `pyproject.toml:219`, `Makefile:66` | ✅ | — |
+| R-12 | VCR cassettes в `tests/fixtures/vcr/` (§4.3) | 8 провайдер-директорий | ✅ | — |
+| R-13 | ChEMBL API base URL: `ebi.ac.uk/chembl/api/data` (§5.1) | `infrastructure/adapters/chembl/entity_mapper.py:35` | ✅ | — |
+| R-14 | PII hashing: sha256(lowercase + SALT) (§5.4) | Domain filtering modules | ✅ | — |
+| R-15 | 33 ADR (§6.1) | `docs/02-architecture/decisions/ADR-*.md` | ✅ | — |
+
+**Итого RULES.md §1-§3:** 9/15 ✅ (60%), 0 ⚠️, 6/15 ❌ (40%)
+
+---
+
+## 13. RULES.md §4-§7 (`docs/00-project/RULES.md`)
+
+| № | Утверждение (секция) | Ссылка на код | Соответствует | План устранения |
+|---|----------------------|---------------|---------------|-----------------|
+| R-16 | UnifiedHTTPClient в `infrastructure/adapters/http/client.py` (§4.1) | `client.py:48`: `class UnifiedHTTPClient` | ✅ | — |
+| R-17 | HTTP client использует httpx (§4.1) | `client.py:24`: `import httpx` | ✅ | — |
+| R-18 | pytest>=8.0, pytest-cov>=4.0, pytest-asyncio>=0.23, pytest-xdist>=3.5 (§4.3) | `pyproject.toml:62-66` | ✅ | — |
+| R-19 | VCR.py и pytest-vcr (§4.3) | `pyproject.toml:79-81` | ✅ | — |
+| R-20 | Type hints: `list[str]` не `List[str]`, `X | None` не `Optional[X]` (§4.1) | Ruff rules FA enabled | ✅ | — |
+| R-21 | No `import random` в storage writers (§4.2) | 0 occurrences | ✅ | — |
+| R-22 | Graceful shutdown with signal handling (§5.3) | `application/core/shutdown.py` | ✅ | — |
+| R-23 | `async def aclose()` contract в адаптерах (§5.3) | 5+ адаптеров проверено | ✅ | — |
+| R-24 | aclose() is idempotent (§5.3) | Base adapter definition | ✅ | — |
+| R-25 | DR targets: RPO 24h, RTO 4h (§5.5) | RULES.md §5.5 | ✅ | — |
+| R-26 | Content hash excludes: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id` (§4.2) | Config-driven | ✅ | — |
+| R-27 | MD5-based jitter (not random module) (§4.2) | Domain resilience config | ✅ | — |
+| R-28 | `docs/archived/refactoring-plan.md` exists (§7.1) | File confirmed | ✅ | — |
+
+**Итого RULES.md §4-§7:** 13/13 ✅ (100%)
+
+---
+
+## 14. API Reference Documentation
+
+### 14.1. Domain API (`docs/04-reference/api/domain.md`)
+
+| № | Утверждение | Ссылка на код | Соответствует | План устранения |
+|---|-------------|---------------|---------------|-----------------|
+| API-01 | LockPort: метод `refresh()` (§Ports) | `domain/ports/locking.py:64` | ❌ Фактический метод: `heartbeat()` | Исправить: `heartbeat()` |
+| API-02 | MetricsPort: `increment()` (§Ports) | `domain/ports/observability.py:46` | ❌ Фактический: `increment_counter()` | Исправить имя метода |
+| API-03 | MetricsPort: `gauge()` (§Ports) | `domain/ports/observability.py:61` | ❌ Фактический: `set_gauge()` | Исправить имя метода |
+| API-04 | MetricsPort: `histogram()` (§Ports) | `domain/ports/observability.py:76` | ❌ Фактический: `observe_histogram()` | Исправить имя метода |
+| API-05 | Entity `Activity` (§Entities) | `domain/entities/` | ❌ Фактически: `ActivityRecord` / `Bioactivity` | Исправить имя |
+| API-06 | Entity `Document` (§Entities) | `domain/entities/` | ❌ Класс не существует | Удалить или уточнить |
+| API-07 | `compute_content_hash` (§Transformations) | `domain/transformations.py:101` | ❌ Фактически: `generate_content_hash` | Исправить имя |
+
+### 14.2. Infrastructure API (`docs/04-reference/api/infrastructure.md`)
+
+| № | Утверждение | Ссылка на код | Соответствует | План устранения |
+|---|-------------|---------------|---------------|-----------------|
+| API-08 | `MetricsExporter` class (§Observability) | Весь код | ❌ Не существует. Фактически: `PrometheusMetrics` | Исправить имя класса |
+| API-09 | `LineageTracker` class (§Observability) | Весь код | ❌ Класс не существует нигде | Удалить из документации |
+| API-10 | UnifiedHTTPClient constructor: `base_url`, `rate_limit`, `max_retries` (§HTTP) | `http/client.py:83-93` | ❌ Фактически: `rate_limiter: RateLimiterPort`, `circuit_breaker: CircuitBreakerPort`, `retry_config: RetryConfig` | Полностью переписать пример конструктора |
+| API-11 | `DeltaWriter` class (§Storage) | Весь код | ❌ Класс полностью удалён | Удалить из документации |
+
+### 14.3. Composition API (`docs/04-reference/api/composition.md`)
+
+| № | Утверждение | Ссылка на код | Соответствует | План устранения |
+|---|-------------|---------------|---------------|-----------------|
+| API-12 | `ServicesFactory` class (§Factories) | `composition/factories/services_factory.py` | ❌ Фактически: `BaseServicesFactory` / `ServicesBuilder` | Исправить имя |
+| API-13 | `@register("chembl_activity")` decorator (§Registry) | Весь код | ❌ Декоратор не существует. Фактически: `registry.register_factory()` | Исправить пример |
+| API-14 | `bootstrap_pipeline(ctx)` extra `registry` param (§Bootstrap) | `composition/bootstrap/` | ⚠️ Сигнатура в целом верна, но `registry` не документирован | Добавить optional param |
+
+### 14.4. CLI Reference (`docs/04-reference/cli.md`)
+
+| № | Утверждение | Ссылка на код | Соответствует | План устранения |
+|---|-------------|---------------|---------------|-----------------|
+| API-15 | Exit codes 82-87 (§Exit Codes) | `interfaces/cli/exit_codes.py:52-57` | ✅ | — |
+| API-16 | `--health-server/--no-health-server` flag (§run) | `interfaces/cli/commands/run.py:191` | ✅ | — |
+| API-17 | `quarantine resolve --payload-hash` (§quarantine) | `interfaces/cli/commands/quarantine.py:220` | ✅ | — |
+
+**Итого API Reference:** 3/17 ✅ (18%), 1/17 ⚠️ (6%), 13/17 ❌ (76%)
+
+---
+
+## 15. Getting Started Guide (`docs/03-guides/getting-started.md`)
+
+| № | Утверждение | Ссылка на код | Соответствует | План устранения |
+|---|-------------|---------------|---------------|-----------------|
+| GS-01 | Bronze path: `data/bronze/v1/chembl/activity/` | `config_loader.py:163` | ❌ Фактически: `data/output/bronze/chembl/activity/{date}/` (нет `v1/`, нужен `output/`) | Исправить паттерн пути |
+| GS-02 | Silver path: `data/silver/chembl.activity/` | `config_loader.py:163` | ❌ Фактически: `data/output/silver/chembl/activity/` (слеш не точка, нужен `output/`) | Исправить разделитель и путь |
+| GS-03 | Gold path: `data/gold/chembl.activity_gold/` | `config_loader.py:163` | ❌ Фактически: `data/output/gold/chembl/activity/` (нет `_gold` суффикса) | Исправить паттерн пути |
+| GS-04 | Convention: `data/output/{layer}/{provider}/{entity}/` | `config_loader.py:163` | ✅ Это фактический паттерн | — |
+
+**Итого Getting Started:** 1/4 ✅, 3/4 ❌ — все пути неверны
+
+---
+
+## 16. Pipelines README (`docs/04-reference/pipelines/README.md`)
+
+| № | Утверждение | Ссылка на код | Соответствует | План устранения |
+|---|-------------|---------------|---------------|-----------------|
+| PL-01 | «19 standard + 3 composite = 22 pipelines» | `configs/pipelines/` | ❌ Фактически: 21 standard + 5 composite = 26 | Обновить подсчёт |
+| PL-02 | Недокументированные: ChEMBL `subcellular_fraction.yaml`, `tissue.yaml` | `configs/pipelines/chembl/` | ❌ Файлы существуют, но не в списке | Добавить в список |
+| PL-03 | Недокументированные composite: `activity.yaml`, `assay.yaml` | `configs/composite/` | ❌ Файлы существуют, но не в списке | Добавить в список |
+
+---
+
+## 17. Оставшиеся ADR (Фаза 2)
+
+| № | ADR | Утверждение | Соответствует | Проблема |
+|---|-----|-------------|---------------|----------|
+| ADR-09 | ADR-002 | Bronze: Medallion Architecture | ✅ | — |
+| ADR-10 | ADR-004 | «Pydantic for all models» | ⚠️ Гибридный: Pydantic для API records, dataclasses для domain entities/configs | Уточнить: «Pydantic + dataclasses hybrid» |
+| ADR-11 | ADR-006 | Circuit Breaker states | ✅ | — |
+| ADR-12 | ADR-007 | Circuit Breaker thresholds, metrics | ✅ Все 6 claims совпадают | — |
+| ADR-13 | ADR-008 | Graceful Shutdown — signal handlers | ❌ Signal handlers удалены (2025-12-31), orchestration/ пуст | ADR устарел, пометить Superseded |
+| ADR-14 | ADR-009 | PaginatedFetcherMixin у ChEMBL/PubChem/UniProt | ⚠️ Только UniProt, ChEMBL имеет свою pagination, PubChem — sync | Уточнить список пользователей mixin |
+| ADR-15 | ADR-012 | Checkpoint Strategy | ✅ | — |
+| ADR-16 | ADR-014 | Deterministic Writes | ✅ | — |
+| ADR-17 | ADR-018 | DQ Architecture | ✅ | — |
+| ADR-18 | ADR-022 | Batch Processing | ✅ | — |
+| ADR-19 | ADR-025 | Pipeline Config Unification | ✅ Все 7 claims | — |
+| ADR-20 | ADR-027 | Storage Refactoring | ✅ | — |
+| ADR-21 | ADR-028 | Transformer DI | ✅ | — |
+| ADR-22 | ADR-033 | Config Validation (Proposed) | ❌ Статус «Proposed» — внешняя и семантическая валидация не реализованы, `configs/validation/` не существует | Обновить статус или реализовать |
+
+**Итого ADR (Фаза 2):** 10/14 ✅ (71%), 2 ⚠️ (14%), 2 ❌ (14%)
+
+---
+
+## 18. Operations Documentation & Runbooks (`docs/05-operations/`)
+
+| № | Документ | Утверждение | Соответствует | План устранения |
+|---|----------|-------------|---------------|-----------------|
+| OPS-01 | observability-checklist.md | `health_check() -> bool` | ❌ Фактически: `-> HealthStatus` (enum) | Исправить тип возврата |
+| OPS-02 | observability-checklist.md | ChEMBL health endpoint: `/chembl/api/data/status.json` | ⚠️ Фактически: `/chembl/api/data/status` (без .json) | Исправить путь |
+| OPS-03 | runbooks/README.md | DQ hard threshold exit code: 10 | ❌ Фактически: 83 (DATA_QUALITY_ERROR) | Исправить: exit code 83 |
+| OPS-04 | runbooks/pipeline-failure-recovery.md | DQ hard threshold exit code: 10 | ❌ Фактически: 83 | Исправить: exit code 83 |
+| OPS-05 | runbooks/pipeline-failure-recovery.md | CLI flag `--full-refresh` | ❌ Не реализован. Использовать `--run-type rebuild` | Заменить на `--run-type rebuild` |
+| OPS-06 | runbooks/data-recovery.md | CLI flag `--full-rebuild` | ❌ Не реализован. Использовать `--run-type rebuild` | Заменить на `--run-type rebuild` |
+| OPS-07 | runbooks/data-recovery.md | CLI flag `--ignore-checkpoint` | ❌ Не реализован | Удалить или реализовать |
+| OPS-08 | runbooks/pipeline-failure-recovery.md | `bioetl verify --table chembl_activity` | ❌ Команда `verify` не существует | Удалить или реализовать |
+| OPS-09 | runbooks/dq-failure-investigation.md | `bioetl quarantine-purge --older-than 30d` | ❌ Фактически: `bioetl quarantine purge --pipeline <name> --older-than-days 30` | Исправить формат команды |
+| OPS-10 | runbooks/backfill-rebuild.md | `make run-pipeline PIPELINE={name} ARGS="--full-rebuild"` | ❌ Makefile target не существует. Использовать `bioetl run --pipeline <name> --run-type rebuild` | Заменить на актуальную CLI команду |
+| OPS-11 | runbooks/backfill-rebuild.md | `make run-pipeline ... ARGS="--backfill ..."` | ❌ Использовать `bioetl run --pipeline <name> --run-type backfill` | Исправить формат |
+| OPS-12 | runbooks/vacuum-procedures.md | `retention_hours: 168` config field | ✅ | — |
+| OPS-13 | incident-response.md | `make release-lock PIPELINE=chembl_activity` | ✅ Makefile target делегирует в CLI | — |
+| OPS-14 | runbooks/dq-failure-investigation.md | `bioetl quarantine stats --pipeline chembl_activity` | ✅ Команда и флаги существуют | — |
+
+**Итого Operations:** 3/14 ✅ (21%), 1/14 ⚠️ (7%), 10/14 ❌ (71%)
+
+---
+
+## 19. .aiassistant Rules & Governance
+
+| № | Документ | Утверждение | Соответствует | План устранения |
+|---|----------|-------------|---------------|-----------------|
+| GOV-01 | `.claude/PROJECT_CONTEXT.md` | 5 architecture layers: domain/, application/, composition/, infrastructure/, interfaces/ | ✅ | — |
+| GOV-02 | `governance/02-naming-policy.md` | Pipeline IDs: `{provider}_{entity}` (snake_case) | ✅ `chembl_activity` и др. | — |
+| GOV-03 | `governance/02-naming-policy.md` | Transformer placement: `application/pipelines/{provider}/{entity}_transformer.py` | ✅ | — |
+| GOV-04 | `governance/03-file-policy.md` | Config path: `configs/pipelines/{provider}/{entity}.yaml` | ✅ | — |
+| GOV-05 | `governance/03-file-policy.md` | 7 required config fields: pipeline_name, provider, entity_type, version, primary_keys, silver_table, gold_table | ✅ | — |
+| GOV-06 | `governance/03-file-policy.md` | Schema validation: `configs/pipelines/_schema.json` | ✅ Файл существует (8747 bytes) | — |
+| GOV-07 | `.aiassistant/rules/09-etl-architecture.md` | Pipeline naming: `{entity}_{source}` | ❌ Фактически обратный порядок: `{source}_{entity}` (chembl_activity) | Исправить: `{source}_{entity}` |
+| GOV-08 | `.claude/agents/py-code-bot.md` | Entity location: `domain/entities/{provider}/{entity}.py` с поддиректориями | ❌ Фактически: flat структура `domain/entities/chembl_activity.py` | Исправить: убрать поддиректории |
+| GOV-09 | `.claude/agents/py-code-bot.md` | Client file: `adapters/{provider}/{entity}_client.py` | ⚠️ Фактически: `adapters/{provider}/client.py` (generic, не per-entity) | Исправить паттерн |
+| GOV-10 | `.aiassistant/rules/12-entity-naming-policy.md` | Test path: `tests/bioetl/pipelines/<provider>/<entity>/test_<stage>.py` | ❌ Фактически: `tests/unit/` и `tests/integration/`, нет `tests/bioetl/` | Исправить базовый путь |
+| GOV-11 | `.claude/agents/py-code-bot.md` | BaseTransformer в `application/core/base_transformer.py` | ✅ `class BaseTransformer(ABC)` line 84 | — |
+| GOV-12 | `.claude/agents/py-code-bot.md` | Provider-specific base: `BaseChemblTransformer` | ✅ `base_chembl_transformer.py:34` | — |
+| GOV-13 | `.claude/PROJECT_CONTEXT.md` | Domain Ports: `domain/ports/` с 27 port файлами | ✅ | — |
+| GOV-14 | `.claude/PROJECT_CONTEXT.md` | Facade import: `from bioetl.domain.ports import DataSourcePort` | ✅ `__init__.py` re-exports via `__all__` | — |
+| GOV-15 | `governance/02-naming-policy.md` | Entity naming: `{Provider}{CanonicalTerm}` PascalCase | ⚠️ Смешанный: есть provider-prefixed (ChemblMolecule) и generic (Bioactivity, Assay) | Стандартизировать |
+
+**Итого Governance:** 10/15 ✅ (67%), 2/15 ⚠️ (13%), 3/15 ❌ (20%)
+
+---
+
+## 20. Pipeline & Provider Specifications
+
+### 20.1. ChEMBL Providers
+
+| № | Документ | Утверждение | Соответствует | План устранения |
+|---|----------|-------------|---------------|-----------------|
+| PROV-01 | chembl/molecule.md | Schema version: 1.0.0 | ❌ Config: 1.2.0 | Обновить версию |
+| PROV-02 | chembl/molecule.md | Primary ID: `molecule_chembl_id` | ✅ | — |
+| PROV-03 | chembl/molecule.md | SMILES validation через Value Object | ✅ `SMILES.from_raw()` в transformer:177 | — |
+| PROV-04 | chembl/molecule.md | InChI Key validation через Value Object | ✅ `InChIKey.validate_value_object()` | — |
+| PROV-05 | chembl/activity.md | Schema version: 1.0.0 | ❌ Config: 1.2.0 | Обновить версию |
+| PROV-06 | chembl/activity.md | «55 полей» в Activity entity | ❌ Фактически: 57 полей (includes _state, activity_properties, toid) | Исправить: 57 |
+| PROV-07 | chembl/activity.md | Gold filter: IC50, Ki | ❌ Фактически 9 типов: IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50 | Добавить все 9 типов |
+| PROV-08 | chembl/activity.md | Primary key: `["activity_id"]` | ✅ | — |
+| PROV-09 | chembl/activity.md | Ligand efficiency: bei, le, lle, sei | ✅ Все 4 метрики в `bioactivity.py:132-135` | — |
+
+### 20.2. PubChem, PubMed, UniProt
+
+| № | Документ | Утверждение | Соответствует | План устранения |
+|---|----------|-------------|---------------|-----------------|
+| PROV-10 | pubchem/compound.md | Primary key: `["cid"]` | ✅ | — |
+| PROV-11 | pubchem/compound.md | Rate Limit: 5 req/sec | ✅ `pubchem.yaml:27`: `requests_per_second: 5.0` | — |
+| PROV-12 | pubmed/publication.md | Rate limit (no key): 3 req/sec | ✅ `pubmed.yaml:32` | — |
+| PROV-13 | pubmed/publication.md | Rate limit (with key): 10 req/sec | ✅ `pubmed.yaml:34-36` | — |
+| PROV-14 | pubmed/publication.md | Entity ID: `pubmed:{pmid}` | ✅ `transformer.py:297` | — |
+| PROV-15 | uniprot/protein.md | Primary key: `["accession"]` | ✅ `protein.yaml:17` | — |
+| PROV-16 | uniprot/protein.md | Rate limit (no key): 10 req/sec | ✅ `uniprot.yaml:28` | — |
+| PROV-17 | uniprot/protein.md | Partition by: `["organism"]` | ✅ `protein.yaml:30` | — |
+
+### 20.3. CrossRef, OpenAlex, Semantic Scholar
+
+| № | Документ | Утверждение | Соответствует | План устранения |
+|---|----------|-------------|---------------|-----------------|
+| PROV-18 | crossref/publication.md | Rate limit без email: ~5 req/sec | ❌ Фактически: 50 req/sec (polite pool) | Исправить |
+| PROV-19 | crossref/publication.md | Batch DOI: до 100 DOIs | ❌ Config: `batch_size: 50` | Исправить: 50 |
+| PROV-20 | openalex/publication.md | Rate limit без email: ~5 req/sec | ❌ Фактически: 10 req/sec (polite pool) | Исправить |
+| PROV-21 | openalex/publication.md | Batch DOI: до 50 DOIs | ✅ `batch_size: 50` | — |
+| PROV-22 | semanticscholar/publication.md | Rate limit: 1000 req/sec (shared) | ❌ Config не содержит rate_limit секции | Добавить rate_limit в config |
+| PROV-23 | semanticscholar/publication.md | Rate limit (API key): 1 req/sec | ❌ Config не содержит rate_limit секции | Добавить rate_limit в config |
+
+**Итого Provider Specs:** 14/23 ✅ (61%), 0 ⚠️, 9/23 ❌ (39%)
+
+---
+
+## 21. Сводная статистика (Полный аудит)
+
+### По категориям документов
+
+| Категория | Всего | ✅ | ⚠️ | ❌ | Процент ✅ |
+|-----------|-------|----|----|----|-----------:|
+| Architecture layers (Phase 1) | 57 | 37 | 5 | 15 | 65% |
+| RULES.md §1-§3 | 15 | 9 | 0 | 6 | 60% |
+| RULES.md §4-§7 | 13 | 13 | 0 | 0 | 100% |
+| API Reference | 17 | 3 | 1 | 13 | 18% |
+| Getting Started | 4 | 1 | 0 | 3 | 25% |
+| Pipeline README | 3 | 0 | 0 | 3 | 0% |
+| ADR (Phase 2) | 14 | 10 | 2 | 2 | 71% |
+| Operations/Runbooks | 14 | 3 | 1 | 10 | 21% |
+| Governance/.aiassistant | 15 | 10 | 2 | 3 | 67% |
+| Provider Specs | 23 | 14 | 0 | 9 | 61% |
+| **ИТОГО** | **175** | **100 (57%)** | **11 (6%)** | **64 (37%)** | **57%** |
+
+### По серьёзности несоответствий
+
+| Серьёзность | Кол-во | Примеры |
+|-------------|--------|---------|
+| P0 CRITICAL | 6 | API-10 (UnifiedHTTPClient конструктор полностью неверен), OPS-05..08 (несуществующие CLI flags/commands), GS-01..03 (все data paths неверны) |
+| P1 HIGH | 14 | API-01..07 (неверные имена методов/классов), OPS-03..04 (exit codes), PROV-22..23 (missing rate limits) |
+| P2 MEDIUM | 22 | R-01..R-06, C-03..C-09, PROV-01..07, GOV-07..10 |
+| P3 LOW | 22 | Подсчёты файлов, недокументированные модули, косметические расхождения |
+
+---
+
+## 22. Топ-20 критических несоответствий (обновлённый)
+
+| # | ID | Документ | Проблема | Серьёзность |
+|---|-----|----------|----------|-------------|
+| 1 | API-10 | api/infrastructure.md | UnifiedHTTPClient constructor — полностью неверная сигнатура | P0 CRITICAL |
+| 2 | GS-01..03 | getting-started.md | ВСЕ data path паттерны неверны (`v1/`, точка вместо слеша, `_gold` суффикс) | P0 CRITICAL |
+| 3 | OPS-05..07 | runbooks/ | 3 несуществующих CLI flags: `--full-refresh`, `--full-rebuild`, `--ignore-checkpoint` | P0 CRITICAL |
+| 4 | OPS-08 | pipeline-failure-recovery.md | Команда `bioetl verify` не существует | P0 CRITICAL |
+| 5 | D-03 | domain-layer.md | QuarantineEntry states полностью неверны | P1 HIGH |
+| 6 | C-09 | composition-layer.md | bootstrap_composite_pipeline — неверная сигнатура | P1 HIGH |
+| 7 | IF-05 | interfaces-layer.md | Graceful shutdown в orchestration/ — модуль пуст | P1 HIGH |
+| 8 | API-01..04 | api/domain.md | 4 неверных имени методов MetricsPort/LockPort | P1 HIGH |
+| 9 | API-08..09 | api/infrastructure.md | 2 несуществующих класса: MetricsExporter, LineageTracker | P1 HIGH |
+| 10 | API-11 | api/infrastructure.md | DeltaWriter — класс полностью удалён | P1 HIGH |
+| 11 | R-01..R-02 | RULES.md | «Iceberg» упоминается но не реализован | P2 MEDIUM |
+| 12 | R-03 | RULES.md | `PipelineRunner._clear_exports()` не существует | P2 MEDIUM |
+| 13 | OPS-03..04 | runbooks/ | DQ exit code 10 vs фактический 83 | P1 HIGH |
+| 14 | OPS-10..11 | backfill-rebuild.md | Makefile targets не существуют | P1 HIGH |
+| 15 | PROV-01,05 | chembl/ docs | Schema version 1.0.0 vs фактическая 1.2.0 | P2 MEDIUM |
+| 16 | PROV-22..23 | semanticscholar/ docs | Rate limits не сконфигурированы | P1 HIGH |
+| 17 | GOV-08 | py-code-bot.md | Entity path structure: subdirs vs flat | P2 MEDIUM |
+| 18 | GOV-07 | 09-etl-architecture.md | Pipeline naming order reversed | P2 MEDIUM |
+| 19 | ADR-13 | ADR-008 | Graceful Shutdown ADR устарел | P2 MEDIUM |
+| 20 | PL-01..03 | pipelines/README.md | Pipeline count: 22 vs 26 | P2 MEDIUM |
+
+---
+
+## 23. Обновлённый план устранения
+
+### Фаза 0: Блокирующие (P0) — немедленно
+
+1. **GS-01..03**: Исправить ВСЕ data path паттерны в `getting-started.md` на `data/output/{layer}/{provider}/{entity}/`
+2. **API-10**: Полностью переписать пример конструктора UnifiedHTTPClient с актуальной сигнатурой
+3. **OPS-05..08**: Удалить/заменить все 3 несуществующих CLI flags + команду `verify` в runbooks
+4. **OPS-10..11**: Заменить `make run-pipeline` на `bioetl run --pipeline <name> --run-type {rebuild|backfill}`
+
+### Фаза 1: Критические (P1) — в течение 1-2 дней
+
+5. **D-03**: Исправить QuarantineEntry states
+6. **C-09**: Исправить bootstrap_composite_pipeline сигнатуру
+7. **IF-05**: Обновить orchestration/ описание
+8. **API-01..07**: Исправить все имена методов/классов в API domain reference
+9. **API-08..11**: Удалить несуществующие классы из API infrastructure reference
+10. **OPS-03..04**: Исправить exit code 10→83
+11. **PROV-22..23**: Добавить rate_limit конфигурацию для Semantic Scholar
+
+### Фаза 2: Важные (P2) — в текущем спринте
+
+12. **R-01..R-02**: Убрать упоминания Iceberg из RULES.md
+13. **R-03**: Исправить `_clear_exports()` → `MedallionLifecycleService.clear()`
+14. **C-03..C-07**: Исправить имена фабрик в composition docs
+15. **PROV-01,05**: Обновить schema versions 1.0.0→1.2.0
+16. **GOV-07,08,10**: Исправить пути и naming patterns в agent/governance docs
+17. **ADR-13**: Пометить ADR-008 как Superseded
+18. **PL-01..03**: Обновить подсчёт пайплайнов
+
+### Фаза 3: Косметические (P3) — при следующем обновлении
+
+19. Исправить все подсчёты файлов (D-01, D-04, D-05, IF-01, O-03)
+20. Документировать недостающие модули и провайдеры
+
+### Фаза 4: Тесты
+
+21. Добавить 21 недостающий архитектурный тест (§8)
+22. Добавить тест синхронизации документации с кодом
+
+---
+
+*Полный аудит завершён. Проверено 175 утверждений из 40+ документов.*
+*Отчёт сгенерирован 2026-02-11. Рекомендуется ручная верификация P0/P1 несоответствий.*
