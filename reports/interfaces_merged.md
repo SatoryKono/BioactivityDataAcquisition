@@ -2140,6 +2140,18 @@ async def _run_composite_async(
     help="Explicit path to Bronze cache directory",
 )
 @click.option(
+    "--cached-bronze-enrichers/--no-cached-bronze-enrichers",
+    "cached_bronze_enrichers",
+    default=None,
+    help="Override cached Bronze for enrichers (default: follow --use-cached-bronze)",
+)
+@click.option(
+    "--cached-bronze-dependencies/--no-cached-bronze-dependencies",
+    "cached_bronze_dependencies",
+    default=None,
+    help="Override cached Bronze for dependencies (default: follow --use-cached-bronze)",
+)
+@click.option(
     "--debug",
     is_flag=True,
     help="Enable DEBUG level logging",
@@ -2169,6 +2181,8 @@ def run_composite(
     use_cached_bronze: bool,
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
+    cached_bronze_enrichers: bool | None,
+    cached_bronze_dependencies: bool | None,
     debug: bool,
     health_server: bool,
     health_port: int,
@@ -2197,6 +2211,8 @@ def run_composite(
         use_cached_bronze=use_cached_bronze,
         cached_bronze_path=cached_bronze_path,
         cached_bronze_date=cached_bronze_date,
+        cached_bronze_enrichers=cached_bronze_enrichers,
+        cached_bronze_dependencies=cached_bronze_dependencies,
     )
 
     echo_info(f"Starting composite pipeline: {composite}")

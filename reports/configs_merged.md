@@ -1465,8 +1465,11 @@ column_groups:
   - name: doc_type
     fields:
       - publication_type
+      - publication_type_unified
+      - publication_subclass
+      - publication_class
       - source_type       # CrossRef, OpenAlex raw type (journal-article, article, etc.)
-    provider_order: [chembl, crossref, openalex, pubmed]
+    provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 16. Language
   - name: language
@@ -1724,6 +1727,9 @@ column_groups:
   - name: doc_type
     fields:
       - publication_type
+      - publication_type_unified
+      - publication_subclass
+      - publication_class
 
   - name: content_domain
     fields:
@@ -1978,6 +1984,9 @@ column_groups:
   - name: doc_type
     fields:
       - publication_type
+      - publication_type_unified
+      - publication_subclass
+      - publication_class
 
   - name: quality
     fields:
@@ -2151,6 +2160,13 @@ column_groups:
     fields:
       - chemical_count
 
+  - name: doc_type
+    fields:
+      - publication_type
+      - publication_type_unified
+      - publication_subclass
+      - publication_class
+
   - name: language
     fields:
       - language
@@ -2194,6 +2210,7 @@ silver:
     - subjects
     - funding
     - chemicals
+    - doc_type
     - language
     - misc
     - dq
@@ -2296,6 +2313,9 @@ column_groups:
   - name: doc_type
     fields:
       - publication_type
+      - publication_type_unified
+      - publication_subclass
+      - publication_class
 
   - name: open_access
     fields:
@@ -2886,15 +2906,15 @@ entity_field_validations:
   - field: pmid
     type: range
     min: 1
-    max: 100000000
+    max: 10000000000
     nullable: true
     error_message: "PubMed ID must be a positive integer"
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.+$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "DOI must start with 10. prefix"
+    error_message: "DOI must match format 10.XXXX/suffix (no whitespace)"
 
   - field: title
     type: max_length
@@ -2902,22 +2922,71 @@ entity_field_validations:
     nullable: true
     error_message: "Title must not exceed 2000 characters"
 
+  - field: title
+    type: not_null
+    nullable: true
+    severity: warn
+    error_message: "Missing title — record will be filtered before Gold"
+
+  - field: title
+    type: pattern
+    pattern: '\S'
+    nullable: true
+    severity: warn
+    error_message: "Title should not be empty or whitespace-only"
+
+  - field: citations_received
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Citation count must be non-negative"
+
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: "Unusually high citation count"
+
+  - field: citations_made
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
+
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
 entity_cross_field_validations:
   - name: publication_identifiable
     fields:
+      - document_chembl_id
+      - title
+    condition: all_present
+    error_message: "Publication must have document_chembl_id and title"
+
+  - name: has_cross_reference
+    fields:
       - pmid
       - doi
-      - title
     condition: any_present
-    error_message: "Publication must have at least one identifier"
+    severity: warn
+    error_message: "Publication should have at least one external identifier (PMID or DOI)"
 
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+entity_conditional_validations:
+  - name: publication_requires_title
+    condition_field: doc_type
+    condition_value: PUBLICATION
+    condition_operator: eq
+    then_validations:
+      - field: title
+        type: not_null
+        nullable: false
+        error_message: "Publications of type PUBLICATION must have a title"
 
 ================================================================================
 File: publication_similarity.yaml
@@ -3292,15 +3361,21 @@ entity: publication
 entity_field_validations:
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.+$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: false
-    error_message: "DOI is required and must start with 10. prefix"
+    error_message: "DOI is required and must match format 10.XXXX/suffix (no whitespace)"
 
   - field: title
     type: max_length
     max_length: 2000
     nullable: true
     error_message: "Title must not exceed 2000 characters"
+
+  - field: title
+    type: not_null
+    nullable: true
+    severity: warn
+    error_message: "Missing title — record will be filtered before Gold"
 
   - field: title
     type: pattern
@@ -3335,6 +3410,20 @@ entity_field_validations:
     nullable: true
     error_message: "Citation count must be non-negative"
 
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: "Unusually high citation count"
+
+  - field: citations_made
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
+
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
@@ -3349,7 +3438,18 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+entity_conditional_validations:
+  - name: article_requires_title
+    condition_field: type
+    condition_value:
+      - journal-article
+      - proceedings-article
+    condition_operator: in
+    then_validations:
+      - field: title
+        type: not_null
+        nullable: false
+        error_message: "Journal and proceedings articles must have a title"
 
 ================================================================================
 File: publication.yaml
@@ -3378,21 +3478,27 @@ entity_field_validations:
   - field: pmid
     type: range
     min: 1
-    max: 100000000
+    max: 10000000000
     nullable: true
     error_message: "PubMed ID must be a positive integer"
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.+$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "DOI must start with 10. prefix"
+    error_message: "DOI must match format 10.XXXX/suffix (no whitespace)"
 
   - field: title
     type: max_length
     max_length: 2000
     nullable: true
     error_message: "Title must not exceed 2000 characters"
+
+  - field: title
+    type: not_null
+    nullable: true
+    severity: warn
+    error_message: "Missing title — record will be filtered before Gold"
 
   - field: title
     type: pattern
@@ -3429,13 +3535,21 @@ entity_field_validations:
     nullable: true
     error_message: "Citation count must be non-negative"
 
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: "Unusually high citation count"
+
   - field: fwci
     type: range
     min: 0
     nullable: true
     error_message: "FWCI must be non-negative"
 
-  - field: reference_count
+  - field: citations_made
     type: range
     min: 0
     nullable: true
@@ -3452,17 +3566,24 @@ entity_cross_field_validations:
     condition: all_present
     error_message: "Publication must have OpenAlex ID and title"
 
-  - name: retracted_publication_warning
-    fields:
-      - is_retracted
-    condition: "is_retracted == true"
-    severity: warn
-    error_message: "Publication has been retracted"
+  # NOTE: retracted_publication_warning moved to conditional_validations
+  # (cross-field condition "is_retracted == true" was invalid syntax)
 
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+entity_conditional_validations:
+  - name: article_requires_title
+    condition_field: type
+    condition_value:
+      - article
+      - review
+    condition_operator: in
+    then_validations:
+      - field: title
+        type: not_null
+        nullable: false
+        error_message: "Articles and reviews must have a title"
 
 ================================================================================
 File: compound.yaml
@@ -3525,7 +3646,7 @@ entity_field_validations:
   - field: pmid
     type: range
     min: 1
-    max: 100000000
+    max: 10000000000
     nullable: false
     error_message: "PMID is required and must be a positive integer"
 
@@ -3535,11 +3656,24 @@ entity_field_validations:
     nullable: true
     error_message: "Title must not exceed 2000 characters"
 
+  - field: title
+    type: not_null
+    nullable: true
+    severity: warn
+    error_message: "Missing title — record will be filtered before Gold"
+
+  - field: title
+    type: pattern
+    pattern: '\S'
+    nullable: true
+    severity: warn
+    error_message: "Title should not be empty or whitespace-only"
+
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.+$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "DOI must start with 10. prefix"
+    error_message: "DOI must match format 10.XXXX/suffix (no whitespace)"
 
   - field: publication_year
     type: range
@@ -3567,6 +3701,26 @@ entity_field_validations:
     pattern: '^PMC\d+$'
     nullable: true
     error_message: "PMC ID must start with PMC followed by digits"
+
+  - field: citations_received
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Citation count must be non-negative"
+
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: "Unusually high citation count"
+
+  - field: citations_made
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
 
 # =============================================================================
 # Cross-Field Validations
@@ -3619,21 +3773,27 @@ entity_field_validations:
   - field: pmid
     type: range
     min: 1
-    max: 100000000
+    max: 10000000000
     nullable: true
     error_message: "PubMed ID must be a positive integer"
 
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.+$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "DOI must start with 10. prefix"
+    error_message: "DOI must match format 10.XXXX/suffix (no whitespace)"
 
   - field: title
     type: max_length
     max_length: 2000
     nullable: true
     error_message: "Title must not exceed 2000 characters"
+
+  - field: title
+    type: not_null
+    nullable: true
+    severity: warn
+    error_message: "Missing title — record will be filtered before Gold"
 
   - field: title
     type: pattern
@@ -3655,7 +3815,15 @@ entity_field_validations:
     nullable: true
     error_message: "Citation count must be non-negative"
 
-  - field: reference_count
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: "Unusually high citation count"
+
+  - field: citations_made
     type: range
     min: 0
     nullable: true
@@ -3681,7 +3849,16 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+entity_conditional_validations:
+  - name: journal_article_requires_title
+    condition_field: publication_type
+    condition_value: JournalArticle
+    condition_operator: eq
+    then_validations:
+      - field: title
+        type: not_null
+        nullable: false
+        error_message: "Journal articles must have a title"
 
 ================================================================================
 File: idmapping.yaml
@@ -4004,9 +4181,9 @@ provider_field_validations:
   # DOI format validation (applies to all CrossRef entities)
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "Invalid DOI format (must start with 10. prefix)"
+    error_message: "Invalid DOI format (must match 10.XXXX/suffix, no whitespace)"
 
   # Year range validation
   - field: publication_year
@@ -4048,9 +4225,9 @@ provider_field_validations:
   # DOI format validation
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "Invalid DOI format (must start with 10. prefix)"
+    error_message: "Invalid DOI format (must match 10.XXXX/suffix, no whitespace)"
 
   # Year range validation
   - field: publication_year
@@ -4115,7 +4292,7 @@ provider_field_validations:
   - field: pmid
     type: range
     min: 1
-    max: 100000000
+    max: 10000000000
     nullable: true
     error_message: "PMID must be a positive integer"
 
@@ -4129,9 +4306,9 @@ provider_field_validations:
   # DOI format validation
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "Invalid DOI format (must start with 10. prefix)"
+    error_message: "Invalid DOI format (must match 10.XXXX/suffix, no whitespace)"
 
   # Year range validation
   - field: publication_year
@@ -4174,9 +4351,9 @@ provider_field_validations:
   # DOI format validation
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "Invalid DOI format (must start with 10. prefix)"
+    error_message: "Invalid DOI format (must match 10.XXXX/suffix, no whitespace)"
 
   # Year range validation
   - field: publication_year
@@ -4259,6 +4436,20 @@ input_filter:
   # column_name: "<id_column>"
   # filter_field: "<api_field>"
   # fallback_column: "<fallback_field>"  # Optional: search by title if ID not found
+
+# =============================================================================
+# Silver Filter Defaults
+# =============================================================================
+# Silver filters control which records pass domain-level quality gates
+# AFTER transformation but BEFORE writing to Silver layer.
+# Uses the same filter engine as gold_filters.
+silver_filters:
+  required_fields: []
+  columns: {}
+  ranges: {}
+  list_lengths: {}
+  list_contains: {}
+  exclude_if_present: []
 
 # =============================================================================
 # Gold Filter Defaults
@@ -4360,6 +4551,53 @@ extraction_params:
 
   # Only ChEMBL-standardized values (manual curation flag)
   standard_flag: 1
+
+# -----------------------------------------------------------------------------
+# Silver Filters — Domain-level quality gates (applied BEFORE Silver write)
+# -----------------------------------------------------------------------------
+# Records that fail these filters are excluded from the Silver layer entirely.
+# These enforce domain invariants and physically plausible value ranges.
+silver_filters:
+  # Column value filters — strict inclusion lists
+  columns:
+    # Only IC50 and Ki measurements
+    standard_type: [IC50, Ki]
+    # Only exact measurements (no censored: >, <, ~)
+    standard_relation: ["="]
+    # Only nanoMolar units
+    standard_units: [nM]
+    # Binding (B) and Functional (F) assays only
+    assay_type: [B, F]
+    # Exclude potential duplicates (0 = not duplicate)
+    potential_duplicate: ["0"]
+
+  # Numeric range filters
+  ranges:
+    activity_id:
+      min: 1
+      max: 10000000000  # 10^10
+    standard_value:
+      min: 0
+      include_min: false  # Exclude exactly 0
+    pchembl_value:
+      min: 3
+      max: 10
+    document_year:
+      min: 1950
+      max: 2050
+
+  # Required fields — must be non-null for silver
+  required_fields:
+    - activity_id
+    - molecule_chembl_id
+    - target_chembl_id
+    - document_chembl_id
+    - standard_value
+    - pchembl_value
+
+  # Exclude records with data validity issues (field must be null / absent)
+  exclude_if_present:
+    - data_validity_comment
 
 # -----------------------------------------------------------------------------
 # Gold Filters
@@ -4534,7 +4772,7 @@ input_filter:
   source_path: "data/input/molecule.csv"
   column_name: "molecule_chembl_id"
   filter_field: "molecule_chembl_id"
-  batch_size: 20
+  batch_size: 10
 
 # -----------------------------------------------------------------------------
 # Gold Filters
@@ -4664,10 +4902,10 @@ gold_filters:
 
   # Numeric range filters
   ranges:
-    # Scientific journals era cutoff (schema allows 1500..2100)
+    # Standardized publication year filter (1950..2050 inclusive)
     publication_year:
-      min: 1800
-      include_min: false
+      min: 1950
+      max: 2050
 
   # Required fields (pubmed_id and doi are optional - not all publications have them)
   required_fields:
@@ -5578,10 +5816,10 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Scientific journals era cutoff (schema allows 1500..2100)
+    # Standardized publication year filter (1950..2050 inclusive)
     publication_year:
-      min: 1800
-      max: 2100
+      min: 1950
+      max: 2050
 
   # Required fields
   required_fields:
@@ -5623,10 +5861,10 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Scientific journals era cutoff (schema allows 1500..2100)
+    # Standardized publication year filter (1950..2050 inclusive)
     publication_year:
-      min: 1800
-      max: 2100
+      min: 1950
+      max: 2050
 
   # Required fields
   required_fields:
@@ -5708,10 +5946,10 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Scientific journals era cutoff (schema allows 1500..2100)
+    # Standardized publication year filter (1950..2050 inclusive)
     publication_year:
-      min: 1800
-      max: 2100
+      min: 1950
+      max: 2050
 
   # Required fields
   required_fields:
@@ -5756,10 +5994,10 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Scientific journals era cutoff (schema allows 1500..2100)
+    # Standardized publication year filter (1950..2050 inclusive)
     publication_year:
-      min: 1800
-      max: 2100
+      min: 1950
+      max: 2050
 
   # Required fields
   required_fields:
@@ -7787,15 +8025,16 @@ Path: pipelines\composite\activity.yaml
 # Combines bioactivity data from ChEMBL with compound record metadata:
 # - Seed: ChEMBL activities (activity_id, molecule_chembl_id, ...)
 # - Dependencies:
-#   1. chembl_compound_record: compound records filtered by molecule_chembl_id
+#   1. chembl_compound_record: compound records filtered by
+#      molecule_chembl_id AND document_chembl_id (dual-key enrichment)
 #
 # This pipeline enables correlation of activity measurements with their
 # original compound names and document references from compound records.
 #
 # Join Strategy:
-# - molecule_chembl_id is the primary join key
-# - Activity → CompoundRecord is M:N (many activities per molecule,
-#   many compound records per molecule from different documents)
+# - Composite key: (molecule_chembl_id, document_chembl_id)
+# - Activity → CompoundRecord is ~1:1 with composite key
+#   (one compound record per molecule-document pair)
 # - Merge uses left_outer to preserve all activities
 #
 # Version: 1.0.0
@@ -7815,15 +8054,16 @@ composite:
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts bioactivity data from ChEMBL.
-  # Its output provides join keys (molecule_chembl_id) for dependency.
+  # Its output provides join keys (molecule_chembl_id, document_chembl_id)
+  # for dependency dual-key filtering and composite join.
   seed:
     pipeline: chembl_activity
     output_keys:
       - activity_id           # Primary key
-      - molecule_chembl_id    # FK for compound_record join
+      - molecule_chembl_id    # FK for compound_record join (key 1)
       - assay_chembl_id       # FK for future assay enrichment
       - target_chembl_id      # FK for future target enrichment
-      - document_chembl_id    # FK for future publication enrichment
+      - document_chembl_id    # FK for compound_record join (key 2)
     silver_table: silver/chembl/activity
 
   # ---------------------------------------------------------------------------
@@ -7831,16 +8071,21 @@ composite:
   # ---------------------------------------------------------------------------
   # compound_record is a dependency (not enricher) because:
   # 1. It requires API calls (not just Silver table lookup)
-  # 2. It should be filtered by molecule_chembl_id from seed
+  # 2. It should be filtered by molecule_chembl_id AND document_chembl_id
   # 3. It must complete before any merge can occur
   dependencies:
     # ChEMBL Compound Record: original compound names from publications
-    # Fetches compound records filtered by molecule_chembl_id from seed.
-    # Many compound records exist per molecule (from different documents).
+    # Fetches compound records filtered by BOTH molecule_chembl_id AND
+    # document_chembl_id from seed (dual-key enrichment).
+    # API call: /compound_record?molecule_chembl_id__in=...&document_chembl_id__in=...
+    # This produces ~1:1 mapping (one record per molecule-document pair).
     - pipeline: chembl_compound_record
       join_keys:
-        - molecule_chembl_id   # Join key from seed
-      filter_field: molecule_chembl_id  # API filter field
+        - molecule_chembl_id   # Composite join key 1
+        - document_chembl_id   # Composite join key 2
+      filter_fields:           # Multi-field API filtering (AND logic)
+        - molecule_chembl_id
+        - document_chembl_id
       required: false          # Optional - missing records don't block composite
       timeout_seconds: 600
       silver_table: silver/chembl/compound_record
@@ -7947,6 +8192,7 @@ composite:
       # === Compound record metadata (from dependency) ===
       - name: compound_record
         fields:
+          - record_id
           - compound_key
           - compound_name
           - src_compound_id
@@ -10646,7 +10892,7 @@ Path: sources\chembl.yaml
 source:
     type: api
     load_strategy: full
-    batch_size: 20
+    batch_size: 10
     provider_config:
         provider: chembl
         base_url: https://www.ebi.ac.uk/chembl/api/data
@@ -10655,7 +10901,7 @@ source:
             timeout_sec: 60.0
             max_retries: 3
         max_url_length: 2000
-        batch_size: 20
+        batch_size: 10
         page_size: 100  # Minimum allowed by schema (ge=100)
         api_version: null
 

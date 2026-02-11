@@ -1613,9 +1613,10 @@ class EnrichmentCoordinator:
     ) -> str | None:
         """Find column name with case-insensitive matching."""
         column_lower = column.lower()
-        for col in df.columns:
-            if col.lower() == column_lower:
-                return col  # type: ignore[no-any-return]
+        col_name: str
+        for col_name in df.columns:
+            if col_name.lower() == column_lower:
+                return col_name
         return None
 
     async def _return_skipped(self, enricher: EnricherConfig) -> EnrichmentResult:
@@ -1874,8 +1875,9 @@ class EnricherDeduplicator:
         missing_cols = [c for c in key_columns if c not in df.columns]
         if missing_cols:
             return False
-        unique_count = df.select(key_columns).n_unique()
-        return unique_count < len(df)  # type: ignore[no-any-return]
+        unique_count: int = df.select(key_columns).n_unique()
+        has_duplicates: bool = unique_count < len(df)
+        return has_duplicates
 
     def _aggregate_duplicates(
         self,
@@ -1965,7 +1967,8 @@ class EnricherDeduplicator:
         conflicts = conflict_check.filter(
             (pl.col("n_unique") > 1) | (pl.col("has_null") & ~pl.col("all_null"))
         )
-        return conflicts.height > 0  # type: ignore[no-any-return]
+        has_conflicts: bool = conflicts.height > 0
+        return has_conflicts
 
     def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Build expression that concatenates values with |.
@@ -3692,8 +3695,12 @@ class MergeService:
 
         Dependencies are simpler than enrichers:
         - Always 1:1 cardinality (no aggregation)
-        - Single join key (first in join_keys)
+        - Single or composite join keys
         - No special cardinality handling
+
+        For multi-field filter dependencies (e.g., compound_record filtered by
+        molecule_chembl_id + document_chembl_id), uses composite key join on
+        all join_keys simultaneously.
 
         Column renaming uses ColumnRenamer to apply {provider}.{entity}.{field}
         format to dependency columns for qualified column matching.
@@ -3714,6 +3721,14 @@ class MergeService:
                 continue
 
             dep_df = dependency_dfs[dep.pipeline]
+
+            # Multi-field filter dependencies use composite key join
+            if dep.is_multi_field_filter:
+                result = self._apply_composite_key_dependency_join(
+                    result, dep_df, dep, seed_pipeline
+                )
+                continue
+
             join_keys_list = list(dep.join_keys)
             primary_key = join_keys_list[0]
 
@@ -3795,6 +3810,183 @@ class MergeService:
                 dep_join_key=dep_join_key,
                 result_rows=len(result),
             )
+
+        return result
+
+    def _resolve_composite_join_keys(
+        self,
+        join_keys_list: list[str],
+        left_pipeline: str | None,
+        right_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[list[str], list[str], set[str]]:
+        """Resolve qualified join key names for composite key join.
+
+        Args:
+            join_keys_list: Raw join key names.
+            left_pipeline: Pipeline name for left-side key resolution.
+            right_pipeline: Pipeline name for right-side key resolution.
+            merged_columns: Available columns in the merged DataFrame.
+
+        Returns:
+            Tuple of (left_keys, right_keys, all_join_key_set).
+        """
+        left_keys: list[str] = []
+        right_keys: list[str] = []
+        all_join_key_set: set[str] = set()
+
+        for key in join_keys_list:
+            seed_key, dep_key, seed_key_qualified = (
+                self._resolve_join_key_names_asymmetric(
+                    left_key=key,
+                    right_key=key,
+                    left_pipeline=left_pipeline,
+                    right_pipeline=right_pipeline,
+                    merged_columns=merged_columns,
+                )
+            )
+            left_keys.append(seed_key)
+            right_keys.append(dep_key)
+            all_join_key_set.add(seed_key)
+            all_join_key_set.add(dep_key)
+            if seed_key_qualified and seed_key_qualified != seed_key:
+                all_join_key_set.add(seed_key_qualified)
+
+        return left_keys, right_keys, all_join_key_set
+
+    def _execute_composite_key_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_keys: list[str],
+        right_keys: list[str],
+        pipeline_name: str,
+    ) -> pl.DataFrame:
+        """Execute a Polars join on multiple keys.
+
+        Args:
+            left_df: Left DataFrame.
+            right_df: Right DataFrame.
+            left_keys: Column names in left_df for join.
+            right_keys: Column names in right_df for join.
+            pipeline_name: Pipeline name for suffix.
+
+        Returns:
+            Joined DataFrame.
+        """
+        import polars as pl
+
+        how = self._get_polars_join_type()
+
+        if left_keys == right_keys:
+            return left_df.join(
+                right_df,
+                on=left_keys,
+                how=how,
+                suffix=f"_{pipeline_name}",
+            )
+
+        # Different column names — use temp columns for right-side
+        temp_cols = []
+        for lk, rk in zip(left_keys, right_keys, strict=True):
+            if lk != rk:
+                temp_col = f"__temp_join_{pipeline_name}_{rk}"
+                right_df = right_df.with_columns(pl.col(rk).alias(temp_col))
+                temp_cols.append(temp_col)
+            else:
+                temp_cols.append(rk)
+
+        return left_df.join(
+            right_df,
+            left_on=left_keys,
+            right_on=temp_cols,
+            how=how,
+            suffix=f"_{pipeline_name}",
+        )
+
+    def _apply_composite_key_dependency_join(
+        self,
+        merged_df: pl.DataFrame,
+        dep_df: pl.DataFrame,
+        dep: DependencyConfig,
+        seed_pipeline: str | None = None,
+    ) -> pl.DataFrame:
+        """Apply composite key join for multi-field filter dependencies.
+
+        Used when a dependency filters by multiple fields (e.g., compound_record
+        filtered by both molecule_chembl_id and document_chembl_id). Joins on
+        all join_keys simultaneously to produce precise 1:1 matches.
+
+        Args:
+            merged_df: DataFrame with seed data.
+            dep_df: Dependency DataFrame to join.
+            dep: Dependency configuration with multiple filter_fields.
+            seed_pipeline: Seed pipeline name for join key resolution.
+
+        Returns:
+            DataFrame with dependency joined on composite key.
+        """
+        join_keys_list = list(dep.join_keys)
+
+        # Deduplicate on all join keys (composite dedup)
+        dep_df = self._deduplicator.deduplicate(
+            enricher_df=dep_df,
+            join_keys=join_keys_list,
+            enricher_name=dep.pipeline,
+        )
+
+        # Normalize join key columns
+        merged_df = self._normalize_join_key_columns(
+            merged_df, join_keys_list, pipeline=seed_pipeline
+        )
+        dep_df = self._normalize_join_key_columns(dep_df, join_keys_list, pipeline=None)
+
+        # Rename dependency columns to qualified format
+        dep_df = self._renamer.rename_dataframe(
+            dep_df, dep.pipeline, exclude_join_keys=False
+        )
+
+        # Drop system columns from dependency
+        dep_df = self._drop_system_columns(dep_df)
+
+        # Resolve qualified join key names for each key
+        left_pipeline = (
+            dep.key_source
+            if dep.key_source and dep.key_source != "seed"
+            else seed_pipeline
+        )
+        left_keys, right_keys, all_join_key_set = self._resolve_composite_join_keys(
+            join_keys_list, left_pipeline, dep.pipeline, merged_df.columns
+        )
+
+        # Detect and resolve conflicts (excluding all join keys)
+        merged_df, dep_df = self._detect_and_resolve_conflicts(
+            merged_df, dep_df, all_join_key_set
+        )
+
+        # Verify all join keys exist
+        missing_left = [k for k in left_keys if k not in merged_df.columns]
+        missing_right = [k for k in right_keys if k not in dep_df.columns]
+        if missing_left or missing_right:
+            self._logger.warning(
+                "Composite key join skipped: missing columns",
+                dependency=dep.pipeline,
+                missing_left=missing_left,
+                missing_right=missing_right,
+            )
+            return merged_df
+
+        result = self._execute_composite_key_join(
+            merged_df, dep_df, left_keys, right_keys, dep.pipeline
+        )
+
+        self._logger.debug(
+            "Joined dependency with composite key",
+            dependency=dep.pipeline,
+            left_keys=left_keys,
+            right_keys=right_keys,
+            result_rows=len(result),
+        )
 
         return result
 
@@ -5260,9 +5452,13 @@ class CompositeRuntimeConfig:
         required_only: Skip optional enrichers.
         force_enricher: Force re-run of specified enricher.
         seed_limit: Optional limit for seed pipeline.
-        use_cached_bronze: Load data from Bronze cache instead of API.
+        use_cached_bronze: Load data from Bronze cache instead of API (master switch).
         cached_bronze_path: Explicit path to Bronze cache directory.
         cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD).
+        cached_bronze_enrichers: Override cached Bronze for enrichers.
+            None=follow master, True=force cache, False=force API.
+        cached_bronze_dependencies: Override cached Bronze for dependencies.
+            None=follow master, True=force cache, False=force API.
     """
 
     resume: bool = False
@@ -5274,6 +5470,8 @@ class CompositeRuntimeConfig:
     use_cached_bronze: bool = True
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
+    cached_bronze_enrichers: bool | None = None
+    cached_bronze_dependencies: bool | None = None
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""
@@ -7030,6 +7228,7 @@ class BaseTransformer(ABC):
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -7042,6 +7241,8 @@ class BaseTransformer(ABC):
             entity_type: Entity type for metrics labels (e.g., 'activity', 'compound').
             tracer: Tracing port for distributed tracing. Defaults to NoOpTracing.
             metrics: Metrics port for duration/error tracking. Defaults to NoOpMetrics.
+            silver_filters: Optional domain-level filter configuration for Silver layer.
+                Applied AFTER transformation but BEFORE writing to Silver.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
                 Defaults to a new IdentityService instance.
@@ -7055,6 +7256,7 @@ class BaseTransformer(ABC):
         self.entity_type = entity_type or "unknown"
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
         self._metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
+        self._silver_filters = silver_filters
         self._gold_filters = gold_filters
         self._identity: IdentityService = (
             identity_service if identity_service is not None else IdentityService()
@@ -7230,6 +7432,17 @@ class BaseTransformer(ABC):
 
         try:
             result = await self._transform_impl(context, record, index)
+            if result is not None and not self.should_write_silver(
+                context,
+                result,  # type: ignore[arg-type]  # SilverRecord is dict at runtime
+            ):
+                context.logger.debug(
+                    "silver_filter_excluded",
+                    provider=self.provider,
+                    entity_type=self.entity_type,
+                    record_index=index,
+                )
+                return None
             return result
         except TransformationError as e:
             error_type = "transformation_error"
@@ -7311,6 +7524,26 @@ class BaseTransformer(ABC):
 
         """
         ...
+
+    def should_write_silver(
+        self, _context: PipelineContext, record: dict[str, Any]
+    ) -> bool:
+        """Determine if a transformed record should be written to Silver.
+
+        Uses silver_filters from config if configured, otherwise passes all records.
+        Applied AFTER transformation but BEFORE writing to Silver layer.
+
+        Args:
+            _context: Pipeline context (unused in base implementation).
+            record: Transformed record to evaluate.
+
+        Returns:
+            True if record passes domain-level silver filters.
+
+        """
+        if self._silver_filters is None or self._silver_filters.is_empty():
+            return True
+        return self._silver_filters.should_include(record)
 
     def should_write_gold(
         self, _context: PipelineContext, record: dict[str, Any]
@@ -8396,6 +8629,9 @@ class BatchExecutor:
 
             return pl.DataFrame(records)
         except Exception:
+            # Catch all: Polars import failure OR DataFrame construction errors
+            # (malformed data, type mismatches). Graceful degradation: return None
+            # so DQ analysis can proceed with fallback logic.
             return None
 
     def _get_dq_thresholds(self) -> tuple[float, float]:
@@ -9718,6 +9954,8 @@ class BatchWriter:
                 converted = schema.to_schema()
                 return set(converted.columns.keys())
             except Exception:
+                # Catch all: to_schema() may fail for invalid/incomplete schema definitions.
+                # Fall through to next schema type check for graceful degradation.
                 pass
 
         # Handle Pandera DataFrameSchema (instance with columns dict)
@@ -9919,13 +10157,15 @@ class CheckpointManager:
         self._run_id = run_id
         self._resume = resume
         self._force_full_scan = force_full_scan
-        # Resolve loading_strategy: explicit value takes precedence
+        # Resolve loading_strategy: explicit value takes precedence, then force_full_scan
         if loading_strategy is not None:
-            self._loading_strategy = loading_strategy
-        else:
+            self._loading_strategy: LoadingStrategy | None = loading_strategy
+        elif force_full_scan:
             self._loading_strategy = LoadingStrategy.from_force_full_scan(
                 force_full_scan
             )
+        else:
+            self._loading_strategy = None
 
     async def load_checkpoint(self) -> dict[str, Any] | None:
         """Load checkpoint if resuming.
@@ -9940,7 +10180,11 @@ class CheckpointManager:
 
         """
         # Block resume for FULL_SCAN_ONLY loading strategy (ADR-030, ADR-031)
-        if self._resume and not self._loading_strategy.allows_checkpoint_resume:
+        if (
+            self._resume
+            and self._loading_strategy is not None
+            and not self._loading_strategy.allows_checkpoint_resume
+        ):
             self._logger.warning(
                 "Checkpoint resume blocked for full_scan_only pipeline. "
                 "Each run performs a full scan; deduplication via content_hash on Silver. "
@@ -10702,8 +10946,8 @@ STR: Callable[[Any], str] = str
 def normalize_pmid(value: Any) -> str | None:
     """Normalize PubMed ID to string format.
 
-    Converts int or string PMID to normalized string representation.
-    Returns None for invalid inputs.
+    Delegates to PubMedId.from_raw() Value Object for validation
+    and normalization (strip leading zeros, int→str, upper-bound < 10^10).
 
     Args:
         value: Raw PMID value (int, str, or None).
@@ -10718,36 +10962,17 @@ def normalize_pmid(value: Any) -> str | None:
         '12345678'
         >>> normalize_pmid("  12345678  ")
         '12345678'
+        >>> normalize_pmid("0012345")
+        '12345'
         >>> normalize_pmid(None)
         None
         >>> normalize_pmid("abc")
         None
     """
-    if value is None:
-        return None
+    from bioetl.domain.value_objects.publications import PubMedId
 
-    # Convert to string and strip whitespace
-    if isinstance(value, bool):
-        # Reject booleans explicitly (isinstance(True, int) is True)
-        return None
-    if isinstance(value, int):
-        str_value = str(value)
-    elif isinstance(value, str):
-        str_value = value.strip()
-    else:
-        return None
-
-    # Validate: must be non-empty and contain only digits
-    if not str_value or not str_value.isdigit():
-        return None
-
-    # Validate: must be positive (no "0" alone)
-    int_value = int(str_value)
-    if int_value <= 0:
-        return None
-
-    # Normalize: remove leading zeros
-    return str(int_value)
+    vo = PubMedId.from_raw(value)
+    return str(vo) if vo else None
 
 
 PMID: Callable[[Any], str | None] = normalize_pmid
@@ -11095,6 +11320,11 @@ class FilteredDataSource:
         if not self._filter_config.enabled:
             return self
 
+        # Check for direct multi-field filter IDs (composite dual-key mode)
+        if self._filter_config.direct_multi_filter_ids:
+            self._load_direct_multi_filter_ids()
+            return self
+
         # Check for direct filter IDs (composite mode - no CSV needed)
         if self._filter_config.direct_filter_ids:
             self._load_direct_filter_ids()
@@ -11103,6 +11333,27 @@ class FilteredDataSource:
         # Pre-load filter IDs from CSV
         await self._load_csv_filter_ids()
         return self
+
+    def _load_direct_multi_filter_ids(self) -> None:
+        """Load direct multi-field filter IDs from composite mode configuration.
+
+        Sets up multi-column filtering state for AND-logic API queries.
+        E.g., molecule_chembl_id AND document_chembl_id simultaneously.
+        """
+        multi_ids = self._filter_config.direct_multi_filter_ids or {}
+        self._multi_filter_ids = {field: list(ids) for field, ids in multi_ids.items()}
+        self._filter_fields = tuple(multi_ids.keys())
+        self._valid_combinations = self._filter_config.direct_valid_combinations
+        if self._logger:
+            self._logger.info(
+                "direct_multi_filter_ids_loaded",
+                fields=list(self._filter_fields),
+                counts={f: len(ids) for f, ids in multi_ids.items()},
+                valid_combinations_count=len(self._valid_combinations)
+                if self._valid_combinations
+                else 0,
+                pipeline=self._pipeline_name,
+            )
 
     def _load_direct_filter_ids(self) -> None:
         """Load direct filter IDs from composite mode configuration."""
@@ -15962,35 +16213,6 @@ class ChEMBLTissuePipeline(BasePipeline):
     """Pipeline for ChEMBL tissue data (anatomical structures)."""
 
 ================================================================================
-File: activity.py
-Path: pipelines\chembl\activity.py
-================================================================================
-"""ChEMBL Activity Pipeline.
-
-Fetches bioactivity data from ChEMBL database and processes it through
-Bronze → Silver → Gold layers.
-
-Entity: Bioactivity measurements (IC50, Ki, EC50, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLActivityPipeline(BasePipeline):
-    """Pipeline for ChEMBL bioactivity data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
 File: activity_transformer.py
 Path: pipelines\chembl\activity_transformer.py
 ================================================================================
@@ -16211,69 +16433,6 @@ class ActivityTransformer(BaseChemblTransformer):
                 record.get("activity_properties")
             ),
         }
-
-================================================================================
-File: assay.py
-Path: pipelines\chembl\assay.py
-================================================================================
-"""ChEMBL Assay Pipeline.
-
-Fetches assay definitions from ChEMBL database and processes them through
-Bronze → Silver → Gold layers.
-
-Entity: Bioassay definitions (binding, functional, ADMET, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLAssayPipeline(BasePipeline):
-    """Pipeline for ChEMBL assay data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
-File: assay_parameters.py
-Path: pipelines\chembl\assay_parameters.py
-================================================================================
-# src/bioetl/application/pipelines/chembl/assay_parameters.py
-"""ChEMBL Assay Parameters Pipeline.
-
-Fetches assay parameters from ChEMBL database and processes through
-Bronze -> Silver -> Gold layers.
-
-Entity: Assay Parameters (experimental conditions for bioassays)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLAssayParametersPipeline(BasePipeline):
-    """Pipeline for ChEMBL assay parameters data.
-
-    Assay parameters contain experimental conditions such as concentrations,
-    pH, temperature, incubation time, etc. for bioassays.
-    M:1 relationship with Assay (many parameters -> one assay via assay_chembl_id FK).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: assay_parameters_transformer.py
@@ -16703,6 +16862,7 @@ class BaseChemblTransformer(BaseTransformer):
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -16716,6 +16876,7 @@ class BaseChemblTransformer(BaseTransformer):
                 entity_class name (e.g., Activity → "activity").
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional domain-level filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -16733,6 +16894,7 @@ class BaseChemblTransformer(BaseTransformer):
             entity_type=resolved_entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -16822,38 +16984,6 @@ class BaseChemblTransformer(BaseTransformer):
         ...
 
 ================================================================================
-File: cell_line.py
-Path: pipelines\chembl\cell_line.py
-================================================================================
-"""ChEMBL Cell Line Pipeline.
-
-Fetches cell lines from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Cell Lines (biological objects for in vitro experiments)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLCellLinePipeline(BasePipeline):
-    """Pipeline for ChEMBL cell line data.
-
-    Cell lines are biological objects used for in vitro experiments.
-    They have M:N relationship with Assay (via assay.cell_chembl_id FK).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
 File: cell_line_transformer.py
 Path: pipelines\chembl\cell_line_transformer.py
 ================================================================================
@@ -16938,38 +17068,6 @@ class CellLineTransformer(BaseChemblTransformer):
             "cl_lincs_id": normalizer.normalize_to_string(record.get("cl_lincs_id")),
             "efo_id": normalizer.normalize_to_string(record.get("efo_id")),
         }
-
-================================================================================
-File: compound_record.py
-Path: pipelines\chembl\compound_record.py
-================================================================================
-"""ChEMBL Compound Record Pipeline.
-
-Fetches compound records from ChEMBL database and processes through
-Bronze -> Silver -> Gold layers.
-
-Entity: Compound Records (links molecules to documents with original names)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLCompoundRecordPipeline(BasePipeline):
-    """Pipeline for ChEMBL compound record data.
-
-    Compound records link molecules to documents and contain the original
-    compound name as it appears in the publication.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: compound_record_transformer.py
@@ -17057,35 +17155,6 @@ class CompoundRecordTransformer(BaseChemblTransformer):
                 record.get("src_compound_id")
             ),
         }
-
-================================================================================
-File: molecule.py
-Path: pipelines\chembl\molecule.py
-================================================================================
-"""ChEMBL Molecule Pipeline.
-
-Fetches molecules from ChEMBL database and processes through
-Bronze -> Silver -> Gold layers.
-
-Entity: Chemical Compounds (small molecules, antibodies, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLMoleculePipeline(BasePipeline):
-    """Pipeline for ChEMBL molecule data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: molecule_transformer.py
@@ -17298,39 +17367,6 @@ class MoleculeTransformer(BaseChemblTransformer):
         }
 
 ================================================================================
-File: protein_class.py
-Path: pipelines\chembl\protein_class.py
-================================================================================
-"""ChEMBL Protein Classification Pipeline.
-
-Fetches protein classification hierarchy from ChEMBL database and processes
-through Bronze -> Silver -> Gold layers.
-
-Entity: Protein Classification hierarchy (enzyme classes, receptor types, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLProteinClassPipeline(BasePipeline):
-    """Pipeline for ChEMBL protein classification data.
-
-    Hierarchical classification of protein targets (enzymes, receptors,
-    ion channels, transporters, etc.). Self-referencing structure with
-    up to 8 levels of depth. Reference table (~1,500 records).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
 File: protein_class_transformer.py
 Path: pipelines\chembl\protein_class_transformer.py
 ================================================================================
@@ -17419,81 +17455,6 @@ class ProteinClassTransformer(BaseChemblTransformer):
             # Declarative field groups
             **map_field_groups(record, _PROTEIN_CLASS_GROUPS),
         }
-
-================================================================================
-File: publication.py
-Path: pipelines\chembl\publication.py
-================================================================================
-"""ChEMBL Publication Pipeline.
-
-Fetches scientific publications from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Scientific Publications (journal articles, patents)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-
-.. versionchanged:: 2.0.0
-    Renamed from document to publication (ADR-024).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLPublicationPipeline(BasePipeline):
-    """Pipeline for ChEMBL publication data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-
-    .. versionchanged:: 2.0.0
-        Renamed from ChEMBLDocumentPipeline (ADR-024).
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
-File: publication_similarity.py
-Path: pipelines\chembl\publication_similarity.py
-================================================================================
-"""ChEMBL Publication Similarity Pipeline.
-
-Fetches publication similarity data from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Publication Similarity (Tanimoto coefficients between publications)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-
-.. versionchanged:: 2.0.0
-    Renamed from document_similarity to publication_similarity (ADR-024).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLPublicationSimilarityPipeline(BasePipeline):
-    """Pipeline for ChEMBL publication similarity data.
-
-    Extracts precomputed similarity relationships between publications
-    based on Tanimoto coefficients calculated from:
-    - Molecules described in publications (mol_tani)
-    - Targets described in publications (tid_tani)
-
-    Transformer is injected via DI from GenericPipelineFactory.
-
-    .. versionchanged:: 2.0.0
-        Renamed from ChEMBLDocumentSimilarityPipeline (ADR-024).
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: publication_similarity_transformer.py
@@ -17586,51 +17547,6 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
             "avg_tani": avg_tani,
             "max_tani": max_tani,
         }
-
-================================================================================
-File: publication_term.py
-Path: pipelines\chembl\publication_term.py
-================================================================================
-"""ChEMBL Publication Term Pipeline.
-
-Extracts terms (MeSH headings, keywords, concepts) from ChEMBL Publication
-records and processes through Bronze → Silver → Gold layers.
-
-Entity: Publication Terms (derived from Publication)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-This is a derived entity pipeline - it extracts nested term data
-from Publication (ChEMBL Document) API responses and flattens the 1:M relationship.
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-
-.. versionchanged:: 2.0.0
-    Renamed from document_term to publication_term (ADR-024).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLPublicationTermPipeline(BasePipeline):
-    """Pipeline for ChEMBL publication term data.
-
-    This pipeline extracts and flattens term data from Publication records:
-    - MeSH headings and qualifiers
-    - Author keywords
-    - ChEMBL concepts
-
-    Each Publication may produce multiple Term records (1:M relationship).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-
-    .. versionchanged:: 2.0.0
-        Renamed from ChEMBLDocumentTermPipeline (ADR-024).
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: publication_term_transformer.py
@@ -18052,6 +17968,7 @@ class PublicationTransformer(BaseChemblTransformer):
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -18065,6 +17982,7 @@ class PublicationTransformer(BaseChemblTransformer):
                 entity_class name.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -18076,6 +17994,7 @@ class PublicationTransformer(BaseChemblTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -18154,8 +18073,14 @@ class PublicationTransformer(BaseChemblTransformer):
         else:
             data["citations_received"] = None
         data["citations_made"] = None
-        data["is_oa"] = None
+
+        # Fields from PublicationBaseSchema that ChEMBL API doesn't provide
+        data["pmc_id"] = None
+        data["affiliation_list"] = None
+        data["author_orcids"] = None
+        data["publication_date"] = None
         data["language"] = None
+        data["is_oa"] = None
         data["oa_status"] = None
 
         # DQ flags (default: no warnings or errors)
@@ -18166,82 +18091,34 @@ class PublicationTransformer(BaseChemblTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding unused fields.
+        """Convert Domain Entity to SilverRecord.
 
-        Overrides base implementation to remove fields not collected for ChEMBL.
+        ChEMBL-specific fields are set to None in _extract_business_data() for
+        fields not available from ChEMBL API (pmc_id, affiliation_list, etc.).
+        These None values satisfy the PublicationBaseSchema inheritance requirement.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord без affiliation_list, pmc_id, publication_date, issn,
-            publisher, oa_status, is_oa и language.
+            SilverRecord with all PublicationBaseSchema fields (ChEMBL-unavailable
+            fields are None).
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
-        # Get base silver record
+        # Get base silver record (includes all fields with None values)
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields (not available from ChEMBL API)
-        silver_record.pop("affiliation_list", None)
-        silver_record.pop("pmc_id", None)
-        silver_record.pop("publication_date", None)
+        # Remove fields not in unified publication schema (ChEMBL-specific exclusions)
         silver_record.pop("issn", None)
         silver_record.pop("publisher", None)
         silver_record.pop("oa_status", None)
-        silver_record.pop("is_oa", None)
-        silver_record.pop("language", None)
+
+        # Note: pmc_id, affiliation_list, author_orcids, publication_date, language,
+        # and is_oa are kept (with None values) to satisfy PublicationBaseSchema
 
         return silver_record
-
-================================================================================
-File: subcellular_fraction.py
-Path: pipelines\chembl\subcellular_fraction.py
-================================================================================
-"""ChEMBL Subcellular Fraction Pipeline.
-
-Extracts unique subcellular fraction values from ChEMBL Assay records
-and processes through Bronze → Silver → Gold layers.
-
-Entity: Subcellular Fraction (derived from Assay)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-This is a derived entity pipeline - it extracts unique assay_subcellular_fraction
-values from Assay API responses. ChEMBL does NOT have a dedicated
-/subcellular_fraction endpoint.
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-
-.. versionadded:: 2.1.0
-    Added as derived entity pipeline (ADR-030).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLSubcellularFractionPipeline(BasePipeline):
-    """Pipeline for ChEMBL subcellular fraction data.
-
-    This pipeline extracts unique subcellular fraction values from Assay records:
-    - Cellular compartments used in bioassays (e.g., "Microsomes", "Cytosol")
-    - Preparation types (e.g., "Mitochondria", "Membrane fraction")
-
-    Subcellular fractions describe the biological context of biochemical assays.
-
-    Uses SubcellularFractionDataSource wrapper to extract and deduplicate
-    unique values from /assay endpoint responses.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-
-    .. versionadded:: 2.1.0
-        Added for derived entity support with force_full_scan (ADR-030).
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: subcellular_fraction_transformer.py
@@ -18438,64 +18315,6 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
 
 
 __all__ = ["SubcellularFractionTransformer"]
-
-================================================================================
-File: target.py
-Path: pipelines\chembl\target.py
-================================================================================
-"""ChEMBL Target Pipeline.
-
-Fetches biological targets from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Biological Targets (proteins, complexes, organisms)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLTargetPipeline(BasePipeline):
-    """Pipeline for ChEMBL target data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
-File: target_component.py
-Path: pipelines\chembl\target_component.py
-================================================================================
-"""ChEMBL Target Component Pipeline.
-
-Fetches target components from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Target Components (protein sequences, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLTargetComponentPipeline(BasePipeline):
-    """Pipeline for ChEMBL target component data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: target_component_transformer.py
@@ -18775,38 +18594,6 @@ class TargetTransformer(BaseChemblTransformer):
         }
 
 ================================================================================
-File: tissue.py
-Path: pipelines\chembl\tissue.py
-================================================================================
-"""ChEMBL Tissue Pipeline.
-
-Fetches tissues from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Tissues (anatomical structures for assay experiments)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLTissuePipeline(BasePipeline):
-    """Pipeline for ChEMBL tissue data.
-
-    Tissues are anatomical structures used in assay experiments.
-    They have 1:M relationship with Assay (via assay.tissue_chembl_id FK).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
 File: tissue_transformer.py
 Path: pipelines\chembl\tissue_transformer.py
 ================================================================================
@@ -18915,6 +18702,9 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.mapping.publication_type_classification import (
+    classify_publication_type,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -19098,43 +18888,40 @@ class BasePublicationTransformer(BaseTransformer):
         # 8. Convert to SilverRecord
         return cast("SilverRecord", self.entity_to_silver_record(entity))
 
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD format (end of period).
+    def _classify_publication_type(
+        self,
+        provider: str,
+        raw_type: str | None = None,
+        raw_types_list: list[str] | None = None,
+    ) -> dict[str, str | None]:
+        """Classify publication type using the unified 3-level hierarchy.
 
-        Common logic for provider APIs that return partial dates:
-        - Full date: "2024-05-15" (YYYY-MM-DD)
-        - Month precision: "2024-05" (YYYY-MM) -> "2024-05-30"
-        - Year precision: "2024" (YYYY) -> "2024-12-31"
-
-        Partial dates are normalized to end of period for consistency across BioETL.
+        Delegates to domain classification module.
 
         Args:
-            date_str: Raw date string from provider API.
+            provider: Provider name ("openalex", "crossref", "pubmed", "semanticscholar").
+            raw_type: Single raw type string (for OpenAlex / CrossRef).
+            raw_types_list: List of raw type strings (for PubMed / S2).
 
         Returns:
-            Normalized ISO date string (YYYY-MM-DD) or None.
+            Dict with keys publication_type_unified, publication_subclass,
+            publication_class (all str | None).
 
         """
-        if not date_str:
-            return None
-
-        date_str = str(date_str).strip()
-
-        # Full ISO format (YYYY-MM-DD) - return as-is
-        # Check length and separators strictly to avoid false positives
-        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-            return date_str
-
-        # Partial date: YYYY-MM → YYYY-MM-30 (end of month approximation)
-        if len(date_str) == 7 and date_str[4] == "-":
-            return f"{date_str}-30"
-
-        # Partial date: YYYY → YYYY-12-31 (end of year)
-        if len(date_str) == 4 and date_str.isdigit():
-            return f"{date_str}-12-31"
-
-        # Unknown format - return None for invalid dates
-        return None
+        entry = classify_publication_type(
+            provider, raw_type=raw_type, raw_types_list=raw_types_list
+        )
+        if entry is None:
+            return {
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
+            }
+        return {
+            "publication_type_unified": entry.unified_type,
+            "publication_subclass": entry.subclass,
+            "publication_class": entry.class_code,
+        }
 
 ================================================================================
 File: extractors.py
@@ -19937,6 +19724,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -19949,6 +19737,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -19960,6 +19749,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -20041,9 +19831,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
                 PublicationYear, raw_year, as_string=False
             ),
             "publication_date": publication_date,
-            "publication_type": rec.get(
-                "type"
-            ),  # Raw CrossRef type (journal-article, etc.)
+            "publication_type": rec.get("type"),  # Raw CrossRef type
+            **self._classify_publication_type("crossref", raw_type=rec.get("type")),
             "citations_received": rec.get("is-referenced-by-count"),
             "citations_made": rec.get("references-count"),
             "language": rec.get("language"),
@@ -20393,7 +20182,7 @@ def _extract_id_from_url(url: str | None) -> str | None:
     """
     if not url or not isinstance(url, str):
         return None
-    return url.split("/")[-1] if "/" in url else url
+    return url.rstrip("/").split("/")[-1] if "/" in url else url
 
 
 def _get_nested_display_name(obj: Any) -> str | None:
@@ -20779,27 +20568,23 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
     if not ids or not isinstance(ids, dict):
         return {"pmid": None, "pmcid": None, "mag_id": None}
 
-    # Extract PMID from URL
-    # Format: https://pubmed.ncbi.nlm.nih.gov/12345678
-    pmid = None
-    pmid_url = ids.get("pmid")
-    if pmid_url and isinstance(pmid_url, str):
-        pmid = pmid_url.rstrip("/").split("/")[-1] if "/" in pmid_url else pmid_url
+    from bioetl.domain.value_objects.publications import PubMedId
 
-    # Extract PMCID from URL
-    # Format: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456
-    pmcid = None
-    pmcid_url = ids.get("pmcid")
-    if pmcid_url and isinstance(pmcid_url, str):
-        pmcid = pmcid_url.rstrip("/").split("/")[-1] if "/" in pmcid_url else pmcid_url
+    # PMID: normalize via PubMedId VO (strips leading zeros, validates bounds)
+    raw_pmid = _extract_id_from_url(ids.get("pmid"))
+    pmid_vo = PubMedId.from_raw(raw_pmid)
 
-    # Extract MAG ID (can be int or string)
-    mag_id = None
+    # PMCID: extract from URL (e.g. https://...pmc/articles/PMC123456)
+    pmcid = _extract_id_from_url(ids.get("pmcid"))
+
+    # MAG ID (can be int or string)
     mag_raw = ids.get("mag")
-    if mag_raw is not None:
-        mag_id = str(mag_raw)
 
-    return {"pmid": pmid, "pmcid": pmcid, "mag_id": mag_id}
+    return {
+        "pmid": str(pmid_vo) if pmid_vo else None,
+        "pmcid": pmcid,
+        "mag_id": str(mag_raw) if mag_raw is not None else None,
+    }
 
 
 def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
@@ -20874,7 +20659,6 @@ Note: Business logic functions are delegated to extractors module.
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
@@ -20945,6 +20729,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -20957,6 +20742,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md S5.4).
@@ -20968,6 +20754,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -21017,7 +20804,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             extract_affiliations(authorships) if isinstance(authorships, list) else None
         )
         serialized_affiliations = (
-            json.dumps(raw_affiliations) if raw_affiliations is not None else None
+            self.serialize_json(raw_affiliations)
+            if raw_affiliations is not None
+            else None
         )
 
         # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
@@ -21094,12 +20883,11 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
             "publication_year": year,
-            "publication_date": self._normalize_partial_date(
+            "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publication_date")
             ),
-            "publication_type": rec.get(
-                "type"
-            ),  # Raw OpenAlex type (article, book, etc.)
+            "publication_type": rec.get("type"),  # Raw OpenAlex type
+            **self._classify_publication_type("openalex", raw_type=rec.get("type")),
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             # OpenAlex source field: cited_by_count
@@ -21110,7 +20898,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "subject_topics": (
                 self.serialize_json_list(subject_topics) if subject_topics else None
             ),
-            "primary_topic": json.dumps(primary_topic) if primary_topic else None,
+            "primary_topic": self.serialize_json(primary_topic)
+            if primary_topic
+            else None,
             # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
             "subject_mesh": subject_mesh,
@@ -21279,6 +21069,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         entity_type: str = "compound",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -21291,6 +21082,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'compound'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher. Not typically used for molecules
@@ -21303,6 +21095,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -21622,6 +21415,14 @@ Path: pipelines\pubmed\extractors\author.py
 
 Handles parsing of author lists including individual and collective authors.
 Supports structured affiliation extraction with institutional identifiers.
+
+PII Safety (RULES.md §5.4):
+    Author names and email addresses extracted here are PII fields.
+    Salted SHA-256 hashing is applied at the transformer level
+    (PubMedPublicationTransformer) before any data reaches the Silver layer:
+    - Author names → hash_pii_list() → hashed before Silver storage
+    - Email addresses → PiiHasherPort.hash_value() → stored as email_hash
+    Raw PII values MUST NOT persist beyond the Bronze→Silver transformation.
 """
 
 from __future__ import annotations
@@ -23076,6 +22877,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -23088,6 +22890,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -23099,6 +22902,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -23351,7 +23155,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             **self._extract_counts(article, pubmed_data),
             "language": get_text(article.find(".//Language")),
             "_source": "pubmed",
-            "publication_type": "PUBLICATION",
+            **self._build_pubmed_classification(
+                ClassificationExtractor.parse_publication_types(article),
+            ),
             "citations_received": None,
             "is_oa": None,
             "_lookup_method": cast("dict[str, Any]", record).get(
@@ -23361,6 +23167,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "_dq_warn": False,
             "_dq_error": False,
         }
+
+    def _build_pubmed_classification(
+        self, pub_types: list[str]
+    ) -> dict[str, str | None]:
+        """Build publication_type and classification fields for PubMed.
+
+        Joins raw types with ``|`` for the raw ``publication_type`` field,
+        then uses the unified classifier to pick the most specific match.
+
+        Args:
+            pub_types: List of raw publication type strings from XML.
+
+        Returns:
+            Dict with publication_type and the 3 classification fields.
+
+        """
+        raw_type = "|".join(pub_types) if pub_types else None
+        classification = self._classify_publication_type(
+            "pubmed",
+            raw_types_list=pub_types,
+        )
+        return {"publication_type": raw_type, **classification}
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
@@ -23555,7 +23383,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Priority 2: pub_date (may be partial, normalize it)
         if pub_date:
-            return self._normalize_partial_date(pub_date)
+            return self._data_normalizer.normalize_partial_date(pub_date)
 
         # Priority 3: Construct from year (end of year)
         if year:
@@ -24638,6 +24466,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -24650,6 +24479,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
@@ -24661,6 +24491,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -24758,7 +24589,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "publication_year": self.validate_value_object(
                 PublicationYear, rec.get("year"), as_string=False
             ),
-            "publication_date": self._normalize_partial_date(
+            "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publicationDate")
             ),
             "citations_received": rec.get("citationCount"),
@@ -24771,6 +24602,16 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
                 extract_fields_of_study(rec.get("fieldsOfStudy"))
             ),
             "publication_type": self._resolve_publication_type(publication_types),
+            **self._classify_publication_type(
+                "semanticscholar",
+                raw_types_list=[
+                    str(t).strip()
+                    for t in publication_types
+                    if t is not None and str(t).strip()
+                ]
+                if isinstance(publication_types, list)
+                else None,
+            ),
             "publication_types": self.serialize_json(publication_types),
             "_source": "semanticscholar",
             "_lookup_method": rec.get("_lookup_method", "unknown"),
@@ -26524,7 +26365,8 @@ class ExtractorUtils:
         """
         if not value or not isinstance(value, list):
             return None
-        return orjson.dumps(value).decode("utf-8")  # type: ignore[no-any-return]
+        result: str = orjson.dumps(value).decode("utf-8")
+        return result
 
     @staticmethod
     def count_list(value: Any) -> int | None:
@@ -26716,6 +26558,7 @@ class IDMappingTransformer(BaseTransformer):
         entity_type: str = "idmapping",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -26728,6 +26571,7 @@ class IDMappingTransformer(BaseTransformer):
             entity_type: Entity type for metrics labels (default: 'idmapping').
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing sensitive data.
@@ -26738,6 +26582,7 @@ class IDMappingTransformer(BaseTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -26934,6 +26779,7 @@ class UniProtProteinTransformer(BaseTransformer):
         entity_type: str = "protein",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -26946,6 +26792,7 @@ class UniProtProteinTransformer(BaseTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'protein'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names and other PII.
@@ -26956,6 +26803,7 @@ class UniProtProteinTransformer(BaseTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -28388,6 +28236,8 @@ def check_data_freshness(
                         max_ts = col_max
                     break
             except Exception:
+                # Catch all: column may not exist, wrong type, or max() unsupported.
+                # Try next candidate column for graceful fallback.
                 pass
 
     if max_ts is None:
@@ -28521,6 +28371,8 @@ def check_business_rules(
         try:
             passed, violations = _evaluate_single_rule(df, rule)
         except Exception:
+            # Catch all: rule evaluation may fail due to missing columns, type errors,
+            # or malformed rule expressions. Treat as rule failure for DQ reporting.
             passed, violations = False, None
 
         if passed:
@@ -28707,6 +28559,8 @@ def check_scd_integrity(
                         ):
                             overlapping += 1
         except Exception:
+            # Catch all: entity group processing may fail due to missing/invalid
+            # temporal fields or sort errors. Skip entity for SCD overlap check.
             pass
 
     status = DQCheckStatus.PASS if overlapping == 0 else DQCheckStatus.WARN
@@ -29853,6 +29707,8 @@ class SilverDQAnalyzer:
                     else 0.0,
                 }
             except Exception:
+                # Catch all: cardinality calculation may fail for unhashable types
+                # or invalid column access. Skip column from cardinality metrics.
                 pass
 
         status = DQCheckStatus.PASS if duplicate_rate == 0 else DQCheckStatus.WARN
@@ -29916,6 +29772,8 @@ class SilverDQAnalyzer:
                             else None,
                         )
                 except Exception:
+                    # Catch all: numeric stats may fail for mixed types, NaN/Inf,
+                    # or non-numeric data in numeric column. Skip column profiling.
                     pass
 
             elif dtype in (pl.Utf8, pl.Categorical):
@@ -29938,6 +29796,8 @@ class SilverDQAnalyzer:
                         cardinality=cardinality,
                     )
                 except Exception:
+                    # Catch all: value_counts() may fail for unhashable types or
+                    # large cardinality. Skip column from categorical profiling.
                     pass
 
         return ValueDistributionResult(
@@ -32352,10 +32212,14 @@ class RunOptions:
         filter_column: Column name in CSV containing filter IDs.
         filter_field: API field name to filter by.
         filter_ids: Direct filter IDs (e.g., DOIs) without CSV file.
+        multi_filter_ids: Multi-field filter IDs for AND-logic filtering.
+            Maps field name to list of IDs. Used for composite dependencies
+            that need to filter by multiple fields simultaneously.
         vacuum_after_run: Enable automatic VACUUM after successful run.
         vacuum_retention_days: Minimum age of files to remove during VACUUM.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
         ignore_yaml_filter: Ignore input_filter from YAML config (for composite mode).
+        skip_gold: Skip Gold layer writing (for composite sub-pipelines).
         use_cached_bronze: Load data from cached Bronze layer instead of API.
         cached_bronze_path: Explicit path to Bronze cache directory.
         cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD format).
@@ -32369,12 +32233,16 @@ class RunOptions:
     filter_column: str | None = None
     filter_field: str | None = None
     filter_ids: tuple[str, ...] | None = None  # Direct filter IDs (no CSV)
+    multi_filter_ids: dict[str, tuple[str, ...]] | None = (
+        None  # Multi-field (AND logic)
+    )
     fallback_column: str | None = None  # Column name for fallback search (CSV mode)
     fallback_mapping: dict[str, str] | None = None  # Direct mapping (composite mode)
     vacuum_after_run: bool | None = None
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
+    skip_gold: bool = False  # Skip Gold layer writing (composite sub-pipelines)
     # Cached Bronze mode options
     use_cached_bronze: bool = True
     cached_bronze_path: str | None = None
