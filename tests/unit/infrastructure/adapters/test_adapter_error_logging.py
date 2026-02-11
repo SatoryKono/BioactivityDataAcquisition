@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from unittest.mock import MagicMock
 
-from bioetl.infrastructure.adapters.adapter_error_logging import log_adapter_error
+from tests.helpers.adapter_error_logging import log_adapter_error
 
 
 class TestLogAdapterError:
