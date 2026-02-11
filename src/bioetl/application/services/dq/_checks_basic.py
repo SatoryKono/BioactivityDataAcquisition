@@ -102,6 +102,8 @@ def check_data_freshness(
                         max_ts = col_max
                     break
             except Exception:
+                # Catch all: column may not exist, wrong type, or max() unsupported.
+                # Try next candidate column for graceful fallback.
                 pass
 
     if max_ts is None:
