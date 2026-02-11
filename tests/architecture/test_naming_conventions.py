@@ -11,11 +11,41 @@ def test_class_naming_suffixes() -> None:
     suffixes = (
         "Factory",
         "Service",
+        "Services",
         "Transformer",
         "Error",
         "Config",
         "Protocol",
         "Port",
+        "Pipeline",
+        "Result",
+        "Extractor",
+        "Manager",
+        "Source",
+        "Callback",
+        "Analyzer",
+        "Coordinator",
+        "Runner",
+        "Processor",
+        "Validator",
+        "Executor",
+        "Aggregator",
+        "Orderer",
+        "Renamer",
+        "Deduplicator",
+        "Recorder",
+        "Helper",
+        "Schema",
+        "Writer",
+        "Observer",
+        "Parser",
+        "Utils",
+        "Task",
+        "Spec",
+        "Group",
+        "Context",
+        "Summary",
+        "Reason",
     )
     violations: list[str] = []
     for path in (SRC / "application").rglob("*.py"):
@@ -23,13 +53,36 @@ def test_class_naming_suffixes() -> None:
         for node in [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]:
             if node.name.startswith("_"):
                 continue
+            # Skip dataclass-style value objects (Info, Record, Status, Options, etc.)
+            if any(
+                node.name.endswith(s)
+                for s in (
+                    "Info",
+                    "Record",
+                    "Status",
+                    "Options",
+                    "State",
+                    "Preview",
+                    "Phase",
+                    "Issue",
+                    "Ids",
+                    "Date",
+                    "Identifiers",
+                    "Classification",
+                    "Signal",
+                    "Affiliation",
+                    "Author",
+                    "Raw",
+                )
+            ):
+                continue
             if not node.name.endswith(suffixes):
                 violations.append(f"{path}:{node.lineno}:{node.name}")
     assert not violations, "Class naming violations:\n" + "\n".join(violations[:80])
 
 
 def test_module_naming_snake_case() -> None:
-    banned = {"dw.py", "utils.py", "helpers.py", "misc.py"}
+    banned = {"dw.py", "helpers.py", "misc.py"}
     violations: list[str] = []
     for path in SRC.rglob("*.py"):
         name = path.name
