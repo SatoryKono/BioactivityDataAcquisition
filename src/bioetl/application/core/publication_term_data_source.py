@@ -25,7 +25,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
-
 from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:
