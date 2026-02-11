@@ -262,7 +262,6 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     job_id=job_id,
                     attempts=attempt + 1,
                     detected_by="redirect_to_results",
-                    results_url=response_url,
                 )
                 return response_url
 
@@ -285,7 +284,6 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     job_id=job_id,
                     attempts=attempt + 1,
                     detected_by="results_in_response",
-                    results_url=response_url or None,
                 )
                 return response_url or None
 
