@@ -50,7 +50,7 @@ BioETL supports multi-source data enrichment through Composite Pipelines:
 bioetl run --pipeline composite_publication --limit 1000
 ```
 
-See [Composite Pipeline Diagram](diagrams/mermaid/26_composite_pipeline_workflow.mmd) for workflow visualization.
+See [Composite Pipeline Diagram](../02-architecture/diagrams/mermaid/26_composite_pipeline_workflow.mmd) for workflow visualization.
 
 ## Current Version
 

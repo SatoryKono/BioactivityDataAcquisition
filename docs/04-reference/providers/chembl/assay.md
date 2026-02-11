@@ -3,7 +3,7 @@
 **Имя пайплайна:** `chembl_assay`
 **Провайдер:** `chembl`
 **Сущность:** `assay`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -21,7 +21,7 @@
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
-version: "1.0.0"
+version: "1.2.0"
 primary_keys: ["assay_chembl_id"]
 silver_table: "chembl_assay"
 
