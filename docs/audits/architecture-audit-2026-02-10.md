@@ -61,7 +61,7 @@
 **Оценка: 10/10**
 
 **Ключевые находки:**
-- **40+ Protocol** классов определены в `domain/ports/` (26 файлов)
+- **40+ Protocol** классов определены в `domain/ports/` (24 файла)
 - **100%** протоколов используют `typing.Protocol` + `@runtime_checkable`
 - **100%** соблюдают именование `*Port` (ARCH-003)
 - **6 адаптеров** (ChEMBL, CrossRef, OpenAlex, UniProt, SemanticScholar, PubChem) — все реализуют `DataSourcePort`

@@ -20,7 +20,7 @@ from bioetl.application.pipelines.chembl import (
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.types import RunID, RunType
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.domain.ports import NoOpMetrics
 
 
 @pytest.fixture

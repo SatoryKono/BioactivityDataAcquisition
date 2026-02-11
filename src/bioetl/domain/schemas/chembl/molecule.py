@@ -5,6 +5,7 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -130,8 +131,10 @@ class MoleculeSchema(ETLRecordSchema):
     dosed_ingredient: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Dosed ingredient flag."
     )
-    availability_type: Series[int] | None = pa.Field(
-        nullable=True, isin=[-2, -1, 0, 1, 2], description="Availability type."
+    availability_type: Series[float] | None = pa.Field(
+        nullable=True,
+        isin=[-2, -1, 0, 1, 2],
+        description="Availability type (float for nullable int).",
     )
     usan_year: Series[float] | None = pa.Field(
         nullable=True,

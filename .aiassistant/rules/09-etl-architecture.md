@@ -11,7 +11,7 @@ etl-architecture
 
 # NAMING
 
-- Pipeline names: `{source}_{entity}` (e.g., `chembl_activity`, `target_uniprot`).
+- Pipeline names: `{source}_{entity}` (e.g., `chembl_activity`, `uniprot_protein`).
 
 # ARCHITECTURE
 

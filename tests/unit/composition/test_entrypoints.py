@@ -18,7 +18,7 @@ from bioetl.composition.entrypoints import (
     ArchiveOptions,
     RunOptions,
     RunResult,
-    RunStatus,
+    PipelineRunResult,
     VacuumOptions,
     build_pipeline_context,
 )
@@ -108,19 +108,19 @@ class TestArchiveOptions:
 
 
 @pytest.mark.unit
-class TestRunStatus:
-    """Tests for RunStatus enum."""
+class TestPipelineRunResult:
+    """Tests for PipelineRunResult enum."""
 
     def test_values(self):
-        """Test RunStatus enum values."""
-        assert RunStatus.SUCCESS.value == "success"
-        assert RunStatus.SHUTDOWN.value == "shutdown"
-        assert RunStatus.FAILED.value == "failed"
+        """Test PipelineRunResult enum values."""
+        assert PipelineRunResult.SUCCESS.value == "success"
+        assert PipelineRunResult.SHUTDOWN.value == "shutdown"
+        assert PipelineRunResult.FAILED.value == "failed"
 
     def test_is_str_enum(self):
-        """Test RunStatus inherits from str."""
-        assert isinstance(RunStatus.SUCCESS, str)
-        assert RunStatus.SUCCESS == "success"
+        """Test PipelineRunResult inherits from str."""
+        assert isinstance(PipelineRunResult.SUCCESS, str)
+        assert PipelineRunResult.SUCCESS == "success"
 
 
 @pytest.mark.unit
@@ -133,7 +133,7 @@ class TestRunResult:
         started = datetime(2024, 1, 15, 10, 0, 0, tzinfo=UTC)
         completed = datetime(2024, 1, 15, 10, 5, 0, tzinfo=UTC)
         return RunResult(
-            status=RunStatus.SUCCESS,
+            status=PipelineRunResult.SUCCESS,
             pipeline_name="chembl_activity",
             run_id="abc-123",
             run_type="incremental",
@@ -149,12 +149,12 @@ class TestRunResult:
     def test_required_fields(self):
         """Test RunResult with required fields only."""
         result = RunResult(
-            status=RunStatus.SUCCESS,
+            status=PipelineRunResult.SUCCESS,
             pipeline_name="test",
             run_id="123",
             run_type="incremental",
         )
-        assert result.status == RunStatus.SUCCESS
+        assert result.status == PipelineRunResult.SUCCESS
         assert result.pipeline_name == "test"
         assert result.run_id == "123"
         assert result.run_type == "incremental"
@@ -178,7 +178,7 @@ class TestRunResult:
     def test_success_rate_zero_fetched(self):
         """Test success_rate with zero records fetched."""
         result = RunResult(
-            status=RunStatus.SUCCESS,
+            status=PipelineRunResult.SUCCESS,
             pipeline_name="test",
             run_id="123",
             run_type="incremental",
@@ -189,26 +189,26 @@ class TestRunResult:
     def test_failed_result(self):
         """Test RunResult with FAILED status."""
         result = RunResult(
-            status=RunStatus.FAILED,
+            status=PipelineRunResult.FAILED,
             pipeline_name="test",
             run_id="123",
             run_type="rebuild",
             error_message="Connection timeout",
         )
-        assert result.status == RunStatus.FAILED
+        assert result.status == PipelineRunResult.FAILED
         assert result.error_message == "Connection timeout"
 
     def test_shutdown_result(self):
         """Test RunResult with SHUTDOWN status."""
         result = RunResult(
-            status=RunStatus.SHUTDOWN,
+            status=PipelineRunResult.SHUTDOWN,
             pipeline_name="test",
             run_id="123",
             run_type="backfill",
             records_fetched=500,
             records_silver=450,
         )
-        assert result.status == RunStatus.SHUTDOWN
+        assert result.status == PipelineRunResult.SHUTDOWN
         assert result.records_fetched == 500
 
 
@@ -306,7 +306,7 @@ class TestRunPipelineIntegration:
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
 
-        assert result.status == RunStatus.SUCCESS
+        assert result.status == PipelineRunResult.SUCCESS
         assert result.pipeline_name == "test_pipeline"
         assert result.run_type == "incremental"
         assert result.records_fetched == 100
@@ -330,7 +330,7 @@ class TestRunPipelineIntegration:
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
 
-        assert result.status == RunStatus.SHUTDOWN
+        assert result.status == PipelineRunResult.SHUTDOWN
         assert result.error_message is None  # Shutdown is not an error
 
     @pytest.mark.asyncio
@@ -346,7 +346,7 @@ class TestRunPipelineIntegration:
         ):
             result = await run_pipeline("test_pipeline", RunOptions(run_type="rebuild"))
 
-        assert result.status == RunStatus.FAILED
+        assert result.status == PipelineRunResult.FAILED
         assert result.error_message == "Connection failed"
         assert result.run_type == "rebuild"
 
@@ -366,7 +366,7 @@ class TestRunPipelineIntegration:
         ):
             result = await run_pipeline("test_pipeline", RunOptions())
 
-        assert result.status == RunStatus.FAILED
+        assert result.status == PipelineRunResult.FAILED
         assert result.records_fetched == 50
         assert result.records_silver == 45
 

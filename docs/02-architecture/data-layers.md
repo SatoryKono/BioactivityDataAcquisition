@@ -20,9 +20,11 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `_ingestion_ts` | Timestamp (UTC) | Время получения записи. |
-| `_run_id` | UUID | Идентификатор запуска пайплайна (Correlation ID). |
-| `_batch_id` | UUID | Идентификатор пакета данных. |
+| `ingestion_ts` | Timestamp (UTC) | Время получения записи (в sidecar `.meta.json`). |
+| `run_id` | UUID | Идентификатор запуска пайплайна (в sidecar `.meta.json`). |
+| `batch_id` | UUID | Идентификатор пакета данных (в sidecar `.meta.json`). |
+
+**Примечание**: Metadata хранится в отдельном sidecar-файле `.meta.json` на уровне файла, а не как per-record поля. Underscore-prefixed версии (`_ingestion_ts`, `_run_id`, `_source_batch_id`) появляются в Silver layer после трансформации.
 
 **Примечание**: Если источник возвращает массив JSON, он разбивается на отдельные строки (records).
 

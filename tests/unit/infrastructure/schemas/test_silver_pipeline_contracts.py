@@ -269,7 +269,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("_ingestion_ts", pa.string()),
         ("_index", pa.int64()),
         ("atc_classifications", pa.string()),
-        ("availability_type", pa.int64()),
+        ("availability_type", pa.float64()),  # Float for nullable int
         ("black_box_warning", pa.int64()),
         ("canonical_smiles", pa.string()),
         ("chirality", pa.int64()),

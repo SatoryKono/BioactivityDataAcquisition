@@ -37,6 +37,56 @@ python -m pytest tests/unit/application/services/test_pipeline_runner_service.py
 
 ---
 
+## RF-ENTITY: Resolve entity class name duplication between domain and infrastructure
+
+**Date**: 2026-02-11
+**Status**: done
+**Layer**: infrastructure
+
+### Context
+
+Two pairs of entity classes shared the same name across domain and infrastructure layers:
+
+1. **ChemblPublicationRecord** existed in both:
+   - `domain/entities/chembl.py` (domain DTO, `extra="forbid"`, `frozen=True`, flat `chembl_release: str`)
+   - `infrastructure/adapters/chembl/models.py` (API response model, `extra="ignore"`, nested `chembl_release: ChemblReleaseInfo`)
+
+2. **PubchemMoleculeRecord** existed in both:
+   - `domain/entities/pubchem.py` (domain DTO, `extra="forbid"`, `cid: str`, 35+ fields)
+   - `infrastructure/adapters/pubchem/models.py` (API response model, `extra="ignore"`, `cid: int`, ~15 fields)
+
+The naming collision created ambiguity about which class was being referenced. Fields and semantics differed significantly in both cases.
+
+### Decision
+
+Renamed the infrastructure versions to include `Api` suffix:
+- `ChemblPublicationRecord` -> `ChemblPublicationApiRecord` (infrastructure)
+- `PubchemMoleculeRecord` -> `PubchemMoleculeApiRecord` (infrastructure)
+
+Domain versions remain unchanged as the canonical entity names. The client adapters (chembl/client.py, pubchem/client.py) already imported from domain, so no changes were needed there.
+
+### Changes
+
+| File | Action | Description |
+|------|--------|-------------|
+| `src/bioetl/infrastructure/adapters/chembl/models.py` | modified | Renamed `ChemblPublicationRecord` to `ChemblPublicationApiRecord`; updated `ChemblPublicationResponse.documents` type hint; updated `CHEMBL_RECORD_MODELS` dict |
+| `src/bioetl/infrastructure/adapters/chembl/__init__.py` | modified | Updated import and `__all__` re-export |
+| `src/bioetl/infrastructure/adapters/pubchem/models.py` | modified | Renamed `PubchemMoleculeRecord` to `PubchemMoleculeApiRecord`; updated `PUBCHEM_RECORD_MODELS` dict |
+| `src/bioetl/infrastructure/adapters/pubchem/__init__.py` | modified | Updated import and `__all__` re-export |
+
+### Verification
+
+```bash
+python -c "from bioetl.infrastructure.adapters.chembl.models import ChemblPublicationApiRecord, CHEMBL_RECORD_MODELS"  # OK
+python -c "from bioetl.infrastructure.adapters.pubchem.models import PubchemMoleculeApiRecord, PUBCHEM_RECORD_MODELS"  # OK
+python -c "from bioetl.domain.entities.chembl import ChemblPublicationRecord"  # Domain unchanged
+python -c "from bioetl.domain.entities.pubchem import PubchemMoleculeRecord"  # Domain unchanged
+python -m pytest tests/architecture/ -q --deselect tests/architecture/test_code_metrics.py::TestFileSizeLimits::test_domain_files_under_limit  # 3 pre-existing noop_tracing failures only
+python -m ruff check --select I src tests  # All checks passed
+```
+
+---
+
 ## RF-NoOp-Consolidate: Consolidate duplicate NoOp implementations
 
 **Date**: 2026-02-11

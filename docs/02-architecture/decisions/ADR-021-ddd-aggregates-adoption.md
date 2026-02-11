@@ -149,10 +149,10 @@ class Measurement:
 src/bioetl/domain/
 ├── aggregates/           # DDD Aggregates
 │   ├── __init__.py
-│   ├── batch.py          # Batch Aggregate (~530 LOC)
-│   ├── pipeline_run.py   # PipelineRun Aggregate (~350 LOC)
-│   ├── quarantine_entry.py # QuarantineEntry Aggregate (~180 LOC)
-│   └── events.py         # Domain Events (~200 LOC)
+│   ├── batch.py          # Batch Aggregate (536 LOC)
+│   ├── pipeline_run.py   # PipelineRun Aggregate (574 LOC)
+│   ├── quarantine_entry.py # QuarantineEntry Aggregate (517 LOC)
+│   └── events.py         # Domain Events (197 LOC)
 ├── value_objects/        # Value Objects
 │   ├── __init__.py
 │   ├── identifiers.py    # RunID, BatchID, EntityID, ContentHash
@@ -179,7 +179,7 @@ src/bioetl/domain/
 
 ### Отрицательные
 
-1. **Увеличение сложности**: Добавлено ~1260 LOC нового кода в domain
+1. **Увеличение сложности**: Добавлено ~1824 LOC нового кода в domain
 2. **Кривая обучения**: Требуется понимание DDD patterns
 3. **Миграция**: Существующий код нужно адаптировать
 

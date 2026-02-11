@@ -17,7 +17,7 @@ from __future__ import annotations
 
 # Re-export canonical DTO classes from application.services (H1 refactoring)
 # These are the single source of truth for pipeline execution interfaces.
-from bioetl.application.services import RunOptions, RunResult, RunStatus
+from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
     VacuumOptions,
@@ -65,7 +65,7 @@ __all__ = [
     "ArchiveOptions",
     # Result classes (re-exported from application.services)
     "RunResult",
-    "RunStatus",
+    "PipelineRunResult",
     # Pipeline operations
     "build_pipeline_context",
     "create_pipeline_runner",

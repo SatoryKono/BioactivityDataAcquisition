@@ -27,7 +27,7 @@ class StageStatus(StrEnum):
 class PipelineRunState(StrEnum):
     """Lifecycle state of a pipeline run (PENDING -> RUNNING -> terminal).
 
-    Unlike application.services.RunStatus (completion result),
+    Unlike application.services.PipelineRunResult (completion result),
     this enum tracks the *current state* during execution.
     """
 

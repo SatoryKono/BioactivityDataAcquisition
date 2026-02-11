@@ -27,7 +27,7 @@ External Service Exceptions (RULES.md §7.2):
     - DataValidationError: Invalid data from external source
 
 Provider-Specific Exceptions:
-    Provider-specific API errors (ChemblApiError, CrossRefApiError, etc.) are
+    Provider-specific API errors (CrossRefApiError, etc.) are
     defined in infrastructure.adapters.{provider}.exceptions. Application layer
     should catch ExternalServiceError instead.
 """

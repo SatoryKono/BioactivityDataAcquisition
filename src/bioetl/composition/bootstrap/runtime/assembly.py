@@ -250,7 +250,7 @@ def assemble_cached_bronze_context(
         ...     run_id=uuid4(),
         ...     run_type=RunType.INCREMENTAL,
         ...     cached_bronze=CachedBronzeContext.from_options(
-        ...         path="/data/bronze/chembl/activity",
+        ...         path="/data/output/bronze/chembl/activity",
         ...         date="2026-01-20"
         ...     ),
         ... )

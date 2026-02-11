@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import warnings
 
-import pytest
-
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,
     HISTOGRAMS,
@@ -69,9 +67,13 @@ class TestNoOpMetrics:
         NoOpMetrics.reset_warning()
 
     def test_warning_on_init(self):
-        """Test that a warning is issued when initialized by default."""
-        with pytest.warns(UserWarning, match="NoOpMetrics is being used"):
-            NoOpMetrics()
+        """Test that a warning is issued when warn_on_use=True."""
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            NoOpMetrics(warn_on_use=True)
+            assert len(w) == 1
+            assert issubclass(w[0].category, UserWarning)
+            assert "NoOpMetrics is being used" in str(w[0].message)
 
     def test_no_warning_explicit_opt_out(self):
         """Test that no warning is issued if warn_on_use=False."""
@@ -82,13 +84,15 @@ class TestNoOpMetrics:
 
     def test_warning_only_once(self):
         """Test that the warning is only issued once globally."""
-        with pytest.warns(UserWarning):
-            NoOpMetrics()
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            NoOpMetrics(warn_on_use=True)
+            assert len(w) == 1
 
         # Second time should be silent
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            NoOpMetrics()
+            NoOpMetrics(warn_on_use=True)
             assert len(w) == 0
 
     def test_methods_do_nothing(self):

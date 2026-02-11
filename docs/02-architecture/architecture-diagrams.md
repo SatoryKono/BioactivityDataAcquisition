@@ -316,9 +316,9 @@ Delta merge by content_hash — критическая операция для i
 Полная доменная модель с DDD Aggregates, Entities, Value Objects.
 
 **DDD Aggregates (Root Entities):**
-- **PipelineRun** (567 LOC) - Aggregate root для pipeline execution
-- **Batch** (537 LOC) - Aggregate root для batch processing
-- **QuarantineEntry** (518 LOC) - Aggregate root для quarantine
+- **PipelineRun** (574 LOC) - Aggregate root для pipeline execution
+- **Batch** (536 LOC) - Aggregate root для batch processing
+- **QuarantineEntry** (517 LOC) - Aggregate root для quarantine
 
 **Entities:**
 - ChemblActivity, UniProtProtein, PubChemMolecule
@@ -383,28 +383,28 @@ Delta merge by content_hash — критическая операция для i
 
 **Core Components:**
 
-1. **PipelineRunner** (186 LOC)
+1. **PipelineRunner** (189 LOC)
    - Orchestrates: preflight → execution → postrun
    - Uses RunnerServices bundle
 
-2. **BatchExecutor** (150 LOC)
+2. **BatchExecutor** (786 LOC)
    - Execute loop: fetch → process → adapt batch size
    - Loads checkpoint for incremental runs
 
-3. **RecordProcessor** (200 LOC)
+3. **RecordProcessor** (222 LOC)
    - Delegates: transform → write_bronze → write_silver → write_gold
 
-4. **BatchTransformer** (200 LOC)
+4. **BatchTransformer** (404 LOC)
    - Applies BaseTransformer
    - Schema validation
    - DQ checks
    - Quarantine handling
 
-5. **BatchWriter** (180 LOC)
+5. **BatchWriter** (562 LOC)
    - Lock validation
    - Writes to Bronze/Silver/Gold
 
-6. **BatchMetricsRecorder** (100 LOC)
+6. **BatchMetricsRecorder** (130 LOC)
    - Records start/success/failure
    - Emits to Prometheus
 
@@ -607,7 +607,7 @@ Complete pipeline configuration с 100+ полями.
 
 **Main Components:**
 
-- **PipelineConfig** (106 LOC)
+- **PipelineConfig** (969 LOC)
   - pipeline_name, provider, entity, version
   - source, sink, transforms
   - dq_config, filters, batch_size
@@ -622,12 +622,12 @@ Complete pipeline configuration с 100+ полями.
   - silver: SilverConfig (write_mode: MERGE/APPEND/DELETE)
   - gold: GoldConfig (write_mode: OVERWRITE/APPEND/SCD2)
 
-- **DQConfig** (78 LOC)
+- **DQConfig** (292 LOC)
   - soft_fail_threshold: 0.05 (5%)
   - hard_fail_threshold: 0.20 (20%)
   - enabled_checks, rules
 
-- **RuntimeConfig** (98 LOC)
+- **RuntimeConfig**
   - run_type: incremental | backfill | rebuild
   - limit, dry_run, data_dir
   - log_level, filters

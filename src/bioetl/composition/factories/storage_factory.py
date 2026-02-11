@@ -13,9 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpMetadataWriter
+from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
