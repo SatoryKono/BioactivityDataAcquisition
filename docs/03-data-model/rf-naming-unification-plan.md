@@ -1,6 +1,37 @@
 # RF-NAMING: План унификации наименований полей
 
-*Версия: 1.0.0 | Дата: 2026-02-11*
+*Версия: 2.0.0 | Дата: 2026-02-11 | Обновлено с учётом main (7e265aa)*
+
+---
+
+## 0. Контекст: Publication Unification Precedent
+
+На main уже существует полноценная **экосистема Publication-пайплайнов** (5 провайдеров:
+ChEMBL, CrossRef, OpenAlex, PubMed, Semantic Scholar), в которой cross-provider
+field naming **уже решён** через:
+
+1. **`PublicationBaseSchema`** (`domain/schemas/common/publication_base.py`) —
+   общая base-схема с unified field names
+2. **`PUBLICATION_FIELD_MAPPING`** (`domain/mapping/publication_fields.py`) —
+   bidirectional маппинг provider → unified names
+3. **`apply_field_mapping()`** — runtime rename при трансформации
+4. **ADR-030** (archived) — Publication Field Naming Unification decision record
+
+Ключевые унифицированные имена publication:
+
+| Provider name | Unified name | Провайдеры |
+|---------------|--------------|------------|
+| `year` | `publication_year` | All 5 |
+| `citation_count` | `citations_received` | CrossRef, OpenAlex, S2 |
+| `reference_count` | `citations_made` | CrossRef, OpenAlex, S2 |
+| `first_page` / `last_page` | `page_first` / `page_last` | CrossRef, OpenAlex, PubMed |
+| `doc_type` / `source_type` | `publication_type` | ChEMBL, CrossRef, OpenAlex |
+| `is_open_access` | `is_oa` | All |
+| `affiliations` | `affiliation_list` | OpenAlex, PubMed |
+
+**Вывод для core pipelines:** Паттерн `BaseSchema` + `FIELD_MAPPING` dict + `apply_field_mapping()`
+является проверенным подходом и должен быть переиспользован для унификации
+Molecule cross-provider naming (N-06).
 
 ---
 
@@ -8,7 +39,8 @@
 
 ### 1.1 Инвентаризация несоответствий
 
-Всего выявлено **9 категорий** несоответствий, затрагивающих **~25 полей** в 4 основных и 6 вспомогательных пайплайнах.
+Всего выявлено **10 категорий** несоответствий, затрагивающих **~30 полей** в 4 основных,
+6 вспомогательных и 5 publication-пайплайнах.
 
 | # | Severity | Категория | Пример |
 |---|----------|-----------|--------|
@@ -21,6 +53,7 @@
 | N-07 | MEDIUM | Inconsistent flatten prefixes | `property_*`, `hierarchy_*`, `ligand_efficiency_*`, но `canonical_smiles` без prefix |
 | N-08 | LOW | Singular/plural ambiguity | `component_id` (scalar) vs `component_ids` (list) |
 | N-09 | LOW | InChI Key dual naming | `structure_standard_inchi_key` (top-level alias) vs `inchikey` (flattened) |
+| N-10 | HIGH | Publication ↔ Activity context naming gap | Activity: `document_year`, Publication unified: `publication_year`; Activity: `document_journal`, Publication: `journal` |
 
 ---
 
@@ -162,6 +195,31 @@ Composite Molecule pipeline объединяет ChEMBL и PubChem данные 
 
 ---
 
+### N-10: Publication ↔ Activity context naming gap (HIGH)
+
+**Проблема:** Activity денормализует publication-поля с prefix `document_`, но
+Publication pipeline использует unified naming из `PublicationBaseSchema`.
+
+| Данные | В Activity | В Publication (unified) | В ChEMBL Document (legacy) |
+|--------|-----------|-------------------------|---------------------------|
+| Год публикации | `document_year` (int) | `publication_year` (Int64) | `year` → `publication_year` |
+| Журнал | `document_journal` (str) | `journal` (str) | `journal` (str) |
+| Количество цитирований | — | `citations_received` (Int64) | — |
+
+**Последствия:**
+- При будущем composite activity + publication join, поле `document_year` (Activity) и `publication_year` (Publication) содержат одни и те же данные, но именуются по-разному
+- Конвенция context prefix `document_*` в Activity конфликтует с unified naming convention `publication_*`
+
+**Root cause:** Activity transformer создавался до Publication unification. Контекстные поля `document_journal` и `document_year` следуют старой конвенции "prefix = source entity name", но Publication pipeline выбрал semantic naming (`publication_year` вместо `document_year`).
+
+**Затронутые файлы:**
+- `src/bioetl/application/pipelines/chembl/activity_transformer.py` — field groups `_QUALITY_ANNOTATIONS`
+- `src/bioetl/domain/schemas/chembl/activity.py` — `document_year`, `document_journal`
+- `src/bioetl/domain/contracts/gold/chembl.py` — Activity Gold schema
+- `configs/pipelines/composite/activity.yaml` — column_groups `document_context`
+
+---
+
 ## 3. План унификации
 
 ### Фаза 1: CRITICAL fixes (type mismatches) — Breaking changes
@@ -252,26 +310,47 @@ _ACTION_TYPE_RENAMES = {
 
 #### RF-NAMING-05: Стандартизировать cross-provider naming для Composite Molecule
 
-**Подход:** НЕ переименовывать ChEMBL/PubChem Silver поля (они отражают API naming). Вместо этого добавить **unified canonical names** в Gold Composite schema:
+**Подход:** Переиспользовать паттерн из Publication unification (§0):
 
-```yaml
-# Предложенный маппинг unified → provider fields
-unified_fields:
-  lipophilicity:   [property_alogp, xlogp]       # Разные методы: ALogP vs XLogP3
-  polar_area:      [property_psa, tpsa]           # PSA vs TPSA
-  hba_count:       [property_hba, hba]            # Одинаковый расчёт
-  hbd_count:       [property_hbd, hbd]            # Одинаковый расчёт
-  rotatable_count: [property_rtb, rotatable_bonds]
-  heavy_count:     [property_heavy_atoms, heavy_atom_count]
-  aromatic_count:  [property_aromatic_rings, aromatic_rings]
-  mol_weight:      [property_full_mwt, molecular_weight]
+1. Создать `MoleculeBaseSchema` в `domain/schemas/common/molecule_base.py` с unified field names
+2. Создать `MOLECULE_FIELD_MAPPING` в `domain/mapping/molecule_fields.py` по аналогии с `PUBLICATION_FIELD_MAPPING`
+3. Использовать `apply_field_mapping()` в трансформерах
+
+```python
+# domain/mapping/molecule_fields.py (по аналогии с publication_fields.py)
+_CHEMBL_MOLECULE_MAPPING: Final[dict[str, str]] = {
+    "property_alogp": "logp",           # ALogP → unified logp
+    "property_psa": "polar_surface_area",
+    "property_hba": "hba_count",
+    "property_hbd": "hbd_count",
+    "property_rtb": "rotatable_bond_count",
+    "property_heavy_atoms": "heavy_atom_count",
+    "property_aromatic_rings": "aromatic_ring_count",
+    "property_full_mwt": "molecular_weight",
+}
+
+_PUBCHEM_MOLECULE_MAPPING: Final[dict[str, str]] = {
+    "xlogp": "logp",
+    "tpsa": "polar_surface_area",
+    "hba": "hba_count",
+    "hbd": "hbd_count",
+    "rotatable_bonds": "rotatable_bond_count",
+    "heavy_atom_count": "heavy_atom_count",  # Already canonical
+    "aromatic_rings": "aromatic_ring_count",
+    "molecular_weight": "molecular_weight",  # Already canonical
+}
 ```
+
+**Важно:** ALogP ≠ XLogP3 — это разные методы расчёта. Unified `logp` в Gold composite
+будет содержать coalesced значение с `field_priority: [pubchem, chembl]` и source tracking.
+Оригинальные `property_alogp` / `xlogp` сохраняются в Silver каждого провайдера.
 
 | Шаг | Действие |
 |-----|----------|
-| 1 | Документировать mapping в composite config comments |
-| 2 | Добавить ADR с обоснованием сохранения обоих полей |
-| 3 | (Опционально) Добавить unified columns в Composite Gold: `hba_count = coalesce(pubchem.hba, chembl.property_hba)` |
+| 1 | Создать `domain/mapping/molecule_fields.py` по шаблону `publication_fields.py` |
+| 2 | Создать `domain/schemas/common/molecule_base.py` (unified field names) |
+| 3 | Обновить Composite Molecule config с unified naming |
+| 4 | Добавить ADR-0XX с обоснованием подхода |
 
 #### RF-NAMING-06: Стандартизировать flatten prefix policy
 
@@ -281,6 +360,20 @@ unified_fields:
 |-----|----------|
 | 1 | Документировать правило + exception в RULES.md |
 | 2 | Добавить комментарий в `molecule_transformer.py:163` объясняющий отсутствие prefix |
+
+#### RF-NAMING-10: Согласовать Activity document context с Publication unified naming
+
+**Проблема:** Activity использует `document_year` / `document_journal`, а Publication ecosystem — `publication_year` / `journal`.
+
+**Стратегия:** НЕ переименовывать Activity поля (breaking change с малой пользой). Вместо этого:
+
+| Шаг | Действие |
+|-----|----------|
+| 1 | В будущем Composite Activity + Publication merge, добавить field_mapping: `document_year` → `publication_year` |
+| 2 | Документировать маппинг в `configs/pipelines/composite/activity.yaml` merge section |
+| 3 | В Gold Composite Activity schema использовать unified name `publication_year` |
+
+**Обоснование:** Activity Silver хранит денормализованные контекстные поля (prefix `document_*`). Publication Silver использует unified naming. Reconciliation происходит в Composite merge layer, не в отдельных Silver-схемах. Это согласуется с паттерном Publication unification, где rename тоже выполняется через `FIELD_MAPPING`, а не через переименование в исходном Silver.
 
 ---
 
@@ -332,8 +425,9 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
      │
      ├── RF-NAMING-03 (action_type rename)
      ├── RF-NAMING-04 (document convention)
+     ├── RF-NAMING-10 (Activity ↔ Publication naming)
      │
-     ├── RF-NAMING-05 (cross-provider)
+     ├── RF-NAMING-05 (cross-provider molecule) ← зависит от Publication pattern (§0)
      ├── RF-NAMING-06 (flatten prefix doc)
      │
      ├── RF-NAMING-07 (component_id rename)
@@ -350,10 +444,11 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
 | RF-NAMING-02 | 1 | ~1-2 | REBUILD CellLine | Нет |
 | RF-NAMING-03 | 4+ | ~3-5 | REBUILD Activity | Да |
 | RF-NAMING-04 | 0 (doc only) | 0 | Нет | Нет |
-| RF-NAMING-05 | 0-2 (doc/config) | 0-2 | Нет (additive) | Да |
+| RF-NAMING-05 | 3-5 (new files) | ~3-5 | Нет (additive) | Да |
 | RF-NAMING-06 | 0 (doc only) | 0 | Нет | Нет |
 | RF-NAMING-07 | 4+ | ~3-5 | REBUILD Target | Да |
 | RF-NAMING-08 | 2 | ~1-2 | REBUILD Molecule | Нет |
+| RF-NAMING-10 | 1-2 (config) | 0 | Нет (merge-time) | Да |
 
 ---
 
@@ -365,15 +460,17 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
 ### Batch 2 (High — naming cleanup)
 2. **RF-NAMING-03** — action_type rename (isolated change)
 3. **RF-NAMING-04** — documentation only
+4. **RF-NAMING-10** — Activity ↔ Publication context mapping (config only, non-breaking)
 
-### Batch 3 (Medium — conventions)
-4. **RF-NAMING-05** + **RF-NAMING-06** — documentation + optional unified fields
+### Batch 3 (Medium — cross-provider unification)
+5. **RF-NAMING-05** — Molecule cross-provider naming по паттерну Publication unification
+6. **RF-NAMING-06** — flatten prefix documentation
 
 ### Batch 4 (Low — polish)
-5. **RF-NAMING-07** + **RF-NAMING-08** — component_id + inchikey cleanup
+7. **RF-NAMING-07** + **RF-NAMING-08** — component_id + inchikey cleanup
 
 ### Post-migration
-6. Один REBUILD для Activity + CellLine + Target + Molecule (можно объединить)
+8. Один REBUILD для Activity + CellLine + Target + Molecule (можно объединить)
 
 ---
 
@@ -403,9 +500,18 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
 
 ## Ссылки
 
+### Core Pipeline Files
 - **Activity Silver Schema:** `src/bioetl/domain/schemas/chembl/activity.py`
 - **Activity Gold Schema:** `src/bioetl/domain/contracts/gold/chembl.py:29-128`
 - **Activity Transformer:** `src/bioetl/application/pipelines/chembl/activity_transformer.py`
 - **TaxonomyId VO:** `src/bioetl/domain/value_objects/taxonomy_id.py`
 - **Composite Configs:** `configs/pipelines/composite/{entity}.yaml`
 - **Validation Matrix:** `docs/03-data-model/pipeline-validation-matrix.md`
+
+### Publication Unification Precedent (main)
+- **Publication Base Schema:** `src/bioetl/domain/schemas/common/publication_base.py`
+- **Publication Field Mapping:** `src/bioetl/domain/mapping/publication_fields.py`
+- **ADR-030 (archived):** `docs/99-archive/decisions/ADR-030-publication-field-unification.md`
+- **Composite Publication Config:** `configs/pipelines/composite/publication.yaml`
+- **S2 Publication Schema:** `src/bioetl/domain/schemas/semanticscholar/publication.py`
+- **ChEMBL Publication Transformer:** `src/bioetl/application/pipelines/chembl/publication_transformer.py`
