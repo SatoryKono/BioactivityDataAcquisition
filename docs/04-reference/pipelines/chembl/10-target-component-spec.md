@@ -1,6 +1,6 @@
 # ChEMBL Target Component Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
 ---
 
@@ -128,7 +128,7 @@ class TargetComponentSchema(ETLRecordSchema):
 pipeline_name: chembl_target_component
 provider: chembl
 entity_type: target_component
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["targcomp_id"]
 silver_table: "chembl_target_component"

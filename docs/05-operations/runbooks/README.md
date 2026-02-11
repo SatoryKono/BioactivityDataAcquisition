@@ -28,11 +28,12 @@ Runbooks for common operational scenarios in the BioETL pipeline system.
 
 ```
 data/
-├── bronze/v1/{provider}/{entity}/{date}/   # Raw JSONL files
-├── silver/{table_name}/                     # Delta Lake tables
-├── gold/{table_name}/                       # Aggregated Delta tables
-├── checkpoints/{provider}_{entity}.json    # Pipeline state
-└── quarantine/{provider}/{entity}/         # Failed records
+└── output/
+    ├── bronze/{provider}/{entity}/{date}/   # Raw JSONL files
+    ├── silver/{provider}/{entity}/           # Delta Lake tables
+    ├── gold/{provider}/{entity}/             # Delta Lake tables
+    ├── checkpoints/{pipeline_name}.json      # Pipeline state
+    └── quarantine/{provider}/{entity}/       # Failed records
 ```
 
 ### Useful Commands

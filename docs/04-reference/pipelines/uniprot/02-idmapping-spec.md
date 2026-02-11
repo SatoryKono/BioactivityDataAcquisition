@@ -1,6 +1,6 @@
 # UniProt ID Mapping Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
 ---
 
@@ -228,7 +228,7 @@ Mode: Overwrite
 pipeline_name: uniprot_idmapping
 provider: uniprot
 entity_type: idmapping
-version: "1.1.0"
+version: "1.2.0"
 description: "Maps ChEMBL target IDs to UniProt accessions"
 
 primary_keys: ["target_chembl_id"]

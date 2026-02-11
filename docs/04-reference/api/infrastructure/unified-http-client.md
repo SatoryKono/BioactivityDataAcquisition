@@ -181,7 +181,7 @@ ______________________________________________________________________
 ### Configuration
 
 ```python
-from bioetl.infrastructure.adapters.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http import CircuitBreaker
 
 circuit_breaker = CircuitBreaker(
     failure_threshold=5,  # Open after 5 consecutive failures
