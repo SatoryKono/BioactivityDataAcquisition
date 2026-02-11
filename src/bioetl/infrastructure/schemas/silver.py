@@ -113,10 +113,10 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("ligand_efficiency_le", pa.float64()),
         pa.field("ligand_efficiency_lle", pa.float64()),
         pa.field("ligand_efficiency_sei", pa.float64()),
-        pa.field("manual_curation_flag", pa.int64()),
+        pa.field("manual_curation_flag", pa.float64()),  # Float for nullable int
         pa.field("molecule_chembl_id", pa.string()),
         pa.field("molecule_pref_name", pa.string()),
-        pa.field("original_activity_id", pa.int64()),
+        pa.field("original_activity_id", pa.float64()),  # Float for nullable int
         pa.field("parent_molecule_chembl_id", pa.string()),
         pa.field("pchembl_value", pa.float64()),
         pa.field("potential_duplicate", pa.int64()),
@@ -138,7 +138,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
             "target_taxonomy_id", pa.string()
         ),  # Standardized name (was target_tax_id)
         pa.field("text_value", pa.string()),
-        pa.field("toid", pa.int64()),
+        pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),
         pa.field("units", pa.string()),
         pa.field("uo_units", pa.string()),
@@ -394,8 +394,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
         pa.field(
-            "assay_taxonomy_id", pa.int64()
-        ),  # Standardized name (was assay_tax_id)
+            "assay_taxonomy_id", pa.float64()
+        ),  # Float for nullable int
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string()),
@@ -422,8 +422,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_sequence", pa.string()),
         pa.field("variant_sequence_json", pa.string()),  # Forensic: original JSON
         pa.field(
-            "variant_taxonomy_id", pa.int64()
-        ),  # Standardized name (was variant_tax_id)
+            "variant_taxonomy_id", pa.float64()
+        ),  # Float for nullable int
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
@@ -461,7 +461,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_components", pa.string()),
         pa.field("target_type", pa.string()),
-        pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
+        pa.field("taxonomy_id", pa.float64()),  # Float for nullable int
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
@@ -625,7 +625,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
         pa.field("dosed_ingredient", pa.int64()),
-        pa.field("first_approval", pa.int64()),
+        pa.field("first_approval", pa.float64()),  # Float for nullable int
         pa.field("first_in_class", pa.int64()),
         pa.field("helm_notation", pa.string()),
         # Flattened Hierarchy
@@ -671,7 +671,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_stem", pa.string()),
         pa.field("usan_stem_definition", pa.string()),
         pa.field("usan_substem", pa.string()),
-        pa.field("usan_year", pa.int64()),
+        pa.field("usan_year", pa.float64()),  # Float for nullable int
         pa.field("withdrawn_flag", pa.bool_()),
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),

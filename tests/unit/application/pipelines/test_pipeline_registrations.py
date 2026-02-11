@@ -14,39 +14,22 @@ import pytest
 from bioetl.application.core.base import BasePipeline
 
 # (module_path, class_name)
+# ChEMBL pipelines consolidated in _pipelines.py per audit-package-structure-2026-02-07
 _PIPELINE_MODULES: list[tuple[str, str]] = [
-    ("bioetl.application.pipelines.chembl.activity", "ChEMBLActivityPipeline"),
-    ("bioetl.application.pipelines.chembl.assay", "ChEMBLAssayPipeline"),
-    (
-        "bioetl.application.pipelines.chembl.assay_parameters",
-        "ChEMBLAssayParametersPipeline",
-    ),
-    ("bioetl.application.pipelines.chembl.cell_line", "ChEMBLCellLinePipeline"),
-    (
-        "bioetl.application.pipelines.chembl.compound_record",
-        "ChEMBLCompoundRecordPipeline",
-    ),
-    ("bioetl.application.pipelines.chembl.molecule", "ChEMBLMoleculePipeline"),
-    ("bioetl.application.pipelines.chembl.protein_class", "ChEMBLProteinClassPipeline"),
-    ("bioetl.application.pipelines.chembl.publication", "ChEMBLPublicationPipeline"),
-    (
-        "bioetl.application.pipelines.chembl.publication_similarity",
-        "ChEMBLPublicationSimilarityPipeline",
-    ),
-    (
-        "bioetl.application.pipelines.chembl.publication_term",
-        "ChEMBLPublicationTermPipeline",
-    ),
-    (
-        "bioetl.application.pipelines.chembl.subcellular_fraction",
-        "ChEMBLSubcellularFractionPipeline",
-    ),
-    ("bioetl.application.pipelines.chembl.target", "ChEMBLTargetPipeline"),
-    (
-        "bioetl.application.pipelines.chembl.target_component",
-        "ChEMBLTargetComponentPipeline",
-    ),
-    ("bioetl.application.pipelines.chembl.tissue", "ChEMBLTissuePipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLActivityPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLAssayPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLAssayParametersPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLCellLinePipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLCompoundRecordPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLMoleculePipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLProteinClassPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLPublicationPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLPublicationSimilarityPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLPublicationTermPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLSubcellularFractionPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTargetPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTargetComponentPipeline"),
+    ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTissuePipeline"),
     ("bioetl.application.pipelines.pubchem.compound", "PubChemCompoundPipeline"),
     ("bioetl.application.pipelines.pubmed.publication", "PubMedPublicationPipeline"),
     ("bioetl.application.pipelines.uniprot.protein", "UniProtProteinPipeline"),
