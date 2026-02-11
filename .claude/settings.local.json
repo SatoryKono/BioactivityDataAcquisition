@@ -83,7 +83,8 @@
       "Bash(git commit:*)",
       "Bash(for name in DomainError EntityValidationError PipelineError SchemaRegistrationError SchemaNotFoundError)",
       "Bash(do echo -n \"$name class def: \")",
-      "Bash(for name in CachePort EventBusPort NotificationPort SchedulerPort DistributedLockPort)"
+      "Bash(for name in CachePort EventBusPort NotificationPort SchedulerPort DistributedLockPort)",
+      "Bash(del \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\src\\\\bioetl\\\\domain\\\\schemas\\\\_field_orders.py\")"
     ]
   },
   "enabledPlugins": {
