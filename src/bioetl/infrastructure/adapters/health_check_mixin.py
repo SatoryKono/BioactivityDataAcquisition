@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     )
 
 
-
 @dataclass
 class HealthCheckContext:
     """Context for health check operations.

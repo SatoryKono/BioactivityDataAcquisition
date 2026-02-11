@@ -20,6 +20,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.resilience import CircuitBreakerConfig
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
@@ -116,16 +118,5 @@ class RateLimitConfig:
     capacity: int
 
 
-@dataclass(frozen=True)
-class CircuitBreakerConfig:
-    """Typed context for circuit breaker configuration.
-
-    Replaces untyped tuple[int, int] from _get_circuit_breaker_from_config().
-
-    Attributes:
-        failure_threshold: Number of failures before opening circuit.
-        recovery_timeout: Seconds to wait before attempting recovery.
-    """
-
-    failure_threshold: int
-    recovery_timeout: int
+# CircuitBreakerConfig is imported from bioetl.domain.resilience (canonical definition)
+# and re-exported via __all__ for backward compatibility.

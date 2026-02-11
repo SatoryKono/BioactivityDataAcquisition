@@ -317,4 +317,3 @@ ENTITY_MAPPING: dict[str, str] = {
     "document_similarity": "document_similarity",
     "document_term": "document",
 }
-
