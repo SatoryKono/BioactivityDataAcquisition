@@ -160,7 +160,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             extract_affiliations(authorships) if isinstance(authorships, list) else None
         )
         serialized_affiliations = (
-            self.serialize_json(raw_affiliations) if raw_affiliations is not None else None
+            self.serialize_json(raw_affiliations)
+            if raw_affiliations is not None
+            else None
         )
 
         # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
@@ -252,7 +254,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "subject_topics": (
                 self.serialize_json_list(subject_topics) if subject_topics else None
             ),
-            "primary_topic": self.serialize_json(primary_topic) if primary_topic else None,
+            "primary_topic": self.serialize_json(primary_topic)
+            if primary_topic
+            else None,
             # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
             "subject_mesh": subject_mesh,

@@ -300,7 +300,8 @@ class TestOpenAlexPublicationTransformer:
         result = await transformer.transform(pipeline_context, record, 0)
 
         assert result is not None
-        assert result["affiliation_list"] == json.dumps(["MIT", "Stanford"])
+        # Deserialize JSON to compare data (not format)
+        assert json.loads(result["affiliation_list"]) == ["MIT", "Stanford"]
 
     @pytest.mark.asyncio
     async def test_transform_affiliation_list_empty(
@@ -308,7 +309,7 @@ class TestOpenAlexPublicationTransformer:
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Should serialize empty affiliation_list to JSON empty array."""
+        """Should return None for empty affiliation_list (no affiliations)."""
         record = {
             "id": "https://openalex.org/W1234567891",
             "title": "Empty Affiliation Test",
@@ -319,7 +320,8 @@ class TestOpenAlexPublicationTransformer:
         result = await transformer.transform(pipeline_context, record, 0)
 
         assert result is not None
-        assert result["affiliation_list"] == "[]"
+        # Empty affiliations list → None (not "[]") per serialize_json design
+        assert result["affiliation_list"] is None
 
 
 class TestOpenAlexDoiNormalization:
