@@ -27,7 +27,12 @@ from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 from bioetl.infrastructure.schemas.base_schemas import (
+    BaseFilterColumnSchema,
+    BaseGoldColumnFilterConfig,
     BaseGoldFiltersConfig,
+    BaseGoldListContainsFilterConfig,
+    BaseGoldListLengthFilterConfig,
+    BaseGoldRangeFilterConfig,
     BaseInputFilterConfig,
 )
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
@@ -295,11 +300,8 @@ class CsvExportConfig(BaseModel):
     encoding: str = "utf-8"
 
 
-class FilterColumnSchema(BaseModel):
+class FilterColumnSchema(BaseFilterColumnSchema):
     """Schema for a single filter column configuration."""
-
-    column_name: str = Field(description="Column name in CSV containing filter IDs")
-    filter_field: str = Field(description="API field name to filter by")
 
 
 class InputFilterConfig(BaseInputFilterConfig):
@@ -314,11 +316,8 @@ class InputFilterConfig(BaseInputFilterConfig):
     Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
     """
 
-    # Override columns type to use pipeline-specific FilterColumnSchema
-    columns: list[FilterColumnSchema] | None = Field(
-        default=None,
-        description="List of column configurations for multi-column filtering",
-    )
+    # Inherits columns from BaseInputFilterConfig.
+    # FilterColumnSchema extends BaseFilterColumnSchema with no additional fields.
 
 
 class MaintenanceConfig(BaseModel):
@@ -624,39 +623,22 @@ class SinkLayerConfig(BaseModel):
     )
 
 
-class GoldRangeFilterConfig(BaseModel):
+class GoldRangeFilterConfig(BaseGoldRangeFilterConfig):
     """Schema for range filters in YAML."""
 
-    min: float | None = None
-    max: float | None = None
-    include_min: bool = True
-    include_max: bool = True
 
-
-class GoldListLengthFilterConfig(BaseModel):
+class GoldListLengthFilterConfig(BaseGoldListLengthFilterConfig):
     """Schema for list length filters in YAML."""
 
-    min: int | None = None
-    max: int | None = None
 
-
-class GoldListContainsFilterConfig(BaseModel):
+class GoldListContainsFilterConfig(BaseGoldListContainsFilterConfig):
     """Schema for list contains filters in YAML."""
 
-    values: list[str]
-    mode: Literal["all", "any"] = "all"
 
-
-class GoldColumnFilterConfig(BaseModel):
+class GoldColumnFilterConfig(BaseGoldColumnFilterConfig):
     """Column filter config with operator support.
 
-    Supports extended operators for column filtering:
-    - in: value must be in the allowed list (default)
-    - not_in: value must not be in the excluded list
-    - is_null: value must be None or empty string
-    - is_not_null: value must not be None or empty string
-    - is_empty: value must be "empty" (None, "", [], {})
-    - is_not_empty: value must not be "empty"
+    Inherits operator, values fields and validate_operator_values() from base.
 
     Example YAML:
         columns:
@@ -666,23 +648,6 @@ class GoldColumnFilterConfig(BaseModel):
           pchembl_value:
             operator: is_not_null
     """
-
-    operator: Literal[
-        "in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"
-    ] = "in"
-    values: list[str] | None = None
-
-    @model_validator(mode="after")
-    def validate_operator_values(self) -> GoldColumnFilterConfig:
-        """Validate that values are provided for IN/NOT_IN operators."""
-        if self.operator in ("in", "not_in") and not self.values:
-            raise ValueError(f"values required for operator '{self.operator}'")
-        if (
-            self.operator in ("is_null", "is_not_null", "is_empty", "is_not_empty")
-            and self.values is not None
-        ):
-            raise ValueError(f"values must be None for operator '{self.operator}'")
-        return self
 
 
 class GoldFiltersConfig(BaseGoldFiltersConfig):
@@ -709,11 +674,9 @@ class GoldFiltersConfig(BaseGoldFiltersConfig):
               operator: is_not_null
     """
 
-    # Override column types to use pipeline-specific config classes
-    columns: dict[str, list[str] | GoldColumnFilterConfig] = Field(default_factory=dict)
-    ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
-    list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
-    list_contains: dict[str, GoldListContainsFilterConfig] = Field(default_factory=dict)
+    # Inherits columns, ranges, list_lengths, list_contains from BaseGoldFiltersConfig.
+    # Child filter types (GoldColumnFilterConfig etc.) extend the base types with no
+    # additional fields, so the base field definitions are sufficient.
 
 
 # Regex for semver validation (allows optional 'v' prefix)

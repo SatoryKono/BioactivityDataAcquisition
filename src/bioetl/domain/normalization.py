@@ -148,7 +148,7 @@ def _compute_expanded_page(first_digits: str, last_digits: str) -> int:
     divisor = 10 ** len(last_digits)
     expanded = (first_num // divisor) * divisor + int(last_digits)
     # Rollover: "199-3" -> 203, not 193
-    return expanded + divisor if expanded < first_num else expanded
+    return int(expanded + divisor) if expanded < first_num else int(expanded)
 
 
 def _expand_abbreviated_page(first_page: str, last_page_raw: str) -> str:
