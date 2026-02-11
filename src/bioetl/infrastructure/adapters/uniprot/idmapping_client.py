@@ -333,10 +333,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         Args:
             job_id: Job ID to fetch results for.
             original_ids: Original list of IDs for initializing results dict.
-            results_url: Redirect URL from polling phase. If provided, used
-                instead of constructing a generic URL. This avoids relying
-                on re-redirect when UniProt returns a target-specific path
-                (e.g., ``/idmapping/uniprotkb/results/{jobId}``).
+            results_url: Redirect URL from polling phase (avoids re-redirect).
 
         Returns:
             Dict mapping source IDs to entry data dicts (None if not found).
