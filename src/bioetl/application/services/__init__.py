@@ -65,9 +65,9 @@ from bioetl.application.services.metrics_service import (
 from bioetl.application.services.pipeline_runner_service import (
     PipelineNotFoundError,
     PipelineRunnerService,
+    PipelineRunResult,
     RunOptions,
     RunResult,
-    RunStatus,
 )
 from bioetl.application.services.quarantine_service import (
     QuarantineRecord,
@@ -118,7 +118,7 @@ __all__ = [
     "QuarantineService",
     "RunOptions",
     "RunResult",
-    "RunStatus",
+    "PipelineRunResult",
     "SettingsInfo",
     "ShutdownReason",
     "ShutdownService",
