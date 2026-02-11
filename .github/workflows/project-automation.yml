@@ -3,8 +3,16 @@ name: Project Automation (Cursor Commands)
 on:
     push:
         branches: [ main, master, develop ]
+        paths-ignore:
+            - 'docs/**'
+            - '*.md'
+            - 'LICENSE'
     pull_request:
         types: [ opened, synchronize, reopened ]
+        paths-ignore:
+            - 'docs/**'
+            - '*.md'
+            - 'LICENSE'
 
 jobs:
     validate-and-test:
