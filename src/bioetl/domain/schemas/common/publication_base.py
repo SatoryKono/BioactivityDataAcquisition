@@ -171,12 +171,12 @@ class PublicationBaseSchema(ETLRecordSchema):
         description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
 
-    @pa.check("title", name="title_not_empty")  # type: ignore[untyped-decorator]
+    @pa.check("title", name="title_not_empty")
     def _check_title(cls, series: Series[str]) -> Series[bool]:
         """Validate title is not empty when present (null is allowed)."""
         return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
 
-    @pa.check("author_orcids", name="orcid_format")  # type: ignore[untyped-decorator]
+    @pa.check("author_orcids", name="orcid_format")
     def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
         """Validate ORCID format in JSON array elements."""
         _pattern = re.compile(ORCID_PATTERN)
