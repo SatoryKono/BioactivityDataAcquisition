@@ -35,9 +35,9 @@ __all__ = [
     "BatchRecord",
     "BatchStatus",
     "PipelineRun",
+    "PipelineRunState",
     "QuarantineEntry",
     "QuarantineStatus",
-    "PipelineRunState",
     "StageResult",
     "StageStatus",
 ]
