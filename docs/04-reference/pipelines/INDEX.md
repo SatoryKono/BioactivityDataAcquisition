@@ -2,7 +2,7 @@
 
 Index page for publication-related data pipelines in BioETL.
 
----
+______________________________________________________________________
 
 ## Purpose
 
@@ -15,22 +15,22 @@ These pipelines ingest, transform, and enrich publication metadata from multiple
 
 All pipelines follow the Medallion Architecture (Bronze -> Silver -> Gold).
 
----
+______________________________________________________________________
 
 ## Quick Navigation
 
-| Pipeline | Provider | Layers | Primary Key(s) | Documentation |
-|----------|----------|--------|----------------|---------------|
-| `chembl_publication` | ChEMBL | Silver, Gold | `document_chembl_id` | [Spec](chembl/07-publication-spec.md) |
-| `chembl_publication_similarity` | ChEMBL | Silver, Gold | `doc_id_1`, `doc_id_2` | [Spec](chembl/12-publication-similarity-spec.md) |
-| `chembl_publication_term` | ChEMBL | Silver, Gold | `doc_id`, `term_type`, `term_value` | [Spec](chembl/11-publication-term-spec.md) |
-| `crossref_publication` | CrossRef | Silver, Gold | `doi` | [Spec](crossref/01-publication-spec.md) |
-| `openalex_publication` | OpenAlex | Silver, Gold | `openalex_id` | [Spec](openalex/01-publication-spec.md) |
-| `pubmed_publication` | PubMed | Silver, Gold | `pmid` | [Spec](pubmed/01-publication-spec.md) |
-| `semanticscholar_publication` | Semantic Scholar | Silver, Gold | `paper_id` | [Spec](semanticscholar/01-publication-spec.md) |
-| `composite_publication` | Composite | Silver, Gold | `document_chembl_id` (seed) | [Spec](composite/01-publication-spec.md) |
+| Pipeline                        | Provider         | Layers       | Primary Key(s)                      | Documentation                                    |
+| ------------------------------- | ---------------- | ------------ | ----------------------------------- | ------------------------------------------------ |
+| `chembl_publication`            | ChEMBL           | Silver, Gold | `document_chembl_id`                | [Spec](chembl/07-publication-spec.md)            |
+| `chembl_publication_similarity` | ChEMBL           | Silver, Gold | `doc_id_1`, `doc_id_2`              | [Spec](chembl/12-publication-similarity-spec.md) |
+| `chembl_publication_term`       | ChEMBL           | Silver, Gold | `doc_id`, `term_type`, `term_value` | [Spec](chembl/11-publication-term-spec.md)       |
+| `crossref_publication`          | CrossRef         | Silver, Gold | `doi`                               | [Spec](crossref/01-publication-spec.md)          |
+| `openalex_publication`          | OpenAlex         | Silver, Gold | `openalex_id`                       | [Spec](openalex/01-publication-spec.md)          |
+| `pubmed_publication`            | PubMed           | Silver, Gold | `pmid`                              | [Spec](pubmed/01-publication-spec.md)            |
+| `semanticscholar_publication`   | Semantic Scholar | Silver, Gold | `paper_id`                          | [Spec](semanticscholar/01-publication-spec.md)   |
+| `composite_publication`         | Composite        | Silver, Gold | `document_chembl_id` (seed)         | [Spec](composite/01-publication-spec.md)         |
 
----
+______________________________________________________________________
 
 ## Composite Pipeline Summary
 
@@ -41,19 +41,19 @@ The `composite_publication` pipeline merges provider Silver tables into a unifie
 - **Config**: `configs/pipelines/composite/publication.yaml`
 - **Field map**: `configs/data_schema/composite/publication.yaml`
 
----
+______________________________________________________________________
 
 ## Naming Conventions
 
 Pipeline names follow these patterns:
 
-| Pattern | Example | Notes |
-|---------|---------|-------|
-| `{provider}_{entity}` | `pubmed_publication` | Standard single-entity pipeline |
-| `{provider}_{entity}_{variant}` | `chembl_publication_term` | Variant/auxiliary pipeline |
-| `composite_{entity}` | `composite_publication` | Multi-provider merge pipeline |
+| Pattern                         | Example                   | Notes                           |
+| ------------------------------- | ------------------------- | ------------------------------- |
+| `{provider}_{entity}`           | `pubmed_publication`      | Standard single-entity pipeline |
+| `{provider}_{entity}_{variant}` | `chembl_publication_term` | Variant/auxiliary pipeline      |
+| `composite_{entity}`            | `composite_publication`   | Multi-provider merge pipeline   |
 
----
+______________________________________________________________________
 
 ## Related ADRs
 
@@ -66,6 +66,10 @@ Pipeline names follow these patterns:
 - [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md): Loading strategy formalization
 - [ADR-032](../02-architecture/decisions/ADR-032-unified-http-client.md): Unified HTTP client pattern
 
----
+______________________________________________________________________
 
 *Last updated: 2026-02-03*
+
+- ChEMBL: subcellular_fraction, tissue
+
+- Composite: activity, assay

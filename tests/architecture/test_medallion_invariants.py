@@ -182,3 +182,45 @@ class TestSilverLayerInvariants:
                 pytest.fail(
                     f"SilverWriter seems to use raw '{method}()'. MUST use write_deltalake()."
                 )
+
+
+from unittest.mock import AsyncMock, MagicMock
+
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.domain.medallion import MedallionPolicy
+from bioetl.domain.types import RunType
+
+
+class TestMedallionClearPolicyInvariants:
+    """ARCH-007: clear policy behavior by run_type."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("run_type", [RunType.REBUILD, RunType.BACKFILL])
+    async def test_rebuild_and_backfill_clear_silver_and_gold(
+        self, run_type: RunType
+    ) -> None:
+        storage = MagicMock()
+        storage.clear_silver = AsyncMock(return_value=1)
+        storage.clear_gold = AsyncMock(return_value=1)
+        logger = MagicMock()
+        service = MedallionLifecycleService(storage=storage, logger=logger)
+
+        policy = MedallionPolicy.for_run_type(run_type)
+        await service.clear(policy, "chembl.activity", "chembl.activity_gold")
+
+        storage.clear_silver.assert_awaited_once()
+        storage.clear_gold.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_incremental_does_not_clear_silver_or_gold(self) -> None:
+        storage = MagicMock()
+        storage.clear_silver = AsyncMock(return_value=0)
+        storage.clear_gold = AsyncMock(return_value=0)
+        logger = MagicMock()
+        service = MedallionLifecycleService(storage=storage, logger=logger)
+
+        policy = MedallionPolicy.for_run_type(RunType.INCREMENTAL)
+        await service.clear(policy, "chembl.activity", "chembl.activity_gold")
+
+        storage.clear_silver.assert_not_awaited()
+        storage.clear_gold.assert_not_awaited()

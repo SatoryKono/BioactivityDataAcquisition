@@ -1,6 +1,6 @@
 # Observability Checklist
 
-*Reference: [RULES.md §3.2](../../RULES.md#32-наблюдаемость-observability)*
+*Reference: [RULES.md §3.2](../../RULES.md#32-%D0%BD%D0%B0%D0%B1%D0%BB%D1%8E%D0%B4%D0%B0%D0%B5%D0%BC%D0%BE%D1%81%D1%82%D1%8C-observability)*
 
 This checklist ensures all components meet the project's observability requirements.
 
@@ -11,7 +11,7 @@ Every adapter in `src/bioetl/infrastructure/adapters/` **MUST** implement:
 ### 1. Health Check Method
 
 ```python
-async def health_check(self) -> bool:
+async def health_check(self) -> HealthStatus:
     """Check if the external service is reachable.
 
     Returns:
@@ -21,25 +21,26 @@ async def health_check(self) -> bool:
 
 **Health Check Endpoints by Provider:**
 
-| Provider | Health Check |
-|----------|--------------|
-| ChEMBL | `GET /chembl/api/data/status.json` |
-| PubChem | `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
-| UniProt | Lightweight Search Probe |
-| Generic | `GET /` or `/status` with 5s timeout |
+| Provider | Health Check                                                     |
+| -------- | ---------------------------------------------------------------- |
+| ChEMBL   | `GET /chembl/api/data/status`                                    |
+| PubChem  | `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
+| UniProt  | Lightweight Search Probe                                         |
+| Generic  | `GET /` or `/status` with 5s timeout                             |
 
 ### 2. Structured Logging
 
 All log messages **MUST** include:
 
-| Field | Required | Example |
-|-------|----------|---------|
-| `run_id` | MUST | UUID |
-| `pipeline` | MUST | `chembl_activity` |
-| `stage` | MUST | `extract`, `transform`, `load` |
-| `dataset` | SHOULD | `chembl.activity` |
+| Field      | Required | Example                        |
+| ---------- | -------- | ------------------------------ |
+| `run_id`   | MUST     | UUID                           |
+| `pipeline` | MUST     | `chembl_activity`              |
+| `stage`    | MUST     | `extract`, `transform`, `load` |
+| `dataset`  | SHOULD   | `chembl.activity`              |
 
 **Example:**
+
 ```python
 self.logger.info(
     "Fetching records",
@@ -57,27 +58,27 @@ self.logger.info(
 
 ### Required Metrics (prefix: `bioetl_`)
 
-| Metric | Type | Labels |
-|--------|------|--------|
+| Metric                      | Type      | Labels                            |
+| --------------------------- | --------- | --------------------------------- |
 | `pipeline_duration_seconds` | Histogram | pipeline, stage, status, run_type |
-| `records_processed_total` | Counter | pipeline, stage, run_type |
-| `errors_total` | Counter | pipeline, stage, error_code |
-| `batch_size_records` | Histogram | pipeline, stage |
+| `records_processed_total`   | Counter   | pipeline, stage, run_type         |
+| `errors_total`              | Counter   | pipeline, stage, error_code       |
+| `batch_size_records`        | Histogram | pipeline, stage                   |
 
 ### DQ Metrics
 
-| Metric | Type | Labels |
-|--------|------|--------|
-| `dq_validation_score` | Gauge | pipeline, column, check |
-| `data_freshness_seconds` | Gauge | pipeline |
+| Metric                   | Type  | Labels                  |
+| ------------------------ | ----- | ----------------------- |
+| `dq_validation_score`    | Gauge | pipeline, column, check |
+| `data_freshness_seconds` | Gauge | pipeline                |
 
 ### Provider Health Metrics
 
-| Metric | Type | Labels |
-|--------|------|--------|
-| `provider_health_status` | Gauge | provider (0=Unhealthy, 1=Degraded, 2=Healthy) |
-| `circuit_breaker_state` | Gauge | provider (0=Closed, 1=Half-Open, 2=Open) |
-| `circuit_breaker_trips_total` | Counter | provider |
+| Metric                        | Type    | Labels                                        |
+| ----------------------------- | ------- | --------------------------------------------- |
+| `provider_health_status`      | Gauge   | provider (0=Unhealthy, 1=Degraded, 2=Healthy) |
+| `circuit_breaker_state`       | Gauge   | provider (0=Closed, 1=Half-Open, 2=Open)      |
+| `circuit_breaker_trips_total` | Counter | provider                                      |
 
 ## Verification Commands
 
@@ -107,11 +108,11 @@ cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .stage)'
 When creating a new adapter:
 
 1. [ ] Implement `health_check()` method
-2. [ ] Use `structlog` for all logging
-3. [ ] Include `run_id` in all log messages
-4. [ ] Add rate limiting (TokenBucket)
-5. [ ] Register metrics in composition layer
-6. [ ] Add integration test with VCR cassette
+1. [ ] Use `structlog` for all logging
+1. [ ] Include `run_id` in all log messages
+1. [ ] Add rate limiting (TokenBucket)
+1. [ ] Register metrics in composition layer
+1. [ ] Add integration test with VCR cassette
 
 ## Architecture Test
 

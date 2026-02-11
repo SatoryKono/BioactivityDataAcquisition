@@ -18,13 +18,13 @@ This runbook covers diagnosing and recovering from failed BioETL pipeline runs.
 echo $?  # After pipeline run
 ```
 
-| Exit Code | Meaning | Next Step |
-|-----------|---------|-----------|
-| 1 | General error | Check logs |
-| 2 | Invalid arguments | Review CLI args |
-| 10 | DQ hard threshold | See DQ runbook |
-| 130 | SIGINT | Check checkpoint |
-| 143 | SIGTERM | Check checkpoint |
+| Exit Code | Meaning           | Next Step        |
+| --------- | ----------------- | ---------------- |
+| 1         | General error     | Check logs       |
+| 2         | Invalid arguments | Review CLI args  |
+| 10        | DQ hard threshold | See DQ runbook   |
+| 130       | SIGINT            | Check checkpoint |
+| 143       | SIGTERM           | Check checkpoint |
 
 ### Step 2: Review Logs
 
@@ -37,6 +37,7 @@ grep "run_id.*<run-id>" logs/
 ```
 
 Key log fields to examine:
+
 - `error_category`: CRITICAL, RECOVERABLE, or DATA_QUALITY
 - `status_code`: HTTP status if external API error
 - `retry_count`: Number of retry attempts
@@ -49,6 +50,7 @@ cat data/checkpoints/{provider}_{entity}.json
 ```
 
 Checkpoint contains:
+
 - `last_offset`: Last successfully processed offset
 - `last_run_id`: Previous run identifier
 - `last_run_timestamp`: When last run completed
@@ -57,16 +59,19 @@ Checkpoint contains:
 ### Step 4: Identify Error Type
 
 **Critical Errors (Fail Immediately)**
+
 - Authentication failures (401, 403)
 - Schema mismatch in Gold layer
 - Database unavailable
 
 **Recoverable Errors (Auto-Retry)**
+
 - Rate limits (429)
 - Timeouts (502, 503, 504)
 - Temporary network issues
 
 **Data Quality Errors (Skip Record)**
+
 - Invalid SMILES strings
 - Missing required fields
 - Value out of range
@@ -82,9 +87,10 @@ bioetl run --pipeline chembl_activity --resume
 ```
 
 The pipeline will:
+
 1. Load checkpoint state
-2. Resume from `last_offset`
-3. Continue processing
+1. Resume from `last_offset`
+1. Continue processing
 
 ### Force Full Refresh
 
@@ -92,7 +98,7 @@ If checkpoint is corrupted or data inconsistent:
 
 ```bash
 # Clear checkpoint and reprocess all data
-bioetl run --pipeline chembl_activity --full-refresh
+bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
 **Warning**: This will reprocess all records from the beginning.
@@ -109,10 +115,10 @@ mv data/silver/chembl_activity data/silver/chembl_activity.bak
 rm data/checkpoints/chembl_activity.json
 
 # 3. Full refresh
-bioetl run --pipeline chembl_activity --full-refresh
+bioetl run --pipeline chembl_activity --run-type rebuild
 
 # 4. Verify data
-bioetl verify --table chembl_activity
+Для проверки данных используйте: bioetl run --pipeline chembl_activity --run-type rebuild --limit 10
 
 # 5. Remove backup if successful
 rm -rf data/silver/chembl_activity.bak
@@ -123,36 +129,37 @@ rm -rf data/silver/chembl_activity.bak
 For 401/403 errors:
 
 1. Check API key validity
-2. Verify environment variables:
+1. Verify environment variables:
    ```bash
    echo $BIOETL_CHEMBL_API_KEY
    echo $BIOETL_UNIPROT_API_KEY
    ```
-3. Rotate API key if expired
-4. Resume pipeline
+1. Rotate API key if expired
+1. Resume pipeline
 
 ### Handle Rate Limit Errors
 
 For persistent 429 errors:
 
 1. Check current rate limit configuration in pipeline YAML
-2. Reduce batch size if needed:
+1. Reduce batch size if needed:
    ```yaml
    # configs/pipelines/chembl/activity.yaml
    batch_size: 500  # Reduce from default
    ```
-3. Add delay between requests:
+1. Add delay between requests:
    ```yaml
    rate_limit:
      requests_per_second: 5  # Reduce if hitting limits
    ```
-4. Resume pipeline
+1. Resume pipeline
 
 ## Prevention
 
 ### Enable Monitoring
 
 Set up alerts for:
+
 - Pipeline failures (exit code != 0)
 - DQ threshold warnings (soft threshold exceeded)
 - Long-running pipelines (> expected duration)
@@ -168,6 +175,6 @@ Set up alerts for:
 If recovery fails after 3 attempts:
 
 1. Document error details
-2. Check for upstream API issues
-3. Review recent code changes
-4. Escalate to development team
+1. Check for upstream API issues
+1. Review recent code changes
+1. Escalate to development team

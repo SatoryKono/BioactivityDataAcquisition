@@ -21,7 +21,7 @@ flowchart TB
         end
 
         subgraph Observability["Observability"]
-            Metrics[MetricsExporter]
+            Metrics[PrometheusMetrics]
             Tracing[NoOpTracing]
             Logging[StructlogLogger]
         end
@@ -57,10 +57,10 @@ Data source adapters implementing `DataSourcePort`:
 Storage writers implementing `StoragePort`:
 
 - `BronzeWriter` - JSONL + zstd compression
-- `SilverWriter` - Delta Lake Silver layer (formerly DeltaWriter)
+- `SilverWriter` - Delta Lake Silver layer
 - `GoldWriter` - Delta Lake Gold layer with SCD Type 2
 
-> **Note**: `DeltaWriter` is deprecated and will be removed after a 14-day deprecation period. Use `SilverWriter` instead.
+> Функциональность перенесена в SilverWriter и GoldWriter.
 
 ### [Observability](infrastructure/observability.md)
 
@@ -69,7 +69,6 @@ Observability infrastructure:
 - `PrometheusMetrics` - Prometheus metrics exporter
 - `NoOpTracing` - Null Object Pattern tracing (see [ADR-022](../../02-architecture/decisions/ADR-022-tracing-noop.md))
 - `StructlogLogger` - Structured logging
-- `LineageTracker` - Data lineage tracking
 
 #### Tracing (NoOp)
 
@@ -86,15 +85,15 @@ class in `tracing.py` provides a ready implementation.
 
 ### Adapters vs Ports
 
-| Domain Port | Infrastructure Adapter |
-|-------------|----------------------|
-| `DataSourcePort` | `ChemblAdapter`, `PubChemAdapter` |
-| `StoragePort` | `BronzeWriter`, `SilverWriter`, `GoldWriter` |
-| `LockPort` | `MemoryLock` |
-| `CheckpointPort` | `LocalCheckpoint` |
-| `MetricsPort` | `PrometheusMetrics`, `NoOpMetrics` |
-| `TracingPort` | `NoOpTracing`, `OpenTelemetryTracer` |
-| `LoggerPort` | `StructlogLogger`, `NoOpLogger` |
+| Domain Port      | Infrastructure Adapter                       |
+| ---------------- | -------------------------------------------- |
+| `DataSourcePort` | `ChemblAdapter`, `PubChemAdapter`            |
+| `StoragePort`    | `BronzeWriter`, `SilverWriter`, `GoldWriter` |
+| `LockPort`       | `MemoryLock`                                 |
+| `CheckpointPort` | `LocalCheckpoint`                            |
+| `MetricsPort`    | `PrometheusMetrics`, `NoOpMetrics`           |
+| `TracingPort`    | `NoOpTracing`, `OpenTelemetryTracer`         |
+| `LoggerPort`     | `StructlogLogger`, `NoOpLogger`              |
 
 ### Medallion Storage Layers
 
@@ -129,10 +128,12 @@ All HTTP adapters use `UnifiedHTTPClient` for consistent behavior:
 from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
 
 client = UnifiedHTTPClient(
-    base_url="https://www.ebi.ac.uk/chembl/api/data",
-    rate_limit=5.0,  # requests per second
-    timeout=30.0,
-    max_retries=3,
+    rate_limiter=rate_limiter,
+    circuit_breaker=circuit_breaker,
+    retry_config=retry_config,
+    metrics=metrics,
+    logger=logger,
+    tracing=tracing,
 )
 ```
 
@@ -142,7 +143,7 @@ client = UnifiedHTTPClient(
 # Storage writers
 from bioetl.infrastructure.storage import (
     BronzeWriter,
-    SilverWriter,  # Preferred (was DeltaWriter)
+    SilverWriter,
     GoldWriter,
 )
 

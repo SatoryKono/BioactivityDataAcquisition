@@ -9,11 +9,12 @@ This guide will walk you through setting up a complete local development environ
 
 Ensure you have the following tools installed on your machine:
 
-*   **Python 3.11** or higher: [Download](https://www.python.org/downloads/)
-*   **Git**: Version control.
-*   **Make** (optional): Build automation tool. On Windows, use Chocolatey or WSL, or run commands manually.
+- **Python 3.11** or higher: [Download](https://www.python.org/downloads/)
+- **Git**: Version control.
+- **Make** (optional): Build automation tool. On Windows, use Chocolatey or WSL, or run commands manually.
 
 **Not required:**
+
 - Docker Desktop (Local-Only architecture)
 - Redis, MinIO, Postgres (replaced with local file system and in-memory locks)
 
@@ -33,6 +34,7 @@ make install
 ```
 
 *Note: If you are on Windows and don't have `make`, you can manually run:*
+
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
@@ -42,6 +44,7 @@ pip install -e .[dev,docs]
 ## 3. Configuration
 
 ### Environment Variables
+
 Copy the example environment file to create your local configuration:
 
 ```bash
@@ -51,11 +54,13 @@ cp .env.example .env
 Open `.env` and verify the settings. For local development, the defaults are usually sufficient.
 
 **Key Variables:**
-*   `BIOETL_ENV`: Set to `dev`.
-*   `BIOETL_DATA_DIR`: Directory for data storage (default: `./data`).
-*   `BIOETL_LOG_LEVEL`: Logging level (default: `INFO`).
+
+- `BIOETL_ENV`: Set to `dev`.
+- `BIOETL_DATA_DIR`: Directory for data storage (default: `./data`).
+- `BIOETL_LOG_LEVEL`: Logging level (default: `INFO`).
 
 ### Secrets
+
 If you plan to access APIs requiring authentication (e.g., UniProt, OpenAlex), add your keys to `.env`:
 
 ```ini
@@ -87,10 +92,11 @@ bioetl run --pipeline chembl_activity --limit 100
 ```
 
 This command will:
-1.  Fetch 100 records from the ChEMBL API.
-2.  Save raw data to the **Bronze** layer (`data/bronze/v1/chembl/activity/`).
-3.  Normalize and save to the **Silver** layer (`data/silver/chembl.activity/`).
-4.  Aggregate to the **Gold** layer (`data/gold/chembl.activity_gold/`).
+
+1. Fetch 100 records from the ChEMBL API.
+1. Save raw data to the **Bronze** layer (`data/output/bronze/chembl/activity/{date}/`).
+1. Normalize and save to the **Silver** layer (`data/output/silver/chembl/activity/`).
+1. Aggregate to the **Gold** layer (`data/output/gold/chembl/activity/`).
 
 ## Data Directory Structure
 
@@ -98,33 +104,38 @@ After running a pipeline, your data directory will look like:
 
 ```
 data/
-├── bronze/
-│   └── v1/chembl/activity/2025-12-24/
-│       └── batch_001.jsonl.zst
-├── silver/
-│   └── chembl.activity/
-│       └── _delta_log/
-├── gold/
-│   └── chembl.activity_gold/
-│       └── _delta_log/
-├── checkpoints/
-│   └── chembl_activity.json
-└── quarantine/
-    └── chembl/activity/
+└── output/
+    ├── bronze/
+    │   └── chembl/activity/2025-12-24/
+    │       └── batch_001.jsonl.zst
+    ├── silver/
+    │   └── chembl/activity/
+    │       └── _delta_log/
+    ├── gold/
+    │   └── chembl/activity/
+    │       └── _delta_log/
+    ├── checkpoints/
+    │   └── chembl_activity.json
+    └── quarantine/
+        └── chembl/activity/
 ```
 
 ## Troubleshooting
 
 ### "Make command not found"
+
 On Windows, ensure you have installed Make via Chocolatey (`choco install make`) or use the manual commands listed above.
 
 ### Permission Denied on data/
+
 Ensure the `data/` directory is writable. On Linux/macOS: `chmod -R 755 data/`
 
 ### Tests Fail with "VCR cassette not found"
+
 Run tests with `--vcr-record=once` to record new cassettes, or ensure you're running against the existing fixtures.
 
 ### Pipeline Fails with "Lock already held"
+
 Another pipeline instance may be running. Check for zombie Python processes or wait for the current pipeline to complete.
 
 ## Next Steps

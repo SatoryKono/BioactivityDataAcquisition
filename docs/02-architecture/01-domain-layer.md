@@ -7,6 +7,7 @@
 Слой `Domain` — это ядро системы, содержащее чистую бизнес-логику и правила. Он не зависит ни от каких других слоёв и не содержит кода, связанного с вводом-выводом (I/O), базами данных, веб-фреймворками или другими инфраструктурными деталями.
 
 **Ключевые характеристики:**
+
 - **Чистота:** Только Python-объекты и чистые функции.
 - **Независимость:** Не импортирует модули из `application`, `infrastructure` или `interfaces`.
 - **Стабильность:** Изменяется только при изменении бизнес-правил, а не технических деталей.
@@ -21,9 +22,10 @@
 
 **Структура пакета (26 файлов):**
 
-Пакет содержит 26 protocol-файлов, организованных по категориям:
+Пакет содержит 26 protocol-файлов (актуально на 2026-02-11), организованных по категориям:
 
 **Основные порты:**
+
 - `DataSourcePort`, `FilterableDataSourcePort` — абстракция для источников данных
 - `StoragePort` — хранилища данных (Bronze, Silver, Gold)
 - `LockPort` — распределённые блокировки
@@ -31,27 +33,29 @@
 - `QuarantinePort` — карантин записей, не прошедших валидацию
 
 **Observability порты:**
+
 - `MetricsPort` — сбор метрик
 - `TracingPort` — распределённый трейсинг (OpenTelemetry)
 - `LoggerPort` — структурированное логирование
 - `DQMonitorPort` — Data Quality мониторинг
-- `PipelineObserverPort` — наблюдение за пайплайнами
 
 **Data Quality порты:**
+
 - `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` — DQ анализ по слоям
 - `DQReportWriterPort` — запись DQ-отчётов
 - `GoldValidatorPort` — валидация Gold-записей
 
 **Input/Output порты:**
+
 - `InputFilterPort` — загрузка filter IDs
-- `ExportPort` — экспорт данных
 
 **Infrastructure порты:**
+
 - `HealthCheckPort` — проверка здоровья адаптеров
 - `AuditPort` — аудит операций
-- `RetentionPort` — управление политиками хранения
 
 **Правило импорта (MUST):**
+
 ```python
 # ✅ Правильно — из фасада:
 from bioetl.domain.ports import StoragePort, LockPort
@@ -70,6 +74,7 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 См. [ADR-021: DDD Aggregates](decisions/ADR-021-ddd-aggregates-adoption.md).
 
 **Структура:**
+
 ```
 src/bioetl/domain/aggregates/
 ├── __init__.py
@@ -81,13 +86,14 @@ src/bioetl/domain/aggregates/
 
 **Ключевые агрегаты:**
 
-| Aggregate | Инварианты | State Machine |
-|-----------|------------|---------------|
-| `Batch` | Records sealed before write; sequential indices | OPEN → SEALED → WRITING → COMMITTED/FAILED |
-| `PipelineRun` | COMPLETED only if all stages SUCCESS | PENDING → RUNNING → COMPLETED/FAILED/SHUTDOWN |
-| `QuarantineEntry` | Atomic retry increment | PENDING → RETRYING → RECOVERED/DEAD_LETTER |
+| Aggregate         | Инварианты                                      | State Machine                                        |
+| ----------------- | ----------------------------------------------- | ---------------------------------------------------- |
+| `Batch`           | Records sealed before write; sequential indices | OPEN → SEALED → WRITING → COMMITTED/FAILED           |
+| `PipelineRun`     | COMPLETED only if all stages SUCCESS            | NEW → RUNNING → COMPLETED/FAILED/SHUTDOWN            |
+| `QuarantineEntry` | Atomic retry increment                          | NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED |
 
 **Пример использования:**
+
 ```python
 from bioetl.domain.aggregates import Batch
 from bioetl.domain.types import RunID
@@ -108,19 +114,23 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 Неизменяемые доменные примитивы с типобезопасностью (19 файлов).
 
 **Идентификаторы:**
+
 - `RunID(UUID)` — идентификатор запуска пайплайна
 - `BatchID(UUID)` — идентификатор batch
 - `EntityID(str)` — бизнес-ключ сущности
 - `ContentHash(str)` — SHA256 хэш содержимого
 
 **Измерения:**
+
 - `ActivityValue(value, unit, relation)` (`activity.py`, 329 LOC) — составной value object для биоактивности (IC50, EC50, Ki), включает `RelationOperator` enum и `ConfidenceScore`
 
 **Data Quality:**
+
 - `DQMetrics` — метрики качества данных
 - `DQReport` — отчёт о качестве данных
 
 **Pipeline Results:**
+
 - `BronzeResult` — результат записи в Bronze
 - `Publications` — value objects для публикаций
 - `ActivityValues` — concentration & unit handling
@@ -136,6 +146,7 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 **Источник:** `src/bioetl/domain/config.py`
 
 Содержит dataclass Value Objects для конфигурации пайплайнов:
+
 - `PipelineConfig` — полная конфигурация пайплайна
 - `RuntimeConfig` — параметры выполнения
 - `DQConfig` — пороги Data Quality
@@ -146,6 +157,7 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 **Источник:** `src/bioetl/domain/error_classifier.py`
 
 Реализует логику классификации ошибок в соответствии с правилами из `RULES.md` (раздел 3.1.1):
+
 - **Critical**: Ошибки, останавливающие пайплайн.
 - **Recoverable**: Временные сбои, требующие повторной попытки.
 - **Data Quality**: Проблемы с данными, которые можно пропустить, отправив запись в карантин.
@@ -154,19 +166,19 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 
 Domain содержит 8 дополнительных поддиректорий:
 
-| Директория | Назначение | Содержание |
-|------------|------------|------------|
-| `composite/` | Composite pipeline domain | Field groups, state, strategy |
-| `configs/` | Конфигурационные базовые классы | Базовые dataclass-ы для конфигураций |
-| `contracts/gold/` | Gold-слой контракты данных | Pandera DataFrameModel схемы |
-| `entities/` | Доменные сущности | Entity-классы для каждого провайдера |
-| `exceptions/` | Доменные исключения | 5 файлов с иерархией ошибок |
-| `filtering/` | Фильтрация данных | Конфигурации и логика фильтров |
-| `mapping/` | Маппинг полей публикаций | Publication field & type mappings |
-| `models/` | Доменные модели | Filter & metadata models |
-| `registry/` | Реестр публикаций | Publication registry |
-| `schemas/` | Pydantic/Pandera схемы | ~60 файлов для всех провайдеров |
-| `services/` | Доменные сервисы | Нормализация, агрегация |
+| Директория        | Назначение                      | Содержание                           |
+| ----------------- | ------------------------------- | ------------------------------------ |
+| `composite/`      | Composite pipeline domain       | Field groups, state, strategy        |
+| `configs/`        | Конфигурационные базовые классы | Базовые dataclass-ы для конфигураций |
+| `contracts/gold/` | Gold-слой контракты данных      | Pandera DataFrameModel схемы         |
+| `entities/`       | Доменные сущности               | Entity-классы для каждого провайдера |
+| `exceptions/`     | Доменные исключения             | 5 файлов с иерархией ошибок          |
+| `filtering/`      | Фильтрация данных               | Конфигурации и логика фильтров       |
+| `mapping/`        | Маппинг полей публикаций        | Publication field & type mappings    |
+| `models/`         | Доменные модели                 | Filter & metadata models             |
+| `registry/`       | Реестр публикаций               | Publication registry                 |
+| `schemas/`        | Pydantic/Pandera схемы          | ~60 файлов для всех провайдеров      |
+| `services/`       | Доменные сервисы                | Нормализация, агрегация              |
 
 ## 3. Принципы Работы
 
@@ -174,35 +186,37 @@ Domain содержит 8 дополнительных поддиректори�
 - **Валидация данных:** Логика валидации бизнес-сущностей (например, проверка SMILES-строк) может находиться здесь, если она не требует внешних зависимостей.
 - **Иммутабельность:** Предпочтение отдаётся иммутабельным структурам данных (например, `NamedTuple`, `dataclasses(frozen=True)`).
 
----
+______________________________________________________________________
 
 ## 4. Связанные Материалы
 
 ### Навигация по Слоям
 
-| ← Предыдущий | Текущий | Следующий → |
-|--------------|---------|-------------|
-| — | **Domain** | [Application Layer](02-application-layer.md) |
+| ← Предыдущий | Текущий    | Следующий →                                  |
+| ------------ | ---------- | -------------------------------------------- |
+| —            | **Domain** | [Application Layer](02-application-layer.md) |
 
 ### Связанные Диаграммы
 
-| Диаграмма | Файл | Описание |
-|-----------|------|----------|
-| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации |
-| Domain DDD | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid) | DDD-структура домена |
-| Domain Models | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid) | Связи доменных моделей |
-| DDD Aggregates | [diagrams/mermaid/09_ddd_aggregates.mmd](diagrams/mermaid/09_ddd_aggregates.mmd) | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов |
+| Диаграмма            | Файл                                                                                     | Описание                                          |
+| -------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid)  | Классы портов, сущностей, конфигурации            |
+| Domain DDD           | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid)                                  | DDD-структура домена                              |
+| Domain Models        | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid)  | Связи доменных моделей                            |
+| DDD Aggregates       | [diagrams/mermaid/09_ddd_aggregates.mmd](diagrams/mermaid/09_ddd_aggregates.mmd)         | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
+| Ports Architecture   | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов                             |
 
 ### Связанные ADR
 
-| ADR | Тема |
-|-----|------|
+| ADR                                                     | Тема                                        |
+| ------------------------------------------------------- | ------------------------------------------- |
 | [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses — выбор dataclasses |
-| [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates — внедрение агрегатов |
+| [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates — внедрение агрегатов        |
 
 ### Смежные Разделы Документации
 
 - [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов, правила слоёв
 - [API Reference: Domain](../04-reference/api/domain.md) — API документация слоя
 - [Glossary](../glossary.md) — терминология Ubiquitous Language
+
+Добавлены актуальные порты из domain/ports/__init__.py, включая IDMappingPort, MetadataCoordinatorPort, DQReportWriterPort и др.
