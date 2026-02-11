@@ -1,23 +1,23 @@
 # ChEMBL Assay Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `chembl_assay` |
-| **Provider** | ChEMBL (EBI) |
-| **Entity** | assay |
+| Parameter        | Value                                         |
+| ---------------- | --------------------------------------------- |
+| **Pipeline ID**  | `chembl_assay`                                |
+| **Provider**     | ChEMBL (EBI)                                  |
+| **Entity**       | assay                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/assay` |
-| **Library** | `chembl_webresource_client` |
-| **Rate Limit** | None (polite usage recommended) |
-| **Health Check** | `/chembl/api/data/status.json` |
-| **Auth Type** | None (public API) |
+| **Library**      | `chembl_webresource_client`                   |
+| **Rate Limit**   | None (polite usage recommended)               |
+| **Health Check** | `/chembl/api/data/status`                     |
+| **Auth Type**    | None (public API)                             |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -33,9 +33,9 @@ Assays represent **experimental protocols** used to measure bioactivity:
 ### 2.2. Use Cases
 
 1. **Protocol Analysis**: Understand experimental conditions for activities
-2. **Assay Selection**: Choose appropriate assays for screening
-3. **Data Quality Assessment**: Filter by confidence and relationship type
-4. **Cell-based vs Biochemical**: Compare assay types
+1. **Assay Selection**: Choose appropriate assays for screening
+1. **Data Quality Assessment**: Filter by confidence and relationship type
+1. **Cell-based vs Biochemical**: Compare assay types
 
 ### 2.3. Entity Relationships
 
@@ -55,72 +55,72 @@ assay
 
 ### 2.4. Load Strategy
 
-| Parameter | Value |
-|-----------|-------|
-| **Strategy** | `incremental` with input filter |
-| **Estimated Volume** | ~1.5M records total |
-| **Batch Size** | 20 (filter batch) |
+| Parameter            | Value                           |
+| -------------------- | ------------------------------- |
+| **Strategy**         | `incremental` with input filter |
+| **Estimated Volume** | ~1.5M records total             |
+| **Batch Size**       | 20 (filter batch)               |
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
 ### 3.1. Complete API Fields
 
-| # | API Field | JSON Type | Nullable | Description |
-|---|-----------|-----------|----------|-------------|
-| 1 | `assay_chembl_id` | string | No | Primary key |
-| 2 | `description` | string | Yes | Assay description |
-| 3 | `assay_type` | string | Yes | B/F/A/T/P/U |
-| 4 | `assay_test_type` | string | Yes | In vivo/vitro/ex vivo |
-| 5 | `assay_category` | string | Yes | screening/confirmatory/... |
-| 6 | `assay_organism` | string | Yes | Organism |
-| 7 | `assay_tax_id` | integer | Yes | NCBI Taxonomy ID |
-| 8 | `assay_strain` | string | Yes | Strain |
-| 9 | `assay_tissue` | string | Yes | Tissue |
-| 10 | `assay_cell_type` | string | Yes | Cell type |
-| 11 | `assay_subcellular_fraction` | string | Yes | Subcellular fraction |
-| 12 | `target_chembl_id` | string | Yes | FK to target |
-| 13 | `relationship_type` | string | Yes | D/H/M/N/S/U |
-| 14 | `relationship_description` | string | Yes | Relationship desc |
-| 15 | `confidence_score` | integer | Yes | 0-9 score |
-| 16 | `confidence_description` | string | Yes | Confidence desc |
-| 17 | `src_id` | integer | Yes | Source ID |
-| 18 | `src_assay_id` | string | Yes | Source assay ID |
-| 19 | `document_chembl_id` | string | Yes | FK to document |
-| 20 | `cell_chembl_id` | string | Yes | FK to cell_line |
-| 21 | `tissue_chembl_id` | string | Yes | FK to tissue |
-| 22 | `bao_format` | string | Yes | BAO format ID |
-| 23 | `bao_label` | string | Yes | BAO label |
-| 24 | `assay_classifications` | array | Yes | Classifications |
-| 25 | `assay_parameters` | array | Yes | Parameters |
-| 26 | `variant_sequence` | object | Yes | Variant info |
+| #   | API Field                    | JSON Type | Nullable | Description                |
+| --- | ---------------------------- | --------- | -------- | -------------------------- |
+| 1   | `assay_chembl_id`            | string    | No       | Primary key                |
+| 2   | `description`                | string    | Yes      | Assay description          |
+| 3   | `assay_type`                 | string    | Yes      | B/F/A/T/P/U                |
+| 4   | `assay_test_type`            | string    | Yes      | In vivo/vitro/ex vivo      |
+| 5   | `assay_category`             | string    | Yes      | screening/confirmatory/... |
+| 6   | `assay_organism`             | string    | Yes      | Organism                   |
+| 7   | `assay_tax_id`               | integer   | Yes      | NCBI Taxonomy ID           |
+| 8   | `assay_strain`               | string    | Yes      | Strain                     |
+| 9   | `assay_tissue`               | string    | Yes      | Tissue                     |
+| 10  | `assay_cell_type`            | string    | Yes      | Cell type                  |
+| 11  | `assay_subcellular_fraction` | string    | Yes      | Subcellular fraction       |
+| 12  | `target_chembl_id`           | string    | Yes      | FK to target               |
+| 13  | `relationship_type`          | string    | Yes      | D/H/M/N/S/U                |
+| 14  | `relationship_description`   | string    | Yes      | Relationship desc          |
+| 15  | `confidence_score`           | integer   | Yes      | 0-9 score                  |
+| 16  | `confidence_description`     | string    | Yes      | Confidence desc            |
+| 17  | `src_id`                     | integer   | Yes      | Source ID                  |
+| 18  | `src_assay_id`               | string    | Yes      | Source assay ID            |
+| 19  | `document_chembl_id`         | string    | Yes      | FK to document             |
+| 20  | `cell_chembl_id`             | string    | Yes      | FK to cell_line            |
+| 21  | `tissue_chembl_id`           | string    | Yes      | FK to tissue               |
+| 22  | `bao_format`                 | string    | Yes      | BAO format ID              |
+| 23  | `bao_label`                  | string    | Yes      | BAO label                  |
+| 24  | `assay_classifications`      | array     | Yes      | Classifications            |
+| 25  | `assay_parameters`           | array     | Yes      | Parameters                 |
+| 26  | `variant_sequence`           | object    | Yes      | Variant info               |
 
----
+______________________________________________________________________
 
 ## 4. Transformation
 
 ### 4.1. Entity ID Strategy
 
-| Parameter | Value |
-|-----------|-------|
-| **Entity ID Field** | `assay_chembl_id` |
-| **ID Source** | `from_api` |
-| **Format** | ChEMBL ID (CHEMBL[0-9]+) |
+| Parameter           | Value                    |
+| ------------------- | ------------------------ |
+| **Entity ID Field** | `assay_chembl_id`        |
+| **ID Source**       | `from_api`               |
+| **Format**          | ChEMBL ID (CHEMBL[0-9]+) |
 
 ### 4.2. Flattening Strategy
 
-| Nested Path | Flattened Name | Strategy |
-|-------------|----------------|----------|
-| `variant_sequence.accession` | `variant_accession` | Extract scalar |
-| `variant_sequence.mutation` | `variant_mutation` | Extract scalar |
-| `variant_sequence.organism` | `variant_organism` | Extract scalar |
-| `variant_sequence.tax_id` | `variant_tax_id` | Extract scalar |
-| `variant_sequence.sequence` | `variant_sequence` | Extract scalar |
-| `assay_classifications` | `assay_classifications` | JSON string |
-| `assay_parameters` | `assay_parameters` | JSON string |
+| Nested Path                  | Flattened Name          | Strategy       |
+| ---------------------------- | ----------------------- | -------------- |
+| `variant_sequence.accession` | `variant_accession`     | Extract scalar |
+| `variant_sequence.mutation`  | `variant_mutation`      | Extract scalar |
+| `variant_sequence.organism`  | `variant_organism`      | Extract scalar |
+| `variant_sequence.tax_id`    | `variant_tax_id`        | Extract scalar |
+| `variant_sequence.sequence`  | `variant_sequence`      | Extract scalar |
+| `assay_classifications`      | `assay_classifications` | JSON string    |
+| `assay_parameters`           | `assay_parameters`      | JSON string    |
 
----
+______________________________________________________________________
 
 ## 5. Validation
 
@@ -206,14 +206,14 @@ class AssaySchema(ETLRecordSchema):
 
 ### 5.2. Field Validation Matrix
 
-| Field | Type | Nullable | Constraints | DQ Level |
-|-------|------|----------|-------------|----------|
-| `assay_chembl_id` | str | No | regex `^CHEMBL\d+$` | CRITICAL |
-| `assay_type` | str | Yes | isin [B,F,A,T,P,U] | WARNING |
-| `confidence_score` | int | Yes | [0, 9] | WARNING |
-| `target_chembl_id` | str | Yes | regex `^CHEMBL\d+$` | INFO |
+| Field              | Type | Nullable | Constraints         | DQ Level |
+| ------------------ | ---- | -------- | ------------------- | -------- |
+| `assay_chembl_id`  | str  | No       | regex `^CHEMBL\d+$` | CRITICAL |
+| `assay_type`       | str  | Yes      | isin [B,F,A,T,P,U]  | WARNING  |
+| `confidence_score` | int  | Yes      | [0, 9]              | WARNING  |
+| `target_chembl_id` | str  | Yes      | regex `^CHEMBL\d+$` | INFO     |
 
----
+______________________________________________________________________
 
 ## 6. Pipeline Configuration
 
@@ -221,7 +221,7 @@ class AssaySchema(ETLRecordSchema):
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["assay_chembl_id"]
 silver_table: "chembl_assay"
@@ -241,21 +241,21 @@ input_filter:
   batch_size: 20
 ```
 
----
+______________________________________________________________________
 
 ## 7. Dependencies
 
 ### 7.1. Upstream
 
-| Dependency | Type | Required |
-|------------|------|----------|
-| ChEMBL API | API | Yes |
+| Dependency      | Type     | Required    |
+| --------------- | -------- | ----------- |
+| ChEMBL API      | API      | Yes         |
 | `chembl_target` | Pipeline | Recommended |
 
 ### 7.2. Downstream
 
-| Consumer | Impact |
-|----------|--------|
-| `chembl_activity` | FK reference |
-| `chembl_assay_parameters` | FK reference |
-| Protocol analysis | Assay type statistics |
+| Consumer                  | Impact                |
+| ------------------------- | --------------------- |
+| `chembl_activity`         | FK reference          |
+| `chembl_assay_parameters` | FK reference          |
+| Protocol analysis         | Assay type statistics |
