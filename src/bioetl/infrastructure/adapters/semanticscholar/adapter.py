@@ -34,9 +34,6 @@ from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.semanticscholar.fallback import (
-    SemanticScholarTitleFallbackHandler,
-)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -98,6 +95,10 @@ class SemanticScholarAdapter(BaseHttpAdapter):
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
+        from bioetl.infrastructure.adapters.semanticscholar.fallback import (
+            SemanticScholarTitleFallbackHandler,
+        )
+
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
