@@ -342,7 +342,6 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         entries_by_id: dict[str, list[dict[str, Any]]] = {
             id_: [] for id_ in original_ids
         }
-        # Use redirect URL from polling if available, otherwise construct default
         url: str | None = results_url or f"{self.base_url}/idmapping/results/{job_id}"
 
         while url:
