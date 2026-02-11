@@ -732,6 +732,5 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("revised_date", None)
         silver_record.pop("accepted_date", None)
         silver_record.pop("citations_received", None)
-        silver_record.pop("is_oa", None)
 
         return silver_record
