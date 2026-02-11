@@ -106,7 +106,8 @@ BioactivityDataAcquisition2/
     │   │   └── validate-mermaid.yml
     │   ├── CODE_OF_CONDUCT.md
     │   ├── CONTRIBUTING.md
-    │   └── SECURITY.md
+    │   ├── SECURITY.md
+    │   └── copilot-instructions.md
     ├── .hypothesis/
     │   ├── constants/
     │   │   ├── 009c4c693fb78114
@@ -1100,10 +1101,13 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp0rnknl4v
     │   │   ├── tmp0zypkjjs
     │   │   ├── tmp18wx_klp
+    │   │   ├── tmp1fui9kio
     │   │   ├── tmp1kgco1s5
     │   │   ├── tmp1pkh1a03
     │   │   ├── tmp1q6yw4rr
     │   │   ├── tmp1sac3yqj
+    │   │   ├── tmp1wq0d5p4
+    │   │   ├── tmp1ym6ohm1
     │   │   ├── tmp2k8pirjf
     │   │   ├── tmp2ldyqqj5
     │   │   ├── tmp2qgqvxlg
@@ -1111,6 +1115,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp2vlpzsmk
     │   │   ├── tmp2vyjhwfw
     │   │   ├── tmp30_gfhqv
+    │   │   ├── tmp337gb6n6
     │   │   ├── tmp35lapczm
     │   │   ├── tmp36yrwkg2
     │   │   ├── tmp38mfaipt
@@ -1129,6 +1134,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp4et95rhs
     │   │   ├── tmp4gsie85u
     │   │   ├── tmp4ogqwo0k
+    │   │   ├── tmp4sjnhk6m
     │   │   ├── tmp4t9j3qo0
     │   │   ├── tmp4vl3g1jk
     │   │   ├── tmp599f7vj7
@@ -1139,6 +1145,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp5yl5jctk
     │   │   ├── tmp64wfuvkf
     │   │   ├── tmp65c4wwqx
+    │   │   ├── tmp65tyd1xp
     │   │   ├── tmp67qca0va
     │   │   ├── tmp6_cvur9b
     │   │   ├── tmp6_xiygz0
@@ -1157,6 +1164,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp7f56fs5n
     │   │   ├── tmp7gqgpxpb
     │   │   ├── tmp7j6v5zbs
+    │   │   ├── tmp7kplck98
     │   │   ├── tmp7mt9oziu
     │   │   ├── tmp7obhul4a
     │   │   ├── tmp7rru1p48
@@ -1170,7 +1178,9 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp872ui707
     │   │   ├── tmp89cevlke
     │   │   ├── tmp8c64kt9b
+    │   │   ├── tmp8cu6esum
     │   │   ├── tmp8ik_iaml
+    │   │   ├── tmp8pyx22o8
     │   │   ├── tmp8szkjy7w
     │   │   ├── tmp8tdp2lze
     │   │   ├── tmp8ts4b0t0
@@ -1185,14 +1195,17 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp9h6irems
     │   │   ├── tmp9olv9mia
     │   │   ├── tmp_194n6jh
+    │   │   ├── tmp_9h9konh
     │   │   ├── tmp_du_7p02
     │   │   ├── tmp_h2_2fb1
     │   │   ├── tmp_lyd0udd
+    │   │   ├── tmp_q6z9y2d
     │   │   ├── tmp_rf95buf
     │   │   ├── tmp_t60k90c
     │   │   ├── tmpa2h808nh
     │   │   ├── tmpagnm86kp
     │   │   ├── tmpagukft_r
+    │   │   ├── tmpakguu_7q
     │   │   ├── tmpal9_a2tf
     │   │   ├── tmpamp5vwup
     │   │   ├── tmpatcrhej4
@@ -1202,6 +1215,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpbb3brjtp
     │   │   ├── tmpbcmmo23j
     │   │   ├── tmpbgbt1y2x
+    │   │   ├── tmpbic4kkxq
     │   │   ├── tmpblsvrutb
     │   │   ├── tmpbo_3m23l
     │   │   ├── tmpbp5_gp9i
@@ -1213,12 +1227,15 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpbwalcyhb
     │   │   ├── tmpbwk0tufy
     │   │   ├── tmpbzamizyi
+    │   │   ├── tmpc21deeaz
     │   │   ├── tmpc30xpuse
+    │   │   ├── tmpc5vg_hed
     │   │   ├── tmpcd3r9pka
     │   │   ├── tmpcfrs0fsr
     │   │   ├── tmpcis6gilx
     │   │   ├── tmpcos738rn
     │   │   ├── tmpcuqh3ekb
+    │   │   ├── tmpcv6ol7l4
     │   │   ├── tmpcyfm2c6j
     │   │   ├── tmpd06z0q6j
     │   │   ├── tmpd2j8p93e
@@ -1228,16 +1245,21 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpdi3vcpas
     │   │   ├── tmpdk5gfbnz
     │   │   ├── tmpdoydcyqj
+    │   │   ├── tmpdqc4s__g
     │   │   ├── tmpdqrw54pt
     │   │   ├── tmpdr08rz1t
     │   │   ├── tmpdyb0n52j
     │   │   ├── tmpe677eqpz
     │   │   ├── tmpes_w92j_
+    │   │   ├── tmpetc025yg
     │   │   ├── tmpexcbwdvi
     │   │   ├── tmpey5ldpm2
     │   │   ├── tmpey8bx0ve
     │   │   ├── tmpf3uyxm1d
+    │   │   ├── tmpf8g_ph3n
+    │   │   ├── tmpfaic6qq9
     │   │   ├── tmpfcfpurlv
+    │   │   ├── tmpfix36nko
     │   │   ├── tmpfjafq2x7
     │   │   ├── tmpflmeczu8
     │   │   ├── tmpfn1tt4yi
@@ -1245,13 +1267,17 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpfnfxrzuv
     │   │   ├── tmpg1g4uex9
     │   │   ├── tmpg4unbb3g
+    │   │   ├── tmpg9sco313
     │   │   ├── tmpg_c8gyw5
     │   │   ├── tmpgbxsmj_g
+    │   │   ├── tmpgjb5tmj7
     │   │   ├── tmpgko1al7m
     │   │   ├── tmpgkz2my19
     │   │   ├── tmpgpzaaiug
+    │   │   ├── tmpgq24eyds
     │   │   ├── tmpgqv28f8m
     │   │   ├── tmpgrgqsq0r
+    │   │   ├── tmpgwzxw6mo
     │   │   ├── tmph07a4o91
     │   │   ├── tmph07g2xhl
     │   │   ├── tmph9_hbfra
@@ -1265,10 +1291,13 @@ BioactivityDataAcquisition2/
     │   │   ├── tmphw7p6iaf
     │   │   ├── tmphx5xc9mg
     │   │   ├── tmphxbw8d5z
+    │   │   ├── tmphyix2i3g
     │   │   ├── tmphzt17cuy
     │   │   ├── tmpi04qd7sp
+    │   │   ├── tmpi0y2ztf6
     │   │   ├── tmpi2jbn3k7
     │   │   ├── tmpi4wcpd8f
+    │   │   ├── tmpi7mfbfjw
     │   │   ├── tmpifb2fmlf
     │   │   ├── tmpiqcjl28c
     │   │   ├── tmpiqrays03
@@ -1283,8 +1312,12 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpjhmb0ujm
     │   │   ├── tmpju4dlkyk
     │   │   ├── tmpju_2nvc2
+    │   │   ├── tmpk3ps48qb
     │   │   ├── tmpk3vm0c1p
+    │   │   ├── tmpk3y471_a
     │   │   ├── tmpk8m3oh89
+    │   │   ├── tmpk_07wcd4
+    │   │   ├── tmpk_944tlw
     │   │   ├── tmpkafrmg6z
     │   │   ├── tmpkcadn8q1
     │   │   ├── tmpkdg8hgmv
@@ -1293,32 +1326,42 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpkq8due9s
     │   │   ├── tmpkquhckjf
     │   │   ├── tmpkrgfbhau
+    │   │   ├── tmpku_shqql
+    │   │   ├── tmpkva5k_ov
     │   │   ├── tmpkwa1_pxo
     │   │   ├── tmpkxn0jy2l
     │   │   ├── tmpl13evlbb
     │   │   ├── tmpl4y4qei2
+    │   │   ├── tmpl5z8mk0n
     │   │   ├── tmple_o5g43
     │   │   ├── tmplgbekxu1
     │   │   ├── tmpli8__ge3
     │   │   ├── tmplowv85n7
     │   │   ├── tmplss1muf4
     │   │   ├── tmplul6vic1
+    │   │   ├── tmplx_k18wa
     │   │   ├── tmplyl7ng5p
     │   │   ├── tmpm3fwyzik
     │   │   ├── tmpmaencqc2
     │   │   ├── tmpmetrrcui
     │   │   ├── tmpmgq8si3_
     │   │   ├── tmpmldbnwck
+    │   │   ├── tmpmp5rve_3
+    │   │   ├── tmpmsqd86n5
     │   │   ├── tmpmwhqjqmp
+    │   │   ├── tmpmxtc8_ti
     │   │   ├── tmpmzlnfww6
     │   │   ├── tmpn5mx6ioo
+    │   │   ├── tmpn62psa_e
     │   │   ├── tmpn7rx1n9c
     │   │   ├── tmpn9dfp5a5
+    │   │   ├── tmpnamgmpmx
     │   │   ├── tmpndbo3dqu
     │   │   ├── tmpnh9d4tkf
     │   │   ├── tmpnke9zeyx
     │   │   ├── tmpnlyv55lo
     │   │   ├── tmpnp4j7bqu
+    │   │   ├── tmpnqw1hcls
     │   │   ├── tmpo6qc9lcq
     │   │   ├── tmpo6xfxmvl
     │   │   ├── tmpob3c44fg
@@ -1329,21 +1372,27 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpom__ahuh
     │   │   ├── tmpopsbibgj
     │   │   ├── tmpoqg4y83r
+    │   │   ├── tmpovfuikia
     │   │   ├── tmpoy2lnn4t
     │   │   ├── tmpp0kc_grp
+    │   │   ├── tmpp671l7l3
     │   │   ├── tmpp7_js049
+    │   │   ├── tmppamfilo5
+    │   │   ├── tmppctc4utw
     │   │   ├── tmppf0rgcxn
     │   │   ├── tmppkbu82k1
     │   │   ├── tmppqv6jxhb
     │   │   ├── tmppvmws5_v
     │   │   ├── tmppzuo201n
     │   │   ├── tmpq09epiev
+    │   │   ├── tmpq3dzk0er
     │   │   ├── tmpq_8u_xsl
     │   │   ├── tmpqcds2mf2
     │   │   ├── tmpqhaqra6z
     │   │   ├── tmpqiapek4b
     │   │   ├── tmpqlgze6ze
     │   │   ├── tmpquwkjwhy
+    │   │   ├── tmpqwu7qbjt
     │   │   ├── tmpqx_638zl
     │   │   ├── tmpr424t_t1
     │   │   ├── tmpr4n8hyac
@@ -1355,13 +1404,17 @@ BioactivityDataAcquisition2/
     │   │   ├── tmprr0zagw3
     │   │   ├── tmprwploznp
     │   │   ├── tmprxgcg34z
+    │   │   ├── tmprxgqj625
     │   │   ├── tmps3cztcz8
     │   │   ├── tmps_do0e03
     │   │   ├── tmpsatn9whk
     │   │   ├── tmpsimcb71q
     │   │   ├── tmpsnp0eb2p
+    │   │   ├── tmpsns9q6ye
     │   │   ├── tmpspax5vj4
+    │   │   ├── tmpt2_42idn
     │   │   ├── tmpt8a_ounw
+    │   │   ├── tmptaw2vw91
     │   │   ├── tmptb4wj3o6
     │   │   ├── tmptg8ai5bg
     │   │   ├── tmptorduhzt
@@ -1375,6 +1428,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpudappe5u
     │   │   ├── tmpul9ad_tc
     │   │   ├── tmpurxu6_5w
+    │   │   ├── tmpuyw2de_v
     │   │   ├── tmpv45mnzkv
     │   │   ├── tmpv81nxno0
     │   │   ├── tmpv9k3fnec
@@ -1382,18 +1436,23 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpvfxlc8dz
     │   │   ├── tmpvjwoqacw
     │   │   ├── tmpvnz0hn9o
+    │   │   ├── tmpvp47fbc2
     │   │   ├── tmpvpwn3daa
     │   │   ├── tmpvqhzmfoc
     │   │   ├── tmpwd99gu_x
     │   │   ├── tmpwgk2h_tt
     │   │   ├── tmpwv68cf3s
+    │   │   ├── tmpwzam3xzt
     │   │   ├── tmpx1q9f3d5
     │   │   ├── tmpx2uvuajx
+    │   │   ├── tmpx6ovftsq
     │   │   ├── tmpxcmydmy2
     │   │   ├── tmpxhshxlnq
     │   │   ├── tmpxlsa2o6f
+    │   │   ├── tmpxnwrr190
     │   │   ├── tmpxt2041br
     │   │   ├── tmpxtd7gju1
+    │   │   ├── tmpxwp8ul54
     │   │   ├── tmpy0ghtp1v
     │   │   ├── tmpy0qrvph7
     │   │   ├── tmpy5y85aie
@@ -1407,6 +1466,8 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpz3hdvdhv
     │   │   ├── tmpz4hzng9a
     │   │   ├── tmpz5edqqh5
+    │   │   ├── tmpz_sk1eiw
+    │   │   ├── tmpza39lca8
     │   │   ├── tmpzdupor62
     │   │   ├── tmpzmop7qfd
     │   │   ├── tmpzt3r68cl
@@ -1750,190 +1811,76 @@ BioactivityDataAcquisition2/
     │   │   ├── bioetl/
     │   │   │   ├── application/
     │   │   │   │   ├── composite/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── aggregator.data.json
     │   │   │   │   │   ├── aggregator.meta.json
-    │   │   │   │   │   ├── checkpoint.data.json
-    │   │   │   │   │   ├── checkpoint.meta.json
     │   │   │   │   │   ├── column_orderer.data.json
     │   │   │   │   │   ├── column_orderer.meta.json
     │   │   │   │   │   ├── column_renamer.data.json
     │   │   │   │   │   ├── column_renamer.meta.json
-    │   │   │   │   │   ├── coordinator.data.json
-    │   │   │   │   │   ├── coordinator.meta.json
     │   │   │   │   │   ├── deduplication.data.json
     │   │   │   │   │   ├── deduplication.meta.json
-    │   │   │   │   │   ├── dependency_coordinator.data.json
-    │   │   │   │   │   ├── dependency_coordinator.meta.json
-    │   │   │   │   │   ├── fsm_helper.data.json
-    │   │   │   │   │   ├── fsm_helper.meta.json
     │   │   │   │   │   ├── key_extractor.data.json
     │   │   │   │   │   ├── key_extractor.meta.json
     │   │   │   │   │   ├── merger.data.json
-    │   │   │   │   │   ├── merger.meta.json
-    │   │   │   │   │   ├── preflight_validator.data.json
-    │   │   │   │   │   ├── preflight_validator.meta.json
-    │   │   │   │   │   ├── runner.data.json
-    │   │   │   │   │   ├── runner.meta.json
-    │   │   │   │   │   ├── runner_helpers.data.json
-    │   │   │   │   │   └── runner_helpers.meta.json
+    │   │   │   │   │   └── merger.meta.json
     │   │   │   │   ├── core/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── base.data.json
-    │   │   │   │   │   ├── base.meta.json
-    │   │   │   │   │   ├── base_transformer.data.json
-    │   │   │   │   │   ├── base_transformer.meta.json
-    │   │   │   │   │   ├── batch_executor.data.json
-    │   │   │   │   │   ├── batch_executor.meta.json
-    │   │   │   │   │   ├── batch_metrics.data.json
-    │   │   │   │   │   ├── batch_metrics.meta.json
-    │   │   │   │   │   ├── batch_tracing.data.json
-    │   │   │   │   │   ├── batch_tracing.meta.json
-    │   │   │   │   │   ├── batch_transformer.data.json
-    │   │   │   │   │   ├── batch_transformer.meta.json
-    │   │   │   │   │   ├── batch_writer.data.json
-    │   │   │   │   │   ├── batch_writer.meta.json
-    │   │   │   │   │   ├── checkpoint_manager.data.json
-    │   │   │   │   │   ├── checkpoint_manager.meta.json
-    │   │   │   │   │   ├── cleanup_service.data.json
-    │   │   │   │   │   ├── cleanup_service.meta.json
-    │   │   │   │   │   ├── config.data.json
-    │   │   │   │   │   ├── config.meta.json
-    │   │   │   │   │   ├── field_specs.data.json
-    │   │   │   │   │   ├── field_specs.meta.json
     │   │   │   │   │   ├── filtered_data_source.data.json
     │   │   │   │   │   ├── filtered_data_source.meta.json
-    │   │   │   │   │   ├── heartbeat.data.json
-    │   │   │   │   │   ├── heartbeat.meta.json
     │   │   │   │   │   ├── idmapping_data_source.data.json
     │   │   │   │   │   ├── idmapping_data_source.meta.json
-    │   │   │   │   │   ├── lock_manager.data.json
-    │   │   │   │   │   ├── lock_manager.meta.json
-    │   │   │   │   │   ├── pipeline_services.data.json
-    │   │   │   │   │   ├── pipeline_services.meta.json
-    │   │   │   │   │   ├── postrun_service.data.json
-    │   │   │   │   │   ├── postrun_service.meta.json
-    │   │   │   │   │   ├── preflight_service.data.json
-    │   │   │   │   │   ├── preflight_service.meta.json
-    │   │   │   │   │   ├── protocols.data.json
-    │   │   │   │   │   ├── protocols.meta.json
     │   │   │   │   │   ├── publication_term_data_source.data.json
     │   │   │   │   │   ├── publication_term_data_source.meta.json
-    │   │   │   │   │   ├── quarantine_manager.data.json
-    │   │   │   │   │   ├── quarantine_manager.meta.json
     │   │   │   │   │   ├── record_processor.data.json
     │   │   │   │   │   ├── record_processor.meta.json
-    │   │   │   │   │   ├── runner.data.json
-    │   │   │   │   │   ├── runner.meta.json
-    │   │   │   │   │   ├── shutdown.data.json
-    │   │   │   │   │   ├── shutdown.meta.json
     │   │   │   │   │   ├── subcellular_fraction_data_source.data.json
     │   │   │   │   │   ├── subcellular_fraction_data_source.meta.json
     │   │   │   │   │   ├── transform_utils.data.json
     │   │   │   │   │   └── transform_utils.meta.json
     │   │   │   │   ├── observability/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── observer.data.json
-    │   │   │   │   │   ├── observer.meta.json
-    │   │   │   │   │   ├── span_helpers.data.json
-    │   │   │   │   │   └── span_helpers.meta.json
     │   │   │   │   ├── pipelines/
     │   │   │   │   │   ├── chembl/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   │   ├── activity.data.json
     │   │   │   │   │   │   ├── activity.meta.json
-    │   │   │   │   │   │   ├── activity_transformer.data.json
-    │   │   │   │   │   │   ├── activity_transformer.meta.json
     │   │   │   │   │   │   ├── assay.data.json
     │   │   │   │   │   │   ├── assay.meta.json
     │   │   │   │   │   │   ├── assay_parameters.data.json
     │   │   │   │   │   │   ├── assay_parameters.meta.json
-    │   │   │   │   │   │   ├── assay_parameters_transformer.data.json
-    │   │   │   │   │   │   ├── assay_parameters_transformer.meta.json
-    │   │   │   │   │   │   ├── assay_transformer.data.json
-    │   │   │   │   │   │   ├── assay_transformer.meta.json
-    │   │   │   │   │   │   ├── base_chembl_transformer.data.json
-    │   │   │   │   │   │   ├── base_chembl_transformer.meta.json
     │   │   │   │   │   │   ├── cell_line.data.json
     │   │   │   │   │   │   ├── cell_line.meta.json
-    │   │   │   │   │   │   ├── cell_line_transformer.data.json
-    │   │   │   │   │   │   ├── cell_line_transformer.meta.json
     │   │   │   │   │   │   ├── compound_record.data.json
     │   │   │   │   │   │   ├── compound_record.meta.json
-    │   │   │   │   │   │   ├── compound_record_transformer.data.json
-    │   │   │   │   │   │   ├── compound_record_transformer.meta.json
     │   │   │   │   │   │   ├── molecule.data.json
     │   │   │   │   │   │   ├── molecule.meta.json
-    │   │   │   │   │   │   ├── molecule_transformer.data.json
-    │   │   │   │   │   │   ├── molecule_transformer.meta.json
     │   │   │   │   │   │   ├── protein_class.data.json
     │   │   │   │   │   │   ├── protein_class.meta.json
-    │   │   │   │   │   │   ├── protein_class_transformer.data.json
-    │   │   │   │   │   │   ├── protein_class_transformer.meta.json
     │   │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   │   ├── publication.meta.json
     │   │   │   │   │   │   ├── publication_similarity.data.json
     │   │   │   │   │   │   ├── publication_similarity.meta.json
-    │   │   │   │   │   │   ├── publication_similarity_transformer.data.json
-    │   │   │   │   │   │   ├── publication_similarity_transformer.meta.json
     │   │   │   │   │   │   ├── publication_term.data.json
     │   │   │   │   │   │   ├── publication_term.meta.json
-    │   │   │   │   │   │   ├── publication_term_transformer.data.json
-    │   │   │   │   │   │   ├── publication_term_transformer.meta.json
-    │   │   │   │   │   │   ├── publication_transformer.data.json
-    │   │   │   │   │   │   ├── publication_transformer.meta.json
     │   │   │   │   │   │   ├── subcellular_fraction.data.json
     │   │   │   │   │   │   ├── subcellular_fraction.meta.json
-    │   │   │   │   │   │   ├── subcellular_fraction_transformer.data.json
-    │   │   │   │   │   │   ├── subcellular_fraction_transformer.meta.json
     │   │   │   │   │   │   ├── target.data.json
     │   │   │   │   │   │   ├── target.meta.json
     │   │   │   │   │   │   ├── target_component.data.json
     │   │   │   │   │   │   ├── target_component.meta.json
-    │   │   │   │   │   │   ├── target_component_transformer.data.json
-    │   │   │   │   │   │   ├── target_component_transformer.meta.json
-    │   │   │   │   │   │   ├── target_transformer.data.json
-    │   │   │   │   │   │   ├── target_transformer.meta.json
     │   │   │   │   │   │   ├── tissue.data.json
-    │   │   │   │   │   │   ├── tissue.meta.json
-    │   │   │   │   │   │   ├── tissue_transformer.data.json
-    │   │   │   │   │   │   └── tissue_transformer.meta.json
+    │   │   │   │   │   │   └── tissue.meta.json
     │   │   │   │   │   ├── common/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── base_publication_transformer.data.json
-    │   │   │   │   │   │   ├── base_publication_transformer.meta.json
     │   │   │   │   │   │   ├── extractors.data.json
     │   │   │   │   │   │   └── extractors.meta.json
     │   │   │   │   │   ├── crossref/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   │   ├── author_extractors.data.json
     │   │   │   │   │   │   ├── author_extractors.meta.json
-    │   │   │   │   │   │   ├── extractors.data.json
-    │   │   │   │   │   │   ├── extractors.meta.json
     │   │   │   │   │   │   ├── reference_extractors.data.json
-    │   │   │   │   │   │   ├── reference_extractors.meta.json
-    │   │   │   │   │   │   ├── transformer.data.json
-    │   │   │   │   │   │   └── transformer.meta.json
+    │   │   │   │   │   │   └── reference_extractors.meta.json
     │   │   │   │   │   ├── openalex/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   │   ├── extractors.data.json
-    │   │   │   │   │   │   ├── extractors.meta.json
-    │   │   │   │   │   │   ├── transformer.data.json
-    │   │   │   │   │   │   └── transformer.meta.json
+    │   │   │   │   │   │   └── extractors.meta.json
     │   │   │   │   │   ├── pubchem/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   │   ├── compound.data.json
-    │   │   │   │   │   │   ├── compound.meta.json
-    │   │   │   │   │   │   ├── transformer.data.json
-    │   │   │   │   │   │   └── transformer.meta.json
+    │   │   │   │   │   │   └── compound.meta.json
     │   │   │   │   │   ├── pubmed/
     │   │   │   │   │   │   ├── extractors/
     │   │   │   │   │   │   │   ├── __init__.data.json
@@ -1950,195 +1897,67 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   │   ├── date.meta.json
     │   │   │   │   │   │   │   ├── identifier.data.json
     │   │   │   │   │   │   │   └── identifier.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   │   ├── publication.meta.json
-    │   │   │   │   │   │   ├── transformer.data.json
-    │   │   │   │   │   │   ├── transformer.meta.json
+    │   │   │   │   │   │   ├── xml_parser.data.json
+    │   │   │   │   │   │   ├── xml_parser.meta.json
     │   │   │   │   │   │   ├── xml_utils.data.json
     │   │   │   │   │   │   └── xml_utils.meta.json
     │   │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── _author_extractors.data.json
+    │   │   │   │   │   │   ├── _author_extractors.meta.json
+    │   │   │   │   │   │   ├── _page_parsing.data.json
+    │   │   │   │   │   │   ├── _page_parsing.meta.json
     │   │   │   │   │   │   ├── extractors.data.json
-    │   │   │   │   │   │   ├── extractors.meta.json
-    │   │   │   │   │   │   ├── transformer.data.json
-    │   │   │   │   │   │   └── transformer.meta.json
-    │   │   │   │   │   ├── uniprot/
-    │   │   │   │   │   │   ├── extractors/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   │   ├── comments.data.json
-    │   │   │   │   │   │   │   ├── comments.meta.json
-    │   │   │   │   │   │   │   ├── crossrefs.data.json
-    │   │   │   │   │   │   │   ├── crossrefs.meta.json
-    │   │   │   │   │   │   │   ├── features.data.json
-    │   │   │   │   │   │   │   ├── features.meta.json
-    │   │   │   │   │   │   │   ├── genes.data.json
-    │   │   │   │   │   │   │   ├── genes.meta.json
-    │   │   │   │   │   │   │   ├── taxonomy.data.json
-    │   │   │   │   │   │   │   ├── taxonomy.meta.json
-    │   │   │   │   │   │   │   ├── utils.data.json
-    │   │   │   │   │   │   │   └── utils.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── idmapping_transformer.data.json
-    │   │   │   │   │   │   ├── idmapping_transformer.meta.json
-    │   │   │   │   │   │   ├── protein.data.json
-    │   │   │   │   │   │   ├── protein.meta.json
-    │   │   │   │   │   │   ├── transformer.data.json
-    │   │   │   │   │   │   └── transformer.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── generic.data.json
-    │   │   │   │   │   └── generic.meta.json
+    │   │   │   │   │   │   └── extractors.meta.json
+    │   │   │   │   │   └── uniprot/
+    │   │   │   │   │       ├── extractors/
+    │   │   │   │   │       │   ├── taxonomy.data.json
+    │   │   │   │   │       │   └── taxonomy.meta.json
+    │   │   │   │   │       ├── protein.data.json
+    │   │   │   │   │       └── protein.meta.json
     │   │   │   │   ├── services/
     │   │   │   │   │   ├── dq/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── bronze_analyzer.data.json
-    │   │   │   │   │   │   ├── bronze_analyzer.meta.json
-    │   │   │   │   │   │   ├── gold_analyzer.data.json
-    │   │   │   │   │   │   ├── gold_analyzer.meta.json
-    │   │   │   │   │   │   ├── silver_analyzer.data.json
-    │   │   │   │   │   │   ├── silver_analyzer.meta.json
+    │   │   │   │   │   │   ├── _checks_basic.data.json
+    │   │   │   │   │   │   ├── _checks_basic.meta.json
+    │   │   │   │   │   │   ├── _checks_business.data.json
+    │   │   │   │   │   │   ├── _checks_business.meta.json
+    │   │   │   │   │   │   ├── _checks_integrity.data.json
+    │   │   │   │   │   │   ├── _checks_integrity.meta.json
+    │   │   │   │   │   │   ├── _checks_statistical.data.json
+    │   │   │   │   │   │   ├── _checks_statistical.meta.json
+    │   │   │   │   │   │   ├── dq_report_builders.data.json
+    │   │   │   │   │   │   ├── dq_report_builders.meta.json
     │   │   │   │   │   │   ├── utils.data.json
     │   │   │   │   │   │   └── utils.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── bronze_cleanup_service.data.json
-    │   │   │   │   │   ├── bronze_cleanup_service.meta.json
-    │   │   │   │   │   ├── checkpoint_service.data.json
-    │   │   │   │   │   ├── checkpoint_service.meta.json
-    │   │   │   │   │   ├── config_service.data.json
-    │   │   │   │   │   ├── config_service.meta.json
-    │   │   │   │   │   ├── data_quality_service.data.json
-    │   │   │   │   │   ├── data_quality_service.meta.json
     │   │   │   │   │   ├── dq_metrics_calculator.data.json
-    │   │   │   │   │   ├── dq_metrics_calculator.meta.json
-    │   │   │   │   │   ├── dq_report_service.data.json
-    │   │   │   │   │   ├── dq_report_service.meta.json
-    │   │   │   │   │   ├── export_service.data.json
-    │   │   │   │   │   ├── export_service.meta.json
-    │   │   │   │   │   ├── health_service.data.json
-    │   │   │   │   │   ├── health_service.meta.json
-    │   │   │   │   │   ├── lock_service.data.json
-    │   │   │   │   │   ├── lock_service.meta.json
-    │   │   │   │   │   ├── medallion_lifecycle.data.json
-    │   │   │   │   │   ├── medallion_lifecycle.meta.json
-    │   │   │   │   │   ├── medallion_types.data.json
-    │   │   │   │   │   ├── medallion_types.meta.json
-    │   │   │   │   │   ├── metrics_service.data.json
-    │   │   │   │   │   ├── metrics_service.meta.json
-    │   │   │   │   │   ├── pipeline_runner_service.data.json
-    │   │   │   │   │   ├── pipeline_runner_service.meta.json
-    │   │   │   │   │   ├── quarantine_service.data.json
-    │   │   │   │   │   ├── quarantine_service.meta.json
-    │   │   │   │   │   ├── shutdown_service.data.json
-    │   │   │   │   │   ├── shutdown_service.meta.json
-    │   │   │   │   │   ├── vacuum_service.data.json
-    │   │   │   │   │   └── vacuum_service.meta.json
+    │   │   │   │   │   └── dq_metrics_calculator.meta.json
     │   │   │   │   ├── __init__.data.json
     │   │   │   │   └── __init__.meta.json
     │   │   │   ├── composition/
     │   │   │   │   ├── bootstrap/
     │   │   │   │   │   ├── assembly/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── checkpoint.data.json
-    │   │   │   │   │   │   ├── checkpoint.meta.json
-    │   │   │   │   │   │   ├── storage.data.json
-    │   │   │   │   │   │   └── storage.meta.json
     │   │   │   │   │   ├── cli/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── checkpoint.data.json
-    │   │   │   │   │   │   ├── checkpoint.meta.json
-    │   │   │   │   │   │   ├── config.data.json
-    │   │   │   │   │   │   ├── config.meta.json
-    │   │   │   │   │   │   ├── health.data.json
-    │   │   │   │   │   │   ├── health.meta.json
     │   │   │   │   │   │   ├── lock.data.json
     │   │   │   │   │   │   ├── lock.meta.json
     │   │   │   │   │   │   ├── metrics.data.json
     │   │   │   │   │   │   ├── metrics.meta.json
     │   │   │   │   │   │   ├── noop.data.json
-    │   │   │   │   │   │   ├── noop.meta.json
-    │   │   │   │   │   │   ├── storage.data.json
-    │   │   │   │   │   │   └── storage.meta.json
-    │   │   │   │   │   ├── runtime/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── assembly.data.json
-    │   │   │   │   │   │   ├── assembly.meta.json
-    │   │   │   │   │   │   ├── composite.data.json
-    │   │   │   │   │   │   ├── composite.meta.json
-    │   │   │   │   │   │   ├── observability.data.json
-    │   │   │   │   │   │   ├── observability.meta.json
-    │   │   │   │   │   │   ├── pipeline.data.json
-    │   │   │   │   │   │   ├── pipeline.meta.json
-    │   │   │   │   │   │   ├── runner.data.json
-    │   │   │   │   │   │   └── runner.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   └── noop.meta.json
+    │   │   │   │   │   └── runtime/
     │   │   │   │   ├── factories/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── data_source_factory.data.json
-    │   │   │   │   │   ├── data_source_factory.meta.json
-    │   │   │   │   │   ├── dq_factory.data.json
-    │   │   │   │   │   ├── dq_factory.meta.json
-    │   │   │   │   │   ├── http_client_factory.data.json
-    │   │   │   │   │   ├── http_client_factory.meta.json
-    │   │   │   │   │   ├── pipeline_factories.data.json
-    │   │   │   │   │   ├── pipeline_factories.meta.json
-    │   │   │   │   │   ├── pipeline_factory.data.json
-    │   │   │   │   │   ├── pipeline_factory.meta.json
-    │   │   │   │   │   ├── runner_factory.data.json
-    │   │   │   │   │   ├── runner_factory.meta.json
-    │   │   │   │   │   ├── services_factory.data.json
-    │   │   │   │   │   ├── services_factory.meta.json
-    │   │   │   │   │   ├── storage.data.json
-    │   │   │   │   │   ├── storage.meta.json
-    │   │   │   │   │   ├── storage_adapter.data.json
-    │   │   │   │   │   ├── storage_adapter.meta.json
-    │   │   │   │   │   ├── storage_factory.data.json
-    │   │   │   │   │   ├── storage_factory.meta.json
-    │   │   │   │   │   ├── transformer_factory.data.json
-    │   │   │   │   │   └── transformer_factory.meta.json
     │   │   │   │   ├── providers/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── decorators.data.json
-    │   │   │   │   │   ├── decorators.meta.json
-    │   │   │   │   │   ├── loader.data.json
-    │   │   │   │   │   ├── loader.meta.json
-    │   │   │   │   │   ├── provider_registry.data.json
-    │   │   │   │   │   ├── provider_registry.meta.json
-    │   │   │   │   │   ├── registration.data.json
-    │   │   │   │   │   └── registration.meta.json
     │   │   │   │   ├── services/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── metadata_coordinator.data.json
-    │   │   │   │   │   ├── metadata_coordinator.meta.json
-    │   │   │   │   │   ├── versioning.data.json
-    │   │   │   │   │   └── versioning.meta.json
+    │   │   │   │   │   └── metadata_coordinator.meta.json
     │   │   │   │   ├── __init__.data.json
     │   │   │   │   ├── __init__.meta.json
     │   │   │   │   ├── bootstrap_contexts.data.json
     │   │   │   │   ├── bootstrap_contexts.meta.json
     │   │   │   │   ├── bootstrap_logger.data.json
     │   │   │   │   ├── bootstrap_logger.meta.json
-    │   │   │   │   ├── builders.data.json
-    │   │   │   │   ├── builders.meta.json
-    │   │   │   │   ├── entrypoints.data.json
-    │   │   │   │   ├── entrypoints.meta.json
     │   │   │   │   ├── observability.data.json
     │   │   │   │   ├── observability.meta.json
-    │   │   │   │   ├── registry.data.json
-    │   │   │   │   ├── registry.meta.json
     │   │   │   │   ├── types.data.json
     │   │   │   │   └── types.meta.json
     │   │   │   ├── domain/
@@ -2256,6 +2075,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── models/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── filter.data.json
+    │   │   │   │   │   ├── filter.meta.json
     │   │   │   │   │   ├── metadata.data.json
     │   │   │   │   │   └── metadata.meta.json
     │   │   │   │   ├── ports/
@@ -2336,8 +2157,6 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── molecule_form.meta.json
     │   │   │   │   │   │   ├── protein_classification.data.json
     │   │   │   │   │   │   ├── protein_classification.meta.json
-    │   │   │   │   │   │   ├── publication.data.json
-    │   │   │   │   │   │   ├── publication.meta.json
     │   │   │   │   │   │   ├── publication_similarity.data.json
     │   │   │   │   │   │   ├── publication_similarity.meta.json
     │   │   │   │   │   │   ├── publication_term.data.json
@@ -2350,34 +2169,18 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   └── target_relation.meta.json
     │   │   │   │   │   ├── common/
     │   │   │   │   │   ├── crossref/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   │   ├── author.data.json
     │   │   │   │   │   │   ├── author.meta.json
     │   │   │   │   │   │   ├── funder.data.json
     │   │   │   │   │   │   ├── funder.meta.json
-    │   │   │   │   │   │   ├── publication.data.json
-    │   │   │   │   │   │   ├── publication.meta.json
     │   │   │   │   │   │   ├── reference.data.json
-    │   │   │   │   │   │   ├── reference.meta.json
-    │   │   │   │   │   │   ├── work.data.json
-    │   │   │   │   │   │   └── work.meta.json
+    │   │   │   │   │   │   └── reference.meta.json
     │   │   │   │   │   ├── openalex/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── publication.data.json
-    │   │   │   │   │   │   └── publication.meta.json
     │   │   │   │   │   ├── pubchem/
     │   │   │   │   │   │   ├── compound.data.json
     │   │   │   │   │   │   └── compound.meta.json
     │   │   │   │   │   ├── pubmed/
-    │   │   │   │   │   │   ├── publication.data.json
-    │   │   │   │   │   │   └── publication.meta.json
     │   │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── publication.data.json
-    │   │   │   │   │   │   └── publication.meta.json
     │   │   │   │   │   ├── uniprot/
     │   │   │   │   │   │   ├── idmapping.data.json
     │   │   │   │   │   │   ├── idmapping.meta.json
@@ -2492,10 +2295,6 @@ BioactivityDataAcquisition2/
     │   │   │   ├── infrastructure/
     │   │   │   │   ├── adapters/
     │   │   │   │   │   ├── chembl/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── client.data.json
-    │   │   │   │   │   │   ├── client.meta.json
     │   │   │   │   │   │   ├── entity_mapper.data.json
     │   │   │   │   │   │   ├── entity_mapper.meta.json
     │   │   │   │   │   │   ├── exceptions.data.json
@@ -2503,25 +2302,13 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
     │   │   │   │   │   ├── common/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── api_request_collector.data.json
-    │   │   │   │   │   │   ├── api_request_collector.meta.json
     │   │   │   │   │   │   ├── base_title_fallback.data.json
     │   │   │   │   │   │   ├── base_title_fallback.meta.json
     │   │   │   │   │   │   ├── title_matching.data.json
     │   │   │   │   │   │   └── title_matching.meta.json
     │   │   │   │   │   ├── crossref/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── batch.data.json
-    │   │   │   │   │   │   ├── batch.meta.json
-    │   │   │   │   │   │   ├── client.data.json
-    │   │   │   │   │   │   ├── client.meta.json
     │   │   │   │   │   │   ├── exceptions.data.json
     │   │   │   │   │   │   ├── exceptions.meta.json
-    │   │   │   │   │   │   ├── fallback.data.json
-    │   │   │   │   │   │   ├── fallback.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
     │   │   │   │   │   ├── decorators/
@@ -2552,54 +2339,24 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── csv_filter_reader.data.json
     │   │   │   │   │   │   └── csv_filter_reader.meta.json
     │   │   │   │   │   ├── openalex/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── client.data.json
-    │   │   │   │   │   │   ├── client.meta.json
-    │   │   │   │   │   │   ├── fallback.data.json
-    │   │   │   │   │   │   └── fallback.meta.json
     │   │   │   │   │   ├── pubchem/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── client.data.json
-    │   │   │   │   │   │   ├── client.meta.json
     │   │   │   │   │   │   ├── entity_mapper.data.json
     │   │   │   │   │   │   ├── entity_mapper.meta.json
-    │   │   │   │   │   │   ├── fetch_strategies.data.json
-    │   │   │   │   │   │   ├── fetch_strategies.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
     │   │   │   │   │   ├── pubmed/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── fallback.data.json
-    │   │   │   │   │   │   ├── fallback.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   ├── models.meta.json
-    │   │   │   │   │   │   ├── pubmed_client.data.json
-    │   │   │   │   │   │   ├── pubmed_client.meta.json
     │   │   │   │   │   │   ├── xml_processor.data.json
     │   │   │   │   │   │   └── xml_processor.meta.json
     │   │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── adapter.data.json
-    │   │   │   │   │   │   ├── adapter.meta.json
-    │   │   │   │   │   │   ├── fallback.data.json
-    │   │   │   │   │   │   └── fallback.meta.json
     │   │   │   │   │   ├── uniprot/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── client.data.json
-    │   │   │   │   │   │   ├── client.meta.json
     │   │   │   │   │   │   ├── fasta_parser.data.json
     │   │   │   │   │   │   ├── fasta_parser.meta.json
     │   │   │   │   │   │   ├── idmapping_client.data.json
     │   │   │   │   │   │   ├── idmapping_client.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   ├── base.meta.json
     │   │   │   │   │   ├── base_metrics.data.json
@@ -2622,32 +2379,12 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── file_audit.data.json
     │   │   │   │   │   └── file_audit.meta.json
     │   │   │   │   ├── checkpoint/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── local_checkpoint.data.json
-    │   │   │   │   │   └── local_checkpoint.meta.json
     │   │   │   │   ├── config/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _base.data.json
-    │   │   │   │   │   ├── _base.meta.json
     │   │   │   │   │   ├── base_config_loader.data.json
     │   │   │   │   │   ├── base_config_loader.meta.json
-    │   │   │   │   │   ├── dq_config_loader.data.json
-    │   │   │   │   │   ├── dq_config_loader.meta.json
     │   │   │   │   │   ├── field_group_loader.data.json
-    │   │   │   │   │   ├── field_group_loader.meta.json
-    │   │   │   │   │   ├── filter_config_loader.data.json
-    │   │   │   │   │   ├── filter_config_loader.meta.json
-    │   │   │   │   │   ├── pipeline_config_loader.data.json
-    │   │   │   │   │   └── pipeline_config_loader.meta.json
+    │   │   │   │   │   └── field_group_loader.meta.json
     │   │   │   │   ├── export/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── csv_exporter.data.json
-    │   │   │   │   │   ├── csv_exporter.meta.json
-    │   │   │   │   │   ├── dq_report_writer.data.json
-    │   │   │   │   │   └── dq_report_writer.meta.json
     │   │   │   │   ├── locking/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -2695,33 +2432,15 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── unified_logger.data.json
     │   │   │   │   │   └── unified_logger.meta.json
     │   │   │   │   ├── quarantine/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── helpers.data.json
     │   │   │   │   │   ├── helpers.meta.json
-    │   │   │   │   │   ├── operations.data.json
-    │   │   │   │   │   ├── operations.meta.json
-    │   │   │   │   │   ├── unified.data.json
-    │   │   │   │   │   └── unified.meta.json
+    │   │   │   │   │   ├── record_encoding.data.json
+    │   │   │   │   │   └── record_encoding.meta.json
     │   │   │   │   ├── schemas/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── base_schemas.data.json
-    │   │   │   │   │   ├── base_schemas.meta.json
-    │   │   │   │   │   ├── composite_config.data.json
-    │   │   │   │   │   ├── composite_config.meta.json
-    │   │   │   │   │   ├── dq_config.data.json
-    │   │   │   │   │   ├── dq_config.meta.json
     │   │   │   │   │   ├── dq_report_config.data.json
     │   │   │   │   │   ├── dq_report_config.meta.json
-    │   │   │   │   │   ├── filter_config.data.json
-    │   │   │   │   │   ├── filter_config.meta.json
-    │   │   │   │   │   ├── pipeline_config.data.json
-    │   │   │   │   │   ├── pipeline_config.meta.json
     │   │   │   │   │   ├── silver.data.json
-    │   │   │   │   │   ├── silver.meta.json
-    │   │   │   │   │   ├── source_config.data.json
-    │   │   │   │   │   └── source_config.meta.json
+    │   │   │   │   │   └── silver.meta.json
     │   │   │   │   ├── security/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -2733,28 +2452,20 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── encoders.data.json
     │   │   │   │   │   └── encoders.meta.json
     │   │   │   │   ├── storage/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
     │   │   │   │   │   ├── _atomic.data.json
     │   │   │   │   │   ├── _atomic.meta.json
     │   │   │   │   │   ├── arrow_converter.data.json
     │   │   │   │   │   ├── arrow_converter.meta.json
     │   │   │   │   │   ├── base_delta_writer.data.json
     │   │   │   │   │   ├── base_delta_writer.meta.json
-    │   │   │   │   │   ├── bronze_writer.data.json
-    │   │   │   │   │   ├── bronze_writer.meta.json
     │   │   │   │   │   ├── delta_reader.data.json
     │   │   │   │   │   ├── delta_reader.meta.json
-    │   │   │   │   │   ├── gold_writer.data.json
-    │   │   │   │   │   ├── gold_writer.meta.json
     │   │   │   │   │   ├── metadata_builder.data.json
     │   │   │   │   │   ├── metadata_builder.meta.json
     │   │   │   │   │   ├── metadata_writer.data.json
     │   │   │   │   │   ├── metadata_writer.meta.json
     │   │   │   │   │   ├── retention_manager.data.json
-    │   │   │   │   │   ├── retention_manager.meta.json
-    │   │   │   │   │   ├── silver_writer.data.json
-    │   │   │   │   │   └── silver_writer.meta.json
+    │   │   │   │   │   └── retention_manager.meta.json
     │   │   │   │   ├── system/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -2766,56 +2477,16 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── pandera_validator.data.json
     │   │   │   │   │   └── pandera_validator.meta.json
     │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── config_loader.data.json
-    │   │   │   │   └── config_loader.meta.json
+    │   │   │   │   └── __init__.meta.json
     │   │   │   ├── interfaces/
     │   │   │   │   ├── cli/
     │   │   │   │   │   ├── commands/
     │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── archive.data.json
-    │   │   │   │   │   │   ├── archive.meta.json
-    │   │   │   │   │   │   ├── checkpoint.data.json
-    │   │   │   │   │   │   ├── checkpoint.meta.json
-    │   │   │   │   │   │   ├── cleanup.data.json
-    │   │   │   │   │   │   ├── cleanup.meta.json
-    │   │   │   │   │   │   ├── config.data.json
-    │   │   │   │   │   │   ├── config.meta.json
-    │   │   │   │   │   │   ├── export.data.json
-    │   │   │   │   │   │   ├── export.meta.json
-    │   │   │   │   │   │   ├── health.data.json
-    │   │   │   │   │   │   ├── health.meta.json
-    │   │   │   │   │   │   ├── health_server_integration.data.json
-    │   │   │   │   │   │   ├── health_server_integration.meta.json
-    │   │   │   │   │   │   ├── lock.data.json
-    │   │   │   │   │   │   ├── lock.meta.json
-    │   │   │   │   │   │   ├── maintenance.data.json
-    │   │   │   │   │   │   ├── maintenance.meta.json
-    │   │   │   │   │   │   ├── metrics_server_integration.data.json
-    │   │   │   │   │   │   ├── metrics_server_integration.meta.json
-    │   │   │   │   │   │   ├── quarantine.data.json
-    │   │   │   │   │   │   ├── quarantine.meta.json
-    │   │   │   │   │   │   ├── run.data.json
-    │   │   │   │   │   │   ├── run.meta.json
-    │   │   │   │   │   │   ├── run_all.data.json
-    │   │   │   │   │   │   ├── run_all.meta.json
-    │   │   │   │   │   │   ├── run_composite.data.json
-    │   │   │   │   │   │   ├── run_composite.meta.json
-    │   │   │   │   │   │   ├── run_helpers.data.json
-    │   │   │   │   │   │   ├── run_helpers.meta.json
-    │   │   │   │   │   │   ├── vacuum.data.json
-    │   │   │   │   │   │   └── vacuum.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   └── __init__.meta.json
     │   │   │   │   │   ├── __main__.data.json
     │   │   │   │   │   ├── __main__.meta.json
     │   │   │   │   │   ├── exit_codes.data.json
-    │   │   │   │   │   ├── exit_codes.meta.json
-    │   │   │   │   │   ├── formatters.data.json
-    │   │   │   │   │   ├── formatters.meta.json
-    │   │   │   │   │   ├── main.data.json
-    │   │   │   │   │   └── main.meta.json
+    │   │   │   │   │   └── exit_codes.meta.json
     │   │   │   │   ├── http/
     │   │   │   │   │   ├── __init__.data.json
     │   │   │   │   │   ├── __init__.meta.json
@@ -2875,6 +2546,114 @@ BioactivityDataAcquisition2/
     │   │   │   ├── strings.meta.json
     │   │   │   ├── trans.data.json
     │   │   │   └── trans.meta.json
+    │   │   ├── boto3/
+    │   │   │   ├── resources/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── factory.data.json
+    │   │   │   │   ├── factory.meta.json
+    │   │   │   │   ├── model.data.json
+    │   │   │   │   └── model.meta.json
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── session.data.json
+    │   │   │   ├── session.meta.json
+    │   │   │   ├── utils.data.json
+    │   │   │   └── utils.meta.json
+    │   │   ├── botocore/
+    │   │   │   ├── crt/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── auth.data.json
+    │   │   │   │   └── auth.meta.json
+    │   │   │   ├── retries/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── adaptive.data.json
+    │   │   │   │   ├── adaptive.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── bucket.data.json
+    │   │   │   │   ├── bucket.meta.json
+    │   │   │   │   ├── quota.data.json
+    │   │   │   │   ├── quota.meta.json
+    │   │   │   │   ├── special.data.json
+    │   │   │   │   ├── special.meta.json
+    │   │   │   │   ├── standard.data.json
+    │   │   │   │   ├── standard.meta.json
+    │   │   │   │   ├── throttling.data.json
+    │   │   │   │   └── throttling.meta.json
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── args.data.json
+    │   │   │   ├── args.meta.json
+    │   │   │   ├── auth.data.json
+    │   │   │   ├── auth.meta.json
+    │   │   │   ├── awsrequest.data.json
+    │   │   │   ├── awsrequest.meta.json
+    │   │   │   ├── client.data.json
+    │   │   │   ├── client.meta.json
+    │   │   │   ├── compat.data.json
+    │   │   │   ├── compat.meta.json
+    │   │   │   ├── config.data.json
+    │   │   │   ├── config.meta.json
+    │   │   │   ├── configprovider.data.json
+    │   │   │   ├── configprovider.meta.json
+    │   │   │   ├── credentials.data.json
+    │   │   │   ├── credentials.meta.json
+    │   │   │   ├── discovery.data.json
+    │   │   │   ├── discovery.meta.json
+    │   │   │   ├── endpoint.data.json
+    │   │   │   ├── endpoint.meta.json
+    │   │   │   ├── endpoint_provider.data.json
+    │   │   │   ├── endpoint_provider.meta.json
+    │   │   │   ├── errorfactory.data.json
+    │   │   │   ├── errorfactory.meta.json
+    │   │   │   ├── eventstream.data.json
+    │   │   │   ├── eventstream.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── history.data.json
+    │   │   │   ├── history.meta.json
+    │   │   │   ├── hooks.data.json
+    │   │   │   ├── hooks.meta.json
+    │   │   │   ├── httpsession.data.json
+    │   │   │   ├── httpsession.meta.json
+    │   │   │   ├── loaders.data.json
+    │   │   │   ├── loaders.meta.json
+    │   │   │   ├── model.data.json
+    │   │   │   ├── model.meta.json
+    │   │   │   ├── paginate.data.json
+    │   │   │   ├── paginate.meta.json
+    │   │   │   ├── parsers.data.json
+    │   │   │   ├── parsers.meta.json
+    │   │   │   ├── regions.data.json
+    │   │   │   ├── regions.meta.json
+    │   │   │   ├── response.data.json
+    │   │   │   ├── response.meta.json
+    │   │   │   ├── serialize.data.json
+    │   │   │   ├── serialize.meta.json
+    │   │   │   ├── session.data.json
+    │   │   │   ├── session.meta.json
+    │   │   │   ├── signers.data.json
+    │   │   │   ├── signers.meta.json
+    │   │   │   ├── tokens.data.json
+    │   │   │   ├── tokens.meta.json
+    │   │   │   ├── useragent.data.json
+    │   │   │   ├── useragent.meta.json
+    │   │   │   ├── utils.data.json
+    │   │   │   ├── utils.meta.json
+    │   │   │   ├── validate.data.json
+    │   │   │   ├── validate.meta.json
+    │   │   │   ├── waiter.data.json
+    │   │   │   └── waiter.meta.json
+    │   │   ├── cachetools/
+    │   │   │   ├── __init__.data.json
+    │   │   │   └── __init__.meta.json
     │   │   ├── certifi/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -2928,6 +2707,165 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── thread.meta.json
     │   │   │   ├── __init__.data.json
     │   │   │   └── __init__.meta.json
+    │   │   ├── cryptography/
+    │   │   │   ├── hazmat/
+    │   │   │   │   ├── backends/
+    │   │   │   │   │   ├── openssl/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── backend.data.json
+    │   │   │   │   │   │   └── backend.meta.json
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── bindings/
+    │   │   │   │   │   ├── _rust/
+    │   │   │   │   │   │   ├── openssl/
+    │   │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   │   ├── aead.data.json
+    │   │   │   │   │   │   │   ├── aead.meta.json
+    │   │   │   │   │   │   │   ├── ciphers.data.json
+    │   │   │   │   │   │   │   ├── ciphers.meta.json
+    │   │   │   │   │   │   │   ├── cmac.data.json
+    │   │   │   │   │   │   │   ├── cmac.meta.json
+    │   │   │   │   │   │   │   ├── dh.data.json
+    │   │   │   │   │   │   │   ├── dh.meta.json
+    │   │   │   │   │   │   │   ├── dsa.data.json
+    │   │   │   │   │   │   │   ├── dsa.meta.json
+    │   │   │   │   │   │   │   ├── ec.data.json
+    │   │   │   │   │   │   │   ├── ec.meta.json
+    │   │   │   │   │   │   │   ├── ed25519.data.json
+    │   │   │   │   │   │   │   ├── ed25519.meta.json
+    │   │   │   │   │   │   │   ├── ed448.data.json
+    │   │   │   │   │   │   │   ├── ed448.meta.json
+    │   │   │   │   │   │   │   ├── hashes.data.json
+    │   │   │   │   │   │   │   ├── hashes.meta.json
+    │   │   │   │   │   │   │   ├── hmac.data.json
+    │   │   │   │   │   │   │   ├── hmac.meta.json
+    │   │   │   │   │   │   │   ├── kdf.data.json
+    │   │   │   │   │   │   │   ├── kdf.meta.json
+    │   │   │   │   │   │   │   ├── keys.data.json
+    │   │   │   │   │   │   │   ├── keys.meta.json
+    │   │   │   │   │   │   │   ├── poly1305.data.json
+    │   │   │   │   │   │   │   ├── poly1305.meta.json
+    │   │   │   │   │   │   │   ├── rsa.data.json
+    │   │   │   │   │   │   │   ├── rsa.meta.json
+    │   │   │   │   │   │   │   ├── x25519.data.json
+    │   │   │   │   │   │   │   ├── x25519.meta.json
+    │   │   │   │   │   │   │   ├── x448.data.json
+    │   │   │   │   │   │   │   └── x448.meta.json
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── _openssl.data.json
+    │   │   │   │   │   │   ├── _openssl.meta.json
+    │   │   │   │   │   │   ├── asn1.data.json
+    │   │   │   │   │   │   ├── asn1.meta.json
+    │   │   │   │   │   │   ├── exceptions.data.json
+    │   │   │   │   │   │   ├── exceptions.meta.json
+    │   │   │   │   │   │   ├── x509.data.json
+    │   │   │   │   │   │   └── x509.meta.json
+    │   │   │   │   │   ├── openssl/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── _conditional.data.json
+    │   │   │   │   │   │   ├── _conditional.meta.json
+    │   │   │   │   │   │   ├── binding.data.json
+    │   │   │   │   │   │   └── binding.meta.json
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── decrepit/
+    │   │   │   │   │   ├── ciphers/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── algorithms.data.json
+    │   │   │   │   │   │   └── algorithms.meta.json
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── primitives/
+    │   │   │   │   │   ├── asymmetric/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── dh.data.json
+    │   │   │   │   │   │   ├── dh.meta.json
+    │   │   │   │   │   │   ├── dsa.data.json
+    │   │   │   │   │   │   ├── dsa.meta.json
+    │   │   │   │   │   │   ├── ec.data.json
+    │   │   │   │   │   │   ├── ec.meta.json
+    │   │   │   │   │   │   ├── ed25519.data.json
+    │   │   │   │   │   │   ├── ed25519.meta.json
+    │   │   │   │   │   │   ├── ed448.data.json
+    │   │   │   │   │   │   ├── ed448.meta.json
+    │   │   │   │   │   │   ├── padding.data.json
+    │   │   │   │   │   │   ├── padding.meta.json
+    │   │   │   │   │   │   ├── rsa.data.json
+    │   │   │   │   │   │   ├── rsa.meta.json
+    │   │   │   │   │   │   ├── types.data.json
+    │   │   │   │   │   │   ├── types.meta.json
+    │   │   │   │   │   │   ├── utils.data.json
+    │   │   │   │   │   │   ├── utils.meta.json
+    │   │   │   │   │   │   ├── x25519.data.json
+    │   │   │   │   │   │   ├── x25519.meta.json
+    │   │   │   │   │   │   ├── x448.data.json
+    │   │   │   │   │   │   └── x448.meta.json
+    │   │   │   │   │   ├── ciphers/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── algorithms.data.json
+    │   │   │   │   │   │   ├── algorithms.meta.json
+    │   │   │   │   │   │   ├── base.data.json
+    │   │   │   │   │   │   ├── base.meta.json
+    │   │   │   │   │   │   ├── modes.data.json
+    │   │   │   │   │   │   └── modes.meta.json
+    │   │   │   │   │   ├── serialization/
+    │   │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── base.data.json
+    │   │   │   │   │   │   ├── base.meta.json
+    │   │   │   │   │   │   ├── ssh.data.json
+    │   │   │   │   │   │   └── ssh.meta.json
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── _asymmetric.data.json
+    │   │   │   │   │   ├── _asymmetric.meta.json
+    │   │   │   │   │   ├── _cipheralgorithm.data.json
+    │   │   │   │   │   ├── _cipheralgorithm.meta.json
+    │   │   │   │   │   ├── _serialization.data.json
+    │   │   │   │   │   ├── _serialization.meta.json
+    │   │   │   │   │   ├── constant_time.data.json
+    │   │   │   │   │   ├── constant_time.meta.json
+    │   │   │   │   │   ├── hashes.data.json
+    │   │   │   │   │   ├── hashes.meta.json
+    │   │   │   │   │   ├── padding.data.json
+    │   │   │   │   │   └── padding.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _oid.data.json
+    │   │   │   │   └── _oid.meta.json
+    │   │   │   ├── x509/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── base.data.json
+    │   │   │   │   ├── base.meta.json
+    │   │   │   │   ├── certificate_transparency.data.json
+    │   │   │   │   ├── certificate_transparency.meta.json
+    │   │   │   │   ├── extensions.data.json
+    │   │   │   │   ├── extensions.meta.json
+    │   │   │   │   ├── general_name.data.json
+    │   │   │   │   ├── general_name.meta.json
+    │   │   │   │   ├── name.data.json
+    │   │   │   │   ├── name.meta.json
+    │   │   │   │   ├── oid.data.json
+    │   │   │   │   ├── oid.meta.json
+    │   │   │   │   ├── verification.data.json
+    │   │   │   │   └── verification.meta.json
+    │   │   │   ├── __about__.data.json
+    │   │   │   ├── __about__.meta.json
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── utils.data.json
+    │   │   │   └── utils.meta.json
     │   │   ├── ctypes/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -3004,7 +2942,9 @@ BioactivityDataAcquisition2/
     │   │   │   ├── message.data.json
     │   │   │   ├── message.meta.json
     │   │   │   ├── policy.data.json
-    │   │   │   └── policy.meta.json
+    │   │   │   ├── policy.meta.json
+    │   │   │   ├── utils.data.json
+    │   │   │   └── utils.meta.json
     │   │   ├── exceptiongroup/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -3014,6 +2954,67 @@ BioactivityDataAcquisition2/
     │   │   │   ├── _suppress.meta.json
     │   │   │   ├── _version.data.json
     │   │   │   └── _version.meta.json
+    │   │   ├── google/
+    │   │   │   ├── auth/
+    │   │   │   │   ├── crypt/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── _cryptography_rsa.data.json
+    │   │   │   │   │   ├── _cryptography_rsa.meta.json
+    │   │   │   │   │   ├── _python_rsa.data.json
+    │   │   │   │   │   ├── _python_rsa.meta.json
+    │   │   │   │   │   ├── base.data.json
+    │   │   │   │   │   ├── base.meta.json
+    │   │   │   │   │   ├── es256.data.json
+    │   │   │   │   │   ├── es256.meta.json
+    │   │   │   │   │   ├── rsa.data.json
+    │   │   │   │   │   └── rsa.meta.json
+    │   │   │   │   ├── transport/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── _custom_tls_signer.data.json
+    │   │   │   │   │   ├── _custom_tls_signer.meta.json
+    │   │   │   │   │   ├── _http_client.data.json
+    │   │   │   │   │   ├── _http_client.meta.json
+    │   │   │   │   │   ├── _mtls_helper.data.json
+    │   │   │   │   │   ├── _mtls_helper.meta.json
+    │   │   │   │   │   ├── requests.data.json
+    │   │   │   │   │   └── requests.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── _credentials_base.data.json
+    │   │   │   │   ├── _credentials_base.meta.json
+    │   │   │   │   ├── _default.data.json
+    │   │   │   │   ├── _default.meta.json
+    │   │   │   │   ├── _exponential_backoff.data.json
+    │   │   │   │   ├── _exponential_backoff.meta.json
+    │   │   │   │   ├── _helpers.data.json
+    │   │   │   │   ├── _helpers.meta.json
+    │   │   │   │   ├── _refresh_worker.data.json
+    │   │   │   │   ├── _refresh_worker.meta.json
+    │   │   │   │   ├── _service_account_info.data.json
+    │   │   │   │   ├── _service_account_info.meta.json
+    │   │   │   │   ├── credentials.data.json
+    │   │   │   │   ├── credentials.meta.json
+    │   │   │   │   ├── environment_vars.data.json
+    │   │   │   │   ├── environment_vars.meta.json
+    │   │   │   │   ├── exceptions.data.json
+    │   │   │   │   ├── exceptions.meta.json
+    │   │   │   │   ├── iam.data.json
+    │   │   │   │   ├── iam.meta.json
+    │   │   │   │   ├── jwt.data.json
+    │   │   │   │   ├── jwt.meta.json
+    │   │   │   │   ├── metrics.data.json
+    │   │   │   │   ├── metrics.meta.json
+    │   │   │   │   ├── version.data.json
+    │   │   │   │   └── version.meta.json
+    │   │   │   └── oauth2/
+    │   │   │       ├── __init__.data.json
+    │   │   │       ├── __init__.meta.json
+    │   │   │       ├── _client.data.json
+    │   │   │       ├── _client.meta.json
+    │   │   │       ├── service_account.data.json
+    │   │   │       └── service_account.meta.json
     │   │   ├── h11/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -3037,6 +3038,46 @@ BioactivityDataAcquisition2/
     │   │   │   ├── _version.meta.json
     │   │   │   ├── _writers.data.json
     │   │   │   └── _writers.meta.json
+    │   │   ├── h2/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── config.data.json
+    │   │   │   ├── config.meta.json
+    │   │   │   ├── connection.data.json
+    │   │   │   ├── connection.meta.json
+    │   │   │   ├── errors.data.json
+    │   │   │   ├── errors.meta.json
+    │   │   │   ├── events.data.json
+    │   │   │   ├── events.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── frame_buffer.data.json
+    │   │   │   ├── frame_buffer.meta.json
+    │   │   │   ├── settings.data.json
+    │   │   │   ├── settings.meta.json
+    │   │   │   ├── stream.data.json
+    │   │   │   ├── stream.meta.json
+    │   │   │   ├── utilities.data.json
+    │   │   │   ├── utilities.meta.json
+    │   │   │   ├── windows.data.json
+    │   │   │   └── windows.meta.json
+    │   │   ├── hpack/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── hpack.data.json
+    │   │   │   ├── hpack.meta.json
+    │   │   │   ├── huffman.data.json
+    │   │   │   ├── huffman.meta.json
+    │   │   │   ├── huffman_constants.data.json
+    │   │   │   ├── huffman_constants.meta.json
+    │   │   │   ├── huffman_table.data.json
+    │   │   │   ├── huffman_table.meta.json
+    │   │   │   ├── struct.data.json
+    │   │   │   ├── struct.meta.json
+    │   │   │   ├── table.data.json
+    │   │   │   └── table.meta.json
     │   │   ├── html/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -3049,6 +3090,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── client.meta.json
     │   │   │   ├── cookiejar.data.json
     │   │   │   ├── cookiejar.meta.json
+    │   │   │   ├── cookies.data.json
+    │   │   │   ├── cookies.meta.json
     │   │   │   ├── server.data.json
     │   │   │   └── server.meta.json
     │   │   ├── httpcore/
@@ -3165,6 +3208,15 @@ BioactivityDataAcquisition2/
     │   │   │   ├── _urls.meta.json
     │   │   │   ├── _utils.data.json
     │   │   │   └── _utils.meta.json
+    │   │   ├── hyperframe/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── flags.data.json
+    │   │   │   ├── flags.meta.json
+    │   │   │   ├── frame.data.json
+    │   │   │   └── frame.meta.json
     │   │   ├── hypothesis/
     │   │   │   ├── extra/
     │   │   │   │   ├── pandas/
@@ -5773,6 +5825,44 @@ BioactivityDataAcquisition2/
     │   │   ├── pytest/
     │   │   │   ├── __init__.data.json
     │   │   │   └── __init__.meta.json
+    │   │   ├── pytz/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── tzinfo.data.json
+    │   │   │   └── tzinfo.meta.json
+    │   │   ├── requests/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── __version__.data.json
+    │   │   │   ├── __version__.meta.json
+    │   │   │   ├── adapters.data.json
+    │   │   │   ├── adapters.meta.json
+    │   │   │   ├── api.data.json
+    │   │   │   ├── api.meta.json
+    │   │   │   ├── auth.data.json
+    │   │   │   ├── auth.meta.json
+    │   │   │   ├── compat.data.json
+    │   │   │   ├── compat.meta.json
+    │   │   │   ├── cookies.data.json
+    │   │   │   ├── cookies.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── hooks.data.json
+    │   │   │   ├── hooks.meta.json
+    │   │   │   ├── models.data.json
+    │   │   │   ├── models.meta.json
+    │   │   │   ├── packages.data.json
+    │   │   │   ├── packages.meta.json
+    │   │   │   ├── sessions.data.json
+    │   │   │   ├── sessions.meta.json
+    │   │   │   ├── status_codes.data.json
+    │   │   │   ├── status_codes.meta.json
+    │   │   │   ├── structures.data.json
+    │   │   │   ├── structures.meta.json
+    │   │   │   ├── utils.data.json
+    │   │   │   └── utils.meta.json
     │   │   ├── rich/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -5916,6 +6006,34 @@ BioactivityDataAcquisition2/
     │   │   │   ├── themes.meta.json
     │   │   │   ├── traceback.data.json
     │   │   │   └── traceback.meta.json
+    │   │   ├── rsa/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── asn1.data.json
+    │   │   │   ├── asn1.meta.json
+    │   │   │   ├── common.data.json
+    │   │   │   ├── common.meta.json
+    │   │   │   ├── core.data.json
+    │   │   │   ├── core.meta.json
+    │   │   │   ├── key.data.json
+    │   │   │   ├── key.meta.json
+    │   │   │   ├── pem.data.json
+    │   │   │   ├── pem.meta.json
+    │   │   │   ├── pkcs1.data.json
+    │   │   │   ├── pkcs1.meta.json
+    │   │   │   ├── prime.data.json
+    │   │   │   ├── prime.meta.json
+    │   │   │   ├── randnum.data.json
+    │   │   │   ├── randnum.meta.json
+    │   │   │   ├── transform.data.json
+    │   │   │   └── transform.meta.json
+    │   │   ├── sniffio/
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _impl.data.json
+    │   │   │   ├── _impl.meta.json
+    │   │   │   ├── _version.data.json
+    │   │   │   └── _version.meta.json
     │   │   ├── sqlalchemy/
     │   │   │   ├── connectors/
     │   │   │   │   ├── __init__.data.json
@@ -6317,6 +6435,59 @@ BioactivityDataAcquisition2/
     │   │   │   ├── request.meta.json
     │   │   │   ├── response.data.json
     │   │   │   └── response.meta.json
+    │   │   ├── urllib3/
+    │   │   │   ├── contrib/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── pyopenssl.data.json
+    │   │   │   │   ├── pyopenssl.meta.json
+    │   │   │   │   ├── socks.data.json
+    │   │   │   │   └── socks.meta.json
+    │   │   │   ├── packages/
+    │   │   │   │   ├── ssl_match_hostname/
+    │   │   │   │   │   ├── __init__.data.json
+    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── util/
+    │   │   │   │   ├── __init__.data.json
+    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── connection.data.json
+    │   │   │   │   ├── connection.meta.json
+    │   │   │   │   ├── queue.data.json
+    │   │   │   │   ├── queue.meta.json
+    │   │   │   │   ├── request.data.json
+    │   │   │   │   ├── request.meta.json
+    │   │   │   │   ├── response.data.json
+    │   │   │   │   ├── response.meta.json
+    │   │   │   │   ├── retry.data.json
+    │   │   │   │   ├── retry.meta.json
+    │   │   │   │   ├── ssl_.data.json
+    │   │   │   │   ├── ssl_.meta.json
+    │   │   │   │   ├── timeout.data.json
+    │   │   │   │   ├── timeout.meta.json
+    │   │   │   │   ├── url.data.json
+    │   │   │   │   └── url.meta.json
+    │   │   │   ├── __init__.data.json
+    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── _collections.data.json
+    │   │   │   ├── _collections.meta.json
+    │   │   │   ├── connection.data.json
+    │   │   │   ├── connection.meta.json
+    │   │   │   ├── connectionpool.data.json
+    │   │   │   ├── connectionpool.meta.json
+    │   │   │   ├── exceptions.data.json
+    │   │   │   ├── exceptions.meta.json
+    │   │   │   ├── fields.data.json
+    │   │   │   ├── fields.meta.json
+    │   │   │   ├── filepost.data.json
+    │   │   │   ├── filepost.meta.json
+    │   │   │   ├── poolmanager.data.json
+    │   │   │   ├── poolmanager.meta.json
+    │   │   │   ├── request.data.json
+    │   │   │   ├── request.meta.json
+    │   │   │   ├── response.data.json
+    │   │   │   └── response.meta.json
     │   │   ├── wsgiref/
     │   │   │   ├── __init__.data.json
     │   │   │   ├── __init__.meta.json
@@ -6539,6 +6710,8 @@ BioactivityDataAcquisition2/
     │   │   ├── gettext.meta.json
     │   │   ├── glob.data.json
     │   │   ├── glob.meta.json
+    │   │   ├── google.data.json
+    │   │   ├── google.meta.json
     │   │   ├── gzip.data.json
     │   │   ├── gzip.meta.json
     │   │   ├── hashlib.data.json
@@ -7134,9 +7307,10 @@ BioactivityDataAcquisition2/
     │   │   │   └── publication.yaml
     │   │   ├── semanticscholar/
     │   │   │   └── publication.yaml
-    │   │   └── uniprot/
-    │   │       ├── idmapping.yaml
-    │   │       └── protein.yaml
+    │   │   ├── uniprot/
+    │   │   │   ├── idmapping.yaml
+    │   │   │   └── protein.yaml
+    │   │   └── publication_type_classification.csv
     │   ├── dq/
     │   │   ├── entities/
     │   │   │   ├── chembl/
@@ -7284,6 +7458,8 @@ BioactivityDataAcquisition2/
     │   ├── checkpoints/
     │   │   └── composite/
     │   │       ├── composite_composite_activity_6279a837-c445-4b58-ae47-1389a53ddddd.json
+    │   │       ├── composite_composite_activity_e197c916-8296-45ea-85a9-0c94bfbc6655.json
+    │   │       ├── composite_composite_activity_e55571f4-dbc3-4629-911e-e4ae5fc9db66.json
     │   │       ├── composite_composite_assay_cc62a7a5-95fb-4307-8aa8-da207987743a.json
     │   │       ├── composite_composite_molecule_097995c4-6ea8-4e8b-b790-4d15e8ff1428.json
     │   │       ├── composite_composite_molecule_4ed101d2-0809-44ef-8cf2-2f14afe5858b.json
@@ -7315,6 +7491,2395 @@ BioactivityDataAcquisition2/
     │   │       ├── composite_composite_target_ac813464-d837-445c-86db-cfde2f34646f.json
     │   │       └── composite_composite_target_e75b3763-b867-460b-94f6-b5c2704ec80f.json
     │   ├── input/
+    │   │   ├── bronze/
+    │   │   │   ├── chembl/
+    │   │   │   │   ├── publication/
+    │   │   │   │   │   ├── 2026-02-09/
+    │   │   │   │   │   │   ├── batch_2026-02-09_045cc68f-7052-45e0-97d8-4919c31ecf2a.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_045cc68f-7052-45e0-97d8-4919c31ecf2a.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_07158211-6ab9-43d6-a280-de405ca1c460.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_07158211-6ab9-43d6-a280-de405ca1c460.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_07158211-6ab9-43d6-a280-de405ca1c460.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_0751e17f-c79e-4b99-ae48-ab3d30e34a45.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_0751e17f-c79e-4b99-ae48-ab3d30e34a45.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_0751e17f-c79e-4b99-ae48-ab3d30e34a45.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_07c25b15-964a-4ac0-9307-a7b7d208554c.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_07c25b15-964a-4ac0-9307-a7b7d208554c.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_07c25b15-964a-4ac0-9307-a7b7d208554c.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_07ef8374-d5ac-42a9-a4d5-bbadd8dc91ea.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_07ef8374-d5ac-42a9-a4d5-bbadd8dc91ea.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_07ef8374-d5ac-42a9-a4d5-bbadd8dc91ea.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_09d79f46-02fb-4215-9a43-e0c48080d8cb.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_09d79f46-02fb-4215-9a43-e0c48080d8cb.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_09d79f46-02fb-4215-9a43-e0c48080d8cb.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_0b65f708-cd84-4fab-8293-53dae955e3fc.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_0b65f708-cd84-4fab-8293-53dae955e3fc.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_0b65f708-cd84-4fab-8293-53dae955e3fc.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_104f26a2-8152-414f-bbaa-30d584af01a3.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_104f26a2-8152-414f-bbaa-30d584af01a3.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_104f26a2-8152-414f-bbaa-30d584af01a3.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1114f23b-7246-44ca-b4b3-b182cfa585e6.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1114f23b-7246-44ca-b4b3-b182cfa585e6.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1114f23b-7246-44ca-b4b3-b182cfa585e6.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_12e77c03-4b25-4653-8100-38622416f341.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_12e77c03-4b25-4653-8100-38622416f341.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_12e77c03-4b25-4653-8100-38622416f341.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1323bbb9-1c01-490b-a951-64bf4d423c44.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1323bbb9-1c01-490b-a951-64bf4d423c44.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1323bbb9-1c01-490b-a951-64bf4d423c44.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_13a0da8c-abc3-4cfe-885e-9bf3bbc7cc93.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_13a0da8c-abc3-4cfe-885e-9bf3bbc7cc93.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_13a0da8c-abc3-4cfe-885e-9bf3bbc7cc93.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_13c5c417-09c9-4c06-980d-e45baafe8aa9.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_13c5c417-09c9-4c06-980d-e45baafe8aa9.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_13c5c417-09c9-4c06-980d-e45baafe8aa9.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_16521d71-d3c8-412e-b0aa-e2579a181ef2.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_16521d71-d3c8-412e-b0aa-e2579a181ef2.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_16521d71-d3c8-412e-b0aa-e2579a181ef2.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_18be4b33-4f74-4095-902b-f91f2c4653fa.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_18be4b33-4f74-4095-902b-f91f2c4653fa.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_18be4b33-4f74-4095-902b-f91f2c4653fa.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1a793404-67b8-4631-90ec-4e6ab2d1f84e.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1a793404-67b8-4631-90ec-4e6ab2d1f84e.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1a793404-67b8-4631-90ec-4e6ab2d1f84e.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1abfa92c-aba2-4e67-911a-f8e0a0821881.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1abfa92c-aba2-4e67-911a-f8e0a0821881.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1abfa92c-aba2-4e67-911a-f8e0a0821881.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1c73e5b5-68b6-4964-93e8-5a3befb706ca.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1c73e5b5-68b6-4964-93e8-5a3befb706ca.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1c73e5b5-68b6-4964-93e8-5a3befb706ca.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1c8478bb-967d-441d-a88b-2d5cf73cf838.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1c8478bb-967d-441d-a88b-2d5cf73cf838.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1c8478bb-967d-441d-a88b-2d5cf73cf838.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1cdf266f-9c21-473f-b86a-5932798ecd71.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1cdf266f-9c21-473f-b86a-5932798ecd71.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1cdf266f-9c21-473f-b86a-5932798ecd71.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1cffdc51-cee9-4fbb-9e7a-4e87a6d46f38.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1cffdc51-cee9-4fbb-9e7a-4e87a6d46f38.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1cffdc51-cee9-4fbb-9e7a-4e87a6d46f38.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1e2718df-ec50-4493-a2ef-5bd10e481360.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1e2718df-ec50-4493-a2ef-5bd10e481360.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1e2718df-ec50-4493-a2ef-5bd10e481360.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_1f20b898-4f28-4d12-8b22-4118506416ac.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_1f20b898-4f28-4d12-8b22-4118506416ac.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_1f20b898-4f28-4d12-8b22-4118506416ac.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_20209257-16a5-4c1c-b478-db9ac79da219.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_20209257-16a5-4c1c-b478-db9ac79da219.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_20209257-16a5-4c1c-b478-db9ac79da219.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_204507f6-d4fa-47cb-8c87-b6b2dcea70e1.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_204507f6-d4fa-47cb-8c87-b6b2dcea70e1.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_204507f6-d4fa-47cb-8c87-b6b2dcea70e1.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_238c48c2-affb-4ed2-8d3d-6de91904c82c.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_238c48c2-affb-4ed2-8d3d-6de91904c82c.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_238c48c2-affb-4ed2-8d3d-6de91904c82c.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_24d12a34-fd6c-4942-8b7c-d55849492b24.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_24d12a34-fd6c-4942-8b7c-d55849492b24.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_24d12a34-fd6c-4942-8b7c-d55849492b24.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_2aa3da27-fb1b-4287-ace8-2c31255e30bf.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_2aa3da27-fb1b-4287-ace8-2c31255e30bf.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_2aa3da27-fb1b-4287-ace8-2c31255e30bf.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_2c229dc2-3d16-4df2-b455-e00c18cd54ec.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_2c229dc2-3d16-4df2-b455-e00c18cd54ec.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_2c229dc2-3d16-4df2-b455-e00c18cd54ec.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_2cd5db0e-a2d2-4f44-b8e1-b90037512049.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_2cd5db0e-a2d2-4f44-b8e1-b90037512049.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_2cd5db0e-a2d2-4f44-b8e1-b90037512049.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_2da3fdc2-144b-4576-89c4-bb5eeb154c2f.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_2da3fdc2-144b-4576-89c4-bb5eeb154c2f.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_2da3fdc2-144b-4576-89c4-bb5eeb154c2f.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_307fb582-34ad-4d37-b2e4-ff27ca6bd2d2.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_307fb582-34ad-4d37-b2e4-ff27ca6bd2d2.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_307fb582-34ad-4d37-b2e4-ff27ca6bd2d2.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_325c7afc-6688-41f5-9970-d0fada990342.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_325c7afc-6688-41f5-9970-d0fada990342.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_325c7afc-6688-41f5-9970-d0fada990342.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_3489569b-2762-4050-8961-0bdb1c73c9b5.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_3489569b-2762-4050-8961-0bdb1c73c9b5.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_3489569b-2762-4050-8961-0bdb1c73c9b5.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_351472a0-4134-4989-9416-e83e596baae2.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_351472a0-4134-4989-9416-e83e596baae2.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_351472a0-4134-4989-9416-e83e596baae2.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_361a43ee-c325-4811-8634-e0afc9695edc.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_361a43ee-c325-4811-8634-e0afc9695edc.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_361a43ee-c325-4811-8634-e0afc9695edc.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_3b6ad420-c6a1-48ff-87e2-263973b83392.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_3b6ad420-c6a1-48ff-87e2-263973b83392.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_3b6ad420-c6a1-48ff-87e2-263973b83392.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_3d985bc4-1664-46bc-8c90-a695a5ffbaa9.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_3d985bc4-1664-46bc-8c90-a695a5ffbaa9.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_3d985bc4-1664-46bc-8c90-a695a5ffbaa9.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_4009094d-8625-448d-8294-6ac80aad0170.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_4009094d-8625-448d-8294-6ac80aad0170.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_4009094d-8625-448d-8294-6ac80aad0170.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_40268b13-05ec-4863-8081-a52ff7c17b91.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_40268b13-05ec-4863-8081-a52ff7c17b91.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_40268b13-05ec-4863-8081-a52ff7c17b91.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_4154650f-40c8-4147-bd9d-8bc2dd8e9b5c.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_4154650f-40c8-4147-bd9d-8bc2dd8e9b5c.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_4154650f-40c8-4147-bd9d-8bc2dd8e9b5c.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_42ab0b87-9a2e-4263-909e-c18192edb29f.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_42ab0b87-9a2e-4263-909e-c18192edb29f.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_42ab0b87-9a2e-4263-909e-c18192edb29f.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_42f36af2-4503-427b-9fcc-fb5158ade634.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_42f36af2-4503-427b-9fcc-fb5158ade634.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_42f36af2-4503-427b-9fcc-fb5158ade634.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_45e6dde9-54fb-41f2-baac-14471f293064.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_45e6dde9-54fb-41f2-baac-14471f293064.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_45e6dde9-54fb-41f2-baac-14471f293064.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_461d3c02-7fc5-4fa0-979a-eb3139d4cb8d.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_461d3c02-7fc5-4fa0-979a-eb3139d4cb8d.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_461d3c02-7fc5-4fa0-979a-eb3139d4cb8d.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_48a8c0cb-65f0-4933-830b-e7ddf4e5cdd7.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_48a8c0cb-65f0-4933-830b-e7ddf4e5cdd7.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_48a8c0cb-65f0-4933-830b-e7ddf4e5cdd7.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_53ac1a8b-8940-4696-861b-6f4aff16131f.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_53ac1a8b-8940-4696-861b-6f4aff16131f.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_53ac1a8b-8940-4696-861b-6f4aff16131f.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_53b85915-3541-4575-b48b-86149a9c4171.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_53b85915-3541-4575-b48b-86149a9c4171.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_53b85915-3541-4575-b48b-86149a9c4171.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_57269476-99ae-44d4-b598-2fe4175135a6.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_57269476-99ae-44d4-b598-2fe4175135a6.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_57269476-99ae-44d4-b598-2fe4175135a6.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_586f11d2-8302-421b-a699-59875f6d3bde.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_586f11d2-8302-421b-a699-59875f6d3bde.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_586f11d2-8302-421b-a699-59875f6d3bde.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_59cbd932-3cc4-4d5e-9525-8b3a2867311b.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_59cbd932-3cc4-4d5e-9525-8b3a2867311b.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_59cbd932-3cc4-4d5e-9525-8b3a2867311b.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_5cc1f917-b1fb-48a4-adb0-bc3071b900a1.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_5cc1f917-b1fb-48a4-adb0-bc3071b900a1.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_5cc1f917-b1fb-48a4-adb0-bc3071b900a1.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_5ceed85a-f050-4546-b3f2-3a5aadd94b89.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_5ceed85a-f050-4546-b3f2-3a5aadd94b89.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_5ceed85a-f050-4546-b3f2-3a5aadd94b89.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_5e831af2-ac3f-418e-b401-9277ba2af023.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_5e831af2-ac3f-418e-b401-9277ba2af023.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_5e831af2-ac3f-418e-b401-9277ba2af023.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_63aa9ad5-560e-4aa2-8112-5628aceea06b.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_63aa9ad5-560e-4aa2-8112-5628aceea06b.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_63aa9ad5-560e-4aa2-8112-5628aceea06b.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_63db02b4-a60a-4974-9820-13211045c792.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_63db02b4-a60a-4974-9820-13211045c792.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_63db02b4-a60a-4974-9820-13211045c792.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_662f2dbc-8591-4bf3-a518-742c941ec0e0.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_662f2dbc-8591-4bf3-a518-742c941ec0e0.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_662f2dbc-8591-4bf3-a518-742c941ec0e0.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_6b04470d-1712-4d46-a2d3-36e21b1a489b.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_6b04470d-1712-4d46-a2d3-36e21b1a489b.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_6b04470d-1712-4d46-a2d3-36e21b1a489b.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_6cb4e9c1-de24-4ccf-9efb-0a4fd9a0d0eb.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_6cb4e9c1-de24-4ccf-9efb-0a4fd9a0d0eb.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_6cb4e9c1-de24-4ccf-9efb-0a4fd9a0d0eb.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_6e9da28d-09f5-48a9-8d0e-d0f31b292ab7.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_6e9da28d-09f5-48a9-8d0e-d0f31b292ab7.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_6e9da28d-09f5-48a9-8d0e-d0f31b292ab7.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_6ebd0f1e-ae6b-445f-86ca-c9f80d480781.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_6ebd0f1e-ae6b-445f-86ca-c9f80d480781.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_6ebd0f1e-ae6b-445f-86ca-c9f80d480781.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_70fd3925-af41-4875-9e7f-a8123d13ea17.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_70fd3925-af41-4875-9e7f-a8123d13ea17.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_70fd3925-af41-4875-9e7f-a8123d13ea17.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_71107317-1dd5-4c9b-b1a3-2f73d91a567a.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_71107317-1dd5-4c9b-b1a3-2f73d91a567a.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_71107317-1dd5-4c9b-b1a3-2f73d91a567a.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_719f2cc9-a67c-4626-982a-aefc9ccaa4ef.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_719f2cc9-a67c-4626-982a-aefc9ccaa4ef.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_719f2cc9-a67c-4626-982a-aefc9ccaa4ef.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_746062ee-622f-4590-bd87-836548c15dc5.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_746062ee-622f-4590-bd87-836548c15dc5.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_746062ee-622f-4590-bd87-836548c15dc5.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_74d49212-a67d-4042-92be-94568396e83c.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_74d49212-a67d-4042-92be-94568396e83c.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_74d49212-a67d-4042-92be-94568396e83c.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_75e643e8-f4a7-4879-8406-75713e178958.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_75e643e8-f4a7-4879-8406-75713e178958.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_75e643e8-f4a7-4879-8406-75713e178958.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_75f2b734-c58b-4e6f-811a-ed09a29ed7e3.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_75f2b734-c58b-4e6f-811a-ed09a29ed7e3.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_75f2b734-c58b-4e6f-811a-ed09a29ed7e3.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_7678a21f-158b-4c69-a415-0330c98eb991.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_7678a21f-158b-4c69-a415-0330c98eb991.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_7678a21f-158b-4c69-a415-0330c98eb991.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_76b2a4e1-e667-4196-a2ac-4706673368e2.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_76b2a4e1-e667-4196-a2ac-4706673368e2.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_76b2a4e1-e667-4196-a2ac-4706673368e2.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_76b2b8fa-241f-4855-b599-9e63dfd76288.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_76b2b8fa-241f-4855-b599-9e63dfd76288.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_76b2b8fa-241f-4855-b599-9e63dfd76288.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_76d24989-f78d-4f51-923d-433eadf34848.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_76d24989-f78d-4f51-923d-433eadf34848.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_76d24989-f78d-4f51-923d-433eadf34848.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_785415e4-41c6-4dce-9b70-e08a98bdf715.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_785415e4-41c6-4dce-9b70-e08a98bdf715.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_785415e4-41c6-4dce-9b70-e08a98bdf715.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_799ab4f4-d295-43ba-8d36-5815146a5394.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_799ab4f4-d295-43ba-8d36-5815146a5394.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_799ab4f4-d295-43ba-8d36-5815146a5394.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_7a59df6e-a297-4d4f-8d6d-e39fe34405f9.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_7a59df6e-a297-4d4f-8d6d-e39fe34405f9.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_7a59df6e-a297-4d4f-8d6d-e39fe34405f9.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_7d11a475-772d-462a-9ad9-a6637b486d1a.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_7d11a475-772d-462a-9ad9-a6637b486d1a.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_7d11a475-772d-462a-9ad9-a6637b486d1a.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_7faf801a-7887-4bf6-849d-cdbd2f2a1589.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_7faf801a-7887-4bf6-849d-cdbd2f2a1589.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_7faf801a-7887-4bf6-849d-cdbd2f2a1589.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_80695da6-800d-4e8f-94bb-6cf7df50313c.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_80695da6-800d-4e8f-94bb-6cf7df50313c.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_80695da6-800d-4e8f-94bb-6cf7df50313c.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_84f3f3d4-8ad4-4ea7-934c-9e67a13874a1.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_84f3f3d4-8ad4-4ea7-934c-9e67a13874a1.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_84f3f3d4-8ad4-4ea7-934c-9e67a13874a1.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_87ca7cad-4d3d-444b-8a79-42ee7b87a47b.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_87ca7cad-4d3d-444b-8a79-42ee7b87a47b.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_87ca7cad-4d3d-444b-8a79-42ee7b87a47b.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_88eafc5f-a653-40ea-8eb8-353492cd2332.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_88eafc5f-a653-40ea-8eb8-353492cd2332.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_88eafc5f-a653-40ea-8eb8-353492cd2332.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_8952c606-57f6-4715-a6ad-d74a8492601d.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_8952c606-57f6-4715-a6ad-d74a8492601d.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_8952c606-57f6-4715-a6ad-d74a8492601d.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_8a14a74b-af1b-42ed-97a5-2efa264367f5.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_8a14a74b-af1b-42ed-97a5-2efa264367f5.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_8a14a74b-af1b-42ed-97a5-2efa264367f5.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_8b600340-4afd-4687-8c66-a12067f44ab3.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_8b600340-4afd-4687-8c66-a12067f44ab3.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_8b600340-4afd-4687-8c66-a12067f44ab3.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_8b82ea5d-7e9c-493b-a012-47c9e8e2d4c7.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_8b82ea5d-7e9c-493b-a012-47c9e8e2d4c7.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_8b82ea5d-7e9c-493b-a012-47c9e8e2d4c7.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_8c37adc5-895b-433b-a603-d26684d546ba.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_8c37adc5-895b-433b-a603-d26684d546ba.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_8c37adc5-895b-433b-a603-d26684d546ba.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_8d3c043c-af11-40cb-8bca-ef309db8458c.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_8d3c043c-af11-40cb-8bca-ef309db8458c.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_8d3c043c-af11-40cb-8bca-ef309db8458c.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_8d9ff2c4-723d-4b54-8a46-47426e4c5999.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_8d9ff2c4-723d-4b54-8a46-47426e4c5999.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_8d9ff2c4-723d-4b54-8a46-47426e4c5999.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_92ab83c0-7de9-4b30-ba8b-5ec0590a3ebe.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_92ab83c0-7de9-4b30-ba8b-5ec0590a3ebe.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_92ab83c0-7de9-4b30-ba8b-5ec0590a3ebe.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_92ab8acc-1479-4aed-b3d0-722cc56c53eb.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_92ab8acc-1479-4aed-b3d0-722cc56c53eb.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_92ab8acc-1479-4aed-b3d0-722cc56c53eb.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_94a5079a-e6c4-461e-9752-851e3b25a178.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_94a5079a-e6c4-461e-9752-851e3b25a178.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_94a5079a-e6c4-461e-9752-851e3b25a178.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_957bf7a2-b146-4070-8139-873a02b600e4.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_957bf7a2-b146-4070-8139-873a02b600e4.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_957bf7a2-b146-4070-8139-873a02b600e4.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_96bfc1e1-18ce-4b70-be3b-0fd490c0424a.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_96bfc1e1-18ce-4b70-be3b-0fd490c0424a.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_96bfc1e1-18ce-4b70-be3b-0fd490c0424a.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_976be8c2-5c47-4347-a1f3-aba3b170f1d4.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_976be8c2-5c47-4347-a1f3-aba3b170f1d4.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_976be8c2-5c47-4347-a1f3-aba3b170f1d4.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_9b722f9c-348c-4a3d-a9b8-83052de714aa.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_9b722f9c-348c-4a3d-a9b8-83052de714aa.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_9b722f9c-348c-4a3d-a9b8-83052de714aa.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_9c50f552-0aa4-4f9e-aa72-a3d2320b4cc3.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_9c50f552-0aa4-4f9e-aa72-a3d2320b4cc3.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_9c50f552-0aa4-4f9e-aa72-a3d2320b4cc3.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_9f05d718-bf13-461f-b9dc-4e77705d0e20.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_9f05d718-bf13-461f-b9dc-4e77705d0e20.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_9f05d718-bf13-461f-b9dc-4e77705d0e20.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a0d3c8e2-dde6-4672-bd3a-90ba210db1e7.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a0d3c8e2-dde6-4672-bd3a-90ba210db1e7.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a0d3c8e2-dde6-4672-bd3a-90ba210db1e7.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a11ae273-6b3a-45f5-8e1f-176a2327236c.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a11ae273-6b3a-45f5-8e1f-176a2327236c.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a11ae273-6b3a-45f5-8e1f-176a2327236c.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a1386541-8bfb-4db1-af96-0c752be57f32.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a1386541-8bfb-4db1-af96-0c752be57f32.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a1386541-8bfb-4db1-af96-0c752be57f32.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a285dcb7-8c17-45c1-a7c4-d3c237fb76e0.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a285dcb7-8c17-45c1-a7c4-d3c237fb76e0.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a285dcb7-8c17-45c1-a7c4-d3c237fb76e0.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a34355ef-2b59-4e26-b861-c8d22d6a5b6f.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a34355ef-2b59-4e26-b861-c8d22d6a5b6f.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a34355ef-2b59-4e26-b861-c8d22d6a5b6f.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a34dd10f-1edb-4d21-b395-99b81c1dad75.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a34dd10f-1edb-4d21-b395-99b81c1dad75.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a34dd10f-1edb-4d21-b395-99b81c1dad75.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a4fb8abc-0150-4baf-ad1e-23ccbbdd9d15.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a4fb8abc-0150-4baf-ad1e-23ccbbdd9d15.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a4fb8abc-0150-4baf-ad1e-23ccbbdd9d15.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a5f0b797-809f-4c2b-8cc9-f583c2c1220f.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a5f0b797-809f-4c2b-8cc9-f583c2c1220f.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a5f0b797-809f-4c2b-8cc9-f583c2c1220f.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a71f1b1b-4593-4b61-aaef-1acbd1e86a00.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a71f1b1b-4593-4b61-aaef-1acbd1e86a00.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a71f1b1b-4593-4b61-aaef-1acbd1e86a00.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a7f6ee64-4ffe-44a7-b9a9-940858aeedab.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a7f6ee64-4ffe-44a7-b9a9-940858aeedab.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a7f6ee64-4ffe-44a7-b9a9-940858aeedab.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_a982249d-ded2-497e-b817-c8b9bd035280.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_a982249d-ded2-497e-b817-c8b9bd035280.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_a982249d-ded2-497e-b817-c8b9bd035280.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ab86977a-aa93-432e-b1c5-c4793912cbf9.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ab86977a-aa93-432e-b1c5-c4793912cbf9.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ab86977a-aa93-432e-b1c5-c4793912cbf9.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_abffa39f-c50c-4e48-8fd8-0b4d413ed411.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_abffa39f-c50c-4e48-8fd8-0b4d413ed411.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_abffa39f-c50c-4e48-8fd8-0b4d413ed411.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ac124ce0-82d8-426c-9694-f1a52f3a2bb4.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ac124ce0-82d8-426c-9694-f1a52f3a2bb4.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ac124ce0-82d8-426c-9694-f1a52f3a2bb4.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ad28c897-a042-4da2-bd7e-adaf701a9797.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ad28c897-a042-4da2-bd7e-adaf701a9797.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ad28c897-a042-4da2-bd7e-adaf701a9797.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_afc0b6d5-7594-4dd3-a934-8ac261b012b8.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_afc0b6d5-7594-4dd3-a934-8ac261b012b8.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_afc0b6d5-7594-4dd3-a934-8ac261b012b8.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_b2c82220-a182-4a62-a803-d72e9ec00101.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_b2c82220-a182-4a62-a803-d72e9ec00101.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_b2c82220-a182-4a62-a803-d72e9ec00101.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_b69a0dae-1153-4c13-a7ad-d8f67f3e3959.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_b69a0dae-1153-4c13-a7ad-d8f67f3e3959.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_b69a0dae-1153-4c13-a7ad-d8f67f3e3959.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_b6c6be45-7755-4896-a588-35e2ef3292ca.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_b6c6be45-7755-4896-a588-35e2ef3292ca.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_b6c6be45-7755-4896-a588-35e2ef3292ca.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_b6cc828b-6090-4aac-8e83-142c4ce2c486.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_b6cc828b-6090-4aac-8e83-142c4ce2c486.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_b6cc828b-6090-4aac-8e83-142c4ce2c486.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba40e227-7218-4e78-9956-983abb9d6be8.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba40e227-7218-4e78-9956-983abb9d6be8.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba40e227-7218-4e78-9956-983abb9d6be8.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba556e5f-2908-46ff-8f09-aeb98e63aedd.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba556e5f-2908-46ff-8f09-aeb98e63aedd.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba556e5f-2908-46ff-8f09-aeb98e63aedd.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba958b01-7bfa-45a7-b1aa-ae6df75ea8af.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba958b01-7bfa-45a7-b1aa-ae6df75ea8af.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ba958b01-7bfa-45a7-b1aa-ae6df75ea8af.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_be02036b-6209-4b05-bc14-23bcb8bc8d77.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_be02036b-6209-4b05-bc14-23bcb8bc8d77.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_be02036b-6209-4b05-bc14-23bcb8bc8d77.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_c026c77a-9431-4b99-8943-138736f0a793.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_c026c77a-9431-4b99-8943-138736f0a793.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_c026c77a-9431-4b99-8943-138736f0a793.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_c078b39f-f3db-4970-86c3-2ad19a226a94.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_c078b39f-f3db-4970-86c3-2ad19a226a94.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_c078b39f-f3db-4970-86c3-2ad19a226a94.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_c195e699-8e03-497b-85cf-8b90e225aefb.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_c195e699-8e03-497b-85cf-8b90e225aefb.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_c195e699-8e03-497b-85cf-8b90e225aefb.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_c352ee60-6665-4c4d-89d9-a7f4c77641ea.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_c352ee60-6665-4c4d-89d9-a7f4c77641ea.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_c352ee60-6665-4c4d-89d9-a7f4c77641ea.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_c4e387c8-2eca-479a-bb11-e8ba114841c4.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_c4e387c8-2eca-479a-bb11-e8ba114841c4.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_c4e387c8-2eca-479a-bb11-e8ba114841c4.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_c501272d-d575-4172-a74f-ea86fdf2afcc.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_c501272d-d575-4172-a74f-ea86fdf2afcc.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_c501272d-d575-4172-a74f-ea86fdf2afcc.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_c55528ca-0cbf-46de-ab4e-31396c7d80e2.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_c55528ca-0cbf-46de-ab4e-31396c7d80e2.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_c55528ca-0cbf-46de-ab4e-31396c7d80e2.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_c82e1283-3e28-41bb-8f54-12cfb215b82d.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_c82e1283-3e28-41bb-8f54-12cfb215b82d.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_c82e1283-3e28-41bb-8f54-12cfb215b82d.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_cded0cd8-abda-4215-b3e9-9dfcd144fd1e.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_cded0cd8-abda-4215-b3e9-9dfcd144fd1e.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_cded0cd8-abda-4215-b3e9-9dfcd144fd1e.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_cfea7f85-04b8-4c91-87e6-62f7ec906ce5.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_cfea7f85-04b8-4c91-87e6-62f7ec906ce5.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_cfea7f85-04b8-4c91-87e6-62f7ec906ce5.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_d1b6a0f1-c75b-43e2-875f-709eb0c44448.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_d1b6a0f1-c75b-43e2-875f-709eb0c44448.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_d1b6a0f1-c75b-43e2-875f-709eb0c44448.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_d243c873-3a5c-4375-8ff4-e3cb387272b5.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_d243c873-3a5c-4375-8ff4-e3cb387272b5.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_d243c873-3a5c-4375-8ff4-e3cb387272b5.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_d37ad901-136c-4e08-9382-7898660f83f9.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_d37ad901-136c-4e08-9382-7898660f83f9.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_d37ad901-136c-4e08-9382-7898660f83f9.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_d3e07f84-ebba-42e1-abd1-6d6aa99f78fd.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_d3e07f84-ebba-42e1-abd1-6d6aa99f78fd.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_d3e07f84-ebba-42e1-abd1-6d6aa99f78fd.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_d45b29d7-5f88-43d7-936d-021d3b791fe9.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_d45b29d7-5f88-43d7-936d-021d3b791fe9.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_d45b29d7-5f88-43d7-936d-021d3b791fe9.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_d77bcc28-bfe1-457c-8adb-b269c214781e.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_d77bcc28-bfe1-457c-8adb-b269c214781e.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_d77bcc28-bfe1-457c-8adb-b269c214781e.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_d8c3912a-a735-42d7-9bb3-7d8b2eb4b595.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_d8c3912a-a735-42d7-9bb3-7d8b2eb4b595.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_d8c3912a-a735-42d7-9bb3-7d8b2eb4b595.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_d972baef-77ec-4c05-91b2-2b387432873e.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_d972baef-77ec-4c05-91b2-2b387432873e.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_d972baef-77ec-4c05-91b2-2b387432873e.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_df3a31c9-9ef2-4216-8592-ffc5609b3e62.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_df3a31c9-9ef2-4216-8592-ffc5609b3e62.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_df3a31c9-9ef2-4216-8592-ffc5609b3e62.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_e20d7417-d885-49f0-b49a-bfcaa6270282.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_e20d7417-d885-49f0-b49a-bfcaa6270282.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_e20d7417-d885-49f0-b49a-bfcaa6270282.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_e2fd15ea-7a28-4593-a4eb-71eef0aa48ed.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_e2fd15ea-7a28-4593-a4eb-71eef0aa48ed.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_e2fd15ea-7a28-4593-a4eb-71eef0aa48ed.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_e8556821-22e2-4792-a51f-3da8e975e9c0.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_e8556821-22e2-4792-a51f-3da8e975e9c0.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_e8556821-22e2-4792-a51f-3da8e975e9c0.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ea2ce061-095a-4b13-b1e4-3ff36bfc5b98.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ea2ce061-095a-4b13-b1e4-3ff36bfc5b98.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ea2ce061-095a-4b13-b1e4-3ff36bfc5b98.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ea327b0a-8640-44c5-ac8d-a393e05b835b.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ea327b0a-8640-44c5-ac8d-a393e05b835b.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ea327b0a-8640-44c5-ac8d-a393e05b835b.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ece72b02-058d-4071-940a-8d405166b0cd.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ece72b02-058d-4071-940a-8d405166b0cd.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_ece72b02-058d-4071-940a-8d405166b0cd.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_f314de42-d7be-41b0-8510-975854d6a30f.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_f314de42-d7be-41b0-8510-975854d6a30f.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_f314de42-d7be-41b0-8510-975854d6a30f.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_f4fb10f2-544b-4740-aed5-87f342e7a7f3.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_f4fb10f2-544b-4740-aed5-87f342e7a7f3.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_f4fb10f2-544b-4740-aed5-87f342e7a7f3.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_f5284e47-5eee-467f-ba76-e56d58c97c7d.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_f5284e47-5eee-467f-ba76-e56d58c97c7d.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_f5284e47-5eee-467f-ba76-e56d58c97c7d.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_f6929b0d-dca5-44b1-8e7a-6a2c0c9e5481.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_f6929b0d-dca5-44b1-8e7a-6a2c0c9e5481.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_f6929b0d-dca5-44b1-8e7a-6a2c0c9e5481.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_f8fb4b49-19a4-49ae-a79e-effcb2672ce9.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_f8fb4b49-19a4-49ae-a79e-effcb2672ce9.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_f8fb4b49-19a4-49ae-a79e-effcb2672ce9.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_f9c735ea-09b5-401c-97bc-9c2a1e1b9956.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_f9c735ea-09b5-401c-97bc-9c2a1e1b9956.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_f9c735ea-09b5-401c-97bc-9c2a1e1b9956.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_fbf38042-0f22-4efb-beaf-da849c012708.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_fbf38042-0f22-4efb-beaf-da849c012708.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_fbf38042-0f22-4efb-beaf-da849c012708.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_fc0c219d-7300-4739-998e-fa9205e7a940.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_fc0c219d-7300-4739-998e-fa9205e7a940.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_fc0c219d-7300-4739-998e-fa9205e7a940.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_fcd5e811-73df-4920-9357-09cd1e143d62.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_fcd5e811-73df-4920-9357-09cd1e143d62.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_fcd5e811-73df-4920-9357-09cd1e143d62.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_fd7e842b-7d77-459a-bc25-f6382e2d8579.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_fd7e842b-7d77-459a-bc25-f6382e2d8579.jsonl.zst
+    │   │   │   │   │   │   ├── batch_2026-02-09_fd7e842b-7d77-459a-bc25-f6382e2d8579.jsonl.zst.meta.json
+    │   │   │   │   │   │   ├── batch_2026-02-09_ff0da4eb-357e-4591-8508-20803d259186.jsonl
+    │   │   │   │   │   │   ├── batch_2026-02-09_ff0da4eb-357e-4591-8508-20803d259186.jsonl.zst
+    │   │   │   │   │   │   └── batch_2026-02-09_ff0da4eb-357e-4591-8508-20803d259186.jsonl.zst.meta.json
+    │   │   │   │   │   ├── bronze_chembl_publication_dq_report.json
+    │   │   │   │   │   └── chembl_publication_metadata.yaml
+    │   │   │   │   ├── activity
+    │   │   │   │   ├── assay
+    │   │   │   │   ├── cell_line
+    │   │   │   │   ├── compound_record
+    │   │   │   │   ├── molecule
+    │   │   │   │   ├── publication_term
+    │   │   │   │   ├── target
+    │   │   │   │   └── target_component
+    │   │   │   ├── crossref/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── 2026-02-09/
+    │   │   │   │       │   ├── batch_2026-02-09_00f57883-4c10-45cc-90f8-74d6832b743d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_00f57883-4c10-45cc-90f8-74d6832b743d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_00f57883-4c10-45cc-90f8-74d6832b743d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_01f71e0a-b29d-49b0-9b81-cae4ef3264ad.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_01f71e0a-b29d-49b0-9b81-cae4ef3264ad.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_01f71e0a-b29d-49b0-9b81-cae4ef3264ad.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_022cc580-9342-47cd-9fe6-73f4a3622a91.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_022cc580-9342-47cd-9fe6-73f4a3622a91.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_022cc580-9342-47cd-9fe6-73f4a3622a91.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_03599b7c-a4b6-4a38-a4b0-2d5807ce35a9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_03599b7c-a4b6-4a38-a4b0-2d5807ce35a9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_03599b7c-a4b6-4a38-a4b0-2d5807ce35a9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_044b0c68-3b26-42c3-93c6-ee9aca0301e3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_044b0c68-3b26-42c3-93c6-ee9aca0301e3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_044b0c68-3b26-42c3-93c6-ee9aca0301e3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_04635dcf-4ad3-4ead-9807-adaf7a4aa816.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_04635dcf-4ad3-4ead-9807-adaf7a4aa816.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_04635dcf-4ad3-4ead-9807-adaf7a4aa816.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_07e9ad30-dc50-4a88-9a49-a75c20ccdfbb.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_07e9ad30-dc50-4a88-9a49-a75c20ccdfbb.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_07e9ad30-dc50-4a88-9a49-a75c20ccdfbb.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0812faf3-d981-4d97-8180-7deb27ca4199.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0812faf3-d981-4d97-8180-7deb27ca4199.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0812faf3-d981-4d97-8180-7deb27ca4199.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0953e792-b0ce-48dc-b517-6610578fcca9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0953e792-b0ce-48dc-b517-6610578fcca9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0953e792-b0ce-48dc-b517-6610578fcca9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_09577f93-68ac-469c-be6d-b09da5e9a4f7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_09577f93-68ac-469c-be6d-b09da5e9a4f7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_09577f93-68ac-469c-be6d-b09da5e9a4f7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_09afb6ad-8706-49ba-9a29-4094b468b86b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_09afb6ad-8706-49ba-9a29-4094b468b86b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_09afb6ad-8706-49ba-9a29-4094b468b86b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0ae878f1-6246-4ce0-92d0-4667901a15b7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0ae878f1-6246-4ce0-92d0-4667901a15b7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0ae878f1-6246-4ce0-92d0-4667901a15b7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0f46557e-9cd1-4a83-82b2-9de50f0c99f4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0f46557e-9cd1-4a83-82b2-9de50f0c99f4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0f46557e-9cd1-4a83-82b2-9de50f0c99f4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_105f6572-b0c3-40b1-8791-6b5b1cbcbbd2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_105f6572-b0c3-40b1-8791-6b5b1cbcbbd2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_105f6572-b0c3-40b1-8791-6b5b1cbcbbd2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_10ffec50-3c4d-47ca-96dd-0e2a1e09187a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_10ffec50-3c4d-47ca-96dd-0e2a1e09187a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_10ffec50-3c4d-47ca-96dd-0e2a1e09187a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_11d5c961-e8e4-4ced-8af2-1430400ca022.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_11d5c961-e8e4-4ced-8af2-1430400ca022.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_11d5c961-e8e4-4ced-8af2-1430400ca022.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_13414c7f-4698-440d-87b6-3a0ce9a9bb4c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_13414c7f-4698-440d-87b6-3a0ce9a9bb4c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_13414c7f-4698-440d-87b6-3a0ce9a9bb4c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_19d2cf54-9314-4d4d-a5d2-c9b605d3643b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_19d2cf54-9314-4d4d-a5d2-c9b605d3643b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_19d2cf54-9314-4d4d-a5d2-c9b605d3643b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1fed1f9e-8c05-44f2-b5bd-14421dc751ec.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1fed1f9e-8c05-44f2-b5bd-14421dc751ec.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1fed1f9e-8c05-44f2-b5bd-14421dc751ec.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2007033d-68a1-4594-8a31-92b94a782b03.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2007033d-68a1-4594-8a31-92b94a782b03.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2007033d-68a1-4594-8a31-92b94a782b03.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_20541d3b-2147-4bff-b9a8-86013d008f1f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_20541d3b-2147-4bff-b9a8-86013d008f1f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_20541d3b-2147-4bff-b9a8-86013d008f1f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_262aa016-ebce-4f75-a2fa-097f2078329b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_262aa016-ebce-4f75-a2fa-097f2078329b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_262aa016-ebce-4f75-a2fa-097f2078329b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_27e9da43-8a7e-48b0-bf36-e1bd3ea40dad.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_27e9da43-8a7e-48b0-bf36-e1bd3ea40dad.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_27e9da43-8a7e-48b0-bf36-e1bd3ea40dad.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_28cc872f-90f8-412e-a922-66f4d743e6ce.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_28cc872f-90f8-412e-a922-66f4d743e6ce.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_28cc872f-90f8-412e-a922-66f4d743e6ce.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_298ceabf-19e6-4156-a77c-4f6eaacdae60.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_298ceabf-19e6-4156-a77c-4f6eaacdae60.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_298ceabf-19e6-4156-a77c-4f6eaacdae60.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2c0da66a-9c28-4535-ac98-54b604ace064.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2c0da66a-9c28-4535-ac98-54b604ace064.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2c0da66a-9c28-4535-ac98-54b604ace064.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2cf454a1-2c4c-49e6-a0a9-34a7cc674db6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2cf454a1-2c4c-49e6-a0a9-34a7cc674db6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2cf454a1-2c4c-49e6-a0a9-34a7cc674db6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2dc63659-faef-4c73-9c17-59643875e702.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2dc63659-faef-4c73-9c17-59643875e702.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2dc63659-faef-4c73-9c17-59643875e702.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2f6ed0f2-efde-45b6-87eb-9a349bdc8b3d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2f6ed0f2-efde-45b6-87eb-9a349bdc8b3d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2f6ed0f2-efde-45b6-87eb-9a349bdc8b3d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3049bc1a-ba0e-450a-ba1b-6baad08592d9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3049bc1a-ba0e-450a-ba1b-6baad08592d9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3049bc1a-ba0e-450a-ba1b-6baad08592d9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3063cf6f-3e44-45de-9a7b-8dfd8e940f44.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3063cf6f-3e44-45de-9a7b-8dfd8e940f44.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3063cf6f-3e44-45de-9a7b-8dfd8e940f44.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3180cbd0-efa1-43bf-8b0d-7dc643119e99.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3180cbd0-efa1-43bf-8b0d-7dc643119e99.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3180cbd0-efa1-43bf-8b0d-7dc643119e99.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_32d1453c-7bae-47c0-9ed9-edf9a6ba4234.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_32d1453c-7bae-47c0-9ed9-edf9a6ba4234.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_32d1453c-7bae-47c0-9ed9-edf9a6ba4234.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_356ecc45-865e-4559-9dcd-81b1e7a33178.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_356ecc45-865e-4559-9dcd-81b1e7a33178.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_356ecc45-865e-4559-9dcd-81b1e7a33178.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3677a4a7-2ea2-4f03-a728-f60471ba5673.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3677a4a7-2ea2-4f03-a728-f60471ba5673.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3677a4a7-2ea2-4f03-a728-f60471ba5673.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3789dcda-2906-41c1-9e7f-8cbb7ffcc226.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3789dcda-2906-41c1-9e7f-8cbb7ffcc226.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3789dcda-2906-41c1-9e7f-8cbb7ffcc226.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3957f725-1671-4013-ad57-770b35190529.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3957f725-1671-4013-ad57-770b35190529.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3957f725-1671-4013-ad57-770b35190529.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_39d1f196-9aeb-4331-aeee-09fe6f109770.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_39d1f196-9aeb-4331-aeee-09fe6f109770.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_39d1f196-9aeb-4331-aeee-09fe6f109770.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3a739afb-cccd-41da-8e93-511ab793c135.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3a739afb-cccd-41da-8e93-511ab793c135.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3a739afb-cccd-41da-8e93-511ab793c135.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3a92a339-40c6-4594-9140-edebdf89570e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3a92a339-40c6-4594-9140-edebdf89570e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3a92a339-40c6-4594-9140-edebdf89570e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_418ee929-9459-472a-886b-b4aa7550c346.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_418ee929-9459-472a-886b-b4aa7550c346.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_418ee929-9459-472a-886b-b4aa7550c346.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_469b0204-bef8-414a-baa7-dee686715f65.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_469b0204-bef8-414a-baa7-dee686715f65.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_469b0204-bef8-414a-baa7-dee686715f65.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_46ee508d-a66b-4174-920c-9f80d16a6ae2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_46ee508d-a66b-4174-920c-9f80d16a6ae2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_46ee508d-a66b-4174-920c-9f80d16a6ae2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_47544474-85ce-4a3f-b02d-1ff8167e41de.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_47544474-85ce-4a3f-b02d-1ff8167e41de.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_47544474-85ce-4a3f-b02d-1ff8167e41de.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_48c2ada2-62ba-48b5-9935-9266d5116f1d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_48c2ada2-62ba-48b5-9935-9266d5116f1d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_48c2ada2-62ba-48b5-9935-9266d5116f1d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4ad51002-f2fd-4473-b685-8e3ca2ddfad9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4ad51002-f2fd-4473-b685-8e3ca2ddfad9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4ad51002-f2fd-4473-b685-8e3ca2ddfad9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4b22b911-1bfd-49d0-9ca7-879729506421.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4b22b911-1bfd-49d0-9ca7-879729506421.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4b22b911-1bfd-49d0-9ca7-879729506421.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4b48a85d-108a-47d6-ae90-fc66c3f3f854.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4b48a85d-108a-47d6-ae90-fc66c3f3f854.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4b48a85d-108a-47d6-ae90-fc66c3f3f854.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4dbd46e1-65e1-4b76-ac36-8b642229a4c7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4dbd46e1-65e1-4b76-ac36-8b642229a4c7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4dbd46e1-65e1-4b76-ac36-8b642229a4c7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4ef65f1c-ae43-484f-9fbe-15081d158da6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4ef65f1c-ae43-484f-9fbe-15081d158da6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4ef65f1c-ae43-484f-9fbe-15081d158da6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4f0c9470-6872-4672-ac2b-60ba9a4a5819.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4f0c9470-6872-4672-ac2b-60ba9a4a5819.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4f0c9470-6872-4672-ac2b-60ba9a4a5819.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5495f222-0e08-4f9e-aa6f-cef1317f6e96.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5495f222-0e08-4f9e-aa6f-cef1317f6e96.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5495f222-0e08-4f9e-aa6f-cef1317f6e96.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_55165347-a30e-4400-8b52-ba86c318f1d3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_55165347-a30e-4400-8b52-ba86c318f1d3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_55165347-a30e-4400-8b52-ba86c318f1d3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_55a62429-85ee-4425-ae3e-d38351cad615.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_55a62429-85ee-4425-ae3e-d38351cad615.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_55a62429-85ee-4425-ae3e-d38351cad615.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_57be2f92-a69f-4c2e-9933-92740beab66a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_57be2f92-a69f-4c2e-9933-92740beab66a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_57be2f92-a69f-4c2e-9933-92740beab66a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_58a892b6-4153-4843-bbf4-6e9185a235ae.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_58a892b6-4153-4843-bbf4-6e9185a235ae.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_58a892b6-4153-4843-bbf4-6e9185a235ae.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5b8dc822-38cf-4293-bf13-9ad5b81d4220.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5b8dc822-38cf-4293-bf13-9ad5b81d4220.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5b8dc822-38cf-4293-bf13-9ad5b81d4220.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5c174930-912f-4a09-bb5f-24599eab2f77.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5c174930-912f-4a09-bb5f-24599eab2f77.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5c174930-912f-4a09-bb5f-24599eab2f77.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5d999c8b-880d-41ce-b02c-8dc7c7efd363.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5d999c8b-880d-41ce-b02c-8dc7c7efd363.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5d999c8b-880d-41ce-b02c-8dc7c7efd363.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5e00a315-9027-4189-a135-947786db0d11.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5e00a315-9027-4189-a135-947786db0d11.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5e00a315-9027-4189-a135-947786db0d11.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5f7e72d5-573d-4bc5-9548-59b7d61a2c4b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5f7e72d5-573d-4bc5-9548-59b7d61a2c4b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5f7e72d5-573d-4bc5-9548-59b7d61a2c4b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_606c1b72-23fc-4e2b-aa5d-2b01d5d3437e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_606c1b72-23fc-4e2b-aa5d-2b01d5d3437e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_606c1b72-23fc-4e2b-aa5d-2b01d5d3437e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_61503827-c6f0-4de3-8546-a896d8ac14d1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_61503827-c6f0-4de3-8546-a896d8ac14d1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_61503827-c6f0-4de3-8546-a896d8ac14d1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_64dd91f5-452c-4715-973a-33724413fe9a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_64dd91f5-452c-4715-973a-33724413fe9a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_64dd91f5-452c-4715-973a-33724413fe9a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_668d130b-2353-420a-8da6-ebf9861dbacb.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_668d130b-2353-420a-8da6-ebf9861dbacb.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_668d130b-2353-420a-8da6-ebf9861dbacb.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_68e7c304-13cd-43d7-9eea-9a41a0e0a397.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_68e7c304-13cd-43d7-9eea-9a41a0e0a397.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_68e7c304-13cd-43d7-9eea-9a41a0e0a397.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_691261f7-531b-44a1-8a67-98262e14b1fb.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_691261f7-531b-44a1-8a67-98262e14b1fb.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_691261f7-531b-44a1-8a67-98262e14b1fb.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_69eb415e-b7fb-4d8c-ade7-077ae3a3b8a8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_69eb415e-b7fb-4d8c-ade7-077ae3a3b8a8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_69eb415e-b7fb-4d8c-ade7-077ae3a3b8a8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6e168db2-63f5-4fc3-ab19-5ffe1d2d3220.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6e168db2-63f5-4fc3-ab19-5ffe1d2d3220.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6e168db2-63f5-4fc3-ab19-5ffe1d2d3220.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6e4951ae-c867-4d6c-830c-5579affdab7d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6e4951ae-c867-4d6c-830c-5579affdab7d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6e4951ae-c867-4d6c-830c-5579affdab7d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7069ccac-8828-4aa2-a901-7b3a3464def3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7069ccac-8828-4aa2-a901-7b3a3464def3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7069ccac-8828-4aa2-a901-7b3a3464def3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_713801bf-94dd-43ca-b331-f44bb311a70a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_713801bf-94dd-43ca-b331-f44bb311a70a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_713801bf-94dd-43ca-b331-f44bb311a70a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_717ddcb2-ae32-4527-aca8-8029d0c39b43.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_717ddcb2-ae32-4527-aca8-8029d0c39b43.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_717ddcb2-ae32-4527-aca8-8029d0c39b43.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_71af6451-1f5b-4717-9042-473afb14c70d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_71af6451-1f5b-4717-9042-473afb14c70d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_71af6451-1f5b-4717-9042-473afb14c70d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_74434bd4-9b64-4afd-8049-b5fa55a147d2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_74434bd4-9b64-4afd-8049-b5fa55a147d2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_74434bd4-9b64-4afd-8049-b5fa55a147d2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_754058cc-1f91-45c7-bd08-278fcbf56ca1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_754058cc-1f91-45c7-bd08-278fcbf56ca1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_754058cc-1f91-45c7-bd08-278fcbf56ca1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_765ab631-9a65-4c5b-b0ac-17f5bb32e51a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_765ab631-9a65-4c5b-b0ac-17f5bb32e51a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_765ab631-9a65-4c5b-b0ac-17f5bb32e51a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_78cda71f-f6ae-4e5d-854a-3979ce9e844b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_78cda71f-f6ae-4e5d-854a-3979ce9e844b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_78cda71f-f6ae-4e5d-854a-3979ce9e844b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7cc32b75-c5de-452b-b5f3-70787657b214.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7cc32b75-c5de-452b-b5f3-70787657b214.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7cc32b75-c5de-452b-b5f3-70787657b214.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7d3503d1-0459-4e34-a088-50b02536f7aa.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7d3503d1-0459-4e34-a088-50b02536f7aa.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7d3503d1-0459-4e34-a088-50b02536f7aa.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7d6608de-e76f-4a0c-b60b-254f2ab30a96.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7d6608de-e76f-4a0c-b60b-254f2ab30a96.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7d6608de-e76f-4a0c-b60b-254f2ab30a96.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_81c91b96-2816-4014-871f-f31cafea07c4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_81c91b96-2816-4014-871f-f31cafea07c4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_81c91b96-2816-4014-871f-f31cafea07c4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_820e718c-1819-4fcb-bb1a-0d41f5dd4e0b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_820e718c-1819-4fcb-bb1a-0d41f5dd4e0b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_820e718c-1819-4fcb-bb1a-0d41f5dd4e0b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_838a4e86-38d8-4679-9d19-5b35d7008c5f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_838a4e86-38d8-4679-9d19-5b35d7008c5f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_838a4e86-38d8-4679-9d19-5b35d7008c5f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8538c02e-33d2-47b9-aa2b-499f48e6d53a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8538c02e-33d2-47b9-aa2b-499f48e6d53a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8538c02e-33d2-47b9-aa2b-499f48e6d53a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_85bf383f-1a73-4356-8990-3856243cf1ac.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_85bf383f-1a73-4356-8990-3856243cf1ac.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_85bf383f-1a73-4356-8990-3856243cf1ac.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_86131ae5-0a88-43cd-b7e5-d6238c844703.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_86131ae5-0a88-43cd-b7e5-d6238c844703.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_86131ae5-0a88-43cd-b7e5-d6238c844703.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_87003a0d-2d85-45af-9710-a297ae40d471.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_87003a0d-2d85-45af-9710-a297ae40d471.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_87003a0d-2d85-45af-9710-a297ae40d471.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_88edb9ea-0741-4134-9683-c97b310f87ef.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_88edb9ea-0741-4134-9683-c97b310f87ef.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_88edb9ea-0741-4134-9683-c97b310f87ef.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8952f413-e361-41a5-a82d-654acf2e945e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8952f413-e361-41a5-a82d-654acf2e945e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8952f413-e361-41a5-a82d-654acf2e945e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8b1dd397-5d58-4bef-9d19-e0202776a1cd.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8b1dd397-5d58-4bef-9d19-e0202776a1cd.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8b1dd397-5d58-4bef-9d19-e0202776a1cd.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8bfd5bcf-878b-46ef-8b38-a5160cdd5f4f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8bfd5bcf-878b-46ef-8b38-a5160cdd5f4f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8bfd5bcf-878b-46ef-8b38-a5160cdd5f4f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8c6833c6-68e0-4b13-bfd7-cebbe76c2b1c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8c6833c6-68e0-4b13-bfd7-cebbe76c2b1c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8c6833c6-68e0-4b13-bfd7-cebbe76c2b1c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8da875cf-e2b9-49a9-ab96-1abcc6b9e945.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8da875cf-e2b9-49a9-ab96-1abcc6b9e945.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8da875cf-e2b9-49a9-ab96-1abcc6b9e945.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8ed2e3af-d61d-4461-8859-f14d42476aa4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8ed2e3af-d61d-4461-8859-f14d42476aa4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8ed2e3af-d61d-4461-8859-f14d42476aa4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_924050b8-041b-4386-9316-e6fe2264dc60.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_924050b8-041b-4386-9316-e6fe2264dc60.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_924050b8-041b-4386-9316-e6fe2264dc60.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_950d9b6e-8834-4b6b-bf1c-b78ae2460765.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_950d9b6e-8834-4b6b-bf1c-b78ae2460765.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_950d9b6e-8834-4b6b-bf1c-b78ae2460765.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_96182ffb-53e7-4034-82e4-5257504c7aec.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_96182ffb-53e7-4034-82e4-5257504c7aec.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_96182ffb-53e7-4034-82e4-5257504c7aec.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_99d29d27-d824-4914-9405-ba4384c44b9f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_99d29d27-d824-4914-9405-ba4384c44b9f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_99d29d27-d824-4914-9405-ba4384c44b9f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9b8e51b7-631b-4dd7-ae65-da80d513f4fb.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9b8e51b7-631b-4dd7-ae65-da80d513f4fb.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9b8e51b7-631b-4dd7-ae65-da80d513f4fb.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9b8fbb2b-4958-423a-a54e-3335cc0a0108.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9b8fbb2b-4958-423a-a54e-3335cc0a0108.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9b8fbb2b-4958-423a-a54e-3335cc0a0108.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9d128e08-fc5e-41b3-8241-b643ecf92c52.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9d128e08-fc5e-41b3-8241-b643ecf92c52.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9d128e08-fc5e-41b3-8241-b643ecf92c52.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9e835ac3-61bc-4a4c-863f-eb39ce1717e6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9e835ac3-61bc-4a4c-863f-eb39ce1717e6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9e835ac3-61bc-4a4c-863f-eb39ce1717e6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9f328ffa-c62a-42f4-811d-196c511acba5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9f328ffa-c62a-42f4-811d-196c511acba5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9f328ffa-c62a-42f4-811d-196c511acba5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9f71e101-190e-40ea-8c80-b068233f2b92.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9f71e101-190e-40ea-8c80-b068233f2b92.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9f71e101-190e-40ea-8c80-b068233f2b92.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a0085fdb-77ad-4acd-a684-a865d7d1263a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a0085fdb-77ad-4acd-a684-a865d7d1263a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a0085fdb-77ad-4acd-a684-a865d7d1263a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a0c85507-262c-4fd7-b4d5-5148a34443d5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a0c85507-262c-4fd7-b4d5-5148a34443d5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a0c85507-262c-4fd7-b4d5-5148a34443d5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a0e8491c-17e4-4e08-a783-f42570cc402b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a0e8491c-17e4-4e08-a783-f42570cc402b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a0e8491c-17e4-4e08-a783-f42570cc402b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a2aec094-48a9-4d00-a21f-e43e025a35a5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a2aec094-48a9-4d00-a21f-e43e025a35a5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a2aec094-48a9-4d00-a21f-e43e025a35a5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a3d7e457-64c0-4327-911f-81353f1913b4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a3d7e457-64c0-4327-911f-81353f1913b4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a3d7e457-64c0-4327-911f-81353f1913b4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a404e673-b629-48f4-8f27-abbeec3739c2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a404e673-b629-48f4-8f27-abbeec3739c2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a404e673-b629-48f4-8f27-abbeec3739c2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a453d67e-7d8b-4886-a8dc-5e005db941e1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a453d67e-7d8b-4886-a8dc-5e005db941e1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a453d67e-7d8b-4886-a8dc-5e005db941e1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a586ae3a-a0fe-4b1d-9510-0c24e2293267.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a586ae3a-a0fe-4b1d-9510-0c24e2293267.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a586ae3a-a0fe-4b1d-9510-0c24e2293267.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a89c01b4-8524-462f-b1af-4d3bd892fca2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a89c01b4-8524-462f-b1af-4d3bd892fca2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a89c01b4-8524-462f-b1af-4d3bd892fca2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a8c47c61-798d-43b7-8a4f-ccc430acb3c2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a8c47c61-798d-43b7-8a4f-ccc430acb3c2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a8c47c61-798d-43b7-8a4f-ccc430acb3c2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a93f6ab8-8978-4fc6-8019-82f339080c2e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a93f6ab8-8978-4fc6-8019-82f339080c2e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a93f6ab8-8978-4fc6-8019-82f339080c2e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b1e46473-e2f9-41a0-88f7-7cab6f1ae971.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b1e46473-e2f9-41a0-88f7-7cab6f1ae971.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b1e46473-e2f9-41a0-88f7-7cab6f1ae971.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b2c86952-ce81-432d-898e-3a336c365f42.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b2c86952-ce81-432d-898e-3a336c365f42.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b2c86952-ce81-432d-898e-3a336c365f42.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b3e28387-8455-414a-83a1-3dfad8302d3a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b3e28387-8455-414a-83a1-3dfad8302d3a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b3e28387-8455-414a-83a1-3dfad8302d3a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b3e9812d-6b19-44cb-bdc0-d417fd719754.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b3e9812d-6b19-44cb-bdc0-d417fd719754.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b3e9812d-6b19-44cb-bdc0-d417fd719754.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b44014b1-4948-471e-91e5-b3c88f34c174.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b44014b1-4948-471e-91e5-b3c88f34c174.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b44014b1-4948-471e-91e5-b3c88f34c174.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b520be5c-629a-41d5-920f-64ab20e35ba5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b520be5c-629a-41d5-920f-64ab20e35ba5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b520be5c-629a-41d5-920f-64ab20e35ba5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b5d44f7b-4681-41ec-bb5c-9807f046c406.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b5d44f7b-4681-41ec-bb5c-9807f046c406.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b5d44f7b-4681-41ec-bb5c-9807f046c406.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b967aa88-0a36-491b-8aa9-d0a2b0aacf0a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b967aa88-0a36-491b-8aa9-d0a2b0aacf0a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b967aa88-0a36-491b-8aa9-d0a2b0aacf0a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b9f8f321-79de-4758-af45-79756ac44fd5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b9f8f321-79de-4758-af45-79756ac44fd5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b9f8f321-79de-4758-af45-79756ac44fd5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_bf5cc7d1-bb49-48e2-b4db-166d15ef59f1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_bf5cc7d1-bb49-48e2-b4db-166d15ef59f1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_bf5cc7d1-bb49-48e2-b4db-166d15ef59f1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c101c895-62e3-4988-9218-4c1fc8429700.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c101c895-62e3-4988-9218-4c1fc8429700.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c101c895-62e3-4988-9218-4c1fc8429700.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c12cb51c-6ce7-4266-b839-b6b1dde07a50.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c12cb51c-6ce7-4266-b839-b6b1dde07a50.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c12cb51c-6ce7-4266-b839-b6b1dde07a50.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c144ff53-7049-4dc3-a03c-072db48de442.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c144ff53-7049-4dc3-a03c-072db48de442.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c144ff53-7049-4dc3-a03c-072db48de442.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c4d01800-8b0a-423f-832d-1f502c1a57f4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c4d01800-8b0a-423f-832d-1f502c1a57f4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c4d01800-8b0a-423f-832d-1f502c1a57f4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c87ede52-4035-475e-a1a4-178a013e7a0b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c87ede52-4035-475e-a1a4-178a013e7a0b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c87ede52-4035-475e-a1a4-178a013e7a0b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ce956c95-abc3-47e2-8cd3-d659d81caa3e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ce956c95-abc3-47e2-8cd3-d659d81caa3e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ce956c95-abc3-47e2-8cd3-d659d81caa3e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ced80691-41d5-43d5-9571-36eec898c5a5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ced80691-41d5-43d5-9571-36eec898c5a5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ced80691-41d5-43d5-9571-36eec898c5a5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d0e80d2f-af3c-4e01-a779-0424264d3e5a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d0e80d2f-af3c-4e01-a779-0424264d3e5a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d0e80d2f-af3c-4e01-a779-0424264d3e5a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d3787690-ddd6-4e03-8200-ecab6bc79a28.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d3787690-ddd6-4e03-8200-ecab6bc79a28.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d3787690-ddd6-4e03-8200-ecab6bc79a28.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d97c29fd-79bc-4287-a71e-cb3e3c6fe032.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d97c29fd-79bc-4287-a71e-cb3e3c6fe032.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d97c29fd-79bc-4287-a71e-cb3e3c6fe032.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_dfd6e74e-0f1e-43f9-b1f0-4d0f150ace9a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_dfd6e74e-0f1e-43f9-b1f0-4d0f150ace9a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_dfd6e74e-0f1e-43f9-b1f0-4d0f150ace9a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e5c90be8-5984-4c9b-ace7-83463890a6d4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e5c90be8-5984-4c9b-ace7-83463890a6d4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e5c90be8-5984-4c9b-ace7-83463890a6d4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e9f259b8-971f-4540-9c22-12ae96c55720.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e9f259b8-971f-4540-9c22-12ae96c55720.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e9f259b8-971f-4540-9c22-12ae96c55720.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ec17f821-b471-4fb3-8b63-8137f2216943.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ec17f821-b471-4fb3-8b63-8137f2216943.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ec17f821-b471-4fb3-8b63-8137f2216943.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ed3cbb3f-49ea-44c9-af5e-3a00a7cf4436.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ed3cbb3f-49ea-44c9-af5e-3a00a7cf4436.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ed3cbb3f-49ea-44c9-af5e-3a00a7cf4436.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ee942ee9-91c5-4cb5-8505-7be1758010ff.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ee942ee9-91c5-4cb5-8505-7be1758010ff.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ee942ee9-91c5-4cb5-8505-7be1758010ff.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_efc0629b-8572-420b-b454-f8a946c3e475.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_efc0629b-8572-420b-b454-f8a946c3e475.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_efc0629b-8572-420b-b454-f8a946c3e475.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f0f40f43-30b3-47a6-b982-513a32736210.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f0f40f43-30b3-47a6-b982-513a32736210.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f0f40f43-30b3-47a6-b982-513a32736210.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f1b84b15-8327-437f-80b7-33aa6436bbf8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f1b84b15-8327-437f-80b7-33aa6436bbf8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f1b84b15-8327-437f-80b7-33aa6436bbf8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f31e35e1-8765-4cc4-b091-abf0874f7648.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f31e35e1-8765-4cc4-b091-abf0874f7648.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f31e35e1-8765-4cc4-b091-abf0874f7648.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f329aba3-a62b-4908-af13-7b1353fa642b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f329aba3-a62b-4908-af13-7b1353fa642b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f329aba3-a62b-4908-af13-7b1353fa642b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f41793d6-436a-4f0c-8b69-4e710069f607.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f41793d6-436a-4f0c-8b69-4e710069f607.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f41793d6-436a-4f0c-8b69-4e710069f607.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f5c7933a-4f2a-4736-a81f-668aec9751d5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f5c7933a-4f2a-4736-a81f-668aec9751d5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f5c7933a-4f2a-4736-a81f-668aec9751d5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f8ef63d8-889f-45af-bec2-3a9924330336.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f8ef63d8-889f-45af-bec2-3a9924330336.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f8ef63d8-889f-45af-bec2-3a9924330336.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f8fa9ad3-4c57-4f1b-9662-0be8310e5e1d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f8fa9ad3-4c57-4f1b-9662-0be8310e5e1d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f8fa9ad3-4c57-4f1b-9662-0be8310e5e1d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fa1e5117-83c0-42f4-ad4f-a1eb328b3ad9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fa1e5117-83c0-42f4-ad4f-a1eb328b3ad9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fa1e5117-83c0-42f4-ad4f-a1eb328b3ad9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_faabe10a-2740-43c4-a49e-bd34896d9abe.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_faabe10a-2740-43c4-a49e-bd34896d9abe.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_faabe10a-2740-43c4-a49e-bd34896d9abe.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fadf08f2-d5c4-46ba-ae42-86c2e2864c09.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fadf08f2-d5c4-46ba-ae42-86c2e2864c09.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fadf08f2-d5c4-46ba-ae42-86c2e2864c09.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fb3bfb84-fea2-4c6c-afb0-ddef7f2fbfe1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fb3bfb84-fea2-4c6c-afb0-ddef7f2fbfe1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fb3bfb84-fea2-4c6c-afb0-ddef7f2fbfe1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fe0d9764-0ed7-4f2a-89e9-ee94216f5e18.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fe0d9764-0ed7-4f2a-89e9-ee94216f5e18.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fe0d9764-0ed7-4f2a-89e9-ee94216f5e18.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fec5963a-1635-44bb-b536-3b300d39975e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fec5963a-1635-44bb-b536-3b300d39975e.jsonl.zst
+    │   │   │   │       │   └── batch_2026-02-09_fec5963a-1635-44bb-b536-3b300d39975e.jsonl.zst.meta.json
+    │   │   │   │       ├── bronze_crossref_publication_dq_report.json
+    │   │   │   │       └── crossref_work_metadata.yaml
+    │   │   │   ├── openalex/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── 2026-02-09/
+    │   │   │   │       │   ├── batch_2026-02-09_00876e1b-9f0b-46af-a4f9-4c4256d46cb7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_00876e1b-9f0b-46af-a4f9-4c4256d46cb7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_00876e1b-9f0b-46af-a4f9-4c4256d46cb7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_02466856-bd79-46c4-a75f-c2ad71805b28.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_02466856-bd79-46c4-a75f-c2ad71805b28.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_02466856-bd79-46c4-a75f-c2ad71805b28.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_048201e6-9d45-422b-b45a-0530c787ef50.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_048201e6-9d45-422b-b45a-0530c787ef50.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_048201e6-9d45-422b-b45a-0530c787ef50.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_05451546-0d53-48fe-881b-cf7c97a405e6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_05451546-0d53-48fe-881b-cf7c97a405e6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_05451546-0d53-48fe-881b-cf7c97a405e6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_080591c4-ae70-420e-b9fb-eb5c2412dd42.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_080591c4-ae70-420e-b9fb-eb5c2412dd42.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_080591c4-ae70-420e-b9fb-eb5c2412dd42.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_091b5b56-48fe-4582-b15d-5891e7eeec16.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_091b5b56-48fe-4582-b15d-5891e7eeec16.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_091b5b56-48fe-4582-b15d-5891e7eeec16.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_109a850b-de58-4f77-918b-6832413fb750.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_109a850b-de58-4f77-918b-6832413fb750.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_109a850b-de58-4f77-918b-6832413fb750.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_13003a10-875b-440a-a3db-89b9b5257a78.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_13003a10-875b-440a-a3db-89b9b5257a78.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_13003a10-875b-440a-a3db-89b9b5257a78.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_132f980d-fb74-4ca2-a6bd-8c00cde57002.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_132f980d-fb74-4ca2-a6bd-8c00cde57002.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_132f980d-fb74-4ca2-a6bd-8c00cde57002.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_153f4a02-34cc-48bc-b5e5-1a23c0873fa2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_153f4a02-34cc-48bc-b5e5-1a23c0873fa2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_153f4a02-34cc-48bc-b5e5-1a23c0873fa2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_16f53558-77f9-4a05-af63-a6dc14890de7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_16f53558-77f9-4a05-af63-a6dc14890de7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_16f53558-77f9-4a05-af63-a6dc14890de7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_19bb5698-ccf1-4a0e-88b2-1e1824a0143b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_19bb5698-ccf1-4a0e-88b2-1e1824a0143b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_19bb5698-ccf1-4a0e-88b2-1e1824a0143b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1a0fab91-73d5-4330-8f70-6ccfad2b4f39.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1a0fab91-73d5-4330-8f70-6ccfad2b4f39.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1a0fab91-73d5-4330-8f70-6ccfad2b4f39.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1a1e767d-3190-414f-b058-9650e61f5e83.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1a1e767d-3190-414f-b058-9650e61f5e83.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1a1e767d-3190-414f-b058-9650e61f5e83.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1b594546-2b93-4d90-8c4d-570c19f2dac2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1b594546-2b93-4d90-8c4d-570c19f2dac2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1b594546-2b93-4d90-8c4d-570c19f2dac2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_216cd660-b6a0-466b-9751-ede5230c433a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_216cd660-b6a0-466b-9751-ede5230c433a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_216cd660-b6a0-466b-9751-ede5230c433a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_223f2959-9986-4414-8518-94ee4f2e4703.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_223f2959-9986-4414-8518-94ee4f2e4703.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_223f2959-9986-4414-8518-94ee4f2e4703.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_224673ab-9e02-4768-a793-1570d5ee42f0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_224673ab-9e02-4768-a793-1570d5ee42f0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_224673ab-9e02-4768-a793-1570d5ee42f0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2265d402-7707-405d-81e7-75bcc6c672b2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2265d402-7707-405d-81e7-75bcc6c672b2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2265d402-7707-405d-81e7-75bcc6c672b2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_24f64d01-3704-4417-a62d-eedfd812323b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_24f64d01-3704-4417-a62d-eedfd812323b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_24f64d01-3704-4417-a62d-eedfd812323b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2592e15a-dcc6-4675-916e-67b211c3326b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2592e15a-dcc6-4675-916e-67b211c3326b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2592e15a-dcc6-4675-916e-67b211c3326b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_269cd1c7-a66d-40b6-88ae-bd53e5385361.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_269cd1c7-a66d-40b6-88ae-bd53e5385361.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_269cd1c7-a66d-40b6-88ae-bd53e5385361.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_290f01f8-bb7e-401b-9c0c-b79684c820da.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_290f01f8-bb7e-401b-9c0c-b79684c820da.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_290f01f8-bb7e-401b-9c0c-b79684c820da.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2914c78f-f274-43f4-af63-972e1f81c28f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2914c78f-f274-43f4-af63-972e1f81c28f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2914c78f-f274-43f4-af63-972e1f81c28f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2a416677-e1a1-4bb7-9dc1-34785d9fc96f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2a416677-e1a1-4bb7-9dc1-34785d9fc96f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2a416677-e1a1-4bb7-9dc1-34785d9fc96f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2c6ae4c6-7706-4b48-9ff4-b296d347526f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2c6ae4c6-7706-4b48-9ff4-b296d347526f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2c6ae4c6-7706-4b48-9ff4-b296d347526f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2ca99b48-37b1-48e7-9e5f-e5a4d377cf69.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2ca99b48-37b1-48e7-9e5f-e5a4d377cf69.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2ca99b48-37b1-48e7-9e5f-e5a4d377cf69.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2db7b84c-c214-42e6-ab2d-5d325d662291.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2db7b84c-c214-42e6-ab2d-5d325d662291.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2db7b84c-c214-42e6-ab2d-5d325d662291.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2dd5cf8a-76ad-4970-8162-7558f7e452a3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2dd5cf8a-76ad-4970-8162-7558f7e452a3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2dd5cf8a-76ad-4970-8162-7558f7e452a3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2de6a5fc-8e6b-4104-a72b-0166ccf9b811.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2de6a5fc-8e6b-4104-a72b-0166ccf9b811.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2de6a5fc-8e6b-4104-a72b-0166ccf9b811.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_32660638-27f2-43b7-abf5-f6da94717a91.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_32660638-27f2-43b7-abf5-f6da94717a91.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_32660638-27f2-43b7-abf5-f6da94717a91.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_32e7b810-63c4-49d6-8ff8-aada11966809.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_32e7b810-63c4-49d6-8ff8-aada11966809.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_32e7b810-63c4-49d6-8ff8-aada11966809.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_336d5671-fc7e-4558-9cac-a848d352daf6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_336d5671-fc7e-4558-9cac-a848d352daf6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_336d5671-fc7e-4558-9cac-a848d352daf6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_345eb86c-7bd5-401e-8235-6f8ab15f459b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_345eb86c-7bd5-401e-8235-6f8ab15f459b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_345eb86c-7bd5-401e-8235-6f8ab15f459b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_36a9c0fc-1127-4bd9-beff-870cac596281.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_36a9c0fc-1127-4bd9-beff-870cac596281.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_36a9c0fc-1127-4bd9-beff-870cac596281.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3b1475fc-ae9b-4000-84cc-a29488960492.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3b1475fc-ae9b-4000-84cc-a29488960492.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3b1475fc-ae9b-4000-84cc-a29488960492.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3df92a2a-4fc3-4a2d-885a-0153ed7d30b7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3df92a2a-4fc3-4a2d-885a-0153ed7d30b7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3df92a2a-4fc3-4a2d-885a-0153ed7d30b7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3ffc9ec4-b456-4690-b0de-16bb54b54fcc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3ffc9ec4-b456-4690-b0de-16bb54b54fcc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3ffc9ec4-b456-4690-b0de-16bb54b54fcc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_422870d7-cab3-4a39-9f7b-27258d413f5f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_422870d7-cab3-4a39-9f7b-27258d413f5f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_422870d7-cab3-4a39-9f7b-27258d413f5f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4323d46b-7904-43ac-bdd8-68fd3af70f3e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4323d46b-7904-43ac-bdd8-68fd3af70f3e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4323d46b-7904-43ac-bdd8-68fd3af70f3e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_438f64ae-6e8a-4256-ad33-2be742f95e5d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_438f64ae-6e8a-4256-ad33-2be742f95e5d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_438f64ae-6e8a-4256-ad33-2be742f95e5d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_448cc620-9457-4495-9d1f-8b6c8f95994e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_448cc620-9457-4495-9d1f-8b6c8f95994e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_448cc620-9457-4495-9d1f-8b6c8f95994e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_46b565c4-9a06-46fe-b712-a23a44195dd0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_46b565c4-9a06-46fe-b712-a23a44195dd0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_46b565c4-9a06-46fe-b712-a23a44195dd0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4bd9527f-ba46-4c05-8a01-36935b725f18.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4bd9527f-ba46-4c05-8a01-36935b725f18.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4bd9527f-ba46-4c05-8a01-36935b725f18.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4c27e4ac-19eb-4fa9-8c99-85413f5d3f5d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4c27e4ac-19eb-4fa9-8c99-85413f5d3f5d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4c27e4ac-19eb-4fa9-8c99-85413f5d3f5d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4dc4bcc8-91d9-42b8-8b50-bf10bb815202.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4dc4bcc8-91d9-42b8-8b50-bf10bb815202.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4dc4bcc8-91d9-42b8-8b50-bf10bb815202.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4e8a71bd-4074-46f0-acb8-c0470f5861e4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4e8a71bd-4074-46f0-acb8-c0470f5861e4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4e8a71bd-4074-46f0-acb8-c0470f5861e4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4efbce9e-3359-44d3-969d-782cb6b0b95a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4efbce9e-3359-44d3-969d-782cb6b0b95a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4efbce9e-3359-44d3-969d-782cb6b0b95a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_501f018a-732e-49d7-9286-02bb4ab64349.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_501f018a-732e-49d7-9286-02bb4ab64349.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_501f018a-732e-49d7-9286-02bb4ab64349.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_50c0d35a-5f06-4f7e-92d3-7dc052a95248.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_50c0d35a-5f06-4f7e-92d3-7dc052a95248.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_50c0d35a-5f06-4f7e-92d3-7dc052a95248.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_520549dc-ab15-49a5-bb20-8b5e9eb80961.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_520549dc-ab15-49a5-bb20-8b5e9eb80961.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_520549dc-ab15-49a5-bb20-8b5e9eb80961.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5579bafe-3b35-4a31-a2cb-19188a32fa56.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5579bafe-3b35-4a31-a2cb-19188a32fa56.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5579bafe-3b35-4a31-a2cb-19188a32fa56.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_573de3d6-66cf-440e-8582-dd4435792035.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_573de3d6-66cf-440e-8582-dd4435792035.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_573de3d6-66cf-440e-8582-dd4435792035.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_584fb11a-a287-4639-981d-6fe15215edd4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_584fb11a-a287-4639-981d-6fe15215edd4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_584fb11a-a287-4639-981d-6fe15215edd4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5b7ab315-3dc0-4115-9fe7-0641326f9f8a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5b7ab315-3dc0-4115-9fe7-0641326f9f8a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5b7ab315-3dc0-4115-9fe7-0641326f9f8a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5ce2ab54-be90-4cb9-b457-07de9989e10c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5ce2ab54-be90-4cb9-b457-07de9989e10c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5ce2ab54-be90-4cb9-b457-07de9989e10c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5fbda55c-3461-4c18-ba53-7d29c2a305ac.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5fbda55c-3461-4c18-ba53-7d29c2a305ac.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5fbda55c-3461-4c18-ba53-7d29c2a305ac.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_604cd6f7-22c1-490b-85ac-7014a604ceb7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_604cd6f7-22c1-490b-85ac-7014a604ceb7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_604cd6f7-22c1-490b-85ac-7014a604ceb7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_60fe971c-0469-4881-a993-579b0bc2b0d0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_60fe971c-0469-4881-a993-579b0bc2b0d0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_60fe971c-0469-4881-a993-579b0bc2b0d0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_63d07d02-f072-4f92-a675-7627497877be.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_63d07d02-f072-4f92-a675-7627497877be.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_63d07d02-f072-4f92-a675-7627497877be.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6c9b2da1-5880-4079-8fbf-5566914a56ff.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6c9b2da1-5880-4079-8fbf-5566914a56ff.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6c9b2da1-5880-4079-8fbf-5566914a56ff.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6e9d8b38-ce89-49b0-adba-603f39b9c008.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6e9d8b38-ce89-49b0-adba-603f39b9c008.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6e9d8b38-ce89-49b0-adba-603f39b9c008.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6fc7afc2-8a45-4319-899c-8fdc192ae11a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6fc7afc2-8a45-4319-899c-8fdc192ae11a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6fc7afc2-8a45-4319-899c-8fdc192ae11a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6fd5ebd3-9e3e-4b51-b189-d62350055667.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6fd5ebd3-9e3e-4b51-b189-d62350055667.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6fd5ebd3-9e3e-4b51-b189-d62350055667.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_718660ee-447c-4228-bc49-adcf168b74fa.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_718660ee-447c-4228-bc49-adcf168b74fa.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_718660ee-447c-4228-bc49-adcf168b74fa.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_71d7aa81-e15e-4129-a0de-94edfdff1f12.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_71d7aa81-e15e-4129-a0de-94edfdff1f12.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_71d7aa81-e15e-4129-a0de-94edfdff1f12.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_71d7b479-4866-49cf-a93d-30de0df99488.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_71d7b479-4866-49cf-a93d-30de0df99488.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_71d7b479-4866-49cf-a93d-30de0df99488.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_73825cc2-fc93-4f57-ad83-73d9a424308d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_73825cc2-fc93-4f57-ad83-73d9a424308d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_73825cc2-fc93-4f57-ad83-73d9a424308d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_738321c3-c17b-4306-aabf-3dbbc704f6c8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_738321c3-c17b-4306-aabf-3dbbc704f6c8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_738321c3-c17b-4306-aabf-3dbbc704f6c8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_740f7284-e189-4004-afd9-e022a7252a3d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_740f7284-e189-4004-afd9-e022a7252a3d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_740f7284-e189-4004-afd9-e022a7252a3d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_761b78b5-8758-4fdc-9a59-425f898a5ff6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_761b78b5-8758-4fdc-9a59-425f898a5ff6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_761b78b5-8758-4fdc-9a59-425f898a5ff6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7753f13f-3d9e-4f79-9941-d3c03559c192.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7753f13f-3d9e-4f79-9941-d3c03559c192.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7753f13f-3d9e-4f79-9941-d3c03559c192.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_79b6a847-7800-4e06-a66a-45f8e317a8b4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_79b6a847-7800-4e06-a66a-45f8e317a8b4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_79b6a847-7800-4e06-a66a-45f8e317a8b4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7a8f97ec-ad7e-4f76-a109-5a8ce2a22275.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7a8f97ec-ad7e-4f76-a109-5a8ce2a22275.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7a8f97ec-ad7e-4f76-a109-5a8ce2a22275.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7b7736ea-773b-40ad-ace6-1148404370a5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7b7736ea-773b-40ad-ace6-1148404370a5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7b7736ea-773b-40ad-ace6-1148404370a5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7ce1ca37-6689-45ca-bc09-23d9ec6cb40a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7ce1ca37-6689-45ca-bc09-23d9ec6cb40a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7ce1ca37-6689-45ca-bc09-23d9ec6cb40a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7d92f78e-35f6-4bb3-a2e7-63a1ec28a989.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7d92f78e-35f6-4bb3-a2e7-63a1ec28a989.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7d92f78e-35f6-4bb3-a2e7-63a1ec28a989.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7ef4b73d-6efb-4237-a068-2a7c15ab0e61.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7ef4b73d-6efb-4237-a068-2a7c15ab0e61.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7ef4b73d-6efb-4237-a068-2a7c15ab0e61.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8494218c-8454-4728-8b74-a52fb3047da1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8494218c-8454-4728-8b74-a52fb3047da1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8494218c-8454-4728-8b74-a52fb3047da1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_85ebcab8-35c7-461e-9914-2fa462ef996a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_85ebcab8-35c7-461e-9914-2fa462ef996a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_85ebcab8-35c7-461e-9914-2fa462ef996a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_87dac8f8-46fe-4106-a26a-4cf6ff5615d8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_87dac8f8-46fe-4106-a26a-4cf6ff5615d8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_87dac8f8-46fe-4106-a26a-4cf6ff5615d8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8c8249fd-7fef-451b-8e06-90df8e66b687.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8c8249fd-7fef-451b-8e06-90df8e66b687.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8c8249fd-7fef-451b-8e06-90df8e66b687.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8cc413ba-71fb-4982-af6b-9392783e7e48.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8cc413ba-71fb-4982-af6b-9392783e7e48.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8cc413ba-71fb-4982-af6b-9392783e7e48.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8fb0c247-4903-4866-ac7d-af4b9e8ff363.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8fb0c247-4903-4866-ac7d-af4b9e8ff363.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8fb0c247-4903-4866-ac7d-af4b9e8ff363.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_90d555e2-0a69-4c02-908c-4d369209ad34.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_90d555e2-0a69-4c02-908c-4d369209ad34.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_90d555e2-0a69-4c02-908c-4d369209ad34.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_90dc8861-b0dd-43a5-98d8-e77113fe1380.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_90dc8861-b0dd-43a5-98d8-e77113fe1380.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_90dc8861-b0dd-43a5-98d8-e77113fe1380.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_925124fd-55a9-4611-8371-d36a594a7900.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_925124fd-55a9-4611-8371-d36a594a7900.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_925124fd-55a9-4611-8371-d36a594a7900.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_95c3b0b1-42c0-4ed8-a8db-0d117ca6a7d1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_95c3b0b1-42c0-4ed8-a8db-0d117ca6a7d1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_95c3b0b1-42c0-4ed8-a8db-0d117ca6a7d1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9685b033-8ac9-4b1a-a302-e9a6db0febf6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9685b033-8ac9-4b1a-a302-e9a6db0febf6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9685b033-8ac9-4b1a-a302-e9a6db0febf6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_968de0da-dca5-4c72-8b43-5a7290a7505a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_968de0da-dca5-4c72-8b43-5a7290a7505a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_968de0da-dca5-4c72-8b43-5a7290a7505a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_986f24a0-67ea-4b7e-b539-e7e26e23b2a2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_986f24a0-67ea-4b7e-b539-e7e26e23b2a2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_986f24a0-67ea-4b7e-b539-e7e26e23b2a2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_98d18451-530e-4df6-a854-fdf7d4aceaad.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_98d18451-530e-4df6-a854-fdf7d4aceaad.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_98d18451-530e-4df6-a854-fdf7d4aceaad.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9b2b8f76-ca9b-49e5-9456-2dc4669c30ef.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9b2b8f76-ca9b-49e5-9456-2dc4669c30ef.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9b2b8f76-ca9b-49e5-9456-2dc4669c30ef.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9e3f1652-2b3b-426f-9229-3f118342f37f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9e3f1652-2b3b-426f-9229-3f118342f37f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9e3f1652-2b3b-426f-9229-3f118342f37f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a2a56ace-7611-4d98-b9e5-4359de1c2ae4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a2a56ace-7611-4d98-b9e5-4359de1c2ae4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a2a56ace-7611-4d98-b9e5-4359de1c2ae4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a4725868-1de8-461d-b09b-c5584bb2f4ca.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a4725868-1de8-461d-b09b-c5584bb2f4ca.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a4725868-1de8-461d-b09b-c5584bb2f4ca.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a5b394bf-0ba5-406e-a321-db7fde37bc0d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a5b394bf-0ba5-406e-a321-db7fde37bc0d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a5b394bf-0ba5-406e-a321-db7fde37bc0d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a72a47db-67f9-4ce6-942b-1bec170e895c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a72a47db-67f9-4ce6-942b-1bec170e895c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a72a47db-67f9-4ce6-942b-1bec170e895c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a753915d-1b86-42ca-9936-aa2f486df3e1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a753915d-1b86-42ca-9936-aa2f486df3e1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a753915d-1b86-42ca-9936-aa2f486df3e1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a77c70c8-25af-497b-a35a-5dd42b6fca22.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a77c70c8-25af-497b-a35a-5dd42b6fca22.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a77c70c8-25af-497b-a35a-5dd42b6fca22.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a9ce7ff4-9024-44a9-8d9f-09cabc0cbffe.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a9ce7ff4-9024-44a9-8d9f-09cabc0cbffe.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a9ce7ff4-9024-44a9-8d9f-09cabc0cbffe.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a9e69603-d666-42a1-b40a-cfd3f802f523.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a9e69603-d666-42a1-b40a-cfd3f802f523.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a9e69603-d666-42a1-b40a-cfd3f802f523.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a9f8a611-132c-4db7-b8d8-b63c904f8a7e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a9f8a611-132c-4db7-b8d8-b63c904f8a7e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a9f8a611-132c-4db7-b8d8-b63c904f8a7e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_acb51bdd-fbb4-4299-9b1b-f42c5c683d1b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_acb51bdd-fbb4-4299-9b1b-f42c5c683d1b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_acb51bdd-fbb4-4299-9b1b-f42c5c683d1b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b049ccb9-6b81-4921-92a5-f8e5bd4d5457.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b049ccb9-6b81-4921-92a5-f8e5bd4d5457.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b049ccb9-6b81-4921-92a5-f8e5bd4d5457.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b43a4fa4-4c9f-47ea-b720-27bce2b5ba8a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b43a4fa4-4c9f-47ea-b720-27bce2b5ba8a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b43a4fa4-4c9f-47ea-b720-27bce2b5ba8a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b4510c68-31dc-4b52-a1d6-cc0e0baf5326.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b4510c68-31dc-4b52-a1d6-cc0e0baf5326.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b4510c68-31dc-4b52-a1d6-cc0e0baf5326.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b7b34455-d3fb-40c1-bb0a-31a9a045ec99.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b7b34455-d3fb-40c1-bb0a-31a9a045ec99.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b7b34455-d3fb-40c1-bb0a-31a9a045ec99.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b801c225-2d17-45b4-83de-8e61280ca101.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b801c225-2d17-45b4-83de-8e61280ca101.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b801c225-2d17-45b4-83de-8e61280ca101.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b92bf330-1e6c-478d-9e87-be0a89839249.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b92bf330-1e6c-478d-9e87-be0a89839249.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b92bf330-1e6c-478d-9e87-be0a89839249.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_bb9a0728-2422-46a5-a2f3-ae8d4a4dafb1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_bb9a0728-2422-46a5-a2f3-ae8d4a4dafb1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_bb9a0728-2422-46a5-a2f3-ae8d4a4dafb1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_be7a69bb-3d4c-47b7-a701-44cb5fbafea5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_be7a69bb-3d4c-47b7-a701-44cb5fbafea5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_be7a69bb-3d4c-47b7-a701-44cb5fbafea5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c12cb722-b5e5-4eec-b9cc-79804b4de48f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c12cb722-b5e5-4eec-b9cc-79804b4de48f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c12cb722-b5e5-4eec-b9cc-79804b4de48f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c4cac939-57e8-4fa8-b0f5-639dc74a8ba9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c4cac939-57e8-4fa8-b0f5-639dc74a8ba9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c4cac939-57e8-4fa8-b0f5-639dc74a8ba9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c6223029-56af-4606-bf9f-e3554ceda3ab.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c6223029-56af-4606-bf9f-e3554ceda3ab.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c6223029-56af-4606-bf9f-e3554ceda3ab.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c6e7ded5-1bae-4a29-ad8a-b7850680d8ec.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c6e7ded5-1bae-4a29-ad8a-b7850680d8ec.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c6e7ded5-1bae-4a29-ad8a-b7850680d8ec.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c7e256f5-4419-4f1f-b0a1-c24a9a545bbc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c7e256f5-4419-4f1f-b0a1-c24a9a545bbc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c7e256f5-4419-4f1f-b0a1-c24a9a545bbc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ca57ed14-0222-4234-831d-151b5dbbdc89.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ca57ed14-0222-4234-831d-151b5dbbdc89.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ca57ed14-0222-4234-831d-151b5dbbdc89.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cae9a9c7-3f44-4b18-b3fc-4d6da96a2154.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cae9a9c7-3f44-4b18-b3fc-4d6da96a2154.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cae9a9c7-3f44-4b18-b3fc-4d6da96a2154.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cb7e034a-ee9e-46e0-92b6-aa4026fe46af.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cb7e034a-ee9e-46e0-92b6-aa4026fe46af.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cb7e034a-ee9e-46e0-92b6-aa4026fe46af.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cbb8264c-0607-4b65-8534-3bf5c7c59c03.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cbb8264c-0607-4b65-8534-3bf5c7c59c03.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cbb8264c-0607-4b65-8534-3bf5c7c59c03.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cc547f2d-cd4b-4e7a-9b5a-b5cc423e4bda.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cc547f2d-cd4b-4e7a-9b5a-b5cc423e4bda.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cc547f2d-cd4b-4e7a-9b5a-b5cc423e4bda.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ce3099dd-0602-4033-b1c6-cd8a0b9a0aa7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ce3099dd-0602-4033-b1c6-cd8a0b9a0aa7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ce3099dd-0602-4033-b1c6-cd8a0b9a0aa7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cf021d50-37e6-4040-91fb-1c0bb691b7b4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cf021d50-37e6-4040-91fb-1c0bb691b7b4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cf021d50-37e6-4040-91fb-1c0bb691b7b4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d1264e45-133b-4a80-b8bf-b7ab1f41c529.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d1264e45-133b-4a80-b8bf-b7ab1f41c529.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d1264e45-133b-4a80-b8bf-b7ab1f41c529.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d191114b-c558-4fa9-916c-16a1fc9d8e65.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d191114b-c558-4fa9-916c-16a1fc9d8e65.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d191114b-c558-4fa9-916c-16a1fc9d8e65.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d38ac083-f28a-4b7c-988a-de69b58fe487.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d38ac083-f28a-4b7c-988a-de69b58fe487.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d38ac083-f28a-4b7c-988a-de69b58fe487.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d4bfcaa3-f8f2-42f6-8a09-e690ce676eb7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d4bfcaa3-f8f2-42f6-8a09-e690ce676eb7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d4bfcaa3-f8f2-42f6-8a09-e690ce676eb7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d73c320b-3699-4309-9a08-9783eab6edfa.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d73c320b-3699-4309-9a08-9783eab6edfa.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d73c320b-3699-4309-9a08-9783eab6edfa.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d7c0fd15-e81d-44e3-9392-a8f63710f97d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d7c0fd15-e81d-44e3-9392-a8f63710f97d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d7c0fd15-e81d-44e3-9392-a8f63710f97d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d911ef96-9cff-420d-b94a-be3f29041445.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d911ef96-9cff-420d-b94a-be3f29041445.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d911ef96-9cff-420d-b94a-be3f29041445.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_dc61e4d3-be1f-44aa-9614-05c42f7e80d4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_dc61e4d3-be1f-44aa-9614-05c42f7e80d4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_dc61e4d3-be1f-44aa-9614-05c42f7e80d4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ddf47ee3-e8eb-4eef-a057-f46901a2d818.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ddf47ee3-e8eb-4eef-a057-f46901a2d818.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ddf47ee3-e8eb-4eef-a057-f46901a2d818.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_df9029bb-49a7-41e5-91b1-d3116839bfb0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_df9029bb-49a7-41e5-91b1-d3116839bfb0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_df9029bb-49a7-41e5-91b1-d3116839bfb0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e056666f-edcb-46fe-ad03-f9d1065c58a1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e056666f-edcb-46fe-ad03-f9d1065c58a1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e056666f-edcb-46fe-ad03-f9d1065c58a1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e39ba8af-4815-42fc-9216-f846b4936972.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e39ba8af-4815-42fc-9216-f846b4936972.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e39ba8af-4815-42fc-9216-f846b4936972.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e3ecb5c4-11e1-450b-8fec-32ed5330bf2b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e3ecb5c4-11e1-450b-8fec-32ed5330bf2b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e3ecb5c4-11e1-450b-8fec-32ed5330bf2b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e47e3c05-8495-4fdb-b93a-c56df274378f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e47e3c05-8495-4fdb-b93a-c56df274378f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e47e3c05-8495-4fdb-b93a-c56df274378f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e810542b-040c-499b-aef8-de7d84ca17d2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e810542b-040c-499b-aef8-de7d84ca17d2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e810542b-040c-499b-aef8-de7d84ca17d2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e9cd7e63-9f07-4ff4-af39-cbc4a9295750.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e9cd7e63-9f07-4ff4-af39-cbc4a9295750.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e9cd7e63-9f07-4ff4-af39-cbc4a9295750.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ec37ea45-f3ff-4844-91c1-72a550c80e0a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ec37ea45-f3ff-4844-91c1-72a550c80e0a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ec37ea45-f3ff-4844-91c1-72a550c80e0a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ed003c9b-aca7-4042-81de-7e80feb3939a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ed003c9b-aca7-4042-81de-7e80feb3939a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ed003c9b-aca7-4042-81de-7e80feb3939a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ede1f245-1e65-4d35-856b-167b1dbba1b5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ede1f245-1e65-4d35-856b-167b1dbba1b5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ede1f245-1e65-4d35-856b-167b1dbba1b5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ee8467d8-f9e1-4c00-8aa1-16ca3bc1eb78.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ee8467d8-f9e1-4c00-8aa1-16ca3bc1eb78.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ee8467d8-f9e1-4c00-8aa1-16ca3bc1eb78.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ef9dcbb8-f30b-4cf7-9a5f-bb2e03a36855.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ef9dcbb8-f30b-4cf7-9a5f-bb2e03a36855.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ef9dcbb8-f30b-4cf7-9a5f-bb2e03a36855.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f01ae36a-b992-48db-a959-83b450068b8f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f01ae36a-b992-48db-a959-83b450068b8f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f01ae36a-b992-48db-a959-83b450068b8f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f2b8667e-8289-49d8-b747-9061e4f5db1b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f2b8667e-8289-49d8-b747-9061e4f5db1b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f2b8667e-8289-49d8-b747-9061e4f5db1b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f37ef5b3-5caf-49e5-8fc1-71eb4b06160f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f37ef5b3-5caf-49e5-8fc1-71eb4b06160f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f37ef5b3-5caf-49e5-8fc1-71eb4b06160f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f38911da-6b02-4654-9ded-fc44df1b676b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f38911da-6b02-4654-9ded-fc44df1b676b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f38911da-6b02-4654-9ded-fc44df1b676b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f81844d6-af39-4df9-b8bf-e80f5960512d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f81844d6-af39-4df9-b8bf-e80f5960512d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f81844d6-af39-4df9-b8bf-e80f5960512d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fa311655-36cf-4c51-8357-fdffd9dee8e8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fa311655-36cf-4c51-8357-fdffd9dee8e8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fa311655-36cf-4c51-8357-fdffd9dee8e8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fa9c1614-506d-417b-b907-8a146c395226.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fa9c1614-506d-417b-b907-8a146c395226.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fa9c1614-506d-417b-b907-8a146c395226.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fc5cb2f2-fe60-460c-8afe-7740808bb733.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fc5cb2f2-fe60-460c-8afe-7740808bb733.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fc5cb2f2-fe60-460c-8afe-7740808bb733.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fcfb4fff-94a6-4f73-a5d8-45539f06059d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fcfb4fff-94a6-4f73-a5d8-45539f06059d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fcfb4fff-94a6-4f73-a5d8-45539f06059d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fde48304-afd8-485d-ac41-e19ed50f02f2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fde48304-afd8-485d-ac41-e19ed50f02f2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fde48304-afd8-485d-ac41-e19ed50f02f2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ff1d4c7c-a072-4772-b738-fae2567089ee.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ff1d4c7c-a072-4772-b738-fae2567089ee.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ff1d4c7c-a072-4772-b738-fae2567089ee.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ffe5d5cc-7d5d-49a5-93d3-f1f688abf91a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ffe5d5cc-7d5d-49a5-93d3-f1f688abf91a.jsonl.zst
+    │   │   │   │       │   └── batch_2026-02-09_ffe5d5cc-7d5d-49a5-93d3-f1f688abf91a.jsonl.zst.meta.json
+    │   │   │   │       ├── bronze_openalex_publication_dq_report.json
+    │   │   │   │       └── openalex_publication_metadata.yaml
+    │   │   │   ├── pubchem/
+    │   │   │   │   └── compound
+    │   │   │   ├── pubmed/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── 2026-02-09/
+    │   │   │   │       │   ├── batch_2026-02-09_0011798e-74b2-4327-9991-579b3251f658.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0011798e-74b2-4327-9991-579b3251f658.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0011798e-74b2-4327-9991-579b3251f658.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_01637166-2041-4fd3-b12e-4ac2f8c8b226.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_01637166-2041-4fd3-b12e-4ac2f8c8b226.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_01637166-2041-4fd3-b12e-4ac2f8c8b226.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_03ab511e-2af8-4f23-8e69-2c3732b88c54.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_03ab511e-2af8-4f23-8e69-2c3732b88c54.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_03ab511e-2af8-4f23-8e69-2c3732b88c54.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_03d819df-f57d-4554-b644-6c1f3ed6348a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_03d819df-f57d-4554-b644-6c1f3ed6348a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_03d819df-f57d-4554-b644-6c1f3ed6348a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_047067ed-9fff-4539-b5ee-8f64841e4d55.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_047067ed-9fff-4539-b5ee-8f64841e4d55.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_047067ed-9fff-4539-b5ee-8f64841e4d55.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_05a87d5f-55d9-42d3-891d-4e2203574a44.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_05a87d5f-55d9-42d3-891d-4e2203574a44.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_05a87d5f-55d9-42d3-891d-4e2203574a44.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_05ed6fcb-a346-487b-9024-d4e9e191d698.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_05ed6fcb-a346-487b-9024-d4e9e191d698.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_05ed6fcb-a346-487b-9024-d4e9e191d698.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_076ed55a-1583-4674-8383-7557fbbdbc24.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_076ed55a-1583-4674-8383-7557fbbdbc24.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_076ed55a-1583-4674-8383-7557fbbdbc24.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0894d0a4-741e-4175-9375-ac758a3a1345.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0894d0a4-741e-4175-9375-ac758a3a1345.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0894d0a4-741e-4175-9375-ac758a3a1345.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0c5c8d8f-eb6c-4739-9e66-bff720453013.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0c5c8d8f-eb6c-4739-9e66-bff720453013.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0c5c8d8f-eb6c-4739-9e66-bff720453013.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0c78eec1-0739-421c-a03e-4efdb9555edf.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0c78eec1-0739-421c-a03e-4efdb9555edf.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0c78eec1-0739-421c-a03e-4efdb9555edf.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0d22354a-9c90-48ff-bb16-458b007c0d92.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0d22354a-9c90-48ff-bb16-458b007c0d92.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0d22354a-9c90-48ff-bb16-458b007c0d92.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0d6f544f-fcf9-4d8a-804d-f259dc727863.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0d6f544f-fcf9-4d8a-804d-f259dc727863.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0d6f544f-fcf9-4d8a-804d-f259dc727863.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0e6bda9a-2851-4f67-bee9-0368d85c7440.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0e6bda9a-2851-4f67-bee9-0368d85c7440.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0e6bda9a-2851-4f67-bee9-0368d85c7440.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0ea310fe-bc8f-4557-ab47-431eedd9fb9a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0ea310fe-bc8f-4557-ab47-431eedd9fb9a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0ea310fe-bc8f-4557-ab47-431eedd9fb9a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_158d4ea0-5eca-4b23-bfe7-4af1f5d6fdeb.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_158d4ea0-5eca-4b23-bfe7-4af1f5d6fdeb.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_158d4ea0-5eca-4b23-bfe7-4af1f5d6fdeb.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_15d874bb-6e32-44ec-a327-8035b289a2eb.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_15d874bb-6e32-44ec-a327-8035b289a2eb.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_15d874bb-6e32-44ec-a327-8035b289a2eb.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_17050c0d-bc66-4ae1-bc29-c8f279a56587.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_17050c0d-bc66-4ae1-bc29-c8f279a56587.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_17050c0d-bc66-4ae1-bc29-c8f279a56587.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_174043e6-3eec-4564-9899-5e415530496e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_174043e6-3eec-4564-9899-5e415530496e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_174043e6-3eec-4564-9899-5e415530496e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_19084d54-aad8-425e-be49-01b32cb9ae32.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_19084d54-aad8-425e-be49-01b32cb9ae32.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_19084d54-aad8-425e-be49-01b32cb9ae32.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1a54f100-d3da-4e0d-b3e3-66b715284902.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1a54f100-d3da-4e0d-b3e3-66b715284902.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1a54f100-d3da-4e0d-b3e3-66b715284902.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1bd9eacf-7fb6-44a2-8a46-81324971557d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1bd9eacf-7fb6-44a2-8a46-81324971557d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1bd9eacf-7fb6-44a2-8a46-81324971557d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1e21dbdf-2321-4994-94be-361b92554d68.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1e21dbdf-2321-4994-94be-361b92554d68.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1e21dbdf-2321-4994-94be-361b92554d68.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_20ae1b8d-828b-431d-be9e-3d9378a8929f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_20ae1b8d-828b-431d-be9e-3d9378a8929f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_20ae1b8d-828b-431d-be9e-3d9378a8929f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_20fc7d00-3ce3-4dee-863d-c83f9231a4d2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_20fc7d00-3ce3-4dee-863d-c83f9231a4d2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_20fc7d00-3ce3-4dee-863d-c83f9231a4d2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2286d4e5-acee-4fb3-b6ca-eabf057dfe15.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2286d4e5-acee-4fb3-b6ca-eabf057dfe15.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2286d4e5-acee-4fb3-b6ca-eabf057dfe15.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_237c9d61-6992-47e0-9773-b491651a7bac.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_237c9d61-6992-47e0-9773-b491651a7bac.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_237c9d61-6992-47e0-9773-b491651a7bac.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_23ab5152-9e79-43ac-8d28-1a7726ae4fe1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_23ab5152-9e79-43ac-8d28-1a7726ae4fe1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_23ab5152-9e79-43ac-8d28-1a7726ae4fe1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_245487c0-4a90-47a0-bdc7-30a23429e908.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_245487c0-4a90-47a0-bdc7-30a23429e908.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_245487c0-4a90-47a0-bdc7-30a23429e908.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_24c5372e-bd14-4486-97d9-d5fc59440670.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_24c5372e-bd14-4486-97d9-d5fc59440670.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_24c5372e-bd14-4486-97d9-d5fc59440670.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_27e5733c-4f06-44fc-97de-b13ccefd9109.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_27e5733c-4f06-44fc-97de-b13ccefd9109.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_27e5733c-4f06-44fc-97de-b13ccefd9109.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2918dbc0-d02b-4d37-ac01-11dda0ebb342.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2918dbc0-d02b-4d37-ac01-11dda0ebb342.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2918dbc0-d02b-4d37-ac01-11dda0ebb342.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_298fb8e5-b1d5-4d69-88f7-aa6ebf197089.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_298fb8e5-b1d5-4d69-88f7-aa6ebf197089.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_298fb8e5-b1d5-4d69-88f7-aa6ebf197089.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_29abc1de-66f8-4dfc-b3ad-efb318c087cc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_29abc1de-66f8-4dfc-b3ad-efb318c087cc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_29abc1de-66f8-4dfc-b3ad-efb318c087cc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_29eaab31-6844-4d88-b24f-3918a412ab50.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_29eaab31-6844-4d88-b24f-3918a412ab50.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_29eaab31-6844-4d88-b24f-3918a412ab50.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2ad7a3ea-21de-4450-90d6-d90ffe46bcea.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2ad7a3ea-21de-4450-90d6-d90ffe46bcea.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2ad7a3ea-21de-4450-90d6-d90ffe46bcea.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_303cbae3-eb70-457f-b1a2-9a934d70e7b0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_303cbae3-eb70-457f-b1a2-9a934d70e7b0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_303cbae3-eb70-457f-b1a2-9a934d70e7b0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_32868712-3e5a-4dbd-8af8-a6bfa4cdc7b2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_32868712-3e5a-4dbd-8af8-a6bfa4cdc7b2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_32868712-3e5a-4dbd-8af8-a6bfa4cdc7b2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_381bd4c8-1633-4b5a-8b62-90588ad6aaa1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_381bd4c8-1633-4b5a-8b62-90588ad6aaa1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_381bd4c8-1633-4b5a-8b62-90588ad6aaa1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_38a52555-41f0-4110-861e-800562576433.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_38a52555-41f0-4110-861e-800562576433.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_38a52555-41f0-4110-861e-800562576433.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_39e49692-5412-4b1e-9291-668cd387ed6d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_39e49692-5412-4b1e-9291-668cd387ed6d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_39e49692-5412-4b1e-9291-668cd387ed6d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3af51519-0e5e-402e-9dc1-dcb89f096cae.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3af51519-0e5e-402e-9dc1-dcb89f096cae.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3af51519-0e5e-402e-9dc1-dcb89f096cae.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3b3ef494-084c-43f6-ae38-7f544678f096.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3b3ef494-084c-43f6-ae38-7f544678f096.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3b3ef494-084c-43f6-ae38-7f544678f096.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3b89959b-d9e6-4360-9923-3cd2e2fd8e2f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3b89959b-d9e6-4360-9923-3cd2e2fd8e2f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3b89959b-d9e6-4360-9923-3cd2e2fd8e2f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3c0e7c03-808b-4a9d-835e-f7b2ee223735.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3c0e7c03-808b-4a9d-835e-f7b2ee223735.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3c0e7c03-808b-4a9d-835e-f7b2ee223735.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3c54cf13-a2ab-4e80-95c8-3f4d91e0e6a2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3c54cf13-a2ab-4e80-95c8-3f4d91e0e6a2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3c54cf13-a2ab-4e80-95c8-3f4d91e0e6a2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3d57515e-baff-4a97-bde5-c13bf7791040.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3d57515e-baff-4a97-bde5-c13bf7791040.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3d57515e-baff-4a97-bde5-c13bf7791040.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3ff581df-9d5e-446d-b86c-4b589b8d9241.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3ff581df-9d5e-446d-b86c-4b589b8d9241.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3ff581df-9d5e-446d-b86c-4b589b8d9241.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_40c9aa38-1d7e-45ac-932f-e9d1f0731ed1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_40c9aa38-1d7e-45ac-932f-e9d1f0731ed1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_40c9aa38-1d7e-45ac-932f-e9d1f0731ed1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_415879de-0bb4-445b-b5bb-2c7aa37f405e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_415879de-0bb4-445b-b5bb-2c7aa37f405e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_415879de-0bb4-445b-b5bb-2c7aa37f405e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_418185b7-fe5b-49b5-bc8c-0c146395d4c8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_418185b7-fe5b-49b5-bc8c-0c146395d4c8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_418185b7-fe5b-49b5-bc8c-0c146395d4c8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_42428d89-0f2c-48fb-92cd-7c9c27cdcac3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_42428d89-0f2c-48fb-92cd-7c9c27cdcac3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_42428d89-0f2c-48fb-92cd-7c9c27cdcac3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_424fc51b-6f80-4e0f-bf9a-1806f2d8bfcf.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_424fc51b-6f80-4e0f-bf9a-1806f2d8bfcf.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_424fc51b-6f80-4e0f-bf9a-1806f2d8bfcf.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_429c58b4-088f-4a45-ad00-56f9d4ac2bcf.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_429c58b4-088f-4a45-ad00-56f9d4ac2bcf.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_429c58b4-088f-4a45-ad00-56f9d4ac2bcf.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_46429065-5534-4290-b907-7c7b8851e67c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_46429065-5534-4290-b907-7c7b8851e67c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_46429065-5534-4290-b907-7c7b8851e67c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_496ed034-b797-46d1-a5f9-29cc87d1f8d3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_496ed034-b797-46d1-a5f9-29cc87d1f8d3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_496ed034-b797-46d1-a5f9-29cc87d1f8d3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_49b14a5e-8264-4fef-8a30-a33481656925.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_49b14a5e-8264-4fef-8a30-a33481656925.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_49b14a5e-8264-4fef-8a30-a33481656925.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4a6a078a-2cf4-4c58-b34c-4f65c06982fc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4a6a078a-2cf4-4c58-b34c-4f65c06982fc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4a6a078a-2cf4-4c58-b34c-4f65c06982fc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4c415895-2062-45a4-8c80-1871662c9439.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4c415895-2062-45a4-8c80-1871662c9439.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4c415895-2062-45a4-8c80-1871662c9439.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4d9931f1-3d25-41ce-b3f6-86afbbd8805c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4d9931f1-3d25-41ce-b3f6-86afbbd8805c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4d9931f1-3d25-41ce-b3f6-86afbbd8805c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_500a5796-5122-4185-922f-1044df39f6dd.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_500a5796-5122-4185-922f-1044df39f6dd.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_500a5796-5122-4185-922f-1044df39f6dd.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_555fd0ac-7cad-414d-9cec-8cffd6c67903.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_555fd0ac-7cad-414d-9cec-8cffd6c67903.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_555fd0ac-7cad-414d-9cec-8cffd6c67903.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_57e9f481-f992-4095-99b8-fa8b1d40dc04.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_57e9f481-f992-4095-99b8-fa8b1d40dc04.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_57e9f481-f992-4095-99b8-fa8b1d40dc04.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_59213b10-e389-4896-b75d-1fa8df946f31.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_59213b10-e389-4896-b75d-1fa8df946f31.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_59213b10-e389-4896-b75d-1fa8df946f31.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5941c4e0-187b-4cea-9c4b-33afd0bb4a4d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5941c4e0-187b-4cea-9c4b-33afd0bb4a4d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5941c4e0-187b-4cea-9c4b-33afd0bb4a4d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5c0827f9-6880-4407-9a36-d3762caaf0b0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5c0827f9-6880-4407-9a36-d3762caaf0b0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5c0827f9-6880-4407-9a36-d3762caaf0b0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5ce89b23-5265-4672-8305-4d1f395bcf33.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5ce89b23-5265-4672-8305-4d1f395bcf33.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5ce89b23-5265-4672-8305-4d1f395bcf33.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_60b6f686-7a1b-41c0-8958-b66055395a1b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_60b6f686-7a1b-41c0-8958-b66055395a1b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_60b6f686-7a1b-41c0-8958-b66055395a1b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_622f8c1a-78f0-4862-aecc-41d7a6817087.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_622f8c1a-78f0-4862-aecc-41d7a6817087.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_622f8c1a-78f0-4862-aecc-41d7a6817087.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_627aefd1-3d14-440e-bf90-655952220374.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_627aefd1-3d14-440e-bf90-655952220374.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_627aefd1-3d14-440e-bf90-655952220374.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_63145125-0e99-4365-bbc6-d305021d314f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_63145125-0e99-4365-bbc6-d305021d314f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_63145125-0e99-4365-bbc6-d305021d314f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6396a823-89a7-4d53-a6a4-0f4de48808d5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6396a823-89a7-4d53-a6a4-0f4de48808d5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6396a823-89a7-4d53-a6a4-0f4de48808d5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_642465ac-799f-45b8-ad26-91308608973a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_642465ac-799f-45b8-ad26-91308608973a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_642465ac-799f-45b8-ad26-91308608973a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_68765c12-f481-4aee-8c0b-d390ebbde6bc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_68765c12-f481-4aee-8c0b-d390ebbde6bc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_68765c12-f481-4aee-8c0b-d390ebbde6bc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6bb1d42e-5e95-4968-9219-53d0004eca1c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6bb1d42e-5e95-4968-9219-53d0004eca1c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6bb1d42e-5e95-4968-9219-53d0004eca1c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6bd298f2-d613-4dfe-ba61-341bd1dc7782.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6bd298f2-d613-4dfe-ba61-341bd1dc7782.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6bd298f2-d613-4dfe-ba61-341bd1dc7782.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6f3606f1-38b9-48cd-933f-77b53b8acdfc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6f3606f1-38b9-48cd-933f-77b53b8acdfc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6f3606f1-38b9-48cd-933f-77b53b8acdfc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6fb69382-8648-4a5f-9522-d6e93b525b5c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6fb69382-8648-4a5f-9522-d6e93b525b5c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6fb69382-8648-4a5f-9522-d6e93b525b5c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_715b1793-fc1e-44a7-a689-08df56250c57.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_715b1793-fc1e-44a7-a689-08df56250c57.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_715b1793-fc1e-44a7-a689-08df56250c57.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_72088180-f928-48a4-b7ab-08d2560137d8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_72088180-f928-48a4-b7ab-08d2560137d8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_72088180-f928-48a4-b7ab-08d2560137d8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_722afc3b-5dd6-4e94-a58f-7e3da92f21a3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_722afc3b-5dd6-4e94-a58f-7e3da92f21a3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_722afc3b-5dd6-4e94-a58f-7e3da92f21a3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_742c9347-aad0-4308-93ba-054099c1f6e1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_742c9347-aad0-4308-93ba-054099c1f6e1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_742c9347-aad0-4308-93ba-054099c1f6e1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7804c074-7b16-4fb6-92c7-f58a1e4c6c6b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7804c074-7b16-4fb6-92c7-f58a1e4c6c6b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7804c074-7b16-4fb6-92c7-f58a1e4c6c6b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_78f439cb-0e0a-4cb5-b085-ea72a831c0d1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_78f439cb-0e0a-4cb5-b085-ea72a831c0d1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_78f439cb-0e0a-4cb5-b085-ea72a831c0d1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_791c63f2-421c-4a05-9285-aea7cd58e793.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_791c63f2-421c-4a05-9285-aea7cd58e793.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_791c63f2-421c-4a05-9285-aea7cd58e793.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7ca66999-d4a2-4a8b-ad80-fd6399da11a1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7ca66999-d4a2-4a8b-ad80-fd6399da11a1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7ca66999-d4a2-4a8b-ad80-fd6399da11a1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7cf4e4f1-2825-44f3-80a5-cf21486c0205.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7cf4e4f1-2825-44f3-80a5-cf21486c0205.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7cf4e4f1-2825-44f3-80a5-cf21486c0205.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7dd40888-6a2d-4f22-b771-43aeaf5fafd6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7dd40888-6a2d-4f22-b771-43aeaf5fafd6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7dd40888-6a2d-4f22-b771-43aeaf5fafd6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_80e6ea1f-c7dd-4295-9bfe-db0c7fb6b7de.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_80e6ea1f-c7dd-4295-9bfe-db0c7fb6b7de.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_80e6ea1f-c7dd-4295-9bfe-db0c7fb6b7de.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8854c08c-8c88-476a-a4b8-e95de246672b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8854c08c-8c88-476a-a4b8-e95de246672b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8854c08c-8c88-476a-a4b8-e95de246672b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8a09f910-2db8-4fdb-a428-5c20016edace.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8a09f910-2db8-4fdb-a428-5c20016edace.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8a09f910-2db8-4fdb-a428-5c20016edace.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8ae63512-0f78-4da9-9583-12cd851f9f0d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8ae63512-0f78-4da9-9583-12cd851f9f0d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8ae63512-0f78-4da9-9583-12cd851f9f0d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8b1f3901-9aff-4888-b87a-7fd593cc3e30.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8b1f3901-9aff-4888-b87a-7fd593cc3e30.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8b1f3901-9aff-4888-b87a-7fd593cc3e30.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8ca24222-77ab-4bc9-9653-088d23b3f045.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8ca24222-77ab-4bc9-9653-088d23b3f045.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8ca24222-77ab-4bc9-9653-088d23b3f045.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8d7a85cf-e5a7-4dd0-bf38-b19ccc1954f7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8d7a85cf-e5a7-4dd0-bf38-b19ccc1954f7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8d7a85cf-e5a7-4dd0-bf38-b19ccc1954f7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8f52c6fe-8ae6-4ebb-b8a5-facf497d651e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8f52c6fe-8ae6-4ebb-b8a5-facf497d651e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8f52c6fe-8ae6-4ebb-b8a5-facf497d651e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_906b51bf-f980-4c30-a731-b35ddb9c8841.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_906b51bf-f980-4c30-a731-b35ddb9c8841.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_906b51bf-f980-4c30-a731-b35ddb9c8841.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_95a36697-688a-43e2-b6c0-86b83c0edcd8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_95a36697-688a-43e2-b6c0-86b83c0edcd8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_95a36697-688a-43e2-b6c0-86b83c0edcd8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_984b0d5f-0beb-4219-94a7-8cc873265bcf.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_984b0d5f-0beb-4219-94a7-8cc873265bcf.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_984b0d5f-0beb-4219-94a7-8cc873265bcf.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9de5cd0e-28a4-410c-a270-4f88aadbd2d8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9de5cd0e-28a4-410c-a270-4f88aadbd2d8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9de5cd0e-28a4-410c-a270-4f88aadbd2d8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a3d6e113-2a85-4e6c-8edb-46a487bb8eb2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a3d6e113-2a85-4e6c-8edb-46a487bb8eb2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a3d6e113-2a85-4e6c-8edb-46a487bb8eb2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a4e327fb-f523-4f9d-ac39-3f87ea3f32a4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a4e327fb-f523-4f9d-ac39-3f87ea3f32a4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a4e327fb-f523-4f9d-ac39-3f87ea3f32a4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a70021a2-f3cb-4441-aa92-1e62d85c3c18.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a70021a2-f3cb-4441-aa92-1e62d85c3c18.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a70021a2-f3cb-4441-aa92-1e62d85c3c18.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a7fa209a-ac91-41f0-8845-b0685f8209e2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a7fa209a-ac91-41f0-8845-b0685f8209e2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a7fa209a-ac91-41f0-8845-b0685f8209e2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a87c2bea-be59-4885-8766-d21c123592d6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a87c2bea-be59-4885-8766-d21c123592d6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a87c2bea-be59-4885-8766-d21c123592d6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a917173f-e2a1-45dd-9855-cd2495ee6fcb.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a917173f-e2a1-45dd-9855-cd2495ee6fcb.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a917173f-e2a1-45dd-9855-cd2495ee6fcb.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ab7c1f27-0c79-4757-9f38-92f3c349dd41.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ab7c1f27-0c79-4757-9f38-92f3c349dd41.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ab7c1f27-0c79-4757-9f38-92f3c349dd41.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ad33216c-d8a8-4b93-a547-c6963f24c5a6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ad33216c-d8a8-4b93-a547-c6963f24c5a6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ad33216c-d8a8-4b93-a547-c6963f24c5a6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_adfd7307-294d-43d1-85e4-e8c6f88d463f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_adfd7307-294d-43d1-85e4-e8c6f88d463f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_adfd7307-294d-43d1-85e4-e8c6f88d463f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b2281b54-ab41-4cb0-bae6-3465eb04e685.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b2281b54-ab41-4cb0-bae6-3465eb04e685.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b2281b54-ab41-4cb0-bae6-3465eb04e685.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b2414e80-0ed2-4dd3-b91f-45cb1da9680b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b2414e80-0ed2-4dd3-b91f-45cb1da9680b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b2414e80-0ed2-4dd3-b91f-45cb1da9680b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b29141b6-f81c-4b0f-85ab-ae26734e0bf4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b29141b6-f81c-4b0f-85ab-ae26734e0bf4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b29141b6-f81c-4b0f-85ab-ae26734e0bf4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_bd39108e-20af-4264-baf3-73bb9e8a7dce.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_bd39108e-20af-4264-baf3-73bb9e8a7dce.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_bd39108e-20af-4264-baf3-73bb9e8a7dce.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_be765b62-cb93-48d3-9976-65d660c865ab.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_be765b62-cb93-48d3-9976-65d660c865ab.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_be765b62-cb93-48d3-9976-65d660c865ab.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_be9f90fc-a8ba-46a7-a7f1-8622b4372fb3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_be9f90fc-a8ba-46a7-a7f1-8622b4372fb3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_be9f90fc-a8ba-46a7-a7f1-8622b4372fb3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_bebdd13e-3dac-4c26-90d3-2fb366111bad.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_bebdd13e-3dac-4c26-90d3-2fb366111bad.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_bebdd13e-3dac-4c26-90d3-2fb366111bad.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_bf02f05c-ebb0-4794-81bf-653ef3288a1c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_bf02f05c-ebb0-4794-81bf-653ef3288a1c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_bf02f05c-ebb0-4794-81bf-653ef3288a1c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c6097cf6-84be-4e82-a69d-03504d1337c6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c6097cf6-84be-4e82-a69d-03504d1337c6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c6097cf6-84be-4e82-a69d-03504d1337c6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c6463d8d-f42a-4e68-ad8c-e3083f3c8675.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c6463d8d-f42a-4e68-ad8c-e3083f3c8675.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c6463d8d-f42a-4e68-ad8c-e3083f3c8675.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c7557d5e-6dbf-4e6e-b63c-e3be57da0f31.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c7557d5e-6dbf-4e6e-b63c-e3be57da0f31.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c7557d5e-6dbf-4e6e-b63c-e3be57da0f31.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c8f2566d-c654-42c4-88d7-bc7075a55d32.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c8f2566d-c654-42c4-88d7-bc7075a55d32.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c8f2566d-c654-42c4-88d7-bc7075a55d32.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cabaf9fb-5db5-4edf-989c-454cda9ac41b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cabaf9fb-5db5-4edf-989c-454cda9ac41b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cabaf9fb-5db5-4edf-989c-454cda9ac41b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cade972e-a59d-440d-b6bf-fa2eccbfebf2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cade972e-a59d-440d-b6bf-fa2eccbfebf2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cade972e-a59d-440d-b6bf-fa2eccbfebf2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cce2983e-d0cf-42e1-afca-2ca4eb6f6590.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cce2983e-d0cf-42e1-afca-2ca4eb6f6590.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cce2983e-d0cf-42e1-afca-2ca4eb6f6590.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ce59e8c6-fcbb-4fb8-87d1-ddaffa78c52c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ce59e8c6-fcbb-4fb8-87d1-ddaffa78c52c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ce59e8c6-fcbb-4fb8-87d1-ddaffa78c52c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cf50a242-c9f0-4852-94e7-77f5d03344bd.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cf50a242-c9f0-4852-94e7-77f5d03344bd.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cf50a242-c9f0-4852-94e7-77f5d03344bd.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d0f91af2-417e-4526-82c2-af4601b5b003.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d0f91af2-417e-4526-82c2-af4601b5b003.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d0f91af2-417e-4526-82c2-af4601b5b003.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d1cf908c-1164-44b9-bb30-4a95a2ac2bec.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d1cf908c-1164-44b9-bb30-4a95a2ac2bec.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d1cf908c-1164-44b9-bb30-4a95a2ac2bec.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d1da03ff-6367-43b4-8abc-48bb19bc6707.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d1da03ff-6367-43b4-8abc-48bb19bc6707.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d1da03ff-6367-43b4-8abc-48bb19bc6707.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d32709e4-997b-43a0-a4b8-2578f6f1bc42.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d32709e4-997b-43a0-a4b8-2578f6f1bc42.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d32709e4-997b-43a0-a4b8-2578f6f1bc42.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d4260cdd-9d60-42d3-ba56-ee08538e3c9c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d4260cdd-9d60-42d3-ba56-ee08538e3c9c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d4260cdd-9d60-42d3-ba56-ee08538e3c9c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d4ea1b36-60bb-4990-8332-5272e0cd53fd.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d4ea1b36-60bb-4990-8332-5272e0cd53fd.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d4ea1b36-60bb-4990-8332-5272e0cd53fd.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d765d5f0-001b-4b3b-8307-c17d6e1216c5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d765d5f0-001b-4b3b-8307-c17d6e1216c5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d765d5f0-001b-4b3b-8307-c17d6e1216c5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_dbb1e9d2-f2df-4e86-8ec6-dbf27354699f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_dbb1e9d2-f2df-4e86-8ec6-dbf27354699f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_dbb1e9d2-f2df-4e86-8ec6-dbf27354699f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_df5d61ff-c310-463c-a4bf-d4fcc7b6b989.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_df5d61ff-c310-463c-a4bf-d4fcc7b6b989.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_df5d61ff-c310-463c-a4bf-d4fcc7b6b989.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_dfbd8c2c-d901-441c-8634-577906014c05.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_dfbd8c2c-d901-441c-8634-577906014c05.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_dfbd8c2c-d901-441c-8634-577906014c05.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e1cc1741-19c2-42a5-ac72-7a7a1283ad81.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e1cc1741-19c2-42a5-ac72-7a7a1283ad81.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e1cc1741-19c2-42a5-ac72-7a7a1283ad81.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e26fc9fd-87f9-4051-896e-d540f3153e0d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e26fc9fd-87f9-4051-896e-d540f3153e0d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e26fc9fd-87f9-4051-896e-d540f3153e0d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e3fab4f1-ef8f-4a16-a7b4-9d5210286c5e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e3fab4f1-ef8f-4a16-a7b4-9d5210286c5e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e3fab4f1-ef8f-4a16-a7b4-9d5210286c5e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e3ff7767-865c-4355-89a3-55a519ff7c9c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e3ff7767-865c-4355-89a3-55a519ff7c9c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e3ff7767-865c-4355-89a3-55a519ff7c9c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e6c059a9-6f09-4f90-9c03-fc87caa8bf64.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e6c059a9-6f09-4f90-9c03-fc87caa8bf64.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e6c059a9-6f09-4f90-9c03-fc87caa8bf64.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e7659889-7d7d-4363-a42a-a9c2ec105422.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e7659889-7d7d-4363-a42a-a9c2ec105422.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e7659889-7d7d-4363-a42a-a9c2ec105422.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e800bebd-2b1d-4f0a-b355-1e10543d0459.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e800bebd-2b1d-4f0a-b355-1e10543d0459.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e800bebd-2b1d-4f0a-b355-1e10543d0459.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e80b8a97-b290-46b2-9aaf-a66e3d9024dc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e80b8a97-b290-46b2-9aaf-a66e3d9024dc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e80b8a97-b290-46b2-9aaf-a66e3d9024dc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ebb16c0e-ff5a-4e50-87ac-cd40d7dfd906.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ebb16c0e-ff5a-4e50-87ac-cd40d7dfd906.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ebb16c0e-ff5a-4e50-87ac-cd40d7dfd906.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_edd9d489-9da3-4aa8-8492-43681cb49592.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_edd9d489-9da3-4aa8-8492-43681cb49592.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_edd9d489-9da3-4aa8-8492-43681cb49592.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f0908789-c2d2-454f-8798-afe953b01a14.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f0908789-c2d2-454f-8798-afe953b01a14.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f0908789-c2d2-454f-8798-afe953b01a14.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f5a7febc-a480-4fe8-baa2-2de6b8352ab6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f5a7febc-a480-4fe8-baa2-2de6b8352ab6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f5a7febc-a480-4fe8-baa2-2de6b8352ab6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f635d8ac-51ff-4dd1-86b8-238af715e361.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f635d8ac-51ff-4dd1-86b8-238af715e361.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f635d8ac-51ff-4dd1-86b8-238af715e361.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f7d87cb6-6416-4251-91df-12e5196fa1d3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f7d87cb6-6416-4251-91df-12e5196fa1d3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f7d87cb6-6416-4251-91df-12e5196fa1d3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f9b24167-64d1-4fb3-8c73-0dd2437874e1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f9b24167-64d1-4fb3-8c73-0dd2437874e1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f9b24167-64d1-4fb3-8c73-0dd2437874e1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f9bee1b4-e2f5-4991-8479-16be740940df.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f9bee1b4-e2f5-4991-8479-16be740940df.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f9bee1b4-e2f5-4991-8479-16be740940df.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fa5e5ad7-f49f-4ba6-b1f0-6187a8217e81.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fa5e5ad7-f49f-4ba6-b1f0-6187a8217e81.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fa5e5ad7-f49f-4ba6-b1f0-6187a8217e81.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fae68176-b168-4261-af54-1dd0410de046.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fae68176-b168-4261-af54-1dd0410de046.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fae68176-b168-4261-af54-1dd0410de046.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fca3194f-af77-49da-a9c6-97743196154d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fca3194f-af77-49da-a9c6-97743196154d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fca3194f-af77-49da-a9c6-97743196154d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ff1089e3-315d-4f3c-81f8-a9ef21ef1abf.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ff1089e3-315d-4f3c-81f8-a9ef21ef1abf.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ff1089e3-315d-4f3c-81f8-a9ef21ef1abf.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ffc4ff08-2531-46f1-9870-f38250403404.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ffc4ff08-2531-46f1-9870-f38250403404.jsonl.zst
+    │   │   │   │       │   └── batch_2026-02-09_ffc4ff08-2531-46f1-9870-f38250403404.jsonl.zst.meta.json
+    │   │   │   │       ├── bronze_pubmed_publication_dq_report.json
+    │   │   │   │       └── pubmed_publication_metadata.yaml
+    │   │   │   ├── semanticscholar/
+    │   │   │   │   └── publication/
+    │   │   │   │       ├── 2026-02-09/
+    │   │   │   │       │   ├── batch_2026-02-09_0159e5cd-1803-4dd7-a3b1-cdab91e2e933.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0159e5cd-1803-4dd7-a3b1-cdab91e2e933.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0159e5cd-1803-4dd7-a3b1-cdab91e2e933.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_01edd9c8-fcfe-46b5-a63b-eecf115f311c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_01edd9c8-fcfe-46b5-a63b-eecf115f311c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_01edd9c8-fcfe-46b5-a63b-eecf115f311c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_027b94ab-6bb4-43b5-b7e0-61ebc2e88a4d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_027b94ab-6bb4-43b5-b7e0-61ebc2e88a4d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_027b94ab-6bb4-43b5-b7e0-61ebc2e88a4d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0489d9c3-fdb0-4878-b65f-b3b1e5b2f271.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0489d9c3-fdb0-4878-b65f-b3b1e5b2f271.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0489d9c3-fdb0-4878-b65f-b3b1e5b2f271.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_05864132-d954-46fd-94c3-9203b401dcfc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_05864132-d954-46fd-94c3-9203b401dcfc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_05864132-d954-46fd-94c3-9203b401dcfc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_05d86254-7f37-405c-baef-d4dc15f8c3d9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_05d86254-7f37-405c-baef-d4dc15f8c3d9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_05d86254-7f37-405c-baef-d4dc15f8c3d9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0709888b-d0de-4c34-8434-209114012dc2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0709888b-d0de-4c34-8434-209114012dc2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0709888b-d0de-4c34-8434-209114012dc2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0808dbb8-1e43-4d06-9137-f2108c28972e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0808dbb8-1e43-4d06-9137-f2108c28972e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0808dbb8-1e43-4d06-9137-f2108c28972e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_083bbf61-3c70-4daa-a6da-3774560283cb.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_083bbf61-3c70-4daa-a6da-3774560283cb.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_083bbf61-3c70-4daa-a6da-3774560283cb.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0ab7cba3-6318-41d8-9a6c-a60229f99956.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0ab7cba3-6318-41d8-9a6c-a60229f99956.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0ab7cba3-6318-41d8-9a6c-a60229f99956.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0b3b0757-203a-4e97-acd7-cbac602c44db.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0b3b0757-203a-4e97-acd7-cbac602c44db.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0b3b0757-203a-4e97-acd7-cbac602c44db.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0c269456-c6eb-44a9-b4a2-51427431cb3c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0c269456-c6eb-44a9-b4a2-51427431cb3c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0c269456-c6eb-44a9-b4a2-51427431cb3c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0c5b783e-1a3f-4418-b2db-29b104bc4c0b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0c5b783e-1a3f-4418-b2db-29b104bc4c0b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0c5b783e-1a3f-4418-b2db-29b104bc4c0b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_0f9e5249-d293-40d6-a6a9-a405f85ba66a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_0f9e5249-d293-40d6-a6a9-a405f85ba66a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_0f9e5249-d293-40d6-a6a9-a405f85ba66a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_103afde8-ba31-44b4-b1b0-b1d671d72380.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_103afde8-ba31-44b4-b1b0-b1d671d72380.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_103afde8-ba31-44b4-b1b0-b1d671d72380.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_10d57db2-946c-4dbe-b597-65c9282ea218.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_10d57db2-946c-4dbe-b597-65c9282ea218.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_10d57db2-946c-4dbe-b597-65c9282ea218.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_133b6311-a748-4f6a-bf6d-90b9c3108f7d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_133b6311-a748-4f6a-bf6d-90b9c3108f7d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_133b6311-a748-4f6a-bf6d-90b9c3108f7d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_175d4fd4-a6cb-47dd-b32b-31d4891960a6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_175d4fd4-a6cb-47dd-b32b-31d4891960a6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_175d4fd4-a6cb-47dd-b32b-31d4891960a6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_18550079-c6aa-40c7-8327-ac3a6180d4fe.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_18550079-c6aa-40c7-8327-ac3a6180d4fe.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_18550079-c6aa-40c7-8327-ac3a6180d4fe.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_19c16254-0507-4431-8e7d-a1e7eb7f60e3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_19c16254-0507-4431-8e7d-a1e7eb7f60e3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_19c16254-0507-4431-8e7d-a1e7eb7f60e3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1a07c5aa-91c6-40fb-9cea-b38a1b51db66.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1a07c5aa-91c6-40fb-9cea-b38a1b51db66.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1a07c5aa-91c6-40fb-9cea-b38a1b51db66.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1acb270c-b3b2-436d-b3fb-2ad0a3c4a586.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1acb270c-b3b2-436d-b3fb-2ad0a3c4a586.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1acb270c-b3b2-436d-b3fb-2ad0a3c4a586.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1bc28ac4-9dd4-4782-b4cd-a17e150e2f13.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1bc28ac4-9dd4-4782-b4cd-a17e150e2f13.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1bc28ac4-9dd4-4782-b4cd-a17e150e2f13.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_1f494372-8ba3-4776-ad96-e1450c872018.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_1f494372-8ba3-4776-ad96-e1450c872018.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_1f494372-8ba3-4776-ad96-e1450c872018.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_204beb51-2600-4a0e-a0f0-72d7acce2317.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_204beb51-2600-4a0e-a0f0-72d7acce2317.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_204beb51-2600-4a0e-a0f0-72d7acce2317.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_209d9e3d-3686-4450-8f90-618f1c68e6cc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_209d9e3d-3686-4450-8f90-618f1c68e6cc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_209d9e3d-3686-4450-8f90-618f1c68e6cc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_235e8d4a-abc4-470b-af65-716daf6ee196.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_235e8d4a-abc4-470b-af65-716daf6ee196.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_235e8d4a-abc4-470b-af65-716daf6ee196.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_259bdb4c-9c36-4d5a-9ffb-75f5ef381816.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_259bdb4c-9c36-4d5a-9ffb-75f5ef381816.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_259bdb4c-9c36-4d5a-9ffb-75f5ef381816.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_28949057-e79e-4c2d-aa05-2be908807cec.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_28949057-e79e-4c2d-aa05-2be908807cec.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_28949057-e79e-4c2d-aa05-2be908807cec.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_293ddf3f-574a-4a07-a672-bbbd48a5e6f7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_293ddf3f-574a-4a07-a672-bbbd48a5e6f7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_293ddf3f-574a-4a07-a672-bbbd48a5e6f7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2ac8e78d-7f2b-4e06-bc11-93604ad7466a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2ac8e78d-7f2b-4e06-bc11-93604ad7466a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2ac8e78d-7f2b-4e06-bc11-93604ad7466a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2e66af93-7be6-4cc5-a06c-14cce5811800.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2e66af93-7be6-4cc5-a06c-14cce5811800.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2e66af93-7be6-4cc5-a06c-14cce5811800.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2f65b03c-3907-4491-a5d8-c9a4ff279b52.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2f65b03c-3907-4491-a5d8-c9a4ff279b52.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2f65b03c-3907-4491-a5d8-c9a4ff279b52.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_2ff33e3c-6065-4b2d-a0a7-2688047e2105.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_2ff33e3c-6065-4b2d-a0a7-2688047e2105.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_2ff33e3c-6065-4b2d-a0a7-2688047e2105.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_34fac728-4bee-4ac7-95ea-c57cad15e2a7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_34fac728-4bee-4ac7-95ea-c57cad15e2a7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_34fac728-4bee-4ac7-95ea-c57cad15e2a7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3501733b-529a-4beb-ac2a-dbaaa7e443d6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3501733b-529a-4beb-ac2a-dbaaa7e443d6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3501733b-529a-4beb-ac2a-dbaaa7e443d6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_37309259-d759-49be-91a4-b84190d1bfb0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_37309259-d759-49be-91a4-b84190d1bfb0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_37309259-d759-49be-91a4-b84190d1bfb0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_39368d1e-b4f1-4702-8391-46351bb5f9bc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_39368d1e-b4f1-4702-8391-46351bb5f9bc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_39368d1e-b4f1-4702-8391-46351bb5f9bc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3ea5fcf3-a024-41ce-b3bb-0df4720f1a73.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3ea5fcf3-a024-41ce-b3bb-0df4720f1a73.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3ea5fcf3-a024-41ce-b3bb-0df4720f1a73.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_3f2247e5-8c7f-4414-847a-3f2ff9898b96.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_3f2247e5-8c7f-4414-847a-3f2ff9898b96.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_3f2247e5-8c7f-4414-847a-3f2ff9898b96.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_420d732b-4fc9-459d-b083-cda18a54b7ad.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_420d732b-4fc9-459d-b083-cda18a54b7ad.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_420d732b-4fc9-459d-b083-cda18a54b7ad.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_498cdca4-2d81-4f68-bdaf-25e79e917d55.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_498cdca4-2d81-4f68-bdaf-25e79e917d55.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_498cdca4-2d81-4f68-bdaf-25e79e917d55.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4b8685ab-6c30-4b65-883d-0e55e9958a32.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4b8685ab-6c30-4b65-883d-0e55e9958a32.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4b8685ab-6c30-4b65-883d-0e55e9958a32.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4cbc14df-0999-4f11-89d5-8f0aa7514e1a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4cbc14df-0999-4f11-89d5-8f0aa7514e1a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4cbc14df-0999-4f11-89d5-8f0aa7514e1a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4d4a1912-aebc-4afa-8d93-26740e955543.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4d4a1912-aebc-4afa-8d93-26740e955543.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4d4a1912-aebc-4afa-8d93-26740e955543.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4d6b8c20-bf1f-47c1-96f0-6710c20c96e9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4d6b8c20-bf1f-47c1-96f0-6710c20c96e9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4d6b8c20-bf1f-47c1-96f0-6710c20c96e9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4d8b4aea-be3c-4eb2-8886-2ff61410d232.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4d8b4aea-be3c-4eb2-8886-2ff61410d232.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4d8b4aea-be3c-4eb2-8886-2ff61410d232.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4d8dffa0-7caa-4ded-8d44-b4aeaf4b4922.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4d8dffa0-7caa-4ded-8d44-b4aeaf4b4922.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4d8dffa0-7caa-4ded-8d44-b4aeaf4b4922.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_4ee237d2-e3ed-482d-9a70-0a690f23084b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_4ee237d2-e3ed-482d-9a70-0a690f23084b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_4ee237d2-e3ed-482d-9a70-0a690f23084b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5050cb54-0fd2-4e8d-a61e-53b1cc01d84a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5050cb54-0fd2-4e8d-a61e-53b1cc01d84a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5050cb54-0fd2-4e8d-a61e-53b1cc01d84a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_50fa45be-ba2a-4735-a9e5-7a934f275ca7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_50fa45be-ba2a-4735-a9e5-7a934f275ca7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_50fa45be-ba2a-4735-a9e5-7a934f275ca7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5271bfcf-8400-49ba-bf3f-4eab5aeea16b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5271bfcf-8400-49ba-bf3f-4eab5aeea16b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5271bfcf-8400-49ba-bf3f-4eab5aeea16b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_54440083-3dbe-44f9-91e5-e975a8fd92f6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_54440083-3dbe-44f9-91e5-e975a8fd92f6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_54440083-3dbe-44f9-91e5-e975a8fd92f6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_54c377fa-0e2b-4aa6-bdb4-9e8555ab575d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_54c377fa-0e2b-4aa6-bdb4-9e8555ab575d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_54c377fa-0e2b-4aa6-bdb4-9e8555ab575d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_54db644e-40f5-43bb-aea5-16138e104acf.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_54db644e-40f5-43bb-aea5-16138e104acf.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_54db644e-40f5-43bb-aea5-16138e104acf.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_55359e78-9810-46cf-8344-81f8961e052c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_55359e78-9810-46cf-8344-81f8961e052c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_55359e78-9810-46cf-8344-81f8961e052c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_58ebc0b9-4d51-48a1-a71d-ecdc612df386.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_58ebc0b9-4d51-48a1-a71d-ecdc612df386.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_58ebc0b9-4d51-48a1-a71d-ecdc612df386.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_597622ae-1268-4fbb-b7ed-984980ae48e1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_597622ae-1268-4fbb-b7ed-984980ae48e1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_597622ae-1268-4fbb-b7ed-984980ae48e1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5ad7241a-f028-4e95-8d82-3263edae29f1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5ad7241a-f028-4e95-8d82-3263edae29f1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5ad7241a-f028-4e95-8d82-3263edae29f1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5cdceb13-be67-4154-849c-739b4ee913d8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5cdceb13-be67-4154-849c-739b4ee913d8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5cdceb13-be67-4154-849c-739b4ee913d8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5ce51c58-f795-4228-991f-b4702befce45.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5ce51c58-f795-4228-991f-b4702befce45.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5ce51c58-f795-4228-991f-b4702befce45.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5d35fece-c057-4c42-91cc-bfa4752ea42a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5d35fece-c057-4c42-91cc-bfa4752ea42a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5d35fece-c057-4c42-91cc-bfa4752ea42a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_5fd68c73-648d-434d-90d0-b8e6b8ae500b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_5fd68c73-648d-434d-90d0-b8e6b8ae500b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_5fd68c73-648d-434d-90d0-b8e6b8ae500b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_60473c30-5cc8-444c-bf80-2cb2be70a8ab.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_60473c30-5cc8-444c-bf80-2cb2be70a8ab.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_60473c30-5cc8-444c-bf80-2cb2be70a8ab.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_60887088-9f0b-4d68-9018-aaf0de67b0d0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_60887088-9f0b-4d68-9018-aaf0de67b0d0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_60887088-9f0b-4d68-9018-aaf0de67b0d0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6348a408-1b0b-4f00-b900-c2bc833d207f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6348a408-1b0b-4f00-b900-c2bc833d207f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6348a408-1b0b-4f00-b900-c2bc833d207f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_64aeb841-d36f-4f45-b48f-3805c5b343db.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_64aeb841-d36f-4f45-b48f-3805c5b343db.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_64aeb841-d36f-4f45-b48f-3805c5b343db.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_64d8f816-d031-47be-8b7a-9e71d1b1f2dc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_64d8f816-d031-47be-8b7a-9e71d1b1f2dc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_64d8f816-d031-47be-8b7a-9e71d1b1f2dc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_65be2133-e5d0-4fe3-b962-0f23bfc88350.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_65be2133-e5d0-4fe3-b962-0f23bfc88350.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_65be2133-e5d0-4fe3-b962-0f23bfc88350.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6b001df1-c3a4-4836-9497-23f9ea640f02.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6b001df1-c3a4-4836-9497-23f9ea640f02.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6b001df1-c3a4-4836-9497-23f9ea640f02.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6b78feb4-1b33-4ac6-9629-867532014723.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6b78feb4-1b33-4ac6-9629-867532014723.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6b78feb4-1b33-4ac6-9629-867532014723.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6be25100-54c6-4f36-acf5-9d06f00af783.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6be25100-54c6-4f36-acf5-9d06f00af783.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6be25100-54c6-4f36-acf5-9d06f00af783.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_6da40739-7525-48c8-9f91-a9b3f7d23e7a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_6da40739-7525-48c8-9f91-a9b3f7d23e7a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_6da40739-7525-48c8-9f91-a9b3f7d23e7a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7032bcdd-690a-44ee-81f1-e5f1eb80d387.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7032bcdd-690a-44ee-81f1-e5f1eb80d387.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7032bcdd-690a-44ee-81f1-e5f1eb80d387.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7140185d-88f7-4f88-9633-9c087c6e9546.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7140185d-88f7-4f88-9633-9c087c6e9546.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7140185d-88f7-4f88-9633-9c087c6e9546.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7284a77b-485f-4f12-87d7-21fcb44e54cf.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7284a77b-485f-4f12-87d7-21fcb44e54cf.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7284a77b-485f-4f12-87d7-21fcb44e54cf.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_72940fb5-bcf7-4fb0-b02c-b35f042b3508.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_72940fb5-bcf7-4fb0-b02c-b35f042b3508.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_72940fb5-bcf7-4fb0-b02c-b35f042b3508.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_72d16eee-2421-406f-a658-cf47e3635911.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_72d16eee-2421-406f-a658-cf47e3635911.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_72d16eee-2421-406f-a658-cf47e3635911.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_761cf63d-46fb-42a7-a653-3d9760972324.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_761cf63d-46fb-42a7-a653-3d9760972324.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_761cf63d-46fb-42a7-a653-3d9760972324.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7625e9af-b0ed-46e6-8a8c-2f7f187170dc.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7625e9af-b0ed-46e6-8a8c-2f7f187170dc.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7625e9af-b0ed-46e6-8a8c-2f7f187170dc.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_76ce44e8-29cf-400a-97f9-b1645194033b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_76ce44e8-29cf-400a-97f9-b1645194033b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_76ce44e8-29cf-400a-97f9-b1645194033b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_77d95502-e4b0-41b6-b905-7671133f23b6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_77d95502-e4b0-41b6-b905-7671133f23b6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_77d95502-e4b0-41b6-b905-7671133f23b6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7c9f6a84-d9b7-4136-8615-38dd31b8c1ae.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7c9f6a84-d9b7-4136-8615-38dd31b8c1ae.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7c9f6a84-d9b7-4136-8615-38dd31b8c1ae.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7f79165c-ef36-4479-adcd-029900ab398f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7f79165c-ef36-4479-adcd-029900ab398f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7f79165c-ef36-4479-adcd-029900ab398f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7f908057-55f1-4329-a06c-bb3dfddb850d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7f908057-55f1-4329-a06c-bb3dfddb850d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7f908057-55f1-4329-a06c-bb3dfddb850d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_7fd6cfea-032c-48df-b4e3-42a8ff7d2cf0.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_7fd6cfea-032c-48df-b4e3-42a8ff7d2cf0.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_7fd6cfea-032c-48df-b4e3-42a8ff7d2cf0.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_829cdb6a-8c58-43dc-9454-dbce91c049da.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_829cdb6a-8c58-43dc-9454-dbce91c049da.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_829cdb6a-8c58-43dc-9454-dbce91c049da.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_833960f6-a6e8-4fff-95ad-ba8188c15be4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_833960f6-a6e8-4fff-95ad-ba8188c15be4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_833960f6-a6e8-4fff-95ad-ba8188c15be4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_87a3fffe-bd93-475f-b28d-c335d031cbac.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_87a3fffe-bd93-475f-b28d-c335d031cbac.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_87a3fffe-bd93-475f-b28d-c335d031cbac.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8a48a1e4-0e65-4257-bdd1-a000a65d4935.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8a48a1e4-0e65-4257-bdd1-a000a65d4935.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8a48a1e4-0e65-4257-bdd1-a000a65d4935.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8c1ff657-a82c-44dc-9622-99e6d96d9188.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8c1ff657-a82c-44dc-9622-99e6d96d9188.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8c1ff657-a82c-44dc-9622-99e6d96d9188.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8deedc90-7cb5-46a2-bc0a-87f388d507e2.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8deedc90-7cb5-46a2-bc0a-87f388d507e2.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8deedc90-7cb5-46a2-bc0a-87f388d507e2.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_8fab487d-23a7-4695-9206-4e6ff0ce93e8.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_8fab487d-23a7-4695-9206-4e6ff0ce93e8.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_8fab487d-23a7-4695-9206-4e6ff0ce93e8.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9264138c-efca-4fb5-86af-b0c8be3e39e1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9264138c-efca-4fb5-86af-b0c8be3e39e1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9264138c-efca-4fb5-86af-b0c8be3e39e1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9323e9c9-71ff-4e37-8cf9-c91766fe65fa.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9323e9c9-71ff-4e37-8cf9-c91766fe65fa.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9323e9c9-71ff-4e37-8cf9-c91766fe65fa.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_93d06d21-cd9e-4de9-8996-e77aa87f87e1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_93d06d21-cd9e-4de9-8996-e77aa87f87e1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_93d06d21-cd9e-4de9-8996-e77aa87f87e1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_953f71f3-041a-4326-8acf-df275ae1bd61.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_953f71f3-041a-4326-8acf-df275ae1bd61.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_953f71f3-041a-4326-8acf-df275ae1bd61.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9694af03-7cae-4361-809e-7083d7970c13.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9694af03-7cae-4361-809e-7083d7970c13.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9694af03-7cae-4361-809e-7083d7970c13.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_983a57c7-9b58-4ac4-8943-4b9d4eac53e6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_983a57c7-9b58-4ac4-8943-4b9d4eac53e6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_983a57c7-9b58-4ac4-8943-4b9d4eac53e6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_989010ed-f922-4f90-9338-b23db7902b81.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_989010ed-f922-4f90-9338-b23db7902b81.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_989010ed-f922-4f90-9338-b23db7902b81.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9a2bf4a5-9e5d-4c95-a8ff-1d7f8ccac049.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9a2bf4a5-9e5d-4c95-a8ff-1d7f8ccac049.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9a2bf4a5-9e5d-4c95-a8ff-1d7f8ccac049.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9dbf57ac-dad5-4f48-b7e9-7deb6686091e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9dbf57ac-dad5-4f48-b7e9-7deb6686091e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9dbf57ac-dad5-4f48-b7e9-7deb6686091e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_9fdadf43-36be-41cd-b2ba-acb277f2425a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_9fdadf43-36be-41cd-b2ba-acb277f2425a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_9fdadf43-36be-41cd-b2ba-acb277f2425a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a0e8465b-66c6-4d9e-87a0-ad790f2d8c28.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a0e8465b-66c6-4d9e-87a0-ad790f2d8c28.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a0e8465b-66c6-4d9e-87a0-ad790f2d8c28.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a39bb061-1751-4f42-bb51-e01416a632a4.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a39bb061-1751-4f42-bb51-e01416a632a4.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a39bb061-1751-4f42-bb51-e01416a632a4.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a5563ca1-2721-4bc0-b7f0-de5d959007ce.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a5563ca1-2721-4bc0-b7f0-de5d959007ce.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a5563ca1-2721-4bc0-b7f0-de5d959007ce.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a6387eac-20b6-4603-a9a2-8a8138a9292f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a6387eac-20b6-4603-a9a2-8a8138a9292f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a6387eac-20b6-4603-a9a2-8a8138a9292f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a83d7a50-b93f-4f85-96a6-b3e3b661562d.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a83d7a50-b93f-4f85-96a6-b3e3b661562d.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a83d7a50-b93f-4f85-96a6-b3e3b661562d.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_a98f1894-dc38-4415-a413-03322af9a313.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_a98f1894-dc38-4415-a413-03322af9a313.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_a98f1894-dc38-4415-a413-03322af9a313.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_abc3b78d-5795-4b39-bfb3-f922363c11b7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_abc3b78d-5795-4b39-bfb3-f922363c11b7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_abc3b78d-5795-4b39-bfb3-f922363c11b7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ad72493b-04b8-4c84-b2b5-fc6a6271a947.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ad72493b-04b8-4c84-b2b5-fc6a6271a947.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ad72493b-04b8-4c84-b2b5-fc6a6271a947.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_af4fecf3-2406-45b8-9fa9-9ab5bc6b86c5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_af4fecf3-2406-45b8-9fa9-9ab5bc6b86c5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_af4fecf3-2406-45b8-9fa9-9ab5bc6b86c5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b35abd85-1d1b-40cc-a046-518c8bf88798.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b35abd85-1d1b-40cc-a046-518c8bf88798.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b35abd85-1d1b-40cc-a046-518c8bf88798.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b4c9d425-a3bb-49b2-aabf-473af9ee0a43.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b4c9d425-a3bb-49b2-aabf-473af9ee0a43.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b4c9d425-a3bb-49b2-aabf-473af9ee0a43.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b58842b1-7ebc-4799-b202-aa211431cf90.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b58842b1-7ebc-4799-b202-aa211431cf90.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b58842b1-7ebc-4799-b202-aa211431cf90.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b976acaf-74f5-4a03-8301-72b99ebb90e9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b976acaf-74f5-4a03-8301-72b99ebb90e9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b976acaf-74f5-4a03-8301-72b99ebb90e9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_b98ac9f4-d1cc-4f96-ad5b-f9d52d8bdcd5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_b98ac9f4-d1cc-4f96-ad5b-f9d52d8bdcd5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_b98ac9f4-d1cc-4f96-ad5b-f9d52d8bdcd5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ba6f9db4-11bf-4735-8c4d-9ecd67f79d40.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ba6f9db4-11bf-4735-8c4d-9ecd67f79d40.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ba6f9db4-11bf-4735-8c4d-9ecd67f79d40.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_bc4812bf-aafe-4a30-9a6e-d25f75648c0f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_bc4812bf-aafe-4a30-9a6e-d25f75648c0f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_bc4812bf-aafe-4a30-9a6e-d25f75648c0f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_bfacba22-f5a3-48d4-a489-48f3da10b13b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_bfacba22-f5a3-48d4-a489-48f3da10b13b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_bfacba22-f5a3-48d4-a489-48f3da10b13b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c429c1ab-2c40-4897-8399-cc15fa13e86c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c429c1ab-2c40-4897-8399-cc15fa13e86c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c429c1ab-2c40-4897-8399-cc15fa13e86c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c844d1ee-15e0-4823-8aee-1767be18b86b.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c844d1ee-15e0-4823-8aee-1767be18b86b.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c844d1ee-15e0-4823-8aee-1767be18b86b.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_c88f51bb-ca33-486c-a822-bc36992d4cd1.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_c88f51bb-ca33-486c-a822-bc36992d4cd1.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_c88f51bb-ca33-486c-a822-bc36992d4cd1.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ca96b158-4577-4306-b528-47b0bd09ac06.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ca96b158-4577-4306-b528-47b0bd09ac06.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ca96b158-4577-4306-b528-47b0bd09ac06.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cc082cc1-7c67-43ea-ad6b-8d95811a8c20.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cc082cc1-7c67-43ea-ad6b-8d95811a8c20.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cc082cc1-7c67-43ea-ad6b-8d95811a8c20.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cfe01c93-d5b6-4e7e-8fce-f4b1aa140d41.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cfe01c93-d5b6-4e7e-8fce-f4b1aa140d41.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cfe01c93-d5b6-4e7e-8fce-f4b1aa140d41.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_cfefd3b9-b00e-450c-9060-03301d69a6c7.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_cfefd3b9-b00e-450c-9060-03301d69a6c7.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_cfefd3b9-b00e-450c-9060-03301d69a6c7.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d10f910d-83e4-48ff-8167-6c9272608f32.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d10f910d-83e4-48ff-8167-6c9272608f32.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d10f910d-83e4-48ff-8167-6c9272608f32.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d6743345-da1a-4d3a-b129-697831c31d49.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d6743345-da1a-4d3a-b129-697831c31d49.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d6743345-da1a-4d3a-b129-697831c31d49.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d674ad7f-f265-4ecf-ace7-7dce0e5dba73.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d674ad7f-f265-4ecf-ace7-7dce0e5dba73.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d674ad7f-f265-4ecf-ace7-7dce0e5dba73.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_d8d5ffda-7eeb-42bd-8a09-00278b3c554e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_d8d5ffda-7eeb-42bd-8a09-00278b3c554e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_d8d5ffda-7eeb-42bd-8a09-00278b3c554e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_da783ffa-762b-43e0-8e68-e0fbe307d6c9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_da783ffa-762b-43e0-8e68-e0fbe307d6c9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_da783ffa-762b-43e0-8e68-e0fbe307d6c9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_db79743e-d0d8-432c-a853-7190b10d1615.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_db79743e-d0d8-432c-a853-7190b10d1615.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_db79743e-d0d8-432c-a853-7190b10d1615.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_dec647ef-d8dc-4ebc-89ba-1f9ca3c169ea.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_dec647ef-d8dc-4ebc-89ba-1f9ca3c169ea.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_dec647ef-d8dc-4ebc-89ba-1f9ca3c169ea.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e010bbe2-ef42-49fc-bc07-3aba5b5f3754.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e010bbe2-ef42-49fc-bc07-3aba5b5f3754.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e010bbe2-ef42-49fc-bc07-3aba5b5f3754.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e11354d1-77e0-4f72-95db-b30387f52f83.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e11354d1-77e0-4f72-95db-b30387f52f83.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e11354d1-77e0-4f72-95db-b30387f52f83.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e12f3950-5496-4317-aa0c-d43f53c26ba5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e12f3950-5496-4317-aa0c-d43f53c26ba5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e12f3950-5496-4317-aa0c-d43f53c26ba5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e2940e59-b351-49e7-b18c-5960b0db829a.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e2940e59-b351-49e7-b18c-5960b0db829a.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e2940e59-b351-49e7-b18c-5960b0db829a.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e3b8f107-5a2e-41b0-8fd3-4c5c903a097c.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e3b8f107-5a2e-41b0-8fd3-4c5c903a097c.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e3b8f107-5a2e-41b0-8fd3-4c5c903a097c.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_e6759bf3-348d-4092-b220-ebe2e7d105c5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_e6759bf3-348d-4092-b220-ebe2e7d105c5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_e6759bf3-348d-4092-b220-ebe2e7d105c5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_eaeaaf55-b765-452f-82b6-2579de098f79.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_eaeaaf55-b765-452f-82b6-2579de098f79.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_eaeaaf55-b765-452f-82b6-2579de098f79.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_ec5dd058-8568-4108-bad7-854daa044047.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_ec5dd058-8568-4108-bad7-854daa044047.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_ec5dd058-8568-4108-bad7-854daa044047.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_eca50c92-fcfd-4fda-84ae-5a4cf3a5c845.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_eca50c92-fcfd-4fda-84ae-5a4cf3a5c845.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_eca50c92-fcfd-4fda-84ae-5a4cf3a5c845.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f0f4d3ad-5303-4315-831d-7f079405b16f.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f0f4d3ad-5303-4315-831d-7f079405b16f.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f0f4d3ad-5303-4315-831d-7f079405b16f.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f1686baf-8559-4664-8d08-d8017b0385f3.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f1686baf-8559-4664-8d08-d8017b0385f3.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f1686baf-8559-4664-8d08-d8017b0385f3.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f2ace72e-09c1-4721-a8d6-24e554ec29b6.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f2ace72e-09c1-4721-a8d6-24e554ec29b6.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f2ace72e-09c1-4721-a8d6-24e554ec29b6.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f442bae3-d8f4-406b-a475-0aa00cd61ca5.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f442bae3-d8f4-406b-a475-0aa00cd61ca5.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f442bae3-d8f4-406b-a475-0aa00cd61ca5.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f49f1f60-270c-47c3-9640-4e6665db1561.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f49f1f60-270c-47c3-9640-4e6665db1561.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f49f1f60-270c-47c3-9640-4e6665db1561.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f70059f5-34cc-4468-8c15-724b27cd31d9.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f70059f5-34cc-4468-8c15-724b27cd31d9.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f70059f5-34cc-4468-8c15-724b27cd31d9.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f7eab6b7-5d72-4d9c-8a35-2de04243c689.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f7eab6b7-5d72-4d9c-8a35-2de04243c689.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f7eab6b7-5d72-4d9c-8a35-2de04243c689.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f814cc0e-9a29-40ed-9ec7-39059caeb078.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f814cc0e-9a29-40ed-9ec7-39059caeb078.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f814cc0e-9a29-40ed-9ec7-39059caeb078.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_f8a5dc45-236d-4bac-bb42-f5ad21136436.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_f8a5dc45-236d-4bac-bb42-f5ad21136436.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_f8a5dc45-236d-4bac-bb42-f5ad21136436.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fb4e2a4d-a52a-49b0-b1a6-ad6b695a8a3e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fb4e2a4d-a52a-49b0-b1a6-ad6b695a8a3e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fb4e2a4d-a52a-49b0-b1a6-ad6b695a8a3e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fb61c3c2-fd86-448f-b5a8-5a48d625fe3e.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fb61c3c2-fd86-448f-b5a8-5a48d625fe3e.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fb61c3c2-fd86-448f-b5a8-5a48d625fe3e.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fb954542-ab11-4099-a828-fe7434443a66.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fb954542-ab11-4099-a828-fe7434443a66.jsonl.zst
+    │   │   │   │       │   ├── batch_2026-02-09_fb954542-ab11-4099-a828-fe7434443a66.jsonl.zst.meta.json
+    │   │   │   │       │   ├── batch_2026-02-09_fda4cf7e-3a3d-4f66-8357-dcf8bc2de2cf.jsonl
+    │   │   │   │       │   ├── batch_2026-02-09_fda4cf7e-3a3d-4f66-8357-dcf8bc2de2cf.jsonl.zst
+    │   │   │   │       │   └── batch_2026-02-09_fda4cf7e-3a3d-4f66-8357-dcf8bc2de2cf.jsonl.zst.meta.json
+    │   │   │   │       ├── bronze_semanticscholar_publication_dq_report.json
+    │   │   │   │       └── semanticscholar_publication_metadata.yaml
+    │   │   │   └── uniprot/
+    │   │   │       └── protein
     │   │   ├── activity.csv
     │   │   ├── assay.csv
     │   │   ├── cell.csv
@@ -7330,6 +9895,141 @@ BioactivityDataAcquisition2/
     │   │   ├── target_component.csv
     │   │   └── tissue.csv
     │   └── output/
+    │       ├── bronze/
+    │       │   ├── chembl/
+    │       │   │   ├── publication/
+    │       │   │   │   ├── 2026-02-11/
+    │       │   │   │   │   ├── batch_2026-02-11_5060d319-32e9-4120-94d7-9a9bcf9e3e2e.jsonl
+    │       │   │   │   │   ├── batch_2026-02-11_5060d319-32e9-4120-94d7-9a9bcf9e3e2e.jsonl.zst
+    │       │   │   │   │   └── batch_2026-02-11_5060d319-32e9-4120-94d7-9a9bcf9e3e2e.jsonl.zst.meta.json
+    │       │   │   │   ├── bronze_chembl_publication_dq_report.json
+    │       │   │   │   └── chembl_publication_metadata.yaml
+    │       │   │   ├── activity
+    │       │   │   ├── assay
+    │       │   │   ├── cell_line
+    │       │   │   ├── compound_record
+    │       │   │   ├── molecule
+    │       │   │   ├── publication_term
+    │       │   │   ├── target
+    │       │   │   └── target_component
+    │       │   ├── crossref/
+    │       │   │   └── publication/
+    │       │   │       ├── 2026-02-11/
+    │       │   │       │   ├── batch_2026-02-11_137b15f7-f5ff-4dc9-9f02-53655f0c8d88.jsonl
+    │       │   │       │   ├── batch_2026-02-11_137b15f7-f5ff-4dc9-9f02-53655f0c8d88.jsonl.zst
+    │       │   │       │   └── batch_2026-02-11_137b15f7-f5ff-4dc9-9f02-53655f0c8d88.jsonl.zst.meta.json
+    │       │   │       ├── bronze_crossref_publication_dq_report.json
+    │       │   │       └── crossref_work_metadata.yaml
+    │       │   ├── openalex/
+    │       │   │   └── publication/
+    │       │   │       ├── 2026-02-11/
+    │       │   │       │   ├── batch_2026-02-11_193e1225-8bed-43f4-8618-7be456706395.jsonl
+    │       │   │       │   ├── batch_2026-02-11_193e1225-8bed-43f4-8618-7be456706395.jsonl.zst
+    │       │   │       │   └── batch_2026-02-11_193e1225-8bed-43f4-8618-7be456706395.jsonl.zst.meta.json
+    │       │   │       ├── bronze_openalex_publication_dq_report.json
+    │       │   │       └── openalex_publication_metadata.yaml
+    │       │   ├── pubchem/
+    │       │   │   └── compound
+    │       │   ├── pubmed/
+    │       │   │   └── publication/
+    │       │   │       ├── 2026-02-11/
+    │       │   │       │   ├── batch_2026-02-11_997577c6-a2e5-43df-83c0-ca0c682575d3.jsonl
+    │       │   │       │   ├── batch_2026-02-11_997577c6-a2e5-43df-83c0-ca0c682575d3.jsonl.zst
+    │       │   │       │   └── batch_2026-02-11_997577c6-a2e5-43df-83c0-ca0c682575d3.jsonl.zst.meta.json
+    │       │   │       ├── bronze_pubmed_publication_dq_report.json
+    │       │   │       └── pubmed_publication_metadata.yaml
+    │       │   └── semanticscholar/
+    │       │       └── publication/
+    │       │           ├── 2026-02-11/
+    │       │           │   ├── batch_2026-02-11_ceb832ef-1c85-430a-b08d-f9dcd9888ec5.jsonl
+    │       │           │   ├── batch_2026-02-11_ceb832ef-1c85-430a-b08d-f9dcd9888ec5.jsonl.zst
+    │       │           │   └── batch_2026-02-11_ceb832ef-1c85-430a-b08d-f9dcd9888ec5.jsonl.zst.meta.json
+    │       │           ├── bronze_semanticscholar_publication_dq_report.json
+    │       │           └── semanticscholar_publication_metadata.yaml
+    │       ├── gold/
+    │       │   ├── chembl/
+    │       │   │   ├── publication/
+    │       │   │   ├── activity
+    │       │   │   ├── cell_line
+    │       │   │   ├── compound_record
+    │       │   │   ├── publication_term
+    │       │   │   ├── target
+    │       │   │   └── target_component
+    │       │   ├── composite/
+    │       │   │   ├── publication/
+    │       │   │   │   ├── _delta_log/
+    │       │   │   │   │   └── 00000000000000000000.json
+    │       │   │   │   ├── composite_publication_metadata.yaml
+    │       │   │   │   └── part-00000-e074f5fb-b503-4ab2-8b40-1bcc9cd775f6-c000.snappy.parquet
+    │       │   │   └── publication.csv
+    │       │   ├── crossref/
+    │       │   │   └── publication/
+    │       │   ├── openalex/
+    │       │   │   └── publication/
+    │       │   ├── pubchem/
+    │       │   │   └── compound
+    │       │   ├── pubmed/
+    │       │   │   └── publication/
+    │       │   └── semanticscholar/
+    │       │       └── publication/
+    │       └── silver/
+    │           ├── chembl/
+    │           │   ├── publication/
+    │           │   │   ├── _delta_log/
+    │           │   │   │   └── 00000000000000000000.json
+    │           │   │   ├── chembl_publication.csv
+    │           │   │   ├── chembl_publication_metadata.yaml
+    │           │   │   ├── part-00000-a755a8eb-487e-4058-bd31-7869fa7eeb19-c000.snappy.parquet
+    │           │   │   └── silver_chembl_publication_dq_report.json
+    │           │   ├── activity
+    │           │   ├── assay
+    │           │   ├── cell_line
+    │           │   ├── compound_record
+    │           │   ├── molecule
+    │           │   ├── publication_term
+    │           │   ├── target
+    │           │   └── target_component
+    │           ├── composite/
+    │           │   ├── publication/
+    │           │   │   ├── _delta_log/
+    │           │   │   │   └── 00000000000000000000.json
+    │           │   │   ├── composite_publication_metadata.yaml
+    │           │   │   └── part-00000-a3ed7ab3-896a-4b1e-9ca2-6097a87432b5-c000.snappy.parquet
+    │           │   └── publication.csv
+    │           ├── crossref/
+    │           │   └── publication/
+    │           │       ├── _delta_log/
+    │           │       │   └── 00000000000000000000.json
+    │           │       ├── crossref_publication.csv
+    │           │       ├── crossref_publication_metadata.yaml
+    │           │       ├── part-00000-a6e0dbe9-82ba-4214-8909-7cdd7f9cd5a1-c000.snappy.parquet
+    │           │       └── silver_crossref_publication_dq_report.json
+    │           ├── openalex/
+    │           │   └── publication/
+    │           │       ├── _delta_log/
+    │           │       │   └── 00000000000000000000.json
+    │           │       ├── openalex_publication.csv
+    │           │       ├── openalex_publication_metadata.yaml
+    │           │       ├── part-00000-42aba5e9-a452-4208-837e-feb925cdd3c9-c000.snappy.parquet
+    │           │       └── silver_openalex_publication_dq_report.json
+    │           ├── pubchem/
+    │           │   └── compound
+    │           ├── pubmed/
+    │           │   └── publication/
+    │           │       ├── _delta_log/
+    │           │       │   └── 00000000000000000000.json
+    │           │       ├── part-00000-6d221357-6b64-4706-9aa2-3705cfd6ee62-c000.snappy.parquet
+    │           │       ├── pubmed_publication.csv
+    │           │       ├── pubmed_publication_metadata.yaml
+    │           │       └── silver_pubmed_publication_dq_report.json
+    │           └── semanticscholar/
+    │               └── publication/
+    │                   ├── _delta_log/
+    │                   │   └── 00000000000000000000.json
+    │                   ├── part-00000-233272f7-ae30-4241-8a3c-3bb9a690bb51-c000.snappy.parquet
+    │                   ├── semanticscholar_publication.csv
+    │                   ├── semanticscholar_publication_metadata.yaml
+    │                   └── silver_semanticscholar_publication_dq_report.json
     ├── docs/
     │   ├── .claude/
     │   │   └── settings.local.json
@@ -7389,8 +10089,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── ADR-029-output-metadata-unification.md
     │   │   │   ├── ADR-030-publication-pagination-strategy.md
     │   │   │   ├── ADR-031-loading-strategy-formalization.md
-    │   │   │   ├── ADR-032-publication-validation-strategy.md
     │   │   │   ├── ADR-032-unified-http-client.md
+    │   │   │   ├── ADR-033-publication-validation-strategy.md
     │   │   │   └── README.md
     │   │   ├── diagrams/
     │   │   │   ├── mermaid/
@@ -7504,12 +10204,14 @@ BioactivityDataAcquisition2/
     │   │   ├── getting-started.md
     │   │   ├── local-storage-layout.md
     │   │   ├── metrics-monitoring.md
+    │   │   ├── migration-5.9-to-5.14.md
     │   │   ├── pipeline-configuration.md
     │   │   ├── pipeline-lifecycle.md
     │   │   ├── publication-validation-guide.md
     │   │   ├── quick-start.md
     │   │   ├── registry-pattern.md
     │   │   ├── running-pipelines.md
+    │   │   ├── silver-schema-testing-guide.md
     │   │   ├── testing.md
     │   │   └── troubleshooting.md
     │   ├── 04-reference/
@@ -7528,9 +10230,11 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── ports.md
     │   │   │   │   └── types.md
     │   │   │   ├── infrastructure/
+    │   │   │   │   ├── adapters-common.md
     │   │   │   │   ├── adapters.md
     │   │   │   │   ├── observability.md
-    │   │   │   │   └── storage.md
+    │   │   │   │   ├── storage.md
+    │   │   │   │   └── unified-http-client.md
     │   │   │   ├── application.md
     │   │   │   ├── composition.md
     │   │   │   ├── domain.md
@@ -7723,11 +10427,21 @@ BioactivityDataAcquisition2/
     │   │   │   ├── project_structure.md
     │   │   │   └── Архитектурный обзор BioETL.docx
     │   │   └── refactoring-plan.md
+    │   ├── analysis/
+    │   │   ├── PUBLICATION_TYPE_NORMALIZATION_ANALYSIS.md
+    │   │   ├── chembl-validation-matrix.md
+    │   │   ├── crossref-validation-matrix.md
+    │   │   ├── openalex-validation-matrix.md
+    │   │   ├── pubmed-validation-matrix.md
+    │   │   └── semanticscholar-validation-matrix.md
     │   ├── assets/
     │   │   └── javascripts/
     │   │       └── mermaid-init.js
-    │   └── audits/
-    │       └── architecture-audit-2026-02-07.md
+    │   ├── audits/
+    │   │   ├── architecture-audit-2026-02-07.md
+    │   │   └── architecture-audit-2026-02-10.md
+    │   └── providers/
+    │       └── chembl.md
     ├── grafana/
     │   ├── dashboards/
     │   │   ├── bioetl-dq.json
@@ -7742,6 +10456,7 @@ BioactivityDataAcquisition2/
     │   ├── application_merged.md
     │   ├── composition_merged.md
     │   ├── configs_merged.md
+    │   ├── documentation-audit-report.md
     │   ├── documentation_merged.md
     │   ├── domain_merged.md
     │   ├── infrastructure_merged.md
@@ -7816,34 +10531,20 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── chembl/
     │   │   │   │   │   ├── __init__.py
     │   │   │   │   │   ├── _pipelines.py
-    │   │   │   │   │   ├── activity.py
     │   │   │   │   │   ├── activity_transformer.py
-    │   │   │   │   │   ├── assay.py
-    │   │   │   │   │   ├── assay_parameters.py
     │   │   │   │   │   ├── assay_parameters_transformer.py
     │   │   │   │   │   ├── assay_transformer.py
     │   │   │   │   │   ├── base_chembl_transformer.py
-    │   │   │   │   │   ├── cell_line.py
     │   │   │   │   │   ├── cell_line_transformer.py
-    │   │   │   │   │   ├── compound_record.py
     │   │   │   │   │   ├── compound_record_transformer.py
-    │   │   │   │   │   ├── molecule.py
     │   │   │   │   │   ├── molecule_transformer.py
-    │   │   │   │   │   ├── protein_class.py
     │   │   │   │   │   ├── protein_class_transformer.py
-    │   │   │   │   │   ├── publication.py
-    │   │   │   │   │   ├── publication_similarity.py
     │   │   │   │   │   ├── publication_similarity_transformer.py
-    │   │   │   │   │   ├── publication_term.py
     │   │   │   │   │   ├── publication_term_transformer.py
     │   │   │   │   │   ├── publication_transformer.py
-    │   │   │   │   │   ├── subcellular_fraction.py
     │   │   │   │   │   ├── subcellular_fraction_transformer.py
-    │   │   │   │   │   ├── target.py
-    │   │   │   │   │   ├── target_component.py
     │   │   │   │   │   ├── target_component_transformer.py
     │   │   │   │   │   ├── target_transformer.py
-    │   │   │   │   │   ├── tissue.py
     │   │   │   │   │   └── tissue_transformer.py
     │   │   │   │   ├── common/
     │   │   │   │   │   ├── __init__.py
@@ -8049,7 +10750,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── range_filter.py
     │   │   │   ├── mapping/
     │   │   │   │   ├── __init__.py
-    │   │   │   │   └── publication_fields.py
+    │   │   │   │   ├── publication_fields.py
+    │   │   │   │   └── publication_type_classification.py
     │   │   │   ├── models/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── filter.py
@@ -8080,8 +10782,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── serialization.py
     │   │   │   │   ├── shutdown.py
     │   │   │   │   ├── storage.py
-    │   │   │   │   ├── validation.py
-    │   │   │   │   └── watermark.py
+    │   │   │   │   └── validation.py
     │   │   │   ├── registry/
     │   │   │   │   ├── __init__.py
     │   │   │   │   └── publication.py
@@ -8445,6 +11146,7 @@ BioactivityDataAcquisition2/
     │   │   ├── test_pii_hashing.py
     │   │   ├── test_port_contracts.py
     │   │   ├── test_port_contracts_hypothesis.py
+    │   │   ├── test_publication_type_sync.py
     │   │   ├── test_registry_contracts.py
     │   │   ├── test_registry_threading.py
     │   │   ├── test_source_config_usage.py
@@ -8460,6 +11162,38 @@ BioactivityDataAcquisition2/
     │   │   ├── test_json_serialization.py
     │   │   └── test_performance.py
     │   ├── contract/
+    │   │   ├── silver_schemas/
+    │   │   │   ├── snapshots/
+    │   │   │   │   ├── .gitkeep
+    │   │   │   │   ├── chembl_activity_schema.json
+    │   │   │   │   ├── chembl_assay_parameters_schema.json
+    │   │   │   │   ├── chembl_assay_schema.json
+    │   │   │   │   ├── chembl_cell_line_schema.json
+    │   │   │   │   ├── chembl_compound_record_schema.json
+    │   │   │   │   ├── chembl_molecule_schema.json
+    │   │   │   │   ├── chembl_protein_class_schema.json
+    │   │   │   │   ├── chembl_publication_schema.json
+    │   │   │   │   ├── chembl_publication_similarity_schema.json
+    │   │   │   │   ├── chembl_publication_term_schema.json
+    │   │   │   │   ├── chembl_target_component_schema.json
+    │   │   │   │   ├── chembl_target_schema.json
+    │   │   │   │   ├── crossref_publication_schema.json
+    │   │   │   │   ├── openalex_publication_schema.json
+    │   │   │   │   ├── pubchem_compound_schema.json
+    │   │   │   │   ├── pubmed_publication_schema.json
+    │   │   │   │   ├── semanticscholar_publication_schema.json
+    │   │   │   │   ├── uniprot_idmapping_schema.json
+    │   │   │   │   └── uniprot_protein_schema.json
+    │   │   │   ├── FIX_PLAN.md
+    │   │   │   ├── README.md
+    │   │   │   ├── SKIPPED_TESTS_ANALYSIS.md
+    │   │   │   ├── TEST_RESULTS.md
+    │   │   │   ├── __init__.py
+    │   │   │   ├── conftest.py
+    │   │   │   ├── test_field_types.py
+    │   │   │   ├── test_naming_conventions.py
+    │   │   │   ├── test_schema_stability.py
+    │   │   │   └── test_validations.py
     │   │   ├── __init__.py
     │   │   ├── conftest.py
     │   │   ├── test_chembl_contract.py
@@ -8646,6 +11380,9 @@ BioactivityDataAcquisition2/
     │   │   │   ├── test_semanticscholar.py
     │   │   │   ├── test_uniprot.py
     │   │   │   └── test_uniprot_idmapping.py
+    │   │   ├── chembl/
+    │   │   │   ├── __init__.py
+    │   │   │   └── test_activity_extraction_params.py
     │   │   ├── composite/
     │   │   │   ├── __init__.py
     │   │   │   ├── test_column_naming_integration.py
@@ -8840,7 +11577,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── bootstrap/
     │   │   │   │   ├── runtime/
     │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── test_assembly.py
+    │   │   │   │   │   ├── test_assembly.py
+    │   │   │   │   │   └── test_resolve_bronze_opts.py
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_checkpoint_bootstrap.py
     │   │   │   │   ├── test_health_bootstrap.py
@@ -8896,6 +11634,9 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── test_list_filters.py
     │   │   │   │   ├── test_load_result.py
     │   │   │   │   └── test_range_filter.py
+    │   │   │   ├── mapping/
+    │   │   │   │   ├── __init__.py
+    │   │   │   │   └── test_publication_type_classification.py
     │   │   │   ├── models/
     │   │   │   │   ├── __init__.py
     │   │   │   │   ├── test_filter.py
@@ -9078,6 +11819,7 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── test_filter_config.py
     │   │   │   │   ├── test_gold.py
     │   │   │   │   ├── test_silver.py
+    │   │   │   │   ├── test_silver_pipeline_contracts.py
     │   │   │   │   └── test_sink_metadata_config.py
     │   │   │   ├── security/
     │   │   │   │   ├── __init__.py
@@ -9201,12 +11943,15 @@ BioactivityDataAcquisition2/
     ├── coverage.json
     ├── dev_setup.sh
     ├── mkdocs.yml
+    ├── nul
     ├── pyproject.toml
     ├── requirements.txt
+    ├── unified_classification.csv
+    ├── unified_classification.xlsx
     └── uv.lock
 ```
 
 **Statistics:**
-- Directories: 780
-- Files: 8421
-- Total items: 9201
+- Directories: 894
+- Files: 11052
+- Total items: 11946

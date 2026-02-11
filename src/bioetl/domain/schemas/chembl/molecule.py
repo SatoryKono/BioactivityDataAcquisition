@@ -68,8 +68,8 @@ class MoleculeSchema(ETLRecordSchema):
         isin=list(MOLECULE_TYPES),
         description="Molecule type.",
     )
-    first_approval: Series[int] | None = pa.Field(
-        nullable=True, description="Year of first approval."
+    first_approval: Series[float] | None = pa.Field(
+        nullable=True, description="Year of first approval (float for nullable int)."
     )
     # chirality: Optional[Series[int]] = pa.Field(
     #     nullable=True,
@@ -100,13 +100,13 @@ class MoleculeSchema(ETLRecordSchema):
         nullable=True, isin=[-1, 0, 1], description="Natural product flag."
     )
     first_in_class: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="First in class flag."
+        nullable=True, isin=[-1, 0, 1], description="First in class flag (-1=unknown)."
     )
     prodrug: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="Prodrug flag."
+        nullable=True, isin=[-1, 0, 1], description="Prodrug flag (-1=unknown)."
     )
     inorganic_flag: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="Inorganic flag."
+        nullable=True, isin=[-1, 0, 1], description="Inorganic flag (-1=unknown)."
     )
     polymer_flag: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Polymer flag."
@@ -133,11 +133,11 @@ class MoleculeSchema(ETLRecordSchema):
     availability_type: Series[int] | None = pa.Field(
         nullable=True, isin=[-2, -1, 0, 1, 2], description="Availability type."
     )
-    usan_year: Series[int] | None = pa.Field(
+    usan_year: Series[float] | None = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
-        description="USAN approval year.",
+        description="USAN approval year (float for nullable int).",
     )
     usan_stem: Series[str] | None = pa.Field(
         nullable=True, description="USAN stem name."

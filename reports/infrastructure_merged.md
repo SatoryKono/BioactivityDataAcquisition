@@ -697,7 +697,9 @@ DTO support via fetch_as_models() returning typed Pydantic models.
 from __future__ import annotations
 
 import contextlib
+import itertools
 import time
+import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
@@ -912,6 +914,12 @@ class ChemblAdapter(BaseHttpAdapter):
             for filter_field, ids in filters.items()
             if ids
         }
+
+    def _get_projected_url_length(self, url: str, params: dict[str, Any]) -> int:
+        """Estimate the length of the final URL with parameters."""
+        # URL-encode parameters to get accurate length (including escaping)
+        query_str = urllib.parse.urlencode(params, doseq=True)
+        return len(url) + 1 + len(query_str)
 
     def _compute_composite_key(
         self,
@@ -1144,6 +1152,9 @@ class ChemblAdapter(BaseHttpAdapter):
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:
+                # Catch all: API errors (network, timeout, 500s, malformed response),
+                # JSON decode errors, or validation failures. Log partial success and
+                # gracefully terminate pagination to avoid data loss.
                 self.logger.warning(
                     "chembl_pagination_interrupted",
                     entity_type=entity_type,
@@ -1575,6 +1586,7 @@ class ChemblAdapter(BaseHttpAdapter):
         ?molecule_chembl_id__in=CHEMBL25,CHEMBL26&document_chembl_id__in=CHEMBL1123
 
         ChEMBL API returns records matching ALL filter conditions (AND logic).
+        Supports automatic batching and URL length validation (1000 char limit).
 
         Args:
             entity_type: Type of entity to fetch
@@ -1585,35 +1597,69 @@ class ChemblAdapter(BaseHttpAdapter):
             Dictionary records matching ALL filter criteria
 
         """
-        filter_params = self._build_filter_in_params(filters)
-        if not filter_params:
+        if not filters:
             return
 
         url = self._mapper.get_resource_url(entity_type)
         pk_field = self._mapper.get_primary_key_field(entity_type)
-        offset = 0
+
+        # Determine optimal batch size based on 1000 character limit
+        # Start with configured batch size and halve proactively if URL is too long
+        batch_size = self._filter_batch_size
+        while batch_size > 1:
+            # Test with current batch size for all fields
+            test_filters = {k: v[:batch_size] for k, v in filters.items()}
+            test_params = self._build_params(0, entity_type)
+            test_params.update(self._build_filter_in_params(test_filters))
+
+            if self._get_projected_url_length(url, test_params) <= 1000:
+                break
+
+            batch_size //= 2
+            self.logger.info(
+                "reducing_multi_filter_batch_size",
+                entity_type=entity_type,
+                new_batch_size=batch_size,
+                reason="url_length_limit_exceeded",
+            )
+
+        # Prepare batches for each filter field
+        filter_keys = list(filters.keys())
+        filter_batches = [
+            list(self._batch_ids(filters[k], batch_size)) for k in filter_keys
+        ]
+
         total_fetched = 0
         seen_ids: set[str] = set()
 
-        while True:
-            params = self._build_params(offset, entity_type)
-            params.update(filter_params)
+        # Iterate over cartesian product of batches to cover all combinations
+        # ChEMBL API returns records matching ALL filters in the request (AND logic)
+        for batch_combination in itertools.product(*filter_batches):
+            current_filters = dict(zip(filter_keys, batch_combination, strict=True))
+            filter_params = self._build_filter_in_params(current_filters)
 
-            records, has_next = await self._fetch_page(url, params, entity_type)
-            if not records:
-                break
+            offset = 0
+            while True:
+                params = self._build_params(offset, entity_type)
+                params.update(filter_params)
 
-            for record in records:
-                if self._is_duplicate_record(record, pk_field, seen_ids, entity_type):
-                    continue
-                yield record
-                total_fetched += 1
-                if limit and total_fetched >= limit:
-                    return
+                records, has_next = await self._fetch_page(url, params, entity_type)
+                if not records:
+                    break
 
-            if not has_next:
-                break
-            offset += len(records)
+                for record in records:
+                    if self._is_duplicate_record(
+                        record, pk_field, seen_ids, entity_type
+                    ):
+                        continue
+                    yield record
+                    total_fetched += 1
+                    if limit and total_fetched >= limit:
+                        return
+
+                if not has_next:
+                    break
+                offset += len(records)
 
     async def fetch_filtered_with_fallback(
         self,
@@ -1793,13 +1839,14 @@ class ChemblAdapter(BaseHttpAdapter):
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
         """Get API request metadata and clear collector."""
+        extraction_qs = self._extraction_params.to_query_string() or None
         metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=CHEMBL_API_BASE, api_version=api_version
+            source_type="api",
+            url=CHEMBL_API_BASE,
+            api_version=api_version,
+            query_string=extraction_qs,
         )
         self._request_collector.clear()
-        # Record extraction params query string for audit trail (ADR-028 §3)
-        if not self._extraction_params.is_empty:
-            metadata.query_string = self._extraction_params.to_query_string()
         return metadata
 
     def clear_request_collector(self) -> None:
@@ -3135,6 +3182,7 @@ class APIRequestCollector:
         source_type: str = "api",
         url: str | None = None,
         api_version: str | None = None,
+        query_string: str | None = None,
     ) -> SourceMetadata:
         """Build SourceMetadata with collected request details and aggregates.
 
@@ -3142,6 +3190,8 @@ class APIRequestCollector:
             source_type: Source type for metadata ("api", "csv", "parquet").
             url: Optional base API URL to include.
             api_version: Optional API version string.
+            query_string: Optional query string for audit trail
+                (e.g., extraction-level filtering params from ADR-028 §3).
 
         Returns:
             SourceMetadata instance with all collected requests and statistics.
@@ -3162,6 +3212,7 @@ class APIRequestCollector:
         return SourceMetadata(
             type=source_type,  # type: ignore[arg-type]
             url=url,
+            query_string=query_string,
             api_version=api_version,
             api_requests=requests_copy,
             total_requests=total_requests,
@@ -15936,6 +15987,14 @@ def _extract_write_modes(
     return write_mode, gold_write_mode
 
 
+def _build_silver_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
+    """Build Silver layer filter config from YAML config.
+
+    Reuses GoldFilterConfig domain type — only the YAML section differs.
+    """
+    return yaml_config.silver_filters.to_domain()
+
+
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
     """Build GoldFilterConfig from YAML config.
 
@@ -15969,6 +16028,7 @@ def yaml_config_to_domain(
     """
     source_fields = _extract_source_fields(yaml_config)
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
+    silver_filters = _build_silver_filters(yaml_config)
     gold_filters = _build_gold_filters(yaml_config)
 
     # Extract on_schema_mismatch from silver sink config
@@ -16001,6 +16061,7 @@ def yaml_config_to_domain(
         gold_table=yaml_config.gold_table,
         write_mode=write_mode,
         gold_write_mode=gold_write_mode,
+        silver_filters=silver_filters,
         gold_filters=gold_filters,
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
@@ -16506,13 +16567,13 @@ class DQConfigLoader:
         # Normalize and validate via Pydantic
         normalized = self._normalize_to_file_format(merged)
         validated = DQConfigFile.model_validate(normalized)
-        domain_config = validated.to_domain()
+        domain_config: DQConfig = validated.to_domain()
 
         # Cache result if no inline overrides
         if inline_overrides is None:
             self._cache[cache_key] = domain_config
 
-        return domain_config  # type: ignore[no-any-return]
+        return domain_config
 
     def clear_cache(self) -> None:
         """Clear the configuration cache.
@@ -16877,7 +16938,9 @@ _FILTER_CONCAT_KEYS = frozenset({"required_fields", "exclude_if_present"})
 
 
 class FilterConfigLoader(
-    BaseConfigLoader[tuple[InputFilterConfig, GoldFilterConfig, ExtractionParams]],
+    BaseConfigLoader[
+        tuple[InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams]
+    ],
 ):
     """Loads and merges filter configurations from hierarchical files.
 
@@ -16901,7 +16964,7 @@ class FilterConfigLoader(
         provider: str,
         entity: str,
         inline_overrides: dict[str, Any] | None = None,
-    ) -> tuple[InputFilterConfig, GoldFilterConfig, ExtractionParams]:
+    ) -> tuple[InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams]:
         """Load merged filter config for provider/entity.
 
         Merge order (later wins for scalars, special handling for collections):
@@ -16916,8 +16979,9 @@ class FilterConfigLoader(
             inline_overrides: Optional inline overrides from pipeline config.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig, ExtractionParams)
-            domain objects.
+            Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
+            ExtractionParams) domain objects.  Silver and Gold filters both use
+            GoldFilterConfig as the domain type.
 
         Raises:
             FileNotFoundError: If _defaults.yaml doesn't exist.
@@ -16955,7 +17019,9 @@ class FilterConfigLoader(
 
         # Validate via Pydantic
         validated = FilterConfigFile.model_validate(merged)
-        domain_configs = validated.to_domain()
+        domain_configs: tuple[InputFilterConfig, GoldFilterConfig, ExtractionParams] = (
+            validated.to_domain()
+        )
 
         # Cache result if no inline overrides
         if inline_overrides is None:
@@ -22367,6 +22433,16 @@ class DependencySchema(BaseModel):
             "from target API field (e.g., protein_classification_id vs protein_class_id)"
         ),
     )
+    filter_fields: list[str] | None = Field(
+        default=None,
+        description=(
+            "Multiple field names for multi-field API filtering (AND logic). "
+            "When set, ALL specified fields are passed as filters to the API. "
+            "Example: ['molecule_chembl_id', 'document_chembl_id'] produces "
+            "?molecule_chembl_id__in=...&document_chembl_id__in=... "
+            "Mutually exclusive with filter_field."
+        ),
+    )
     key_filter: str | None = Field(
         default=None,
         description=(
@@ -22386,6 +22462,16 @@ class DependencySchema(BaseModel):
                 raise ValueError("join_keys cannot contain empty strings")
         return v
 
+    @model_validator(mode="after")
+    def validate_filter_fields_exclusive(self) -> Self:
+        """Ensure filter_field and filter_fields are mutually exclusive."""
+        if self.filter_field and self.filter_fields:
+            raise ValueError(
+                "filter_field and filter_fields are mutually exclusive. "
+                "Use filter_fields for multi-field filtering."
+            )
+        return self
+
     def to_domain(self) -> DependencyConfig:
         """Convert to immutable domain DependencyConfig."""
         return DependencyConfig(
@@ -22396,6 +22482,7 @@ class DependencySchema(BaseModel):
             silver_table=self.silver_table,
             key_source=self.key_source,
             filter_field=self.filter_field,
+            filter_fields=tuple(self.filter_fields) if self.filter_fields else None,
             key_filter=self.key_filter,
         )
 
@@ -23085,10 +23172,12 @@ class DQConfigFile(BaseModel):
                 field=fv.field,
                 validation_type=fv.type,
                 nullable=fv.nullable,
+                severity=fv.severity,
                 min_value=fv.min,
                 max_value=fv.max,
                 pattern=fv.pattern,
                 allowed=tuple(fv.allowed),
+                max_length=fv.max_length,
                 validator=fv.validator,
                 error_message=fv.error_message,
             )
@@ -23423,7 +23512,7 @@ Structure:
 Usage:
     >>> from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
     >>> config = FilterConfigFile.model_validate(yaml_data)
-    >>> input_filter, gold_filters, extraction_params = config.to_domain()
+    >>> input_filter, silver_filters, gold_filters, extraction_params = config.to_domain()
 """
 
 from __future__ import annotations
@@ -23491,6 +23580,30 @@ class InputFilterFileConfig(BaseInputFilterConfig):
         return super().to_domain()
 
 
+class SilverFiltersFileConfig(BaseGoldFiltersConfig):
+    """Silver filter configuration for domain-level quality gates.
+
+    Applied AFTER transformation but BEFORE writing to Silver layer.
+    Reuses the same filter engine as GoldFiltersFileConfig.
+
+    Attributes:
+        columns: Column value filters with operator support.
+        ranges: Numeric range filters.
+        list_lengths: List length filters.
+        list_contains: List contains filters.
+        required_fields: Required non-null fields.
+        exclude_if_present: Exclude if field has value.
+    """
+
+    def to_domain(self) -> GoldFilterConfig:
+        """Convert to domain GoldFilterConfig dataclass.
+
+        Returns:
+            GoldFilterConfig: Immutable domain filter configuration.
+        """
+        return super().to_domain()
+
+
 class GoldFiltersFileConfig(BaseGoldFiltersConfig):
     """Gold filter configuration for standalone filter files.
 
@@ -23530,6 +23643,7 @@ class FilterConfigFile(BaseModel):
         provider: Provider name (for provider/entity configs).
         entity: Entity name (for entity configs).
         input_filter: Input filtering configuration.
+        silver_filters: Silver layer domain-level filter configuration.
         gold_filters: Gold layer filter configuration.
     """
 
@@ -23549,6 +23663,10 @@ class FilterConfigFile(BaseModel):
         default_factory=InputFilterFileConfig,
         description="Input filtering configuration",
     )
+    silver_filters: SilverFiltersFileConfig = Field(
+        default_factory=SilverFiltersFileConfig,
+        description="Silver layer domain-level filter configuration",
+    )
     gold_filters: GoldFiltersFileConfig = Field(
         default_factory=GoldFiltersFileConfig,
         description="Gold layer filter configuration",
@@ -23558,7 +23676,7 @@ class FilterConfigFile(BaseModel):
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
     )
 
-    @field_validator("extraction_params")
+    @field_validator("extraction_params")  # type: ignore[untyped-decorator]
     @classmethod
     def validate_extraction_params(
         cls,
@@ -23579,14 +23697,19 @@ class FilterConfigFile(BaseModel):
 
     def to_domain(
         self,
-    ) -> tuple[DomainInputFilterConfig, GoldFilterConfig, ExtractionParams]:
+    ) -> tuple[
+        DomainInputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams
+    ]:
         """Convert to domain objects.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig, ExtractionParams).
+            Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
+            ExtractionParams).  Silver and Gold filters both use GoldFilterConfig
+            as the domain type — only their YAML section differs.
         """
         return (
             self.input_filter.to_domain(),
+            self.silver_filters.to_domain(),
             self.gold_filters.to_domain(),
             ExtractionParams(params=self.extraction_params),
         )
@@ -23601,6 +23724,7 @@ __all__ = [
     "GoldListLengthFilterConfig",
     "GoldRangeFilterConfig",
     "InputFilterFileConfig",
+    "SilverFiltersFileConfig",
 ]
 
 ================================================================================
@@ -23649,14 +23773,17 @@ if TYPE_CHECKING:
 class FieldValidationConfig(BaseModel):
     """Configuration for a single field validation rule.
 
-    Supports: required, range, pattern, enum, custom validation types.
+    Supports: required, not_null, range, pattern, enum, max_length, custom validation types.
     """
 
     field: str = Field(description="Field name to validate")
-    type: Literal["required", "range", "pattern", "enum", "custom"] = Field(
-        description="Validation type"
-    )
+    type: Literal[
+        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+    ] = Field(description="Validation type")
     nullable: bool = Field(default=True, description="Whether field can be null")
+    severity: Literal["error", "warn"] = Field(
+        default="error", description="Severity level (error or warn)"
+    )
     # Range validation
     min: float | None = Field(default=None, description="Minimum value (range)")
     max: float | None = Field(default=None, description="Maximum value (range)")
@@ -23664,6 +23791,8 @@ class FieldValidationConfig(BaseModel):
     pattern: str | None = Field(default=None, description="Regex pattern")
     # Enum validation
     allowed: list[str] = Field(default_factory=list, description="Allowed values")
+    # Max length validation
+    max_length: int | None = Field(default=None, description="Maximum string length")
     # Custom validation
     validator: str | None = Field(default=None, description="Custom validator name")
     # Error message
@@ -23792,10 +23921,12 @@ class DQConfig(BaseModel):
                 field=fv.field,
                 validation_type=fv.type,
                 nullable=fv.nullable,
+                severity=fv.severity,
                 min_value=fv.min,
                 max_value=fv.max,
                 pattern=fv.pattern,
                 allowed=tuple(fv.allowed),
+                max_length=fv.max_length,
                 validator=fv.validator,
                 error_message=fv.error_message,
             )
@@ -24581,6 +24712,7 @@ class PipelineYamlConfig(BaseModel):
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
+    silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
 
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
@@ -24609,11 +24741,10 @@ class PipelineYamlConfig(BaseModel):
 
     # Loading strategy (ADR-031)
     # Explicit formalization of data loading approach.
-    loading_strategy: Literal["full_scan_only", "watermark_based"] | None = Field(
+    loading_strategy: Literal["full_scan_only"] | None = Field(
         default=None,
         description="Explicit loading strategy for the pipeline. "
         "'full_scan_only': Each run performs full scan, checkpoint resume disabled. "
-        "'watermark_based': Incremental loading via watermark (placeholder, not implemented). "
         "If not specified, derived from force_full_scan for backward compatibility. "
         "See ADR-031.",
     )
@@ -24682,10 +24813,13 @@ class PipelineYamlConfig(BaseModel):
             bronze_config.format = "jsonl"
 
         # Silver MUST use Delta Lake (RULES.md §2.1)
-        if silver_config and silver_config.format == "parquet":
+        # Strict positive check: only "delta" is allowed. This prevents bypass
+        # with formats like "jsonl" or "csv" that the previous negative check
+        # (format == "parquet") would not catch.
+        if silver_config and silver_config.format != "delta":
             raise ValueError(
-                "Silver layer MUST use 'delta' format (RULES.md §2.1). "
-                "Parquet is not allowed for Silver layer."
+                f"Silver layer MUST use 'delta' format (RULES.md §2.1). "
+                f"Got '{silver_config.format}'. Only Delta Lake is allowed for Silver layer."
             )
 
         # Gold MAY use delta or parquet (RULES.md §2.1) - no validation needed
@@ -24764,6 +24898,13 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
         # === Unified citation metrics ===
@@ -24818,10 +24959,10 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("ligand_efficiency_le", pa.float64()),
         pa.field("ligand_efficiency_lle", pa.float64()),
         pa.field("ligand_efficiency_sei", pa.float64()),
-        pa.field("manual_curation_flag", pa.int64()),
+        pa.field("manual_curation_flag", pa.float64()),  # Float for nullable int
         pa.field("molecule_chembl_id", pa.string()),
         pa.field("molecule_pref_name", pa.string()),
-        pa.field("original_activity_id", pa.int64()),
+        pa.field("original_activity_id", pa.float64()),  # Float for nullable int
         pa.field("parent_molecule_chembl_id", pa.string()),
         pa.field("pchembl_value", pa.float64()),
         pa.field("potential_duplicate", pa.int64()),
@@ -24843,7 +24984,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
             "target_taxonomy_id", pa.string()
         ),  # Standardized name (was target_tax_id)
         pa.field("text_value", pa.string()),
-        pa.field("toid", pa.int64()),
+        pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),
         pa.field("units", pa.string()),
         pa.field("uo_units", pa.string()),
@@ -25051,10 +25192,17 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pub_date", pa.string()),
         pa.field("pub_day", pa.int64()),  # Publication day (1-31)
         pa.field("pub_month", pa.int64()),  # Publication month (1-12)
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD format
         pa.field("publication_status", pa.string()),  # ppublish/epublish/aheadofprint
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
         pa.field("publication_type", pa.string()),  # Unified: publication type
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),
         pa.field("subject_keywords", pa.list_(pa.string())),  # Author keywords
@@ -25092,8 +25240,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
         pa.field(
-            "assay_taxonomy_id", pa.int64()
-        ),  # Standardized name (was assay_tax_id)
+            "assay_taxonomy_id", pa.float64()
+        ),  # Float for nullable int
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string()),
@@ -25120,8 +25268,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_sequence", pa.string()),
         pa.field("variant_sequence_json", pa.string()),  # Forensic: original JSON
         pa.field(
-            "variant_taxonomy_id", pa.int64()
-        ),  # Standardized name (was variant_tax_id)
+            "variant_taxonomy_id", pa.float64()
+        ),  # Float for nullable int
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
@@ -25159,7 +25307,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_components", pa.string()),
         pa.field("target_type", pa.string()),
-        pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
+        pa.field("taxonomy_id", pa.float64()),  # Float for nullable int
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
@@ -25323,7 +25471,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
         pa.field("dosed_ingredient", pa.int64()),
-        pa.field("first_approval", pa.int64()),
+        pa.field("first_approval", pa.float64()),  # Float for nullable int
         pa.field("first_in_class", pa.int64()),
         pa.field("helm_notation", pa.string()),
         # Flattened Hierarchy
@@ -25369,7 +25517,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_stem", pa.string()),
         pa.field("usan_stem_definition", pa.string()),
         pa.field("usan_substem", pa.string()),
-        pa.field("usan_year", pa.int64()),
+        pa.field("usan_year", pa.float64()),  # Float for nullable int
         pa.field("withdrawn_flag", pa.bool_()),
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
@@ -25479,10 +25627,17 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("paper_id", pa.string()),  # Primary key
         # Note: pmc_id excluded per design (2026-01)
         pa.field("pmid", pa.string()),
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
         pa.field(
             "publication_type", pa.string()
         ),  # Unified: from publicationTypes (joined)
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
         pa.field("publication_types", pa.string()),  # Raw publicationTypes (JSON array)
         pa.field("publication_year", pa.int64()),
         pa.field("subject_fields", pa.string()),
@@ -25538,10 +25693,17 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
         # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
         pa.field(
             "publication_type", pa.string()
         ),  # Raw CrossRef type (journal-article, etc.)
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
         pa.field("publication_year", pa.int64()),
         pa.field("published", pa.string()),  # Canonical publication date
         pa.field("published_online", pa.string()),  # Provider-specific
@@ -25621,11 +25783,17 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pmid", pa.string()),
         # Primary topic (single most relevant topic for quick categorization)
         pa.field("primary_topic", pa.string()),  # JSON object
-        # Date fields
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
         pa.field(
             "publication_type", pa.string()
         ),  # Raw OpenAlex type (article, book, etc.)
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
         pa.field("publication_year", pa.int64()),
         pa.field("publisher", pa.string()),
         # ROR IDs (may be empty if not returned by Works API)
@@ -28060,7 +28228,8 @@ class BronzeWriter:
             decompressor = zstd.ZstdDecompressor()
             # Use streaming decompression since content size may not be in frame header
             with decompressor.stream_reader(compressed_data) as reader:
-                return reader.read()  # type: ignore[no-any-return]
+                data: bytes = reader.read()
+                return data
 
         decompressed_data = await asyncio.get_running_loop().run_in_executor(
             None, _read_and_decompress
@@ -28656,24 +28825,34 @@ class GoldWriter(BaseDeltaWriter):
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
         *,
+        schema: DataFrameSchema | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Gold layer without Pandera schema.
+        """Write merged records to Gold layer with optional strict validation.
 
-        Used by composite pipelines where schema is dynamically determined
-        by the merge operation. No Pandera validation is performed.
+        Used by composite pipelines where schema may be dynamically determined
+        by the merge operation. When a schema is provided, strict Pandera
+        validation is enforced (same as write_gold). When no schema is provided,
+        basic structural validation is performed.
 
         Args:
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            schema: Optional Pandera schema for strict validation.
+                When provided, must have strict=True and all records
+                are validated before writing (REQ-DATA-009).
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical_column_order()
                 and preserve the column order from records (e.g. semantic
                 ordering applied by ColumnOrderer in composite pipelines).
+
+        Raises:
+            ValueError: If records are empty, schema is not strict, or
+                records fail schema validation.
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -28683,6 +28862,11 @@ class GoldWriter(BaseDeltaWriter):
                 table_name=table_name,
             )
             return
+
+        # Validate against schema if provided (REQ-DATA-009)
+        if schema is not None:
+            self._validate_schema_strict(schema)
+            await self._validate_records_against_schema(records, schema)
 
         # Convert to Arrow and apply column order
         arrow_table = pa.Table.from_pylist(records)
@@ -30719,7 +30903,13 @@ class SilverWriter(BaseDeltaWriter):
         Raises:
             SchemaViolationError: If Pandera validation fails.
         """
-        result = self._silver_validator.validate(records)
+        # Filter out internal domain entity fields (_state) before validation
+        # _state is a domain entity processing state, not a Silver layer field
+        cleaned_records = [
+            {k: v for k, v in record.items() if k != "_state"} for record in records
+        ]
+
+        result = self._silver_validator.validate(cleaned_records)
         if not result.valid:
             self.logger.error(
                 "Silver Pandera validation failed",
