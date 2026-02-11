@@ -59,6 +59,10 @@ composition/bootstrap/
 | `transformer_factory.py`      | `transformer_factory.py — модуль с функциями register_transformer() и create_transformer()` | Создание трансформеров по провайдеру                           |
 | `dq_factory.py`               | `DQServicesFactory`                                                                         | Создание Data Quality компонентов                              |
 
+**Root-level файлы:**
+
+Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`.
+
 ### 2.3. Реестр провайдеров и DataSourceRegistry
 
 **Расположение:** `src/bioetl/composition/factories/data_source_factory.py:100` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
@@ -79,17 +83,18 @@ data_source = creator(settings, config, logger)
 data_source = ProviderRegistry.create_data_source("chembl", settings, config, logger)
 ```
 
-**Зарегистрированные провайдеры (7 шт):**
+**Зарегистрированные провайдеры (8 шт, включая uniprot_idmapping):**
 
-| Provider        | Data Sources           | Pipelines                                                          | Rate Limit   |
-| --------------- | ---------------------- | ------------------------------------------------------------------ | ------------ |
-| chembl          | ChemblAdapter          | activity, assay, molecule, target, document, target_component (13) | None         |
-| pubchem         | PubChemAdapter         | compound                                                           | 5 req/sec    |
-| uniprot         | UniProtAdapter         | protein                                                            | 100 req/sec  |
-| pubmed          | PubMedAdapter          | publications                                                       | 3 req/sec    |
-| crossref        | CrossRefAdapter        | publication                                                        | Polite pool  |
-| openalex        | OpenAlexAdapter        | publication                                                        | 10 req/sec   |
-| semanticscholar | SemanticScholarAdapter | publication                                                        | 100 req/5min |
+| Provider          | Data Sources           | Pipelines                                                                                                                                                                                | Rate Limit   |
+| ----------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| chembl            | ChemblAdapter          | activity, assay, assay_parameters, cell_line, compound_record, molecule, target, target_component, protein_class, publication, publication_similarity, publication_term, tissue, subcellular_fraction (14) | None         |
+| pubchem           | PubChemAdapter         | compound                                                                                                                                                                                 | 5 req/sec    |
+| uniprot           | UniProtAdapter         | protein                                                                                                                                                                                  | 100 req/sec  |
+| uniprot_idmapping | IDMappingDataSource    | id_mapping                                                                                                                                                                               | —            |
+| pubmed            | PubMedAdapter          | publications                                                                                                                                                                             | 3 req/sec    |
+| crossref          | CrossRefAdapter        | publication                                                                                                                                                                              | Polite pool  |
+| openalex          | OpenAlexAdapter        | publication                                                                                                                                                                              | 10 req/sec   |
+| semanticscholar   | SemanticScholarAdapter | publication                                                                                                                                                                              | 100 req/5min |
 
 ### 2.3. `registry.py` — Реестр пайплайнов
 
