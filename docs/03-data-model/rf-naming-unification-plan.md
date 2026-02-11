@@ -1,6 +1,6 @@
 # RF-NAMING: План унификации наименований полей
 
-*Версия: 2.0.0 | Дата: 2026-02-11 | Обновлено с учётом main (7e265aa)*
+*Версия: 2.1.0 | Дата: 2026-02-11 | Обновлено с учётом main (3ba7aea)*
 
 ---
 
@@ -225,6 +225,10 @@ Publication pipeline использует unified naming из `PublicationBaseSc
 ### Фаза 1: CRITICAL fixes (type mismatches) — Breaking changes
 
 > **Impact:** Меняет тип данных в Silver/Gold таблицах → требует REBUILD.
+>
+> **Schema Drift Policy (RULES.md v5.17):** Тип change = **Critical** drift.
+> Политика упрощена: только Info (новые поля) и Critical (пропавшее поле / смена типа).
+> Уровень Warn (>3 новых полей) удалён.
 
 #### RF-NAMING-01: Унифицировать `target_taxonomy_id` → `float`
 
