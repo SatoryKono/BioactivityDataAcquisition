@@ -1107,6 +1107,76 @@ publication_types: Series[str] | None = pa.Field(nullable=True, ...)
 
 ---
 
+### 10.5 PyArrow Schema Missing Fields (RESOLVED - 2026-02-10)
+
+**Проблема (ROOT CAUSE):** Classification fields (`publication_type_unified`, `publication_subclass`, `publication_class`) отсутствовали в PyArrow schemas для публикаций.
+
+**Файл:** `src/bioetl/infrastructure/schemas/silver.py`
+
+**Пострадавшие schemas:**
+- `CHEMBL_PUBLICATION_SCHEMA`
+- `PUBMED_PUBLICATION_SCHEMA`
+- `SEMANTICSCHOLAR_PUBLICATION_SCHEMA`
+- `CROSSREF_PUBLICATION_SCHEMA`
+- `OPENALEX_PUBLICATION_SCHEMA`
+
+**Симптомы:**
+
+1. **Transformers создавали поля:** Все publication transformers вызывали `_classify_publication_type()` и добавляли classification fields в records
+2. **Writer фильтровал поля:** `SilverWriter._prepare_arrow_data()` (line 194) фильтровал records, оставляя только поля из PyArrow schema:
+   ```python
+   schema_fields = set(schema.names)
+   filtered_records = [
+       {k: v for k, v in record.items() if k in schema_fields}
+       for record in records
+   ]
+   ```
+3. **Result:** Classification fields НЕ попадали в Silver Delta tables и отсутствовали в Composite output
+
+**Доказательства:**
+- Pandera schemas (`domain/schemas/common/publication_base.py`) содержали поля (validation OK)
+- Entity dataclasses (`domain/entities/publication_base.py`) содержали поля (types OK)
+- PyArrow schemas НЕ содержали поля (write filtering!)
+
+**Решение (2026-02-10):**
+
+Добавлены 3 classification fields во все 5 PyArrow schemas после `publication_type` field:
+
+```python
+pa.field("publication_type", pa.string()),  # Raw provider type
+pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
+pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
+pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
+```
+
+**Affected Lines:**
+- CHEMBL_PUBLICATION_SCHEMA: lines 52-56
+- PUBMED_PUBLICATION_SCHEMA: lines 347-351
+- SEMANTICSCHOLAR_PUBLICATION_SCHEMA: lines 777-781
+- CROSSREF_PUBLICATION_SCHEMA: lines 839-843
+- OPENALEX_PUBLICATION_SCHEMA: lines 926-930
+
+**Impact:**
+
+✅ **Provider pipelines:** Classification fields теперь записываются в Silver Delta tables
+✅ **Composite pipeline:** `write_silver_merged()` динамически выводит schema из records → classification fields автоматически включаются
+✅ **Tests:** Добавлен `TestPublicationSchemaClassificationFields` в `tests/unit/infrastructure/schemas/test_silver.py`
+
+**Verification:**
+
+После перезапуска pipelines:
+```bash
+# Check Silver output
+python -m pytest tests/unit/infrastructure/schemas/test_silver.py::TestPublicationSchemaClassificationFields -v
+
+# Verify Delta tables contain new fields
+# data/output/silver/{provider}/publication/*.parquet
+```
+
+**Status:** ✅ RESOLVED
+
+---
+
 ## Заключение
 
 **Нормализация publication_type полей в BioETL:**
@@ -1114,9 +1184,10 @@ publication_types: Series[str] | None = pa.Field(nullable=True, ...)
 1. ✅ **Unified 3-level classification** (214 types) применяется в Silver Layer для OpenAlex, CrossRef, PubMed, SemanticScholar
 2. ✅ **Multi-value strategy** (PubMed, S2): выбор most specific type (highest row number)
 3. ✅ **Preserve all sources** в Composite Layer: все provider-qualified колонки сохраняются
-4. ⚠️ **ChEMBL не участвует** в unified classification (4-value enum)
-5. ⚠️ **Дублирование полей** (`type` vs `publication_type` для CrossRef/OpenAlex)
-6. ⚠️ **Classification fields не перечислены** в column_groups (неявный порядок)
+4. ✅ **PyArrow schemas updated** (2026-02-10): classification fields теперь присутствуют в Silver output
+5. ⚠️ **ChEMBL не участвует** в unified classification (4-value enum)
+6. ⚠️ **Дублирование полей** (`type` vs `publication_type` для CrossRef/OpenAlex)
+7. ⚠️ **Classification fields не перечислены** в column_groups (неявный порядок)
 
 **Метрики:**
 - **214 unified types** (Level 3)
