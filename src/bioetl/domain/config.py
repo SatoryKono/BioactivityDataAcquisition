@@ -421,6 +421,7 @@ class PipelineConfig:
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
     # Processing
+    silver_filters: GoldFilterConfig | None = None  # Domain-level Silver layer filters
     gold_filters: GoldFilterConfig | None = None  # Configurable Gold layer filters
     batch_size: int = 100
     checkpoint_interval: int = 1000

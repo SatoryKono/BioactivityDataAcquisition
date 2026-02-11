@@ -36,6 +36,7 @@ class MockTransformer:
         entity_type: str | None = None,
         tracer: Any = None,
         metrics: Any = None,
+        silver_filters: Any = None,
         gold_filters: Any = None,
         identity_service: Any = None,
         pii_hasher: Any = None,
@@ -45,6 +46,7 @@ class MockTransformer:
         self.entity_type = entity_type
         self.tracer = tracer
         self.metrics = metrics
+        self.silver_filters = silver_filters
         self.gold_filters = gold_filters
         self.identity_service = identity_service
         self.pii_hasher = pii_hasher
