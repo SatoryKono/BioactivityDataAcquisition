@@ -101,9 +101,9 @@ class TestFileSizeLimits:
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 820,  # 814 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation
-        "pipeline_factories.py": 555,  # 551 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction)
-        "services_factory.py": 690,  # 687 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030)
+        "pipeline_factory.py": 845,  # 838 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation + Pandera Silver schema DI
+        "pipeline_factories.py": 610,  # 602 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction + Pandera Silver schema imports)
+        "services_factory.py": 695,  # 692 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030) + silver_validator param
         # Infrastructure layer exemptions
         "silver_writer.py": 1155,  # 1151 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
         "gold_writer.py": 950,  # 946 LOC - SCD Type 2 (metadata/arrow logic extracted) + column_order + write_gold_merged schema validation (REQ-DATA-009)
