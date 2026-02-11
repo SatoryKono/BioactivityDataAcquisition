@@ -44,7 +44,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
