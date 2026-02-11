@@ -691,6 +691,9 @@ class BatchExecutor:
 
             return pl.DataFrame(records)
         except Exception:
+            # Catch all: Polars import failure OR DataFrame construction errors
+            # (malformed data, type mismatches). Graceful degradation: return None
+            # so DQ analysis can proceed with fallback logic.
             return None
 
     def _get_dq_thresholds(self) -> tuple[float, float]:

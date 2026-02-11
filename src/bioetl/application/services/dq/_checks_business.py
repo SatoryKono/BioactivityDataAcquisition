@@ -100,6 +100,8 @@ def check_business_rules(
         try:
             passed, violations = _evaluate_single_rule(df, rule)
         except Exception:
+            # Catch all: rule evaluation may fail due to missing columns, type errors,
+            # or malformed rule expressions. Treat as rule failure for DQ reporting.
             passed, violations = False, None
 
         if passed:
