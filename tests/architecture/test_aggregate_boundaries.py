@@ -44,7 +44,7 @@ class TestAggregateBoundaryIsolation:
                 "PipelineRun",
                 "StageResult",
                 "StageStatus",
-                "RunStatus",
+                "PipelineRunState",
             },
             "quarantine_entry.py": {
                 "QuarantineEntry",

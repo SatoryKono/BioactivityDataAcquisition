@@ -837,7 +837,7 @@ pip install -e ".[tests]"
 #### Детерминистичный Jitter
 
 ```python
-# RetryConfig (src/bioetl/infrastructure/adapters/http/client.py)
+# RetryConfig (src/bioetl/domain/resilience.py)
 RetryConfig(
     deterministic=True,  # Hash-based jitter
     jitter_seed=42,  # Reproducible seed
@@ -1024,9 +1024,9 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 1. **Randomness**: Модуль `random` **MUST NOT** использоваться в `infrastructure/storage` и других критических узлах записи. Используйте хэш-функции от входных данных или фиксированные константы.
 1. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`ingestion_ts`, `processing_ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started_at`) и передаваться вниз.
-1. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `domain/resilience.py:RetryPolicy.calculate_delay()` использует MD5-based jitter.
+1. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `domain/resilience.py:RetryConfig.calculate_delay()` использует MD5-based jitter.
 1. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
-1. **Content Hash**: Исключать из расчёта хэша технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`. Реализация: `domain/transformations.py:META_FIELDS`.
+1. **Content Hash**: Исключать из расчёта хэша технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`. Реализация: `domain/constants.py:META_FIELDS` (re-exported через `domain/transformations.py`).
 
 #### Архитектурные Тесты Детерминизма
 
@@ -1047,7 +1047,7 @@ digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
 jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
 ```
 
-При `RetryPolicy(deterministic=False)` выдаётся `DeprecationWarning` — рекомендуется переход на детерминистичный режим.
+При `RetryConfig(deterministic=False)` выдаётся `DeprecationWarning` — рекомендуется переход на детерминистичный режим.
 
 ## 7. Протокол Архитектурных Обзоров
 
@@ -1308,14 +1308,20 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 
 **Маппинг entity → API resource** (`_NON_PUBLICATION_ENTITY_MAPPING`):
 
-| Entity Type     | API Resource             | Primary Key          |
-| --------------- | ------------------------ | -------------------- |
-| `activity`      | `activity`               | `activity_id`        |
-| `assay`         | `assay`                  | `assay_chembl_id`    |
-| `molecule`      | `molecule`               | `molecule_chembl_id` |
-| `target`        | `target`                 | `target_chembl_id`   |
-| `protein_class` | `protein_classification` | `protein_class_id`   |
-| `publication`   | `document`               | `document_chembl_id` |
+| Entity Type        | API Resource             | Primary Key              |
+| ------------------ | ------------------------ | ------------------------ |
+| `activity`         | `activity`               | `activity_id`            |
+| `assay`            | `assay`                  | `assay_chembl_id`        |
+| `assay_parameters` | `assay`                  | *(composite)*            |
+| `cell_line`        | `cell_line`              | `cell_chembl_id`         |
+| `compound`         | `molecule`               | `molecule_chembl_id`     |
+| `compound_record`  | `compound_record`        | `record_id`              |
+| `molecule`         | `molecule`               | `molecule_chembl_id`     |
+| `protein_class`    | `protein_classification` | `protein_class_id`       |
+| `publication`      | `document`               | `document_chembl_id`     |
+| `target`           | `target`                 | `target_chembl_id`       |
+| `target_component` | `target_component`       | `component_id`           |
+| `tissue`           | `tissue`                 | `tissue_chembl_id`       |
 
 **Query parameters** (формируются в `ChemblAdapter._build_params()`):
 
