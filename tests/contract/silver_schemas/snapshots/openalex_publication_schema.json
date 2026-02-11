@@ -130,7 +130,7 @@
   "author_orcids": {
     "checks": [
       {
-        "name": "_check_author_orcids"
+        "name": "orcid_format"
       }
     ],
     "coerce": false,
@@ -532,7 +532,7 @@
   "title": {
     "checks": [
       {
-        "name": "_check_title"
+        "name": "title_not_empty"
       }
     ],
     "coerce": false,

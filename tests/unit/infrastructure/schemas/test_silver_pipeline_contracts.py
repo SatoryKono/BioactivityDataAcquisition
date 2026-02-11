@@ -693,6 +693,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("openalex_id", pa.string()),
         ("page_first", pa.string()),
         ("page_last", pa.string()),
+        ("pmc_id", pa.string()),
         ("pmid", pa.string()),
         ("primary_topic", pa.string()),
         ("publication_class", pa.string()),
