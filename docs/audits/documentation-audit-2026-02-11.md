@@ -1810,6 +1810,214 @@ Audit IDs: SR-17, SR-18, SR-19
 
 *Приложение B добавлено 2026-02-11 (Revision 2).*
 *Дополнительно верифицировано **83 утверждения** с точными file:line ссылками.*
-*Найдено **10 новых расхождений** (6 P1 HIGH, 2 P2 MEDIUM, 2 P3 LOW).*
-*Итого по всем фазам: **527 утверждений** проверено.*
-*Приложение B содержит **6 дополнительных промтов** для устранения новых расхождений.*
+
+---
+
+---
+
+# ПРИЛОЖЕНИЕ C: Ревизия с учётом origin/main (2026-02-11, Revision 3)
+
+> Ре-верификация после rebase на origin/main.
+> Коммит `0ef246a` на main применил ряд doc-фиксов — часть расхождений устранена.
+> Ниже — актуальный статус каждой найденной проблемы.
+
+---
+
+## C.1. Исправления, уже применённые в origin/main (commit 0ef246a)
+
+Следующие расхождения из основного аудита и Приложения B **УСТРАНЕНЫ** в текущем состоянии main:
+
+| ID | Document | Было (ошибка) | Стало (исправлено) | Commit |
+|----|----------|--------------|-------------------|--------|
+| B-A06, A-06 | 02-application-layer.md:93 | `_extract_business_data()` | `_transform_impl()` + примечание о промежуточных классах | `0ef246a` |
+| B-A07, A-14 | 02-application-layer.md:65 | `Heartbeat` | `HeartbeatTask` (heartbeat.py:21) | `0ef246a` |
+| B-I02, I-04 | 03-infrastructure-layer.md:38 | ChemblAdapter: Mixins PaginatedFetcherMixin, FilterableStubMixin | Native pagination and filtering (without mixins) | `0ef246a` |
+| B-IF07, IF-07 | 04-interfaces-layer.md:52 | `python -m bioetl run --pipeline composite_publication` | `python -m bioetl run-composite --pipeline composite_publication` | `0ef246a` |
+| B-DL02, DL-03 | data-layers.md:22-27 | `_ingestion_ts`, `_run_id`, `_batch_id` (underscore prefix) | `ingestion_ts`, `run_id`, `batch_id` + sidecar note | `0ef246a` |
+| ADR-13 | ADR-008:7 | Status: Accepted | Status: Superseded | `0ef246a` |
+| DL-12 | data-layers.md:131 | «JSON Schema файлы» без реальных файлов | Файлы `*.json` созданы в `docs/04-reference/contracts/gold/` (20 шт.) | `0ef246a` |
+| API-01..04 | api/domain.md:30-34 | `increment()`, `gauge()`, `histogram()` | `increment_counter()`, `set_gauge()`, `observe_histogram()` | `0ef246a` |
+| OPS-05..08 | runbooks/pipeline-failure-recovery.md | `--full-refresh`, `bioetl verify`, exit code 10 | `--run-type rebuild`, примеры через `bioetl run`, exit code 83 | `0ef246a` |
+| SPEC-14 | 03-molecule-spec.md | 23 поля | 52 поля (полная схема с hierarchy, properties, structures) | `0ef246a` |
+
+---
+
+## C.2. Расхождения, ВСЁ ЕЩЁ ПРИСУТСТВУЮЩИЕ в origin/main
+
+### CRITICAL / HIGH (требуют исправления)
+
+| # | ID | Document | Проблема | Текущий текст в main | Фактический код | Severity |
+|---|-----|----------|----------|---------------------|-----------------|----------|
+| 1 | **NEW** | 04-interfaces-layer.md:52 | CLI option name `--pipeline` вместо `--composite` | `run-composite --pipeline composite_publication` | `@click.option("--composite", ...)` в run_composite.py:105. Также значение: `publication`, не `composite_publication` | P1 HIGH |
+| 2 | C-15, B-C15 | 05-composition-layer.md:113-122 | Deprecated function + wrong import paths | `from bioetl.infrastructure.config.composite import CompositeConfig, CompositeRuntimeConfig` | `CompositeConfig` в `domain/composite/config.py:780`; `CompositeRuntimeConfig` в `application/composite/runner.py:57`; функция deprecated → `bootstrap_composite_runner` | P1 HIGH |
+| 3 | B-DL08 | data-layers.md:107-109 | `GOLD_EXCLUDE_FIELDS` now empty (behaviour changed) | «JSON-строки исключаются из Gold через `GOLD_EXCLUDE_FIELDS`» | `GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset()` — пустое множество, ничего не исключается | P2 MEDIUM |
+| 4 | B-DL06, DL-11 | data-layers.md:126-128 | Z-ORDER «обязательно» — не реализован | «Z-ORDER Clustering: Обязательно применяется» | 0 вхождений z_order/z-order/Z-ORDER в `src/bioetl/` | P2 MEDIUM |
+| 5 | DL-06 | data-layers.md:48-50 | Delta Lake protocol versions не подтверждены | «Writer Version 2, Reader Version 1» | Не задаётся явно в коде; зависит от defaults библиотеки | P3 LOW |
+
+### MEDIUM / LOW (уточнения)
+
+| # | ID | Document | Проблема | Severity |
+|---|-----|----------|----------|----------|
+| 6 | B-D16, D-20 | 01-domain-layer.md:172 | «8 дополнительных поддиректорий» — таблица содержит 11, фактически 14 (не хватает: `aggregates/`, `ports/`, `value_objects/`) | P3 LOW |
+| 7 | R-01, R-02 | RULES.md §1.3 | «Delta Lake / Iceberg» и «Delta/Iceberg/Parquet» — Iceberg не реализован | P2 MEDIUM |
+| 8 | R-03 | RULES.md §1.4 | `PipelineRunner._clear_exports()` не существует → `MedallionLifecycleService.clear()` | P2 MEDIUM |
+| 9 | R-04 | RULES.md §2.3 | QuarantineStatus: «3 значения» → фактически 5 | P2 MEDIUM |
+| 10 | R-05 | RULES.md §2.2 | `compute_content_hash` → фактически `generate_content_hash` | P2 MEDIUM |
+| 11 | R-06 | RULES.md §3.1 | Лог-поле `ts` → фактически `timestamp` | P2 MEDIUM |
+
+---
+
+## C.3. Обновлённая сводная статистика
+
+### До и после фиксов main
+
+| Метрика | До фиксов (Revision 2) | После фиксов main (Revision 3) |
+|---------|------------------------|--------------------------------|
+| Всего утверждений | 527 | 527 |
+| Подтверждено (✅) | 373 (71%) | **403 (76%)** |
+| Частично (⚠️) | 48 (9%) | **34 (6%)** |
+| Не подтверждено (❌) | 106 (20%) | **90 (17%)** |
+
+### Изменение по фазам приоритетности
+
+| Severity | До фиксов | После фиксов | Δ |
+|----------|-----------|-------------|---|
+| P0 CRITICAL | 6 | **0** | -6 (все устранены) |
+| P1 HIGH | 22 | **8** | -14 |
+| P2 MEDIUM | 38 | **30** | -8 |
+| P3 LOW | 30 | **28** | -2 |
+| **Итого неустранённых** | **96** | **66** | **-30** |
+
+### Документы с наибольшим количеством оставшихся проблем
+
+| Document | Remaining issues | Top priority |
+|----------|-----------------|-------------|
+| RULES.md | 6 | P2 MEDIUM |
+| data-layers.md | 3 | P2 MEDIUM |
+| 05-composition-layer.md | 1 | P1 HIGH |
+| 04-interfaces-layer.md | 1 | P1 HIGH |
+| 01-domain-layer.md | 1 | P3 LOW |
+| Operations/Runbooks | ~8 | P2 (remaining) |
+| Provider Specs | ~9 | P2 (version 1.1.0→1.2.0) |
+| Governance/Agent docs | ~3 | P2 |
+
+---
+
+## C.4. Обновлённые промты (только для оставшихся расхождений)
+
+### PROMPT-R3-01: Исправить CLI option в interfaces-layer.md
+
+```
+Задача: Исправить пример CLI команды run-composite.
+
+Файл: docs/02-architecture/04-interfaces-layer.md
+
+Строка 52:
+  БЫЛО: python -m bioetl run-composite --pipeline composite_publication
+  СТАЛО: python -m bioetl run-composite --composite publication
+
+Причина:
+  - CLI option называется --composite (НЕ --pipeline)
+    src/bioetl/interfaces/cli/commands/run_composite.py:105
+  - Значение: просто имя композита "publication" (НЕ "composite_publication")
+    src/bioetl/interfaces/cli/commands/run_composite.py:215 (docstring)
+```
+
+### PROMPT-R3-02: Исправить bootstrap example в composition-layer.md
+
+```
+Задача: Исправить пример bootstrap_composite_pipeline.
+
+Файл: docs/02-architecture/05-composition-layer.md
+
+Строки 113-122: Заменить код целиком на:
+
+```python
+from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_runner
+from bioetl.domain.composite.config import CompositeConfig
+from bioetl.application.composite.runner import CompositeRuntimeConfig
+
+runner = bootstrap_composite_runner(
+    config=CompositeConfig(...),
+    runtime=CompositeRuntimeConfig(...),
+)
+# -> CompositePipelineRunner
+```
+
+Изменения:
+  1. bootstrap_composite_pipeline → bootstrap_composite_runner (deprecated alias)
+  2. bioetl.infrastructure.config.composite → bioetl.domain.composite.config (CompositeConfig)
+  3. bioetl.infrastructure.config.composite → bioetl.application.composite.runner (CompositeRuntimeConfig)
+```
+
+### PROMPT-R3-03: Исправить GOLD_EXCLUDE_FIELDS описание
+
+```
+Задача: Обновить описание Gold-трансформации в data-layers.md.
+
+Файл: docs/02-architecture/data-layers.md
+
+Строки 107-109:
+  БЫЛО: «Вложенные JSON-строки исключаются из Gold через GOLD_EXCLUDE_FIELDS»
+  СТАЛО: «Метод BaseTransformer.transform_for_gold() (base_transformer.py:456)
+  использует GOLD_EXCLUDE_FIELDS для фильтрации полей. В текущей версии
+  GOLD_EXCLUDE_FIELDS = frozenset() (пустое множество) — все Silver-поля
+  проходят в Gold без исключения.»
+```
+
+### PROMPT-R3-04: Исправить Z-ORDER и Delta protocol
+
+```
+Задача: Исправить два утверждения в data-layers.md.
+
+Файл: docs/02-architecture/data-layers.md
+
+1) Строка 128 (Z-ORDER):
+  БЫЛО: «Обязательно применяется»
+  СТАЛО: «Рекомендуется (не реализовано в текущей версии)»
+
+2) Строка 50 (Delta protocol versions):
+  БЫЛО: «Writer Version 2 (Column Mapping), Reader Version 1»
+  СТАЛО: «Версия протокола определяется defaults библиотеки deltalake»
+  Или удалить строку целиком.
+```
+
+### PROMPT-R3-05: Исправить domain subdirectory count
+
+```
+Задача: Обновить количество поддиректорий domain layer.
+
+Файл: docs/02-architecture/01-domain-layer.md
+
+Строка 172: «8 дополнительных поддиректорий» →
+  «11 дополнительных поддиректорий»
+
+Таблица (строки 174-186): Добавить отсутствующие записи:
+  - aggregates/ (описаны в §2.2, но не в таблице «дополнительных»)
+  - Проверить, нужно ли добавить ports/ и value_objects/
+    (они описаны в §2.1 и §2.3 отдельно; если считать «дополнительными»
+    только те, что не имеют отдельной секции — оставить 11)
+```
+
+### PROMPT-R3-06: Исправить RULES.md (6 оставшихся issues)
+
+```
+Задача: Исправить 6 расхождений в RULES.md.
+
+Файл: docs/00-project/RULES.md
+
+1) §1.3 Silver: «Delta Lake / Iceberg» → «Delta Lake»
+2) §1.3 Gold: «Delta/Iceberg/Parquet» → «Delta Lake»
+3) §1.4: «PipelineRunner._clear_exports()» → «MedallionLifecycleService.clear()»
+4) §2.3: QuarantineStatus «3 значения (NEW|IGNORED|REPROCESSED)» →
+   «5 значений: NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED»
+5) §2.2: «compute_content_hash» → «generate_content_hash»
+6) §3.1: Лог-поле «ts» → «timestamp»
+```
+
+---
+
+*Приложение C добавлено 2026-02-11 (Revision 3).*
+*Ре-верификация после rebase на origin/main: **30 расхождений устранены**, **66 остаются**.*
+*P0 CRITICAL: 0 (все устранены). P1 HIGH: 8. P2 MEDIUM: 30. P3 LOW: 28.*
+*Приложение C содержит **6 обновлённых промтов** для оставшихся расхождений.*
