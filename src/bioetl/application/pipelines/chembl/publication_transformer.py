@@ -219,8 +219,14 @@ class PublicationTransformer(BaseChemblTransformer):
         else:
             data["citations_received"] = None
         data["citations_made"] = None
-        data["is_oa"] = None
+
+        # Fields from PublicationBaseSchema that ChEMBL API doesn't provide
+        data["pmc_id"] = None
+        data["affiliation_list"] = None
+        data["author_orcids"] = None
+        data["publication_date"] = None
         data["language"] = None
+        data["is_oa"] = None
         data["oa_status"] = None
 
         # DQ flags (default: no warnings or errors)
@@ -231,31 +237,31 @@ class PublicationTransformer(BaseChemblTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding unused fields.
+        """Convert Domain Entity to SilverRecord.
 
-        Overrides base implementation to remove fields not collected for ChEMBL.
+        ChEMBL-specific fields are set to None in _extract_business_data() for
+        fields not available from ChEMBL API (pmc_id, affiliation_list, etc.).
+        These None values satisfy the PublicationBaseSchema inheritance requirement.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord без affiliation_list, pmc_id, publication_date, issn,
-            publisher, oa_status, is_oa и language.
+            SilverRecord with all PublicationBaseSchema fields (ChEMBL-unavailable
+            fields are None).
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
-        # Get base silver record
+        # Get base silver record (includes all fields with None values)
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields (not available from ChEMBL API)
-        silver_record.pop("affiliation_list", None)
-        silver_record.pop("pmc_id", None)
-        silver_record.pop("publication_date", None)
+        # Remove fields not in unified publication schema (ChEMBL-specific exclusions)
         silver_record.pop("issn", None)
         silver_record.pop("publisher", None)
         silver_record.pop("oa_status", None)
-        silver_record.pop("is_oa", None)
-        silver_record.pop("language", None)
+
+        # Note: pmc_id, affiliation_list, author_orcids, publication_date, language,
+        # and is_oa are kept (with None values) to satisfy PublicationBaseSchema
 
         return silver_record
