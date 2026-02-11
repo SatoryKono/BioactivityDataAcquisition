@@ -3,7 +3,7 @@
 **Имя пайплайна:** `chembl_publication_similarity`
 **Провайдер:** `chembl`
 **Сущность:** `publication_similarity`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
