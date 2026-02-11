@@ -21,7 +21,7 @@ from bioetl.domain.aggregates.batch import (
 )
 from bioetl.domain.aggregates.pipeline_run import (
     PipelineRun,
-    RunStatus,
+    PipelineRunState,
     StageResult,
     StageStatus,
 )
@@ -37,7 +37,7 @@ __all__ = [
     "PipelineRun",
     "QuarantineEntry",
     "QuarantineStatus",
-    "RunStatus",
+    "PipelineRunState",
     "StageResult",
     "StageStatus",
 ]

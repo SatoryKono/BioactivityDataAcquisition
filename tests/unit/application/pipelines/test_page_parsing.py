@@ -36,9 +36,9 @@ class TestPubMedMedlinePgnParsing:
             # Supplement pages
             ("S1-S10", "S1", "S10"),
             ("s100-s200", "s100", "s200"),
-            # Short form (abbreviated last page)
-            ("100-10", "100", "10"),
-            ("1234-56", "1234", "56"),
+            # Short form (abbreviated last page - expanded)
+            ("100-10", "100", "110"),
+            ("1234-56", "1234", "1256"),
             # Empty and None
             ("", None, None),
             (None, None, None),

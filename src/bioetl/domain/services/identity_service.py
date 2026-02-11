@@ -3,6 +3,9 @@
 Provides centralized logic for computing entity identifiers and content hashes
 according to RULES.md §2.8.
 
+Delegates normalization and hashing to the canonical implementations in
+``bioetl.domain.transformations`` to avoid algorithm duplication (DRY).
+
 This is a pure domain service with no external dependencies (only stdlib).
 All methods are deterministic and side-effect free.
 
@@ -13,13 +16,14 @@ Requirements:
 
 from __future__ import annotations
 
-import hashlib
-import math
-from datetime import date, datetime
 from typing import Any
 
-from bioetl.domain.constants import META_FIELDS
-from bioetl.domain.serialization import serialize_to_json_canonical
+from bioetl.domain.constants import META_FIELDS as META_FIELDS  # re-export for tests
+from bioetl.domain.transformations import (
+    generate_content_hash,
+    generate_entity_id,
+    normalize_for_hash,
+)
 from bioetl.domain.types import ContentHash, EntityID
 
 
@@ -30,6 +34,10 @@ class IdentityService:
     - Stable entity_id from business keys or content hash
     - SHA256 content hash with canonical JSON normalization
     - Meta-field exclusion for deterministic hashing
+
+    All normalization and hashing logic is delegated to the canonical
+    free functions in ``bioetl.domain.transformations`` to maintain a
+    single source of truth for the hash algorithm (DRY principle).
 
     This service is stateless and can be safely shared across transformers.
     All methods are pure (deterministic, side-effect free).
@@ -60,6 +68,8 @@ class IdentityService:
 
         If source_id is provided, uses it directly for stable identification.
         Otherwise, generates identifier from content hash prefix.
+
+        Delegates to ``bioetl.domain.transformations.generate_entity_id``.
 
         Args:
             provider: Data provider identifier (e.g., 'chembl', 'pubchem').
@@ -93,6 +103,8 @@ class IdentityService:
     ) -> ContentHash:
         """Compute SHA256 content hash for record versioning.
 
+        Delegates to ``bioetl.domain.transformations.generate_content_hash``.
+
         Implements RULES.md §2.8.1:
         - sha256(provider + canonical_json(record))
         - Normalizes values before hashing for consistency
@@ -110,11 +122,7 @@ class IdentityService:
             ContentHash("abc123...")
 
         """
-        normalized = self._normalize_for_hash(record, exclude_none=exclude_none)
-        canonical = self._canonical_json_dumps(normalized)
-        data = f"{provider}{canonical}"
-        hash_digest = hashlib.sha256(data.encode("utf-8")).hexdigest()
-        return ContentHash(hash_digest)
+        return generate_content_hash(record, provider, exclude_none=exclude_none)
 
     def _normalize_for_hash(
         self,
@@ -124,12 +132,14 @@ class IdentityService:
     ) -> dict[str, Any]:
         """Normalize record before hashing for consistency.
 
+        Delegates to ``bioetl.domain.transformations.normalize_for_hash``.
+
         Applies normalization rules from RULES.md §2.8.1:
-        - NaN/Inf floats → null
-        - Floats → round(val, 10)
-        - Dates → ISO YYYY-MM-DD
-        - Strings → strip()
-        - Meta-fields (_ingestion_ts, _run_id, etc.) → excluded
+        - NaN/Inf floats -> null
+        - Floats -> round(val, 10)
+        - Dates -> ISO YYYY-MM-DD
+        - Strings -> strip()
+        - Meta-fields (_ingestion_ts, _run_id, etc.) -> excluded
 
         Args:
             record: Input record dictionary.
@@ -139,87 +149,4 @@ class IdentityService:
             Normalized dictionary suitable for hashing.
 
         """
-        result: dict[str, Any] = {}
-
-        for key, value in record.items():
-            # Skip meta-fields
-            if key in META_FIELDS:
-                continue
-
-            # Optionally skip None values
-            if exclude_none and value is None:
-                continue
-
-            # Normalize and include
-            result[key] = self._normalize_value(value)
-
-        return result
-
-    def _normalize_value(self, value: Any) -> Any:
-        """Normalize a single value for hashing.
-
-        Args:
-            value: Input value of any type.
-
-        Returns:
-            Normalized value.
-
-        """
-        if value is None:
-            return None
-        return self._normalize_by_type(value)
-
-    def _normalize_by_type(self, value: Any) -> Any:
-        """Dispatch normalization by type."""
-        # Handle scalar types first
-        scalar_result = self._normalize_scalar(value)
-        if scalar_result is not value:  # Was processed
-            return scalar_result
-
-        # Handle container types
-        return self._normalize_container(value)
-
-    def _normalize_scalar(self, value: Any) -> Any:
-        """Normalize scalar types: float, datetime, date, str."""
-        if isinstance(value, float):
-            return self._normalize_float(value)
-        if isinstance(value, datetime):
-            return value.date().isoformat()
-        if isinstance(value, date):
-            return value.isoformat()
-        if isinstance(value, str):
-            return value.strip()
-        return value  # Return unchanged if not a scalar type we handle
-
-    def _normalize_container(self, value: Any) -> Any:
-        """Normalize container types: dict, list."""
-        if isinstance(value, dict):
-            return {k: self._normalize_value(v) for k, v in value.items()}
-        if isinstance(value, list):
-            return [self._normalize_value(v) for v in value]
-        return value
-
-    def _normalize_float(self, value: float) -> float | None:
-        """Normalize float value: NaN/Inf → None, else round to 10 decimals."""
-        if math.isnan(value) or math.isinf(value):
-            return None
-        return round(value, 10)
-
-    @staticmethod
-    def _canonical_json_dumps(obj: dict[str, Any]) -> str:
-        """Convert object to canonical JSON representation.
-
-        Uses centralized serialization with sorted keys and minimal separators
-        for deterministic output per RULES.md §2.8.1.
-
-        Delegates to domain.serialization.serialize_to_json_canonical() which
-        uses orjson for optimal performance when available.
-
-        Args:
-            obj: Dictionary to serialize.
-
-        Returns:
-            Canonical JSON string.
-
-        """
-        return serialize_to_json_canonical(obj)
+        return normalize_for_hash(record, exclude_none=exclude_none)

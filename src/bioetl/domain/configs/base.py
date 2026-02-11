@@ -24,7 +24,6 @@ class RateLimitConfig:
     - composition/providers/provider_registry.py:HttpConfig
     - infrastructure/schemas/pipeline_config.py:ApiConfig
 
-
     Attributes:
         requests_per_second: Maximum requests per second (default: 5.0).
         burst: Token bucket burst capacity (default: 10).

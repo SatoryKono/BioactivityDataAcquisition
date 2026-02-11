@@ -17,7 +17,7 @@ import pytest
 
 from bioetl.domain.aggregates.pipeline_run import (
     PipelineRun,
-    RunStatus,
+    PipelineRunState,
     StageResult,
     StageStatus,
 )
@@ -139,14 +139,14 @@ class TestPipelineRunStateTransitions:
 
     def test_initial_status_is_pending(self, pipeline_run: PipelineRun) -> None:
         """New run should be in PENDING status."""
-        assert pipeline_run.status == RunStatus.PENDING
+        assert pipeline_run.status == PipelineRunState.PENDING
         assert pipeline_run.started_at is None
         assert pipeline_run.ended_at is None
 
     def test_start_transitions_to_running(self, pipeline_run: PipelineRun) -> None:
         """start() should transition PENDING -> RUNNING."""
         pipeline_run.start()
-        assert pipeline_run.status == RunStatus.RUNNING
+        assert pipeline_run.status == PipelineRunState.RUNNING
         assert pipeline_run.started_at is not None
 
     def test_cannot_start_already_running(self, started_run: PipelineRun) -> None:
@@ -187,7 +187,7 @@ class TestPipelineRunStageRecording:
         """Invariant: First stage failure transitions run to FAILED."""
         started_run.record_stage_failure("execution", "Test error")
 
-        assert started_run.status == RunStatus.FAILED
+        assert started_run.status == PipelineRunState.FAILED
         assert started_run.ended_at is not None
         assert len(started_run.failed_stages) == 1
 
@@ -231,7 +231,7 @@ class TestPipelineRunCompletionInvariants:
 
         started_run.complete()
 
-        assert started_run.status == RunStatus.COMPLETED
+        assert started_run.status == PipelineRunState.COMPLETED
         assert started_run.ended_at is not None
         assert started_run.total_records_processed == 1000
 
@@ -249,7 +249,7 @@ class TestPipelineRunEncapsulation:
     ) -> None:
         """Invariant: status changes only through aggregate methods."""
         with pytest.raises(AttributeError):
-            pipeline_run.status = RunStatus.COMPLETED  # type: ignore
+            pipeline_run.status = PipelineRunState.COMPLETED  # type: ignore
 
     def test_stages_returns_immutable_tuple(self, started_run: PipelineRun) -> None:
         """Invariant: stages property returns immutable copy."""
@@ -342,20 +342,20 @@ class TestPipelineRunDomainEvents:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# RunStatus Tests
+# PipelineRunState Tests
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-class TestRunStatus:
-    """Tests for RunStatus enum behavior."""
+class TestPipelineRunState:
+    """Tests for PipelineRunState enum behavior."""
 
     def test_terminal_statuses(self) -> None:
         """Terminal statuses should return True for is_terminal()."""
-        assert RunStatus.COMPLETED.is_terminal()
-        assert RunStatus.FAILED.is_terminal()
-        assert RunStatus.SHUTDOWN.is_terminal()
+        assert PipelineRunState.COMPLETED.is_terminal()
+        assert PipelineRunState.FAILED.is_terminal()
+        assert PipelineRunState.SHUTDOWN.is_terminal()
 
     def test_non_terminal_statuses(self) -> None:
         """Non-terminal statuses should return False for is_terminal()."""
-        assert not RunStatus.PENDING.is_terminal()
-        assert not RunStatus.RUNNING.is_terminal()
+        assert not PipelineRunState.PENDING.is_terminal()
+        assert not PipelineRunState.RUNNING.is_terminal()

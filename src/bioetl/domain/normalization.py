@@ -157,15 +157,76 @@ def _is_electronic_page(page: str) -> bool:
     return bool(_ELECTRONIC_PAGE_PATTERN.match(page))
 
 
-def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
-    """Parse page range '123-456' to (first, last) tuple.
+def _extract_digits(s: str) -> str:
+    """Extract only digit characters from a string."""
+    return "".join(c for c in s if c.isdigit())
 
-    Handles various page formats:
-    - Standard ranges: "123-456" → ("123", "456")
-    - Single pages: "42" → ("42", None)
-    - Electronic pages: "e12345", "e-123" → (original, None)
-    - Article numbers: "100234" → ("100234", None)
-    - Supplements: "S1-S15" → ("S1", "S15")
+
+def _extract_non_digits(s: str) -> str:
+    """Extract only non-digit characters from a string."""
+    return "".join(c for c in s if not c.isdigit())
+
+
+def _expand_abbreviated_page(first_page: str, last_page_raw: str) -> str:
+    """Expand abbreviated last page number.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    - "199-3" means 199-203 (rollover case)
+
+    Algorithm:
+    1. If last_page_raw has >= digits than first_page, return as-is.
+    2. Otherwise: expanded = (first_num // 10^n) * 10^n + last_num.
+    3. Handle rollover: if expanded < first_num, add 10^n.
+
+    Args:
+        first_page: First page (e.g., "737").
+        last_page_raw: Potentially abbreviated last page (e.g., "9", "39", "839").
+
+    Returns:
+        Expanded last page string.
+    """
+    first_digits = _extract_digits(first_page)
+    last_digits = _extract_digits(last_page_raw)
+
+    # If either is non-numeric, return as-is (e.g., "S1-S5")
+    if not first_digits or not last_digits:
+        return last_page_raw
+
+    # If last page has same or more digits, it's a full number
+    if len(last_digits) >= len(first_digits):
+        return last_page_raw
+
+    # Expand abbreviated page number
+    first_num = int(first_digits)
+    last_num = int(last_digits)
+    divisor = 10 ** len(last_digits)
+
+    expanded = (first_num // divisor) * divisor + last_num
+
+    # Handle rollover case: "199-3" should be "199-203", not "199-193"
+    if expanded < first_num:
+        expanded += divisor
+
+    # Preserve any prefix from last_page_raw (e.g., "S" in "S5")
+    prefix = _extract_non_digits(last_page_raw)
+    return f"{prefix}{expanded}" if prefix else str(expanded)
+
+
+def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
+    """Parse page range string to (first, last) tuple.
+
+    Handles various page formats including abbreviated ranges common
+    in academic publishing:
+    - Standard ranges: "123-456" -> ("123", "456")
+    - Abbreviated ranges: "737-9" -> ("737", "739")
+    - Rollover abbreviations: "199-3" -> ("199", "203")
+    - Single pages: "42" -> ("42", None)
+    - Electronic pages: "e12345", "e-123" -> (original, None)
+    - Article numbers: "100234" -> ("100234", None)
+    - Supplements: "S1-S15" -> ("S1", "S15")
+    - En-dash/em-dash: normalized to hyphen before parsing
 
     Args:
         page: Page string from publication metadata.
@@ -185,9 +246,29 @@ def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
     if _is_electronic_page(stripped):
         return stripped, None
 
-    # Standard range parsing
-    first, sep, last = stripped.partition("-")
-    return _to_none_if_empty(first), _to_none_if_empty(last) if sep else None
+    # Normalize various dash types to hyphen
+    # EN DASH (U+2013) and EM DASH (U+2014) -> HYPHEN-MINUS (U+002D)
+    stripped = stripped.replace("\u2013", "-").replace("\u2014", "-")
+
+    # Split on first hyphen only
+    parts = stripped.split("-", 1)
+
+    first_page = parts[0].strip()
+    if not first_page:
+        return None, None
+
+    # No range separator - single page
+    if len(parts) == 1:
+        return first_page, None
+
+    last_page_raw = parts[1].strip()
+    if not last_page_raw:
+        return first_page, None
+
+    # Expand abbreviated page number (e.g., 737-9 -> 737-739)
+    last_page = _expand_abbreviated_page(first_page, last_page_raw)
+
+    return first_page, last_page
 
 
 def normalize_pmc_id(pmc_id: str | None) -> str | None:

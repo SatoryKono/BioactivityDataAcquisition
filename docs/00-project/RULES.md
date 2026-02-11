@@ -237,7 +237,12 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 - `bronze_batch_id` (UUID): Ссылка на пакет исходных данных.
 
-- `dq_status` (String): `NEW` | `IGNORED` | `REPROCESSED`.
+- `dq_status` (String): `NEW` | `UNDER_REVIEW` | `IGNORED` | `REPROCESSED` | `EXPIRED`.
+  - `NEW`: Только что создана, ждёт разбора.
+  - `UNDER_REVIEW`: Анализируется оператором.
+  - `IGNORED`: Разобрана и признана неактуальной.
+  - `REPROCESSED`: Успешно повторно обработана и перемещена в Silver.
+  - `EXPIRED`: Запись превысила период хранения.
 
 - **Запрещено**: Sentinel values (-1, "N/A", 9999) **MUST NOT** использоваться.
 
@@ -1356,52 +1361,44 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 См. [ADR-025](02-architecture/decisions/ADR-025-pipeline-config-unification.md) для унификации конфигурации, [ADR-027](02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
 
 ```yaml
-# configs/pipelines/chembl_activity.yaml
-pipeline:
-  name: chembl_activity
-  provider: chembl
-  entity: activity
+# configs/pipelines/chembl/activity.yaml
+# Minimal config using convention-based path resolution (ADR-029).
+# Inherits from _base.yaml with paths/filters auto-computed from provider/entity.
+#
+# Auto-computed by convention:
+#   - source_file: ../../sources/chembl.yaml
+#   - dq_config_file: ../../dq/entities/chembl/activity.yaml
+#   - filter_config_file: ../../filter/entities/chembl/activity.yaml
+#   - sink paths: data/output/{layer}/chembl/activity
+#   - sink.silver.primary_key: ["activity_id"]
 
-source:
-  type: api  # api | csv | parquet
-  load_strategy: incremental  # incremental | full
-  watermark_field: updated_at
+pipeline_name: chembl_activity
+provider: chembl
+entity_type: activity
+version: "1.2.0"
+description: "Extract biological activity records from ChEMBL API"
 
-transform:
-  version: "1.2.0"
-  steps:
-    - normalize_units
-    - validate_smiles
-    - deduplicate
+primary_keys: ["activity_id"]
+silver_table: "chembl_activity"
+gold_table: "chembl_activity"
 
 sink:
   silver:
-    path: data/output/silver/chembl/activity
-    format: delta          # Использовать Delta Lake
-    mode: merge            # Стратегия Upsert
-    primary_key: [id]      # Ключ для merge
-    partition_by: [year, month]
-    classification: public
-    forensic_retention: false  # true = 30 days for Critical tables
-    # Example for Critical table (Core Data):
-    # forensic_retention: true
-
+    primary_key: ["activity_id"]
+    sort_by:
+      columns: ["activity_id"]
   gold:
-    path: data/output/gold/chembl/activity_aggregated
-    format: delta
-    mode: overwrite        # Витрины часто перезаписываются целиком или партициями
+    sort_by:
+      columns: ["activity_id"]
 
+# DQ Overrides (applied on top of entity DQ config)
 dq_rules:
-  soft_fail_threshold: 0.05  # 5%
-  hard_fail_threshold: 0.20  # 20% (Strict)
-
-circuit_breaker:
-  failure_threshold: 5
-  recovery_timeout: 300      # 5 min
-
-rate_limit:
-  requests_per_second: 5
-  burst: 10
+  field_validations:
+    - field: "standard_value"
+      type: "range"
+      min: 0
+      max: 1000000000
+      nullable: true
 ```
 
 ## Приложение E: Примеры Schema Evolution
