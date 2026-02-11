@@ -952,7 +952,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Unified page fields (from biblio object)
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
-        # Note: pmc_id excluded per design (2026-01)
+        # PubMed Central ID - Not available from OpenAlex API (None values)
+        pa.field("pmc_id", pa.string()),
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
         # Primary topic (single most relevant topic for quick categorization)
