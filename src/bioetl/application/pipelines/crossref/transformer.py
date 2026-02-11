@@ -168,6 +168,12 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         return {
             "doi": doi,
+            # Fields from PublicationBaseSchema that CrossRef doesn't provide
+            # (set to None to satisfy schema inheritance requirement)
+            "pmid": None,
+            "pmc_id": None,
+            "abstract": None,
+            "affiliation_list": None,
             "title": extract_first_string(rec.get("title", [])),
             "authors": self.serialize_json_list(hashed_authors),
             **journal_info,
@@ -185,9 +191,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "license_url": extract_license_url(rec),
             "subject_keywords": rec.get("subject", []),
             "_source": "crossref",
-            # Excluded fields (always NULL, not written to Delta Lake):
-            # - is_oa: CrossRef doesn't provide Open Access info
-            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs (excluded entirely)
+            # is_oa: CrossRef doesn't provide Open Access info
             "is_oa": None,
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
@@ -338,15 +342,17 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding unused fields.
+        """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
-        Overrides base implementation to remove fields not collected for CrossRef.
+        Overrides base implementation to handle ISSN list conversion.
+        Note: Fields like pmid, pmc_id, abstract, affiliation_list are kept
+        with None values to satisfy PublicationBaseSchema inheritance requirement.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without excluded fields.
+            SilverRecord dictionary with all base schema fields.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
@@ -354,11 +360,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields (CrossRef doesn't provide these)
-        silver_record.pop("abstract", None)
-        silver_record.pop("affiliation_list", None)
-        silver_record.pop("pmid", None)
-        silver_record.pop("pmc_id", None)
+        # Note: Do NOT remove pmid, pmc_id, abstract, affiliation_list
+        # These fields inherit from PublicationBaseSchema and must exist in DataFrame
+        # even if set to None (Pandera requires columns to exist, not just be nullable)
 
         # Convert ISSN list to scalar + JSON array (unification with other providers)
         issn_raw = silver_record.get("issn")

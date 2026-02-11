@@ -598,10 +598,15 @@ def test_extract_business_data_date_year_only(transformer):
 
 
 @pytest.mark.asyncio
-async def test_transform_excludes_abstract_and_affiliations(
+async def test_transform_includes_base_schema_fields_as_none(
     transformer, pipeline_context
 ):
-    """Test that abstract and affiliations are excluded from Silver record."""
+    """Test that base schema fields are included with None values.
+
+    CrossRef doesn't provide abstract, affiliation_list, pmid, or pmc_id,
+    but these fields must exist in the Silver record with None values
+    to satisfy PublicationBaseSchema inheritance requirements for Pandera validation.
+    """
     publication = {
         "DOI": "10.1234/test",
         "title": ["Test"],
@@ -617,5 +622,12 @@ async def test_transform_excludes_abstract_and_affiliations(
     result = await transformer.transform(pipeline_context, publication, index=0)
 
     assert result is not None
-    assert "abstract" not in result
-    assert "affiliations" not in result
+    # Fields from base schema must exist with None values
+    assert "abstract" in result
+    assert result["abstract"] is None
+    assert "affiliation_list" in result
+    assert result["affiliation_list"] is None
+    assert "pmid" in result
+    assert result["pmid"] is None
+    assert "pmc_id" in result
+    assert result["pmc_id"] is None

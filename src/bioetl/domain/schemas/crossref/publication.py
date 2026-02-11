@@ -41,6 +41,27 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     - doc_type: CrossRef uses raw 'type' field instead (journal-article, etc.)
     """
 
+    # === Override inherited fields to allow missing (align with excluded fields) ===
+    # Note: Fields are already nullable in base schema, just re-declaring here for clarity
+    pmid: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^[1-9]\d*$",
+        description="PubMed ID (positive numeric string)",
+    )
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central ID",
+    )
+    abstract: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication abstract",
+    )
+    affiliation_list: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of unique affiliations (unified field name)",
+    )
+
     # === Primary Key (override doi to be non-nullable) ===
     doi: Series[str] = pa.Field(
         nullable=False,
