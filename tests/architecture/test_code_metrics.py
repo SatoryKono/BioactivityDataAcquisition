@@ -642,12 +642,12 @@ class TestClassSize:
         # Domain ports (Protocol definitions with comprehensive docstrings)
         "StoragePort": 380,  # 374 lines - Protocol with read_silver, write_*_merged + SourceMetadata param for Bronze write + SilverWriteResult return + silver_refs param
         # Pandera schemas (declarative field definitions)
-        "PubchemMoleculeSchema": 380,  # 375 lines - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
+        "PubchemMoleculeSchema": 395,  # 389 lines - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass + nullable int handling
         "UniprotTargetSchema": 435,  # 430 lines - UniProt protein schema with biochemical fields + extended extractors
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
-        "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
+        "MetadataCoordinator": 440,  # 436 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
