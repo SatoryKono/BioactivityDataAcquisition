@@ -391,14 +391,16 @@ class TestMedallionLifecycleServicePrepareForRun:
     @pytest.fixture
     def pipeline_config(self):
         """Create a pipeline config."""
-        from bioetl.domain.config import PipelineConfig
+        from bioetl.domain.config import PipelineConfig, TableConfig
 
         return PipelineConfig(
             pipeline_name="test_pipeline",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
+            table=TableConfig(
+                primary_keys=["activity_id"],
+                silver_table="test_silver",
+            ),
         )
 
     @pytest.fixture
@@ -459,15 +461,17 @@ class TestMedallionLifecycleServicePrepareForRun:
         self, mock_storage, mock_logger, runtime_config_rebuild
     ):
         """prepare_for_run uses default gold table when not configured."""
-        from bioetl.domain.config import PipelineConfig
+        from bioetl.domain.config import PipelineConfig, TableConfig
 
         config = PipelineConfig(
             pipeline_name="test_pipeline",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-            gold_table=None,
+            table=TableConfig(
+                primary_keys=["activity_id"],
+                silver_table="test_silver",
+                gold_table=None,
+            ),
         )
         service = MedallionLifecycleService(storage=mock_storage, logger=mock_logger)
 
@@ -482,15 +486,17 @@ class TestMedallionLifecycleServicePrepareForRun:
         self, mock_storage, mock_logger, runtime_config_rebuild
     ):
         """prepare_for_run uses configured gold table when provided."""
-        from bioetl.domain.config import PipelineConfig
+        from bioetl.domain.config import PipelineConfig, TableConfig
 
         config = PipelineConfig(
             pipeline_name="test_pipeline",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
-            gold_table="custom_gold_table",
+            table=TableConfig(
+                primary_keys=["activity_id"],
+                silver_table="test_silver",
+                gold_table="custom_gold_table",
+            ),
         )
         service = MedallionLifecycleService(storage=mock_storage, logger=mock_logger)
 
@@ -534,14 +540,16 @@ class TestMedallionLifecycleServiceFinalizeRun:
     @pytest.fixture
     def pipeline_config(self):
         """Create a pipeline config."""
-        from bioetl.domain.config import PipelineConfig
+        from bioetl.domain.config import PipelineConfig, TableConfig
 
         return PipelineConfig(
             pipeline_name="test_pipeline",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="test_silver",
+            table=TableConfig(
+                primary_keys=["activity_id"],
+                silver_table="test_silver",
+            ),
         )
 
     @pytest.fixture

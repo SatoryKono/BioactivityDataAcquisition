@@ -70,10 +70,10 @@ class CompositeRuntimeConfig:
         cached_bronze_enrichers: Override cached Bronze for enrichers.
             None=follow master, True=force cache, False=force API.
         cached_bronze_dependencies: Override cached Bronze for dependencies.
-            None=follow master, True=force cache, False=force API.
-            Defaults to False because dependencies (e.g. IDMapping) must call
-            APIs with seed IDs; reading from Bronze cache would silently
-            produce empty results when no prior standalone run exists.
+            False by default — dependencies call APIs with seed-derived keys,
+            so their Bronze cache is often stale or absent (e.g. uniprot_idmapping
+            on first composite run). Set True to force cache if Bronze was
+            pre-populated by a standalone run with identical keys.
     """
 
     resume: bool = False

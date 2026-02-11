@@ -60,7 +60,7 @@ composite:
   #
   # Use dependencies for:
   # - Derived entities (e.g., publication_term extracted from publication data)
-  # - Pipelines with force_full_scan that don't work with enricher filtering
+  # - Pipelines with full_scan_only strategy that don't work with enricher filtering
   # - Data that must be pre-populated before enrichment phase
   dependencies: []  # No dependencies currently
 

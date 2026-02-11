@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.types import RunType
 
 
@@ -17,8 +17,10 @@ class TestPipelineConfig:
             pipeline_name="test_pipeline",
             provider="test_provider",
             entity_type="test_entity",
-            primary_keys=["id"],
-            silver_table="test_silver",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test_silver",
+            ),
         )
 
         assert config.pipeline_name == "test_pipeline"
@@ -36,9 +38,11 @@ class TestPipelineConfig:
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id", "assay_chembl_id"],
-            silver_table="chembl_activity",
-            gold_table="chembl_activity_gold",
+            table=TableConfig(
+                primary_keys=["activity_id", "assay_chembl_id"],
+                silver_table="chembl_activity",
+                gold_table="chembl_activity_gold",
+            ),
             batch_size=500,
             checkpoint_interval=5000,
         )
@@ -53,8 +57,10 @@ class TestPipelineConfig:
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
-            silver_table="test",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test",
+            ),
         )
 
         with pytest.raises(AttributeError):
@@ -66,8 +72,10 @@ class TestPipelineConfig:
             pipeline_name="my_pipeline",
             provider="provider",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="table",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="table",
+            ),
         )
 
         assert config.lock_key == "pipeline:my_pipeline"
@@ -79,8 +87,10 @@ class TestPipelineConfig:
                 pipeline_name="",
                 provider="test",
                 entity_type="test",
-                primary_keys=["id"],
-                silver_table="test",
+                table=TableConfig(
+                    primary_keys=["id"],
+                    silver_table="test",
+                ),
             )
 
     def test_empty_provider_raises(self):
@@ -90,8 +100,10 @@ class TestPipelineConfig:
                 pipeline_name="test",
                 provider="",
                 entity_type="test",
-                primary_keys=["id"],
-                silver_table="test",
+                table=TableConfig(
+                    primary_keys=["id"],
+                    silver_table="test",
+                ),
             )
 
     def test_empty_entity_type_raises(self):
@@ -101,8 +113,10 @@ class TestPipelineConfig:
                 pipeline_name="test",
                 provider="test",
                 entity_type="",
-                primary_keys=["id"],
-                silver_table="test",
+                table=TableConfig(
+                    primary_keys=["id"],
+                    silver_table="test",
+                ),
             )
 
     def test_empty_primary_keys_raises(self):
@@ -112,8 +126,10 @@ class TestPipelineConfig:
                 pipeline_name="test",
                 provider="test",
                 entity_type="test",
-                primary_keys=[],
-                silver_table="test",
+                table=TableConfig(
+                    primary_keys=[],
+                    silver_table="test",
+                ),
             )
 
     def test_invalid_batch_size_raises(self):
@@ -123,8 +139,10 @@ class TestPipelineConfig:
                 pipeline_name="test",
                 provider="test",
                 entity_type="test",
-                primary_keys=["id"],
-                silver_table="test",
+                table=TableConfig(
+                    primary_keys=["id"],
+                    silver_table="test",
+                ),
                 batch_size=0,
             )
 
@@ -133,8 +151,10 @@ class TestPipelineConfig:
                 pipeline_name="test",
                 provider="test",
                 entity_type="test",
-                primary_keys=["id"],
-                silver_table="test",
+                table=TableConfig(
+                    primary_keys=["id"],
+                    silver_table="test",
+                ),
                 batch_size=-1,
             )
 
@@ -145,8 +165,10 @@ class TestPipelineConfig:
                 pipeline_name="test",
                 provider="test",
                 entity_type="test",
-                primary_keys=["id"],
-                silver_table="test",
+                table=TableConfig(
+                    primary_keys=["id"],
+                    silver_table="test",
+                ),
                 checkpoint_interval=0,
             )
 

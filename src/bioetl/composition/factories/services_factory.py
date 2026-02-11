@@ -384,7 +384,6 @@ class ServicesBuilder:
         run_id: RunID,
         resume: bool,
         *,
-        force_full_scan: bool = False,
         loading_strategy: LoadingStrategy | None = None,
     ) -> CheckpointManager:
         """Create configured CheckpointManager.
@@ -395,10 +394,8 @@ class ServicesBuilder:
             pipeline_name: Name of the pipeline
             run_id: Unique run identifier
             resume: Whether to resume from previous checkpoint
-            force_full_scan: If True, checkpoint resume is disabled (ADR-030).
-                Used for entities with unreliable offset pagination like publications.
-            loading_strategy: Explicit loading strategy (ADR-031). Takes precedence
-                over force_full_scan if provided. FULL_SCAN_ONLY disables resume.
+            loading_strategy: Loading strategy (ADR-031).
+                FULL_SCAN_ONLY disables checkpoint resume.
 
         Returns:
             Configured CheckpointManager instance
@@ -409,7 +406,6 @@ class ServicesBuilder:
             pipeline_name=pipeline_name,
             run_id=run_id,
             resume=resume,
-            force_full_scan=force_full_scan,
             loading_strategy=loading_strategy,
         )
 
@@ -603,14 +599,6 @@ class ServicesBuilder:
 
         # Build configuration
         error_classifier = ErrorClassifier()
-        table_config = TableConfig(
-            primary_keys=tuple(pipeline.config.primary_keys),
-            silver_table=pipeline.config.silver_table,
-            gold_table=pipeline.config.gold_table,
-            silver_write_mode=pipeline.config.write_mode,
-            gold_write_mode=pipeline.config.gold_write_mode,
-            on_schema_mismatch=pipeline.config.on_schema_mismatch,
-        )
 
         processor_config = RecordProcessorConfig(
             pipeline_name=pipeline.config.pipeline_name,
@@ -619,7 +607,7 @@ class ServicesBuilder:
             silver_schema=silver_schema,
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
-            table_config=table_config,
+            table_config=pipeline.config.table,
             # DQ report output paths for flat_structure support
             bronze_output_path=bronze_output_path,
             silver_output_path=silver_output_path,

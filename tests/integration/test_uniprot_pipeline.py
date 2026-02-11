@@ -13,7 +13,7 @@ import pytest
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.uniprot import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -25,9 +25,11 @@ def uniprot_config() -> PipelineConfig:
         pipeline_name="uniprot_protein",
         provider="uniprot",
         entity_type="protein",
-        primary_keys=["accession"],
-        silver_table="uniprot.protein",
-        gold_table="uniprot.protein_gold",
+        table=TableConfig(
+            primary_keys=["accession"],
+            silver_table="uniprot.protein",
+            gold_table="uniprot.protein_gold",
+        ),
         batch_size=100,
         checkpoint_interval=1000,
         fields=[

@@ -4,7 +4,19 @@ from __future__ import annotations
 
 import pytest
 
-from bioetl.domain.config import DQConfig, PipelineConfig
+from bioetl.domain.config import DQConfig, PipelineConfig, TableConfig
+
+
+def _make_config(**overrides: object) -> PipelineConfig:
+    """Create a PipelineConfig with sensible defaults, allowing overrides."""
+    defaults: dict[str, object] = {
+        "pipeline_name": "test",
+        "provider": "test",
+        "entity_type": "test",
+        "table": TableConfig(primary_keys=("id",), silver_table="silver"),
+    }
+    defaults.update(overrides)
+    return PipelineConfig(**defaults)  # type: ignore[arg-type]
 
 
 @pytest.mark.unit
@@ -17,8 +29,7 @@ class TestPipelineConfig:
             pipeline_name="test_pipeline",
             provider="test_provider",
             entity_type="test_entity",
-            primary_keys=["id"],
-            silver_table="test_silver",
+            table=TableConfig(primary_keys=["id"], silver_table="test_silver"),
         )
 
         assert config.pipeline_name == "test_pipeline"
@@ -29,13 +40,7 @@ class TestPipelineConfig:
 
     def test_default_values(self) -> None:
         """Test default values for optional fields."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-        )
+        config = _make_config()
 
         assert config.gold_table is None
         assert config.batch_size == 100
@@ -45,55 +50,25 @@ class TestPipelineConfig:
 
     def test_custom_batch_size(self) -> None:
         """Test custom batch size."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-            batch_size=500,
-        )
-
+        config = _make_config(batch_size=500)
         assert config.batch_size == 500
 
     def test_custom_checkpoint_interval(self) -> None:
         """Test custom checkpoint interval."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-            checkpoint_interval=5000,
-        )
-
+        config = _make_config(checkpoint_interval=5000)
         assert config.checkpoint_interval == 5000
 
     def test_custom_dq_config(self) -> None:
         """Test custom DQ config."""
         dq = DQConfig(soft_fail_threshold=0.10, hard_fail_threshold=0.50)
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-            dq=dq,
-        )
+        config = _make_config(dq=dq)
 
         assert config.dq.soft_fail_threshold == 0.10
         assert config.dq.hard_fail_threshold == 0.50
 
     def test_fields_tuple(self) -> None:
         """Test fields configuration (converted to tuple)."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-            fields=["field1", "field2", "field3"],
-        )
+        config = _make_config(fields=["field1", "field2", "field3"])
 
         assert config.fields == ("field1", "field2", "field3")
         assert isinstance(config.fields, tuple)
@@ -104,21 +79,14 @@ class TestPipelineConfig:
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id"],
-            silver_table="silver",
+            table=TableConfig(primary_keys=["activity_id"], silver_table="silver"),
         )
 
         assert config.lock_key == "pipeline:chembl_activity"
 
     def test_immutability(self) -> None:
         """Test that PipelineConfig is frozen (immutable)."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-        )
+        config = _make_config()
 
         with pytest.raises(AttributeError):
             config.pipeline_name = "new_name"  # type: ignore[misc]
@@ -128,83 +96,37 @@ class TestPipelineConfig:
     def test_empty_pipeline_name_raises(self) -> None:
         """Test that empty pipeline_name raises ValueError."""
         with pytest.raises(ValueError, match="pipeline_name cannot be empty"):
-            PipelineConfig(
-                pipeline_name="",
-                provider="test",
-                entity_type="test",
-                primary_keys=["id"],
-                silver_table="silver",
-            )
+            _make_config(pipeline_name="")
 
     def test_empty_provider_raises(self) -> None:
         """Test that empty provider raises ValueError."""
         with pytest.raises(ValueError, match="provider cannot be empty"):
-            PipelineConfig(
-                pipeline_name="test",
-                provider="",
-                entity_type="test",
-                primary_keys=["id"],
-                silver_table="silver",
-            )
+            _make_config(provider="")
 
     def test_empty_entity_type_raises(self) -> None:
         """Test that empty entity_type raises ValueError."""
         with pytest.raises(ValueError, match="entity_type cannot be empty"):
-            PipelineConfig(
-                pipeline_name="test",
-                provider="test",
-                entity_type="",
-                primary_keys=["id"],
-                silver_table="silver",
-            )
+            _make_config(entity_type="")
 
     def test_zero_batch_size_raises(self) -> None:
         """Test that zero batch_size raises ValueError."""
         with pytest.raises(ValueError, match="batch_size must be positive"):
-            PipelineConfig(
-                pipeline_name="test",
-                provider="test",
-                entity_type="test",
-                primary_keys=["id"],
-                silver_table="silver",
-                batch_size=0,
-            )
+            _make_config(batch_size=0)
 
     def test_negative_batch_size_raises(self) -> None:
         """Test that negative batch_size raises ValueError."""
         with pytest.raises(ValueError, match="batch_size must be positive"):
-            PipelineConfig(
-                pipeline_name="test",
-                provider="test",
-                entity_type="test",
-                primary_keys=["id"],
-                silver_table="silver",
-                batch_size=-10,
-            )
+            _make_config(batch_size=-10)
 
     def test_zero_checkpoint_interval_raises(self) -> None:
         """Test that zero checkpoint_interval raises ValueError."""
         with pytest.raises(ValueError, match="checkpoint_interval must be positive"):
-            PipelineConfig(
-                pipeline_name="test",
-                provider="test",
-                entity_type="test",
-                primary_keys=["id"],
-                silver_table="silver",
-                checkpoint_interval=0,
-            )
+            _make_config(checkpoint_interval=0)
 
     def test_negative_checkpoint_interval_raises(self) -> None:
         """Test that negative checkpoint_interval raises ValueError."""
         with pytest.raises(ValueError, match="checkpoint_interval must be positive"):
-            PipelineConfig(
-                pipeline_name="test",
-                provider="test",
-                entity_type="test",
-                primary_keys=["id"],
-                silver_table="silver",
-                checkpoint_interval=-100,
-            )
+            _make_config(checkpoint_interval=-100)
 
     def test_empty_primary_keys_raises(self) -> None:
         """Test that empty primary_keys raises ValueError."""
@@ -213,8 +135,7 @@ class TestPipelineConfig:
                 pipeline_name="test",
                 provider="test",
                 entity_type="test",
-                primary_keys=[],
-                silver_table="silver",
+                table=TableConfig(primary_keys=[], silver_table="silver"),
             )
 
     def test_multiple_primary_keys(self) -> None:
@@ -223,8 +144,10 @@ class TestPipelineConfig:
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["org_id", "entity_id", "version"],
-            silver_table="silver",
+            table=TableConfig(
+                primary_keys=["org_id", "entity_id", "version"],
+                silver_table="silver",
+            ),
         )
 
         assert len(config.primary_keys) == 3
@@ -239,9 +162,11 @@ class TestPipelineConfig:
             pipeline_name="chembl_activity",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["activity_id", "assay_chembl_id"],
-            silver_table="chembl_activity_silver",
-            gold_table="chembl_activity_gold",
+            table=TableConfig(
+                primary_keys=["activity_id", "assay_chembl_id"],
+                silver_table="chembl_activity_silver",
+                gold_table="chembl_activity_gold",
+            ),
             batch_size=250,
             checkpoint_interval=2500,
             fields=[
@@ -267,26 +192,24 @@ class TestPipelineConfig:
 
     def test_equality(self) -> None:
         """Test equality between PipelineConfig instances."""
+        table = TableConfig(primary_keys=["id"], silver_table="silver")
         config1 = PipelineConfig(
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
+            table=table,
         )
         config2 = PipelineConfig(
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
+            table=table,
         )
         config3 = PipelineConfig(
             pipeline_name="other",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
+            table=table,
         )
 
         assert config1 == config2
@@ -294,19 +217,18 @@ class TestPipelineConfig:
 
     def test_hashable_with_tuple(self) -> None:
         """Test that PipelineConfig is hashable with tuple fields."""
+        table = TableConfig(primary_keys=["id"], silver_table="silver")
         config1 = PipelineConfig(
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
+            table=table,
         )
         config2 = PipelineConfig(
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
+            table=table,
         )
 
         # Tuples are hashable, so frozen dataclass with tuple field is hashable
@@ -322,8 +244,7 @@ class TestPipelineConfig:
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id", "version"],
-            silver_table="silver",
+            table=TableConfig(primary_keys=["id", "version"], silver_table="silver"),
         )
 
         # Tuples don't support item assignment - raises TypeError
@@ -332,14 +253,7 @@ class TestPipelineConfig:
 
     def test_immutable_fields(self) -> None:
         """Test that fields tuple cannot be mutated."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-            fields=["field1", "field2"],
-        )
+        config = _make_config(fields=["field1", "field2"])
 
         # Tuples don't support item assignment - raises TypeError
         with pytest.raises(TypeError):
@@ -347,29 +261,14 @@ class TestPipelineConfig:
 
     def test_immutable_transform_steps(self) -> None:
         """Test that transform_steps tuple cannot be mutated."""
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-            transform_steps=["step1", "step2"],
-        )
+        config = _make_config(transform_steps=["step1", "step2"])
 
         with pytest.raises(TypeError):
             config.transform_steps[0] = "new_step"  # type: ignore[index]
 
     def test_immutable_dq_config(self) -> None:
         """Test that dq config cannot be replaced or mutated."""
-        dq = DQConfig()
-        config = PipelineConfig(
-            pipeline_name="test",
-            provider="test",
-            entity_type="test",
-            primary_keys=["id"],
-            silver_table="silver",
-            dq=dq,
-        )
+        config = _make_config(dq=DQConfig())
 
         # Cannot replace dq attribute
         with pytest.raises(AttributeError):
@@ -385,9 +284,11 @@ class TestPipelineConfig:
             pipeline_name="test",
             provider="test",
             entity_type="test",
-            primary_keys=["id", "version"],
-            silver_table="silver",
-            partition_cols=["col1"],
+            table=TableConfig(
+                primary_keys=["id", "version"],
+                silver_table="silver",
+                partition_cols=["col1"],
+            ),
             fields=["f1", "f2"],
         )
 
@@ -397,3 +298,33 @@ class TestPipelineConfig:
         assert config.primary_keys == ("id", "version")
         assert config.partition_cols == ("col1",)
         assert config.fields == ("f1", "f2")
+
+    def test_table_field_is_single_source_of_truth(self) -> None:
+        """Test that table field provides table config directly."""
+        table = TableConfig(
+            primary_keys=["id"],
+            silver_table="my_silver",
+            gold_table="my_gold",
+            silver_write_mode="merge",
+            gold_write_mode="append",
+        )
+        config = PipelineConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            table=table,
+        )
+
+        # Direct access via table field
+        assert config.table is table
+        assert config.table.silver_table == "my_silver"
+        assert config.table.gold_table == "my_gold"
+
+        # Convenience properties forward correctly
+        assert config.silver_table == config.table.silver_table
+        assert config.gold_table == config.table.gold_table
+        assert config.primary_keys == config.table.primary_keys
+        assert config.write_mode == config.table.silver_write_mode
+        assert config.gold_write_mode == config.table.gold_write_mode
+        assert config.partition_cols == config.table.partition_cols
+        assert config.on_schema_mismatch == config.table.on_schema_mismatch

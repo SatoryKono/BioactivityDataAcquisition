@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.domain.schemas.common.publication_base import OA_STATUS_VALUES
+
 # Re-export from submodules for backward compatibility
 from bioetl.application.pipelines.semanticscholar._author_extractors import (
     extract_affiliations,

@@ -46,7 +46,11 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
+    from bioetl.domain.filtering import (
+        GoldFilterConfig,
+        InputFilterConfig,
+        SilverFilterConfig,
+    )
     from bioetl.domain.ports import (
         DataSourcePort,
         DQMonitorPort,
@@ -140,7 +144,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        silver_filters: GoldFilterConfig | None = None,
+        silver_filters: SilverFilterConfig | GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -611,7 +615,6 @@ def assemble_runner(
         pipeline_name=pipeline.config.pipeline_name,
         run_id=pipeline.run_id,
         resume=pipeline.runtime.resume,
-        force_full_scan=pipeline.config.force_full_scan,
         loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
     )
 
