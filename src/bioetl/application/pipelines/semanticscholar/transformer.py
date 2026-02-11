@@ -204,7 +204,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "publication_year": self.validate_value_object(
                 PublicationYear, rec.get("year"), as_string=False
             ),
-            "publication_date": self._normalize_partial_date(
+            "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publicationDate")
             ),
             "citations_received": rec.get("citationCount"),
