@@ -211,6 +211,7 @@ ______________________________________________________________________
 
 ```python
 # src/bioetl/domain/schemas/chembl/molecule.py
+# 52 entity-specific fields (excluding ETL metadata from ETLRecordSchema)
 
 
 class MoleculeSchema(ETLRecordSchema):
@@ -219,13 +220,13 @@ class MoleculeSchema(ETLRecordSchema):
     # === Identifiers ===
     molecule_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
     structure_standard_inchi_key: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=INCHI_KEY_REGEX_PATTERN,  # ^[A-Z]{14}-[A-Z]{10}-[A-Z]$
-        description="Standard InChI Key (27 characters).",
+        str_matches=INCHI_KEY_REGEX_PATTERN,
+        description="Standard InChI Key (27 characters, format: XXXX-YYYY-Z).",
     )
 
     # === Core Properties ===
@@ -241,21 +242,13 @@ class MoleculeSchema(ETLRecordSchema):
     molecule_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=[
-            "Small molecule",
-            "Antibody",
-            "Antibody drug conjugate",
-            "Protein",
-            "Oligonucleotide",
-            "Oligosaccharide",
-            "Cell",
-            "Enzyme",
-            "Unknown",
-            "Unclassified",
-            "Inorganic small molecule",
-            "Polymeric small molecule",
+            "Small molecule", "Antibody", "Antibody drug conjugate",
+            "Protein", "Oligonucleotide", "Oligosaccharide",
+            "Cell", "Enzyme", "Unknown", "Unclassified",
+            "Inorganic small molecule", "Polymeric small molecule",
         ],
     )
-    first_approval: Series[int] | None = pa.Field(nullable=True)
+    first_approval: Series[float] | None = pa.Field(nullable=True)
 
     # === Flags ===
     therapeutic_flag: Series[bool] | None = pa.Field(nullable=True)
@@ -264,11 +257,55 @@ class MoleculeSchema(ETLRecordSchema):
     topical: Series[bool] | None = pa.Field(nullable=True)
     black_box_warning: Series[int] | None = pa.Field(nullable=True, isin=[0, 1])
     natural_product: Series[int] | None = pa.Field(nullable=True, isin=[-1, 0, 1])
-    first_in_class: Series[int] | None = pa.Field(nullable=True, isin=[0, 1])
-    prodrug: Series[int] | None = pa.Field(nullable=True, isin=[0, 1])
-    inorganic_flag: Series[int] | None = pa.Field(nullable=True, isin=[0, 1])
+    first_in_class: Series[int] | None = pa.Field(nullable=True, isin=[-1, 0, 1])
+    prodrug: Series[int] | None = pa.Field(nullable=True, isin=[-1, 0, 1])
+    inorganic_flag: Series[int] | None = pa.Field(nullable=True, isin=[-1, 0, 1])
     polymer_flag: Series[int] | None = pa.Field(nullable=True, isin=[0, 1])
     withdrawn_flag: Series[bool] | None = pa.Field(nullable=True)
+
+    # === Other Properties ===
+    chirality: Series[int] | None = pa.Field(nullable=True, isin=[-1, 0, 1, 2])
+    dosed_ingredient: Series[int] | None = pa.Field(nullable=True, isin=[0, 1])
+    availability_type: Series[float] | None = pa.Field(nullable=True, isin=[-2, -1, 0, 1, 2])
+    usan_year: Series[float] | None = pa.Field(nullable=True)
+    usan_stem: Series[str] | None = pa.Field(nullable=True)
+    usan_substem: Series[str] | None = pa.Field(nullable=True)
+    usan_stem_definition: Series[str] | None = pa.Field(nullable=True)
+    helm_notation: Series[str] | None = pa.Field(nullable=True)
+    molecule_species: Series[str] | None = pa.Field(nullable=True)
+
+    # === Hierarchy Fields (flattened from molecule_hierarchy) ===
+    hierarchy_parent_chembl_id: Series[str] | None = pa.Field(
+        nullable=True, str_matches=CHEMBL_ID_PATTERN,
+    )
+    hierarchy_active_chembl_id: Series[str] | None = pa.Field(
+        nullable=True, str_matches=CHEMBL_ID_PATTERN,
+    )
+    hierarchy_child_chembl_id: Series[str] | None = pa.Field(
+        nullable=True, str_matches=CHEMBL_ID_PATTERN,
+    )
+
+    # === Property Fields (flattened from molecule_properties) ===
+    property_alogp: Series[float] | None = pa.Field(nullable=True)
+    property_mw_freebase: Series[float] | None = pa.Field(nullable=True)
+    property_full_mwt: Series[float] | None = pa.Field(nullable=True)
+    property_hba: Series[int] | None = pa.Field(nullable=True, ge=0)
+    property_hbd: Series[int] | None = pa.Field(nullable=True, ge=0)
+    property_psa: Series[float] | None = pa.Field(nullable=True, ge=0)
+    property_rtb: Series[int] | None = pa.Field(nullable=True, ge=0)
+    property_ro5_violations: Series[int] | None = pa.Field(nullable=True, ge=0, le=4)
+    property_heavy_atoms: Series[int] | None = pa.Field(nullable=True, ge=0)
+    property_aromatic_rings: Series[int] | None = pa.Field(nullable=True, ge=0)
+    property_qed_weighted: Series[float] | None = pa.Field(nullable=True, ge=0, le=1)
+    property_full_molformula: Series[str] | None = pa.Field(nullable=True)
+    property_ro3_pass: Series[str] | None = pa.Field(nullable=True, isin=["Y", "N"])
+
+    # === Structure Fields (flattened from molecule_structures) ===
+    canonical_smiles: Series[str] | None = pa.Field(nullable=True)
+    standard_inchi: Series[str] | None = pa.Field(nullable=True)
+    inchikey: Series[str] | None = pa.Field(
+        nullable=True, str_matches=INCHI_KEY_REGEX_PATTERN,
+    )
 
     # === Complex Fields (JSON Strings) ===
     molecule_hierarchy: Series[str] | None = pa.Field(nullable=True)
@@ -322,7 +359,7 @@ Retention: 90 days → Archive
 Path: silver/chembl/molecule/
 Format: Delta Lake (delta-rs)
 Mode: Merge on [molecule_chembl_id]
-Partition: None
+Partition: ["molecule_type"]
 Retention: Permanent
 ```
 

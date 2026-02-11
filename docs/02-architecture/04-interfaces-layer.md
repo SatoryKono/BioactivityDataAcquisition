@@ -49,7 +49,7 @@
 python -m bioetl run --pipeline chembl_activity --limit 100
 
 # Запуск композитного пайплайна (ADR-026)
-python -m bioetl run --pipeline composite_publication
+python -m bioetl run-composite --pipeline composite_publication
 
 # Проверка здоровья провайдеров
 python -m bioetl health --provider chembl

@@ -110,7 +110,7 @@ data_source = ProviderRegistry.create_data_source("chembl", settings, config, lo
 
 Для композитных пайплайнов доступна функция `bootstrap_composite_pipeline()`:
 
-````python
+```python
 from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_pipeline
 from bioetl.infrastructure.config.composite import CompositeConfig, CompositeRuntimeConfig
 
@@ -119,15 +119,7 @@ runner = bootstrap_composite_pipeline(
     runtime=CompositeRuntimeConfig(...),
 )
 # -> CompositePipelineRunner
-```python
-from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_pipeline
-
-runner = bootstrap_composite_pipeline(
-    "composite_publication",
-    limit=1000,
-)
-result = await runner.run()
-````
+```
 
 См. [ADR-026: Composite Pipeline Pattern](decisions/ADR-026-composite-pipeline-pattern.md) для деталей.
 

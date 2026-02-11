@@ -62,7 +62,7 @@
 **Observability:**
 - **`BatchMetricsRecorder`** (`batch_metrics.py`) — Метрики per batch
 - **`BatchTracingManager`** (`batch_tracing.py`) — Tracing span management
-- **`Heartbeat`** (`heartbeat.py`) — Heartbeat мониторинг
+- **`HeartbeatTask`** (`heartbeat.py:21`) — Heartbeat мониторинг
 
 **Data Sources:**
 - **`FilteredDataSource`** (`filtered_data_source.py`) — Filter wrapper для data sources
@@ -90,7 +90,7 @@ factory = GenericPipelineFactory(
 **Ключевые характеристики:**
 - **MUST**: Трансформер передаётся в конструктор `BasePipeline` через параметр `transformer`
 - **MUST NOT**: Пайплайн не создаёт трансформер внутри себя
-- **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `_extract_business_data()`
+- **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `_transform_impl()`. Примечание: `_extract_business_data()` — метод промежуточных базовых классов `BaseChemblTransformer` (`base_chembl_transformer.py:160`) и `BasePublicationTransformer` (`base_publication_transformer.py:54`), не `BaseTransformer`.
 - **Если трансформер не передан**: `transform_bronze_to_silver()` выбрасывает `NotImplementedError`
 
 **Доступные трансформеры (23 класса):**

@@ -35,7 +35,7 @@
 
 | Адаптер | Базовый класс | HTTP-клиент | Примечание |
 |---------|---------------|-------------|------------|
-| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 14 entities, 3 req/sec. Mixins: `PaginatedFetcherMixin`, `FilterableStubMixin` |
+| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 14 entities, 3 req/sec. Native pagination and filtering (without mixins) |
 | **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec. Mixin: `PaginatedFetcherMixin` |
 | **PubMedAdapter** | `@dataclass` + `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
 | **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec. Mixin: `NotSupportedMultiFilterMixin` |
