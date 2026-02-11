@@ -79,7 +79,7 @@ class CompositeRuntimeConfig:
     required_only: bool = False
     force_enricher: str | None = None
     seed_limit: int | None = None
-    use_cached_bronze: bool = True
+    use_cached_bronze: bool = False
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
     cached_bronze_enrichers: bool | None = None

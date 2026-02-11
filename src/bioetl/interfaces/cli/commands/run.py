@@ -208,7 +208,7 @@ def _echo_run_result(
 @click.option(
     "--use-cached-bronze/--no-cached-bronze",
     "use_cached_bronze",
-    default=True,
+    default=False,
     help="Load data from Bronze cache instead of API",
     show_default=True,
 )
