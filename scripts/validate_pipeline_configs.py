@@ -14,34 +14,36 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any
 
 import yaml
 
 try:
     import jsonschema
 except ImportError:
-    print("ERROR: jsonschema not installed. Run: pip install jsonschema", file=sys.stderr)
+    sys.stderr.write("ERROR: jsonschema not installed. Run: pip install jsonschema\n")
     sys.exit(2)
 
 
-def load_schema(schema_path: Path) -> dict:
+def load_schema(schema_path: Path) -> dict[str, Any]:
     """Load JSON Schema from file."""
     if not schema_path.exists():
-        print(f"ERROR: Schema file not found: {schema_path}", file=sys.stderr)
+        sys.stderr.write(f"ERROR: Schema file not found: {schema_path}\n")
         sys.exit(2)
-    return json.loads(schema_path.read_text())
+    raw_schema: dict[str, Any] = json.loads(schema_path.read_text())
+    return raw_schema
 
 
-def find_config_files(configs_dir: Path) -> List[Path]:
+def find_config_files(configs_dir: Path) -> list[Path]:
     """Find all entity config files (excluding base configs)."""
     return [
-        p for p in configs_dir.rglob("*.yaml")
+        p
+        for p in configs_dir.rglob("*.yaml")
         if not p.name.startswith("_") and p.parent.name != "_providers"
     ]
 
 
-def validate_config(config_path: Path, schema: dict) -> Tuple[bool, str]:
+def validate_config(config_path: Path, schema: dict[str, Any]) -> tuple[bool, str]:
     """Validate single config file against schema."""
     try:
         config = yaml.safe_load(config_path.read_text())
@@ -53,7 +55,7 @@ def validate_config(config_path: Path, schema: dict) -> Tuple[bool, str]:
         return False, f"Schema validation: {e.message} at {'.'.join(map(str, e.path))}"
 
 
-def validate_paths_hierarchy(config: dict, config_path: Path) -> List[str]:
+def validate_paths_hierarchy(config: dict[str, Any]) -> list[str]:
     """Check that paths follow {provider}/{entity} hierarchy."""
     warnings = []
     provider = config.get("provider", "")
@@ -72,7 +74,7 @@ def validate_paths_hierarchy(config: dict, config_path: Path) -> List[str]:
     return warnings
 
 
-def validate_sort_by_present(config: dict) -> List[str]:
+def validate_sort_by_present(config: dict[str, Any]) -> list[str]:
     """Check that sort_by is defined for determinism (ADR-014)."""
     warnings = []
 
@@ -84,19 +86,22 @@ def validate_sort_by_present(config: dict) -> List[str]:
     return warnings
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Validate pipeline configs")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument(
-        "--strict", action="store_true",
-        help="Treat warnings as errors (path hierarchy, sort_by)"
+        "--strict",
+        action="store_true",
+        help="Treat warnings as errors (path hierarchy, sort_by)",
     )
     args = parser.parse_args()
 
     configs_dir = Path("configs/pipelines")
     schema_path = configs_dir / "_schema.json"
+    composite_schema_path = configs_dir / "_composite_schema.json"
 
     schema = load_schema(schema_path)
+    composite_schema = load_schema(composite_schema_path)
     config_files = find_config_files(configs_dir)
 
     errors = []
@@ -104,10 +109,13 @@ def main():
 
     for config_path in config_files:
         if args.verbose:
-            print(f"Checking: {config_path}")
+            sys.stdout.write(f"Checking: {config_path}\n")
+
+        is_composite_config = "composite" in config_path.parts
+        active_schema = composite_schema if is_composite_config else schema
 
         # Schema validation
-        valid, error_msg = validate_config(config_path, schema)
+        valid, error_msg = validate_config(config_path, active_schema)
         if not valid:
             errors.append(f"{config_path}: {error_msg}")
             continue
@@ -115,8 +123,12 @@ def main():
         # Load config for additional checks
         config = yaml.safe_load(config_path.read_text())
 
+        # Hierarchy and sort checks apply only to standard pipeline configs.
+        if is_composite_config:
+            continue
+
         # Path hierarchy check
-        path_warnings = validate_paths_hierarchy(config, config_path)
+        path_warnings = validate_paths_hierarchy(config)
         for w in path_warnings:
             warnings.append(f"{config_path}: {w}")
 
@@ -127,17 +139,17 @@ def main():
 
     # Output results
     if errors:
-        print("\n❌ ERRORS:", file=sys.stderr)
+        sys.stderr.write("\n❌ ERRORS:\n")
         for e in errors:
-            print(f"  {e}", file=sys.stderr)
+            sys.stderr.write(f"  {e}\n")
 
     if warnings:
-        print("\n⚠️  WARNINGS:")
+        sys.stdout.write("\n⚠️  WARNINGS:\n")
         for w in warnings:
-            print(f"  {w}")
+            sys.stdout.write(f"  {w}\n")
 
     if not errors and not warnings:
-        print(f"✅ All {len(config_files)} configs valid")
+        sys.stdout.write(f"✅ All {len(config_files)} configs valid\n")
         return 0
 
     if errors:

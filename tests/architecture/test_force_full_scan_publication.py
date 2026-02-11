@@ -1,12 +1,10 @@
-"""Architecture test: force_full_scan and loading_strategy enforcement for publication pipelines.
+"""Architecture test: loading_strategy enforcement for publication pipelines.
 
 Tests that all publication pipeline configs have:
-- force_full_scan=true (ADR-030)
 - loading_strategy=full_scan_only (ADR-031)
 
 This ensures reproducible extraction via full scans with deduplication on Silver.
 
-REQ-ARCH-050: Publication pipelines MUST use force_full_scan=true.
 REQ-ARCH-051: Publication pipelines MUST use loading_strategy=full_scan_only.
 """
 
@@ -17,7 +15,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-# Publication-related entity types that require force_full_scan
+# Publication-related entity types that require full_scan_only
 PUBLICATION_ENTITY_TYPES = {
     "publication",
     "publication_term",
@@ -25,17 +23,17 @@ PUBLICATION_ENTITY_TYPES = {
     "work",  # CrossRef uses "work" for publications
 }
 
-# Derived entity types that require force_full_scan for deduplication
+# Derived entity types that require full_scan_only for deduplication
 # These entities are extracted from parent records and need full scans
 # to ensure comprehensive deduplication at Silver layer
 DERIVED_ENTITY_TYPES = {
     "subcellular_fraction",  # Derived from assay records
 }
 
-# All entity types that legitimately require force_full_scan
-FORCE_FULL_SCAN_ENTITY_TYPES = PUBLICATION_ENTITY_TYPES | DERIVED_ENTITY_TYPES
+# All entity types that legitimately require full_scan_only
+FULL_SCAN_ENTITY_TYPES = PUBLICATION_ENTITY_TYPES | DERIVED_ENTITY_TYPES
 
-# All publication pipeline configs that MUST have force_full_scan=true
+# All publication pipeline configs that MUST have loading_strategy: full_scan_only
 PUBLICATION_PIPELINE_CONFIGS = [
     "configs/pipelines/chembl/publication.yaml",
     "configs/pipelines/chembl/publication_term.yaml",
@@ -47,16 +45,16 @@ PUBLICATION_PIPELINE_CONFIGS = [
 ]
 
 
-class TestForceFullScanPublicationConfigs:
-    """Tests for force_full_scan enforcement in publication configs."""
+class TestLoadingStrategyPublicationConfigs:
+    """Tests for loading_strategy enforcement in publication configs."""
 
     @pytest.mark.parametrize("config_path", PUBLICATION_PIPELINE_CONFIGS)
-    def test_publication_config_has_force_full_scan_enabled(
+    def test_publication_config_has_full_scan_only_strategy(
         self, config_path: str
     ) -> None:
-        """Publication pipeline configs MUST have force_full_scan: true.
+        """Publication pipeline configs MUST have loading_strategy: full_scan_only.
 
-        ADR-030 requires all publication-related pipelines to perform full scans
+        ADR-031 requires all publication-related pipelines to perform full scans
         on each run due to API offset instability. Checkpoint-based resume is
         disabled for these pipelines; deduplication happens on Silver via content_hash.
         """
@@ -71,13 +69,6 @@ class TestForceFullScanPublicationConfigs:
         # Skip composite configs (they use sub-pipelines)
         if "composite" in config:
             pytest.skip(f"{config_path} is a composite pipeline")
-
-        # Verify force_full_scan is explicitly set to true
-        force_full_scan = config.get("force_full_scan", False)
-        assert force_full_scan is True, (
-            f"{config_path} MUST have 'force_full_scan: true' per ADR-030. "
-            f"Found: force_full_scan={force_full_scan}"
-        )
 
         # Verify loading_strategy is explicitly set to full_scan_only (ADR-031)
         loading_strategy = config.get("loading_strategy")
@@ -127,13 +118,13 @@ class TestForceFullScanPublicationConfigs:
             pytest.fail(msg)
 
 
-class TestForceFullScanNonPublicationConfigs:
-    """Tests that non-publication configs don't have force_full_scan enabled."""
+class TestLoadingStrategyNonPublicationConfigs:
+    """Tests that non-publication configs don't have full_scan_only enabled."""
 
-    def test_non_publication_configs_default_to_false(self) -> None:
-        """Non-publication configs SHOULD NOT have force_full_scan: true.
+    def test_non_publication_configs_default_to_incremental(self) -> None:
+        """Non-publication configs SHOULD NOT have loading_strategy: full_scan_only.
 
-        Only publication-related entities should use force_full_scan.
+        Only publication-related entities should use full_scan_only.
         Other entities (activity, compound, target) can use checkpoint resume.
         """
         configs_dir = Path("configs/pipelines")
@@ -159,19 +150,19 @@ class TestForceFullScanNonPublicationConfigs:
                 continue
 
             entity_type = config.get("entity_type", "")
-            force_full_scan = config.get("force_full_scan", False)
+            loading_strategy = config.get("loading_strategy")
 
-            # Only publication and derived entities should have force_full_scan=true
+            # Only publication and derived entities should have full_scan_only
             if (
-                entity_type not in FORCE_FULL_SCAN_ENTITY_TYPES
-                and force_full_scan is True
+                entity_type not in FULL_SCAN_ENTITY_TYPES
+                and loading_strategy == "full_scan_only"
             ):
                 incorrectly_enabled.append(f"{yaml_file} (entity_type={entity_type})")
 
         if incorrectly_enabled:
             msg = (
-                "Non-publication configs with force_full_scan=true:\n"
+                "Non-publication configs with loading_strategy=full_scan_only:\n"
                 + "\n".join(f"  - {p}" for p in incorrectly_enabled)
-                + "\n\nforce_full_scan should only be enabled for publication entities."
+                + "\n\nfull_scan_only should only be used for publication entities."
             )
             pytest.fail(msg)

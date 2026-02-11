@@ -14,7 +14,6 @@ description: "Extract publication terms (MeSH, keywords) from ChEMBL Publication
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
 # Deduplication is handled on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
 # Composite primary key (document_chembl_id + term_type + term)

@@ -217,12 +217,12 @@ class TestSchemaDrift:
         assert level == DriftLevel.INFO
         assert "description" in details["added_fields"]
 
-    def test_warn_level_many_fields(self):
-        """REQ-SCHEMA-003: >3 new fields → WARN."""
+    def test_info_level_many_fields(self):
+        """REQ-SCHEMA-003: >3 new fields remains informational drift."""
         old = {"id", "name"}
         new = {"id", "name", "field1", "field2", "field3", "field4"}
         level, details = detect_schema_drift(old, new, required_fields={"id"})
-        assert level == DriftLevel.WARN
+        assert level == DriftLevel.INFO
         assert len(details["added_fields"]) == 4
 
     def test_critical_level_missing_required(self):

@@ -161,10 +161,10 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         # Step 1: Submit job
         job_id = await self._submit_job(from_db, to_db, ids)
 
-        # Step 2: Poll for completion (returns redirect results URL if available)
+        # Step 2: Poll for completion (returns redirect URL if detected)
         results_url = await self._poll_until_ready(job_id)
 
-        # Step 3: Retrieve results using the redirect URL from polling
+        # Step 3: Retrieve results using redirect URL or default
         return await self._fetch_results(job_id, ids, results_url=results_url)
 
     async def _submit_job(
@@ -226,7 +226,10 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         return str(job_id)
 
     async def _poll_until_ready(self, job_id: str) -> str | None:
-        """Poll job status until complete, returning redirect results URL if found.
+        """Poll job status until complete.
+
+        GET /idmapping/status/{jobId}
+        Response: {"jobStatus": "RUNNING|FINISHED|ERROR", ...}
 
         Note: When job is finished, UniProt returns 303 redirect to results.
         httpx follows redirects automatically, so we detect completion by:
@@ -238,7 +241,9 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             job_id: Job ID to poll.
 
         Returns:
-            Redirect results URL, or None if finished without redirect.
+            Results URL captured from redirect (e.g.
+            ``/idmapping/uniprotkb/results/{jobId}``), or None if the URL
+            was not detected via redirect.
 
         Raises:
             IDMappingJobError: If the job fails.
@@ -283,7 +288,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     attempts=attempt + 1,
                     detected_by="results_in_response",
                 )
-                return response_url if response_url else None
+                return None
 
             status = result.get("jobStatus", "UNKNOWN")
 
@@ -322,15 +327,19 @@ class UniProtIDMappingClient(BaseHttpAdapter):
     ) -> dict[str, dict[str, Any] | None]:
         """Fetch mapping results with full entry metadata.
 
-        Uses *results_url* (redirect URL from polling) when available,
-        falling back to ``/idmapping/results/{jobId}``.
-        Results may be paginated (Link header). Multiple mappings for the
-        same ID are aggregated with primary selection.
+        GET /idmapping/results/{jobId}
+        Response: {"results": [{"from": "CHEMBL204", "to": {...}}, ...]}
+
+        Note: Results may be paginated. Handle Link header for pagination.
+        Multiple mappings for same ID are aggregated with primary selection.
 
         Args:
             job_id: Job ID to fetch results for.
             original_ids: Original list of IDs for initializing results dict.
-            results_url: Redirect URL from polling; avoids a second redirect.
+            results_url: Exact results URL captured from the polling redirect
+                (e.g. ``/idmapping/uniprotkb/results/{jobId}``).
+                When provided, avoids an extra redirect hop.  Falls back to
+                the generic ``/idmapping/results/{jobId}`` when *None*.
 
         Returns:
             Dict mapping source IDs to entry data dicts (None if not found).
@@ -339,7 +348,6 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         entries_by_id: dict[str, list[dict[str, Any]]] = {
             id_: [] for id_ in original_ids
         }
-        # Prefer the redirect URL from polling; fall back to generic path
         url: str | None = results_url or f"{self.base_url}/idmapping/results/{job_id}"
 
         while url:

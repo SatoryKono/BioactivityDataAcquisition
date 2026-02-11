@@ -98,7 +98,7 @@ class DependencyConfig:
 
     Use cases:
     - Derived entities that need full API data (e.g., publication_term from /document)
-    - Pipelines with force_full_scan that don't work with enricher filtering
+    - Pipelines with full_scan_only strategy that don't work with enricher filtering
     - Data that must be pre-populated before enrichment phase
     - Chained dependencies where one dependency provides keys for another
 

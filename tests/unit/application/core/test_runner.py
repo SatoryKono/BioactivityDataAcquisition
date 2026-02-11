@@ -19,7 +19,7 @@ from bioetl.application.services.medallion_lifecycle import (
     MedallionLifecycleService,
     PrepareResult,
 )
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -42,8 +42,10 @@ def pipeline_config():
         pipeline_name="test_runner_pipeline",
         provider="chembl",
         entity_type="activity",
-        primary_keys=["activity_id"],
-        silver_table="test_silver",
+        table=TableConfig(
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+        ),
     )
 
 

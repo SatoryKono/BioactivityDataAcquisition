@@ -18,7 +18,6 @@ source:
 # Deduplication is handled on Silver layer via content_hash.
 # - full_scan_only: Explicit strategy disabling checkpoint resume
 # - watermark_based: Placeholder for future incremental loading (not implemented)
-force_full_scan: true
 loading_strategy: full_scan_only
 
 primary_keys: ["document_chembl_id"]
