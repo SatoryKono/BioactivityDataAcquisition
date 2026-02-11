@@ -58,6 +58,30 @@ thresholds:
 
 **Invariant**: `soft_fail` must be strictly less than `hard_fail`.
 
+## Complete `_defaults.yaml` Key Reference
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `version` | string | `"1.0.0"` | Schema version of the DQ config |
+| `thresholds.soft_fail` | float | `0.05` | Error rate (>5%) that triggers a warning |
+| `thresholds.hard_fail` | float | `0.20` | Error rate (>20%) that fails the batch |
+| `strict_validation` | bool | `false` | Feature flag for stricter validation rules |
+| `invalid_record_policy` | string | `"quarantine"` | How to handle failed records: `quarantine`, `skip`, or `fail` |
+| `report.enabled` | bool | `true` | Enable DQ report generation |
+| `report.format` | string | `"json"` | Report format: `json`, `yaml`, or `csv` |
+| `report.include_sample_failures` | bool | `true` | Include sample of failed records in report |
+| `report.sample_size` | int | `10` | Number of failed records to include in sample |
+| `report.output_path` | string | `null` | Custom output path (null = pipeline output dir) |
+| `common_field_validations` | list | see below | Field validations applied to ALL entities |
+| `common_cross_field_validations` | list | `[]` | Cross-field validations applied to ALL entities |
+
+### Default Common Field Validations
+
+Two validations are applied globally to all entities:
+
+1. **`_content_hash` required** — Content hash must be present after transform (for deduplication)
+2. **`_ingestion_ts` pattern** — Ingestion timestamp must match ISO 8601 format (`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`)
+
 ## Adding DQ Rules for New Entity
 
 ### Step 1: Check if provider config exists

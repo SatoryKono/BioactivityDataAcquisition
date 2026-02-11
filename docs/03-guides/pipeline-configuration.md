@@ -25,10 +25,10 @@ BioETL использует **YAML-файлы** для конфигурации 
 
 ```
 configs/
-├── pipelines/                    # Конфигурации пайплайнов (21 = 19 entity + 2 composite)
-│   ├── _base.yaml               # Базовая конфигурация v2.0.0 (474 строки)
+├── pipelines/                    # Конфигурации пайплайнов (26 = 21 entity + 5 composite)
+│   ├── _base.yaml               # Базовая конфигурация v2.1.0 (491 строка)
 │   ├── _schema.json             # JSON Schema для валидации
-│   ├── chembl/                  # 12 entity configs
+│   ├── chembl/                  # 14 entity configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
 │   │   ├── assay_parameters.yaml
@@ -39,8 +39,10 @@ configs/
 │   │   ├── publication.yaml
 │   │   ├── publication_similarity.yaml
 │   │   ├── publication_term.yaml
+│   │   ├── subcellular_fraction.yaml
 │   │   ├── target.yaml
-│   │   └── target_component.yaml
+│   │   ├── target_component.yaml
+│   │   └── tissue.yaml
 │   ├── pubchem/                 # 1 entity config
 │   │   └── compound.yaml
 │   ├── uniprot/                 # 2 entity configs
@@ -54,10 +56,13 @@ configs/
 │   │   └── publication.yaml
 │   ├── semanticscholar/         # 1 entity config
 │   │   └── publication.yaml
-│   └── composite/               # 2 composite configs (ADR-026)
+│   └── composite/               # 5 composite configs (ADR-026)
+│       ├── activity.yaml        # chembl_activity + enrichers
+│       ├── assay.yaml           # chembl_assay + enrichers
+│       ├── molecule.yaml        # chembl_molecule + enrichers
 │       ├── publication.yaml     # chembl_publication + enrichers
 │       └── target.yaml          # chembl_target + enrichers
-├── dq/                           # Data Quality правила (21 файлов)
+├── dq/                           # Data Quality правила (30 файлов)
 │   ├── _defaults.yaml           # Глобальные DQ defaults (soft_fail=0.05, hard_fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
 │   │   ├── chembl.yaml
@@ -67,11 +72,11 @@ configs/
 │   │   ├── pubmed.yaml
 │   │   ├── semanticscholar.yaml
 │   │   └── uniprot.yaml
-│   └── entities/                # 14 entity-specific DQ
+│   └── entities/                # 22 entity-specific DQ
 │       ├── chembl/
 │       │   ├── activity.yaml
 │       │   ├── assay.yaml
-│       │   └── ...              # 12 entity DQ configs
+│       │   └── ...              # 14 entity DQ configs
 │       ├── crossref/
 │       │   └── publication.yaml
 │       ├── openalex/
@@ -110,12 +115,12 @@ configs/
 
 | Категория | Количество | Описание |
 |-----------|------------|----------|
-| Pipeline configs (entity) | 19 | Regular ETL pipelines |
-| Composite configs | 2 | Multi-provider pipelines (ADR-026) |
-| DQ configs | 21 | 1 defaults + 7 providers + 13 entities |
+| Pipeline configs (entity) | 21 | Regular ETL pipelines |
+| Composite configs | 5 | Multi-provider pipelines (ADR-026) |
+| DQ configs | 30 | 1 defaults + 7 providers + 22 entities |
 | Filter configs | 8 | 1 defaults + 7 providers |
 | Source configs | 7 | Один на провайдера |
-| **Итого** | **58** | Все конфиги валидированы |
+| **Итого** | **71** | Все конфиги валидированы |
 
 ---
 
@@ -232,6 +237,9 @@ composite:
 
 | Composite | Seed | Enrichers | Описание |
 |-----------|------|-----------|----------|
+| `composite_activity` | `chembl_activity` | enrichers | Обогащённые данные активности |
+| `composite_assay` | `chembl_assay` | enrichers | Обогащённые данные анализов |
+| `composite_molecule` | `chembl_molecule` | pubchem_compound, enrichers | Обогащённые молекулы |
 | `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar | Обогащённые публикации |
 | `composite_target` | `chembl_target` | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets |
 

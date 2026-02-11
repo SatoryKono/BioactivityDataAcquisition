@@ -76,6 +76,7 @@ class IntegrationPipelineTestCase:
         metrics: MetricsPort,
         tracing: Any = None,
         metadata_coordinator: Any = None,
+        silver_validator: Any = None,
     ) -> StorageContext:
         """Create a StorageContext pointing to local temp paths."""
         # Create real writers pointing to local paths

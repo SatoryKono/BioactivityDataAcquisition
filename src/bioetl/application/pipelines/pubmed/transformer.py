@@ -75,6 +75,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -87,6 +88,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -98,6 +100,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -578,7 +581,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Priority 2: pub_date (may be partial, normalize it)
         if pub_date:
-            return self._normalize_partial_date(pub_date)
+            return self._data_normalizer.normalize_partial_date(pub_date)
 
         # Priority 3: Construct from year (end of year)
         if year:

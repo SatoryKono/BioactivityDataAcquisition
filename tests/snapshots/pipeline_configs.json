@@ -185,6 +185,14 @@
       "activity_id"
     ],
     "provider": "chembl",
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
     "silver_table": "chembl_activity",
     "transform_steps": [],
     "transform_version": null,
@@ -460,6 +468,14 @@
       "cid"
     ],
     "provider": "pubchem",
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
     "silver_table": "pubchem_compound",
     "transform_steps": [],
     "transform_version": null,
@@ -809,6 +825,14 @@
       "pmid"
     ],
     "provider": "pubmed",
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
     "silver_table": "pubmed_publication",
     "transform_steps": [],
     "transform_version": null,
@@ -867,6 +891,14 @@
       "accession"
     ],
     "provider": "uniprot",
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
     "silver_table": "uniprot_protein",
     "transform_steps": [],
     "transform_version": null,

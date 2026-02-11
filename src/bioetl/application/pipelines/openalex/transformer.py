@@ -15,7 +15,6 @@ Note: Business logic functions are delegated to extractors module.
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
@@ -86,6 +85,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -98,6 +98,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md S5.4).
@@ -109,6 +110,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -158,7 +160,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             extract_affiliations(authorships) if isinstance(authorships, list) else None
         )
         serialized_affiliations = (
-            json.dumps(raw_affiliations) if raw_affiliations is not None else None
+            self.serialize_json(raw_affiliations) if raw_affiliations is not None else None
         )
 
         # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
@@ -235,7 +237,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
             "publication_year": year,
-            "publication_date": self._normalize_partial_date(
+            "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publication_date")
             ),
             "publication_type": rec.get("type"),  # Raw OpenAlex type
@@ -250,7 +252,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "subject_topics": (
                 self.serialize_json_list(subject_topics) if subject_topics else None
             ),
-            "primary_topic": json.dumps(primary_topic) if primary_topic else None,
+            "primary_topic": self.serialize_json(primary_topic) if primary_topic else None,
             # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
             "subject_mesh": subject_mesh,
