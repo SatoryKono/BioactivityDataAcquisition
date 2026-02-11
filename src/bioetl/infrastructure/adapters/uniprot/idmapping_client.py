@@ -226,10 +226,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         return str(job_id)
 
     async def _poll_until_ready(self, job_id: str) -> str | None:
-        """Poll job status until complete.
-
-        GET /idmapping/status/{jobId}
-        Response: {"jobStatus": "RUNNING|FINISHED|ERROR", ...}
+        """Poll job status until complete, returning redirect results URL if found.
 
         Note: When job is finished, UniProt returns 303 redirect to results.
         httpx follows redirects automatically, so we detect completion by:
@@ -241,8 +238,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             job_id: Job ID to poll.
 
         Returns:
-            The redirect results URL discovered during polling, or None if the
-            job finished without a redirect (e.g. via jobStatus field).
+            Redirect results URL, or None if finished without redirect.
 
         Raises:
             IDMappingJobError: If the job fails.
@@ -326,21 +322,15 @@ class UniProtIDMappingClient(BaseHttpAdapter):
     ) -> dict[str, dict[str, Any] | None]:
         """Fetch mapping results with full entry metadata.
 
-        Uses the redirect URL discovered during polling when available,
-        falling back to the generic ``/idmapping/results/{jobId}`` path.
-
-        Response: {"results": [{"from": "CHEMBL204", "to": {...}}, ...]}
-
-        Note: Results may be paginated. Handle Link header for pagination.
-        Multiple mappings for same ID are aggregated with primary selection.
+        Uses *results_url* (redirect URL from polling) when available,
+        falling back to ``/idmapping/results/{jobId}``.
+        Results may be paginated (Link header). Multiple mappings for the
+        same ID are aggregated with primary selection.
 
         Args:
             job_id: Job ID to fetch results for.
             original_ids: Original list of IDs for initializing results dict.
-            results_url: Redirect URL from polling (e.g.
-                ``/idmapping/uniprotkb/results/{jobId}``).  When provided the
-                client hits this URL directly instead of relying on UniProt to
-                redirect again.
+            results_url: Redirect URL from polling; avoids a second redirect.
 
         Returns:
             Dict mapping source IDs to entry data dicts (None if not found).
