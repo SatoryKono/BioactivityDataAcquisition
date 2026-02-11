@@ -12,7 +12,8 @@ from __future__ import annotations
 
 import warnings
 
-from bioetl.domain.ports import MetricsPort, NoOpMetrics as _DomainNoOpMetrics
+from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import NoOpMetrics as _DomainNoOpMetrics
 
 
 class NoOpMetrics(_DomainNoOpMetrics, MetricsPort):
