@@ -189,8 +189,8 @@
   "assay_taxonomy_id": {
     "checks": [],
     "coerce": false,
-    "description": "NCBI Taxonomy ID. Standardized name (was assay_tax_id).",
-    "dtype": "int64",
+    "description": "NCBI Taxonomy ID (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -232,11 +232,20 @@
     "required": false,
     "unique": false
   },
+  "assay_type_description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Assay type description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "bao_format": {
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^BAO:\\d+$"
+        "regex": "^BAO[_:]\\d+$"
       }
     ],
     "coerce": false,
@@ -467,8 +476,8 @@
   "variant_taxonomy_id": {
     "checks": [],
     "coerce": false,
-    "description": "Variant taxonomy ID. Standardized name (was variant_tax_id).",
-    "dtype": "int64",
+    "description": "Variant taxonomy ID (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
