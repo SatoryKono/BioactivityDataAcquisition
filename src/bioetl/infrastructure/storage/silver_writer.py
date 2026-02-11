@@ -713,7 +713,6 @@ class SilverWriter(BaseDeltaWriter):
         if self._audit is None:
             return
 
-        from datetime import datetime
         from uuid import UUID
 
         from bioetl.domain.types import RunID
@@ -736,8 +735,6 @@ class SilverWriter(BaseDeltaWriter):
             return
 
         # Parse timestamp (ensure UTC-aware for consistency)
-        from datetime import UTC
-
         if isinstance(ingestion_ts_str, str):
             timestamp = datetime.fromisoformat(ingestion_ts_str)
         elif isinstance(ingestion_ts_str, datetime):
