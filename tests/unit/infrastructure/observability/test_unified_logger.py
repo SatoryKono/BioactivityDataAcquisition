@@ -249,9 +249,7 @@ class TestLoggingUtilsIntegration:
         """Test that log_adapter_error accepts stage parameter."""
         from unittest.mock import MagicMock
 
-        from bioetl.infrastructure.adapters.adapter_error_logging import (
-            log_adapter_error,
-        )
+        from tests.helpers.adapter_error_logging import log_adapter_error
 
         mock_logger = MagicMock()
 
@@ -275,9 +273,7 @@ class TestLoggingUtilsIntegration:
         """Test that log_adapter_error has sensible default stage."""
         from unittest.mock import MagicMock
 
-        from bioetl.infrastructure.adapters.adapter_error_logging import (
-            log_adapter_error,
-        )
+        from tests.helpers.adapter_error_logging import log_adapter_error
 
         mock_logger = MagicMock()
 

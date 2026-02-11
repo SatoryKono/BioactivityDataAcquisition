@@ -12,9 +12,11 @@ Uses declarative field_specs DSL for mapping.
 
 from __future__ import annotations
 
-import hashlib
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.publication_term_utils import (
+    compute_publication_term_entity_id,
+)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -290,6 +292,8 @@ class PublicationTermTransformer(BaseChemblTransformer):
             Entity ID string (first 16 chars of SHA256 hex digest).
 
         """
-        normalized_term = term.lower().strip() if term else ""
-        composite = f"{document_chembl_id}:{term_type}:{normalized_term}"
-        return hashlib.sha256(composite.encode()).hexdigest()[:16]
+        return compute_publication_term_entity_id(
+            document_chembl_id=document_chembl_id,
+            term_type=term_type,
+            term=term,
+        )
