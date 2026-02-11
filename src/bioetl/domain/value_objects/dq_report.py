@@ -103,32 +103,6 @@ class GoldDQCheckType(StrEnum):
 # =============================================================================
 
 
-@dataclass(frozen=True, slots=True)
-class DQCheckResult:
-    """Result of a single DQ check.
-
-    Attributes:
-        check_type: Type of check performed.
-        status: Check status (pass/warn/fail).
-        value: Primary metric value.
-        details: Additional check details.
-        note: Optional note about the check result.
-    """
-
-    check_type: str
-    status: DQCheckStatus
-    value: Any = None
-    details: dict[str, Any] = field(default_factory=dict)
-    note: str | None = None
-
-    def __post_init__(self) -> None:
-        """Ensure details is immutable by converting dict."""
-        if isinstance(self.details, dict):
-            # Create a frozen copy by converting to tuple of items
-            object.__setattr__(self, "details", dict(self.details))
-
-
-@dataclass(frozen=True, slots=True)
 class RecordCountResult:
     """Record count check result."""
 
@@ -175,16 +149,6 @@ class SchemaSnapshotResult:
             )
 
 
-@dataclass(frozen=True, slots=True)
-class FieldPresenceResult:
-    """Raw field presence check result."""
-
-    field_name: str
-    presence_rate: float
-    status: DQCheckStatus
-
-
-@dataclass(frozen=True, slots=True)
 class EncodingValidationResult:
     """Encoding validation result."""
 
@@ -486,20 +450,6 @@ class DQThresholds:
 
 
 @dataclass(frozen=True, slots=True)
-class BaseDQReport:
-    """Base DQ report structure.
-
-    Common fields for all layer reports.
-    """
-
-    layer: MedallionLayer
-    timestamp: datetime
-    run_id: str
-    pipeline: str
-    summary: DQReportSummary
-
-
-@dataclass(frozen=True, slots=True)
 class BronzeDQReport:
     """DQ report for Bronze layer.
 
@@ -599,7 +549,6 @@ class GoldDQReport:
 __all__ = [
     "AnomalyDetectionResult",
     "AnomalyMetric",
-    "BaseDQReport",
     "BronzeDQCheckType",
     "BronzeDQReport",
     "BusinessRuleResult",
@@ -608,7 +557,6 @@ __all__ = [
     "CompletenessResult",
     "ContentHashIntegrityResult",
     # Check Results
-    "DQCheckResult",
     "DQCheckStatus",
     # Enums
     "DQReportFormat",
@@ -620,7 +568,6 @@ __all__ = [
     "DeduplicationStatsResult",
     "DriftLevel",
     "EncodingValidationResult",
-    "FieldPresenceResult",
     "FileIntegrityResult",
     "ForeignKeyResult",
     "GoldDQCheckType",

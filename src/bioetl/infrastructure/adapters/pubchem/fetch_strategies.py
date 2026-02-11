@@ -23,9 +23,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 
 
-# PubChem REST API base URL for request metadata
-PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
-
 
 class PubChemFetchStrategies:
     """Helper class for PubChem fetch operations.
@@ -90,6 +87,8 @@ class PubChemFetchStrategies:
         # Estimate response size based on result count (rough approximation)
         # Average compound JSON is ~2KB, substance ~1KB, assay ~3KB
         estimated_size = result_count * 2000
+
+        from bioetl.infrastructure.adapters.pubchem.client import PUBCHEM_API_BASE
 
         self._request_collector.record_request(
             url=f"{PUBCHEM_API_BASE}{endpoint}",

@@ -27,7 +27,6 @@ __all__ = [
 ]
 
 # Semantic Scholar API configuration
-SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
 DEFAULT_SEARCH_FIELDS = (
     "paperId,externalIds,title,abstract,year,publicationDate,"
     "venue,authors,citationCount,referenceCount,isOpenAccess,"
@@ -140,6 +139,10 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
             self._logger.debug(
                 "semanticscholar_title_search",
                 title=title[:100],
+            )
+
+            from bioetl.infrastructure.adapters.semanticscholar.adapter import (
+                SEMANTICSCHOLAR_BASE_URL,
             )
 
             url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/search"

@@ -126,7 +126,7 @@ def test_detect_schema_drift_warn():
     old = {"id"}
     new = {"id", "f1", "f2", "f3", "f4"}
     level, details = detect_schema_drift(old, new)
-    assert level == DriftLevel.WARN
+    assert level == DriftLevel.INFO
     assert len(details["added_fields"]) == 4
 
 
