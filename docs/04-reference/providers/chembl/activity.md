@@ -3,7 +3,7 @@
 **Имя пайплайна:** `chembl_activity`
 **Провайдер:** `chembl`
 **Сущность:** `activity`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -21,7 +21,7 @@
 pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
-version: "1.0.0"
+version: "1.2.0"
 primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 
@@ -62,7 +62,7 @@ dq_rules:
 
 ### 3.1. Определение сущности Activity
 
-**Файл:** `src/bioetl/domain/entities.py`
+**Файл:** `src/bioetl/domain/entities/bioactivity.py`
 
 Сущность `Activity` содержит **55 полей**, сгруппированных по категориям:
 
@@ -482,7 +482,7 @@ def extract(self, context, record) -> Watermark:
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/pipelines/chembl/activity.yaml` |
-| Сущность | `src/bioetl/domain/entities.py` |
+| Сущность | `src/bioetl/domain/entities/bioactivity.py` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold-фильтр | `src/bioetl/application/pipelines/chembl/activity_gold_filter.py` |
 | Watermark | `src/bioetl/application/pipelines/chembl/activity_watermark.py` |

@@ -58,7 +58,7 @@
 - ✅ Infrastructure реализует Domain Ports
 - ✅ Composition собирает зависимости
 
-**Файл:** [`docs/diagrams/mermaid/01_five_layer_architecture.mmd`](diagrams/01_five_layer_architecture.mmd)
+**Файл:** [`docs/02-architecture/diagrams/01_five_layer_architecture.mmd`](diagrams/01_five_layer_architecture.mmd)
 
 ---
 
@@ -93,7 +93,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 - TracingPort, MetricsPort, LoggerPort
 - И другие...
 
-**Файл:** [`docs/diagrams/mermaid/03_hexagonal_architecture.mmd`](diagrams/03_hexagonal_architecture.mmd)
+**Файл:** [`docs/02-architecture/diagrams/03_hexagonal_architecture.mmd`](diagrams/03_hexagonal_architecture.mmd)
 
 ---
 
@@ -124,7 +124,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 **Нарушение = Блокер PR**
 
-**Файл:** [`docs/diagrams/mermaid/04_layer_dependency_matrix.mmd`](diagrams/04_layer_dependency_matrix.mmd)
+**Файл:** [`docs/02-architecture/diagrams/04_layer_dependency_matrix.mmd`](diagrams/04_layer_dependency_matrix.mmd)
 
 ---
 
@@ -167,7 +167,7 @@ Bronze → Silver → Gold уровни хранения данных.
 - Delta Time Travel (7-day history)
 - VACUUM cleanup (weekly)
 
-**Файл:** [`docs/diagrams/mermaid/05_medallion_architecture.mmd`](diagrams/05_medallion_architecture.mmd)
+**Файл:** [`docs/02-architecture/diagrams/05_medallion_architecture.mmd`](diagrams/05_medallion_architecture.mmd)
 
 ---
 
@@ -248,7 +248,7 @@ End-to-end поток данных от API провайдера до Gold layer
 **Graceful Shutdown:**
 - SIGTERM → Finish current batch → Save checkpoint → Exit(0)
 
-**Файл:** [`docs/diagrams/mermaid/02_complete_pipeline_flow.mmd`](diagrams/02_complete_pipeline_flow.mmd)
+**Файл:** [`docs/02-architecture/diagrams/02_complete_pipeline_flow.mmd`](diagrams/02_complete_pipeline_flow.mmd)
 
 ---
 
@@ -299,7 +299,7 @@ Delta merge by content_hash — критическая операция для i
 - ✓ Automatic deduplication
 - ✓ Optimistic concurrency
 
-**Файл:** [`docs/diagrams/mermaid/22_silver_merge_operation.mmd`](diagrams/22_silver_merge_operation.mmd)
+**Файл:** [`docs/02-architecture/diagrams/22_silver_merge_operation.mmd`](diagrams/22_silver_merge_operation.mmd)
 
 ---
 
@@ -332,7 +332,7 @@ Delta merge by content_hash — критическая операция для i
 - DataNormalizationService, IdentityService
 - UnitConverter, ActivityAggregator, ValueValidator
 
-**Файл:** [`docs/diagrams/mermaid/06_domain_model_overview.mmd`](diagrams/06_domain_model_overview.mmd)
+**Файл:** [`docs/02-architecture/diagrams/06_domain_model_overview.mmd`](diagrams/06_domain_model_overview.mmd)
 
 ---
 
@@ -367,7 +367,7 @@ Delta merge by content_hash — критическая операция для i
 - StructlogLogger → LoggerPort
 - NoOpTracing/NoOpMetrics → Null Object Pattern
 
-**Файл:** [`docs/diagrams/mermaid/07_ports_architecture.mmd`](diagrams/07_ports_architecture.mmd)
+**Файл:** [`docs/02-architecture/diagrams/07_ports_architecture.mmd`](diagrams/07_ports_architecture.mmd)
 
 ---
 
@@ -414,7 +414,7 @@ Delta merge by content_hash — критическая операция для i
 **Services:**
 - PreflightService, PostrunService, PipelineObserver
 
-**Файл:** [`docs/diagrams/mermaid/10_pipeline_core_components.mmd`](diagrams/10_pipeline_core_components.mmd)
+**Файл:** [`docs/02-architecture/diagrams/10_pipeline_core_components.mmd`](diagrams/10_pipeline_core_components.mmd)
 
 ---
 
@@ -461,7 +461,7 @@ Delta merge by content_hash — критическая операция для i
   - RecoverableError (429, 5xx)
   - DataQualityError (invalid data)
 
-**Файл:** [`docs/diagrams/mermaid/12_error_classification.mmd`](diagrams/12_error_classification.mmd)
+**Файл:** [`docs/02-architecture/diagrams/12_error_classification.mmd`](diagrams/12_error_classification.mmd)
 
 ---
 
@@ -503,7 +503,7 @@ delay = (backoff_factor ^ retry_count) * base_delay + random(jitter_min, jitter_
 - 400 Bad Request
 - 404 Not Found
 
-**Файл:** [`docs/diagrams/mermaid/17_retry_mechanism.mmd`](diagrams/17_retry_mechanism.mmd)
+**Файл:** [`docs/02-architecture/diagrams/17_retry_mechanism.mmd`](diagrams/17_retry_mechanism.mmd)
 
 ---
 
@@ -547,7 +547,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 - `circuit_breaker_state` (gauge)
 - `circuit_breaker_failure_count` (gauge)
 
-**Файл:** [`docs/diagrams/mermaid/15_circuit_breaker_states.mmd`](diagrams/15_circuit_breaker_states.mmd)
+**Файл:** [`docs/02-architecture/diagrams/15_circuit_breaker_states.mmd`](diagrams/15_circuit_breaker_states.mmd)
 
 ---
 
@@ -589,7 +589,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 - last_batch_id
 - timestamp
 
-**Файл:** [`docs/diagrams/mermaid/24_graceful_shutdown.mmd`](diagrams/24_graceful_shutdown.mmd)
+**Файл:** [`docs/02-architecture/diagrams/24_graceful_shutdown.mmd`](diagrams/24_graceful_shutdown.mmd)
 
 ---
 
@@ -645,7 +645,7 @@ bioetl run chembl_activity \
   --data-dir /path/to/data
 ```
 
-**Файл:** [`docs/diagrams/mermaid/25_pipeline_config_structure.mmd`](diagrams/25_pipeline_config_structure.mmd)
+**Файл:** [`docs/02-architecture/diagrams/25_pipeline_config_structure.mmd`](diagrams/25_pipeline_config_structure.mmd)
 
 ---
 

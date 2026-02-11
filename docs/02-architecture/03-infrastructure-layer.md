@@ -35,13 +35,13 @@
 
 | Адаптер | Базовый класс | HTTP-клиент | Примечание |
 |---------|---------------|-------------|------------|
-| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 13 entities. Mixins: `PaginatedFetcherMixin`, `FilterableStubMixin` |
+| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 14 entities, 3 req/sec. Mixins: `PaginatedFetcherMixin`, `FilterableStubMixin` |
 | **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec. Mixin: `PaginatedFetcherMixin` |
 | **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
 | **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec. Mixin: `NotSupportedMultiFilterMixin` |
 | **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool. Mixin: `PaginatedFetcherMixin` |
 | **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec. Mixin: `PaginatedFetcherMixin` |
-| **SemanticScholarAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/5min |
+| **SemanticScholarAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 0.1 req/sec (1.0 with key). Mixin: `PaginatedFetcherMixin` |
 
 **Архитектура HTTP-адаптеров:**
 
