@@ -122,6 +122,7 @@ jobs:
               "src/bioetl/composition/factories/storage_factory.py",  # create() multi-layer config (CC=11)
               "src/bioetl/composition/services/metadata_coordinator.py",  # create_silver_metadata, _extract_schema_metadata (CC=12-16)
               "src/bioetl/infrastructure/storage/metadata_builder.py",  # _extract_schema_metadata with schema introspection (CC=16)
+              "src/bioetl/domain/normalization.py",  # _expand_abbreviated_page (CC=12) consolidated from S2 adapter (RF-PAGES)
           }
 
           # Exempted functions (with documented reasons)
