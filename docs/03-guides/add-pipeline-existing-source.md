@@ -23,40 +23,45 @@
 **Пример:** `configs/pipelines/chembl/target.yaml`
 
 ```yaml
-pipeline:
-    name: chembl_target
-    provider: chembl
-    entity: target
+# Inherits defaults from ../_base.yaml
+pipeline_name: chembl_target
+provider: chembl
+entity_type: target
+version: "1.2.0"
+description: "Extract biological targets from ChEMBL API"
 
-source:
-    type: api
-    load_strategy: incremental
-    watermark_field: target_chembl_id
+primary_keys: ["target_chembl_id"]
+silver_table: "chembl_target"
+gold_table: "chembl_target"
 
-transform:
-    version: "1.0.0"
-    steps:
-        - normalize_fields
-        - generate_content_hash
+source_file: ../../sources/chembl.yaml
 
+# DQ rules loaded from hierarchical config files (ADR-027):
+#   1. configs/dq/_defaults.yaml
+#   2. configs/dq/providers/chembl.yaml
+#   3. configs/dq/entities/chembl/target.yaml
+dq_config_file: ../../dq/entities/chembl/target.yaml
+
+# Paths auto-computed by convention (ADR-029),
+# override only when different from default
 sink:
-    bronze:
-        path: "data/output/bronze/chembl/target"
-        format: json
-    silver:
-        path: "data/output/silver/chembl/target"
-        format: delta
-        mode: merge
-        primary_key: ["target_chembl_id"]
+  bronze:
+    path: "data/output/bronze/chembl/target"
+  silver:
+    path: "data/output/silver/chembl/target"
+    primary_key: ["target_chembl_id"]
+    partition_by: ["target_type"]
+  gold:
+    path: "data/output/gold/chembl/target"
 ```
 
 ## Шаг 2: Реализация пайплайна (Application Layer)
 
-Создайте новый файл в `src/bioetl/application/pipelines/`. Имя файла должно отражать провайдера и сущность (например, `chembl_target.py`).
+Создайте новый файл в `src/bioetl/application/pipelines/<provider>/`. Имя файла должно отражать сущность (например, `target.py` внутри `chembl/`).
 
 Класс должен наследовать `BasePipeline` и реализовывать методы трансформации.
 
-**Пример:** `src/bioetl/application/pipelines/chembl_target.py`
+**Пример:** `src/bioetl/application/pipelines/chembl/target.py`
 
 ```python
 from typing import Any
@@ -72,7 +77,7 @@ CHEMBL_TARGET_CONFIG = PipelineConfig(
     provider="chembl",
     entity_type="target",
     primary_keys=["target_chembl_id"],
-    silver_table="chembl.target",
+    silver_table="chembl_target",
     checkpoint_interval=1000,
 )
 
