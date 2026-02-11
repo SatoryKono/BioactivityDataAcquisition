@@ -225,17 +225,17 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 Единая таблица `common.quarantine` для всех сущностей.
 
-- `ingestion_ts` (Timestamp): Время инцидента.
+- `ingestion_ts` (Timestamp): Время инцидента. [Код: `QuarantineEntry._created_at`]
 
-- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`).
+- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`). [Код: `QuarantineEntry._pipeline_name`]
 
-- `error_code` (String): Тип ошибки (напр., `SCHEMA_VIOLATION`).
+- `error_code` (String): Тип ошибки (напр., `SCHEMA_VIOLATION`). [Код: `QuarantineEntry._error_code`]
 
-- `payload` (JSON/Text): Сырая запись (**Truncated to 64KB**).
+- `payload` (JSON/Text): Сырая запись (**Truncated to 64KB**). [Код: `QuarantineEntry._payload`]
 
-- `payload_hash` (String): Для дедупликации ошибок.
+- `payload_hash` (String): Для дедупликации ошибок. [Код: `QuarantineEntry._payload_hash`]
 
-- `bronze_batch_id` (UUID): Ссылка на пакет исходных данных.
+- `bronze_batch_id` (UUID): Ссылка на пакет исходных данных. [Код: `QuarantineEntry._batch_id` (BatchID)]
 
 - `dq_status` (String): `NEW` | `UNDER_REVIEW` | `IGNORED` | `REPROCESSED` | `EXPIRED`.
   - `NEW`: Только что создана, ждёт разбора.
@@ -307,6 +307,11 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 - **Watermark**: Для инкрементальной загрузки хранить `last_successful_watermark` (timestamp или ID).
 - **Конфигурация**: `load_strategy: incremental | full` в YAML пайплайна.
+
+> **Примечание**: `load_strategy` определяется в файле источника данных
+> (`configs/sources/{provider}.yaml`), а не непосредственно в pipeline config.
+> Pipeline config ссылается на источник через convention-based resolution
+> (`source_file: ../../sources/{provider}.yaml`) или явно через поле `data_schema_file`.
 - **Hybrid**: Incremental ежедневно + Full еженедельно для обеспечения консистентности.
 
 ### 2.8. Генерация ID Сущности (Entity ID)
@@ -1284,7 +1289,7 @@ ______________________________________________________________________
 
 | Источник     | Библиотека                  | Rate Limit               | Retry Strategy          | Auth Type       | Health Check                                                                  |
 | ------------ | --------------------------- | ------------------------ | ----------------------- | --------------- | ----------------------------------------------------------------------------- |
-| **ChEMBL**   | `chembl_webresource_client` | Нет явного лимита        | Exponential backoff     | Public          | `GET /chembl/api/data/status`                                                 |
+| **ChEMBL**   | `httpx` via `UnifiedHTTPClient` | Нет явного лимита        | Exponential backoff     | Public          | `GET /chembl/api/data/status`                                                 |
 | **PubChem**  | `pubchempy`                 | 5 req/sec                | 429 -> wait Retry-After | Public          | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
 | **UniProt**  | `unipressed`                | 100 req/sec (c API key)  | Exponential backoff     | API Key         | Lightweight Search Probe                                                      |
 | **OpenAlex** | `pyalex`                    | 10 req/sec (polite pool) | 429 -> backoff          | API Key (Email) | Generic Probe\*                                                               |
