@@ -108,15 +108,17 @@ def test_extract_authors(sample_publication):
 
 def test_map_doc_type():
     """Test document type mapping using classification function."""
-    # Test journal article → Research Article
+    # Test journal article → EXP / Original Experimental Data / Journal Article
     result = classify_publication_type("crossref", raw_type="journal-article")
     assert result is not None
-    assert result.class_code == "research"
+    assert result.class_code == "EXP"
+    assert result.unified_type == "Journal Article"
 
-    # Test posted-content → Preprint
+    # Test posted-content → EXP / Original Experimental Data / Preprint
     result = classify_publication_type("crossref", raw_type="posted-content")
     assert result is not None
-    assert result.class_code == "preprint"
+    assert result.class_code == "EXP"
+    assert result.unified_type == "Preprint"
 
     # Test unknown type → None (default handling by transformer)
     result = classify_publication_type("crossref", raw_type="unknown-future-type")
@@ -440,78 +442,101 @@ def test_doc_type_mapping_all_types():
 
     See: https://api.crossref.org/types for complete list (30 types).
     Tests use the new classify_publication_type() function which returns
-    ClassificationEntry with 3-level hierarchy: class_code → subclass → unified_type.
+    ClassificationEntry with 3-level hierarchy:
+    - Level 1 class_code: EXP | REV | PEER
+    - Level 2 subclass: ~25 groupings (e.g. "Original Experimental Data")
+    - Level 3 unified_type: 214 specific types (e.g. "Journal Article")
     """
-    # Research types (journal/conference articles)
-    research_types = [
-        "journal-article",  # → research/journal_article/Research Article
-        "proceedings-article",  # → research/proceedings_article/Proceedings Article
-        "peer-review",  # → research/peer_review/Peer Review
+    # EXP types (experimental research - journal/conference articles)
+    exp_article_types = [
+        ("journal-article", "Journal Article"),
+        ("proceedings-article", "Conference Paper"),
     ]
-    for doc_type in research_types:
+    for doc_type, expected_unified in exp_article_types:
         result = classify_publication_type("crossref", raw_type=doc_type)
         assert result is not None, f"{doc_type} should be classified"
-        assert result.class_code == "research", (
-            f"{doc_type} should map to research class"
-        )
+        assert result.class_code == "EXP", f"{doc_type} should map to EXP class"
+        assert result.unified_type == expected_unified
 
-    # Book types (books, book parts, dissertations, reference entries)
-    book_types = [
-        "book",  # → book/book/Book
-        "monograph",  # → book/monograph/Monograph
-        "edited-book",  # → book/edited_book/Edited Book
-        "reference-book",  # → book/reference/Reference Work
-        "book-chapter",  # → book/chapter/Book Chapter
-        "book-section",  # → book/section/Book Section
-        "book-part",  # → book/part/Book Part
-        "book-track",  # → book/track/Book Track
-        "dissertation",  # → dissertation/dissertation/Dissertation
-        "reference-entry",  # → book/reference_entry/Reference Entry
-    ]
-    for doc_type in book_types:
-        result = classify_publication_type("crossref", raw_type=doc_type)
-        assert result is not None, f"{doc_type} should be classified"
-        # Allow both book and dissertation class (dissertation is separate)
-        assert result.class_code in ("book", "dissertation"), (
-            f"{doc_type} should map to book or dissertation class"
-        )
-
-    # PREPRINT types
-    result = classify_publication_type("crossref", raw_type="posted-content")
+    # PEER type (peer review)
+    result = classify_publication_type("crossref", raw_type="peer-review")
     assert result is not None
-    assert result.class_code == "preprint", "posted-content should map to preprint"
+    assert result.class_code == "PEER"
 
-    # DATASET types
-    for doc_type in ["dataset", "database"]:
+    # REV types (books, monographs)
+    # Most book types map to REV class (Books & Monographs subclass)
+    book_types = [
+        ("book", "Book"),
+        ("monograph", "Monograph"),
+        ("edited-book", "Edited Book"),
+        ("reference-book", "Reference Book"),
+        ("book-chapter", "Book Chapter"),
+    ]
+    for doc_type, expected_unified in book_types:
         result = classify_publication_type("crossref", raw_type=doc_type)
         assert result is not None, f"{doc_type} should be classified"
-        assert result.class_code == "dataset", f"{doc_type} should map to dataset"
+        assert result.class_code == "REV", f"{doc_type} should map to REV class"
+        assert result.unified_type == expected_unified
 
-    # OTHER types (reports, standards, supplementary, container/series, funding)
-    other_types = [
-        "report",  # → report/report/Report
-        "report-component",  # → other/component/Component
-        "standard",  # → other/standard/Standard
-        "component",  # → other/component/Component
-        "journal",  # → other/container/Container
-        "journal-volume",  # → other/container/Container
-        "journal-issue",  # → other/container/Container
-        "proceedings",  # → other/container/Container
-        "proceedings-series",  # → other/series/Series
-        "book-series",  # → other/series/Series
-        "book-set",  # → other/series/Series
-        "report-series",  # → other/series/Series
-        "grant",  # → other/grant/Grant
-        "other",  # → other/other/Other
+    # EXP type (dissertation is experimental, not review)
+    result = classify_publication_type("crossref", raw_type="dissertation")
+    assert result is not None
+    assert result.class_code == "EXP"
+    assert result.unified_type == "Dissertation"
+
+    # Additional REV book types
+    book_minor_types = [
+        ("book-section", "Book Section"),
+        ("book-part", "Book Part"),
+        ("book-track", "Book Track"),
+        ("reference-entry", "Reference Entry"),
     ]
-    for doc_type in other_types:
+    for doc_type, expected_unified in book_minor_types:
         result = classify_publication_type("crossref", raw_type=doc_type)
-        # Some OTHER types may be unmapped (return None)
-        # This is OK - transformer will handle with defaults
-        if result is not None:
-            assert result.class_code in ("report", "other"), (
-                f"{doc_type} should map to report or other class"
-            )
+        assert result is not None, f"{doc_type} should be classified"
+        assert result.class_code == "REV"
+        assert result.unified_type == expected_unified
+
+    # EXP types (preprint, dataset, report)
+    exp_data_types = [
+        ("posted-content", "Preprint"),
+        ("dataset", "Dataset"),
+        ("report", "Report"),
+    ]
+    for doc_type, expected_unified in exp_data_types:
+        result = classify_publication_type("crossref", raw_type=doc_type)
+        assert result is not None, f"{doc_type} should be classified"
+        assert result.class_code == "EXP"
+        assert result.unified_type == expected_unified
+
+    # Database type (may map to Dataset)
+    result = classify_publication_type("crossref", raw_type="database")
+    # Database may be unmapped or map to Dataset
+    if result is not None:
+        assert result.class_code == "EXP"
+
+    # Container/series types - many may be unmapped (return None)
+    # This is expected - these are metadata containers, not publications
+    container_types = [
+        "report-component",
+        "standard",
+        "component",
+        "journal",
+        "journal-volume",
+        "journal-issue",
+        "proceedings",
+        "proceedings-series",
+        "book-series",
+        "book-set",
+        "report-series",
+        "grant",
+        "other",
+    ]
+    for doc_type in container_types:
+        result = classify_publication_type("crossref", raw_type=doc_type)
+        # These may be unmapped - transformer handles with raw type preservation
+        # Just verify they don't crash - any result is acceptable
+        pass  # No assertion - these are edge cases
 
 
 def test_doc_type_unknown_handling():

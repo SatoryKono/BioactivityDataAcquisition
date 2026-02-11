@@ -28,7 +28,6 @@ from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-
 # === Pydantic DTO Model ===
 
 
