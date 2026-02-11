@@ -21,15 +21,23 @@
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные команды:**
+**Доступные команды (17 модулей в `commands/`):**
 
-| Команда | Описание |
-|---------|----------|
-| `run` | Запуск одного пайплайна |
-| `run_all` | Запуск всех пайплайнов провайдера |
-| `export` | Экспорт данных из Gold |
-| `quarantine` | Управление карантинными записями |
-| `health` | Проверка здоровья провайдеров |
+| Команда | Модуль | Описание |
+|---------|--------|----------|
+| `run` | `run.py` | Запуск одного пайплайна |
+| `run-all` | `run_all.py` | Запуск всех пайплайнов провайдера |
+| `run-composite` | `run_composite.py` | Запуск композитного пайплайна (ADR-026) |
+| `export` | `export.py` | Экспорт данных из Gold |
+| `quarantine` | `quarantine.py` | Управление карантинными записями |
+| `health` | `health.py` | Проверка здоровья провайдеров |
+| `config` | `config.py` | Просмотр и валидация конфигураций |
+| `checkpoint` | `checkpoint.py` | Управление checkpoint-ами |
+| `lock` | `lock.py` | Управление блокировками |
+| `vacuum` | `vacuum.py` | VACUUM операции для Delta Lake |
+| `cleanup` | `cleanup.py` | Очистка Bronze данных |
+| `maintenance` | `maintenance.py` | Maintenance операции |
+| `archive` | `archive.py` | Архивирование данных |
 
 **Примеры использования:**
 ```bash
@@ -45,7 +53,14 @@ python -m bioetl health --provider chembl
 
 `cli.py` парсит эти аргументы, вызывает функции из `src/bioetl/composition/bootstrap.py` для инициализации системы и запускает выполнение пайплайна.
 
-### 2.2. Оркестрация (Driving Adapters)
+### 2.2. `http/` — HTTP Health Server
+
+**Расположение:** `src/bioetl/interfaces/http/`
+
+Содержит HTTP health endpoint (`health_server.py`) с интеграцией Prometheus metrics.
+Endpoints: `/health`, `/health/live`, `/health/ready`.
+
+### 2.3. `orchestration/` — Оркестрация (Driving Adapters)
 
 **Расположение:** `src/bioetl/interfaces/orchestration/`
 
@@ -75,9 +90,9 @@ python -m bioetl health --provider chembl
 
 | Диаграмма | Файл | Описание |
 |-----------|------|----------|
-| Five Layer Architecture | [../diagrams/mermaid/01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) | Полная архитектура с Interfaces слоем |
+| Five Layer Architecture | [diagrams/mermaid/01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) | Полная архитектура с Interfaces слоем |
 | Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Взаимодействие слоёв |
-| Graceful Shutdown | [../diagrams/mermaid/24_graceful_shutdown.mmd](../diagrams/mermaid/24_graceful_shutdown.mmd) | Sequence diagram graceful shutdown |
+| Graceful Shutdown | [diagrams/mermaid/24_graceful_shutdown.mmd](diagrams/mermaid/24_graceful_shutdown.mmd) | Sequence diagram graceful shutdown |
 
 ### Связанные ADR
 
