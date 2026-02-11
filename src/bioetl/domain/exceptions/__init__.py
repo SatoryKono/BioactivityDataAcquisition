@@ -56,12 +56,10 @@ from bioetl.domain.exceptions.infrastructure import (
     BronzeValidationError,
     BucketNotFoundError,
     CachedBronzeEmptyError,
-    ConfigurationError,
     DeltaOptimizeError,
     DeltaSchemaValidationError,
     DeltaTransactionError,
     DeltaWriteConflictError,
-    FileSystemError,
     InfrastructureError,
     SchemaEvolutionError,
     StorageError,
@@ -76,7 +74,6 @@ from bioetl.domain.exceptions.infrastructure import (
 from bioetl.domain.exceptions.internal import (
     AuthFailureError,
     CheckpointConflictError,
-    InternalError,
     InvalidStateError,
     LockAcquisitionError,
     LockLostError,
@@ -123,7 +120,6 @@ __all__ = [
     "CachedBronzeEmptyError",
     "CheckpointConflictError",
     "CircuitBreakerOpenError",
-    "ConfigurationError",
     "CriticalError",
     "DataQualityError",
     # DataQualityErrors
@@ -135,11 +131,8 @@ __all__ = [
     "DeltaWriteConflictError",
     # External service errors (NetworkErrors subcategory)
     "ExternalServiceError",
-    "FileSystemError",
     # InfrastructureErrors
     "InfrastructureError",
-    # InternalErrors
-    "InternalError",
     "InvalidDataFormatError",
     "InvalidStateError",
     "LockAcquisitionError",

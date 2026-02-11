@@ -50,7 +50,6 @@ class TestFileSizeLimits:
         "context.py": 385,  # 380 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
-        "config_types.py": 450,  # 446 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
         "exceptions.py": 550,  # 513 LOC
         # Domain exceptions module reorganization (refactoring into logical categories)
         "infrastructure.py": 640,  # 632 LOC - InfrastructureErrors (storage, filesystem, environment)

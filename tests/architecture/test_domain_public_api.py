@@ -34,7 +34,6 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "aggregates",  # Aggregate submodule
         "config",
         "configs",  # Submodule for value object configs
-        "config_types",  # TypedDict definitions for YAML config (not public API)
         "context",
         "entities",
         "error_classifier",

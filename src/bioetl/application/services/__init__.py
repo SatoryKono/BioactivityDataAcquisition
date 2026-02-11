@@ -85,12 +85,6 @@ from bioetl.application.services.vacuum_service import (
     VacuumService,
 )
 
-# Re-export from domain for backward compatibility
-from bioetl.domain.services.dq_metrics_calculator import (
-    DQMetricsCalculator,
-    DQMetricsInput,
-)
-
 __all__ = [
     "BronzeCleanupService",
     "CheckpointInfo",
@@ -99,8 +93,6 @@ __all__ = [
     "ClearResult",
     "ColumnInfo",
     "ConfigService",
-    "DQMetricsCalculator",
-    "DQMetricsInput",
     "DQReportContext",
     "DQReportResult",
     "DQReportService",

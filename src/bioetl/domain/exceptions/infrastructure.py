@@ -54,66 +54,6 @@ class InfrastructureError(CriticalError):
         super().__init__(message)
 
 
-class ConfigurationError(InfrastructureError):
-    """Raised when system configuration is invalid or missing.
-
-    This error indicates that the pipeline cannot start due to
-    configuration problems that must be resolved first.
-
-    Attributes:
-        config_key: Name of the problematic configuration key.
-
-    Example:
-        >>> raise ConfigurationError("BIOETL_CHEMBL_API_KEY")
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, config_key: str) -> None:
-        """Initialize ConfigurationError.
-
-        Args:
-            config_key: Name of the problematic configuration key.
-        """
-        self.config_key = config_key
-        super().__init__(f"Missing or invalid configuration: {config_key}")
-
-
-class FileSystemError(InfrastructureError):
-    """Raised when filesystem operations fail.
-
-    This error indicates problems with local file I/O operations
-    such as reading, writing, or directory operations.
-
-    Attributes:
-        path: Path that caused the error.
-        operation: Type of operation that failed (read, write, delete).
-        reason: Description of why the operation failed.
-
-    Example:
-        >>> raise FileSystemError(
-        ...     "/data/bronze",
-        ...     operation="write",
-        ...     reason="Permission denied"
-        ... )
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, path: str, operation: str, reason: str) -> None:
-        """Initialize FileSystemError.
-
-        Args:
-            path: Path that caused the error.
-            operation: Type of operation that failed.
-            reason: Description of why the operation failed.
-        """
-        self.path = path
-        self.operation = operation
-        self.reason = reason
-        super().__init__(f"Filesystem {operation} failed for '{path}': {reason}")
-
-
 # =============================================================================
 # Storage Exceptions
 # =============================================================================
