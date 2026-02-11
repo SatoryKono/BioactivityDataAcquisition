@@ -139,6 +139,7 @@ class BaseServicesFactory:
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: Any = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -151,6 +152,8 @@ class BaseServicesFactory:
             dq_monitor: Optional data quality monitor for anomaly detection
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation across Bronze, Silver, Gold.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
 
         Returns:
             PipelineServices with all dependencies configured
@@ -164,6 +167,7 @@ class BaseServicesFactory:
             logger,
             metrics=metrics,
             metadata_coordinator=metadata_coordinator,
+            silver_validator=silver_validator,
         )
 
         lock = cls._create_lock()
