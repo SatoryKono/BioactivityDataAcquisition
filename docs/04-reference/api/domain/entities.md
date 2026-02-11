@@ -12,12 +12,12 @@ BioETL entities follow these design principles:
 
 ### Field Classification
 
-| Category | Description | Example |
-|----------|-------------|---------|
-| **REQUIRED** | Must be non-None, validated in `__post_init__` | `entity_id`, `content_hash` |
-| **LINEAGE** | System metadata for tracking | `run_id`, `ingestion_ts` |
-| **API-OPTIONAL** | May be None (API-dependent) | `pchembl_value`, `target_name` |
-| **COMPUTED** | Derived from other fields | `pchembl_value` (log conversion) |
+| Category         | Description                                    | Example                          |
+| ---------------- | ---------------------------------------------- | -------------------------------- |
+| **REQUIRED**     | Must be non-None, validated in `__post_init__` | `entity_id`, `content_hash`      |
+| **LINEAGE**      | System metadata for tracking                   | `run_id`, `ingestion_ts`         |
+| **API-OPTIONAL** | May be None (API-dependent)                    | `pchembl_value`, `target_name`   |
+| **COMPUTED**     | Derived from other fields                      | `pchembl_value` (log conversion) |
 
 ## Base Entity
 
@@ -26,81 +26,81 @@ BioETL entities follow these design principles:
 Base class containing system fields for lineage and versioning.
 
 ::: bioetl.domain.entities.BaseEntity
-    options:
-        show_root_heading: true
-        show_source: true
-        members:
-            - entity_id
-            - content_hash
-            - run_id
-            - run_type
-            - ingestion_ts
-            - source_batch_id
+options:
+show_root_heading: true
+show_source: true
+members:
+\- entity_id
+\- content_hash
+\- run_id
+\- run_type
+\- ingestion_ts
+\- source_batch_id
 
 ### RequiredEntityFields
 
 Protocol defining minimum required fields for all entities.
 
 ::: bioetl.domain.entities.RequiredEntityFields
-    options:
-        show_root_heading: true
-        show_source: false
+options:
+show_root_heading: true
+show_source: false
 
 ## ChEMBL Entities
 
-### Activity
+### Bioactivity
 
 Bioactivity measurement from ChEMBL database.
 
-::: bioetl.domain.entities.Activity
-    options:
-        show_root_heading: true
-        show_source: false
+::: bioetl.domain.entities.Bioactivity
+options:
+show_root_heading: true
+show_source: false
 
 ### Assay
 
 Experimental assay information.
 
 ::: bioetl.domain.entities.Assay
-    options:
-        show_root_heading: true
-        show_source: false
+options:
+show_root_heading: true
+show_source: false
 
 ### Molecule
 
 Chemical compound structure.
 
 ::: bioetl.domain.entities.Molecule
-    options:
-        show_root_heading: true
-        show_source: false
+options:
+show_root_heading: true
+show_source: false
 
 ### Target
 
 Biological target (protein, gene, etc.).
 
 ::: bioetl.domain.entities.Target
-    options:
-        show_root_heading: true
-        show_source: false
+options:
+show_root_heading: true
+show_source: false
 
 ### TargetComponent
 
 Component of a complex biological target.
 
 ::: bioetl.domain.entities.TargetComponent
-    options:
-        show_root_heading: true
-        show_source: false
+options:
+show_root_heading: true
+show_source: false
 
-### Document
+### ChemblPublication
 
 Publication or patent reference.
 
-::: bioetl.domain.entities.Document
-    options:
-        show_root_heading: true
-        show_source: false
+::: bioetl.domain.entities.ChemblPublication
+options:
+show_root_heading: true
+show_source: false
 
 ## PubChem Entities
 
@@ -109,9 +109,9 @@ Publication or patent reference.
 PubChem compound with chemical properties.
 
 ::: bioetl.domain.entities.Compound
-    options:
-        show_root_heading: true
-        show_source: false
+options:
+show_root_heading: true
+show_source: false
 
 ## PubMed Entities
 
@@ -120,9 +120,9 @@ PubChem compound with chemical properties.
 Scientific publication metadata.
 
 ::: bioetl.domain.entities.Publication
-    options:
-        show_root_heading: true
-        show_source: false
+options:
+show_root_heading: true
+show_source: false
 
 ## UniProt Entities
 
@@ -131,20 +131,20 @@ Scientific publication metadata.
 UniProt protein entry.
 
 ::: bioetl.domain.entities.Protein
-    options:
-        show_root_heading: true
-        show_source: false
+options:
+show_root_heading: true
+show_source: false
 
 ## Usage Example
 
 ```python
-from bioetl.domain.entities import Activity, BaseEntity
+from bioetl.domain.entities import Bioactivity, BaseEntity
 from bioetl.domain.types import RunType, RunID, ContentHash
 from datetime import datetime
 from uuid import uuid4
 
 # Create an activity entity
-activity = Activity(
+activity = Bioactivity(
     entity_id="CHEMBL12345",
     content_hash=ContentHash("sha256:abc123..."),
     run_id=RunID(uuid4()),
@@ -160,6 +160,7 @@ activity = Activity(
 
 # Check required fields protocol
 from bioetl.domain.entities import RequiredEntityFields
+
 assert isinstance(activity, RequiredEntityFields)
 ```
 

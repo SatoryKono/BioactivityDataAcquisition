@@ -1,3 +1,7 @@
+> **Superseded:** Signal handlers удалены 2025-12-31.
+> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/shutdown.py.
+> orchestration/ модуль пуст.
+
 # ADR-008: Graceful Shutdown Strategy
 
 **Status:** Accepted
@@ -14,9 +18,10 @@ ETL pipelines process large datasets in batches, maintaining state via checkpoin
 We have implemented a **two-layer shutdown coordination system**:
 
 1. **`ShutdownSignal`** (`application/core/shutdown.py`): Application-level signal object shared across components
-2. **OS Signal Handlers** (`interfaces/orchestration/signals.py`): Translate SIGTERM/SIGINT to ShutdownSignal
+1. **OS Signal Handlers** (`interfaces/orchestration/signals.py`): Translate SIGTERM/SIGINT to ShutdownSignal
 
 Key characteristics:
+
 - Idempotent shutdown requests
 - Async-friendly with `asyncio.Event`
 - Propagates to all pipeline components via dependency injection
@@ -53,10 +58,10 @@ Key characteristics:
 
 ### 1. Separation of Concerns
 
-| Layer | Responsibility |
-|-------|----------------|
-| interfaces | Captures OS signals, framework events |
-| application | Coordinates shutdown via shared signal |
+| Layer          | Responsibility                          |
+| -------------- | --------------------------------------- |
+| interfaces     | Captures OS signals, framework events   |
+| application    | Coordinates shutdown via shared signal  |
 | infrastructure | Releases resources (locks, connections) |
 
 This follows the hexagonal architecture: interfaces translate external events, application orchestrates, infrastructure cleans up.
@@ -64,11 +69,12 @@ This follows the hexagonal architecture: interfaces translate external events, a
 ### 2. Checkpoint-First Shutdown
 
 On shutdown signal:
+
 1. Current batch completes (no mid-batch abort)
-2. Checkpoint is saved with last processed watermark
-3. Lock heartbeat stops
-4. Lock is released
-5. Connections are closed
+1. Checkpoint is saved with last processed watermark
+1. Lock heartbeat stops
+1. Lock is released
+1. Connections are closed
 
 This ensures resumability—next run can continue from saved checkpoint.
 
@@ -146,12 +152,9 @@ async def execute(self, watermark, limit):
             break
         await self.process_batch(batch)
 
+
 # Runner passes signal to all components
-runner = PipelineRunner(
-    shutdown_signal=shutdown_signal,
-    executor=executor,
-    ...
-)
+runner = PipelineRunner(shutdown_signal=shutdown_signal, executor=executor, ...)
 ```
 
 ## Alternatives Considered
@@ -159,6 +162,7 @@ runner = PipelineRunner(
 ### 1. asyncio.CancelledError Propagation
 
 Rejected because:
+
 - Cancellation is abrupt, doesn't allow checkpoint saving
 - Hard to distinguish between timeout and shutdown
 - Less control over cleanup order
@@ -166,6 +170,7 @@ Rejected because:
 ### 2. Context Manager / RAII Pattern
 
 Rejected because:
+
 - Doesn't work well with async generators
 - Cleanup order is implicit (reverse of acquisition)
 - Less visibility into shutdown state
@@ -173,6 +178,7 @@ Rejected because:
 ### 3. Global Singleton Signal
 
 Rejected because:
+
 - Violates dependency injection principle
 - Hard to test (global state)
 - Doesn't work for multiple concurrent pipelines
@@ -180,6 +186,7 @@ Rejected because:
 ## Consequences
 
 ### Positive
+
 - Clean shutdown with checkpoint preservation
 - Resumable pipelines after interruption
 - Lock safety guaranteed
@@ -187,6 +194,7 @@ Rejected because:
 - Testable via signal injection
 
 ### Negative
+
 - **Main thread requirement**: Signal handlers can only be set in main thread. Mitigated by try/except in setup.
 - **Blocking operations**: Long-running sync operations can delay shutdown. Mitigated by using async throughout.
 
@@ -204,10 +212,11 @@ spec:
 ```
 
 The 5-minute grace period allows:
+
 1. Current batch to complete (~30s max)
-2. Checkpoint to be saved (~10s)
-3. Lock release and cleanup (~5s)
-4. Buffer for slow operations
+1. Checkpoint to be saved (~10s)
+1. Lock release and cleanup (~5s)
+1. Buffer for slow operations
 
 ## Related ADRs
 

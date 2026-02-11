@@ -24,14 +24,14 @@ classDiagram
         <<interface>>
         +acquire()
         +release()
-        +refresh()
+        +heartbeat()
     }
 
     class MetricsPort {
         <<interface>>
-        +increment()
-        +gauge()
-        +histogram()
+        +increment_counter()
+        +set_gauge()
+        +observe_histogram()
     }
 
     StoragePort <|.. SilverWriter
@@ -69,11 +69,11 @@ Core type definitions and enumerations:
 
 Domain model dataclasses representing bioactivity data:
 
-- `Activity` - Bioactivity measurement
+- `Bioactivity` - Bioactivity measurement
 - `Assay` - Experimental assay
 - `Molecule` - Chemical compound
 - `Target` - Biological target
-- `Document` - Publication reference
+- `ChemblPublication` - Publication reference
 
 ### [Exceptions](domain/exceptions.md)
 
@@ -114,13 +114,14 @@ writer: StoragePort = SilverWriter(...)
 Unique record identification using deterministic hashing:
 
 ```python
-from bioetl.domain.transformations import compute_content_hash
+from bioetl.domain.transformations import generate_content_hash
 
 # sha256(provider + canonical_json(record))
-hash = compute_content_hash("chembl", record)
+hash = generate_content_hash("chembl", record)
 ```
 
 Normalization rules:
+
 - NaN/Inf → `null`
 - Floats → rounded to 10 decimals
 - Dates → ISO format `YYYY-MM-DD`
@@ -135,14 +136,14 @@ from bioetl.domain import (
     DataSourcePort,
     RunType,
     HealthStatus,
-    Activity,
+    Bioactivity,
     DataQualityError,
 )
 
 # Alternative: Import from specific modules
 from bioetl.domain.ports import StoragePort
 from bioetl.domain.types import RunType
-from bioetl.domain.entities import Activity
+from bioetl.domain.entities import Bioactivity
 ```
 
 ## See Also
