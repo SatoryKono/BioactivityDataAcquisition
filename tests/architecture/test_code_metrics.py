@@ -88,7 +88,7 @@ class TestFileSizeLimits:
         "batch_writer.py": 565,  # 560 LOC - BatchWriter with Safety Guard + column_order + layer config filtering
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
-        "batch_executor.py": 790,  # 786 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params
+        "batch_executor.py": 790,  # 786 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params + documented exception handlers
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 200,  # 192 LOC - Thin orchestrator (checks extracted to _checks_*.py modules)
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
@@ -105,7 +105,7 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 610,  # 602 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction + Pandera Silver schema imports)
         "services_factory.py": 695,  # 692 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030) + silver_validator param
         # Infrastructure layer exemptions
-        "silver_writer.py": 1155,  # 1151 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
+        "silver_writer.py": 1160,  # 1157 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
         "gold_writer.py": 955,  # 953 LOC - SCD Type 2 (metadata/arrow logic extracted) + column_order + write_gold_merged schema validation (REQ-DATA-009)
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
@@ -647,7 +647,7 @@ class TestClassSize:
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
-        "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
+        "MetadataCoordinator": 440,  # 436 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service

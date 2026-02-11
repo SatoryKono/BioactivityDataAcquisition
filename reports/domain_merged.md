@@ -259,8 +259,6 @@ from bioetl.domain.ports import (
     TracingPort,
     UnitConverterPort,
     ValueValidatorPort,
-    WatermarkStrategyPort,
-    NoOpWatermarkStrategy,
 )
 
 # Resilience (domain value objects)
@@ -542,8 +540,6 @@ __all__ = [
     "TracingPort",
     "UnitConverterPort",
     "ValueValidatorPort",
-    "WatermarkStrategyPort",
-    "NoOpWatermarkStrategy",
     # Registry (publication entity types, ADR-024)
     "LEGACY_PUBLICATION_ALIASES",
     "PUBLICATION_ENTITY_TYPES",
@@ -2974,6 +2970,11 @@ class DependencyConfig:
             If None, uses the first join_key. Useful when source column name
             differs from target API field name (e.g., protein_classification_id
             in source table vs protein_class_id in API).
+        filter_fields: Multiple field names for multi-field API filtering.
+            When set, ALL specified fields are passed as AND-filters to the API.
+            Example: ("molecule_chembl_id", "document_chembl_id") produces
+            ?molecule_chembl_id__in=...&document_chembl_id__in=...
+            Takes precedence over filter_field.
 
     Example:
         >>> # Standard dependency using seed keys
@@ -2990,6 +2991,13 @@ class DependencyConfig:
         ...     key_source="chembl_target_component",
         ...     silver_table="silver/chembl/protein_class",
         ... )
+        >>> # Dual-field filtering (compound_record by molecule + document)
+        >>> config = DependencyConfig(
+        ...     pipeline="chembl_compound_record",
+        ...     join_keys=("molecule_chembl_id", "document_chembl_id"),
+        ...     filter_fields=("molecule_chembl_id", "document_chembl_id"),
+        ...     silver_table="silver/chembl/compound_record",
+        ... )
     """
 
     pipeline: str
@@ -2999,12 +3007,17 @@ class DependencyConfig:
     silver_table: str | None = None
     key_source: str | None = None  # None = seed, or pipeline name for chained deps
     filter_field: str | None = None  # API filter field (defaults to first join_key)
+    filter_fields: tuple[str, ...] | None = (
+        None  # Multi-field API filtering (AND logic)
+    )
     key_filter: str | None = None  # SQL-like condition to filter key_source records
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.join_keys, list):
             object.__setattr__(self, "join_keys", tuple(self.join_keys))
+        if isinstance(self.filter_fields, list):
+            object.__setattr__(self, "filter_fields", tuple(self.filter_fields))
         self._validate()
 
     def _validate(self) -> None:
@@ -3014,6 +3027,11 @@ class DependencyConfig:
         _validate_positive(
             self.timeout_seconds, f"dependency {self.pipeline} timeout_seconds"
         )
+        if self.filter_fields and self.filter_field:
+            raise ValueError(
+                f"Dependency {self.pipeline}: filter_fields and filter_field "
+                "are mutually exclusive. Use filter_fields for multi-field filtering."
+            )
 
     @property
     def primary_join_key(self) -> str:
@@ -3024,6 +3042,23 @@ class DependencyConfig:
     def uses_seed_keys(self) -> bool:
         """Check if this dependency uses keys from seed (default behavior)."""
         return self.key_source is None or self.key_source == "seed"
+
+    @property
+    def effective_filter_fields(self) -> tuple[str, ...]:
+        """Resolve effective filter fields.
+
+        Priority: filter_fields > filter_field > first join_key.
+        """
+        if self.filter_fields:
+            return self.filter_fields
+        if self.filter_field:
+            return (self.filter_field,)
+        return (self.join_keys[0],)
+
+    @property
+    def is_multi_field_filter(self) -> bool:
+        """Check if this dependency uses multi-field API filtering."""
+        return len(self.effective_filter_fields) > 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -3781,6 +3816,11 @@ class CompositeConfig:
                     "required": d.required,
                     "timeout_seconds": d.timeout_seconds,
                     "silver_table": d.silver_table,
+                    **(
+                        {"filter_fields": list(d.filter_fields)}
+                        if d.filter_fields
+                        else {}
+                    ),
                 }
                 for d in self.dependencies
             ],
@@ -5350,26 +5390,33 @@ class FieldValidation:
 
     Supports multiple validation types:
     - required: Field must be present and non-null
+    - not_null: Field should not be null (typically used with severity=warn)
     - range: Numeric range validation (min/max)
     - pattern: Regex pattern matching
     - enum: Allowed values validation
+    - max_length: Maximum string length validation
     - custom: Custom validator function reference
 
     Attributes:
         field: Field name to validate.
-        validation_type: Type of validation (required, range, pattern, enum, custom).
+        validation_type: Type of validation.
         nullable: Whether field can be null/None. Default: True.
+        severity: Severity level (error or warn). Default: error.
         min_value: Minimum value for range validation.
         max_value: Maximum value for range validation.
         pattern: Regex pattern for pattern validation.
         allowed: Allowed values for enum validation.
+        max_length: Maximum string length for max_length validation.
         validator: Validator function name for custom validation.
         error_message: Custom error message template.
     """
 
     field: str
-    validation_type: Literal["required", "range", "pattern", "enum", "custom"]
+    validation_type: Literal[
+        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+    ]
     nullable: bool = True
+    severity: Literal["error", "warn"] = "error"
     # Range validation
     min_value: float | None = None
     max_value: float | None = None
@@ -5377,6 +5424,8 @@ class FieldValidation:
     pattern: str | None = None
     # Enum validation
     allowed: tuple[str, ...] = ()
+    # Max length validation
+    max_length: int | None = None
     # Custom validation
     validator: str | None = None
     # Custom error message
@@ -5646,6 +5695,7 @@ class PipelineConfig:
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
     # Processing
+    silver_filters: GoldFilterConfig | None = None  # Domain-level Silver layer filters
     gold_filters: GoldFilterConfig | None = None  # Configurable Gold layer filters
     batch_size: int = 100
     checkpoint_interval: int = 1000
@@ -5668,7 +5718,6 @@ class PipelineConfig:
     # Loading strategy (ADR-031)
     # Explicit formalization of data loading approach.
     # - FULL_SCAN_ONLY: Each run performs full scan, checkpoint resume disabled
-    # - WATERMARK_BASED: Incremental loading via watermark (placeholder, not implemented)
     # If not specified, derived from force_full_scan for backward compatibility.
     loading_strategy: LoadingStrategy | str | None = None
 
@@ -5800,6 +5849,11 @@ class RuntimeConfig:
     # When False (default), missing Gold schema skips validation
     # Use False during migration, True for production readiness
     strict_gold_validation: bool = False
+
+    # Skip Gold layer writing (composite sub-pipelines)
+    # When True, Gold filter returns False for all records,
+    # preventing individual Gold writes during composite execution
+    skip_gold: bool = False
 
     def __post_init__(self) -> None:
         """Validate runtime config."""
@@ -6039,12 +6093,18 @@ class FieldValidationDict(TypedDict, total=False):
     """YAML structure for field validation rule."""
 
     field: Required[str]
-    type: Required[Literal["required", "range", "pattern", "enum", "custom"]]
+    type: Required[
+        Literal[
+            "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+        ]
+    ]
     nullable: bool
+    severity: Literal["error", "warn"]
     min: float
     max: float
     pattern: str
     allowed: list[str]
+    max_length: int
     validator: str
     error_message: str
 
@@ -6623,7 +6683,9 @@ class InputFilterContext:
 
     All fields are required when filtering is enabled via CSV.
     For direct IDs, only filter_ids and filter_field are required.
-    Create via InputFilterContext.from_csv(), from_ids(), or disabled().
+    For multi-field IDs, use multi_filter_ids (dict of field -> IDs).
+    Create via InputFilterContext.from_csv(), from_ids(), from_multi_ids(),
+    or disabled().
     """
 
     enabled: bool
@@ -6631,6 +6693,8 @@ class InputFilterContext:
     column_name: str
     filter_field: str
     filter_ids: tuple[str, ...] | None = None
+    multi_filter_ids: dict[str, tuple[str, ...]] | None = None
+    valid_combinations: frozenset[tuple[str, ...]] | None = None
     fallback_mapping: dict[str, str] | None = None
     fallback_column: str | None = None
 
@@ -6643,6 +6707,8 @@ class InputFilterContext:
             column_name="",
             filter_field="",
             filter_ids=None,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=None,
             fallback_column=None,
         )
@@ -6662,6 +6728,8 @@ class InputFilterContext:
             column_name=column_name,
             filter_field=filter_field,
             filter_ids=None,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=None,
             fallback_column=fallback_column,
         )
@@ -6683,7 +6751,39 @@ class InputFilterContext:
             column_name="",
             filter_field=filter_field,
             filter_ids=filter_ids,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=fallback_mapping,
+            fallback_column=None,
+        )
+
+    @classmethod
+    def from_multi_ids(
+        cls,
+        multi_filter_ids: dict[str, tuple[str, ...]],
+        valid_combinations: frozenset[tuple[str, ...]] | None = None,
+    ) -> InputFilterContext:
+        """Create an enabled filter context from multi-field IDs.
+
+        Used for composite dependencies that filter by multiple fields
+        simultaneously (AND logic). E.g., compound_record filtered by both
+        molecule_chembl_id and document_chembl_id.
+
+        Args:
+            multi_filter_ids: Mapping of field name to tuple of IDs.
+            valid_combinations: Optional set of valid (field1, field2, ...)
+                tuples for client-side combination filtering.
+        """
+        fields = list(multi_filter_ids.keys())
+        return cls(
+            enabled=True,
+            source_path="",
+            column_name="",
+            filter_field=fields[0] if fields else "",
+            filter_ids=None,
+            multi_filter_ids=multi_filter_ids,
+            valid_combinations=valid_combinations,
+            fallback_mapping=None,
             fallback_column=None,
         )
 
@@ -6691,10 +6791,17 @@ class InputFilterContext:
         """Validate filter configuration."""
         if not self.enabled:
             return
-        if self.filter_ids is not None:
+        if self.multi_filter_ids is not None:
+            self._validate_multi_ids_mode()
+        elif self.filter_ids is not None:
             self._validate_direct_ids_mode()
         else:
             self._validate_csv_mode()
+
+    def _validate_multi_ids_mode(self) -> None:
+        """Validate multi-field IDs mode configuration."""
+        if not self.multi_filter_ids:
+            raise ValueError("multi_filter_ids must be non-empty when set")
 
     def _validate_direct_ids_mode(self) -> None:
         """Validate direct IDs mode configuration."""
@@ -6826,6 +6933,9 @@ class PipelineRunContext:
 
     # Composite mode: ignore YAML input_filter config (use only CLI filter)
     ignore_yaml_filter: bool = False
+
+    # Composite mode: skip Gold layer writing (sub-pipelines produce merged Gold separately)
+    skip_gold: bool = False
 
     @property
     def has_input_filter(self) -> bool:
@@ -10839,68 +10949,6 @@ from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-# Document type mapping from CrossRef types to BioETL unified types.
-# See: https://api.crossref.org/types for complete list (30 types).
-#
-# Unified types (aligned with chembl/publication.py schema):
-# - PUBLICATION: Journal articles, conference papers, peer reviews
-# - BOOK: Books, monographs, book chapters, dissertations, reference entries
-# - PREPRINT: Pre-publication works (posted-content)
-# - DATASET: Research data and databases
-# - OTHER: Reports, standards, container types, supplementary materials, funding, unclassified
-#
-# Rationale:
-# - BOOK includes dissertations (thesis = monograph) and reference entries
-# - Reports/standards → OTHER (technical documents, not scholarly publications)
-# - "component" → OTHER (supplementary material, not standalone scholarly work)
-# - Container types → OTHER (metadata records, not scholarly content)
-CROSSREF_TYPE_MAP: dict[str, str] = {
-    # === Journal/Conference Articles → PUBLICATION ===
-    "journal-article": "PUBLICATION",
-    "proceedings-article": "PUBLICATION",
-    "peer-review": "PUBLICATION",  # Published peer review
-    # === Books & Book Parts → BOOK ===
-    "book": "BOOK",
-    "monograph": "BOOK",
-    "edited-book": "BOOK",
-    "reference-book": "BOOK",  # Dictionary, encyclopedia
-    "book-chapter": "BOOK",
-    "book-section": "BOOK",
-    "book-part": "BOOK",
-    "book-track": "BOOK",  # Audio book track
-    "dissertation": "BOOK",  # Thesis/monograph
-    "reference-entry": "BOOK",  # Dictionary/encyclopedia entry
-    # === Pre-publication → PREPRINT ===
-    "posted-content": "PREPRINT",
-    # === Research Data → DATASET ===
-    "dataset": "DATASET",
-    "database": "DATASET",
-    # === Reports & Standards → OTHER ===
-    "report": "OTHER",  # Technical report
-    "report-component": "OTHER",  # Part of a report
-    "standard": "OTHER",  # Technical standard
-    # === Supplementary Material → OTHER ===
-    "component": "OTHER",  # Figures, tables, supplementary files
-    # === Container/Series Types → OTHER ===
-    # (Metadata records for series, not individual works)
-    "journal": "OTHER",
-    "journal-volume": "OTHER",
-    "journal-issue": "OTHER",
-    "proceedings": "OTHER",
-    "proceedings-series": "OTHER",
-    "book-series": "OTHER",
-    "book-set": "OTHER",
-    "report-series": "OTHER",
-    # === Funding → OTHER ===
-    "grant": "OTHER",
-    # === Unclassified → OTHER ===
-    "other": "OTHER",  # Unclassified content
-}
-
-# Default type for unknown CrossRef types (conservative fallback)
-CROSSREF_TYPE_DEFAULT = "PUBLICATION"
-
-
 # === Pydantic DTO Model ===
 
 
@@ -11094,8 +11142,6 @@ class CrossRefPublicationEntity(PublicationEntityBase):
 
 
 __all__ = [
-    "CROSSREF_TYPE_DEFAULT",
-    "CROSSREF_TYPE_MAP",
     "CrossRefPublicationEntity",
     "PublicationRecord",
 ]
@@ -11119,28 +11165,6 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
-
-# Document type mapping from OpenAlex types to internal types
-OPENALEX_TYPE_MAP = {
-    "article": "PUBLICATION",
-    "journal-article": "PUBLICATION",
-    "book-chapter": "PUBLICATION",
-    "book": "PUBLICATION",
-    "dissertation": "PUBLICATION",
-    "dataset": "DATASET",
-    "preprint": "PREPRINT",
-    "posted-content": "PREPRINT",
-    "proceedings": "PUBLICATION",
-    "proceedings-article": "PUBLICATION",
-    "report": "PUBLICATION",
-    "standard": "PUBLICATION",
-    "peer-review": "PUBLICATION",
-    "editorial": "PUBLICATION",
-    "erratum": "PUBLICATION",
-    "letter": "PUBLICATION",
-    "review": "PUBLICATION",
-    "other": "OTHER",
-}
 
 # Lookup method values for tracking DOI resolution strategy
 LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
@@ -11374,7 +11398,6 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
 __all__ = [
     "LOOKUP_METHODS",
-    "OPENALEX_TYPE_MAP",
     "OpenAlexPublicationEntity",
     "OpenAlexPublicationRecord",
 ]
@@ -11715,7 +11738,10 @@ class PublicationEntityBase(BaseEntity):
         publication_date: Publication date (ISO format: YYYY-MM-DD).
         citations_received: Number of citations TO this publication (unified field name).
         citations_made: Number of references FROM this publication (unified field name).
-        publication_type: Document type - PUBLICATION, PREPRINT, BOOK, DATASET, OTHER (unified field name).
+        publication_type: Raw provider type string (preserved for forensic/debug).
+        publication_type_unified: Unified type Level 3 (e.g. "Journal Article").
+        publication_subclass: Unified type Level 2 (e.g. "Original Experimental Data").
+        publication_class: Unified type Level 1 ("EXP", "REV", or "PEER").
         language: Publication language code.
         is_oa: Whether the publication is Open Access.
         oa_status: OA status (gold, green, hybrid, bronze, closed).
@@ -11761,7 +11787,12 @@ class PublicationEntityBase(BaseEntity):
     citations_made: int | None = None  # Number of references FROM this publication
 
     # Classification
-    publication_type: str = "PUBLICATION"
+    publication_type: str | None = None  # Raw provider type (forensic/debug)
+    publication_type_unified: str | None = None  # Level 3: "Journal Article", etc.
+    publication_subclass: str | None = (
+        None  # Level 2: "Original Experimental Data", etc.
+    )
+    publication_class: str | None = None  # Level 1: "EXP" | "REV" | "PEER"
     language: str | None = None
 
     # Open Access status
@@ -15134,6 +15165,8 @@ class InputFilterConfig:
     fallback_column: str | None = None
     direct_filter_ids: tuple[str, ...] | None = None
     direct_fallback_mapping: dict[str, str] | None = None
+    direct_multi_filter_ids: dict[str, tuple[str, ...]] | None = None
+    direct_valid_combinations: frozenset[tuple[str, ...]] | None = None
 
     def __post_init__(self) -> None:
         """Validate configuration consistency."""
@@ -15144,10 +15177,17 @@ class InputFilterConfig:
         """Validate fields required when filtering is enabled."""
         if not self.enabled:
             return
-        if self.direct_filter_ids is not None:
+        if self.direct_multi_filter_ids is not None:
+            self._validate_direct_multi_ids_mode()
+        elif self.direct_filter_ids is not None:
             self._validate_direct_ids_mode()
         else:
             self._validate_csv_mode()
+
+    def _validate_direct_multi_ids_mode(self) -> None:
+        """Validate direct multi-field filter IDs mode configuration."""
+        if not self.direct_multi_filter_ids:
+            raise ValueError("direct_multi_filter_ids must be non-empty when set")
 
     def _validate_direct_ids_mode(self) -> None:
         """Validate direct filter IDs mode configuration."""
@@ -15190,6 +15230,11 @@ class InputFilterConfig:
     def is_direct_filter(self) -> bool:
         """Check if direct filter IDs mode is active (no CSV file)."""
         return self.direct_filter_ids is not None
+
+    @property
+    def is_direct_multi_filter(self) -> bool:
+        """Check if direct multi-field filter IDs mode is active."""
+        return self.direct_multi_filter_ids is not None
 
     def get_columns(self) -> tuple[FilterColumn, ...]:
         """Get filter columns (resolves single-column to columns format).
@@ -15571,11 +15616,17 @@ from bioetl.domain.mapping.publication_fields import (
     get_provider_name,
     get_unified_name,
 )
+from bioetl.domain.mapping.publication_type_classification import (
+    PublicationTypeEntry,
+    classify_publication_type,
+)
 
 __all__ = [
     "PUBLICATION_FIELD_MAPPING",
     "UNIFIED_TO_PROVIDER",
+    "PublicationTypeEntry",
     "apply_field_mapping",
+    "classify_publication_type",
     "get_provider_name",
     "get_unified_name",
 ]
@@ -15861,6 +15912,1660 @@ def apply_field_mapping(
 #   - language (unified)
 
 ================================================================================
+File: publication_type_classification.py
+Path: mapping\publication_type_classification.py
+================================================================================
+"""Unified publication type classification for cross-provider harmonization.
+
+Maps raw publication type strings from each provider (OpenAlex, CrossRef,
+PubMed, Semantic Scholar) to a 3-level unified hierarchy:
+
+- Level 1 (class_code): EXP | REV | PEER  (3 values)
+- Level 2 (subclass): ~25 groupings (e.g. "Original Experimental Data")
+- Level 3 (unified_type): 214 specific types (e.g. "Journal Article")
+
+Reference CSV: configs/data_schema/publication_type_classification.csv
+
+The lookup tables are built at import time from a pure Python constant
+(no I/O). Keys are normalized to lowercase for case-insensitive matching.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Final
+
+__all__ = [
+    "PublicationTypeEntry",
+    "classify_publication_type",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class PublicationTypeEntry:
+    """Single entry in the unified publication type classification.
+
+    Attributes:
+        unified_type: Level 3 type name (e.g. "Journal Article").
+        subclass: Level 2 grouping (e.g. "Original Experimental Data").
+        class_code: Level 1 code: "EXP", "REV", or "PEER".
+        specificity: Row number from CSV (higher = more specific).
+
+    """
+
+    unified_type: str
+    subclass: str
+    class_code: str
+    specificity: int
+
+
+# ============================================================================
+# Classification table: 214 entries translated from unified_classification.csv
+#
+# Each tuple: (unified_type, subclass, class_code,
+#               openalex_keys, crossref_keys, pubmed_keys, s2_keys)
+#
+# Keys use "—" for no mapping.  Asterisk suffix (e.g. "article*") means
+# the key is an additional/secondary mapping (asterisk stripped in lookup).
+# ============================================================================
+
+_ClassificationRow = tuple[str, str, str, str, str, str, str]
+
+_CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
+    # 1
+    ("Peer Review", "Peer Review", "PEER", "peer-review", "peer-review", "—", "—"),
+    # 2
+    (
+        "Journal Article",
+        "Original Experimental Data",
+        "EXP",
+        "article",
+        "journal-article",
+        "Journal Article",
+        "JournalArticle",
+    ),
+    # 3
+    (
+        "Conference Paper",
+        "Original Experimental Data",
+        "EXP",
+        "article*",
+        "proceedings-article",
+        "Congress",
+        "Conference",
+    ),
+    # 4
+    (
+        "Preprint",
+        "Original Experimental Data",
+        "EXP",
+        "preprint",
+        "posted-content",
+        "Preprint",
+        "—",
+    ),
+    # 5
+    (
+        "Dataset",
+        "Original Experimental Data",
+        "EXP",
+        "dataset",
+        "dataset",
+        "Dataset",
+        "Dataset",
+    ),
+    # 6
+    (
+        "Database",
+        "Original Experimental Data",
+        "EXP",
+        "database",
+        "database",
+        "Database",
+        "—",
+    ),
+    # 7
+    (
+        "Dissertation",
+        "Original Experimental Data",
+        "EXP",
+        "dissertation",
+        "dissertation",
+        "Academic Dissertation",
+        "—",
+    ),
+    # 8
+    (
+        "Report",
+        "Original Experimental Data",
+        "EXP",
+        "report",
+        "report",
+        "Technical Report",
+        "—",
+    ),
+    # 9
+    (
+        "Report Component",
+        "Original Experimental Data",
+        "EXP",
+        "report-component",
+        "report-component",
+        "—",
+        "—",
+    ),
+    # 10
+    (
+        "Component (figure/table/suppl)",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "component",
+        "—",
+        "—",
+    ),
+    # 11
+    (
+        "Supplementary Materials",
+        "Original Experimental Data",
+        "EXP",
+        "supplementary-materials",
+        "—",
+        "Electronic Supplementary Materials",
+        "—",
+    ),
+    # 12
+    ("Software", "Original Experimental Data", "EXP", "software", "—", "—", "—"),
+    # 13
+    ("Patent", "Original Experimental Data", "EXP", "—", "—", "Patent", "—"),
+    # 14
+    (
+        "Case Report",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Case Reports",
+        "CaseReport",
+    ),
+    # 15
+    (
+        "Clinical Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Study",
+        "Study",
+    ),
+    # 16
+    (
+        "Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial",
+        "ClinicalTrial",
+    ),
+    # 17
+    (
+        "Clinical Trial Protocol",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial Protocol",
+        "—",
+    ),
+    # 18
+    (
+        "Clinical Trial, Phase I",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase I",
+        "—",
+    ),
+    # 19
+    (
+        "Clinical Trial, Phase II",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase II",
+        "—",
+    ),
+    # 20
+    (
+        "Clinical Trial, Phase III",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase III",
+        "—",
+    ),
+    # 21
+    (
+        "Clinical Trial, Phase IV",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase IV",
+        "—",
+    ),
+    # 22
+    (
+        "Clinical Trial, Veterinary",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Veterinary",
+        "—",
+    ),
+    # 23
+    (
+        "Adaptive Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Adaptive Clinical Trial",
+        "—",
+    ),
+    # 24
+    (
+        "Pragmatic Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Pragmatic Clinical Trial",
+        "—",
+    ),
+    # 25
+    (
+        "Equivalence Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Equivalence Trial",
+        "—",
+    ),
+    # 26
+    (
+        "Randomized Controlled Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Randomized Controlled Trial",
+        "—",
+    ),
+    # 27
+    (
+        "Randomized Controlled Trial, Vet",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Randomized Controlled Trial, Veterinary",
+        "—",
+    ),
+    # 28
+    (
+        "Controlled Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Controlled Clinical Trial",
+        "—",
+    ),
+    # 29
+    (
+        "Observational Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Observational Study",
+        "—",
+    ),
+    # 30
+    (
+        "Observational Study, Veterinary",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Observational Study, Veterinary",
+        "—",
+    ),
+    # 31
+    (
+        "Comparative Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Comparative Study",
+        "—",
+    ),
+    # 32
+    (
+        "Validation Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Validation Study",
+        "—",
+    ),
+    # 33
+    (
+        "Evaluation Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Evaluation Study",
+        "—",
+    ),
+    # 34
+    (
+        "Multicenter Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Multicenter Study",
+        "—",
+    ),
+    # 35
+    ("Twin Study", "Original Experimental Data", "EXP", "—", "—", "Twin Study", "—"),
+    # 36
+    (
+        "Clinical Conference",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Conference",
+        "—",
+    ),
+    # 37
+    (
+        "Annual Report",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Annual Report",
+        "—",
+    ),
+    # 38
+    ("Statistics", "Original Experimental Data", "EXP", "—", "—", "Statistics", "—"),
+    # 39
+    ("Review", "Reviews & Syntheses", "REV", "review", "—", "Review", "Review"),
+    # 40
+    (
+        "Systematic Review",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Systematic Review",
+        "—",
+    ),
+    # 41
+    (
+        "Meta-Analysis",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Meta-Analysis",
+        "MetaAnalysis",
+    ),
+    # 42
+    (
+        "Network Meta-Analysis",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Network Meta-Analysis",
+        "—",
+    ),
+    # 43
+    ("Scoping Review", "Reviews & Syntheses", "REV", "—", "—", "Scoping Review", "—"),
+    # 44
+    (
+        "Scientific Integrity Review",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Scientific Integrity Review",
+        "—",
+    ),
+    # 45
+    (
+        "Editorial",
+        "Editorial & Commentary",
+        "REV",
+        "editorial",
+        "—",
+        "Editorial",
+        "Editorial",
+    ),
+    # 46
+    (
+        "Letter",
+        "Editorial & Commentary",
+        "REV",
+        "letter",
+        "—",
+        "Letter",
+        "LettersAndComments",
+    ),
+    # 47
+    (
+        "Comment",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Comment",
+        "LettersAndComments",
+    ),
+    # 48
+    ("News", "Editorial & Commentary", "REV", "—", "—", "News", "News"),
+    # 49
+    (
+        "Newspaper Article",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Newspaper Article",
+        "—",
+    ),
+    # 50
+    ("Interview", "Editorial & Commentary", "REV", "—", "—", "Interview", "—"),
+    # 51
+    ("Address", "Editorial & Commentary", "REV", "—", "—", "Address", "—"),
+    # 52
+    (
+        "Introductory Journal Article",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Introductory Journal Article",
+        "—",
+    ),
+    # 53
+    (
+        "Meeting Abstract",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Meeting Abstract",
+        "—",
+    ),
+    # 54
+    ("Popular Work", "Editorial & Commentary", "REV", "—", "—", "Popular Work", "—"),
+    # 55
+    ("Blog", "Editorial & Commentary", "REV", "—", "—", "Blog", "—"),
+    # 56
+    ("Webcast", "Editorial & Commentary", "REV", "—", "—", "Webcast", "—"),
+    # 57
+    (
+        "Erratum",
+        "Corrections & Retractions",
+        "REV",
+        "erratum",
+        "—",
+        "Published Erratum",
+        "—",
+    ),
+    # 58
+    (
+        "Retraction notice",
+        "Corrections & Retractions",
+        "REV",
+        "retraction",
+        "—",
+        "Retraction of Publication",
+        "—",
+    ),
+    # 59
+    (
+        "Retracted Publication",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Retracted Publication",
+        "—",
+    ),
+    # 60
+    (
+        "Corrected and Republished Article",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Corrected and Republished Article",
+        "—",
+    ),
+    # 61
+    (
+        "Expression of Concern",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Expression of Concern",
+        "—",
+    ),
+    # 62
+    (
+        "Duplicate Publication",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Duplicate Publication",
+        "—",
+    ),
+    # 63
+    ("Book", "Books & Monographs", "REV", "book", "book", "—", "Book"),
+    # 64
+    (
+        "Book Chapter",
+        "Books & Monographs",
+        "REV",
+        "book-chapter",
+        "book-chapter",
+        "—",
+        "BookSection",
+    ),
+    # 65
+    (
+        "Book Section",
+        "Books & Monographs",
+        "REV",
+        "book-section",
+        "book-section",
+        "—",
+        "—",
+    ),
+    # 66
+    ("Book Part", "Books & Monographs", "REV", "—", "book-part", "—", "—"),
+    # 67
+    ("Book Track", "Books & Monographs", "REV", "—", "book-track", "—", "—"),
+    # 68
+    ("Book Set", "Books & Monographs", "REV", "—", "book-set", "—", "—"),
+    # 69
+    ("Book Series", "Books & Monographs", "REV", "—", "book-series", "—", "—"),
+    # 70
+    ("Edited Book", "Books & Monographs", "REV", "—", "edited-book", "—", "—"),
+    # 71
+    ("Reference Book", "Books & Monographs", "REV", "—", "reference-book", "—", "—"),
+    # 72
+    ("Monograph", "Books & Monographs", "REV", "—", "monograph", "Monograph", "—"),
+    # 73
+    ("Book Review", "Books & Monographs", "REV", "—", "—", "Book Review", "—"),
+    # 74
+    (
+        "Book Illustrations",
+        "Books & Monographs",
+        "REV",
+        "—",
+        "—",
+        "Book Illustrations",
+        "—",
+    ),
+    # 75
+    ("Collected Work", "Books & Monographs", "REV", "—", "—", "Collected Work", "—"),
+    # 76
+    ("Collection", "Books & Monographs", "REV", "—", "—", "Collection", "—"),
+    # 77
+    ("Festschrift", "Books & Monographs", "REV", "—", "—", "Festschrift", "—"),
+    # 78
+    (
+        "Reference Entry",
+        "Reference & Encyclopedic",
+        "REV",
+        "reference-entry",
+        "reference-entry",
+        "—",
+        "—",
+    ),
+    # 79
+    ("Encyclopedia", "Reference & Encyclopedic", "REV", "—", "—", "Encyclopedia", "—"),
+    # 80
+    ("Dictionary", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary", "—"),
+    # 81
+    (
+        "Dictionary, Chemical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Chemical",
+        "—",
+    ),
+    # 82
+    (
+        "Dictionary, Classical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Classical",
+        "—",
+    ),
+    # 83
+    (
+        "Dictionary, Dental",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Dental",
+        "—",
+    ),
+    # 84
+    (
+        "Dictionary, Medical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Medical",
+        "—",
+    ),
+    # 85
+    (
+        "Dictionary, Pharmaceutic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Pharmaceutic",
+        "—",
+    ),
+    # 86
+    (
+        "Dictionary, Polyglot",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Polyglot",
+        "—",
+    ),
+    # 87
+    ("Terminology", "Reference & Encyclopedic", "REV", "—", "—", "Terminology", "—"),
+    # 88
+    ("Atlas", "Reference & Encyclopedic", "REV", "—", "—", "Atlas", "—"),
+    # 89
+    (
+        "Pharmacopoeia",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Pharmacopoeia",
+        "—",
+    ),
+    # 90
+    (
+        "Pharmacopoeia, Homeopathic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Pharmacopoeia, Homeopathic",
+        "—",
+    ),
+    # 91
+    ("Formulary", "Reference & Encyclopedic", "REV", "—", "—", "Formulary", "—"),
+    # 92
+    (
+        "Formulary, Dental",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Dental",
+        "—",
+    ),
+    # 93
+    (
+        "Formulary, Homeopathic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Homeopathic",
+        "—",
+    ),
+    # 94
+    (
+        "Formulary, Hospital",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Hospital",
+        "—",
+    ),
+    # 95
+    ("Dispensatory", "Reference & Encyclopedic", "REV", "—", "—", "Dispensatory", "—"),
+    # 96
+    ("Herbal", "Reference & Encyclopedic", "REV", "—", "—", "Herbal", "—"),
+    # 97
+    ("Guideline", "Guidelines & Consensus", "REV", "—", "—", "Guideline", "—"),
+    # 98
+    (
+        "Practice Guideline",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Practice Guideline",
+        "—",
+    ),
+    # 99
+    (
+        "Consensus Development Conference",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Consensus Development Conference",
+        "—",
+    ),
+    # 100
+    (
+        "Consensus Development Conference, NIH",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Consensus Development Conference, NIH",
+        "—",
+    ),
+    # 101
+    ("Standard", "Standards", "REV", "standard", "standard", "—", "—"),
+    # 102
+    (
+        "Paratext",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "paratext",
+        "—",
+        "—",
+        "—",
+    ),
+    # 103
+    (
+        "Libguides",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "libguides",
+        "—",
+        "—",
+        "—",
+    ),
+    # 104
+    (
+        "Journal (container)",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal",
+        "—",
+        "—",
+    ),
+    # 105
+    (
+        "Journal Issue",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal-issue",
+        "—",
+        "—",
+    ),
+    # 106
+    (
+        "Journal Volume",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal-volume",
+        "—",
+        "—",
+    ),
+    # 107
+    (
+        "Proceedings (container)",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "proceedings",
+        "—",
+        "—",
+    ),
+    # 108
+    (
+        "Proceedings Series",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "proceedings-series",
+        "—",
+        "—",
+    ),
+    # 109
+    (
+        "Report Series",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "report-series",
+        "—",
+        "—",
+    ),
+    # 110
+    (
+        "Periodical",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "—",
+        "Periodical",
+        "—",
+    ),
+    # 111
+    (
+        "Periodical Index",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "—",
+        "Periodical Index",
+        "—",
+    ),
+    # 112
+    ("Grant", "Grants & Funding", "REV", "grant", "grant", "—", "—"),
+    # 113
+    (
+        "Research Support, ARRA",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, American Recovery and Reinvestment Act",
+        "—",
+    ),
+    # 114
+    (
+        "Research Support, NIH Extramural",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, N.I.H., Extramural",
+        "—",
+    ),
+    # 115
+    (
+        "Research Support, NIH Intramural",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, N.I.H., Intramural",
+        "—",
+    ),
+    # 116
+    (
+        "Research Support, Non-U.S. Gov't",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, Non-U.S. Gov't",
+        "—",
+    ),
+    # 117
+    (
+        "Research Support, U.S. Gov't Non-PHS",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Gov't, Non-P.H.S.",
+        "—",
+    ),
+    # 118
+    (
+        "Research Support, U.S. Gov't PHS",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Gov't, P.H.S.",
+        "—",
+    ),
+    # 119
+    (
+        "Research Support, U.S. Government",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Government",
+        "—",
+    ),
+    # 120
+    (
+        "Support of Research",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Support of Research",
+        "—",
+    ),
+    # 121
+    ("Biography", "Biographical & Historical", "REV", "—", "—", "Biography", "—"),
+    # 122
+    (
+        "Autobiography",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Autobiography",
+        "—",
+    ),
+    # 123
+    (
+        "Biobibliography",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Biobibliography",
+        "—",
+    ),
+    # 124
+    ("Bibliography", "Biographical & Historical", "REV", "—", "—", "Bibliography", "—"),
+    # 125
+    (
+        "Classical Article",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Classical Article",
+        "—",
+    ),
+    # 126
+    (
+        "Historical Article",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Historical Article",
+        "—",
+    ),
+    # 127
+    (
+        "Personal Narrative",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Personal Narrative",
+        "—",
+    ),
+    # 128
+    ("Eulogy", "Biographical & Historical", "REV", "—", "—", "Eulogy", "—"),
+    # 129
+    ("Portrait", "Biographical & Historical", "REV", "—", "—", "Portrait", "—"),
+    # 130
+    ("Diary", "Biographical & Historical", "REV", "—", "—", "Diary", "—"),
+    # 131
+    (
+        "Collected Correspondence",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Collected Correspondence",
+        "—",
+    ),
+    # 132
+    ("Textbook", "Educational & Instructional", "REV", "—", "—", "Textbook", "—"),
+    # 133
+    ("Handbook", "Educational & Instructional", "REV", "—", "—", "Handbook", "—"),
+    # 134
+    (
+        "Laboratory Manual",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Laboratory Manual",
+        "—",
+    ),
+    # 135
+    ("Study Guide", "Educational & Instructional", "REV", "—", "—", "Study Guide", "—"),
+    # 136
+    (
+        "Resource Guide",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Resource Guide",
+        "—",
+    ),
+    # 137
+    ("Guidebook", "Educational & Instructional", "REV", "—", "—", "Guidebook", "—"),
+    # 138
+    ("Lecture", "Educational & Instructional", "REV", "—", "—", "Lecture", "—"),
+    # 139
+    (
+        "Lecture Note",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Lecture Note",
+        "—",
+    ),
+    # 140
+    (
+        "Nurses Instruction",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Nurses Instruction",
+        "—",
+    ),
+    # 141
+    (
+        "Patient Education Handout",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Patient Education Handout",
+        "—",
+    ),
+    # 142
+    (
+        "Interactive Tutorial",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Interactive Tutorial",
+        "—",
+    ),
+    # 143
+    (
+        "Programmed Instruction",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Programmed Instruction",
+        "—",
+    ),
+    # 144
+    (
+        "Examination Questions",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Examination Questions",
+        "—",
+    ),
+    # 145
+    (
+        "Problems and Exercises",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Problems and Exercises",
+        "—",
+    ),
+    # 146
+    ("Cookbook", "Educational & Instructional", "REV", "—", "—", "Cookbook", "—"),
+    # 147
+    ("Photograph", "Visual / Media", "REV", "—", "—", "Photograph", "—"),
+    # 148
+    ("Drawing", "Visual / Media", "REV", "—", "—", "Drawing", "—"),
+    # 149
+    ("Pictorial Work", "Visual / Media", "REV", "—", "—", "Pictorial Work", "—"),
+    # 150
+    ("Caricature", "Visual / Media", "REV", "—", "—", "Caricature", "—"),
+    # 151
+    ("Cartoon", "Visual / Media", "REV", "—", "—", "Cartoon", "—"),
+    # 152
+    ("Graphic Novel", "Visual / Media", "REV", "—", "—", "Graphic Novel", "—"),
+    # 153
+    ("Map", "Visual / Media", "REV", "—", "—", "Map", "—"),
+    # 154
+    ("Poster", "Visual / Media", "REV", "—", "—", "Poster", "—"),
+    # 155
+    ("Postcard", "Visual / Media", "REV", "—", "—", "Postcard", "—"),
+    # 156
+    ("Bookplate", "Visual / Media", "REV", "—", "—", "Bookplate", "—"),
+    # 157
+    ("Broadside", "Visual / Media", "REV", "—", "—", "Broadside", "—"),
+    # 158
+    (
+        "Architectural Drawing",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Architectural Drawing",
+        "—",
+    ),
+    # 159
+    ("Animation", "Visual / Media", "REV", "—", "—", "Animation", "—"),
+    # 160
+    (
+        "Documentaries and Factual Films",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Documentaries and Factual Films",
+        "—",
+    ),
+    # 161
+    (
+        "Instructional Film and Video",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Instructional Film and Video",
+        "—",
+    ),
+    # 162
+    ("Unedited Footage", "Visual / Media", "REV", "—", "—", "Unedited Footage", "—"),
+    # 163
+    ("Video-Audio Media", "Visual / Media", "REV", "—", "—", "Video-Audio Media", "—"),
+    # 164
+    ("Essay", "Literary / Miscellaneous", "REV", "—", "—", "Essay", "—"),
+    # 165
+    ("Poetry", "Literary / Miscellaneous", "REV", "—", "—", "Poetry", "—"),
+    # 166
+    (
+        "Fictional Work",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Fictional Work",
+        "—",
+    ),
+    # 167
+    (
+        "Juvenile Literature",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Juvenile Literature",
+        "—",
+    ),
+    # 168
+    (
+        "Wit and Humor",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Wit and Humor",
+        "—",
+    ),
+    # 169
+    ("Anecdotes", "Literary / Miscellaneous", "REV", "—", "—", "Anecdotes", "—"),
+    # 170
+    (
+        "Aphorisms and Proverbs",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Aphorisms and Proverbs",
+        "—",
+    ),
+    # 171
+    ("Phrases", "Literary / Miscellaneous", "REV", "—", "—", "Phrases", "—"),
+    # 172
+    ("Sermon", "Literary / Miscellaneous", "REV", "—", "—", "Sermon", "—"),
+    # 173
+    (
+        "Funeral Sermon",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Funeral Sermon",
+        "—",
+    ),
+    # 174
+    (
+        "Movable Books",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Movable Books",
+        "—",
+    ),
+    # 175
+    ("Catalog", "Administrative / Catalogs / Legal", "REV", "—", "—", "Catalog", "—"),
+    # 176
+    (
+        "Catalog, Bookseller",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Bookseller",
+        "—",
+    ),
+    # 177
+    (
+        "Catalog, Commercial",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Commercial",
+        "—",
+    ),
+    # 178
+    (
+        "Catalog, Drug",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Drug",
+        "—",
+    ),
+    # 179
+    (
+        "Catalog, Publisher",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Publisher",
+        "—",
+    ),
+    # 180
+    (
+        "Catalog, Union",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Union",
+        "—",
+    ),
+    # 181
+    (
+        "Directory",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Directory",
+        "—",
+    ),
+    # 182
+    ("Index", "Administrative / Catalogs / Legal", "REV", "—", "—", "Index", "—"),
+    # 183
+    (
+        "Union List",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Union List",
+        "—",
+    ),
+    # 184
+    (
+        "Price List",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Price List",
+        "—",
+    ),
+    # 185
+    (
+        "Legal Case",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Legal Case",
+        "—",
+    ),
+    # 186
+    (
+        "Legislation",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Legislation",
+        "—",
+    ),
+    # 187
+    (
+        "Government Publication",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Government Publication",
+        "—",
+    ),
+    # 188
+    (
+        "Public Service Announcement",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Public Service Announcement",
+        "—",
+    ),
+    # 189
+    (
+        "Advertisement",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Advertisement",
+        "—",
+    ),
+    # 190
+    (
+        "Prospectus",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Prospectus",
+        "—",
+    ),
+    # 191
+    ("Other", "Format / Meta-types", "REV", "other", "other", "—", "—"),
+    # 192
+    ("Abbreviations", "Format / Meta-types", "REV", "—", "—", "Abbreviations", "—"),
+    # 193
+    ("Abstracts", "Format / Meta-types", "REV", "—", "—", "Abstracts", "—"),
+    # 194
+    (
+        "English Abstract",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "English Abstract",
+        "—",
+    ),
+    # 195
+    ("Chart", "Format / Meta-types", "REV", "—", "—", "Chart", "—"),
+    # 196
+    ("Chronology", "Format / Meta-types", "REV", "—", "—", "Chronology", "—"),
+    # 197
+    ("Tables", "Format / Meta-types", "REV", "—", "—", "Tables", "—"),
+    # 198
+    ("Form", "Format / Meta-types", "REV", "—", "—", "Form", "—"),
+    # 199
+    ("Outline", "Format / Meta-types", "REV", "—", "—", "Outline", "—"),
+    # 200
+    ("Almanac", "Format / Meta-types", "REV", "—", "—", "Almanac", "—"),
+    # 201
+    ("Calendar", "Format / Meta-types", "REV", "—", "—", "Calendar", "—"),
+    # 202
+    ("Ephemera", "Format / Meta-types", "REV", "—", "—", "Ephemera", "—"),
+    # 203
+    ("Program", "Format / Meta-types", "REV", "—", "—", "Program", "—"),
+    # 204
+    ("Manuscript", "Format / Meta-types", "REV", "—", "—", "Manuscript", "—"),
+    # 205
+    (
+        "Manuscript, Medical",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Manuscript, Medical",
+        "—",
+    ),
+    # 206
+    ("Incunabula", "Format / Meta-types", "REV", "—", "—", "Incunabula", "—"),
+    # 207
+    (
+        "Unpublished Work",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Unpublished Work",
+        "—",
+    ),
+    # 208
+    ("Web Archive", "Format / Meta-types", "REV", "—", "—", "Web Archive", "—"),
+    # 209
+    ("Account Book", "Format / Meta-types", "REV", "—", "—", "Account Book", "—"),
+    # 210
+    ("Overall", "Format / Meta-types", "REV", "—", "—", "Overall", "—"),
+    # 211
+    (
+        "Publication Components",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Publication Components",
+        "—",
+    ),
+    # 212
+    (
+        "Publication Formats",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Publication Formats",
+        "—",
+    ),
+    # 213
+    (
+        "Study Characteristics",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Study Characteristics",
+        "—",
+    ),
+    # 214
+    ("Exhibition", "Format / Meta-types", "REV", "—", "—", "Exhibition", "—"),
+)
+
+# Total number of entries (used by architecture sync test)
+CLASSIFICATION_TABLE_SIZE: Final[int] = len(_CLASSIFICATION_TABLE)
+
+# ============================================================================
+# Build reverse-lookup dicts at import time (pure code, no I/O)
+# ============================================================================
+
+_DASH = "—"
+
+
+def _build_lookups() -> tuple[
+    dict[str, PublicationTypeEntry],
+    dict[str, PublicationTypeEntry],
+    dict[str, PublicationTypeEntry],
+    dict[str, PublicationTypeEntry],
+]:
+    """Build four provider-specific lookup dicts from the classification table.
+
+    Keys are normalized to lowercase.  Asterisk suffix (``*``) is stripped
+    and the key is added as an *additional* mapping (does not replace the
+    primary key without asterisk, if any).
+
+    Returns:
+        Tuple of (openalex, crossref, pubmed, s2) lookup dicts.
+
+    """
+    openalex: dict[str, PublicationTypeEntry] = {}
+    crossref: dict[str, PublicationTypeEntry] = {}
+    pubmed: dict[str, PublicationTypeEntry] = {}
+    s2: dict[str, PublicationTypeEntry] = {}
+
+    for row_idx, row in enumerate(_CLASSIFICATION_TABLE, start=1):
+        unified_type, subclass, class_code, oa_keys, cr_keys, pm_keys, s2_keys = row
+        entry = PublicationTypeEntry(
+            unified_type=unified_type,
+            subclass=subclass,
+            class_code=class_code,
+            specificity=row_idx,
+        )
+
+        for raw_key, target in (
+            (oa_keys, openalex),
+            (cr_keys, crossref),
+            (pm_keys, pubmed),
+            (s2_keys, s2),
+        ):
+            if raw_key == _DASH:
+                continue
+            # Strip asterisk (secondary mapping) and normalize to lowercase
+            key = raw_key.rstrip("*").lower()
+            # Only set if not already present (primary key wins over secondary)
+            if key not in target:
+                target[key] = entry
+
+    return openalex, crossref, pubmed, s2
+
+
+_OPENALEX_LOOKUP, _CROSSREF_LOOKUP, _PUBMED_LOOKUP, _S2_LOOKUP = _build_lookups()
+
+
+# ============================================================================
+# Public API
+# ============================================================================
+
+
+def classify_publication_type(
+    provider: str,
+    raw_type: str | None = None,
+    raw_types_list: list[str] | None = None,
+) -> PublicationTypeEntry | None:
+    """Classify a publication type using the unified 3-level hierarchy.
+
+    For single-value providers (OpenAlex, CrossRef): uses ``raw_type`` for
+    a direct lookup.
+
+    For multi-value providers (PubMed, Semantic Scholar): iterates
+    ``raw_types_list``, collects all matches, and returns the entry with
+    the highest specificity (largest row number = most specific type).
+
+    Args:
+        provider: Provider name ("openalex", "crossref", "pubmed",
+            "semanticscholar").
+        raw_type: Single raw type string (for OpenAlex / CrossRef).
+        raw_types_list: List of raw type strings (for PubMed / S2).
+
+    Returns:
+        The matching ``PublicationTypeEntry``, or ``None`` if no match.
+
+    """
+    lookup = _get_lookup(provider)
+    if lookup is None:
+        return None
+
+    # Single-value lookup (OpenAlex, CrossRef)
+    if raw_type is not None:
+        return lookup.get(raw_type.lower())
+
+    # Multi-value lookup (PubMed, Semantic Scholar)
+    if raw_types_list is not None:
+        return _best_match(lookup, raw_types_list)
+
+    return None
+
+
+def _best_match(
+    lookup: dict[str, PublicationTypeEntry],
+    raw_types: list[str],
+) -> PublicationTypeEntry | None:
+    """Return the most specific match from a list of raw type strings."""
+    matches = [
+        entry
+        for raw in raw_types
+        if raw and (entry := lookup.get(raw.strip().lower())) is not None
+    ]
+    return max(matches, key=lambda e: e.specificity, default=None)
+
+
+_PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {
+    "openalex": _OPENALEX_LOOKUP,
+    "crossref": _CROSSREF_LOOKUP,
+    "pubmed": _PUBMED_LOOKUP,
+    "semanticscholar": _S2_LOOKUP,
+    "semantic_scholar": _S2_LOOKUP,
+    "s2": _S2_LOOKUP,
+}
+
+
+def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:
+    """Return the lookup dict for the given provider."""
+    return _PROVIDER_LOOKUPS.get(provider.lower())
+
+================================================================================
 File: medallion.py
 Path: medallion.py
 ================================================================================
@@ -16042,17 +17747,11 @@ class LoadingStrategy(StrEnum):
             Checkpoint-based resume is disabled. Deduplication is handled
             on Silver layer via content_hash. Required for entities with
             unstable API pagination (e.g., publications).
-        WATERMARK_BASED: Incremental loading based on watermark field.
-            NOT YET IMPLEMENTED - placeholder for future watermark support.
-            Requires confirmed watermark field availability in source API.
 
     Example:
         >>> strategy = LoadingStrategy.FULL_SCAN_ONLY
         >>> strategy.allows_checkpoint_resume
         False
-        >>> strategy = LoadingStrategy.WATERMARK_BASED
-        >>> strategy.allows_checkpoint_resume
-        True
 
     See Also:
         ADR-030: Publication pagination strategy (force_full_scan)
@@ -16062,9 +17761,6 @@ class LoadingStrategy(StrEnum):
     FULL_SCAN_ONLY = "full_scan_only"
     """Full scan on each run. No checkpoint resume. Deduplication via content_hash."""
 
-    WATERMARK_BASED = "watermark_based"
-    """Incremental loading via watermark. Placeholder - NOT YET IMPLEMENTED."""
-
     @property
     def allows_checkpoint_resume(self) -> bool:
         """Check if this strategy allows checkpoint-based resume.
@@ -16072,14 +17768,14 @@ class LoadingStrategy(StrEnum):
         Returns:
             True if checkpoint resume is allowed, False otherwise.
         """
-        return self != LoadingStrategy.FULL_SCAN_ONLY
+        return False
 
     @classmethod
     def from_string(cls, value: str) -> LoadingStrategy:
         """Convert string to LoadingStrategy with validation.
 
         Args:
-            value: String value (e.g., "full_scan_only", "watermark_based")
+            value: String value (e.g., "full_scan_only")
 
         Returns:
             Corresponding LoadingStrategy enum value
@@ -16096,7 +17792,7 @@ class LoadingStrategy(StrEnum):
             ) from None
 
     @classmethod
-    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:
+    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:  # noqa: ARG003
         """Convert legacy force_full_scan flag to LoadingStrategy.
 
         Provides backward compatibility with existing configs using
@@ -16106,9 +17802,9 @@ class LoadingStrategy(StrEnum):
             force_full_scan: Legacy boolean flag
 
         Returns:
-            FULL_SCAN_ONLY if force_full_scan is True, WATERMARK_BASED otherwise
+            FULL_SCAN_ONLY (always, since watermark-based loading was removed)
         """
-        return cls.FULL_SCAN_ONLY if force_full_scan else cls.WATERMARK_BASED
+        return cls.FULL_SCAN_ONLY
 
 
 class ClearPolicy(StrEnum):
@@ -16611,8 +18307,6 @@ class SourceMetadata(BaseModel):
         file_path: File path for file sources.
         query_string: Query string used for data source filtering
             (e.g., 'assay_type=B&standard_type=IC50').
-        watermark_before: Previous watermark timestamp.
-        watermark_after: New watermark timestamp after ingestion.
         api_version: Provider API version.
         api_requests: List of detailed API request information.
         total_requests: Total number of API requests made.
@@ -16628,12 +18322,6 @@ class SourceMetadata(BaseModel):
     query_string: str | None = Field(
         default=None,
         description="Query string used for data source filtering (e.g., 'assay_type=B')",
-    )
-    watermark_before: datetime | None = Field(
-        default=None, description="Previous watermark"
-    )
-    watermark_after: datetime | None = Field(
-        default=None, description="New watermark after ingestion"
     )
     api_version: str | None = Field(default=None, description="Provider API version")
     api_requests: list[APIRequestDetails] = Field(
@@ -17451,7 +19139,6 @@ This package contains all port definitions organized by domain:
 - normalization: UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort
 - data_normalization: DataNormalizationPort for text/data normalization
 - delta_reader: DeltaReaderPort for read-only Delta table access
-- watermark: WatermarkStrategyPort for incremental loading (ADR-031, placeholder)
 """
 
 from bioetl.domain.ports.audit import (
@@ -17530,7 +19217,6 @@ from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.shutdown import ShutdownPort
 from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
-from bioetl.domain.ports.watermark import NoOpWatermarkStrategy, WatermarkStrategyPort
 
 __all__ = [
     "ActivityAggregatorPort",
@@ -17575,7 +19261,6 @@ __all__ = [
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
-    "NoOpWatermarkStrategy",
     "NormalizationServicePort",
     "OutlierFilterPort",
     "PiiHasherPort",
@@ -17593,7 +19278,6 @@ __all__ = [
     "TracingPort",
     "UnitConverterPort",
     "ValueValidatorPort",
-    "WatermarkStrategyPort",
 ]
 
 ================================================================================
@@ -17946,6 +19630,7 @@ for adapters that support server-side filtering.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from types import TracebackType
 from typing import Any, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
@@ -17973,7 +19658,7 @@ class DataSourcePort(Protocol):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit the async context manager."""
         ...
@@ -21944,140 +23629,6 @@ class GoldValidatorPort(Protocol):
         ...
 
 ================================================================================
-File: watermark.py
-Path: ports\watermark.py
-================================================================================
-"""Watermark strategy port for incremental data loading.
-
-This module defines the interface for watermark-based incremental loading.
-Currently a placeholder for future implementation (ADR-031).
-
-IMPORTANT: Watermark-based loading requires:
-1. Confirmed watermark field availability in source API
-2. Reliable timestamp/version tracking on the source side
-3. Proper handling of late-arriving data
-
-Do NOT implement without confirming API support for watermark fields.
-"""
-
-from __future__ import annotations
-
-from abc import abstractmethod
-from datetime import datetime
-from typing import Any, Protocol, runtime_checkable
-
-
-@runtime_checkable
-class WatermarkStrategyPort(Protocol):
-    """Port for watermark-based incremental loading strategy.
-
-    Defines the interface for managing watermarks that track the progress
-    of incremental data extraction. Watermarks are typically timestamps
-    or version numbers that identify the last successfully processed record.
-
-    This is a PLACEHOLDER interface for future implementation.
-    Current status: NOT IMPLEMENTED.
-
-    Requirements for implementation:
-    1. Source API must provide a reliable watermark field (e.g., updated_at)
-    2. Watermark field must be monotonically increasing
-    3. Source must support filtering by watermark (e.g., WHERE updated_at > watermark)
-
-    Example usage (future):
-        >>> strategy = WatermarkStrategy(checkpoint_port, "updated_at")
-        >>> last_watermark = await strategy.get_watermark("chembl_activity")
-        >>> # Fetch records WHERE updated_at > last_watermark
-        >>> await strategy.update_watermark("chembl_activity", new_watermark)
-
-    See Also:
-        ADR-030: Publication pagination strategy (full_scan_only)
-        ADR-031: Loading strategy formalization
-        LoadingStrategy: Enum controlling which strategy is used
-    """
-
-    @abstractmethod
-    async def get_watermark(self, pipeline_name: str) -> datetime | int | str | None:
-        """Get the current watermark for a pipeline.
-
-        Args:
-            pipeline_name: Name of the pipeline to get watermark for.
-
-        Returns:
-            The current watermark value (timestamp, version number, or ID),
-            or None if no watermark exists (first run).
-        """
-        ...
-
-    @abstractmethod
-    async def update_watermark(
-        self,
-        pipeline_name: str,
-        watermark: datetime | int | str,
-        metadata: dict[str, Any] | None = None,
-    ) -> None:
-        """Update the watermark after successful processing.
-
-        Args:
-            pipeline_name: Name of the pipeline to update watermark for.
-            watermark: New watermark value to store.
-            metadata: Optional metadata about the processing run.
-        """
-        ...
-
-    @abstractmethod
-    async def clear_watermark(self, pipeline_name: str) -> None:
-        """Clear the watermark for a pipeline (triggers full reload).
-
-        Args:
-            pipeline_name: Name of the pipeline to clear watermark for.
-        """
-        ...
-
-
-class NoOpWatermarkStrategy:
-    """No-operation implementation of WatermarkStrategyPort.
-
-    Used as a placeholder when watermark-based loading is not available.
-    Always returns None for watermark and does nothing on update.
-
-    This is the DEFAULT implementation until watermark support is added.
-    """
-
-    async def get_watermark(self, _pipeline_name: str) -> None:
-        """Always returns None (no watermark available).
-
-        Args:
-            _pipeline_name: Ignored (intentionally unused in no-op).
-
-        Returns:
-            None, indicating no watermark support.
-        """
-        return None
-
-    async def update_watermark(
-        self,
-        _pipeline_name: str,
-        _watermark: datetime | int | str,
-        _metadata: dict[str, Any] | None = None,
-    ) -> None:
-        """No-op: does nothing.
-
-        Args:
-            _pipeline_name: Ignored (intentionally unused in no-op).
-            _watermark: Ignored (intentionally unused in no-op).
-            _metadata: Ignored (intentionally unused in no-op).
-        """
-        pass
-
-    async def clear_watermark(self, _pipeline_name: str) -> None:
-        """No-op: does nothing.
-
-        Args:
-            _pipeline_name: Ignored (intentionally unused in no-op).
-        """
-        pass
-
-================================================================================
 File: __init__.py
 Path: registry\__init__.py
 ================================================================================
@@ -22762,13 +24313,13 @@ Defines the authoritative field ordering for composite publication output.
 The order is derived from docs/schemas/publication_field_order.csv and
 used by ColumnOrderer and tests to ensure deterministic column ordering.
 
-Categories (6 groups, 167 fully-qualified fields):
+Categories (6 groups, 179 fully-qualified fields):
   - id (1-24): Identifiers, content hashes, entity IDs
   - bibliography (25-83): Title, abstract, journal, pagination, year
   - author_and_affiliation (84-104): Authors, affiliations, institutions
   - date (105-114): Publication and revision dates
   - topics_and_keywords (115-130): MeSH, topics, keywords, chemicals
-  - publication (131-167): Citations, OA, types, language, misc
+  - publication (131-179): Citations, OA, types, language, misc
 """
 
 from __future__ import annotations
@@ -22780,7 +24331,7 @@ __all__ = [
     "PUBLICATION_FIELD_ORDER",
 ]
 
-# Canonical order of all 167 fully-qualified publication fields.
+# Canonical order of all 179 fully-qualified publication fields.
 # Source of truth: docs/schemas/publication_field_order.csv
 PUBLICATION_FIELD_ORDER: Final[tuple[str, ...]] = (
     # === id (1-24) ===
@@ -22951,6 +24502,18 @@ PUBLICATION_FIELD_ORDER: Final[tuple[str, ...]] = (
     "openalex.publication.publication_type",
     "pubmed.publication.publication_type",
     "semanticscholar.publication.publication_type",
+    "crossref.publication.publication_type_unified",
+    "openalex.publication.publication_type_unified",
+    "pubmed.publication.publication_type_unified",
+    "semanticscholar.publication.publication_type_unified",
+    "crossref.publication.publication_subclass",
+    "openalex.publication.publication_subclass",
+    "pubmed.publication.publication_subclass",
+    "semanticscholar.publication.publication_subclass",
+    "crossref.publication.publication_class",
+    "openalex.publication.publication_class",
+    "pubmed.publication.publication_class",
+    "semanticscholar.publication.publication_class",
     "pubmed.publication.publication_type_list",
     "pubmed.publication.publication_types",
     "semanticscholar.publication.publication_types",
@@ -22965,7 +24528,7 @@ PUBLICATION_CANONICAL_CATEGORIES: Final[dict[str, tuple[int, int]]] = {
     "author_and_affiliation": (84, 104),
     "date": (105, 114),
     "topics_and_keywords": (115, 130),
-    "publication": (131, 167),
+    "publication": (131, 179),
 }
 
 ================================================================================
@@ -23003,7 +24566,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
 
     # === Lineage & DQ Fields (from RULES.md §2.4) ===
-    run_id: Series[object] = pa.Field(
+    run_id: Series[str] = pa.Field(
         alias="_run_id",
         nullable=False,
         description="Correlation ID for the pipeline run.",
@@ -23015,7 +24578,7 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Type of pipeline run.",
     )
 
-    source_batch_id: Series[object] | None = pa.Field(
+    source_batch_id: Series[str] | None = pa.Field(
         alias="_source_batch_id",
         nullable=True,
         description="Batch context ID from the source.",
@@ -23076,6 +24639,7 @@ from bioetl.domain.schemas.constants import (
     STANDARD_RELATIONS,
     UO_ID_PATTERN,
 )
+from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 
 
 class ActivitySchema(ETLRecordSchema):
@@ -23188,51 +24752,96 @@ class ActivitySchema(ETLRecordSchema):
     standard_upper_value: Series[float] | None = pa.Field(
         nullable=True, description="Standardized upper bound."
     )
-    toid: Series[int] | None = pa.Field(nullable=True, description="Test Occasion ID.")
-    manual_curation_flag: Series[int] | None = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="Manual curation flag indicating record was manually reviewed.",
+    toid: Series[float] | None = pa.Field(
+        nullable=True, description="Test Occasion ID (float for nullable int)."
     )
-    original_activity_id: Series[int] | None = pa.Field(
-        nullable=True, description="Original activity ID for traceability."
+    manual_curation_flag: Series[float] | None = pa.Field(
+        nullable=True,
+        isin=[0.0, 1.0],
+        description="Manual curation flag (float for nullable int).",
+    )
+    original_activity_id: Series[float] | None = pa.Field(
+        nullable=True, description="Original activity ID (float for nullable int)."
     )
     data_validity_description: Series[str] | None = pa.Field(
         nullable=True, description="Human-readable data validity explanation."
     )
 
     # === Flattened Fields (from JSON) ===
-    ligand_efficiency_bei: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_le: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_lle: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_sei: Series[float] | None = pa.Field(nullable=True)
+    ligand_efficiency_bei: Series[float] | None = pa.Field(
+        nullable=True, description="Binding Efficiency Index (BEI)."
+    )
+    ligand_efficiency_le: Series[float] | None = pa.Field(
+        nullable=True, description="Ligand Efficiency (LE)."
+    )
+    ligand_efficiency_lle: Series[float] | None = pa.Field(
+        nullable=True, description="Lipophilic Ligand Efficiency (LLE)."
+    )
+    ligand_efficiency_sei: Series[float] | None = pa.Field(
+        nullable=True, description="Surface Efficiency Index (SEI)."
+    )
 
-    action_type_action_type: Series[str] | None = pa.Field(nullable=True)
-    action_type_description: Series[str] | None = pa.Field(nullable=True)
-    action_type_parent_type: Series[str] | None = pa.Field(nullable=True)
+    action_type_action_type: Series[str] | None = pa.Field(
+        nullable=True, description="Action type classification."
+    )
+    action_type_description: Series[str] | None = pa.Field(
+        nullable=True, description="Action type description."
+    )
+    action_type_parent_type: Series[str] | None = pa.Field(
+        nullable=True, description="Parent action type category."
+    )
 
     activity_properties: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of activity properties."
     )
 
     # === Additional Fields from Silver Schema ===
-    canonical_smiles: Series[str] | None = pa.Field(nullable=True)
-    molecule_pref_name: Series[str] | None = pa.Field(nullable=True)
-    parent_molecule_chembl_id: Series[str] | None = pa.Field(nullable=True)
-    target_pref_name: Series[str] | None = pa.Field(nullable=True)
-    target_organism: Series[str] | None = pa.Field(nullable=True)
+    canonical_smiles: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical SMILES of molecule."
+    )
+    molecule_pref_name: Series[str] | None = pa.Field(
+        nullable=True, description="Molecule preferred name."
+    )
+    parent_molecule_chembl_id: Series[str] | None = pa.Field(
+        nullable=True, description="Parent molecule ChEMBL ID."
+    )
+    target_pref_name: Series[str] | None = pa.Field(
+        nullable=True, description="Target preferred name."
+    )
+    target_organism: Series[str] | None = pa.Field(
+        nullable=True, description="Target organism."
+    )
     target_taxonomy_id: Series[str] | None = pa.Field(
         nullable=True,
         description="Target taxonomy ID. Standardized name (was target_tax_id).",
     )
-    assay_type: Series[str] | None = pa.Field(nullable=True)
-    assay_description: Series[str] | None = pa.Field(nullable=True)
-    assay_variant_accession: Series[str] | None = pa.Field(nullable=True)
-    assay_variant_mutation: Series[str] | None = pa.Field(nullable=True)
-    bao_format: Series[str] | None = pa.Field(nullable=True)
-    bao_label: Series[str] | None = pa.Field(nullable=True)
-    document_journal: Series[str] | None = pa.Field(nullable=True)
-    document_year: Series[int] | None = pa.Field(nullable=True)
+    assay_type: Series[str] | None = pa.Field(
+        nullable=True, description="Assay type (B/F/A/T/P/U)."
+    )
+    assay_description: Series[str] | None = pa.Field(
+        nullable=True, description="Assay description text."
+    )
+    assay_variant_accession: Series[str] | None = pa.Field(
+        nullable=True, description="Assay variant protein accession."
+    )
+    assay_variant_mutation: Series[str] | None = pa.Field(
+        nullable=True, description="Assay variant mutation description."
+    )
+    bao_format: Series[str] | None = pa.Field(
+        nullable=True, description="BioAssay Ontology format ID."
+    )
+    bao_label: Series[str] | None = pa.Field(
+        nullable=True, description="BioAssay Ontology label."
+    )
+    document_journal: Series[str] | None = pa.Field(
+        nullable=True, description="Publication journal name."
+    )
+    document_year: Series[int] | None = pa.Field(
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="Publication year.",
+    )
 
     class Config:
         """Pandera configuration."""
@@ -23291,6 +24900,9 @@ class AssaySchema(ETLRecordSchema):
         isin=list(ASSAY_TYPES),
         description="Assay type.",
     )
+    assay_type_description: Series[str] | None = pa.Field(
+        nullable=True, description="Assay type description."
+    )
     assay_test_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=list(ASSAY_TEST_TYPES),
@@ -23309,9 +24921,9 @@ class AssaySchema(ETLRecordSchema):
     assay_organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    assay_taxonomy_id: Series[int] | None = pa.Field(
+    assay_taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
-        description="NCBI Taxonomy ID. Standardized name (was assay_tax_id).",
+        description="NCBI Taxonomy ID (float for nullable int).",
     )
     assay_strain: Series[str] | None = pa.Field(nullable=True, description="Strain.")
     assay_tissue: Series[str] | None = pa.Field(nullable=True, description="Tissue.")
@@ -23423,16 +25035,28 @@ class AssaySchema(ETLRecordSchema):
     # )
 
     # === Variant Information (Flattened) ===
-    variant_accession: Series[str] | None = pa.Field(nullable=True)
-    variant_isoform: Series[str] | None = pa.Field(nullable=True)
-    variant_mutation: Series[str] | None = pa.Field(nullable=True)
-    variant_organism: Series[str] | None = pa.Field(nullable=True)
-    variant_sequence: Series[str] | None = pa.Field(nullable=True)
-    variant_taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True,
-        description="Variant taxonomy ID. Standardized name (was variant_tax_id).",
+    variant_accession: Series[str] | None = pa.Field(
+        nullable=True, description="Variant protein accession number."
     )
-    variant_sequence_json: Series[str] | None = pa.Field(nullable=True)
+    variant_isoform: Series[str] | None = pa.Field(
+        nullable=True, description="Variant isoform identifier."
+    )
+    variant_mutation: Series[str] | None = pa.Field(
+        nullable=True, description="Variant mutation description."
+    )
+    variant_organism: Series[str] | None = pa.Field(
+        nullable=True, description="Variant organism name."
+    )
+    variant_sequence: Series[str] | None = pa.Field(
+        nullable=True, description="Variant amino acid sequence."
+    )
+    variant_taxonomy_id: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Variant taxonomy ID (float for nullable int).",
+    )
+    variant_sequence_json: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of variant sequence details."
+    )
 
     # === Complex Fields (JSON) ===
     assay_classifications: Series[str] | None = pa.Field(
@@ -23465,6 +25089,10 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    ASSAY_PARAMETER_STANDARD_TYPES,
+    STANDARD_RELATIONS,
+)
 
 
 class AssayParametersSchema(ETLRecordSchema):
@@ -23527,11 +25155,13 @@ class AssayParametersSchema(ETLRecordSchema):
     standard_type: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
-        description="Standardized type.",
+        isin=list(ASSAY_PARAMETER_STANDARD_TYPES),
+        description="Standardized type (IC50, EC50, CONC, PH, TEMP, etc.).",
     )
     standard_relation: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
+        isin=list(STANDARD_RELATIONS),
         description="Standardized relation.",
     )
     standard_value: Series[float] | None = pa.Field(
@@ -23755,7 +25385,11 @@ from bioetl.domain.schemas.constants import (
     MOLECULE_TYPES,
     STRUCTURE_TYPES,
 )
-from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
+from bioetl.domain.validation import (
+    INCHI_KEY_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 
 class MoleculeSchema(ETLRecordSchema):
@@ -23804,8 +25438,8 @@ class MoleculeSchema(ETLRecordSchema):
         isin=list(MOLECULE_TYPES),
         description="Molecule type.",
     )
-    first_approval: Series[int] | None = pa.Field(
-        nullable=True, description="Year of first approval."
+    first_approval: Series[float] | None = pa.Field(
+        nullable=True, description="Year of first approval (float for nullable int)."
     )
     # chirality: Optional[Series[int]] = pa.Field(
     #     nullable=True,
@@ -23836,13 +25470,13 @@ class MoleculeSchema(ETLRecordSchema):
         nullable=True, isin=[-1, 0, 1], description="Natural product flag."
     )
     first_in_class: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="First in class flag."
+        nullable=True, isin=[-1, 0, 1], description="First in class flag (-1=unknown)."
     )
     prodrug: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="Prodrug flag."
+        nullable=True, isin=[-1, 0, 1], description="Prodrug flag (-1=unknown)."
     )
     inorganic_flag: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="Inorganic flag."
+        nullable=True, isin=[-1, 0, 1], description="Inorganic flag (-1=unknown)."
     )
     polymer_flag: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Polymer flag."
@@ -23869,8 +25503,11 @@ class MoleculeSchema(ETLRecordSchema):
     availability_type: Series[int] | None = pa.Field(
         nullable=True, isin=[-2, -1, 0, 1, 2], description="Availability type."
     )
-    usan_year: Series[int] | None = pa.Field(
-        nullable=True, description="USAN approval year."
+    usan_year: Series[float] | None = pa.Field(
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="USAN approval year (float for nullable int).",
     )
     usan_stem: Series[str] | None = pa.Field(
         nullable=True, description="USAN stem name."
@@ -24161,7 +25798,9 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Identifiers ===
-    src_id: Series[pd.Int64Dtype] = pa.Field(nullable=True, description="Source ID.")
+    src_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Source ID."
+    )
 
     # === ChEMBL Release Metadata ===
     chembl_release: Series[str] = pa.Field(
@@ -24180,20 +25819,17 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     page_first: Series[str] = pa.Field(nullable=True, description="First page.")
     page_last: Series[str] = pa.Field(nullable=True, description="Last page.")
 
-    # === DQ Fields ===
-    _dq_warn: Series[pd.BooleanDtype] = pa.Field(
-        nullable=True, default=False, description="DQ warning flag."
-    )
-    _dq_error: Series[pd.BooleanDtype] = pa.Field(
-        nullable=True, default=False, description="DQ error flag."
-    )
+    # DQ fields (_dq_warn, _dq_error) inherited from ETLRecordSchema as bool, nullable=False
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow missing columns and extra columns
+        strict = False  # Allow extra columns beyond schema definition
         ordered = False
         coerce = True
+        # Note: Fields from PublicationBaseSchema that ChEMBL doesn't provide
+        # (pmc_id, affiliation_list, author_orcids, publication_date, language, is_oa)
+        # are set to None by the transformer to satisfy schema inheritance
 
 ================================================================================
 File: publication_similarity.py
@@ -24387,8 +26023,8 @@ class TargetSchema(ETLRecordSchema):
     pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True, description="NCBI Taxonomy ID. Standardized name (was tax_id)."
+    taxonomy_id: Series[float] | None = pa.Field(
+        nullable=True, description="NCBI Taxonomy ID (float for nullable int)."
     )
     organism: Series[str] | None = pa.Field(nullable=True, description="Organism.")
     species_group_flag: Series[bool] | None = pa.Field(
@@ -24418,6 +26054,9 @@ class TargetSchema(ETLRecordSchema):
     # Note: Pandera Series[object] is used for lists, validation is limited
     component_accessions: Series[object] | None = pa.Field(
         nullable=True, description="List of component accessions."
+    )
+    component_descriptions: Series[object] | None = pa.Field(
+        nullable=True, description="List of component descriptions."
     )
     component_id: Series[float] | None = pa.Field(
         nullable=True,
@@ -24793,7 +26432,7 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="Journal name",
     )
-    publication_year: Series[pd.Int64Dtype] = pa.Field(
+    publication_year: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
@@ -24806,7 +26445,20 @@ class PublicationBaseSchema(ETLRecordSchema):
     )
     publication_type: Series[str] = pa.Field(
         nullable=True,
-        description="Document type - PUBLICATION, PREPRINT, BOOK, DATASET, OTHER (unified field name)",
+        description="Raw provider type string (preserved for forensic/debug)",
+    )
+    publication_type_unified: Series[str] = pa.Field(
+        nullable=True,
+        description="Unified type Level 3: 'Journal Article', 'Preprint', 'Clinical Trial', etc.",
+    )
+    publication_subclass: Series[str] = pa.Field(
+        nullable=True,
+        description="Subclass Level 2: 'Original Experimental Data', 'Reviews & Syntheses', etc.",
+    )
+    publication_class: Series[str] = pa.Field(
+        nullable=True,
+        isin=["EXP", "REV", "PEER"],
+        description="Class Level 1: EXP (experimental), REV (reviews/secondary), PEER (peer review)",
     )
     language: Series[str] = pa.Field(
         nullable=True,
@@ -24826,12 +26478,12 @@ class PublicationBaseSchema(ETLRecordSchema):
 
     # === Metrics (unified field names) ===
     # Use pd.Int64Dtype for nullable integer support
-    citations_received: Series[pd.Int64Dtype] = pa.Field(
+    citations_received: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of citations TO this publication (unified field name)",
     )
-    citations_made: Series[pd.Int64Dtype] = pa.Field(
+    citations_made: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of references FROM this publication (unified field name)",
@@ -24863,12 +26515,12 @@ class PublicationBaseSchema(ETLRecordSchema):
         description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
 
-    @pa.check("title", name="title_not_empty")
+    @pa.check("title", name="title_not_empty")  # type: ignore[untyped-decorator]
     def _check_title(cls, series: Series[str]) -> Series[bool]:
         """Validate title is not empty when present (null is allowed)."""
         return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
 
-    @pa.check("author_orcids", name="orcid_format")
+    @pa.check("author_orcids", name="orcid_format")  # type: ignore[untyped-decorator]
     def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
         """Validate ORCID format in JSON array elements."""
         _pattern = re.compile(ORCID_PATTERN)
@@ -24916,8 +26568,9 @@ from __future__ import annotations
 CHEMBL_ID_PATTERN = r"^CHEMBL\d+$"
 
 # Ontology identifiers
-BAO_ID_PATTERN = r"^BAO:\d+$"  # BioAssay Ontology
-UO_ID_PATTERN = r"^UO:\d+$"  # Units Ontology
+# ChEMBL API returns underscore format (BAO_0000190), not colon format (BAO:0000190)
+BAO_ID_PATTERN = r"^BAO[_:]\d+$"  # BioAssay Ontology (accepts both _ and :)
+UO_ID_PATTERN = r"^UO[_:]\d+$"  # Units Ontology (accepts both _ and :)
 CLO_ID_PATTERN = r"^CLO_\d+$"  # Cell Line Ontology
 EFO_ID_PATTERN = r"^EFO_\d+$"  # Experimental Factor Ontology
 
@@ -24952,6 +26605,40 @@ ACTIVITY_STANDARD_TYPES: frozenset[str] = frozenset(
         "Ratio",
         "ED50",
         "ID50",
+    ]
+)
+
+# Assay parameter standard types (superset of activity types + parameter-specific)
+ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset(
+    [
+        # Measurement types (from ACTIVITY_STANDARD_TYPES)
+        "IC50",
+        "EC50",
+        "Ki",
+        "Kd",
+        "AC50",
+        "GI50",
+        "Potency",
+        "Inhibition",
+        "% Inhibition",
+        "Activity",
+        "Ratio",
+        "ED50",
+        "ID50",
+        # Parameter-specific types
+        "CONC",  # Concentration
+        "PH",  # pH level
+        "TEMP",  # Temperature
+        "TIME",  # Incubation time
+        "DOSE",  # Dose
+        "VOLUME",  # Volume
+        "WAVELENGTH",  # Wavelength
+        "PERCENT",  # Percentage
+        "PRESSURE",  # Pressure
+        "HUMIDITY",  # Humidity
+        "CELL_COUNT",  # Cell count
+        "CELL_DENSITY",  # Cell density
+        "SERUM",  # Serum percentage
     ]
 )
 
@@ -25065,6 +26752,7 @@ PUBLICATION_TYPES: frozenset[str] = frozenset(
 __all__ = [
     "ACTIVITY_STANDARD_TYPES",
     "ASSAY_CATEGORIES",
+    "ASSAY_PARAMETER_STANDARD_TYPES",
     "ASSAY_TEST_TYPES",
     # Assay enums
     "ASSAY_TYPES",
@@ -25151,7 +26839,7 @@ class AuthorSchema(ETLRecordSchema):
     # === Foreign Key ===
     doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="FK to Publication.doi",
     )
 
@@ -25240,7 +26928,7 @@ class FunderSchema(ETLRecordSchema):
     # === Foreign Key ===
     doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="FK to Publication.doi",
     )
 
@@ -25467,7 +27155,7 @@ class ReferenceSchema(ETLRecordSchema):
     # === Foreign Key ===
     source_doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="DOI of citing publication (FK to Publication.doi)",
     )
 
@@ -25481,7 +27169,7 @@ class ReferenceSchema(ETLRecordSchema):
     # === Target Reference ===
     target_doi: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="DOI of cited publication (if resolved)",
     )
     unstructured: Series[str] | None = pa.Field(
@@ -25822,7 +27510,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     )
 
     # === Additional Metrics ===
-    fwci: Series[float] = pa.Field(
+    fwci: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Field-Weighted Citation Impact (must be non-negative)",
@@ -25936,12 +27624,12 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    cid: Series[int] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
+    cid: Series[str] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
 
     @pa.check("cid", name="cid_positive")
-    def _check_cid(cls, series: Series[int]) -> Series[bool]:
-        """Validate CID is positive."""
-        return cast("Series[bool]", series >= 1)
+    def _check_cid(cls, series: Series[str]) -> Series[bool]:
+        """Validate CID is a positive integer string."""
+        return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === Structural Identifiers ===
     canonical_smiles: Series[str] | None = pa.Field(
@@ -26453,7 +28141,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         nullable=True, description="Page numbers (unified field name)"
     )
 
-    pub_month: Series[pd.Int64Dtype] = pa.Field(
+    pub_month: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Publication month"
     )
 
@@ -26462,7 +28150,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate publication month range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 12)))
 
-    pub_day: Series[pd.Int64Dtype] = pa.Field(
+    pub_day: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Publication day"
     )
 
@@ -26507,7 +28195,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Counts (denormalized for query efficiency) ===
-    author_count: Series[pd.Int64Dtype] = pa.Field(
+    author_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of authors"
     )
 
@@ -26516,7 +28204,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate author count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    mesh_heading_count: Series[pd.Int64Dtype] = pa.Field(
+    mesh_heading_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of MeSH headings"
     )
 
@@ -26525,7 +28213,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate MeSH heading count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    keyword_count: Series[pd.Int64Dtype] = pa.Field(
+    keyword_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of keywords"
     )
 
@@ -26534,7 +28222,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate keyword count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    grant_count: Series[pd.Int64Dtype] = pa.Field(
+    grant_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of grants"
     )
 
@@ -26543,7 +28231,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         """Validate grant count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    chemical_count: Series[pd.Int64Dtype] = pa.Field(
+    chemical_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of chemicals"
     )
 
@@ -26711,7 +28399,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="DBLP publication key",
     )
 
-    corpus_id: Series[pd.Int64Dtype] = pa.Field(
+    corpus_id: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="S2 Corpus ID",
@@ -26735,7 +28423,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
 
     # === Provider-specific Metrics ===
 
-    influential_citation_count: Series[pd.Int64Dtype] = pa.Field(
+    influential_citation_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of influential citations",
@@ -27642,7 +29330,7 @@ json_object_check = pa.Check(is_valid_json_object, name="valid_json_object")
 # and can be used in pa.Field() as keyword arguments.
 
 
-@register_check_method(  # type: ignore[untyped-decorator]
+@register_check_method(
     statistics=["min_value"],
     supported_types=(pd.Series,),
 )
@@ -27661,7 +29349,7 @@ def is_non_negative(pandas_obj: pd.Series, *, min_value: float | bool = 0) -> pd
     return pandas_obj.isna() | (pandas_obj >= actual_min)
 
 
-@register_check_method(  # type: ignore[untyped-decorator]
+@register_check_method(
     statistics=["min_value"],
     supported_types=(pd.Series,),
 )
@@ -27680,7 +29368,7 @@ def is_positive(pandas_obj: pd.Series, *, min_value: int | bool = 1) -> pd.Serie
     return pandas_obj.isna() | (pandas_obj >= actual_min)
 
 
-@register_check_method(  # type: ignore[untyped-decorator]
+@register_check_method(
     statistics=["min_val", "max_val"],
     supported_types=(pd.Series,),
 )
@@ -27700,7 +29388,7 @@ def in_closed_range(
     return pandas_obj.isna() | ((pandas_obj >= min_val) & (pandas_obj <= max_val))
 
 
-@register_check_method(  # type: ignore[untyped-decorator]
+@register_check_method(
     statistics=["max_len"],
     supported_types=(pd.Series,),
 )
@@ -27713,7 +29401,7 @@ def max_str_length(pandas_obj: pd.Series, *, max_len: int) -> pd.Series:
     return pandas_obj.isna() | (pandas_obj.str.len() <= max_len)
 
 
-@register_check_method(  # type: ignore[untyped-decorator]
+@register_check_method(
     statistics=["prefix"],
     supported_types=(pd.Series,),
 )
@@ -27726,7 +29414,7 @@ def str_starts_with(pandas_obj: pd.Series, *, prefix: str) -> pd.Series:
     return pandas_obj.isna() | pandas_obj.str.startswith(prefix)
 
 
-@register_check_method(  # type: ignore[untyped-decorator]
+@register_check_method(
     statistics=["pattern"],
     supported_types=(pd.Series,),
 )
@@ -27886,8 +29574,9 @@ def _has_non_ascii(text: str) -> bool:
 def _get_orjson_options(sort_keys: bool) -> int:
     """Get orjson options based on configuration."""
     assert orjson is not None
-    options = orjson.OPT_SERIALIZE_NUMPY
-    return options | orjson.OPT_SORT_KEYS if sort_keys else options  # type: ignore[no-any-return]
+    options: int = orjson.OPT_SERIALIZE_NUMPY
+    result: int = options | orjson.OPT_SORT_KEYS if sort_keys else options
+    return result
 
 
 def _serialize_with_orjson(
@@ -29084,10 +30773,11 @@ class DQReportSerializer:
     def _to_json(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to JSON with pretty formatting."""
         data = to_dict(report)
-        return orjson.dumps(  # type: ignore[no-any-return]
+        result: str = orjson.dumps(
             data,
             option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
         ).decode("utf-8")
+        return result
 
     def _to_yaml(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to YAML format (simple, no external dependencies)."""
@@ -31541,8 +33231,8 @@ def _get_default_config() -> ValidationConfig:
 
 
 # Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
-MIN_PUBLICATION_YEAR: int = 1500
-MAX_PUBLICATION_YEAR: int = 2100
+MIN_PUBLICATION_YEAR: int = 1950
+MAX_PUBLICATION_YEAR: int = 2050
 
 
 # =============================================================================
@@ -31801,8 +33491,9 @@ def validate_non_empty_string(value: str | None) -> str | None:
 # Format: 10.XXXX/suffix where:
 #   - 10. is the fixed prefix
 #   - XXXX is registrant code (minimum 4 digits)
-#   - suffix is the identifier (minimum 1 character)
-DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/.+$"
+#   - suffix is the identifier (minimum 1 non-whitespace character)
+# Aligned with DOI Value Object: \S+ forbids whitespace in DOI suffix.
+DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/\S+$"
 _DOI_PATTERN = re.compile(DOI_REGEX_PATTERN)
 
 

@@ -463,6 +463,9 @@ class ChemblAdapter(BaseHttpAdapter):
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:
+                # Catch all: API errors (network, timeout, 500s, malformed response),
+                # JSON decode errors, or validation failures. Log partial success and
+                # gracefully terminate pagination to avoid data loss.
                 self.logger.warning(
                     "chembl_pagination_interrupted",
                     entity_type=entity_type,

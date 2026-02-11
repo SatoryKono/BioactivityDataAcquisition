@@ -44,6 +44,9 @@ class AssaySchema(ETLRecordSchema):
         isin=list(ASSAY_TYPES),
         description="Assay type.",
     )
+    assay_type_description: Series[str] | None = pa.Field(
+        nullable=True, description="Assay type description."
+    )
     assay_test_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=list(ASSAY_TEST_TYPES),
@@ -62,9 +65,9 @@ class AssaySchema(ETLRecordSchema):
     assay_organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    assay_taxonomy_id: Series[int] | None = pa.Field(
+    assay_taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
-        description="NCBI Taxonomy ID. Standardized name (was assay_tax_id).",
+        description="NCBI Taxonomy ID (float for nullable int).",
     )
     assay_strain: Series[str] | None = pa.Field(nullable=True, description="Strain.")
     assay_tissue: Series[str] | None = pa.Field(nullable=True, description="Tissue.")
@@ -191,9 +194,9 @@ class AssaySchema(ETLRecordSchema):
     variant_sequence: Series[str] | None = pa.Field(
         nullable=True, description="Variant amino acid sequence."
     )
-    variant_taxonomy_id: Series[int] | None = pa.Field(
+    variant_taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
-        description="Variant taxonomy ID. Standardized name (was variant_tax_id).",
+        description="Variant taxonomy ID (float for nullable int).",
     )
     variant_sequence_json: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of variant sequence details."

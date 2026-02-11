@@ -362,6 +362,8 @@ class SilverDQAnalyzer:
                     else 0.0,
                 }
             except Exception:
+                # Catch all: cardinality calculation may fail for unhashable types
+                # or invalid column access. Skip column from cardinality metrics.
                 pass
 
         status = DQCheckStatus.PASS if duplicate_rate == 0 else DQCheckStatus.WARN
@@ -425,6 +427,8 @@ class SilverDQAnalyzer:
                             else None,
                         )
                 except Exception:
+                    # Catch all: numeric stats may fail for mixed types, NaN/Inf,
+                    # or non-numeric data in numeric column. Skip column profiling.
                     pass
 
             elif dtype in (pl.Utf8, pl.Categorical):
@@ -447,6 +451,8 @@ class SilverDQAnalyzer:
                         cardinality=cardinality,
                     )
                 except Exception:
+                    # Catch all: value_counts() may fail for unhashable types or
+                    # large cardinality. Skip column from categorical profiling.
                     pass
 
         return ValueDistributionResult(

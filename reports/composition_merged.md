@@ -125,10 +125,16 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         PipelineRunContext ready for bootstrap_pipeline.
     """
     # Build InputFilterContext from CLI options
-    # Priority: filter_ids > input_csv > disabled
+    # Priority: multi_filter_ids > filter_ids > input_csv > disabled
+    # - multi_filter_ids: Multi-field AND filtering (composite dependencies)
     # - filter_ids: Direct IDs for composite mode (no CSV file needed)
     # - input_csv: CSV file path, column_name/filter_field from YAML defaults
-    if options.filter_ids:
+    if options.multi_filter_ids:
+        # Multi-field filtering mode (composite dependencies with AND logic)
+        input_filter = InputFilterContext.from_multi_ids(
+            multi_filter_ids=options.multi_filter_ids,
+        )
+    elif options.filter_ids:
         # Direct IDs mode (composite pipelines)
         input_filter = InputFilterContext.from_ids(
             filter_ids=options.filter_ids,
@@ -179,6 +185,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         vacuum=vacuum,
         log_level=options.log_level,
         ignore_yaml_filter=options.ignore_yaml_filter,
+        skip_gold=options.skip_gold,
         cached_bronze=cached_bronze,
     )
 
@@ -2250,6 +2257,7 @@ def assemble_runtime_config(
     dry_run: bool,
     heartbeat_interval: int,
     vacuum: VacuumSettings,
+    skip_gold: bool = False,
 ) -> RuntimeConfig:
     """Assemble RuntimeConfig from resolved parameters.
 
@@ -2294,6 +2302,7 @@ def assemble_runtime_config(
         dry_run=dry_run,
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
+        skip_gold=skip_gold,
     )
 
 
@@ -2344,6 +2353,8 @@ def assemble_filter_config(
         test_mode=effective_test_mode,
         direct_filter_ids=ctx.input_filter.filter_ids,
         direct_fallback_mapping=ctx.input_filter.fallback_mapping,
+        direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
+        direct_valid_combinations=ctx.input_filter.valid_combinations,
     )
 
 
@@ -2424,7 +2435,11 @@ from bioetl.application.composite.runner import (
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
+from bioetl.domain.composite.config import (
+    CompositeConfig,
+    DependencyConfig,
+    EnricherConfig,
+)
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.field_group_loader import (
@@ -2496,7 +2511,8 @@ def load_composite_config(name: str) -> CompositeConfig:
         # Validate using Pydantic schema
         schema = CompositeConfigFileSchema.model_validate(raw)
         # Convert to immutable domain objects
-        return schema.to_domain()  # type: ignore[no-any-return]
+        config: CompositeConfig = schema.to_domain()
+        return config
     except ValidationError as e:
         # Convert Pydantic errors to ValueError for consistent API
         raise ValueError(f"Invalid composite config '{name}': {e}") from e
@@ -2563,6 +2579,96 @@ def _extract_filter_ids_from_keys(
     return filter_ids, filter_key, fallback
 
 
+def _extract_field_values(
+    keys: pl.DataFrame,
+    field: str,
+) -> tuple[str, ...] | None:
+    """Extract unique non-null values for a single field from keys DataFrame.
+
+    Returns:
+        Tuple of string values, or None if field missing or empty.
+    """
+    if field not in keys.columns:
+        return None
+    values = keys.select(field).drop_nulls().unique().to_series().to_list()
+    if not values:
+        return None
+    return tuple(str(v) for v in values)
+
+
+def _extract_multi_filter_ids(
+    dep_cfg: DependencyConfig,
+    keys: pl.DataFrame,
+    logger: LoggerPort | None = None,
+) -> dict[str, tuple[str, ...]] | None:
+    """Extract multi-field filter IDs from seed keys for a dependency.
+
+    For dual-key filtering (e.g., molecule_chembl_id + document_chembl_id),
+    extracts unique values for each filter field from the keys DataFrame.
+
+    Args:
+        dep_cfg: Dependency configuration with filter_fields.
+        keys: DataFrame containing seed keys.
+        logger: Optional logger.
+
+    Returns:
+        Dict mapping field name to tuple of unique IDs, or None if extraction fails.
+    """
+    if keys is None or len(keys) == 0:
+        return None
+
+    result: dict[str, tuple[str, ...]] = {}
+    for field in dep_cfg.effective_filter_fields:
+        values = _extract_field_values(keys, field)
+        if values is None:
+            if logger:
+                logger.warning(
+                    "Multi-filter field missing or empty",
+                    pipeline=dep_cfg.pipeline,
+                    field=field,
+                    available_columns=list(keys.columns),
+                )
+            return None
+        result[field] = values
+
+    if logger:
+        logger.info(
+            "Extracted multi-field filter IDs",
+            pipeline=dep_cfg.pipeline,
+            fields=list(result.keys()),
+            counts={f: len(ids) for f, ids in result.items()},
+        )
+
+    return result
+
+
+def _resolve_bronze_opts(
+    runtime: CompositeRuntimeConfig,
+    phase_override: bool | None,
+) -> dict[str, object]:
+    """Resolve cached Bronze options for a specific pipeline phase.
+
+    Tri-state resolution: phase_override takes precedence over master switch.
+    - None: use master switch (runtime.use_cached_bronze)
+    - True/False: override master switch
+
+    Args:
+        runtime: Composite runtime configuration with master switch.
+        phase_override: Per-phase override (None=follow master).
+
+    Returns:
+        Dict with use_cached_bronze, cached_bronze_path, cached_bronze_date.
+    """
+    effective = (
+        phase_override if phase_override is not None else runtime.use_cached_bronze
+    )
+    return {
+        "use_cached_bronze": effective,
+        "cached_bronze_path": runtime.cached_bronze_path if effective else None,
+        "cached_bronze_date": runtime.cached_bronze_date if effective else None,
+    }
+
+
 def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
@@ -2603,19 +2709,22 @@ def bootstrap_composite_runner(
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
 
-    # Shared cached bronze RunOptions kwargs for all runner factories
-    _bronze_opts: dict[str, object] = {
-        "use_cached_bronze": runtime.use_cached_bronze,
-        "cached_bronze_path": runtime.cached_bronze_path,
-        "cached_bronze_date": runtime.cached_bronze_date,
-    }
+    # Per-phase cached bronze RunOptions kwargs
+    _seed_bronze_opts = _resolve_bronze_opts(runtime, phase_override=None)
+    _enricher_bronze_opts = _resolve_bronze_opts(
+        runtime, phase_override=runtime.cached_bronze_enrichers
+    )
+    _dependency_bronze_opts = _resolve_bronze_opts(
+        runtime, phase_override=runtime.cached_bronze_dependencies
+    )
 
     def seed_runner_factory() -> PipelineRunner:
         """Create PipelineRunner for the seed phase."""
         options = RunOptions(
             run_type="incremental",
             limit=runtime.seed_limit,
-            **_bronze_opts,  # type: ignore[arg-type]
+            skip_gold=True,
+            **_seed_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline_runner(ctx)
@@ -2660,10 +2769,11 @@ def bootstrap_composite_runner(
             run_type="incremental",
             limit=limit,
             ignore_yaml_filter=True,
+            skip_gold=True,
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
-            **_bronze_opts,  # type: ignore[arg-type]
+            **_enricher_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -2687,6 +2797,8 @@ def bootstrap_composite_runner(
         - Extracts join key values from provided keys DataFrame
         - Passes extracted IDs as filter_ids to limit API calls
         - Uses filter_field from config if set (for field name mapping)
+        - For multi-field filtering (filter_fields), extracts all fields
+          and passes as multi_filter_ids with valid combinations
 
         Args:
             pipeline_name: Name of the dependency pipeline to instantiate.
@@ -2698,19 +2810,24 @@ def bootstrap_composite_runner(
         dep_cfg = dependency_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
+        multi_filter_ids: dict[str, tuple[str, ...]] | None = None
 
         if dep_cfg and keys is not None and len(keys) > 0:
-            # Extract filter IDs from keys
-            for key in dep_cfg.join_keys:
-                if key in keys.columns:
-                    key_values = (
-                        keys.select(key).drop_nulls().unique().to_series().to_list()
-                    )
-                    if key_values:
-                        filter_ids = tuple(str(v) for v in key_values)
-                        # Use filter_field from config if set, otherwise use join_key
-                        filter_field = dep_cfg.filter_field or key
-                        break
+            if dep_cfg.is_multi_field_filter:
+                # Multi-field filtering: extract all filter fields
+                multi_filter_ids = _extract_multi_filter_ids(dep_cfg, keys, logger)
+            else:
+                # Single-field filtering (existing logic)
+                for key in dep_cfg.join_keys:
+                    if key in keys.columns:
+                        key_values = (
+                            keys.select(key).drop_nulls().unique().to_series().to_list()
+                        )
+                        if key_values:
+                            filter_ids = tuple(str(v) for v in key_values)
+                            # Use filter_field from config if set, otherwise use join_key
+                            filter_field = dep_cfg.filter_field or key
+                            break
 
         # Debug logging for dependency filter configuration
         logger.debug(
@@ -2722,16 +2839,27 @@ def bootstrap_composite_runner(
             filter_field=filter_field,
             filter_ids_count=len(filter_ids) if filter_ids else 0,
             filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+            multi_filter_fields=list(multi_filter_ids.keys())
+            if multi_filter_ids
+            else [],
+            multi_filter_counts={f: len(ids) for f, ids in multi_filter_ids.items()}
+            if multi_filter_ids
+            else {},
             is_chained=dep_cfg.key_source is not None if dep_cfg else False,
             key_source=dep_cfg.key_source if dep_cfg else None,
         )
 
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if filter_ids and keys is not None else None,
+            limit=len(keys)
+            if (filter_ids or multi_filter_ids) and keys is not None
+            else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
-            **_bronze_opts,  # type: ignore[arg-type]
+            multi_filter_ids=multi_filter_ids,
+            ignore_yaml_filter=True,
+            skip_gold=True,
+            **_dependency_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -3478,6 +3606,7 @@ def bootstrap_pipeline_runner(
         dry_run=ctx.dry_run,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         vacuum=vacuum,
+        skip_gold=ctx.skip_gold,
     )
 
     # Assemble filter config (CLI/direct IDs override YAML)
@@ -3986,6 +4115,31 @@ class FilterConfigBuilder:
         )
 
     @staticmethod
+    def from_direct_multi_ids(
+        multi_filter_ids: dict[str, tuple[str, ...]],
+        valid_combinations: frozenset[tuple[str, ...]] | None = None,
+        batch_size: int = 100,
+    ) -> InputFilterConfig:
+        """Build config for direct multi-field filter IDs mode.
+
+        Used for composite dependencies that filter by multiple fields
+        simultaneously (AND logic). E.g., compound_record filtered by both
+        molecule_chembl_id and document_chembl_id.
+
+        Args:
+            multi_filter_ids: Mapping of field name to tuple of IDs.
+            valid_combinations: Valid (field1, field2, ...) tuples for
+                client-side combination filtering.
+            batch_size: Number of IDs per API request.
+        """
+        return InputFilterConfig(
+            enabled=True,
+            direct_multi_filter_ids=multi_filter_ids,
+            direct_valid_combinations=valid_combinations,
+            batch_size=batch_size,
+        )
+
+    @staticmethod
     def build(
         yaml_filter: YamlInputFilter,
         cli_csv: str | None = None,
@@ -3996,13 +4150,16 @@ class FilterConfigBuilder:
         test_mode: bool = False,
         direct_filter_ids: tuple[str, ...] | None = None,
         direct_fallback_mapping: dict[str, str] | None = None,
+        direct_multi_filter_ids: dict[str, tuple[str, ...]] | None = None,
+        direct_valid_combinations: frozenset[tuple[str, ...]] | None = None,
     ) -> InputFilterConfig | None:
         """Build InputFilterConfig by merging YAML config and CLI overrides.
 
         Priority:
-        1. direct_filter_ids: Direct IDs (highest priority, for composite mode)
-        2. cli_csv: CSV path from CLI
-        3. yaml_filter: YAML config (disabled in test_mode)
+        1. direct_multi_filter_ids: Multi-field AND filtering (highest, composite)
+        2. direct_filter_ids: Direct IDs (composite mode)
+        3. cli_csv: CSV path from CLI
+        4. yaml_filter: YAML config (disabled in test_mode)
 
         Multi-column mode (columns list in YAML) is used as-is, CLI overrides ignored.
 
@@ -4019,10 +4176,21 @@ class FilterConfigBuilder:
             test_mode: If True, YAML-based filters are disabled
             direct_filter_ids: Direct filter IDs (no CSV file, for composite mode)
             direct_fallback_mapping: Direct fallback mapping (DOI->Title)
+            direct_multi_filter_ids: Multi-field filter IDs (AND logic, composite)
+            direct_valid_combinations: Valid (field1, field2) tuples for
+                client-side combination filtering
 
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
         """
+        # Direct multi-field filter IDs take highest priority
+        if direct_multi_filter_ids is not None:
+            return FilterConfigBuilder.from_direct_multi_ids(
+                multi_filter_ids=direct_multi_filter_ids,
+                valid_combinations=direct_valid_combinations,
+                batch_size=yaml_filter.batch_size,
+            )
+
         # Direct filter IDs take highest priority (composite mode)
         if direct_filter_ids is not None:
             return FilterConfigBuilder.from_direct_ids(
@@ -4916,6 +5084,33 @@ from bioetl.domain.contracts import (
     UniProtProteinGoldSchema,
 )
 
+# Pandera Silver schemas (DataFrameModel classes for validation)
+from bioetl.domain.schemas.chembl.activity import ActivitySchema
+from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
+from bioetl.domain.schemas.chembl.cell_line import CellLineSchema
+from bioetl.domain.schemas.chembl.compound_record import CompoundRecordSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.protein_classification import (
+    ProteinClassificationSchema,
+)
+from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
+from bioetl.domain.schemas.chembl.publication_similarity import (
+    PublicationSimilaritySchema,
+)
+from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
+from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
+from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
+from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
+from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
+from bioetl.domain.schemas.semanticscholar.publication import (
+    SemanticScholarPublicationSchema,
+)
+from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
+from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
+
 # Silver schemas (optional PyArrow schemas)
 from bioetl.infrastructure.schemas.silver import (
     CHEMBL_ACTIVITY_SCHEMA,
@@ -4966,6 +5161,9 @@ class PipelineFactoryConfig(NamedTuple):
         transformer_class: Transformer class for Bronze→Silver transformation
         silver_schema: PyArrow schema for Silver layer validation
         gold_schema: Pandera schema for Gold layer validation (required)
+        pandera_silver_schema: Pandera DataFrameModel class for Silver validation.
+            If provided, PanderaSilverValidator is created and injected into
+            SilverWriter for pre-write validation.
         data_source_provider: Override provider name for DataSourceRegistry lookup.
             When set, data source is created using this provider name instead of
             ``provider``. Use when the ProviderRegistry key differs from the
@@ -4977,6 +5175,7 @@ class PipelineFactoryConfig(NamedTuple):
     transformer_class: type[BaseTransformer]
     silver_schema: pa.Schema | None
     gold_schema: Any  # Pandera schema class
+    pandera_silver_schema: Any = None  # Pandera DataFrameModel class
     data_source_provider: str | None = None
 
 
@@ -4989,6 +5188,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=ActivityTransformer,
         silver_schema=CHEMBL_ACTIVITY_SCHEMA,
         gold_schema=ChEMBLActivityGoldSchema,
+        pandera_silver_schema=ActivitySchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_assay",
@@ -4996,6 +5196,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=AssayTransformer,
         silver_schema=CHEMBL_ASSAY_SCHEMA,
         gold_schema=ChEMBLAssayGoldSchema,
+        pandera_silver_schema=AssaySchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_assay_parameters",
@@ -5003,6 +5204,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=AssayParametersTransformer,
         silver_schema=CHEMBL_ASSAY_PARAMETERS_SCHEMA,
         gold_schema=ChEMBLAssayParametersGoldSchema,
+        pandera_silver_schema=AssayParametersSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_cell_line",
@@ -5010,6 +5212,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=CellLineTransformer,
         silver_schema=CHEMBL_CELL_LINE_SCHEMA,
         gold_schema=ChEMBLCellLineGoldSchema,
+        pandera_silver_schema=CellLineSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_compound_record",
@@ -5017,6 +5220,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=CompoundRecordTransformer,
         silver_schema=CHEMBL_COMPOUND_RECORD_SCHEMA,
         gold_schema=ChEMBLCompoundRecordGoldSchema,
+        pandera_silver_schema=CompoundRecordSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_publication",
@@ -5024,6 +5228,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PublicationTransformer,
         silver_schema=CHEMBL_PUBLICATION_SCHEMA,
         gold_schema=ChEMBLDocumentGoldSchema,
+        pandera_silver_schema=ChemblPublicationSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_publication_similarity",
@@ -5031,6 +5236,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PublicationSimilarityTransformer,
         silver_schema=CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
         gold_schema=ChEMBLDocumentSimilarityGoldSchema,
+        pandera_silver_schema=PublicationSimilaritySchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_publication_term",
@@ -5038,6 +5244,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PublicationTermTransformer,
         silver_schema=CHEMBL_DOCUMENT_TERM_SCHEMA,
         gold_schema=ChEMBLDocumentTermGoldSchema,
+        pandera_silver_schema=PublicationTermSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_molecule",
@@ -5045,6 +5252,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=MoleculeTransformer,
         silver_schema=CHEMBL_MOLECULE_SCHEMA,
         gold_schema=ChEMBLMoleculeGoldSchema,
+        pandera_silver_schema=MoleculeSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_target",
@@ -5052,6 +5260,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=TargetTransformer,
         silver_schema=CHEMBL_TARGET_SCHEMA,
         gold_schema=ChEMBLTargetGoldSchema,
+        pandera_silver_schema=TargetSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_target_component",
@@ -5059,6 +5268,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=TargetComponentTransformer,
         silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
         gold_schema=ChEMBLTargetComponentGoldSchema,
+        pandera_silver_schema=TargetComponentSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_protein_class",
@@ -5066,6 +5276,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=ProteinClassTransformer,
         silver_schema=CHEMBL_PROTEIN_CLASS_SCHEMA,
         gold_schema=ChEMBLProteinClassGoldSchema,
+        pandera_silver_schema=ProteinClassificationSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_tissue",
@@ -5088,6 +5299,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PubChemCompoundTransformer,
         silver_schema=PUBCHEM_COMPOUND_SCHEMA,
         gold_schema=PubChemCompoundGoldSchema,
+        pandera_silver_schema=PubchemMoleculeSchema,
     ),
     # UniProt pipelines
     PipelineFactoryConfig(
@@ -5096,6 +5308,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=UniProtProteinTransformer,
         silver_schema=UNIPROT_PROTEIN_SCHEMA,
         gold_schema=UniProtProteinGoldSchema,
+        pandera_silver_schema=UniprotTargetSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="uniprot_idmapping",
@@ -5103,6 +5316,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=IDMappingTransformer,
         silver_schema=UNIPROT_ID_MAPPING_SCHEMA,
         gold_schema=UniProtIDMappingGoldSchema,
+        pandera_silver_schema=IDMappingSchema,
         data_source_provider="uniprot_idmapping",
     ),
     # PubMed pipeline
@@ -5112,6 +5326,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PubMedPublicationTransformer,
         silver_schema=PUBMED_PUBLICATION_SCHEMA,
         gold_schema=PubMedPublicationGoldSchema,
+        pandera_silver_schema=PubMedPublicationSchema,
     ),
     # CrossRef pipeline
     PipelineFactoryConfig(
@@ -5120,6 +5335,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=CrossRefPublicationTransformer,
         silver_schema=CROSSREF_PUBLICATION_SCHEMA,
         gold_schema=CrossRefPublicationGoldSchema,
+        pandera_silver_schema=PublicationEnrichedSchema,
     ),
     # OpenAlex pipeline
     PipelineFactoryConfig(
@@ -5128,6 +5344,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=OpenAlexPublicationTransformer,
         silver_schema=OPENALEX_PUBLICATION_SCHEMA,
         gold_schema=OpenAlexPublicationGoldSchema,
+        pandera_silver_schema=OpenAlexPublicationSchema,
     ),
     # Semantic Scholar pipeline
     PipelineFactoryConfig(
@@ -5136,6 +5353,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=SemanticScholarPublicationTransformer,
         silver_schema=SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
         gold_schema=SemanticScholarPublicationGoldSchema,
+        pandera_silver_schema=SemanticScholarPublicationSchema,
     ),
 )
 
@@ -5162,6 +5380,7 @@ def _create_factory(
         provider=config.provider,
         silver_schema=config.silver_schema,
         gold_schema=config.gold_schema,
+        pandera_silver_schema=config.pandera_silver_schema,
         transformer_class=config.transformer_class,
         data_source_creator=data_source_creator,
     )
@@ -5457,6 +5676,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: The pipeline class to instantiate
         silver_schema: PyArrow schema for Silver layer
         gold_schema: Pandera schema for Gold layer
+        pandera_silver_schema: Pandera DataFrameModel class for Silver validation
     """
 
     def __init__(
@@ -5466,6 +5686,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         provider: str,
         silver_schema: pa.Schema | None = None,
         gold_schema: Any = None,
+        pandera_silver_schema: Any = None,
         data_source_creator: DataSourceCreator | None = None,
         transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
@@ -5484,6 +5705,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.provider = provider
         self.silver_schema = silver_schema
         self.gold_schema = gold_schema
+        self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
 
         # Use custom creator or look up from registry
@@ -5495,6 +5717,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -5504,6 +5727,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         Args:
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional domain-level filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
@@ -5519,6 +5743,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             entity_type=_extract_entity_type(self.pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -5583,6 +5808,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 provider=self.provider,
                 create_data_source_fn=self._create_data_source,
                 transformer_class=self.transformer_class,
+                pandera_silver_schema=self.pandera_silver_schema,
                 run_id=run_id,
                 runtime=runtime,
                 settings=settings,
@@ -5642,6 +5868,7 @@ def create_pipeline_factory(
     provider: str,
     silver_schema: pa.Schema | None = None,
     gold_schema: Any = None,
+    pandera_silver_schema: Any = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories."""
@@ -5651,6 +5878,7 @@ def create_pipeline_factory(
         provider=provider,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
+        pandera_silver_schema=pandera_silver_schema,
         transformer_class=transformer_class,
     )
 
@@ -5751,6 +5979,7 @@ def build_pipeline_services(
     dq_monitor: DQMonitorPort | None = None,
     metadata_coordinator: MetadataCoordinator | None = None,
     cached_bronze: CachedBronzeContext | None = None,
+    silver_validator: Any = None,
 ) -> PipelineServices:
     """Build PipelineServices from settings.
 
@@ -5768,6 +5997,8 @@ def build_pipeline_services(
         cached_bronze: Optional CachedBronzeContext for reading from Bronze
                       cache instead of API. When enabled, creates
                       CachedBronzeDataSource instead of the normal data source.
+        silver_validator: Optional SilverValidatorPort for Pandera validation
+            in SilverWriter. Created from Pandera Silver schema.
 
     Returns:
         Configured PipelineServices instance
@@ -5806,6 +6037,7 @@ def build_pipeline_services(
         tracer=tracer,
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
+        silver_validator=silver_validator,
     )
 
 
@@ -5825,6 +6057,7 @@ def create_pipeline_with_services(
     dq_monitor: DQMonitorPort | None = None,
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext | None = None,
+    pandera_silver_schema: Any = None,
 ) -> BasePipeline:
     """Create pipeline instance with services.
 
@@ -5848,12 +6081,24 @@ def create_pipeline_with_services(
         metrics: Optional metrics port for transformer observability
         cached_bronze: Optional CachedBronzeContext for reading from Bronze
                       cache instead of API.
+        pandera_silver_schema: Optional Pandera DataFrameModel class for Silver
+            validation. If provided, PanderaSilverValidator is created and
+            injected into SilverWriter.
 
     Returns:
         Configured pipeline instance
     """
     yaml_config = config or load_pipeline_config(pipeline_name)
     entity = _extract_entity_type(pipeline_name) or pipeline_name
+
+    # Create Silver validator from Pandera schema if provided (DI pattern)
+    silver_validator = None
+    if pandera_silver_schema is not None:
+        from bioetl.infrastructure.validation.pandera_validator import (
+            PanderaSilverValidator,
+        )
+
+        silver_validator = PanderaSilverValidator(pandera_silver_schema.to_schema())
 
     # Create RunContext with versioning metadata for MetadataCoordinator
     run_context = RunContext.create(
@@ -5879,6 +6124,7 @@ def create_pipeline_with_services(
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
         cached_bronze=cached_bronze,
+        silver_validator=silver_validator,
     )
 
     domain_config = yaml_config_to_domain(yaml_config)
@@ -5891,6 +6137,7 @@ def create_pipeline_with_services(
             entity_type=_extract_entity_type(pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            silver_filters=domain_config.silver_filters,
             gold_filters=domain_config.gold_filters,
             # identity_service and pii_hasher use defaults in transformer
         )
@@ -6480,6 +6727,7 @@ class BaseServicesFactory:
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: Any = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -6492,6 +6740,8 @@ class BaseServicesFactory:
             dq_monitor: Optional data quality monitor for anomaly detection
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation across Bronze, Silver, Gold.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
 
         Returns:
             PipelineServices with all dependencies configured
@@ -6505,6 +6755,7 @@ class BaseServicesFactory:
             logger,
             metrics=metrics,
             metadata_coordinator=metadata_coordinator,
+            silver_validator=silver_validator,
         )
 
         lock = cls._create_lock()
@@ -6935,6 +7186,8 @@ class ServicesBuilder:
             Configured BatchExecutor instance.
         """
         callbacks = extract_pipeline_callbacks(pipeline)
+        skip = pipeline.runtime.skip_gold
+        gold_filter = (lambda _c, _r: False) if skip else callbacks.gold_filter
 
         # Build configuration
         error_classifier = ErrorClassifier()
@@ -6974,7 +7227,7 @@ class ServicesBuilder:
             config=processor_config,
             error_classifier=error_classifier,
             transform_callback=callbacks.transform,
-            gold_filter_callback=callbacks.gold_filter,
+            gold_filter_callback=gold_filter,
             gold_transform_callback=callbacks.gold_transform,
             gold_validator=gold_validator,
             checkpoint_manager=checkpoint_manager,
@@ -7842,6 +8095,7 @@ class StorageFactory:
         bronze_flat_structure: bool = False,
         silver_flat_structure: bool = False,
         gold_flat_structure: bool = False,
+        silver_validator: Any = None,
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -7889,6 +8143,7 @@ class StorageFactory:
                 logger=logger,
                 tracing=effective_tracing,
                 csv_exporter=silver_csv_exporter,
+                silver_validator=silver_validator,
                 metadata_writer=silver_metadata_writer,
                 metadata_coordinator=metadata_coordinator,
                 transform_version=transform_version,
@@ -7916,6 +8171,7 @@ class StorageFactory:
         metrics: MetricsPort,
         tracing: TracingPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: Any = None,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -7928,6 +8184,8 @@ class StorageFactory:
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation. If provided, ensures consistent
                                 run_id and timestamps across Bronze, Silver, Gold.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
 
         Returns:
             StorageContext with adapter and paths
@@ -8023,6 +8281,7 @@ class StorageFactory:
             bronze_flat_structure=bronze_flat_structure,
             silver_flat_structure=silver_flat_structure,
             gold_flat_structure=gold_flat_structure,
+            silver_validator=silver_validator,
         )
 
         return StorageContext(
@@ -8120,6 +8379,7 @@ def create_transformer(
     entity_type: str,
     tracer: TracingPort | None = None,
     metrics: MetricsPort | None = None,
+    silver_filters: GoldFilterConfig | None = None,
     gold_filters: GoldFilterConfig | None = None,
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
@@ -8135,6 +8395,7 @@ def create_transformer(
         entity_type: Entity type (e.g., 'activity', 'compound').
         tracer: Optional tracing port for distributed tracing (O1 observability).
         metrics: Optional metrics port for duration/error tracking (O1 observability).
+        silver_filters: Optional domain-level filter configuration for Silver layer.
         gold_filters: Optional filter configuration for Gold layer.
         identity_service: Service for computing entity IDs and content hashes.
             Defaults to a new IdentityService instance in BaseTransformer.
@@ -8169,6 +8430,7 @@ def create_transformer(
         entity_type=entity_type,
         tracer=tracer,
         metrics=metrics,
+        silver_filters=silver_filters,
         gold_filters=gold_filters,
         identity_service=identity_service,
         pii_hasher=pii_hasher,
@@ -9838,6 +10100,7 @@ class PipelineFactoryProtocol(Protocol):
 
     pipeline_name: str
     silver_schema: pa.Schema | None
+    pandera_silver_schema: Any
 
     def create_with_services(
         self,
@@ -9850,6 +10113,7 @@ class PipelineFactoryProtocol(Protocol):
         tracer: TracingPort | None = ...,
         dq_monitor: DQMonitorPort | None = ...,
         metrics: MetricsPort | None = ...,
+        cached_bronze: CachedBronzeContext | None = ...,
     ) -> BasePipeline:
         """Create pipeline with services."""
         ...
@@ -9879,6 +10143,9 @@ class PipelineDefinition(NamedTuple):
 
     gold_schema: Any
     """Pandera schema for Gold layer validation (required)."""
+
+    pandera_silver_schema: Any = None
+    """Pandera DataFrameModel class for Silver layer validation."""
 
 
 class PipelineRegistry:
@@ -9937,6 +10204,7 @@ class PipelineRegistry:
                 factory=factory,
                 silver_schema=factory.silver_schema,
                 gold_schema=gold_schema,
+                pandera_silver_schema=getattr(factory, "pandera_silver_schema", None),
             )
 
     def get(self, pipeline_name: str) -> PipelineDefinition:
@@ -10015,6 +10283,7 @@ class PipelineRegistry:
                 factory=value,
                 silver_schema=value.silver_schema,
                 gold_schema=gold_schema,
+                pandera_silver_schema=getattr(value, "pandera_silver_schema", None),
             )
 
     def list_keys(self) -> list[str]:
@@ -10477,6 +10746,8 @@ class MetadataCoordinator:
                     idx = file_path.find("src/bioetl")
                     contract_path = file_path[idx:]
         except Exception:
+            # Catch all: module may not have __file__, or path extraction may fail
+            # for dynamically generated modules. Use default contract_path = None.
             pass
 
         # Extract schema version from Config if defined

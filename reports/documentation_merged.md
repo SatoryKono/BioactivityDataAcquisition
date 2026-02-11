@@ -4,14 +4,15 @@ Path: 00-project\00-map.md
 ================================================================================
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.17 | Last updated: 2026-02-08*
+*Synced with RULES.md v5.17 | Last updated: 2026-02-10*
 
-> **Documentation Update:** 2026-02-08
-> - Codebase metrics updated: ~500 Python files, ~110,902 LOC, ~10,957 tests
-> - ADR count corrected: 32 ADRs (ADR-001 through ADR-032)
+> **Documentation Update:** 2026-02-10
+> - Codebase metrics updated: ~1,094 Python files, ~115,351 LOC, ~7,090 tests
+> - ADR count corrected: 33 ADRs (ADR-001 through ADR-033)
 > - Pipeline configs: 27 configurations
 > - Adapter listing completed (all 7 providers)
 > - Gold contract link fixed (chembl_activity_v1.0.json)
+> - ADR-032 duplicate resolved (publication-validation → ADR-033)
 
 ## Quick Links
 
@@ -360,7 +361,7 @@ graph TD
 | rules-summary.md         | 2026-02-03   | v5.17 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
-| ADR-001..032             | 2026-01-28   | All 32 ADRs documented       |
+| ADR-001..033             | 2026-02-10   | All 33 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | archived/audits/         | 2026-01-21   | Historical audit files       |
@@ -1723,6 +1724,7 @@ fields:
 | [ADR-030](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | Accepted | 2026-01-26 |
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | 2026-01-26 |
 | [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | Accepted | 2026-01-28 |
+| [ADR-033](02-architecture/decisions/ADR-033-publication-validation-strategy.md) | Publication Metadata Validation Strategy | Accepted | 2026-02 |
 
 ## История Изменений (Changelog)
 - **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key_source` и `filter_field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
@@ -1853,6 +1855,24 @@ python src/tools/verify_schema_parity.py
 - `Molecule` ↔ `ChEMBLMoleculeGoldSchema`
 - `Target` ↔ `ChEMBLTargetGoldSchema`
 - `Assay` ↔ `ChEMBLAssayGoldSchema`
+
+---
+
+### file_merger.py
+
+**Назначение:** Объединение нескольких файлов проекта в один выходной файл с метаданными.
+
+**Использование:**
+```bash
+# Объединить файлы из директории
+python src/tools/file_merger.py --dir src/bioetl/domain/ --ext .py --output merged.txt
+```
+
+| Параметр | Описание |
+|----------|----------|
+| `--dir` | Директория для рекурсивного обхода |
+| `--ext` | Фильтр расширений файлов |
+| `--output` | Путь к выходному файлу |
 
 ---
 
@@ -2092,6 +2112,38 @@ python scripts/render_diagrams.py
 
 ---
 
+### config_gap_analysis.py
+
+**Назначение:** Анализ расхождений между конфигурациями пайплайнов и фактическим кодом.
+
+**Использование:**
+```bash
+python scripts/config_gap_analysis.py
+```
+
+**Что анализирует:**
+- Пропущенные entity configs для зарегистрированных пайплайнов
+- Несоответствия между конфигурацией и кодовой базой
+- Отсутствующие поля в entity configs
+
+---
+
+### validate_pipeline_configs.py
+
+**Назначение:** Валидация всех pipeline configs против JSON Schema.
+
+**Использование:**
+```bash
+python scripts/validate_pipeline_configs.py
+```
+
+**Что проверяет:**
+- Соответствие `_schema.json` для всех entity configs
+- Обязательные поля (`pipeline_name`, `provider`, `entity_type`, etc.)
+- Корректность `sink` путей и `sort_by` конфигурации
+
+---
+
 ## Бенчмарки
 
 Директория `src/tools/benchmarks/` содержит performance-тесты для критических операций.
@@ -2233,6 +2285,7 @@ if __name__ == "__main__":
 |------|------------|-------------------|-----------|
 | `create_pipeline.py` | src/tools/ | Да | `make new-pipeline` |
 | `verify_schema_parity.py` | src/tools/ | Да | — |
+| `file_merger.py` | src/tools/ | Нет | — |
 | `cleanup_project.py` | scripts/ | Нет | `make clean-dev` |
 | `vacuum_delta.py` | scripts/ | Нет | `make vacuum-silver` |
 | `salt_rotate.py` | scripts/ | Нет | — |
@@ -2242,6 +2295,8 @@ if __name__ == "__main__":
 | `naming_audit.py` | scripts/ | Нет | `make audit-naming` |
 | `lint_terminology.py` | scripts/ | Нет | — |
 | `render_diagrams.py` | scripts/ | Нет | — |
+| `config_gap_analysis.py` | scripts/ | Нет | — |
+| `validate_pipeline_configs.py` | scripts/ | Нет | — |
 
 ---
 
@@ -2256,6 +2311,7 @@ if __name__ == "__main__":
 | RULES.md §3.4.1 | `dq_baseline_update.py` |
 | RULES.md §5.4.1 | `salt_rotate.py` |
 | docs/glossary.md | `lint_terminology.py` |
+| 03-file-policy.md (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py` |
 
 ---
 
@@ -2384,7 +2440,7 @@ src/bioetl/
 **Ключевые ограничения:**
 - `domain` ← `application` ← `composition` → `infrastructure`; `interfaces` может импортировать всё
 - **Нарушение = Блокер PR.** Используй `import-linter` для проверки
-- **DI:** Зависимости передаются в конструктор. `composition/bootstrap.py` — единственное место сборки
+- **DI:** Зависимости передаются в конструктор. `composition/bootstrap/` — единственное место сборки
 
 ### 3.3. ⚠️ Частые Ошибочные Выводы об Архитектуре
 
@@ -2729,17 +2785,17 @@ ls tests/architecture/test_*.py
 | **Язык** | Python 3.11+ |
 | **Стиль документации** | Русский, RFC 2119 keywords |
 
-### 1.1. Метрики Кодовой Базы (2026-02-03)
+### 1.1. Метрики Кодовой Базы (2026-02-10)
 
 | Метрика | Значение |
 |---------|----------|
-| **Python-файлов** | ~500 |
-| **Строк кода** | ~109,300 |
-| **Тестов** | ~9,926 (функций test_) |
-| **ADR** | 32 |
+| **Python-файлов** | ~1,094 (522 src + 552 tests) |
+| **Строк кода** | ~115,351 (src/bioetl/) |
+| **Тестов** | ~7,090 (функций test_) |
+| **ADR** | 33 |
 | **Провайдеров** | 7 |
-| **Pipeline-конфигураций** | 21 (19 entity + 2 composite) |
-| **Конфиг-файлов всего** | 58 (pipelines, dq, filter, sources) |
+| **Pipeline-конфигураций** | 27 |
+| **Конфиг-файлов всего** | 123 (pipelines, dq, filter, sources, composite) |
 
 ---
 
@@ -2769,10 +2825,10 @@ src/bioetl/
 | Компонент | ❌ Ложное утверждение | ✅ Реальность |
 |-----------|----------------------|---------------|
 | **Email в config/adapters** | "PII поля (email) требуют хэширования HashService" | **НЕ PII**: `default_email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed_client.py:38-42` |
-| **PipelineRunner** | "God object, слишком много ответственностей" | **161 строка**, делегирует через `PipelineServices` bundle (`runner.py:54,89`) |
+| **PipelineRunner** | "God object, слишком много ответственностей" | **189 строк**, делегирует через `PipelineServices` bundle (`runner.py:54,89`) |
 | **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
-| **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **870 строк**, делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py`) |
-| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **818 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py`) |
+| **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **1124 строки**, делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py`) |
+| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **938 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py`) |
 | **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — **законная** ответственность interfaces слоя |
 | **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
 | **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
@@ -2998,11 +3054,11 @@ async def aclose() -> None                             # Graceful shutdown
 
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
-| **Unit** | `tests/unit/` | ~7,249 | In-memory fakes предпочтительны |
-| **Integration** | `tests/integration/` | ~291 | VCR.py для HTTP |
-| **Architecture** | `tests/architecture/` | ~421 | Проверка слоёв, контракты портов |
+| **Unit** | `tests/unit/` | ~6,359 | In-memory fakes предпочтительны |
+| **Integration** | `tests/integration/` | ~167 | VCR.py для HTTP |
+| **Architecture** | `tests/architecture/` | ~400 | Проверка слоёв, контракты портов |
 
-**Всего:** ~8,330 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
+**Всего:** ~7,090 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
 ### Основные команды
 
@@ -3098,7 +3154,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | `docs/RULES.md` | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `docs/00-project/agent/AGENT.md` | Инструкции для агента (персона, workflow, специфика работы) |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст для быстрой справки |
-| `docs/02-architecture/decisions/` | ADR (001-031) — архитектурные решения |
+| `docs/02-architecture/decisions/` | ADR (001-033) — архитектурные решения |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 
 > **Иерархия документации**: При противоречиях приоритет имеет `docs/RULES.md`.
@@ -3947,7 +4003,7 @@ Path: 00-project\governance\03-file-policy.md
 ```
 configs/
 ├── pipelines/
-│   ├── _defaults.yaml       # Унифицированная базовая схема (v2.0.0)
+│   ├── _base.yaml            # Унифицированная базовая схема (v2.0.0)
 │   ├── _schema.json         # JSON Schema для валидации конфигов
 │   ├── _providers/          # Документация провайдеров
 │   │   ├── chembl.yaml
@@ -3962,12 +4018,11 @@ configs/
 ### 1.2. Цепочка наследования
 
 ```
-_defaults.yaml (базовые значения) → <provider>/<entity>.yaml (переопределения)
+_base.yaml (базовые значения) → <provider>/<entity>.yaml (переопределения)
 ```
 
-**Важно**: Ранее существовавший файл `_base.yaml` был объединён с `_defaults.yaml`
-в единый источник defaults (v2.0.0). Теперь `_defaults.yaml` является каноническим
-файлом для всех базовых настроек.
+**Примечание**: `_base.yaml` является каноническим файлом для всех базовых настроек
+пайплайнов (v2.0.0).
 
 ### 1.3. Обязательные поля entity config
 
@@ -4526,7 +4581,7 @@ BioETL supports multi-source data enrichment through Composite Pipelines:
 bioetl run --pipeline composite_publication --limit 1000
 ```
 
-See [Composite Pipeline Diagram](diagrams/mermaid/26_composite_pipeline_workflow.mmd) for workflow visualization.
+See [Composite Pipeline Diagram](../02-architecture/diagrams/mermaid/26_composite_pipeline_workflow.mmd) for workflow visualization.
 
 ## Current Version
 
@@ -5663,13 +5718,13 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 - [diagrams/](diagrams/) — 35 Mermaid diagram files
 - [diagrams/diagrams-index.md](diagrams/diagrams-index.md) — Full diagram index
 - [diagrams.md](diagrams.md) — Inline diagram collection
-- [../diagrams/mermaid/](../diagrams/mermaid/) — Additional 26 diagrams (includes Composite Pipeline workflow)
+- [diagrams/mermaid/](diagrams/mermaid/) — Additional 26 diagrams (includes Composite Pipeline workflow)
 
 ### Architecture Decision Records (ADRs)
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-32 ADRs documenting key architectural decisions:
+33 ADRs documenting key architectural decisions:
 
 | ADR | Topic | RULES.md Reference |
 |-----|-------|-------------------|
@@ -5705,6 +5760,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-030](decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | - |
 | [ADR-031](decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | - |
 | [ADR-032](decisions/ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | §3.1 |
+| [ADR-033](decisions/ADR-033-publication-validation-strategy.md) | Publication Metadata Validation Strategy | - |
 
 ---
 
@@ -5726,7 +5782,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 1. **Dependency Injection**: Dependencies injected via constructor
 2. **Ports & Adapters**: Interfaces in `domain/ports/`, implementations in `infrastructure/`
-3. **Composition Root**: Single assembly point in `composition/bootstrap.py`
+3. **Composition Root**: Single assembly point in `composition/bootstrap/`
 4. **Medallion Architecture**: Bronze (raw) → Silver (normalized) → Gold (curated)
 5. **Composite Pipeline** (ADR-026): Multi-source data enrichment with seed → enrich (fan-out) → merge workflow
 
@@ -5734,10 +5790,10 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 | Diagram | Description | File |
 |---------|-------------|------|
-| Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) |
+| Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) |
 | Layers Interaction | How layers communicate | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) |
-| Composite Pipeline | ADR-026 workflow: seed → enrich → merge | [26_composite_pipeline_workflow.mmd](../diagrams/mermaid/26_composite_pipeline_workflow.mmd) |
-| Provider Adapters | 7 providers with rate limits | [23_provider_adapters_overview.mmd](../diagrams/mermaid/23_provider_adapters_overview.mmd) |
+| Composite Pipeline | ADR-026 workflow: seed → enrich → merge | [26_composite_pipeline_workflow.mmd](diagrams/mermaid/26_composite_pipeline_workflow.mmd) |
+| Provider Adapters | 7 providers with rate limits | [23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd) |
 | Pipeline Hierarchy | Pipeline/Transformer inheritance | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid) |
 
 ---
@@ -5773,33 +5829,37 @@ Path: 02-architecture\01-domain-layer.md
 
 Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через `typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
 
-**Структура пакета:**
-```
-src/bioetl/domain/ports/
-├── __init__.py          # Фасад — единая точка импорта всех портов
-├── data_source.py       # DataSourcePort, FilterableDataSourcePort
-├── storage.py           # StoragePort
-├── locking.py           # LockPort
-├── checkpoint.py        # CheckpointPort
-├── quarantine.py        # QuarantinePort
-├── observability.py     # MetricsPort, TracingPort, LoggerPort, DQMonitorPort
-├── validation.py        # GoldValidatorPort
-└── filtering.py         # InputFilterPort
-```
+**Структура пакета (26 файлов):**
 
-**Основные порты (12 шт):**
-- `DataSourcePort`: Абстракция для источников данных (API, файлы).
-- `FilterableDataSourcePort`: Расширение с server-side фильтрацией.
-- `StoragePort`: Абстракция для хранилищ данных (Bronze, Silver, Gold).
-- `LockPort`: Контракт для распределённых блокировок.
-- `CheckpointPort`: Интерфейс для сохранения и загрузки состояния пайплайнов.
-- `QuarantinePort`: Контракт для "карантина" — хранилища записей, не прошедших валидацию.
-- `MetricsPort`: Интерфейс для сбора метрик.
-- `TracingPort`: Распределённый трейсинг (OpenTelemetry).
-- `LoggerPort`: Структурированное логирование.
-- `DQMonitorPort`: Data Quality мониторинг.
-- `GoldValidatorPort`: Валидация Gold-записей.
-- `InputFilterPort`: Загрузка filter IDs.
+Пакет содержит 26 protocol-файлов, организованных по категориям:
+
+**Основные порты:**
+- `DataSourcePort`, `FilterableDataSourcePort` — абстракция для источников данных
+- `StoragePort` — хранилища данных (Bronze, Silver, Gold)
+- `LockPort` — распределённые блокировки
+- `CheckpointPort` — сохранение/загрузка состояния пайплайнов
+- `QuarantinePort` — карантин записей, не прошедших валидацию
+
+**Observability порты:**
+- `MetricsPort` — сбор метрик
+- `TracingPort` — распределённый трейсинг (OpenTelemetry)
+- `LoggerPort` — структурированное логирование
+- `DQMonitorPort` — Data Quality мониторинг
+- `PipelineObserverPort` — наблюдение за пайплайнами
+
+**Data Quality порты:**
+- `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` — DQ анализ по слоям
+- `DQReportWriterPort` — запись DQ-отчётов
+- `GoldValidatorPort` — валидация Gold-записей
+
+**Input/Output порты:**
+- `InputFilterPort` — загрузка filter IDs
+- `ExportPort` — экспорт данных
+
+**Infrastructure порты:**
+- `HealthCheckPort` — проверка здоровья адаптеров
+- `AuditPort` — аудит операций
+- `RetentionPort` — управление политиками хранения
 
 **Правило импорта (MUST):**
 ```python
@@ -5824,9 +5884,9 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 src/bioetl/domain/aggregates/
 ├── __init__.py
 ├── batch.py             # Batch Aggregate (530 LOC)
-├── pipeline_run.py      # PipelineRun Aggregate (350 LOC)
-├── quarantine_entry.py  # QuarantineEntry Aggregate (180 LOC)
-└── events.py            # Domain Events (200 LOC)
+├── pipeline_run.py      # PipelineRun Aggregate (566 LOC)
+├── quarantine_entry.py  # QuarantineEntry Aggregate (517 LOC)
+└── events.py            # Domain Events (260 LOC)
 ```
 
 **Ключевые агрегаты:**
@@ -5855,7 +5915,7 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 
 **Расположение:** `src/bioetl/domain/value_objects/`
 
-Неизменяемые доменные примитивы с типобезопасностью.
+Неизменяемые доменные примитивы с типобезопасностью (19 файлов).
 
 **Идентификаторы:**
 - `RunID(UUID)` — идентификатор запуска пайплайна
@@ -5864,7 +5924,16 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 - `ContentHash(str)` — SHA256 хэш содержимого
 
 **Измерения:**
-- `Measurement(value, unit, relation)` — биоактивность (IC50, EC50, Ki)
+- `ActivityValue(value, unit, relation)` (`activity.py`, 329 LOC) — составной value object для биоактивности (IC50, EC50, Ki), включает `RelationOperator` enum и `ConfidenceScore`
+
+**Data Quality:**
+- `DQMetrics` — метрики качества данных
+- `DQReport` — отчёт о качестве данных
+
+**Pipeline Results:**
+- `BronzeResult` — результат записи в Bronze
+- `Publications` — value objects для публикаций
+- `ActivityValues` — concentration & unit handling
 
 ### 2.4. `types.py` — Пользовательские Типы
 
@@ -5891,6 +5960,24 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 - **Recoverable**: Временные сбои, требующие повторной попытки.
 - **Data Quality**: Проблемы с данными, которые можно пропустить, отправив запись в карантин.
 
+### 2.7. Дополнительные поддиректории
+
+Domain содержит 8 дополнительных поддиректорий:
+
+| Директория | Назначение | Содержание |
+|------------|------------|------------|
+| `composite/` | Composite pipeline domain | Field groups, state, strategy |
+| `configs/` | Конфигурационные базовые классы | Базовые dataclass-ы для конфигураций |
+| `contracts/gold/` | Gold-слой контракты данных | Pandera DataFrameModel схемы |
+| `entities/` | Доменные сущности | Entity-классы для каждого провайдера |
+| `exceptions/` | Доменные исключения | 5 файлов с иерархией ошибок |
+| `filtering/` | Фильтрация данных | Конфигурации и логика фильтров |
+| `mapping/` | Маппинг полей публикаций | Publication field & type mappings |
+| `models/` | Доменные модели | Filter & metadata models |
+| `registry/` | Реестр публикаций | Publication registry |
+| `schemas/` | Pydantic/Pandera схемы | ~60 файлов для всех провайдеров |
+| `services/` | Доменные сервисы | Нормализация, агрегация |
+
 ## 3. Принципы Работы
 
 - **Никакого I/O:** В этом слое запрещены любые операции, связанные с сетью, файловой системой или базами данных.
@@ -5914,8 +6001,8 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 | Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации |
 | Domain DDD | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid) | DDD-структура домена |
 | Domain Models | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid) | Связи доменных моделей |
-| DDD Aggregates | [../diagrams/mermaid/09_ddd_aggregates.mmd](../diagrams/mermaid/09_ddd_aggregates.mmd) | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture | [../diagrams/mermaid/07_ports_architecture.mmd](../diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов |
+| DDD Aggregates | [diagrams/mermaid/09_ddd_aggregates.mmd](diagrams/mermaid/09_ddd_aggregates.mmd) | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
+| Ports Architecture | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов |
 
 ### Связанные ADR
 
@@ -5973,11 +6060,36 @@ Path: 02-architecture\02-application-layer.md
 
 **Расположение:** `src/bioetl/application/core/`
 
-Содержит базовые классы и общие компоненты, используемые пайплайнами:
+Содержит базовые классы и общие компоненты, используемые пайплайнами (27 файлов):
 
+**Базовые классы:**
 - **`BasePipeline`** (`base.py`) — Базовый класс для всех пайплайнов
 - **`BaseTransformer`** (`base_transformer.py`) — Базовый класс для трансформеров (Template Method паттерн)
 - **`RecordProcessor`** (`record_processor.py`) — Обработка batch-ов записей через Bronze→Silver→Gold
+
+**Исполнение:**
+- **`BatchExecutor`** (`batch_executor.py`, 783 LOC) — Unified batch executor (extract→transform→write)
+- **`BatchTransformer`** (`batch_transformer.py`) — Координация трансформаций
+- **`BatchWriter`** (`batch_writer.py`) — Запись batch-ов в medallion слои
+- **`PipelineRunner`** (`runner.py`) — Оркестрация жизненного цикла пайплайна
+
+**Сервисы ядра:**
+- **`PipelineServices`** (`pipeline_services.py`) — DI bundle портов для пайплайна
+- **`LockManager`** (`lock_manager.py`) — Координация блокировок
+- **`PreflightService`** (`preflight_service.py`) — Pre-run health checks
+- **`PostrunService`** (`postrun_service.py`) — Post-run операции (DQ, VACUUM, cleanup)
+- **`CheckpointManager`** (`checkpoint_manager.py`) — Checkpoint I/O
+- **`QuarantineManager`** (`quarantine_manager.py`) — Quarantine record handling
+- **`CleanupService`** (`cleanup_service.py`) — Bronze cleanup
+
+**Observability:**
+- **`BatchMetricsRecorder`** (`batch_metrics.py`) — Метрики per batch
+- **`BatchTracingManager`** (`batch_tracing.py`) — Tracing span management
+- **`Heartbeat`** (`heartbeat.py`) — Heartbeat мониторинг
+
+**Data Sources:**
+- **`FilteredDataSource`** (`filtered_data_source.py`) — Filter wrapper для data sources
+- **`IDMappingDataSource`** (`idmapping_data_source.py`) — ID mapping wrapper
 
 Подробнее о компонентах исполнения пайплайнов см. [раздел 2.4](#24-core--ядро-исполнения-пайплайнов).
 
@@ -6030,26 +6142,35 @@ factory = GenericPipelineFactory(
 | Файл | Компонент | Назначение |
 |------|-----------|------------|
 | `runner.py` | `PipelineRunner` | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
-| `executor.py` | `PipelineExecutor` | Координирует data flow: извлечение → трансформация → запись |
-| `lifecycle_orchestrator.py` | `LifecycleOrchestrator` | Управляет очисткой Silver/Gold слоёв по политике |
-| `runner_services.py` | `RunnerServices` | DI bundle сервисов для PipelineRunner |
+| `batch_executor.py` | `BatchExecutor` | Координирует data flow: извлечение → трансформация → запись (783 LOC) |
+| `services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM |
+| `pipeline_services.py` | `PipelineServices` | DI bundle сервисов для PipelineRunner |
 
 **`PipelineRunner`** — координатор исполнения:
 - Делегирует блокировку через `LockManager`
 - Запускает preflight-валидацию через `PreflightService`
-- Исполняет пайплайн через `PipelineExecutor`
+- Исполняет пайплайн через `BatchExecutor`
 - Управляет postrun-операциями через `PostrunService`
-- Оркестрирует очистку слоёв через `LifecycleOrchestrator`
+- Оркестрирует очистку слоёв через `MedallionLifecycleService`
 
-**`RunnerServices`** — frozen dataclass, bundling зависимостей:
+**`PipelineServices`** — frozen dataclass, bundling зависимостей:
 ```python
 @dataclass(frozen=True)
-class RunnerServices:
-    lock_manager: LockManager
-    preflight: PreflightService
-    postrun: PostrunService
-    lifecycle_orch: LifecycleOrchestrator
-    observer: PipelineObserver
+class PipelineServices:
+    data_source: DataSourcePort
+    storage: StoragePort
+    lock: LockPort
+    checkpoint: CheckpointPort
+    quarantine: QuarantinePort
+    metrics: MetricsPort
+    tracing: TracingPort
+    logger: LoggerPort
+    dq_monitor: DQMonitorPort | None = None
+    bronze_dq_analyzer: BronzeDQAnalyzerPort | None = None
+    silver_dq_analyzer: SilverDQAnalyzerPort | None = None
+    gold_dq_analyzer: GoldDQAnalyzerPort | None = None
+    dq_report_writer: DQReportWriterPort | None = None
+    dq_report_service: DQReportService | None = None
 ```
 
 ### 2.5. `composite/` — Composite Pipeline (ADR-026)
@@ -6100,9 +6221,9 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 | Pipeline Execution | [06-pipeline-execution.mermaid](diagrams/06-pipeline-execution.mermaid) | Поток выполнения пайплайна |
 | Pipeline Hierarchy | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid) | Иерархия Pipeline/Transformer |
 | Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Взаимодействие слоёв (включая Composite) |
-| Composite Pipeline | [../diagrams/mermaid/26_composite_pipeline_workflow.mmd](../diagrams/mermaid/26_composite_pipeline_workflow.mmd) | Workflow Composite Pipeline |
-| Pipeline Core | [../diagrams/mermaid/10_pipeline_core_components.mmd](../diagrams/mermaid/10_pipeline_core_components.mmd) | Ядро пайплайнов |
-| BaseTransformer | [../diagrams/mermaid/19_base_transformer_template_method.mmd](../diagrams/mermaid/19_base_transformer_template_method.mmd) | Template Method паттерн |
+| Composite Pipeline | [diagrams/mermaid/26_composite_pipeline_workflow.mmd](diagrams/mermaid/26_composite_pipeline_workflow.mmd) | Workflow Composite Pipeline |
+| Pipeline Core | [diagrams/mermaid/10_pipeline_core_components.mmd](diagrams/mermaid/10_pipeline_core_components.mmd) | Ядро пайплайнов |
+| BaseTransformer | [diagrams/mermaid/19_base_transformer_template_method.mmd](diagrams/mermaid/19_base_transformer_template_method.mmd) | Template Method паттерн |
 
 ### Связанные ADR
 
@@ -6160,13 +6281,13 @@ Path: 02-architecture\03-infrastructure-layer.md
 
 | Адаптер | Базовый класс | HTTP-клиент | Примечание |
 |---------|---------------|-------------|------------|
-| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 13 entities |
-| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec |
+| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 14 entities, 3 req/sec. Mixins: `PaginatedFetcherMixin`, `FilterableStubMixin` |
+| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec. Mixin: `PaginatedFetcherMixin` |
 | **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
-| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec |
-| **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool |
-| **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec |
-| **SemanticScholarAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/5min |
+| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec. Mixin: `NotSupportedMultiFilterMixin` |
+| **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool. Mixin: `PaginatedFetcherMixin` |
+| **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec. Mixin: `PaginatedFetcherMixin` |
+| **SemanticScholarAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 0.1 req/sec (1.0 with key). Mixin: `PaginatedFetcherMixin` |
 
 **Архитектура HTTP-адаптеров:**
 
@@ -6205,9 +6326,18 @@ PubMedAdapter                         (pubchempy)
 
 Реализует `StoragePort` для работы с различными уровнями данных (Bronze, Silver, Gold).
 
-- **`BronzeStorageAdapter`**: Отвечает за запись сырых данных (JSONL) в файловое хранилище (например, локальный диск; объектное хранилище — только в future-режиме).
-- **`SilverStorageAdapter`**: Управляет записью в Delta Lake таблицы, реализуя логику `merge` (upsert) для обеспечения идемпотентности.
-- **`GoldStorageAdapter`**: Записывает агрегированные витрины данных.
+Реализация разделена на три отдельных writer-а:
+
+- **`BronzeWriter`** (`bronze_writer.py`): Запись сырых данных в формате JSONL + zstd. Atomic writes через temp file + rename, генерация checksums.
+- **`SilverWriter`** (`silver_writer.py`): Запись в Delta Lake таблицы с ACID-транзакциями, логикой merge/upsert для идемпотентности, поддержкой Time Travel и 7-дневным VACUUM retention.
+- **`GoldWriter`** (`gold_writer.py`): Запись бизнес-готовых данных с наследованием от `BaseDeltaWriter`, строгой валидацией через Pandera, поддержкой SCD Type 2 и контрактов данных.
+
+Вспомогательные модули:
+- **`BaseDeltaWriter`** (`base_delta_writer.py`): Базовый класс для Delta Lake writers (Silver, Gold).
+- **`DeltaReader`** (`delta_reader.py`): Чтение Delta Lake таблиц.
+- **`ArrowConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.
+- **`MetadataBuilder`** / **`MetadataWriter`**: Генерация и запись метаданных.
+- **`RetentionManager`** (`retention_manager.py`): Управление политиками хранения данных.
 
 ### 2.3. `locking/` — Реализация Блокировок
 
@@ -6258,10 +6388,10 @@ Redis-адаптер без изменения domain/application слоёв.
 | Диаграмма | Файл | Описание |
 |-----------|------|----------|
 | Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure |
-| Provider Adapters | [../diagrams/mermaid/23_provider_adapters_overview.mmd](../diagrams/mermaid/23_provider_adapters_overview.mmd) | Обзор 7 провайдеров и их rate limits |
-| HTTP Infrastructure | [../diagrams/mermaid/14_http_infrastructure.mmd](../diagrams/mermaid/14_http_infrastructure.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Provider Adapters | [diagrams/mermaid/23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd) | Обзор 7 провайдеров и их rate limits |
+| HTTP Infrastructure | [diagrams/mermaid/14_http_infrastructure.mmd](diagrams/mermaid/14_http_infrastructure.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
 | Circuit Breaker | [07-circuit-breaker-states.mermaid](diagrams/07-circuit-breaker-states.mermaid) | Состояния Circuit Breaker |
-| Storage Architecture | [../diagrams/mermaid/13_storage_architecture.mmd](../diagrams/mermaid/13_storage_architecture.mmd) | Bronze, Silver, Gold writers |
+| Storage Architecture | [diagrams/mermaid/13_storage_architecture.mmd](diagrams/mermaid/13_storage_architecture.mmd) | Bronze, Silver, Gold writers |
 | MemoryLock | [16-memory-lock-class.mermaid](diagrams/16-memory-lock-class.mermaid) | Класс MemoryLock |
 
 ### Связанные ADR
@@ -6307,15 +6437,23 @@ Path: 02-architecture\04-interfaces-layer.md
 
 Реализует CLI для взаимодействия с пользователем. Использует библиотеку **Click** для определения команд.
 
-**Доступные команды:**
+**Доступные команды (17 модулей в `commands/`):**
 
-| Команда | Описание |
-|---------|----------|
-| `run` | Запуск одного пайплайна |
-| `run_all` | Запуск всех пайплайнов провайдера |
-| `export` | Экспорт данных из Gold |
-| `quarantine` | Управление карантинными записями |
-| `health` | Проверка здоровья провайдеров |
+| Команда | Модуль | Описание |
+|---------|--------|----------|
+| `run` | `run.py` | Запуск одного пайплайна |
+| `run-all` | `run_all.py` | Запуск всех пайплайнов провайдера |
+| `run-composite` | `run_composite.py` | Запуск композитного пайплайна (ADR-026) |
+| `export` | `export.py` | Экспорт данных из Gold |
+| `quarantine` | `quarantine.py` | Управление карантинными записями |
+| `health` | `health.py` | Проверка здоровья провайдеров |
+| `config` | `config.py` | Просмотр и валидация конфигураций |
+| `checkpoint` | `checkpoint.py` | Управление checkpoint-ами |
+| `lock` | `lock.py` | Управление блокировками |
+| `vacuum` | `vacuum.py` | VACUUM операции для Delta Lake |
+| `cleanup` | `cleanup.py` | Очистка Bronze данных |
+| `maintenance` | `maintenance.py` | Maintenance операции |
+| `archive` | `archive.py` | Архивирование данных |
 
 **Примеры использования:**
 ```bash
@@ -6331,7 +6469,14 @@ python -m bioetl health --provider chembl
 
 `cli.py` парсит эти аргументы, вызывает функции из `src/bioetl/composition/bootstrap.py` для инициализации системы и запускает выполнение пайплайна.
 
-### 2.2. Оркестрация (Driving Adapters)
+### 2.2. `http/` — HTTP Health Server
+
+**Расположение:** `src/bioetl/interfaces/http/`
+
+Содержит HTTP health endpoint (`health_server.py`) с интеграцией Prometheus metrics.
+Endpoints: `/health`, `/health/live`, `/health/ready`.
+
+### 2.3. `orchestration/` — Оркестрация (Driving Adapters)
 
 **Расположение:** `src/bioetl/interfaces/orchestration/`
 
@@ -6361,9 +6506,9 @@ python -m bioetl health --provider chembl
 
 | Диаграмма | Файл | Описание |
 |-----------|------|----------|
-| Five Layer Architecture | [../diagrams/mermaid/01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) | Полная архитектура с Interfaces слоем |
+| Five Layer Architecture | [diagrams/mermaid/01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) | Полная архитектура с Interfaces слоем |
 | Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Взаимодействие слоёв |
-| Graceful Shutdown | [../diagrams/mermaid/24_graceful_shutdown.mmd](../diagrams/mermaid/24_graceful_shutdown.mmd) | Sequence diagram graceful shutdown |
+| Graceful Shutdown | [diagrams/mermaid/24_graceful_shutdown.mmd](diagrams/mermaid/24_graceful_shutdown.mmd) | Sequence diagram graceful shutdown |
 
 ### Связанные ADR
 
@@ -6399,20 +6544,46 @@ Path: 02-architecture\05-composition-layer.md
 
 ## 2. Ключевые Компоненты
 
-### 2.1. `bootstrap.py` — Процесс инициализации
+### 2.1. `bootstrap/` — Процесс инициализации
 
-Этот модуль содержит функции для высокоуровневой сборки основных сервисов:
-- `bootstrap_pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна.
-- Инициализация общих сервисов: Логгер, Метрики, Чекпоинты, Карантин.
+**Расположение:** `src/bioetl/composition/bootstrap/`
+
+Пакет содержит модули для высокоуровневой сборки основных сервисов:
+
+```
+composition/bootstrap/
+├── assembly/            # Сборка компонентов (checkpoint, storage)
+├── cli/                 # CLI-специфичная сборка (health, lock, config, metrics, noop)
+└── runtime/             # Runtime assembly
+    ├── assembly.py      # Главная сборка компонентов
+    ├── composite.py     # Bootstrap для Composite Pipeline (ADR-026)
+    ├── observability.py # Сборка observability
+    ├── pipeline.py      # Сборка pipeline
+    └── runner.py        # Сборка runner
+```
+
+- `bootstrap_pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна. **Deprecated** — предпочтителен прямой вызов `runtime/pipeline.py`.
+- `bootstrap/runtime/composite.py`: Bootstrap для Composite Pipeline (ADR-026).
 
 ### 2.2. `factories/` — Фабрики компонентов
 
 В v5.1+ логика создания компонентов централизована в специализированных фабриках:
 
-- **`GenericPipelineFactory`**: Универсальный конструктор пайплайнов. Декларативно описывает класс пайплайна, провайдер, схемы и класс трансформера для DI.
-- **`HttpClientFactory`**: Создает настроенные `UnifiedHTTPClient` с учетом специфичных для каждого провайдера ограничений (Rate Limits, Circuit Breaker).
-- **`StorageFactory`**: Собирает `StoragePort`, объединяя адаптеры для Bronze, Silver и Gold слоев.
-- **`DataSourceFactory`**: Создает `DataSourcePort` для конкретного провайдера.
+**Расположение:** `src/bioetl/composition/factories/` (12 файлов)
+
+| Файл | Фабрика | Назначение |
+|------|---------|------------|
+| `pipeline_factory.py` | `GenericPipelineFactory` | Универсальный конструктор пайплайнов (декларативно) |
+| `pipeline_factories.py` | Реестр фабрик | Все зарегистрированные pipeline factories |
+| `data_source_factory.py` | `DataSourceFactory` | Создает `DataSourcePort` для провайдера |
+| `http_client_factory.py` | `HttpClientFactory` | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
+| `storage_factory.py` | `StorageFactory` | Сборка `StoragePort` (Bronze + Silver + Gold) |
+| `storage_adapter.py` | `StorageAdapterFactory` | Создание отдельных storage адаптеров |
+| `storage.py` | Storage helpers | Вспомогательные функции для storage |
+| `runner_factory.py` | `RunnerFactory` | Создание `PipelineRunner` с DI |
+| `services_factory.py` | `ServicesFactory` | Создание `PipelineServices` bundle |
+| `transformer_factory.py` | `TransformerFactory` | Создание трансформеров по провайдеру |
+| `dq_factory.py` | `DQFactory` | Создание Data Quality компонентов |
 
 ### 2.3. `providers/` — Реестр провайдеров
 
@@ -6461,7 +6632,7 @@ data_source = ProviderRegistry.create_data_source(
 Для композитных пайплайнов доступна функция `bootstrap_composite_pipeline()`:
 
 ```python
-from bioetl.composition.composite.bootstrap import bootstrap_composite_pipeline
+from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_pipeline
 
 runner = await bootstrap_composite_pipeline(
     "composite_publication",
@@ -6486,9 +6657,9 @@ result = await runner.run()
 
 | Диаграмма | Файл | Описание |
 |-----------|------|----------|
-| Composition Root | [../diagrams/mermaid/11_composition_root.mmd](../diagrams/mermaid/11_composition_root.mmd) | DI container, factories, bootstrap |
-| Factory Pattern | [../diagrams/mermaid/20_factory_pattern_usage.mmd](../diagrams/mermaid/20_factory_pattern_usage.mmd) | Использование Factory паттерна |
-| Five Layer Architecture | [../diagrams/mermaid/01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) | Composition слой в архитектуре |
+| Composition Root | [diagrams/mermaid/11_composition_root.mmd](diagrams/mermaid/11_composition_root.mmd) | DI container, factories, bootstrap |
+| Factory Pattern | [diagrams/mermaid/20_factory_pattern_usage.mmd](diagrams/mermaid/20_factory_pattern_usage.mmd) | Использование Factory паттерна |
+| Five Layer Architecture | [diagrams/mermaid/01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) | Composition слой в архитектуре |
 | Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Bootstrap → Factories → Runner |
 
 ### Связанные ADR
@@ -6570,7 +6741,7 @@ Path: 02-architecture\architecture-diagrams.md
 - ✅ Infrastructure реализует Domain Ports
 - ✅ Composition собирает зависимости
 
-**Файл:** [`docs/diagrams/mermaid/01_five_layer_architecture.mmd`](diagrams/01_five_layer_architecture.mmd)
+**Файл:** [`docs/02-architecture/diagrams/01_five_layer_architecture.mmd`](diagrams/01_five_layer_architecture.mmd)
 
 ---
 
@@ -6605,7 +6776,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 - TracingPort, MetricsPort, LoggerPort
 - И другие...
 
-**Файл:** [`docs/diagrams/mermaid/03_hexagonal_architecture.mmd`](diagrams/03_hexagonal_architecture.mmd)
+**Файл:** [`docs/02-architecture/diagrams/03_hexagonal_architecture.mmd`](diagrams/03_hexagonal_architecture.mmd)
 
 ---
 
@@ -6636,7 +6807,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 **Нарушение = Блокер PR**
 
-**Файл:** [`docs/diagrams/mermaid/04_layer_dependency_matrix.mmd`](diagrams/04_layer_dependency_matrix.mmd)
+**Файл:** [`docs/02-architecture/diagrams/04_layer_dependency_matrix.mmd`](diagrams/04_layer_dependency_matrix.mmd)
 
 ---
 
@@ -6679,7 +6850,7 @@ Bronze → Silver → Gold уровни хранения данных.
 - Delta Time Travel (7-day history)
 - VACUUM cleanup (weekly)
 
-**Файл:** [`docs/diagrams/mermaid/05_medallion_architecture.mmd`](diagrams/05_medallion_architecture.mmd)
+**Файл:** [`docs/02-architecture/diagrams/05_medallion_architecture.mmd`](diagrams/05_medallion_architecture.mmd)
 
 ---
 
@@ -6760,7 +6931,7 @@ End-to-end поток данных от API провайдера до Gold layer
 **Graceful Shutdown:**
 - SIGTERM → Finish current batch → Save checkpoint → Exit(0)
 
-**Файл:** [`docs/diagrams/mermaid/02_complete_pipeline_flow.mmd`](diagrams/02_complete_pipeline_flow.mmd)
+**Файл:** [`docs/02-architecture/diagrams/02_complete_pipeline_flow.mmd`](diagrams/02_complete_pipeline_flow.mmd)
 
 ---
 
@@ -6811,7 +6982,7 @@ Delta merge by content_hash — критическая операция для i
 - ✓ Automatic deduplication
 - ✓ Optimistic concurrency
 
-**Файл:** [`docs/diagrams/mermaid/22_silver_merge_operation.mmd`](diagrams/22_silver_merge_operation.mmd)
+**Файл:** [`docs/02-architecture/diagrams/22_silver_merge_operation.mmd`](diagrams/22_silver_merge_operation.mmd)
 
 ---
 
@@ -6844,7 +7015,7 @@ Delta merge by content_hash — критическая операция для i
 - DataNormalizationService, IdentityService
 - UnitConverter, ActivityAggregator, ValueValidator
 
-**Файл:** [`docs/diagrams/mermaid/06_domain_model_overview.mmd`](diagrams/06_domain_model_overview.mmd)
+**Файл:** [`docs/02-architecture/diagrams/06_domain_model_overview.mmd`](diagrams/06_domain_model_overview.mmd)
 
 ---
 
@@ -6879,7 +7050,7 @@ Delta merge by content_hash — критическая операция для i
 - StructlogLogger → LoggerPort
 - NoOpTracing/NoOpMetrics → Null Object Pattern
 
-**Файл:** [`docs/diagrams/mermaid/07_ports_architecture.mmd`](diagrams/07_ports_architecture.mmd)
+**Файл:** [`docs/02-architecture/diagrams/07_ports_architecture.mmd`](diagrams/07_ports_architecture.mmd)
 
 ---
 
@@ -6926,7 +7097,7 @@ Delta merge by content_hash — критическая операция для i
 **Services:**
 - PreflightService, PostrunService, PipelineObserver
 
-**Файл:** [`docs/diagrams/mermaid/10_pipeline_core_components.mmd`](diagrams/10_pipeline_core_components.mmd)
+**Файл:** [`docs/02-architecture/diagrams/10_pipeline_core_components.mmd`](diagrams/10_pipeline_core_components.mmd)
 
 ---
 
@@ -6973,7 +7144,7 @@ Delta merge by content_hash — критическая операция для i
   - RecoverableError (429, 5xx)
   - DataQualityError (invalid data)
 
-**Файл:** [`docs/diagrams/mermaid/12_error_classification.mmd`](diagrams/12_error_classification.mmd)
+**Файл:** [`docs/02-architecture/diagrams/12_error_classification.mmd`](diagrams/12_error_classification.mmd)
 
 ---
 
@@ -7015,7 +7186,7 @@ delay = (backoff_factor ^ retry_count) * base_delay + random(jitter_min, jitter_
 - 400 Bad Request
 - 404 Not Found
 
-**Файл:** [`docs/diagrams/mermaid/17_retry_mechanism.mmd`](diagrams/17_retry_mechanism.mmd)
+**Файл:** [`docs/02-architecture/diagrams/17_retry_mechanism.mmd`](diagrams/17_retry_mechanism.mmd)
 
 ---
 
@@ -7059,7 +7230,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 - `circuit_breaker_state` (gauge)
 - `circuit_breaker_failure_count` (gauge)
 
-**Файл:** [`docs/diagrams/mermaid/15_circuit_breaker_states.mmd`](diagrams/15_circuit_breaker_states.mmd)
+**Файл:** [`docs/02-architecture/diagrams/15_circuit_breaker_states.mmd`](diagrams/15_circuit_breaker_states.mmd)
 
 ---
 
@@ -7101,7 +7272,7 @@ Fault tolerance pattern для защиты от каскадных сбоев.
 - last_batch_id
 - timestamp
 
-**Файл:** [`docs/diagrams/mermaid/24_graceful_shutdown.mmd`](diagrams/24_graceful_shutdown.mmd)
+**Файл:** [`docs/02-architecture/diagrams/24_graceful_shutdown.mmd`](diagrams/24_graceful_shutdown.mmd)
 
 ---
 
@@ -7157,7 +7328,7 @@ bioetl run chembl_activity \
   --data-dir /path/to/data
 ```
 
-**Файл:** [`docs/diagrams/mermaid/25_pipeline_config_structure.mmd`](diagrams/25_pipeline_config_structure.mmd)
+**Файл:** [`docs/02-architecture/diagrams/25_pipeline_config_structure.mmd`](diagrams/25_pipeline_config_structure.mmd)
 
 ---
 
@@ -7299,7 +7470,7 @@ flowchart LR
 > Для распределённого развёртывания (future) — S3/MinIO.
 
 ```
-data/                              # Local-Only (current)
+data/output/                       # Local-Only (current)
 ├── bronze/
 │   └── {provider}/{entity}/{date}/
 │       ├── batch_001.jsonl.zst
@@ -7311,7 +7482,7 @@ data/                              # Local-Only (current)
 │           └── _delta_log/
 │
 ├── gold/
-│   └── {provider}/{entity}_aggregated/
+│   └── {provider}/{entity}/
 │       └── _delta_log/
 │
 ├── quarantine/
@@ -7360,7 +7531,7 @@ flowchart TB
     E1["Safety Guard<br/>(validate lock)"]
     E2["Delta Lake Write<br/>(Silver)"]
     E3["Gold Transform<br/>(exclude JSON fields)"]
-    E4["Delta Lake Write<br/>(Gold)"]
+    E4["Delta Lake Write<br/>(Gold)<br/><i>skipped if skip_gold=True</i>"]
   end
 
   subgraph Finalize
@@ -7402,7 +7573,7 @@ flowchart TB
    - `molecule_synonyms`, `cross_references`, `atc_classifications`
 3. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
 
-**Code Reference**: `src/bioetl/application/core/base.py` → `transform_for_gold()`
+**Code Reference**: `src/bioetl/application/core/base_transformer.py` → `BaseTransformer.transform_for_gold()`
 
 ---
 
@@ -7458,8 +7629,7 @@ Path: 02-architecture\data-layers.md
 
 ### 1.1. Формат и Хранение
 *   **Формат**: `JSONL` (JSON Lines), сжатый кодеком `zstd`.
-*   **Путь**: `bronze/v1/{provider}/{entity}/{date}/`.
-    *   `v1` — версия формата хранения (версия бакета/пути).
+*   **Путь**: `data/output/bronze/{provider}/{entity}/{date}/`.
     *   `{date}` — дата выгрузки (ingestion date), формат `YYYY-MM-DD`.
 *   **Схема**: Implicit (Схема источника). Файлы сохраняются "как есть", без валидации структуры содержимого, но с добавлением технических метаданных.
 *   **Правило**: Файлы в Bronze **НИКОГДА** не перезаписываются и не удаляются (кроме политики Retention для архивации).
@@ -7493,7 +7663,7 @@ Path: 02-architecture\data-layers.md
 ### 2.1. Формат и Технологии
 *   **Формат**: Delta Lake (Parquet + Transaction Log).
 *   **Engine**: `delta-rs` (через библиотеку `deltalake` Python binding).
-*   **Путь**: `silver/{provider}/{entity}/[{partition_cols}/]` — партиционирование опционально, настраивается через `partition_by` в YAML конфиге пайплайна.
+*   **Путь**: `data/output/silver/{provider}/{entity}/[{partition_cols}/]` — партиционирование опционально, настраивается через `partition_by` в YAML конфиге пайплайна.
 *   **Протокол**: Writer Version 2 (поддержка Column Mapping), Reader Version 1.
 
 ### 2.2. Схема и Валидация
@@ -7528,7 +7698,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 *   **Приоритет обновлений (Conflict Resolution)**:
     При конкурентных запусках (например, Backfill vs Incremental) используется поле `_run_type`.
     Приоритет: `rebuild` > `backfill` > `incremental`.
-    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/delta_writer.py`).
+    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/silver_writer.py`).
 
 ### 2.5. PII и Безопасность
 *   Поля, помеченные как чувствительные (PII), **ОБЯЗАНЫ** быть хэшированы перед записью в Silver.
@@ -7553,7 +7723,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 *   **Исключение JSON полей**: Вложенные JSON-строки, сохранённые в Silver для forensic целей, исключаются из Gold.
 *   **Плоская структура**: Gold содержит только плоские (scalar) поля для оптимизации аналитических запросов.
-*   **Реализация**: `BasePipeline.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS`.
+*   **Реализация**: `BaseTransformer.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS` в `src/bioetl/application/core/base_transformer.py`.
 
 #### Пример: ChEMBL Molecule
 
@@ -7570,14 +7740,14 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 ### 3.2. Формат и Оптимизация
 *   **Формат**: Delta Lake.
-*   **Путь**: `gold/{domain}/{mart_name}/` (например, `gold/discovery/target_affinity`).
+*   **Путь**: `data/output/gold/{provider}/{entity}/` (например, `data/output/gold/chembl/activity`).
 *   **Оптимизация чтения**:
     *   **Z-ORDER Clustering**: Обязательно применяется по часто используемым предикатам фильтрации (например, `target_id`, `assay_type`).
     *   **Compaction**: Регулярная (еженедельная) компрессия мелких файлов через `OPTIMIZE`.
 
 ### 3.3. Контракты Данных (Data Contracts)
 Gold слой имеет строгие публичные контракты.
-*   **Реестр**: JSON Schema файлы в `docs/contracts/gold/`.
+*   **Реестр**: JSON Schema файлы в `docs/04-reference/contracts/gold/`.
 *   **Стабильность**: Любое изменение схемы в Gold требует:
     1.  Обновления JSON-контракта.
     2.  Создания миграции или новой версии витрины (v2).
@@ -11057,6 +11227,7 @@ class RuntimeConfig:
     run_type: RunType
     resume: bool = False
     limit: int | None = None
+    skip_gold: bool = False  # Skip Gold writes (composite sub-pipelines)
 ```
 
 #### PipelineServices (immutable dataclass with lifecycle)
@@ -13320,8 +13491,8 @@ class CompositePipelineRunner:
         self,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        seed_runner_factory: Callable[[], PipelineRunner],
-        enricher_runner_factory: Callable[[str], PipelineRunner],
+        seed_runner_factory: Callable[[], PipelineRunner],  # skip_gold=True
+        enricher_runner_factory: Callable[[str], PipelineRunner],  # skip_gold=True
         key_extractor: KeyExtractorService,
         coordinator: EnrichmentCoordinator,
         merger: MergeService,
@@ -13859,6 +14030,8 @@ def run(pipeline: str, enrich_only: str | None, required_only: bool, ...):
 3. **Full lineage** - Every field traceable to source
 4. **Resume capability** - Checkpoint-based recovery from failures
 5. **Configurable flexibility** - YAML-based orchestration without code changes
+6. **No redundant Gold writes** - Sub-pipelines run with `skip_gold=True`,
+   writing only Bronze+Silver; the composite merge phase produces the unified Gold output
 
 ### Negative
 
@@ -14964,10 +15137,198 @@ Once watermark is implemented:
 - ChEMBL API Documentation — Offset pagination behavior
 
 ================================================================================
-File: ADR-032-publication-validation-strategy.md
-Path: 02-architecture\decisions\ADR-032-publication-validation-strategy.md
+File: ADR-032-unified-http-client.md
+Path: 02-architecture\decisions\ADR-032-unified-http-client.md
 ================================================================================
-# ADR-032: Publication Metadata Validation Strategy
+# ADR-032: Unified HTTP Client Pattern
+
+**Status:** Accepted
+**Date:** 2026-01-28
+**Decision makers:** @BioETL-Team
+
+## Context
+
+All data source adapters require HTTP communication with external APIs (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, Semantic Scholar). Each API has different requirements for:
+- Rate limiting (1-100 requests/second depending on provider)
+- Authentication (API keys, email headers)
+- Retry strategies (different transient error patterns)
+- Circuit breaking (different failure thresholds)
+
+Without unification, each adapter would implement its own HTTP handling, leading to:
+- Duplicated rate limiting and retry logic
+- Inconsistent error handling
+- Difficulty in applying cross-cutting concerns (tracing, metrics)
+- Testing complexity
+
+## The Decision
+
+We have implemented **`UnifiedHTTPClient`** in `infrastructure/adapters/http/client.py` as the single HTTP abstraction for all adapters.
+
+### Design Principles
+
+1. **Composition over Inheritance**: Client accepts injected ports (RateLimiterPort, CircuitBreakerPort)
+2. **SRP Compliance**: Each concern handled by dedicated component
+3. **Observability Built-in**: Tracing and metrics integrated via ports
+4. **Async-first**: Uses httpx for async HTTP
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    UnifiedHTTPClient                         │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────┐    │
+│  │ RateLimiter │  │CircuitBreaker│  │  RetryConfig    │    │
+│  │   Port      │  │    Port      │  │ (value object)  │    │
+│  └─────────────┘  └──────────────┘  └─────────────────┘    │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────┐    │
+│  │ TracingPort │  │ MetricsPort  │  │   LoggerPort    │    │
+│  └─────────────┘  └──────────────┘  └─────────────────┘    │
+├─────────────────────────────────────────────────────────────┤
+│                     httpx.AsyncClient                        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Features
+
+| Feature | Implementation |
+|---------|----------------|
+| Rate Limiting | TokenBucket algorithm via RateLimiterPort |
+| Circuit Breaker | 5 consecutive errors → Open 5 min (ADR-007) |
+| Retry | Exponential backoff with jitter (RetryConfig) |
+| Tracing | OpenTelemetry spans per request |
+| Metrics | http_request_duration_seconds, http_request_errors_total |
+| Correlation | X-Correlation-ID header from run_id |
+
+## Justification
+
+### 1. Single Point of Configuration
+
+```python
+# Before: Each adapter configured independently
+class ChEMBLAdapter:
+    def __init__(self):
+        self._rate_limit = 10  # Hardcoded
+        self._timeout = 30     # Duplicated
+
+class PubChemAdapter:
+    def __init__(self):
+        self._rate_limit = 5   # Different value
+        self._timeout = 30     # Duplicated
+```
+
+```python
+# After: Factory creates configured client
+client = HttpClientFactory.create_for_provider("chembl", settings)
+# Rate limit, timeout, retry config from YAML
+```
+
+### 2. Consistent Observability
+
+All HTTP requests automatically get:
+- Tracing spans with provider/method/status attributes
+- Latency histogram for SLA monitoring
+- Error counters for alerting
+- Correlation IDs for distributed tracing
+
+### 3. Testability
+
+```python
+# Easy to mock for testing
+mock_client = Mock(spec=UnifiedHTTPClient)
+mock_client.get.return_value = {"data": [...]}
+adapter = ChEMBLAdapter(http_client=mock_client)
+```
+
+## Implementation
+
+### Client Configuration
+
+```python
+@dataclass
+class UnifiedHTTPClient:
+    rate_limiter: RateLimiterPort
+    circuit_breaker: CircuitBreakerPort
+    retry_config: RetryConfig = field(default_factory=RetryConfig)
+    timeout: float = 30.0
+    run_id: RunID | None = None
+    user_agent: str = "BioETL/5.0.0"
+    contact_email: str | None = None
+    provider: str = "unknown"
+    tracer: TracingPort | None = None
+    metrics: MetricsPort | None = None
+    logger: LoggerPort | None = None
+```
+
+### Factory Pattern
+
+```python
+class HttpClientFactory:
+    @classmethod
+    def create_for_provider(
+        cls, provider: str, settings: Settings
+    ) -> UnifiedHTTPClient:
+        config = load_source_config(provider)
+        return UnifiedHTTPClient(
+            rate_limiter=TokenBucket(
+                rate=config.rate_limit.rate,
+                capacity=config.rate_limit.capacity,
+            ),
+            circuit_breaker=CircuitBreaker(provider=provider),
+            timeout=config.timeout,
+            contact_email=settings.default_email,
+        )
+```
+
+### Usage in Adapters
+
+```python
+class ChEMBLAdapter(BaseHttpAdapter):
+    async def fetch(self, entity_type: str, limit: int | None = None):
+        async with self._http_client:
+            response = await self._http_client.get(
+                f"{self.base_url}/{entity_type}",
+                params={"limit": limit},
+            )
+            yield from response.json()["data"]
+```
+
+## Consequences
+
+### Positive
+
+1. **Consistency**: All adapters use same HTTP patterns
+2. **Observability**: Unified metrics and tracing
+3. **Maintainability**: Single place to update HTTP behavior
+4. **Testability**: Easy to mock and test
+5. **Configuration**: Provider settings in YAML, not code
+
+### Negative
+
+1. **Indirection**: Additional layer between adapter and HTTP
+2. **Learning curve**: Developers must understand client API
+
+### Mitigation
+
+- Clear documentation and examples
+- Factory hides complexity from adapter authors
+- Sensible defaults reduce configuration burden
+
+## Related ADRs
+
+- [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy (client cleanup)
+- [ADR-009](ADR-009-paginated-fetcher-mixin.md): Paginated Fetcher (uses HTTP client)
+- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy (retry classification)
+- [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement (TracingPort, MetricsPort)
+- [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing for Local-Only
+
+================================================================================
+File: ADR-033-publication-validation-strategy.md
+Path: 02-architecture\decisions\ADR-033-publication-validation-strategy.md
+================================================================================
+# ADR-033: Publication Metadata Validation Strategy
 
 | Параметр | Значение |
 |----------|----------|
@@ -15410,194 +15771,6 @@ dq_thresholds:
 **Последнее обновление:** 2026-02-06
 
 ================================================================================
-File: ADR-032-unified-http-client.md
-Path: 02-architecture\decisions\ADR-032-unified-http-client.md
-================================================================================
-# ADR-032: Unified HTTP Client Pattern
-
-**Status:** Accepted
-**Date:** 2026-01-28
-**Decision makers:** @BioETL-Team
-
-## Context
-
-All data source adapters require HTTP communication with external APIs (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, Semantic Scholar). Each API has different requirements for:
-- Rate limiting (1-100 requests/second depending on provider)
-- Authentication (API keys, email headers)
-- Retry strategies (different transient error patterns)
-- Circuit breaking (different failure thresholds)
-
-Without unification, each adapter would implement its own HTTP handling, leading to:
-- Duplicated rate limiting and retry logic
-- Inconsistent error handling
-- Difficulty in applying cross-cutting concerns (tracing, metrics)
-- Testing complexity
-
-## The Decision
-
-We have implemented **`UnifiedHTTPClient`** in `infrastructure/adapters/http/client.py` as the single HTTP abstraction for all adapters.
-
-### Design Principles
-
-1. **Composition over Inheritance**: Client accepts injected ports (RateLimiterPort, CircuitBreakerPort)
-2. **SRP Compliance**: Each concern handled by dedicated component
-3. **Observability Built-in**: Tracing and metrics integrated via ports
-4. **Async-first**: Uses httpx for async HTTP
-
-### Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    UnifiedHTTPClient                         │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────┐    │
-│  │ RateLimiter │  │CircuitBreaker│  │  RetryConfig    │    │
-│  │   Port      │  │    Port      │  │ (value object)  │    │
-│  └─────────────┘  └──────────────┘  └─────────────────┘    │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────┐    │
-│  │ TracingPort │  │ MetricsPort  │  │   LoggerPort    │    │
-│  └─────────────┘  └──────────────┘  └─────────────────┘    │
-├─────────────────────────────────────────────────────────────┤
-│                     httpx.AsyncClient                        │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Key Features
-
-| Feature | Implementation |
-|---------|----------------|
-| Rate Limiting | TokenBucket algorithm via RateLimiterPort |
-| Circuit Breaker | 5 consecutive errors → Open 5 min (ADR-007) |
-| Retry | Exponential backoff with jitter (RetryConfig) |
-| Tracing | OpenTelemetry spans per request |
-| Metrics | http_request_duration_seconds, http_request_errors_total |
-| Correlation | X-Correlation-ID header from run_id |
-
-## Justification
-
-### 1. Single Point of Configuration
-
-```python
-# Before: Each adapter configured independently
-class ChEMBLAdapter:
-    def __init__(self):
-        self._rate_limit = 10  # Hardcoded
-        self._timeout = 30     # Duplicated
-
-class PubChemAdapter:
-    def __init__(self):
-        self._rate_limit = 5   # Different value
-        self._timeout = 30     # Duplicated
-```
-
-```python
-# After: Factory creates configured client
-client = HttpClientFactory.create_for_provider("chembl", settings)
-# Rate limit, timeout, retry config from YAML
-```
-
-### 2. Consistent Observability
-
-All HTTP requests automatically get:
-- Tracing spans with provider/method/status attributes
-- Latency histogram for SLA monitoring
-- Error counters for alerting
-- Correlation IDs for distributed tracing
-
-### 3. Testability
-
-```python
-# Easy to mock for testing
-mock_client = Mock(spec=UnifiedHTTPClient)
-mock_client.get.return_value = {"data": [...]}
-adapter = ChEMBLAdapter(http_client=mock_client)
-```
-
-## Implementation
-
-### Client Configuration
-
-```python
-@dataclass
-class UnifiedHTTPClient:
-    rate_limiter: RateLimiterPort
-    circuit_breaker: CircuitBreakerPort
-    retry_config: RetryConfig = field(default_factory=RetryConfig)
-    timeout: float = 30.0
-    run_id: RunID | None = None
-    user_agent: str = "BioETL/5.0.0"
-    contact_email: str | None = None
-    provider: str = "unknown"
-    tracer: TracingPort | None = None
-    metrics: MetricsPort | None = None
-    logger: LoggerPort | None = None
-```
-
-### Factory Pattern
-
-```python
-class HttpClientFactory:
-    @classmethod
-    def create_for_provider(
-        cls, provider: str, settings: Settings
-    ) -> UnifiedHTTPClient:
-        config = load_source_config(provider)
-        return UnifiedHTTPClient(
-            rate_limiter=TokenBucket(
-                rate=config.rate_limit.rate,
-                capacity=config.rate_limit.capacity,
-            ),
-            circuit_breaker=CircuitBreaker(provider=provider),
-            timeout=config.timeout,
-            contact_email=settings.default_email,
-        )
-```
-
-### Usage in Adapters
-
-```python
-class ChEMBLAdapter(BaseHttpAdapter):
-    async def fetch(self, entity_type: str, limit: int | None = None):
-        async with self._http_client:
-            response = await self._http_client.get(
-                f"{self.base_url}/{entity_type}",
-                params={"limit": limit},
-            )
-            yield from response.json()["data"]
-```
-
-## Consequences
-
-### Positive
-
-1. **Consistency**: All adapters use same HTTP patterns
-2. **Observability**: Unified metrics and tracing
-3. **Maintainability**: Single place to update HTTP behavior
-4. **Testability**: Easy to mock and test
-5. **Configuration**: Provider settings in YAML, not code
-
-### Negative
-
-1. **Indirection**: Additional layer between adapter and HTTP
-2. **Learning curve**: Developers must understand client API
-
-### Mitigation
-
-- Clear documentation and examples
-- Factory hides complexity from adapter authors
-- Sensible defaults reduce configuration burden
-
-## Related ADRs
-
-- [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation
-- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy (client cleanup)
-- [ADR-009](ADR-009-paginated-fetcher-mixin.md): Paginated Fetcher (uses HTTP client)
-- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy (retry classification)
-- [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement (TracingPort, MetricsPort)
-- [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing for Local-Only
-
-================================================================================
 File: README.md
 Path: 02-architecture\decisions\README.md
 ================================================================================
@@ -15641,6 +15814,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-030](ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | Accepted | Data Fetching | 2026-01-25 |
 | [ADR-031](ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | Data Loading | 2026-01-26 |
 | [ADR-032](ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | Accepted | HTTP/Networking | 2026-01-28 |
+| [ADR-033](ADR-033-publication-validation-strategy.md) | Publication Metadata Validation Strategy | Proposed | Data Quality | 2026-02-06 |
 
 ## ADRs by Category
 
@@ -15675,6 +15849,7 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Data Quality
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation
 - [ADR-027](ADR-027-dq-rules-externalization.md): DQ Rules Externalization — Hierarchical DQ config
+- [ADR-033](ADR-033-publication-validation-strategy.md): Publication Metadata Validation Strategy — 5-level validation for publication data
 
 ### Domain Model
 - [ADR-004](ADR-004-pydantic-vs-dataclasses.md): Pydantic vs Dataclasses
@@ -17883,40 +18058,45 @@ Path: 03-guides\add-pipeline-existing-source.md
 **Пример:** `configs/pipelines/chembl/target.yaml`
 
 ```yaml
-pipeline:
-    name: chembl_target
-    provider: chembl
-    entity: target
+# Inherits defaults from ../_base.yaml
+pipeline_name: chembl_target
+provider: chembl
+entity_type: target
+version: "1.2.0"
+description: "Extract biological targets from ChEMBL API"
 
-source:
-    type: api
-    load_strategy: incremental
-    watermark_field: target_chembl_id
+primary_keys: ["target_chembl_id"]
+silver_table: "chembl_target"
+gold_table: "chembl_target"
 
-transform:
-    version: "1.0.0"
-    steps:
-        - normalize_fields
-        - generate_content_hash
+source_file: ../../sources/chembl.yaml
 
+# DQ rules loaded from hierarchical config files (ADR-027):
+#   1. configs/dq/_defaults.yaml
+#   2. configs/dq/providers/chembl.yaml
+#   3. configs/dq/entities/chembl/target.yaml
+dq_config_file: ../../dq/entities/chembl/target.yaml
+
+# Paths auto-computed by convention (ADR-029),
+# override only when different from default
 sink:
-    bronze:
-        path: "data/output/bronze/chembl/target"
-        format: json
-    silver:
-        path: "data/output/silver/chembl/target"
-        format: delta
-        mode: merge
-        primary_key: ["target_chembl_id"]
+  bronze:
+    path: "data/output/bronze/chembl/target"
+  silver:
+    path: "data/output/silver/chembl/target"
+    primary_key: ["target_chembl_id"]
+    partition_by: ["target_type"]
+  gold:
+    path: "data/output/gold/chembl/target"
 ```
 
 ## Шаг 2: Реализация пайплайна (Application Layer)
 
-Создайте новый файл в `src/bioetl/application/pipelines/`. Имя файла должно отражать провайдера и сущность (например, `chembl_target.py`).
+Создайте новый файл в `src/bioetl/application/pipelines/<provider>/`. Имя файла должно отражать сущность (например, `target.py` внутри `chembl/`).
 
 Класс должен наследовать `BasePipeline` и реализовывать методы трансформации.
 
-**Пример:** `src/bioetl/application/pipelines/chembl_target.py`
+**Пример:** `src/bioetl/application/pipelines/chembl/target.py`
 
 ```python
 from typing import Any
@@ -17932,7 +18112,7 @@ CHEMBL_TARGET_CONFIG = PipelineConfig(
     provider="chembl",
     entity_type="target",
     primary_keys=["target_chembl_id"],
-    silver_table="chembl.target",
+    silver_table="chembl_target",
     checkpoint_interval=1000,
 )
 
@@ -18978,6 +19158,30 @@ thresholds:
 
 **Invariant**: `soft_fail` must be strictly less than `hard_fail`.
 
+## Complete `_defaults.yaml` Key Reference
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `version` | string | `"1.0.0"` | Schema version of the DQ config |
+| `thresholds.soft_fail` | float | `0.05` | Error rate (>5%) that triggers a warning |
+| `thresholds.hard_fail` | float | `0.20` | Error rate (>20%) that fails the batch |
+| `strict_validation` | bool | `false` | Feature flag for stricter validation rules |
+| `invalid_record_policy` | string | `"quarantine"` | How to handle failed records: `quarantine`, `skip`, or `fail` |
+| `report.enabled` | bool | `true` | Enable DQ report generation |
+| `report.format` | string | `"json"` | Report format: `json`, `yaml`, or `csv` |
+| `report.include_sample_failures` | bool | `true` | Include sample of failed records in report |
+| `report.sample_size` | int | `10` | Number of failed records to include in sample |
+| `report.output_path` | string | `null` | Custom output path (null = pipeline output dir) |
+| `common_field_validations` | list | see below | Field validations applied to ALL entities |
+| `common_cross_field_validations` | list | `[]` | Cross-field validations applied to ALL entities |
+
+### Default Common Field Validations
+
+Two validations are applied globally to all entities:
+
+1. **`_content_hash` required** — Content hash must be present after transform (for deduplication)
+2. **`_ingestion_ts` pattern** — Ingestion timestamp must match ISO 8601 format (`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}`)
+
 ## Adding DQ Rules for New Entity
 
 ### Step 1: Check if provider config exists
@@ -19678,7 +19882,7 @@ source .venv/bin/activate  # Linux/macOS
 # .venv\Scripts\activate   # Windows
 
 # Run the pipeline
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 ```
 
 This command will:
@@ -20102,7 +20306,7 @@ export BIOETL_METRICS_ENABLED=false
 
 ```bash
 # Запуск пайплайна
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 
 # В другом терминале
 curl http://localhost:8000/metrics | grep bioetl_
@@ -20232,7 +20436,7 @@ sum(rate(bioetl_records_processed_total[5m])) * 100
 export BIOETL_LOG_LEVEL=DEBUG
 
 # Via CLI флаг
-python -m bioetl.main run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug
 ```
 
 ---
@@ -20293,13 +20497,13 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
 
 ```bash
 # По умолчанию на порту 8080
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 
 # Кастомный порт
-python -m bioetl.main run --pipeline chembl_activity --health-port 9090
+bioetl run --pipeline chembl_activity --health-port 9090
 
 # Отключить
-python -m bioetl.main run --pipeline chembl_activity --no-health-server
+bioetl run --pipeline chembl_activity --no-health-server
 ```
 
 ### Endpoints
@@ -20316,20 +20520,20 @@ python -m bioetl.main run --pipeline chembl_activity --no-health-server
 Для отдельного мониторинга без запуска пайплайна:
 
 ```bash
-python -m bioetl.main health server --host 0.0.0.0 --port 8080
+bioetl health server --host 0.0.0.0 --port 8080
 ```
 
 ### CLI Health Check
 
 ```bash
 # Проверить все провайдеры
-python -m bioetl.main health check
+bioetl health check
 
 # Проверить конкретные провайдеры
-python -m bioetl.main health check --provider chembl --provider pubchem
+bioetl health check --provider chembl --provider pubchem
 
 # JSON output
-python -m bioetl.main health check --json
+bioetl health check --json
 ```
 
 ---
@@ -20448,7 +20652,7 @@ groups:
 
 1. Проверить connectivity к провайдеру:
    ```bash
-   python -m bioetl.main health check --provider chembl
+   bioetl health check --provider chembl
    ```
 
 2. Проверить логи на ошибки:
@@ -20477,6 +20681,464 @@ groups:
 - [Observability Checklist](../05-operations/runbooks/observability-checklist.md) — чек-лист для адаптеров
 - [ADR-017: Observability Architecture](../02-architecture/decisions/ADR-017-observability-architecture.md)
 - [ADR-019: Observability Port Enforcement](../02-architecture/decisions/ADR-019-observability-port-enforcement.md)
+
+================================================================================
+File: migration-5.9-to-5.14.md
+Path: 03-guides\migration-5.9-to-5.14.md
+================================================================================
+# Migration Guide: 5.9 → 5.14
+
+**Target versions:** 5.9.0 → 5.14.0
+**Release dates:** 2026-01-06 → 2026-02-09
+**Migration time:** ~15-30 minutes
+**Breaking changes:** ⚠️ **YES** (Publication schema fields renamed)
+
+---
+
+## Overview
+
+Versions 5.10-5.14 introduce significant enhancements to publication validation, composite pipelines, and schema standardization. Most changes are backward-compatible, but **publication field renames** require data migration.
+
+**Key changes:**
+- ✅ Publication field standardization (5.14.0) — **BREAKING**
+- ✅ Comprehensive publication validation system (5.13.0)
+- ✅ Composite activity pipeline (5.11.0)
+- ✅ UniProt extended fields (5.10.0)
+
+---
+
+## Breaking Changes
+
+### 🔴 Publication Field Renames (5.14.0)
+
+**Affected providers:** All 5 publication providers (ChEMBL, PubMed, CrossRef, OpenAlex, Semantic Scholar)
+
+**Changes:**
+
+| Old Field Name | New Field Name | Reason |
+|----------------|----------------|--------|
+| `citation_count` | `citations_received` | Semantic clarity (incoming vs outgoing) |
+| `author_orcid_list` | `author_orcids` | Naming consistency |
+
+**Impact:**
+- ❌ Silver layer queries using old field names will fail
+- ❌ Gold layer reports may break if not updated
+- ✅ Bronze layer unaffected (raw data preserved)
+
+**Migration steps:**
+
+#### Step 1: Update SQL queries
+
+```sql
+-- BEFORE (5.9)
+SELECT
+    document_chembl_id,
+    citation_count,
+    author_orcid_list
+FROM chembl.publication;
+
+-- AFTER (5.14)
+SELECT
+    document_chembl_id,
+    citations_received,
+    author_orcids
+FROM chembl.publication;
+```
+
+#### Step 2: Update DQ configs
+
+If you have custom DQ rules referencing these fields:
+
+```yaml
+# configs/dq/entities/chembl/publication.yaml
+
+# BEFORE (5.9)
+- field: citation_count
+  validation: range
+  min: 0
+
+# AFTER (5.14)
+- field: citations_received
+  validation: range
+  min: 0
+```
+
+#### Step 3: Rebuild Gold layer
+
+```bash
+# Rebuild all publication pipelines
+bioetl run --pipeline chembl_publication --run-type rebuild --yes
+bioetl run --pipeline pubmed_publication --run-type rebuild --yes
+bioetl run --pipeline crossref_publication --run-type rebuild --yes
+bioetl run --pipeline openalex_publication --run-type rebuild --yes
+bioetl run --pipeline semanticscholar_publication --run-type rebuild --yes
+```
+
+**Automation:**
+```bash
+# Rebuild all publication providers
+for provider in chembl pubmed crossref openalex semanticscholar; do
+    bioetl run --pipeline ${provider}_publication --run-type rebuild --yes
+done
+```
+
+**Estimated time:** ~30-60 minutes per provider (depending on data volume)
+
+---
+
+## New Features
+
+### 1. Publication Validation System (5.13.0)
+
+**Purpose:** Comprehensive 5-level validation strategy for publication data quality.
+
+**Validation levels:**
+
+| Level | Description | Tests | Default |
+|-------|-------------|-------|---------|
+| **Base** | Pandera schema validation (types, regex, nullable) | 329 | ✅ Enabled |
+| **Structural** | Cross-field consistency (page ordering, year matching) | 16 | ✅ Enabled |
+| **External** | HTTP-based ID verification with upstream providers | 16 | ❌ Disabled |
+| **Logical** | Range constraints and invariants | 12 | ✅ Enabled |
+| **Semantic** | NLP-based text consistency (title-abstract similarity) | 13 | ❌ Disabled |
+
+**Usage:**
+
+```bash
+# Balanced mode (default) - Base + Structural + Logical
+bioetl run --pipeline pubmed_publication
+
+# Strict mode - All 5 levels
+bioetl run --pipeline pubmed_publication --validation-mode strict
+
+# Fast mode - Base only
+bioetl run --pipeline pubmed_publication --validation-mode fast
+```
+
+**DQ flags in Silver:**
+- `_dq_error`: FAIL (blocking) — record rejected
+- `_dq_warn`: WARN (quarantine) — record flagged for manual review
+
+**Documentation:**
+- [ADR-033: Publication Validation Strategy](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)
+- [Publication Validation Guide](publication-validation-guide.md)
+- [Operational Runbook](../05-operations/runbooks/publication-validation-runbook.md)
+
+---
+
+### 2. Composite Activity Pipeline (5.11.0)
+
+**Purpose:** Combine ChEMBL activity data with compound record metadata in a single Gold table.
+
+**Structure:**
+- **Seed:** `chembl_activity` (bioactivity measurements)
+- **Dependency:** `chembl_compound_record` (compound metadata, optional)
+- **Join:** LEFT OUTER join on `molecule_chembl_id`
+
+**Usage:**
+
+```bash
+# Run composite pipeline
+bioetl run-composite --composite activity
+
+# With limits (testing)
+bioetl run-composite --composite activity --seed-limit 1000
+```
+
+**Output:** `data/gold/composite_activity/`
+
+**Configuration:** `configs/pipelines/composite/activity.yaml`
+
+**Documentation:** [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
+
+---
+
+### 3. UniProt Extended Fields (5.10.0)
+
+**Added 22 new fields** to UniProt protein pipeline:
+
+**Taxonomy:**
+- `superkingdom`, `phylum`, `genus`
+
+**Gene Ontology:**
+- `molecular_function`, `cellular_component`
+
+**Structural Features:**
+- `topology`, `transmembrane`, `intramembrane`, `signal_peptide`, `propeptide`
+
+**PTM Features:**
+- `glycosylation`, `lipidation`, `disulfide_bond`, `modified_residue`
+- `phosphorylation`, `acetylation`, `ubiquitination`
+
+**Isoforms:**
+- `isoform_names`, `isoform_ids`, `isoform_synonyms`
+
+**Reactions:**
+- `reactions`, `reaction_ec_numbers`
+
+**Usage:**
+
+```bash
+# Rebuild UniProt to get new fields
+bioetl run --pipeline uniprot_protein --run-type rebuild --yes
+```
+
+**Data availability:** Fields populated only for entries with relevant data (nullable).
+
+---
+
+## Configuration Changes
+
+### 1. Deprecated Parameter Migration (5.12.0)
+
+**Change:** `column_groups_file` → `data_schema_file`
+
+**Affected configs:** 21 pipeline configs across all providers
+
+**Migration:**
+
+```yaml
+# BEFORE (5.9)
+silver_config:
+  column_groups_file: configs/data_schema/chembl/activity.yaml
+
+# AFTER (5.14)
+silver_config:
+  data_schema_file: configs/data_schema/chembl/activity.yaml
+```
+
+**Note:** Old parameter still works (deprecated warning), will be removed in 6.0.
+
+---
+
+### 2. Composite Pipeline Output Paths (5.12.0)
+
+**Change:** Removed redundant explicit output paths — now auto-computed.
+
+**Before (5.9):**
+```yaml
+# configs/pipelines/composite/activity.yaml
+output:
+  gold_path: data/gold/composite_activity
+```
+
+**After (5.14):**
+```yaml
+# configs/pipelines/composite/activity.yaml
+# output.gold_path removed — auto-computed as:
+# data/gold/composite_{pipeline_name}/
+```
+
+**Impact:** No action required — convention-based paths work automatically.
+
+---
+
+## Validation Enhancements
+
+### 1. ORCID Format Validation (5.14.0)
+
+**Added:** ORCID regex validation in `PublicationBaseSchema`
+
+```python
+# Pattern: ^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$
+# Valid:   0000-0001-2345-678X
+# Invalid: 0000000123456789
+```
+
+**Impact:** Records with malformed ORCIDs will be flagged in `_dq_warn`.
+
+---
+
+### 2. MIN_PUBLICATION_YEAR Change (5.14.0)
+
+**Change:** Lowered from 1800 → 1500
+
+**Reason:** Support for historical publications (e.g., Renaissance era scientific texts)
+
+**Impact:** Publications dated 1500-1800 now pass validation.
+
+---
+
+### 3. ISSN Regex Constant (5.14.0)
+
+**Added:** `ISSN_PATTERN` in `domain/schemas/constants.py`
+
+```python
+ISSN_PATTERN = r"^\d{4}-\d{3}[\dX]$"
+# Valid:   1234-567X
+# Invalid: 12345678
+```
+
+---
+
+## CLI Changes
+
+### 1. Entry Point Update
+
+**Old (5.9):**
+```bash
+python -m bioetl.main run --pipeline chembl_activity
+```
+
+**New (5.14):**
+```bash
+# Preferred (via setuptools entry point)
+bioetl run --pipeline chembl_activity
+
+# Or development mode
+python -m bioetl.interfaces.cli run --pipeline chembl_activity
+```
+
+**Note:** Old entry point still works but is considered legacy.
+
+---
+
+### 2. Validation Mode Flag (5.13.0)
+
+**New flag:** `--validation-mode {strict,balanced,fast}`
+
+```bash
+# Enable all 5 validation levels
+bioetl run --pipeline pubmed_publication --validation-mode strict
+```
+
+---
+
+## Testing Changes
+
+### 1. Generated Tests (5.13.0)
+
+**Added:** 471 auto-generated tests for publication validation
+
+**Location:** `tests_generated/`
+
+**Run:**
+```bash
+pytest tests_generated/test_validation_base_*.py
+pytest tests_generated/test_validation_structural_*.py
+```
+
+---
+
+### 2. VCR Cassettes
+
+**No breaking changes** — all existing VCR cassettes remain valid.
+
+---
+
+## Performance Impact
+
+| Change | Impact | Notes |
+|--------|--------|-------|
+| Publication validation | +5-10% overhead | Only Base+Structural enabled by default |
+| Composite pipelines | Neutral | Eliminates redundant Gold writes |
+| UniProt extended fields | +2-3% overhead | Minimal (20 new fields) |
+
+---
+
+## Rollback Plan
+
+If issues arise after upgrade:
+
+### Option 1: Downgrade
+
+```bash
+# Downgrade to 5.9.0
+pip install bioetl==5.9.0
+
+# Restore old data
+# (assuming you backed up before rebuild)
+rm -rf data/silver/chembl.publication
+cp -r backup/data/silver/chembl.publication data/silver/
+```
+
+### Option 2: Disable New Features
+
+```bash
+# Disable validation levels
+export BIOETL_VALIDATION_MODE=fast  # Base only
+
+# Skip composite pipelines
+# (use individual pipelines instead)
+```
+
+---
+
+## Migration Checklist
+
+- [ ] **Backup data** (especially Silver layer)
+  ```bash
+  tar -czf bioetl_backup_$(date +%Y%m%d).tar.gz data/silver/ data/gold/
+  ```
+
+- [ ] **Upgrade package**
+  ```bash
+  pip install --upgrade bioetl==5.14.0
+  ```
+
+- [ ] **Update SQL queries** (replace `citation_count`, `author_orcid_list`)
+
+- [ ] **Update custom DQ configs** (if using old field names)
+
+- [ ] **Rebuild publication Gold layers**
+  ```bash
+  for provider in chembl pubmed crossref openalex semanticscholar; do
+      bioetl run --pipeline ${provider}_publication --run-type rebuild --yes
+  done
+  ```
+
+- [ ] **Test queries** (verify new field names work)
+  ```sql
+  SELECT citations_received, author_orcids FROM chembl.publication LIMIT 10;
+  ```
+
+- [ ] **Update documentation** (if you have custom docs referencing old fields)
+
+- [ ] **Run test suite**
+  ```bash
+  bioetl health check
+  pytest tests/integration/
+  ```
+
+---
+
+## Getting Help
+
+**Issues:** [GitHub Issues](https://github.com/SatoryKono/BioactivityDataAcquisition/issues)
+
+**Documentation:**
+- [CHANGELOG.md](../../CHANGELOG.md) — Full release notes
+- [RULES.md](../00-project/RULES.md) — Project governance
+- [ADRs](../02-architecture/decisions/) — Architecture decisions
+
+**Support:** Create an issue with:
+- BioETL version
+- Python version
+- Error message or unexpected behavior
+- Steps to reproduce
+
+---
+
+## Summary
+
+**Mandatory actions:**
+1. ✅ Update SQL queries (field renames)
+2. ✅ Rebuild publication Gold layers
+3. ✅ Update custom DQ configs (if any)
+
+**Optional actions:**
+1. ⚪ Explore publication validation system
+2. ⚪ Test composite activity pipeline
+3. ⚪ Rebuild UniProt for extended fields
+
+**Estimated migration time:**
+- Minimal setup: 15 minutes (code update + query fixes)
+- With data rebuild: 30-60 minutes per provider
+
+**Compatibility:**
+- Python: 3.11+ (unchanged)
+- Dependencies: See `pyproject.toml` for updated versions
+- Operating systems: Linux, macOS, Windows (unchanged)
 
 ================================================================================
 File: pipeline-configuration.md
@@ -20509,10 +21171,10 @@ BioETL использует **YAML-файлы** для конфигурации 
 
 ```
 configs/
-├── pipelines/                    # Конфигурации пайплайнов (21 = 19 entity + 2 composite)
-│   ├── _base.yaml               # Базовая конфигурация v2.0.0 (474 строки)
+├── pipelines/                    # Конфигурации пайплайнов (26 = 21 entity + 5 composite)
+│   ├── _base.yaml               # Базовая конфигурация v2.1.0 (491 строка)
 │   ├── _schema.json             # JSON Schema для валидации
-│   ├── chembl/                  # 12 entity configs
+│   ├── chembl/                  # 14 entity configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
 │   │   ├── assay_parameters.yaml
@@ -20523,8 +21185,10 @@ configs/
 │   │   ├── publication.yaml
 │   │   ├── publication_similarity.yaml
 │   │   ├── publication_term.yaml
+│   │   ├── subcellular_fraction.yaml
 │   │   ├── target.yaml
-│   │   └── target_component.yaml
+│   │   ├── target_component.yaml
+│   │   └── tissue.yaml
 │   ├── pubchem/                 # 1 entity config
 │   │   └── compound.yaml
 │   ├── uniprot/                 # 2 entity configs
@@ -20538,10 +21202,13 @@ configs/
 │   │   └── publication.yaml
 │   ├── semanticscholar/         # 1 entity config
 │   │   └── publication.yaml
-│   └── composite/               # 2 composite configs (ADR-026)
+│   └── composite/               # 5 composite configs (ADR-026)
+│       ├── activity.yaml        # chembl_activity + enrichers
+│       ├── assay.yaml           # chembl_assay + enrichers
+│       ├── molecule.yaml        # chembl_molecule + enrichers
 │       ├── publication.yaml     # chembl_publication + enrichers
 │       └── target.yaml          # chembl_target + enrichers
-├── dq/                           # Data Quality правила (21 файлов)
+├── dq/                           # Data Quality правила (30 файлов)
 │   ├── _defaults.yaml           # Глобальные DQ defaults (soft_fail=0.05, hard_fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
 │   │   ├── chembl.yaml
@@ -20551,11 +21218,11 @@ configs/
 │   │   ├── pubmed.yaml
 │   │   ├── semanticscholar.yaml
 │   │   └── uniprot.yaml
-│   └── entities/                # 14 entity-specific DQ
+│   └── entities/                # 22 entity-specific DQ
 │       ├── chembl/
 │       │   ├── activity.yaml
 │       │   ├── assay.yaml
-│       │   └── ...              # 12 entity DQ configs
+│       │   └── ...              # 14 entity DQ configs
 │       ├── crossref/
 │       │   └── publication.yaml
 │       ├── openalex/
@@ -20594,12 +21261,12 @@ configs/
 
 | Категория | Количество | Описание |
 |-----------|------------|----------|
-| Pipeline configs (entity) | 19 | Regular ETL pipelines |
-| Composite configs | 2 | Multi-provider pipelines (ADR-026) |
-| DQ configs | 21 | 1 defaults + 7 providers + 13 entities |
+| Pipeline configs (entity) | 21 | Regular ETL pipelines |
+| Composite configs | 5 | Multi-provider pipelines (ADR-026) |
+| DQ configs | 30 | 1 defaults + 7 providers + 22 entities |
 | Filter configs | 8 | 1 defaults + 7 providers |
 | Source configs | 7 | Один на провайдера |
-| **Итого** | **58** | Все конфиги валидированы |
+| **Итого** | **71** | Все конфиги валидированы |
 
 ---
 
@@ -20716,6 +21383,9 @@ composite:
 
 | Composite | Seed | Enrichers | Описание |
 |-----------|------|-----------|----------|
+| `composite_activity` | `chembl_activity` | enrichers | Обогащённые данные активности |
+| `composite_assay` | `chembl_assay` | enrichers | Обогащённые данные анализов |
+| `composite_molecule` | `chembl_molecule` | pubchem_compound, enrichers | Обогащённые молекулы |
 | `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar | Обогащённые публикации |
 | `composite_target` | `chembl_target` | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets |
 
@@ -21073,16 +21743,16 @@ maintenance:
 
 ```bash
 # Показать конфигурацию
-python -m bioetl.main config show chembl_activity
+bioetl config show chembl_activity
 
 # Валидация
-python -m bioetl.main config validate chembl_activity
+bioetl config validate chembl_activity
 
 # Показать глобальные настройки
-python -m bioetl.main config show-settings
+bioetl config show-settings
 
 # Список всех пайплайнов
-python -m bioetl.main config list-pipelines
+bioetl config list-pipelines
 ```
 
 ### Pydantic валидация
@@ -21194,7 +21864,7 @@ batch_size: 100
 ### Ошибка валидации конфига
 
 ```bash
-python -m bioetl.main config validate chembl_activity
+bioetl config validate chembl_activity
 ```
 
 **Распространённые ошибки:**
@@ -21217,7 +21887,7 @@ python -m bioetl.main config validate chembl_activity
 
 3. Использовать CLI для просмотра resolved конфига:
    ```bash
-   python -m bioetl.main config show chembl_activity --format json
+   bioetl config show chembl_activity --format json
    ```
 
 ---
@@ -21355,7 +22025,7 @@ Path: 03-guides\publication-validation-guide.md
 **Версия:** 1.0.0
 **Дата:** 2026-02-06
 **Статус:** Утверждено ✅
-**Связанный ADR:** ADR-032
+**Связанный ADR:** ADR-033
 
 ---
 
@@ -22182,7 +22852,7 @@ pytest tests/integration/validation/ --record-mode=once
 
 ## Связанная документация
 
-- **ADR-032:** Стратегия валидации публикаций
+- **ADR-033:** Стратегия валидации публикаций
 - **Field Reference:** `docs/04-reference/publication-fields-reference.md`
 - **Validation Schema:** `docs/04-reference/schemas/publication_validation_schema_v3.xlsx`
 - **Operational Runbook:** `docs/05-operations/runbooks/publication-validation-runbook.md`
@@ -22228,7 +22898,7 @@ source .venv/bin/activate  # Linux/macOS
 
 # Run ChEMBL activity pipeline (limited to 100 records)
 # Note: Use --no-cached-bronze for the very first run to fetch from API
-python -m bioetl.main run --pipeline chembl_activity --limit 100 --no-cached-bronze
+bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 
 # Data will be stored in:
 # - data/bronze/v1/chembl/activity/
@@ -22254,9 +22924,9 @@ make lint
 | Run all tests | `make test` |
 | Run linting | `make lint` |
 | Run on fixtures | `make run-local` |
-| List pipelines | `python -m bioetl.main list` |
-| Full rebuild | `python -m bioetl.main run --pipeline <name> --full-rebuild` |
-| Resume from checkpoint | `python -m bioetl.main run --pipeline <name> --resume` |
+| List pipelines | `bioetl list` |
+| Full rebuild | `bioetl run --pipeline <name> --full-rebuild` |
+| Resume from checkpoint | `bioetl run --pipeline <name> --resume` |
 
 ## Project Structure (Data)
 
@@ -22429,8 +23099,8 @@ Path: 03-guides\running-pipelines.md
 
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
-**Версия:** 5.9.0
-**Дата обновления:** 2026-01-26
+**Версия:** 5.14.0
+**Дата обновления:** 2026-02-10
 
 ---
 
@@ -22461,13 +23131,13 @@ Path: 03-guides\running-pipelines.md
 
 ```bash
 # Список доступных пайплайнов
-python -m bioetl.main config list-pipelines
+bioetl config list-pipelines
 
 # Запуск пайплайна с ограничением (для тестирования)
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 
 # Запуск полного пайплайна
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 ```
 
 ---
@@ -22485,7 +23155,7 @@ python -m bioetl.main run --pipeline chembl_activity
 Обрабатывает только новые записи с момента последнего успешного запуска:
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 ```
 
 ### Backfill Run
@@ -22494,13 +23164,13 @@ python -m bioetl.main run --pipeline chembl_activity
 
 ```bash
 # С подтверждением
-python -m bioetl.main run --pipeline chembl_activity --run-type backfill
+bioetl run --pipeline chembl_activity --run-type backfill
 
 # Без подтверждения
-python -m bioetl.main run --pipeline chembl_activity --run-type backfill --yes
+bioetl run --pipeline chembl_activity --run-type backfill --yes
 
 # Предпросмотр очистки
-python -m bioetl.main run --pipeline chembl_activity --run-type backfill --dry-run
+bioetl run --pipeline chembl_activity --run-type backfill --dry-run
 ```
 
 ### Full Rebuild
@@ -22509,13 +23179,13 @@ python -m bioetl.main run --pipeline chembl_activity --run-type backfill --dry-r
 
 ```bash
 # С подтверждением
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl_activity --run-type rebuild
 
 # Без подтверждения
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --yes
+bioetl run --pipeline chembl_activity --run-type rebuild --yes
 
 # Предпросмотр очистки
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 ```
 
 ---
@@ -22527,7 +23197,7 @@ python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --dry-ru
 Для тестирования ограничьте количество обрабатываемых записей:
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 ```
 
 ### Resume (продолжение прерванного запуска)
@@ -22535,13 +23205,13 @@ python -m bioetl.main run --pipeline chembl_activity --limit 100
 Если пайплайн был прерван, продолжите с checkpoint:
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl_activity --resume
 ```
 
 ### Debug логирование
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug
 ```
 
 ### Bronze Cache (use_cached_bronze)
@@ -22553,16 +23223,16 @@ BioETL поддерживает запуск пайплайнов на осно�
 
 ```bash
 # Использовать кеш (по умолчанию)
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 
 # Принудительно запросить свежие данные из API
-python -m bioetl.main run --pipeline chembl_activity --no-cached-bronze
+bioetl run --pipeline chembl_activity --no-cached-bronze
 
 # Фильтрация кеша по дате
-python -m bioetl.main run --pipeline chembl_activity --cached-bronze-date 2026-01-20
+bioetl run --pipeline chembl_activity --cached-bronze-date 2026-01-20
 
 # Указание кастомного пути к кешу
-python -m bioetl.main run --pipeline chembl_activity --cached-bronze-path ./my_cache
+bioetl run --pipeline chembl_activity --cached-bronze-path ./my_cache
 ```
 
 ### Фильтрация по CSV
@@ -22570,7 +23240,7 @@ python -m bioetl.main run --pipeline chembl_activity --cached-bronze-path ./my_c
 Обрабатывать только записи с указанными ID:
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity \
+bioetl run --pipeline chembl_activity \
     --input-csv data/filter_ids.csv \
     --filter-column molecule_id \
     --filter-field molecule_chembl_id
@@ -22601,13 +23271,13 @@ configs/
 
 ```bash
 # Показать конфигурацию пайплайна
-python -m bioetl.main config show chembl_activity
+bioetl config show chembl_activity
 
 # В формате JSON
-python -m bioetl.main config show chembl_activity --format json
+bioetl config show chembl_activity --format json
 
 # Валидация конфигурации
-python -m bioetl.main config validate chembl_activity
+bioetl config validate chembl_activity
 ```
 
 ### Структура YAML-конфига
@@ -22646,7 +23316,7 @@ BioETL использует **in-memory блокировки** для предо
 ### Проверка статуса блокировки
 
 ```bash
-python -m bioetl.main lock check --pipeline chembl_activity --run-id <UUID>
+bioetl lock check --pipeline chembl_activity --run-id <UUID>
 ```
 
 ### Освобождение зависшей блокировки
@@ -22654,7 +23324,7 @@ python -m bioetl.main lock check --pipeline chembl_activity --run-id <UUID>
 Если пайплайн завершился аварийно и не освободил блокировку:
 
 ```bash
-python -m bioetl.main lock release --pipeline chembl_activity --run-id <UUID>
+bioetl lock release --pipeline chembl_activity --run-id <UUID>
 ```
 
 > **Внимание:** Используйте только если уверены, что пайплайн не выполняется.
@@ -22673,11 +23343,11 @@ python -m bioetl.main lock release --pipeline chembl_activity --run-id <UUID>
 
 ```bash
 # Via флаг
-python -m bioetl.main run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug
 
 # Via переменную окружения
 export BIOETL_LOG_LEVEL=DEBUG
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 ```
 
 | Уровень | Использование |
@@ -22725,10 +23395,10 @@ export BIOETL_METRICS_ENABLED=false
 
 ```bash
 # Включён по умолчанию на порту 8080
-python -m bioetl.main run --pipeline chembl_activity --health-port 8080
+bioetl run --pipeline chembl_activity --health-port 8080
 
 # Отключить
-python -m bioetl.main run --pipeline chembl_activity --no-health-server
+bioetl run --pipeline chembl_activity --no-health-server
 ```
 
 **Endpoints:**
@@ -22739,7 +23409,7 @@ python -m bioetl.main run --pipeline chembl_activity --no-health-server
 ### Standalone Health Server
 
 ```bash
-python -m bioetl.main health server --port 8080
+bioetl health server --port 8080
 ```
 
 ---
@@ -22777,16 +23447,16 @@ data/
 
 ```bash
 # Список доступных таблиц
-python -m bioetl.main export --list
+bioetl export --list
 
 # Экспорт в CSV
-python -m bioetl.main export chembl.activity
+bioetl export chembl.activity
 
 # Экспорт в Excel
-python -m bioetl.main export chembl.activity --format xlsx
+bioetl export chembl.activity --format xlsx
 
 # Экспорт Gold слоя
-python -m bioetl.main export chembl.activity --layer gold
+bioetl export chembl.activity --layer gold
 ```
 
 ---
@@ -22797,16 +23467,16 @@ python -m bioetl.main export chembl.activity --layer gold
 
 ```bash
 # VACUUM одной таблицы
-python -m bioetl.main maintenance vacuum chembl.activity
+bioetl maintenance vacuum chembl.activity
 
 # VACUUM всех таблиц
-python -m bioetl.main maintenance vacuum-all
+bioetl maintenance vacuum-all
 
 # С кастомным retention
-python -m bioetl.main maintenance vacuum-all --retention-days 30
+bioetl maintenance vacuum-all --retention-days 30
 
 # Предпросмотр
-python -m bioetl.main maintenance vacuum-all --dry-run
+bioetl maintenance vacuum-all --dry-run
 ```
 
 ### Bronze Cleanup
@@ -22814,8 +23484,8 @@ python -m bioetl.main maintenance vacuum-all --dry-run
 Удаление старых Bronze файлов (по умолчанию >90 дней):
 
 ```bash
-python -m bioetl.main maintenance bronze-cleanup
-python -m bioetl.main maintenance bronze-cleanup --retention-days 60 --dry-run
+bioetl maintenance bronze-cleanup
+bioetl maintenance bronze-cleanup --retention-days 60 --dry-run
 ```
 
 ---
@@ -22828,26 +23498,26 @@ python -m bioetl.main maintenance bronze-cleanup --retention-days 60 --dry-run
 
 ```bash
 # Статистика
-python -m bioetl.main quarantine stats --pipeline chembl_activity
+bioetl quarantine stats --pipeline chembl_activity
 
 # Просмотр записей
-python -m bioetl.main quarantine inspect --pipeline chembl_activity --limit 50
+bioetl quarantine inspect --pipeline chembl_activity --limit 50
 
 # Фильтрация по коду ошибки
-python -m bioetl.main quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
+bioetl quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
 ```
 
 ### Повторная обработка
 
 ```bash
-python -m bioetl.main quarantine replay --pipeline chembl_activity --dry-run
-python -m bioetl.main quarantine replay --pipeline chembl_activity --max-age-days 7
+bioetl quarantine replay --pipeline chembl_activity --dry-run
+bioetl quarantine replay --pipeline chembl_activity --max-age-days 7
 ```
 
 ### Очистка карантина
 
 ```bash
-python -m bioetl.main quarantine purge --pipeline chembl_activity --older-than-days 30 --dry-run
+bioetl quarantine purge --pipeline chembl_activity --older-than-days 30 --dry-run
 ```
 
 ---
@@ -22871,13 +23541,13 @@ python -m bioetl.main quarantine purge --pipeline chembl_activity --older-than-d
 
 ```bash
 # Список пайплайнов
-python -m bioetl.main run-all --source chembl --list-only
+bioetl run-all --source chembl --list-only
 
 # Запуск всех
-python -m bioetl.main run-all --source chembl
+bioetl run-all --source chembl
 
 # С ограничением
-python -m bioetl.main run-all --source chembl --limit 100
+bioetl run-all --source chembl --limit 100
 ```
 
 ### Композитные пайплайны
@@ -22885,8 +23555,8 @@ python -m bioetl.main run-all --source chembl --limit 100
 Для сущностей с обогащением из нескольких источников (например, publications):
 
 ```bash
-python -m bioetl.main run-composite --composite publication
-python -m bioetl.main run-composite --composite publication --seed-limit 100
+bioetl run-composite --composite publication
+bioetl run-composite --composite publication --seed-limit 100
 ```
 
 ---
@@ -22898,6 +23568,569 @@ python -m bioetl.main run-composite --composite publication --seed-limit 100
 - [Metrics & Monitoring](metrics-monitoring.md) — метрики и мониторинг
 - [Troubleshooting](troubleshooting.md) — решение проблем
 - [Getting Started](getting-started.md) — начало работы
+
+================================================================================
+File: silver-schema-testing-guide.md
+Path: 03-guides\silver-schema-testing-guide.md
+================================================================================
+# Silver Schema Testing Guide
+
+**Version:** 1.0.0
+**Created:** 2026-02-10
+**Purpose:** Guidelines for testing and maintaining Silver layer schemas
+
+---
+
+## Overview
+
+Silver layer schemas define the structure and validation rules for normalized data. Schema stability is critical because changes affect:
+- ✅ Gold layer contracts
+- ✅ Downstream analytics
+- ✅ External data consumers
+- ✅ Historical data compatibility
+
+This guide covers the **Silver Schema Contract Tests** that protect against accidental schema modifications.
+
+---
+
+## Test Suite Location
+
+```
+tests/contract/silver_schemas/
+├── conftest.py                    # Schema registry and introspection
+├── test_schema_stability.py       # Snapshot tests (~60 tests)
+├── test_field_types.py            # Type safety tests (~50 tests)
+├── test_validations.py            # Validation rules tests (~40 tests)
+├── test_naming_conventions.py     # Naming consistency tests (~35 tests)
+├── snapshots/                     # JSON snapshots (auto-generated)
+│   ├── chembl_activity_schema.json
+│   ├── chembl_molecule_schema.json
+│   └── ...
+└── README.md                      # Detailed test documentation
+```
+
+**Total:** ~185 contract tests covering 18 Silver schemas (100% coverage)
+
+---
+
+## Running Tests
+
+### Quick Start
+
+```bash
+# Run all Silver schema contract tests
+pytest tests/contract/silver_schemas/ -v
+
+# Run with coverage
+pytest tests/contract/silver_schemas/ --cov=src/bioetl/domain/schemas
+
+# Run for specific schema
+pytest tests/contract/silver_schemas/ -k chembl_activity
+```
+
+### By Test Category
+
+```bash
+# Schema stability (snapshot tests)
+pytest tests/contract/silver_schemas/test_schema_stability.py -v
+
+# Type safety
+pytest tests/contract/silver_schemas/test_field_types.py -v
+
+# Validation rules
+pytest tests/contract/silver_schemas/test_validations.py -v
+
+# Naming conventions
+pytest tests/contract/silver_schemas/test_naming_conventions.py -v
+```
+
+### Continuous Integration
+
+```bash
+# Run as part of contract test suite
+pytest tests/contract/ -m contracts -v
+```
+
+---
+
+## Understanding Snapshot Tests
+
+### What Are Snapshot Tests?
+
+Snapshot tests capture the **current state** of a schema and detect ANY deviation:
+- ✅ Field additions
+- ✅ Field deletions (BREAKING)
+- ✅ Type changes (BREAKING)
+- ✅ Nullability changes
+- ✅ Validation changes
+
+### How They Work
+
+1. **First run:** Creates `snapshots/{schema_name}_schema.json`
+2. **Subsequent runs:** Compares current schema against snapshot
+3. **On mismatch:** Test fails with detailed diff
+
+### Example Snapshot
+
+```json
+{
+  "activity_id": {
+    "dtype": "str",
+    "nullable": false,
+    "unique": false,
+    "coerce": false,
+    "required": true,
+    "description": "Primary key.",
+    "checks": []
+  },
+  "standard_value": {
+    "dtype": "float64",
+    "nullable": true,
+    "unique": false,
+    "coerce": false,
+    "required": true,
+    "description": "Standardized value.",
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Workflow: Adding New Schema
+
+### Step 1: Create Pandera Schema
+
+```python
+# src/bioetl/domain/schemas/provider/entity.py
+import pandera.pandas as pa
+from pandera.typing import Series
+
+from bioetl.domain.schemas.base import ETLRecordSchema
+
+class EntitySchema(ETLRecordSchema):
+    """Pandera schema for Provider Entity.
+
+    Aligned with RULES.md v5.17 and Provider API v2.0.
+    """
+
+    # Primary key
+    entity_id: Series[str] = pa.Field(
+        nullable=False,
+        description="Primary key."
+    )
+
+    # Other fields...
+```
+
+### Step 2: Register Schema
+
+```python
+# tests/contract/silver_schemas/conftest.py
+from bioetl.domain.schemas.provider.entity import EntitySchema
+
+SILVER_SCHEMAS = {
+    # ... existing schemas ...
+    "provider_entity": EntitySchema,  # Add new schema
+}
+```
+
+### Step 3: Generate Snapshot
+
+```bash
+# Run tests to create initial snapshot
+pytest tests/contract/silver_schemas/test_schema_stability.py -k provider_entity
+
+# Verify snapshot created
+ls tests/contract/silver_schemas/snapshots/provider_entity_schema.json
+```
+
+### Step 4: Commit Together
+
+```bash
+git add src/bioetl/domain/schemas/provider/entity.py
+git add tests/contract/silver_schemas/conftest.py
+git add tests/contract/silver_schemas/snapshots/provider_entity_schema.json
+git commit -m "feat(schemas): add EntitySchema for Provider"
+```
+
+---
+
+## Workflow: Modifying Existing Schema
+
+### Step 1: Understand Impact
+
+**Questions to ask:**
+1. Is this a **breaking change**? (field deletion, type change, nullability change)
+2. Will Gold layer contracts need updates?
+3. Are there downstream consumers using this field?
+4. Is historical data compatible?
+
+### Step 2: Modify Schema
+
+```python
+# Example: Adding optional field (NON-BREAKING)
+class ActivitySchema(ETLRecordSchema):
+    # ... existing fields ...
+
+    # NEW: Additional metadata
+    data_source_version: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Provider API version."
+    )
+```
+
+### Step 3: Run Tests (They WILL Fail)
+
+```bash
+pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_activity
+
+# Example failure:
+# FAILED: chembl_activity: New fields detected: ['data_source_version']
+# If intentional, run: UPDATE_SNAPSHOTS=1 pytest ...
+```
+
+### Step 4: Review Diff Carefully
+
+The test output shows:
+- **Added fields** — Usually safe
+- **Removed fields** — **BREAKING CHANGE**
+- **Type changes** — **BREAKING CHANGE**
+- **Validation changes** — Review impact
+
+### Step 5: Update Downstream
+
+If breaking change:
+1. Update Gold contracts (`docs/04-reference/contracts/gold/`)
+2. Update composite pipeline configs (if applicable)
+3. Create migration guide
+4. Notify data consumers
+
+### Step 6: Update Snapshot
+
+```bash
+# After confirming change is intentional
+UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_activity
+
+# Verify snapshot updated
+git diff tests/contract/silver_schemas/snapshots/chembl_activity_schema.json
+```
+
+### Step 7: Commit with Context
+
+```bash
+git add src/bioetl/domain/schemas/chembl/activity.py
+git add tests/contract/silver_schemas/snapshots/chembl_activity_schema.json
+git commit -m "feat(schemas): add data_source_version to ActivitySchema
+
+- Added optional field for API version tracking
+- Non-breaking change (nullable)
+- Updated snapshot contract
+
+Related: #1234"
+```
+
+---
+
+## Workflow: Deprecating Field
+
+**NEVER delete fields directly** — this is a BREAKING CHANGE.
+
+### Phase 1: Add Replacement (Release N)
+
+```python
+class PublicationSchema(ETLRecordSchema):
+    # NEW field with correct name
+    citations_received: Series[int] | None = pa.Field(
+        nullable=True,
+        description="Number of citations received (incoming)."
+    )
+
+    # OLD field marked deprecated
+    citation_count: Series[int] | None = pa.Field(
+        nullable=True,
+        description="DEPRECATED: Use citations_received instead. Will be removed in v6.0."
+    )
+```
+
+### Phase 2: Update Transformers (Release N)
+
+```python
+def transform_publication(raw: dict) -> dict:
+    # Populate BOTH fields during deprecation period
+    citation_count = raw.get("citation_count", 0)
+
+    return {
+        "citations_received": citation_count,  # NEW
+        "citation_count": citation_count,      # OLD (deprecated)
+        # ... other fields
+    }
+```
+
+### Phase 3: Update Documentation (Release N)
+
+- Add to CHANGELOG.md: "DEPRECATED: citation_count field"
+- Create migration guide showing field rename
+- Update Gold contracts to use new field name
+
+### Phase 4: Monitor Usage (Release N+1)
+
+- Check logs for queries using old field
+- Contact consumers to migrate
+- Wait 1-2 releases
+
+### Phase 5: Remove Field (Release N+2)
+
+```python
+class PublicationSchema(ETLRecordSchema):
+    # NEW field (kept)
+    citations_received: Series[int] | None = pa.Field(
+        nullable=True,
+        description="Number of citations received (incoming)."
+    )
+
+    # OLD field REMOVED
+```
+
+Update snapshot:
+```bash
+UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k publication
+```
+
+---
+
+## Test Categories Explained
+
+### 1. Schema Stability Tests (`test_schema_stability.py`)
+
+**Purpose:** Prevent accidental schema modifications
+
+**Tests:**
+- ✅ `test_schema_fields_unchanged` — Snapshot comparison
+- ✅ `test_primary_key_field_exists` — PK presence
+- ✅ `test_etl_metadata_fields_present` — ETL metadata
+- ✅ `test_schema_has_docstring` — Documentation
+- ✅ `test_fields_have_descriptions` — Field descriptions
+
+**Coverage:** All 18 schemas
+
+---
+
+### 2. Field Type Tests (`test_field_types.py`)
+
+**Purpose:** Ensure type safety and consistency
+
+**Tests:**
+- ✅ `test_no_object_dtype_without_reason` — Avoid generic `object`
+- ✅ `test_id_fields_are_strings` — IDs are `str`, not `int`
+- ✅ `test_numeric_fields_not_nullable_without_union` — `Series[float] | None`
+- ✅ `test_boolean_fields_use_bool_type` — Booleans use `bool`
+- ✅ `test_timestamp_fields_use_datetime` — Timestamps use `datetime64[ns]`
+- ✅ `test_year_fields_are_int` — Years are `int`
+- ✅ `test_coerce_used_appropriately` — Coercion justified
+
+**Coverage:** All 18 schemas
+
+---
+
+### 3. Validation Tests (`test_validations.py`)
+
+**Purpose:** Ensure validation consistency
+
+**Tests:**
+- ✅ `test_chembl_id_pattern_consistent` — ChEMBL ID regex
+- ✅ `test_pmid_pattern_if_present` — PMID format
+- ✅ `test_year_fields_have_range_check` — Year bounds
+- ✅ `test_percentage_fields_bounded` — Percentages 0-100
+- ✅ `test_pchembl_value_range` — pChEMBL 0-14
+- ✅ `test_enum_fields_have_isin_check` — Enum validation
+- ✅ `test_primary_keys_not_nullable` — PKs non-nullable
+- ✅ `test_publication_doi_validation_consistent` — Cross-provider DOI
+- ✅ `test_publication_year_range_consistent` — Cross-provider year
+
+**Coverage:** All 18 schemas
+
+---
+
+### 4. Naming Convention Tests (`test_naming_conventions.py`)
+
+**Purpose:** Enforce naming consistency
+
+**Tests:**
+- ✅ `test_field_names_are_snake_case` — snake_case only
+- ✅ `test_no_camelcase_fields` — No camelCase
+- ✅ `test_no_abbreviations_without_glossary` — Documented abbreviations
+- ✅ `test_boolean_fields_start_with_is_has_can` — Boolean prefixes
+- ✅ `test_metadata_fields_start_with_underscore` — Metadata `_` prefix
+- ✅ `test_foreign_keys_have_id_suffix` — FKs end with `_id`
+- ✅ `test_chembl_fk_naming_consistency` — ChEMBL FK patterns
+- ✅ `test_common_fields_same_name_across_publications` — Publication consistency
+- ✅ `test_id_field_naming_by_provider` — Provider conventions
+- ✅ `test_no_legacy_dq_field_names` — No legacy DQ names
+
+**Coverage:** All 18 schemas
+
+---
+
+## Troubleshooting
+
+### Test Fails: "New fields detected"
+
+**Cause:** You added a field to the schema
+
+**Solution:**
+```bash
+# If addition is intentional
+UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k schema_name
+```
+
+---
+
+### Test Fails: "Fields removed"
+
+**Cause:** You deleted a field — **BREAKING CHANGE**
+
+**Solution:**
+1. **STOP** — Do not delete fields without deprecation
+2. Follow deprecation workflow (Phase 1-5)
+3. Only delete after 1-2 releases
+
+---
+
+### Test Fails: "Type changed"
+
+**Cause:** You changed field dtype — **BREAKING CHANGE**
+
+**Solution:**
+1. Verify change is necessary
+2. Check impact on historical data
+3. Update Gold contracts
+4. Create migration guide
+5. Update snapshot
+
+---
+
+### Test Fails: "Validation checks changed"
+
+**Cause:** You added/removed validation (regex, range, enum)
+
+**Solution:**
+1. Verify validation is correct
+2. Check if change affects existing data
+3. Update DQ configs if needed
+4. Update snapshot
+
+---
+
+### Test Fails: "Field not snake_case"
+
+**Cause:** Field name violates naming conventions
+
+**Solution:**
+```python
+# BAD
+publicationYear: Series[int]
+PublicationYear: Series[int]
+
+# GOOD
+publication_year: Series[int]
+```
+
+---
+
+## Best Practices
+
+### DO ✅
+
+- ✅ Run contract tests before committing schema changes
+- ✅ Update snapshots explicitly with `UPDATE_SNAPSHOTS=1`
+- ✅ Add field descriptions for all new fields
+- ✅ Follow deprecation workflow for field removal
+- ✅ Keep commits atomic (schema + snapshot together)
+- ✅ Document breaking changes in CHANGELOG.md
+
+### DON'T ❌
+
+- ❌ Delete fields without deprecation period
+- ❌ Change field types without migration plan
+- ❌ Use `object` dtype without justification
+- ❌ Ignore failed contract tests
+- ❌ Update snapshots without reviewing diff
+- ❌ Commit schema without updating snapshot
+
+---
+
+## Integration with CI/CD
+
+Contract tests run automatically in CI:
+
+```yaml
+# .github/workflows/tests.yml
+- name: Run Contract Tests
+  run: |
+    pytest tests/contract/ -m contracts -v --tb=short
+```
+
+**On failure:** Pipeline blocks, preventing broken schemas from merging.
+
+**Manual override:** Requires `UPDATE_SNAPSHOTS=1` flag (not available in CI by design).
+
+---
+
+## Performance
+
+| Test Category | Execution Time | Parallelizable |
+|---------------|----------------|----------------|
+| Schema Stability | ~5-10 seconds | ✅ Yes |
+| Field Types | ~3-5 seconds | ✅ Yes |
+| Validations | ~5-10 seconds | ✅ Yes |
+| Naming Conventions | ~3-5 seconds | ✅ Yes |
+| **Total** | **~20-30 seconds** | ✅ Yes |
+
+**Optimization:** Tests run in parallel with `pytest-xdist`:
+```bash
+pytest tests/contract/silver_schemas/ -n auto
+```
+
+---
+
+## Maintenance Schedule
+
+| Task | Frequency | Owner |
+|------|-----------|-------|
+| Run contract tests | Every commit | Developer |
+| Review snapshots | Every schema change | Code reviewer |
+| Update documentation | Every breaking change | Developer |
+| Audit schema consistency | Quarterly | Data team |
+| Cleanup deprecated fields | Every major release | Maintainer |
+
+---
+
+## References
+
+- **RULES.md §2.2**: Silver Layer Validation
+- **ADR-018**: Gold Strict Validation
+- **ADR-024**: Entity Naming Unification
+- **ADR-027**: DQ Rules Externalization
+- **docs/glossary.md**: Ubiquitous Language
+- **tests/contract/silver_schemas/README.md**: Detailed test documentation
+
+---
+
+## Statistics
+
+**Test Count:** ~185 tests
+**Schemas Covered:** 18 (100%)
+**Snapshot Coverage:** 18/18 (100%)
+**Maintenance Time:** <5 min per schema change
+**Value:** Prevents accidental breaking changes
+
+**Last Updated:** 2026-02-10
 
 ================================================================================
 File: testing.md
@@ -27053,7 +28286,8 @@ Data source adapters implementing `DataSourcePort`:
 - `PubChemAdapter` - PubChem compound API
 - `UniProtAdapter` - UniProt protein database
 - `PubMedAdapter` - PubMed publication API
-- `UnifiedHTTPClient` - Shared HTTP client infrastructure
+- `UnifiedHTTPClient` - Shared HTTP client with rate limiting, circuit breaker, and retry logic ([ADR-032](../../02-architecture/decisions/ADR-032-unified-http-client.md))
+- [Common Utilities](infrastructure/adapters-common.md) - Shared adapter utilities (APIRequestCollector, title fallback, etc.)
 
 ### [Storage](infrastructure/storage.md)
 
@@ -27167,6 +28401,292 @@ from bioetl.infrastructure.observability.tracing import NoOpTracing, OpenTelemet
 - [Storage](infrastructure/storage.md) - Storage writers
 - [Observability](infrastructure/observability.md) - Metrics, tracing, logging
 - [Domain Ports](domain/ports.md) - Port interfaces
+
+================================================================================
+File: adapters-common.md
+Path: 04-reference\api\infrastructure\adapters-common.md
+================================================================================
+# Common Adapter Utilities
+
+**Module:** `bioetl.infrastructure.adapters.common`
+**Version:** 5.14.0
+**Last updated:** 2026-02-10
+
+---
+
+## Overview
+
+The `common` module provides shared utilities and base classes for infrastructure adapters. These components enable consistent API request tracking, title-based fallback search, and text normalization across all provider adapters.
+
+**Key Components:**
+- `APIRequestCollector` — Thread-safe request metadata collector
+- `BaseTitleFallbackHandler` — Abstract base for title-based DOI resolution
+- `normalize_title()`, `titles_match()` — Title normalization and fuzzy matching utilities
+
+---
+
+## APIRequestCollector
+
+**Purpose:** Collects API request metadata for Bronze layer audit trail and rate limit monitoring.
+
+**Thread-safety:** ✅ Safe for concurrent request recording within a single pipeline run.
+
+### Usage
+
+```python
+from bioetl.infrastructure.adapters.common import APIRequestCollector
+
+# Initialize collector
+collector = APIRequestCollector()
+
+# Record each API request
+collector.record_request(
+    url="https://api.example.com/data?limit=100",
+    method="GET",
+    response_size=1024,
+    duration_ms=150.5,
+    status_code=200,
+    rate_limit_remaining=950,  # Optional
+    rate_limit_reset=1234567890,  # Optional
+)
+
+# Generate Bronze metadata
+source_metadata = collector.to_source_metadata()
+# Returns: SourceMetadata with aggregate statistics:
+#   - total_requests: 1
+#   - total_bytes: 1024
+#   - avg_duration_ms: 150.5
+#   - endpoints_hit: ["https://api.example.com"]
+```
+
+### Key Methods
+
+| Method | Description | Thread-safe |
+|--------|-------------|-------------|
+| `record_request()` | Record API request details | ✅ |
+| `to_source_metadata()` | Generate SourceMetadata with aggregates | ✅ |
+| `reset()` | Clear all recorded requests | ✅ |
+
+### Integration with Adapters
+
+All HTTP adapters **SHOULD** use `APIRequestCollector` to track API calls:
+
+```python
+class MyAdapter:
+    def __init__(self, http_client: UnifiedHTTPClient, logger: LoggerPort):
+        self._http = http_client
+        self._logger = logger
+        self._collector = APIRequestCollector()
+
+    async def fetch(self, query: Query) -> AsyncIterator[RawRecord]:
+        async for response in self._http.get("/endpoint", params=query.params):
+            # Record request
+            self._collector.record_request(
+                url=str(response.url),
+                method="GET",
+                response_size=len(response.content),
+                duration_ms=response.elapsed.total_seconds() * 1000,
+                status_code=response.status_code,
+            )
+
+            for record in response.json()["results"]:
+                yield RawRecord(
+                    data=record,
+                    source_metadata=self._collector.to_source_metadata(),
+                )
+```
+
+**Related ADR:** [ADR-029: Output Metadata Unification](../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+
+---
+
+## BaseTitleFallbackHandler
+
+**Purpose:** Abstract base class for title-based DOI resolution when batch ID lookup fails.
+
+**Use case:** CrossRef, OpenAlex, and other publication providers often fail to resolve DOIs directly. This handler implements a three-phase fallback strategy:
+
+1. **Phase 1:** Batch ID lookup (implemented by adapter)
+2. **Phase 2:** Title fallback for unresolved IDs (`process_missing_dois()`)
+3. **Phase 3:** Title-only lookup for entries without IDs (`process_title_only_entries()`)
+
+### Three-Phase Fallback Strategy
+
+```mermaid
+flowchart LR
+    A[Input: IDs + Titles] --> B{Phase 1: Batch ID}
+    B -->|Success| C[Resolved]
+    B -->|Fail| D{Phase 2: Title Fallback}
+    D -->|Title exists| E[Title search]
+    D -->|No title| F[Skip]
+    E -->|Found| C
+    E -->|Not found| F
+
+    G[Input: Title only] --> H{Phase 3: Title-only}
+    H -->|Title exists| I[Title search]
+    H -->|No title| F
+    I -->|Found| C
+    I -->|Not found| F
+```
+
+### Abstract Methods
+
+Subclasses **MUST** implement:
+
+```python
+@abstractmethod
+async def search_by_title(self, title: str) -> dict[str, Any] | None:
+    """Provider-specific title search implementation.
+
+    Args:
+        title: Normalized title string
+
+    Returns:
+        Dict with provider data if found, None otherwise
+    """
+```
+
+### Event Naming Convention
+
+When `provider_prefix` is set (e.g., `"crossref"`), event names are auto-generated:
+
+| Event | When Emitted | Metrics Key |
+|-------|--------------|-------------|
+| `{provider}_no_fallback_title` | Phase 2/3: No title available | `crossref_no_fallback_title` |
+| `{provider}_title_fallback_attempt` | Phase 2: Starting title search | `crossref_title_fallback_attempt` |
+| `{provider}_title_fallback_success` | Phase 2: Title match found | `crossref_title_fallback_success` |
+| `{provider}_title_fallback_not_found` | Phase 2: No match | `crossref_title_fallback_not_found` |
+| `{provider}_title_only_attempt` | Phase 3: Starting title-only search | `crossref_title_only_attempt` |
+| `{provider}_title_only_success` | Phase 3: Title match found | `crossref_title_only_success` |
+| `{provider}_title_only_not_found` | Phase 3: No match | `crossref_title_only_not_found` |
+
+### Example Implementation
+
+```python
+from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler
+
+class CrossRefTitleFallback(BaseTitleFallbackHandler):
+    def __init__(
+        self,
+        http_client: UnifiedHTTPClient,
+        logger: LoggerPort,
+        metrics: MetricsPort,
+    ):
+        super().__init__(logger, provider_prefix="crossref")
+        self._http = http_client
+        self._metrics = metrics
+
+    async def search_by_title(self, title: str) -> dict[str, Any] | None:
+        """Search CrossRef by title."""
+        response = await self._http.get(
+            "/works",
+            params={"query.title": title, "rows": 1},
+        )
+
+        if not response.json().get("message", {}).get("items"):
+            return None
+
+        return response.json()["message"]["items"][0]
+```
+
+**Related ADR:** [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+
+---
+
+## Title Normalization Utilities
+
+### normalize_title()
+
+**Purpose:** Normalize publication titles for fuzzy matching.
+
+**Transformations:**
+- Convert to lowercase
+- Remove punctuation (except hyphens)
+- Collapse multiple spaces
+- Strip leading/trailing whitespace
+
+```python
+from bioetl.infrastructure.adapters.common import normalize_title
+
+title = "The Quick Brown Fox: A Study"
+normalized = normalize_title(title)
+# Returns: "the quick brown fox a study"
+```
+
+### titles_match()
+
+**Purpose:** Fuzzy title comparison using Levenshtein distance.
+
+**Algorithm:** Normalized Levenshtein ratio with configurable threshold.
+
+```python
+from bioetl.infrastructure.adapters.common import titles_match
+
+title1 = "The Quick Brown Fox"
+title2 = "Quick Brown Fox"
+
+match = titles_match(title1, title2, threshold=0.85)
+# Returns: True (similarity >= 85%)
+```
+
+**Default threshold:** 0.85 (85% similarity required)
+
+---
+
+## Architecture Integration
+
+### Layer Placement
+
+```
+infrastructure/adapters/
+├── common/               # ← Shared utilities
+│   ├── api_request_collector.py
+│   ├── base_title_fallback.py
+│   └── title_matching.py
+├── chembl/               # Uses APIRequestCollector
+├── pubmed/               # Uses BaseTitleFallbackHandler + title_matching
+├── crossref/             # Uses BaseTitleFallbackHandler + title_matching
+└── openalex/             # Uses BaseTitleFallbackHandler + title_matching
+```
+
+### Dependency Rules
+
+**MUST:**
+- All adapters **MUST** use `APIRequestCollector` for Bronze metadata
+- Publication adapters **SHOULD** extend `BaseTitleFallbackHandler` when title fallback is needed
+- Adapters **MUST NOT** import from other adapter modules (only from `common/`)
+
+**Related:**
+- [ADR-005: Composition Layer Separation](../../02-architecture/decisions/ADR-005-composition-layer-separation.md)
+- [ARCH-001: Import Matrix](../../../00-project/RULES.md#arch-001-import-matrix)
+
+---
+
+## Testing
+
+All common utilities have comprehensive unit tests:
+
+```bash
+# Test APIRequestCollector
+pytest tests/unit/infrastructure/adapters/common/test_api_request_collector.py
+
+# Test title matching
+pytest tests/unit/infrastructure/adapters/common/test_title_matching.py
+
+# Test title fallback base class
+pytest tests/unit/infrastructure/adapters/common/test_base_title_fallback.py
+```
+
+**Test coverage:** 95%+ for all common utilities
+
+---
+
+## See Also
+
+- [Infrastructure Layer Overview](infrastructure.md)
+- [ADR-029: Output Metadata Unification](../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+- [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+- [ADR-032: Unified HTTP Client Pattern](../../02-architecture/decisions/ADR-032-unified-http-client.md)
 
 ================================================================================
 File: adapters.md
@@ -28063,6 +29583,539 @@ await audit_port.log(entry)
 - [Medallion Architecture](../../../02-architecture/01-domain-layer.md)
 
 ================================================================================
+File: unified-http-client.md
+Path: 04-reference\api\infrastructure\unified-http-client.md
+================================================================================
+# UnifiedHTTPClient Reference
+
+**Module:** `bioetl.infrastructure.adapters.http.client`
+**Version:** 5.14.0
+**Last updated:** 2026-02-10
+
+---
+
+## Overview
+
+`UnifiedHTTPClient` provides a standardized HTTP client for all data source adapters. It encapsulates:
+- **Rate limiting** (provider-specific)
+- **Circuit breaker** (cascading failure prevention)
+- **Retry logic** (exponential backoff)
+- **Observability** (metrics, tracing, logging)
+
+All API adapters **MUST** use `UnifiedHTTPClient` instead of direct `httpx` calls.
+
+**Related ADR:** [ADR-032: Unified HTTP Client Pattern](../../../02-architecture/decisions/ADR-032-unified-http-client.md)
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph UnifiedHTTPClient
+        RateLimiter[RateLimiterPort]
+        CircuitBreaker[CircuitBreakerPort]
+        RetryConfig[RetryConfig]
+    end
+
+    subgraph Observability
+        Tracing[TracingPort]
+        Metrics[MetricsPort]
+        Logger[LoggerPort]
+    end
+
+    subgraph HTTPX
+        AsyncClient[httpx.AsyncClient]
+    end
+
+    UnifiedHTTPClient --> Observability
+    UnifiedHTTPClient --> HTTPX
+
+    Adapter[ChEMBLAdapter] -->|uses| UnifiedHTTPClient
+```
+
+### Design Principles
+
+1. **Composition over Inheritance:** Ports injected, not inherited
+2. **SRP Compliance:** Each concern (rate limit, circuit breaker, retry) is a separate component
+3. **Observability Built-in:** Tracing and metrics integrated via ports
+4. **Async-first:** Uses `httpx.AsyncClient` for async HTTP
+
+---
+
+## Basic Usage
+
+### Simple GET Request
+
+```python
+from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
+from bioetl.domain.models.retry_config import RetryConfig
+
+# Create client
+client = UnifiedHTTPClient(
+    base_url="https://www.ebi.ac.uk/chembl/api/data",
+    rate_limiter=rate_limiter,
+    circuit_breaker=circuit_breaker,
+    retry_config=RetryConfig(
+        max_attempts=3,
+        base_delay=1.0,
+        max_delay=60.0,
+    ),
+    logger=logger,
+    metrics=metrics,
+    tracing=tracing,
+)
+
+# Make request
+response = await client.get("/activity", params={"limit": 100})
+data = response.json()
+```
+
+### POST Request
+
+```python
+response = await client.post(
+    "/search",
+    json={"query": "aspirin"},
+    headers={"Content-Type": "application/json"},
+)
+```
+
+---
+
+## Rate Limiting
+
+### Provider-Specific Limits
+
+Each provider has different rate limit policies:
+
+| Provider | Limit | Implementation |
+|----------|-------|----------------|
+| **ChEMBL** | None | `NoOpRateLimiter` |
+| **PubChem** | 5 req/sec | `TokenBucketLimiter(rate=5.0)` |
+| **UniProt** | 100 req/sec | `TokenBucketLimiter(rate=100.0)` |
+| **PubMed** | 3 req/sec (no key) | `TokenBucketLimiter(rate=3.0)` |
+| **CrossRef** | Polite pool (50 req/sec) | `TokenBucketLimiter(rate=50.0)` |
+| **OpenAlex** | ~10 req/sec | `TokenBucketLimiter(rate=10.0)` |
+| **Semantic Scholar** | 100 req/5min | `SlidingWindowLimiter(100, window=300)` |
+
+### Token Bucket Example
+
+```python
+from bioetl.infrastructure.adapters.rate_limiting import TokenBucketLimiter
+
+# PubChem: 5 requests per second
+rate_limiter = TokenBucketLimiter(
+    rate=5.0,  # tokens per second
+    burst=10,  # max burst size
+    logger=logger,
+    metrics=metrics,
+)
+
+client = UnifiedHTTPClient(
+    base_url="https://pubchem.ncbi.nlm.nih.gov/rest/pug",
+    rate_limiter=rate_limiter,
+    # ... other config
+)
+
+# Requests are automatically throttled
+for cid in compound_ids:
+    response = await client.get(f"/compound/cid/{cid}/JSON")
+    # Rate limiter ensures ≤ 5 req/sec
+```
+
+### Sliding Window Example
+
+```python
+from bioetl.infrastructure.adapters.rate_limiting import SlidingWindowLimiter
+
+# Semantic Scholar: 100 requests per 5 minutes
+rate_limiter = SlidingWindowLimiter(
+    max_requests=100,
+    window_seconds=300,  # 5 minutes
+    logger=logger,
+    metrics=metrics,
+)
+
+client = UnifiedHTTPClient(
+    base_url="https://api.semanticscholar.org/graph/v1",
+    rate_limiter=rate_limiter,
+    # ... other config
+)
+```
+
+### Rate Limit Headers
+
+The client automatically respects standard rate limit headers:
+
+```python
+# X-RateLimit-Remaining: 950
+# X-RateLimit-Reset: 1640000000
+# Retry-After: 60
+
+# Client will automatically:
+# 1. Parse headers from response
+# 2. Adjust internal rate limiter state
+# 3. Wait until reset time if limit exceeded
+```
+
+---
+
+## Circuit Breaker
+
+**Purpose:** Prevent cascading failures when external API is unhealthy.
+
+### Configuration
+
+```python
+from bioetl.infrastructure.adapters.circuit_breaker import SimpleCircuitBreaker
+
+circuit_breaker = SimpleCircuitBreaker(
+    failure_threshold=5,      # Open after 5 consecutive failures
+    success_threshold=2,      # Close after 2 consecutive successes in half-open
+    timeout_seconds=60,       # Try again after 60 seconds
+    logger=logger,
+    metrics=metrics,
+)
+
+client = UnifiedHTTPClient(
+    base_url="https://api.example.com",
+    circuit_breaker=circuit_breaker,
+    # ... other config
+)
+```
+
+### States
+
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open: 5 failures
+    Open --> HalfOpen: 60s timeout
+    HalfOpen --> Closed: 2 successes
+    HalfOpen --> Open: 1 failure
+    Closed --> Closed: success
+```
+
+| State | Behavior |
+|-------|----------|
+| **Closed** | Normal operation, all requests pass through |
+| **Open** | Circuit breaker tripped, all requests fail fast |
+| **Half-Open** | Testing if service recovered, limited requests allowed |
+
+### Exception Types
+
+```python
+from bioetl.domain.exceptions import CircuitBreakerOpenError
+
+try:
+    response = await client.get("/endpoint")
+except CircuitBreakerOpenError:
+    # Circuit breaker is open, service is unhealthy
+    logger.error("API circuit breaker tripped, skipping request")
+    # Fail gracefully or use fallback
+```
+
+---
+
+## Retry Logic
+
+### Exponential Backoff
+
+```python
+from bioetl.domain.models.retry_config import RetryConfig
+
+retry_config = RetryConfig(
+    max_attempts=5,       # Maximum 5 attempts total
+    base_delay=1.0,       # Start with 1 second delay
+    max_delay=60.0,       # Cap delay at 60 seconds
+    backoff_factor=2.0,   # Double delay each retry
+)
+
+client = UnifiedHTTPClient(
+    base_url="https://api.example.com",
+    retry_config=retry_config,
+    # ... other config
+)
+
+# Retry delays: 1s, 2s, 4s, 8s, 16s
+# Total max delay: ~31 seconds
+```
+
+### Retry Strategy
+
+**Retryable errors:**
+- HTTP 429 (Rate Limit)
+- HTTP 500, 502, 503, 504 (Server errors)
+- Network errors (`httpx.NetworkError`)
+- Timeout errors (`httpx.TimeoutException`)
+
+**Non-retryable errors:**
+- HTTP 400, 401, 403, 404 (Client errors)
+- HTTP 422 (Unprocessable Entity)
+- JSON decode errors
+
+```python
+try:
+    response = await client.get("/endpoint")
+except httpx.HTTPStatusError as e:
+    if e.response.status_code == 404:
+        # Non-retryable, entity not found
+        logger.warning(f"Entity not found: {e.request.url}")
+    elif e.response.status_code >= 500:
+        # Retryable, already attempted with exponential backoff
+        logger.error("API server error after retries", exc_info=e)
+```
+
+---
+
+## Observability Integration
+
+### Metrics
+
+The client automatically emits metrics:
+
+```python
+# Counter: HTTP requests by method and status
+http_requests_total{method="GET", status="200", provider="chembl"}
+
+# Histogram: Request duration
+http_request_duration_seconds{method="GET", provider="chembl"}
+
+# Counter: Rate limiter wait events
+rate_limiter_wait_total{provider="pubchem"}
+
+# Counter: Circuit breaker state changes
+circuit_breaker_state_change_total{provider="uniprot", state="open"}
+```
+
+### Tracing
+
+```python
+from bioetl.infrastructure.observability import OpenTelemetryTracer
+
+# With distributed tracing enabled
+tracing = OpenTelemetryTracer()
+
+client = UnifiedHTTPClient(
+    base_url="https://api.example.com",
+    tracing=tracing,
+    # ... other config
+)
+
+# Each HTTP request creates a span
+with tracing.start_span("fetch_compounds") as span:
+    span.set_attribute("provider", "pubchem")
+    response = await client.get("/compound/cid/2244/JSON")
+    span.set_attribute("http.status_code", response.status_code)
+```
+
+**Note:** For Local-Only deployment, use `NoOpTracing` (default, ADR-022).
+
+### Logging
+
+All HTTP operations are logged with structured context:
+
+```json
+{
+  "event": "http_request",
+  "method": "GET",
+  "url": "https://www.ebi.ac.uk/chembl/api/data/activity?limit=100",
+  "status_code": 200,
+  "duration_ms": 523.45,
+  "provider": "chembl",
+  "run_id": "run-20260210-143022-abc123"
+}
+```
+
+---
+
+## Error Handling
+
+### Exception Hierarchy
+
+```
+HTTPError
+├── CircuitBreakerOpenError (domain)
+├── RateLimitExceededError (domain)
+├── httpx.HTTPStatusError
+│   ├── 4xx ClientError
+│   └── 5xx ServerError
+├── httpx.NetworkError
+└── httpx.TimeoutException
+```
+
+### Recommended Pattern
+
+```python
+from bioetl.domain.exceptions import (
+    CircuitBreakerOpenError,
+    RateLimitExceededError,
+)
+import httpx
+
+async def fetch_with_error_handling(client: UnifiedHTTPClient, url: str):
+    try:
+        response = await client.get(url)
+        return response.json()
+
+    except CircuitBreakerOpenError:
+        # Service is unhealthy, fail fast
+        logger.error("Circuit breaker open, service unavailable")
+        raise
+
+    except RateLimitExceededError as e:
+        # Rate limit exceeded despite throttling
+        wait_seconds = e.retry_after or 60
+        logger.warning(f"Rate limit exceeded, retry after {wait_seconds}s")
+        await asyncio.sleep(wait_seconds)
+        return await fetch_with_error_handling(client, url)
+
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            logger.info(f"Entity not found: {url}")
+            return None
+        elif e.response.status_code >= 500:
+            logger.error(f"Server error: {e.response.status_code}")
+            raise
+
+    except httpx.NetworkError as e:
+        logger.error(f"Network error: {e}")
+        raise
+
+    except httpx.TimeoutException:
+        logger.error(f"Request timeout: {url}")
+        raise
+```
+
+---
+
+## Testing
+
+### Unit Tests with Mocking
+
+```python
+import pytest
+import httpx
+import respx
+
+@respx.mock
+async def test_unified_http_client_retry():
+    """Test retry logic with mocked responses."""
+    # First two attempts fail, third succeeds
+    route = respx.get("https://api.example.com/data")
+    route.mock(side_effect=[
+        httpx.Response(503),
+        httpx.Response(503),
+        httpx.Response(200, json={"result": "success"}),
+    ])
+
+    client = UnifiedHTTPClient(
+        base_url="https://api.example.com",
+        retry_config=RetryConfig(max_attempts=3),
+        rate_limiter=NoOpRateLimiter(),
+        circuit_breaker=NoOpCircuitBreaker(),
+        logger=logger,
+        metrics=NoOpMetrics(),
+        tracing=NoOpTracing(),
+    )
+
+    response = await client.get("/data")
+    assert response.status_code == 200
+    assert route.call_count == 3
+```
+
+### Integration Tests with VCR
+
+```python
+import pytest
+import vcr
+
+@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/chembl")
+async def test_chembl_activity_fetch_real():
+    """Test with recorded HTTP interactions."""
+    client = UnifiedHTTPClient(
+        base_url="https://www.ebi.ac.uk/chembl/api/data",
+        # ... config
+    )
+
+    response = await client.get("/activity", params={"limit": 10})
+    assert response.status_code == 200
+    data = response.json()
+    assert "activities" in data
+```
+
+---
+
+## Configuration via YAML
+
+Source configs support HTTP client settings:
+
+```yaml
+# configs/sources/pubchem.yaml
+name: pubchem
+version: "1.0"
+http_config:
+  timeout_sec: 30.0
+  max_retries: 3
+  retry_base_delay: 1.0
+  retry_max_delay: 60.0
+  rate_limit:
+    type: token_bucket
+    rate: 5.0  # 5 requests per second
+    burst: 10
+  circuit_breaker:
+    failure_threshold: 5
+    success_threshold: 2
+    timeout_seconds: 60
+```
+
+**Note:** See [ADR-032 Configuration](../../../02-architecture/decisions/ADR-032-unified-http-client.md#configuration) for full schema.
+
+---
+
+## Migration from Direct httpx
+
+**Before (legacy):**
+```python
+import httpx
+
+async def fetch_data():
+    async with httpx.AsyncClient() as client:
+        response = await client.get("https://api.example.com/data")
+        return response.json()
+```
+
+**After (unified):**
+```python
+from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
+
+class MyAdapter:
+    def __init__(self, http_client: UnifiedHTTPClient):
+        self._http = http_client
+
+    async def fetch_data(self):
+        response = await self._http.get("/data")
+        return response.json()
+```
+
+**Benefits:**
+- ✅ Automatic rate limiting
+- ✅ Circuit breaker protection
+- ✅ Standardized retry logic
+- ✅ Built-in observability
+- ✅ Testability with NoOp implementations
+
+---
+
+## See Also
+
+- [ADR-032: Unified HTTP Client Pattern](../../../02-architecture/decisions/ADR-032-unified-http-client.md)
+- [ADR-007: Circuit Breaker Implementation](../../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)
+- [Common Adapter Utilities](adapters-common.md)
+- [Infrastructure Layer Overview](../infrastructure.md)
+
+================================================================================
 File: cli.md
 Path: 04-reference\cli.md
 ================================================================================
@@ -28071,26 +30124,26 @@ Path: 04-reference\cli.md
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 5.9.0
-**Дата обновления:** 2026-01-26
+**Версия:** 5.14.0
+**Дата обновления:** 2026-02-10
 
 ---
 
 ## Запуск CLI
 
 ```bash
-# Рекомендуемый способ
-python -m bioetl.main <command> [options]
-
-# Или через активированное venv
+# Рекомендуемый способ (после установки)
 bioetl <command> [options]
+
+# Или во время разработки
+python -m bioetl.interfaces.cli <command> [options]
 ```
 
 Для справки по любой команде добавьте `--help`:
 
 ```bash
-python -m bioetl.main --help
-python -m bioetl.main run --help
+bioetl --help
+bioetl run --help
 ```
 
 ---
@@ -28103,7 +30156,7 @@ python -m bioetl.main run --help
 
 **Синтаксис:**
 ```bash
-python -m bioetl.main run --pipeline <NAME> [OPTIONS]
+bioetl run --pipeline <NAME> [OPTIONS]
 ```
 
 **Обязательные параметры:**
@@ -28134,28 +30187,28 @@ python -m bioetl.main run --pipeline <NAME> [OPTIONS]
 
 ```bash
 # Инкрементальный запуск (по умолчанию)
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 
 # С ограничением записей (для тестирования)
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 
 # Полная перезагрузка данных
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --yes
+bioetl run --pipeline chembl_activity --run-type rebuild --yes
 
 # Предпросмотр очистки без выполнения
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 
 # Продолжить прерванный запуск
-python -m bioetl.main run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl_activity --resume
 
 # С фильтрацией по CSV
-python -m bioetl.main run --pipeline chembl_activity \
+bioetl run --pipeline chembl_activity \
     --input-csv data/filter_ids.csv \
     --filter-column molecule_id \
     --filter-field molecule_chembl_id
 
 # С DEBUG логированием
-python -m bioetl.main run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug
 ```
 
 **Типы запуска:**
@@ -28185,7 +30238,7 @@ python -m bioetl.main run --pipeline chembl_activity --debug
 
 **Синтаксис:**
 ```bash
-python -m bioetl.main run-all --source <PROVIDER> [OPTIONS]
+bioetl run-all --source <PROVIDER> [OPTIONS]
 ```
 
 **Опции:**
@@ -28204,16 +30257,16 @@ python -m bioetl.main run-all --source <PROVIDER> [OPTIONS]
 
 ```bash
 # Запуск всех ChEMBL пайплайнов
-python -m bioetl.main run-all --source chembl
+bioetl run-all --source chembl
 
 # Только просмотр списка
-python -m bioetl.main run-all --source chembl --list-only
+bioetl run-all --source chembl --list-only
 
 # Предпросмотр
-python -m bioetl.main run-all --source pubchem --dry-run
+bioetl run-all --source pubchem --dry-run
 
 # Rebuild всех пайплайнов провайдера
-python -m bioetl.main run-all --source chembl --run-type rebuild --yes
+bioetl run-all --source chembl --run-type rebuild --yes
 ```
 
 ---
@@ -28224,7 +30277,7 @@ python -m bioetl.main run-all --source chembl --run-type rebuild --yes
 
 **Синтаксис:**
 ```bash
-python -m bioetl.main run-composite --composite <NAME> [OPTIONS]
+bioetl run-composite --composite <NAME> [OPTIONS]
 ```
 
 **Опции:**
@@ -28244,16 +30297,16 @@ python -m bioetl.main run-composite --composite <NAME> [OPTIONS]
 
 ```bash
 # Запуск композитного пайплайна публикаций
-python -m bioetl.main run-composite --composite publication
+bioetl run-composite --composite publication
 
 # С ограничением seed
-python -m bioetl.main run-composite --composite publication --seed-limit 100
+bioetl run-composite --composite publication --seed-limit 100
 
 # Только определённые enrichers
-python -m bioetl.main run-composite --composite publication --enrich-only crossref,openalex
+bioetl run-composite --composite publication --enrich-only crossref,openalex
 
 # Только обязательные enrichers
-python -m bioetl.main run-composite --composite publication --required-only
+bioetl run-composite --composite publication --required-only
 ```
 
 ---
@@ -28264,7 +30317,7 @@ python -m bioetl.main run-composite --composite publication --required-only
 
 **Синтаксис:**
 ```bash
-python -m bioetl.main export [TABLE] [OPTIONS]
+bioetl export [TABLE] [OPTIONS]
 ```
 
 **Аргументы:**
@@ -28289,25 +30342,25 @@ python -m bioetl.main export [TABLE] [OPTIONS]
 
 ```bash
 # Список всех таблиц
-python -m bioetl.main export --list
+bioetl export --list
 
 # Предпросмотр таблицы
-python -m bioetl.main export chembl.activity --preview
+bioetl export chembl.activity --preview
 
 # Экспорт в CSV (по умолчанию)
-python -m bioetl.main export chembl.activity
+bioetl export chembl.activity
 
 # Экспорт в Excel
-python -m bioetl.main export chembl.activity --format xlsx
+bioetl export chembl.activity --format xlsx
 
 # С ограничением строк и колонок
-python -m bioetl.main export chembl.activity --limit 10000 --columns id,name,value
+bioetl export chembl.activity --limit 10000 --columns id,name,value
 
 # Экспорт Gold-слоя
-python -m bioetl.main export chembl.activity --layer gold
+bioetl export chembl.activity --layer gold
 
 # В указанную директорию
-python -m bioetl.main export chembl.activity -o ./my_exports
+bioetl export chembl.activity -o ./my_exports
 ```
 
 ---
@@ -28319,19 +30372,19 @@ python -m bioetl.main export chembl.activity -o ./my_exports
 #### `config show` — Показать конфигурацию пайплайна
 
 ```bash
-python -m bioetl.main config show <PIPELINE> [--format yaml|json]
+bioetl config show <PIPELINE> [--format yaml|json]
 ```
 
 **Примеры:**
 ```bash
-python -m bioetl.main config show chembl_activity
-python -m bioetl.main config show chembl_activity --format json
+bioetl config show chembl_activity
+bioetl config show chembl_activity --format json
 ```
 
 #### `config validate` — Валидация конфигурации
 
 ```bash
-python -m bioetl.main config validate <PIPELINE>
+bioetl config validate <PIPELINE>
 ```
 
 Выводит: Provider, Entity type, Silver table, Gold table (если есть).
@@ -28339,7 +30392,7 @@ python -m bioetl.main config validate <PIPELINE>
 #### `config show-settings` — Глобальные настройки
 
 ```bash
-python -m bioetl.main config show-settings [--format yaml|json]
+bioetl config show-settings [--format yaml|json]
 ```
 
 Показывает все `BIOETL_*` переменные окружения (API-ключи маскируются).
@@ -28347,7 +30400,7 @@ python -m bioetl.main config show-settings [--format yaml|json]
 #### `config list-pipelines` — Список пайплайнов
 
 ```bash
-python -m bioetl.main config list-pipelines
+bioetl config list-pipelines
 ```
 
 ---
@@ -28359,7 +30412,7 @@ Dashboard для работы с проблемными записями.
 #### `quarantine inspect` — Просмотр записей
 
 ```bash
-python -m bioetl.main quarantine inspect --pipeline <NAME> [OPTIONS]
+bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -28370,14 +30423,14 @@ python -m bioetl.main quarantine inspect --pipeline <NAME> [OPTIONS]
 
 **Примеры:**
 ```bash
-python -m bioetl.main quarantine inspect --pipeline chembl_activity
-python -m bioetl.main quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
+bioetl quarantine inspect --pipeline chembl_activity
+bioetl quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
 ```
 
 #### `quarantine stats` — Статистика
 
 ```bash
-python -m bioetl.main quarantine stats --pipeline <NAME> [--json]
+bioetl quarantine stats --pipeline <NAME> [--json]
 ```
 
 Показывает: общее количество, распределение по кодам ошибок, статусы (NEW, REVIEWED, RESOLVED).
@@ -28385,7 +30438,7 @@ python -m bioetl.main quarantine stats --pipeline <NAME> [--json]
 #### `quarantine replay` — Повторная обработка
 
 ```bash
-python -m bioetl.main quarantine replay --pipeline <NAME> [OPTIONS]
+bioetl quarantine replay --pipeline <NAME> [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -28398,7 +30451,7 @@ python -m bioetl.main quarantine replay --pipeline <NAME> [OPTIONS]
 #### `quarantine purge` — Удаление старых записей
 
 ```bash
-python -m bioetl.main quarantine purge --pipeline <NAME> [OPTIONS]
+bioetl quarantine purge --pipeline <NAME> [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -28410,7 +30463,7 @@ python -m bioetl.main quarantine purge --pipeline <NAME> [OPTIONS]
 #### `quarantine resolve` — Пометить как решённое
 
 ```bash
-python -m bioetl.main quarantine resolve --pipeline <NAME> --payload-hash <HASH> [--status IGNORED|REPROCESSED]
+bioetl quarantine resolve --pipeline <NAME> --payload-hash <HASH> [--status IGNORED|REPROCESSED]
 ```
 
 ---
@@ -28420,7 +30473,7 @@ python -m bioetl.main quarantine resolve --pipeline <NAME> --payload-hash <HASH>
 #### `checkpoint list` — Список checkpoint
 
 ```bash
-python -m bioetl.main checkpoint list --pipeline <NAME>
+bioetl checkpoint list --pipeline <NAME>
 ```
 
 ---
@@ -28430,7 +30483,7 @@ python -m bioetl.main checkpoint list --pipeline <NAME>
 #### `health server` — HTTP health server
 
 ```bash
-python -m bioetl.main health server [--host 127.0.0.1] [--port 8080]
+bioetl health server [--host 127.0.0.1] [--port 8080]
 ```
 
 **Endpoints:**
@@ -28442,16 +30495,16 @@ python -m bioetl.main health server [--host 127.0.0.1] [--port 8080]
 #### `health check` — Проверка провайдеров
 
 ```bash
-python -m bioetl.main health check [--provider chembl] [--json]
+bioetl health check [--provider chembl] [--json]
 ```
 
 Проверяет connectivity и health всех или указанных провайдеров.
 
 **Примеры:**
 ```bash
-python -m bioetl.main health check
-python -m bioetl.main health check --provider chembl --provider pubchem
-python -m bioetl.main health check --json
+bioetl health check
+bioetl health check --provider chembl --provider pubchem
+bioetl health check --json
 ```
 
 ---
@@ -28461,7 +30514,7 @@ python -m bioetl.main health check --json
 #### `lock release` — Освобождение блокировки
 
 ```bash
-python -m bioetl.main lock release --pipeline <NAME> --run-id <UUID> [--exclusive]
+bioetl lock release --pipeline <NAME> --run-id <UUID> [--exclusive]
 ```
 
 > **Внимание:** Используйте только если уверены, что пайплайн не выполняется.
@@ -28469,7 +30522,7 @@ python -m bioetl.main lock release --pipeline <NAME> --run-id <UUID> [--exclusiv
 #### `lock check` — Проверка статуса блокировки
 
 ```bash
-python -m bioetl.main lock check --pipeline <NAME> --run-id <UUID>
+bioetl lock check --pipeline <NAME> --run-id <UUID>
 ```
 
 ---
@@ -28479,7 +30532,7 @@ python -m bioetl.main lock check --pipeline <NAME> --run-id <UUID>
 #### `maintenance vacuum` — VACUUM одной таблицы
 
 ```bash
-python -m bioetl.main maintenance vacuum <TABLE> [OPTIONS]
+bioetl maintenance vacuum <TABLE> [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -28489,15 +30542,15 @@ python -m bioetl.main maintenance vacuum <TABLE> [OPTIONS]
 
 **Примеры:**
 ```bash
-python -m bioetl.main maintenance vacuum chembl.activity
-python -m bioetl.main maintenance vacuum chembl.activity --dry-run
-python -m bioetl.main maintenance vacuum chembl.activity -r 30
+bioetl maintenance vacuum chembl.activity
+bioetl maintenance vacuum chembl.activity --dry-run
+bioetl maintenance vacuum chembl.activity -r 30
 ```
 
 #### `maintenance vacuum-all` — VACUUM всех таблиц
 
 ```bash
-python -m bioetl.main maintenance vacuum-all [OPTIONS]
+bioetl maintenance vacuum-all [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -28509,13 +30562,13 @@ python -m bioetl.main maintenance vacuum-all [OPTIONS]
 #### `maintenance archive` — Архивирование таблицы
 
 ```bash
-python -m bioetl.main maintenance archive <TABLE> <TARGET_PATH> [--remove-source]
+bioetl maintenance archive <TABLE> <TARGET_PATH> [--remove-source]
 ```
 
 #### `maintenance bronze-cleanup` — Очистка Bronze
 
 ```bash
-python -m bioetl.main maintenance bronze-cleanup [OPTIONS]
+bioetl maintenance bronze-cleanup [OPTIONS]
 ```
 
 | Опция | Тип | По умолчанию | Описание |
@@ -29199,9 +31252,18 @@ validated = ChEMBLActivityGoldSchema.validate(df.to_pandas())
 
 ---
 
-## JSON Contracts
+## Gold Schema Implementation
 
-JSON exports for Gold schemas are stored in `docs/contracts/gold/`:
+Gold-схемы реализованы как **Python Pandera DataFrameModel** классы в `src/bioetl/domain/contracts/gold/`.
+
+Каждая Gold-схема определяет:
+- Строгую валидацию типов (`strict=True`)
+- Nullable/non-nullable поля
+- Coercion rules (например, `int→float` для nullable integers)
+
+### JSON Contract Exports
+
+JSON exports для Gold-схем хранятся в `docs/04-reference/contracts/gold/`:
 
 - `chembl_activity_v1.0.json`
 - `chembl_assay_parameters_v1.0.json`
@@ -29222,7 +31284,6 @@ JSON exports for Gold schemas are stored in `docs/contracts/gold/`:
 - `pubmed_publication_v1.0.json`
 - `semanticscholar_publication_v1.0.json`
 - `uniprot_idmapping_v1.0.json`
-- `uniprot_protein_v1.0.json`
 
 ## Связанные документы
 
@@ -29230,7 +31291,7 @@ JSON exports for Gold schemas are stored in `docs/contracts/gold/`:
 - [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
 - [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
 - [Data Layers](../02-architecture/data-layers.md)
-- [Existing JSON Contracts](../contracts/gold/)
+- [JSON Contract Exports](gold/)
 
 ---
 
@@ -29562,7 +31623,7 @@ This directory contains documentation for all BioETL pipelines, including compos
 
 ## Pipeline Index
 
-### Provider Pipelines (19)
+### Provider Pipelines (21)
 
 | # | Pipeline ID | Provider | Entity | Spec |
 |---|-------------|----------|--------|------|
@@ -29578,21 +31639,25 @@ This directory contains documentation for all BioETL pipelines, including compos
 | 10 | `chembl_target_component` | ChEMBL | target_component | [Spec](chembl/10-target-component-spec.md) |
 | 11 | `chembl_publication_term` | ChEMBL | publication_term | [Spec](chembl/11-publication-term-spec.md) |
 | 12 | `chembl_publication_similarity` | ChEMBL | publication_similarity | [Spec](chembl/12-publication-similarity-spec.md) |
-| 13 | `uniprot_protein` | UniProt | protein | [Spec](uniprot/01-protein-spec.md) |
-| 14 | `uniprot_idmapping` | UniProt | idmapping | [Spec](uniprot/02-idmapping-spec.md) |
-| 15 | `pubchem_compound` | PubChem | compound | [Spec](pubchem/01-compound-spec.md) |
-| 16 | `pubmed_publication` | PubMed | publication | [Spec](pubmed/01-publication-spec.md) |
-| 17 | `crossref_publication` | CrossRef | publication | [Spec](crossref/01-publication-spec.md) |
-| 18 | `openalex_publication` | OpenAlex | publication | [Spec](openalex/01-publication-spec.md) |
-| 19 | `semanticscholar_publication` | Semantic Scholar | publication | [Spec](semanticscholar/01-publication-spec.md) |
+| 13 | `chembl_subcellular_fraction` | ChEMBL | subcellular_fraction | [Spec](chembl/13-subcellular-fraction-spec.md) |
+| 14 | `chembl_tissue` | ChEMBL | tissue | [Spec](chembl/14-tissue-spec.md) |
+| 15 | `uniprot_protein` | UniProt | protein | [Spec](uniprot/01-protein-spec.md) |
+| 16 | `uniprot_idmapping` | UniProt | idmapping | [Spec](uniprot/02-idmapping-spec.md) |
+| 17 | `pubchem_compound` | PubChem | compound | [Spec](pubchem/01-compound-spec.md) |
+| 18 | `pubmed_publication` | PubMed | publication | [Spec](pubmed/01-publication-spec.md) |
+| 19 | `crossref_publication` | CrossRef | publication | [Spec](crossref/01-publication-spec.md) |
+| 20 | `openalex_publication` | OpenAlex | publication | [Spec](openalex/01-publication-spec.md) |
+| 21 | `semanticscholar_publication` | Semantic Scholar | publication | [Spec](semanticscholar/01-publication-spec.md) |
 
-### Composite Pipelines (3)
+### Composite Pipelines (5)
 
 | # | Pipeline ID | Provider | Entity | Spec |
 |---|-------------|----------|--------|------|
-| 20 | `composite_publication` | Composite | publication | [Spec](composite/01-publication-spec.md) |
-| 21 | `composite_molecule` | Composite | molecule | [Spec](composite/02-molecule-spec.md) |
-| 22 | `composite_target` | Composite | target | [Spec](composite/03-target-spec.md) |
+| 22 | `composite_activity` | Composite | activity | [Spec](composite/01-activity-spec.md) |
+| 23 | `composite_assay` | Composite | assay | [Spec](composite/02-assay-spec.md) |
+| 24 | `composite_molecule` | Composite | molecule | [Spec](composite/03-molecule-spec.md) |
+| 25 | `composite_publication` | Composite | publication | [Spec](composite/04-publication-spec.md) |
+| 26 | `composite_target` | Composite | target | [Spec](composite/05-target-spec.md) |
 
 ---
 
@@ -29600,14 +31665,14 @@ This directory contains documentation for all BioETL pipelines, including compos
 
 | Provider | Pipelines | Rate Limit | Auth |
 |----------|-----------|------------|------|
-| **ChEMBL** | 12 | None | Public |
+| **ChEMBL** | 14 | 3 req/sec | Public |
 | **UniProt** | 2 | 100 req/sec | API Key (optional) |
 | **PubChem** | 1 | 5 req/sec | Public |
 | **PubMed** | 1 | 3 req/sec (10 with key) | API Key |
 | **CrossRef** | 1 | Polite pool | mailto header |
 | **OpenAlex** | 1 | ~10 req/sec | email-based |
-| **Semantic Scholar** | 1 | 100 req/5min | API Key |
-| **Composite** | 3 | N/A (local merge) | N/A |
+| **Semantic Scholar** | 1 | 0.1 req/sec (1.0 with key) | API Key |
+| **Composite** | 5 | N/A (local merge) | N/A |
 
 ---
 
@@ -29663,9 +31728,13 @@ configs/pipelines/
   - publication.yaml
   - publication_similarity.yaml
   - publication_term.yaml
+  - subcellular_fraction.yaml
   - target.yaml
   - target_component.yaml
+  - tissue.yaml
 - composite/
+  - activity.yaml
+  - assay.yaml
   - molecule.yaml
   - publication.yaml
   - target.yaml
@@ -29772,16 +31841,16 @@ Records pass to Gold layer only if:
 
 ```bash
 # Incremental load (default)
-bioetl run chembl_activity
+bioetl run --pipeline chembl_activity
 
 # With record limit
-bioetl run chembl_activity --limit 1000
+bioetl run --pipeline chembl_activity --limit 1000
 
 # Backfill
-bioetl run chembl_activity --run-type backfill --start-date 2024-01-01
+bioetl run --pipeline chembl_activity --run-type backfill --start-date 2024-01-01
 
 # Full rebuild
-bioetl run chembl_activity --run-type rebuild
+bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
 ## Related Files
@@ -34245,8 +36314,8 @@ erDiagram
 
 - [OpenAlex Works API Documentation](https://docs.openalex.org/api-entities/works)
 - [OpenAlex Data Model](https://docs.openalex.org/about-the-data)
-- [ADR-030: OpenAlex Offset Stability](../02-architecture/decisions/ADR-030-openalex-offset-stability.md)
-- [ADR-031: Full Scan Loading Strategy](../02-architecture/decisions/ADR-031-full-scan-loading.md)
+- [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+- [ADR-031: Loading Strategy Formalization](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
 - [RULES.md 5.4: PII Handling](../RULES.md#54-pii-handling)
 
 ================================================================================
@@ -35132,7 +37201,7 @@ The `semanticscholar_publication` pipeline ingests scholarly publication records
 | **Entity Type** | `publication` |
 | **Primary Key** | `paper_id` (40-char hex S2 ID) |
 | **Loading Strategy** | `full_scan_only` (ADR-030, ADR-031) |
-| **Batch Size** | 100 records |
+| **Batch Size** | 50 records |
 
 ### Primary Key Format
 
@@ -35892,8 +37961,8 @@ The following fields are created by the transformer but not defined in Silver sc
 
 - [Semantic Scholar API Documentation](https://api.semanticscholar.org/api-docs/graph)
 - [S2 Paper Object Schema](https://api.semanticscholar.org/api-docs/graph#tag/Paper-Data/operation/get_graph_get_paper)
-- [ADR-030: API Offset Stability](../02-architecture/decisions/ADR-030-api-offset-stability.md)
-- [ADR-031: Full Scan Loading Strategy](../02-architecture/decisions/ADR-031-full-scan-loading.md)
+- [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+- [ADR-031: Loading Strategy Formalization](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
 - [RULES.md: Medallion Architecture](../RULES.md#2-medallion-architecture)
 
 ================================================================================
@@ -36914,7 +38983,7 @@ Path: 04-reference\providers\chembl\activity.md
 **Имя пайплайна:** `chembl_activity`
 **Провайдер:** `chembl`
 **Сущность:** `activity`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -36932,7 +39001,7 @@ Path: 04-reference\providers\chembl\activity.md
 pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
-version: "1.0.0"
+version: "1.2.0"
 primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 
@@ -36973,7 +39042,7 @@ dq_rules:
 
 ### 3.1. Определение сущности Activity
 
-**Файл:** `src/bioetl/domain/entities.py`
+**Файл:** `src/bioetl/domain/entities/bioactivity.py`
 
 Сущность `Activity` содержит **55 полей**, сгруппированных по категориям:
 
@@ -37393,7 +39462,7 @@ def extract(self, context, record) -> Watermark:
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/pipelines/chembl/activity.yaml` |
-| Сущность | `src/bioetl/domain/entities.py` |
+| Сущность | `src/bioetl/domain/entities/bioactivity.py` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold-фильтр | `src/bioetl/application/pipelines/chembl/activity_gold_filter.py` |
 | Watermark | `src/bioetl/application/pipelines/chembl/activity_watermark.py` |
@@ -37434,7 +39503,7 @@ Path: 04-reference\providers\chembl\assay-parameters.md
 **Имя пайплайна:** `chembl_assay_parameters`
 **Провайдер:** `chembl`
 **Сущность:** `assay_parameters`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -37572,7 +39641,7 @@ Path: 04-reference\providers\chembl\assay.md
 **Имя пайплайна:** `chembl_assay`
 **Провайдер:** `chembl`
 **Сущность:** `assay`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -37590,7 +39659,7 @@ Path: 04-reference\providers\chembl\assay.md
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
-version: "1.0.0"
+version: "1.2.0"
 primary_keys: ["assay_chembl_id"]
 silver_table: "chembl_assay"
 
@@ -38018,7 +40087,7 @@ Path: 04-reference\providers\chembl\cell-line.md
 **Имя пайплайна:** `chembl_cell_line`
 **Провайдер:** `chembl`
 **Сущность:** `cell_line`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -38184,7 +40253,7 @@ Path: 04-reference\providers\chembl\compound-record.md
 **Имя пайплайна:** `chembl_compound_record`
 **Провайдер:** `chembl`
 **Сущность:** `compound_record`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -38376,7 +40445,7 @@ Path: 04-reference\providers\chembl\molecule.md
 **Имя пайплайна:** `chembl_molecule`
 **Провайдер:** `chembl`
 **Сущность:** `molecule`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -38501,7 +40570,7 @@ Path: 04-reference\providers\chembl\protein-class.md
 **Имя пайплайна:** `chembl_protein_class`
 **Провайдер:** `chembl`
 **Сущность:** `protein_class`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -38626,7 +40695,7 @@ Path: 04-reference\providers\chembl\publication-similarity.md
 **Имя пайплайна:** `chembl_publication_similarity`
 **Провайдер:** `chembl`
 **Сущность:** `publication_similarity`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -38727,7 +40796,7 @@ Path: 04-reference\providers\chembl\publication-term.md
 **Имя пайплайна:** `chembl_publication_term`
 **Провайдер:** `chembl`
 **Сущность:** `publication_term`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -38867,7 +40936,7 @@ Path: 04-reference\providers\chembl\publication.md
 **Имя пайплайна:** `chembl_publication`
 **Провайдер:** `chembl`
 **Сущность:** `publication`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -38964,7 +41033,7 @@ Path: 04-reference\providers\chembl\target-component.md
 **Имя пайплайна:** `chembl_target_component`
 **Провайдер:** `chembl`
 **Сущность:** `target_component`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -39050,7 +41119,7 @@ Path: 04-reference\providers\chembl\target.md
 **Имя пайплайна:** `chembl_target`
 **Провайдер:** `chembl`
 **Сущность:** `target`
-**Версия схемы:** 1.0.0
+**Версия схемы:** 1.2.0
 
 ---
 
@@ -41241,7 +43310,7 @@ Path: 04-reference\publication-fields-reference.md
 ## Связанная документация
 
 - **Validation Schema:** `docs/04-reference/schemas/publication_validation_schema_v3.xlsx`
-- **ADR-032:** Стратегия валидации публикаций (`docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md`)
+- **ADR-033:** Стратегия валидации публикаций (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
 - **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
 - **Тесты:** `tests_generated/` (471 тест, 64% покрытие)
 
@@ -41282,7 +43351,7 @@ Path: 04-reference\publication-validation-index.md
 
 | Документ | Описание | Статус |
 |----------|----------|--------|
-| **[ADR-032](../02-architecture/decisions/ADR-032-publication-validation-strategy.md)** | Стратегия валидации публикаций: 5 уровней, DQ-флаги, карантин, конфигурация | ✅ Принят (2026-02-06) |
+| **[ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)** | Стратегия валидации публикаций: 5 уровней, DQ-флаги, карантин, конфигурация | ✅ Принят (2026-02-06) |
 
 **Связанные ADR:**
 - [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) — Hexagonal Architecture (validation services в application layer)
@@ -41336,8 +43405,8 @@ tests_generated/
 ### 1. Понять архитектуру
 
 ```bash
-# Прочитать ADR-032 (решение + обоснование)
-open docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md
+# Прочитать ADR-033 (решение + обоснование)
+open docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md
 
 # Изучить диаграммы в Validation Guide
 open docs/03-guides/publication-validation-guide.md
@@ -41438,7 +43507,7 @@ cat /var/log/bioetl/pipeline.log | \
 ### Data Engineer (Реализация)
 
 1. **Прочитать:**
-   - [ADR-032](../02-architecture/decisions/ADR-032-publication-validation-strategy.md) — Архитектурное решение
+   - [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md) — Архитектурное решение
    - [Validation Guide](../03-guides/publication-validation-guide.md) — Примеры кода
 
 2. **Реализовать:**
@@ -41585,7 +43654,7 @@ cat /var/log/bioetl/pipeline.log | \
 
 | Дата | Событие |
 |------|---------|
-| **2026-02-06** | ✅ Утверждение ADR-032 |
+| **2026-02-06** | ✅ Утверждение ADR-033 |
 | **2026-02-06** | ✅ Генерация Validation Schema v3 (191 правило) |
 | **2026-02-06** | ✅ Генерация Test Suite (471 тест, 64% покрытие) |
 | **2026-02-06** | ✅ Публикация документации (7 документов) |
@@ -43223,7 +45292,7 @@ Path: 05-operations\README.md
 ================================================================================
 # Operations Documentation
 
-*Synced with RULES.md v5.17 (2026-01-06)*
+*Synced with RULES.md v5.17 (2026-02-03)*
 
 ## Overview
 
@@ -43268,6 +45337,10 @@ File: RELEASE_CHECKLIST.md
 Path: 05-operations\RELEASE_CHECKLIST.md
 ================================================================================
 # Release Checklist v5.9.0
+
+> **Historical Document**: This checklist was created for BioETL v5.9.0 (verified 2026-01-13).
+> It is preserved for reference only. For current release procedures, create a new checklist
+> aligned with the latest project version.
 
 This checklist documents the pre-release verification completed for BioETL v5.9.0.
 
@@ -43499,17 +45572,17 @@ data/
 ### Useful Commands
 
 ```bash
-# Check pipeline status
-bioetl status
+# Check pipeline health
+bioetl health check
 
 # Resume from checkpoint
-bioetl run --provider chembl --entity activity --resume
+bioetl run --pipeline chembl_activity --resume
 
-# Force full refresh
-bioetl run --provider chembl --entity activity --full-refresh
+# Force full refresh (rebuild)
+bioetl run --pipeline chembl_activity --run-type rebuild
 
 # Dry run (no writes)
-bioetl run --provider chembl --entity activity --dry-run
+bioetl run --pipeline chembl_activity --dry-run
 ```
 
 ## Prerequisites
@@ -43706,7 +45779,7 @@ touch data/checkpoints/test && rm data/checkpoints/test
 If schema version mismatch is intentional:
 ```bash
 # Full refresh with new schema
-bioetl run --provider chembl --entity activity --full-refresh
+bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
 ## Manual Checkpoint Operations
@@ -43863,7 +45936,7 @@ This runbook provides procedures for recovering data in case of corruption, acci
         *   Delete the corrupted data from the Silver/Gold tables.
         *   Run the pipeline with the `--full-rebuild` flag. This will re-process all data from Bronze.
         ```bash
-        python -m bioetl.main run --pipeline <pipeline_name> --full-rebuild
+        bioetl run --pipeline <pipeline_name> --full-rebuild
         ```
 
 ## Scenario 2: Bronze Data Loss or Corruption
@@ -43884,7 +45957,7 @@ This runbook provides procedures for recovering data in case of corruption, acci
 *   **Recovery Steps**:
     1.  **Option A (Safest)**: Ignore the checkpoint and re-process a slightly larger window of data.
         ```bash
-        python -m bioetl.main run --pipeline <pipeline_name> --ignore-checkpoint
+        bioetl run --pipeline <pipeline_name> --ignore-checkpoint
         ```
         *   **Impact**: This may create duplicate records in the Bronze layer, but the merge/upsert logic in the Silver layer will handle deduplication, ensuring correctness.
     2.  **Option B (Advanced)**: Manually determine the last successfully processed record ID or timestamp from the Silver table and create a new checkpoint file. This is faster but more error-prone.
@@ -44098,7 +46171,7 @@ For unfixable records, quarantine is the correct behavior:
 
 ```bash
 # View quarantine statistics
-bioetl quarantine-stats --provider chembl --entity activity
+bioetl quarantine stats --pipeline chembl_activity
 
 # Purge old quarantine (> 30 days)
 bioetl quarantine-purge --older-than 30d
@@ -44605,7 +46678,7 @@ Checkpoint contains:
 For recoverable failures, simply resume:
 
 ```bash
-bioetl run --provider chembl --entity activity --resume
+bioetl run --pipeline chembl_activity --resume
 ```
 
 The pipeline will:
@@ -44619,7 +46692,7 @@ If checkpoint is corrupted or data inconsistent:
 
 ```bash
 # Clear checkpoint and reprocess all data
-bioetl run --provider chembl --entity activity --full-refresh
+bioetl run --pipeline chembl_activity --full-refresh
 ```
 
 **Warning**: This will reprocess all records from the beginning.
@@ -44636,7 +46709,7 @@ mv data/silver/chembl_activity data/silver/chembl_activity.bak
 rm data/checkpoints/chembl_activity.json
 
 # 3. Full refresh
-bioetl run --provider chembl --entity activity --full-refresh
+bioetl run --pipeline chembl_activity --full-refresh
 
 # 4. Verify data
 bioetl verify --table chembl_activity
@@ -44708,7 +46781,7 @@ Path: 05-operations\runbooks\publication-validation-runbook.md
 **Версия:** 1.0.0
 **Дата:** 2026-02-06
 **Для:** DevOps, Data Engineers, Support
-**Связанный ADR:** ADR-032
+**Связанный ADR:** ADR-033
 
 ---
 
@@ -44810,8 +46883,8 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 3. Если медленный **Semantic Validation**:
    - Отключить временно:
      ```bash
-     python -m bioetl.interfaces.cli.main run-pipeline \
-       --provider pubmed --entity publication \
+     bioetl run \
+       --pipeline pubmed_publication \
        --skip-semantic
      ```
 
@@ -45140,8 +47213,8 @@ curl -v --connect-timeout 5 https://api.crossref.org/
 **Решение:**
 - Временно отключить External Verification:
   ```bash
-  python -m bioetl.interfaces.cli.main run-pipeline \
-    --provider crossref --entity publication \
+  bioetl run \
+    --pipeline crossref_publication \
     --skip-external
   ```
 
@@ -45349,8 +47422,8 @@ lsof -i -P -n | grep bioetl
 pkill -f "bioetl.interfaces.cli.main run-pipeline"
 
 # Перезапустить без External Verification
-python -m bioetl.interfaces.cli.main run-pipeline \
-  --provider pubmed --entity publication \
+bioetl run \
+  --pipeline pubmed_publication \
   --skip-external \
   --skip-semantic
 ```
@@ -45426,8 +47499,8 @@ curl http://localhost:8000/metrics | grep bioetl_validation
 **Решение:**
 ```bash
 # Перезапустить pipeline с Prometheus exporter
-python -m bioetl.interfaces.cli.main run-pipeline \
-  --provider pubmed --entity publication \
+bioetl run \
+  --pipeline pubmed_publication \
   --enable-metrics \
   --metrics-port 8000
 
@@ -45496,7 +47569,7 @@ scrape_configs:
 
 ### ADR и документация
 
-- **ADR-032:** Стратегия валидации (`docs/02-architecture/decisions/ADR-032-publication-validation-strategy.md`)
+- **ADR-033:** Стратегия валидации (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
 - **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
 - **Field Reference:** `docs/04-reference/publication-fields-reference.md`
 - **Test Suite:** `tests_generated/` (471 тест)
@@ -251013,6 +253086,2050 @@ BioactivityDataAcquisition2/
 - Total items: 13200
 
 ================================================================================
+File: PUBLICATION_TYPE_NORMALIZATION_ANALYSIS.md
+Path: analysis\PUBLICATION_TYPE_NORMALIZATION_ANALYSIS.md
+================================================================================
+# Publication Type Normalization Analysis
+
+**Дата:** 2026-02-10
+**Версия:** 1.0.0
+**Scope:** Нормализация полей publication_type в composite publication pipeline
+
+---
+
+## Executive Summary
+
+Нормализация полей `publication_type` в BioETL происходит в **два этапа**:
+
+1. **Silver Layer Transformation** — провайдер-специфичные raw типы классифицируются с помощью унифицированной 3-уровневой иерархии (214 типов, 4 провайдера)
+2. **Composite Pipeline Merging** — все provider-qualified поля сохраняются (preserve_all_sources=true), coalescing НЕ происходит
+
+**Ключевые файлы:**
+- `domain/mapping/publication_type_classification.py` — 214 mappings (OpenAlex, CrossRef, PubMed, SemanticScholar)
+- `application/pipelines/common/base_publication_transformer.py` — метод `_classify_publication_type()`
+- `configs/composite/field_groups/publication.yaml` — field grouping для composite
+- Provider transformers — вызывают классификацию для каждой записи
+
+---
+
+## Часть 1: Исходные Поля от Провайдеров (Bronze Layer)
+
+### 1.1 CrossRef
+
+**Поле:** `type` (строка)
+
+**Примеры значений:**
+- `"journal-article"`
+- `"proceedings-article"`
+- `"book-chapter"`
+- `"posted-content"` (preprint)
+- `"peer-review"`
+
+**Mapping table:** 191 уникальных mappings (строки 59-1423 в classification.py)
+
+---
+
+### 1.2 OpenAlex
+
+**Поле:** `type` (строка)
+
+**Примеры значений:**
+- `"article"`
+- `"book"`
+- `"dataset"`
+- `"review"`
+- `"editorial"`
+- `"preprint"`
+
+**Mapping table:** 191 уникальных mappings (column 4 в _CLASSIFICATION_TABLE)
+
+---
+
+### 1.3 PubMed
+
+**Поля:**
+- Внутри XML: `<PublicationType>` (множественные значения)
+- После парсинга: список строк
+
+**Примеры значений:**
+```python
+["Journal Article", "Research Support, NIH, Extramural"]
+["Clinical Trial", "Randomized Controlled Trial"]
+["Review", "Systematic Review"]
+["Meta-Analysis"]
+```
+
+**Mapping table:** 191 уникальных mappings (column 6 в _CLASSIFICATION_TABLE)
+
+**Особенность:** Multi-value provider — классификатор выбирает **наиболее специфичный тип** (highest specificity row number)
+
+---
+
+### 1.4 SemanticScholar
+
+**Поле:** `publicationTypes` (список строк)
+
+**Примеры значений:**
+```python
+["JournalArticle"]
+["Conference"]
+["Review"]
+["CaseReport", "JournalArticle"]
+["MetaAnalysis"]
+```
+
+**Mapping table:** 191 уникальных mappings (column 7 в _CLASSIFICATION_TABLE)
+
+**Особенность:** Multi-value provider — классификатор выбирает **наиболее специфичный тип**
+
+---
+
+### 1.5 ChEMBL
+
+**Поле:** `doc_type` (строка)
+
+**Примеры значений:**
+- `"PUBLICATION"`
+- `"PATENT"`
+- `"DATASET"`
+- `"BOOK"`
+
+**Mapping:** Использует константу `PUBLICATION_TYPES` из `domain/schemas/constants.py` (line 187-194):
+
+```python
+PUBLICATION_TYPES: frozenset[str] = frozenset([
+    "PUBLICATION",
+    "PATENT",
+    "DATASET",
+    "BOOK",
+])
+```
+
+**Отличие:** ChEMBL использует ограниченный enum (4 значения), не участвует в unified classification с 214 типами.
+
+---
+
+## Часть 2: Унифицированная Классификация (3-Level Hierarchy)
+
+### 2.1 Архитектура Классификации
+
+**Файл:** `src/bioetl/domain/mapping/publication_type_classification.py`
+
+**Структура:**
+
+```python
+@dataclass(frozen=True, slots=True)
+class PublicationTypeEntry:
+    unified_type: str       # Level 3: 214 типов (e.g., "Journal Article")
+    subclass: str           # Level 2: ~25 groupings (e.g., "Original Experimental Data")
+    class_code: str         # Level 1: 3 codes (EXP | REV | PEER)
+    specificity: int        # Row number (higher = more specific)
+```
+
+**Level 1: Class Code (3 значения)**
+- `EXP` — Experimental (original research)
+- `REV` — Review (secondary literature)
+- `PEER` — Peer Review
+
+**Level 2: Subclass (~25 groupings)**
+- Original Experimental Data
+- Reviews & Syntheses
+- Editorial & Commentary
+- Corrections & Retractions
+- Books & Monographs
+- Reference & Encyclopedic
+- Guidelines & Consensus
+- Standards
+- Journal / Proceedings Infrastructure
+- Grants & Funding
+- Biographical & Historical
+- Educational & Instructional
+- Visual / Media
+- Literary / Miscellaneous
+- Administrative / Catalogs / Legal
+- Format / Meta-types
+
+**Level 3: Unified Type (214 значений)**
+
+См. примеры в таблице ниже.
+
+---
+
+### 2.2 Примеры Mapping
+
+| Row | Unified Type | Subclass | Class | OpenAlex | CrossRef | PubMed | S2 |
+|-----|-------------|----------|-------|----------|----------|--------|-----|
+| 2 | Journal Article | Original Experimental Data | EXP | article | journal-article | Journal Article | JournalArticle |
+| 3 | Conference Paper | Original Experimental Data | EXP | article* | proceedings-article | Congress | Conference |
+| 4 | Preprint | Original Experimental Data | EXP | preprint | posted-content | Preprint | — |
+| 5 | Dataset | Original Experimental Data | EXP | dataset | dataset | Dataset | Dataset |
+| 14 | Case Report | Original Experimental Data | EXP | — | — | Case Reports | CaseReport |
+| 16 | Clinical Trial | Original Experimental Data | EXP | — | — | Clinical Trial | ClinicalTrial |
+| 39 | Review | Reviews & Syntheses | REV | review | — | Review | Review |
+| 40 | Systematic Review | Reviews & Syntheses | REV | — | — | Systematic Review | — |
+| 41 | Meta-Analysis | Reviews & Syntheses | REV | — | — | Meta-Analysis | MetaAnalysis |
+| 45 | Editorial | Editorial & Commentary | REV | editorial | — | Editorial | Editorial |
+| 57 | Erratum | Corrections & Retractions | REV | erratum | — | Published Erratum | — |
+| 63 | Book | Books & Monographs | REV | book | book | — | Book |
+| 1 | Peer Review | Peer Review | PEER | peer-review | peer-review | — | — |
+
+**Примечание:**
+- `*` (asterisk suffix) — вторичный mapping (e.g., OpenAlex "article" → Conference Paper OR Journal Article)
+- `—` — нет mapping для этого провайдера
+
+---
+
+### 2.3 Функция Классификации
+
+**Файл:** `src/bioetl/domain/mapping/publication_type_classification.py:1585`
+
+```python
+def classify_publication_type(
+    provider: str,
+    raw_type: str | None = None,
+    raw_types_list: list[str] | None = None,
+) -> PublicationTypeEntry | None:
+    """Classify a publication type using the unified 3-level hierarchy.
+
+    For single-value providers (OpenAlex, CrossRef): uses raw_type for
+    a direct lookup.
+
+    For multi-value providers (PubMed, Semantic Scholar): iterates
+    raw_types_list, collects all matches, and returns the entry with
+    the highest specificity (largest row number = most specific type).
+
+    Args:
+        provider: Provider name ("openalex", "crossref", "pubmed", "semanticscholar").
+        raw_type: Single raw type string (for OpenAlex / CrossRef).
+        raw_types_list: List of raw type strings (for PubMed / S2).
+
+    Returns:
+        The matching PublicationTypeEntry, or None if no match.
+    """
+```
+
+**Lookup Tables (built at import time):**
+- `_OPENALEX_LOOKUP: dict[str, PublicationTypeEntry]`
+- `_CROSSREF_LOOKUP: dict[str, PublicationTypeEntry]`
+- `_PUBMED_LOOKUP: dict[str, PublicationTypeEntry]`
+- `_S2_LOOKUP: dict[str, PublicationTypeEntry]`
+
+**Normalization:** Keys normalized to lowercase (`"JournalArticle"` → `"journalarticle"`)
+
+**Multi-value strategy:**
+```python
+# PubMed example: ["Journal Article", "Clinical Trial", "Randomized Controlled Trial"]
+# Returns: "Randomized Controlled Trial" (row 287, most specific)
+best: PublicationTypeEntry | None = None
+for raw in raw_types_list:
+    entry = lookup.get(raw.strip().lower())
+    if entry is not None and (best is None or entry.specificity > best.specificity):
+        best = entry
+return best
+```
+
+---
+
+## Часть 3: Трансформация в Silver Layer
+
+### 3.1 BasePublicationTransformer
+
+**Файл:** `src/bioetl/application/pipelines/common/base_publication_transformer.py:206`
+
+**Метод:**
+
+```python
+def _classify_publication_type(
+    self,
+    provider: str,
+    raw_type: str | None = None,
+    raw_types_list: list[str] | None = None,
+) -> dict[str, str | None]:
+    """Classify publication type using the unified 3-level hierarchy.
+
+    Delegates to domain classification module.
+
+    Returns:
+        Dict with keys publication_type_unified, publication_subclass,
+        publication_class (all str | None).
+    """
+    entry = classify_publication_type(
+        provider, raw_type=raw_type, raw_types_list=raw_types_list
+    )
+    if entry is None:
+        return {
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
+        }
+    return {
+        "publication_type_unified": entry.unified_type,
+        "publication_subclass": entry.subclass,
+        "publication_class": entry.class_code,
+    }
+```
+
+**Возвращает 3 поля:**
+- `publication_type_unified` — Level 3 (e.g., "Journal Article")
+- `publication_subclass` — Level 2 (e.g., "Original Experimental Data")
+- `publication_class` — Level 1 (e.g., "EXP")
+
+---
+
+### 3.2 CrossRef Transformer
+
+**Файл:** `src/bioetl/application/pipelines/crossref/transformer.py:177-178`
+
+```python
+return {
+    # ... other fields ...
+    "publication_type": rec.get("type"),  # Raw CrossRef type
+    **self._classify_publication_type("crossref", raw_type=rec.get("type")),
+    # ... other fields ...
+}
+```
+
+**Пример:**
+
+Bronze record:
+```json
+{
+  "DOI": "10.1038/nature12345",
+  "type": "journal-article",
+  "title": ["Example Article"]
+}
+```
+
+Silver record:
+```python
+{
+    "doi": "10.1038/nature12345",
+    "publication_type": "journal-article",  # Raw
+    "publication_type_unified": "Journal Article",  # Level 3
+    "publication_subclass": "Original Experimental Data",  # Level 2
+    "publication_class": "EXP",  # Level 1
+    # ...
+}
+```
+
+---
+
+### 3.3 OpenAlex Transformer
+
+**Файл:** `src/bioetl/application/pipelines/openalex/transformer.py:241-242`
+
+```python
+return {
+    # ... other fields ...
+    "publication_type": rec.get("type"),  # Raw OpenAlex type
+    **self._classify_publication_type("openalex", raw_type=rec.get("type")),
+    # ... other fields ...
+}
+```
+
+**Пример:**
+
+Bronze record:
+```json
+{
+  "id": "https://openalex.org/W2741809807",
+  "type": "article",
+  "title": "Example Article"
+}
+```
+
+Silver record:
+```python
+{
+    "openalex_id": "W2741809807",
+    "publication_type": "article",  # Raw
+    "publication_type_unified": "Journal Article",  # Level 3
+    "publication_subclass": "Original Experimental Data",  # Level 2
+    "publication_class": "EXP",  # Level 1
+    # ...
+}
+```
+
+---
+
+### 3.4 PubMed Transformer
+
+**Файл:** `src/bioetl/application/pipelines/pubmed/transformer.py:366-386`
+
+**Метод:**
+
+```python
+def _build_pubmed_classification(
+    self, pub_types: list[str]
+) -> dict[str, str | None]:
+    """Build publication_type and classification fields for PubMed.
+
+    Joins raw types with | for the raw publication_type field,
+    then uses the unified classifier to pick the most specific match.
+
+    Args:
+        pub_types: List of raw publication type strings from XML.
+
+    Returns:
+        Dict with publication_type and the 3 classification fields.
+    """
+    raw_type = "|".join(pub_types) if pub_types else None
+    classification = self._classify_publication_type(
+        "pubmed",
+        raw_types_list=pub_types,
+    )
+    return {"publication_type": raw_type, **classification}
+```
+
+**Пример:**
+
+Bronze record (parsed XML):
+```python
+pub_types = ["Journal Article", "Clinical Trial", "Randomized Controlled Trial"]
+```
+
+Silver record:
+```python
+{
+    "pmid": "12345678",
+    "publication_type": "Journal Article|Clinical Trial|Randomized Controlled Trial",  # Raw (joined)
+    "publication_type_unified": "Randomized Controlled Trial",  # Level 3 (most specific)
+    "publication_subclass": "Original Experimental Data",  # Level 2
+    "publication_class": "EXP",  # Level 1
+    # ...
+}
+```
+
+**Алгоритм выбора:**
+1. Iterate pub_types: ["Journal Article", "Clinical Trial", "Randomized Controlled Trial"]
+2. Lookup each in `_PUBMED_LOOKUP`
+3. Compare `specificity` (row number)
+4. Return entry with highest specificity
+
+Row numbers in classification table:
+- "Journal Article" → row 2 (specificity=2)
+- "Clinical Trial" → row 16 (specificity=16)
+- "Randomized Controlled Trial" → row 26 (specificity=26) ← **Winner**
+
+---
+
+### 3.5 SemanticScholar Transformer
+
+**Файл:** `src/bioetl/application/pipelines/semanticscholar/transformer.py:219-230`
+
+```python
+publication_types = extract_publication_types(rec)
+
+return {
+    # ... other fields ...
+    "publication_type": self._resolve_publication_type(publication_types),
+    **self._classify_publication_type(
+        "semanticscholar",
+        raw_types_list=[
+            str(t).strip()
+            for t in publication_types
+            if t is not None and str(t).strip()
+        ]
+        if isinstance(publication_types, list)
+        else None,
+    ),
+    "publication_types": self.serialize_json(publication_types),
+    # ... other fields ...
+}
+```
+
+**Пример:**
+
+Bronze record:
+```json
+{
+  "paperId": "1234567890abcdef",
+  "publicationTypes": ["JournalArticle", "Review"]
+}
+```
+
+Silver record:
+```python
+{
+    "paper_id": "1234567890abcdef",
+    "publication_type": "JournalArticle",  # First item (from _resolve_publication_type)
+    "publication_type_unified": "Review",  # Level 3 (most specific)
+    "publication_subclass": "Reviews & Syntheses",  # Level 2
+    "publication_class": "REV",  # Level 1
+    "publication_types": '["JournalArticle", "Review"]',  # JSON string
+    # ...
+}
+```
+
+**Алгоритм:**
+1. `publication_type` = первый элемент списка (fallback логика)
+2. `publication_type_unified` = most specific match from ["JournalArticle", "Review"]
+3. `publication_types` = JSON-сериализованный исходный список
+
+Row numbers:
+- "JournalArticle" → row 2 (specificity=2)
+- "Review" → row 39 (specificity=39) ← **Winner**
+
+---
+
+## Часть 4: Field Naming в Silver Schemas
+
+### 4.1 Поля в Silver Layer (post-transformation)
+
+Каждый provider schema содержит следующие поля:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `publication_type` | `Series[str] \| None` | Raw provider-specific type (для backward compatibility) |
+| `publication_type_unified` | `Series[str] \| None` | Level 3: унифицированный тип из 214 значений |
+| `publication_subclass` | `Series[str] \| None` | Level 2: подкласс (~25 значений) |
+| `publication_class` | `Series[str] \| None` | Level 1: class code (EXP/REV/PEER) |
+
+**PubMed дополнительно:**
+- `publication_type_list` — не используется (deprecated/placeholder)
+- `publication_types` — не используется (deprecated/placeholder)
+
+**SemanticScholar дополнительно:**
+- `publication_types` — JSON string с исходным списком типов
+
+---
+
+### 4.2 Field Name Mapping (publication_fields.py)
+
+**Файл:** `src/bioetl/domain/mapping/publication_fields.py:34-41`
+
+**Цель:** Унификация field names между провайдерами для будущей интеграции.
+
+**ChEMBL Mapping:**
+```python
+_CHEMBL_MAPPING: Final[dict[str, str]] = {
+    "doc_type": "publication_type",  # ChEMBL doc_type → unified publication_type
+    "year": "publication_year",
+}
+```
+
+**Примечание:** Это mapping для field names, НЕ для значений. ChEMBL не участвует в unified classification (использует enum из 4 значений).
+
+---
+
+## Часть 5: Composite Publication Pipeline
+
+### 5.1 Field Groups Configuration
+
+**Файл:** `configs/composite/field_groups/publication.yaml:40-44, 496-514`
+
+**Doc Type Group (line 40-44):**
+```yaml
+- base_name: publication_type
+  columns:
+    - chembl.publication.publication_type
+    - pubmed.publication.publication_type
+```
+
+**Publication Types Group (line 496-514):**
+```yaml
+# ===== PUBLICATION_TYPES =====
+- id: publication_types
+  display_name: "Publication Types"
+  include_in_gold: true
+  fields:
+    - base_name: publication_type_list
+      columns:
+        - pubmed.publication.publication_type_list
+
+    - base_name: publication_types
+      columns:
+        - pubmed.publication.publication_types
+        - semanticscholar.publication.publication_types
+
+    - base_name: type
+      columns:
+        - crossref.publication.type
+        - openalex.publication.type
+```
+
+**Интерпретация:**
+
+1. `publication_type` — базовое поле (ChEMBL, PubMed)
+2. `publication_type_list` — PubMed-specific (deprecated)
+3. `publication_types` — PubMed + SemanticScholar (JSON списки)
+4. `type` — CrossRef + OpenAlex (raw типы)
+
+**Отсутствуют в field_groups:**
+- `publication_type_unified` (Level 3)
+- `publication_subclass` (Level 2)
+- `publication_class` (Level 1)
+
+Эти поля **сохраняются** с provider qualification (e.g., `crossref.publication.publication_type_unified`).
+
+---
+
+### 5.2 Merge Strategy (preserve_all_sources)
+
+**Файл:** `configs/pipelines/composite/publication.yaml:132`
+
+```yaml
+merge:
+  preserve_all_sources: true
+  conflict_resolution: seed_priority
+```
+
+**Файл:** `src/bioetl/application/composite/merger.py:1334-1346`
+
+```python
+def _resolve_conflicts(
+    self,
+    df: pl.DataFrame,
+    enricher_dfs: dict[str, pl.DataFrame],
+    enrichers: Sequence[EnricherConfig],
+    seed_pipeline: str | None = None,
+) -> pl.DataFrame:
+    """Apply conflict resolution based on configured strategy."""
+    # Skip coalescing if preserve_all_sources is enabled
+    if self._config.preserve_all_sources:
+        qualified_cols = [
+            c for c in df.columns if "." in c and not c.startswith("_")
+        ]
+        self._logger.info(
+            "Skipping conflict resolution - preserve_all_sources=True",
+            qualified_columns=len(qualified_cols),
+        )
+        return df
+```
+
+**Вывод:** С `preserve_all_sources: true`, **coalescing НЕ происходит**. Все поля сохраняются с квалификацией провайдера.
+
+---
+
+### 5.3 Результирующие Колонки в Composite Publication
+
+**Пример для публикации, присутствующей во всех 5 провайдерах:**
+
+| Column Name | Type | Example Value | Source |
+|-------------|------|---------------|--------|
+| `entity_id` | str | "pub-HASH123" | Unified PK |
+| `doi` | str | "10.1038/nature12345" | Coalesced DOI |
+| `pmid` | str | "12345678" | PubMed ID |
+| **ChEMBL** |||
+| `chembl.publication.publication_type` | str | "PUBLICATION" | Raw ChEMBL enum |
+| **CrossRef** |||
+| `crossref.publication.type` | str | "journal-article" | Raw CrossRef type |
+| `crossref.publication.publication_type` | str | "journal-article" | Raw (duplicated) |
+| `crossref.publication.publication_type_unified` | str | "Journal Article" | Level 3 |
+| `crossref.publication.publication_subclass` | str | "Original Experimental Data" | Level 2 |
+| `crossref.publication.publication_class` | str | "EXP" | Level 1 |
+| **OpenAlex** |||
+| `openalex.publication.type` | str | "article" | Raw OpenAlex type |
+| `openalex.publication.publication_type` | str | "article" | Raw (duplicated) |
+| `openalex.publication.publication_type_unified` | str | "Journal Article" | Level 3 |
+| `openalex.publication.publication_subclass` | str | "Original Experimental Data" | Level 2 |
+| `openalex.publication.publication_class` | str | "EXP" | Level 1 |
+| **PubMed** |||
+| `pubmed.publication.publication_type` | str | "Journal Article\|Clinical Trial" | Raw (pipe-joined) |
+| `pubmed.publication.publication_type_unified` | str | "Clinical Trial" | Level 3 (most specific) |
+| `pubmed.publication.publication_subclass` | str | "Original Experimental Data" | Level 2 |
+| `pubmed.publication.publication_class` | str | "EXP" | Level 1 |
+| `pubmed.publication.publication_type_list` | str? | NULL | Deprecated field |
+| `pubmed.publication.publication_types` | str? | NULL | Deprecated field |
+| **SemanticScholar** |||
+| `semanticscholar.publication.publication_type` | str | "JournalArticle" | Raw (first item) |
+| `semanticscholar.publication.publication_type_unified` | str | "Journal Article" | Level 3 |
+| `semanticscholar.publication.publication_subclass` | str | "Original Experimental Data" | Level 2 |
+| `semanticscholar.publication.publication_class` | str | "EXP" | Level 1 |
+| `semanticscholar.publication.publication_types` | str | '["JournalArticle"]' | JSON list |
+
+**Итого:** ~20 publication_type-related колонок (с provider qualification)
+
+---
+
+### 5.4 Column Ordering
+
+**Файл:** `configs/pipelines/composite/publication.yaml:406-409`
+
+```yaml
+- name: doc_type
+  fields:
+    - publication_status
+    - publication_type
+    - publication_type_list
+    - publication_types
+```
+
+**Интерпретация:**
+
+Колонки группируются по `base_name` из field_groups, но фактически в DataFrame будут provider-qualified:
+- `chembl.publication.publication_type`
+- `pubmed.publication.publication_type`
+- `crossref.publication.type`
+- `openalex.publication.type`
+- `pubmed.publication.publication_type_list`
+- `pubmed.publication.publication_types`
+- `semanticscholar.publication.publication_types`
+
+**Дополнительно:**
+- `*.publication.publication_type_unified`
+- `*.publication.publication_subclass`
+- `*.publication.publication_class`
+
+Эти колонки НЕ перечислены в column_groups, но сохраняются в DataFrame.
+
+---
+
+## Часть 6: Поток Данных (End-to-End)
+
+### 6.1 Диаграмма
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                       BRONZE LAYER (Provider APIs)                     │
+├──────────────────────────────────────────────────────────────────────┤
+│ CrossRef:         type: "journal-article"                             │
+│ OpenAlex:         type: "article"                                     │
+│ PubMed:           PublicationType: ["Journal Article", "Clinical..."] │
+│ SemanticScholar:  publicationTypes: ["JournalArticle", "Review"]     │
+│ ChEMBL:           doc_type: "PUBLICATION"                             │
+└──────────────────────────────────────────────────────────────────────┘
+                               ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│                    TRANSFORMATION (Silver Transformer)                 │
+├──────────────────────────────────────────────────────────────────────┤
+│ 1. Extract raw type(s) from Bronze record                             │
+│ 2. Call _classify_publication_type(provider, raw_type/raw_types_list) │
+│ 3. Lookup in provider-specific table (case-insensitive)              │
+│ 4. Return PublicationTypeEntry:                                      │
+│    - unified_type (Level 3)                                           │
+│    - subclass (Level 2)                                               │
+│    - class_code (Level 1)                                             │
+│ 5. Multi-value providers: select most specific (highest row number)  │
+└──────────────────────────────────────────────────────────────────────┘
+                               ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│                       SILVER LAYER (Per-Provider)                      │
+├──────────────────────────────────────────────────────────────────────┤
+│ CrossRef Silver:                                                      │
+│   - publication_type: "journal-article" (raw)                         │
+│   - publication_type_unified: "Journal Article"                       │
+│   - publication_subclass: "Original Experimental Data"                │
+│   - publication_class: "EXP"                                          │
+│                                                                       │
+│ OpenAlex Silver:                                                      │
+│   - publication_type: "article" (raw)                                 │
+│   - publication_type_unified: "Journal Article"                       │
+│   - publication_subclass: "Original Experimental Data"                │
+│   - publication_class: "EXP"                                          │
+│                                                                       │
+│ PubMed Silver:                                                        │
+│   - publication_type: "Journal Article|Clinical Trial" (joined)       │
+│   - publication_type_unified: "Clinical Trial" (most specific)        │
+│   - publication_subclass: "Original Experimental Data"                │
+│   - publication_class: "EXP"                                          │
+│                                                                       │
+│ SemanticScholar Silver:                                               │
+│   - publication_type: "JournalArticle" (first item)                   │
+│   - publication_type_unified: "Review" (most specific)                │
+│   - publication_subclass: "Reviews & Syntheses"                       │
+│   - publication_class: "REV"                                          │
+│   - publication_types: '["JournalArticle", "Review"]' (JSON)          │
+└──────────────────────────────────────────────────────────────────────┘
+                               ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│                   COMPOSITE PIPELINE (Merge Service)                   │
+├──────────────────────────────────────────────────────────────────────┤
+│ 1. Load seed (e.g., ChEMBL) and enrichers (CrossRef, OpenAlex, etc.)  │
+│ 2. Apply qualified column renaming:                                  │
+│    - crossref.publication.publication_type                            │
+│    - openalex.publication.publication_type                            │
+│    - pubmed.publication.publication_type                              │
+│    - semanticscholar.publication.publication_type                     │
+│    - crossref.publication.publication_type_unified                    │
+│    - openalex.publication.publication_type_unified                    │
+│    - pubmed.publication.publication_type_unified                      │
+│    - semanticscholar.publication.publication_type_unified             │
+│    - (same for publication_subclass, publication_class)               │
+│ 3. Join on doi/pmid                                                   │
+│ 4. preserve_all_sources=true → NO coalescing                          │
+│ 5. Apply field_groups ordering (semantic grouping)                   │
+└──────────────────────────────────────────────────────────────────────┘
+                               ↓
+┌──────────────────────────────────────────────────────────────────────┐
+│                    COMPOSITE PUBLICATION (Gold Layer)                  │
+├──────────────────────────────────────────────────────────────────────┤
+│ Result DataFrame:                                                     │
+│   - entity_id: "pub-HASH123"                                          │
+│   - doi: "10.1038/nature12345"                                        │
+│   - pmid: "12345678"                                                  │
+│                                                                       │
+│   # ChEMBL (seed)                                                     │
+│   - chembl.publication.publication_type: "PUBLICATION"                │
+│                                                                       │
+│   # CrossRef (enricher)                                               │
+│   - crossref.publication.type: "journal-article"                      │
+│   - crossref.publication.publication_type: "journal-article"          │
+│   - crossref.publication.publication_type_unified: "Journal Article"  │
+│   - crossref.publication.publication_subclass: "Original..."          │
+│   - crossref.publication.publication_class: "EXP"                     │
+│                                                                       │
+│   # OpenAlex (enricher)                                               │
+│   - openalex.publication.type: "article"                              │
+│   - openalex.publication.publication_type: "article"                  │
+│   - openalex.publication.publication_type_unified: "Journal Article"  │
+│   - openalex.publication.publication_subclass: "Original..."          │
+│   - openalex.publication.publication_class: "EXP"                     │
+│                                                                       │
+│   # PubMed (enricher)                                                 │
+│   - pubmed.publication.publication_type: "Journal Article|Clinical..."│
+│   - pubmed.publication.publication_type_unified: "Clinical Trial"     │
+│   - pubmed.publication.publication_subclass: "Original..."            │
+│   - pubmed.publication.publication_class: "EXP"                       │
+│                                                                       │
+│   # SemanticScholar (enricher)                                        │
+│   - semanticscholar.publication.publication_type: "JournalArticle"    │
+│   - semanticscholar.publication.publication_type_unified: "Review"    │
+│   - semanticscholar.publication.publication_subclass: "Reviews..."    │
+│   - semanticscholar.publication.publication_class: "REV"              │
+│   - semanticscholar.publication.publication_types: '["Journal..."]'   │
+│                                                                       │
+│   # ~20 publication_type-related columns total                        │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Часть 7: Ключевые Выводы
+
+### 7.1 Нормализация Происходит в 2 Этапа
+
+1. **Silver Layer** — провайдер-специфичные raw типы классифицируются через unified 3-level hierarchy (214 типов)
+2. **Composite Layer** — все provider-qualified поля сохраняются (preserve_all_sources=true)
+
+---
+
+### 7.2 Unified Classification (214 Types)
+
+- **Источник:** `domain/mapping/publication_type_classification.py`
+- **Провайдеры:** OpenAlex, CrossRef, PubMed, SemanticScholar (ChEMBL НЕ участвует)
+- **Структура:** 3 уровня (class_code → subclass → unified_type)
+- **Алгоритм:** Multi-value провайдеры (PubMed, S2) выбирают most specific type (highest row number)
+
+---
+
+### 7.3 Silver Layer Output (4 поля)
+
+Каждый трансформер создает:
+1. `publication_type` — raw provider-specific type (backward compatibility)
+2. `publication_type_unified` — Level 3 unified type
+3. `publication_subclass` — Level 2 subclass
+4. `publication_class` — Level 1 class code (EXP/REV/PEER)
+
+---
+
+### 7.4 Composite Layer Preservation
+
+С `preserve_all_sources: true`:
+- **НЕТ автоматического coalescing** полей
+- **ВСЕ поля сохраняются** с provider qualification
+- Результат: ~20 publication_type-related колонок для записи с 5 провайдерами
+
+---
+
+### 7.5 ChEMBL Отличие
+
+ChEMBL:
+- Использует ограниченный enum (4 значения): `PUBLICATION`, `PATENT`, `DATASET`, `BOOK`
+- **НЕ участвует** в unified classification с 214 типами
+- `doc_type` → `publication_type` mapping существует в `publication_fields.py`, но это field name mapping, не value classification
+
+---
+
+### 7.6 Field Naming Inconsistencies
+
+**Внутри провайдеров (Bronze → Silver):**
+- CrossRef: `type` (Bronze) → `type` + `publication_type` (Silver, duplicated)
+- OpenAlex: `type` (Bronze) → `type` + `publication_type` (Silver, duplicated)
+- PubMed: `PublicationType` (Bronze XML) → `publication_type` (Silver, joined with `|`)
+- SemanticScholar: `publicationTypes` (Bronze) → `publication_type` + `publication_types` (Silver, resolved + JSON)
+
+**В Composite:**
+- `crossref.publication.type` vs `crossref.publication.publication_type` (оба содержат одинаковое значение)
+- `openalex.publication.type` vs `openalex.publication.publication_type` (оба содержат одинаковое значение)
+
+**Причина:** field_groups configuration сохраняет оба имени для backward compatibility.
+
+---
+
+## Часть 8: Примеры Реальных Данных
+
+### 8.1 Пример: Journal Article
+
+**Bronze (OpenAlex):**
+```json
+{
+  "id": "https://openalex.org/W2741809807",
+  "type": "article",
+  "title": "Mechanisms of autophagy"
+}
+```
+
+**Silver (OpenAlex):**
+```python
+{
+    "openalex_id": "W2741809807",
+    "publication_type": "article",
+    "publication_type_unified": "Journal Article",
+    "publication_subclass": "Original Experimental Data",
+    "publication_class": "EXP",
+}
+```
+
+**Composite:**
+```
+openalex.publication.type: "article"
+openalex.publication.publication_type: "article"
+openalex.publication.publication_type_unified: "Journal Article"
+openalex.publication.publication_subclass: "Original Experimental Data"
+openalex.publication.publication_class: "EXP"
+```
+
+---
+
+### 8.2 Пример: Meta-Analysis (PubMed Multi-Value)
+
+**Bronze (PubMed XML):**
+```xml
+<PublicationTypeList>
+  <PublicationType UI="D016428">Journal Article</PublicationType>
+  <PublicationType UI="D017418">Meta-Analysis</PublicationType>
+  <PublicationType UI="D016454">Review</PublicationType>
+</PublicationTypeList>
+```
+
+**Silver (PubMed):**
+```python
+{
+    "pmid": "12345678",
+    "publication_type": "Journal Article|Meta-Analysis|Review",  # Joined
+    "publication_type_unified": "Meta-Analysis",  # Most specific (row 41)
+    "publication_subclass": "Reviews & Syntheses",
+    "publication_class": "REV",
+}
+```
+
+**Алгоритм:**
+- "Journal Article" → row 2 (specificity=2)
+- "Meta-Analysis" → row 41 (specificity=41) ← **Winner**
+- "Review" → row 39 (specificity=39)
+
+**Composite:**
+```
+pubmed.publication.publication_type: "Journal Article|Meta-Analysis|Review"
+pubmed.publication.publication_type_unified: "Meta-Analysis"
+pubmed.publication.publication_subclass: "Reviews & Syntheses"
+pubmed.publication.publication_class: "REV"
+```
+
+---
+
+### 8.3 Пример: Conference Paper (Mixed Providers)
+
+**Bronze:**
+- CrossRef: `"type": "proceedings-article"`
+- OpenAlex: `"type": "article"` (secondary mapping with asterisk)
+
+**Silver (CrossRef):**
+```python
+{
+    "doi": "10.1109/CVPR.2020.00123",
+    "publication_type": "proceedings-article",
+    "publication_type_unified": "Conference Paper",
+    "publication_subclass": "Original Experimental Data",
+    "publication_class": "EXP",
+}
+```
+
+**Silver (OpenAlex):**
+```python
+{
+    "openalex_id": "W3012345678",
+    "publication_type": "article",
+    "publication_type_unified": "Conference Paper",  # Secondary mapping
+    "publication_subclass": "Original Experimental Data",
+    "publication_class": "EXP",
+}
+```
+
+**Примечание:** OpenAlex `"article"` может мапиться на "Journal Article" (row 2) ИЛИ "Conference Paper" (row 3, secondary with `*`). Classifier выбирает primary mapping (row 2).
+
+---
+
+## Часть 9: Архитектурные Инварианты
+
+### 9.1 Domain Layer Purity
+
+**Файл:** `domain/mapping/publication_type_classification.py`
+
+✅ **Соответствует RULES.md:**
+- Pure Python (no I/O)
+- Lookup tables built at import time (no file reading)
+- Value Objects (PublicationTypeEntry dataclass)
+- Type-safe API (typing.Protocol not needed here, but consistent)
+
+---
+
+### 9.2 Template Method Pattern
+
+**Файл:** `application/pipelines/common/base_publication_transformer.py`
+
+✅ **Соответствует Pattern:**
+- `_transform_impl()` — Template Method (base class)
+- `_extract_business_data()` — Abstract (provider-specific)
+- `_classify_publication_type()` — Reusable helper (base class)
+
+---
+
+### 9.3 Single Responsibility
+
+**Classification module:**
+- ✅ Only classifies types (no transformation)
+- ✅ No I/O (stateless lookup)
+
+**Transformer:**
+- ✅ Orchestrates extraction and classification
+- ✅ Delegates to extractors (REFACTOR-004)
+
+**Composite merger:**
+- ✅ Only merges DataFrames (no classification)
+
+---
+
+## Часть 10: Потенциальные Улучшения
+
+### 10.1 Deduplicate `type` and `publication_type`
+
+**Проблема:** CrossRef и OpenAlex имеют оба поля с одинаковым значением.
+
+**Текущее состояние:**
+```python
+{
+    "publication_type": rec.get("type"),  # Raw
+    # ...
+    "type": rec.get("type"),  # Duplicate via field_groups
+}
+```
+
+**Решение:** Удалить дублирование, оставить только `publication_type` в Silver schemas.
+
+**Impact:** Requires field_groups update and schema validation tests.
+
+---
+
+### 10.2 ChEMBL Integration в Unified Classification
+
+**Проблема:** ChEMBL использует 4-value enum, не участвует в unified 214-type classification.
+
+**Текущее состояние:**
+- ChEMBL: `doc_type` ∈ {PUBLICATION, PATENT, DATASET, BOOK}
+- No `publication_type_unified`, `publication_subclass`, `publication_class`
+
+**Решение:** Add ChEMBL column to `_CLASSIFICATION_TABLE` for 4 types:
+
+```python
+# Row example
+("Journal Article", "Original Experimental Data", "EXP",
+ "article", "journal-article", "Journal Article", "JournalArticle",
+ "PUBLICATION"),  # Add ChEMBL column
+```
+
+**Benefit:** Consistent classification across all 5 providers.
+
+**Effort:** ~2 hours (update table, add tests)
+
+---
+
+### 10.3 Explicit Column Ordering для classification fields
+
+**Проблема:** `publication_type_unified`, `publication_subclass`, `publication_class` не перечислены в `column_groups`.
+
+**Текущее состояние:**
+```yaml
+# configs/pipelines/composite/publication.yaml:406-409
+- name: doc_type
+  fields:
+    - publication_status
+    - publication_type
+    - publication_type_list
+    - publication_types
+    # Missing: publication_type_unified, publication_subclass, publication_class
+```
+
+**Решение:** Add to column_groups for explicit ordering:
+
+```yaml
+- name: doc_type
+  fields:
+    - publication_status
+    - publication_type
+    - publication_type_unified  # Add
+    - publication_subclass      # Add
+    - publication_class         # Add
+    - publication_type_list
+    - publication_types
+```
+
+**Benefit:** Explicit control over column ordering in composite output.
+
+---
+
+### 10.4 Deprecate `publication_type_list` and `publication_types` (PubMed)
+
+**Проблема:** PubMed Silver schema имеет deprecated placeholders:
+- `publication_type_list` — always NULL
+- `publication_types` — always NULL (not to be confused with SemanticScholar's field)
+
+**Текущее состояние:**
+```python
+# pubmed/publication.py schema
+publication_type_list: Series[str] | None = pa.Field(nullable=True, ...)
+publication_types: Series[str] | None = pa.Field(nullable=True, ...)
+```
+
+**Решение:** Remove from schema, update field_groups, update skipped tests analysis.
+
+**Benefit:** Reduce schema complexity, eliminate confusion with SemanticScholar's `publication_types`.
+
+---
+
+### 10.5 PyArrow Schema Missing Fields (RESOLVED - 2026-02-10)
+
+**Проблема (ROOT CAUSE):** Classification fields (`publication_type_unified`, `publication_subclass`, `publication_class`) отсутствовали в PyArrow schemas для публикаций.
+
+**Файл:** `src/bioetl/infrastructure/schemas/silver.py`
+
+**Пострадавшие schemas:**
+- `CHEMBL_PUBLICATION_SCHEMA`
+- `PUBMED_PUBLICATION_SCHEMA`
+- `SEMANTICSCHOLAR_PUBLICATION_SCHEMA`
+- `CROSSREF_PUBLICATION_SCHEMA`
+- `OPENALEX_PUBLICATION_SCHEMA`
+
+**Симптомы:**
+
+1. **Transformers создавали поля:** Все publication transformers вызывали `_classify_publication_type()` и добавляли classification fields в records
+2. **Writer фильтровал поля:** `SilverWriter._prepare_arrow_data()` (line 194) фильтровал records, оставляя только поля из PyArrow schema:
+   ```python
+   schema_fields = set(schema.names)
+   filtered_records = [
+       {k: v for k, v in record.items() if k in schema_fields}
+       for record in records
+   ]
+   ```
+3. **Result:** Classification fields НЕ попадали в Silver Delta tables и отсутствовали в Composite output
+
+**Доказательства:**
+- Pandera schemas (`domain/schemas/common/publication_base.py`) содержали поля (validation OK)
+- Entity dataclasses (`domain/entities/publication_base.py`) содержали поля (types OK)
+- PyArrow schemas НЕ содержали поля (write filtering!)
+
+**Решение (2026-02-10):**
+
+Добавлены 3 classification fields во все 5 PyArrow schemas после `publication_type` field:
+
+```python
+pa.field("publication_type", pa.string()),  # Raw provider type
+pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
+pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
+pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
+```
+
+**Affected Lines:**
+- CHEMBL_PUBLICATION_SCHEMA: lines 52-56
+- PUBMED_PUBLICATION_SCHEMA: lines 347-351
+- SEMANTICSCHOLAR_PUBLICATION_SCHEMA: lines 777-781
+- CROSSREF_PUBLICATION_SCHEMA: lines 839-843
+- OPENALEX_PUBLICATION_SCHEMA: lines 926-930
+
+**Impact:**
+
+✅ **Provider pipelines:** Classification fields теперь записываются в Silver Delta tables
+✅ **Composite pipeline:** `write_silver_merged()` динамически выводит schema из records → classification fields автоматически включаются
+✅ **Tests:** Добавлен `TestPublicationSchemaClassificationFields` в `tests/unit/infrastructure/schemas/test_silver.py`
+
+**Verification:**
+
+После перезапуска pipelines:
+```bash
+# Check Silver output
+python -m pytest tests/unit/infrastructure/schemas/test_silver.py::TestPublicationSchemaClassificationFields -v
+
+# Verify Delta tables contain new fields
+# data/output/silver/{provider}/publication/*.parquet
+```
+
+**Status:** ✅ RESOLVED
+
+---
+
+## Заключение
+
+**Нормализация publication_type полей в BioETL:**
+
+1. ✅ **Unified 3-level classification** (214 types) применяется в Silver Layer для OpenAlex, CrossRef, PubMed, SemanticScholar
+2. ✅ **Multi-value strategy** (PubMed, S2): выбор most specific type (highest row number)
+3. ✅ **Preserve all sources** в Composite Layer: все provider-qualified колонки сохраняются
+4. ✅ **PyArrow schemas updated** (2026-02-10): classification fields теперь присутствуют в Silver output
+5. ⚠️ **ChEMBL не участвует** в unified classification (4-value enum)
+6. ⚠️ **Дублирование полей** (`type` vs `publication_type` для CrossRef/OpenAlex)
+7. ⚠️ **Classification fields не перечислены** в column_groups (неявный порядок)
+
+**Метрики:**
+- **214 unified types** (Level 3)
+- **~25 subclasses** (Level 2)
+- **3 class codes** (Level 1: EXP/REV/PEER)
+- **4 провайдера** в unified classification (OpenAlex, CrossRef, PubMed, SemanticScholar)
+- **5 провайдеров total** (+ ChEMBL с отдельным enum)
+- **~20 publication_type columns** в composite output (для записи с 5 провайдерами)
+
+---
+
+**Дата создания:** 2026-02-10
+**Автор:** Claude Code (AI-generated analysis)
+**Статус:** ✅ Complete — ready for review
+
+================================================================================
+File: chembl-validation-matrix.md
+Path: analysis\chembl-validation-matrix.md
+================================================================================
+# ChEMBL Publication — Validation Matrix
+
+> Сравнение: standalone-пайплайн `chembl_publication` vs. **seed** в `composite_publication`.
+
+## 1. DQ-пороги
+
+| Параметр | Standalone | Composite (seed) |
+|----------|-----------|------------------|
+| soft_fail | 0.05 (provider) | 0.10 (composite default) |
+| hard_fail | 0.15 (provider) | 0.30 (composite default) |
+
+## 2. Общий Silver-слой
+
+Оба режима записывают в одну таблицу `silver/chembl/publication` и применяют идентичную валидацию:
+
+- **Pandera-схема**: `ChemblPublicationSchema` (наследует `PublicationBaseSchema`)
+- **DQ-конфиг**: `configs/dq/entities/chembl/publication.yaml`
+- **Provider DQ**: `configs/dq/providers/chembl.yaml`
+
+## 3. Матрица валидации полей
+
+Обозначения: **S** — Silver (Pandera + DQ), **G** — Gold-контракт, **F** — Gold-фильтр.
+`NN` = not null, `N` = nullable. Silver-валидация идентична в обоих режимах.
+
+### Первичный ключ и идентификаторы
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `document_chembl_id` | **S**: str/NN, pattern `^CHEMBL\d+$` (Pandera + DQ) · **G**: нет отдельного Gold-контракта · **F**: required | **S**: идентично · **G**: ожидается как `chembl.publication.document_chembl_id`, strict=False — нет поле-специфичной проверки · **F**: required (composite `required_fields`) |
+| `doi` | **S**: str/N, pattern `^10\.\d{4,}/\S+$` (Pandera + DQ) · **G**: — · **F**: не required | **S**: идентично · **G**: qualified имя, strict=False · **F**: не required |
+| `pmid` | **S**: str/N, pattern `^[1-9]\d*$` (Pandera); DQ: range 1–10B · **G**: — · **F**: не required | **S**: идентично · **G**: strict=False · **F**: не required |
+| `pmc_id` | **S**: str/N, pattern `^PMC\d+$` (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `src_id` | **S**: Int64/N · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Основной контент
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `title` | **S**: str/N; DQ: max_length 2000, not_null (warn), non-empty pattern (warn); title_not_empty check (Pandera) · **G**: — · **F**: required | **S**: идентично · **G**: strict=False · **F**: required (composite `required_fields` + `gold_filters`) |
+| `abstract` | **S**: str/N (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `authors` | **S**: str/N (base, JSON array) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `affiliation_list` | **S**: str/N (base, JSON array) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `author_orcids` | **S**: str/N (base); ORCID format check (Pandera) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+
+### Метаданные публикации
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `publication_type` | **S**: str/N, isin `{PUBLICATION, PATENT, DATASET, BOOK}` (Pandera) · DQ: enum PUBLICATION/BOOK/DATASET/PATENT · **G**: — · **F**: column filter `doc_type=[PUBLICATION]` | **S**: идентично · **G**: strict=False · **F**: нет column filter для type |
+| `publication_type_unified` | **S**: str/N (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_subclass` | **S**: str/N (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_class` | **S**: str/N, isin `[EXP, REV, PEER]` (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_year` | **S**: Int64/N, 1950–2050 (Pandera); DQ: range 1500–2100 · **G**: — · **F**: range 1950–2050 | **S**: идентично · **G**: strict=False · **F**: нет range filter в composite |
+| `publication_date` | **S**: str/N, pattern `^\d{4}-\d{2}-\d{2}$` (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `language` | **S**: str/N, length 2–3 (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `journal` | **S**: str/N (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Пагинация и библиография
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `volume` | **S**: str/N · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issue` | **S**: str/N · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_first` | **S**: str/N (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_last` | **S**: str/N (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Метрики
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `citations_received` | **S**: Int64/N, ≥0 (base); DQ: range ≥0 + warn 0–10M · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `citations_made` | **S**: Int64/N, ≥0 (base); DQ: range ≥0 · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Open Access
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `is_oa` | **S**: bool/N (base) · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### ChEMBL-специфичные поля
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `chembl_release` | **S**: str/N · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `creation_date` | **S**: str/N, ISO date pattern `^\d{4}-\d{2}-\d{2}$` · **G**: — · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Системные поля
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `_source` | **S**: str/NN, eq `"chembl"` · **G**: — · **F**: — | **S**: идентично · **G**: str/N (composite schema) · **F**: — |
+| `_lookup_method` | **S**: str/NN, isin `[direct, doi, pmid, title_fallback, title_only, unknown]` · **G**: — · **F**: — | **S**: идентично · **G**: str/N (composite ослаблено) · **F**: — |
+| `_original_id` | **S**: str/N · **G**: — · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+| `entity_id` | **S**: str/NN (base) · **G**: — · **F**: — | **S**: идентично · **G**: str/NN (composite required) · **F**: — |
+| `content_hash` | **S**: str/NN, 64-hex (base) · **G**: — · **F**: — | **S**: идентично · **G**: str/NN (composite required) · **F**: — |
+| `_dq_warn` | **S**: bool/NN (base) · **G**: — · **F**: — | **S**: идентично · **G**: bool/NN · **F**: — |
+| `_dq_error` | **S**: bool/NN (base) · **G**: — · **F**: — | **S**: идентично · **G**: bool/NN · **F**: — |
+| `_run_id` | **S**: str/NN (base) · **G**: — · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_run_type` | **S**: str/NN, isin `[incremental, backfill, rebuild]` (base) · **G**: — · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_ingestion_ts` | **S**: str/NN, ISO 8601 (base) · **G**: — · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_index` | **S**: int/NN, ≥0 (base) · **G**: — · **F**: — | **S**: идентично · **G**: int/NN · **F**: — |
+
+### Composite-only поля (отсутствуют в standalone)
+
+| Поле | Standalone | Composite (seed) |
+|------|-----------|------------------|
+| `_composite_run_id` | — | str/NN (добавляется MergeService) |
+| `_source_providers` | — | str/NN, JSON list |
+| `_enrichment_status` | — | str/NN, JSON dict |
+| `_lineage_created_at` | — | str/NN, ISO timestamp |
+
+## 4. Cross-field валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `publication_identifiable` | `document_chembl_id` AND `title` — all_present (error) | Нет специфичного cross-field; `required_fields: [document_chembl_id, title]` в DQ-конфиге |
+| `has_cross_reference` | `pmid` OR `doi` — any_present (warn) | Не применяется на уровне composite |
+
+## 5. Conditional валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `publication_requires_title` | Если `doc_type == PUBLICATION` → title not null (error) | Не применяется (нет conditional в composite DQ) |
+
+## 6. Gold-фильтры
+
+| Параметр | Standalone | Composite |
+|----------|-----------|-----------|
+| required_fields | `document_chembl_id`, `doc_type`, `title` | `title` |
+| column filter | `doc_type: [PUBLICATION]` | — |
+| range filter | `publication_year: 1950–2050` | — |
+
+## 7. Ключевые различия
+
+1. **Нет отдельного Gold-контракта для ChEMBL**: standalone-пайплайн не имеет `ChEMBLPublicationGoldSchema` — валидация Gold-слоя опирается только на filter rules.
+2. **Composite Gold — strict=False**: `CompositePublicationGoldSchema` валидирует только системные/lineage-поля; бизнес-поля не проверяются на уровне Gold.
+3. **Ослабленные фильтры в composite**: standalone фильтрует по `doc_type=[PUBLICATION]` и `publication_year: 1950–2050`; composite требует только `title`.
+4. **Повышенные DQ-пороги**: composite (soft=0.10, hard=0.30) мягче, чем standalone ChEMBL (soft=0.05, hard=0.15).
+5. **Qualified column names**: в composite все ChEMBL-поля получают префикс `chembl.publication.*`.
+6. **Lineage-поля**: composite добавляет 4 поля lineage (`_composite_run_id`, `_source_providers`, `_enrichment_status`, `_lineage_created_at`).
+
+================================================================================
+File: crossref-validation-matrix.md
+Path: analysis\crossref-validation-matrix.md
+================================================================================
+# CrossRef Publication — Validation Matrix
+
+> Сравнение: standalone-пайплайн `crossref_publication` vs. **enricher** в `composite_publication`.
+
+## 1. DQ-пороги
+
+| Параметр | Standalone | Composite (enricher) |
+|----------|-----------|----------------------|
+| soft_fail | 0.10 (provider) | 0.10 (composite default) |
+| hard_fail | 0.30 (provider) | 0.30 (composite default) |
+
+> Пороги совпадают — CrossRef provider defaults = composite defaults.
+
+## 2. Общий Silver-слой
+
+Оба режима записывают в одну таблицу `silver/crossref/publication` и применяют идентичную валидацию:
+
+- **Pandera-схема**: `PublicationEnrichedSchema` (наследует `PublicationBaseSchema`)
+- **DQ-конфиг**: `configs/dq/entities/crossref/publication.yaml`
+- **Provider DQ**: `configs/dq/providers/crossref.yaml`
+
+## 3. Матрица валидации полей
+
+Обозначения: **S** — Silver (Pandera + DQ), **G** — Gold-контракт, **F** — Gold-фильтр.
+`NN` = not null, `N` = nullable.
+
+### Первичный ключ и идентификаторы
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `doi` | **S**: str/NN, pattern `^10\.\d{4,}/\S+$` (Pandera + DQ, not null) · **G**: str/NN, DOI pattern (strict) · **F**: required | **S**: идентично · **G**: qualified `crossref.publication.doi`, strict=False — нет поле-проверки · **F**: не required отдельно |
+| `pmid` | **S**: str/N, pattern `^[1-9]\d*$` (base) · **G**: отсутствует (CrossRef не предоставляет pmid) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pmc_id` | **S**: str/N, pattern `^PMC\d+$` (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `alternative_id` | **S**: object/N · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Основной контент
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `title` | **S**: str/N; DQ: max_length 2000, not_null (warn), non-empty (warn); title_not_empty (Pandera) · **G**: str/N (strict) · **F**: required | **S**: идентично · **G**: strict=False · **F**: required (composite `gold_filters`) |
+| `abstract` | **S**: str/N (base) · **G**: отсутствует (нет в CrossRef Gold) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `authors` | **S**: str/N (base, JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `affiliation_list` | **S**: str/N (base, JSON) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `author_orcids` | **S**: str/N (base); ORCID format check · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `author_details` | **S**: str/N (JSON array of author objects) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `references` | **S**: str/N (JSON array of cited refs) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+
+### Метаданные публикации
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `publication_type` | **S**: str/N · DQ: enum `[journal-article, book-chapter, proceedings-article, posted-content, book, report, dataset, standard]` · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_type_unified` | **S**: str/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_subclass` | **S**: str/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_class` | **S**: str/N, isin `[EXP, REV, PEER]` (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_year` | **S**: Int64/N, 1950–2050 (Pandera); DQ: range 1500–2100 · **G**: float/N, 1500–2100, coerce (strict) · **F**: range 1950–2050 | **S**: идентично · **G**: strict=False · **F**: нет range filter |
+| `publication_date` | **S**: str/N, pattern `^\d{4}-\d{2}-\d{2}$` (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `published` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `published_print` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `published_online` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `language` | **S**: str/N, length 2–3 (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Журнал и ISSN
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `journal` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `journal_name_short` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publisher` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issn` | **S**: str/N, ISSN pattern `^\d{4}-\d{3}[\dX]$` · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issn_list` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issn_print` | **S**: str/N, ISSN pattern · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issn_electronic` | **S**: str/N, ISSN pattern · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Пагинация
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `volume` | **S**: отсутствует в schema (base `page_first`/`page_last` only) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issue` | **S**: аналогично · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_first` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_last` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Метрики
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `citations_received` | **S**: Int64/N, ≥0 (base); DQ: range ≥0, warn 0–10M · **G**: float/N, ≥0, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `citations_made` | **S**: Int64/N, ≥0 (base); DQ: range ≥0 · **G**: float/N, ≥0, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Open Access и лицензии
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `is_oa` | **S**: bool/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `license_url` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `subject_keywords` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Content Domain (CrossRef-специфичные)
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `content_domain_domains` | **S**: object/N · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `content_domain_crossmark_restriction` | **S**: bool/N, coerce · **G**: bool/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Системные поля
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `_source` | **S**: str/NN, eq `"crossref"` · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/N (composite ослаблено) · **F**: — |
+| `_lookup_method` | **S**: str/NN, isin LOOKUP_METHODS · **G**: str/NN, isin LOOKUP_METHODS (strict) · **F**: — | **S**: идентично · **G**: str/N (composite ослаблено, нет isin) · **F**: — |
+| `_original_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+| `entity_id` | **S**: str/NN · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `content_hash` | **S**: str/NN, 64-hex · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_dq_warn` | **S**: bool/NN · **G**: bool/NN (strict) · **F**: — | **S**: идентично · **G**: bool/NN · **F**: — |
+| `_dq_error` | **S**: bool/NN · **G**: bool/NN (strict) · **F**: — | **S**: идентично · **G**: bool/NN · **F**: — |
+| `_run_id` | **S**: str/NN · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_run_type` | **S**: str/NN, isin runs · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_ingestion_ts` | **S**: str/NN, ISO 8601 · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_index` | **S**: int/NN, ≥0 · **G**: int/NN (strict) · **F**: — | **S**: идентично · **G**: int/NN · **F**: — |
+| `_source_batch_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+
+### Composite-only поля
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `_composite_run_id` | — | str/NN (MergeService) |
+| `_source_providers` | — | str/NN, JSON list |
+| `_enrichment_status` | — | str/NN, JSON dict |
+| `_lineage_created_at` | — | str/NN, ISO timestamp |
+
+## 4. Cross-field валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `publication_identifiable` | `doi` AND `title` — all_present (error) | Не применяется на composite level |
+
+## 5. Conditional валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `article_requires_title` | Если `type` in `[journal-article, proceedings-article]` → title not null (error) | Не применяется на composite level |
+
+## 6. Gold-фильтры
+
+| Параметр | Standalone | Composite |
+|----------|-----------|-----------|
+| required_fields | `doi`, `title` | `title` |
+| column filter | — | — |
+| range filter | `publication_year: 1950–2050` | — |
+
+## 7. Ключевые различия
+
+1. **Strict vs. Loose Gold**: standalone использует `CrossRefPublicationGoldSchema` (strict=True, ~40 полей) — каждое поле типизировано. Composite Gold (strict=False) проверяет только системные поля.
+2. **doi required в Gold**: standalone Gold требует `doi` not null с DOI-паттерном. В composite Gold нет per-field проверки doi.
+3. **Filter relaxation**: standalone требует `doi` + `title` + year range. Composite требует только `title`.
+4. **Conditional validation coverage**: standalone проверяет, что articles/proceedings имеют title. В composite этот conditional не применяется.
+5. **DQ-пороги**: совпадают (soft=0.10, hard=0.30 — CrossRef provider = composite default).
+6. **Qualified column names**: в composite CrossRef-поля получают префикс `crossref.publication.*`.
+7. **Composite field_validations**: composite добавляет валидацию JSON-array полей (`author_orcids`, `author_details`, `references`, `affiliation_list`) через `field_validations` в конфиге composite.
+8. **Lineage-поля**: composite добавляет 4 поля lineage, отсутствующие в standalone.
+
+================================================================================
+File: openalex-validation-matrix.md
+Path: analysis\openalex-validation-matrix.md
+================================================================================
+# OpenAlex Publication — Validation Matrix
+
+> Сравнение: standalone-пайплайн `openalex_publication` vs. **enricher** в `composite_publication`.
+
+## 1. DQ-пороги
+
+| Параметр | Standalone | Composite (enricher) |
+|----------|-----------|----------------------|
+| soft_fail | 0.08 (provider) | 0.10 (composite default) |
+| hard_fail | 0.25 (provider) | 0.30 (composite default) |
+
+> Composite пороги мягче, чем standalone OpenAlex.
+
+## 2. Общий Silver-слой
+
+Оба режима записывают в одну таблицу `silver/openalex/publication` и применяют идентичную валидацию:
+
+- **Pandera-схема**: `OpenAlexPublicationSchema` (наследует `PublicationBaseSchema`)
+- **DQ-конфиг**: `configs/dq/entities/openalex/publication.yaml`
+- **Provider DQ**: `configs/dq/providers/openalex.yaml`
+
+## 3. Матрица валидации полей
+
+Обозначения: **S** — Silver (Pandera + DQ), **G** — Gold-контракт, **F** — Gold-фильтр.
+
+### Первичный ключ и идентификаторы
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `openalex_id` | **S**: str/NN, pattern `^W\d+$` (Pandera + DQ) · **G**: str/NN (strict) · **F**: required | **S**: идентично · **G**: strict=False — нет поле-проверки · **F**: не required |
+| `doi` | **S**: str/N, DOI pattern `^10\.\d{4,}/\S+$` (Pandera + DQ) · **G**: str/N, DOI pattern (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pmid` | **S**: str/N, pattern `^[1-9]\d*$` (base); DQ: range 1–10B · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pmc_id` | **S**: str/N, pattern `^PMC\d+$` (base) · **G**: отсутствует в Gold · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `mag_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: string/N · **F**: — |
+
+### Основной контент
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `title` | **S**: str/N; DQ: max_length 2000, not_null (warn), non-empty (warn); title_not_empty (Pandera) · **G**: str/N (strict) · **F**: required | **S**: идентично · **G**: strict=False · **F**: required (composite `gold_filters`) |
+| `abstract` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `authors` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `affiliation_list` | **S**: str/N (base, JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `author_orcids` | **S**: str/N (base); ORCID format check · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `author_openalex_ids` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+
+### Метаданные публикации
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `publication_type` | **S**: str/N; DQ: enum `[article, book-chapter, book, dataset, dissertation, editorial, letter, review, preprint, other]` · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_type_unified` | **S**: str/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_subclass` | **S**: str/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_class` | **S**: str/N, isin `[EXP, REV, PEER]` (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_year` | **S**: Int64/N, 1950–2050 (Pandera); DQ: range 1500–2100 · **G**: float/N, 1500–2100, coerce (strict) · **F**: range 1950–2050 | **S**: идентично · **G**: strict=False · **F**: нет range filter |
+| `publication_date` | **S**: str/N, pattern `^\d{4}-\d{2}-\d{2}$` (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `language` | **S**: str/N, length 2–3 (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Журнал
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `journal` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issn` | **S**: str/N, ISSN pattern `^\d{4}-\d{3}[\dX]$` · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publisher` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `volume` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issue` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Пагинация
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `page_first` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_last` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Метрики
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `citations_received` | **S**: Int64/N, ≥0 (base); DQ: range ≥0, warn 0–10M · **G**: float/N, ≥0, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `citations_made` | **S**: Int64/N, ≥0 (base); DQ: range ≥0 · **G**: float/N, ≥0, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `fwci` | **S**: float/N, ≥0 (Pandera + DQ) · **G**: float/N, ≥0 (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: float/N, min_value=0.0 · **F**: — |
+
+### Качество данных
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `is_retracted` | **S**: bool/NN (Pandera, non-nullable) · **G**: bool/NN, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: boolean/NN · **F**: — |
+
+### Open Access
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `is_oa` | **S**: bool/N (base) · **G**: bool/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `oa_status` | **S**: str/N, isin `[gold, green, hybrid, bronze, closed]` · **G**: str/N, isin OA_STATUS (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Темы и классификация
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `subject_topics` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `primary_topic` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_object/N · **F**: — |
+| `subject_mesh` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `subject_keywords` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Гранты и институции
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `grants` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `institution_ids` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `institution_country_codes` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `ror_ids` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Системные поля
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `_source` | **S**: str/NN, eq `"openalex"` · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/N (composite ослаблено) · **F**: — |
+| `_lookup_method` | **S**: str/NN, isin LOOKUP_METHODS · **G**: str/NN, isin LOOKUP_METHODS (strict) · **F**: — | **S**: идентично · **G**: str/N (composite, нет isin) · **F**: — |
+| `_original_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+| `entity_id` | **S**: str/NN · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `content_hash` | **S**: str/NN, 64-hex · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_dq_warn` / `_dq_error` | **S**: bool/NN · **G**: bool/NN (strict) · **F**: — | **S**: идентично · **G**: bool/NN · **F**: — |
+| `_run_id` | **S**: str/NN · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_run_type` | **S**: str/NN, isin runs · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_ingestion_ts` | **S**: str/NN, ISO 8601 · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_index` | **S**: int/NN, ≥0 · **G**: int/NN · **F**: — | **S**: идентично · **G**: int/NN · **F**: — |
+| `_source_batch_id` | **S**: str/N · **G**: str/N · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+
+### Composite-only поля
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `_composite_run_id` | — | str/NN (MergeService) |
+| `_source_providers` | — | str/NN, JSON list |
+| `_enrichment_status` | — | str/NN, JSON dict |
+| `_lineage_created_at` | — | str/NN, ISO timestamp |
+
+## 4. Cross-field валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `publication_identifiable` | `openalex_id` AND `title` — all_present (error) | Не применяется на composite level |
+
+## 5. Conditional валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `article_requires_title` | Если `type` in `[article, review]` → title not null (error) | Не применяется на composite level |
+
+## 6. Gold-фильтры
+
+| Параметр | Standalone | Composite |
+|----------|-----------|-----------|
+| required_fields | `openalex_id`, `title` | `title` |
+| column filter | — | — |
+| range filter | `publication_year: 1950–2050` | — |
+
+## 7. Ключевые различия
+
+1. **Strict vs. Loose Gold**: standalone `OpenAlexPublicationGoldSchema` (strict=True, ~45 полей) проверяет каждое поле. Composite Gold (strict=False) — только системные.
+2. **openalex_id required**: standalone Gold и Filter требуют `openalex_id`. В composite — не required.
+3. **Filter relaxation**: standalone требует `openalex_id` + `title` + year range. Composite — только `title`.
+4. **DQ-пороги мягче в composite**: standalone (soft=0.08, hard=0.25) → composite (soft=0.10, hard=0.30).
+5. **Composite field_validations**: composite добавляет типизацию JSON-полей (`subject_topics`, `primary_topic`, `grants`, `institution_ids`, `institution_country_codes`, `author_orcids`, `author_openalex_ids`, `affiliation_list`), а также `is_retracted: boolean/NN` и `fwci: float/N, ≥0`.
+6. **Qualified column names**: в composite OpenAlex-поля получают префикс `openalex.publication.*`.
+7. **Lineage-поля**: composite добавляет 4 поля lineage.
+8. **Gold type coercion**: standalone Gold использует `coerce=True` для int→float (nullable ints). Composite Gold тоже использует coerce=True, но не проверяет business-поля.
+
+================================================================================
+File: pubmed-validation-matrix.md
+Path: analysis\pubmed-validation-matrix.md
+================================================================================
+# PubMed Publication — Validation Matrix
+
+> Сравнение: standalone-пайплайн `pubmed_publication` vs. **enricher** в `composite_publication`.
+
+## 1. DQ-пороги
+
+| Параметр | Standalone | Composite (enricher) |
+|----------|-----------|----------------------|
+| soft_fail | 0.05 (provider) | 0.15 (composite override для `pubmed_publication`) |
+| hard_fail | 0.15 (provider) | 0.40 (composite override для `pubmed_publication`) |
+
+> Composite существенно мягче — PubMed в composite допускает больше ошибок
+> из-за фильтрации pmid-less записей.
+
+## 2. Общий Silver-слой
+
+Оба режима записывают в одну таблицу `silver/pubmed/publication` и применяют идентичную валидацию:
+
+- **Pandera-схема**: `PubMedPublicationSchema` (наследует `PublicationBaseSchema`)
+- **DQ-конфиг**: `configs/dq/entities/pubmed/publication.yaml`
+- **Provider DQ**: `configs/dq/providers/pubmed.yaml`
+
+## 3. Матрица валидации полей
+
+Обозначения: **S** — Silver (Pandera + DQ), **G** — Gold-контракт, **F** — Gold-фильтр.
+
+### Первичный ключ и идентификаторы
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `pmid` | **S**: str/NN, pattern `^[1-9]\d*$` (Pandera); DQ: range 1–10B, not null · **G**: str/NN (strict) · **F**: required | **S**: идентично · **G**: strict=False — нет поле-проверки · **F**: не required отдельно (composite filter_condition: `pmid IS NOT NULL`) |
+| `doi` | **S**: str/N, DOI pattern (Pandera + DQ) · **G**: str/N, DOI pattern (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pmc_id` | **S**: str/N; pmc_id_format check `^PMC\d+$` (Pandera); DQ: pattern · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pii` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: string/N · **F**: — |
+| `mid` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: string/N · **F**: — |
+| `publisher_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: string/N · **F**: — |
+| `nlm_unique_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Основной контент
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `title` | **S**: str/NN (Pandera override — not null для PubMed); DQ: max_length 2000, not_null (warn), non-empty (warn); title_not_empty (Pandera) · **G**: str/NN (strict) · **F**: required | **S**: идентично · **G**: strict=False · **F**: required (composite `gold_filters`) |
+| `abstract` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `abstract_structured` | **S**: bool/N · **G**: bool/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `authors` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `affiliation_list` | **S**: str/N (base, JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `affiliation_structured` | **S**: str/N (JSON with ROR/GRID) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `authors_with_affiliations` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `author_orcids` | **S**: str/N (base); ORCID format check · **G**: отсутствует в PubMed Gold · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+
+### Журнал и ISSN
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `journal` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `journal_name_short` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `journal_iso_abbrev` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `issn` | **S**: str/N, ISSN pattern `^\d{4}-\d{3}[\dX]$` · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `journal_issn_type` | **S**: str/N; check isin `[Print, Electronic, Linking]` · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `country` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Пагинация
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `page_first` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_last` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_range` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `medline_pgn` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Даты
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `publication_year` | **S**: Int64/N, 1950–2050 (Pandera); DQ: range 1500–2100 · **G**: float/N, 1500–2100, coerce (strict) · **F**: range 1950–2050 | **S**: идентично · **G**: strict=False · **F**: нет range filter |
+| `publication_date` | **S**: str/N, pattern `^\d{4}-\d{2}-\d{2}$` (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pub_month` | **S**: Int64/N; check range 1–12 · **G**: float/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pub_day` | **S**: Int64/N; check range 1–31 · **G**: float/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `date_completed` | **S**: datetime/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `date_revised` | **S**: datetime/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Метаданные публикации
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `publication_type` | **S**: str/N (base) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pub_type` (DQ only) | DQ: enum `[Journal Article, Review, Letter, Editorial, Clinical Trial, Meta-Analysis, Case Reports, Comparative Study, Evaluation Study]` · **G**: — · **F**: — | DQ: идентично · **G**: strict=False · **F**: — |
+| `publication_type_unified` | **S**: str/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_subclass` | **S**: str/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_class` | **S**: str/N, isin `[EXP, REV, PEER]` (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_status` | **S**: str/N; check isin `[ppublish, epublish, aheadofprint]` · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_type_list` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_types` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `language` | **S**: str/N, length 2–3 (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `citation_subset` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Классификация
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `subject_mesh` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `subject_keywords` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `chemicals` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `gene_symbols` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `databanks` | **S**: str/N (JSON) · **G**: object/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+
+### Метрики и счётчики
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `citations_received` | **S**: Int64/N, ≥0 (base); DQ: range ≥0, warn 0–10M · **G**: отсутствует (PubMed не предоставляет) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `citations_made` | **S**: Int64/N, ≥0 (base); DQ: range ≥0 · **G**: float/N, ≥0, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `author_count` | **S**: Int64/N; check ≥0 · **G**: float/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `mesh_heading_count` | **S**: Int64/N; check ≥0 · **G**: float/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `keyword_count` | **S**: Int64/N; check ≥0 · **G**: float/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `grant_count` | **S**: Int64/N; check ≥0 · **G**: float/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `chemical_count` | **S**: Int64/N; check ≥0 · **G**: float/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Open Access
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `is_oa` | **S**: bool/N (base) · **G**: отсутствует (PubMed не предоставляет) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Системные поля
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `_source` | **S**: str/NN, eq `"pubmed"` · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/N (composite ослаблено) · **F**: — |
+| `_lookup_method` | **S**: str/NN, isin LOOKUP_METHODS · **G**: str/NN, isin LOOKUP_METHODS (strict) · **F**: — | **S**: идентично · **G**: str/N (composite, нет isin) · **F**: — |
+| `_original_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+| `entity_id` | **S**: str/NN · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `content_hash` | **S**: str/NN, 64-hex · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_dq_warn` / `_dq_error` | **S**: bool/NN · **G**: bool/NN (strict) · **F**: — | **S**: идентично · **G**: bool/NN · **F**: — |
+| `_run_id` | **S**: str/NN · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_run_type` | **S**: str/NN, isin runs · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_ingestion_ts` | **S**: str/NN, ISO 8601 · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_index` | **S**: int/NN, ≥0 · **G**: int/NN · **F**: — | **S**: идентично · **G**: int/NN · **F**: — |
+| `_source_batch_id` | **S**: str/N · **G**: str/N · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+
+### Composite-only поля
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `_composite_run_id` | — | str/NN (MergeService) |
+| `_source_providers` | — | str/NN, JSON list |
+| `_enrichment_status` | — | str/NN, JSON dict |
+| `_lineage_created_at` | — | str/NN, ISO timestamp |
+
+## 4. Cross-field валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `publication_identifiable` | `pmid` AND `title` — all_present (error) | Не применяется на composite level |
+| `has_identifier` | `pmid` OR `doi` OR `pmc_id` — any_present (error) | Не применяется на composite level |
+
+## 5. Conditional валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| — | Нет conditional валидаций | — |
+
+## 6. Gold-фильтры
+
+| Параметр | Standalone | Composite |
+|----------|-----------|-----------|
+| required_fields | `pmid`, `title` | `title` |
+| column filter | — | — |
+| range filter | `publication_year: 1950–2050` | — |
+| enricher filter_condition | — | `pmid IS NOT NULL` (pre-filter записей seed) |
+
+## 7. Ключевые различия
+
+1. **Существенно разные DQ-пороги**: standalone (soft=0.05, hard=0.15) vs. composite override (soft=0.15, hard=0.40) — composite в 3× мягче по soft и 2.7× по hard. Обоснование: PubMed в composite фильтрует записи без pmid, что приводит к большей доле ошибок среди оставшихся.
+2. **Strict vs. Loose Gold**: standalone `PubMedPublicationGoldSchema` (strict=True, ~60 полей) — каждое поле типизировано с int→float coercion. Composite Gold (strict=False) — только системные поля.
+3. **title non-nullable**: PubMed Silver Schema делает `title` NN (override base). Это одинаково в обоих режимах (Silver shared).
+4. **pmid required**: standalone Gold + Filter требуют `pmid`. Composite — нет (pmid фильтруется на уровне `filter_condition`).
+5. **has_identifier cross-field**: standalone проверяет наличие хотя бы одного ID (pmid/doi/pmc_id). В composite отсутствует.
+6. **Filter relaxation**: standalone требует `pmid` + `title` + year range. Composite — только `title`.
+7. **PubMed-specific counts**: standalone Gold проверяет `author_count`, `mesh_heading_count`, `keyword_count`, `grant_count`, `chemical_count` как float с coerce. Composite Gold не проверяет эти поля.
+8. **Composite field_validations**: composite добавляет json_array-проверку для `chemicals`, `gene_symbols`, `databanks`, `affiliation_list`, `author_orcids` и string-проверку для `pii`, `mid`, `publisher_id`.
+9. **Qualified column names**: в composite PubMed-поля получают префикс `pubmed.publication.*`.
+10. **Lineage-поля**: composite добавляет 4 поля lineage.
+
+================================================================================
+File: semanticscholar-validation-matrix.md
+Path: analysis\semanticscholar-validation-matrix.md
+================================================================================
+# Semantic Scholar Publication — Validation Matrix
+
+> Сравнение: standalone-пайплайн `semanticscholar_publication` vs. **enricher** в `composite_publication`.
+
+## 1. DQ-пороги
+
+| Параметр | Standalone | Composite (enricher) |
+|----------|-----------|----------------------|
+| soft_fail | 0.15 (provider) | 0.20 (composite override для `semanticscholar_publication`) |
+| hard_fail | 0.40 (provider) | 0.50 (composite override для `semanticscholar_publication`) |
+
+> Composite ещё мягче — S2 имеет высокие rate limits и вариативные данные.
+
+## 2. Общий Silver-слой
+
+Оба режима записывают в одну таблицу `silver/semanticscholar/publication` и применяют идентичную валидацию:
+
+- **Pandera-схема**: `SemanticScholarPublicationSchema` (наследует `PublicationBaseSchema`)
+- **DQ-конфиг**: `configs/dq/entities/semanticscholar/publication.yaml`
+- **Provider DQ**: `configs/dq/providers/semanticscholar.yaml`
+
+## 3. Матрица валидации полей
+
+Обозначения: **S** — Silver (Pandera + DQ), **G** — Gold-контракт, **F** — Gold-фильтр.
+
+### Первичный ключ и идентификаторы
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `paper_id` | **S**: str/NN, pattern `^[a-f0-9]{40}$` (Pandera + DQ) · **G**: str/NN (strict) · **F**: required | **S**: идентично · **G**: strict=False — нет поле-проверки · **F**: не required |
+| `doi` | **S**: str/N, DOI pattern (Pandera + DQ) · **G**: str/N, DOI pattern (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `pmid` | **S**: str/N, pattern `^[1-9]\d*$` (base); DQ: range 1–10B · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `corpus_id` | **S**: Int64/N, ≥0 · **G**: float/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `dblp_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: string/N · **F**: — |
+
+### Основной контент
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `title` | **S**: str/N; DQ: max_length 2000, not_null (warn), non-empty (warn); title_not_empty (Pandera) · **G**: str/N (strict) · **F**: required | **S**: идентично · **G**: strict=False · **F**: required (composite `gold_filters`) |
+| `abstract` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `tldr` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `authors` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `affiliation_list` | **S**: str/N (base, JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `author_orcids` | **S**: str/N (base); ORCID format check · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `author_s2_ids` | **S**: str/N (JSON, 40-char hex IDs) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+| `author_h_indices` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+
+### Метаданные публикации
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `publication_type` | **S**: str/N (pipe-delimited) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_types` | **S**: str/N (JSON array) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_type_unified` | **S**: str/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_subclass` | **S**: str/N (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_class` | **S**: str/N, isin `[EXP, REV, PEER]` (base) · **G**: отсутствует · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `publication_year` | **S**: Int64/N, 1950–2050 (Pandera); DQ: range 1500–2100 · **G**: float/N, 1500–2100, coerce (strict) · **F**: range 1950–2050 | **S**: идентично · **G**: strict=False · **F**: нет range filter |
+| `publication_date` | **S**: str/N, pattern `^\d{4}-\d{2}-\d{2}$` (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `language` | **S**: str/N, length 2–3 (base) · **G**: отсутствует (S2 не предоставляет) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Журнал
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `journal` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `volume` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Пагинация
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `page_first` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_last` | **S**: str/N (base) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `page_range` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Метрики
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `citations_received` | **S**: Int64/N, ≥0 (base); DQ: range ≥0, warn 0–10M · **G**: float/N, ≥0, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `citations_made` | **S**: Int64/N, ≥0 (base); DQ: range ≥0 · **G**: float/N, ≥0, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `influential_citation_count` | **S**: Int64/N, ≥0 (Pandera + DQ) · **G**: float/N, ≥0, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: integer/N, min_value=0 · **F**: — |
+
+### Open Access
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `is_oa` | **S**: bool/N (base) · **G**: bool/N, coerce (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `oa_status` | **S**: str/N, isin `[gold, green, hybrid, bronze, closed]` · **G**: str/N, isin OA_STATUS (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `open_access_url` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+
+### Классификация
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `subject_fields` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False · **F**: — |
+| `citation_contexts` | **S**: str/N (JSON) · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: strict=False; composite `field_validations`: json_array/N · **F**: — |
+
+### Системные поля
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `_source` | **S**: str/NN, eq `"semanticscholar"` · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/N (composite ослаблено) · **F**: — |
+| `_lookup_method` | **S**: str/NN, isin LOOKUP_METHODS · **G**: str/NN, isin LOOKUP_METHODS (strict) · **F**: — | **S**: идентично · **G**: str/N (composite, нет isin) · **F**: — |
+| `_original_id` | **S**: str/N · **G**: str/N (strict) · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+| `entity_id` | **S**: str/NN · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `content_hash` | **S**: str/NN, 64-hex · **G**: str/NN (strict) · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_dq_warn` / `_dq_error` | **S**: bool/NN · **G**: bool/NN (strict) · **F**: — | **S**: идентично · **G**: bool/NN · **F**: — |
+| `_run_id` | **S**: str/NN · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_run_type` | **S**: str/NN, isin runs · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_ingestion_ts` | **S**: str/NN, ISO 8601 · **G**: str/NN · **F**: — | **S**: идентично · **G**: str/NN · **F**: — |
+| `_index` | **S**: int/NN, ≥0 · **G**: int/NN · **F**: — | **S**: идентично · **G**: int/NN · **F**: — |
+| `_source_batch_id` | **S**: str/N · **G**: str/N · **F**: — | **S**: идентично · **G**: str/N · **F**: — |
+
+### Composite-only поля
+
+| Поле | Standalone | Composite (enricher) |
+|------|-----------|----------------------|
+| `_composite_run_id` | — | str/NN (MergeService) |
+| `_source_providers` | — | str/NN, JSON list |
+| `_enrichment_status` | — | str/NN, JSON dict |
+| `_lineage_created_at` | — | str/NN, ISO timestamp |
+
+## 4. Cross-field валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `publication_identifiable` | `paper_id` AND `title` — all_present (error) | Не применяется на composite level |
+
+## 5. Conditional валидации
+
+| Правило | Standalone | Composite |
+|---------|-----------|-----------|
+| `journal_article_requires_title` | Если `publication_type == JournalArticle` → title not null (error) | Не применяется на composite level |
+
+## 6. Gold-фильтры
+
+| Параметр | Standalone | Composite |
+|----------|-----------|-----------|
+| required_fields | `paper_id`, `title` | `title` |
+| column filter | — | — |
+| range filter | `publication_year: 1950–2050` | — |
+| enricher filter_condition | — | `doi IS NOT NULL OR title IS NOT NULL` |
+
+## 7. Ключевые различия
+
+1. **DQ-пороги ещё мягче в composite**: standalone (soft=0.15, hard=0.40) → composite override (soft=0.20, hard=0.50). S2 имеет самые мягкие пороги среди всех enrichers.
+2. **Strict vs. Loose Gold**: standalone `SemanticScholarPublicationGoldSchema` (strict=True, ~35 полей) типизирует каждое поле. Composite Gold (strict=False) — только системные.
+3. **paper_id required**: standalone Gold + Filter требуют `paper_id` not null с 40-hex pattern. Composite — не required.
+4. **Filter relaxation**: standalone требует `paper_id` + `title` + year range. Composite — только `title`.
+5. **Conditional validation**: standalone проверяет `JournalArticle` → title required. Не применяется в composite.
+6. **Composite field_validations**: composite добавляет `influential_citation_count: integer/N, ≥0`, а также json_array-проверку для `author_s2_ids`, `author_h_indices`, `citation_contexts`, `affiliation_list`, `author_orcids` и string для `dblp_id`.
+7. **Qualified column names**: в composite S2-поля получают префикс `semanticscholar.publication.*`.
+8. **Lineage-поля**: composite добавляет 4 поля lineage.
+9. **Timeout**: composite использует `timeout_seconds: 7200` (2 часа) для S2 enricher, vs. standalone pipeline timeout определяется по runtime config.
+
+================================================================================
 File: architecture-audit-2026-02-07.md
 Path: audits\architecture-audit-2026-02-07.md
 ================================================================================
@@ -251264,4 +255381,695 @@ Path: audits\architecture-audit-2026-02-07.md
 - Импортный smoke для domain.
 - `rg/find/wc` для подсчёта классов/файлов/TODO/print/secrets.
 - Точечные `rg`/`nl -ba` проверки по слоям, lock/cb/dq/logging/security.
+
+================================================================================
+File: architecture-audit-2026-02-10.md
+Path: audits\architecture-audit-2026-02-10.md
+================================================================================
+# BioETL Architecture Audit Report
+
+**Дата:** 2026-02-10
+**Версия кодовой базы:** v5.14.0 (RULES.md v5.17)
+**Аудитор:** Claude Opus 4.6 (automated)
+**Ветка:** `claude/bioetl-architecture-audit-nttXM`
+
+---
+
+## Часть 1. Объективные метрики
+
+| Метрика | Команда/метод | Значение |
+|---------|---------------|----------|
+| Покрытие тестами | `pytest --cov=src/bioetl --cov-report=term` | **90.41%** |
+| Ошибки mypy | `mypy src/bioetl --strict 2>&1 \| grep -c "error:"` | **16 шт.** (все — unused `type: ignore`) |
+| Циклические импорты | `python -c "from bioetl.domain import *"` | **PASS** |
+| Количество классов | `grep -r "^class " src/ --include="*.py" \| wc -l` | **956 шт.** |
+| Количество файлов .py | `find src/bioetl -name "*.py" \| wc -l` | **522 шт.** |
+| Общий объём кода | `wc -l src/bioetl/**/*.py \| tail -1` | **116 554 строк** |
+| Средний размер модуля | 116 554 / 522 | **223 строки** |
+| TODO/FIXME в коде | `grep -rE "(TODO\|FIXME\|XXX\|HACK)" src/ \| wc -l` | **24 шт.** |
+| Использование print() | `grep -r "print(" src/bioetl --include="*.py" \| wc -l` | **0 шт.** |
+| Hardcoded secrets | `grep -rE "(api_key\|password\|secret)\s*=" src/ \| wc -l` | **0 шт.** |
+| Тесты всего | `pytest` | **11 548 passed, 18 failed, 215 skipped** |
+| Тест-файлы | `find tests/ -name "test_*.py" \| wc -l` | **457 шт.** |
+| Отношение test/prod код | 179 051 LOC tests / 116 554 LOC src | **1.54:1** |
+
+---
+
+## Часть 2. Оценка по 10 категориям
+
+### 1. Соблюдение слоистой архитектуры (вес: 15%)
+
+**Оценка: 10/10**
+
+Проверено по матрице импортов ARCH-001. Результаты:
+
+| Проверка | Нарушений |
+|----------|-----------|
+| domain → infrastructure | 0 |
+| domain → application | 0 |
+| application → infrastructure | 0 |
+| infrastructure → application | 0 |
+| infrastructure → composition | 0 |
+| infrastructure → interfaces | 0 |
+| application → interfaces | 0 |
+
+**Ключевые находки:**
+- Границы слоёв строго соблюдены во всех 522 модулях
+- Фасад `bioetl.domain.ports.__init__.py` экспортирует 61 символ; 176 файлов импортируют через фасад
+- 0 нарушений ARCH-008 (Single Source of Imports)
+- Composition layer корректно выполняет роль assembly root
+- Все TYPE_CHECKING guards используются правильно (EXC-001)
+
+**Обоснование:** 0 нарушений границ слоёв → 9-10 по критериям → **10**
+
+---
+
+### 2. Контракты и Ports (вес: 12%)
+
+**Оценка: 10/10**
+
+**Ключевые находки:**
+- **40+ Protocol** классов определены в `domain/ports/` (26 файлов)
+- **100%** протоколов используют `typing.Protocol` + `@runtime_checkable`
+- **100%** соблюдают именование `*Port` (ARCH-003)
+- **6 адаптеров** (ChEMBL, CrossRef, OpenAlex, UniProt, SemanticScholar, PubChem) — все реализуют `DataSourcePort`
+- **6 NoOp-реализаций** (NoOpTracing, NoOpMetrics, NoOpAudit, NoOpPiiHasher, NoOpMemoryMonitor, NoOpMetadataWriter) — Null Object Pattern (EXC-003)
+- Все HTTP-адаптеры реализуют `health_check()` через `HealthCheckProviderMixin` (ARCH-004)
+- 0 прямых импортов `httpx`/`requests`/`structlog` в application/interfaces слоях
+
+**Обоснование:** Все внешние зависимости абстрагированы через Protocol → **10**
+
+---
+
+### 3. Medallion Architecture (вес: 12%)
+
+**Оценка: 10/10**
+
+**Bronze Layer:**
+- Формат: JSONL + zstd (`compression="zstd"`, `compression_level=3`) — `bronze_writer.py:364-368`
+- Атомарные записи: temp file + rename — `bronze_writer.py:341-407`
+- Метаданные: `run_id`, `run_type`, `batch_id`, `ingestion_ts` — `bronze_writer.py:223-240`
+- Контрольные суммы: BLAKE2b — `bronze_writer.py:643-654`
+
+**Silver Layer:**
+- **Delta Lake ONLY** — `write_deltalake()` в строках 234, 250, 1063
+- **0 использований** `to_parquet()` / `write_parquet()` (ARCH-006 PASS)
+- Merge/Upsert: primary key predicate + приоритет по run_type — `silver_writer.py:859-894`
+- Schema drift detection: severity (critical/warn/info) — `silver_writer.py:421-466`
+- Pandera validation — `silver_writer.py:374-399`
+
+**Gold Layer:**
+- Strict Pandera validation (`strict=True`) — `gold_writer.py:263-269`
+- SCD Type 2: version tracking, valid_from/valid_to — `gold_writer.py:765-768`
+- Delta Lake writes — `gold_writer.py`
+
+**Medallion Policy (ARCH-007):**
+- REBUILD → Clear Silver + Gold ✅ (`medallion.py:304`)
+- BACKFILL → Clear Silver + Gold ✅ (`medallion.py:304`)
+- INCREMENTAL → Never clear ✅ (`medallion.py:306`)
+- Тесты: `test_medallion.py:61-83`
+
+**Обоснование:** Полное соответствие: форматы, пути, merge, ACID, retention → **10**
+
+---
+
+### 4. Обработка ошибок и Circuit Breaker (вес: 10%)
+
+**Оценка: 9/10**
+
+**Exception hierarchy:** 43 кастомных исключения в 5 категориях:
+- Network (11): `RateLimitError`, `TimeoutError`, `ConnectionError` и др. → `RecoverableError`
+- Infrastructure (15): storage, Delta Lake, filesystem → `CriticalError`/`RecoverableError`
+- Validation (4): schema, field, format → `DataQualityError`
+- Data Quality (1): threshold violations → `BioETLError`
+- Internal (10): state, locks, auth → `CriticalError`
+
+**Circuit Breaker:**
+- State machine: CLOSED → OPEN → HALF_OPEN → CLOSED — `circuit_breaker.py:111-154`
+- Метрики: `circuit_breaker_state` (gauge), `circuit_breaker_trips_total` (counter)
+- Selective triggering: только 5xx, 429, timeouts (не 4xx)
+- Thread safety: `asyncio.Lock` — `circuit_breaker.py:75`
+- Decorator pattern: `CircuitBreakerDataSourceDecorator` обёртывает любой `DataSourcePort`
+
+**Retry Logic:**
+- Exponential backoff с детерминистическим jitter (MD5-hash based) — `resilience.py:78-109`
+- `max_attempts=3`, `base_delay=1.0s`, `max_delay=60.0s`
+- Retryable statuses: `{429, 500, 502, 503, 504}`
+- `RetryExhaustedError` с контекстом (url, attempts, last_error)
+
+**Замечания:**
+- 13 из 23 `except Exception:` блоков не имеют документирующих комментариев — `batch_executor.py:530,693`, `batch_writer.py:424`, `dq/_checks_*.py`, `metadata_coordinator.py:359,401`, `chembl/client.py:465`
+- CB state — in-memory only (достаточно для local deployment per ADR-010)
+
+**Обоснование:** Все 3 типа ошибок обрабатываются, CB реализован с метриками; -1 за undocumented broad exceptions → **9**
+
+---
+
+### 5. Блокировки и конкурентность (вес: 10%)
+
+**Оценка: 9.5/10**
+
+**Lock Implementation:**
+- `LockPort` protocol: acquire, release, heartbeat, validate_owner, aclose — `domain/ports/locking.py:14-104`
+- `MemoryLock`: asyncio.Lock + global lock + TTL checker — `memory_lock.py:31-266`
+- Thread-safe: все мутации `_locks` dict под `_global_lock`
+
+**Heartbeat:**
+- `HeartbeatTask`: фоновый loop каждые 30s (default) — `heartbeat.py:108-123`
+- Fail fast: initial heartbeat check при старте — `heartbeat.py:81-87`
+- Shutdown signal: `PipelineShutdownError` при потере lock
+
+**Fencing Token:**
+- `RunID` (UUID) как owner_id — `locking.py:43-124`
+- 4-point validation: exists + held + not expired + owner match — `memory_lock.py:233-248`
+- Immutable `LockContext` (frozen dataclass)
+
+**Safety Guard:**
+- `BatchWriter._validate_lock()` перед каждой записью — `batch_writer.py:127-148`
+- Raises `LockNotHeldError` если lock потерян
+- 6 architecture tests — `test_lock_safety_guard.py`
+
+**Configuration:** TTL=90s, Heartbeat=30s, Wait timeout=300s
+
+**Замечания:**
+- Redis/distributed lock пока не реализован (по плану, LockPort готов к расширению)
+
+**Обоснование:** lock + heartbeat + fencing + safety guard → полная реализация; -0.5 за отсутствие distributed lock → **9.5**
+
+---
+
+### 6. Валидация и DQ (вес: 10%)
+
+**Оценка: 9.5/10**
+
+**Pandera Schemas:**
+- **30+ DataFrameModel** schemas по провайдерам (ChEMBL: 14, UniProt: 3, PubChem: 1, Publications: 5)
+- **Custom validators**: `is_non_negative`, `is_valid_json`, `max_str_length`, `in_closed_range` и др. — `validators.py`
+- Gold contracts: 5 DataFrameModel с `strict=True`
+
+**Quarantine System:**
+- `QuarantineManager`: write, inspect, get_stats — `quarantine_manager.py`
+- `QuarantineService`: replay, purge (30 days), mark_as_reprocessed — `quarantine_service.py`
+- Policy: quarantine | skip | fail (configurable)
+
+**DQ Thresholds:**
+- soft_fail: 5%, hard_fail: 20% — `configs/dq/_defaults.yaml:16-18`
+- Pydantic validation: `soft_fail < hard_fail` enforced
+- 3-level hierarchy: defaults → provider → entity → inline
+
+**Content Hash:**
+- SHA256(provider + canonical_json(normalized)) — `transformations.py:101-109`
+- NaN/Inf → None, float rounding to 10 decimals, NFKC unicode normalization
+- Deterministic canonical JSON (sorted keys)
+
+**DQ Metrics:** 20 check types across Bronze (5), Silver (8), Gold (7)
+
+**Externalized DQ Rules:**
+- 30+ YAML configs в `configs/dq/` — entities/, providers/, _defaults.yaml
+- Cross-field validations, conditional validations
+
+**Замечания:**
+- 0 sentinel values в production коде (AP-004 PASS)
+
+**Обоснование:** Pandera для всех сущностей, Quarantine, Content Hash, DQ metrics; -0.5 за отсутствие DQ dashboard → **9.5**
+
+---
+
+### 7. Логирование и наблюдаемость (вес: 8%)
+
+**Оценка: 9.5/10**
+
+**LoggerPort:**
+- 4 реализации: UnifiedLogger, StructlogLogger, BootstrapLogger, NoOpLogger
+- `UnifiedLogger`: обязательный bind `run_id` + `pipeline` при инициализации — `unified_logger.py:76-102`
+- 0 direct structlog imports в application/interfaces (AP-002 PASS)
+- 0 print() statements в production коде (AP-006 PASS)
+
+**Structured JSON Logging:**
+- Processor chain: contextvars → log level → ISO timestamps → **secret filter** → JSON renderer — `logging_config.py:156-171`
+- Secret masking: API keys, Bearer tokens, passwords, AWS keys → `[REDACTED_*]`
+- Thread-safe configuration: `_config_lock` mutex
+
+**Prometheus Metrics:** 28 метрик:
+- Pipeline execution: 5 (duration, batch size, records, errors, health)
+- Data Quality: 7 (score, check duration, quarantine, anomalies, freshness)
+- Resilience: 7 (CB state/trips/success/failure, health check success/failure/latency)
+- Storage: 4 (vacuum, archive)
+- Filtering: 2
+- Infrastructure: 2
+
+**OpenTelemetry:** Optional, реализован полностью (OTel SDK + OTLP gRPC exporter), NoOp по умолчанию (ADR-010)
+
+**Health Checks:** `HealthCheckProviderMixin` — template method с `_probe_health()`, метрики + logging + CB fallback
+
+**Обоснование:** UnifiedLogger везде, run_id в логах, 28 Prometheus metrics, secret filtering → **9.5**
+
+---
+
+### 8. Тестирование (вес: 8%)
+
+**Оценка: 8/10**
+
+**Coverage:** 90.41% (порог 85% — PASS)
+
+**Test Suite:** 457 test files, 11 548 passed, 18 failed, 215 skipped
+
+| Категория | Файлов | % от общего |
+|-----------|--------|-------------|
+| Unit | 331 | 72.4% |
+| Architecture | 44 | 9.6% |
+| Integration | 34 | 7.4% |
+| E2E | 22 | 4.8% |
+| Contract | 9 | 2.0% |
+| Benchmark | 5 | 1.1% |
+| Security | 1 | 0.2% |
+
+**VCR Cassettes:** 87 YAML cassettes, custom query matcher (TEST-003 PASS)
+**Golden Tests:** 22 snapshot files (syrupy + custom JSON)
+**Hypothesis:** 6 files с property-based testing, 3 profiles (ci/dev/fast)
+**Architecture Tests:** 44 files — enforcement ARCH-001 через ARCH-008
+**Test Code in Production:** 0 (TEST-005 PASS)
+
+**18 Failing Tests (детали):**
+
+| Тест | Причина |
+|------|---------|
+| `test_ruff_formatting_src` | Ruff formatting drift |
+| `test_infrastructure_files_under_limit` | File size limit exceeded |
+| `test_business_fields_sorted` ×4 | Schema column order (CROSSREF, OPENALEX, PUBMED, SEMANTICSCHOLAR) |
+| `test_schema_matches_canonical_order` ×4 | Canonical column order mismatch |
+| `test_transform_snapshot` | Transformer snapshot mismatch |
+| `test_transform_minimal_snapshot` / `test_transform_full_snapshot` | PubMed transformer snapshots |
+| `test_schema_field_names_and_types` ×5 | Pipeline schema field contracts (publication schemas) |
+
+**Замечания:**
+- 18 failures преимущественно в publication schema contracts и column ordering — последствия недавнего рефакторинга v5.14.0 (Publication field standardization)
+- Coverage >85% даже с exclusion composite модуля
+
+**Обоснование:** Coverage ≥85%, VCR есть, architecture tests отличные; -2 за 18 failing tests → **8**
+
+---
+
+### 9. Безопасность и секреты (вес: 8%)
+
+**Оценка: 9.5/10**
+
+**Secrets Management:**
+- `SecretStr` (Pydantic) для API keys — `config/_base.py:337-344`
+- Env vars: `BIOETL_{PROVIDER}_API_KEY` через pydantic-settings
+- `.env` в `.gitignore` (`*.env`, `!.env.example`) — `.gitignore:64-69`
+- `.env.example` содержит только placeholder values
+
+**PII Hashing:**
+- SHA256 + salt — `pii_hasher.py:45-64`
+- NFKC normalization → lowercase → strip → SHA256(value + salt)
+- Min salt length: 32 chars
+- Salt rotation: `BIOETL_PII_SALT_CURRENT` / `BIOETL_PII_SALT_NEXT`
+- Rotation tool: `scripts/salt_rotate.py` (501 lines, cryptographically secure via `secrets`)
+
+**SAST Pipeline:**
+- Bandit: configured in `pyproject.toml`, blocks CI on HIGH severity
+- osv-scanner: dependency vulnerabilities (Google)
+- pip-audit: secondary dependency scanner
+- Gitleaks: secrets detection in CI с tuned allowlist — `.gitleaks.toml`
+
+**Command Injection:** 2 subprocess calls, both SAFE (list-based args, no `shell=True`, timeout)
+
+**Замечания:**
+- 0 hardcoded credentials
+- 0 SQL injection vectors (no SQL in codebase)
+- Security test suite: 611 lines (`test_security.py`)
+
+**Обоснование:** Секреты через env, PII salted, .env не в git, SAST в CI → **9.5**
+
+---
+
+### 10. Документация и сопровождаемость (вес: 7%)
+
+**Оценка: 9.5/10**
+
+**ADR:** 33 Architecture Decision Records — `docs/02-architecture/decisions/`
+**CHANGELOG:** 740 строк, актуален (v5.14.0, 2026-02-09), Keep a Changelog format
+**README:** 322 строки, 20+ секций, 31 таблица, 21 code block
+
+**Docstring Coverage:**
+- Module-level: **100%** (520/520)
+- Class-level: **100%** (1001/1001)
+- Function-level: **97.7%** (3261/3336)
+
+**Data Contracts:** Gold schemas + 5-level validation strategy (191 fields × 19 columns)
+**Glossary:** 100+ canonical terms (DDD ubiquitous language) — `glossary.md` v2.5
+**API Docs:** 83 reference files (domain/application/infrastructure/composition/interfaces)
+**Operations:** 24 operational guides, runbooks
+**Total Documentation:** 225 markdown files
+
+**Замечания:**
+- Interfaces layer: 89% function docstrings (Click decorators)
+- `__init__.py` version (5.9.0) расходится с CHANGELOG (5.14.0)
+
+**Обоснование:** Gold contracts, 33 ADR, 100% class docstrings, CHANGELOG актуален; -0.5 за version mismatch → **9.5**
+
+---
+
+## Часть 3. Сводная таблица
+
+| # | Категория | Вес | Оценка | Взвеш. балл | Ключевые находки |
+|---|-----------|-----|--------|-------------|------------------|
+| 1 | Слоистая архитектура | 15% | 10.0 | 1.500 | 0 нарушений ARCH-001, фасад Ports 100% |
+| 2 | Контракты и Ports | 12% | 10.0 | 1.200 | 40+ Protocols, все @runtime_checkable |
+| 3 | Medallion Architecture | 12% | 10.0 | 1.200 | Delta Lake only, 0 raw Parquet, ACID |
+| 4 | Обработка ошибок и CB | 10% | 9.0 | 0.900 | 43 exceptions, CB с метриками; 13 broad catches |
+| 5 | Блокировки и конкурентность | 10% | 9.5 | 0.950 | Lock+heartbeat+fencing+safety guard |
+| 6 | Валидация и DQ | 10% | 9.5 | 0.950 | 30+ Pandera schemas, quarantine, content hash |
+| 7 | Логирование и наблюдаемость | 8% | 9.5 | 0.760 | 28 Prometheus metrics, secret masking |
+| 8 | Тестирование | 8% | 8.0 | 0.640 | 90.41% coverage, 18 failing tests |
+| 9 | Безопасность | 8% | 9.5 | 0.760 | 0 secrets, PII hashing, SAST pipeline |
+| 10 | Документация | 7% | 9.5 | 0.665 | 33 ADR, 100% class docstrings |
+| **Итого** | **100%** | | **9.53** | |
+
+### Интерпретация
+
+**9.53 / 10.0 — Production-ready, minor improvements**
+
+Кодовая база BioETL демонстрирует зрелую, production-grade архитектуру с последовательным соблюдением Hexagonal Architecture, Medallion pattern и DI principles. Единственные области для улучшения — 18 падающих тестов (последствия недавнего рефакторинга v5.14.0) и ряд косметических замечаний.
+
+---
+
+## Часть 3.3. План рефакторинга
+
+### [P1] Исправление 18 падающих тестов
+
+**Категория:** Тестирование
+**Текущий балл → Целевой балл:** 8.0 → 9.5
+**Влияние на общий балл:** +0.12
+
+**Проблема:** 18 тестов упали после рефакторинга v5.14.0 (Publication field standardization):
+- 8 тестов column order (`test_column_order.py`) — CROSSREF, OPENALEX, PUBMED, SEMANTICSCHOLAR
+- 5 тестов pipeline schema contracts (`test_silver_pipeline_contracts.py`)
+- 3 теста transformer snapshots (`test_transformer_snapshots.py`)
+- 1 тест ruff formatting (`test_code_formatting.py`)
+- 1 тест file size limits (`test_code_metrics.py`)
+
+**Решение:**
+1. Обновить canonical column order CSV для publication schemas
+2. Обновить syrupy snapshots: `pytest --snapshot-update`
+3. Обновить pipeline schema field contracts для publication entities
+4. Исправить ruff formatting: `ruff format src/`
+5. Рефакторить oversized infrastructure файл или обновить limit
+
+**Файлы:**
+- `docs/schemas/publication_field_order.csv`
+- `tests/unit/application/pipelines/__snapshots__/`
+- `tests/unit/infrastructure/schemas/test_silver_pipeline_contracts.py`
+- `tests/architecture/test_code_formatting.py`
+- `tests/architecture/test_code_metrics.py`
+
+**Риски:** Минимальные — snapshot и contract updates отражают текущее состояние
+**Критерий готовности:** `pytest` — 0 failures
+**Трудозатраты:** S (часы)
+
+---
+
+### [P1] Устранение 16 unused `type: ignore` в mypy
+
+**Категория:** Типизация (дополнительно)
+**Текущий балл → Целевой балл:** 16 errors → 0
+**Влияние на общий балл:** Чистый `mypy --strict`
+
+**Проблема:** 16 `# type: ignore` комментариев стали невалидными (библиотеки обновили type stubs):
+- `domain/serialization.py:146`
+- `application/pipelines/uniprot/extractors/utils.py:35`
+- `domain/services/dq_serializer.py:113`
+- `infrastructure/storage/bronze_writer.py:698`
+- `infrastructure/config/dq_config_loader.py:111`
+- `infrastructure/adapters/common/api_request_collector.py:110`
+- `domain/schemas/validators.py:124,143,162,182,195,208`
+- `application/composite/deduplication.py:66,156`
+- `application/composite/coordinator.py:218`
+- `composition/bootstrap/runtime/composite.py:109`
+
+**Решение:** Удалить неиспользуемые `# type: ignore` комментарии из 10 файлов
+**Риски:** Нулевые — удаление неиспользуемых комментариев
+**Критерий готовности:** `mypy --strict src/bioetl` — 0 errors
+**Трудозатраты:** S (часы)
+
+---
+
+### [P2] Документирование 13 broad exception handlers
+
+**Категория:** Обработка ошибок
+**Текущий балл → Целевой балл:** 9.0 → 9.5
+**Влияние на общий балл:** +0.05
+
+**Проблема:** 13 `except Exception:` блоков без комментариев или specific exception types:
+- `batch_executor.py:530,693` — batch processing failures
+- `batch_writer.py:424` — metadata enrichment
+- `dq/_checks_*.py:104,102,155` — DQ check execution
+- `dq/silver_analyzer.py:427,449` — analysis failures
+- `metadata_coordinator.py:359,401` — coordination
+- `chembl/client.py:465` — API response parsing
+
+**Решение:** Для каждого handler:
+1. Заменить на specific exception types где возможно
+2. Добавить комментарий с justification где `Exception` необходим
+3. Добавить structured logging для failure context
+
+**Файлы:** 6 файлов в application/ и infrastructure/
+**Риски:** Низкие — уточнение типов может изменить поведение при edge cases
+**Критерий готовности:** Все `except Exception:` имеют comment или заменены на specific types
+**Трудозатраты:** S (часы)
+
+---
+
+### [P2] Устранение 24 TODO/FIXME
+
+**Категория:** Сопровождаемость
+**Влияние на общий балл:** Косвенное (tech debt)
+
+**Проблема:** 24 TODO/FIXME маркеров в production коде:
+- `domain/validation.py` — 5 items
+- `domain/value_objects/academic_ids.py` — 4 items
+- `domain/value_objects/publications.py` — 3 items
+- 4 других файла — 1-2 items каждый
+
+**Решение:** Для каждого TODO:
+1. Создать issue в трекере
+2. Удалить TODO из кода, заменив ссылкой на issue
+3. Или реализовать если scope мал
+
+**Риски:** Низкие
+**Критерий готовности:** `grep -rE "TODO|FIXME" src/` — 0 результатов
+**Трудозатраты:** M (дни)
+
+---
+
+### [P2] Синхронизация версии в `__init__.py`
+
+**Категория:** Документация
+**Влияние:** Косметическое
+
+**Проблема:** `src/bioetl/__init__.py` содержит `__version__ = "5.9.0"`, а CHANGELOG — v5.14.0
+
+**Решение:** Обновить `__version__` или настроить dynamic versioning через `setuptools-scm`
+**Трудозатраты:** S (часы)
+
+---
+
+### [P3] Distributed Lock (Redis/Consul)
+
+**Категория:** Блокировки
+**Текущий балл → Целевой балл:** 9.5 → 10.0
+
+**Проблема:** `MemoryLock` работает только для single-process deployment (ADR-010)
+
+**Решение:** Реализовать `RedisLockPort` с SETNX + TTL + Lua scripts
+**Файлы:** `infrastructure/locking/redis_lock.py` (новый), `composition/` (factory update)
+**Риски:** Средние — требует Redis dependency и integration testing
+**Критерий готовности:** Architecture tests pass с Redis backend
+**Трудозатраты:** L (неделя)
+
+---
+
+### [P3] OpenTelemetry полная интеграция
+
+**Категория:** Наблюдаемость
+**Влияние на общий балл:** +0.04
+
+**Проблема:** OTel реализован но отключён по умолчанию (NoOpTracing)
+
+**Решение:** Документировать и активировать для production:
+1. Настроить OTLP collector endpoint
+2. Добавить OTel baggage для run_id propagation
+3. Grafana dashboards для Prometheus metrics
+
+**Трудозатраты:** M (дни)
+
+---
+
+## Часть 3.4. Roadmap
+
+### Фаза 1 (неделя 1): P1 — Стабилизация
+
+| Задача | Влияние |
+|--------|---------|
+| Исправить 18 падающих тестов | Tests: 8.0 → 9.5 |
+| Удалить 16 unused `type: ignore` | mypy: 16 → 0 errors |
+| Ruff format | Clean CI |
+
+**Ожидаемый общий балл после фазы 1:** 9.53 → **9.65**
+
+### Фаза 2 (неделя 2-3): P2 — Улучшение качества
+
+| Задача | Влияние |
+|--------|---------|
+| Документировать broad exceptions | Errors: 9.0 → 9.5 |
+| Устранить TODO/FIXME | Tech debt reduction |
+| Синхронизировать version | Docs consistency |
+
+**Ожидаемый общий балл после фазы 2:** 9.65 → **9.72**
+
+### Фаза 3 (неделя 4+): P3 — Расширение
+
+| Задача | Влияние |
+|--------|---------|
+| Redis distributed lock | Locks: 9.5 → 10.0 |
+| OpenTelemetry activation | Observability: 9.5 → 10.0 |
+| DQ dashboards | Validation: 9.5 → 10.0 |
+
+**Ожидаемый общий балл после фазы 3:** 9.72 → **9.85+**
+
+---
+
+## Часть 4. Метрики контроля регресса (CI)
+
+| Метрика | Порог | Команда | Блокирует PR |
+|---------|-------|---------|--------------|
+| Coverage | ≥85% | `pytest --cov-fail-under=85` | Да |
+| mypy errors | 0 | `mypy --strict src/bioetl` | Да |
+| Циклические импорты | 0 | `python -c "from bioetl.domain import *"` | Да |
+| Нарушения слоёв (ARCH-001) | 0 | `grep -r "from bioetl.infrastructure" src/bioetl/domain/` | Да |
+| print() в коде | 0 | `ruff check --select T201 src/bioetl/` | Да |
+| Architecture tests | 0 failures | `pytest tests/architecture/ -v` | Да |
+| Security (Bandit HIGH) | 0 | `bandit -r src/bioetl -ll` | Да |
+| Ruff lint | 0 | `ruff check src/bioetl/` | Да |
+| Ruff format | 0 diff | `ruff format --check src/bioetl/` | Да |
+| Gitleaks | 0 | `gitleaks detect` | Да |
+| Complexity (Xenon) | B/B/A | `xenon --max-absolute B --max-modules B --max-average A src/bioetl/` | Да |
+| Test failures | 0 | `pytest tests/` | Да |
+| Import linter | 0 | `lint-imports` | Рекомендовано |
+| Dead code (Vulture) | 0 | `vulture src/bioetl/` | Рекомендовано |
+| TODO/FIXME | ≤ baseline | `grep -rcE "TODO\|FIXME" src/ \| awk -F: '{sum+=$2} END {print sum}'` | Нет (мониторинг) |
+
+---
+
+## Заключение
+
+BioETL v5.14.0 — зрелый, production-ready проект с **общей оценкой 9.53/10**. Архитектура Hexagonal + Medallion реализована образцово с нулевыми нарушениями границ слоёв, полной абстракцией через 40+ Protocol-портов и строгим ACID через Delta Lake.
+
+Основные рекомендации:
+1. **Срочно (P1):** Исправить 18 failing tests и 16 mypy warnings — чисто техническая задача после недавнего рефакторинга publication schemas
+2. **Среднесрочно (P2):** Документировать broad exception handlers, устранить TODO/FIXME
+3. **Долгосрочно (P3):** Redis distributed lock, OpenTelemetry, DQ dashboards
+
+Кодовая база может служить эталонной реализацией Ports & Adapters + Medallion Architecture в Python.
+
+================================================================================
+File: chembl.md
+Path: providers\chembl.md
+================================================================================
+# ChEMBL Provider
+
+Data source adapter for [ChEMBL](https://www.ebi.ac.uk/chembl/) — the EMBL-EBI
+chemical database of bioactive molecules with drug-like properties.
+
+## API
+
+- **Base URL:** `https://www.ebi.ac.uk/chembl/api/data`
+- **Format:** JSON (REST API with Django-style query lookups)
+- **Pagination:** `limit`/`offset` (except target, target_component, protein_class)
+- **Reference:** [ChEMBL Web Services Documentation](https://chembl.gitbook.io/chembl-interface-documentation/web-services/chembl-data-web-services)
+
+## Supported Entities
+
+| Entity | Resource | Paginated |
+|--------|----------|-----------|
+| activity | `/activity.json` | Yes |
+| assay | `/assay.json` | Yes |
+| molecule (compound) | `/molecule.json` | Yes |
+| target | `/target.json` | No |
+| target_component | `/target_component.json` | No |
+| document | `/document.json` | Yes |
+| cell_line | `/cell_line.json` | Yes |
+| protein_class | `/protein_class.json` | No |
+
+## Extraction-Level Filtering
+
+**Reference:** [ADR-028 §3](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
+
+### Overview
+
+Server-side query parameters applied at the Bronze extraction stage.
+Instead of downloading the full Activity dataset (~20M records), the API
+returns only records matching the configured criteria (~2–5M records),
+reducing data volume by approximately 75–90%.
+
+### Configuration
+
+Defined in `configs/filter/entities/chembl/activity.yaml` under the
+`extraction_params` key:
+
+```yaml
+extraction_params:
+  # Measurement types: IC50 and Ki only
+  standard_type__in: "IC50,Ki"
+
+  # Standardized units: nanomolar
+  standard_units: "nM"
+
+  # Exact measurements only (exclude censored: >, <, ~)
+  standard_relation: "="
+
+  # Binding (B) and Functional (F) assays
+  assay_type__in: "B,F"
+
+  # Exclude potential duplicate records
+  potential_duplicate: 0
+
+  # Exclude records with data validity issues
+  data_validity_comment__isnull: true
+
+  # Only records with standardized pChEMBL value
+  pchembl_value__isnull: false
+
+  # Only ChEMBL-standardized values
+  standard_flag: 1
+```
+
+### How It Works
+
+1. Parameters are loaded from YAML config as `ExtractionParams` (frozen dataclass)
+2. `ChemblAdapter._build_params()` merges extraction params into every API request
+3. The resulting API URL includes all parameters:
+   ```
+   /chembl/api/data/activity?format=json&limit=1000&offset=0
+     &standard_type__in=IC50,Ki&standard_units=nM&standard_relation==
+     &assay_type__in=B,F&potential_duplicate=0
+     &data_validity_comment__isnull=true&pchembl_value__isnull=false
+     &standard_flag=1
+   ```
+4. Parameters are recorded in `SourceMetadata.query_string` for audit and reproducibility
+
+### Audit Trail
+
+Extraction params are logged in Bronze `SourceMetadata.query_string`, enabling:
+- **Reproducibility**: exact API query can be reconstructed from metadata
+- **Audit**: which filters were active during a given pipeline run
+- **Debugging**: verify that server-side filtering was applied correctly
+
+### Constraints
+
+- Does **not** affect `content_hash` (ADR-014)
+- No CLI override — deterministic per config (ADR-014)
+- Provider-specific: uses ChEMBL Django-style lookups (`__in`, `__isnull`, etc.)
+- Only affects Bronze extraction — Gold filters are applied separately at Silver→Gold
 
