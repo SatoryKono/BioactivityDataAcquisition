@@ -6,7 +6,6 @@ import pytest
 
 from bioetl.domain.mapping.publication_type_classification import (
     CLASSIFICATION_TABLE_SIZE,
-    PublicationTypeEntry,
     _CLASSIFICATION_TABLE,
     _CROSSREF_LOOKUP,
     _OPENALEX_LOOKUP,
