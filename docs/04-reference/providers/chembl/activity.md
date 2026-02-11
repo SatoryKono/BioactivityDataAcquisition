@@ -28,6 +28,13 @@ silver_table: "chembl_activity"
 gold_filter_types:
     - IC50
     - Ki
+    - Kd
+    - EC50
+    - AC50
+    - GI50
+    - ED50
+    - MIC
+    - CC50
 
 transform:
     steps:
@@ -370,7 +377,7 @@ def should_include(self, context, record) -> bool:
             record.get("standard_value") is not None,  # Есть значение
             record.get("standard_units"),  # Есть единицы
             record.get("target_chembl_id"),  # Есть мишень
-            record.get("standard_type") in {"IC50", "Ki"},  # Правильный тип
+            record.get("standard_type") in {"IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"},  # 9 типов
             not record.get("data_validity_comment"),  # Нет флагов проблем
         ]
     )
@@ -443,7 +450,7 @@ ChEMBL API (/activity.json)
 ┌─────────────────────────────────────────┐
 │  GOLD (бизнес-данные)                   │
 │  ─────────────────────────────────────  │
-│  • Только IC50/Ki с полными данными     │
+│  • IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50 │
 │  • Strict Pandera validation            │
 │  • Режим: Overwrite                     │
 └─────────────────────────────────────────┘

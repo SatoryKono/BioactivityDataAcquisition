@@ -133,7 +133,7 @@ client = UnifiedHTTPClient(
     retry_config=retry_config,
     metrics=metrics,
     logger=logger,
-    tracing=tracing,
+    tracer=tracer,
 )
 ```
 

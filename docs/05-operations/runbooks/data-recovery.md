@@ -43,8 +43,14 @@ This runbook provides procedures for recovering data in case of corruption, acci
 - **Symptom**: A pipeline was interrupted, but the checkpoint file was lost or corrupted. The pipeline warns about a "Stale checkpoint" on restart.
 - **Cause**: Local checkpoint write failure, race condition, or manual error.
 - **Recovery Steps**:
-  1. **Option A (Safest)**: Ignore the checkpoint and re-process a slightly larger window of data.
+  1. **Option A (Safest)**: Delete the checkpoint and re-process from the beginning.
      ```bash
+     # Delete the checkpoint file for the affected pipeline
+     rm data/output/checkpoints/{pipeline_name}.json
+
+     # Re-run the pipeline (will start from scratch)
+     bioetl run --pipeline <pipeline_name> --run-type rebuild
      ```
+     - **Note**: For checkpoint reset, delete the file at `data/output/checkpoints/{pipeline_name}.json`.
      - **Impact**: This may create duplicate records in the Bronze layer, but the merge/upsert logic in the Silver layer will handle deduplication, ensuring correctness.
   1. **Option B (Advanced)**: Manually determine the last successfully processed record ID or timestamp from the Silver table and create a new checkpoint file. This is faster but more error-prone.

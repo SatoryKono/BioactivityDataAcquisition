@@ -20,9 +20,9 @@
 
 Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через `typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
 
-**Структура пакета (24 файла):**
+**Структура пакета (25 файлов):**
 
-Пакет содержит 24 protocol-файла (актуально на 2026-02-11), организованных по категориям:
+Пакет содержит 25 protocol-файлов (актуально на 2026-02-11), организованных по категориям:
 
 **Основные порты:**
 
@@ -44,7 +44,8 @@
 
 - `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` — DQ анализ по слоям
 - `DQReportWriterPort` — запись DQ-отчётов
-- `GoldValidatorPort` — валидация Gold-записей
+- `GoldValidatorPort`, `SilverValidatorPort` — валидация записей Gold/Silver слоёв
+- `BronzeDQConfigPort`, `SilverDQConfigPort`, `GoldDQConfigPort` — конфигурация DQ-правил по слоям
 
 **Input/Output порты:**
 
@@ -53,9 +54,17 @@
 
 **Infrastructure порты:**
 
-- `HealthCheckPort` — проверка здоровья адаптеров
+- `HealthCheckPort`, `HealthMonitorPort`, `HealthStatePort` — проверка и мониторинг здоровья адаптеров
 - `AuditPort` — аудит операций
 - `ShutdownPort`, `MemoryMonitorPort`, `DeltaReaderPort`, `IDMappingPort`, `PiiHasherPort` — системные и вспомогательные порты
+- `RunnablePort`, `RunnerFactoryPort`, `MetricsExtractorPort` — абстракция запуска пайплайнов
+- `RateLimiterPort`, `CircuitBreakerPort` — Resilience-порты (rate limiting, circuit breaker)
+- `DataNormalizationPort` — нормализация текста/данных
+- `MetadataWriterPort` — запись метаданных
+
+**NoOp реализации (Null Object Pattern):**
+
+- `NoOpAudit`, `NoOpMemoryMonitor`, `NoOpMetadataWriter`, `NoOpMetrics`, `NoOpPiiHasher`, `NoOpTracing` — реализации-заглушки для опциональных зависимостей
 
 **Правило импорта (MUST):**
 
@@ -177,7 +186,7 @@ Domain содержит 8 дополнительных поддиректори�
 | `configs/`        | Конфигурационные базовые классы | Базовые dataclass-ы для конфигураций                     |
 | `contracts/gold/` | Gold-слой контракты данных      | Pandera DataFrameModel схемы                             |
 | `entities/`       | Доменные сущности               | Entity-классы для каждого провайдера                     |
-| `exceptions/`     | Доменные исключения             | 6 файлов с иерархией ошибок (актуально на 2026-02-11)    |
+| `exceptions/`     | Доменные исключения             | 7 файлов с иерархией ошибок (актуально на 2026-02-11)    |
 | `filtering/`      | Фильтрация данных               | Конфигурации и логика фильтров                           |
 | `mapping/`        | Маппинг полей публикаций        | Publication field & type mappings                        |
 | `models/`         | Доменные модели                 | Filter & metadata models                                 |
@@ -209,7 +218,7 @@ ______________________________________________________________________
 | Domain DDD           | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid)                                  | DDD-структура домена                              |
 | Domain Models        | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid)  | Связи доменных моделей                            |
 | DDD Aggregates       | [diagrams/mermaid/09_ddd_aggregates.mmd](diagrams/mermaid/09_ddd_aggregates.mmd)         | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture   | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 24 портов                             |
+| Ports Architecture   | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 25 портов                             |
 
 ### Связанные ADR
 
