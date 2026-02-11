@@ -362,6 +362,17 @@ module = [
     "bioetl.domain.schemas.pubchem.compound",
     # Pydantic BaseModel.model_validate returns Any without stubs
     "bioetl.infrastructure.config.filter_config_loader",
+    "bioetl.infrastructure.config.dq_config_loader",
+    # orjson returns Any without stubs
+    "bioetl.domain.serialization",
+    "bioetl.domain.services.dq_serializer",
+    # Polars/PyArrow interop returns Any
+    "bioetl.application.composite.deduplication",
+    "bioetl.application.composite.coordinator",
+    "bioetl.application.pipelines.uniprot.extractors.utils",
+    "bioetl.infrastructure.storage.bronze_writer",
+    # Pydantic model_validate returns Any
+    "bioetl.composition.bootstrap.runtime.composite",
 ]
 disable_error_code = ["no-any-return", "return-value"]
 

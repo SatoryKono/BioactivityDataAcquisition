@@ -366,7 +366,6 @@ class TestCrossProviderNaming:
             "_lookup_method",
         }
 
-
         for schema_name, schema_class in publication_schemas.items():
             fields = extract_field_metadata(schema_class)
 
