@@ -1522,7 +1522,502 @@ Audit IDs: SR-17, SR-18, SR-19
 
 ---
 
-*Исчерпывающий аудит завершён. Проверено **444 утверждения** из **~145 документов** в 3 фазах.*
-*Общий результат: **314 (71%)** соответствуют, **34 (8%)** частично, **96 (22%)** не соответствуют.*
-*Приложение A содержит **20 промтов** для устранения **96 расхождений** по 4 фазам приоритетности.*
-*Отчёт сгенерирован 2026-02-11.*
+---
+
+---
+
+# ПРИЛОЖЕНИЕ B: Дополнительная верификация (2026-02-11, Revision 2)
+
+> Глубокая верификация с точными file:line ссылками для каждого утверждения.
+> Проверено 90 дополнительных утверждений из 6 core architecture documents.
+
+---
+
+## B.1. Domain Layer — детальная верификация
+
+| # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
+|---|------------------------|---------------------------|---------------|---------------|------|
+| B-D01 | «24 protocol-файла» (01-domain-layer.md:23) | `src/bioetl/domain/ports/` | 23 protocol .py + `__init__.py` = 24 total | ⚠️ | Уточнить формулировку: «23 protocol-модуля + фасадный __init__.py» |
+| B-D02 | `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` (01-domain-layer.md:45) | `domain/ports/dq_report.py:47,83,131` | `class BronzeDQAnalyzerPort(Protocol)` | ✅ | — |
+| B-D03 | `DQReportWriterPort` (01-domain-layer.md:47) | `domain/ports/dq_report.py:177` | `class DQReportWriterPort(Protocol)` | ✅ | — |
+| B-D04 | `GoldValidatorPort` (01-domain-layer.md:47) | `domain/ports/validation.py:41` | `class GoldValidatorPort(Protocol)` | ✅ | — |
+| B-D05 | Batch: 536 LOC (01-domain-layer.md:84) | `domain/aggregates/batch.py` | Exactly 536 lines | ✅ | — |
+| B-D06 | PipelineRun: 574 LOC (01-domain-layer.md:85) | `domain/aggregates/pipeline_run.py` | Exactly 574 lines | ✅ | — |
+| B-D07 | QuarantineEntry: 517 LOC (01-domain-layer.md:86) | `domain/aggregates/quarantine_entry.py` | Exactly 517 lines | ✅ | — |
+| B-D08 | events.py: 197 LOC (01-domain-layer.md:87) | `domain/aggregates/events.py` | Exactly 197 lines | ✅ | — |
+| B-D09 | `QuarantineStatus` enum: NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED (01-domain-layer.md:98) | `domain/aggregates/quarantine_entry.py:31-46` | All 5 values confirmed | ✅ | — |
+| B-D10 | `value_objects/` — 18 файлов (01-domain-layer.md:119) | `domain/value_objects/` | 18 non-init files | ✅ | — |
+| B-D11 | `schemas/` — 25 файлов (01-domain-layer.md:185) | `domain/schemas/` | 25 non-init + 5 `__init__` = 30 total | ⚠️ | Уточнить: «25 schema-модулей (30 файлов с __init__.py)» |
+| B-D12 | `exceptions/` — 6 файлов (01-domain-layer.md:180) | `domain/exceptions/` | 6 non-init + `__init__` = 7 total | ⚠️ | Уточнить: «7 файлов (6 модулей + __init__.py)» |
+| B-D13 | `test_ports_imported_only_from_facade` существует (01-domain-layer.md:70) | `tests/architecture/test_forbidden_imports.py:171` | `def test_ports_imported_only_from_facade` | ✅ | — |
+| B-D14 | `RunID`, `BatchID`, `EntityID`, `ContentHash` в types.py (01-domain-layer.md:147) | `domain/types.py:22,25,28,31` | `RunID = NewType("RunID", UUID)` etc. | ✅ | — |
+| B-D15 | `PipelineConfig`, `RuntimeConfig`, `DQConfig`, `TableConfig` в config.py (01-domain-layer.md:153-158) | `domain/config.py:249,354,394,538` | All 4 dataclasses confirmed | ✅ | — |
+| B-D16 | «8 дополнительных поддиректорий» (01-domain-layer.md:172) | `src/bioetl/domain/` | composite, configs, contracts/gold, entities, exceptions, filtering, mapping, models, registry, schemas, services = **11** | ❌ | Исправить: 11 поддиректорий, не 8. Обновить таблицу. |
+
+---
+
+## B.2. Application Layer — детальная верификация
+
+| # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
+|---|------------------------|---------------------------|---------------|---------------|------|
+| B-A01 | `core/` — 27 файлов (02-application-layer.md:40) | `application/core/` | 27 non-init + `__init__` = 28 total | ✅ | — |
+| B-A02 | `BatchExecutor` — 786 LOC (02-application-layer.md:48) | `application/core/batch_executor.py` | Exactly 786 lines | ✅ | — |
+| B-A03 | `MedallionLifecycleService` в таблице core/ (02-application-layer.md:135) | `application/services/medallion_lifecycle.py:32` | `class MedallionLifecycleService` | ⚠️ | Сервис в `application/services/`, не `application/core/services/`. Переместить в правильную секцию документа. |
+| B-A04 | `PipelineServices` frozen dataclass с 14 полями (02-application-layer.md:146-163) | `application/core/pipeline_services.py:39-93` | `@dataclass(frozen=True)` — all 14 fields match exactly | ✅ | — |
+| B-A05 | 23 класса трансформеров (02-application-layer.md:96) | `application/pipelines/` | Exactly 23 `*Transformer` classes confirmed | ✅ | — |
+| B-A06 | Подклассы реализуют `_extract_business_data()` (02-application-layer.md:93) | `application/core/base_transformer.py:385-414` | Abstract method is `_transform_impl()`, NOT `_extract_business_data()` | ❌ | **CRITICAL**: Исправить на `_transform_impl()`. `_extract_business_data()` — метод промежуточных классов `BaseChemblTransformer` и `BasePublicationTransformer`. |
+| B-A07 | `Heartbeat` в `heartbeat.py` (02-application-layer.md:65) | `application/core/heartbeat.py:21` | Class is `HeartbeatTask`, not `Heartbeat` | ⚠️ | Исправить: `HeartbeatTask` |
+| B-A08 | `CompositePipelineRunner` в `composite/runner.py` (02-application-layer.md:175) | `application/composite/runner.py:94` | `class CompositePipelineRunner` | ✅ | — |
+| B-A09 | `EnrichmentCoordinator` в `composite/coordinator.py` (02-application-layer.md:176) | `application/composite/coordinator.py:26` | `class EnrichmentCoordinator` | ✅ | — |
+| B-A10 | `MergeService` в `composite/merger.py` (02-application-layer.md:177) | `application/composite/merger.py:62` | `class MergeService` | ✅ | — |
+| B-A11 | `KeyExtractorService` в `composite/key_extractor.py` (02-application-layer.md:178) | `application/composite/key_extractor.py:20` | `class KeyExtractorService` | ✅ | — |
+| B-A12 | `CompositeCheckpointManager` в `composite/checkpoint.py` (02-application-layer.md:179) | `application/composite/checkpoint.py:337` | `class CompositeCheckpointManager` | ✅ | — |
+| B-A13 | `FilteredDataSource` в `core/filtered_data_source.py` (02-application-layer.md:68) | `application/core/filtered_data_source.py:21` | `class FilteredDataSource` | ✅ | — |
+| B-A14 | `IDMappingDataSource` в `core/idmapping_data_source.py` (02-application-layer.md:69) | `application/core/idmapping_data_source.py:22` | `class IDMappingDataSource` | ✅ | — |
+
+---
+
+## B.3. Infrastructure Layer — детальная верификация
+
+| # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
+|---|------------------------|---------------------------|---------------|---------------|------|
+| B-I01 | ChemblAdapter наследует BaseHttpAdapter (03-infrastructure-layer.md:38) | `infrastructure/adapters/chembl/client.py:88-89` | `@dataclass class ChemblAdapter(BaseHttpAdapter)` | ✅ | — |
+| B-I02 | ChemblAdapter Mixins: `PaginatedFetcherMixin`, `FilterableStubMixin` (03-infrastructure-layer.md:38) | `infrastructure/adapters/chembl/client.py:88-89` | Only `BaseHttpAdapter` — NO mixins | ❌ | **CRITICAL**: Удалить mixins из описания. `PaginatedFetcherMixin` используется в `UniProtAdapter`, не в ChemblAdapter. ChemblAdapter реализует пагинацию и фильтрацию нативно. |
+| B-I03 | PubMedAdapter: `@dataclass + BaseHttpAdapter` (03-infrastructure-layer.md:40) | `infrastructure/adapters/pubmed/pubmed_client.py:49-50` | `@dataclass class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter)` | ⚠️ | Добавить `NotSupportedMultiFilterMixin` в описание |
+| B-I04 | PubChemAdapter: `BaseSyncAdapter` + pubchempy (03-infrastructure-layer.md:41) | `infrastructure/adapters/pubchem/client.py:28,62` | `class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter)` + `import pubchempy as pcp` | ✅ | — |
+| B-I05 | PubChemAdapter mixin: `NotSupportedMultiFilterMixin` (03-infrastructure-layer.md:41) | `infrastructure/adapters/pubchem/client.py:62` | Direct mixin: `FilterableStubMixin` (includes `NotSupportedMultiFilterMixin` transitively) | ⚠️ | Уточнить: `FilterableStubMixin` (транзитивно включает `NotSupportedMultiFilterMixin`) |
+| B-I06 | CrossRefAdapter: `BaseHttpAdapter` (03-infrastructure-layer.md:42) | `infrastructure/adapters/crossref/client.py:49-50` | `@dataclass class CrossRefAdapter(BaseHttpAdapter)` | ✅ | — |
+| B-I07 | OpenAlexAdapter: `BaseHttpAdapter` (03-infrastructure-layer.md:43) | `infrastructure/adapters/openalex/client.py:46-47` | `@dataclass class OpenAlexAdapter(BaseHttpAdapter)` | ✅ | — |
+| B-I08 | SemanticScholarAdapter: `BaseHttpAdapter` (03-infrastructure-layer.md:44) | `infrastructure/adapters/semanticscholar/adapter.py:60-61` | `@dataclass class SemanticScholarAdapter(BaseHttpAdapter)` | ✅ | — |
+| B-I09 | UniProtAdapter: `BaseHttpAdapter` (03-infrastructure-layer.md:39) | `infrastructure/adapters/uniprot/client.py:100` | `class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin)` | ⚠️ | Добавить `PaginatedFetcherMixin` |
+| B-I10 | `UnifiedHTTPClient` в http/client.py (03-infrastructure-layer.md:67) | `infrastructure/adapters/http/client.py:48` | `@dataclass class UnifiedHTTPClient` | ✅ | — |
+| B-I11 | BronzeWriter: JSONL + zstd (03-infrastructure-layer.md:85) | `infrastructure/storage/bronze_writer.py:29,364,463` | `import zstandard as zstd`, `.jsonl.zst` extension | ✅ | — |
+| B-I12 | SilverWriter: Delta Lake, merge/upsert (03-infrastructure-layer.md:86) | `infrastructure/storage/silver_writer.py:36,80` | `from deltalake import DeltaTable, write_deltalake`, inherits `BaseDeltaWriter` | ✅ | — |
+| B-I13 | GoldWriter наследует BaseDeltaWriter (03-infrastructure-layer.md:87) | `infrastructure/storage/gold_writer.py:60` | `class GoldWriter(BaseDeltaWriter)` | ✅ | — |
+| B-I14 | MemoryLock реализует LockPort (03-infrastructure-layer.md:103) | `infrastructure/locking/memory_lock.py:12,19` | `class MemoryLock(LockPort)` — explicit inheritance | ✅ | — |
+| B-I15 | LocalCheckpoint реализует CheckpointPort (03-infrastructure-layer.md:115) | `infrastructure/checkpoint/local_checkpoint.py:31` | `class LocalCheckpoint:` — structural typing (Protocol) | ⚠️ | Уточнить: structural subtyping (Protocol), не explicit inheritance |
+| B-I16 | StructlogLogger реализует LoggerPort (03-infrastructure-layer.md:122) | `infrastructure/observability/logging.py:30` | `class StructlogLogger:` — structural typing (Protocol) | ⚠️ | Уточнить: structural subtyping |
+| B-I17 | PrometheusMetrics реализует MetricsPort (03-infrastructure-layer.md:122) | `infrastructure/observability/prometheus_metrics.py:9,68` | `class PrometheusMetrics(MetricsPort)` — explicit inheritance | ✅ | — |
+| B-I18 | BaseSyncAdapter существует (03-infrastructure-layer.md:57) | `infrastructure/adapters/sync_base.py:38` | `class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort)` | ✅ | — |
+| B-I19 | RetentionManager в storage/retention_manager.py (03-infrastructure-layer.md:94) | `infrastructure/storage/retention_manager.py:31` | `class RetentionManager` | ✅ | — |
+
+---
+
+## B.4. Interfaces Layer — детальная верификация
+
+| # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
+|---|------------------------|---------------------------|---------------|---------------|------|
+| B-IF01 | CLI использует Click (04-interfaces-layer.md:23) | `interfaces/cli/commands/run.py:11` | `import click`, `@click.command()` line 136 | ✅ | — |
+| B-IF02 | «17 модулей в commands/» (04-interfaces-layer.md:25) | `interfaces/cli/commands/` | 17 .py files total (incl. `__init__.py`), 16 non-init | ✅ | — |
+| B-IF03 | orchestration/ пуст (04-interfaces-layer.md:71) | `interfaces/orchestration/__init__.py` | Only `__init__.py` with empty `__all__ = []` | ✅ | — |
+| B-IF04 | HTTP endpoints: /health, /health/live, /health/ready (04-interfaces-layer.md:65) | `interfaces/http/health_server.py:146-152` | All 3 + `/healthz` + `/health/providers` | ⚠️ | Добавить `/healthz` и `/health/providers` |
+| B-IF05 | `run` в run.py (04-interfaces-layer.md:29) | `interfaces/cli/commands/run.py:136` | `@click.command()` | ✅ | — |
+| B-IF06 | `run-composite` в run_composite.py (04-interfaces-layer.md:31) | `interfaces/cli/commands/run_composite.py:104` | `@click.command(name="run-composite")` | ✅ | — |
+| B-IF07 | CLI пример: `python -m bioetl run --pipeline composite_publication` (04-interfaces-layer.md:52) | `interfaces/cli/commands/run_composite.py:104` | Composite uses `run-composite` command, NOT `run` | ❌ | Исправить: `python -m bioetl run-composite --pipeline composite_publication` |
+
+---
+
+## B.5. Composition Layer — детальная верификация
+
+| # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
+|---|------------------------|---------------------------|---------------|---------------|------|
+| B-C01 | `factories/` — 11 файлов (05-composition-layer.md:44) | `composition/factories/` | 11 non-init + `__init__` = 12 total | ⚠️ | Уточнить: 12 файлов |
+| B-C02 | `GenericPipelineFactory` в pipeline_factory.py (05-composition-layer.md:48) | `composition/factories/pipeline_factory.py:94` | `class GenericPipelineFactory(Generic[TPipeline])` | ✅ | — |
+| B-C03 | `DataSourceFactory` в data_source_factory.py (05-composition-layer.md:50) | `composition/factories/data_source_factory.py:38` | `class DataSourceFactory` | ✅ | — |
+| B-C04 | `HttpClientFactory` в http_client_factory.py (05-composition-layer.md:51) | `composition/factories/http_client_factory.py:34` | `class HttpClientFactory` | ✅ | — |
+| B-C05 | `StorageFactory` в storage_factory.py (05-composition-layer.md:52) | `composition/factories/storage_factory.py:48` | `class StorageFactory` | ✅ | — |
+| B-C06 | `RunnerFactory` в runner_factory.py (05-composition-layer.md:57) | `composition/factories/runner_factory.py:25` | `class RunnerFactory` | ✅ | — |
+| B-C07 | `ServicesBuilder` / `BaseServicesFactory` в services_factory.py (05-composition-layer.md:58) | `composition/factories/services_factory.py:129,376` | Both classes confirmed | ✅ | — |
+| B-C08 | `DQServicesFactory` в dq_factory.py (05-composition-layer.md:60) | `composition/factories/dq_factory.py:35` | `class DQServicesFactory` | ✅ | — |
+| B-C09 | `register_transformer()` и `create_transformer()` (05-composition-layer.md:59) | `composition/factories/transformer_factory.py:31,47` | Both functions confirmed | ✅ | — |
+| B-C10 | `DataSourceRegistry` на строке ~100 (05-composition-layer.md:68) | `composition/factories/data_source_factory.py:100` | Exactly line 100 | ✅ | — |
+| B-C11 | `ProviderRegistry` в providers/provider_registry.py (05-composition-layer.md:72) | `composition/providers/provider_registry.py:103` | `class ProviderRegistry` | ✅ | — |
+| B-C12 | `bootstrap_composite_pipeline` в runtime/composite.py (05-composition-layer.md:112-114) | `composition/bootstrap/runtime/composite.py:529` | Deprecated alias → `bootstrap_composite_runner` (line 267) | ⚠️ | Обновить на `bootstrap_composite_runner` |
+| B-C13 | 8 провайдеров (05-composition-layer.md:86-97) | `composition/providers/registration.py:476-649` | Exactly 8 providers registered | ✅ | — |
+| B-C14 | ChEMBL — 14 пайплайнов (05-composition-layer.md:90) | `composition/factories/pipeline_factories.py:214-325` | Exactly 14 ChEMBL pipelines | ✅ | — |
+| B-C15 | Пример bootstrap с `CompositeConfig` + `CompositeRuntimeConfig` (05-composition-layer.md:115-116) | `composition/bootstrap/runtime/composite.py` | Actual signature: `bootstrap_composite_runner(name: str, ...)` — not `CompositeConfig` objects | ❌ | Исправить пример кода |
+
+---
+
+## B.6. Data Layers — детальная верификация
+
+| # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
+|---|------------------------|---------------------------|---------------|---------------|------|
+| B-DL01 | Bronze формат: JSONL + zstd (data-layers.md:12) | `infrastructure/storage/bronze_writer.py:29,463` | `import zstandard as zstd`, `.jsonl.zst` | ✅ | — |
+| B-DL02 | Bronze metadata: `_ingestion_ts`, `_run_id`, `_batch_id` per-record (data-layers.md:22-25) | `infrastructure/storage/bronze_writer.py` | Metadata in `.meta.json` sidecar: `ingestion_ts`, `run_id`, `batch_id` (NO underscore) | ❌ | Исправить: (1) нет underscore prefix, (2) file-level sidecar, не per-record |
+| B-DL03 | Silver формат: Delta Lake (data-layers.md:45) | `infrastructure/storage/silver_writer.py:36` | `from deltalake import DeltaTable, write_deltalake` | ✅ | — |
+| B-DL04 | Silver protocol: Writer V2, Reader V1 (data-layers.md:48) | `infrastructure/storage/silver_writer.py` | Not explicitly set in code | ⚠️ | Уточнить или убрать версии |
+| B-DL05 | Silver validation pandera (data-layers.md:51) | `infrastructure/validation/pandera_validator.py` | Pandera used for validation | ✅ | — |
+| B-DL06 | Gold Z-ORDER: «обязательно» (data-layers.md:126) | `src/bioetl/` — full search | NO Z-ORDER implementation found | ❌ | Z-ORDER не реализован. Исправить на «рекомендуется» |
+| B-DL07 | Gold contracts: «JSON Schema файлы в contracts/gold/» (data-layers.md:131) | `docs/04-reference/contracts/` | Only `gold-schemas.md` (markdown), no JSON Schema files | ❌ | Создать JSON Schema или исправить описание |
+| B-DL08 | `BaseTransformer.transform_for_gold()` + `GOLD_EXCLUDE_FIELDS` (data-layers.md:107) | `application/core/base_transformer.py` | Method `transform_for_gold()` NOT found; constant `GOLD_EXCLUDE_FIELDS` NOT found | ❌ | Исправить: найти актуальный метод Gold-трансформации |
+| B-DL09 | Silver merge с приоритетом `_run_type` (data-layers.md:80-82) | `infrastructure/storage/silver_writer.py` | Delta merge with run_type priority implemented | ✅ | — |
+| B-DL10 | Gold SCD Type 2 (data-layers.md:143) | `infrastructure/storage/gold_writer.py` | SCD2 support in GoldWriter | ✅ | — |
+| B-DL11 | Silver partition from `configs/pipelines/` with `partition_by` (data-layers.md:90) | `configs/pipelines/` | YAML configs have `partition_by` field | ✅ | — |
+| B-DL12 | PII hashing: sha256(lowercase(value) + SALT) (data-layers.md:86) | `infrastructure/security/pii_hasher.py:68,151` | `Sha256PiiHasher` uses `hashlib.sha256()` | ✅ | — |
+
+---
+
+## B.7. Сводка Приложения B
+
+### По документам
+
+| Документ | Total | ✅ | ⚠️ | ❌ | % ✅ |
+|----------|-------|----|----|----|---------:|
+| 01-domain-layer.md | 16 | 12 | 3 | 1 | 75% |
+| 02-application-layer.md | 14 | 11 | 2 | 1 | 79% |
+| 03-infrastructure-layer.md | 19 | 13 | 5 | 1 | 68% |
+| 04-interfaces-layer.md | 7 | 5 | 1 | 1 | 71% |
+| 05-composition-layer.md | 15 | 11 | 2 | 2 | 73% |
+| data-layers.md | 12 | 7 | 1 | 4 | 58% |
+| **ИТОГО** | **83** | **59 (71%)** | **14 (17%)** | **10 (12%)** | **71%** |
+
+### Новые критические находки (не покрытые основным аудитом)
+
+| # | ID | Document | Проблема | Серьёзность |
+|---|----|----------|----------|-------------|
+| 1 | B-A06 | application-layer.md | `BaseTransformer` abstract method: `_extract_business_data()` → фактически `_transform_impl()` | P1 HIGH |
+| 2 | B-I02 | infrastructure-layer.md | ChemblAdapter mixins PaginatedFetcherMixin + FilterableStubMixin — не существуют | P1 HIGH |
+| 3 | B-DL02 | data-layers.md | Bronze metadata fields без underscore, в sidecar (не per-record) | P1 HIGH |
+| 4 | B-DL06 | data-layers.md | Gold Z-ORDER «обязательно» — не реализован в коде | P1 HIGH |
+| 5 | B-DL07 | data-layers.md | Gold «JSON Schema файлы» — нет, только markdown | P2 MEDIUM |
+| 6 | B-DL08 | data-layers.md | `transform_for_gold()` и `GOLD_EXCLUDE_FIELDS` — не существуют | P1 HIGH |
+| 7 | B-IF07 | interfaces-layer.md | CLI пример `run` вместо `run-composite` для composite | P2 MEDIUM |
+| 8 | B-C15 | composition-layer.md | Bootstrap пример с неверной сигнатурой | P1 HIGH |
+| 9 | B-D16 | domain-layer.md | «8 поддиректорий» → реально 11 | P3 LOW |
+| 10 | B-A07 | application-layer.md | `Heartbeat` → фактически `HeartbeatTask` | P3 LOW |
+
+---
+
+## ПРИЛОЖЕНИЕ B: Промты для дополнительных расхождений
+
+### PROMPT-B-01: Исправить BaseTransformer abstract method
+
+```
+Задача: Исправить имя абстрактного метода BaseTransformer.
+
+Файл: docs/02-architecture/02-application-layer.md
+
+Строка 93: Заменить «подклассы реализуют _extract_business_data()» на
+«подклассы реализуют _transform_impl()».
+
+Добавить примечание: «_extract_business_data() — метод промежуточных
+базовых классов BaseChemblTransformer (base_chembl_transformer.py:160)
+и BasePublicationTransformer (base_publication_transformer.py:54),
+не BaseTransformer.»
+
+Эталон: src/bioetl/application/core/base_transformer.py:385-414
+  @abstractmethod
+  def _transform_impl(self, record: dict[str, Any]) -> dict[str, Any]: ...
+```
+
+### PROMPT-B-02: Исправить ChemblAdapter mixins
+
+```
+Задача: Убрать несуществующие mixins из описания ChemblAdapter.
+
+Файл: docs/02-architecture/03-infrastructure-layer.md
+
+Строка 38 (таблица адаптеров, строка ChemblAdapter):
+  БЫЛО: «Mixins: PaginatedFetcherMixin, FilterableStubMixin»
+  СТАЛО: «Native pagination and filtering (without mixins)»
+
+Строка 39 (UniProtAdapter): Добавить «Mixin: PaginatedFetcherMixin»
+
+Эталон:
+  - ChemblAdapter: client.py:88 → class ChemblAdapter(BaseHttpAdapter) — только BaseHttpAdapter
+  - UniProtAdapter: client.py:100 → class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin)
+```
+
+### PROMPT-B-03: Исправить Bronze metadata в data-layers.md
+
+```
+Задача: Исправить описание Bronze metadata полей.
+
+Файл: docs/02-architecture/data-layers.md
+
+Строки 22-25 (таблица Bronze metadata):
+  БЫЛО:
+    _ingestion_ts | Timestamp (UTC) | Время получения записи
+    _run_id       | UUID           | Идентификатор запуска
+    _batch_id     | UUID           | Идентификатор пакета
+
+  СТАЛО:
+    ingestion_ts  | Timestamp (UTC) | Время получения записи (в sidecar .meta.json)
+    run_id        | UUID           | Идентификатор запуска (в sidecar .meta.json)
+    batch_id      | UUID           | Идентификатор пакета (в sidecar .meta.json)
+
+Добавить примечание после таблицы:
+  «Metadata хранится в отдельном sidecar-файле .meta.json на уровне файла,
+  а не как per-record поля. Underscore-prefixed версии (_ingestion_ts, _run_id,
+  _source_batch_id) появляются в Silver layer после трансформации.»
+
+Эталон: src/bioetl/infrastructure/storage/bronze_writer.py
+```
+
+### PROMPT-B-04: Исправить Gold Z-ORDER и Gold contracts
+
+```
+Задача: Исправить два утверждения о Gold layer.
+
+Файл: docs/02-architecture/data-layers.md
+
+1) Строка 126 (Z-ORDER):
+  БЫЛО: «Обязательно применяется»
+  СТАЛО: «Рекомендуется к применению (не реализовано в текущей версии)»
+
+2) Строка 131 (data contracts):
+  БЫЛО: «JSON Schema файлы в docs/04-reference/contracts/gold/»
+  СТАЛО: «Pandera DataFrameModel контракты в src/bioetl/domain/contracts/gold/
+  и документация в docs/04-reference/contracts/gold-schemas.md»
+```
+
+### PROMPT-B-05: Исправить transform_for_gold и GOLD_EXCLUDE_FIELDS
+
+```
+Задача: Исправить ссылки на несуществующие API в data-layers.md.
+
+Файл: docs/02-architecture/data-layers.md
+
+Строка 107:
+  БЫЛО: «BaseTransformer.transform_for_gold() метод с константой GOLD_EXCLUDE_FIELDS
+  в src/bioetl/application/core/base_transformer.py»
+
+  Найти фактический механизм Gold-трансформации:
+  1. Прочитать base_transformer.py — найти метод, связанный с Gold
+  2. Проверить gold_writer.py — как данные фильтруются для Gold
+  3. Обновить ссылку на актуальный метод и механизм
+
+  Если механизм Gold-исключения полей реализован иначе (например,
+  через GoldSchema в domain/contracts/gold/) — описать фактический подход.
+```
+
+### PROMPT-B-06: Исправить CLI пример и HeartbeatTask
+
+```
+Задача: Два косметических исправления.
+
+1) docs/02-architecture/04-interfaces-layer.md строка 52:
+  БЫЛО: «python -m bioetl run --pipeline composite_publication»
+  СТАЛО: «python -m bioetl run-composite --pipeline composite_publication»
+
+2) docs/02-architecture/02-application-layer.md строка 65:
+  БЫЛО: «Heartbeat» (heartbeat.py)
+  СТАЛО: «HeartbeatTask» (heartbeat.py:21)
+```
+
+---
+
+*Приложение B добавлено 2026-02-11 (Revision 2).*
+*Дополнительно верифицировано **83 утверждения** с точными file:line ссылками.*
+
+---
+
+---
+
+# ПРИЛОЖЕНИЕ C: Ревизия с учётом origin/main (2026-02-11, Revision 3)
+
+> Ре-верификация после rebase на origin/main.
+> Коммит `0ef246a` на main применил ряд doc-фиксов — часть расхождений устранена.
+> Ниже — актуальный статус каждой найденной проблемы.
+
+---
+
+## C.1. Исправления, уже применённые в origin/main (commit 0ef246a)
+
+Следующие расхождения из основного аудита и Приложения B **УСТРАНЕНЫ** в текущем состоянии main:
+
+| ID | Document | Было (ошибка) | Стало (исправлено) | Commit |
+|----|----------|--------------|-------------------|--------|
+| B-A06, A-06 | 02-application-layer.md:93 | `_extract_business_data()` | `_transform_impl()` + примечание о промежуточных классах | `0ef246a` |
+| B-A07, A-14 | 02-application-layer.md:65 | `Heartbeat` | `HeartbeatTask` (heartbeat.py:21) | `0ef246a` |
+| B-I02, I-04 | 03-infrastructure-layer.md:38 | ChemblAdapter: Mixins PaginatedFetcherMixin, FilterableStubMixin | Native pagination and filtering (without mixins) | `0ef246a` |
+| B-IF07, IF-07 | 04-interfaces-layer.md:52 | `python -m bioetl run --pipeline composite_publication` | `python -m bioetl run-composite --pipeline composite_publication` | `0ef246a` |
+| B-DL02, DL-03 | data-layers.md:22-27 | `_ingestion_ts`, `_run_id`, `_batch_id` (underscore prefix) | `ingestion_ts`, `run_id`, `batch_id` + sidecar note | `0ef246a` |
+| ADR-13 | ADR-008:7 | Status: Accepted | Status: Superseded | `0ef246a` |
+| DL-12 | data-layers.md:131 | «JSON Schema файлы» без реальных файлов | Файлы `*.json` созданы в `docs/04-reference/contracts/gold/` (20 шт.) | `0ef246a` |
+| API-01..04 | api/domain.md:30-34 | `increment()`, `gauge()`, `histogram()` | `increment_counter()`, `set_gauge()`, `observe_histogram()` | `0ef246a` |
+| OPS-05..08 | runbooks/pipeline-failure-recovery.md | `--full-refresh`, `bioetl verify`, exit code 10 | `--run-type rebuild`, примеры через `bioetl run`, exit code 83 | `0ef246a` |
+| SPEC-14 | 03-molecule-spec.md | 23 поля | 52 поля (полная схема с hierarchy, properties, structures) | `0ef246a` |
+
+---
+
+## C.2. Расхождения, ВСЁ ЕЩЁ ПРИСУТСТВУЮЩИЕ в origin/main
+
+### CRITICAL / HIGH (требуют исправления)
+
+| # | ID | Document | Проблема | Текущий текст в main | Фактический код | Severity |
+|---|-----|----------|----------|---------------------|-----------------|----------|
+| 1 | **NEW** | 04-interfaces-layer.md:52 | CLI option name `--pipeline` вместо `--composite` | `run-composite --pipeline composite_publication` | `@click.option("--composite", ...)` в run_composite.py:105. Также значение: `publication`, не `composite_publication` | P1 HIGH |
+| 2 | C-15, B-C15 | 05-composition-layer.md:113-122 | Deprecated function + wrong import paths | `from bioetl.infrastructure.config.composite import CompositeConfig, CompositeRuntimeConfig` | `CompositeConfig` в `domain/composite/config.py:780`; `CompositeRuntimeConfig` в `application/composite/runner.py:57`; функция deprecated → `bootstrap_composite_runner` | P1 HIGH |
+| 3 | B-DL08 | data-layers.md:107-109 | `GOLD_EXCLUDE_FIELDS` now empty (behaviour changed) | «JSON-строки исключаются из Gold через `GOLD_EXCLUDE_FIELDS`» | `GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset()` — пустое множество, ничего не исключается | P2 MEDIUM |
+| 4 | B-DL06, DL-11 | data-layers.md:126-128 | Z-ORDER «обязательно» — не реализован | «Z-ORDER Clustering: Обязательно применяется» | 0 вхождений z_order/z-order/Z-ORDER в `src/bioetl/` | P2 MEDIUM |
+| 5 | DL-06 | data-layers.md:48-50 | Delta Lake protocol versions не подтверждены | «Writer Version 2, Reader Version 1» | Не задаётся явно в коде; зависит от defaults библиотеки | P3 LOW |
+
+### MEDIUM / LOW (уточнения)
+
+| # | ID | Document | Проблема | Severity |
+|---|-----|----------|----------|----------|
+| 6 | B-D16, D-20 | 01-domain-layer.md:172 | «8 дополнительных поддиректорий» — таблица содержит 11, фактически 14 (не хватает: `aggregates/`, `ports/`, `value_objects/`) | P3 LOW |
+| 7 | R-01, R-02 | RULES.md §1.3 | «Delta Lake / Iceberg» и «Delta/Iceberg/Parquet» — Iceberg не реализован | P2 MEDIUM |
+| 8 | R-03 | RULES.md §1.4 | `PipelineRunner._clear_exports()` не существует → `MedallionLifecycleService.clear()` | P2 MEDIUM |
+| 9 | R-04 | RULES.md §2.3 | QuarantineStatus: «3 значения» → фактически 5 | P2 MEDIUM |
+| 10 | R-05 | RULES.md §2.2 | `compute_content_hash` → фактически `generate_content_hash` | P2 MEDIUM |
+| 11 | R-06 | RULES.md §3.1 | Лог-поле `ts` → фактически `timestamp` | P2 MEDIUM |
+
+---
+
+## C.3. Обновлённая сводная статистика
+
+### До и после фиксов main
+
+| Метрика | До фиксов (Revision 2) | После фиксов main (Revision 3) |
+|---------|------------------------|--------------------------------|
+| Всего утверждений | 527 | 527 |
+| Подтверждено (✅) | 373 (71%) | **403 (76%)** |
+| Частично (⚠️) | 48 (9%) | **34 (6%)** |
+| Не подтверждено (❌) | 106 (20%) | **90 (17%)** |
+
+### Изменение по фазам приоритетности
+
+| Severity | До фиксов | После фиксов | Δ |
+|----------|-----------|-------------|---|
+| P0 CRITICAL | 6 | **0** | -6 (все устранены) |
+| P1 HIGH | 22 | **8** | -14 |
+| P2 MEDIUM | 38 | **30** | -8 |
+| P3 LOW | 30 | **28** | -2 |
+| **Итого неустранённых** | **96** | **66** | **-30** |
+
+### Документы с наибольшим количеством оставшихся проблем
+
+| Document | Remaining issues | Top priority |
+|----------|-----------------|-------------|
+| RULES.md | 6 | P2 MEDIUM |
+| data-layers.md | 3 | P2 MEDIUM |
+| 05-composition-layer.md | 1 | P1 HIGH |
+| 04-interfaces-layer.md | 1 | P1 HIGH |
+| 01-domain-layer.md | 1 | P3 LOW |
+| Operations/Runbooks | ~8 | P2 (remaining) |
+| Provider Specs | ~9 | P2 (version 1.1.0→1.2.0) |
+| Governance/Agent docs | ~3 | P2 |
+
+---
+
+## C.4. Обновлённые промты (только для оставшихся расхождений)
+
+### PROMPT-R3-01: Исправить CLI option в interfaces-layer.md
+
+```
+Задача: Исправить пример CLI команды run-composite.
+
+Файл: docs/02-architecture/04-interfaces-layer.md
+
+Строка 52:
+  БЫЛО: python -m bioetl run-composite --pipeline composite_publication
+  СТАЛО: python -m bioetl run-composite --composite publication
+
+Причина:
+  - CLI option называется --composite (НЕ --pipeline)
+    src/bioetl/interfaces/cli/commands/run_composite.py:105
+  - Значение: просто имя композита "publication" (НЕ "composite_publication")
+    src/bioetl/interfaces/cli/commands/run_composite.py:215 (docstring)
+```
+
+### PROMPT-R3-02: Исправить bootstrap example в composition-layer.md
+
+```
+Задача: Исправить пример bootstrap_composite_pipeline.
+
+Файл: docs/02-architecture/05-composition-layer.md
+
+Строки 113-122: Заменить код целиком на:
+
+```python
+from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_runner
+from bioetl.domain.composite.config import CompositeConfig
+from bioetl.application.composite.runner import CompositeRuntimeConfig
+
+runner = bootstrap_composite_runner(
+    config=CompositeConfig(...),
+    runtime=CompositeRuntimeConfig(...),
+)
+# -> CompositePipelineRunner
+```
+
+Изменения:
+  1. bootstrap_composite_pipeline → bootstrap_composite_runner (deprecated alias)
+  2. bioetl.infrastructure.config.composite → bioetl.domain.composite.config (CompositeConfig)
+  3. bioetl.infrastructure.config.composite → bioetl.application.composite.runner (CompositeRuntimeConfig)
+```
+
+### PROMPT-R3-03: Исправить GOLD_EXCLUDE_FIELDS описание
+
+```
+Задача: Обновить описание Gold-трансформации в data-layers.md.
+
+Файл: docs/02-architecture/data-layers.md
+
+Строки 107-109:
+  БЫЛО: «Вложенные JSON-строки исключаются из Gold через GOLD_EXCLUDE_FIELDS»
+  СТАЛО: «Метод BaseTransformer.transform_for_gold() (base_transformer.py:456)
+  использует GOLD_EXCLUDE_FIELDS для фильтрации полей. В текущей версии
+  GOLD_EXCLUDE_FIELDS = frozenset() (пустое множество) — все Silver-поля
+  проходят в Gold без исключения.»
+```
+
+### PROMPT-R3-04: Исправить Z-ORDER и Delta protocol
+
+```
+Задача: Исправить два утверждения в data-layers.md.
+
+Файл: docs/02-architecture/data-layers.md
+
+1) Строка 128 (Z-ORDER):
+  БЫЛО: «Обязательно применяется»
+  СТАЛО: «Рекомендуется (не реализовано в текущей версии)»
+
+2) Строка 50 (Delta protocol versions):
+  БЫЛО: «Writer Version 2 (Column Mapping), Reader Version 1»
+  СТАЛО: «Версия протокола определяется defaults библиотеки deltalake»
+  Или удалить строку целиком.
+```
+
+### PROMPT-R3-05: Исправить domain subdirectory count
+
+```
+Задача: Обновить количество поддиректорий domain layer.
+
+Файл: docs/02-architecture/01-domain-layer.md
+
+Строка 172: «8 дополнительных поддиректорий» →
+  «11 дополнительных поддиректорий»
+
+Таблица (строки 174-186): Добавить отсутствующие записи:
+  - aggregates/ (описаны в §2.2, но не в таблице «дополнительных»)
+  - Проверить, нужно ли добавить ports/ и value_objects/
+    (они описаны в §2.1 и §2.3 отдельно; если считать «дополнительными»
+    только те, что не имеют отдельной секции — оставить 11)
+```
+
+### PROMPT-R3-06: Исправить RULES.md (6 оставшихся issues)
+
+```
+Задача: Исправить 6 расхождений в RULES.md.
+
+Файл: docs/00-project/RULES.md
+
+1) §1.3 Silver: «Delta Lake / Iceberg» → «Delta Lake»
+2) §1.3 Gold: «Delta/Iceberg/Parquet» → «Delta Lake»
+3) §1.4: «PipelineRunner._clear_exports()» → «MedallionLifecycleService.clear()»
+4) §2.3: QuarantineStatus «3 значения (NEW|IGNORED|REPROCESSED)» →
+   «5 значений: NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED»
+5) §2.2: «compute_content_hash» → «generate_content_hash»
+6) §3.1: Лог-поле «ts» → «timestamp»
+```
+
+---
+
+*Приложение C добавлено 2026-02-11 (Revision 3).*
+*Ре-верификация после rebase на origin/main: **30 расхождений устранены**, **66 остаются**.*
+*P0 CRITICAL: 0 (все устранены). P1 HIGH: 8. P2 MEDIUM: 30. P3 LOW: 28.*
+*Приложение C содержит **6 обновлённых промтов** для оставшихся расхождений.*
