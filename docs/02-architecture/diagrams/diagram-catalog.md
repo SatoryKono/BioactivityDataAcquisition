@@ -22,7 +22,7 @@
 
 ### 1.2 Domain Layer (10)
 11. **Domain Model Overview** - Class - Все entities, value objects, aggregates
-12. **Ports Architecture** - Interface - 26 портов и их категории
+12. **Ports Architecture** - Interface - 24 порта и их категории
 13. **DDD Aggregates** - Class - PipelineRun, Batch, QuarantineEntry с границами
 14. **Domain Services** - Component - DataNormalizationService, IdentityService и др.
 15. **Value Objects Hierarchy** - Class - Все value objects и их отношения

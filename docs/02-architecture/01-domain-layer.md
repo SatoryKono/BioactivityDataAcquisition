@@ -209,7 +209,7 @@ ______________________________________________________________________
 | Domain DDD           | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid)                                  | DDD-структура домена                              |
 | Domain Models        | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid)  | Связи доменных моделей                            |
 | DDD Aggregates       | [diagrams/mermaid/09_ddd_aggregates.mmd](diagrams/mermaid/09_ddd_aggregates.mmd)         | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture   | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 26 портов                             |
+| Ports Architecture   | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd) | Архитектура 24 портов                             |
 
 ### Связанные ADR
 
