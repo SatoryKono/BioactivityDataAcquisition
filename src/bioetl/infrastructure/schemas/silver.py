@@ -47,10 +47,12 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
-        # pmc_id excluded: not available from ChEMBL API
+        pa.field("pmc_id", pa.string()),  # Not available from ChEMBL API (None values)
         pa.field("pmid", pa.string()),  # Unified: from pubmed_id
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
+        pa.field("affiliation_list", pa.string()),  # JSON array (None for ChEMBL)
+        pa.field("author_orcids", pa.string()),  # JSON array (None for ChEMBL)
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
         pa.field(
             "publication_type_unified", pa.string()
@@ -59,7 +61,9 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
             "publication_subclass", pa.string()
         ),  # Level 2: "Original Experimental Data", etc.
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
-        # publication_date excluded: not available from ChEMBL API
+        pa.field("publication_date", pa.string()),  # Not available from ChEMBL API (None values)
+        pa.field("language", pa.string()),  # Not available from ChEMBL API (None values)
+        pa.field("is_oa", pa.bool_()),  # Not available from ChEMBL API (None values)
         pa.field("src_id", pa.int64()),
         # === Unified citation metrics ===
         pa.field("citations_received", pa.int64()),  # Unified: from citation_count
@@ -166,14 +170,30 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         pa.field("canonical_smiles", pa.string()),
         pa.field("cid", pa.string()),  # Domain entity uses str for cid
+        pa.field("conformer_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("conformer_rmsd_3d", pa.float64()),
+        pa.field("complexity", pa.float64()),
+        pa.field("effective_rotor_count_3d", pa.float64()),
+        pa.field("exact_mass", pa.float64()),
+        pa.field("feature_acceptor_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_anion_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_cation_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_donor_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_hydrophobe_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_ring_count_3d", pa.float64()),  # Float for nullable int
         pa.field("inchi", pa.string()),
-        pa.field("inchikey", pa.string()),  # Matches domain entity field name
+        pa.field("inchi_key", pa.string()),  # Matches Pandera field name
         pa.field("isomeric_smiles", pa.string()),
         pa.field("iupac_name", pa.string()),
         pa.field("molecular_formula", pa.string()),
-        pa.field(
-            "molecular_weight", pa.float64()
-        ),  # Transformed to float by transformer
+        pa.field("molecular_weight", pa.float64()),
+        pa.field("monoisotopic_mass", pa.float64()),
+        pa.field("tpsa", pa.float64()),
+        pa.field("x_steric_quadrupole_3d", pa.float64()),
+        pa.field("xlogp", pa.float64()),
+        pa.field("y_steric_quadrupole_3d", pa.float64()),
+        pa.field("z_steric_quadrupole_3d", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
