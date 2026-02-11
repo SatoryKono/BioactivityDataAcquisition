@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Publication Classification Fields in Silver Output**: Classification fields now present in Silver Delta tables
+  - Added 3 classification fields to all 5 publication PyArrow schemas: `publication_type_unified` (Level 3: 214 types), `publication_subclass` (Level 2: ~25 groupings), `publication_class` (Level 1: EXP/REV/PEER)
+  - Affected schemas: `CHEMBL_PUBLICATION_SCHEMA`, `PUBMED_PUBLICATION_SCHEMA`, `SEMANTICSCHOLAR_PUBLICATION_SCHEMA`, `CROSSREF_PUBLICATION_SCHEMA`, `OPENALEX_PUBLICATION_SCHEMA`
+  - Root cause: Fields were created by transformers but filtered out by `SilverWriter._prepare_arrow_data()` due to absence in PyArrow schemas
+  - Impact: Classification fields now appear in both Silver provider tables and Composite publication output
+  - Tests: Added `TestPublicationSchemaClassificationFields` in `tests/unit/infrastructure/schemas/test_silver.py`
+  - Documentation: Updated `docs/analysis/PUBLICATION_TYPE_NORMALIZATION_ANALYSIS.md` with resolution details (§10.5)
+  - File: `src/bioetl/infrastructure/schemas/silver.py` (lines 52-56, 347-351, 777-781, 839-843, 926-930)
+
 - **`skip_gold` flag for composite sub-pipelines**: Individual pipelines (seed, enrichers,
   dependencies) running within a composite pipeline now skip their own Gold layer writing.
   Gold output is produced only by the composite merge phase, eliminating redundant writes
