@@ -37,9 +37,6 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
-from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
-    PubChemFetchStrategies,
-)
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 if TYPE_CHECKING:
@@ -117,6 +114,10 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         )
         self._mapper = PubChemEntityMapper()
         self._request_collector = APIRequestCollector()
+        from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
+            PubChemFetchStrategies,
+        )
+
         self._strategies = PubChemFetchStrategies(
             logger=logger,
             rate_limiter=rate_limiter,

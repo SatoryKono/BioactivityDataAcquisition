@@ -28,6 +28,7 @@ from bioetl.application.pipelines.semanticscholar._page_parsing import (
     parse_page_range,
     parse_volume_issue,
 )
+from bioetl.domain.schemas.common.publication_base import OA_STATUS_VALUES
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
