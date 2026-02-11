@@ -63,7 +63,7 @@ class EnricherDeduplicator:
         if missing_cols:
             return False
         unique_count = df.select(key_columns).n_unique()
-        return unique_count < len(df)  # type: ignore[no-any-return]
+        return unique_count < len(df)
 
     def _aggregate_duplicates(
         self,
@@ -153,7 +153,7 @@ class EnricherDeduplicator:
         conflicts = conflict_check.filter(
             (pl.col("n_unique") > 1) | (pl.col("has_null") & ~pl.col("all_null"))
         )
-        return conflicts.height > 0  # type: ignore[no-any-return]
+        return conflicts.height > 0
 
     def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Build expression that concatenates values with |.

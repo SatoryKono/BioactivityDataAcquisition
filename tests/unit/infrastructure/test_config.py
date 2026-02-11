@@ -250,6 +250,50 @@ class TestMedallionFormatValidation:
         yaml_config = PipelineYamlConfig.model_validate(config_dict)
         assert yaml_config.sink["bronze"].format == "jsonl"
 
+    def test_silver_jsonl_format_rejected(self):
+        """Test that JSONL format is rejected for Silver layer.
+
+        Strict positive check: only 'delta' is allowed for Silver (RULES.md §2.1).
+        Previously only 'parquet' was blocked, allowing 'jsonl' bypass.
+        """
+        from pydantic import ValidationError
+
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "silver": {"format": "jsonl"},
+            },
+        }
+
+        with pytest.raises(ValidationError, match="Silver layer MUST use 'delta'"):
+            PipelineYamlConfig.model_validate(config_dict)
+
+    def test_silver_csv_format_rejected(self):
+        """Test that CSV format is rejected for Silver layer.
+
+        CSV is not in the allowed literal types for SinkLayerConfig.format,
+        so Pydantic rejects it at the type level before the validator runs.
+        """
+        from pydantic import ValidationError
+
+        config_dict = {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "sink": {
+                "silver": {"format": "csv"},
+            },
+        }
+
+        with pytest.raises(ValidationError):
+            PipelineYamlConfig.model_validate(config_dict)
+
 
 @pytest.mark.unit
 class TestTransformConfig:
