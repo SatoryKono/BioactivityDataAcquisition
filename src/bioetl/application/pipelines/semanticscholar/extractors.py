@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.domain.schemas.common.publication_base import OA_STATUS_VALUES
+
 # Re-export from submodules for backward compatibility
 from bioetl.application.pipelines.semanticscholar._author_extractors import (
     extract_affiliations,
@@ -159,7 +161,7 @@ def extract_journal_info(
 
 
 # Valid OA status values (normalized to lowercase for consistency with OpenAlex)
-VALID_OA_STATUS_VALUES = {"gold", "green", "hybrid", "bronze", "closed"}
+OA_STATUS_SET = frozenset(OA_STATUS_VALUES)
 
 
 def normalize_oa_status(status: str | None) -> str | None:
@@ -188,7 +190,7 @@ def normalize_oa_status(status: str | None) -> str | None:
     if status is None:
         return None
     normalized = status.lower().strip()
-    return normalized if normalized in VALID_OA_STATUS_VALUES else None
+    return normalized if normalized in OA_STATUS_SET else None
 
 
 def extract_open_access_info(
@@ -305,7 +307,7 @@ def extract_fields_of_study(
 
 
 __all__ = [
-    "VALID_OA_STATUS_VALUES",
+    "OA_STATUS_SET",
     "extract_affiliations",
     "extract_author_h_indices",
     "extract_author_ids",

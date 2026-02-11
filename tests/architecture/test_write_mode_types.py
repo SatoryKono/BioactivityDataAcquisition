@@ -14,7 +14,10 @@ from pathlib import Path
 
 import pytest
 
-DOMAIN_CONFIG_PATH = Path("src/bioetl/domain/config.py")
+DOMAIN_CONFIG_PATHS = [
+    Path("src/bioetl/domain/config/table.py"),
+    Path("src/bioetl/domain/config/pipeline.py"),
+]
 
 
 class WriteModeTypeChecker(ast.NodeVisitor):
@@ -50,7 +53,7 @@ class WriteModeTypeChecker(ast.NodeVisitor):
 def test_no_literal_write_modes_in_domain_config() -> None:
     """Domain config SHOULD use WriteMode enums, not Literal strings.
 
-    This test verifies that write_mode fields in domain/config.py
+    This test verifies that write_mode fields in the domain/config/ package
     use SilverWriteMode/GoldWriteMode enums from domain/medallion.py
     instead of Literal["merge", "append", ...] strings.
 
@@ -58,35 +61,35 @@ def test_no_literal_write_modes_in_domain_config() -> None:
     allows string values that are converted to enums in __post_init__.
     Will become a MUST after full migration.
     """
-    if not DOMAIN_CONFIG_PATH.exists():
-        pytest.skip(f"{DOMAIN_CONFIG_PATH} does not exist")
+    existing_paths = [p for p in DOMAIN_CONFIG_PATHS if p.exists()]
+    if not existing_paths:
+        pytest.skip("No domain config files found")
 
-    source = DOMAIN_CONFIG_PATH.read_text()
-    tree = ast.parse(source)
+    all_pure_literals: list[tuple[str, int, str]] = []
+    for config_path in existing_paths:
+        source = config_path.read_text()
+        tree = ast.parse(source)
 
-    checker = WriteModeTypeChecker()
-    checker.visit(tree)
+        checker = WriteModeTypeChecker()
+        checker.visit(tree)
 
-    # Currently we allow Literal for backward compatibility with type: str | Enum
-    # But we want to track and eventually remove all pure Literal annotations
-    # This test documents the current state
-
-    # Expect NO pure Literal[...] for write modes (should be Enum | str)
-    pure_literals = [
-        (line, vals)
-        for line, vals in checker.literal_write_modes
-        # Filter out lines that are part of | str union type
-        if "str" not in source.split("\n")[line - 1]
-    ]
+        # Expect NO pure Literal[...] for write modes (should be Enum | str)
+        pure_literals = [
+            (str(config_path), line, vals)
+            for line, vals in checker.literal_write_modes
+            # Filter out lines that are part of | str union type
+            if "str" not in source.split("\n")[line - 1]
+        ]
+        all_pure_literals.extend(pure_literals)
 
     # For now, just report - will be a hard failure after migration
-    if pure_literals:
+    if all_pure_literals:
         warnings = [
-            f"  Line {line}: Literal{vals} should use WriteMode enum"
-            for line, vals in pure_literals
+            f"  {path} Line {line}: Literal{vals} should use WriteMode enum"
+            for path, line, vals in all_pure_literals
         ]
         pytest.skip(
-            f"Found {len(pure_literals)} Literal write mode annotations:\n"
+            f"Found {len(all_pure_literals)} Literal write mode annotations:\n"
             + "\n".join(warnings)
         )
 
@@ -165,17 +168,19 @@ def test_table_config_accepts_enums_directly() -> None:
 
 def test_pipeline_config_converts_strings_to_enums() -> None:
     """PipelineConfig MUST convert string write modes to enums."""
-    from bioetl.domain.config import PipelineConfig
+    from bioetl.domain.config import PipelineConfig, TableConfig
     from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
     config = PipelineConfig(
         pipeline_name="test",
         provider="test",
         entity_type="test",
-        primary_keys=("id",),
-        silver_table="test_silver",
-        write_mode="merge",
-        gold_write_mode="scd2",
+        table=TableConfig(
+            primary_keys=("id",),
+            silver_table="test_silver",
+            silver_write_mode="merge",
+            gold_write_mode="scd2",
+        ),
     )
 
     assert isinstance(config.write_mode, SilverWriteMode)

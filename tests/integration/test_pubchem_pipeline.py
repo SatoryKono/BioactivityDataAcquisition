@@ -13,7 +13,7 @@ import pytest
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.pubchem import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -25,9 +25,11 @@ def pubchem_config() -> PipelineConfig:
         pipeline_name="pubchem_compound",
         provider="pubchem",
         entity_type="compound",
-        primary_keys=["cid"],
-        silver_table="pubchem.compound",
-        gold_table="pubchem.compound_gold",
+        table=TableConfig(
+            primary_keys=["cid"],
+            silver_table="pubchem.compound",
+            gold_table="pubchem.compound_gold",
+        ),
         batch_size=100,
         checkpoint_interval=1000,
         fields=[

@@ -16,6 +16,7 @@ from bioetl.domain.filtering.list_filters import (
 )
 from bioetl.domain.filtering.load_result import FilterLoadResult
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
+from bioetl.domain.filtering.silver_config import SilverFilterConfig
 
 __all__ = [
     "FilterColumn",
@@ -27,4 +28,5 @@ __all__ = [
     "GoldListLengthFilter",
     "GoldRangeFilter",
     "InputFilterConfig",
+    "SilverFilterConfig",
 ]

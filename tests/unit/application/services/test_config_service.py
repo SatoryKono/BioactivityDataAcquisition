@@ -11,7 +11,7 @@ from bioetl.application.services.config_service import (
     PipelineInfo,
     SettingsInfo,
 )
-from bioetl.domain.config import PipelineConfig
+from bioetl.domain.config import PipelineConfig, TableConfig
 
 
 def _make_mock_settings() -> MagicMock:
@@ -80,8 +80,10 @@ def config_service(mock_logger: MagicMock) -> ConfigService:
                 pipeline_name="chembl_activity",
                 provider="chembl",
                 entity_type="activity",
-                primary_keys=("activity_id",),
-                silver_table="chembl_activity_silver",
+                table=TableConfig(
+                    primary_keys=("activity_id",),
+                    silver_table="chembl_activity_silver",
+                ),
             )
         ),
         _registry_accessor=MagicMock(
