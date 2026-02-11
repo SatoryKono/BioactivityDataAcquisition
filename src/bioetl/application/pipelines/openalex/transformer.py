@@ -218,6 +218,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "openalex_id": openalex_id,
             "doi": doi,
             "pmid": external_ids.get("pmid"),
+            "pmc_id": None,  # Not available from OpenAlex API
             "mag_id": external_ids.get("mag_id"),
             "title": rec.get("title"),
             "abstract": abstract,
@@ -300,23 +301,23 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding pmc_id.
+        """Convert Domain Entity to SilverRecord.
 
-        Overrides base implementation to remove fields not collected for OpenAlex.
+        OpenAlex doesn't provide pmc_id, so it will be None in the entity.
+        This None value satisfies the PublicationBaseSchema inheritance requirement.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without pmc_id and doc_type fields.
+            SilverRecord dictionary with all PublicationBaseSchema fields.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
-        # Get base silver record
+        # Get base silver record (includes all fields with None values)
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields
-        silver_record.pop("pmc_id", None)
+        # Note: pmc_id is kept (with None value) to satisfy PublicationBaseSchema
 
         return silver_record
