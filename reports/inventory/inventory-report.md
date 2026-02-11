@@ -463,3 +463,529 @@ Despite these ports being dead, concrete implementations exist:
 | `PubChemCompoundPipeline` double def | Duplicate class | `compound.py` removed; single definition in `__init__.py` |
 | `PubMedPublicationPipeline` double def | Duplicate class | `publication.py` removed; single definition in `__init__.py` |
 | `UniProtProteinPipeline` double def | Duplicate class | `protein.py` removed; single definition in `__init__.py` |
+
+---
+
+## Appendix D: Промпты для модификации кода
+
+Готовые к использованию промпты. Каждый промпт самодостаточен — содержит контекст,
+файлы и ожидаемый результат. Рекомендуется выполнять в указанном порядке:
+Quick Wins (QW) → Refactorings (RF).
+
+---
+
+### QW-2: Удаление мёртвых Event-классов
+
+```
+Удали 4 мёртвых Event-класса из src/bioetl/domain/aggregates/events.py:
+
+- PipelineStarted (строка ~48)
+- StageCompleted (строка ~103)
+- DQThresholdExceeded (строка ~233)
+- SchemaEvolutionDetected (строка ~249)
+
+Все 4 класса наследуют DomainEvent, но не используются ни в production, ни в тестах
+(0 ссылок в src/bioetl/, 0 ссылок в tests/). Они НЕ экспортируются из
+domain/aggregates/__init__.py.
+
+Шаги:
+1. Удали определения 4 классов из events.py.
+2. Удали импорты, ставшие ненужными (если какой-то import используется только этими классами).
+3. Убедись что файл events.py остаётся синтаксически корректным.
+4. Запусти: grep -rn "PipelineStarted\|StageCompleted\|DQThresholdExceeded\|SchemaEvolutionDetected" src/ tests/ — должно быть 0 результатов.
+5. Запусти pytest tests/unit/domain/aggregates/ -x — тесты должны проходить.
+
+Ожидаемый результат: −120 LOC, без поломок.
+```
+
+---
+
+### QW-3: Удаление мёртвых Exceptions
+
+```
+Удали 3 мёртвых исключения, которые определены и ре-экспортируются, но нигде не используются:
+
+1. ConfigurationError в src/bioetl/domain/exceptions/infrastructure.py (строка ~57)
+2. FileSystemError в src/bioetl/domain/exceptions/infrastructure.py (строка ~82)
+3. InternalError в src/bioetl/domain/exceptions/internal.py (строка ~24)
+
+Шаги:
+1. Удали определения классов из соответствующих файлов.
+2. Удали их из __all__ и из import-строк в src/bioetl/domain/exceptions/__init__.py.
+3. Проверь что domain/__init__.py не ре-экспортирует их — если да, удали оттуда тоже.
+4. Запусти: grep -rn "ConfigurationError\|FileSystemError\|InternalError" src/bioetl/ tests/ --include="*.py" — убедись что осталось 0 ссылок (кроме возможных строк в самих удалённых определениях).
+5. Запусти pytest tests/unit/domain/ -x и pytest tests/architecture/ -x.
+
+Ожидаемый результат: −30 LOC. Эти исключения не импортируются и не выбрасываются нигде.
+```
+
+---
+
+### QW-4: Удаление мёртвых инфраструктурных классов
+
+```
+Удали 4 мёртвых класса из infrastructure-слоя (0 ссылок в production и тестах):
+
+1. ChemblStatusResponse в src/bioetl/infrastructure/adapters/chembl/models.py (строка ~611)
+   — Pydantic-модель для ответа ChEMBL status, не используется нигде.
+
+2. HasProviderName в src/bioetl/infrastructure/adapters/filterable_mixin.py (строка ~22)
+   — Protocol с единственным полем provider_name, не используется.
+
+3. HealthCheckObservability в src/bioetl/infrastructure/adapters/health_check_mixin.py (строка ~39)
+   — Protocol для health check адаптеров, не используется.
+
+4. PageFetcher в src/bioetl/infrastructure/adapters/http/pagination.py (строка ~14)
+   — Generic Protocol для пагинированного fetch, не используется.
+
+Шаги:
+1. Удали каждый класс из файла.
+2. Если класс упомянут в __all__ своего модуля — удали из __all__.
+3. Удали ставшие ненужными импорты (typing.Protocol, runtime_checkable и т.д.) если они не используются другими классами в том же файле.
+4. Запусти: grep -rn "ChemblStatusResponse\|HasProviderName\|HealthCheckObservability\|PageFetcher" src/ tests/ — 0 результатов.
+5. Запусти pytest tests/unit/infrastructure/ -x.
+
+Ожидаемый результат: −60 LOC.
+```
+
+---
+
+### QW-5: Удаление orphan-модуля config_types.py
+
+```
+Удали orphan-файл src/bioetl/domain/config_types.py (446 LOC).
+
+Контекст: файл содержит TypedDict-определения (RateLimitDict, RetryPolicyDict и др.),
+которые были вытеснены dataclass-аналогами в domain/configs/ и domain/resilience.py.
+Единственная "ссылка" — комментарий в domain/configs/base.py, а не import.
+
+Шаги:
+1. Проверь: grep -rn "config_types" src/bioetl/ — должно быть 0 import-ов (только комментарий).
+2. Проверь: grep -rn "RateLimitDict\|RetryPolicyDict\|CircuitBreakerDict\|HealthCheckDict" src/bioetl/ — убедись что TypedDict-имена из этого файла не используются нигде.
+3. Удали файл: src/bioetl/domain/config_types.py.
+4. Если есть ссылка в domain/__init__.py — удали.
+5. Запусти pytest tests/ -x --timeout=60.
+
+Ожидаемый результат: −446 LOC. Файл не импортируется, типы мигрированы.
+```
+
+---
+
+### QW-6: Удаление orphan-модуля _field_orders.py
+
+```
+Удали orphan-файл src/bioetl/domain/schemas/_field_orders.py (223 LOC).
+
+Контекст: файл содержит PUBLICATION_FIELD_ORDER и PUBLICATION_CANONICAL_CATEGORIES —
+константы порядка полей, не импортируемые ни в production, ни в тестах. Функциональность
+перенесена в domain/schemas/column_order.py и domain/value_objects/column_order.py.
+
+Шаги:
+1. Проверь: grep -rn "_field_orders\|PUBLICATION_FIELD_ORDER\|PUBLICATION_CANONICAL_CATEGORIES" src/bioetl/ tests/ — должно быть 0 import-ов.
+2. Удали файл: src/bioetl/domain/schemas/_field_orders.py.
+3. Запусти pytest tests/ -x --timeout=60.
+
+Ожидаемый результат: −223 LOC.
+```
+
+---
+
+### QW-7: Удаление deprecated shim dq_metrics_calculator.py
+
+```
+Удали deprecated re-export shim src/bioetl/application/services/dq_metrics_calculator.py (25 LOC).
+
+Контекст: файл содержит DeprecationWarning и ре-экспорт из bioetl.domain.services.dq_metrics_calculator.
+Никто не импортирует из bioetl.application.services.dq_metrics_calculator —
+все потребители уже используют domain-версию напрямую.
+
+Шаги:
+1. Проверь: grep -rn "from bioetl.application.services.dq_metrics_calculator" src/ tests/ — 0 результатов.
+2. Удали файл.
+3. Если application/services/__init__.py содержит import из этого модуля — проверь что import идёт из domain.services, а не из application.services.
+4. Запусти pytest tests/ -x --timeout=60.
+
+Ожидаемый результат: −25 LOC.
+```
+
+---
+
+### QW-8 / RF-DRIFT: Устранение конфликта DriftLevel enum
+
+```
+Устрани конфликт двух DriftLevel enum с разными значениями:
+
+- src/bioetl/domain/types.py:83 — DriftLevel(StrEnum) со значениями "INFO", "WARN", "CRITICAL" (UPPERCASE)
+- src/bioetl/domain/value_objects/dq_report.py:41 — DriftLevel(StrEnum) со значениями "info", "warn", "critical" (lowercase)
+
+Это BUG RISK: `from bioetl.domain import DriftLevel` и `from bioetl.domain.value_objects import DriftLevel`
+дают разные классы с разными строковыми значениями.
+
+Потребители:
+- domain/transformations.py → импортирует из domain.types (UPPERCASE)
+- application/services/dq/silver_analyzer.py → импортирует из domain.value_objects.dq_report (lowercase)
+
+Шаги:
+1. Определи каноническую версию: domain/types.py (UPPERCASE) — она используется в domain/transformations.py, ре-экспортируется из domain/__init__.py.
+2. В src/bioetl/domain/value_objects/dq_report.py: удали определение DriftLevel, замени на import из domain.types:
+   `from bioetl.domain.types import DriftLevel`
+3. В domain/value_objects/__init__.py: замени ре-экспорт так, чтобы он указывал на единственный DriftLevel.
+4. В application/services/dq/silver_analyzer.py: обнови import на `from bioetl.domain.types import DriftLevel`.
+5. Найди все места сравнения с lowercase строками ("info", "warn", "critical") и обнови на UPPERCASE ("INFO", "WARN", "CRITICAL") или на enum-члены.
+6. Запусти: grep -rn "DriftLevel" src/bioetl/ — убедись что все import ведут к единому определению.
+7. Запусти pytest tests/ -x.
+
+Ожидаемый результат: единый DriftLevel enum, устранённый риск silent bugs при сравнении.
+```
+
+---
+
+### QW-9: Удаление мёртвых констант
+
+```
+Удали 15 мёртвых констант (0 ссылок в production-коде):
+
+Файл src/bioetl/application/core/field_specs.py:
+- STR (строка ~35) — удали из файла и из __all__
+
+Файл src/bioetl/domain/mapping/publication_type_classification.py:
+- CLASSIFICATION_TABLE_SIZE (строка ~1521)
+
+Файл src/bioetl/domain/registry/publication.py:
+- ALL_PUBLICATION_ENTITY_TYPES (строка ~171)
+
+Файл src/bioetl/domain/schemas/column_order.py:
+- ALL_PUBLICATION_FIELDS (строка ~84)
+
+Файл src/bioetl/domain/schemas/crossref/publication.py:
+- DOCUMENT_TYPES (строка ~23)
+
+Файл src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:
+- ALL_SUPPORTED_ENTITY_TYPES (строка ~88)
+- ENTITY_MAPPING (строка ~315)
+- ENTITY_PLURAL (строка ~326)
+- PK_FIELD_OVERRIDES (строка ~333)
+
+Файл src/bioetl/infrastructure/adapters/health_check_mixin.py:
+- DEFAULT_HEALTH_CHECK_TIMEOUT_SECONDS (строка ~36)
+
+Файл src/bioetl/infrastructure/observability/metrics.py:
+- HEALTH_CHECK_FAILURES_TOTAL (строка ~175)
+- HEALTH_CHECK_LATENCY_SECONDS (строка ~181)
+- HEALTH_CHECK_SUCCESS_TOTAL (строка ~169)
+
+Шаги:
+1. Для каждой константы проверь: grep -rn "CONSTANT_NAME" src/bioetl/ tests/ — 0 ссылок кроме определения.
+2. Удали определение из файла.
+3. Если константа в __all__ — удали из __all__.
+4. Удали ставшие ненужными imports.
+5. Запусти pytest tests/ -x.
+
+Ожидаемый результат: −30 LOC, чище кодовая база.
+```
+
+---
+
+### QW-10: Удаление orphan-модуля chembl/exceptions.py
+
+```
+Удали orphan-файл src/bioetl/infrastructure/adapters/chembl/exceptions.py (116 LOC).
+
+Контекст: файл содержит иерархию ChemblApiError, но НЕ импортируется ни одним модулем
+в src/bioetl/ — ни напрямую, ни через chembl/__init__.py. Ошибки ChEMBL-адаптера
+обрабатываются через domain/exceptions/.
+
+Шаги:
+1. Проверь: grep -rn "from bioetl.infrastructure.adapters.chembl.exceptions\|from bioetl.infrastructure.adapters.chembl import.*Error\|ChemblApiError" src/bioetl/ — должно быть 0 import-ов из этого модуля.
+2. Проверь chembl/__init__.py — убедись что нет ре-экспорта из exceptions.
+3. Удали файл.
+4. Запусти pytest tests/unit/infrastructure/adapters/chembl/ -x.
+
+Ожидаемый результат: −116 LOC.
+```
+
+---
+
+### RF-NOOP: Консолидация NoOp-реализаций
+
+```
+Консолидируй две параллельные NoOp-иерархии в единую каноническую локацию.
+
+Сейчас:
+- domain/ports/noop.py (470 LOC): NoOpTracing, NoOpMetrics, NoOpAudit, NoOpPiiHasher, NoOpMemoryMonitor, NoOpMetadataWriter
+- infrastructure/observability/noop_tracing.py (60 LOC): NoOpTracing (дубликат)
+- infrastructure/observability/noop_metrics.py (88 LOC): NoOpMetrics (дубликат, расширенный с warn_on_use)
+
+Дубли: NoOpTracing и NoOpMetrics определены в обоих местах с разными реализациями.
+
+Потребители domain/ports/noop.py:
+- application/core/base_transformer.py, batch_tracing.py
+- infrastructure/adapters/http/client.py, bronze_writer.py, gold_writer.py
+- infrastructure/adapters/base.py, sync_base.py, health_check_mixin.py
+- Все provider clients (chembl, crossref, openalex, pubmed, semanticscholar, uniprot)
+
+Потребители infrastructure/observability/noop_*.py:
+- composition/bootstrap/assembly/storage.py, cli/noop.py, runtime/observability.py
+- composition/factories/services_factory.py, storage_factory.py
+- infrastructure/storage/silver_writer.py
+
+Шаги:
+1. Каноническая локация: domain/ports/noop.py (больше потребителей, ближе к портам).
+2. Если infrastructure NoOpMetrics имеет полезную логику warn_on_use — перенеси её в domain-версию.
+3. В каждом потребителе infrastructure/observability/noop_*.py замени import на domain/ports:
+   `from bioetl.domain.ports import NoOpTracing, NoOpMetrics`
+4. Удали файлы infrastructure/observability/noop_tracing.py и noop_metrics.py.
+5. Обнови infrastructure/observability/__init__.py (убери ре-экспорты удалённых модулей).
+6. Запусти: grep -rn "from bioetl.infrastructure.observability.noop_tracing\|from bioetl.infrastructure.observability.noop_metrics" src/ — 0 результатов.
+7. Запусти pytest tests/ -x и pytest tests/architecture/ -x.
+
+Ожидаемый результат: −148 LOC (noop_tracing.py + noop_metrics.py), единая точка определения NoOp.
+```
+
+---
+
+### RF-NORM: Очистка нормализационной иерархии
+
+```
+Очисти нормализационную иерархию domain-слоя, которая содержит 3 пересекающиеся системы.
+
+Проблема:
+- System A: domain/ports/normalization.py — 5 DEAD портов (0 ссылок): ActivityAggregatorPort,
+  NormalizationServicePort, OutlierFilterPort, UnitConverterPort, ValueValidatorPort.
+  Конкретные сервисы (NormalizationService, UnitConverter и др.) используются напрямую, минуя порты.
+- System B: domain/ports/data_normalization.py — DataNormalizationPort (ACTIVE, 12 refs). OK.
+- System C: domain/normalization.py — standalone-функции (normalize_string, normalize_doi,
+  parse_date_field и др.), частично дублирующие DataNormalizationService.
+
+Шаги:
+1. Удали 5 мёртвых портов из src/bioetl/domain/ports/normalization.py.
+2. Удали ре-экспорт этих портов из domain/ports/__init__.py:
+   - ActivityAggregatorPort
+   - NormalizationServicePort
+   - OutlierFilterPort
+   - UnitConverterPort
+   - ValueValidatorPort
+3. Если domain/ports/normalization.py стал пустым — удали файл.
+4. Проверь domain/__init__.py — удали ре-экспорт мёртвых портов если есть.
+5. Запусти pytest tests/architecture/ -x — архитектурные тесты должны проходить.
+6. Запусти pytest tests/ -x.
+
+Примечание: Консолидация standalone-функций в normalization.py с DataNormalizationService
+требует отдельного рефакторинга — здесь удаляем только мёртвые порты.
+
+Ожидаемый результат: −5 мёртвых Protocol-классов, чище port-контракты.
+```
+
+---
+
+### RF-TODOMAIN: Дедупликация to_domain() конвертеров
+
+```
+Устрани дублирование to_domain() методов между base_schemas.py и pipeline_config.py.
+
+Дубли:
+1. BaseGoldFiltersConfig.to_domain() в src/bioetl/infrastructure/schemas/base_schemas.py (строка ~551, 61 LOC)
+   vs GoldFiltersConfig.to_domain() в src/bioetl/infrastructure/schemas/pipeline_config.py (строка ~795)
+   — AST-идентичны. Оба класса наследуют BaseModel напрямую, без наследования друг от друга.
+
+2. BaseInputFilterConfig.to_domain() в base_schemas.py (строка ~333, 35 LOC)
+   vs InputFilterConfig.to_domain() в pipeline_config.py (строка ~363)
+   — AST-идентичны. Та же ситуация.
+
+Варианты решения (выбери один):
+
+A) Наследование: GoldFiltersConfig(BaseGoldFiltersConfig) и InputFilterConfig(BaseInputFilterConfig)
+   — to_domain() наследуется автоматически. Нужно проверить совместимость полей Pydantic.
+
+B) Общий mixin/helper: вынести логику конвертации в standalone-функцию:
+   def _gold_filters_to_domain(config: BaseModel) -> GoldFilterConfig: ...
+   и вызывать из обоих классов.
+
+C) Делегирование: pipeline_config.py-версии делегируют к base_schemas.py:
+   def to_domain(self): return BaseGoldFiltersConfig(**self.model_dump()).to_domain()
+
+Шаги:
+1. Сравни поля BaseGoldFiltersConfig и GoldFiltersConfig — если идентичны, используй вариант A.
+2. Аналогично для BaseInputFilterConfig и InputFilterConfig.
+3. Удали дублирующий to_domain() из pipeline_config.py-версий.
+4. Запусти pytest tests/unit/infrastructure/schemas/ -x.
+5. Запусти pytest tests/ -x.
+
+Ожидаемый результат: −96 LOC, единая точка конвертации schema→domain.
+```
+
+---
+
+### RF-FALLBACK: Удаление избыточного override в SemanticScholar fallback
+
+```
+Удали избыточный override метода _process_found_result в SemanticScholarTitleFallbackHandler.
+
+Файл: src/bioetl/infrastructure/adapters/semanticscholar/fallback.py
+Класс: SemanticScholarTitleFallbackHandler (наследует BaseTitleFallbackHandler)
+Метод: _process_found_result — переопределяет базовый метод идентичным кодом (no-op override).
+
+Базовый метод в src/bioetl/infrastructure/adapters/common/base_title_fallback.py:
+  result["_lookup_method"] = "title_fallback"
+  result["_original_id"] = original_doi
+
+Override в SemanticScholar делает ровно то же самое — нет кастомной логики.
+
+Шаги:
+1. Удали метод _process_found_result из SemanticScholarTitleFallbackHandler.
+2. Базовая реализация будет использоваться автоматически через наследование.
+3. Запусти pytest tests/unit/infrastructure/adapters/semanticscholar/ -x.
+4. Запусти pytest tests/ -x.
+
+Ожидаемый результат: −15 LOC, наследование работает как задумано.
+```
+
+---
+
+### RF-CBCFG: Консолидация CircuitBreakerConfig
+
+```
+Устрани тройное определение CircuitBreakerConfig (3 класса в разных слоях).
+
+Текущее состояние:
+1. src/bioetl/domain/resilience.py:124 — @dataclass (frozen) — каноническое domain value object
+2. src/bioetl/infrastructure/schemas/pipeline_config.py:267 — Pydantic BaseModel с to_domain() — OK (schema→domain converter pattern)
+3. src/bioetl/composition/bootstrap_contexts.py:120 — @dataclass — ДУБЛИКАТ domain-версии
+
+Потребители composition-версии:
+- composition/providers/_config_helpers.py
+
+Шаги:
+1. В composition/bootstrap_contexts.py: удали определение CircuitBreakerConfig.
+2. Замени на import из domain: `from bioetl.domain.resilience import CircuitBreakerConfig`
+3. В composition/providers/_config_helpers.py: обнови import если он шёл из bootstrap_contexts.
+4. Убедись что domain/resilience.py:CircuitBreakerConfig имеет все поля, которые были в composition-версии.
+5. Запусти pytest tests/ -x.
+
+Примечание: Pydantic-версия в pipeline_config.py — штатный паттерн (YAML schema → domain).
+Оставляем её. Удаляем только composition-дубль.
+
+Ожидаемый результат: −20 LOC, два определения вместо трёх.
+```
+
+---
+
+### RF-RUNST: Разрешение дублирования RunStatus
+
+```
+Разреши конфликт двух RunStatus enum с разными членами.
+
+Текущее состояние:
+1. src/bioetl/domain/aggregates/pipeline_run.py:27 — RunStatus(StrEnum):
+   PENDING, RUNNING, COMPLETED, FAILED, SHUTDOWN — состояния жизненного цикла PipelineRun aggregate.
+
+2. src/bioetl/application/services/pipeline_runner_service.py:34 — RunStatus(StrEnum):
+   SUCCESS, SHUTDOWN, FAILED, DRY_RUN — результат выполнения runner service.
+
+Семантически это РАЗНЫЕ enum с одинаковым именем:
+- Domain: lifecycle state (PENDING→RUNNING→COMPLETED/FAILED/SHUTDOWN)
+- Application: outcome status (SUCCESS/FAILED/SHUTDOWN/DRY_RUN)
+
+Шаги:
+1. Переименуй application-версию в PipelineRunResult или RunOutcome:
+   - В src/bioetl/application/services/pipeline_runner_service.py
+   - Обнови все import в composition/ и interfaces/cli/
+2. Оставь domain-версию RunStatus без изменений.
+3. grep -rn "RunStatus" src/bioetl/ — убедись что нет путаницы.
+4. Запусти pytest tests/ -x.
+
+Ожидаемый результат: устранена двусмысленность имён, 0 LOC изменение.
+```
+
+---
+
+### RF-ENTITY: Разрешение entity/model дублирования
+
+```
+Разреши дублирование entity-классов между domain/entities и infrastructure/adapters:
+
+1. ChemblPublicationRecord:
+   - src/bioetl/domain/entities/chembl.py:511 — domain entity
+   - src/bioetl/infrastructure/adapters/chembl/models.py:467 — infrastructure model
+
+2. PubchemMoleculeRecord:
+   - src/bioetl/domain/entities/pubchem.py:24 — domain entity
+   - src/bioetl/infrastructure/adapters/pubchem/models.py:19 — infrastructure model
+
+Шаги:
+1. Сравни поля domain-версий и infrastructure-версий для каждой пары.
+2. Если поля идентичны: удали infrastructure-версию, замени import на domain-версию.
+3. Если поля различаются: переименуй infrastructure-версию (напр. RawChemblPublicationRecord),
+   чтобы было ясно что это raw API response, а domain-версия — нормализованный entity.
+4. Обнови все import потребителей.
+5. Запусти pytest tests/ -x.
+
+Ожидаемый результат: устранена двусмысленность, ясная граница domain vs infrastructure.
+```
+
+---
+
+### RF-PAGES: Консолидация parse_page_range
+
+```
+Консолидируй две реализации parse_page_range():
+
+1. src/bioetl/domain/normalization.py:160 — базовая версия (не обрабатывает сокращённые диапазоны вроде "737-9")
+2. src/bioetl/infrastructure/adapters/semanticscholar/_page_parsing.py:124 — расширенная версия (обрабатывает "737-9" → "737-739")
+
+Шаги:
+1. Перенеси расширенную логику из _page_parsing.py в domain/normalization.py:parse_page_range().
+2. В _page_parsing.py замени реализацию на import:
+   `from bioetl.domain.normalization import parse_page_range`
+   или удали файл если в нём нет другой логики.
+3. Напиши unit-тесты для новых edge cases ("737-9" → "737-739") в tests/unit/domain/.
+4. Запусти pytest tests/ -x.
+
+Ожидаемый результат: −40 LOC, единая реализация в domain с полным набором возможностей.
+```
+
+---
+
+### RF-HASH: Консолидация _normalize_for_hash
+
+```
+Консолидируй 3 реализации _normalize_for_hash():
+
+1. src/bioetl/domain/transformations.py:81
+2. src/bioetl/domain/services/identity_service.py:119
+3. src/bioetl/composition/services/versioning.py:65
+
+Шаги:
+1. Определи каноническую версию (domain/transformations.py — наиболее общая).
+2. В identity_service.py и versioning.py замени локальную реализацию на import:
+   `from bioetl.domain.transformations import _normalize_for_hash`
+   Или, если функция приватная и не экспортируется: сделай её публичной (normalize_for_hash)
+   и добавь в domain/transformations/__all__.
+3. Убедись что все 3 реализации семантически идентичны. Если нет — определи superset-логику.
+4. Запусти pytest tests/ -x.
+
+Ожидаемый результат: −50 LOC, единая hash-нормализация.
+```
+
+---
+
+### RF-ORPHAN: Удаление оставшихся orphan-модулей
+
+```
+Удали 2 оставшихся orphan-модуля, не охваченных Quick Wins:
+
+1. src/bioetl/infrastructure/adapters/chembl/exceptions.py (116 LOC)
+   — ChemblApiError иерархия, не импортируется ни одним модулем.
+   → Если QW-10 уже выполнен — пропусти.
+
+2. src/bioetl/application/core/subcellular_fraction_data_source.py (~50 LOC)
+   — Data source класс, не подключённый в composition/ и не импортируемый нигде.
+
+Шаги:
+1. Для каждого файла: grep -rn "module_name\|ClassName" src/bioetl/ — 0 import-ов.
+2. Удали файл.
+3. Удали ре-экспорты из __init__.py если есть.
+4. Запусти pytest tests/ -x.
+
+Ожидаемый результат: −166 LOC.
+```
