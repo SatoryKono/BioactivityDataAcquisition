@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
+from bioetl.infrastructure.adapters.semanticscholar.adapter import SEMANTICSCHOLAR_BASE_URL
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -27,7 +28,6 @@ __all__ = [
 ]
 
 # Semantic Scholar API configuration
-SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
 DEFAULT_SEARCH_FIELDS = (
     "paperId,externalIds,title,abstract,year,publicationDate,"
     "venue,authors,citationCount,referenceCount,isOpenAccess,"
