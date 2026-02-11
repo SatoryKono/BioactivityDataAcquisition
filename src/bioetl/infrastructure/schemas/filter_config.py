@@ -151,7 +151,7 @@ class FilterConfigFile(BaseModel):
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
     )
 
-    @field_validator("extraction_params")
+    @field_validator("extraction_params")  # type: ignore[untyped-decorator]
     @classmethod
     def validate_extraction_params(
         cls,
