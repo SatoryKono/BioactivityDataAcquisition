@@ -26,6 +26,9 @@ from bioetl.application.pipelines.semanticscholar._page_parsing import (
     parse_page_range,
     parse_volume_issue,
 )
+from bioetl.domain.schemas.common.publication_base import OA_STATUS_VALUES
+
+OA_STATUS_SET = frozenset(OA_STATUS_VALUES)
 
 
 def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
@@ -158,10 +161,6 @@ def extract_journal_info(
     }
 
 
-# Valid OA status values (normalized to lowercase for consistency with OpenAlex)
-VALID_OA_STATUS_VALUES = {"gold", "green", "hybrid", "bronze", "closed"}
-
-
 def normalize_oa_status(status: str | None) -> str | None:
     """Normalize OA status to lowercase.
 
@@ -188,7 +187,7 @@ def normalize_oa_status(status: str | None) -> str | None:
     if status is None:
         return None
     normalized = status.lower().strip()
-    return normalized if normalized in VALID_OA_STATUS_VALUES else None
+    return normalized if normalized in OA_STATUS_SET else None
 
 
 def extract_open_access_info(
@@ -305,7 +304,6 @@ def extract_fields_of_study(
 
 
 __all__ = [
-    "VALID_OA_STATUS_VALUES",
     "extract_affiliations",
     "extract_author_h_indices",
     "extract_author_ids",
