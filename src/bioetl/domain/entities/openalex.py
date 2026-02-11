@@ -13,10 +13,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
-
-# Lookup method values for tracking DOI resolution strategy
-LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
-
+from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 
 # === Pydantic DTO Model ===
 
@@ -166,7 +163,7 @@ class OpenAlexPublicationRecord(BaseModel):
     # Note: Pydantic doesn't allow underscore-prefixed fields, so these use public names
     lookup_method: str = PydanticField(
         default="unknown",
-        description="How record was resolved: doi, title_fallback, title_only",
+        description="How record was resolved: direct, doi, pmid, title_fallback, title_only",
     )
     original_doi: str | None = PydanticField(
         default=None,
