@@ -72,3 +72,13 @@ class TestResolveBronzeOpts:
         assert result["use_cached_bronze"] is True
         assert result["cached_bronze_path"] == "/some/path"
         assert result["cached_bronze_date"] == "2026-01-01"
+
+    def test_dependencies_default_to_api(self) -> None:
+        """Dependencies default to False (API) even when master is True."""
+        runtime = CompositeRuntimeConfig()  # defaults
+        assert runtime.use_cached_bronze is True
+        assert runtime.cached_bronze_dependencies is False
+        result = _resolve_bronze_opts(
+            runtime, phase_override=runtime.cached_bronze_dependencies
+        )
+        assert result["use_cached_bronze"] is False

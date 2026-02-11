@@ -161,11 +161,11 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         # Step 1: Submit job
         job_id = await self._submit_job(from_db, to_db, ids)
 
-        # Step 2: Poll for completion
-        await self._poll_until_ready(job_id)
+        # Step 2: Poll for completion (returns redirect results URL if available)
+        results_url = await self._poll_until_ready(job_id)
 
-        # Step 3: Retrieve results
-        return await self._fetch_results(job_id, ids)
+        # Step 3: Retrieve results using the redirect URL from polling
+        return await self._fetch_results(job_id, ids, results_url=results_url)
 
     async def _submit_job(
         self,
@@ -225,7 +225,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         self.logger.debug("idmapping_job_submitted", job_id=job_id)
         return str(job_id)
 
-    async def _poll_until_ready(self, job_id: str) -> None:
+    async def _poll_until_ready(self, job_id: str) -> str | None:
         """Poll job status until complete.
 
         GET /idmapping/status/{jobId}
@@ -239,6 +239,10 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
         Args:
             job_id: Job ID to poll.
+
+        Returns:
+            The redirect results URL discovered during polling, or None if the
+            job finished without a redirect (e.g. via jobStatus field).
 
         Raises:
             IDMappingJobError: If the job fails.
@@ -259,8 +263,9 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     job_id=job_id,
                     attempts=attempt + 1,
                     detected_by="redirect_to_results",
+                    results_url=response_url,
                 )
-                return
+                return response_url
 
             if response.status_code not in (200, 303):
                 self.logger.warning(
@@ -282,7 +287,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     attempts=attempt + 1,
                     detected_by="results_in_response",
                 )
-                return
+                return response_url if response_url else None
 
             status = result.get("jobStatus", "UNKNOWN")
 
@@ -297,7 +302,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     attempts=attempt + 1,
                     detected_by="job_status",
                 )
-                return
+                return None
 
             if status == "ERROR":
                 error_msg = result.get("errorMessage", "Unknown error")
@@ -317,10 +322,13 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         self,
         job_id: str,
         original_ids: list[str],
+        results_url: str | None = None,
     ) -> dict[str, dict[str, Any] | None]:
         """Fetch mapping results with full entry metadata.
 
-        GET /idmapping/results/{jobId}
+        Uses the redirect URL discovered during polling when available,
+        falling back to the generic ``/idmapping/results/{jobId}`` path.
+
         Response: {"results": [{"from": "CHEMBL204", "to": {...}}, ...]}
 
         Note: Results may be paginated. Handle Link header for pagination.
@@ -329,6 +337,10 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         Args:
             job_id: Job ID to fetch results for.
             original_ids: Original list of IDs for initializing results dict.
+            results_url: Redirect URL from polling (e.g.
+                ``/idmapping/uniprotkb/results/{jobId}``).  When provided the
+                client hits this URL directly instead of relying on UniProt to
+                redirect again.
 
         Returns:
             Dict mapping source IDs to entry data dicts (None if not found).
@@ -337,7 +349,8 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         entries_by_id: dict[str, list[dict[str, Any]]] = {
             id_: [] for id_ in original_ids
         }
-        url: str | None = f"{self.base_url}/idmapping/results/{job_id}"
+        # Prefer the redirect URL from polling; fall back to generic path
+        url: str | None = results_url or f"{self.base_url}/idmapping/results/{job_id}"
 
         while url:
             with self._adapter_metrics.measure_request("/idmapping/results"):
