@@ -622,8 +622,8 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("_index", pa.int64()),
         ("_lookup_method", pa.string()),
         ("_original_id", pa.string()),
-        ("abstract", pa.string()),  # Not available from CrossRef (None values)
-        ("affiliation_list", pa.string()),  # Not available from CrossRef (None values)
+        ("abstract", pa.string()),
+        ("affiliation_list", pa.string()),
         ("alternative_id", pa.list_(pa.string())),
         ("author_details", pa.string()),
         ("author_orcids", pa.string()),
@@ -644,8 +644,8 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("license_url", pa.string()),
         ("page_first", pa.string()),
         ("page_last", pa.string()),
-        ("pmc_id", pa.string()),  # Not available from CrossRef (None values)
-        ("pmid", pa.string()),  # Not available from CrossRef (None values)
+        ("pmc_id", pa.string()),
+        ("pmid", pa.string()),
         ("publication_class", pa.string()),
         ("publication_date", pa.string()),
         ("publication_subclass", pa.string()),
@@ -748,7 +748,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("page_last", pa.string()),
         ("page_range", pa.string()),
         ("paper_id", pa.string()),
-        ("pmc_id", pa.string()),  # Not available from Semantic Scholar (None values)
+        ("pmc_id", pa.string()),
         ("pmid", pa.string()),
         ("publication_class", pa.string()),
         ("publication_date", pa.string()),
