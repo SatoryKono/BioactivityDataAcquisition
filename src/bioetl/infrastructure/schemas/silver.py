@@ -799,7 +799,9 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_last", pa.string()),
         pa.field("page_range", pa.string()),  # Page range: "first-last" format
         pa.field("paper_id", pa.string()),  # Primary key
-        pa.field("pmc_id", pa.string()),  # PubMed Central ID (inherited from base schema)
+        pa.field(
+            "pmc_id", pa.string()
+        ),  # PubMed Central ID (inherited from base schema)
         pa.field("pmid", pa.string()),
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
@@ -843,7 +845,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         # Note: abstract and affiliation_list not provided by CrossRef but required by PublicationBaseSchema
         pa.field("abstract", pa.string()),  # Not available from CrossRef (None values)
-        pa.field("affiliation_list", pa.string()),  # Not available from CrossRef (None values)
+        pa.field(
+            "affiliation_list", pa.string()
+        ),  # Not available from CrossRef (None values)
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("author_details", pa.string()),  # JSON array of author objects
         pa.field("author_orcids", pa.string()),  # ORCID IDs (JSON array)
