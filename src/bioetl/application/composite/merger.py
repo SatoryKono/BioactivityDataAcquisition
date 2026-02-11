@@ -267,6 +267,7 @@ class MergeService:
             enrichment_results=enrichment_results,
             run_id=run_id,
             sources_used=sources_used,
+            dependency_results=dependency_results,
         )
 
         # Step 5b: Drop excluded fields from merged output
@@ -1784,14 +1785,18 @@ class MergeService:
         enrichment_results: dict[str, EnrichmentResult],
         run_id: str,
         sources_used: list[str],
+        dependency_results: dict[str, DependencyResult] | None = None,
     ) -> pl.DataFrame:
         """Add lineage metadata columns to DataFrame."""
         import polars as pl
 
-        # Build enrichment status dict
-        status_dict = {
-            name: result.status.value for name, result in enrichment_results.items()
-        }
+        # Build enrichment status dict (enrichers + dependencies)
+        status_dict: dict[str, str] = {}
+        if dependency_results:
+            for name, result in dependency_results.items():
+                status_dict[name] = result.status.value
+        for name, result in enrichment_results.items():
+            status_dict[name] = result.status.value
 
         # Add lineage columns
         return df.with_columns(

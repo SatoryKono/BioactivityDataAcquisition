@@ -16,7 +16,6 @@ This package contains all port definitions organized by domain:
 - audit: AuditPort for write operation traceability
 - shutdown: ShutdownPort for graceful termination coordination
 - memory: MemoryMonitorPort for adaptive batch sizing
-- normalization: UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort
 - data_normalization: DataNormalizationPort for text/data normalization
 - delta_reader: DeltaReaderPort for read-only Delta table access
 """
@@ -72,13 +71,6 @@ from bioetl.domain.ports.noop import (
     NoOpPiiHasher,
     NoOpTracing,
 )
-from bioetl.domain.ports.normalization import (
-    ActivityAggregatorPort,
-    NormalizationServicePort,
-    OutlierFilterPort,
-    UnitConverterPort,
-    ValueValidatorPort,
-)
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
     LoggerPort,
@@ -99,7 +91,6 @@ from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
 
 __all__ = [
-    "ActivityAggregatorPort",
     "AuditEntry",
     "AuditLayer",
     "AuditOperation",
@@ -141,8 +132,6 @@ __all__ = [
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
-    "NormalizationServicePort",
-    "OutlierFilterPort",
     "PiiHasherPort",
     "QuarantinePort",
     "RateLimiterPort",
@@ -156,6 +145,4 @@ __all__ = [
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
-    "UnitConverterPort",
-    "ValueValidatorPort",
 ]
