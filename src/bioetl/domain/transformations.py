@@ -132,7 +132,12 @@ def detect_schema_drift(
     new_schema: set[str],
     required_fields: set[str] | None = None,
 ) -> tuple[DriftLevel, dict[str, Any]]:
-    """Detect schema drift between two schemas."""
+    """Detect schema drift between two schemas.
+
+    Policy (RULES.md §2.2):
+    - INFO for any newly added fields
+    - CRITICAL when required fields are missing
+    """
     added = sorted(new_schema - old_schema)
     removed = sorted(old_schema - new_schema)
     missing_required = sorted((required_fields or set()) & set(removed))
@@ -140,8 +145,6 @@ def detect_schema_drift(
     level = DriftLevel.INFO
     if missing_required:
         level = DriftLevel.CRITICAL
-    elif len(added) > 3:
-        level = DriftLevel.WARN
 
     details = {
         "added_fields": added,

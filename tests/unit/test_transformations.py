@@ -121,12 +121,12 @@ def test_detect_schema_drift_info():
     assert details["added_fields"] == ["description"]
 
 
-def test_detect_schema_drift_warn():
-    """Tests schema drift detection for warning level drift."""
+def test_detect_schema_drift_info_many_new_fields():
+    """Tests schema drift detection for many new fields (still INFO)."""
     old = {"id"}
     new = {"id", "f1", "f2", "f3", "f4"}
     level, details = detect_schema_drift(old, new)
-    assert level == DriftLevel.WARN
+    assert level == DriftLevel.INFO
     assert len(details["added_fields"]) == 4
 
 
