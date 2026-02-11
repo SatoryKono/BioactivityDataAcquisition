@@ -979,6 +979,7 @@ class PipelineYamlConfig(BaseModel):
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
+    silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
 
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
@@ -1079,10 +1080,13 @@ class PipelineYamlConfig(BaseModel):
             bronze_config.format = "jsonl"
 
         # Silver MUST use Delta Lake (RULES.md §2.1)
-        if silver_config and silver_config.format == "parquet":
+        # Strict positive check: only "delta" is allowed. This prevents bypass
+        # with formats like "jsonl" or "csv" that the previous negative check
+        # (format == "parquet") would not catch.
+        if silver_config and silver_config.format != "delta":
             raise ValueError(
-                "Silver layer MUST use 'delta' format (RULES.md §2.1). "
-                "Parquet is not allowed for Silver layer."
+                f"Silver layer MUST use 'delta' format (RULES.md §2.1). "
+                f"Got '{silver_config.format}'. Only Delta Lake is allowed for Silver layer."
             )
 
         # Gold MAY use delta or parquet (RULES.md §2.1) - no validation needed

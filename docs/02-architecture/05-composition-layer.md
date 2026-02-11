@@ -15,20 +15,46 @@
 
 ## 2. Ключевые Компоненты
 
-### 2.1. `bootstrap.py` — Процесс инициализации
+### 2.1. `bootstrap/` — Процесс инициализации
 
-Этот модуль содержит функции для высокоуровневой сборки основных сервисов:
-- `bootstrap_pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна.
-- Инициализация общих сервисов: Логгер, Метрики, Чекпоинты, Карантин.
+**Расположение:** `src/bioetl/composition/bootstrap/`
+
+Пакет содержит модули для высокоуровневой сборки основных сервисов:
+
+```
+composition/bootstrap/
+├── assembly/            # Сборка компонентов (checkpoint, storage)
+├── cli/                 # CLI-специфичная сборка (health, lock, config, metrics, noop)
+└── runtime/             # Runtime assembly
+    ├── assembly.py      # Главная сборка компонентов
+    ├── composite.py     # Bootstrap для Composite Pipeline (ADR-026)
+    ├── observability.py # Сборка observability
+    ├── pipeline.py      # Сборка pipeline
+    └── runner.py        # Сборка runner
+```
+
+- `bootstrap_pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна. **Deprecated** — предпочтителен прямой вызов `runtime/pipeline.py`.
+- `bootstrap/runtime/composite.py`: Bootstrap для Composite Pipeline (ADR-026).
 
 ### 2.2. `factories/` — Фабрики компонентов
 
 В v5.1+ логика создания компонентов централизована в специализированных фабриках:
 
-- **`GenericPipelineFactory`**: Универсальный конструктор пайплайнов. Декларативно описывает класс пайплайна, провайдер, схемы и класс трансформера для DI.
-- **`HttpClientFactory`**: Создает настроенные `UnifiedHTTPClient` с учетом специфичных для каждого провайдера ограничений (Rate Limits, Circuit Breaker).
-- **`StorageFactory`**: Собирает `StoragePort`, объединяя адаптеры для Bronze, Silver и Gold слоев.
-- **`DataSourceFactory`**: Создает `DataSourcePort` для конкретного провайдера.
+**Расположение:** `src/bioetl/composition/factories/` (12 файлов)
+
+| Файл | Фабрика | Назначение |
+|------|---------|------------|
+| `pipeline_factory.py` | `GenericPipelineFactory` | Универсальный конструктор пайплайнов (декларативно) |
+| `pipeline_factories.py` | Реестр фабрик | Все зарегистрированные pipeline factories |
+| `data_source_factory.py` | `DataSourceFactory` | Создает `DataSourcePort` для провайдера |
+| `http_client_factory.py` | `HttpClientFactory` | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
+| `storage_factory.py` | `StorageFactory` | Сборка `StoragePort` (Bronze + Silver + Gold) |
+| `storage_adapter.py` | `StorageAdapterFactory` | Создание отдельных storage адаптеров |
+| `storage.py` | Storage helpers | Вспомогательные функции для storage |
+| `runner_factory.py` | `RunnerFactory` | Создание `PipelineRunner` с DI |
+| `services_factory.py` | `ServicesFactory` | Создание `PipelineServices` bundle |
+| `transformer_factory.py` | `TransformerFactory` | Создание трансформеров по провайдеру |
+| `dq_factory.py` | `DQFactory` | Создание Data Quality компонентов |
 
 ### 2.3. `providers/` — Реестр провайдеров
 
@@ -77,7 +103,7 @@ data_source = ProviderRegistry.create_data_source(
 Для композитных пайплайнов доступна функция `bootstrap_composite_pipeline()`:
 
 ```python
-from bioetl.composition.composite.bootstrap import bootstrap_composite_pipeline
+from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_pipeline
 
 runner = await bootstrap_composite_pipeline(
     "composite_publication",
@@ -102,9 +128,9 @@ result = await runner.run()
 
 | Диаграмма | Файл | Описание |
 |-----------|------|----------|
-| Composition Root | [../diagrams/mermaid/11_composition_root.mmd](../diagrams/mermaid/11_composition_root.mmd) | DI container, factories, bootstrap |
-| Factory Pattern | [../diagrams/mermaid/20_factory_pattern_usage.mmd](../diagrams/mermaid/20_factory_pattern_usage.mmd) | Использование Factory паттерна |
-| Five Layer Architecture | [../diagrams/mermaid/01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) | Composition слой в архитектуре |
+| Composition Root | [diagrams/mermaid/11_composition_root.mmd](diagrams/mermaid/11_composition_root.mmd) | DI container, factories, bootstrap |
+| Factory Pattern | [diagrams/mermaid/20_factory_pattern_usage.mmd](diagrams/mermaid/20_factory_pattern_usage.mmd) | Использование Factory паттерна |
+| Five Layer Architecture | [diagrams/mermaid/01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) | Composition слой в архитектуре |
 | Layers Interaction | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) | Bootstrap → Factories → Runner |
 
 ### Связанные ADR

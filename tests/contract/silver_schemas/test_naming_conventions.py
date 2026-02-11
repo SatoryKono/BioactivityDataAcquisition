@@ -353,19 +353,6 @@ class TestCrossProviderNaming:
             if "publication" in name
         }
 
-        # Common fields from PublicationBaseSchema
-        expected_common_fields = {
-            "title",
-            "abstract",
-            "authors",
-            "author_orcids",  # Renamed from author_orcid_list (5.14.0)
-            "journal",
-            "publication_year",
-            "citations_received",  # Renamed from citation_count (5.14.0)
-            "_source",
-            "_lookup_method",
-        }
-
         for schema_name, schema_class in publication_schemas.items():
             fields = extract_field_metadata(schema_class)
 

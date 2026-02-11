@@ -305,6 +305,11 @@ class TestPrivateKeyExposure:
 class TestPIIHandling:
     """Tests for PII handling patterns.
 
+    Enforces that all files containing PII-related fields (email, phone,
+    address, ssn) either:
+    1. Reference hashing/anonymization (sha256, hash, anonymize keywords), OR
+    2. Are in the known technical/false-positive allowlist.
+
     IMPORTANT: Known False Positives (NOT actual PII):
     -------------------------------------------------
     - `email` in config.py, pubmed_client.py, pipeline_config.py, client.py:
@@ -316,10 +321,9 @@ class TestPIIHandling:
     - `issn` (matched by `ssn` pattern): ISSN is International Standard Serial
       Number for journals, NOT Social Security Number.
 
-    This test uses pytest.skip() (not assert fail) because:
-    1. Pattern matching may catch false positives like API identifiers
-    2. Some fields may be intentionally excluded from Silver layer
-    3. Manual review is needed to distinguish real PII from technical identifiers
+    - `address` in affiliation contexts: Refers to "email address" text in
+      PubMed affiliation extraction, not physical/postal address PII.
+      Actual email values are hashed at the transformer level (RULES.md §5.4).
     """
 
     # Files with known technical email usage (NOT user PII)
@@ -336,15 +340,22 @@ class TestPIIHandling:
         }
     )
 
+    # Files where "address" refers to non-PII context (email address text,
+    # network address, etc.) — not physical/postal address
+    KNOWN_NON_PII_ADDRESS_FILES = frozenset(
+        {
+            "noop_logger.py",  # Logging infrastructure, no PII
+            "retry.py",  # Network retry logic, "address" = URL/endpoint
+        }
+    )
+
     def test_silver_layer_uses_hashing(self) -> None:
         """Verify Silver layer transformers use hashing for PII fields.
 
-        Note: This test may flag false positives for technical identifiers
-        (e.g., NCBI API email). The test uses pytest.skip() to request manual
-        review rather than failing, as automated pattern matching cannot
-        distinguish between real PII and API configuration values.
+        ENFORCED: Files containing PII-related fields MUST reference
+        hashing/anonymization or be in the known allowlist.
+        Violations indicate PII leakage risk (RULES.md §5.4).
         """
-        # Check that PII-related code uses sha256
         infrastructure_files = list((SRC_DIR / "infrastructure").rglob("*.py"))
         application_files = list((SRC_DIR / "application").rglob("*.py"))
 
@@ -374,18 +385,27 @@ class TestPIIHandling:
                     ):
                         continue
 
-                    # Check if sha256 or hashing is mentioned nearby
+                    # Skip known non-PII address files (email address text, network address)
+                    if (
+                        pattern_name == "address"
+                        and py_file.name in self.KNOWN_NON_PII_ADDRESS_FILES
+                    ):
+                        continue
+
+                    # Check if sha256 or hashing is mentioned in the file
                     if not re.search(r"sha256|hash|anonymize", content, re.IGNORECASE):
                         rel_path = py_file.relative_to(PROJECT_ROOT)
                         files_with_pii.append(
                             f"{rel_path}: PII field '{pattern_name}' without hashing"
                         )
 
-        # This is informational - PII fields without explicit hashing may be OK
-        # if they're excluded from Silver layer or are technical identifiers
-        # (e.g., NCBI API email is NOT user PII)
-        if files_with_pii:
-            pytest.skip("Review PII handling:\n" + "\n".join(files_with_pii))
+        assert not files_with_pii, (
+            "PII fields found without hashing reference (RULES.md §5.4).\n"
+            "Each file with PII-related fields MUST either:\n"
+            "  1. Reference hashing/anonymization (sha256, hash, anonymize), OR\n"
+            "  2. Be added to the known allowlist with documented rationale.\n"
+            "Violations:\n" + "\n".join(files_with_pii)
+        )
 
 
 @pytest.mark.timeout(120)  # File scanning needs more time

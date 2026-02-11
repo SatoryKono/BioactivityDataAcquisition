@@ -1347,6 +1347,7 @@ fields:
 | [ADR-030](02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | Accepted | 2026-01-26 |
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | 2026-01-26 |
 | [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | Accepted | 2026-01-28 |
+| [ADR-033](02-architecture/decisions/ADR-033-publication-validation-strategy.md) | Publication Metadata Validation Strategy | Accepted | 2026-02 |
 
 ## История Изменений (Changelog)
 - **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key_source` и `filter_field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
