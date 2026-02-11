@@ -1616,29 +1616,34 @@ def classify_publication_type(
 
     # Multi-value lookup (PubMed, Semantic Scholar)
     if raw_types_list is not None:
-        best: PublicationTypeEntry | None = None
-        for raw in raw_types_list:
-            if not raw:
-                continue
-            entry = lookup.get(raw.strip().lower())
-            if entry is not None and (
-                best is None or entry.specificity > best.specificity
-            ):
-                best = entry
-        return best
+        return _best_match(lookup, raw_types_list)
 
     return None
+
+
+def _best_match(
+    lookup: dict[str, PublicationTypeEntry],
+    raw_types: list[str],
+) -> PublicationTypeEntry | None:
+    """Return the most specific match from a list of raw type strings."""
+    matches = [
+        entry
+        for raw in raw_types
+        if raw and (entry := lookup.get(raw.strip().lower())) is not None
+    ]
+    return max(matches, key=lambda e: e.specificity, default=None)
+
+
+_PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {
+    "openalex": _OPENALEX_LOOKUP,
+    "crossref": _CROSSREF_LOOKUP,
+    "pubmed": _PUBMED_LOOKUP,
+    "semanticscholar": _S2_LOOKUP,
+    "semantic_scholar": _S2_LOOKUP,
+    "s2": _S2_LOOKUP,
+}
 
 
 def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:
     """Return the lookup dict for the given provider."""
-    provider_lower = provider.lower()
-    if provider_lower == "openalex":
-        return _OPENALEX_LOOKUP
-    if provider_lower == "crossref":
-        return _CROSSREF_LOOKUP
-    if provider_lower == "pubmed":
-        return _PUBMED_LOOKUP
-    if provider_lower in ("semanticscholar", "semantic_scholar", "s2"):
-        return _S2_LOOKUP
-    return None
+    return _PROVIDER_LOOKUPS.get(provider.lower())

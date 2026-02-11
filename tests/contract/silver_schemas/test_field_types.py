@@ -10,7 +10,6 @@ Related:
 from __future__ import annotations
 
 import pytest
-import pandera as pa
 
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
