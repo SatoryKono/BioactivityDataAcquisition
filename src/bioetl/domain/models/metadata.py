@@ -379,7 +379,7 @@ class BaseOutputMetadata(BaseModel):
         description="UTC timestamp when write operation completed",
     )
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def write_duration_ms(self) -> int | None:
         """Calculate write duration in milliseconds.

@@ -35,7 +35,7 @@ try:
 
     _ORJSON_AVAILABLE = True
 except ImportError:
-    orjson = None
+    orjson = None  # type: ignore[assignment]
     _ORJSON_AVAILABLE = False
 
 
