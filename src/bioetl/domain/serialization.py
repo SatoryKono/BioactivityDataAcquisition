@@ -143,7 +143,7 @@ def _get_orjson_options(sort_keys: bool) -> int:
     """Get orjson options based on configuration."""
     assert orjson is not None
     options = orjson.OPT_SERIALIZE_NUMPY
-    return options | orjson.OPT_SORT_KEYS if sort_keys else options  # type: ignore[no-any-return]
+    return options | orjson.OPT_SORT_KEYS if sort_keys else options
 
 
 def _serialize_with_orjson(

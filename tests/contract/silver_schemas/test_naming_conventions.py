@@ -354,7 +354,7 @@ class TestCrossProviderNaming:
         }
 
         # Common fields from PublicationBaseSchema
-        expected_common_fields = {
+        _expected_common_fields = {
             "title",
             "abstract",
             "authors",

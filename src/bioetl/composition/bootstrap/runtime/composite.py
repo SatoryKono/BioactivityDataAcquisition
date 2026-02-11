@@ -106,7 +106,7 @@ def load_composite_config(name: str) -> CompositeConfig:
         # Validate using Pydantic schema
         schema = CompositeConfigFileSchema.model_validate(raw)
         # Convert to immutable domain objects
-        return schema.to_domain()  # type: ignore[no-any-return]
+        return schema.to_domain()
     except ValidationError as e:
         # Convert Pydantic errors to ValueError for consistent API
         raise ValueError(f"Invalid composite config '{name}': {e}") from e
