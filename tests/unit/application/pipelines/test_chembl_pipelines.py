@@ -18,7 +18,7 @@ from bioetl.application.pipelines.chembl import (
     PublicationTransformer,
     TargetTransformer,
 )
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.ports import NoOpMetrics
 
@@ -67,8 +67,10 @@ def create_pipeline_config(
         pipeline_name=pipeline_name,
         provider="chembl",
         entity_type=entity_type,
-        primary_keys=primary_keys,
-        silver_table=silver_table,
+        table=TableConfig(
+            primary_keys=primary_keys,
+            silver_table=silver_table,
+        ),
     )
 
 

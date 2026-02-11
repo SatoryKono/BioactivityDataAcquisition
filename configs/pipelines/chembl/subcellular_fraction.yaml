@@ -15,7 +15,6 @@ description: "Extract unique subcellular fractions from ChEMBL Assay records"
 # Loading strategy (ADR-030, ADR-031)
 # Derived entity requires full scan to ensure comprehensive deduplication.
 # Deduplication is handled both at DataSource level and on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
 # Primary key is the normalized subcellular_fraction name

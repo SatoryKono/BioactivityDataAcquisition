@@ -157,14 +157,15 @@ class TestCheckpointManagerDeleteCheckpoint:
 
 
 @pytest.mark.unit
-class TestCheckpointManagerForceFullScan:
-    """Tests for CheckpointManager force_full_scan behavior (ADR-030)."""
+class TestCheckpointManagerFullScanOnly:
+    """Tests for CheckpointManager loading_strategy=FULL_SCAN_ONLY behavior (ADR-031)."""
 
-    async def test_load_checkpoint_blocked_when_force_full_scan_enabled(
+    async def test_load_checkpoint_blocked_when_full_scan_only(
         self, mock_checkpoint_port, mock_logger
     ):
-        """Test load_checkpoint returns None when force_full_scan=True, even if resume=True."""
-        # Setup: checkpoint exists
+        """Test load_checkpoint returns None when loading_strategy=FULL_SCAN_ONLY."""
+        from bioetl.domain.medallion import LoadingStrategy
+
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
@@ -178,44 +179,23 @@ class TestCheckpointManagerForceFullScan:
             pipeline_name="chembl_publication",
             run_id=run_id,
             resume=True,
-            force_full_scan=True,
+            loading_strategy=LoadingStrategy.FULL_SCAN_ONLY,
         )
 
         result = await manager.load_checkpoint()
 
-        # Checkpoint load should NOT be called - blocked immediately
         mock_checkpoint_port.load.assert_not_called()
-        # Result should be None
         assert result is None
-        # Warning should be logged
         mock_logger.warning.assert_called_once()
         warning_call = mock_logger.warning.call_args
-        # Message uses "full_scan_only" since ADR-031 loading_strategy formalization
         assert "full_scan_only" in warning_call[0][0].lower()
-
-    async def test_load_checkpoint_warning_contains_adr_reference(
-        self, mock_checkpoint_port, mock_logger
-    ):
-        """Test that warning message references ADR-030."""
-        run_id = uuid4()
-        manager = CheckpointManager(
-            checkpoint_port=mock_checkpoint_port,
-            logger=mock_logger,
-            pipeline_name="chembl_publication",
-            run_id=run_id,
-            resume=True,
-            force_full_scan=True,
-        )
-
-        await manager.load_checkpoint()
-
-        warning_call = mock_logger.warning.call_args
-        assert "ADR-030" in warning_call[0][0]
 
     async def test_load_checkpoint_warning_includes_pipeline_name(
         self, mock_checkpoint_port, mock_logger
     ):
         """Test that warning includes pipeline name in extra context."""
+        from bioetl.domain.medallion import LoadingStrategy
+
         run_id = uuid4()
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
@@ -223,7 +203,7 @@ class TestCheckpointManagerForceFullScan:
             pipeline_name="pubmed_publication",
             run_id=run_id,
             resume=True,
-            force_full_scan=True,
+            loading_strategy=LoadingStrategy.FULL_SCAN_ONLY,
         )
 
         await manager.load_checkpoint()
@@ -231,12 +211,11 @@ class TestCheckpointManagerForceFullScan:
         warning_call = mock_logger.warning.call_args
         extra = warning_call[1].get("extra", {})
         assert extra.get("pipeline") == "pubmed_publication"
-        assert extra.get("force_full_scan") is True
 
-    async def test_load_checkpoint_works_normally_when_force_full_scan_false(
+    async def test_load_checkpoint_works_normally_without_strategy(
         self, mock_checkpoint_port, mock_logger
     ):
-        """Test load_checkpoint works normally when force_full_scan=False (default)."""
+        """Test load_checkpoint works normally when no loading_strategy set."""
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
@@ -247,25 +226,24 @@ class TestCheckpointManagerForceFullScan:
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
-            pipeline_name="chembl_activity",  # Non-publication pipeline
+            pipeline_name="chembl_activity",
             run_id=run_id,
             resume=True,
-            force_full_scan=False,
         )
 
         result = await manager.load_checkpoint()
 
-        # Should load checkpoint normally
         mock_checkpoint_port.load.assert_called_once()
         assert result is not None
         assert result["records_processed"] == 1000
-        # No warning logged
         mock_logger.warning.assert_not_called()
 
     async def test_load_checkpoint_no_warning_when_resume_false(
         self, mock_checkpoint_port, mock_logger
     ):
-        """Test no warning when resume=False, even if force_full_scan=True."""
+        """Test no warning when resume=False, even with full_scan_only."""
+        from bioetl.domain.medallion import LoadingStrategy
+
         run_id = uuid4()
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
@@ -273,19 +251,18 @@ class TestCheckpointManagerForceFullScan:
             pipeline_name="chembl_publication",
             run_id=run_id,
             resume=False,
-            force_full_scan=True,
+            loading_strategy=LoadingStrategy.FULL_SCAN_ONLY,
         )
 
         result = await manager.load_checkpoint()
 
-        # No warning - resume wasn't requested
         mock_logger.warning.assert_not_called()
         assert result is None
 
-    async def test_default_force_full_scan_is_false(
+    async def test_default_loading_strategy_is_none(
         self, mock_checkpoint_port, mock_logger
     ):
-        """Test that force_full_scan defaults to False for backward compatibility."""
+        """Test that loading_strategy defaults to None (allows resume)."""
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
             saved_run_id,
@@ -293,7 +270,6 @@ class TestCheckpointManagerForceFullScan:
         )
 
         run_id = uuid4()
-        # Note: force_full_scan not specified
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
@@ -304,7 +280,6 @@ class TestCheckpointManagerForceFullScan:
 
         result = await manager.load_checkpoint()
 
-        # Should work normally (default force_full_scan=False)
         mock_checkpoint_port.load.assert_called_once()
         assert result is not None
 
@@ -342,11 +317,10 @@ class TestCheckpointManagerLoadingStrategy:
         assert result is None
         mock_logger.warning.assert_called_once()
 
-    async def test_loading_strategy_derived_from_force_full_scan_when_none(
+    async def test_loading_strategy_none_allows_checkpoint_resume(
         self, mock_checkpoint_port, mock_logger
     ):
-        """Test loading_strategy is derived from force_full_scan when not specified."""
-        from bioetl.domain.medallion import LoadingStrategy
+        """Test loading_strategy=None allows normal checkpoint resume."""
 
         saved_run_id = uuid4()
         mock_checkpoint_port.load.return_value = (
@@ -355,22 +329,20 @@ class TestCheckpointManagerLoadingStrategy:
         )
 
         run_id = uuid4()
-        # No loading_strategy, force_full_scan=True
         manager = CheckpointManager(
             checkpoint_port=mock_checkpoint_port,
             logger=mock_logger,
             pipeline_name="test_pipeline",
             run_id=run_id,
             resume=True,
-            force_full_scan=True,
-            loading_strategy=None,  # Will be derived
+            loading_strategy=None,
         )
 
-        # Internal loading_strategy should be FULL_SCAN_ONLY
-        assert manager._loading_strategy == LoadingStrategy.FULL_SCAN_ONLY
+        assert manager._loading_strategy is None
 
         result = await manager.load_checkpoint()
-        assert result is None
+        assert result is not None
+        assert result["records_processed"] == 1000
 
     async def test_loading_strategy_warning_references_adr_031(
         self, mock_checkpoint_port, mock_logger

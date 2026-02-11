@@ -143,19 +143,6 @@ class TestLoadingStrategy:
         """Test FULL_SCAN_ONLY does not allow checkpoint resume."""
         assert LoadingStrategy.FULL_SCAN_ONLY.allows_checkpoint_resume is False
 
-    def test_from_force_full_scan_true(self):
-        """Test from_force_full_scan with True returns FULL_SCAN_ONLY."""
-        assert (
-            LoadingStrategy.from_force_full_scan(True) == LoadingStrategy.FULL_SCAN_ONLY
-        )
-
-    def test_from_force_full_scan_false(self):
-        """Test from_force_full_scan with False returns FULL_SCAN_ONLY."""
-        assert (
-            LoadingStrategy.from_force_full_scan(False)
-            == LoadingStrategy.FULL_SCAN_ONLY
-        )
-
     def test_string_enum_comparison(self):
         """Test LoadingStrategy can be compared with strings."""
         assert LoadingStrategy.FULL_SCAN_ONLY == "full_scan_only"

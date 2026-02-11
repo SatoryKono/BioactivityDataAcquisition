@@ -858,22 +858,11 @@ class PipelineYamlConfig(BaseModel):
         "Merged from filter config file. Keys are provider-specific query params.",
     )
 
-    # Pagination strategy (ADR-030)
-    force_full_scan: bool = Field(
-        default=False,
-        description="When True, checkpoint-based resume is disabled and each run "
-        "performs a full scan of the data source. Deduplication is handled on "
-        "Silver layer via content_hash. Required for publication entities due to "
-        "API offset instability. See ADR-030.",
-    )
-
     # Loading strategy (ADR-031)
-    # Explicit formalization of data loading approach.
     loading_strategy: Literal["full_scan_only"] | None = Field(
         default=None,
         description="Explicit loading strategy for the pipeline. "
         "'full_scan_only': Each run performs full scan, checkpoint resume disabled. "
-        "If not specified, derived from force_full_scan for backward compatibility. "
         "See ADR-031.",
     )
 
