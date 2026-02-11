@@ -466,7 +466,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         # Flattened component fields
         pa.field("component_accessions", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
-        pa.field("component_id", pa.int64()),
+        pa.field("component_id", pa.float64()),  # Float for nullable int
         pa.field("component_ids", pa.list_(pa.int64())),
         pa.field("component_relationships", pa.list_(pa.string())),
         pa.field("component_types", pa.list_(pa.string())),
