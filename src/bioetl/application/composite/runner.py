@@ -71,6 +71,9 @@ class CompositeRuntimeConfig:
             None=follow master, True=force cache, False=force API.
         cached_bronze_dependencies: Override cached Bronze for dependencies.
             None=follow master, True=force cache, False=force API.
+            Defaults to False because dependencies (e.g. IDMapping) must call
+            APIs with seed IDs; reading from Bronze cache would silently
+            produce empty results when no prior standalone run exists.
     """
 
     resume: bool = False
@@ -83,7 +86,7 @@ class CompositeRuntimeConfig:
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
     cached_bronze_enrichers: bool | None = None
-    cached_bronze_dependencies: bool | None = None
+    cached_bronze_dependencies: bool = False
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""
