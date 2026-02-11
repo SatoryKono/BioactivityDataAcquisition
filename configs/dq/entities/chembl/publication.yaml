@@ -18,7 +18,7 @@ entity_field_validations:
     nullable: false
     error_message: "document_chembl_id must match CHEMBL format"
 
-  - field: doc_type
+  - field: publication_type
     type: enum
     allowed:
       - PUBLICATION
@@ -110,7 +110,7 @@ entity_cross_field_validations:
 # =============================================================================
 entity_conditional_validations:
   - name: publication_requires_title
-    condition_field: doc_type
+    condition_field: publication_type
     condition_value: PUBLICATION
     condition_operator: eq
     then_validations:
