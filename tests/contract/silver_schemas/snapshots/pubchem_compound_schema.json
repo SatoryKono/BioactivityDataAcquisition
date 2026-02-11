@@ -412,10 +412,10 @@
     "required": false,
     "unique": false
   },
-  "inchi_key": {
+  "inchikey": {
     "checks": [
       {
-        "name": "inchi_key_format"
+        "name": "inchikey_format"
       }
     ],
     "coerce": false,

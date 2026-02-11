@@ -60,13 +60,13 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate InChI format."""
         return cast("Series[bool]", series.isna() | series.str.startswith("InChI="))
 
-    inchi_key: Series[str] | None = pa.Field(
+    inchikey: Series[str] | None = pa.Field(
         nullable=True,
         description="InChI hash key (27 chars)",
     )
 
-    @pa.check("inchi_key", name="inchi_key_format")
-    def _check_inchi_key(cls, series: Series[str]) -> Series[bool]:
+    @pa.check("inchikey", name="inchikey_format")
+    def _check_inchikey(cls, series: Series[str]) -> Series[bool]:
         """Validate InChI key format."""
         return cast(
             "Series[bool]",

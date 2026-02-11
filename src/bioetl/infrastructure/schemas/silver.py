@@ -187,7 +187,7 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         pa.field("feature_hydrophobe_count_3d", pa.float64()),  # Float for nullable int
         pa.field("feature_ring_count_3d", pa.float64()),  # Float for nullable int
         pa.field("inchi", pa.string()),
-        pa.field("inchi_key", pa.string()),  # Matches Pandera field name
+        pa.field("inchikey", pa.string()),  # Matches Pandera field name
         pa.field("isomeric_smiles", pa.string()),
         pa.field("iupac_name", pa.string()),
         pa.field("molecular_formula", pa.string()),
