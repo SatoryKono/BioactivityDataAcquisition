@@ -594,7 +594,10 @@ class TestCompositeRuntimeConfigPostInit:
         assert config.cached_bronze_enrichers is None
 
     def test_cached_bronze_dependencies_default_none(self) -> None:
-        """Test cached_bronze_dependencies defaults to False (force API)."""
+        """Test cached_bronze_dependencies defaults to False (force API).
+
+        Dependencies must force API by default to ensure they have access to seed IDs.
+        """
         config = CompositeRuntimeConfig()
         assert config.cached_bronze_dependencies is False
 
