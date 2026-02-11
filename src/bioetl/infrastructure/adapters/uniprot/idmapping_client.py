@@ -241,9 +241,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             job_id: Job ID to poll.
 
         Returns:
-            Redirect URL to results if detected (e.g.,
-            ``/idmapping/uniprotkb/results/{jobId}``), or None if completion
-            was detected by jobStatus field alone.
+            Redirect URL to results if detected, or None.
 
         Raises:
             IDMappingJobError: If the job fails.
