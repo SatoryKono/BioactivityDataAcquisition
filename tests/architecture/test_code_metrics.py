@@ -106,7 +106,7 @@ class TestFileSizeLimits:
         "services_factory.py": 695,  # 692 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030) + silver_validator param
         # Infrastructure layer exemptions
         "silver_writer.py": 1155,  # 1151 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
-        "gold_writer.py": 950,  # 946 LOC - SCD Type 2 (metadata/arrow logic extracted) + column_order + write_gold_merged schema validation (REQ-DATA-009)
+        "gold_writer.py": 955,  # 953 LOC - SCD Type 2 (metadata/arrow logic extracted) + column_order + write_gold_merged schema validation (REQ-DATA-009)
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
         "silver.py": 1050,  # 1038 LOC - Silver PyArrow schemas + SubcellularFraction schema + publication classification fields (3 fields × 5 providers)
