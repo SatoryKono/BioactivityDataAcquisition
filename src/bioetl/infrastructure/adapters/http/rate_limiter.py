@@ -152,47 +152,6 @@ def create_pubchem_bucket(
     return TokenBucket(rate=5.0, capacity=5, provider="pubchem", metrics=metrics)
 
 
-def create_uniprot_bucket(
-    with_api_key: bool = False,
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for UniProt.
-
-    Args:
-        with_api_key: True if using API key (100 req/sec vs default)
-        metrics: Optional metrics port for observability
-
-    """
-    rate = 100.0 if with_api_key else 10.0
-    return TokenBucket(
-        rate=rate, capacity=int(rate), provider="uniprot", metrics=metrics
-    )
-
-
-def create_openalex_bucket(
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for OpenAlex (10 req/sec polite).
-
-    Args:
-        metrics: Optional metrics port for observability
-
-    """
-    return TokenBucket(rate=10.0, capacity=10, provider="openalex", metrics=metrics)
-
-
-def create_crossref_bucket(
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for Crossref (50 req/sec polite).
-
-    Args:
-        metrics: Optional metrics port for observability
-
-    """
-    return TokenBucket(rate=50.0, capacity=50, provider="crossref", metrics=metrics)
-
-
 def create_pubmed_bucket(
     with_api_key: bool = False,
     metrics: MetricsPort | None = None,

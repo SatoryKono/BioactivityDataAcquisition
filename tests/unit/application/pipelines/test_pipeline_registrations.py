@@ -30,9 +30,9 @@ _PIPELINE_MODULES: list[tuple[str, str]] = [
     ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTargetPipeline"),
     ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTargetComponentPipeline"),
     ("bioetl.application.pipelines.chembl._pipelines", "ChEMBLTissuePipeline"),
-    ("bioetl.application.pipelines.pubchem.compound", "PubChemCompoundPipeline"),
-    ("bioetl.application.pipelines.pubmed.publication", "PubMedPublicationPipeline"),
-    ("bioetl.application.pipelines.uniprot.protein", "UniProtProteinPipeline"),
+    ("bioetl.application.pipelines.pubchem", "PubChemCompoundPipeline"),
+    ("bioetl.application.pipelines.pubmed", "PubMedPublicationPipeline"),
+    ("bioetl.application.pipelines.uniprot", "UniProtProteinPipeline"),
 ]
 
 

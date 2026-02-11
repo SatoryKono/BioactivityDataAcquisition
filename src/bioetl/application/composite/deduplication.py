@@ -6,7 +6,6 @@ to prevent fan-out when enricher has duplicate values by join keys.
 
 from __future__ import annotations
 
-from datetime import date, datetime, time, timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -214,30 +213,3 @@ class EnricherDeduplicator:
             records_after=records_after,
             columns_with_conflicts=columns_with_conflicts,
         )
-
-
-def value_to_string(value: object, dtype: pl.DataType) -> str:
-    """Convert a single value to string representation.
-
-    Args:
-        value: Value to convert.
-        dtype: Original data type.
-
-    Returns:
-        String representation.
-    """
-    if value is None:
-        return "null"
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, date) and not isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, datetime):
-        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
-    if isinstance(value, time):
-        return value.isoformat()
-    if isinstance(value, timedelta):
-        return str(value)
-    if isinstance(value, (list, dict)):
-        return str(value)
-    return str(value)

@@ -22,8 +22,9 @@ Architecture:
 
 from __future__ import annotations
 
-import hashlib
 from typing import TYPE_CHECKING, Any, Self
+
+from bioetl.application.core.entity_id import compute_publication_term_entity_id
 
 from bioetl.domain.ports import FilterableDataSourcePort
 
@@ -315,7 +316,7 @@ class PublicationTermDataSource:
     ) -> str:
         """Compute entity ID for a term based on composite key.
 
-        Entity ID is SHA256 hash of: document_chembl_id:term_type:normalized_term
+        Delegates to shared ``compute_publication_term_entity_id``.
 
         Args:
             document_chembl_id: Document ChEMBL ID.
@@ -326,9 +327,7 @@ class PublicationTermDataSource:
             Entity ID string (first 16 chars of SHA256 hex digest).
 
         """
-        normalized_term = term.lower().strip() if term else ""
-        composite = f"{document_chembl_id}:{term_type}:{normalized_term}"
-        return hashlib.sha256(composite.encode()).hexdigest()[:16]
+        return compute_publication_term_entity_id(document_chembl_id, term_type, term)
 
     async def health_check(self) -> HealthStatus:
         """Delegate health check to wrapped adapter."""
