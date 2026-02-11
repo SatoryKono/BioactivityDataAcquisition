@@ -152,14 +152,10 @@ class NoOpMetrics:
     ) -> None:
         """Observe a value for a histogram metric (no-op)."""
 
-    def increment_counter(
-        self, name: str, value: int, labels: dict[str, str]
-    ) -> None:
+    def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
         """Increment a counter metric (no-op)."""
 
-    def set_gauge(
-        self, name: str, value: float, labels: dict[str, str]
-    ) -> None:
+    def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
         """Set a gauge metric to a specific value (no-op)."""
 
     def close(self) -> None:
