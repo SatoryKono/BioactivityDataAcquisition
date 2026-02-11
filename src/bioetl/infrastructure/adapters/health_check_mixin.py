@@ -32,9 +32,6 @@ if TYPE_CHECKING:
     )
 
 
-# Default health check timeout per RULES.md §11.3
-DEFAULT_HEALTH_CHECK_TIMEOUT_SECONDS: float = 5.0
-
 
 @dataclass
 class HealthCheckContext:
