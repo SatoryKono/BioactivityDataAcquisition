@@ -47,7 +47,7 @@
 *   **Формат**: Delta Lake (Parquet + Transaction Log).
 *   **Engine**: `delta-rs` (через библиотеку `deltalake` Python binding).
 *   **Путь**: `data/output/silver/{provider}/{entity}/[{partition_cols}/]` — партиционирование опционально, настраивается через `partition_by` в YAML конфиге пайплайна.
-*   **Протокол**: Writer Version 2 (поддержка Column Mapping), Reader Version 1.
+*   **Протокол**: Версия протокола определяется defaults библиотеки deltalake.
 
 ### 2.2. Схема и Валидация
 Валидация происходит **перед** записью в Silver. Используется библиотека `pandera`.
@@ -104,7 +104,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 При переходе из Silver в Gold выполняется трансформация данных:
 
-*   **Исключение JSON полей**: Вложенные JSON-строки, сохранённые в Silver для forensic целей, исключаются из Gold.
+*   **Фильтрация полей**: Метод `BaseTransformer.transform_for_gold()` (`base_transformer.py:456`) использует `GOLD_EXCLUDE_FIELDS` для фильтрации полей. В текущей версии `GOLD_EXCLUDE_FIELDS = frozenset()` (пустое множество) — все Silver-поля проходят в Gold без исключения.
 *   **Плоская структура**: Gold содержит только плоские (scalar) поля для оптимизации аналитических запросов.
 *   **Реализация**: `BaseTransformer.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS` в `src/bioetl/application/core/base_transformer.py`.
 
@@ -125,7 +125,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 *   **Формат**: Delta Lake.
 *   **Путь**: `data/output/gold/{provider}/{entity}/` (например, `data/output/gold/chembl/activity`).
 *   **Оптимизация чтения**:
-    *   **Z-ORDER Clustering**: Обязательно применяется по часто используемым предикатам фильтрации (например, `target_id`, `assay_type`).
+    *   **Z-ORDER Clustering**: Рекомендуется (не реализовано в текущей версии) по часто используемым предикатам фильтрации (например, `target_id`, `assay_type`).
     *   **Compaction**: Регулярная (еженедельная) компрессия мелких файлов через `OPTIMIZE`.
 
 ### 3.3. Контракты Данных (Data Contracts)
