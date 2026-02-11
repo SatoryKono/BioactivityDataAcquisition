@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import cast
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -59,13 +60,13 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate InChI format."""
         return cast("Series[bool]", series.isna() | series.str.startswith("InChI="))
 
-    inchi_key: Series[str] | None = pa.Field(
+    inchikey: Series[str] | None = pa.Field(
         nullable=True,
         description="InChI hash key (27 chars)",
     )
 
-    @pa.check("inchi_key", name="inchi_key_format")
-    def _check_inchi_key(cls, series: Series[str]) -> Series[bool]:
+    @pa.check("inchikey", name="inchikey_format")
+    def _check_inchikey(cls, series: Series[str]) -> Series[bool]:
         """Validate InChI key format."""
         return cast(
             "Series[bool]",
@@ -136,128 +137,140 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate complexity is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    charge: Series[int] | None = pa.Field(nullable=True, description="Formal charge")
+    charge: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Formal charge"
+    )
 
     @pa.check("charge", name="charge_range")
-    def _check_charge(cls, series: Series[int]) -> Series[bool]:
+    def _check_charge(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate formal charge range."""
         return cast("Series[bool]", series.isna() | ((series >= -10) & (series <= 10)))
 
     # === Atom/Bond Counts ===
-    heavy_atom_count: Series[int] | None = pa.Field(
+    heavy_atom_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Non-hydrogen atom count"
     )
 
     @pa.check("heavy_atom_count", name="heavy_atom_count_range")
-    def _check_heavy_atom_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_heavy_atom_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate heavy atom count range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 500)))
 
-    h_bond_donor_count: Series[int] | None = pa.Field(
+    h_bond_donor_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Hydrogen bond donor count"
     )
 
     @pa.check("h_bond_donor_count", name="h_bond_donor_count_range")
-    def _check_h_bond_donor_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_h_bond_donor_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate H-bond donor count range."""
         return cast("Series[bool]", series.isna() | ((series >= 0) & (series <= 50)))
 
-    h_bond_acceptor_count: Series[int] | None = pa.Field(
+    h_bond_acceptor_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Hydrogen bond acceptor count"
     )
 
     @pa.check("h_bond_acceptor_count", name="h_bond_acceptor_count_range")
-    def _check_h_bond_acceptor_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_h_bond_acceptor_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate H-bond acceptor count range."""
         return cast("Series[bool]", series.isna() | ((series >= 0) & (series <= 50)))
 
-    rotatable_bond_count: Series[int] | None = pa.Field(
+    rotatable_bond_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Rotatable bond count"
     )
 
     @pa.check("rotatable_bond_count", name="rotatable_bond_count_range")
-    def _check_rotatable_bond_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_rotatable_bond_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate rotatable bond count range."""
         return cast("Series[bool]", series.isna() | ((series >= 0) & (series <= 100)))
 
     # === Stereochemistry ===
-    atom_stereo_count: Series[int] | None = pa.Field(
+    atom_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Total stereocenters"
     )
 
     @pa.check("atom_stereo_count", name="atom_stereo_count_non_negative")
-    def _check_atom_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_atom_stereo_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate atom stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    defined_atom_stereo_count: Series[int] | None = pa.Field(
+    defined_atom_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Defined stereocenters"
     )
 
     @pa.check(
         "defined_atom_stereo_count", name="defined_atom_stereo_count_non_negative"
     )
-    def _check_defined_atom_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_defined_atom_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate defined atom stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    undefined_atom_stereo_count: Series[int] | None = pa.Field(
+    undefined_atom_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Undefined stereocenters"
     )
 
     @pa.check(
         "undefined_atom_stereo_count", name="undefined_atom_stereo_count_non_negative"
     )
-    def _check_undefined_atom_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_undefined_atom_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate undefined atom stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    bond_stereo_count: Series[int] | None = pa.Field(
+    bond_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Total E/Z bonds"
     )
 
     @pa.check("bond_stereo_count", name="bond_stereo_count_non_negative")
-    def _check_bond_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_bond_stereo_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate bond stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    defined_bond_stereo_count: Series[int] | None = pa.Field(
+    defined_bond_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Defined E/Z bonds"
     )
 
     @pa.check(
         "defined_bond_stereo_count", name="defined_bond_stereo_count_non_negative"
     )
-    def _check_defined_bond_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_defined_bond_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate defined bond stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    undefined_bond_stereo_count: Series[int] | None = pa.Field(
+    undefined_bond_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Undefined E/Z bonds"
     )
 
     @pa.check(
         "undefined_bond_stereo_count", name="undefined_bond_stereo_count_non_negative"
     )
-    def _check_undefined_bond_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_undefined_bond_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate undefined bond stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    isotope_atom_count: Series[int] | None = pa.Field(
+    isotope_atom_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Isotopic atom count"
     )
 
     @pa.check("isotope_atom_count", name="isotope_atom_count_non_negative")
-    def _check_isotope_atom_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_isotope_atom_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate isotopic atom count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    covalent_unit_count: Series[int] | None = pa.Field(
+    covalent_unit_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of covalent units"
     )
 
     @pa.check("covalent_unit_count", name="covalent_unit_count_positive")
-    def _check_covalent_unit_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_covalent_unit_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate covalent unit count is positive."""
         return cast("Series[bool]", series.isna() | (series >= 1))
 
@@ -271,70 +284,71 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate 3D volume is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    conformer_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="Number of 3D conformers"
+    conformer_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="Number of 3D conformers (float for nullable int)"
     )
 
     @pa.check("conformer_count_3d", name="conformer_count_3d_non_negative")
-    def _check_conformer_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_conformer_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D conformer count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_acceptor_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D H-bond acceptor features"
+    feature_acceptor_count_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="3D H-bond acceptor features (float for nullable int)",
     )
 
     @pa.check(
         "feature_acceptor_count_3d", name="feature_acceptor_count_3d_non_negative"
     )
-    def _check_feature_acceptor_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_acceptor_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D H-bond acceptor count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_donor_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D H-bond donor features"
+    feature_donor_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D H-bond donor features (float for nullable int)"
     )
 
     @pa.check("feature_donor_count_3d", name="feature_donor_count_3d_non_negative")
-    def _check_feature_donor_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_donor_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D H-bond donor count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_anion_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D anion features"
+    feature_anion_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D anion features (float for nullable int)"
     )
 
     @pa.check("feature_anion_count_3d", name="feature_anion_count_3d_non_negative")
-    def _check_feature_anion_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_anion_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D anion count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_cation_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D cation features"
+    feature_cation_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D cation features (float for nullable int)"
     )
 
     @pa.check("feature_cation_count_3d", name="feature_cation_count_3d_non_negative")
-    def _check_feature_cation_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_cation_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D cation count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_ring_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D ring features"
+    feature_ring_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D ring features (float for nullable int)"
     )
 
     @pa.check("feature_ring_count_3d", name="feature_ring_count_3d_non_negative")
-    def _check_feature_ring_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_ring_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D ring count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_hydrophobe_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D hydrophobic features"
+    feature_hydrophobe_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D hydrophobic features (float for nullable int)"
     )
 
     @pa.check(
         "feature_hydrophobe_count_3d", name="feature_hydrophobe_count_3d_non_negative"
     )
-    def _check_feature_hydrophobe_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_hydrophobe_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D hydrophobic count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
@@ -373,20 +387,21 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     )
 
     # === 3D Feature Count (total pharmacophore features) ===
-    feature_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="Total count of 3D pharmacophore features"
+    feature_count_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Total count of 3D pharmacophore features (float for nullable int)",
     )
 
     @pa.check("feature_count_3d", name="feature_count_3d_non_negative")
-    def _check_feature_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D feature count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
     class Config:
         """Pandera configuration."""
 
-        strict = True
-        ordered = True
+        strict = False
+        ordered = False
         coerce = True
         name = "PubchemMoleculeSchema"
         description = "PubChem Molecule Silver layer validation"

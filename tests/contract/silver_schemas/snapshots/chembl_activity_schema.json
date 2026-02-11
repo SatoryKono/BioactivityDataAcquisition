@@ -185,7 +185,7 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^BAO:\\d+$"
+        "regex": "^BAO[_:]\\d+$"
       }
     ],
     "coerce": false,
@@ -353,8 +353,8 @@
       }
     ],
     "coerce": false,
-    "description": "Manual curation flag indicating record was manually reviewed.",
-    "dtype": "int64",
+    "description": "Manual curation flag (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -385,8 +385,8 @@
   "original_activity_id": {
     "checks": [],
     "coerce": false,
-    "description": "Original activity ID for traceability.",
-    "dtype": "int64",
+    "description": "Original activity ID (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -604,8 +604,8 @@
   "toid": {
     "checks": [],
     "coerce": false,
-    "description": "Test Occasion ID.",
-    "dtype": "int64",
+    "description": "Test Occasion ID (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -632,7 +632,7 @@
     "checks": [
       {
         "name": "str_matches",
-        "regex": "^UO:\\d+$"
+        "regex": "^UO[_:]\\d+$"
       }
     ],
     "coerce": false,

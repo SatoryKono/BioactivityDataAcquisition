@@ -44,6 +44,14 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     - doc_type: S2 uses publication_type (JSON array) instead
     """
 
+    # === Override inherited fields to allow missing (align with excluded fields) ===
+    # Note: pmc_id is already nullable in base schema, just re-declaring here for clarity
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central ID",
+    )
+
     # === Primary Key (SemanticScholar-specific) ===
     paper_id: Series[str] = pa.Field(
         nullable=False,
