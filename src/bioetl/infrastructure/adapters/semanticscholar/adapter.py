@@ -34,14 +34,18 @@ from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
+from bioetl.infrastructure.adapters.semanticscholar.constants import (
+    SEMANTICSCHOLAR_BASE_URL,
+)
+from bioetl.infrastructure.adapters.semanticscholar.fallback import (
+    SemanticScholarTitleFallbackHandler,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
-SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
 
 # Default fields to retrieve from Semantic Scholar
 # Note: authors.externalIds includes ORCID, DBLP, and other identifiers

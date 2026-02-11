@@ -51,16 +51,11 @@
       "type": "string",
       "description": "Gold layer table name"
     },
-    "force_full_scan": {
-      "type": "boolean",
-      "default": false,
-      "description": "Disable checkpoint resume and always perform full data scan. Used for publication entities due to API offset instability (ADR-030, ADR-031)"
-    },
     "loading_strategy": {
       "type": "string",
       "enum": ["incremental", "full_scan_only"],
       "default": "incremental",
-      "description": "Data loading strategy. 'full_scan_only' requires force_full_scan=true"
+      "description": "Data loading strategy. 'full_scan_only' disables checkpoint resume (ADR-031)"
     },
     "batch_size": {
       "type": "integer",

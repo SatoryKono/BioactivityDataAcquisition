@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
-from bioetl.infrastructure.adapters.semanticscholar.adapter import (
+from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
 
@@ -29,6 +29,7 @@ __all__ = [
     "titles_match",
 ]
 
+# Semantic Scholar API configuration
 DEFAULT_SEARCH_FIELDS = (
     "paperId,externalIds,title,abstract,year,publicationDate,"
     "venue,authors,citationCount,referenceCount,isOpenAccess,"

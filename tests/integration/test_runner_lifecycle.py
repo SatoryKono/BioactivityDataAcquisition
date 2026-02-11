@@ -27,7 +27,7 @@ from bioetl.application.services.medallion_lifecycle import (
     PrepareResult,
     VacuumResult,
 )
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -358,8 +358,10 @@ class TestPipelineRunnerLifecycle:
             pipeline_name="test_lifecycle",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="test.silver",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+            ),
         )
         runtime = RuntimeConfig(run_type=RunType.REBUILD, limit=None)
         context = PipelineContext(
@@ -435,8 +437,10 @@ class TestPipelineRunnerLifecycle:
             pipeline_name="test_incremental",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="test.silver",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+            ),
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
@@ -514,8 +518,10 @@ class TestPipelineRunnerLifecycle:
             pipeline_name="test_error",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="test.silver",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+            ),
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
@@ -587,8 +593,10 @@ class TestPipelineRunnerLifecycle:
             pipeline_name="test_backfill",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="test.silver",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+            ),
         )
         runtime = RuntimeConfig(run_type=RunType.BACKFILL, limit=None)
         context = PipelineContext(
@@ -668,8 +676,10 @@ class TestPipelineRunnerLifecycle:
             pipeline_name="test_health_fail",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="test.silver",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+            ),
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
@@ -748,8 +758,10 @@ class TestPipelineRunnerLifecycle:
             pipeline_name="test_resume",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="test.silver",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+            ),
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
@@ -838,8 +850,10 @@ class TestPipelineRunnerLifecycle:
             pipeline_name="test_dq_threshold",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="test.silver",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+            ),
         )
         runtime = RuntimeConfig(run_type=RunType.INCREMENTAL, limit=None)
         context = PipelineContext(
@@ -961,9 +975,11 @@ class TestPipelineRunnerLifecycle:
             pipeline_name="test_vacuum",
             provider="test",
             entity_type="entity",
-            primary_keys=["id"],
-            silver_table="test.silver",
-            gold_table="test.gold",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="test.silver",
+                gold_table="test.gold",
+            ),
         )
         runtime = RuntimeConfig(
             run_type=RunType.INCREMENTAL,

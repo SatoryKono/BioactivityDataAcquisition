@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
 
-from bioetl.infrastructure.adapters.pubchem.client import PUBCHEM_API_BASE
+from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable

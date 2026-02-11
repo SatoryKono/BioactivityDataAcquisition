@@ -90,6 +90,7 @@ class DriftLevel(StrEnum):
     INFO = "INFO"
     """New optional fields detected (logged)."""
 
+
     CRITICAL = "CRITICAL"
     """Critical drift (missing required fields), blocks pipeline."""
 

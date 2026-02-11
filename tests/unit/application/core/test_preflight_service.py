@@ -8,7 +8,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.preflight_service import PreflightService
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.exceptions import InfrastructureError
 from bioetl.domain.types import (
@@ -47,9 +47,11 @@ def pipeline_config():
         pipeline_name="test_preflight_pipeline",
         provider="chembl",
         entity_type="activity",
-        primary_keys=["activity_id"],
-        silver_table="test_silver",
-        gold_write_mode="scd2",  # Use valid gold write mode per medallion policy
+        table=TableConfig(
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+            gold_write_mode="scd2",
+        ),
     )
 
 
@@ -670,10 +672,12 @@ class TestValidateWriteModes:
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            write_mode="merge",
-            gold_write_mode="scd2",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="silver",
+                silver_write_mode="merge",
+                gold_write_mode="scd2",
+            ),
         )
         service = PreflightService(
             config=config,
@@ -690,10 +694,12 @@ class TestValidateWriteModes:
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            write_mode="append",
-            gold_write_mode="scd2",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="silver",
+                silver_write_mode="append",
+                gold_write_mode="scd2",
+            ),
         )
         service = PreflightService(
             config=config,
@@ -717,10 +723,12 @@ class TestValidateWriteModes:
                 pipeline_name="test",
                 provider="chembl",
                 entity_type="activity",
-                primary_keys=["id"],
-                silver_table="silver",
-                write_mode="overwrite",
-                gold_write_mode="scd2",
+                table=TableConfig(
+                    primary_keys=["id"],
+                    silver_table="silver",
+                    silver_write_mode="overwrite",
+                    gold_write_mode="scd2",
+                ),
             )
 
     def test_gold_merge_mode_is_valid(self, mock_context, mock_logger, mock_metrics):
@@ -732,9 +740,11 @@ class TestValidateWriteModes:
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            gold_write_mode="scd2",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="silver",
+                gold_write_mode="scd2",
+            ),
         )
         service = PreflightService(
             config=config,
@@ -753,9 +763,11 @@ class TestValidateWriteModes:
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            gold_write_mode="overwrite",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="silver",
+                gold_write_mode="overwrite",
+            ),
         )
         service = PreflightService(
             config=config,
@@ -772,9 +784,11 @@ class TestValidateWriteModes:
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            gold_write_mode="scd2",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="silver",
+                gold_write_mode="scd2",
+            ),
         )
         service = PreflightService(
             config=config,
@@ -804,9 +818,11 @@ class TestValidateWriteModes:
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            gold_write_mode="append",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="silver",
+                gold_write_mode="append",
+            ),
         )
         service = PreflightService(
             config=config,
@@ -831,10 +847,12 @@ class TestValidateWriteModes:
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            write_mode=SilverWriteMode.DELETE,  # Valid enum, invalid for policy
-            gold_write_mode="scd2",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="silver",
+                silver_write_mode=SilverWriteMode.DELETE,
+                gold_write_mode="scd2",
+            ),
         )
         service = PreflightService(
             config=config,
@@ -976,10 +994,12 @@ class TestValidatePreflight:
             pipeline_name="test",
             provider="chembl",
             entity_type="activity",
-            primary_keys=["id"],
-            silver_table="silver",
-            write_mode=SilverWriteMode.DELETE,  # Valid enum, invalid for policy
-            gold_write_mode="scd2",
+            table=TableConfig(
+                primary_keys=["id"],
+                silver_table="silver",
+                silver_write_mode=SilverWriteMode.DELETE,
+                gold_write_mode="scd2",
+            ),
         )
         service = PreflightService(
             config=config,

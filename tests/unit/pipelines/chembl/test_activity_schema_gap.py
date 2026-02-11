@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.pipelines.chembl import ChEMBLActivityPipeline
 from bioetl.application.pipelines.chembl.activity_transformer import ActivityTransformer
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
@@ -21,8 +21,10 @@ def chembl_pipeline() -> ChEMBLActivityPipeline:
         pipeline_name="chembl_activity",
         provider="chembl",
         entity_type="activity",
-        primary_keys=["activity_id"],
-        silver_table="chembl_activity",
+        table=TableConfig(
+            primary_keys=["activity_id"],
+            silver_table="chembl_activity",
+        ),
     )
     runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
     logger = MagicMock()

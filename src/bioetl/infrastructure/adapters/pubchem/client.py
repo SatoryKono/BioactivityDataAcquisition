@@ -35,11 +35,9 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
+from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
-
-# PubChem REST API base URL
-PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator

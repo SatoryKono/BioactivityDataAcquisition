@@ -5,8 +5,10 @@ Provides SemanticScholarAdapter for batch DOI resolution with title fallback.
 """
 
 from bioetl.infrastructure.adapters.semanticscholar.adapter import (
-    SEMANTICSCHOLAR_BASE_URL,
     SemanticScholarAdapter,
+)
+from bioetl.infrastructure.adapters.semanticscholar.constants import (
+    SEMANTICSCHOLAR_BASE_URL,
 )
 
 __all__ = [
