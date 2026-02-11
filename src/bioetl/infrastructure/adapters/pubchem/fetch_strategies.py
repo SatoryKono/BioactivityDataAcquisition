@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, AsyncIterator
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -21,6 +21,27 @@ class PubChemFetchStrategies:
         """
         self.client = client
         self.logger = logger
+
+    async def fetch_by_cids(
+        self, cids: list[str] | None = None, limit: int | None = None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds by CIDs."""
+        if not cids:
+            return
+
+        count = 0
+        for cid in cids:
+            if limit and count >= limit:
+                break
+
+            try:
+                # Assuming client.get_compound_by_cid is synchronous based on previous code
+                compound = self.client.get_compound_by_cid(cid)
+                if compound:
+                    yield compound
+                    count += 1
+            except Exception as e:
+                self.logger.warning("pubchem_cid_fetch_failed", cid=cid, error=str(e))
 
     def fetch_by_cid(self, cid: str) -> dict[str, Any] | None:
         """Fetch by Compound ID."""
@@ -91,7 +112,4 @@ class PubChemFetchStrategies:
 
     def health_check(self) -> bool:
         """Perform a health check for the fetch strategies."""
-        # Since this class relies on the client which should have its own health check,
-        # we can perform a minimal check or just return True if initialized.
-        # Ideally, we might check if the client is responsive.
         return True

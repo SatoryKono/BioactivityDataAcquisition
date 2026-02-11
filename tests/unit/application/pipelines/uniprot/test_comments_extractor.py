@@ -1,11 +1,7 @@
 """Unit tests for UniProt CommentExtractor."""
 
 import json
-from bioetl.application.pipelines.uniprot.extractors.comments import (
-    CommentExtractor,
-    _is_comment_of_type,
-    _extract_texts_from_dict,
-)
+from bioetl.application.pipelines.uniprot.extractors.comments import CommentExtractor
 
 
 class TestCommentExtractor:
@@ -125,7 +121,7 @@ class TestCommentExtractor:
         assert result is not None
         parsed = json.loads(result)
         assert parsed["ph_dependence"] == ["Optimum pH is 7."]
-        assert parsed["kinetic_parameters"]["km"][0]["value"] == 1.5
+        assert parsed["kinetic_parameters"]["km"][0]["constant"] == 1.5
 
     def test_extract_induction(self):
         """Test extraction of INDUCTION comments."""
@@ -177,20 +173,6 @@ class TestCommentExtractor:
         result = CommentExtractor.extract_reaction_ec_numbers(comments)
         assert result is not None
         assert "1.1.1.1" in json.loads(result)
-
-    def test_helper_is_comment_of_type(self):
-        """Test _is_comment_of_type helper."""
-        assert _is_comment_of_type({"commentType": "TEST"}, "TEST") is True
-        assert _is_comment_of_type({"commentType": "OTHER"}, "TEST") is False
-        assert _is_comment_of_type("not a dict", "TEST") is False
-
-    def test_helper_extract_texts_from_dict(self):
-        """Test _extract_texts_from_dict helper."""
-        data = {"texts": [{"value": "Text 1"}, {"value": "Text 2"}]}
-        assert _extract_texts_from_dict(data) == ["Text 1", "Text 2"]
-        assert _extract_texts_from_dict({}) == []
-        assert _extract_texts_from_dict(None) == []
-        assert _extract_texts_from_dict({"texts": "not list"}) == []
 
     def test_extract_by_type_none(self):
         """Test extract_by_type with empty input."""

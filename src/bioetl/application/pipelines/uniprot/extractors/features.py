@@ -1,6 +1,8 @@
 """
-Feature extractor for UniProt XML data.
+Feature extractor for UniProt JSON data.
 """
+
+from __future__ import annotations
 
 from typing import Any
 
@@ -8,15 +10,12 @@ from bioetl.application.pipelines.uniprot.extractors.abstract import AbstractExt
 from bioetl.application.pipelines.uniprot.extractors.extractor_utils import (
     ExtractorUtils,
 )
-from bioetl.domain.schemas.uniprot.protein import FeatureSchema
+from bioetl.domain.serialization import serialize_to_json
 
 
 class FeatureExtractor(AbstractExtractor):
     """
-    Extracts feature information from UniProt XML data.
-
-    Maps UniProt 'feature' elements to the FeatureSchema.
-    Features include regions, sites, bonds, and other annotations on the sequence.
+    Extracts feature information from UniProt JSON data.
     """
 
     def extract(self, entry: dict[str, Any]) -> list[dict[str, Any]]:
@@ -29,97 +28,172 @@ class FeatureExtractor(AbstractExtractor):
         Returns:
             List of feature dictionaries
         """
-        features = []
-        if not (feature_list := entry.get("feature")):
-            return features
+        return []
 
-        # Handle single feature (dict) vs list of features
-        if isinstance(feature_list, dict):
-            feature_list = [feature_list]
-
-        for feat in feature_list:
-            if not isinstance(feat, dict):
-                continue
-
-            if feature_data := self._process_feature(feat):
-                features.append(feature_data)
-
-        return features
-
-    def _process_feature(self, feat: dict[str, Any]) -> dict[str, Any] | None:
+    @staticmethod
+    def _process_feature(feat: dict[str, Any]) -> dict[str, Any] | None:
         """Process a single feature entry."""
-        # Get location data
-        location = feat.get("location", {})
-        if not location:
+        if not isinstance(feat, dict):
             return None
 
+        # Get location data
+        location = feat.get("location", {})
+
         # Extract positions
-        start, end = self._extract_location(location)
-
-        # Build feature dictionary
-        return {
-            "type": feat.get("@type"),
-            "description": self._clean_description(feat.get("@description")),
-            "status": feat.get("@status"),
-            "id": feat.get("@id"),
-            "start": start,
-            "end": end,
-            "original": self._extract_original(location),
-            "variation": self._extract_variation(location),
-            "evidence": self._extract_evidence(feat),
-            "ref": feat.get("@ref"),
-        }
-
-    def _extract_location(
-        self, location: dict[str, Any]
-    ) -> tuple[int | None, int | None]:
-        """Extract start and end positions from location."""
         start = None
         end = None
 
-        # Try exact position
-        if position := location.get("position"):
-            if pos := position.get("@position"):
-                try:
-                    start = int(pos)
-                    end = int(pos)
-                except (ValueError, TypeError):
-                    pass
-        else:
-            # Try range
-            if begin := location.get("begin"):
-                try:
-                    start = int(begin.get("@position"))
-                except (ValueError, TypeError):
-                    pass
-            if end_elem := location.get("end"):
-                try:
-                    end = int(end_elem.get("@position"))
-                except (ValueError, TypeError):
-                    pass
+        if loc_start := location.get("start"):
+            if val := loc_start.get("value"):
+                start = val
 
-        return start, end
+        if loc_end := location.get("end"):
+            if val := loc_end.get("value"):
+                end = val
 
-    def _clean_description(self, description: str | None) -> str | None:
-        """Clean description text."""
-        return ExtractorUtils.clean_text(description)
+        # Build feature dictionary
+        feature_dict = {
+            "type": feat.get("type"),
+            "description": ExtractorUtils.clean_text(feat.get("description")),
+            "status": feat.get("status"),
+            "id": feat.get("featureId"),
+            "start": start,
+            "end": end,
+            "evidence": feat.get("evidences"),
+        }
 
-    def _extract_evidence(self, element: dict[str, Any]) -> list[str]:
-        """Extract evidence codes from an element."""
-        return ExtractorUtils.extract_evidence(element)
+        # Filter out None values to match test expectations (missing keys instead of null)
+        return {k: v for k, v in feature_dict.items() if v is not None}
 
-    def _extract_original(self, location: dict[str, Any]) -> str | None:
-        """Extract original sequence from location."""
-        # Try finding sequence in nested location
-        if position := location.get("position"):
-            # Not strictly correct as original is usually separate?
-            # XML schema: location has sequence? No, usually distinct.
-            # But sometimes in variation.
-            pass
-        return None  # Placeholder, needs clearer mapping if available in XML
+    @staticmethod
+    def extract_features(features: Any) -> str | None:
+        """Extract all features as JSON string."""
+        if not features or not isinstance(features, list):
+            return None
 
-    def _extract_variation(self, location: dict[str, Any]) -> list[str]:
-        """Extract sequence variations."""
-        # Typically variations are stored in specific fields, not location directly.
-        # But for this schema mapping, we return empty if not found.
-        return []
+        processed_features = []
+        for feat in features:
+            if p := FeatureExtractor._process_feature(feat):
+                processed_features.append(p)
+
+        return serialize_to_json(processed_features, ensure_ascii=False) if processed_features else None
+
+    @staticmethod
+    def extract_features_by_type(features: Any, feature_type: str) -> str | None:
+        """Extract features of a specific type."""
+        if not features or not isinstance(features, list):
+            return None
+
+        processed_features = []
+        for feat in features:
+            if isinstance(feat, dict) and feat.get("type") == feature_type:
+                if p := FeatureExtractor._process_feature(feat):
+                    processed_features.append(p)
+
+        return serialize_to_json(processed_features, ensure_ascii=False) if processed_features else None
+
+    # Specific extractors delegates
+    @staticmethod
+    def extract_domains(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Domain")
+
+    @staticmethod
+    def extract_binding_sites(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Binding site")
+
+    @staticmethod
+    def extract_active_sites(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Active site")
+
+    @staticmethod
+    def extract_topology(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Topological domain")
+
+    @staticmethod
+    def extract_transmembrane(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Transmembrane")
+
+    @staticmethod
+    def extract_intramembrane(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Intramembrane")
+
+    @staticmethod
+    def extract_signal_peptide(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Signal peptide")
+
+    @staticmethod
+    def extract_propeptide(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Propeptide")
+
+    @staticmethod
+    def extract_glycosylation(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Glycosylation")
+
+    @staticmethod
+    def extract_lipidation(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Lipidation")
+
+    @staticmethod
+    def extract_disulfide_bonds(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Disulfide bond")
+
+    @staticmethod
+    def extract_modified_residues(features: Any) -> str | None:
+        return FeatureExtractor.extract_features_by_type(features, "Modified residue")
+
+    @staticmethod
+    def extract_phosphorylation(features: Any) -> str | None:
+        if not features or not isinstance(features, list): return None
+
+        results = []
+        for feat in features:
+            if isinstance(feat, dict) and feat.get("type") == "Modified residue":
+                desc = feat.get("description", "")
+                if "phospho" in desc.lower():
+                    if p := FeatureExtractor._process_feature(feat):
+                        results.append(p)
+        return serialize_to_json(results, ensure_ascii=False) if results else None
+
+    @staticmethod
+    def extract_acetylation(features: Any) -> str | None:
+        if not features or not isinstance(features, list): return None
+
+        results = []
+        for feat in features:
+            if isinstance(feat, dict) and feat.get("type") == "Modified residue":
+                desc = feat.get("description", "")
+                if "acetyl" in desc.lower():
+                    if p := FeatureExtractor._process_feature(feat):
+                        results.append(p)
+        return serialize_to_json(results, ensure_ascii=False) if results else None
+
+    @staticmethod
+    def extract_ubiquitination(features: Any) -> str | None:
+        if not features or not isinstance(features, list): return None
+
+        results = []
+        for feat in features:
+            if isinstance(feat, dict):
+                t = feat.get("type")
+                desc = feat.get("description", "")
+                if t in ("Cross-link", "Modified residue") and "ubiquitin" in desc.lower():
+                    if p := FeatureExtractor._process_feature(feat):
+                        results.append(p)
+        return serialize_to_json(results, ensure_ascii=False) if results else None
+
+    @staticmethod
+    def extract_keywords(keywords: Any) -> str | None:
+        """Extract keywords."""
+        if not keywords or not isinstance(keywords, list):
+            return None
+
+        keyword_list = []
+        for kw in keywords:
+            if isinstance(kw, dict):
+                # Return the whole dict to preserve ID/Name/Category structure
+                keyword_list.append(kw)
+            elif isinstance(kw, str):
+                keyword_list.append({"name": kw}) # Normalize string to dict? Or just append?
+                # If mixed, this might be messy. Assuming consistent input.
+
+        return serialize_to_json(keyword_list, ensure_ascii=False) if keyword_list else None

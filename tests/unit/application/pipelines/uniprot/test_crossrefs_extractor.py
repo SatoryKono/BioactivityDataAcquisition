@@ -1,7 +1,7 @@
 """Unit tests for UniProt CrossRefExtractor."""
 
 import json
-from bioetl.application.pipelines.uniprot.extractors.crossrefs import CrossRefExtractor
+from bioetl.application.pipelines.uniprot.extractors.crossref import CrossRefExtractor
 
 
 class TestCrossRefExtractor:
