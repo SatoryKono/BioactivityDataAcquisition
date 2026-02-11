@@ -937,7 +937,6 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("pmid", pa.string()),
         # Primary topic (single most relevant topic for quick categorization)
         pa.field("primary_topic", pa.string()),  # JSON object
-        # Date fields
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
         pa.field(
