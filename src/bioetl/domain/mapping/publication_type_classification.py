@@ -1644,6 +1644,7 @@ _PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {
 }
 
 
+
 def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:
     """Return the lookup dict for the given provider."""
     return _PROVIDER_LOOKUPS.get(provider.lower())

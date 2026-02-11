@@ -102,7 +102,9 @@ class FilterConfigLoader(
 
         # Validate via Pydantic
         validated = FilterConfigFile.model_validate(merged)
-        domain_configs = validated.to_domain()
+        domain_configs: tuple[InputFilterConfig, GoldFilterConfig, ExtractionParams] = (
+            validated.to_domain()
+        )
 
         # Cache result if no inline overrides
         if inline_overrides is None:
