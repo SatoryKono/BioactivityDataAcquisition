@@ -130,14 +130,16 @@ class ActivitySchema(ETLRecordSchema):
     standard_upper_value: Series[float] | None = pa.Field(
         nullable=True, description="Standardized upper bound."
     )
-    toid: Series[int] | None = pa.Field(nullable=True, description="Test Occasion ID.")
-    manual_curation_flag: Series[int] | None = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="Manual curation flag indicating record was manually reviewed.",
+    toid: Series[float] | None = pa.Field(
+        nullable=True, description="Test Occasion ID (float for nullable int)."
     )
-    original_activity_id: Series[int] | None = pa.Field(
-        nullable=True, description="Original activity ID for traceability."
+    manual_curation_flag: Series[float] | None = pa.Field(
+        nullable=True,
+        isin=[0.0, 1.0],
+        description="Manual curation flag (float for nullable int).",
+    )
+    original_activity_id: Series[float] | None = pa.Field(
+        nullable=True, description="Original activity ID (float for nullable int)."
     )
     data_validity_description: Series[str] | None = pa.Field(
         nullable=True, description="Human-readable data validity explanation."

@@ -357,6 +357,8 @@ class MetadataCoordinator:
                     idx = file_path.find("src/bioetl")
                     contract_path = file_path[idx:]
         except Exception:
+            # Catch all: module may not have __file__, or path extraction may fail
+            # for dynamically generated modules. Use default contract_path = None.
             pass
 
         # Extract schema version from Config if defined
