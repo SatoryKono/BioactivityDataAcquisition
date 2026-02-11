@@ -67,6 +67,53 @@ extraction_params:
   standard_flag: 1
 
 # -----------------------------------------------------------------------------
+# Silver Filters — Domain-level quality gates (applied BEFORE Silver write)
+# -----------------------------------------------------------------------------
+# Records that fail these filters are excluded from the Silver layer entirely.
+# These enforce domain invariants and physically plausible value ranges.
+silver_filters:
+  # Column value filters — strict inclusion lists
+  columns:
+    # Only IC50 and Ki measurements
+    standard_type: [IC50, Ki]
+    # Only exact measurements (no censored: >, <, ~)
+    standard_relation: ["="]
+    # Only nanoMolar units
+    standard_units: [nM]
+    # Binding (B) and Functional (F) assays only
+    assay_type: [B, F]
+    # Exclude potential duplicates (0 = not duplicate)
+    potential_duplicate: ["0"]
+
+  # Numeric range filters
+  ranges:
+    activity_id:
+      min: 1
+      max: 10000000000  # 10^10
+    standard_value:
+      min: 0
+      include_min: false  # Exclude exactly 0
+    pchembl_value:
+      min: 3
+      max: 10
+    document_year:
+      min: 1950
+      max: 2050
+
+  # Required fields — must be non-null for silver
+  required_fields:
+    - activity_id
+    - molecule_chembl_id
+    - target_chembl_id
+    - document_chembl_id
+    - standard_value
+    - pchembl_value
+
+  # Exclude records with data validity issues (field must be null / absent)
+  exclude_if_present:
+    - data_validity_comment
+
+# -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------
 # Strict criteria for high-quality activity data

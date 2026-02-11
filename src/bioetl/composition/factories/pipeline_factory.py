@@ -141,6 +141,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -150,6 +151,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         Args:
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional domain-level filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
@@ -165,6 +167,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             entity_type=_extract_entity_type(self.pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -558,6 +561,7 @@ def create_pipeline_with_services(
             entity_type=_extract_entity_type(pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            silver_filters=domain_config.silver_filters,
             gold_filters=domain_config.gold_filters,
             # identity_service and pii_hasher use defaults in transformer
         )
