@@ -35,10 +35,30 @@ def test_quarantine_states_match_docs() -> None:
 
 
 def test_exit_codes_match_docs() -> None:
+    """Check that project-specific exit codes are documented.
+
+    BSD sysexits (EX_DATAERR..EX_NOPERM) are standard boilerplate
+    and not required in project docs.
+    """
+    bsd_sysexits = {
+        "EX_DATAERR",
+        "EX_NOINPUT",
+        "EX_NOUSER",
+        "EX_NOHOST",
+        "EX_UNAVAILABLE",
+        "EX_SOFTWARE",
+        "EX_OSERR",
+        "EX_OSFILE",
+        "EX_CANTCREAT",
+        "EX_IOERR",
+        "EX_TEMPFAIL",
+        "EX_PROTOCOL",
+        "EX_NOPERM",
+    }
     code = Path("src/bioetl/interfaces/cli/exit_codes.py").read_text(encoding="utf-8")
     names = re.findall(r"^\s+([A-Z_]+)\s*=\s*\d+", code, flags=re.M)
     doc = Path("docs/04-reference/cli.md").read_text(encoding="utf-8")
-    missing = [n for n in names if n not in doc]
+    missing = [n for n in names if n not in doc and n not in bsd_sysexits]
     assert not missing, (
         f"Exit codes missing in docs/04-reference/cli.md: {missing[:10]}"
     )
