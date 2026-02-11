@@ -8,7 +8,7 @@ This directory contains documentation for all BioETL pipelines, including compos
 
 ## Pipeline Index
 
-### Provider Pipelines (19)
+### Provider Pipelines (21)
 
 | # | Pipeline ID | Provider | Entity | Spec |
 |---|-------------|----------|--------|------|
@@ -24,21 +24,25 @@ This directory contains documentation for all BioETL pipelines, including compos
 | 10 | `chembl_target_component` | ChEMBL | target_component | [Spec](chembl/10-target-component-spec.md) |
 | 11 | `chembl_publication_term` | ChEMBL | publication_term | [Spec](chembl/11-publication-term-spec.md) |
 | 12 | `chembl_publication_similarity` | ChEMBL | publication_similarity | [Spec](chembl/12-publication-similarity-spec.md) |
-| 13 | `uniprot_protein` | UniProt | protein | [Spec](uniprot/01-protein-spec.md) |
-| 14 | `uniprot_idmapping` | UniProt | idmapping | [Spec](uniprot/02-idmapping-spec.md) |
-| 15 | `pubchem_compound` | PubChem | compound | [Spec](pubchem/01-compound-spec.md) |
-| 16 | `pubmed_publication` | PubMed | publication | [Spec](pubmed/01-publication-spec.md) |
-| 17 | `crossref_publication` | CrossRef | publication | [Spec](crossref/01-publication-spec.md) |
-| 18 | `openalex_publication` | OpenAlex | publication | [Spec](openalex/01-publication-spec.md) |
-| 19 | `semanticscholar_publication` | Semantic Scholar | publication | [Spec](semanticscholar/01-publication-spec.md) |
+| 13 | `chembl_subcellular_fraction` | ChEMBL | subcellular_fraction | [Spec](chembl/13-subcellular-fraction-spec.md) |
+| 14 | `chembl_tissue` | ChEMBL | tissue | [Spec](chembl/14-tissue-spec.md) |
+| 15 | `uniprot_protein` | UniProt | protein | [Spec](uniprot/01-protein-spec.md) |
+| 16 | `uniprot_idmapping` | UniProt | idmapping | [Spec](uniprot/02-idmapping-spec.md) |
+| 17 | `pubchem_compound` | PubChem | compound | [Spec](pubchem/01-compound-spec.md) |
+| 18 | `pubmed_publication` | PubMed | publication | [Spec](pubmed/01-publication-spec.md) |
+| 19 | `crossref_publication` | CrossRef | publication | [Spec](crossref/01-publication-spec.md) |
+| 20 | `openalex_publication` | OpenAlex | publication | [Spec](openalex/01-publication-spec.md) |
+| 21 | `semanticscholar_publication` | Semantic Scholar | publication | [Spec](semanticscholar/01-publication-spec.md) |
 
-### Composite Pipelines (3)
+### Composite Pipelines (5)
 
 | # | Pipeline ID | Provider | Entity | Spec |
 |---|-------------|----------|--------|------|
-| 20 | `composite_publication` | Composite | publication | [Spec](composite/01-publication-spec.md) |
-| 21 | `composite_molecule` | Composite | molecule | [Spec](composite/02-molecule-spec.md) |
-| 22 | `composite_target` | Composite | target | [Spec](composite/03-target-spec.md) |
+| 22 | `composite_activity` | Composite | activity | [Spec](composite/01-activity-spec.md) |
+| 23 | `composite_assay` | Composite | assay | [Spec](composite/02-assay-spec.md) |
+| 24 | `composite_molecule` | Composite | molecule | [Spec](composite/03-molecule-spec.md) |
+| 25 | `composite_publication` | Composite | publication | [Spec](composite/04-publication-spec.md) |
+| 26 | `composite_target` | Composite | target | [Spec](composite/05-target-spec.md) |
 
 ---
 
@@ -46,14 +50,14 @@ This directory contains documentation for all BioETL pipelines, including compos
 
 | Provider | Pipelines | Rate Limit | Auth |
 |----------|-----------|------------|------|
-| **ChEMBL** | 12 | None | Public |
+| **ChEMBL** | 14 | 3 req/sec | Public |
 | **UniProt** | 2 | 100 req/sec | API Key (optional) |
 | **PubChem** | 1 | 5 req/sec | Public |
 | **PubMed** | 1 | 3 req/sec (10 with key) | API Key |
 | **CrossRef** | 1 | Polite pool | mailto header |
 | **OpenAlex** | 1 | ~10 req/sec | email-based |
-| **Semantic Scholar** | 1 | 100 req/5min | API Key |
-| **Composite** | 3 | N/A (local merge) | N/A |
+| **Semantic Scholar** | 1 | 0.1 req/sec (1.0 with key) | API Key |
+| **Composite** | 5 | N/A (local merge) | N/A |
 
 ---
 
@@ -109,9 +113,13 @@ configs/pipelines/
   - publication.yaml
   - publication_similarity.yaml
   - publication_term.yaml
+  - subcellular_fraction.yaml
   - target.yaml
   - target_component.yaml
+  - tissue.yaml
 - composite/
+  - activity.yaml
+  - assay.yaml
   - molecule.yaml
   - publication.yaml
   - target.yaml
