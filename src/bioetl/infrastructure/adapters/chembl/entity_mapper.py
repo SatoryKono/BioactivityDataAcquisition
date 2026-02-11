@@ -84,11 +84,6 @@ _NON_PUBLICATION_PK_FIELD_OVERRIDES: dict[str, str] = {
     "protein_class": "protein_class_id",
 }
 
-# All supported entity types (for validation)
-ALL_SUPPORTED_ENTITY_TYPES: frozenset[str] = frozenset(
-    _NON_PUBLICATION_ENTITY_MAPPING.keys()
-)
-
 
 class ChemblEntityMapper:
     """Maps entity types to ChEMBL API resources and primary keys.
@@ -321,22 +316,4 @@ ENTITY_MAPPING: dict[str, str] = {
     "document": "document",
     "document_similarity": "document_similarity",
     "document_term": "document",
-}
-
-ENTITY_PLURAL: dict[str, str] = {
-    **_NON_PUBLICATION_ENTITY_PLURAL,
-    # Publication plurals from registry (for backward compatibility)
-    "document": "documents",
-    "document_similarity": "document_similarities",
-}
-
-PK_FIELD_OVERRIDES: dict[str, str] = {
-    **_NON_PUBLICATION_PK_FIELD_OVERRIDES,
-    # Publication PK fields from registry (for backward compatibility)
-    "publication": "document_chembl_id",
-    "publication_similarity": "sim_id",
-    "publication_term": "document_chembl_id",
-    "document": "document_chembl_id",
-    "document_similarity": "sim_id",
-    "document_term": "document_chembl_id",
 }

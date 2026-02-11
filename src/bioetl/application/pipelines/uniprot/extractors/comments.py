@@ -456,3 +456,123 @@ class CommentExtractor:
             JSON array of induction text values, or None.
         """
         return cls.extract_by_type(comments, "INDUCTION")
+
+    @staticmethod
+    def extract_isoform_details(comments: Any) -> dict[str, str | None]:
+        """Extract detailed isoform information from ALTERNATIVE PRODUCTS.
+
+        Parses isoform data to extract names, IDs, and synonyms separately.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            Dict with keys:
+                - isoform_names: JSON array of isoform names
+                - isoform_ids: JSON array of isoform IDs (e.g., P12345-1)
+                - isoform_synonyms: JSON array of synonyms
+        """
+        result: dict[str, str | None] = {
+            "isoform_names": None,
+            "isoform_ids": None,
+            "isoform_synonyms": None,
+        }
+
+        if not comments or not isinstance(comments, list):
+            return result
+
+        names: list[str] = []
+        ids: list[str] = []
+        synonyms: list[str] = []
+
+        for comment in comments:
+            if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
+                continue
+
+            isoforms = comment.get("isoforms", [])
+            if not isinstance(isoforms, list):
+                continue
+
+            for iso in isoforms:
+                if not isinstance(iso, dict):
+                    continue
+
+                # Extract isoform IDs
+                isoform_ids = iso.get("isoformIds", [])
+                if isinstance(isoform_ids, list):
+                    for iso_id in isoform_ids:
+                        if iso_id:
+                            ids.append(str(iso_id))
+
+                # Extract isoform name
+                name = iso.get("name", {})
+                if isinstance(name, dict) and name.get("value"):
+                    names.append(str(name["value"]))
+
+                # Extract synonyms
+                iso_synonyms = iso.get("synonyms", [])
+                if isinstance(iso_synonyms, list):
+                    for syn in iso_synonyms:
+                        if isinstance(syn, dict) and syn.get("value"):
+                            synonyms.append(str(syn["value"]))
+
+        if names:
+            result["isoform_names"] = serialize_to_json(names, ensure_ascii=False)
+        if ids:
+            result["isoform_ids"] = serialize_to_json(ids, ensure_ascii=False)
+        if synonyms:
+            result["isoform_synonyms"] = serialize_to_json(synonyms, ensure_ascii=False)
+
+        return result
+
+    @staticmethod
+    def extract_reactions(comments: Any) -> str | None:
+        """Extract reaction names from CATALYTIC ACTIVITY comments.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            JSON array of reaction name strings, or None.
+        """
+        if not comments or not isinstance(comments, list):
+            return None
+
+        reactions: list[str] = []
+        for comment in comments:
+            if not _is_comment_of_type(comment, "CATALYTIC ACTIVITY"):
+                continue
+
+            reaction = comment.get("reaction", {})
+            if isinstance(reaction, dict):
+                name = reaction.get("name")
+                if name:
+                    reactions.append(str(name))
+
+        return serialize_to_json(reactions, ensure_ascii=False) if reactions else None
+
+    @staticmethod
+    def extract_reaction_ec_numbers(comments: Any) -> str | None:
+        """Extract EC numbers from CATALYTIC ACTIVITY comments.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            JSON array of EC number strings, or None.
+        """
+        if not comments or not isinstance(comments, list):
+            return None
+
+        ec_numbers: list[str] = []
+        for comment in comments:
+            if not _is_comment_of_type(comment, "CATALYTIC ACTIVITY"):
+                continue
+
+            reaction = comment.get("reaction", {})
+            if isinstance(reaction, dict):
+                ec_number = reaction.get("ecNumber")
+                if ec_number:
+                    ec_numbers.append(str(ec_number))
+
+        return serialize_to_json(ec_numbers, ensure_ascii=False) if ec_numbers else None

@@ -138,21 +138,23 @@ class TestNoHardcodedRateLimits:
         )
 
     def test_registration_uses_source_config(self) -> None:
-        """registration.py should use load_source_config for rate limits."""
+        """registration.py (or its _config_helpers) should use load_source_config for rate limits."""
         import inspect
 
-        from bioetl.composition.providers import registration
+        from bioetl.composition.providers import _config_helpers, registration
 
-        source = inspect.getsource(registration)
+        reg_source = inspect.getsource(registration)
+        helpers_source = inspect.getsource(_config_helpers)
+        combined = reg_source + helpers_source
 
-        # Should import load_source_config
-        assert "load_source_config" in source, (
-            "registration.py should use load_source_config"
+        # Should import load_source_config (in _config_helpers after split)
+        assert "load_source_config" in combined, (
+            "registration providers should use load_source_config"
         )
 
         # Should have helper functions for getting config
-        assert "_get_rate_limit_from_config" in source
-        assert "_get_circuit_breaker_from_config" in source
+        assert "_get_rate_limit_from_config" in combined
+        assert "_get_circuit_breaker_from_config" in combined
 
 
 class TestSourceConfigSchema:

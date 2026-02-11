@@ -17,6 +17,9 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.mapping.publication_type_classification import (
+    classify_publication_type,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -200,40 +203,37 @@ class BasePublicationTransformer(BaseTransformer):
         # 8. Convert to SilverRecord
         return cast("SilverRecord", self.entity_to_silver_record(entity))
 
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD format (end of period).
+    def _classify_publication_type(
+        self,
+        provider: str,
+        raw_type: str | None = None,
+        raw_types_list: list[str] | None = None,
+    ) -> dict[str, str | None]:
+        """Classify publication type using the unified 3-level hierarchy.
 
-        Common logic for provider APIs that return partial dates:
-        - Full date: "2024-05-15" (YYYY-MM-DD)
-        - Month precision: "2024-05" (YYYY-MM) -> "2024-05-30"
-        - Year precision: "2024" (YYYY) -> "2024-12-31"
-
-        Partial dates are normalized to end of period for consistency across BioETL.
+        Delegates to domain classification module.
 
         Args:
-            date_str: Raw date string from provider API.
+            provider: Provider name ("openalex", "crossref", "pubmed", "semanticscholar").
+            raw_type: Single raw type string (for OpenAlex / CrossRef).
+            raw_types_list: List of raw type strings (for PubMed / S2).
 
         Returns:
-            Normalized ISO date string (YYYY-MM-DD) or None.
+            Dict with keys publication_type_unified, publication_subclass,
+            publication_class (all str | None).
 
         """
-        if not date_str:
-            return None
-
-        date_str = str(date_str).strip()
-
-        # Full ISO format (YYYY-MM-DD) - return as-is
-        # Check length and separators strictly to avoid false positives
-        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-            return date_str
-
-        # Partial date: YYYY-MM → YYYY-MM-30 (end of month approximation)
-        if len(date_str) == 7 and date_str[4] == "-":
-            return f"{date_str}-30"
-
-        # Partial date: YYYY → YYYY-12-31 (end of year)
-        if len(date_str) == 4 and date_str.isdigit():
-            return f"{date_str}-12-31"
-
-        # Unknown format - return None for invalid dates
-        return None
+        entry = classify_publication_type(
+            provider, raw_type=raw_type, raw_types_list=raw_types_list
+        )
+        if entry is None:
+            return {
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
+            }
+        return {
+            "publication_type_unified": entry.unified_type,
+            "publication_subclass": entry.subclass,
+            "publication_class": entry.class_code,
+        }

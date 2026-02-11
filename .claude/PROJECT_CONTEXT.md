@@ -1,11 +1,11 @@
 # BioETL: Компактный Контекст для Claude
 
-*Синхронизировано с RULES.md v5.14 (2026-01-26)*
+*Синхронизировано с RULES.md v5.17 (2026-02-03)*
 
 > **Это сокращённая версия.** Полная документация:
-> - `docs/RULES.md` — **Единственный источник истины** для архитектурных правил
-> - `CLAUDE.md` — Протокол верификации и архитектурные пояснения
-> - `AGENT.md` — Персона, workflow и инструкции для агента
+> - `docs/00-project/RULES.md` — **Единственный источник истины** для архитектурных правил
+> - `docs/00-project/agents/CLAUDE.md` — Протокол верификации и архитектурные пояснения
+> - `docs/00-project/agents/AGENT.md` — Персона, workflow и инструкции для агента
 
 ---
 
@@ -20,7 +20,7 @@ make install             # Установка зависимостей
 
 ## 1. Архитектура
 
-> **Полная документация**: См. `docs/RULES.md` §1 и `CLAUDE.md` §2
+> **Полная документация**: См. `docs/00-project/RULES.md` §1 и `docs/00-project/agents/CLAUDE.md` §2
 
 ```
 src/bioetl/
@@ -34,10 +34,10 @@ src/bioetl/
 **Ключевые ограничения:**
 - Матрица импортов: `domain` ← `application` ← `composition` → `infrastructure`
 - **Нарушение = Блокер PR**
-- DI: Зависимости в конструктор. `composition/bootstrap.py` — единственное место сборки
+- DI: Зависимости в конструктор. `composition/bootstrap/` — единственное место сборки
 
 > **⚠️ Протокол верификации**: Перед утверждениями о компонентах проверяй код!
-> См. `CLAUDE.md` §0 и §2.3 для списка частых ложных выводов.
+> См. `docs/00-project/agents/CLAUDE.md` §0 и §2.3 для списка частых ложных выводов.
 
 ---
 
@@ -90,7 +90,7 @@ src/bioetl/
 | Domain Ports | `src/bioetl/domain/ports/` |
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
-| Bootstrap | `src/bioetl/composition/bootstrap.py` |
+| Bootstrap | `src/bioetl/composition/bootstrap/` |
 | Configs | `configs/pipelines/{provider}/{entity}.yaml` |
 | ADR | `docs/02-architecture/decisions/` |
 

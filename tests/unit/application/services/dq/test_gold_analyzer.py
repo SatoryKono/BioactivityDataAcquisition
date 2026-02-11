@@ -19,8 +19,25 @@ import polars as pl
 import pyarrow as pa
 import pytest
 
+from bioetl.application.services.dq._checks_basic import (
+    check_completeness,
+    check_data_freshness,
+    check_record_count,
+)
+from bioetl.application.services.dq._checks_business import check_business_rules
+from bioetl.application.services.dq._checks_integrity import (
+    check_referential_integrity,
+    check_scd_integrity,
+)
+from bioetl.application.services.dq._checks_statistical import (
+    check_anomaly_detection,
+    check_statistical_profile,
+)
 from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
-from bioetl.application.services.dq.utils import convert_value, update_counts
+from bioetl.application.services.dq.dq_report_builders import (
+    convert_value,
+    update_counts,
+)
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     DQReportStatus,
@@ -148,41 +165,39 @@ class TestHelperFunctions:
 class TestRecordCountCheck:
     """Tests for record count validation."""
 
-    def test_record_count_pass(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_record_count_pass(self) -> None:
         """Record count check passes with stable count."""
         df = pl.DataFrame({"id": [1, 2, 3, 4, 5]})
         baseline_stats = {"record_count_ma30": 5}
 
-        result = gold_analyzer._check_record_count(df, baseline_stats)
+        result = check_record_count(df, baseline_stats)
 
         assert result.value == 5
         assert result.status == DQCheckStatus.PASS
 
-    def test_record_count_warn_on_drop(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_record_count_warn_on_drop(self) -> None:
         """Record count check warns on >30% drop."""
         df = pl.DataFrame({"id": [1, 2, 3]})  # 3 records
         baseline_stats = {"record_count_ma30": 5}  # 40% drop
 
-        result = gold_analyzer._check_record_count(df, baseline_stats)
+        result = check_record_count(df, baseline_stats)
 
         assert result.status == DQCheckStatus.WARN
 
-    def test_record_count_fail_on_large_drop(
-        self, gold_analyzer: GoldDQAnalyzer
-    ) -> None:
+    def test_record_count_fail_on_large_drop(self) -> None:
         """Record count check fails on >50% drop."""
         df = pl.DataFrame({"id": [1, 2]})  # 2 records
         baseline_stats = {"record_count_ma30": 5}  # 60% drop
 
-        result = gold_analyzer._check_record_count(df, baseline_stats)
+        result = check_record_count(df, baseline_stats)
 
         assert result.status == DQCheckStatus.FAIL
 
-    def test_record_count_no_baseline(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_record_count_no_baseline(self) -> None:
         """Record count check passes when no baseline available."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_record_count(df, None)
+        result = check_record_count(df, None)
 
         assert result.value == 3
         assert result.status == DQCheckStatus.PASS
@@ -191,25 +206,25 @@ class TestRecordCountCheck:
 class TestCompletenessCheck:
     """Tests for completeness validation."""
 
-    def test_completeness_pass(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_completeness_pass(self) -> None:
         """Completeness check passes with high fill rate."""
         df = pl.DataFrame({"id": [1, 2, 3], "name": ["a", "b", "c"]})
 
-        result = gold_analyzer._check_completeness(df, ["id", "name"], 0.9)
+        result = check_completeness(df, ["id", "name"], 0.9)
 
         assert result.overall_completeness_score == 1.0
         assert result.status == DQCheckStatus.PASS
 
-    def test_completeness_fail_low_fill(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_completeness_fail_low_fill(self) -> None:
         """Completeness check fails with low fill rate."""
         df = pl.DataFrame({"id": [1, 2, 3], "name": ["a", None, None]})
 
-        result = gold_analyzer._check_completeness(df, ["id", "name"], 0.9)
+        result = check_completeness(df, ["id", "name"], 0.9)
 
         assert result.overall_completeness_score < 0.9
         assert result.status == DQCheckStatus.FAIL
 
-    def test_completeness_missing_field(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_completeness_missing_field(self) -> None:
         """Completeness check handles missing required field.
 
         Note: The implementation only counts existing columns in overall score,
@@ -218,7 +233,7 @@ class TestCompletenessCheck:
         """
         df = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_completeness(df, ["id", "missing_field"], 0.9)
+        result = check_completeness(df, ["id", "missing_field"], 0.9)
 
         # Missing field is tracked with 0.0 fill rate
         assert result.required_fields["missing_field"] == 0.0
@@ -227,13 +242,11 @@ class TestCompletenessCheck:
         assert result.overall_completeness_score == 1.0
         assert result.status == DQCheckStatus.PASS
 
-    def test_completeness_no_required_fields(
-        self, gold_analyzer: GoldDQAnalyzer
-    ) -> None:
+    def test_completeness_no_required_fields(self) -> None:
         """Completeness check passes when no required fields specified."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_completeness(df, [], 0.9)
+        result = check_completeness(df, [], 0.9)
 
         assert result.overall_completeness_score == 1.0
         assert result.status == DQCheckStatus.PASS
@@ -242,7 +255,7 @@ class TestCompletenessCheck:
 class TestBusinessRulesCheck:
     """Tests for business rules validation."""
 
-    def test_business_rules_pass(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_business_rules_pass(self) -> None:
         """Business rules check passes when all rules satisfied."""
         df = pl.DataFrame({"value": [100.0, 200.0, 300.0]})
         rules = [
@@ -255,13 +268,13 @@ class TestBusinessRulesCheck:
             }
         ]
 
-        result = gold_analyzer._check_business_rules(df, rules)
+        result = check_business_rules(df, rules)
 
         assert result.rules_passed == 1
         assert result.rules_failed == 0
         assert result.status == DQCheckStatus.PASS
 
-    def test_business_rules_fail(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_business_rules_fail(self) -> None:
         """Business rules check fails when rules violated."""
         df = pl.DataFrame({"value": [-100.0, 200.0, 300.0]})
         rules = [
@@ -274,12 +287,12 @@ class TestBusinessRulesCheck:
             }
         ]
 
-        result = gold_analyzer._check_business_rules(df, rules)
+        result = check_business_rules(df, rules)
 
         assert result.rules_failed == 1
         assert result.status == DQCheckStatus.FAIL
 
-    def test_business_rules_not_null(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_business_rules_not_null(self) -> None:
         """Test not_null condition."""
         df = pl.DataFrame({"id": [1, 2, None]})
         rules = [
@@ -291,11 +304,11 @@ class TestBusinessRulesCheck:
             }
         ]
 
-        result = gold_analyzer._check_business_rules(df, rules)
+        result = check_business_rules(df, rules)
 
         assert result.rules_failed == 1
 
-    def test_business_rules_in_list(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_business_rules_in_list(self) -> None:
         """Test in_list condition."""
         df = pl.DataFrame({"status": ["active", "inactive", "unknown"]})
         rules = [
@@ -308,11 +321,11 @@ class TestBusinessRulesCheck:
             }
         ]
 
-        result = gold_analyzer._check_business_rules(df, rules)
+        result = check_business_rules(df, rules)
 
         assert result.rules_failed == 1
 
-    def test_business_rules_regex(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_business_rules_regex(self) -> None:
         """Test regex condition."""
         df = pl.DataFrame({"code": ["A-123", "B-456", "invalid"]})
         rules = [
@@ -325,25 +338,25 @@ class TestBusinessRulesCheck:
             }
         ]
 
-        result = gold_analyzer._check_business_rules(df, rules)
+        result = check_business_rules(df, rules)
 
         assert result.rules_failed == 1
 
-    def test_business_rules_empty(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_business_rules_empty(self) -> None:
         """Business rules check passes when no rules specified."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_business_rules(df, [])
+        result = check_business_rules(df, [])
 
         assert result.rules_evaluated == 0
         assert result.status == DQCheckStatus.PASS
 
-    def test_business_rules_missing_column(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_business_rules_missing_column(self) -> None:
         """Business rules check handles missing column gracefully."""
         df = pl.DataFrame({"id": [1, 2, 3]})
         rules = [{"rule_id": "R1", "column": "missing", "condition": "not_null"}]
 
-        result = gold_analyzer._check_business_rules(df, rules)
+        result = check_business_rules(df, rules)
 
         # Should pass since column doesn't exist
         assert result.rules_passed == 1
@@ -352,37 +365,33 @@ class TestBusinessRulesCheck:
 class TestReferentialIntegrityCheck:
     """Tests for referential integrity validation."""
 
-    def test_referential_integrity_pass(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_referential_integrity_pass(self) -> None:
         """Referential integrity check passes when all references valid."""
         df = pl.DataFrame({"category_id": [1, 2, 1, 2]})
         ref_table = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_referential_integrity(
+        result = check_referential_integrity(
             df, {"category_id -> categories.id": ref_table}
         )
 
         assert result.status == DQCheckStatus.PASS
 
-    def test_referential_integrity_fail_orphans(
-        self, gold_analyzer: GoldDQAnalyzer
-    ) -> None:
+    def test_referential_integrity_fail_orphans(self) -> None:
         """Referential integrity check fails with many orphans."""
         df = pl.DataFrame({"category_id": [1, 999, 888, 777]})  # Many invalid refs
         ref_table = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_referential_integrity(
+        result = check_referential_integrity(
             df, {"category_id -> categories.id": ref_table}
         )
 
         assert result.status == DQCheckStatus.FAIL
 
-    def test_referential_integrity_empty_refs(
-        self, gold_analyzer: GoldDQAnalyzer
-    ) -> None:
+    def test_referential_integrity_empty_refs(self) -> None:
         """Referential integrity check passes with no references."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_referential_integrity(df, {})
+        result = check_referential_integrity(df, {})
 
         assert result.status == DQCheckStatus.PASS
 
@@ -390,7 +399,7 @@ class TestReferentialIntegrityCheck:
 class TestStatisticalProfileCheck:
     """Tests for statistical profile validation."""
 
-    def test_statistical_profile_pass(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_statistical_profile_pass(self) -> None:
         """Statistical profile check passes with normal stats."""
         df = pl.DataFrame(
             {"id": [1, 2, 3, 4, 5], "value": [10.0, 20.0, 30.0, 40.0, 50.0]}
@@ -400,31 +409,27 @@ class TestStatisticalProfileCheck:
             "record_count_ma30": 5,
         }
 
-        result = gold_analyzer._check_statistical_profile(df, baseline_stats)
+        result = check_statistical_profile(df, baseline_stats)
 
         assert result.status == DQCheckStatus.PASS
 
-    def test_statistical_profile_warn_high_null(
-        self, gold_analyzer: GoldDQAnalyzer
-    ) -> None:
+    def test_statistical_profile_warn_high_null(self) -> None:
         """Statistical profile check warns on high null rate."""
         df = pl.DataFrame({"id": [1, 2, 3], "value": [None, None, 30.0]})
         baseline_stats = {
             "null_rate_ma30": 0.05,  # 5% baseline null rate
         }
 
-        result = gold_analyzer._check_statistical_profile(df, baseline_stats)
+        result = check_statistical_profile(df, baseline_stats)
 
         # With 2/3 nulls in value column, null rate is much higher than baseline
         assert result.status in [DQCheckStatus.WARN, DQCheckStatus.FAIL]
 
-    def test_statistical_profile_no_baseline(
-        self, gold_analyzer: GoldDQAnalyzer
-    ) -> None:
+    def test_statistical_profile_no_baseline(self) -> None:
         """Statistical profile check passes when no baseline."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_statistical_profile(df, None)
+        result = check_statistical_profile(df, None)
 
         assert result.status == DQCheckStatus.PASS
 
@@ -432,26 +437,26 @@ class TestStatisticalProfileCheck:
 class TestAnomalyDetectionCheck:
     """Tests for anomaly detection."""
 
-    def test_anomaly_detection_cold_start(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_anomaly_detection_cold_start(self) -> None:
         """Anomaly detection in cold start mode."""
         df = pl.DataFrame({"id": [1, 2, 3]})
         baseline_stats = {"days_since_start": 10}  # Less than 30 days
 
-        result = gold_analyzer._check_anomaly_detection(df, baseline_stats)
+        result = check_anomaly_detection(df, baseline_stats)
 
         assert result.cold_start_mode is True
         assert result.status == DQCheckStatus.PASS
 
-    def test_anomaly_detection_no_baseline(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_anomaly_detection_no_baseline(self) -> None:
         """Anomaly detection passes without baseline."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_anomaly_detection(df, None)
+        result = check_anomaly_detection(df, None)
 
         assert result.cold_start_mode is True
         assert result.status == DQCheckStatus.PASS
 
-    def test_anomaly_detection_normal(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_anomaly_detection_normal(self) -> None:
         """Anomaly detection passes with normal values."""
         df = pl.DataFrame(
             {"id": [1, 2, 3, 4, 5], "value": [10.0, 20.0, 30.0, 40.0, 50.0]}
@@ -462,7 +467,7 @@ class TestAnomalyDetectionCheck:
             "record_count_ma30": 5,
         }
 
-        result = gold_analyzer._check_anomaly_detection(df, baseline_stats)
+        result = check_anomaly_detection(df, baseline_stats)
 
         assert result.cold_start_mode is False
         assert result.status == DQCheckStatus.PASS
@@ -471,15 +476,15 @@ class TestAnomalyDetectionCheck:
 class TestSCDIntegrityCheck:
     """Tests for SCD integrity validation."""
 
-    def test_scd_integrity_no_config(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_scd_integrity_no_config(self) -> None:
         """SCD integrity check passes without config."""
         df = pl.DataFrame({"id": [1, 2, 3]})
 
-        result = gold_analyzer._check_scd_integrity(df, None)
+        result = check_scd_integrity(df, None)
 
         assert result.status == DQCheckStatus.PASS
 
-    def test_scd_integrity_with_history(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_scd_integrity_with_history(self) -> None:
         """SCD integrity check with version history."""
         df = pl.DataFrame(
             {
@@ -507,7 +512,7 @@ class TestSCDIntegrityCheck:
             "valid_to_col": "_valid_to",
         }
 
-        result = gold_analyzer._check_scd_integrity(df, scd_config)
+        result = check_scd_integrity(df, scd_config)
 
         assert result.scd_type == 2
         assert result.total_entities == 3
@@ -517,7 +522,7 @@ class TestSCDIntegrityCheck:
 class TestDataFreshnessCheck:
     """Tests for data freshness validation."""
 
-    def test_data_freshness_pass(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_data_freshness_pass(self) -> None:
         """Data freshness check passes with recent data."""
         current_time = datetime(2024, 5, 15, 15, 0, tzinfo=UTC)
         df = pl.DataFrame(
@@ -530,12 +535,12 @@ class TestDataFreshnessCheck:
             }
         )
 
-        result = gold_analyzer._check_data_freshness(df, current_time)
+        result = check_data_freshness(df, current_time)
 
         assert result.freshness_lag_hours < 24
         assert result.status == DQCheckStatus.PASS
 
-    def test_data_freshness_warn(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_data_freshness_warn(self) -> None:
         """Data freshness check warns on stale data."""
         current_time = datetime(2024, 5, 17, 15, 0, tzinfo=UTC)
         df = pl.DataFrame(
@@ -548,18 +553,18 @@ class TestDataFreshnessCheck:
             }
         )
 
-        result = gold_analyzer._check_data_freshness(df, current_time)
+        result = check_data_freshness(df, current_time)
 
         # ~52 hours old
         assert result.freshness_lag_hours > 24
         assert result.status == DQCheckStatus.WARN
 
-    def test_data_freshness_no_timestamp(self, gold_analyzer: GoldDQAnalyzer) -> None:
+    def test_data_freshness_no_timestamp(self) -> None:
         """Data freshness check passes without timestamp column."""
         current_time = datetime(2024, 5, 15, 15, 0, tzinfo=UTC)
         df = pl.DataFrame({"id": [1, 2]})
 
-        result = gold_analyzer._check_data_freshness(df, current_time)
+        result = check_data_freshness(df, current_time)
 
         assert result.status == DQCheckStatus.PASS
         assert result.max_updated_at is None

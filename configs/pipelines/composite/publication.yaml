@@ -78,7 +78,7 @@ composite:
         - title
       required: false    # Optional - seed may not have DOIs
       filter_condition: "doi IS NOT NULL"
-      timeout_seconds: 900
+      timeout_seconds: 3600
       silver_table: silver/crossref/publication
 
     # OpenAlex: Academic topics and institutions
@@ -89,7 +89,7 @@ composite:
         - title          # Fallback key if doi not found
       required: false    # Optional - needs doi or pmid
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
-      timeout_seconds: 600
+      timeout_seconds: 3600
       silver_table: silver/openalex/publication
 
     # PubMed: MeSH terms and medical metadata
@@ -100,7 +100,7 @@ composite:
         - doi
       required: false    # Optional - only for records with pmid
       filter_condition: "pmid IS NOT NULL"
-      timeout_seconds: 600
+      timeout_seconds: 3600
       silver_table: silver/pubmed/publication
 
     # Semantic Scholar: AI/ML embeddings and TLDR (mapped to abstract)
@@ -111,7 +111,7 @@ composite:
         - title
       required: false    # Optional - high rate limits, ok to skip
       filter_condition: "doi IS NOT NULL OR title IS NOT NULL"
-      timeout_seconds: 1200
+      timeout_seconds: 7200
       #fallback_strategy: skip  # Skip on failure (high rate limits)
       silver_table: silver/semanticscholar/publication
 
@@ -130,6 +130,11 @@ composite:
     # When true, keeps columns like chembl.publication.title, crossref.publication.title
     # instead of coalescing them into a single 'title' column
     preserve_all_sources: true
+
+    # Output paths for merged data
+    output:
+      silver: data/output/silver/composite/publication
+      gold: data/output/gold/composite/publication
 
     # Field-level priority overrides (when using explicit_rules)
     # Maps field name to ordered list of source preferences
@@ -265,8 +270,9 @@ composite:
           - _original_id
         pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      # === Business identifiers ===
-      - name: id
+
+      # === Provider identifiers ===
+      - name: provider_ids
         fields:
           - alternative_id
           - chembl_release
@@ -280,8 +286,10 @@ composite:
           - pmc_id
           - pmid
           - src_id
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: bibliography
+        provider_order: [semanticscholar, openalex, pubmed, chembl, crossref]
+
+      # === Journal / Venue information ===
+      - name: journal
         fields:
           - abstract
           - abstract_structured
@@ -295,35 +303,46 @@ composite:
           - journal_iso_abbrev
           - journal_issn_type
           - journal_name_short
+          - publisher
+          - title
+          - venue
+          - volume
+        provider_order: [pubmed, semanticscholar, chembl, crossref, openalex]
+
+      # === Pagination ===
+      - name: pagination
+        fields:
+          - medline_pgn
           - page_first
           - page_last
           - page_range
-          - published
-          - published_online
-          - published_print
-          - publisher
-          - publication_year
-          - title
-          - volume
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: author_and_affiliation
+        provider_order: [pubmed, chembl, crossref, openalex, semanticscholar]
+
+      # === Authors ===
+      - name: authors
         fields:
-          - affiliation_list
-          - affiliation_structured
           - author_count
           - author_details
           - author_h_indices
           - author_openalex_ids
-          - author_orcid_list
           - author_orcids
           - author_s2_ids
           - authors
           - authors_with_affiliations
-          - country
+        provider_order: [pubmed, semanticscholar, openalex, chembl, crossref]
+
+      # === Affiliations ===
+      - name: affiliations
+        fields:
+          - affiliation_list
+          - affiliation_structured
           - institution_country_codes
           - institution_ids
           - ror_ids
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+          - country
+        provider_order: [pubmed, openalex, semanticscholar, chembl, crossref]
+
+      # === Date ===
       - name: date
         fields:
           - creation_date
@@ -333,15 +352,12 @@ composite:
           - pub_day
           - pub_month
           - publication_date
+          - publication_year
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: topics_and_keywords
+
+      # === Subjects / Topics ===
+      - name: subjects
         fields:
-          - chemical_count
-          - chemicals
-          - citation_subset
-          - databanks
-          - fwci
-          - gene_symbols
           - keyword_count
           - mesh_heading_count
           - primary_topic
@@ -349,34 +365,52 @@ composite:
           - subject_keywords
           - subject_mesh
           - subject_topics
-        provider_order: [crossref, openalex, pubmed, semanticscholar, chembl]
-      - name: publication
+          - tldr
+        provider_order: [pubmed, openalex, semanticscholar, crossref, chembl]
+
+      # === Biomedical (NEW) ===
+      - name: biomedical
+        fields:
+          - chemicals
+          - chemical_count
+          - gene_symbols
+          - databanks
+          - grants
+          - grant_count
+        provider_order: [pubmed, openalex, chembl]
+
+      # === Citations / Metrics ===
+      - name: citations
         fields:
           - citation_contexts
+          - citation_subset
           - citations_made
           - citations_received
+          - fwci
+          - influential_citation_count
+          - references
+        provider_order: [semanticscholar, crossref, openalex, pubmed, chembl]
+
+      # === Document type and status ===
+      - name: doc_type
+        fields:
           - content_domain_crossmark_restriction
           - content_domain_domains
-          - grant_count
-          - grants
-          - influential_citation_count
           - is_oa
           - is_retracted
           - language
           - license_url
-          - medline_pgn
           - oa_status
           - open_access_url
           - publication_status
           - publication_type
           - publication_type_list
           - publication_types
-          - references
-          - tldr
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-    output:
-      silver: data/output/silver/composite/publication
-      gold: data/output/gold/composite/publication
+        provider_order: [semanticscholar, pubmed, chembl, crossref, openalex]
+
+    # Note: output paths auto-computed per ADR-029 convention-based resolution
+    # silver: data/output/silver/composite/publication (auto)
+    # gold: data/output/gold/composite/publication (auto)
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration

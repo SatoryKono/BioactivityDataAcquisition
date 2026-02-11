@@ -38,6 +38,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-030](ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | Accepted | Data Fetching | 2026-01-25 |
 | [ADR-031](ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | Data Loading | 2026-01-26 |
 | [ADR-032](ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | Accepted | HTTP/Networking | 2026-01-28 |
+| [ADR-033](ADR-033-publication-validation-strategy.md) | Publication Metadata Validation Strategy | Proposed | Data Quality | 2026-02-06 |
 
 ## ADRs by Category
 
@@ -72,6 +73,7 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Data Quality
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation
 - [ADR-027](ADR-027-dq-rules-externalization.md): DQ Rules Externalization — Hierarchical DQ config
+- [ADR-033](ADR-033-publication-validation-strategy.md): Publication Metadata Validation Strategy — 5-level validation for publication data
 
 ### Domain Model
 - [ADR-004](ADR-004-pydantic-vs-dataclasses.md): Pydantic vs Dataclasses

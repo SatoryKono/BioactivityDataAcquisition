@@ -23,6 +23,9 @@ Path: adapters\__init__.py
 
 from __future__ import annotations
 
+from bioetl.infrastructure.adapters.cached_bronze_data_source import (
+    CachedBronzeDataSource,
+)
 from bioetl.infrastructure.adapters.decorators import (
     CircuitBreakerDataSourceDecorator,
     RetryingDataSourceDecorator,
@@ -37,6 +40,7 @@ from bioetl.infrastructure.adapters.validation import (
 )
 
 __all__ = [
+    "CachedBronzeDataSource",
     "CircuitBreakerDataSourceDecorator",
     "RetryingDataSourceDecorator",
     "ValidationResult",
@@ -46,6 +50,67 @@ __all__ = [
     "validate_records",
     "wrap_with_resilience",
 ]
+
+================================================================================
+File: adapter_error_logging.py
+Path: adapters\adapter_error_logging.py
+================================================================================
+"""Logging utilities for adapters.
+
+Provides standardized error logging format across all data source adapters.
+Implements RULES.md §3.2.1 Log Schema with mandatory stage field.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Literal
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
+
+# Stage type for Log Schema compliance
+StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup"]
+
+
+def log_adapter_error(
+    logger: LoggerPort,
+    provider: str,
+    operation: str,
+    *,
+    stage: StageType = "extract",
+    error_type: str = "adapter_error",
+    exc_info: bool = True,
+    **context: Any,
+) -> None:
+    """Log adapter error in standardized format with Log Schema fields.
+
+    Формат сообщения: "{provider} {operation} failed"
+
+    Implements RULES.md §3.2.1 - mandatory fields:
+    - stage: Pipeline stage (default: "extract" for adapter operations)
+    - error_type: Error classification
+
+    Args:
+        logger: LoggerPort-compatible logger instance
+        provider: Provider name (e.g., "chembl", "pubchem", "uniprot")
+        operation: Operation that failed (e.g., "fetch", "batch fetch", "health check")
+        stage: Pipeline stage for Log Schema (default: "extract")
+        error_type: Classification of error (default: "adapter_error")
+        exc_info: Include exception traceback (default: True)
+        **context: Additional context fields to include in log
+
+    """
+    message = f"{provider} {operation} failed"
+
+    logger.error(
+        message,
+        stage=stage,
+        error_type=error_type,
+        provider=provider,
+        operation=operation,
+        exc_info=exc_info,
+        **context,
+    )
 
 ================================================================================
 File: base.py
@@ -307,6 +372,268 @@ class AdapterMetrics:
         )
 
 ================================================================================
+File: cached_bronze_data_source.py
+Path: adapters\cached_bronze_data_source.py
+================================================================================
+"""Cached Bronze data source adapter.
+
+Implements DataSourcePort by reading from cached Bronze layer files instead
+of making API calls. Used for re-processing without network access or
+for testing transformations on previously fetched data.
+
+ADR-014 Compliance:
+- Batches are sorted by date then filename for deterministic ordering
+- All operations are reproducible across runs
+
+RULES.md §1.2 - Infrastructure Layer:
+- Implements domain port (DataSourcePort)
+- No domain logic, only I/O operations
+"""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from pathlib import Path
+from types import TracebackType
+from typing import TYPE_CHECKING, Any, Self
+
+from bioetl.domain.exceptions import CachedBronzeEmptyError
+from bioetl.domain.ports import LoggerPort
+from bioetl.domain.types import HealthStatus
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+
+class CachedBronzeDataSource:
+    """DataSource adapter that reads from cached Bronze layer files.
+
+    Implements DataSourcePort protocol by reading JSONL+zstd files from Bronze
+    storage instead of making API calls. Useful for:
+    - Re-processing data without API access
+    - Testing transformations on previously fetched data
+    - Faster iteration during development
+
+    ADR-014 Compliance:
+    - Batches are sorted lexicographically for deterministic ordering
+    - Path format: {date}/batch_{date}_{uuid}.jsonl.zst
+
+    Attributes:
+        provider_name: Provider identifier (e.g., 'chembl').
+
+    Example:
+        >>> from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+        >>> writer = BronzeWriter(base_path="/data/bronze/chembl/activity", ...)
+        >>> source = CachedBronzeDataSource(
+        ...     bronze_reader=writer,
+        ...     provider="chembl",
+        ...     entity_type="activity",
+        ...     logger=logger,
+        ... )
+        >>> async for record in source.fetch("activity", limit=100):
+        ...     process(record)
+    """
+
+    def __init__(
+        self,
+        bronze_reader: BronzeWriter,
+        provider: str,
+        entity_type: str,
+        logger: LoggerPort,
+        bronze_date: str | None = None,
+    ) -> None:
+        """Initialize CachedBronzeDataSource.
+
+        Args:
+            bronze_reader: BronzeWriter instance for reading Bronze files.
+                Reuses BronzeWriter's read_bronze() and list_batches() methods.
+            provider: Provider name (e.g., 'chembl').
+            entity_type: Entity type (e.g., 'activity').
+            logger: LoggerPort for structured logging.
+            bronze_date: Optional date filter in YYYY-MM-DD format.
+                When set, only reads batches from that specific date directory.
+        """
+        self._reader = bronze_reader
+        self._provider = provider
+        self._entity_type = entity_type
+        self._logger = logger.bind(
+            adapter="cached_bronze",
+            provider=provider,
+            entity_type=entity_type,
+        )
+        self._bronze_date = bronze_date
+
+    @property
+    def provider_name(self) -> str:
+        """Return the provider name."""
+        return self._provider
+
+    async def __aenter__(self) -> Self:
+        """Enter async context manager (no-op for file-based source)."""
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        """Exit async context manager (no-op for file-based source)."""
+        pass
+
+    async def health_check(self) -> HealthStatus:
+        """Check health of the cached Bronze data source.
+
+        Always returns HEALTHY since this is a local file-based source.
+        """
+        return HealthStatus.HEALTHY
+
+    async def aclose(self) -> None:
+        """Close the data source (no-op for file-based source)."""
+        pass
+
+    def _parse_date(self, date_str: str | None) -> datetime | None:
+        """Parse date string to datetime for list_batches filtering."""
+        if date_str is None:
+            return None
+        return datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
+
+    async def _list_batches_sorted(self) -> list[str]:
+        """List batches with deterministic sorting (ADR-014).
+
+        Bronze files are stored in date subdirectories:
+        - With flat_structure=True: {date}/batch_{date}_{uuid}.jsonl.zst
+        - With flat_structure=False: {provider}/{entity}/{date}/batch_...
+
+        Sorting by path ensures:
+        1. Earlier dates come first
+        2. Within same date, files sorted alphabetically by UUID
+
+        Returns:
+            List of relative paths, sorted lexicographically.
+        """
+        # Note: BronzeWriter with flat_structure=True expects provider/entity
+        # to already be in base_path, so we pass empty strings for those.
+        # The list_batches method constructs: base_path / provider / entity / date
+        # When flat_structure=True and base_path already includes provider/entity,
+        # we need to handle this differently.
+
+        # Check if reader has flat_structure enabled
+        flat_structure = getattr(self._reader, "_flat_structure", False)
+
+        if flat_structure:
+            # flat_structure=True: base_path already has provider/entity
+            # list_batches needs empty provider/entity to avoid duplication
+            batches = await self._reader.list_batches(
+                provider="",
+                entity="",
+                date=self._parse_date(self._bronze_date),
+            )
+        else:
+            # flat_structure=False: standard path construction
+            batches = await self._reader.list_batches(
+                provider=self._provider,
+                entity=self._entity_type,
+                date=self._parse_date(self._bronze_date),
+            )
+
+        # Sort for deterministic ordering (ADR-014)
+        return sorted(batches)
+
+    async def fetch(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records from cached Bronze files.
+
+        Reads JSONL+zstd files from Bronze storage and yields records.
+        Batches are processed in deterministic order (ADR-014).
+
+        Args:
+            entity_type: Entity type (validated against configured type).
+            limit: Maximum number of records to yield. None = unlimited.
+            query: Ignored (not applicable for cached data).
+            filter_ids: Ignored (filtering not supported for cached Bronze).
+            filter_field: Ignored (filtering not supported for cached Bronze).
+
+        Yields:
+            Dictionary records from Bronze files.
+
+        Raises:
+            CachedBronzeEmptyError: If no Bronze files found for the
+                specified provider/entity combination.
+        """
+        # Log warnings for unsupported parameters
+        if query:
+            self._logger.warning(
+                "cached_bronze_query_ignored",
+                query=query,
+                reason="query parameter not supported for cached Bronze",
+            )
+        if filter_ids:
+            self._logger.warning(
+                "cached_bronze_filter_ignored",
+                filter_count=len(filter_ids),
+                reason="filter_ids not supported for cached Bronze",
+            )
+
+        # List and sort batches
+        batches = await self._list_batches_sorted()
+
+        self._logger.info(
+            "cached_bronze_fetch_start",
+            batch_count=len(batches),
+            date_filter=self._bronze_date,
+            limit=limit,
+        )
+
+        if not batches:
+            # Determine the actual path that was searched
+            bronze_path = str(self._reader.base_path)
+            if not getattr(self._reader, "_flat_structure", False):
+                bronze_path = str(
+                    Path(bronze_path) / self._provider / self._entity_type
+                )
+
+            raise CachedBronzeEmptyError(
+                provider=self._provider,
+                entity_type=self._entity_type,
+                bronze_path=bronze_path,
+                date_filter=self._bronze_date,
+            )
+
+        count = 0
+        for batch_path in batches:
+            self._logger.debug(
+                "cached_bronze_reading_batch",
+                batch_path=batch_path,
+            )
+
+            async for record in self._reader.read_bronze(batch_path):
+                yield record
+                count += 1
+
+                if limit is not None and count >= limit:
+                    self._logger.info(
+                        "cached_bronze_fetch_limit_reached",
+                        records_yielded=count,
+                        limit=limit,
+                    )
+                    return
+
+        self._logger.info(
+            "cached_bronze_fetch_complete",
+            records_yielded=count,
+            batches_processed=len(batches),
+        )
+
+================================================================================
 File: __init__.py
 Path: adapters\chembl\__init__.py
 ================================================================================
@@ -370,7 +697,9 @@ DTO support via fetch_as_models() returning typed Pydantic models.
 from __future__ import annotations
 
 import contextlib
+import itertools
 import time
+import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
@@ -391,6 +720,7 @@ from bioetl.domain.exceptions import (
     ExternalServiceError,
     RetryExhaustedError,
 )
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import HealthStatus
@@ -433,6 +763,16 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
     "protein_class": ProteinClassRecord,
 }
 
+# Entity types that don't support limit/offset pagination
+# These endpoints return all records in a single response
+_NO_PAGINATION_ENTITIES: frozenset[str] = frozenset(
+    {
+        "target",
+        "target_component",
+        "protein_class",
+    }
+)
+
 
 @dataclass
 class ChemblAdapter(BaseHttpAdapter):
@@ -447,6 +787,7 @@ class ChemblAdapter(BaseHttpAdapter):
     adapter_config: AdapterConfig | None = None
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
+    extraction_params: ExtractionParams | None = None
 
     provider_name: str = field(init=False, default="chembl")
     """Provider identifier (required by DataSourcePort)."""
@@ -463,6 +804,11 @@ class ChemblAdapter(BaseHttpAdapter):
         init=False, default_factory=APIRequestCollector
     )
 
+    # Resolved extraction params (computed in __post_init__)
+    _extraction_params: ExtractionParams = field(
+        init=False, default_factory=ExtractionParams.empty
+    )
+
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         # Initialize error handler from base class
@@ -476,6 +822,17 @@ class ChemblAdapter(BaseHttpAdapter):
 
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+
+        # Resolve extraction params
+        self._extraction_params = self.extraction_params or ExtractionParams.empty()
+
+        if not self._extraction_params.is_empty:
+            self.logger.info(
+                "chembl_extraction_params_configured",
+                provider="chembl",
+                param_count=len(self._extraction_params.params),
+                query_string=self._extraction_params.to_query_string(),
+            )
 
     @property
     def effective_batch_size(self) -> int:
@@ -508,13 +865,31 @@ class ChemblAdapter(BaseHttpAdapter):
             return reduced
         return self._page_size
 
-    def _build_params(self, offset: int) -> dict[str, Any]:
-        """Build API request parameters with health-aware batch size."""
-        return {
-            "limit": self._get_effective_batch_size(),
-            "offset": offset,
-            "format": "json",
-        }
+    def _build_params(
+        self, offset: int, entity_type: str | None = None
+    ) -> dict[str, Any]:
+        """Build API request parameters with health-aware batch size.
+
+        Args:
+            offset: Pagination offset.
+            entity_type: Entity type for determining pagination support.
+                        If in _NO_PAGINATION_ENTITIES, limit/offset are excluded.
+
+        Returns:
+            Dictionary of query parameters.
+        """
+        params: dict[str, Any] = {"format": "json"}
+
+        # Some endpoints don't support limit/offset pagination
+        if entity_type not in _NO_PAGINATION_ENTITIES:
+            params["limit"] = self._get_effective_batch_size()
+            params["offset"] = offset
+
+        # Extraction-level filtering (ADR-028 §3)
+        if not self._extraction_params.is_empty:
+            params.update(self._extraction_params.to_query_dict())
+
+        return params
 
     def _process_response(
         self, response: Response, entity_type: str
@@ -539,6 +914,12 @@ class ChemblAdapter(BaseHttpAdapter):
             for filter_field, ids in filters.items()
             if ids
         }
+
+    def _get_projected_url_length(self, url: str, params: dict[str, Any]) -> int:
+        """Estimate the length of the final URL with parameters."""
+        # URL-encode parameters to get accurate length (including escaping)
+        query_str = urllib.parse.urlencode(params, doseq=True)
+        return len(url) + 1 + len(query_str)
 
     def _compute_composite_key(
         self,
@@ -656,9 +1037,10 @@ class ChemblAdapter(BaseHttpAdapter):
         url = self._mapper.get_resource_url(entity_type)
         offset = 0
         while True:
-            params = self._build_params(offset)
+            params = self._build_params(offset, entity_type)
             # Optimize limit: if we have a global limit and it's smaller than effective batch size
-            if limit is not None:
+            # Skip for entities that don't support pagination
+            if limit is not None and "limit" in params:
                 remaining = limit - offset
                 if remaining > 0:
                     params["limit"] = min(params["limit"], remaining)
@@ -765,11 +1147,14 @@ class ChemblAdapter(BaseHttpAdapter):
         while True:
             if limit and offset >= limit:
                 break
-            params = self._build_params(offset)
+            params = self._build_params(offset, entity_type)
             params[f"{filter_field}__in"] = ",".join(id_batch)
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:
+                # Catch all: API errors (network, timeout, 500s, malformed response),
+                # JSON decode errors, or validation failures. Log partial success and
+                # gracefully terminate pagination to avoid data loss.
                 self.logger.warning(
                     "chembl_pagination_interrupted",
                     entity_type=entity_type,
@@ -803,7 +1188,7 @@ class ChemblAdapter(BaseHttpAdapter):
         pk_field = self._mapper.get_primary_key_field(entity_type)
         pk_fields = self._mapper.get_dedup_key_fields(entity_type)
 
-        params = self._build_params(0)
+        params = self._build_params(0, entity_type)
         params[f"{filter_field}__in"] = ",".join(id_batch)
 
         records, has_next = await self._fetch_page(url, params, entity_type)
@@ -874,6 +1259,61 @@ class ChemblAdapter(BaseHttpAdapter):
             error=str(e),
             error_class=type(e).__name__,
         )
+
+    async def _fetch_single_record_direct(
+        self, entity_type: str, record_id: str
+    ) -> dict[str, Any] | None:
+        """Fetch a single record using direct endpoint as fallback.
+
+        ChEMBL API has two code paths:
+        1. Filter endpoint: /target?target_chembl_id__in=CHEMBL123 (may fail with 500)
+        2. Direct endpoint: /target/CHEMBL123 (often works when filter fails)
+
+        This method is used as a fallback when the filter endpoint fails for a single ID.
+
+        Args:
+            entity_type: Entity type to fetch.
+            record_id: The ChEMBL ID of the record.
+
+        Returns:
+            Record dict if successful, None if failed.
+        """
+        direct_url = self._mapper.get_direct_record_url(entity_type, record_id)
+        params = {"format": "json"}
+
+        try:
+            start_time = time.perf_counter()
+            with self._adapter_metrics.measure_request(f"/{entity_type}/{record_id}"):
+                response = await self.http_client.get(direct_url, params=params)
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            # Record request for metadata enrichment
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
+            # Direct endpoint returns single record, not wrapped in plural key
+            data = response.json()
+
+            # ChEMBL direct endpoint returns the record directly (not in a list)
+            if isinstance(data, dict) and not data.get("page_meta"):
+                self.logger.info(
+                    "direct_endpoint_fallback_success",
+                    entity_type=entity_type,
+                    record_id=record_id,
+                )
+                return data
+
+            return None
+
+        except Exception as e:
+            self.logger.warning(
+                "direct_endpoint_fallback_failed",
+                entity_type=entity_type,
+                record_id=record_id,
+                error=str(e),
+                error_class=type(e).__name__,
+            )
+            return None
 
     async def _retry_with_split_batches(
         self,
@@ -965,7 +1405,30 @@ class ChemblAdapter(BaseHttpAdapter):
                 ):
                     yield record
             else:
-                self._log_single_id_failure(entity_type, filter_field, id_batch, e)
+                # Filter endpoint failed for single ID - try direct endpoint fallback
+                # ChEMBL filter and direct endpoints use different server code paths
+                single_id = id_batch[0]
+                direct_record = await self._fetch_single_record_direct(
+                    entity_type, single_id
+                )
+                if direct_record is not None:
+                    # Deduplicate and yield
+                    if use_composite:
+                        assert pk_fields is not None
+                        composite_key = self._compute_composite_key(
+                            direct_record, pk_fields
+                        )
+                        if composite_key and composite_key not in seen_ids:
+                            seen_ids.add(composite_key)
+                            yield direct_record
+                    else:
+                        record_pk = str(direct_record.get(pk_field, ""))
+                        if record_pk and record_pk not in seen_ids:
+                            seen_ids.add(record_pk)
+                            yield direct_record
+                else:
+                    # Both filter and direct endpoints failed
+                    self._log_single_id_failure(entity_type, filter_field, id_batch, e)
 
     async def _fetch_filtered(
         self,
@@ -1123,6 +1586,7 @@ class ChemblAdapter(BaseHttpAdapter):
         ?molecule_chembl_id__in=CHEMBL25,CHEMBL26&document_chembl_id__in=CHEMBL1123
 
         ChEMBL API returns records matching ALL filter conditions (AND logic).
+        Supports automatic batching and URL length validation (1000 char limit).
 
         Args:
             entity_type: Type of entity to fetch
@@ -1133,35 +1597,69 @@ class ChemblAdapter(BaseHttpAdapter):
             Dictionary records matching ALL filter criteria
 
         """
-        filter_params = self._build_filter_in_params(filters)
-        if not filter_params:
+        if not filters:
             return
 
         url = self._mapper.get_resource_url(entity_type)
         pk_field = self._mapper.get_primary_key_field(entity_type)
-        offset = 0
+
+        # Determine optimal batch size based on 1000 character limit
+        # Start with configured batch size and halve proactively if URL is too long
+        batch_size = self._filter_batch_size
+        while batch_size > 1:
+            # Test with current batch size for all fields
+            test_filters = {k: v[:batch_size] for k, v in filters.items()}
+            test_params = self._build_params(0, entity_type)
+            test_params.update(self._build_filter_in_params(test_filters))
+
+            if self._get_projected_url_length(url, test_params) <= 1000:
+                break
+
+            batch_size //= 2
+            self.logger.info(
+                "reducing_multi_filter_batch_size",
+                entity_type=entity_type,
+                new_batch_size=batch_size,
+                reason="url_length_limit_exceeded",
+            )
+
+        # Prepare batches for each filter field
+        filter_keys = list(filters.keys())
+        filter_batches = [
+            list(self._batch_ids(filters[k], batch_size)) for k in filter_keys
+        ]
+
         total_fetched = 0
         seen_ids: set[str] = set()
 
-        while True:
-            params = self._build_params(offset)
-            params.update(filter_params)
+        # Iterate over cartesian product of batches to cover all combinations
+        # ChEMBL API returns records matching ALL filters in the request (AND logic)
+        for batch_combination in itertools.product(*filter_batches):
+            current_filters = dict(zip(filter_keys, batch_combination, strict=True))
+            filter_params = self._build_filter_in_params(current_filters)
 
-            records, has_next = await self._fetch_page(url, params, entity_type)
-            if not records:
-                break
+            offset = 0
+            while True:
+                params = self._build_params(offset, entity_type)
+                params.update(filter_params)
 
-            for record in records:
-                if self._is_duplicate_record(record, pk_field, seen_ids, entity_type):
-                    continue
-                yield record
-                total_fetched += 1
-                if limit and total_fetched >= limit:
-                    return
+                records, has_next = await self._fetch_page(url, params, entity_type)
+                if not records:
+                    break
 
-            if not has_next:
-                break
-            offset += len(records)
+                for record in records:
+                    if self._is_duplicate_record(
+                        record, pk_field, seen_ids, entity_type
+                    ):
+                        continue
+                    yield record
+                    total_fetched += 1
+                    if limit and total_fetched >= limit:
+                        return
+
+                if not has_next:
+                    break
+                offset += len(records)
 
     async def fetch_filtered_with_fallback(
         self,
@@ -1341,8 +1839,12 @@ class ChemblAdapter(BaseHttpAdapter):
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
         """Get API request metadata and clear collector."""
+        extraction_qs = self._extraction_params.to_query_string() or None
         metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=CHEMBL_API_BASE, api_version=api_version
+            source_type="api",
+            url=CHEMBL_API_BASE,
+            api_version=api_version,
+            query_string=extraction_qs,
         )
         self._request_collector.clear()
         return metadata
@@ -1502,6 +2004,31 @@ class ChemblEntityMapper:
             msg = f"Unknown entity type: {entity_type}"
             raise ValueError(msg)
         return f"{CHEMBL_API_BASE}/{resource}"
+
+    @staticmethod
+    def get_direct_record_url(entity_type: str, record_id: str) -> str:
+        """Get direct URL for fetching a single record by ID.
+
+        ChEMBL API supports two ways to fetch records:
+        1. Filter endpoint: /target?target_chembl_id__in=CHEMBL123
+        2. Direct endpoint: /target/CHEMBL123
+
+        The direct endpoint uses different server-side code paths and may work
+        when the filter endpoint fails with 500 errors.
+
+        Args:
+            entity_type: Entity type (e.g., 'target', 'molecule').
+            record_id: The ChEMBL ID of the record (e.g., 'CHEMBL1075105').
+
+        Returns:
+            Direct API URL for the single record.
+
+        Example:
+            >>> ChemblEntityMapper.get_direct_record_url("target", "CHEMBL1075105")
+            'https://www.ebi.ac.uk/chembl/api/data/target/CHEMBL1075105'
+        """
+        base_url = ChemblEntityMapper.get_resource_url(entity_type)
+        return f"{base_url}/{record_id}"
 
     @staticmethod
     def get_plural_key(entity_type: str) -> str:
@@ -2289,7 +2816,6 @@ class ChemblPublicationRecord(BaseModel):
 
     # Journal Info
     journal: str | None = Field(default=None, description="Journal name")
-    journal_full_title: str | None = Field(default=None)
     volume: str | None = Field(default=None)
     issue: str | None = Field(default=None)
     first_page: str | None = Field(default=None)
@@ -2593,7 +3119,7 @@ class APIRequestCollector:
         request_details = APIRequestDetails(
             endpoint=endpoint,
             base_url=base_url,
-            query_params=sanitized_params,
+            query_params=sanitized_params,  # type: ignore[arg-type]
             http_method=method.upper(),  # type: ignore[arg-type]
             response_size_bytes=response_size,
             request_duration_ms=duration_ms,
@@ -2656,6 +3182,7 @@ class APIRequestCollector:
         source_type: str = "api",
         url: str | None = None,
         api_version: str | None = None,
+        query_string: str | None = None,
     ) -> SourceMetadata:
         """Build SourceMetadata with collected request details and aggregates.
 
@@ -2663,6 +3190,8 @@ class APIRequestCollector:
             source_type: Source type for metadata ("api", "csv", "parquet").
             url: Optional base API URL to include.
             api_version: Optional API version string.
+            query_string: Optional query string for audit trail
+                (e.g., extraction-level filtering params from ADR-028 §3).
 
         Returns:
             SourceMetadata instance with all collected requests and statistics.
@@ -2683,6 +3212,7 @@ class APIRequestCollector:
         return SourceMetadata(
             type=source_type,  # type: ignore[arg-type]
             url=url,
+            query_string=query_string,
             api_version=api_version,
             api_requests=requests_copy,
             total_requests=total_requests,
@@ -5392,7 +5922,7 @@ Structured JSON via LoggerPort with consistent fields.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -5410,7 +5940,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class ErrorCategory(str, Enum):
+class ErrorCategory(StrEnum):
     """Error category for adapter error handling (RULES.md §4.1).
 
     Determines pipeline behavior:
@@ -7132,7 +7662,10 @@ class UnifiedHTTPClient:
             httpx.ConnectError
             | httpx.ConnectTimeout
             | httpx.ReadTimeout
-            | httpx.ReadError,
+            | httpx.ReadError
+            | httpx.WriteError
+            | httpx.ProtocolError
+            | httpx.ProxyError,
         ):
             return True
         # Check httpx status errors using configured retryable statuses
@@ -7323,12 +7856,13 @@ from bioetl.domain.types import HealthStatus
 def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
     """Determine adapter health status from circuit breaker state.
 
-    Maps circuit breaker state and failure count to a HealthStatus value
-    for use in adapter health checks. The mapping follows these rules:
+    Maps circuit breaker state to a HealthStatus value for use in adapter
+    health checks. The mapping respects the circuit breaker's own configured
+    failure_threshold rather than using hardcoded counts:
 
     - HEALTHY: Circuit is CLOSED with zero failures (normal operation)
-    - DEGRADED: Circuit has 1-2 failures (experiencing intermittent issues)
-    - UNHEALTHY: Circuit has 3+ failures or is OPEN/HALF_OPEN
+    - DEGRADED: Circuit is CLOSED with some failures, or HALF_OPEN (recovering)
+    - UNHEALTHY: Circuit is OPEN (failure_threshold reached, blocking requests)
 
     This function expects a circuit breaker implementing CircuitBreakerPort
     with get_state() and get_failure_count() methods.
@@ -7342,15 +7876,15 @@ def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
         HealthStatus enum value:
         - HEALTHY: Adapter is fully operational
         - DEGRADED: Adapter is functional but experiencing issues
-        - UNHEALTHY: Adapter is not operational or has critical failures
+        - UNHEALTHY: Adapter is not operational (circuit breaker tripped)
 
     Example:
         >>> from bioetl.infrastructure.adapters.http import CircuitBreaker
         >>> cb = CircuitBreaker(provider="chembl", failure_threshold=5)
         >>> assess_health_from_circuit_breaker(cb)
         <HealthStatus.HEALTHY: 'healthy'>
-        >>> # After some failures:
-        >>> cb._failure_count = 2  # Simulated failures
+        >>> # After some failures (below threshold):
+        >>> cb._failure_count = 3  # Below threshold of 5
         >>> assess_health_from_circuit_breaker(cb)
         <HealthStatus.DEGRADED: 'degraded'>
 
@@ -7362,12 +7896,14 @@ def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
     cb_state = circuit_breaker.get_state()
     failure_count = circuit_breaker.get_failure_count()
 
-    if cb_state.value == "CLOSED" and failure_count == 0:
-        return HealthStatus.HEALTHY
-    elif failure_count <= 2:
-        return HealthStatus.DEGRADED
-    else:
+    if cb_state.value == "OPEN":
         return HealthStatus.UNHEALTHY
+    if cb_state.value == "HALF_OPEN":
+        return HealthStatus.DEGRADED
+    # CLOSED state
+    if failure_count == 0:
+        return HealthStatus.HEALTHY
+    return HealthStatus.DEGRADED
 
 ================================================================================
 File: health_monitor.py
@@ -8125,21 +8661,6 @@ def create_crossref_bucket(
     return TokenBucket(rate=50.0, capacity=50, provider="crossref", metrics=metrics)
 
 
-def create_semantic_scholar_bucket(
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for Semantic Scholar (100 req/5min).
-
-    Args:
-        metrics: Optional metrics port for observability
-
-    """
-    # 100 requests per 5 minutes = 0.333 req/sec
-    return TokenBucket(
-        rate=0.333, capacity=10, provider="semantic_scholar", metrics=metrics
-    )
-
-
 def create_pubmed_bucket(
     with_api_key: bool = False,
     metrics: MetricsPort | None = None,
@@ -8449,67 +8970,6 @@ class CsvFilterReader:
             valid_combinations=frozenset(valid_combinations),
             filter_fields=filter_fields,
         )
-
-================================================================================
-File: logging_utils.py
-Path: adapters\logging_utils.py
-================================================================================
-"""Logging utilities for adapters.
-
-Provides standardized error logging format across all data source adapters.
-Implements RULES.md §3.2.1 Log Schema with mandatory stage field.
-"""
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, Literal
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
-
-# Stage type for Log Schema compliance
-StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup"]
-
-
-def log_adapter_error(
-    logger: LoggerPort,
-    provider: str,
-    operation: str,
-    *,
-    stage: StageType = "extract",
-    error_type: str = "adapter_error",
-    exc_info: bool = True,
-    **context: Any,
-) -> None:
-    """Log adapter error in standardized format with Log Schema fields.
-
-    Формат сообщения: "{provider} {operation} failed"
-
-    Implements RULES.md §3.2.1 - mandatory fields:
-    - stage: Pipeline stage (default: "extract" for adapter operations)
-    - error_type: Error classification
-
-    Args:
-        logger: LoggerPort-compatible logger instance
-        provider: Provider name (e.g., "chembl", "pubchem", "uniprot")
-        operation: Operation that failed (e.g., "fetch", "batch fetch", "health check")
-        stage: Pipeline stage for Log Schema (default: "extract")
-        error_type: Classification of error (default: "adapter_error")
-        exc_info: Include exception traceback (default: True)
-        **context: Additional context fields to include in log
-
-    """
-    message = f"{provider} {operation} failed"
-
-    logger.error(
-        message,
-        stage=stage,
-        error_type=error_type,
-        provider=provider,
-        operation=operation,
-        exc_info=exc_info,
-        **context,
-    )
 
 ================================================================================
 File: __init__.py
@@ -9604,6 +10064,9 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         elif filter_field == "cid":
             async for record in self._strategies.fetch_by_cids(filter_ids, limit):
                 yield record
+        elif filter_field in ("inchikey", "inchi_key"):
+            async for record in self._strategies.fetch_by_inchikey(filter_ids, limit):
+                yield record
         else:
             raise ValueError(f"Unsupported filter_field: {filter_field}")
 
@@ -10132,6 +10595,78 @@ class PubChemFetchStrategies:
                     provider=self._provider_name,
                     batch_start=batch[0] if batch else None,
                     batch_size=len(batch),
+                    error=str(e),
+                )
+
+    async def _fetch_single_inchikey(self, inchikey: str) -> list[dict[str, Any]]:
+        """Fetch compounds for a single InChIKey.
+
+        PubChem supports InChIKey lookup via the 'inchikey' namespace.
+        InChIKey format: XXXXXXXXXXXXXX-YYYYYYYYYY-Z (27 characters).
+
+        Args:
+            inchikey: Standard InChIKey string.
+
+        Returns:
+            List of compound dicts (usually 0 or 1 result per InChIKey).
+        """
+        await self._rate_limiter.acquire()
+        start_time = time.perf_counter()
+        compounds = await self._circuit_breaker.call(
+            self._run_in_executor, pcp.get_compounds, inchikey.strip(), "inchikey"
+        )
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        result_count = len(compounds) if compounds else 0
+        self._record_request(
+            "/compound/inchikey/JSON", duration_ms, result_count=result_count
+        )
+        return [self._mapper.compound_to_dict(c) for c in (compounds or [])]
+
+    async def fetch_by_inchikey(
+        self, inchikey_list: list[str], limit: int | None = None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch compounds by InChIKey list.
+
+        InChIKey is the IUPAC standard chemical identifier (27 characters).
+        Each InChIKey maps to at most one compound in PubChem.
+
+        Args:
+            inchikey_list: List of InChIKey strings.
+            limit: Maximum number of records to return.
+
+        Yields:
+            Compound dicts with CID, SMILES, properties, etc.
+        """
+        fetched = 0
+        for inchikey in inchikey_list:
+            if limit and fetched >= limit:
+                return
+            if not inchikey or not inchikey.strip():
+                continue
+
+            # Basic InChIKey format validation (27 chars, XXXX-YYYY-Z pattern)
+            cleaned = inchikey.strip()
+            if len(cleaned) != 27 or cleaned.count("-") != 2:
+                self._logger.warning(
+                    "invalid_inchikey_skipped",
+                    provider=self._provider_name,
+                    inchikey=cleaned[:30],
+                    reason="invalid_format",
+                )
+                continue
+
+            try:
+                records = await self._fetch_single_inchikey(cleaned)
+                for record in records:
+                    if limit and fetched >= limit:
+                        return
+                    yield record
+                    fetched += 1
+            except Exception as e:
+                self._logger.warning(
+                    "inchikey_fetch_failed",
+                    provider=self._provider_name,
+                    inchikey=cleaned,
                     error=str(e),
                 )
 
@@ -12621,6 +13156,59 @@ if TYPE_CHECKING:
 # Maximum IDs per batch for UniProt OR-query (API recommendation)
 UNIPROT_BATCH_SIZE = 100
 
+# Fields to request from UniProt protein API
+_PROTEIN_FETCH_FIELDS: tuple[str, ...] = (
+    "accession",
+    "id",
+    "protein_name",
+    "gene_names",  # identifiers
+    "organism_name",
+    "organism_id",
+    "lineage",
+    "sequence",
+    "length",
+    "mass",
+    "protein_existence",
+    "annotation_score",
+    "reviewed",  # quality
+    "date_created",
+    "date_modified",
+    "version",  # metadata
+    "cc_function",
+    "cc_catalytic_activity",
+    "cc_activity_regulation",  # comments
+    "cc_subunit",
+    "cc_pathway",
+    "cc_subcellular_location",
+    "cc_tissue_specificity",
+    "cc_alternative_products",
+    "cc_disease",
+    "cc_cofactor",
+    "ph_dependence",
+    "temp_dependence",
+    "kinetics",
+    "absorption",
+    "redox_potential",
+    "cc_induction",
+    "cc_caution",
+    "cc_similarity",
+    "cc_pharmaceutical",
+    "ft_domain",
+    "ft_binding",
+    "ft_site",
+    "ft_act_site",
+    "ft_mod_res",  # features
+    "xref_pdb",
+    "xref_chembl",
+    "xref_drugbank",
+    "xref_guidetopharmacology",
+    "go_id",
+    "xref_interpro",
+    "xref_pfam",
+    "xref_reactome",
+    "keyword",  # xrefs
+)
+
 
 class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     """UniProt API adapter implementing DataSourcePort.
@@ -12991,25 +13579,11 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
     ) -> dict[str, Any]:
         """Build the parameter dictionary for a protein fetch request."""
-        fields = [
-            "accession",
-            "id",
-            "gene_names",
-            "organism_name",
-            "organism_id",
-            "protein_name",
-            "length",
-            "sequence",
-            "cc_function",
-            "ft_domain",
-            "xref_pdb",
-            "xref_chembl",
-        ]
         params = {
             "query": query,
             "size": min(size, (limit - fetched) if limit else size),
             "format": "json",
-            "fields": ",".join(fields),
+            "fields": ",".join(_PROTEIN_FETCH_FIELDS),
         }
         if cursor:
             params["cursor"] = cursor
@@ -13353,6 +13927,7 @@ Rate Limits:
 from __future__ import annotations
 
 import asyncio
+import json
 import re
 from collections.abc import AsyncIterator, Mapping
 from typing import TYPE_CHECKING, Any
@@ -13402,13 +13977,14 @@ class UniProtIDMappingClient(BaseHttpAdapter):
     """UniProt ID Mapping API client.
 
     Supports mapping between ChEMBL and UniProtKB identifiers using
-    UniProt's job-based ID Mapping REST API.
+    UniProt's job-based ID Mapping REST API. Extracts comprehensive
+    entry metadata when mapping to UniProtKB.
 
     Example:
         >>> client = UniProtIDMappingClient(http_client, logger)
         >>> results = await client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
-        >>> results
-        {"CHEMBL204": "P00742"}
+        >>> results["CHEMBL204"]
+        {"uniprot_accession": "P00742", "uniprot_entry_name": "FA10_HUMAN", ...}
     """
 
     provider_name: str = "uniprot_idmapping"
@@ -13444,7 +14020,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> Mapping[str, str | None]:
+    ) -> Mapping[str, dict[str, Any] | None]:
         """Map identifiers using UniProt ID Mapping API.
 
         Args:
@@ -13453,7 +14029,11 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             ids: List of source identifiers
 
         Returns:
-            Dict mapping source IDs to target IDs (None if not found)
+            Dict mapping source IDs to entry data dicts (None if not found).
+            Each entry dict contains: uniprot_accession, uniprot_entry_name,
+            organism_scientific, organism_common, taxonomy_id, protein_name,
+            gene_primary, sequence_length, sequence_mass, reviewed, annotation_score,
+            and optionally all_mappings (JSON) if multiple mappings found.
 
         Raises:
             IDMappingJobError: If the mapping job fails.
@@ -13462,7 +14042,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         if not ids:
             return {}
 
-        results: dict[str, str | None] = dict.fromkeys(ids, None)
+        results: dict[str, dict[str, Any] | None] = dict.fromkeys(ids, None)
 
         # Process in batches
         for batch_start in range(0, len(ids), self.MAX_IDS_PER_BATCH):
@@ -13477,7 +14057,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> dict[str, str | None]:
+    ) -> dict[str, dict[str, Any] | None]:
         """Map a batch of IDs.
 
         Args:
@@ -13486,7 +14066,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             ids: Batch of source identifiers.
 
         Returns:
-            Dict mapping source IDs to target IDs.
+            Dict mapping source IDs to entry data dicts.
         """
         # Step 1: Submit job
         job_id = await self._submit_job(from_db, to_db, ids)
@@ -13647,22 +14227,26 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         self,
         job_id: str,
         original_ids: list[str],
-    ) -> dict[str, str | None]:
-        """Fetch mapping results.
+    ) -> dict[str, dict[str, Any] | None]:
+        """Fetch mapping results with full entry metadata.
 
         GET /idmapping/results/{jobId}
-        Response: {"results": [{"from": "CHEMBL204", "to": "P00742"}, ...]}
+        Response: {"results": [{"from": "CHEMBL204", "to": {...}}, ...]}
 
         Note: Results may be paginated. Handle Link header for pagination.
+        Multiple mappings for same ID are aggregated with primary selection.
 
         Args:
             job_id: Job ID to fetch results for.
             original_ids: Original list of IDs for initializing results dict.
 
         Returns:
-            Dict mapping source IDs to target IDs (None if not found).
+            Dict mapping source IDs to entry data dicts (None if not found).
         """
-        results: dict[str, str | None] = dict.fromkeys(original_ids, None)
+        # Collect all entries per source ID (for multiple mappings)
+        entries_by_id: dict[str, list[dict[str, Any]]] = {
+            id_: [] for id_ in original_ids
+        }
         url: str | None = f"{self.base_url}/idmapping/results/{job_id}"
 
         while url:
@@ -13679,25 +14263,67 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
             data = response.json()
 
-            # Process results
+            # Process results - collect all entries per source ID
             for mapping in data.get("results", []):
-                from_id, to_id = self._parse_mapping_entry(mapping)
-                if from_id in results and to_id:
-                    results[from_id] = to_id
+                from_id, entry_data = self._parse_mapping_entry(mapping)
+                if from_id in entries_by_id and entry_data:
+                    entries_by_id[from_id].append(entry_data)
 
             # Check for pagination (Link header)
             url = self._get_next_page_url(response.headers)
 
+        # Select primary entry for each ID, handle multiple mappings
+        results: dict[str, dict[str, Any] | None] = {}
+        for id_, entries in entries_by_id.items():
+            results[id_] = self._select_primary_entry(entries)
+
         found_count = sum(1 for v in results.values() if v is not None)
+        multiple_count = sum(1 for v in results.values() if v and v.get("all_mappings"))
         self.logger.info(
             "idmapping_results_fetched",
             job_id=job_id,
             total=len(original_ids),
             found=found_count,
             not_found=len(original_ids) - found_count,
+            multiple_mappings=multiple_count,
         )
 
         return results
+
+    @staticmethod
+    def _select_primary_entry(
+        entries: list[dict[str, Any]],
+    ) -> dict[str, Any] | None:
+        """Select primary entry from list, handling multiple mappings.
+
+        When multiple mappings exist, selects the best entry based on:
+        1. Reviewed status (Swiss-Prot preferred over TrEMBL)
+        2. Annotation score (higher is better)
+
+        Args:
+            entries: List of entry data dicts for a single source ID.
+
+        Returns:
+            Primary entry dict with optional all_mappings field, or None.
+        """
+        if not entries:
+            return None
+        if len(entries) == 1:
+            return entries[0]
+
+        # Multiple mappings: sort by reviewed (desc), annotation_score (desc)
+        sorted_entries = sorted(
+            entries,
+            key=lambda e: (
+                -int(e.get("reviewed") or False),
+                -int(e.get("annotation_score") or 0),
+            ),
+        )
+        primary = dict(sorted_entries[0])  # Copy to avoid mutation
+        # Store all accessions as JSON array
+        all_accessions = [e["uniprot_accession"] for e in sorted_entries]
+        primary["all_mappings"] = json.dumps(all_accessions)
+        return primary
 
     @staticmethod
     def _get_next_page_url(headers: Mapping[str, Any]) -> str | None:
@@ -13717,31 +14343,140 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         return match.group(1) if match else None
 
     @staticmethod
-    def _parse_mapping_entry(mapping: dict[str, Any]) -> tuple[str | None, str | None]:
+    def _extract_organism_info(
+        organism: Any,
+    ) -> tuple[str | None, str | None, int | None]:
+        """Extract organism metadata from entry.
+
+        Args:
+            organism: Organism object from UniProt entry.
+
+        Returns:
+            Tuple of (scientific_name, common_name, taxonomy_id).
+        """
+        if not isinstance(organism, dict):
+            return None, None, None
+        return (
+            organism.get("scientificName"),
+            organism.get("commonName"),
+            organism.get("taxonId"),
+        )
+
+    @staticmethod
+    def _extract_protein_name(protein_desc: Any) -> str | None:
+        """Extract recommended protein name from description.
+
+        Args:
+            protein_desc: proteinDescription object from UniProt entry.
+
+        Returns:
+            Protein full name or None.
+        """
+        if not isinstance(protein_desc, dict):
+            return None
+        recommended = protein_desc.get("recommendedName", {})
+        if not isinstance(recommended, dict):
+            return None
+        full_name = recommended.get("fullName", {})
+        if not isinstance(full_name, dict):
+            return None
+        return full_name.get("value")
+
+    @staticmethod
+    def _extract_gene_primary(genes: Any) -> str | None:
+        """Extract primary gene name from genes list.
+
+        Args:
+            genes: Genes array from UniProt entry.
+
+        Returns:
+            Primary gene name or None.
+        """
+        if not isinstance(genes, list) or not genes:
+            return None
+        first_gene = genes[0]
+        if not isinstance(first_gene, dict):
+            return None
+        gene_name_obj = first_gene.get("geneName", {})
+        if not isinstance(gene_name_obj, dict):
+            return None
+        return gene_name_obj.get("value")
+
+    @staticmethod
+    def _extract_sequence_info(sequence: Any) -> tuple[int | None, int | None]:
+        """Extract sequence length and mass from entry.
+
+        Args:
+            sequence: Sequence object from UniProt entry.
+
+        Returns:
+            Tuple of (sequence_length, sequence_mass).
+        """
+        if not isinstance(sequence, dict):
+            return None, None
+        return sequence.get("length"), sequence.get("molWeight")
+
+    @staticmethod
+    def _parse_mapping_entry(
+        mapping: dict[str, Any],
+    ) -> tuple[str | None, dict[str, Any] | None]:
         """Parse a single mapping entry from API response.
 
-        Handles both direct string mappings and entry-based responses
-        where UniProtKB returns full entry objects with primaryAccession.
+        Extracts comprehensive entry metadata from UniProtKB responses.
+        Handles both direct string mappings and full entry objects.
 
         Args:
             mapping: Single mapping entry from results array.
 
         Returns:
-            Tuple of (from_id, to_id), either may be None if not found.
+            Tuple of (from_id, entry_data_dict), either may be None if not found.
         """
         from_id = mapping.get("from")
         to_entry = mapping.get("to", {})
 
-        # Handle both direct mapping and entry-based response
+        # Handle direct string mapping (simple database mapping)
         if isinstance(to_entry, str):
-            return from_id, to_entry
+            return from_id, {"uniprot_accession": to_entry}
 
-        if isinstance(to_entry, dict):
-            # UniProtKB returns full entry with primaryAccession
-            accession = to_entry.get("primaryAccession")
-            return from_id, str(accession) if accession else None
+        if not isinstance(to_entry, dict):
+            return from_id, None
 
-        return from_id, None
+        # Extract primary accession (required)
+        accession = to_entry.get("primaryAccession")
+        if not accession:
+            return from_id, None
+
+        # Extract nested fields using helper methods
+        org_sci, org_common, tax_id = UniProtIDMappingClient._extract_organism_info(
+            to_entry.get("organism")
+        )
+        protein_name = UniProtIDMappingClient._extract_protein_name(
+            to_entry.get("proteinDescription")
+        )
+        gene_primary = UniProtIDMappingClient._extract_gene_primary(
+            to_entry.get("genes")
+        )
+        seq_len, seq_mass = UniProtIDMappingClient._extract_sequence_info(
+            to_entry.get("sequence")
+        )
+
+        # Determine reviewed status from entryType
+        entry_type = to_entry.get("entryType", "")
+        reviewed = "Swiss-Prot" in entry_type if entry_type else None
+
+        return from_id, {
+            "uniprot_accession": str(accession),
+            "uniprot_entry_name": to_entry.get("uniProtkbId"),
+            "organism_scientific": org_sci,
+            "organism_common": org_common,
+            "taxonomy_id": tax_id,
+            "protein_name": protein_name,
+            "gene_primary": gene_primary,
+            "sequence_length": seq_len,
+            "sequence_mass": seq_mass,
+            "reviewed": reviewed,
+            "annotation_score": to_entry.get("annotationScore"),
+        }
 
     async def _probe_health(self) -> HealthStatus:
         """Perform health probe for ID Mapping API.
@@ -15169,6 +15904,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
+from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, PipelineConfig
 from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.infrastructure.config_loader import (
@@ -15251,6 +15987,14 @@ def _extract_write_modes(
     return write_mode, gold_write_mode
 
 
+def _build_silver_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
+    """Build Silver layer filter config from YAML config.
+
+    Reuses GoldFilterConfig domain type — only the YAML section differs.
+    """
+    return yaml_config.silver_filters.to_domain()
+
+
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
     """Build GoldFilterConfig from YAML config.
 
@@ -15284,6 +16028,7 @@ def yaml_config_to_domain(
     """
     source_fields = _extract_source_fields(yaml_config)
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
+    silver_filters = _build_silver_filters(yaml_config)
     gold_filters = _build_gold_filters(yaml_config)
 
     # Extract on_schema_mismatch from silver sink config
@@ -15303,6 +16048,9 @@ def yaml_config_to_domain(
     # Extract transform info for lineage tracking
     transform_version = yaml_config.transform.version
     transform_steps = tuple(yaml_config.transform.steps)
+    column_groups = tuple(
+        ColumnGroupConfig(**group.model_dump()) for group in yaml_config.column_groups
+    )
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
@@ -15313,10 +16061,12 @@ def yaml_config_to_domain(
         gold_table=yaml_config.gold_table,
         write_mode=write_mode,
         gold_write_mode=gold_write_mode,
+        silver_filters=silver_filters,
         gold_filters=gold_filters,
         batch_size=yaml_config.batch_size,
         checkpoint_interval=yaml_config.checkpoint_interval,
         fields=tuple(source_fields),
+        column_groups=column_groups,
         dq=dq_config,
         on_schema_mismatch=on_schema_mismatch,
         transform_version=transform_version,
@@ -15817,7 +16567,7 @@ class DQConfigLoader:
         # Normalize and validate via Pydantic
         normalized = self._normalize_to_file_format(merged)
         validated = DQConfigFile.model_validate(normalized)
-        domain_config = validated.to_domain()
+        domain_config: DQConfig = validated.to_domain()
 
         # Cache result if no inline overrides
         if inline_overrides is None:
@@ -15983,6 +16733,182 @@ class DQConfigLoader:
 __all__ = ["DQConfigLoader"]
 
 ================================================================================
+File: field_group_loader.py
+Path: config\field_group_loader.py
+================================================================================
+"""YAML loader for field group configuration.
+
+Loads and validates field group definitions from YAML files,
+converting them to domain objects (FieldGroupRegistry).
+
+See ADR-026 for Composite Publication Pipeline rationale.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from bioetl.domain.composite.field_groups import (
+    DEFAULT_PROVIDER_ORDER,
+    FieldGroupDefinition,
+    FieldGroupId,
+    FieldGroupRegistry,
+    FieldMapping,
+    build_field_group_registry,
+)
+
+__all__ = [
+    "FieldGroupLoadError",
+    "load_field_groups",
+]
+
+
+class FieldGroupLoadError(ValueError):
+    """Error loading field group configuration."""
+
+
+def load_field_groups(path: Path) -> FieldGroupRegistry:
+    """Load field group configuration from YAML file.
+
+    Parses the YAML file, validates structure, and converts to
+    domain objects (FieldGroupRegistry).
+
+    Args:
+        path: Path to the YAML configuration file.
+
+    Returns:
+        Configured FieldGroupRegistry instance.
+
+    Raises:
+        FileNotFoundError: If the config file doesn't exist.
+        FieldGroupLoadError: If the config is invalid.
+    """
+    if not path.exists():
+        raise FileNotFoundError(f"Field group config not found: {path}")
+
+    with path.open(encoding="utf-8") as f:
+        raw = yaml.safe_load(f)
+
+    if not isinstance(raw, dict):
+        raise FieldGroupLoadError(
+            f"Invalid field group config: expected dict, got {type(raw).__name__}"
+        )
+
+    return _parse_config(raw, source=str(path))
+
+
+def _parse_config(raw: dict[str, Any], source: str) -> FieldGroupRegistry:
+    """Parse raw YAML dict into FieldGroupRegistry.
+
+    Args:
+        raw: Parsed YAML content.
+        source: Source path for error messages.
+
+    Returns:
+        Configured FieldGroupRegistry.
+
+    Raises:
+        FieldGroupLoadError: If validation fails.
+    """
+    # Parse provider order
+    provider_order = tuple(raw.get("provider_order", DEFAULT_PROVIDER_ORDER))
+
+    # Parse groups
+    raw_groups = raw.get("groups", [])
+    if not isinstance(raw_groups, list):
+        raise FieldGroupLoadError(
+            f"Invalid 'groups' in {source}: expected list, got {type(raw_groups).__name__}"
+        )
+
+    groups: list[FieldGroupDefinition] = []
+    for i, raw_group in enumerate(raw_groups):
+        try:
+            group_def = _parse_group(raw_group, i)
+            groups.append(group_def)
+        except (KeyError, ValueError, TypeError) as e:
+            raise FieldGroupLoadError(
+                f"Invalid group at index {i} in {source}: {e}"
+            ) from e
+
+    return build_field_group_registry(
+        groups=tuple(groups),
+        provider_order=provider_order,
+    )
+
+
+def _parse_group(raw_group: dict[str, Any], index: int) -> FieldGroupDefinition:
+    """Parse a single group definition from YAML.
+
+    Args:
+        raw_group: Raw group dict from YAML.
+        index: Group index for error messages.
+
+    Returns:
+        FieldGroupDefinition instance.
+
+    Raises:
+        KeyError: If required fields are missing.
+        ValueError: If group ID is invalid.
+    """
+    group_id_str = raw_group.get("id")
+    if not group_id_str:
+        raise KeyError(f"Group at index {index} missing 'id'")
+
+    group_id = FieldGroupId.from_string(group_id_str)
+    display_name = raw_group.get("display_name", group_id.display_name)
+    include_in_gold = raw_group.get("include_in_gold", group_id.include_in_gold)
+
+    raw_fields = raw_group.get("fields", [])
+    fields: list[FieldMapping] = []
+
+    for j, raw_field in enumerate(raw_fields):
+        try:
+            field_mapping = _parse_field(raw_field, group_id)
+            fields.append(field_mapping)
+        except (KeyError, ValueError, TypeError) as e:
+            raise ValueError(
+                f"Invalid field at index {j} in group '{group_id_str}': {e}"
+            ) from e
+
+    return FieldGroupDefinition(
+        group_id=group_id,
+        display_name=display_name,
+        include_in_gold=include_in_gold,
+        fields=tuple(fields),
+    )
+
+
+def _parse_field(raw_field: dict[str, Any], group_id: FieldGroupId) -> FieldMapping:
+    """Parse a single field mapping from YAML.
+
+    Args:
+        raw_field: Raw field dict from YAML.
+        group_id: Parent group ID.
+
+    Returns:
+        FieldMapping instance.
+
+    Raises:
+        KeyError: If required fields are missing.
+    """
+    base_name = raw_field.get("base_name")
+    if not base_name:
+        raise KeyError("Field missing 'base_name'")
+
+    columns = raw_field.get("columns", [])
+    if not isinstance(columns, list):
+        raise TypeError(f"'columns' must be a list, got {type(columns).__name__}")
+
+    return FieldMapping(
+        base_name=base_name,
+        provider_columns=tuple(columns),
+        group=group_id,
+    )
+
+================================================================================
 File: filter_config_loader.py
 Path: config\filter_config_loader.py
 ================================================================================
@@ -16003,6 +16929,7 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
@@ -16010,7 +16937,11 @@ from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 _FILTER_CONCAT_KEYS = frozenset({"required_fields", "exclude_if_present"})
 
 
-class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterConfig]]):
+class FilterConfigLoader(
+    BaseConfigLoader[
+        tuple[InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams]
+    ],
+):
     """Loads and merges filter configurations from hierarchical files.
 
     Thread-safe with internal caching for performance.
@@ -16033,7 +16964,7 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
         provider: str,
         entity: str,
         inline_overrides: dict[str, Any] | None = None,
-    ) -> tuple[InputFilterConfig, GoldFilterConfig]:
+    ) -> tuple[InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams]:
         """Load merged filter config for provider/entity.
 
         Merge order (later wins for scalars, special handling for collections):
@@ -16048,7 +16979,9 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
             inline_overrides: Optional inline overrides from pipeline config.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig) domain objects.
+            Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
+            ExtractionParams) domain objects.  Silver and Gold filters both use
+            GoldFilterConfig as the domain type.
 
         Raises:
             FileNotFoundError: If _defaults.yaml doesn't exist.
@@ -16086,7 +17019,9 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
 
         # Validate via Pydantic
         validated = FilterConfigFile.model_validate(merged)
-        domain_configs = validated.to_domain()
+        domain_configs: tuple[InputFilterConfig, GoldFilterConfig, ExtractionParams] = (
+            validated.to_domain()
+        )
 
         # Cache result if no inline overrides
         if inline_overrides is None:
@@ -16531,6 +17466,71 @@ def _apply_file_reference_defaults(
     config.setdefault(
         "filter_config_file", f"../../filter/entities/{provider}/{entity_type}.yaml"
     )
+    config.setdefault(
+        "column_groups_file",
+        f"../data_schema/{provider}/{entity_type}.yaml",
+    )
+
+
+def _load_column_groups_config(
+    config_path: Path, column_groups_file: str
+) -> list[dict[str, Any]] | None:
+    """Load column group configuration from column_groups_file."""
+    column_groups_path = config_path.parent / column_groups_file
+    if not column_groups_path.exists():
+        return None
+
+    with open(column_groups_path, encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    if isinstance(data, list):
+        return data
+
+    if isinstance(data, dict):
+        groups = data.get("column_groups")
+        if isinstance(groups, list):
+            return groups
+
+    return None
+
+
+def _load_data_schema_config(
+    config_path: Path, data_schema_file: str
+) -> dict[str, Any] | None:
+    """Load data schema configuration with layer-specific column definitions.
+
+    Supports:
+    1. Legacy format: column_groups only
+    2. Layer-specific format: silver/gold with filtering
+
+    Args:
+        config_path: Path to pipeline config file.
+        data_schema_file: Relative path to data schema YAML.
+
+    Returns:
+        Dictionary with column_groups, silver, and gold keys, or None if file not found.
+    """
+    schema_path = config_path.parent / data_schema_file
+    if not schema_path.exists():
+        return None
+
+    with open(schema_path, encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+
+    # Build result with backward compatibility
+    result: dict[str, Any] = {}
+
+    # Always include column_groups if present (for backward compatibility)
+    if "column_groups" in data:
+        result["column_groups"] = data["column_groups"]
+
+    # Add layer-specific configs if present
+    if "silver" in data:
+        result["silver"] = data["silver"]
+    if "gold" in data:
+        result["gold"] = data["gold"]
+
+    return result if result else None
 
 
 def _apply_layer_defaults(
@@ -16637,7 +17637,7 @@ def _merge_filter_config(
     filter_config: dict[str, Any],
     explicit_entity_config: dict[str, Any],
 ) -> None:
-    """Merge filter config (input_filter, gold_filters) into pipeline config.
+    """Merge filter config (input_filter, gold_filters, extraction_params) into pipeline config.
 
     Merge priority (highest to lowest):
     1. Explicit entity config (from pipeline YAML file)
@@ -16679,6 +17679,57 @@ def _merge_filter_config(
             )
 
         config["gold_filters"] = merged_gold_filters
+
+    # Merge extraction_params (ADR-028 §3)
+    if "extraction_params" in filter_config:
+        merged_extraction_params = dict(filter_config["extraction_params"])
+
+        # Pipeline-level overrides take precedence
+        if "extraction_params" in explicit_entity_config:
+            merged_extraction_params.update(explicit_entity_config["extraction_params"])
+
+        config["extraction_params"] = merged_extraction_params
+
+
+def _load_column_groups_section(
+    config: dict[str, Any],
+    entity_config: dict[str, Any],
+    config_path: Path,
+) -> None:
+    """Load column groups from external file unless explicitly set inline.
+
+    Priority: explicit inline > data_schema_file > column_groups_file (legacy).
+    """
+    if "column_groups" in entity_config:
+        return
+
+    if data_schema_file := config.get("data_schema_file"):
+        data_schema = _load_data_schema_config(config_path, data_schema_file)
+        if data_schema:
+            if "column_groups" in data_schema:
+                config["column_groups"] = data_schema["column_groups"]
+            if "silver" in data_schema:
+                config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
+            if "gold" in data_schema:
+                config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
+        return
+
+    if column_groups_file := config.get("column_groups_file"):
+        column_groups = _load_column_groups_config(config_path, column_groups_file)
+        if column_groups is not None:
+            config["column_groups"] = column_groups
+
+
+def _load_source_section(config: dict[str, Any], config_path: Path) -> None:
+    """Load source config from external file if specified."""
+    source_file = config.get("source_file")
+    if not source_file:
+        return
+    source_path = config_path.parent / source_file
+    if source_path.exists():
+        with open(source_path, encoding="utf-8") as f:
+            source_config = yaml.safe_load(f) or {}
+        config["source"] = source_config.get("source", source_config)
 
 
 @lru_cache(maxsize=10)
@@ -16726,8 +17777,6 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
         entity_config = yaml.safe_load(f) or {}
 
     config = _deep_merge(defaults, entity_config)
-
-    # Apply convention-based defaults (auto-compute paths/references)
     config = _apply_convention_defaults(config)
 
     # Load and merge filter config from filter_config_file
@@ -16736,12 +17785,8 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
         if filter_config:
             _merge_filter_config(config, filter_config, entity_config)
 
-    if source_file := config.get("source_file"):
-        source_path = config_path.parent / source_file
-        if source_path.exists():
-            with open(source_path, encoding="utf-8") as f:
-                source_config = yaml.safe_load(f) or {}
-            config["source"] = source_config.get("source", source_config)
+    _load_column_groups_section(config, entity_config, config_path)
+    _load_source_section(config, config_path)
 
     validated: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
     return validated
@@ -18346,14 +19391,14 @@ Contains enums and data classes shared across detection strategies.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datetime import datetime
 
 
-class AnomalyType(str, Enum):
+class AnomalyType(StrEnum):
     """Types of anomalies that can be detected."""
 
     SPIKE = "spike"  # Value much higher than baseline
@@ -18362,7 +19407,7 @@ class AnomalyType(str, Enum):
     TREND_CHANGE = "trend_change"  # Significant trend deviation
 
 
-class AnomalySeverity(str, Enum):
+class AnomalySeverity(StrEnum):
     """Severity levels for anomalies."""
 
     LOW = "low"  # Within 2-3 std deviations
@@ -18744,7 +19789,6 @@ def configure_logging(
             structlog.stdlib.PositionalArgumentsFormatter(),
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
             structlog.processors.UnicodeDecoder(),
             secret_filter_processor,  # Filter secrets before output
         ]
@@ -19999,61 +21043,10 @@ Implements RULES.md §2.6 - Quarantine Policy.
 
 from __future__ import annotations
 
-from bioetl.infrastructure.quarantine.helpers import quote_literal
+from bioetl.infrastructure.quarantine.record_encoding import quote_literal
 from bioetl.infrastructure.quarantine.unified import UnifiedQuarantine
 
 __all__ = ["UnifiedQuarantine", "quote_literal"]
-
-================================================================================
-File: helpers.py
-Path: quarantine\helpers.py
-================================================================================
-"""Helper functions for quarantine operations.
-
-Contains utility functions used across quarantine modules.
-"""
-
-from __future__ import annotations
-
-import hashlib
-from typing import Any
-
-
-def quote_literal(value: Any) -> str:
-    """Safely quote a literal value for a Delta Lake predicate.
-
-    Args:
-        value: Value to quote
-
-    Returns:
-        Quoted string safe for Delta Lake predicates
-
-    """
-    if isinstance(value, str):
-        escaped = value.replace("'", "''")
-        return f"'{escaped}'"
-    if isinstance(value, (int, float)):
-        return str(value)
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    return f"'{value!s}'"
-
-
-def calculate_hash(payload_json: str) -> str:
-    """Calculate SHA256 hash of payload for deduplication.
-
-    Args:
-        payload_json: JSON string of payload
-
-    Returns:
-        Hex digest of SHA256 hash
-
-    """
-    return hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
-
-
-# Maximum payload size (64KB per REQ-QUARANTINE-002)
-MAX_PAYLOAD_SIZE = 64 * 1024
 
 ================================================================================
 File: operations.py
@@ -20075,7 +21068,7 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import QuarantineRecordStatus
-from bioetl.infrastructure.quarantine.helpers import quote_literal
+from bioetl.infrastructure.quarantine.record_encoding import quote_literal
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -20257,6 +21250,57 @@ def purge_records(
     return count_before
 
 ================================================================================
+File: record_encoding.py
+Path: quarantine\record_encoding.py
+================================================================================
+"""Helper functions for quarantine operations.
+
+Contains utility functions used across quarantine modules.
+"""
+
+from __future__ import annotations
+
+import hashlib
+from typing import Any
+
+
+def quote_literal(value: Any) -> str:
+    """Safely quote a literal value for a Delta Lake predicate.
+
+    Args:
+        value: Value to quote
+
+    Returns:
+        Quoted string safe for Delta Lake predicates
+
+    """
+    if isinstance(value, str):
+        escaped = value.replace("'", "''")
+        return f"'{escaped}'"
+    if isinstance(value, (int, float)):
+        return str(value)
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return f"'{value!s}'"
+
+
+def calculate_hash(payload_json: str) -> str:
+    """Calculate SHA256 hash of payload for deduplication.
+
+    Args:
+        payload_json: JSON string of payload
+
+    Returns:
+        Hex digest of SHA256 hash
+
+    """
+    return hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
+
+
+# Maximum payload size (64KB per REQ-QUARANTINE-002)
+MAX_PAYLOAD_SIZE = 64 * 1024
+
+================================================================================
 File: unified.py
 Path: quarantine\unified.py
 ================================================================================
@@ -20282,16 +21326,16 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import serialize_to_json
 from bioetl.domain.types import BatchID, QuarantineRecordStatus, RunID
-from bioetl.infrastructure.quarantine.helpers import (
-    MAX_PAYLOAD_SIZE,
-    calculate_hash,
-    quote_literal,
-)
 from bioetl.infrastructure.quarantine.operations import (
     get_statistics,
     inspect_records,
     purge_records,
     replay_records,
+)
+from bioetl.infrastructure.quarantine.record_encoding import (
+    MAX_PAYLOAD_SIZE,
+    calculate_hash,
+    quote_literal,
 )
 
 if TYPE_CHECKING:
@@ -20488,22 +21532,16 @@ Architecture:
     filter_config.py: Standalone filter configuration file schemas.
     dq_config.py: Standalone DQ configuration file schemas.
     composite_config.py: Composite pipeline configuration schemas (ADR-026).
-    common_config.py: Backward compatibility re-exports (deprecated).
 
 Schema Hierarchy:
     base_schemas.py (base classes)
     ├── pipeline_config.py (extends base classes)
     ├── source_config.py (extends base classes)
-    ├── filter_config.py (extends base classes)
-    └── common_config.py (re-exports for backward compatibility)
+    └── filter_config.py (extends base classes)
 
 Usage:
-    # Preferred: Import from specific modules
     >>> from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
     >>> from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
-    # For backward compatibility only
-    >>> from bioetl.infrastructure.schemas.common_config import DQConfig
 
 These schemas ensure type safety and validation when loading
 YAML configuration files from configs/pipelines/.
@@ -20737,29 +21775,14 @@ class BaseRateLimitConfig(BaseModel):
 
 
 class BaseClientConfig(BaseModel):
-    """Base class for HTTP Client configuration.
-
-    Provides common HTTP client fields for both pipeline and source configs.
-
-    Attributes:
-        timeout_sec: Request timeout in seconds.
-        max_retries: Maximum number of retry attempts.
-    """
+    """Base HTTP client config for pipeline and source configs."""
 
     model_config = ConfigDict(extra="ignore")
 
-    timeout_sec: float = Field(
-        default=30.0,
-        ge=1.0,
-        le=300.0,
-        description="Request timeout in seconds",
-    )
-    max_retries: int = Field(
-        default=3,
-        ge=0,
-        le=10,
-        description="Maximum number of retry attempts",
-    )
+    timeout_sec: float = Field(default=30.0, ge=1.0, le=300.0)
+    max_retries: int = Field(default=3, ge=0, le=10)
+    retry_base_delay: float = Field(default=1.0, ge=0.1, le=120.0)
+    retry_max_delay: float = Field(default=60.0, ge=1.0, le=600.0)
 
 
 class BaseApiConfig(BaseModel):
@@ -21233,159 +22256,6 @@ __all__ = [
 ]
 
 ================================================================================
-File: common_config.py
-Path: schemas\common_config.py
-================================================================================
-"""Common configuration schemas for pipeline YAML files.
-
-This module provides backward-compatible re-exports of base configuration classes.
-New code should import directly from `base_schemas` or `pipeline_config` instead.
-
-Deprecated:
-    This module is maintained for backward compatibility only.
-    Prefer importing from:
-    - `bioetl.infrastructure.schemas.base_schemas` for base classes
-    - `bioetl.infrastructure.schemas.pipeline_config` for extended classes
-
-Example:
-    # Preferred (new code):
-    >>> from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
-    >>> from bioetl.infrastructure.schemas.pipeline_config import DQConfig
-
-    # Deprecated (backward compatibility):
-    >>> from bioetl.infrastructure.schemas.common_config import DQConfig
-"""
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
-from bioetl.infrastructure.schemas.base_schemas import (
-    BaseApiConfig,
-    BaseCircuitBreakerConfig,
-    BaseCsvExportConfig,
-    BaseDQConfig,
-    BaseInputFilterConfig,
-    BaseMaintenanceConfig,
-)
-
-if TYPE_CHECKING:
-    from bioetl.domain.config import DQConfig as DomainDQConfig
-    from bioetl.domain.configs.base import BaseClientConfig as DomainBaseClientConfig
-    from bioetl.domain.filtering.input_config import (
-        InputFilterConfig as DomainInputFilterConfig,
-    )
-    from bioetl.domain.resilience import (
-        CircuitBreakerConfig as DomainCircuitBreakerConfig,
-    )
-
-
-# =============================================================================
-# Backward Compatibility Aliases
-# =============================================================================
-#
-# These classes inherit from base classes without modification.
-# They exist solely for backward compatibility with existing code.
-# New code should import from base_schemas or pipeline_config directly.
-
-
-class DQConfig(BaseDQConfig):
-    """Data Quality configuration (backward compatibility alias).
-
-    Deprecated:
-        Use `BaseDQConfig` from `base_schemas` or extended `DQConfig`
-        from `pipeline_config` instead.
-    """
-
-    def to_domain(self) -> DomainDQConfig:
-        """Convert Pydantic schema to domain DQConfig object.
-
-        Returns:
-            Domain-layer DQConfig with validated thresholds.
-        """
-        return super().to_domain()
-
-
-class CircuitBreakerConfig(BaseCircuitBreakerConfig):
-    """Circuit Breaker configuration (backward compatibility alias).
-
-    Deprecated:
-        Use `BaseCircuitBreakerConfig` from `base_schemas` instead.
-    """
-
-    def to_domain(self) -> DomainCircuitBreakerConfig:
-        """Convert Pydantic schema to domain CircuitBreakerConfig.
-
-        Returns:
-            Domain-layer CircuitBreakerConfig with failure threshold
-            and recovery timeout settings.
-        """
-        return super().to_domain()
-
-
-class CsvExportConfig(BaseCsvExportConfig):
-    """Configuration for CSV export (backward compatibility alias).
-
-    Deprecated:
-        Use `BaseCsvExportConfig` from `base_schemas` instead.
-    """
-
-
-class InputFilterConfig(BaseInputFilterConfig):
-    """Configuration for input ID filtering from CSV (backward compatibility alias).
-
-    Note:
-        This is a simplified version that supports both single-column and
-        multi-column modes. The full implementation is in `pipeline_config`.
-
-    Deprecated:
-        Use `BaseInputFilterConfig` from `base_schemas` or extended
-        `InputFilterConfig` from `pipeline_config` instead.
-    """
-
-    def to_domain(self) -> DomainInputFilterConfig:
-        """Convert Pydantic schema to domain InputFilterConfig.
-
-        Returns:
-            Domain-layer InputFilterConfig for selective record processing.
-        """
-        return super().to_domain()
-
-
-class MaintenanceConfig(BaseMaintenanceConfig):
-    """Configuration for maintenance operations (backward compatibility alias).
-
-    Deprecated:
-        Use `BaseMaintenanceConfig` from `base_schemas` instead.
-    """
-
-
-class ApiConfig(BaseApiConfig):
-    """Configuration for API connection details (backward compatibility alias).
-
-    Deprecated:
-        Use `BaseApiConfig` from `base_schemas` instead.
-    """
-
-    def to_domain(self) -> DomainBaseClientConfig:
-        """Convert Pydantic schema to domain BaseClientConfig.
-
-        Returns:
-            Domain-layer BaseClientConfig for HTTP client initialization.
-        """
-        return super().to_domain()
-
-
-__all__ = [
-    "ApiConfig",
-    "CircuitBreakerConfig",
-    "CsvExportConfig",
-    "DQConfig",
-    "InputFilterConfig",
-    "MaintenanceConfig",
-]
-
-================================================================================
 File: composite_config.py
 Path: schemas\composite_config.py
 ================================================================================
@@ -21412,6 +22282,7 @@ from bioetl.domain.composite.aggregation import (
     EnricherCardinality,
 )
 from bioetl.domain.composite.config import (
+    ColumnGroupConfig,
     CompositeConfig,
     CompositeDQConfig,
     DependencyConfig,
@@ -21523,13 +22394,18 @@ class DependencySchema(BaseModel):
     """Pydantic schema for dependency pipeline configuration.
 
     Dependencies run after seed but before enrichers to populate Silver tables.
+
+    Supports chained dependencies via `key_source`:
+    - None or "seed": Extract join_keys from seed output (default behavior)
+    - "<pipeline_name>": Extract join_keys from that pipeline's Silver table
+      (useful when join keys come from enrichers, not seed)
     """
 
     pipeline: str = Field(
         ..., min_length=1, description="Name of the dependency pipeline"
     )
     join_keys: list[str] = Field(
-        ..., min_length=1, description="Keys to extract from seed for filtering"
+        ..., min_length=1, description="Keys to extract from key_source for filtering"
     )
     required: bool = Field(
         default=False, description="If True, failure causes composite failure"
@@ -21541,6 +22417,38 @@ class DependencySchema(BaseModel):
     )
     silver_table: str | None = Field(
         default=None, description="Path to dependency's Silver table"
+    )
+    key_source: str | None = Field(
+        default=None,
+        description=(
+            "Source of join keys: None/'seed' for seed keys, "
+            "or pipeline name for chained dependencies"
+        ),
+    )
+    filter_field: str | None = Field(
+        default=None,
+        description=(
+            "Field name to use when filtering the target API. "
+            "Defaults to first join_key. Useful when source column differs "
+            "from target API field (e.g., protein_classification_id vs protein_class_id)"
+        ),
+    )
+    filter_fields: list[str] | None = Field(
+        default=None,
+        description=(
+            "Multiple field names for multi-field API filtering (AND logic). "
+            "When set, ALL specified fields are passed as filters to the API. "
+            "Example: ['molecule_chembl_id', 'document_chembl_id'] produces "
+            "?molecule_chembl_id__in=...&document_chembl_id__in=... "
+            "Mutually exclusive with filter_field."
+        ),
+    )
+    key_filter: str | None = Field(
+        default=None,
+        description=(
+            "SQL-like condition to filter records from key_source before extracting join keys. "
+            "Example: \"mapping_status = 'found'\" to only fetch successfully mapped IDs."
+        ),
     )
 
     @field_validator("join_keys")
@@ -21554,6 +22462,16 @@ class DependencySchema(BaseModel):
                 raise ValueError("join_keys cannot contain empty strings")
         return v
 
+    @model_validator(mode="after")
+    def validate_filter_fields_exclusive(self) -> Self:
+        """Ensure filter_field and filter_fields are mutually exclusive."""
+        if self.filter_field and self.filter_fields:
+            raise ValueError(
+                "filter_field and filter_fields are mutually exclusive. "
+                "Use filter_fields for multi-field filtering."
+            )
+        return self
+
     def to_domain(self) -> DependencyConfig:
         """Convert to immutable domain DependencyConfig."""
         return DependencyConfig(
@@ -21562,6 +22480,10 @@ class DependencySchema(BaseModel):
             required=self.required,
             timeout_seconds=self.timeout_seconds,
             silver_table=self.silver_table,
+            key_source=self.key_source,
+            filter_field=self.filter_field,
+            filter_fields=tuple(self.filter_fields) if self.filter_fields else None,
+            key_filter=self.key_filter,
         )
 
 
@@ -21645,6 +22567,40 @@ class MergeOutputSchema(BaseModel):
     gold: str = Field(..., min_length=1, description="Path for merged Gold table")
 
 
+class ColumnGroupSchema(BaseModel):
+    """Pydantic schema for column group configuration.
+
+    Defines how columns are grouped and ordered in merged output.
+    """
+
+    name: str = Field(..., min_length=1, description="Group name for logging")
+    fields: list[str] = Field(
+        default_factory=list, description="Explicit field names to include"
+    )
+    pattern: str | None = Field(
+        default=None, description="Regex pattern to match field names"
+    )
+    provider_order: list[str] = Field(
+        default_factory=lambda: [
+            "chembl",
+            "crossref",
+            "openalex",
+            "pubmed",
+            "semanticscholar",
+        ],
+        description="Order of providers within this group",
+    )
+
+    @model_validator(mode="after")
+    def validate_fields_or_pattern(self) -> ColumnGroupSchema:
+        """Ensure at least one of fields or pattern is provided."""
+        if not self.fields and not self.pattern:
+            raise ValueError(
+                f"Column group '{self.name}' must have either fields or pattern"
+            )
+        return self
+
+
 class MergeSchema(BaseModel):
     """Pydantic schema for merge step configuration."""
 
@@ -21667,6 +22623,22 @@ class MergeSchema(BaseModel):
     output: MergeOutputSchema = Field(
         ..., description="Output paths for Silver and Gold tables"
     )
+    preserve_all_sources: bool = Field(
+        default=False,
+        description="Keep all provider-qualified columns instead of coalescing",
+    )
+    column_groups: list[ColumnGroupSchema] = Field(
+        default_factory=list,
+        description="Column ordering by semantic groups",
+    )
+    column_groups_file: str | None = Field(
+        default=None,
+        description="Path to column group config file relative to composite config",
+    )
+    exclude_fields: list[str] = Field(
+        default_factory=list,
+        description="Columns to drop from merged output (supports glob patterns)",
+    )
 
     @model_validator(mode="after")
     def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
@@ -21682,6 +22654,16 @@ class MergeSchema(BaseModel):
         field_priorities_tuples = {
             k: tuple(v) for k, v in self.field_priorities.items()
         }
+        # Convert column groups to domain objects
+        column_groups_domain = tuple(
+            ColumnGroupConfig(
+                name=g.name,
+                fields=tuple(g.fields),
+                pattern=g.pattern,
+                provider_order=tuple(g.provider_order),
+            )
+            for g in self.column_groups
+        )
         return MergeConfig(
             strategy=MergeStrategy.from_string(self.strategy),
             conflict_resolution=ConflictResolution.from_string(
@@ -21691,6 +22673,9 @@ class MergeSchema(BaseModel):
             output_gold_path=self.output.gold,
             field_priorities=field_priorities_tuples,
             field_mappings=self.field_mappings,
+            preserve_all_sources=self.preserve_all_sources,
+            column_groups=column_groups_domain,
+            exclude_fields=tuple(self.exclude_fields),
         )
 
 
@@ -21839,7 +22824,8 @@ class CompositeConfigSchema(BaseModel):
         description="List of dependency configurations (run after seed, before enrichers)",
     )
     enrichers: list[EnricherSchema] = Field(
-        ..., min_length=1, description="List of enricher configurations"
+        default_factory=list,
+        description="List of enricher configurations (optional if dependencies provided)",
     )
     merge: MergeSchema = Field(..., description="Merge step configuration")
     dq_rules: CompositeDQSchema = Field(
@@ -21853,8 +22839,17 @@ class CompositeConfigSchema(BaseModel):
     )
 
     @model_validator(mode="after")
+    def validate_has_enrichers_or_dependencies(self) -> CompositeConfigSchema:
+        """Validate that at least one enricher or dependency is defined."""
+        if not self.enrichers and not self.dependencies:
+            raise ValueError("At least one enricher or dependency must be defined")
+        return self
+
+    @model_validator(mode="after")
     def validate_enricher_join_keys(self) -> CompositeConfigSchema:
         """Validate that enricher join keys exist in seed output_keys."""
+        if not self.enrichers:
+            return self  # Skip if no enrichers
         seed_keys = set(self.seed.output_keys)
         for enricher in self.enrichers:
             for key in enricher.join_keys:
@@ -21867,9 +22862,17 @@ class CompositeConfigSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_dependency_join_keys(self) -> CompositeConfigSchema:
-        """Validate that dependency join keys exist in seed output_keys."""
+        """Validate that dependency join keys exist in seed output_keys.
+
+        For chained dependencies (key_source != None and != "seed"),
+        join_keys are taken from the key_source's Silver table,
+        so they are NOT validated against seed output_keys.
+        """
         seed_keys = set(self.seed.output_keys)
         for dep in self.dependencies:
+            # Skip validation for chained dependencies
+            if dep.key_source is not None and dep.key_source != "seed":
+                continue
             for key in dep.join_keys:
                 if key not in seed_keys:
                     raise ValueError(
@@ -21881,6 +22884,8 @@ class CompositeConfigSchema(BaseModel):
     @model_validator(mode="after")
     def validate_unique_enricher_names(self) -> CompositeConfigSchema:
         """Validate that enricher pipeline names are unique."""
+        if not self.enrichers:
+            return self  # Skip if no enrichers
         names = [e.pipeline for e in self.enrichers]
         if len(names) != len(set(names)):
             duplicates = {n for n in names if names.count(n) > 1}
@@ -21939,6 +22944,7 @@ class CompositeConfigFileSchema(BaseModel):
 __all__ = [
     "AggregationFieldSchema",
     "AggregationSchema",
+    "ColumnGroupSchema",
     "CompositeConfigFileSchema",
     "CompositeConfigSchema",
     "CompositeDQSchema",
@@ -22166,10 +23172,12 @@ class DQConfigFile(BaseModel):
                 field=fv.field,
                 validation_type=fv.type,
                 nullable=fv.nullable,
+                severity=fv.severity,
                 min_value=fv.min,
                 max_value=fv.max,
                 pattern=fv.pattern,
                 allowed=tuple(fv.allowed),
+                max_length=fv.max_length,
                 validator=fv.validator,
                 error_message=fv.error_message,
             )
@@ -22504,17 +23512,18 @@ Structure:
 Usage:
     >>> from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
     >>> config = FilterConfigFile.model_validate(yaml_data)
-    >>> input_filter, gold_filters = config.to_domain()
+    >>> input_filter, silver_filters, gold_filters, extraction_params = config.to_domain()
 """
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.domain.filtering import (
     InputFilterConfig as DomainInputFilterConfig,
 )
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
     BaseGoldColumnFilterConfig,
@@ -22571,6 +23580,30 @@ class InputFilterFileConfig(BaseInputFilterConfig):
         return super().to_domain()
 
 
+class SilverFiltersFileConfig(BaseGoldFiltersConfig):
+    """Silver filter configuration for domain-level quality gates.
+
+    Applied AFTER transformation but BEFORE writing to Silver layer.
+    Reuses the same filter engine as GoldFiltersFileConfig.
+
+    Attributes:
+        columns: Column value filters with operator support.
+        ranges: Numeric range filters.
+        list_lengths: List length filters.
+        list_contains: List contains filters.
+        required_fields: Required non-null fields.
+        exclude_if_present: Exclude if field has value.
+    """
+
+    def to_domain(self) -> GoldFilterConfig:
+        """Convert to domain GoldFilterConfig dataclass.
+
+        Returns:
+            GoldFilterConfig: Immutable domain filter configuration.
+        """
+        return super().to_domain()
+
+
 class GoldFiltersFileConfig(BaseGoldFiltersConfig):
     """Gold filter configuration for standalone filter files.
 
@@ -22610,6 +23643,7 @@ class FilterConfigFile(BaseModel):
         provider: Provider name (for provider/entity configs).
         entity: Entity name (for entity configs).
         input_filter: Input filtering configuration.
+        silver_filters: Silver layer domain-level filter configuration.
         gold_filters: Gold layer filter configuration.
     """
 
@@ -22629,20 +23663,55 @@ class FilterConfigFile(BaseModel):
         default_factory=InputFilterFileConfig,
         description="Input filtering configuration",
     )
+    silver_filters: SilverFiltersFileConfig = Field(
+        default_factory=SilverFiltersFileConfig,
+        description="Silver layer domain-level filter configuration",
+    )
     gold_filters: GoldFiltersFileConfig = Field(
         default_factory=GoldFiltersFileConfig,
         description="Gold layer filter configuration",
     )
+    extraction_params: dict[str, str | int | bool] = Field(
+        default_factory=dict,
+        description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
+    )
 
-    def to_domain(self) -> tuple[DomainInputFilterConfig, GoldFilterConfig]:
+    @field_validator("extraction_params")  # type: ignore[untyped-decorator]
+    @classmethod
+    def validate_extraction_params(
+        cls,
+        v: dict[str, str | int | bool],
+    ) -> dict[str, str | int | bool]:
+        """Validate extraction params keys and values."""
+        for key, value in v.items():
+            if not key or not isinstance(key, str):
+                raise ValueError(
+                    f"Extraction param key must be non-empty string, got: {key!r}"
+                )
+            if not isinstance(value, (str, int, bool)):
+                raise ValueError(
+                    f"Extraction param '{key}' value must be str|int|bool, "
+                    f"got {type(value).__name__}: {value!r}"
+                )
+        return v
+
+    def to_domain(
+        self,
+    ) -> tuple[
+        DomainInputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams
+    ]:
         """Convert to domain objects.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig).
+            Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
+            ExtractionParams).  Silver and Gold filters both use GoldFilterConfig
+            as the domain type — only their YAML section differs.
         """
         return (
             self.input_filter.to_domain(),
+            self.silver_filters.to_domain(),
             self.gold_filters.to_domain(),
+            ExtractionParams(params=self.extraction_params),
         )
 
 
@@ -22655,6 +23724,7 @@ __all__ = [
     "GoldListLengthFilterConfig",
     "GoldRangeFilterConfig",
     "InputFilterFileConfig",
+    "SilverFiltersFileConfig",
 ]
 
 ================================================================================
@@ -22689,6 +23759,7 @@ from pydantic import (
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
@@ -22702,14 +23773,17 @@ if TYPE_CHECKING:
 class FieldValidationConfig(BaseModel):
     """Configuration for a single field validation rule.
 
-    Supports: required, range, pattern, enum, custom validation types.
+    Supports: required, not_null, range, pattern, enum, max_length, custom validation types.
     """
 
     field: str = Field(description="Field name to validate")
-    type: Literal["required", "range", "pattern", "enum", "custom"] = Field(
-        description="Validation type"
-    )
+    type: Literal[
+        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+    ] = Field(description="Validation type")
     nullable: bool = Field(default=True, description="Whether field can be null")
+    severity: Literal["error", "warn"] = Field(
+        default="error", description="Severity level (error or warn)"
+    )
     # Range validation
     min: float | None = Field(default=None, description="Minimum value (range)")
     max: float | None = Field(default=None, description="Maximum value (range)")
@@ -22717,6 +23791,8 @@ class FieldValidationConfig(BaseModel):
     pattern: str | None = Field(default=None, description="Regex pattern")
     # Enum validation
     allowed: list[str] = Field(default_factory=list, description="Allowed values")
+    # Max length validation
+    max_length: int | None = Field(default=None, description="Maximum string length")
     # Custom validation
     validator: str | None = Field(default=None, description="Custom validator name")
     # Error message
@@ -22845,10 +23921,12 @@ class DQConfig(BaseModel):
                 field=fv.field,
                 validation_type=fv.type,
                 nullable=fv.nullable,
+                severity=fv.severity,
                 min_value=fv.min,
                 max_value=fv.max,
                 pattern=fv.pattern,
                 allowed=tuple(fv.allowed),
+                max_length=fv.max_length,
                 validator=fv.validator,
                 error_message=fv.error_message,
             )
@@ -23621,9 +24699,20 @@ class PipelineYamlConfig(BaseModel):
         "Format: {input_filter: {...}, gold_filters: {...}}",
     )
 
+    # Column ordering configuration (external file)
+    column_groups_file: str | None = Field(
+        default=None,
+        description="Path to column group config file relative to pipeline config.",
+    )
+    data_schema_file: str | None = Field(
+        default=None,
+        description="Path to data schema file with layer-specific columns (silver/gold).",
+    )
+
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
+    silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
 
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
@@ -23631,6 +24720,15 @@ class PipelineYamlConfig(BaseModel):
     input_filter: InputFilterConfig = Field(default_factory=InputFilterConfig)
     maintenance: MaintenanceConfig = Field(default_factory=MaintenanceConfig)
     transform: TransformConfig = Field(default_factory=TransformConfig)
+    column_groups: list[ColumnGroupSchema] = Field(
+        default_factory=list,
+        description="Optional column ordering groups for Silver/Gold output",
+    )
+    extraction_params: dict[str, str | int | bool] = Field(
+        default_factory=dict,
+        description="Server-side API query parameters for Bronze extraction (ADR-028 §3). "
+        "Merged from filter config file. Keys are provider-specific query params.",
+    )
 
     # Pagination strategy (ADR-030)
     force_full_scan: bool = Field(
@@ -23643,11 +24741,10 @@ class PipelineYamlConfig(BaseModel):
 
     # Loading strategy (ADR-031)
     # Explicit formalization of data loading approach.
-    loading_strategy: Literal["full_scan_only", "watermark_based"] | None = Field(
+    loading_strategy: Literal["full_scan_only"] | None = Field(
         default=None,
         description="Explicit loading strategy for the pipeline. "
         "'full_scan_only': Each run performs full scan, checkpoint resume disabled. "
-        "'watermark_based': Incremental loading via watermark (placeholder, not implemented). "
         "If not specified, derived from force_full_scan for backward compatibility. "
         "See ADR-031.",
     )
@@ -23716,10 +24813,13 @@ class PipelineYamlConfig(BaseModel):
             bronze_config.format = "jsonl"
 
         # Silver MUST use Delta Lake (RULES.md §2.1)
-        if silver_config and silver_config.format == "parquet":
+        # Strict positive check: only "delta" is allowed. This prevents bypass
+        # with formats like "jsonl" or "csv" that the previous negative check
+        # (format == "parquet") would not catch.
+        if silver_config and silver_config.format != "delta":
             raise ValueError(
-                "Silver layer MUST use 'delta' format (RULES.md §2.1). "
-                "Parquet is not allowed for Silver layer."
+                f"Silver layer MUST use 'delta' format (RULES.md §2.1). "
+                f"Got '{silver_config.format}'. Only Delta Lake is allowed for Silver layer."
             )
 
         # Gold MAY use delta or parquet (RULES.md §2.1) - no validation needed
@@ -23752,7 +24852,7 @@ Column Order Convention (per RULES.md §2.4 and ADR-014):
 1. System prefix fields (entity_id, content_hash, _run_id, _run_type,
    _source_batch_id, _ingestion_ts, _index) - MUST be first
 2. Business fields - sorted alphabetically
-3. DQ suffix fields (_dq_warn, _dq_error) - MUST be last (if present)
+3. DQ suffix fields (_dq_error, _dq_warn) - MUST be last (if present)
 """
 
 from __future__ import annotations
@@ -23785,28 +24885,39 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("authors", pa.string()),  # JSON array of author names
         pa.field("title", pa.string()),
         pa.field("journal", pa.string()),
-        pa.field("year", pa.int64()),
+        pa.field("publication_year", pa.int64()),
         pa.field("volume", pa.string()),
         pa.field("issue", pa.string()),
-        pa.field("first_page", pa.string()),
-        pa.field("last_page", pa.string()),
+        pa.field("page_first", pa.string()),  # Unified: from first_page
+        pa.field("page_last", pa.string()),  # Unified: from last_page
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
         # pmc_id excluded: not available from ChEMBL API
-        pa.field("pmid", pa.string()),  # PubMed ID (numeric string)
+        pa.field("pmid", pa.string()),  # Unified: from pubmed_id
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
-        pa.field("doc_type", pa.string()),  # PUBLICATION, PATENT, DATASET, BOOK
-        pa.field("journal_full_title", pa.string()),
+        pa.field("publication_type", pa.string()),  # Unified: from doc_type
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         # publication_date excluded: not available from ChEMBL API
         pa.field("src_id", pa.int64()),
+        # === Unified citation metrics ===
+        pa.field("citations_received", pa.int64()),  # Unified: from citation_count
+        pa.field(
+            "citations_made", pa.int64()
+        ),  # Unified: references made (N/A for ChEMBL)
         # === ChEMBL Release Metadata ===
         pa.field("chembl_release", pa.string()),  # e.g., CHEMBL_1, CHEMBL_34
         pa.field("creation_date", pa.string()),  # Record creation date (YYYY-MM-DD)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -23848,10 +24959,10 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("ligand_efficiency_le", pa.float64()),
         pa.field("ligand_efficiency_lle", pa.float64()),
         pa.field("ligand_efficiency_sei", pa.float64()),
-        pa.field("manual_curation_flag", pa.int64()),
+        pa.field("manual_curation_flag", pa.float64()),  # Float for nullable int
         pa.field("molecule_chembl_id", pa.string()),
         pa.field("molecule_pref_name", pa.string()),
-        pa.field("original_activity_id", pa.int64()),
+        pa.field("original_activity_id", pa.float64()),  # Float for nullable int
         pa.field("parent_molecule_chembl_id", pa.string()),
         pa.field("pchembl_value", pa.float64()),
         pa.field("potential_duplicate", pa.int64()),
@@ -23873,15 +24984,15 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
             "target_taxonomy_id", pa.string()
         ),  # Standardized name (was target_tax_id)
         pa.field("text_value", pa.string()),
-        pa.field("toid", pa.int64()),
+        pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),
         pa.field("units", pa.string()),
         pa.field("uo_units", pa.string()),
         pa.field("upper_value", pa.float64()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -23910,12 +25021,14 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
             "molecular_weight", pa.float64()
         ),  # Transformed to float by transformer
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
 # Schema for UniProt Protein
+# Extended schema with functional annotations, cross-references, and quality metrics
+# See: https://www.uniprot.org/help/return_fields
 UNIPROT_PROTEIN_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
@@ -23927,20 +25040,64 @@ UNIPROT_PROTEIN_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("accession", pa.string()),
-        pa.field("entry_name", pa.string()),
-        pa.field("gene_names", pa.list_(pa.string())),
-        pa.field("organism_id", pa.int64()),
-        pa.field("protein_name", pa.string()),
-        pa.field("sequence_length", pa.int64()),
+        pa.field("accession", pa.string()),  # Primary UniProt accession
+        pa.field("acetylation", pa.string()),  # PTM: acetylation sites
+        pa.field("active_sites", pa.string()),  # JSON: ft_act_site features
+        pa.field("activity_regulation", pa.string()),  # cc_activity_regulation
+        pa.field("annotation_score", pa.int64()),  # Quality score 1-5
+        pa.field("binding_sites", pa.string()),  # JSON: ft_binding features
+        pa.field("catalytic_activity", pa.string()),  # cc_catalytic_activity
+        pa.field("cellular_component", pa.string()),  # GO aspect C
+        pa.field("chembl_ids", pa.string()),  # ChEMBL target cross-refs (JSON array)
+        pa.field("disease_involvement", pa.string()),  # cc_disease
+        pa.field("disulfide_bond", pa.string()),  # PTM: disulfide bonds
+        pa.field("domains", pa.string()),  # JSON: ft_domain features
+        pa.field("drugbank_ids", pa.string()),  # DrugBank cross-refs (JSON array)
+        pa.field("entry_name", pa.string()),  # UniProt entry name (e.g., FA10_HUMAN)
+        pa.field("features_json", pa.string()),  # All features combined (forensic)
+        pa.field("function_comment", pa.string()),  # cc_function
+        pa.field("gene_names", pa.list_(pa.string())),  # Gene name synonyms
+        pa.field("genus", pa.string()),  # Taxonomy: genus
+        pa.field("glycosylation", pa.string()),  # PTM: glycosylation sites
+        pa.field("go_terms", pa.string()),  # GO annotations (JSON array)
+        pa.field("interpro_xrefs", pa.string()),  # InterPro domain IDs (JSON array)
+        pa.field("intramembrane", pa.string()),  # Structural: intramembrane regions
+        pa.field("isoform_ids", pa.string()),  # Isoform IDs (e.g., P12345-2)
+        pa.field("isoform_names", pa.string()),  # Isoform names
+        pa.field("isoform_synonyms", pa.string()),  # Isoform synonyms
+        pa.field("lipidation", pa.string()),  # PTM: lipidation sites
+        pa.field("modified_residue", pa.string()),  # PTM: all modified residues
+        pa.field("molecular_function", pa.string()),  # GO aspect F
+        pa.field("organism_id", pa.int64()),  # NCBI Taxonomy ID
+        pa.field("pathway", pa.string()),  # cc_pathway
+        pa.field("pdb_xrefs", pa.string()),  # PDB structure IDs (JSON array)
+        pa.field("pfam_xrefs", pa.string()),  # Pfam family IDs (JSON array)
+        pa.field("phosphorylation", pa.string()),  # PTM: phosphorylation sites
+        pa.field("phylum", pa.string()),  # Taxonomy: phylum
+        pa.field("propeptide", pa.string()),  # Structural: propeptide
+        pa.field("protein_existence", pa.string()),  # Evidence level string
+        pa.field("protein_name", pa.string()),  # Recommended protein name
+        pa.field("reaction_ec_numbers", pa.string()),  # EC numbers from reactions
+        pa.field("reactions", pa.string()),  # Reaction names from catalytic activity
+        pa.field("reactome_xrefs", pa.string()),  # Reactome pathway IDs (JSON array)
+        pa.field("reviewed", pa.bool_()),  # Swiss-Prot (true) vs TrEMBL (false)
+        pa.field("sequence_length", pa.int64()),  # Protein sequence length
+        pa.field("signal_peptide", pa.string()),  # Structural: signal peptide
+        pa.field("similarity_comment", pa.string()),  # cc_similarity
+        pa.field("subcellular_location", pa.string()),  # cc_subcellular_location
+        pa.field("superkingdom", pa.string()),  # Taxonomy: superkingdom
+        pa.field("tissue_specificity", pa.string()),  # cc_tissue_specificity
+        pa.field("topology", pa.string()),  # Structural: topological domains
+        pa.field("transmembrane", pa.string()),  # Structural: transmembrane regions
+        pa.field("ubiquitination", pa.string()),  # PTM: ubiquitination sites
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
 # Schema for UniProt ID Mapping
-# Maps ChEMBL target IDs to UniProt accessions
+# Maps ChEMBL target IDs to UniProt accessions with entry metadata
 UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
     [
         # === System prefix (MUST be first, per RULES.md §2.4) ===
@@ -23952,16 +25109,27 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Mapping status: 'found', 'not_found', 'error'
+        pa.field("all_mappings", pa.string()),  # JSON array for multiple mappings
+        pa.field("annotation_score", pa.int64()),  # Quality score 1-5
+        pa.field("gene_primary", pa.string()),  # Primary gene name
+        # Mapping status: 'found', 'not_found', 'error', 'multiple'
         pa.field("mapping_status", pa.string()),
+        pa.field("organism_common", pa.string()),  # Common organism name
+        pa.field("organism_scientific", pa.string()),  # Scientific organism name
+        pa.field("protein_name", pa.string()),  # Recommended protein name
+        pa.field("reviewed", pa.bool_()),  # Swiss-Prot (true) vs TrEMBL (false)
+        pa.field("sequence_length", pa.int64()),  # Protein sequence length
+        pa.field("sequence_mass", pa.int64()),  # Molecular weight in Daltons
         # Primary key (source identifier)
         pa.field("target_chembl_id", pa.string()),
+        pa.field("taxonomy_id", pa.int64()),  # NCBI Taxonomy ID
         # Mapped identifier (nullable - None if not found)
         pa.field("uniprot_accession", pa.string()),
+        pa.field("uniprot_entry_name", pa.string()),  # Entry name (e.g., FA10_HUMAN)
         # === DQ suffix (MUST be last, if present) ===
         # DQ warning flag (True for not_found)
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -23981,75 +25149,69 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Lookup metadata
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
-        # Title and abstract
         pa.field("abstract", pa.string()),
         pa.field(
             "abstract_structured", pa.bool_()
         ),  # Whether abstract has NLM sections
-        # Dates (ISO format strings)
-        pa.field("accepted_date", pa.string()),
-        # Authors (affiliations excluded per user request)
-        pa.field("author_count", pa.int64()),  # Denormalized count for query efficiency
+        pa.field("affiliation_list", pa.string()),  # JSON array of unique affiliations
+        pa.field("affiliation_structured", pa.string()),  # JSON array with ROR/GRID
+        pa.field("author_count", pa.int64()),
         pa.field("authors", pa.string()),  # JSON-serialized list
-        # Counts (denormalized for query efficiency)
+        pa.field("authors_with_affiliations", pa.string()),  # JSON array
         pa.field("chemical_count", pa.int64()),
-        pa.field("citation_subset", pa.string()),  # Citation subset codes (e.g., 'AIM')
-        # Additional metadata
+        pa.field("chemicals", pa.string()),  # Chemical substances (JSON array)
+        pa.field("citation_subset", pa.string()),  # Citation subset codes
+        pa.field("citations_made", pa.int64()),  # Unified: citations made
+        # citations_received: excluded (PubMed doesn't provide citation metrics)
         pa.field("country", pa.string()),
-        # MEDLINE dates
+        pa.field("databanks", pa.string()),  # Databank accession numbers (JSON array)
         pa.field("date_completed", pa.string()),  # MEDLINE processing completion date
-        pa.field("date_revised", pa.string()),  # Record revision date (MEDLINE)
-        # Primary identifiers
+        pa.field("date_revised", pa.string()),  # Record revision date
         pa.field("doi", pa.string()),
-        pa.field("epub_date", pa.string()),
-        # Unified page fields (parsed from medline_pgn/pages)
-        pa.field("first_page", pa.string()),
-        pa.field("grant_count", pa.int64()),  # Number of grants
-        # Journal information
+        pa.field("gene_symbols", pa.string()),  # Gene symbols (JSON array)
+        pa.field("grant_count", pa.int64()),
+        # is_oa: excluded (PubMed doesn't provide OA status directly)
         pa.field("issn", pa.string()),
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
-        pa.field("journal_abbrev", pa.string()),
-        # PubMed-specific journal fields (forensic retention)
         pa.field("journal_iso_abbrev", pa.string()),  # ISO journal abbreviation
-        pa.field(
-            "journal_issn_type", pa.string()
-        ),  # ISSN type: Print/Electronic/Linking
-        pa.field("journal_title", pa.string()),  # Full journal name (PubMed source)
-        pa.field("keyword_count", pa.int64()),  # Number of keywords
-        # Classification
-        pa.field("keywords", pa.list_(pa.string())),
+        pa.field("journal_issn_type", pa.string()),  # Print/Electronic/Linking
+        pa.field("journal_name_short", pa.string()),  # Journal abbreviation
+        pa.field("keyword_count", pa.int64()),
         pa.field("language", pa.string()),
-        pa.field("last_page", pa.string()),
-        # Page numbers (MEDLINE format)
         pa.field("medline_pgn", pa.string()),  # Original PubMed pagination
-        pa.field("mesh_heading_count", pa.int64()),  # Number of MeSH headings
-        pa.field("mesh_terms", pa.list_(pa.string())),
+        pa.field("mesh_heading_count", pa.int64()),
         pa.field("nlm_unique_id", pa.string()),  # NLM catalog ID
-        pa.field("pages", pa.string()),  # Legacy: medline_pgn format
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
+        pa.field("page_range", pa.string()),  # Page range string
         pa.field("pmc_id", pa.string()),
         pa.field("pmid", pa.string()),
         pa.field("pub_date", pa.string()),
         pa.field("pub_day", pa.int64()),  # Publication day (1-31)
         pa.field("pub_month", pa.int64()),  # Publication month (1-12)
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD format
         pa.field("publication_status", pa.string()),  # ppublish/epublish/aheadofprint
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
+        pa.field("publication_type", pa.string()),  # Unified: publication type
         pa.field("publication_type_list", pa.string()),  # JSON array of pub types
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
         pa.field("publication_types", pa.list_(pa.string())),
-        pa.field("publication_year", pa.int64()),  # Legacy alias for year
-        pa.field("received_date", pa.string()),
-        pa.field("reference_count", pa.int64()),  # Number of references
-        pa.field("revised_date", pa.string()),
+        pa.field("publication_year", pa.int64()),
+        pa.field("subject_keywords", pa.list_(pa.string())),  # Author keywords
+        pa.field("subject_mesh", pa.list_(pa.string())),  # MeSH terms
         pa.field("title", pa.string()),
-        pa.field("vernacular_title", pa.string()),  # Original non-English title
         pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24078,8 +25240,8 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
         pa.field(
-            "assay_taxonomy_id", pa.int64()
-        ),  # Standardized name (was assay_tax_id)
+            "assay_taxonomy_id", pa.float64()
+        ),  # Float for nullable int
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string()),
@@ -24106,11 +25268,11 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_sequence", pa.string()),
         pa.field("variant_sequence_json", pa.string()),  # Forensic: original JSON
         pa.field(
-            "variant_taxonomy_id", pa.int64()
-        ),  # Standardized name (was variant_tax_id)
+            "variant_taxonomy_id", pa.float64()
+        ),  # Float for nullable int
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24130,17 +25292,12 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         # Flattened component fields
         pa.field("component_accessions", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
+        pa.field("component_id", pa.int64()),
         pa.field("component_ids", pa.list_(pa.int64())),
-        pa.field("component_organisms", pa.list_(pa.string())),
         pa.field("component_relationships", pa.list_(pa.string())),
-        pa.field(
-            "component_taxonomy_ids", pa.list_(pa.int64())
-        ),  # Standardized name (was component_tax_ids)
         pa.field("component_types", pa.list_(pa.string())),
         # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
-        pa.field("dap_id", pa.int64()),
-        pa.field("description", pa.string()),
         pa.field("downgraded", pa.bool_()),
         pa.field("organism", pa.string()),
         pa.field("pipeline_stages", pa.string()),
@@ -24149,14 +25306,13 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_chembl_id", pa.string()),
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_components", pa.string()),
-        pa.field("target_constraints", pa.string()),
         pa.field("target_type", pa.string()),
-        pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
+        pa.field("taxonomy_id", pa.float64()),  # Float for nullable int
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24179,6 +25335,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("description", pa.string()),
         pa.field("organism", pa.string()),
         # Flattened fields (extracted from protein_classifications)
+        pa.field("protein_classification_id", pa.int64()),
         pa.field("protein_classification_ids", pa.list_(pa.int64())),
         pa.field("protein_classifications", pa.string()),  # Forensic JSON
         # Complex fields (JSON strings)
@@ -24186,8 +25343,8 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("target_component_xrefs", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24216,13 +25373,57 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("cellosaurus_id", pa.string()),
         pa.field("cl_lincs_id", pa.string()),
         pa.field("efo_id", pa.string()),
-        # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
-# Schema for ChEMBL Document Term
+# Schema for ChEMBL Tissue
+# See: https://www.ebi.ac.uk/chembl/api/data/tissue
+CHEMBL_TISSUE_SCHEMA = pa.schema(
+    [
+        # === System prefix (MUST be first, per RULES.md §2.4) ===
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+        # === Business fields (alphabetical order) ===
+        pa.field("bto_id", pa.string()),  # BRENDA Tissue Ontology
+        pa.field("caloha_id", pa.string()),  # CALIPHO ID
+        pa.field("efo_id", pa.string()),  # Experimental Factor Ontology
+        pa.field("pref_name", pa.string()),  # Preferred tissue name
+        pa.field("tissue_chembl_id", pa.string()),  # Primary key
+        pa.field("uberon_id", pa.string()),  # Uberon Ontology
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
+    ]
+)
+# Derived entity extracted from Assay records (assay_subcellular_fraction field)
+# Lookup table for subcellular fractions used in bioassays
+CHEMBL_SUBCELLULAR_FRACTION_SCHEMA = pa.schema(
+    [
+        # === System prefix (MUST be first, per RULES.md §2.4) ===
+        pa.field("entity_id", pa.string()),
+        pa.field("content_hash", pa.string()),
+        pa.field("_run_id", pa.string()),
+        pa.field("_run_type", pa.string()),
+        pa.field("_source_batch_id", pa.string()),
+        pa.field("_ingestion_ts", pa.string()),
+        pa.field("_index", pa.int64()),
+        # === Business fields (alphabetical order) ===
+        pa.field("assay_count", pa.int64()),  # Number of assays using this fraction
+        pa.field("example_assay_chembl_id", pa.string()),  # Example assay ChEMBL ID
+        pa.field("subcellular_fraction", pa.string()),  # Primary key - fraction name
+        # === DQ_FIELDS_SUFFIX ===
+        pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
+    ]
+)
+
 # Derived entity extracted from Document records
 # See: https://www.ebi.ac.uk/chembl/api/data/document
 CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
@@ -24243,8 +25444,8 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("term", pa.string()),
         pa.field("term_type", pa.string()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24270,14 +25471,14 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
         pa.field("dosed_ingredient", pa.int64()),
-        pa.field("first_approval", pa.int64()),
+        pa.field("first_approval", pa.float64()),  # Float for nullable int
         pa.field("first_in_class", pa.int64()),
         pa.field("helm_notation", pa.string()),
         # Flattened Hierarchy
         pa.field("hierarchy_active_chembl_id", pa.string()),
         pa.field("hierarchy_child_chembl_id", pa.string()),
         pa.field("hierarchy_parent_chembl_id", pa.string()),
-        pa.field("inchi_key", pa.string()),
+        pa.field("inchikey", pa.string()),  # Standard InChIKey (matches domain schema)
         pa.field("inorganic_flag", pa.int64()),
         pa.field("max_phase", pa.int64()),
         pa.field("molecule_chembl_id", pa.string()),
@@ -24316,11 +25517,11 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_stem", pa.string()),
         pa.field("usan_stem_definition", pa.string()),
         pa.field("usan_substem", pa.string()),
-        pa.field("usan_year", pa.int64()),
+        pa.field("usan_year", pa.float64()),  # Float for nullable int
         pa.field("withdrawn_flag", pa.bool_()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24348,8 +25549,8 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24380,8 +25581,8 @@ CHEMBL_DOCUMENT_SIMILARITY_SCHEMA = pa.schema(
         pa.field("sim_id", pa.int64()),
         pa.field("tid_tani", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24400,48 +25601,52 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         # Lookup metadata
-        # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-        # _original_id: Original identifier used for lookup
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
-        # abstract, affiliations, authors excluded per user request
-        # External IDs
-        pa.field("arxiv_id", pa.string()),
-        pa.field("author_ids", pa.string()),
-        # Metrics
-        pa.field("citation_count", pa.int64()),
+        pa.field("abstract", pa.string()),
+        pa.field("affiliation_list", pa.string()),  # JSON array
+        # Author identifiers (for author-level analytics)
+        pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
+        pa.field("author_orcids", pa.string()),  # JSON array of ORCIDs
+        pa.field("author_s2_ids", pa.string()),  # JSON array of S2 author IDs
+        pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
+        pa.field("citations_made", pa.int64()),  # Unified: from referenceCount
+        pa.field("citations_received", pa.int64()),  # Unified: from citationCount
         pa.field("corpus_id", pa.int64()),
+        pa.field("dblp_id", pa.string()),  # DBLP publication key
         pa.field("doi", pa.string()),
-        pa.field("fields_of_study", pa.string()),
-        # Unified page fields (parsed from pages)
-        pa.field("first_page", pa.string()),
-        # Open Access
+        pa.field("influential_citation_count", pa.int64()),
         pa.field("is_oa", pa.bool_()),
-        # Journal/Venue
+        pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
-        pa.field("last_page", pa.string()),
         pa.field("oa_status", pa.string()),
         pa.field("open_access_url", pa.string()),
-        pa.field("pages", pa.string()),  # Legacy: "first-last" format
-        # Primary key
-        pa.field("paper_id", pa.string()),
-        # Cross-reference IDs for linking publications across providers
-        # pmc_id: PubMed Central ID (format: "PMC1234567")
-        pa.field("pmc_id", pa.string()),
-        # pmid: PubMed ID (numeric string: "12345678")
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
+        pa.field("page_range", pa.string()),  # Page range: "first-last" format
+        pa.field("paper_id", pa.string()),  # Primary key
+        # Note: pmc_id excluded per design (2026-01)
         pa.field("pmid", pa.string()),
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
-        pa.field("publication_types", pa.string()),
-        pa.field("reference_count", pa.int64()),
-        # Core fields
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
+        pa.field(
+            "publication_type", pa.string()
+        ),  # Unified: from publicationTypes (joined)
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
+        pa.field("publication_types", pa.string()),  # Raw publicationTypes (JSON array)
+        pa.field("publication_year", pa.int64()),
+        pa.field("subject_fields", pa.string()),
         pa.field("title", pa.string()),
         pa.field("tldr", pa.string()),
-        pa.field("venue", pa.string()),
         pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, if present) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24464,39 +25669,53 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         # abstract and affiliations excluded per user request
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
+        pa.field("author_details", pa.string()),  # JSON array of author objects
+        pa.field("author_orcids", pa.string()),  # ORCID IDs (JSON array)
         pa.field("authors", pa.string()),  # JSON-serialized list
-        pa.field("citation_count", pa.int64()),
+        pa.field("citations_made", pa.int64()),  # Unified: from references-count
+        pa.field(
+            "citations_received", pa.int64()
+        ),  # Unified: from is-referenced-by-count
         pa.field("content_domain_crossmark_restriction", pa.bool_()),
         pa.field("content_domain_domains", pa.list_(pa.string())),
-        pa.field("doc_type", pa.string()),
+        # Note: doc_type excluded; CrossRef uses raw 'type' field instead
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
-        pa.field("first_page", pa.string()),
-        pa.field("issn", pa.list_(pa.string())),
+        pa.field("issn", pa.string()),
         pa.field("issn_electronic", pa.string()),  # Electronic ISSN
+        pa.field("issn_list", pa.string()),  # JSON array of all ISSNs
         pa.field("issn_print", pa.string()),  # Print ISSN
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
+        pa.field("journal_name_short", pa.string()),
         pa.field("language", pa.string()),
-        pa.field("last_page", pa.string()),
         pa.field("license_url", pa.string()),
-        # Cross-reference IDs (nullable - CrossRef doesn't provide these natively)
-        pa.field("pmc_id", pa.string()),  # PubMed Central ID
-        pa.field("pmid", pa.string()),  # PubMed ID
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
+        # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
+        pa.field(
+            "publication_type", pa.string()
+        ),  # Raw CrossRef type (journal-article, etc.)
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
+        pa.field("publication_year", pa.int64()),
         pa.field("published", pa.string()),  # Canonical publication date
         pa.field("published_online", pa.string()),  # Provider-specific
         pa.field("published_print", pa.string()),  # Provider-specific
         pa.field("publisher", pa.string()),
-        pa.field("reference_count", pa.int64()),
-        pa.field("short_container_title", pa.list_(pa.string())),
-        pa.field("subjects", pa.list_(pa.string())),
+        pa.field("references", pa.string()),  # JSON array of cited references
+        pa.field("subject_keywords", pa.list_(pa.string())),
         pa.field("title", pa.string()),
         pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24520,21 +25739,25 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         pa.field("abstract", pa.string()),
-        pa.field("affiliations", pa.string()),
+        pa.field("affiliation_list", pa.string()),  # JSON array
+        # Author identifiers (JSON arrays preserving author order)
+        pa.field("author_openalex_ids", pa.string()),  # OpenAlex author IDs
+        pa.field("author_orcids", pa.string()),  # ORCID IDs (empty string for missing)
         pa.field("authors", pa.string()),  # JSON-serialized list
+        # Unified: from referenced_works_count
+        pa.field("citations_made", pa.int64()),
         # OpenAlex source field: cited_by_count
-        # Unified BioETL field: citation_count (standardized across all providers)
-        pa.field("citation_count", pa.int64()),
-        pa.field("concepts", pa.list_(pa.string())),
-        # Metadata
-        pa.field("doc_type", pa.string()),
+        # Unified BioETL field: citations_received (standardized across all providers)
+        pa.field("citations_received", pa.int64()),
+        # NOTE: concepts field removed - OpenAlex deprecated concepts in 2024, use topics instead
+        # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
         # Cross-reference IDs for linking publications across providers
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
         pa.field("doi", pa.string()),
-        # Unified page fields (from biblio object)
-        pa.field("first_page", pa.string()),
         # Field-Weighted Citation Impact (must be non-negative)
         pa.field("fwci", pa.float64()),
+        # Grants/funding information (JSON array)
+        pa.field("grants", pa.string()),
         # Institution identifiers (for cross-referencing and geographic analysis)
         pa.field("institution_country_codes", pa.list_(pa.string())),
         pa.field("institution_ids", pa.list_(pa.string())),
@@ -24546,33 +25769,47 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Bibliographic info (from biblio object)
         pa.field("issue", pa.string()),
         pa.field("journal", pa.string()),
-        # Keywords extracted from OpenAlex
-        pa.field("keywords", pa.list_(pa.string())),
         pa.field("language", pa.string()),
-        pa.field("last_page", pa.string()),
         # Microsoft Academic Graph ID (legacy, from ids object)
         pa.field("mag_id", pa.string()),
-        # MeSH terms extracted from OpenAlex mesh field
-        pa.field("mesh", pa.list_(pa.string())),
         pa.field("oa_status", pa.string()),
         # Primary key
         pa.field("openalex_id", pa.string()),
-        # pmc_id: PubMed Central ID (format: "PMC1234567") - nullable, may not exist for all publications
-        pa.field("pmc_id", pa.string()),
+        # Unified page fields (from biblio object)
+        pa.field("page_first", pa.string()),
+        pa.field("page_last", pa.string()),
+        # Note: pmc_id excluded per design (2026-01)
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
-        # Date fields
+        # Primary topic (single most relevant topic for quick categorization)
+        pa.field("primary_topic", pa.string()),  # JSON object
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
+        pa.field(
+            "publication_type", pa.string()
+        ),  # Raw OpenAlex type (article, book, etc.)
+        pa.field(
+            "publication_type_unified", pa.string()
+        ),  # Level 3: "Journal Article", etc.
+        pa.field("publication_year", pa.int64()),
         pa.field("publisher", pa.string()),
-        # Number of works referenced (from referenced_works_count)
-        pa.field("referenced_works_count", pa.int64()),
+        # ROR IDs (may be empty if not returned by Works API)
+        pa.field("ror_ids", pa.string()),  # JSON array of ROR URLs
+        # Keywords extracted from OpenAlex
+        pa.field("subject_keywords", pa.list_(pa.string())),
+        # MeSH terms extracted from OpenAlex mesh field
+        pa.field("subject_mesh", pa.list_(pa.string())),
+        # Topics (hierarchical 4-level classification - replaces deprecated concepts)
+        pa.field("subject_topics", pa.string()),  # JSON array
         pa.field("title", pa.string()),
         # Bibliographic info (from biblio object)
         pa.field("volume", pa.string()),
-        pa.field("year", pa.int64()),
         # === DQ suffix (MUST be last, per RULES.md §2.4) ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24603,8 +25840,8 @@ CHEMBL_PROTEIN_CLASS_SCHEMA = pa.schema(
         pa.field("short_name", pa.string()),
         pa.field("sort_order", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24640,8 +25877,8 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("units", pa.string()),
         pa.field("value", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
-        pa.field("_dq_warn", pa.bool_()),
         pa.field("_dq_error", pa.bool_()),
+        pa.field("_dq_warn", pa.bool_()),
     ]
 )
 
@@ -24858,6 +26095,16 @@ class SourceYamlConfig(BaseModel):
     def max_retries(self) -> int:
         """Get max retries."""
         return self.source.provider_config.client.max_retries
+
+    @property
+    def retry_base_delay(self) -> float:
+        """Get retry base delay in seconds."""
+        return self.source.provider_config.client.retry_base_delay
+
+    @property
+    def retry_max_delay(self) -> float:
+        """Get retry max delay in seconds."""
+        return self.source.provider_config.client.retry_max_delay
 
     @property
     def base_url(self) -> str | None:
@@ -25782,48 +27029,65 @@ class ArrowDataConverter:
             return pa.map_(key_type, item_type)
         return dtype
 
+    def _apply_column_order(
+        self,
+        arrow_data: pa.Table,
+        column_order: list[str] | None,
+    ) -> pa.Table:
+        """Apply explicit or canonical column order to an Arrow table."""
+        from bioetl.domain.schemas.column_order import canonical_column_order
+
+        if column_order:
+            ordered = [c for c in column_order if c in arrow_data.column_names]
+            remaining = [c for c in arrow_data.column_names if c not in ordered]
+            return arrow_data.select(ordered + remaining)
+
+        ordered = canonical_column_order(list(arrow_data.column_names))
+        return arrow_data.select(ordered)
+
+    def _sort_by_keys(
+        self,
+        arrow_data: pa.Table,
+        primary_keys: list[str] | None,
+    ) -> pa.Table:
+        """Sort Arrow table by primary keys for deterministic writes."""
+        if not primary_keys:
+            return arrow_data
+        valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
+        if valid_keys:
+            return arrow_data.sort_by([(pk, "ascending") for pk in valid_keys])
+        return arrow_data
+
     def convert_records_to_arrow(
         self,
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
+        column_order: list[str] | None = None,
     ) -> pa.Table:
         """Convert records to PyArrow table with null type handling.
 
         Performs:
         1. Convert records to Arrow table
-        2. Apply canonical column order (ADR-014)
+        2. Apply canonical column order (ADR-014) or an explicit order
         3. Coerce null types to string (Delta Lake compatibility)
         4. Sort by primary keys for deterministic writes
 
         Args:
             records: List of record dictionaries.
             primary_keys: Optional list of columns for sorting.
+            column_order: Optional explicit column order to apply.
 
         Returns:
             PyArrow Table ready for Delta Lake write.
         """
-        from bioetl.domain.schemas.column_order import canonical_column_order
-
         arrow_data = pa.Table.from_pylist(records)
-
-        # Enforce canonical column order (ADR-014, RULES.md §2.4)
-        ordered_columns = canonical_column_order(list(arrow_data.column_names))
-        arrow_data = arrow_data.select(ordered_columns)
+        arrow_data = self._apply_column_order(arrow_data, column_order)
 
         # Check if schema needs sanitization (contains null types)
-        schema_str = str(arrow_data.schema).lower()
-        if "null" in schema_str:
+        if "null" in str(arrow_data.schema).lower():
             arrow_data = self._sanitize_null_columns(arrow_data)
 
-        # Sort by primary keys for deterministic writes
-        if primary_keys:
-            valid_keys = [pk for pk in primary_keys if pk in arrow_data.schema.names]
-            if valid_keys:
-                arrow_data = arrow_data.sort_by(
-                    [(pk, "ascending") for pk in valid_keys]
-                )
-
-        return arrow_data
+        return self._sort_by_keys(arrow_data, primary_keys)
 
     def _sanitize_null_columns(self, arrow_data: pa.Table) -> pa.Table:
         """Sanitize null-typed columns in Arrow table.
@@ -26325,7 +27589,7 @@ class BronzeWriter:
 
     COMPRESSION_CHUNK_SIZE = 256 * 1024
     COMPRESSION_LEVEL = 3
-    COMPRESSION_THREADS = -1
+    COMPRESSION_THREADS = -1  # zstd: auto-detect available CPU cores
 
     def __init__(
         self,
@@ -26964,7 +28228,8 @@ class BronzeWriter:
             decompressor = zstd.ZstdDecompressor()
             # Use streaming decompression since content size may not be in frame header
             with decompressor.stream_reader(compressed_data) as reader:
-                return reader.read()
+                data: bytes = reader.read()
+                return data
 
         decompressed_data = await asyncio.get_running_loop().run_in_executor(
             None, _read_and_decompress
@@ -26979,19 +28244,38 @@ class BronzeWriter:
         entity: str,
         date: datetime | None = None,
     ) -> list[str]:
-        """List all batch files for a given provider/entity."""
-        # Path format: {provider}/{entity}/{date}/
-        prefix = f"{provider}/{entity}/"
-        if date:
-            prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
+        """List all batch files for a given provider/entity.
 
-        search_path = self.base_path / prefix
+        Path resolution depends on flat_structure setting:
+        - flat_structure=False: {base_path}/{provider}/{entity}/{date}/
+        - flat_structure=True: {base_path}/{date}/ (provider/entity in base_path)
+
+        When flat_structure=True and provider/entity are empty strings,
+        searches directly from base_path (used by CachedBronzeDataSource).
+
+        Results are sorted lexicographically for deterministic ordering (ADR-014).
+        """
+        # Handle flat_structure mode (provider/entity already in base_path)
+        if self._flat_structure and not provider and not entity:
+            # Search directly from base_path
+            if date:
+                search_path = self.base_path / date.strftime("%Y-%m-%d")
+            else:
+                search_path = self.base_path
+        else:
+            # Standard path format: {provider}/{entity}/{date}/
+            prefix = f"{provider}/{entity}/"
+            if date:
+                prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
+            search_path = self.base_path / prefix
+
         if not search_path.exists():
             return []
 
         pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
         files = list(search_path.glob(pattern))
-        return [str(p.relative_to(self.base_path)) for p in files]
+        # Sort for deterministic ordering (ADR-014)
+        return sorted(str(p.relative_to(self.base_path)) for p in files)
 
     def _find_old_date_dirs(
         self,
@@ -27414,6 +28698,7 @@ class GoldWriter(BaseDeltaWriter):
         partition_cols: list[str] | None = None,
         scd_config: dict[str, Any] | None = None,
         *,
+        column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[Any] | None = None,
@@ -27428,6 +28713,7 @@ class GoldWriter(BaseDeltaWriter):
             mode: Write mode - 'overwrite', 'append', or 'scd2'
             partition_cols: Optional partition columns
             scd_config: Required config for SCD2 mode
+            column_order: Optional explicit column order to apply.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required for SCD2 mode
                          and audit logging.
@@ -27467,6 +28753,7 @@ class GoldWriter(BaseDeltaWriter):
                 schema,
                 scd_config,
                 ingestion_ts,
+                column_order,
             )
 
             if self._audit:
@@ -27538,20 +28825,34 @@ class GoldWriter(BaseDeltaWriter):
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
         *,
+        schema: DataFrameSchema | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Gold layer without Pandera schema.
+        """Write merged records to Gold layer with optional strict validation.
 
-        Used by composite pipelines where schema is dynamically determined
-        by the merge operation. No Pandera validation is performed.
+        Used by composite pipelines where schema may be dynamically determined
+        by the merge operation. When a schema is provided, strict Pandera
+        validation is enforced (same as write_gold). When no schema is provided,
+        basic structural validation is performed.
 
         Args:
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            schema: Optional Pandera schema for strict validation.
+                When provided, must have strict=True and all records
+                are validated before writing (REQ-DATA-009).
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
+
+        Raises:
+            ValueError: If records are empty, schema is not strict, or
+                records fail schema validation.
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -27562,15 +28863,22 @@ class GoldWriter(BaseDeltaWriter):
             )
             return
 
-        # Convert to Arrow and apply canonical column order
+        # Validate against schema if provided (REQ-DATA-009)
+        if schema is not None:
+            self._validate_schema_strict(schema)
+            await self._validate_records_against_schema(records, schema)
+
+        # Convert to Arrow and apply column order
         arrow_table = pa.Table.from_pylist(records)
 
         # Coerce Null-typed columns for Delta Lake compatibility
         arrow_table = coerce_null_types_for_delta(arrow_table)
 
-        # Enforce canonical column order (ADR-014, RULES.md §2.4)
-        ordered_columns = canonical_column_order(list(arrow_table.column_names))
-        arrow_table = arrow_table.select(ordered_columns)
+        # Apply canonical column order unless caller already ordered columns
+        # (e.g. ColumnOrderer in composite pipelines applies semantic ordering)
+        if not preserve_column_order:
+            ordered_columns = canonical_column_order(list(arrow_table.column_names))
+            arrow_table = arrow_table.select(ordered_columns)
 
         if primary_keys:
             valid_keys = [pk for pk in primary_keys if pk in arrow_table.schema.names]
@@ -27698,13 +29006,19 @@ class GoldWriter(BaseDeltaWriter):
         schema: DataFrameSchema,
         scd_config: dict[str, Any] | None,
         ingestion_ts: datetime | None,
+        column_order: list[str] | None,
     ) -> None:
         """Dispatch to appropriate write method based on mode."""
         if mode == GoldWriteMode.SCD2:
             assert ingestion_ts is not None  # Validated in _validate_scd2_requirements
             assert scd_config is not None
             await self._write_scd2(
-                table_path, records, scd_config, partition_cols, ingestion_ts
+                table_path,
+                records,
+                scd_config,
+                partition_cols,
+                ingestion_ts,
+                column_order,
             )
         else:
             await self._write_simple(
@@ -27715,6 +29029,7 @@ class GoldWriter(BaseDeltaWriter):
                 partition_cols,
                 primary_keys,
                 schema,
+                column_order,
             )
 
     async def _log_gold_audit(
@@ -27909,7 +29224,9 @@ class GoldWriter(BaseDeltaWriter):
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, func, *args)
 
-    def _to_arrow_table(self, records: list[dict[str, Any]]) -> pa.Table:
+    def _to_arrow_table(
+        self, records: list[dict[str, Any]], column_order: list[str] | None = None
+    ) -> pa.Table:
         """Convert records to PyArrow table, handling null types.
 
         Delta Lake doesn't support null type, so we convert null columns to string.
@@ -27920,7 +29237,10 @@ class GoldWriter(BaseDeltaWriter):
         from bioetl.infrastructure.storage.arrow_converter import ArrowDataConverter
 
         converter = ArrowDataConverter(logger=self.logger)
-        return converter.convert_records_to_arrow(records)
+        return converter.convert_records_to_arrow(
+            records,
+            column_order=column_order,
+        )
 
     async def _write_simple(
         self,
@@ -27931,9 +29251,10 @@ class GoldWriter(BaseDeltaWriter):
         partition_cols: list[str] | None,
         primary_keys: list[str] | None = None,
         _schema: DataFrameSchema | None = None,
+        column_order: list[str] | None = None,
     ) -> None:
         """Write records using simple overwrite or append mode."""
-        arrow_data = self._to_arrow_table(records)
+        arrow_data = self._to_arrow_table(records, column_order=column_order)
 
         # Sort by primary keys for deterministic writing
         if primary_keys:
@@ -27949,14 +29270,16 @@ class GoldWriter(BaseDeltaWriter):
                     data=arrow_data,
                     mode=mode,
                     partition_by=partition_cols,
-                    schema_mode=schema_mode: write_deltalake(
-                        table_or_uri=table_or_uri,
-                        data=pa.RecordBatchReader.from_batches(
-                            data.schema, data.to_batches()
-                        ),
-                        mode=mode,
-                        partition_by=partition_by,
-                        schema_mode=schema_mode,
+                    schema_mode=schema_mode: (
+                        write_deltalake(
+                            table_or_uri=table_or_uri,
+                            data=pa.RecordBatchReader.from_batches(
+                                data.schema, data.to_batches()
+                            ),
+                            mode=mode,
+                            partition_by=partition_by,
+                            schema_mode=schema_mode,
+                        )
                     )
                 )
                 break
@@ -27986,6 +29309,7 @@ class GoldWriter(BaseDeltaWriter):
         scd_config: dict[str, Any],
         partition_cols: list[str] | None,
         ingestion_ts: datetime,
+        column_order: list[str] | None = None,
     ) -> None:
         """Write records using SCD Type 2 (history tracking).
 
@@ -28024,21 +29348,30 @@ class GoldWriter(BaseDeltaWriter):
                         lambda table_path=table_path: DeltaTable(table_path)
                     )
                     await self._merge_scd2(
-                        dt, records, business_key, scd_config, ingestion_ts
+                        dt,
+                        records,
+                        business_key,
+                        scd_config,
+                        ingestion_ts,
+                        column_order,
                     )
                 except TableNotFoundError:
-                    arrow_data = self._to_arrow_table(records)
+                    arrow_data = self._to_arrow_table(
+                        records, column_order=column_order
+                    )
                     await self._run_in_executor(
                         lambda table_or_uri=table_path,
                         data=arrow_data,
                         mode="append",
-                        partition_by=partition_cols: write_deltalake(
-                            table_or_uri=table_or_uri,
-                            data=pa.RecordBatchReader.from_batches(
-                                data.schema, data.to_batches()
-                            ),
-                            mode=mode,
-                            partition_by=partition_by,
+                        partition_by=partition_cols: (
+                            write_deltalake(
+                                table_or_uri=table_or_uri,
+                                data=pa.RecordBatchReader.from_batches(
+                                    data.schema, data.to_batches()
+                                ),
+                                mode=mode,
+                                partition_by=partition_by,
+                            )
                         )
                     )
                 break
@@ -28056,6 +29389,7 @@ class GoldWriter(BaseDeltaWriter):
         business_key: str | list[str],
         scd_config: dict[str, Any],
         ingestion_ts: datetime,
+        column_order: list[str] | None = None,
     ) -> None:
         """Merge records using SCD Type 2 logic.
 
@@ -28072,7 +29406,7 @@ class GoldWriter(BaseDeltaWriter):
         else:
             business_keys = business_key
 
-        new_data = self._to_arrow_table(records)
+        new_data = self._to_arrow_table(records, column_order=column_order)
         valid_to_col = scd_config.get("valid_to_col", "valid_to")
         current_flag_col = scd_config.get("current_flag_col", "is_current")
         merge_condition = " AND ".join(
@@ -28960,54 +30294,6 @@ class MetadataWriter:
         """
         pass
 
-
-class NoOpMetadataWriter:
-    """No-op implementation of MetadataWriterPort.
-
-    Used when save_metadata is disabled or for testing.
-    """
-
-    async def write_bronze_metadata(
-        self,
-        base_path: str | Path,
-        metadata: BronzeMetadata,
-        *,
-        provider: str | None = None,
-        entity: str | None = None,
-    ) -> str:
-        """No-op Bronze metadata write."""
-        return ""
-
-    async def write_silver_metadata(
-        self,
-        base_path: str | Path,
-        metadata: SilverMetadata,
-        *,
-        table_name: str | None = None,
-        flat_structure: bool = False,
-        provider: str | None = None,
-        entity: str | None = None,
-    ) -> str:
-        """No-op Silver metadata write."""
-        return ""
-
-    async def write_gold_metadata(
-        self,
-        base_path: str | Path,
-        metadata: GoldMetadata,
-        *,
-        table_name: str | None = None,
-        flat_structure: bool = False,
-        provider: str | None = None,
-        entity: str | None = None,
-    ) -> str:
-        """No-op Gold metadata write."""
-        return ""
-
-    async def aclose(self) -> None:
-        """No-op close."""
-        pass
-
 ================================================================================
 File: retention_manager.py
 Path: storage\retention_manager.py
@@ -29413,6 +30699,7 @@ class SilverWriter(BaseDeltaWriter):
         records: list[dict[str, Any]],
         schema: pa.Schema,
         primary_keys: list[str],
+        column_order: list[str] | None = None,
     ) -> pa.Table:
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
@@ -29443,9 +30730,14 @@ class SilverWriter(BaseDeltaWriter):
         ]
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
 
-        # Enforce canonical column order (ADR-014, RULES.md §2.4)
-        ordered_columns = canonical_column_order(list(arrow_data.column_names))
-        arrow_data = arrow_data.select(ordered_columns)
+        if column_order:
+            ordered_columns = [c for c in column_order if c in arrow_data.column_names]
+            remaining = [c for c in arrow_data.column_names if c not in ordered_columns]
+            arrow_data = arrow_data.select(ordered_columns + remaining)
+        else:
+            # Enforce canonical column order (ADR-014, RULES.md §2.4)
+            ordered_columns = canonical_column_order(list(arrow_data.column_names))
+            arrow_data = arrow_data.select(ordered_columns)
 
         # Sort rows by primary keys for deterministic writes
         if primary_keys:
@@ -29611,7 +30903,13 @@ class SilverWriter(BaseDeltaWriter):
         Raises:
             SchemaViolationError: If Pandera validation fails.
         """
-        result = self._silver_validator.validate(records)
+        # Filter out internal domain entity fields (_state) before validation
+        # _state is a domain entity processing state, not a Silver layer field
+        cleaned_records = [
+            {k: v for k, v in record.items() if k != "_state"} for record in records
+        ]
+
+        result = self._silver_validator.validate(cleaned_records)
         if not result.valid:
             self.logger.error(
                 "Silver Pandera validation failed",
@@ -29749,6 +31047,7 @@ class SilverWriter(BaseDeltaWriter):
         mode: str = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> SilverWriteResult | None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
@@ -29764,6 +31063,7 @@ class SilverWriter(BaseDeltaWriter):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            column_order: Optional explicit column order to apply.
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
@@ -29806,7 +31106,12 @@ class SilverWriter(BaseDeltaWriter):
             await self._check_schema_drift(table_name, records, on_schema_mismatch)
 
             table_path = self._resolve_table_path(table_name)
-            arrow_data = self._prepare_arrow_data(records, schema, primary_keys)
+            arrow_data = self._prepare_arrow_data(
+                records,
+                schema,
+                primary_keys,
+                column_order=column_order,
+            )
 
             try:
                 await self._dispatch_write(
@@ -30222,6 +31527,7 @@ class SilverWriter(BaseDeltaWriter):
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -30234,6 +31540,9 @@ class SilverWriter(BaseDeltaWriter):
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -30251,9 +31560,11 @@ class SilverWriter(BaseDeltaWriter):
         arrow_table = coerce_null_types_for_delta(arrow_table)
         schema = arrow_table.schema
 
-        # Enforce canonical column order (ADR-014, RULES.md §2.4)
-        ordered_columns = canonical_column_order(list(arrow_table.column_names))
-        arrow_table = arrow_table.select(ordered_columns)
+        # Apply canonical column order unless caller already ordered columns
+        # (e.g. ColumnOrderer in composite pipelines applies semantic ordering)
+        if not preserve_column_order:
+            ordered_columns = canonical_column_order(list(arrow_table.column_names))
+            arrow_table = arrow_table.select(ordered_columns)
 
         # Sort by primary keys if provided for deterministic writes
         if primary_keys:
@@ -30522,11 +31833,16 @@ class MemoryMonitor:
         return self._get_stats_estimate()
 
     def _get_stats_resource(self) -> MemoryStats:
-        """Get memory stats using resource module (Unix only)."""
+        """Get memory stats using resource module (Unix only).
+
+        Note:
+            This method is only called on Unix platforms (guarded by
+            sys.platform check in _get_stats_fallback).
+        """
         import resource
 
         # Get process memory usage (Unix-only attributes)
-        rusage = resource.getrusage(resource.RUSAGE_SELF)  # type: ignore[attr-defined]
+        rusage = resource.getrusage(resource.RUSAGE_SELF)
         process_mb = rusage.ru_maxrss / 1024  # Convert KB to MB on Linux
 
         # Try to read system memory from /proc/meminfo

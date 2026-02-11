@@ -305,3 +305,71 @@ class CrossRefExtractor:
             if reactome_refs
             else None
         )
+
+    @classmethod
+    def extract_go_by_aspect(cls, xrefs: Any, aspect: str) -> str | None:
+        """Extract GO terms filtered by aspect.
+
+        Args:
+            xrefs: List of cross-reference objects.
+            aspect: GO aspect to filter by (F, P, or C).
+
+        Returns:
+            JSON array of GO terms with matching aspect, or None.
+        """
+        if aspect not in cls.GO_ASPECTS:
+            return None
+
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        go_terms: list[dict[str, Any]] = []
+        for xref in xrefs:
+            if not isinstance(xref, dict):
+                continue
+            if xref.get("database") != "GO":
+                continue
+
+            go_id = xref.get("id")
+            if not go_id:
+                continue
+
+            props = cls._parse_properties(xref.get("properties", []))
+            parsed_aspect, term = cls._parse_go_term_value(props.get("GoTerm", ""))
+
+            if parsed_aspect != aspect:
+                continue
+
+            go_terms.append(
+                {
+                    "id": go_id,
+                    "term": term,
+                    "evidence": props.get("GoEvidenceType"),
+                }
+            )
+
+        return serialize_to_json(go_terms, ensure_ascii=False) if go_terms else None
+
+    @classmethod
+    def extract_molecular_function(cls, xrefs: Any) -> str | None:
+        """Extract GO terms for molecular function (F aspect).
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of molecular function GO terms, or None.
+        """
+        return cls.extract_go_by_aspect(xrefs, "F")
+
+    @classmethod
+    def extract_cellular_component(cls, xrefs: Any) -> str | None:
+        """Extract GO terms for cellular component (C aspect).
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of cellular component GO terms, or None.
+        """
+        return cls.extract_go_by_aspect(xrefs, "C")

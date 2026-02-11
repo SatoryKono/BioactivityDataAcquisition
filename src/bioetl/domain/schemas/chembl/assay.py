@@ -9,6 +9,14 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    ASSAY_CATEGORIES,
+    ASSAY_TEST_TYPES,
+    ASSAY_TYPES,
+    BAO_ID_PATTERN,
+    CHEMBL_ID_PATTERN,
+    RELATIONSHIP_TYPES,
+)
 
 
 class AssaySchema(ETLRecordSchema):
@@ -23,7 +31,7 @@ class AssaySchema(ETLRecordSchema):
     # === Identifiers ===
     assay_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
 
@@ -33,17 +41,20 @@ class AssaySchema(ETLRecordSchema):
     )
     assay_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["B", "F", "A", "T", "P", "U"],
+        isin=list(ASSAY_TYPES),
         description="Assay type.",
+    )
+    assay_type_description: Series[str] | None = pa.Field(
+        nullable=True, description="Assay type description."
     )
     assay_test_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["In vivo", "In vitro", "Ex vivo"],
+        isin=list(ASSAY_TEST_TYPES),
         description="Assay test type.",
     )
     assay_category: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["screening", "confirmatory", "panel", "summary", "other"],
+        isin=list(ASSAY_CATEGORIES),
         description="Assay category.",
     )
     assay_group: Series[str] | None = pa.Field(
@@ -54,9 +65,9 @@ class AssaySchema(ETLRecordSchema):
     assay_organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    assay_taxonomy_id: Series[int] | None = pa.Field(
+    assay_taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
-        description="NCBI Taxonomy ID. Standardized name (was assay_tax_id).",
+        description="NCBI Taxonomy ID (float for nullable int).",
     )
     assay_strain: Series[str] | None = pa.Field(nullable=True, description="Strain.")
     assay_tissue: Series[str] | None = pa.Field(nullable=True, description="Tissue.")
@@ -70,12 +81,12 @@ class AssaySchema(ETLRecordSchema):
     # === Target & Relationship ===
     target_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Target ChEMBL ID.",
     )
     relationship_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["D", "H", "M", "N", "S", "U"],
+        isin=list(RELATIONSHIP_TYPES),
         description="Relationship type.",
     )
     relationship_description: Series[str] | None = pa.Field(
@@ -106,7 +117,7 @@ class AssaySchema(ETLRecordSchema):
     )
     document_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Document ChEMBL ID.",
     )
     assay_pref_name: Series[str] | None = pa.Field(
@@ -128,7 +139,7 @@ class AssaySchema(ETLRecordSchema):
     # === Other Fields ===
     bao_format: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^BAO:\d+$",
+        str_matches=BAO_ID_PATTERN,
         description="BAO format.",
     )
     bao_label: Series[str] | None = pa.Field(nullable=True, description="BAO label.")
@@ -168,16 +179,28 @@ class AssaySchema(ETLRecordSchema):
     # )
 
     # === Variant Information (Flattened) ===
-    variant_accession: Series[str] | None = pa.Field(nullable=True)
-    variant_isoform: Series[str] | None = pa.Field(nullable=True)
-    variant_mutation: Series[str] | None = pa.Field(nullable=True)
-    variant_organism: Series[str] | None = pa.Field(nullable=True)
-    variant_sequence: Series[str] | None = pa.Field(nullable=True)
-    variant_taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True,
-        description="Variant taxonomy ID. Standardized name (was variant_tax_id).",
+    variant_accession: Series[str] | None = pa.Field(
+        nullable=True, description="Variant protein accession number."
     )
-    variant_sequence_json: Series[str] | None = pa.Field(nullable=True)
+    variant_isoform: Series[str] | None = pa.Field(
+        nullable=True, description="Variant isoform identifier."
+    )
+    variant_mutation: Series[str] | None = pa.Field(
+        nullable=True, description="Variant mutation description."
+    )
+    variant_organism: Series[str] | None = pa.Field(
+        nullable=True, description="Variant organism name."
+    )
+    variant_sequence: Series[str] | None = pa.Field(
+        nullable=True, description="Variant amino acid sequence."
+    )
+    variant_taxonomy_id: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Variant taxonomy ID (float for nullable int).",
+    )
+    variant_sequence_json: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of variant sequence details."
+    )
 
     # === Complex Fields (JSON) ===
     assay_classifications: Series[str] | None = pa.Field(

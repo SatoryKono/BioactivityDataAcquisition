@@ -8,7 +8,9 @@ DTO support via fetch_as_models() returning typed Pydantic models.
 from __future__ import annotations
 
 import contextlib
+import itertools
 import time
+import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
@@ -29,6 +31,7 @@ from bioetl.domain.exceptions import (
     ExternalServiceError,
     RetryExhaustedError,
 )
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import HealthStatus
@@ -95,6 +98,7 @@ class ChemblAdapter(BaseHttpAdapter):
     adapter_config: AdapterConfig | None = None
     thread_pool: ThreadPoolExecutor | None = None
     metrics: MetricsPort | None = None
+    extraction_params: ExtractionParams | None = None
 
     provider_name: str = field(init=False, default="chembl")
     """Provider identifier (required by DataSourcePort)."""
@@ -111,6 +115,11 @@ class ChemblAdapter(BaseHttpAdapter):
         init=False, default_factory=APIRequestCollector
     )
 
+    # Resolved extraction params (computed in __post_init__)
+    _extraction_params: ExtractionParams = field(
+        init=False, default_factory=ExtractionParams.empty
+    )
+
     def __post_init__(self) -> None:
         """Initialize adapter with config values and metrics."""
         # Initialize error handler from base class
@@ -124,6 +133,17 @@ class ChemblAdapter(BaseHttpAdapter):
 
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+
+        # Resolve extraction params
+        self._extraction_params = self.extraction_params or ExtractionParams.empty()
+
+        if not self._extraction_params.is_empty:
+            self.logger.info(
+                "chembl_extraction_params_configured",
+                provider="chembl",
+                param_count=len(self._extraction_params.params),
+                query_string=self._extraction_params.to_query_string(),
+            )
 
     @property
     def effective_batch_size(self) -> int:
@@ -176,6 +196,10 @@ class ChemblAdapter(BaseHttpAdapter):
             params["limit"] = self._get_effective_batch_size()
             params["offset"] = offset
 
+        # Extraction-level filtering (ADR-028 §3)
+        if not self._extraction_params.is_empty:
+            params.update(self._extraction_params.to_query_dict())
+
         return params
 
     def _process_response(
@@ -201,6 +225,12 @@ class ChemblAdapter(BaseHttpAdapter):
             for filter_field, ids in filters.items()
             if ids
         }
+
+    def _get_projected_url_length(self, url: str, params: dict[str, Any]) -> int:
+        """Estimate the length of the final URL with parameters."""
+        # URL-encode parameters to get accurate length (including escaping)
+        query_str = urllib.parse.urlencode(params, doseq=True)
+        return len(url) + 1 + len(query_str)
 
     def _compute_composite_key(
         self,
@@ -433,6 +463,9 @@ class ChemblAdapter(BaseHttpAdapter):
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:
+                # Catch all: API errors (network, timeout, 500s, malformed response),
+                # JSON decode errors, or validation failures. Log partial success and
+                # gracefully terminate pagination to avoid data loss.
                 self.logger.warning(
                     "chembl_pagination_interrupted",
                     entity_type=entity_type,
@@ -864,6 +897,7 @@ class ChemblAdapter(BaseHttpAdapter):
         ?molecule_chembl_id__in=CHEMBL25,CHEMBL26&document_chembl_id__in=CHEMBL1123
 
         ChEMBL API returns records matching ALL filter conditions (AND logic).
+        Supports automatic batching and URL length validation (1000 char limit).
 
         Args:
             entity_type: Type of entity to fetch
@@ -874,35 +908,69 @@ class ChemblAdapter(BaseHttpAdapter):
             Dictionary records matching ALL filter criteria
 
         """
-        filter_params = self._build_filter_in_params(filters)
-        if not filter_params:
+        if not filters:
             return
 
         url = self._mapper.get_resource_url(entity_type)
         pk_field = self._mapper.get_primary_key_field(entity_type)
-        offset = 0
+
+        # Determine optimal batch size based on 1000 character limit
+        # Start with configured batch size and halve proactively if URL is too long
+        batch_size = self._filter_batch_size
+        while batch_size > 1:
+            # Test with current batch size for all fields
+            test_filters = {k: v[:batch_size] for k, v in filters.items()}
+            test_params = self._build_params(0, entity_type)
+            test_params.update(self._build_filter_in_params(test_filters))
+
+            if self._get_projected_url_length(url, test_params) <= 1000:
+                break
+
+            batch_size //= 2
+            self.logger.info(
+                "reducing_multi_filter_batch_size",
+                entity_type=entity_type,
+                new_batch_size=batch_size,
+                reason="url_length_limit_exceeded",
+            )
+
+        # Prepare batches for each filter field
+        filter_keys = list(filters.keys())
+        filter_batches = [
+            list(self._batch_ids(filters[k], batch_size)) for k in filter_keys
+        ]
+
         total_fetched = 0
         seen_ids: set[str] = set()
 
-        while True:
-            params = self._build_params(offset, entity_type)
-            params.update(filter_params)
+        # Iterate over cartesian product of batches to cover all combinations
+        # ChEMBL API returns records matching ALL filters in the request (AND logic)
+        for batch_combination in itertools.product(*filter_batches):
+            current_filters = dict(zip(filter_keys, batch_combination, strict=True))
+            filter_params = self._build_filter_in_params(current_filters)
 
-            records, has_next = await self._fetch_page(url, params, entity_type)
-            if not records:
-                break
+            offset = 0
+            while True:
+                params = self._build_params(offset, entity_type)
+                params.update(filter_params)
 
-            for record in records:
-                if self._is_duplicate_record(record, pk_field, seen_ids, entity_type):
-                    continue
-                yield record
-                total_fetched += 1
-                if limit and total_fetched >= limit:
-                    return
+                records, has_next = await self._fetch_page(url, params, entity_type)
+                if not records:
+                    break
 
-            if not has_next:
-                break
-            offset += len(records)
+                for record in records:
+                    if self._is_duplicate_record(
+                        record, pk_field, seen_ids, entity_type
+                    ):
+                        continue
+                    yield record
+                    total_fetched += 1
+                    if limit and total_fetched >= limit:
+                        return
+
+                if not has_next:
+                    break
+                offset += len(records)
 
     async def fetch_filtered_with_fallback(
         self,
@@ -1082,8 +1150,12 @@ class ChemblAdapter(BaseHttpAdapter):
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
         """Get API request metadata and clear collector."""
+        extraction_qs = self._extraction_params.to_query_string() or None
         metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=CHEMBL_API_BASE, api_version=api_version
+            source_type="api",
+            url=CHEMBL_API_BASE,
+            api_version=api_version,
+            query_string=extraction_qs,
         )
         self._request_collector.clear()
         return metadata

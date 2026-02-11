@@ -28,68 +28,6 @@ from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
-# Document type mapping from CrossRef types to BioETL unified types.
-# See: https://api.crossref.org/types for complete list (30 types).
-#
-# Unified types (aligned with chembl/publication.py schema):
-# - PUBLICATION: Journal articles, conference papers, peer reviews
-# - BOOK: Books, monographs, book chapters, dissertations, reference entries
-# - PREPRINT: Pre-publication works (posted-content)
-# - DATASET: Research data and databases
-# - OTHER: Reports, standards, container types, supplementary materials, funding, unclassified
-#
-# Rationale:
-# - BOOK includes dissertations (thesis = monograph) and reference entries
-# - Reports/standards → OTHER (technical documents, not scholarly publications)
-# - "component" → OTHER (supplementary material, not standalone scholarly work)
-# - Container types → OTHER (metadata records, not scholarly content)
-CROSSREF_TYPE_MAP: dict[str, str] = {
-    # === Journal/Conference Articles → PUBLICATION ===
-    "journal-article": "PUBLICATION",
-    "proceedings-article": "PUBLICATION",
-    "peer-review": "PUBLICATION",  # Published peer review
-    # === Books & Book Parts → BOOK ===
-    "book": "BOOK",
-    "monograph": "BOOK",
-    "edited-book": "BOOK",
-    "reference-book": "BOOK",  # Dictionary, encyclopedia
-    "book-chapter": "BOOK",
-    "book-section": "BOOK",
-    "book-part": "BOOK",
-    "book-track": "BOOK",  # Audio book track
-    "dissertation": "BOOK",  # Thesis/monograph
-    "reference-entry": "BOOK",  # Dictionary/encyclopedia entry
-    # === Pre-publication → PREPRINT ===
-    "posted-content": "PREPRINT",
-    # === Research Data → DATASET ===
-    "dataset": "DATASET",
-    "database": "DATASET",
-    # === Reports & Standards → OTHER ===
-    "report": "OTHER",  # Technical report
-    "report-component": "OTHER",  # Part of a report
-    "standard": "OTHER",  # Technical standard
-    # === Supplementary Material → OTHER ===
-    "component": "OTHER",  # Figures, tables, supplementary files
-    # === Container/Series Types → OTHER ===
-    # (Metadata records for series, not individual works)
-    "journal": "OTHER",
-    "journal-volume": "OTHER",
-    "journal-issue": "OTHER",
-    "proceedings": "OTHER",
-    "proceedings-series": "OTHER",
-    "book-series": "OTHER",
-    "book-set": "OTHER",
-    "report-series": "OTHER",
-    # === Funding → OTHER ===
-    "grant": "OTHER",
-    # === Unclassified → OTHER ===
-    "other": "OTHER",  # Unclassified content
-}
-
-# Default type for unknown CrossRef types (conservative fallback)
-CROSSREF_TYPE_DEFAULT = "PUBLICATION"
-
-
 # === Pydantic DTO Model ===
 
 
@@ -258,8 +196,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     issn_electronic: str | None = None
 
     # Author ORCID identifiers (JSON array of ORCID IDs)
-    # Unified field name: author_orcid_list (was: author_orcids)
-    author_orcid_list: str | None = None
+    author_orcids: str | None = None
 
     # Full author details with ORCID, sequence, affiliations (JSON array)
     author_details: str | None = None
@@ -284,8 +221,6 @@ class CrossRefPublicationEntity(PublicationEntityBase):
 
 
 __all__ = [
-    "CROSSREF_TYPE_DEFAULT",
-    "CROSSREF_TYPE_MAP",
     "CrossRefPublicationEntity",
     "PublicationRecord",
 ]

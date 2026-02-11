@@ -2,6 +2,14 @@
 
 Handles parsing of author lists including individual and collective authors.
 Supports structured affiliation extraction with institutional identifiers.
+
+PII Safety (RULES.md §5.4):
+    Author names and email addresses extracted here are PII fields.
+    Salted SHA-256 hashing is applied at the transformer level
+    (PubMedPublicationTransformer) before any data reaches the Silver layer:
+    - Author names → hash_pii_list() → hashed before Silver storage
+    - Email addresses → PiiHasherPort.hash_value() → stored as email_hash
+    Raw PII values MUST NOT persist beyond the Bronze→Silver transformation.
 """
 
 from __future__ import annotations
@@ -11,7 +19,7 @@ from typing import TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 
 # Email pattern for detection and extraction
 EMAIL_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")

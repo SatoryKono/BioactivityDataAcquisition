@@ -71,7 +71,7 @@ This document defines deterministic cleanup rules and automation for removing ca
 ### 3.1. Bronze Layer
 | Parameter | Value |
 |-----------|-------|
-| Retention | 90 дней hot → Archive (S3 Lifecycle) |
+| Retention | 90 дней hot → Archive (local archive policy) |
 | Format | JSONL + zstd |
 | Path | `bronze/{format_version}/{provider}/{entity}/{date}/` |
 
@@ -92,7 +92,7 @@ This document defines deterministic cleanup rules and automation for removing ca
 ### 3.4. Quarantine (`common.quarantine`)
 | Parameter | Value |
 |-----------|-------|
-| Retention | 30 дней (S3 Lifecycle) |
+| Retention | 30 дней (local retention policy) |
 | Triage | Еженедельно |
 | Purge | `make quarantine-purge PIPELINE=...` |
 
@@ -250,7 +250,7 @@ Stale checkpoints **SHOULD** be cleaned after successful pipeline completion:
 ```python
 # After successful run
 async def cleanup_checkpoint(run_id: UUID) -> None:
-    checkpoint_path = f"s3://bioetl/checkpoints/{run_id}.json"
+    checkpoint_path = f"data/output/checkpoints/{run_id}.json"
     await s3.delete(checkpoint_path)
     logger.info("Checkpoint deleted", run_id=str(run_id))
 ```
@@ -282,5 +282,5 @@ Production cleanup **MUST** be done through CI/CD only. Manual cleanup **MUST NO
 |--------|-------------------|
 | VACUUM | No (automated) |
 | Quarantine purge | No (automated, >30 days) |
-| Bronze archive | No (S3 Lifecycle) |
+| Bronze archive | No (local retention policy) |
 | Manual delete | Yes (P0 incident only) |

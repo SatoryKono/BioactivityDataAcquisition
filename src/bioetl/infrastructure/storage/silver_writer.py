@@ -145,7 +145,7 @@ class SilverWriter(BaseDeltaWriter):
 
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            from bioetl.domain.ports import NoOpTracing
 
             tracing = NoOpTracing()
 
@@ -387,7 +387,13 @@ class SilverWriter(BaseDeltaWriter):
         Raises:
             SchemaViolationError: If Pandera validation fails.
         """
-        result = self._silver_validator.validate(records)
+        # Filter out internal domain entity fields (_state) before validation
+        # _state is a domain entity processing state, not a Silver layer field
+        cleaned_records = [
+            {k: v for k, v in record.items() if k != "_state"} for record in records
+        ]
+
+        result = self._silver_validator.validate(cleaned_records)
         if not result.valid:
             self.logger.error(
                 "Silver Pandera validation failed",
@@ -711,7 +717,6 @@ class SilverWriter(BaseDeltaWriter):
         if self._audit is None:
             return
 
-        from datetime import datetime
         from uuid import UUID
 
         from bioetl.domain.types import RunID
@@ -734,8 +739,6 @@ class SilverWriter(BaseDeltaWriter):
             return
 
         # Parse timestamp (ensure UTC-aware for consistency)
-        from datetime import UTC
-
         if isinstance(ingestion_ts_str, str):
             timestamp = datetime.fromisoformat(ingestion_ts_str)
         elif isinstance(ingestion_ts_str, datetime):

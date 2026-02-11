@@ -46,6 +46,10 @@ flowchart LR
         SRC1["ChEMBL"]
         SRC2["PubChem"]
         SRC3["UniProt"]
+        SRC4["PubMed"]
+        SRC5["CrossRef"]
+        SRC6["OpenAlex"]
+        SRC7["Semantic Scholar"]
     end
 
     subgraph Bronze["Bronze Layer"]
@@ -59,7 +63,7 @@ flowchart LR
         direction TB
         S1["Delta Lake"]
         S2["Merge/Upsert"]
-        S3["Permanent"]
+        LocalFS["Permanent"]
     end
 
     subgraph Gold["Gold Layer"]
@@ -201,6 +205,10 @@ flowchart LR
         ChEMBL[(ChEMBL)]
         PubChem[(PubChem)]
         UniProt[(UniProt)]
+        PubMed[(PubMed)]
+        CrossRef[(CrossRef)]
+        OpenAlex[(OpenAlex)]
+        S2[(Semantic Scholar)]
     end
 
     subgraph Bronze["Bronze Layer"]

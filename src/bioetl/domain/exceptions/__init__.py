@@ -27,7 +27,7 @@ External Service Exceptions (RULES.md §7.2):
     - DataValidationError: Invalid data from external source
 
 Provider-Specific Exceptions:
-    Provider-specific API errors (ChemblApiError, CrossRefApiError, etc.) are
+    Provider-specific API errors (CrossRefApiError, etc.) are
     defined in infrastructure.adapters.{provider}.exceptions. Application layer
     should catch ExternalServiceError instead.
 """
@@ -55,12 +55,11 @@ from bioetl.domain.exceptions.data_quality import (
 from bioetl.domain.exceptions.infrastructure import (
     BronzeValidationError,
     BucketNotFoundError,
-    ConfigurationError,
+    CachedBronzeEmptyError,
     DeltaOptimizeError,
     DeltaSchemaValidationError,
     DeltaTransactionError,
     DeltaWriteConflictError,
-    FileSystemError,
     InfrastructureError,
     SchemaEvolutionError,
     StorageError,
@@ -75,7 +74,6 @@ from bioetl.domain.exceptions.infrastructure import (
 from bioetl.domain.exceptions.internal import (
     AuthFailureError,
     CheckpointConflictError,
-    InternalError,
     InvalidStateError,
     LockAcquisitionError,
     LockLostError,
@@ -119,9 +117,9 @@ __all__ = [
     "BioETLError",
     "BronzeValidationError",
     "BucketNotFoundError",
+    "CachedBronzeEmptyError",
     "CheckpointConflictError",
     "CircuitBreakerOpenError",
-    "ConfigurationError",
     "CriticalError",
     "DataQualityError",
     # DataQualityErrors
@@ -133,11 +131,8 @@ __all__ = [
     "DeltaWriteConflictError",
     # External service errors (NetworkErrors subcategory)
     "ExternalServiceError",
-    "FileSystemError",
     # InfrastructureErrors
     "InfrastructureError",
-    # InternalErrors
-    "InternalError",
     "InvalidDataFormatError",
     "InvalidStateError",
     "LockAcquisitionError",

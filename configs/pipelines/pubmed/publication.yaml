@@ -51,12 +51,17 @@ sink:
     flat_structure: true  # Path already includes provider/entity
   silver:
     path: "data/output/silver/pubmed/publication"
+    primary_key: ["pmid"]
+    sort_by:
+      columns: ["pmid"]
     partition_by: ["pub_year"]
     csv_export:
       path: "data/output/silver/pubmed/publication"
     flat_structure: true
   gold:
     path: "data/output/gold/pubmed/publication"
+    sort_by:
+      columns: ["pmid"]
     csv_export:
       path: "data/output/gold/pubmed/publication"
     flat_structure: true

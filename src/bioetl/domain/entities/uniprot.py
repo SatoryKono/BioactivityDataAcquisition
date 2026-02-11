@@ -205,6 +205,40 @@ class UniprotTarget(BaseEntity):
     active_sites: str | None = None  # ft_act_site features
     keywords: str | None = None
 
+    # Taxonomy components (parsed from lineage)
+    superkingdom: str | None = None
+    phylum: str | None = None
+    genus: str | None = None
+
+    # GO components (filtered by aspect)
+    molecular_function: str | None = None  # JSON array, aspect F
+    cellular_component: str | None = None  # JSON array, aspect C
+
+    # Structural features
+    topology: str | None = None  # JSON array
+    transmembrane: str | None = None  # JSON array
+    intramembrane: str | None = None  # JSON array
+    signal_peptide: str | None = None  # JSON array
+    propeptide: str | None = None  # JSON array
+
+    # PTM features
+    glycosylation: str | None = None  # JSON array
+    lipidation: str | None = None  # JSON array
+    disulfide_bond: str | None = None  # JSON array
+    modified_residue: str | None = None  # JSON array
+    phosphorylation: str | None = None  # JSON array
+    acetylation: str | None = None  # JSON array
+    ubiquitination: str | None = None  # JSON array
+
+    # Isoform details (parsed from ALTERNATIVE PRODUCTS)
+    isoform_names: str | None = None  # JSON array
+    isoform_ids: str | None = None  # JSON array
+    isoform_synonyms: str | None = None  # JSON array
+
+    # Reaction data (parsed from CATALYTIC ACTIVITY)
+    reactions: str | None = None  # JSON array
+    reaction_ec_numbers: str | None = None  # JSON array
+
     # Counts
     cross_reference_count: int | None = None
     feature_count: int | None = None

@@ -1182,91 +1182,93 @@ class TestMapStatusToExitCode:
 
     def test_success_status(self):
         """Test SUCCESS status maps to OK."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.SUCCESS, None)
+        result = _map_status_to_exit_code(PipelineRunResult.SUCCESS, None)
 
         assert result == ExitCode.OK
 
     def test_dry_run_status(self):
         """Test DRY_RUN status maps to OK."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.DRY_RUN, None)
+        result = _map_status_to_exit_code(PipelineRunResult.DRY_RUN, None)
 
         assert result == ExitCode.OK
 
     def test_shutdown_status(self):
         """Test SHUTDOWN status maps to SIGINT."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.SHUTDOWN, None)
+        result = _map_status_to_exit_code(PipelineRunResult.SHUTDOWN, None)
 
         assert result == ExitCode.SIGINT
 
     def test_failed_with_value_error(self):
         """Test FAILED with ValueError maps to CONFIG_ERROR."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.FAILED, "ValueError")
+        result = _map_status_to_exit_code(PipelineRunResult.FAILED, "ValueError")
 
         assert result == ExitCode.CONFIG_ERROR
 
     def test_failed_with_data_quality_error(self):
         """Test FAILED with DataQualityError maps to DATA_QUALITY_ERROR."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.FAILED, "DataQualityError")
+        result = _map_status_to_exit_code(PipelineRunResult.FAILED, "DataQualityError")
 
         assert result == ExitCode.DATA_QUALITY_ERROR
 
     def test_failed_with_lock_error(self):
         """Test FAILED with LockAcquisitionError maps to LOCK_ERROR."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.FAILED, "LockAcquisitionError")
+        result = _map_status_to_exit_code(
+            PipelineRunResult.FAILED, "LockAcquisitionError"
+        )
 
         assert result == ExitCode.LOCK_ERROR
 
     def test_failed_with_network_error(self):
         """Test FAILED with NetworkError maps to NETWORK_ERROR."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.FAILED, "NetworkError")
+        result = _map_status_to_exit_code(PipelineRunResult.FAILED, "NetworkError")
 
         assert result == ExitCode.NETWORK_ERROR
 
     def test_failed_with_unknown_error(self):
         """Test FAILED with unknown error type maps to PIPELINE_ERROR."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.FAILED, "SomeUnknownError")
+        result = _map_status_to_exit_code(PipelineRunResult.FAILED, "SomeUnknownError")
 
         assert result == ExitCode.PIPELINE_ERROR
 
     def test_failed_without_error_type(self):
         """Test FAILED without error type maps to PIPELINE_ERROR."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
         from bioetl.interfaces.cli.commands.run import _map_status_to_exit_code
         from bioetl.interfaces.cli.exit_codes import ExitCode
 
-        result = _map_status_to_exit_code(RunStatus.FAILED, None)
+        result = _map_status_to_exit_code(PipelineRunResult.FAILED, None)
 
         assert result == ExitCode.PIPELINE_ERROR
 

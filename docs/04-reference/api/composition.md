@@ -12,7 +12,7 @@ flowchart TB
 
         subgraph Factories["Factories"]
             PF[GenericPipelineFactory]
-            SF[ServicesFactory]
+            SF[BaseServicesFactory / ServicesBuilder]
             DF[DataSourceFactory]
             StF[StorageFactory]
         end
@@ -46,7 +46,7 @@ Entry point for pipeline creation:
 Component factories for DI:
 
 - `GenericPipelineFactory` - Pipeline instance creation
-- `ServicesFactory` - Service bundle creation
+- `BaseServicesFactory / ServicesBuilder` - Service bundle creation
 - `DataSourceFactory` - Data source adapter creation
 - `StorageFactory` - Storage writer creation
 
@@ -98,10 +98,13 @@ Pipelines are registered via decorator:
 ```python
 from bioetl.composition.registry import register
 
-@register("chembl_activity")
+registry.register_factory("chembl_activity", factory_fn)
+
+
 def chembl_activity_factory(ctx: PipelineRunContext) -> PipelineRunner:
     """Factory function for ChEMBL activity pipeline."""
     ...
+
 
 # Later: retrieve and create
 factory = registry.get("chembl_activity")
@@ -117,7 +120,7 @@ from bioetl.composition.bootstrap import bootstrap_pipeline
 # Factories
 from bioetl.composition.factories import (
     GenericPipelineFactory,
-    ServicesFactory,
+    BaseServicesFactory / ServicesBuilder,
     DataSourceFactory,
     StorageFactory,
 )

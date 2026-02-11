@@ -89,6 +89,19 @@ composite:
     # UniProt ID Mapping: maps ChEMBL target IDs to UniProt accessions
     # This MUST run before uniprot_protein to provide uniprot_accession keys.
     # OPTIONAL: Many non-protein targets lack UniProt mappings.
+    #
+    # ID source: target_chembl_id values extracted from seed DataFrame
+    #   (NOT from data/input/target.csv — CSV is fallback for standalone mode only).
+    #   Flow: seed DataFrame → dependencies_runner_factory extracts join_keys
+    #         → filter_ids → IDMappingDataSource.seed_ids → UniProt API.
+    #
+    # API parameters (from configs/pipelines/uniprot/idmapping.yaml):
+    #   from_db: ChEMBL          — source database for UniProt ID Mapping API
+    #   to_db: UniProtKB         — target database
+    #   base_url: https://rest.uniprot.org
+    #   batch_size: 500 IDs/job  — MAX_IDS_PER_BATCH in idmapping_client.py
+    #   polling_interval: 3s     — job status polling period
+    #   max_poll_attempts: 100   — ~5 min max wait per batch
     - pipeline: uniprot_idmapping
       join_keys:
         - target_chembl_id  # Direct join key from seed
@@ -134,6 +147,11 @@ composite:
     # preserve_all_sources: false
     # Multiple sources with field overlap. Seed values take priority.
     preserve_all_sources: false
+
+    # Output paths for merged data
+    output:
+      silver: data/output/silver/composite/target
+      gold: data/output/gold/composite/target
 
     # Field-level priority for overlapping fields
     # seed_priority applies globally; these are explicit overrides per field.
@@ -332,9 +350,9 @@ composite:
       - uniprot.protein.organism_scientific  # Use ChEMBL organism
       - uniprot.protein.organism_common     # Use ChEMBL organism
 
-    output:
-      silver: data/output/silver/composite/target
-      gold: data/output/gold/composite/target
+    # Note: output paths auto-computed per ADR-029 convention-based resolution
+    # silver: data/output/silver/composite/target (auto)
+    # gold: data/output/gold/composite/target (auto)
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration

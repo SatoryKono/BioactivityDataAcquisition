@@ -46,14 +46,14 @@ class TestCliRunDryRun:
         Dry-run only affects rebuild/backfill cleanup preview.
         For incremental, the pipeline executes normally.
         """
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SUCCESS,
+                PipelineRunResult.SUCCESS,
                 None,
                 None,
                 "test-run-id",

@@ -9,7 +9,7 @@ PubMedPublicationSchema replaces ArticleSchema for consistency with other provid
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import datetime
 from typing import cast
 
 import pandas as pd
@@ -20,10 +20,9 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
-    MAX_PUBLICATION_YEAR,
-    MIN_PUBLICATION_YEAR,
 )
 
 # Re-export for backwards compatibility
@@ -58,25 +57,16 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     # === Primary Key (str for cross-provider consistency) ===
     pmid: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^\d+$",
+        str_matches=r"^[1-9]\d*$",
         description="PubMed ID (PK, numeric string)",
     )
-
-    @pa.check("pmid", name="pmid_positive")
-    def _check_pmid(cls, series: Series[str]) -> Series[bool]:
-        """Validate PMID represents a positive integer."""
-        return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === External Identifiers (override doi for check method) ===
     doi: Series[str] = pa.Field(
         nullable=True,
+        str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier",
     )
-
-    @pa.check("doi", name="doi_format")
-    def _check_doi(cls, series: Series[str]) -> Series[bool]:
-        """Validate DOI format."""
-        return cast("Series[bool]", series.isna() | series.str.match(DOI_REGEX_PATTERN))
 
     @pa.check("pmc_id", name="pmc_id_format")
     def _check_pmc_id(cls, series: Series[str]) -> Series[bool]:
@@ -103,27 +93,13 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Article title (required)",
     )
 
-    @pa.check("title", name="title_not_empty")
-    def _check_title(cls, series: Series[str]) -> Series[bool]:
-        """Validate title is not empty."""
-        return cast("Series[bool]", series.str.len() >= 1)
+    # title_not_empty: inherited from PublicationBaseSchema
 
     abstract_structured: Series[bool] = pa.Field(
         nullable=True, description="Whether abstract has NLM sections"
     )
     # Note: vernacular_title excluded from transformer output per design
-    language: Series[str] = pa.Field(
-        nullable=True,
-        description="MARC language code (e.g., 'eng')",
-    )
-
-    @pa.check("language", name="language_length")
-    def _check_language(cls, series: Series[str]) -> Series[bool]:
-        """Validate language code length."""
-        return cast(
-            "Series[bool]",
-            series.isna() | ((series.str.len() >= 2) & (series.str.len() <= 3)),
-        )
+    # language: inherited from PublicationBaseSchema (MARC codes fit str_length 2..3)
 
     # === Journal Information (PubMed-specific) ===
     journal: Series[str] = pa.Field(
@@ -137,15 +113,9 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
     issn: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="ISSN (print or electronic)",
     )
-
-    @pa.check("issn", name="issn_format")
-    def _check_issn(cls, series: Series[str]) -> Series[bool]:
-        """Validate ISSN format."""
-        return cast(
-            "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{3}[\dX]$")
-        )
 
     journal_issn_type: Series[str] = pa.Field(nullable=True, description="ISSN type")
 
@@ -167,26 +137,21 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         nullable=True, description="Page numbers (unified field name)"
     )
 
-    @pa.check("publication_year", name="year_range")
-    def _check_year(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
-        """Validate publication year range."""
-        return cast(
-            "Series[bool]",
-            series.isna()
-            | ((series >= MIN_PUBLICATION_YEAR) & (series <= MAX_PUBLICATION_YEAR)),
-        )
-
-    pub_month: Series[int] = pa.Field(nullable=True, description="Publication month")
+    pub_month: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Publication month"
+    )
 
     @pa.check("pub_month", name="pub_month_range")
-    def _check_pub_month(cls, series: Series[int]) -> Series[bool]:
+    def _check_pub_month(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication month range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 12)))
 
-    pub_day: Series[int] = pa.Field(nullable=True, description="Publication day")
+    pub_day: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Publication day"
+    )
 
     @pa.check("pub_day", name="pub_day_range")
-    def _check_pub_day(cls, series: Series[int]) -> Series[bool]:
+    def _check_pub_day(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication day range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 31)))
 
@@ -204,10 +169,10 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Dates ===
-    date_completed: Series[date] = pa.Field(
+    date_completed: Series[datetime] = pa.Field(
         nullable=True, description="MEDLINE processing completion date"
     )
-    date_revised: Series[date] = pa.Field(
+    date_revised: Series[datetime] = pa.Field(
         nullable=True, description="Record revision date"
     )
 
@@ -226,44 +191,48 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Counts (denormalized for query efficiency) ===
-    author_count: Series[int] = pa.Field(nullable=True, description="Number of authors")
+    author_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of authors"
+    )
 
     @pa.check("author_count", name="author_count_non_negative")
-    def _check_author_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_author_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate author count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    mesh_heading_count: Series[int] = pa.Field(
+    mesh_heading_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of MeSH headings"
     )
 
     @pa.check("mesh_heading_count", name="mesh_heading_count_non_negative")
-    def _check_mesh_heading_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_mesh_heading_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate MeSH heading count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    keyword_count: Series[int] = pa.Field(
+    keyword_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of keywords"
     )
 
     @pa.check("keyword_count", name="keyword_count_non_negative")
-    def _check_keyword_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_keyword_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate keyword count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    grant_count: Series[int] = pa.Field(nullable=True, description="Number of grants")
+    grant_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of grants"
+    )
 
     @pa.check("grant_count", name="grant_count_non_negative")
-    def _check_grant_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_grant_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate grant count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    chemical_count: Series[int] = pa.Field(
+    chemical_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of chemicals"
     )
 
     @pa.check("chemical_count", name="chemical_count_non_negative")
-    def _check_chemical_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_chemical_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate chemical count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
@@ -296,6 +265,13 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array, e.g., Journal Article, Review)",
+    )
+
+    # === System Fields ===
+    _source: Series[str] = pa.Field(
+        nullable=False,
+        eq="pubmed",
+        description="Data source identifier",
     )
 
     # Note: accepted_date, received_date, revised_date, epub_date excluded from

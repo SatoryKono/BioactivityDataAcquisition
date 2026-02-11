@@ -19,7 +19,7 @@ from __future__ import annotations
 import time
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.types import HealthStatus
 
@@ -30,26 +30,6 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
-
-
-# Default health check timeout per RULES.md §11.3
-DEFAULT_HEALTH_CHECK_TIMEOUT_SECONDS: float = 5.0
-
-
-@runtime_checkable
-class HealthCheckObservability(Protocol):
-    """Protocol for adapters using HealthCheckMixin.
-
-    Adapters must provide logger, metrics, and provider_name attributes.
-    """
-
-    logger: LoggerPort
-    metrics: MetricsPort
-    provider_name: str
-
-    def _get_health_endpoint(self) -> str:
-        """Return the health check endpoint path."""
-        ...
 
 
 @dataclass

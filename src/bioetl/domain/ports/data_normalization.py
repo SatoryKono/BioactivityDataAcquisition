@@ -8,8 +8,8 @@ Defines contracts for text and data normalization operations:
 - HTML tag stripping
 - Open Access status normalization
 
-This port is distinct from NormalizationServicePort which handles
-bioactivity value normalization (unit conversion, pChEMBL, etc.).
+This port handles text/data normalization, distinct from bioactivity
+value normalization (unit conversion, pChEMBL, etc.).
 
 All ports follow the Ports & Adapters pattern per RULES.md §1.1.
 """
@@ -48,7 +48,7 @@ class DataNormalizationPort(Protocol):
         ...
 
     def normalize_year(self, year: int | None) -> tuple[int | None, bool]:
-        """Validate publication year against range [1800, 2100].
+        """Validate publication year against range [1500, 2100].
 
         Returns (year, is_warning). Warning is True if year is outside valid range.
         """

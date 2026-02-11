@@ -1,4 +1,4 @@
-column_groups_file: ../../data_schema/chembl/assay.yaml
+data_schema_file: ../../data_schema/chembl/assay.yaml
 # configs/pipelines/chembl/assay.yaml
 # =============================================================================
 # ChEMBL Assay Pipeline Configuration
@@ -53,4 +53,10 @@ dq_rules:
 # Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
+    primary_key: ["assay_chembl_id"]
+    sort_by:
+      columns: ["assay_chembl_id"]
     partition_by: ["assay_type"]
+  gold:
+    sort_by:
+      columns: ["assay_chembl_id"]

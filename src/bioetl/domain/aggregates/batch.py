@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import InvalidStateError
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 
 
-class BatchStatus(str, Enum):
+class BatchStatus(StrEnum):
     """Status of a batch."""
 
     OPEN = "open"

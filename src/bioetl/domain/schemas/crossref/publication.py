@@ -13,13 +13,11 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
 __all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "PublicationEnrichedSchema"]
-
-# === Fixed Value Constants ===
-DOCUMENT_TYPES = ["PUBLICATION", "PREPRINT"]
 
 
 class PublicationEnrichedSchema(PublicationBaseSchema):
@@ -40,6 +38,27 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     - doc_type: CrossRef uses raw 'type' field instead (journal-article, etc.)
     """
 
+    # === Override inherited fields to allow missing (align with excluded fields) ===
+    # Note: Fields are already nullable in base schema, just re-declaring here for clarity
+    pmid: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^[1-9]\d*$",
+        description="PubMed ID (positive numeric string)",
+    )
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central ID",
+    )
+    abstract: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication abstract",
+    )
+    affiliation_list: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of unique affiliations (unified field name)",
+    )
+
     # === Primary Key (override doi to be non-nullable) ===
     doi: Series[str] = pa.Field(
         nullable=False,
@@ -49,7 +68,9 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
 
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
-        nullable=True, description="Primary ISSN (first from ISSN array)"
+        nullable=True,
+        str_matches=ISSN_PATTERN,
+        description="Primary ISSN (first from ISSN array)",
     )
     issn_list: Series[str] = pa.Field(
         nullable=True, description="JSON array of all ISSNs"
@@ -113,18 +134,17 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     # === ISSN by Type ===
     issn_print: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="Print ISSN (format: XXXX-XXXX)",
     )
     issn_electronic: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="Electronic ISSN (format: XXXX-XXXX)",
     )
 
-    # === Author ORCID Identifiers ===
-    author_orcid_list: Series[str] = pa.Field(
-        nullable=True,
-        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
-    )
+    # === Author ORCID Identifiers (inherited from base, kept for clarity) ===
+    # author_orcids: inherited from PublicationBaseSchema
 
     # === Full Author Details ===
     author_details: Series[str] = pa.Field(

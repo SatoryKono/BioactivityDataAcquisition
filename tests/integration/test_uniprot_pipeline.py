@@ -11,7 +11,7 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
+from bioetl.application.pipelines.uniprot import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig
 from bioetl.domain.context import PipelineContext
@@ -319,6 +319,196 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record is not None
         assert silver_record["gene_names"] == []
         assert "_run_id" in silver_record
+
+    async def test_transform_extracts_new_fields(
+        self,
+        uniprot_config,
+        uniprot_runtime,
+        mock_uniprot_services,
+    ):
+        """Test extraction of taxonomy, GO, PTM, isoform, and reaction fields."""
+        run_id = uuid4()
+        pipeline = UniProtProteinPipeline(
+            config=uniprot_config,
+            runtime=uniprot_runtime,
+            services=mock_uniprot_services,
+            run_id=run_id,
+            transformer=UniProtProteinTransformer(provider="uniprot"),
+        )
+
+        context = PipelineContext(
+            run_id=uuid4(),
+            run_type=RunType.INCREMENTAL,
+            logger=mock_uniprot_services.logger,
+        )
+
+        # Full record with all new field types
+        bronze_record = {
+            "primaryAccession": "P00533",
+            "uniProtkbId": "EGFR_HUMAN",
+            "proteinDescription": {
+                "recommendedName": {
+                    "fullName": {"value": "Epidermal growth factor receptor"}
+                }
+            },
+            "organism": {
+                "taxonId": 9606,
+                "scientificName": "Homo sapiens",
+                "lineage": [
+                    "Eukaryota",
+                    "Metazoa",
+                    "Chordata",
+                    "Mammalia",
+                    "Primates",
+                    "Hominidae",
+                    "Homo",
+                ],
+            },
+            "sequence": {"length": 1210, "value": "MRPSGTAGAALLALLAALCPA..."},
+            "uniProtKBCrossReferences": [
+                {
+                    "database": "GO",
+                    "id": "GO:0005524",
+                    "properties": [
+                        {"key": "GoTerm", "value": "F:ATP binding"},
+                        {"key": "GoEvidenceType", "value": "IEA"},
+                    ],
+                },
+                {
+                    "database": "GO",
+                    "id": "GO:0005886",
+                    "properties": [
+                        {"key": "GoTerm", "value": "C:plasma membrane"},
+                        {"key": "GoEvidenceType", "value": "TAS"},
+                    ],
+                },
+            ],
+            "features": [
+                {
+                    "type": "Topological domain",
+                    "description": "Extracellular",
+                    "location": {"start": {"value": 25}, "end": {"value": 645}},
+                },
+                {
+                    "type": "Transmembrane",
+                    "description": "Helical",
+                    "location": {"start": {"value": 646}, "end": {"value": 668}},
+                },
+                {
+                    "type": "Signal peptide",
+                    "description": "Signal",
+                    "location": {"start": {"value": 1}, "end": {"value": 24}},
+                },
+                {
+                    "type": "Glycosylation",
+                    "description": "N-linked (GlcNAc...)",
+                    "location": {"start": {"value": 56}, "end": {"value": 56}},
+                },
+                {
+                    "type": "Disulfide bond",
+                    "description": "Disulfide",
+                    "location": {"start": {"value": 271}, "end": {"value": 283}},
+                },
+                {
+                    "type": "Modified residue",
+                    "description": "Phosphotyrosine",
+                    "featureId": "PTM-001",
+                    "location": {"start": {"value": 1068}, "end": {"value": 1068}},
+                },
+                {
+                    "type": "Modified residue",
+                    "description": "N-acetylalanine",
+                    "featureId": "PTM-002",
+                    "location": {"start": {"value": 1}, "end": {"value": 1}},
+                },
+            ],
+            "comments": [
+                {
+                    "commentType": "ALTERNATIVE PRODUCTS",
+                    "isoforms": [
+                        {
+                            "isoformIds": ["P00533-1", "P00533-2"],
+                            "name": {"value": "Isoform 1"},
+                            "synonyms": [{"value": "EGFRvIII"}],
+                        },
+                    ],
+                },
+                {
+                    "commentType": "CATALYTIC ACTIVITY",
+                    "reaction": {
+                        "name": "ATP + L-tyrosyl-[protein] = ADP + H(+) + O-phospho-L-tyrosyl-[protein]",
+                        "ecNumber": "2.7.10.1",
+                    },
+                },
+            ],
+        }
+
+        silver_record = await pipeline.transform_bronze_to_silver(
+            context, bronze_record
+        )
+
+        assert silver_record is not None
+
+        # Taxonomy components
+        assert "superkingdom" in silver_record
+        assert silver_record["superkingdom"] == "Eukaryota"
+        assert "phylum" in silver_record
+        assert silver_record["phylum"] == "Metazoa"
+        assert "genus" in silver_record
+        assert silver_record["genus"] == "Hominidae"
+
+        # GO components
+        assert "molecular_function" in silver_record
+        assert silver_record["molecular_function"] is not None
+        assert "ATP binding" in silver_record["molecular_function"]
+        assert "cellular_component" in silver_record
+        assert silver_record["cellular_component"] is not None
+        assert "plasma membrane" in silver_record["cellular_component"]
+
+        # Structural features
+        assert "topology" in silver_record
+        assert silver_record["topology"] is not None
+        assert "transmembrane" in silver_record
+        assert silver_record["transmembrane"] is not None
+        assert "intramembrane" in silver_record  # None expected
+        assert "signal_peptide" in silver_record
+        assert silver_record["signal_peptide"] is not None
+        assert "propeptide" in silver_record  # None expected
+
+        # PTM features
+        assert "glycosylation" in silver_record
+        assert silver_record["glycosylation"] is not None
+        assert "lipidation" in silver_record  # None expected
+        assert "disulfide_bond" in silver_record
+        assert silver_record["disulfide_bond"] is not None
+        assert "modified_residue" in silver_record
+        assert silver_record["modified_residue"] is not None
+        assert "phosphorylation" in silver_record
+        assert silver_record["phosphorylation"] is not None
+        assert "Phosphotyrosine" in silver_record["phosphorylation"]
+        assert "acetylation" in silver_record
+        assert silver_record["acetylation"] is not None
+        assert "acetylalanine" in silver_record["acetylation"]
+        assert "ubiquitination" in silver_record  # None expected
+
+        # Isoform details
+        assert "isoform_names" in silver_record
+        assert silver_record["isoform_names"] is not None
+        assert "Isoform 1" in silver_record["isoform_names"]
+        assert "isoform_ids" in silver_record
+        assert silver_record["isoform_ids"] is not None
+        assert "P00533-1" in silver_record["isoform_ids"]
+        assert "isoform_synonyms" in silver_record
+        assert silver_record["isoform_synonyms"] is not None
+        assert "EGFRvIII" in silver_record["isoform_synonyms"]
+
+        # Reaction data
+        assert "reactions" in silver_record
+        assert silver_record["reactions"] is not None
+        assert "ATP" in silver_record["reactions"]
+        assert "reaction_ec_numbers" in silver_record
+        assert silver_record["reaction_ec_numbers"] is not None
+        assert "2.7.10.1" in silver_record["reaction_ec_numbers"]
 
 
 @pytest.mark.integration

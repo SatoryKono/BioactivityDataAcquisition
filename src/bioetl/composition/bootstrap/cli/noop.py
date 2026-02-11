@@ -24,10 +24,8 @@ Note:
 
 from __future__ import annotations
 
-from bioetl.domain.ports import MetricsPort, TracingPort
+from bioetl.domain.ports import MetricsPort, NoOpMetrics, NoOpTracing, TracingPort
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
 __all__ = [
     "create_noop_logger",
