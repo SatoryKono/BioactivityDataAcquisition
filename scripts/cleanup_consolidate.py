@@ -21,11 +21,10 @@ import fnmatch
 import os
 import re
 import shutil
-import sys
 import tomllib
+from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Iterator, Sequence
 
 import typer
 import yaml
@@ -402,7 +401,7 @@ def main(
         "--apply",
         help="Применить удаление найденных .pyc/__pycache__/temp файлов.",
     ),
-    root: Path = typer.Option(
+    root: Path = typer.Option(  # noqa: B008
         PROJECT_ROOT,
         "--root",
         help="Корень репозитория для анализа.",

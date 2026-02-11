@@ -175,9 +175,7 @@ def _is_technical_or_generated(name: str) -> bool:
     """Check if directory is technical/generated."""
     if name in TECHNICAL_DIRS or name in GENERATED_DIRS:
         return True
-    if name.endswith(".egg-info"):
-        return True
-    return False
+    return name.endswith(".egg-info")
 
 
 def _check_root_directories(project_root: Path) -> Iterator[Violation]:
