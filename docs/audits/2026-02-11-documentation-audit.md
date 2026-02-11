@@ -180,3 +180,430 @@
 2. Исправить ссылки на код в §6.1 (META_FIELDS location, RetryConfig vs RetryPolicy).
 3. Добавить недостающие entity маппинги в App A.1.
 4. Рассмотреть автоматизацию синхронизации doc↔code через architecture tests.
+
+---
+
+## Промты для устранения несоответствий
+
+Каждый промт ниже — самодостаточная инструкция для AI-агента (py-doc-bot или ручного редактирования).
+Промты упорядочены по severity (HIGH → LOW → INFO). Каждый содержит:
+- **Что изменить** (файл, секция, строки)
+- **Текущий текст** (что есть сейчас)
+- **Целевой текст** (что должно быть)
+- **Обоснование** (ссылка на код)
+
+---
+
+### PROMPT-01: QuarantineStatus enum (HIGH, Audit #20)
+
+**Файл**: `docs/00-project/RULES.md`, строка ~240
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> Найди строку в секции §2.6 "Спецификация Unified Quarantine":
+>
+> ```
+> - `dq_status` (String): `NEW` | `IGNORED` | `REPROCESSED`.
+> ```
+>
+> Замени её на:
+>
+> ```
+> - `dq_status` (String): `NEW` | `UNDER_REVIEW` | `IGNORED` | `REPROCESSED` | `EXPIRED`.
+>   - `NEW`: Только что создана, ждёт разбора.
+>   - `UNDER_REVIEW`: Анализируется оператором.
+>   - `IGNORED`: Разобрана и признана неактуальной.
+>   - `REPROCESSED`: Успешно повторно обработана и перемещена в Silver.
+>   - `EXPIRED`: Запись превысила период хранения.
+> ```
+>
+> **Обоснование**: В коде `src/bioetl/domain/aggregates/quarantine_entry.py:31-47`
+> `QuarantineStatus` содержит 5 значений, а не 3:
+> `NEW`, `UNDER_REVIEW`, `IGNORED`, `REPROCESSED`, `EXPIRED`.
+> Переходы: `NEW → UNDER_REVIEW → (IGNORED | REPROCESSED)`, `* → EXPIRED` (по TTL).
+
+---
+
+### PROMPT-02: Pipeline config path and format in App D (HIGH, Audit #28, #73)
+
+**Файл**: `docs/00-project/RULES.md`, строки ~1354-1405
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> Найди секцию "Приложение D: Схема Конфигурации Пайплайна" (строка ~1354).
+>
+> Замени весь блок YAML-примера (строки ~1358-1405):
+>
+> ```yaml
+> # configs/pipelines/chembl_activity.yaml
+> pipeline:
+>   name: chembl_activity
+>   provider: chembl
+>   entity: activity
+> ...
+> rate_limit:
+>   requests_per_second: 5
+>   burst: 10
+> ```
+>
+> На актуальный формат (после ADR-025):
+>
+> ```yaml
+> # configs/pipelines/chembl/activity.yaml
+> # Minimal config using convention-based path resolution (ADR-029).
+> # Inherits from _base.yaml with paths/filters auto-computed from provider/entity.
+> #
+> # Auto-computed by convention:
+> #   - source_file: ../../sources/chembl.yaml
+> #   - dq_config_file: ../../dq/entities/chembl/activity.yaml
+> #   - filter_config_file: ../../filter/entities/chembl/activity.yaml
+> #   - sink paths: data/output/{layer}/chembl/activity
+> #   - sink.silver.primary_key: ["activity_id"]
+>
+> pipeline_name: chembl_activity
+> provider: chembl
+> entity_type: activity
+> version: "1.2.0"
+> description: "Extract biological activity records from ChEMBL API"
+>
+> primary_keys: ["activity_id"]
+> silver_table: "chembl_activity"
+> gold_table: "chembl_activity"
+>
+> sink:
+>   silver:
+>     primary_key: ["activity_id"]
+>     sort_by:
+>       columns: ["activity_id"]
+>   gold:
+>     sort_by:
+>       columns: ["activity_id"]
+>
+> # DQ Overrides (applied on top of entity DQ config)
+> dq_rules:
+>   field_validations:
+>     - field: "standard_value"
+>       type: "range"
+>       min: 0
+>       max: 1000000000
+>       nullable: true
+> ```
+>
+> **Обоснование**: Фактический файл `configs/pipelines/chembl/activity.yaml` (а не
+> `configs/pipelines/chembl_activity.yaml`) использует упрощённый формат после ADR-025.
+> Старый формат с секциями `source`, `transform.steps`, `circuit_breaker`, `rate_limit`
+> больше не используется — эти параметры вынесены в `configs/sources/chembl.yaml`
+> и convention-based resolution.
+
+---
+
+### PROMPT-03: META_FIELDS location in §6.1 (MEDIUM, Audit #23)
+
+**Файл**: `docs/00-project/RULES.md`, строка ~1024
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> Найди строку в секции §6.1 "MUST (Обязательно)", пункт 5:
+>
+> ```
+> Реализация: `domain/transformations.py:META_FIELDS`.
+> ```
+>
+> Замени на:
+>
+> ```
+> Реализация: `domain/constants.py:META_FIELDS` (re-exported через `domain/transformations.py`).
+> ```
+>
+> **Обоснование**: `META_FIELDS` определён в `src/bioetl/domain/constants.py:15`,
+> а `domain/transformations.py:21` лишь импортирует его (`from .constants import META_FIELDS`).
+> Первоисточник — `constants.py`.
+
+---
+
+### PROMPT-04: RetryPolicy → RetryConfig in §6.1 (MEDIUM, Audit #49)
+
+**Файл**: `docs/00-project/RULES.md`, строки ~1022, ~1045
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+>
+> **Замена 1** (строка ~1022, секция §6.1, пункт 3):
+>
+> Найди:
+> ```
+> Реализация: `domain/resilience.py:RetryPolicy.calculate_delay()` использует MD5-based jitter.
+> ```
+> Замени на:
+> ```
+> Реализация: `domain/resilience.py:RetryConfig.calculate_delay()` использует MD5-based jitter.
+> ```
+>
+> **Замена 2** (строка ~1045):
+>
+> Найди:
+> ```
+> При `RetryPolicy(deterministic=False)` выдаётся `DeprecationWarning`
+> ```
+> Замени на:
+> ```
+> При `RetryConfig(deterministic=False)` выдаётся `DeprecationWarning`
+> ```
+>
+> **Обоснование**: Класс в коде называется `RetryConfig` (dataclass в
+> `src/bioetl/domain/resilience.py:18`), а не `RetryPolicy`.
+
+---
+
+### PROMPT-05: RetryConfig location in §4.3 (MEDIUM, Audit #78)
+
+**Файл**: `docs/00-project/RULES.md`, строка ~835
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> Найди строку в секции §4.3 "Детерминистичный Jitter":
+>
+> ```python
+> # RetryConfig (src/bioetl/infrastructure/adapters/http/client.py)
+> RetryConfig(
+> ```
+>
+> Замени на:
+>
+> ```python
+> # RetryConfig (src/bioetl/domain/resilience.py)
+> RetryConfig(
+> ```
+>
+> **Обоснование**: `class RetryConfig` находится в `src/bioetl/domain/resilience.py:18`,
+> а не в `infrastructure/adapters/http/client.py`. Retry-конфигурация — domain value object.
+
+---
+
+### PROMPT-06: Entity mapping table in App A.1 (MEDIUM, Audit #72)
+
+**Файл**: `docs/00-project/RULES.md`, строки ~1304-1313
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> Найди таблицу "Маппинг entity → API resource" в секции А.1 (строка ~1304).
+>
+> Текущая таблица (6 строк):
+>
+> ```markdown
+> | Entity Type     | API Resource             | Primary Key          |
+> | --------------- | ------------------------ | -------------------- |
+> | `activity`      | `activity`               | `activity_id`        |
+> | `assay`         | `assay`                  | `assay_chembl_id`    |
+> | `molecule`      | `molecule`               | `molecule_chembl_id` |
+> | `target`        | `target`                 | `target_chembl_id`   |
+> | `protein_class` | `protein_classification` | `protein_class_id`   |
+> | `publication`   | `document`               | `document_chembl_id` |
+> ```
+>
+> Замени на полную таблицу (12 строк):
+>
+> ```markdown
+> | Entity Type        | API Resource             | Primary Key              |
+> | ------------------ | ------------------------ | ------------------------ |
+> | `activity`         | `activity`               | `activity_id`            |
+> | `assay`            | `assay`                  | `assay_chembl_id`        |
+> | `assay_parameters` | `assay`                  | *(composite)*            |
+> | `cell_line`        | `cell_line`              | `cell_chembl_id`         |
+> | `compound`         | `molecule`               | `molecule_chembl_id`     |
+> | `compound_record`  | `compound_record`        | `record_id`              |
+> | `molecule`         | `molecule`               | `molecule_chembl_id`     |
+> | `protein_class`    | `protein_classification` | `protein_class_id`       |
+> | `publication`      | `document`               | `document_chembl_id`     |
+> | `target`           | `target`                 | `target_chembl_id`       |
+> | `target_component` | `target_component`       | `component_id`           |
+> | `tissue`           | `tissue`                 | `tissue_chembl_id`       |
+> ```
+>
+> **Обоснование**: В коде `src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:44-55`
+> `_NON_PUBLICATION_ENTITY_MAPPING` содержит 11 маппингов (+ publication из registry).
+> В документации было задокументировано только 6 из них.
+
+---
+
+### PROMPT-07: ChEMBL library name in App A (LOW, Audit #66)
+
+**Файл**: `docs/00-project/RULES.md`, строка ~1282
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> В таблице "Приложение А: Источники и Библиотеки" (строка ~1282), найди строку ChEMBL:
+>
+> ```
+> | **ChEMBL**   | `chembl_webresource_client` | Нет явного лимита        | ...
+> ```
+>
+> Замени колонку "Библиотека" на:
+>
+> ```
+> | **ChEMBL**   | `httpx` via `UnifiedHTTPClient` | Нет явного лимита        | ...
+> ```
+>
+> **Обоснование**: ChEMBL адаптер (`ChemblAdapter` в
+> `src/bioetl/infrastructure/adapters/chembl/client.py:89`) наследует `BaseHttpAdapter`
+> и использует `UnifiedHTTPClient` (httpx), а не `chembl_webresource_client`.
+
+---
+
+### PROMPT-08: Quarantine field names sync (LOW, Audit #19)
+
+**Файл**: `docs/00-project/RULES.md`, строки ~228-240
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> В секции §2.6 "Спецификация Unified Quarantine" найди поля:
+>
+> ```
+> - `ingestion_ts` (Timestamp): Время инцидента.
+> ...
+> - `bronze_batch_id` (UUID): Ссылка на пакет исходных данных.
+> ```
+>
+> Добавь маппинг на кодовые имена (квадратные скобки):
+>
+> ```
+> - `ingestion_ts` (Timestamp): Время инцидента. [Код: `QuarantineEntry._created_at`]
+>
+> - `pipeline` (String): Имя пайплайна (напр., `chembl_activity`). [Код: `QuarantineEntry._pipeline_name`]
+>
+> - `error_code` (String): Тип ошибки (напр., `SCHEMA_VIOLATION`). [Код: `QuarantineEntry._error_code`]
+>
+> - `payload` (JSON/Text): Сырая запись (**Truncated to 64KB**). [Код: `QuarantineEntry._payload`]
+>
+> - `payload_hash` (String): Для дедупликации ошибок. [Код: `QuarantineEntry._payload_hash`]
+>
+> - `bronze_batch_id` (UUID): Ссылка на пакет исходных данных. [Код: `QuarantineEntry._batch_id` (BatchID)]
+> ```
+>
+> **Обоснование**: Документация использует "логические" имена полей таблицы,
+> а код использует private-атрибуты `_created_at`, `_batch_id` и т.д.
+> (класс `QuarantineEntry` в `src/bioetl/domain/aggregates/quarantine_entry.py:109-189`).
+> Маппинг нужен для навигации разработчиков между документацией и кодом.
+
+---
+
+### PROMPT-09: load_strategy location clarification (LOW, Audit #32)
+
+**Файл**: `docs/00-project/RULES.md`, секция §2.7 (или App D)
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> В секции, где упоминается `load_strategy: incremental | full` как поле pipeline YAML,
+> добавь уточнение:
+>
+> ```
+> > **Примечание**: `load_strategy` определяется в файле источника данных
+> > (`configs/sources/{provider}.yaml`), а не непосредственно в pipeline config.
+> > Pipeline config ссылается на источник через convention-based resolution
+> > (`source_file: ../../sources/{provider}.yaml`) или явно через поле `data_schema_file`.
+> ```
+>
+> **Обоснование**: В фактическом `configs/pipelines/chembl/activity.yaml` поле
+> `load_strategy` отсутствует. Оно определяется в source-конфигурации
+> и подтягивается при resolution. После ADR-025 pipeline config стал минимальным.
+
+---
+
+### PROMPT-10: `__future__` import exception for `__init__.py` (LOW, Audit #58)
+
+**Файл**: `docs/00-project/RULES.md`, секция §4.4 "Python Standards"
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> В секции §4.4, где указано правило:
+>
+> ```
+> Все Python-файлы MUST начинаться с `from __future__ import annotations`
+> ```
+>
+> Добавь исключение:
+>
+> ```
+> > **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
+> > и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
+> > они не содержат type annotations, требующих отложенной эвалюации.
+> > Текущее состояние: 468 из 499 файлов (93.8%) содержат импорт;
+> > 31 файл без импорта — все `__init__.py`.
+> ```
+>
+> **Обоснование**: 31 файл без `from __future__ import annotations` — это
+> исключительно `__init__.py` модули с re-exports. Они не используют
+> type annotations в теле файла, поэтому `__future__` import не влияет
+> на их поведение.
+
+---
+
+### PROMPT-11: @runtime_checkable ports clarification (INFO, Audit #3)
+
+**Файл**: `docs/00-project/RULES.md`, секция §1.1.1
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> В секции §1.1.1, где упоминается `@runtime_checkable`:
+>
+> Замени общую формулировку на конкретный перечень:
+>
+> ```
+> Следующие порты **SHOULD** быть `@runtime_checkable` для boundary validation
+> в composition layer:
+> - `DataSourcePort` — для проверки адаптеров при регистрации
+> - `FilterableDataSourcePort` — для проверки расширенных адаптеров
+> - `HealthCheckPort` — для проверки health-check capability
+> - `StoragePort` — для проверки storage backends
+>
+> Остальные порты (LoggerPort, MetricsPort, TracingPort и т.д.) используют
+> structural subtyping без runtime проверок и **MAY** не иметь `@runtime_checkable`.
+> ```
+>
+> **Обоснование**: В текущем коде `@runtime_checkable` применён к
+> `DataSourcePort`, `FilterableDataSourcePort`, `HealthCheckPort` и некоторым другим.
+> Не все 43 порта нуждаются в runtime-проверке — только те, которые
+> валидируются в composition layer при сборке dependency graph.
+
+---
+
+### PROMPT-12: Int→Float coercion count (INFO, Audit #27)
+
+**Файл**: `docs/00-project/RULES.md`, строка ~1500 (changelog 5.11)
+
+**Инструкция**:
+
+> Открой файл `docs/00-project/RULES.md`.
+> В changelog записи 5.11:
+>
+> ```
+> Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (34 occurrences).
+> ```
+>
+> Добавь пометку:
+>
+> ```
+> Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (~34 occurrences на момент 5.11; актуальное число может отличаться).
+> ```
+>
+> Дополнительно, в секции §2.6 "Int→Float Coercion для Nullable Integers" добавить:
+>
+> ```
+> > **Примечание**: Для получения актуального числа occurrences:
+> > `grep -rn "coerce=True" src/bioetl/infrastructure/schemas/ src/bioetl/domain/schemas/ --include="*.py" | grep -c "Series\[float\]"`
+> ```
+>
+> **Обоснование**: Число 34 было точным на момент версии 5.11, но может
+> устареть при добавлении новых gold-схем. Команда для пересчёта
+> помогает поддерживать актуальность.
