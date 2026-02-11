@@ -133,31 +133,32 @@ def _extract_non_digits(s: str) -> str:
     return "".join(c for c in s if not c.isdigit())
 
 
+def _is_abbreviated(first_digits: str, last_digits: str) -> bool:
+    """Return True if last_digits is an abbreviated form of first_digits."""
+    return (
+        bool(first_digits)
+        and bool(last_digits)
+        and len(last_digits) < len(first_digits)
+    )
+
+
+def _compute_expanded_page(first_digits: str, last_digits: str) -> int:
+    """Compute expanded page number with rollover handling."""
+    first_num = int(first_digits)
+    divisor = 10 ** len(last_digits)
+    expanded = (first_num // divisor) * divisor + int(last_digits)
+    # Rollover: "199-3" -> 203, not 193
+    return expanded + divisor if expanded < first_num else expanded
+
+
 def _expand_abbreviated_page(first_page: str, last_page_raw: str) -> str:
     """Expand abbreviated last page (e.g., 737-9 -> 739, 199-3 -> 203)."""
     first_digits = _extract_digits(first_page)
     last_digits = _extract_digits(last_page_raw)
-
-    # If either is non-numeric, return as-is (e.g., "S1-S5")
-    if not first_digits or not last_digits:
+    if not _is_abbreviated(first_digits, last_digits):
         return last_page_raw
 
-    # If last page has same or more digits, it's a full number
-    if len(last_digits) >= len(first_digits):
-        return last_page_raw
-
-    # Expand abbreviated page number
-    first_num = int(first_digits)
-    last_num = int(last_digits)
-    divisor = 10 ** len(last_digits)
-
-    expanded = (first_num // divisor) * divisor + last_num
-
-    # Handle rollover case: "199-3" should be "199-203", not "199-193"
-    if expanded < first_num:
-        expanded += divisor
-
-    # Preserve any prefix from last_page_raw (e.g., "S" in "S5")
+    expanded = _compute_expanded_page(first_digits, last_digits)
     prefix = _extract_non_digits(last_page_raw)
     return f"{prefix}{expanded}" if prefix else str(expanded)
 
