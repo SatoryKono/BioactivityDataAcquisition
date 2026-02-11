@@ -139,7 +139,7 @@
   "author_orcids": {
     "checks": [
       {
-        "name": "orcid_format"
+        "name": "_check_author_orcids"
       }
     ],
     "coerce": false,
@@ -169,7 +169,7 @@
     "description": "Number of references FROM this publication (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": false,
+    "required": true,
     "unique": false
   },
   "citations_received": {
@@ -183,7 +183,7 @@
     "description": "Number of citations TO this publication (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": false,
+    "required": true,
     "unique": false
   },
   "content_domain_crossmark_restriction": {
@@ -458,7 +458,7 @@
     "description": "Publication year (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": false,
+    "required": true,
     "unique": false
   },
   "published": {
@@ -518,7 +518,7 @@
   "title": {
     "checks": [
       {
-        "name": "title_not_empty"
+        "name": "_check_title"
       }
     ],
     "coerce": false,

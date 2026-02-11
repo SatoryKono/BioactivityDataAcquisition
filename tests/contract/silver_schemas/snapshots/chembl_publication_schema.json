@@ -160,7 +160,7 @@
     "description": "Number of references FROM this publication (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": false,
+    "required": true,
     "unique": false
   },
   "citations_received": {
@@ -174,7 +174,7 @@
     "description": "Number of citations TO this publication (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": false,
+    "required": true,
     "unique": false
   },
   "content_hash": {
@@ -404,7 +404,7 @@
     "description": "Publication year (unified field name)",
     "dtype": "Int64",
     "nullable": true,
-    "required": false,
+    "required": true,
     "unique": false
   },
   "src_id": {
