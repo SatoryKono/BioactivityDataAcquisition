@@ -109,7 +109,7 @@ class TestFileSizeLimits:
         "gold_writer.py": 940,  # 934 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py) + column_order support
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 1005,  # 1003 LOC - Silver PyArrow schemas + SubcellularFraction schema
+        "silver.py": 1050,  # 1038 LOC - Silver PyArrow schemas + SubcellularFraction schema + publication classification fields (3 fields × 5 providers)
         "client.py": 1175,  # 1169 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication + extraction_params ADR-028), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups + extraction_params + DQ severity/max_length/not_null
