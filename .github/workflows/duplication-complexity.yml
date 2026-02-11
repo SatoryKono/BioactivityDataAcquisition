@@ -203,8 +203,8 @@ jobs:
       - name: Install tooling
         run: pip install xenon radon
 
-      - name: Check executor.py complexity (max CC = 10)
+      - name: Check batch_executor.py complexity (max CC = 10)
         run: |
-          echo "Checking executor.py complexity..."
+          echo "Checking batch_executor.py complexity..."
           xenon --max-absolute B --max-modules B --max-average A \
-            src/bioetl/application/core/executor.py
+            src/bioetl/application/core/batch_executor.py
