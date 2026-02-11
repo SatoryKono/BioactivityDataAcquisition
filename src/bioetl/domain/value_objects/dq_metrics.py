@@ -80,7 +80,7 @@ class SchemaDriftInfo:
         from bioetl.domain.models.metadata import SchemaDrift
 
         return SchemaDrift(
-            status=self.status,
+            status=self.status,  # type: ignore[arg-type]
             new_fields=list(self.new_fields),
             missing_fields=list(self.missing_fields),
         )

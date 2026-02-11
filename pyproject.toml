@@ -365,6 +365,24 @@ module = [
 ]
 disable_error_code = ["no-any-return", "return-value"]
 
+# Modules with type: ignore comments that may be unused in some environments
+# but needed in others (different type stub versions). Per-module
+# warn_unused_ignores=false overrides --strict to prevent [unused-ignore].
+[[tool.mypy.overrides]]
+module = [
+    "bioetl.domain.serialization",
+    "bioetl.domain.models.metadata",
+    "bioetl.domain.value_objects.dq_metrics",
+    "bioetl.domain.schemas.validators",
+    "bioetl.application.services.dq.silver_analyzer",
+    "bioetl.application.services.dq.gold_analyzer",
+    "bioetl.application.services.dq._checks_integrity",
+    "bioetl.infrastructure.adapters.common.api_request_collector",
+    "bioetl.infrastructure.storage.metadata_builder",
+    "bioetl.composition.services.metadata_coordinator",
+]
+warn_unused_ignores = false
+
 # Note: All layers now pass strict mypy checks.
 # ignore_errors was removed as part of architecture review (2025-12-23).
 

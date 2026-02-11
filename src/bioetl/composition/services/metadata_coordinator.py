@@ -484,7 +484,8 @@ class MetadataCoordinator:
         schema_info = self._extract_schema_metadata(input_data.gold_schema)
 
         # Note: schema_info uses Field(alias="schema") with populate_by_name=True
-        return GoldMetadata(
+        # mypy doesn't understand this Pydantic feature, but it works at runtime
+        return GoldMetadata(  # type: ignore[call-arg]
             runtime=self._build_runtime_metadata(
                 completed_at=input_data.completed_at,
             ),
