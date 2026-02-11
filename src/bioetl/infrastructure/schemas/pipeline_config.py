@@ -979,6 +979,7 @@ class PipelineYamlConfig(BaseModel):
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
+    silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
 
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)

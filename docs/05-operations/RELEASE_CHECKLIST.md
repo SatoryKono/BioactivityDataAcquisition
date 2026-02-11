@@ -1,5 +1,9 @@
 # Release Checklist v5.9.0
 
+> **Historical Document**: This checklist was created for BioETL v5.9.0 (verified 2026-01-13).
+> It is preserved for reference only. For current release procedures, create a new checklist
+> aligned with the latest project version.
+
 This checklist documents the pre-release verification completed for BioETL v5.9.0.
 
 ## Final Verification Results

@@ -301,6 +301,8 @@ module = [
     "bioetl.domain.schemas.pubchem.compound",
     # Pandera extensions @register_check_method lacks type stubs
     "bioetl.domain.schemas.validators",
+    # Pandera @pa.check in publication base schema
+    "bioetl.domain.schemas.common.publication_base",
     # Pydantic validators (@field_validator, @model_validator)
     "bioetl.domain.models.metadata",
     "bioetl.infrastructure.schemas.base_schemas",

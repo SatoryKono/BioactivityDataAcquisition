@@ -112,6 +112,7 @@ class StorageFactory:
         bronze_flat_structure: bool = False,
         silver_flat_structure: bool = False,
         gold_flat_structure: bool = False,
+        silver_validator: Any = None,
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -159,6 +160,7 @@ class StorageFactory:
                 logger=logger,
                 tracing=effective_tracing,
                 csv_exporter=silver_csv_exporter,
+                silver_validator=silver_validator,
                 metadata_writer=silver_metadata_writer,
                 metadata_coordinator=metadata_coordinator,
                 transform_version=transform_version,
@@ -186,6 +188,7 @@ class StorageFactory:
         metrics: MetricsPort,
         tracing: TracingPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: Any = None,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -198,6 +201,8 @@ class StorageFactory:
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation. If provided, ensures consistent
                                 run_id and timestamps across Bronze, Silver, Gold.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
 
         Returns:
             StorageContext with adapter and paths
@@ -293,6 +298,7 @@ class StorageFactory:
             bronze_flat_structure=bronze_flat_structure,
             silver_flat_structure=silver_flat_structure,
             gold_flat_structure=gold_flat_structure,
+            silver_validator=silver_validator,
         )
 
         return StorageContext(

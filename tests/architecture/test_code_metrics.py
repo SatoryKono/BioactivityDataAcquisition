@@ -101,9 +101,9 @@ class TestFileSizeLimits:
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 820,  # 814 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation
-        "pipeline_factories.py": 555,  # 551 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction)
-        "services_factory.py": 690,  # 687 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030)
+        "pipeline_factory.py": 845,  # 838 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation + Pandera Silver schema DI
+        "pipeline_factories.py": 610,  # 602 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction + Pandera Silver schema imports)
+        "services_factory.py": 695,  # 692 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030) + silver_validator param
         # Infrastructure layer exemptions
         "silver_writer.py": 1155,  # 1151 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
         "gold_writer.py": 950,  # 946 LOC - SCD Type 2 (metadata/arrow logic extracted) + column_order + write_gold_merged schema validation (REQ-DATA-009)
@@ -120,7 +120,7 @@ class TestFileSizeLimits:
         "storage_factory.py": 400,  # Extracted from storage.py
         "observability.py": 475,  # Bootstrap observability + deprecated aliases
         # Application layer exemptions
-        "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
+        "base_transformer.py": 825,  # 821 LOC - BaseTransformer with silver_filters + should_write_silver()
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "subcellular_fraction_data_source.py": 520,  # 518 LOC - Derived entity wrapper with FilterableDataSourcePort delegation
         "merger.py": 1895,  # 1887 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
@@ -588,7 +588,7 @@ class TestClassSize:
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 625,  # 619 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult
-        "BaseTransformer": 710,  # 703 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list + validate_value_object)
+        "BaseTransformer": 740,  # 735 lines - Template Method with silver_filters + should_write_silver()
         "SilverWriter": 1140,  # 1132 lines - schema drift detection (metadata builder extracted) + column_order
         "GoldWriter": 920,  # 917 lines - SCD Type 2 (metadata/arrow logic extracted) + column_order
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service

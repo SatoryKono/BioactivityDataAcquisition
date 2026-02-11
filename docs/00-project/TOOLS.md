@@ -96,6 +96,24 @@ python src/tools/verify_schema_parity.py
 
 ---
 
+### file_merger.py
+
+**Назначение:** Объединение нескольких файлов проекта в один выходной файл с метаданными.
+
+**Использование:**
+```bash
+# Объединить файлы из директории
+python src/tools/file_merger.py --dir src/bioetl/domain/ --ext .py --output merged.txt
+```
+
+| Параметр | Описание |
+|----------|----------|
+| `--dir` | Директория для рекурсивного обхода |
+| `--ext` | Фильтр расширений файлов |
+| `--output` | Путь к выходному файлу |
+
+---
+
 ## scripts/ — Standalone скрипты
 
 Эти скрипты **НЕ импортируют** `bioetl` и используют только stdlib/внешние библиотеки.
@@ -505,6 +523,7 @@ if __name__ == "__main__":
 |------|------------|-------------------|-----------|
 | `create_pipeline.py` | src/tools/ | Да | `make new-pipeline` |
 | `verify_schema_parity.py` | src/tools/ | Да | — |
+| `file_merger.py` | src/tools/ | Нет | — |
 | `cleanup_project.py` | scripts/ | Нет | `make clean-dev` |
 | `vacuum_delta.py` | scripts/ | Нет | `make vacuum-silver` |
 | `salt_rotate.py` | scripts/ | Нет | — |
