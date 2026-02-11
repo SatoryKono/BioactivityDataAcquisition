@@ -21,19 +21,6 @@ from bioetl.domain.types import ErrorType
 # =============================================================================
 
 
-class InternalError(CriticalError):
-    """Base class for internal application errors.
-
-    InternalErrors indicate unexpected conditions that should not occur
-    during normal operation. They typically represent programming errors,
-    invariant violations, or system state corruption.
-
-    These errors are always critical and result in immediate pipeline termination.
-    """
-
-    error_type = ErrorType.INVALID_DATA
-
-
 # =============================================================================
 # State and Invariant Violations
 # =============================================================================

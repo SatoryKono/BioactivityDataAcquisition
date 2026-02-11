@@ -13,6 +13,8 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
+from bioetl.domain.types import DriftLevel as DriftLevel  # canonical definition
+
 
 class DQReportFormat(StrEnum):
     """Output format for DQ reports."""
@@ -36,14 +38,6 @@ class DQReportStatus(StrEnum):
     PASS = "pass"
     WARNING = "warning"
     FAIL = "fail"
-
-
-class DriftLevel(StrEnum):
-    """Schema drift severity level."""
-
-    INFO = "info"
-    WARN = "warn"
-    CRITICAL = "critical"
 
 
 class MedallionLayer(StrEnum):

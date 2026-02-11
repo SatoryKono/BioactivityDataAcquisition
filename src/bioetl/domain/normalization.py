@@ -157,15 +157,59 @@ def _is_electronic_page(page: str) -> bool:
     return bool(_ELECTRONIC_PAGE_PATTERN.match(page))
 
 
+def _expand_abbreviated_page(first_page: str, last_page: str) -> str:
+    """Expand abbreviated last page number.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739
+    - "737-39" means 737-739
+    - "199-3" means 199-203 (rollover case)
+
+    If last_page has >= digits than first_page, return as-is.
+    """
+    first_digits = "".join(c for c in first_page if c.isdigit())
+    last_digits = "".join(c for c in last_page if c.isdigit())
+
+    if not first_digits or not last_digits:
+        return last_page
+
+    if len(last_digits) >= len(first_digits):
+        return last_page
+
+    first_num = int(first_digits)
+    last_num = int(last_digits)
+    divisor = 10 ** len(last_digits)
+
+    expanded = (first_num // divisor) * divisor + last_num
+    if expanded < first_num:
+        expanded += divisor
+
+    prefix = "".join(c for c in last_page if not c.isdigit())
+    return f"{prefix}{expanded}" if prefix else str(expanded)
+
+
+def _normalize_page_input(page: str | None) -> str | None:
+    """Strip and normalize dashes in page string, return None if empty."""
+    if not page:
+        return None
+    stripped = page.strip()
+    if not stripped:
+        return None
+    # Normalize en-dash (U+2013) and em-dash (U+2014) to hyphen
+    return stripped.replace("\u2013", "-").replace("\u2014", "-")
+
+
 def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
     """Parse page range '123-456' to (first, last) tuple.
 
     Handles various page formats:
     - Standard ranges: "123-456" → ("123", "456")
+    - Abbreviated ranges: "737-9" → ("737", "739")
     - Single pages: "42" → ("42", None)
     - Electronic pages: "e12345", "e-123" → (original, None)
     - Article numbers: "100234" → ("100234", None)
     - Supplements: "S1-S15" → ("S1", "S15")
+    - En-dashes/em-dashes are normalized to hyphens.
 
     Args:
         page: Page string from publication metadata.
@@ -174,10 +218,7 @@ def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
         Tuple of (first_page, last_page). last_page is None for single pages
         or electronic article identifiers.
     """
-    if not page:
-        return None, None
-
-    stripped = page.strip()
+    stripped = _normalize_page_input(page)
     if not stripped:
         return None, None
 
@@ -187,7 +228,13 @@ def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
 
     # Standard range parsing
     first, sep, last = stripped.partition("-")
-    return _to_none_if_empty(first), _to_none_if_empty(last) if sep else None
+    first_clean = _to_none_if_empty(first)
+    last_clean = _to_none_if_empty(last) if sep else None
+
+    if first_clean and last_clean:
+        last_clean = _expand_abbreviated_page(first_clean, last_clean)
+
+    return first_clean, last_clean
 
 
 def normalize_pmc_id(pmc_id: str | None) -> str | None:

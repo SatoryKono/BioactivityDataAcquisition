@@ -40,7 +40,7 @@ class TestFileSizeLimits:
         "filter_config.py": 400,  # 354 LOC
         "entities.py": 600,  # 569 LOC
         "chembl.py": 760,  # 758 LOC - ChEMBL entity DTOs + SubcellularFraction Gold schema
-        "normalization.py": 350,  # 341 LOC - Pure domain normalization functions
+        "normalization.py": 370,  # 367 LOC - Pure domain normalization functions + abbreviated page expansion (RF-PAGES)
         "validation.py": 450,  # 430 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year, molecular weight)
         "activity_aggregator.py": 400,  # 392 LOC - Activity aggregation with multiple strategies
         "normalization_service.py": 420,  # 411 LOC - Normalization service with validation
@@ -50,7 +50,6 @@ class TestFileSizeLimits:
         "context.py": 385,  # 380 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
-        "config_types.py": 450,  # 446 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
         "exceptions.py": 550,  # 513 LOC
         # Domain exceptions module reorganization (refactoring into logical categories)
         "infrastructure.py": 640,  # 632 LOC - InfrastructureErrors (storage, filesystem, environment)
@@ -241,8 +240,9 @@ class TestFunctionComplexity:
         "_detect_schema_drift": 10,  # CC=9 - Schema drift detection with severity levels
         # CrossRef/OpenAlex/SemanticScholar adapter fallback logic
         "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing + multi-identifier resolution
-        # SemanticScholar page range abbreviation expansion
+        # Page range parsing and abbreviation expansion (RF-PAGES)
         "_expand_abbreviated_page": 13,  # CC=12 - Page range expansion with digit-level alignment
+        "parse_page_range": 7,  # CC=6 - Consolidated page range parser
         # Domain value coercion with type handling
         "_coerce_to_int": 10,  # CC=8 - Integer coercion with multiple type checks
         # FilterableDataSourcePort batch filtering

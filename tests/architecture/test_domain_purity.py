@@ -238,6 +238,8 @@ class TestDomainComplexity:
             "__post_init__": 12,  # Dataclass post-init validation with complex context
             "__init__": 10,  # Constructor with validation logic
             "TableConfig": 8,  # Dataclass with write mode enum conversion in __post_init__
+            "_expand_abbreviated_page": 12,  # Abbreviated page range expansion (RF-PAGES)
+            "parse_page_range": 6,  # Consolidated page range parser (RF-PAGES)
             "SchemaEvolutionError": 7,  # Exception with detailed field tracking
             "_validate_config": 8,  # PipelineConfig validation logic
             # Domain value object validation

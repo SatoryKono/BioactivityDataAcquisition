@@ -1,27 +1,29 @@
-"""No-operation metrics implementation.
+"""No-operation metrics implementation with optional usage warning.
 
-Provides a null object pattern implementation for metrics when
-metrics collection is disabled or not configured.
+Extends the canonical domain NoOpMetrics with a developer-facing warning
+when metrics collection is silently disabled.
 
-This implementation is in infrastructure layer (not domain) because
-it's a concrete implementation detail, even though it does nothing.
+The base no-op behaviour (all methods are silent no-ops) is inherited from
+``bioetl.domain.ports.noop.NoOpMetrics``.  This module adds only the
+``warn_on_use`` / ``reset_warning`` helpers used by the composition layer.
 """
 
 from __future__ import annotations
 
 import warnings
 
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import MetricsPort, NoOpMetrics as _DomainNoOpMetrics
 
 
-class NoOpMetrics(MetricsPort):
-    """No-operation metrics implementation.
+class NoOpMetrics(_DomainNoOpMetrics, MetricsPort):
+    """No-operation metrics with optional usage warning.
 
-    Used when metrics collection is explicitly disabled via configuration.
-    All operations are silently ignored.
+    Extends the canonical domain NoOpMetrics with a ``warn_on_use`` flag.
+    When *warn_on_use* is True (the default), a one-time ``UserWarning``
+    is emitted to alert developers that metrics are not being collected.
 
-    If instantiated without explicit opt-out, logs a warning to alert
-    developers that metrics are not being collected.
+    If instantiated with ``warn_on_use=False``, behaves identically to
+    the domain NoOpMetrics (pure silent no-op).
 
     Args:
         warn_on_use: If True, emit a warning when instantiated in non-test mode.
@@ -54,33 +56,6 @@ class NoOpMetrics(MetricsPort):
                 stacklevel=2,
             )
             NoOpMetrics._warned = True
-
-    def observe_histogram(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op histogram observation."""
-
-    def increment_counter(
-        self,
-        name: str,
-        value: int,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op counter increment."""
-
-    def set_gauge(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op gauge set."""
-
-    def close(self) -> None:
-        """No-op close. Idempotent."""
 
     @classmethod
     def reset_warning(cls) -> None:
