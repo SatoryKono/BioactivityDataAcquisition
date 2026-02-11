@@ -22,7 +22,7 @@ dq:
 
 ## Symptoms
 
-- Pipeline exits with code 10 (DQ hard threshold)
+- Pipeline exits with code 83 (DATA_QUALITY_ERROR, DQ hard threshold)
 - Log messages: `dq_soft_threshold_exceeded`
 - Prometheus metric: `bioetl_dq_soft_threshold_exceeded_total`
 - Records in quarantine directory
@@ -131,7 +131,7 @@ from deltalake import DeltaTable
 import polars as pl
 
 # Check current Silver table state
-dt = DeltaTable("data/silver/chembl_activity")
+dt = DeltaTable("data/output/silver/chembl/activity")
 df = pl.scan_delta(str(dt)).collect()
 
 # Count records by run_id
