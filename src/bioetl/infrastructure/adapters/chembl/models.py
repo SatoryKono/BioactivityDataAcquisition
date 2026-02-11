@@ -464,11 +464,18 @@ class ChemblReleaseInfo(BaseModel):
     )
 
 
-class ChemblPublicationRecord(BaseModel):
-    """Individual publication record from ChEMBL API.
+class ChemblPublicationApiRecord(BaseModel):
+    """Individual publication record from ChEMBL API (infrastructure model).
+
+    This is the infrastructure-layer API response model with extra='ignore'
+    and nested ChemblReleaseInfo. NOT the same as the domain entity
+    ChemblPublicationRecord (domain/entities/chembl.py) which uses
+    extra='forbid' and a flat chembl_release string.
 
     Note: ChEMBL API uses 'document' as the endpoint name.
     Renamed from ChemblDocumentRecord per ADR-024 (Ubiquitous Language).
+    Renamed from ChemblPublicationRecord to ChemblPublicationApiRecord
+    to resolve naming collision with the domain entity.
     """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
@@ -515,7 +522,7 @@ class ChemblPublicationResponse(BaseModel):
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
-    documents: list[ChemblPublicationRecord] = Field(
+    documents: list[ChemblPublicationApiRecord] = Field(
         default_factory=list, description="List of publication records"
     )
     page_meta: ChemblPageMeta | None = Field(
@@ -628,6 +635,6 @@ CHEMBL_RECORD_MODELS: dict[str, type[BaseModel]] = {
     "compound": ChemblMoleculeRecord,
     "target": ChemblTargetRecord,
     "target_component": ChemblTargetComponentRecord,
-    "document": ChemblPublicationRecord,  # ADR-024: Publication is canonical
+    "document": ChemblPublicationApiRecord,  # ADR-024: Publication is canonical
     "cell_line": ChemblCellLineRecord,
 }

@@ -10,8 +10,8 @@ from bioetl.infrastructure.adapters.pubchem.models import (
     PUBCHEM_RECORD_MODELS,
     PubChemAssayRecord,
     PubChemBioactivityRecord,
+    PubchemMoleculeApiRecord,
     PubchemMoleculeDetailRecord,
-    PubchemMoleculeRecord,
     PubChemSubstanceRecord,
 )
 
@@ -25,5 +25,5 @@ __all__ = [
     "PubChemBioactivityRecord",
     "PubChemSubstanceRecord",
     "PubchemMoleculeDetailRecord",
-    "PubchemMoleculeRecord",
+    "PubchemMoleculeApiRecord",
 ]

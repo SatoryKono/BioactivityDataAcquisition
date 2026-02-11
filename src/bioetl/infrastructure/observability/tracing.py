@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+from bioetl.domain.ports import NoOpTracing
 
 # Store OTLP exporter class if available (for runtime use)
 # This avoids reassigning an imported type to None, which mypy strict rejects

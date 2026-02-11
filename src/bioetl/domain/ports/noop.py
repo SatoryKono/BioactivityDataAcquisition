@@ -120,8 +120,15 @@ class NoOpMetrics:
     Used when metrics collection is disabled or not configured.
     All operations are silently ignored.
 
+    Supports optional warn_on_use flag for composition/CLI layers to alert
+    developers when metrics collection is disabled in non-test environments.
+
     Implements:
         MetricsPort: Domain port for metrics collection.
+
+    Args:
+        warn_on_use: If True, emit a warning on first instantiation.
+                     Default is False (silent).
 
     Example:
         >>> metrics = NoOpMetrics()
@@ -129,6 +136,32 @@ class NoOpMetrics:
         >>> metrics.increment_counter("errors", 1, {"type": "validation"})
 
     """
+
+    _warned: bool = False
+
+    def __init__(self, warn_on_use: bool = False) -> None:
+        """Initialize NoOpMetrics.
+
+        Args:
+            warn_on_use: Whether to warn about disabled metrics.
+
+        """
+        if warn_on_use and not NoOpMetrics._warned:
+            import warnings
+
+            warnings.warn(
+                "NoOpMetrics is being used - metrics are NOT being collected. "
+                "Set BIOETL_METRICS_ENABLED=true or inject PrometheusMetrics "
+                "to enable metrics collection.",
+                UserWarning,
+                stacklevel=2,
+            )
+            NoOpMetrics._warned = True
+
+    @classmethod
+    def reset_warning(cls) -> None:
+        """Reset warning state (for testing)."""
+        cls._warned = False
 
     def observe_histogram(
         self,

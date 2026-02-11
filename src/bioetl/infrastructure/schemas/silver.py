@@ -637,7 +637,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         pa.field("atc_classifications", pa.string()),
-        pa.field("availability_type", pa.int64()),
+        pa.field("availability_type", pa.float64()),  # Float for nullable int
         pa.field("black_box_warning", pa.int64()),
         # Flattened Structures (unified naming without structure_ prefix)
         pa.field("canonical_smiles", pa.string()),
