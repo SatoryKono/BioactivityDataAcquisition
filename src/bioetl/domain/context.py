@@ -50,7 +50,7 @@ class CachedBronzeContext:
 
         >>> # Enabled with explicit path
         >>> ctx = CachedBronzeContext.from_options(
-        ...     path="./data/bronze/chembl/activity",
+        ...     path="./data/output/bronze/chembl/activity",
         ...     date="2026-01-20"
         ... )
     """
