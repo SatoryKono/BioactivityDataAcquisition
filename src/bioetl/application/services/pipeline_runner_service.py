@@ -158,7 +158,7 @@ class RunOptions:
     ignore_yaml_filter: bool = False
     skip_gold: bool = False  # Skip Gold layer writing (composite sub-pipelines)
     # Cached Bronze mode options
-    use_cached_bronze: bool = True
+    use_cached_bronze: bool = False
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None  # YYYY-MM-DD format
 
