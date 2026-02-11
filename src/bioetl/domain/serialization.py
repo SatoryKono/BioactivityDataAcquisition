@@ -142,8 +142,9 @@ def _has_non_ascii(text: str) -> bool:
 def _get_orjson_options(sort_keys: bool) -> int:
     """Get orjson options based on configuration."""
     assert orjson is not None
-    options = orjson.OPT_SERIALIZE_NUMPY
-    return options | orjson.OPT_SORT_KEYS if sort_keys else options
+    options: int = orjson.OPT_SERIALIZE_NUMPY
+    result: int = options | orjson.OPT_SORT_KEYS if sort_keys else options
+    return result
 
 
 def _serialize_with_orjson(

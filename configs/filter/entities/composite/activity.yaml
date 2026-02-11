@@ -1,0 +1,137 @@
+# configs/filter/entities/composite/activity.yaml
+# =============================================================================
+# Composite Activity Filter Configuration
+# =============================================================================
+# Entity-specific filter rules for composite activity pipeline.
+# Reference: ADR-028 (Filter Rules Externalization)
+#
+# This composite combines:
+# - chembl_activity (seed)
+# - chembl_compound_record (dependency)
+#
+# Version: 1.0.0
+# Last Updated: 2026-02-04
+#
+# =============================================================================
+
+version: "1.0.0"
+provider: composite
+entity: activity
+
+# -----------------------------------------------------------------------------
+# Input Filter
+# -----------------------------------------------------------------------------
+# No input filter for composite pipeline.
+# Composite pipeline aggregates from seed pipeline internally.
+input_filter:
+  enabled: false
+
+# -----------------------------------------------------------------------------
+# Gold Filters
+# -----------------------------------------------------------------------------
+# Criteria for valid activities in Gold layer.
+# Note: Composite uses qualified column names ({provider}.{entity}.{field})
+# Filter rules apply to either qualified or coalesced column names.
+gold_filters:
+  # Required fields - records missing these are excluded from Gold
+  required_fields:
+    - activity_id          # Primary key from seed
+    - molecule_chembl_id   # FK to molecule (join key)
+    - assay_chembl_id      # FK to assay
+
+  # Field-specific validation (applied before Gold write)
+  columns:
+    activity_id:
+      type: string
+      nullable: false
+      description: "ChEMBL activity ID (primary key)"
+
+    molecule_chembl_id:
+      type: string
+      nullable: false
+      pattern: "^CHEMBL\\d+$"
+      description: "ChEMBL molecule identifier (FK)"
+
+    assay_chembl_id:
+      type: string
+      nullable: false
+      pattern: "^CHEMBL\\d+$"
+      description: "ChEMBL assay identifier (FK)"
+
+    target_chembl_id:
+      type: string
+      nullable: true
+      pattern: "^CHEMBL\\d+$"
+      description: "ChEMBL target identifier (FK, optional)"
+
+    document_chembl_id:
+      type: string
+      nullable: true
+      pattern: "^CHEMBL\\d+$"
+      description: "ChEMBL document identifier (FK, optional)"
+
+    standard_type:
+      type: string
+      nullable: true
+      description: "Standardized activity type (IC50, Ki, EC50, etc.)"
+
+    standard_relation:
+      type: string
+      nullable: true
+      enum: ["=", "<", "<=", ">", ">="]
+      description: "Standardized relation operator"
+
+    standard_value:
+      type: float
+      nullable: true
+      min_value: 0
+      description: "Standardized activity value (non-negative)"
+
+    standard_units:
+      type: string
+      nullable: true
+      description: "Standardized activity units (nM, uM, etc.)"
+
+    pchembl_value:
+      type: float
+      nullable: true
+      min_value: 0
+      max_value: 14
+      description: "-log10 molar activity value (0-14 range)"
+
+    # Compound record fields (from dependency)
+    record_id:
+      type: integer
+      nullable: true
+      min_value: 1
+      description: "Compound record ID (from chembl_compound_record)"
+
+    compound_name:
+      type: string
+      nullable: true
+      description: "Original compound name from publication"
+
+    compound_key:
+      type: string
+      nullable: true
+      description: "Original compound key from source"
+
+# -----------------------------------------------------------------------------
+# DQ Thresholds (from composite config)
+# -----------------------------------------------------------------------------
+# These thresholds are applied during composite merge:
+# - soft_fail_threshold: 0.10 (10% errors = warning)
+# - hard_fail_threshold: 0.30 (30% errors = failure)
+#
+# Per-dependency overrides defined in composite config:
+# - chembl_compound_record: soft=0.30, hard=0.70
+#   (Many activities may not have matching compound records)
+
+# -----------------------------------------------------------------------------
+# Notes on Join Semantics
+# -----------------------------------------------------------------------------
+# Activity → CompoundRecord join is M:N:
+# - One activity has one molecule_chembl_id
+# - One molecule can have many compound records (from different documents)
+# - Merge uses left_outer to preserve all activities
+# - Missing compound_record fields will be null

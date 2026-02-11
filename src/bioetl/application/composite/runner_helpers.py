@@ -9,12 +9,17 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
-from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    DependencyStatus,
+    EnrichmentResult,
+    EnrichmentStatus,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Set
 
-    from bioetl.domain.composite.config import EnricherConfig
+    from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
     from bioetl.domain.ports import LoggerPort
 
 
@@ -229,5 +234,61 @@ def get_mergeable_enrichers(
             continue
 
         mergeable.append(enricher_cfg)
+
+    return mergeable
+
+
+def get_mergeable_dependencies(
+    dependency_results: dict[str, DependencyResult],
+    all_dependencies: Iterable[DependencyConfig],
+    logger: LoggerPort,
+) -> list[DependencyConfig]:
+    """Get list of dependencies that should be included in merge.
+
+    Excludes dependencies with SKIPPED status or without silver_table since
+    they have no data to merge. This prevents file I/O errors when trying
+    to read non-existent or empty Silver tables.
+
+    Args:
+        dependency_results: All dependency results.
+        all_dependencies: All dependency configs.
+        logger: Logger port for structured logging.
+
+    Returns:
+        List of DependencyConfig for dependencies that have data to merge.
+    """
+    mergeable: list[DependencyConfig] = []
+    for dep_cfg in all_dependencies:
+        result = dependency_results.get(dep_cfg.pipeline)
+
+        # If no result, don't include in merge
+        if result is None:
+            logger.debug(
+                "Excluding dependency from merge",
+                dependency=dep_cfg.pipeline,
+                reason="no_result",
+            )
+            continue
+
+        # If status indicates skipped, don't include in merge
+        if result.status == DependencyStatus.SKIPPED:
+            logger.debug(
+                "Excluding dependency from merge",
+                dependency=dep_cfg.pipeline,
+                status=result.status.value,
+                reason="skipped",
+            )
+            continue
+
+        # If no silver_table configured, can't read data
+        if not dep_cfg.silver_table:
+            logger.debug(
+                "Excluding dependency from merge",
+                dependency=dep_cfg.pipeline,
+                reason="no_silver_table",
+            )
+            continue
+
+        mergeable.append(dep_cfg)
 
     return mergeable

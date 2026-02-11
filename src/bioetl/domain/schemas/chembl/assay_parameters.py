@@ -10,6 +10,10 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    ASSAY_PARAMETER_STANDARD_TYPES,
+    STANDARD_RELATIONS,
+)
 
 
 class AssayParametersSchema(ETLRecordSchema):
@@ -72,11 +76,13 @@ class AssayParametersSchema(ETLRecordSchema):
     standard_type: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
-        description="Standardized type.",
+        isin=list(ASSAY_PARAMETER_STANDARD_TYPES),
+        description="Standardized type (IC50, EC50, CONC, PH, TEMP, etc.).",
     )
     standard_relation: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
+        isin=list(STANDARD_RELATIONS),
         description="Standardized relation.",
     )
     standard_value: Series[float] | None = pa.Field(

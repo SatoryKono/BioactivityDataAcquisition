@@ -15,10 +15,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class ConcentrationUnit(str, Enum):
+class ConcentrationUnit(StrEnum):
     """Concentration units commonly used in bioactivity data.
 
     Ordered from largest to smallest for easy comparison.
@@ -175,7 +175,7 @@ class Concentration:
         return f"{self.value} {self.unit.value}"
 
 
-class ActivityType(str, Enum):
+class ActivityType(StrEnum):
     """Types of bioactivity measurements in drug discovery.
 
     Categorizes different assay endpoints used to measure compound activity.

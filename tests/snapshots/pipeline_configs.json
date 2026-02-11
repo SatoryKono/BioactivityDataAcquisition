@@ -15,10 +15,12 @@
               "allowed": [],
               "error_message": null,
               "field": "standard_value",
+              "max_length": null,
               "max_value": 100000.0,
               "min_value": 0.001,
               "nullable": false,
               "pattern": null,
+              "severity": "error",
               "validation_type": "range",
               "validator": null
             }
@@ -45,10 +47,12 @@
           "allowed": [],
           "error_message": "standard_value must be non-negative and below 1B",
           "field": "standard_value",
+          "max_length": null,
           "max_value": 1000000000.0,
           "min_value": 0.0,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "range",
           "validator": null
         },
@@ -66,10 +70,12 @@
           ],
           "error_message": null,
           "field": "standard_type",
+          "max_length": null,
           "max_value": null,
           "min_value": null,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "enum",
           "validator": null
         },
@@ -85,10 +91,12 @@
           ],
           "error_message": null,
           "field": "standard_units",
+          "max_length": null,
           "max_value": null,
           "min_value": null,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "enum",
           "validator": null
         }
@@ -107,7 +115,7 @@
     },
     "entity_type": "activity",
     "fields": [],
-    "force_full_scan": false,
+    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [
         {
@@ -169,7 +177,7 @@
     },
     "gold_table": "chembl_activity",
     "gold_write_mode": "overwrite",
-    "loading_strategy": "watermark_based",
+    "loading_strategy": "full_scan_only",
     "on_schema_mismatch": "evolve",
     "partition_cols": [],
     "pipeline_name": "chembl_activity",
@@ -177,6 +185,14 @@
       "activity_id"
     ],
     "provider": "chembl",
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
     "silver_table": "chembl_activity",
     "transform_steps": [],
     "transform_version": null,
@@ -315,10 +331,12 @@
           "allowed": [],
           "error_message": "Molecular formula must start with uppercase letter",
           "field": "molecular_formula",
+          "max_length": null,
           "max_value": null,
           "min_value": null,
           "nullable": true,
           "pattern": "^[A-Z][A-Za-z0-9]*$",
+          "severity": "error",
           "validation_type": "pattern",
           "validator": null
         },
@@ -326,10 +344,12 @@
           "allowed": [],
           "error_message": null,
           "field": "molecular_weight",
+          "max_length": null,
           "max_value": 10000.0,
           "min_value": 10.0,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "range",
           "validator": null
         },
@@ -337,10 +357,12 @@
           "allowed": [],
           "error_message": null,
           "field": "canonical_smiles",
+          "max_length": null,
           "max_value": null,
           "min_value": null,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "custom",
           "validator": "smiles_validator"
         },
@@ -348,10 +370,12 @@
           "allowed": [],
           "error_message": null,
           "field": "isomeric_smiles",
+          "max_length": null,
           "max_value": null,
           "min_value": null,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "custom",
           "validator": "smiles_validator"
         },
@@ -359,10 +383,12 @@
           "allowed": [],
           "error_message": null,
           "field": "xlogp",
+          "max_length": null,
           "max_value": 30.0,
           "min_value": -20.0,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "range",
           "validator": null
         },
@@ -370,10 +396,12 @@
           "allowed": [],
           "error_message": null,
           "field": "tpsa",
+          "max_length": null,
           "max_value": 1000.0,
           "min_value": 0.0,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "range",
           "validator": null
         },
@@ -381,10 +409,12 @@
           "allowed": [],
           "error_message": null,
           "field": "h_bond_donor_count",
+          "max_length": null,
           "max_value": 50.0,
           "min_value": 0.0,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "range",
           "validator": null
         },
@@ -392,10 +422,12 @@
           "allowed": [],
           "error_message": null,
           "field": "h_bond_acceptor_count",
+          "max_length": null,
           "max_value": 50.0,
           "min_value": 0.0,
           "nullable": true,
           "pattern": null,
+          "severity": "error",
           "validation_type": "range",
           "validator": null
         }
@@ -414,7 +446,7 @@
     },
     "entity_type": "compound",
     "fields": [],
-    "force_full_scan": false,
+    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
@@ -428,7 +460,7 @@
     },
     "gold_table": "pubchem_compound",
     "gold_write_mode": "overwrite",
-    "loading_strategy": "watermark_based",
+    "loading_strategy": "full_scan_only",
     "on_schema_mismatch": "evolve",
     "partition_cols": [],
     "pipeline_name": "pubchem_compound",
@@ -436,6 +468,14 @@
       "cid"
     ],
     "provider": "pubchem",
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
     "silver_table": "pubchem_compound",
     "transform_steps": [],
     "transform_version": null,
@@ -680,6 +720,23 @@
       },
       {
         "fields": [
+          "publication_type",
+          "publication_type_unified",
+          "publication_subclass",
+          "publication_class"
+        ],
+        "name": "doc_type",
+        "pattern": null,
+        "provider_order": [
+          "chembl",
+          "crossref",
+          "openalex",
+          "pubmed",
+          "semanticscholar"
+        ]
+      },
+      {
+        "fields": [
           "language"
         ],
         "name": "language",
@@ -744,7 +801,15 @@
       "exclude_if_present": [],
       "list_contains_filters": [],
       "list_length_filters": [],
-      "range_filters": [],
+      "range_filters": [
+        {
+          "column": "publication_year",
+          "include_max": true,
+          "include_min": true,
+          "max_value": 2050.0,
+          "min_value": 1950.0
+        }
+      ],
       "required_fields": [
         "pmid",
         "title"
@@ -760,6 +825,14 @@
       "pmid"
     ],
     "provider": "pubmed",
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
     "silver_table": "pubmed_publication",
     "transform_steps": [],
     "transform_version": null,
@@ -787,7 +860,7 @@
     },
     "entity_type": "protein",
     "fields": [],
-    "force_full_scan": false,
+    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [
         {
@@ -810,7 +883,7 @@
     },
     "gold_table": "uniprot_protein",
     "gold_write_mode": "overwrite",
-    "loading_strategy": "watermark_based",
+    "loading_strategy": "full_scan_only",
     "on_schema_mismatch": "evolve",
     "partition_cols": [],
     "pipeline_name": "uniprot_protein",
@@ -818,6 +891,14 @@
       "accession"
     ],
     "provider": "uniprot",
+    "silver_filters": {
+      "column_filters": [],
+      "exclude_if_present": [],
+      "list_contains_filters": [],
+      "list_length_filters": [],
+      "range_filters": [],
+      "required_fields": []
+    },
     "silver_table": "uniprot_protein",
     "transform_steps": [],
     "transform_version": null,

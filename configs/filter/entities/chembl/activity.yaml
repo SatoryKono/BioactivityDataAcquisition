@@ -20,6 +20,99 @@ input_filter:
   filter_field: "activity_id"
   batch_size: 20
 
+# ---------------------------------------------------------------------------
+# Extraction-Level Filtering (ADR-028 §3)
+# ---------------------------------------------------------------------------
+# Server-side query parameters appended to every ChEMBL Activity API request.
+# Syntax: ChEMBL django-style lookups (__in, __isnull, __gt, __lt, etc.)
+# Reference: https://chembl.gitbook.io/chembl-interface-documentation/web-services/chembl-data-web-services
+#
+# These params reduce API traffic from ~20M to ~2-5M records.
+# Does NOT affect content_hash (ADR-014).
+# Logged in SourceMetadata.query_string for audit/reproducibility.
+#
+# Resulting API URL pattern:
+#   /chembl/api/data/activity?format=json&limit=1000&offset=0
+#     &standard_type__in=IC50,Ki
+#     &standard_units=nM
+#     &standard_relation==
+#     &assay_type__in=B,F
+#     &potential_duplicate=0
+#     &data_validity_comment__isnull=true
+#     &pchembl_value__isnull=false
+#     &standard_flag=1
+extraction_params:
+  # Measurement types: IC50 (inhibitor concentration) and Ki (inhibition constant)
+  standard_type__in: "IC50,Ki"
+
+  # Standardized units: nanomolar only
+  standard_units: "nM"
+
+  # Exact measurements only (exclude censored: >, <, ~)
+  standard_relation: "="
+
+  # Assay types: Binding and Functional (exclude ADMET, Toxicity, etc.)
+  assay_type__in: "B,F"
+
+  # Exclude potential duplicate records
+  potential_duplicate: 0
+
+  # Exclude records flagged with data validity issues
+  data_validity_comment__isnull: true
+
+  # Only records with standardized pChEMBL value
+  pchembl_value__isnull: false
+
+  # Only ChEMBL-standardized values (manual curation flag)
+  standard_flag: 1
+
+# -----------------------------------------------------------------------------
+# Silver Filters — Domain-level quality gates (applied BEFORE Silver write)
+# -----------------------------------------------------------------------------
+# Records that fail these filters are excluded from the Silver layer entirely.
+# These enforce domain invariants and physically plausible value ranges.
+silver_filters:
+  # Column value filters — strict inclusion lists
+  columns:
+    # Only IC50 and Ki measurements
+    standard_type: [IC50, Ki]
+    # Only exact measurements (no censored: >, <, ~)
+    standard_relation: ["="]
+    # Only nanoMolar units
+    standard_units: [nM]
+    # Binding (B) and Functional (F) assays only
+    assay_type: [B, F]
+    # Exclude potential duplicates (0 = not duplicate)
+    potential_duplicate: ["0"]
+
+  # Numeric range filters
+  ranges:
+    activity_id:
+      min: 1
+      max: 10000000000  # 10^10
+    standard_value:
+      min: 0
+      include_min: false  # Exclude exactly 0
+    pchembl_value:
+      min: 3
+      max: 10
+    document_year:
+      min: 1950
+      max: 2050
+
+  # Required fields — must be non-null for silver
+  required_fields:
+    - activity_id
+    - molecule_chembl_id
+    - target_chembl_id
+    - document_chembl_id
+    - standard_value
+    - pchembl_value
+
+  # Exclude records with data validity issues (field must be null / absent)
+  exclude_if_present:
+    - data_validity_comment
+
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------

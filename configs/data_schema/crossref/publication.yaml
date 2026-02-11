@@ -75,6 +75,9 @@ column_groups:
   - name: doc_type
     fields:
       - publication_type
+      - publication_type_unified
+      - publication_subclass
+      - publication_class
 
   - name: content_domain
     fields:
@@ -98,7 +101,7 @@ field_aliases:
   reference_count: citations_made
   subjects: subject_keywords
   source_type: publication_type
-  author_orcids: author_orcid_list
+  # author_orcids: now native field name (was: author_orcid_list)
 
 # Layer-specific column filtering
 silver:

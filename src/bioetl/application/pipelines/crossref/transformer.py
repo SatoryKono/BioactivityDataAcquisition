@@ -31,12 +31,11 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_page_info,
     extract_published_date,
     extract_references,
-    extract_year,
 )
 from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
-from bioetl.domain.value_objects import DOI
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -71,6 +70,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -83,6 +83,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -94,6 +95,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -155,35 +157,46 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             dates.get("published_online"),
         )
 
+        # Extract raw year from date-parts for validation
+        raw_year = None
+        for date_field in ["published-print", "published-online", "issued"]:
+            date_info = rec.get(date_field, {})
+            date_parts = date_info.get("date-parts", [[]])
+            if date_parts and date_parts[0] and len(date_parts[0]) > 0:
+                raw_year = date_parts[0][0]
+                break
+
         return {
             "doi": doi,
+            # Fields from PublicationBaseSchema that CrossRef doesn't provide
+            # (set to None to satisfy schema inheritance requirement)
+            "pmid": None,
+            "pmc_id": None,
+            "abstract": None,
+            "affiliation_list": None,
             "title": extract_first_string(rec.get("title", [])),
             "authors": self.serialize_json_list(hashed_authors),
             **journal_info,
             **page_info,
             **dates,
-            "publication_year": extract_year(rec),
+            "publication_year": self.validate_value_object(
+                PublicationYear, raw_year, as_string=False
+            ),
             "publication_date": publication_date,
-            "publication_type": rec.get(
-                "type"
-            ),  # Raw CrossRef type (journal-article, etc.)
+            "publication_type": rec.get("type"),  # Raw CrossRef type
+            **self._classify_publication_type("crossref", raw_type=rec.get("type")),
             "citations_received": rec.get("is-referenced-by-count"),
             "citations_made": rec.get("references-count"),
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
             "subject_keywords": rec.get("subject", []),
             "_source": "crossref",
-            # Excluded fields (always NULL, not written to Delta Lake):
-            # - is_oa: CrossRef doesn't provide Open Access info
-            # - pmid/pmc_id: CrossRef doesn't provide PubMed IDs (excluded entirely)
+            # is_oa: CrossRef doesn't provide Open Access info
             "is_oa": None,
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
-            # DQ flags (default: no warnings or errors)
-            "_dq_warn": False,
-            "_dq_error": False,
-            # NEW: Additional CrossRef fields
+            # Additional CrossRef fields
             "alternative_id": rec.get("alternative-id", []) or [],
             "journal_name_short": extract_first_string(
                 rec.get("short-container-title")
@@ -191,10 +204,13 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "published": published_date,
             **content_domain,
             **issn_by_type,
-            # NEW: Author and reference data (per PROMPT 3 enhancement)
-            "author_orcid_list": serialized_orcids,
+            # Author and reference data
+            "author_orcids": serialized_orcids,
             "author_details": serialized_author_details,
             "references": serialized_references,
+            # DQ flags (MUST be last, per RULES.md §2.4)
+            "_dq_warn": False,
+            "_dq_error": False,
         }
 
     def _get_primary_id_field(self) -> str:
@@ -326,15 +342,17 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding unused fields.
+        """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
-        Overrides base implementation to remove fields not collected for CrossRef.
+        Overrides base implementation to handle ISSN list conversion.
+        Note: Fields like pmid, pmc_id, abstract, affiliation_list are kept
+        with None values to satisfy PublicationBaseSchema inheritance requirement.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without excluded fields.
+            SilverRecord dictionary with all base schema fields.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
@@ -342,11 +360,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields (CrossRef doesn't provide these)
-        silver_record.pop("abstract", None)
-        silver_record.pop("affiliation_list", None)
-        silver_record.pop("pmid", None)
-        silver_record.pop("pmc_id", None)
+        # Note: Do NOT remove pmid, pmc_id, abstract, affiliation_list
+        # These fields inherit from PublicationBaseSchema and must exist in DataFrame
+        # even if set to None (Pandera requires columns to exist, not just be nullable)
 
         # Convert ISSN list to scalar + JSON array (unification with other providers)
         issn_raw = silver_record.get("issn")

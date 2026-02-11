@@ -19,7 +19,7 @@ from bioetl.application.services import (
     PipelineNotFoundError,
     RunOptions,
     RunResult,
-    RunStatus,
+    PipelineRunResult,
 )
 from bioetl.interfaces.cli.commands.run_all import (
     _run_all_pipelines_async,
@@ -58,7 +58,7 @@ def mock_pipeline_runner_service():
 
 def _create_run_result(
     pipeline_name: str,
-    status: RunStatus = RunStatus.SUCCESS,
+    status: PipelineRunResult = PipelineRunResult.SUCCESS,
     run_type: str = "incremental",
     error_message: str | None = None,
 ) -> RunResult:
@@ -259,7 +259,7 @@ class TestRunAllDryRunMode:
         mock_registry.list_pipelines.return_value = ["chembl_activity"]
 
         mock_pipeline_runner_service.run.return_value = _create_run_result(
-            "chembl_activity", status=RunStatus.DRY_RUN
+            "chembl_activity", status=PipelineRunResult.DRY_RUN
         )
 
         result = cli_runner.invoke(
@@ -289,7 +289,7 @@ class TestRunAllDryRunMode:
         mock_registry.list_pipelines.return_value = ["chembl_activity"]
 
         mock_pipeline_runner_service.run.return_value = _create_run_result(
-            "chembl_activity", status=RunStatus.DRY_RUN
+            "chembl_activity", status=PipelineRunResult.DRY_RUN
         )
 
         result = cli_runner.invoke(
@@ -320,8 +320,8 @@ class TestRunAllDryRunMode:
         ]
 
         mock_pipeline_runner_service.run.side_effect = [
-            _create_run_result("chembl_activity", status=RunStatus.DRY_RUN),
-            _create_run_result("chembl_assay", status=RunStatus.DRY_RUN),
+            _create_run_result("chembl_activity", status=PipelineRunResult.DRY_RUN),
+            _create_run_result("chembl_assay", status=PipelineRunResult.DRY_RUN),
         ]
 
         result = cli_runner.invoke(
@@ -388,7 +388,7 @@ class TestRunAllFormatterOutput:
 
         mock_pipeline_runner_service.run.return_value = _create_run_result(
             "chembl_activity",
-            status=RunStatus.FAILED,
+            status=PipelineRunResult.FAILED,
             error_message="Connection timeout",
         )
 
@@ -452,7 +452,7 @@ class TestRunAllFormatterOutput:
 
         mock_pipeline_runner_service.run.side_effect = [
             _create_run_result("chembl_activity"),
-            _create_run_result("chembl_assay", status=RunStatus.FAILED),
+            _create_run_result("chembl_assay", status=PipelineRunResult.FAILED),
         ]
 
         result = cli_runner.invoke(
@@ -483,7 +483,7 @@ class TestRunAllFormatterOutput:
 
         mock_pipeline_runner_service.run.side_effect = [
             _create_run_result("chembl_activity"),
-            _create_run_result("chembl_assay", status=RunStatus.FAILED),
+            _create_run_result("chembl_assay", status=PipelineRunResult.FAILED),
         ]
 
         result = cli_runner.invoke(
@@ -526,7 +526,7 @@ class TestRunAllShutdownScenarios:
         # First succeeds, second gets shutdown, third should not run
         mock_pipeline_runner_service.run.side_effect = [
             _create_run_result("chembl_activity"),
-            _create_run_result("chembl_assay", status=RunStatus.SHUTDOWN),
+            _create_run_result("chembl_assay", status=PipelineRunResult.SHUTDOWN),
             _create_run_result("chembl_molecule"),  # Should not be called
         ]
 
@@ -556,7 +556,7 @@ class TestRunAllShutdownScenarios:
         mock_registry.list_pipelines.return_value = ["chembl_activity"]
 
         mock_pipeline_runner_service.run.return_value = _create_run_result(
-            "chembl_activity", status=RunStatus.SHUTDOWN
+            "chembl_activity", status=PipelineRunResult.SHUTDOWN
         )
 
         result = cli_runner.invoke(
@@ -589,7 +589,7 @@ class TestRunAllShutdownScenarios:
         mock_registry.list_pipelines.return_value = ["chembl_activity"]
 
         mock_pipeline_runner_service.run.return_value = _create_run_result(
-            "chembl_activity", status=RunStatus.SHUTDOWN
+            "chembl_activity", status=PipelineRunResult.SHUTDOWN
         )
 
         result = cli_runner.invoke(
@@ -641,7 +641,7 @@ class TestRunAllAsyncFunction:
         mock_service.run = AsyncMock(
             side_effect=[
                 _create_run_result("pipeline1"),
-                _create_run_result("pipeline2", status=RunStatus.FAILED),
+                _create_run_result("pipeline2", status=PipelineRunResult.FAILED),
             ]
         )
 

@@ -44,6 +44,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         entity_type: str = "compound",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -56,6 +57,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'compound'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher. Not typically used for molecules
@@ -68,6 +70,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,

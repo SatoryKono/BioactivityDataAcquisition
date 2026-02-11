@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams
 
-*Updated: 2026-01-26*
+*Updated: 2026-02-09*
 
 В каталоге 34 исходных файла диаграмм Mermaid, документирующих архитектуру BioETL.
 
@@ -121,7 +121,8 @@ All diagrams use the following Mermaid theme configuration:
 │  Ports (Protocols), Entities, Config, Types                 │
 ├─────────────────────────────────────────────────────────────┤
 │                   INFRASTRUCTURE LAYER                      │
-│  Adapters (ChEMBL, PubChem, UniProt, PubMed),               │
+│  Adapters (ChEMBL, PubChem, UniProt, PubMed, CrossRef,      │
+│  OpenAlex, Semantic Scholar),                                │
 │  Storage (Bronze, Silver, Gold), Locking, Observability     │
 ├─────────────────────────────────────────────────────────────┤
 │                    COMPOSITION LAYER                        │

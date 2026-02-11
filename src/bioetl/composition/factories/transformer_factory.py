@@ -49,6 +49,7 @@ def create_transformer(
     entity_type: str,
     tracer: TracingPort | None = None,
     metrics: MetricsPort | None = None,
+    silver_filters: GoldFilterConfig | None = None,
     gold_filters: GoldFilterConfig | None = None,
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
@@ -64,6 +65,7 @@ def create_transformer(
         entity_type: Entity type (e.g., 'activity', 'compound').
         tracer: Optional tracing port for distributed tracing (O1 observability).
         metrics: Optional metrics port for duration/error tracking (O1 observability).
+        silver_filters: Optional domain-level filter configuration for Silver layer.
         gold_filters: Optional filter configuration for Gold layer.
         identity_service: Service for computing entity IDs and content hashes.
             Defaults to a new IdentityService instance in BaseTransformer.
@@ -98,6 +100,7 @@ def create_transformer(
         entity_type=entity_type,
         tracer=tracer,
         metrics=metrics,
+        silver_filters=silver_filters,
         gold_filters=gold_filters,
         identity_service=identity_service,
         pii_hasher=pii_hasher,
@@ -157,6 +160,9 @@ def register_all_transformers() -> None:
     from bioetl.application.pipelines.chembl.publication_transformer import (
         PublicationTransformer,
     )
+    from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
+        SubcellularFractionTransformer,
+    )
     from bioetl.application.pipelines.chembl.target_component_transformer import (
         TargetComponentTransformer,
     )
@@ -195,6 +201,9 @@ def register_all_transformers() -> None:
     )
     register_transformer("chembl", "document_term", PublicationTermTransformer)
     register_transformer("chembl", "molecule", MoleculeTransformer)
+    register_transformer(
+        "chembl", "subcellular_fraction", SubcellularFractionTransformer
+    )
     register_transformer("chembl", "protein_class", ProteinClassTransformer)
     register_transformer("chembl", "target", TargetTransformer)
     register_transformer("chembl", "target_component", TargetComponentTransformer)

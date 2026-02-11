@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
@@ -22,7 +23,11 @@ from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 _FILTER_CONCAT_KEYS = frozenset({"required_fields", "exclude_if_present"})
 
 
-class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterConfig]]):
+class FilterConfigLoader(
+    BaseConfigLoader[
+        tuple[InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams]
+    ],
+):
     """Loads and merges filter configurations from hierarchical files.
 
     Thread-safe with internal caching for performance.
@@ -45,7 +50,7 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
         provider: str,
         entity: str,
         inline_overrides: dict[str, Any] | None = None,
-    ) -> tuple[InputFilterConfig, GoldFilterConfig]:
+    ) -> tuple[InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams]:
         """Load merged filter config for provider/entity.
 
         Merge order (later wins for scalars, special handling for collections):
@@ -60,7 +65,9 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
             inline_overrides: Optional inline overrides from pipeline config.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig) domain objects.
+            Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
+            ExtractionParams) domain objects.  Silver and Gold filters both use
+            GoldFilterConfig as the domain type.
 
         Raises:
             FileNotFoundError: If _defaults.yaml doesn't exist.
@@ -98,7 +105,9 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
 
         # Validate via Pydantic
         validated = FilterConfigFile.model_validate(merged)
-        domain_configs = validated.to_domain()
+        domain_configs: tuple[
+            InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams
+        ] = validated.to_domain()
 
         # Cache result if no inline overrides
         if inline_overrides is None:

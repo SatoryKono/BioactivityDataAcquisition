@@ -51,6 +51,77 @@ entity_field_validations:
     nullable: true
     error_message: "Molecular mass must be between 100 and 10,000,000 Da"
 
+  # Quality metrics (added for extended schema)
+  - field: annotation_score
+    type: range
+    min: 1
+    max: 5
+    nullable: true
+    error_message: "Annotation score must be between 1 and 5"
+
+  - field: protein_existence
+    type: range
+    min: 1
+    max: 5
+    nullable: true
+    error_message: "Protein existence level must be between 1 and 5"
+
+  # Cross-reference validations
+  - field: go_terms
+    type: not_empty_list
+    nullable: true
+    error_message: "GO terms list cannot be empty if present"
+
+  - field: pdb_xrefs
+    type: not_empty_list
+    nullable: true
+    error_message: "PDB xrefs list cannot be empty if present"
+
+  # === GO Components (JSON arrays) ===
+  - field: molecular_function
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "molecular_function must be JSON array"
+
+  - field: cellular_component
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "cellular_component must be JSON array"
+
+  # === Isoform Details (JSON arrays) ===
+  - field: isoform_ids
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "isoform_ids must be JSON array"
+
+  - field: isoform_names
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "isoform_names must be JSON array"
+
+  - field: isoform_synonyms
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "isoform_synonyms must be JSON array"
+
+  # === Reaction Data (JSON arrays) ===
+  - field: reactions
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "reactions must be JSON array"
+
+  - field: reaction_ec_numbers
+    type: pattern
+    pattern: '^\[.*\]$'
+    nullable: true
+    error_message: "reaction_ec_numbers must be JSON array"
+
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================

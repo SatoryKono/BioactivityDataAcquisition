@@ -237,7 +237,7 @@ def apply_field_mapping(
 #
 # AUTHORS & AFFILIATIONS:
 #   - authors (unified)
-#   - author_orcid_list (unified structure for ORCID identifiers)
+#   - author_orcids (unified structure for ORCID identifiers)
 #   - affiliation_list (unified, was: affiliations in all)
 #   - affiliation_structured (PubMed-specific structured data)
 #

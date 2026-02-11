@@ -133,13 +133,18 @@ class DependencySchema(BaseModel):
     """Pydantic schema for dependency pipeline configuration.
 
     Dependencies run after seed but before enrichers to populate Silver tables.
+
+    Supports chained dependencies via `key_source`:
+    - None or "seed": Extract join_keys from seed output (default behavior)
+    - "<pipeline_name>": Extract join_keys from that pipeline's Silver table
+      (useful when join keys come from enrichers, not seed)
     """
 
     pipeline: str = Field(
         ..., min_length=1, description="Name of the dependency pipeline"
     )
     join_keys: list[str] = Field(
-        ..., min_length=1, description="Keys to extract from seed for filtering"
+        ..., min_length=1, description="Keys to extract from key_source for filtering"
     )
     required: bool = Field(
         default=False, description="If True, failure causes composite failure"
@@ -151,6 +156,38 @@ class DependencySchema(BaseModel):
     )
     silver_table: str | None = Field(
         default=None, description="Path to dependency's Silver table"
+    )
+    key_source: str | None = Field(
+        default=None,
+        description=(
+            "Source of join keys: None/'seed' for seed keys, "
+            "or pipeline name for chained dependencies"
+        ),
+    )
+    filter_field: str | None = Field(
+        default=None,
+        description=(
+            "Field name to use when filtering the target API. "
+            "Defaults to first join_key. Useful when source column differs "
+            "from target API field (e.g., protein_classification_id vs protein_class_id)"
+        ),
+    )
+    filter_fields: list[str] | None = Field(
+        default=None,
+        description=(
+            "Multiple field names for multi-field API filtering (AND logic). "
+            "When set, ALL specified fields are passed as filters to the API. "
+            "Example: ['molecule_chembl_id', 'document_chembl_id'] produces "
+            "?molecule_chembl_id__in=...&document_chembl_id__in=... "
+            "Mutually exclusive with filter_field."
+        ),
+    )
+    key_filter: str | None = Field(
+        default=None,
+        description=(
+            "SQL-like condition to filter records from key_source before extracting join keys. "
+            "Example: \"mapping_status = 'found'\" to only fetch successfully mapped IDs."
+        ),
     )
 
     @field_validator("join_keys")
@@ -164,6 +201,16 @@ class DependencySchema(BaseModel):
                 raise ValueError("join_keys cannot contain empty strings")
         return v
 
+    @model_validator(mode="after")
+    def validate_filter_fields_exclusive(self) -> Self:
+        """Ensure filter_field and filter_fields are mutually exclusive."""
+        if self.filter_field and self.filter_fields:
+            raise ValueError(
+                "filter_field and filter_fields are mutually exclusive. "
+                "Use filter_fields for multi-field filtering."
+            )
+        return self
+
     def to_domain(self) -> DependencyConfig:
         """Convert to immutable domain DependencyConfig."""
         return DependencyConfig(
@@ -172,6 +219,10 @@ class DependencySchema(BaseModel):
             required=self.required,
             timeout_seconds=self.timeout_seconds,
             silver_table=self.silver_table,
+            key_source=self.key_source,
+            filter_field=self.filter_field,
+            filter_fields=tuple(self.filter_fields) if self.filter_fields else None,
+            key_filter=self.key_filter,
         )
 
 
@@ -323,6 +374,10 @@ class MergeSchema(BaseModel):
         default=None,
         description="Path to column group config file relative to composite config",
     )
+    exclude_fields: list[str] = Field(
+        default_factory=list,
+        description="Columns to drop from merged output (supports glob patterns)",
+    )
 
     @model_validator(mode="after")
     def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
@@ -359,6 +414,7 @@ class MergeSchema(BaseModel):
             field_mappings=self.field_mappings,
             preserve_all_sources=self.preserve_all_sources,
             column_groups=column_groups_domain,
+            exclude_fields=tuple(self.exclude_fields),
         )
 
 
@@ -507,7 +563,8 @@ class CompositeConfigSchema(BaseModel):
         description="List of dependency configurations (run after seed, before enrichers)",
     )
     enrichers: list[EnricherSchema] = Field(
-        ..., min_length=1, description="List of enricher configurations"
+        default_factory=list,
+        description="List of enricher configurations (optional if dependencies provided)",
     )
     merge: MergeSchema = Field(..., description="Merge step configuration")
     dq_rules: CompositeDQSchema = Field(
@@ -521,8 +578,17 @@ class CompositeConfigSchema(BaseModel):
     )
 
     @model_validator(mode="after")
+    def validate_has_enrichers_or_dependencies(self) -> CompositeConfigSchema:
+        """Validate that at least one enricher or dependency is defined."""
+        if not self.enrichers and not self.dependencies:
+            raise ValueError("At least one enricher or dependency must be defined")
+        return self
+
+    @model_validator(mode="after")
     def validate_enricher_join_keys(self) -> CompositeConfigSchema:
         """Validate that enricher join keys exist in seed output_keys."""
+        if not self.enrichers:
+            return self  # Skip if no enrichers
         seed_keys = set(self.seed.output_keys)
         for enricher in self.enrichers:
             for key in enricher.join_keys:
@@ -535,9 +601,17 @@ class CompositeConfigSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_dependency_join_keys(self) -> CompositeConfigSchema:
-        """Validate that dependency join keys exist in seed output_keys."""
+        """Validate that dependency join keys exist in seed output_keys.
+
+        For chained dependencies (key_source != None and != "seed"),
+        join_keys are taken from the key_source's Silver table,
+        so they are NOT validated against seed output_keys.
+        """
         seed_keys = set(self.seed.output_keys)
         for dep in self.dependencies:
+            # Skip validation for chained dependencies
+            if dep.key_source is not None and dep.key_source != "seed":
+                continue
             for key in dep.join_keys:
                 if key not in seed_keys:
                     raise ValueError(
@@ -549,6 +623,8 @@ class CompositeConfigSchema(BaseModel):
     @model_validator(mode="after")
     def validate_unique_enricher_names(self) -> CompositeConfigSchema:
         """Validate that enricher pipeline names are unique."""
+        if not self.enrichers:
+            return self  # Skip if no enrichers
         names = [e.pipeline for e in self.enrichers]
         if len(names) != len(set(names)):
             duplicates = {n for n in names if names.count(n) > 1}

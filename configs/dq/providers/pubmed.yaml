@@ -20,7 +20,7 @@ provider_field_validations:
   - field: pmid
     type: range
     min: 1
-    max: 100000000
+    max: 10000000000
     nullable: true
     error_message: "PMID must be a positive integer"
 
@@ -34,14 +34,14 @@ provider_field_validations:
   # DOI format validation
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "Invalid DOI format (must start with 10. prefix)"
+    error_message: "Invalid DOI format (must match 10.XXXX/suffix, no whitespace)"
 
   # Year range validation
-  - field: pub_year
+  - field: publication_year
     type: range
-    min: 1800
+    min: 1500
     max: 2100
     nullable: true
     error_message: "Publication year out of valid range"

@@ -1,5 +1,5 @@
 # System Context
-*Aligned with RULES.md v5.15 (Local-Only Deployment)*
+*Aligned with RULES.md v5.17 (Local-Only Deployment)*
 
 ## Overview
 
@@ -26,8 +26,8 @@ flowchart TB
     end
 
     subgraph Storage Layer
-        FS[("Local File System<br/>━━━━━━━━━━<br/>data/bronze<br/>data/silver<br/>data/gold")]
-        CP[("Checkpoints<br/>━━━━━━━━<br/>data/checkpoints")]
+        FS[("Local File System<br/>━━━━━━━━━━<br/>data/output/bronze<br/>data/output/silver<br/>data/output/gold")]
+        CP[("Checkpoints<br/>━━━━━━━━<br/>data/output/checkpoints")]
     end
 
     subgraph Consumers

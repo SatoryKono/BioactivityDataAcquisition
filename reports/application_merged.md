@@ -771,6 +771,7 @@ import re
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.domain.schemas.column_order import DQ_FIELDS_SUFFIX
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
     ColumnOrderConfig,
@@ -779,12 +780,56 @@ from bioetl.domain.value_objects.column_order import (
 from bioetl.domain.value_objects.column_qualifier import ColumnQualifier
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     import polars as pl
 
-    from bioetl.domain.composite.config import ColumnGroupConfig
+    from bioetl.domain.composite.config import ColumnGroupConfig, LayerColumnConfig
     from bioetl.domain.ports import LoggerPort
 
+    _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
+
 __all__ = ["ColumnOrderer"]
+
+
+def _collect_pattern_columns(
+    available: set[str],
+    used: set[str],
+    group: ColumnGroupConfig,
+    sort_fn: _SortFn,
+    logger: LoggerPort,
+) -> list[str]:
+    """Collect columns matching a group regex pattern.
+
+    Args:
+        available: Set of available column names.
+        used: Set of already-matched column names (mutated in-place).
+        group: Column group configuration with optional pattern.
+        sort_fn: Provider-sorting callable.
+        logger: Logger for warnings on invalid patterns.
+
+    Returns:
+        Sorted list of pattern-matched columns not already in *used*.
+    """
+    if not group.pattern:
+        return []
+    try:
+        pattern_re = re.compile(group.pattern, re.IGNORECASE)
+    except re.error as e:
+        logger.warning(
+            "Invalid regex pattern in column group",
+            group=group.name,
+            pattern=group.pattern,
+            error=str(e),
+        )
+        return []
+
+    pattern_matches: list[str] = []
+    for col in available:
+        if col not in used and pattern_re.search(col):
+            pattern_matches.append(col)
+            used.add(col)
+    return sort_fn(pattern_matches, group.provider_order)
 
 
 class ColumnOrderer:
@@ -864,6 +909,20 @@ class ColumnOrderer:
             )
 
         return df.select(ordered)
+
+    def order_column_names(self, columns: Sequence[str]) -> list[str]:
+        """Order column names by semantic groups.
+
+        Uses YAML-based column groups when configured, otherwise falls back
+        to the default semantic ordering.
+        """
+        if not columns:
+            return []
+
+        if self._column_groups:
+            return self._order_by_yaml_groups(columns)
+
+        return self.get_ordered_columns(columns)
 
     def get_ordered_columns(self, columns: Sequence[str]) -> list[str]:
         """Get columns in semantic order.
@@ -959,8 +1018,10 @@ class ColumnOrderer:
             ordered_columns.extend(group_columns)
             used_columns.update(group_columns)
 
-        # Add remaining columns at the end (alphabetically)
-        remaining = sorted(all_columns - used_columns)
+        # Add remaining columns at the end (alphabetically),
+        # excluding DQ suffix fields which must come last
+        dq_suffix_set = frozenset(DQ_FIELDS_SUFFIX)
+        remaining = sorted(all_columns - used_columns - dq_suffix_set)
         if remaining:
             ordered_columns.extend(remaining)
             self._logger.debug(
@@ -969,6 +1030,17 @@ class ColumnOrderer:
                 sample=remaining[:5],
             )
 
+        # DQ suffix fields MUST be last (DQ_FIELDS_SUFFIX convention)
+        # Remove any DQ fields that may have been captured by groups earlier
+        for dq_field in DQ_FIELDS_SUFFIX:
+            if dq_field in ordered_columns:
+                ordered_columns.remove(dq_field)
+
+        # Re-append DQ fields at the very end, preserving DQ_FIELDS_SUFFIX order
+        for dq_field in DQ_FIELDS_SUFFIX:
+            if dq_field in all_columns:
+                ordered_columns.append(dq_field)
+
         return ordered_columns
 
     def _collect_group_columns(
@@ -976,7 +1048,12 @@ class ColumnOrderer:
         available: set[str],
         group: ColumnGroupConfig,
     ) -> list[str]:
-        """Collect columns for a group, ordered by provider.
+        """Collect columns for a group, preserving field order from config.
+
+        Fields are emitted in the order they appear in ``group.fields``.
+        Within each field, provider-qualified columns are sorted by
+        ``group.provider_order``.  Pattern-matched columns that were not
+        already captured by explicit field names are appended at the end.
 
         Args:
             available: Set of available column names.
@@ -985,33 +1062,29 @@ class ColumnOrderer:
         Returns:
             Ordered list of columns for this group.
         """
-        matched: set[str] = set()
+        ordered: list[str] = []
+        used: set[str] = set()
 
-        # Match by explicit field names
-        for field in group.fields:
+        # Match by explicit field names, preserving field order
+        for field_name in group.fields:
+            field_matches: list[str] = []
             for col in available:
-                # Match exact field name or suffixed versions
-                field_name = self._extract_field_from_qualified(col)
-                if field_name == field or col == field:
-                    matched.add(col)
+                if col in used:
+                    continue
+                extracted = self._extract_field_from_qualified(col)
+                if extracted == field_name or col == field_name:
+                    field_matches.append(col)
+                    used.add(col)
+            ordered.extend(self._sort_by_provider(field_matches, group.provider_order))
 
-        # Match by pattern
-        if group.pattern:
-            try:
-                pattern = re.compile(group.pattern, re.IGNORECASE)
-                for col in available:
-                    if pattern.search(col):
-                        matched.add(col)
-            except re.error as e:
-                self._logger.warning(
-                    "Invalid regex pattern in column group",
-                    group=group.name,
-                    pattern=group.pattern,
-                    error=str(e),
-                )
+        # Match by pattern (appended after explicit fields)
+        ordered.extend(
+            _collect_pattern_columns(
+                available, used, group, self._sort_by_provider, self._logger
+            )
+        )
 
-        # Sort by provider order
-        return self._sort_by_provider(list(matched), group.provider_order)
+        return ordered
 
     def _sort_by_provider(
         self,
@@ -1062,6 +1135,91 @@ class ColumnOrderer:
         if len(parts) == 2:
             return parts[1]  # field.A -> A (conflict suffix) - keep original
         return column
+
+    def filter_by_layer_config(
+        self,
+        columns: Sequence[str],
+        layer_config: LayerColumnConfig,
+    ) -> list[str]:
+        """Filter columns by layer-specific configuration.
+
+        Supports three filtering modes:
+        1. Explicit column list (layer_config.columns)
+        2. Group-based filtering (layer_config.include_groups + exclude_fields)
+        3. Layer-specific groups (layer_config.column_groups)
+
+        Also applies rename_fields mapping if specified.
+
+        Args:
+            columns: Available columns to filter.
+            layer_config: Layer-specific column configuration.
+
+        Returns:
+            Filtered list of columns in semantic order (with renames applied).
+        """
+        from fnmatch import fnmatch
+
+        # Mode 1: Explicit column list
+        if layer_config.columns:
+            # Return columns in specified order, keeping only those available
+            filtered = [c for c in layer_config.columns if c in columns]
+            return self._apply_renames(filtered, layer_config.rename_fields)
+
+        # Mode 2: Group-based filtering
+        if layer_config.include_groups:
+            if not self._column_groups:
+                self._logger.warning(
+                    "include_groups specified but no column_groups configured",
+                    include_groups=layer_config.include_groups,
+                )
+                return list(columns)
+
+            # Filter groups by include_groups
+            included_groups = [
+                g for g in self._column_groups if g.name in layer_config.include_groups
+            ]
+
+            # Match columns to included groups
+            all_cols = set(columns)
+            matched: set[str] = set()
+            for group in included_groups:
+                group_columns = self._collect_group_columns(all_cols - matched, group)
+                matched.update(group_columns)
+
+            # Apply exclude_fields filter
+            if layer_config.exclude_fields:
+                matched = {
+                    c
+                    for c in matched
+                    if not any(
+                        fnmatch(c, pattern) for pattern in layer_config.exclude_fields
+                    )
+                }
+
+            # Order by semantic groups
+            ordered = self._order_by_yaml_groups(list(matched))
+            return self._apply_renames(ordered, layer_config.rename_fields)
+
+        # Mode 3: Layer-specific groups (handled by caller via constructor)
+        # If we reach here, no filtering is needed
+        return list(columns)
+
+    def _apply_renames(
+        self, columns: list[str], rename_map: dict[str, str]
+    ) -> list[str]:
+        """Apply column renames from rename_fields mapping.
+
+        Args:
+            columns: List of column names to rename.
+            rename_map: Mapping of old_name -> new_name.
+
+        Returns:
+            List of columns with renames applied.
+        """
+        if not rename_map:
+            return columns
+
+        return [rename_map.get(col, col) for col in columns]
 
 ================================================================================
 File: column_renamer.py
@@ -1455,9 +1613,10 @@ class EnrichmentCoordinator:
     ) -> str | None:
         """Find column name with case-insensitive matching."""
         column_lower = column.lower()
-        for col in df.columns:
-            if col.lower() == column_lower:
-                return col
+        col_name: str
+        for col_name in df.columns:
+            if col_name.lower() == column_lower:
+                return col_name
         return None
 
     async def _return_skipped(self, enricher: EnricherConfig) -> EnrichmentResult:
@@ -1716,8 +1875,9 @@ class EnricherDeduplicator:
         missing_cols = [c for c in key_columns if c not in df.columns]
         if missing_cols:
             return False
-        unique_count = df.select(key_columns).n_unique()
-        return unique_count < len(df)
+        unique_count: int = df.select(key_columns).n_unique()
+        has_duplicates: bool = unique_count < len(df)
+        return has_duplicates
 
     def _aggregate_duplicates(
         self,
@@ -1807,7 +1967,8 @@ class EnricherDeduplicator:
         conflicts = conflict_check.filter(
             (pl.col("n_unique") > 1) | (pl.col("has_null") & ~pl.col("all_null"))
         )
-        return conflicts.height > 0
+        has_conflicts: bool = conflicts.height > 0
+        return has_conflicts
 
     def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Build expression that concatenates values with |.
@@ -1904,6 +2065,9 @@ Application Service that coordinates dependency pipeline execution.
 Dependencies run after the seed but before enrichers to populate
 Silver tables that enrichers will read from.
 
+Supports chained dependencies where one dependency provides keys
+for another via the key_source configuration field.
+
 See ADR-026 for architectural decisions.
 """
 
@@ -1914,14 +2078,14 @@ from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+import polars as pl
+
 from bioetl.domain.composite.result import DependencyResult
 
 if TYPE_CHECKING:
-    import polars as pl
-
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import DependencyConfig
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import DeltaReaderPort, LoggerPort
 
 
 class DependencyCoordinator:
@@ -1930,14 +2094,19 @@ class DependencyCoordinator:
     Dependencies run sequentially after the seed but before enrichers.
     They populate Silver tables that enrichers will read from.
 
+    Supports chained dependencies where one dependency's output provides
+    keys for another. The key_source field in DependencyConfig specifies
+    which dependency's Silver table to read keys from.
+
     Unlike enrichers which run in parallel, dependencies run sequentially
     to avoid overwhelming APIs and ensure predictable ordering.
 
     Attributes:
         logger: Structured logger.
+        delta_reader: Reader for Silver tables (for chained dependencies).
 
     Example:
-        >>> coordinator = DependencyCoordinator(logger=logger)
+        >>> coordinator = DependencyCoordinator(logger=logger, delta_reader=reader)
         >>> results = await coordinator.run_dependencies(
         ...     keys=keys_df,
         ...     dependencies=dependency_configs,
@@ -1946,13 +2115,19 @@ class DependencyCoordinator:
         ... )
     """
 
-    def __init__(self, logger: LoggerPort) -> None:
+    def __init__(
+        self,
+        logger: LoggerPort,
+        delta_reader: DeltaReaderPort | None = None,
+    ) -> None:
         """Initialize dependency coordinator.
 
         Args:
             logger: Structured logger.
+            delta_reader: Reader for Silver tables (required for chained dependencies).
         """
         self._logger = logger
+        self._delta_reader = delta_reader
 
     async def run_dependencies(
         self,
@@ -1960,17 +2135,23 @@ class DependencyCoordinator:
         dependencies: Sequence[DependencyConfig],
         completed: frozenset[str],
         runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
+        dependency_configs: dict[str, DependencyConfig] | None = None,
     ) -> dict[str, DependencyResult]:
         """Run all dependencies sequentially.
 
         Dependencies run after seed to have access to seed's keys for filtering.
         They populate Silver tables before enrichers run.
 
+        Supports chained dependencies where key_source points to another
+        dependency. In this case, keys are read from the source dependency's
+        Silver table instead of using seed keys.
+
         Args:
             keys: DataFrame with join keys from seed.
             dependencies: Dependency configurations.
             completed: Set of already-completed dependencies (for resume).
             runner_factory: Factory to create PipelineRunner for each dependency.
+            dependency_configs: All dependency configs for looking up key_source.
 
         Returns:
             Mapping of dependency name to result.
@@ -1986,6 +2167,8 @@ class DependencyCoordinator:
             True
         """
         results: dict[str, DependencyResult] = {}
+        # Build lookup if not provided
+        dep_config_lookup = dependency_configs or {d.pipeline: d for d in dependencies}
 
         if not dependencies:
             self._logger.debug(
@@ -2011,9 +2194,16 @@ class DependencyCoordinator:
                 )
                 continue
 
+            # Determine effective keys for this dependency
+            effective_keys = await self._get_effective_keys(
+                dependency=dependency,
+                seed_keys=keys,
+                dep_config_lookup=dep_config_lookup,
+            )
+
             result = await self._run_single_dependency(
                 dependency=dependency,
-                keys=keys,
+                keys=effective_keys,
                 runner_factory=runner_factory,
             )
             results[dependency.pipeline] = result
@@ -2029,6 +2219,149 @@ class DependencyCoordinator:
                 break
 
         return results
+
+    async def _get_effective_keys(
+        self,
+        dependency: DependencyConfig,
+        seed_keys: pl.DataFrame,
+        dep_config_lookup: dict[str, DependencyConfig],
+    ) -> pl.DataFrame:
+        """Get effective keys for a dependency.
+
+        For standard dependencies (uses_seed_keys=True), returns seed keys.
+        For chained dependencies, reads keys from the key_source's Silver table.
+
+        Args:
+            dependency: Current dependency configuration.
+            seed_keys: Keys from seed pipeline.
+            dep_config_lookup: All dependency configs for finding source tables.
+
+        Returns:
+            DataFrame with keys for this dependency.
+
+        Raises:
+            ValueError: If chained dependency config is invalid or keys cannot be read.
+        """
+        # Standard dependency: use seed keys
+        if dependency.uses_seed_keys:
+            self._logger.debug(
+                "Using seed keys for dependency",
+                dependency=dependency.pipeline,
+                key_count=len(seed_keys),
+            )
+            return seed_keys
+
+        # Chained dependency: read from key_source's Silver table
+        if self._delta_reader is None:
+            raise ValueError(
+                f"Chained dependency '{dependency.pipeline}' requires delta_reader, "
+                f"but none was provided. key_source='{dependency.key_source}'"
+            )
+
+        source_config = dep_config_lookup.get(dependency.key_source or "")
+        if not source_config:
+            raise ValueError(
+                f"Chained dependency '{dependency.pipeline}' references unknown "
+                f"key_source='{dependency.key_source}'. "
+                f"Available dependencies: {list(dep_config_lookup.keys())}"
+            )
+
+        if not source_config.silver_table:
+            raise ValueError(
+                f"Chained dependency '{dependency.pipeline}' references "
+                f"key_source='{dependency.key_source}' which has no silver_table configured"
+            )
+
+        try:
+            # Read PyArrow table from Silver
+            pa_table = await self._delta_reader.read_table(source_config.silver_table)
+
+            if pa_table is None or pa_table.num_rows == 0:
+                self._logger.warning(
+                    "Source Silver table is empty, falling back to seed keys",
+                    dependency=dependency.pipeline,
+                    key_source=dependency.key_source,
+                    source_table=source_config.silver_table,
+                )
+                return seed_keys
+
+            # Convert PyArrow Table → Polars DataFrame
+            # from_arrow returns DataFrame for Table, Series for Array
+            source_keys_result = pl.from_arrow(pa_table)
+            if not isinstance(source_keys_result, pl.DataFrame):
+                raise TypeError(
+                    f"Expected DataFrame from PyArrow Table, got {type(source_keys_result)}"
+                )
+            source_keys: pl.DataFrame = source_keys_result
+
+            # Validate that join key column exists
+            join_key = dependency.join_keys[0] if dependency.join_keys else None
+            if join_key and join_key not in source_keys.columns:
+                raise ValueError(
+                    f"Column '{join_key}' not found in source table "
+                    f"'{source_config.silver_table}'. "
+                    f"Available columns: {list(source_keys.columns)}"
+                )
+
+            # Apply key_filter if configured (e.g., "mapping_status = 'found'")
+            if dependency.key_filter:
+                try:
+                    original_count = len(source_keys)
+                    source_keys = source_keys.filter(pl.sql_expr(dependency.key_filter))
+                    filtered_count = len(source_keys)
+                    self._logger.info(
+                        "Applied key_filter to chained dependency",
+                        dependency=dependency.pipeline,
+                        key_filter=dependency.key_filter,
+                        original_count=original_count,
+                        filtered_count=filtered_count,
+                    )
+                except Exception as e:
+                    self._logger.warning(
+                        "Failed to apply key_filter, using all keys",
+                        dependency=dependency.pipeline,
+                        key_filter=dependency.key_filter,
+                        error=str(e),
+                    )
+
+            self._logger.info(
+                "Using chained dependency keys",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+                source_table=source_config.silver_table,
+                key_count=len(source_keys),
+                columns=list(source_keys.columns),
+            )
+            return source_keys
+
+        except FileNotFoundError:
+            # Table doesn't exist yet (first run) — fallback to seed keys is OK
+            self._logger.warning(
+                "Source Silver table not found (first run?), falling back to seed keys",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+                source_table=source_config.silver_table,
+            )
+            return seed_keys
+
+        except ValueError:
+            # Re-raise validation errors
+            raise
+
+        except Exception as e:
+            # For chained dependencies, errors should be explicit, not silent
+            self._logger.error(
+                "Failed to read chained dependency keys",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+                source_table=source_config.silver_table,
+                error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise ValueError(
+                f"Failed to read keys for chained dependency '{dependency.pipeline}' "
+                f"from '{source_config.silver_table}': {e}"
+            ) from e
 
     async def _run_single_dependency(
         self,
@@ -2517,7 +2850,11 @@ from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.column_orderer import ColumnOrderer
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.application.composite.deduplication import EnricherDeduplicator
-from bioetl.domain.composite.result import EnrichmentResult, MergeResult
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    EnrichmentResult,
+    MergeResult,
+)
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
 
 JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
@@ -2525,7 +2862,12 @@ JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "ou
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import EnricherConfig, MergeConfig
+    from bioetl.domain.composite.config import (
+        DependencyConfig,
+        EnricherConfig,
+        MergeConfig,
+    )
+    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
 
 
@@ -2589,11 +2931,13 @@ class MergeService:
         storage: StoragePort,
         logger: LoggerPort,
         delta_reader: DeltaReaderPort | None = None,
+        field_group_registry: FieldGroupRegistry | None = None,
     ) -> None:
         self._config = merge_config
         self._storage = storage
         self._logger = logger
         self._delta_reader = delta_reader
+        self._field_group_registry = field_group_registry
         self._deduplicator = EnricherDeduplicator(logger)
         self._aggregator = EnricherAggregator(logger)
         self._renamer = ColumnRenamer(logger)
@@ -2612,8 +2956,10 @@ class MergeService:
         enrichment_results: dict[str, EnrichmentResult],
         run_id: str,
         seed_pipeline: str | None = None,
+        dependencies: Sequence[DependencyConfig] | None = None,
+        dependency_results: dict[str, DependencyResult] | None = None,
     ) -> MergeResult:
-        """Merge seed and enricher data into unified output.
+        """Merge seed, dependency, and enricher data into unified output.
 
         Args:
             seed_table: Path to seed Silver table (e.g., "silver/chembl/publication").
@@ -2623,6 +2969,8 @@ class MergeService:
             seed_pipeline: Seed pipeline name (e.g., "chembl_publication").
                 If None, will be inferred from seed_table path.
                 Used for intelligent column renaming during merge.
+            dependencies: Sequence of dependency configurations (optional).
+            dependency_results: Results from dependency execution (optional).
 
         Returns:
             MergeResult with statistics and output paths.
@@ -2694,6 +3042,35 @@ class MergeService:
                     error=str(e),
                 )
 
+        # Step 2b: Read successful dependency tables
+        dependency_dfs: dict[str, pl.DataFrame] = {}
+        if dependencies and dependency_results:
+            for dep in dependencies:
+                dep_result = dependency_results.get(dep.pipeline)
+                if dep_result is None or not dep_result.is_success:
+                    continue
+
+                dep_table = dep.silver_table
+                if not dep_table:
+                    continue
+
+                self._logger.info(
+                    "Reading dependency table",
+                    dependency=dep.pipeline,
+                    table=dep_table,
+                )
+
+                try:
+                    dep_df = await self._read_silver_table(dep_table)
+                    dependency_dfs[dep.pipeline] = dep_df
+                    sources_used.append(dep.pipeline)
+                except Exception as e:
+                    self._logger.warning(
+                        "Failed to read dependency table",
+                        dependency=dep.pipeline,
+                        error=str(e),
+                    )
+
         # Step 3: Apply joins with intelligent column renaming
         merged_df = await self._apply_joins(
             seed_df=seed_df,
@@ -2701,6 +3078,20 @@ class MergeService:
             enrichers=enrichers,
             seed_pipeline=effective_seed_pipeline,
         )
+
+        # Step 3b: Apply dependency joins (if any)
+        if dependencies and dependency_dfs:
+            merged_df = await self._apply_dependency_joins(
+                merged_df=merged_df,
+                dependency_dfs=dependency_dfs,
+                dependencies=[d for d in dependencies if d.pipeline in dependency_dfs],
+                seed_pipeline=effective_seed_pipeline,
+            )
+            self._logger.info(
+                "Applied dependency joins",
+                dependencies_joined=len(dependency_dfs),
+                total_columns=len(merged_df.columns),
+            )
 
         # Step 4: Resolve conflicts
         merged_df = self._resolve_conflicts(
@@ -2717,6 +3108,9 @@ class MergeService:
             run_id=run_id,
             sources_used=sources_used,
         )
+
+        # Step 5b: Drop excluded fields from merged output
+        merged_df = self._drop_excluded_fields(merged_df)
 
         # Step 6: Order columns by semantic groups
         merged_df = self._orderer.order_columns(merged_df)
@@ -2849,6 +3243,7 @@ class MergeService:
             records,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=True,
         )
 
     async def _write_merged_gold(
@@ -2859,11 +3254,25 @@ class MergeService:
     ) -> None:
         """Write merged data to Gold layer via StoragePort.
 
+        When a FieldGroupRegistry is configured, trash-group columns are
+        excluded from the Gold output.
+
         Args:
             df: Polars DataFrame to write.
             run_id: Composite run ID for metadata tracking.
             sources_used: List of source pipelines used in merge.
         """
+        # Filter out trash columns when field group registry is available
+        if self._field_group_registry is not None:
+            trash_cols = self._field_group_registry.get_trash_columns(df.columns)
+            if trash_cols:
+                self._logger.info(
+                    "Filtering trash columns from Gold output",
+                    trash_count=len(trash_cols),
+                    trash_columns=trash_cols[:10],  # Log first 10 for brevity
+                )
+                df = df.drop(trash_cols)
+
         # Coerce null columns for Delta Lake compatibility
         df = self._coerce_null_columns(df)
 
@@ -2874,6 +3283,7 @@ class MergeService:
             records,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=True,
         )
 
     def _infer_silver_table(self, pipeline_name: str) -> str:
@@ -3217,22 +3627,368 @@ class MergeService:
                 merged, enricher_df, join_key_set
             )
 
-            # Apply join based on strategy using left_on/right_on for qualified keys
-            how = self._get_polars_join_type()
-
-            if (
-                seed_join_key in merged.columns
-                and enricher_join_key in enricher_df.columns
-            ):
-                merged = merged.join(
-                    enricher_df,
-                    left_on=seed_join_key,
-                    right_on=enricher_join_key,
-                    how=how,
-                    suffix=f"_{enricher.pipeline}",
-                )
+            # Apply join using shared helper
+            merged = self._execute_polars_join(
+                merged, enricher_df, seed_join_key, enricher_join_key, enricher.pipeline
+            )
 
         return merged
+
+    def _execute_polars_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_key: str,
+        right_key: str,
+        pipeline_name: str,
+    ) -> pl.DataFrame:
+        """Execute a Polars join with temp column handling.
+
+        When left_key != right_key, Polars drops the right_on column.
+        This method uses a temp column to preserve the qualified join key.
+
+        Args:
+            left_df: Left DataFrame (seed/merged).
+            right_df: Right DataFrame (enricher/dependency).
+            left_key: Column name in left_df for join.
+            right_key: Column name in right_df for join.
+            pipeline_name: Pipeline name for suffix and temp column naming.
+
+        Returns:
+            Joined DataFrame.
+        """
+        how = self._get_polars_join_type()
+
+        if left_key not in left_df.columns or right_key not in right_df.columns:
+            return left_df
+
+        if left_key != right_key:
+            # Use temp column to preserve qualified join key in right_df
+            import polars as pl
+
+            temp_join_col = f"__temp_join_{pipeline_name}"
+            right_df = right_df.with_columns(pl.col(right_key).alias(temp_join_col))
+            return left_df.join(
+                right_df,
+                left_on=left_key,
+                right_on=temp_join_col,
+                how=how,
+                suffix=f"_{pipeline_name}",
+            )
+
+        return left_df.join(
+            right_df,
+            left_on=left_key,
+            right_on=right_key,
+            how=how,
+            suffix=f"_{pipeline_name}",
+        )
+
+    async def _apply_dependency_joins(
+        self,
+        merged_df: pl.DataFrame,
+        dependency_dfs: dict[str, pl.DataFrame],
+        dependencies: Sequence[DependencyConfig],
+        seed_pipeline: str | None = None,
+    ) -> pl.DataFrame:
+        """Apply joins for dependency tables.
+
+        Dependencies are simpler than enrichers:
+        - Always 1:1 cardinality (no aggregation)
+        - Single or composite join keys
+        - No special cardinality handling
+
+        For multi-field filter dependencies (e.g., compound_record filtered by
+        molecule_chembl_id + document_chembl_id), uses composite key join on
+        all join_keys simultaneously.
+
+        Column renaming uses ColumnRenamer to apply {provider}.{entity}.{field}
+        format to dependency columns for qualified column matching.
+
+        Args:
+            merged_df: DataFrame with seed data (possibly already enriched).
+            dependency_dfs: Mapping of dependency pipeline name to DataFrame.
+            dependencies: Sequence of dependency configurations.
+            seed_pipeline: Seed pipeline name for join key resolution.
+
+        Returns:
+            DataFrame with dependency data joined.
+        """
+        result = merged_df
+
+        for dep in dependencies:
+            if dep.pipeline not in dependency_dfs:
+                continue
+
+            dep_df = dependency_dfs[dep.pipeline]
+
+            # Multi-field filter dependencies use composite key join
+            if dep.is_multi_field_filter:
+                result = self._apply_composite_key_dependency_join(
+                    result, dep_df, dep, seed_pipeline
+                )
+                continue
+
+            join_keys_list = list(dep.join_keys)
+            primary_key = join_keys_list[0]
+
+            # For dependencies with filter_field, use it for right-side operations
+            # (e.g., protein_classification_id -> protein_class_id)
+            right_key = dep.filter_field if dep.filter_field else primary_key
+            right_keys_list = [right_key] if dep.filter_field else join_keys_list
+
+            # Deduplicate dependency before join to prevent fan-out
+            dep_df = self._deduplicator.deduplicate(
+                enricher_df=dep_df,
+                join_keys=right_keys_list,  # Use right-side key for dedup
+                enricher_name=dep.pipeline,
+            )
+
+            # Normalize join key columns for case-insensitive matching
+            result = self._normalize_join_key_columns(
+                result, join_keys_list, pipeline=seed_pipeline
+            )
+            dep_df = self._normalize_join_key_columns(
+                dep_df,
+                right_keys_list,
+                pipeline=None,  # Use right-side key
+            )
+
+            # Rename dependency columns to qualified format: {provider}.{entity}.{field}
+            dep_df = self._renamer.rename_dataframe(
+                dep_df, dep.pipeline, exclude_join_keys=False
+            )
+
+            self._logger.debug(
+                "Renamed dependency columns to qualified format",
+                dependency=dep.pipeline,
+                qualified_count=len(
+                    [c for c in dep_df.columns if "." in c and not c.startswith("_")]
+                ),
+            )
+
+            # Drop system columns from dependency to prevent duplicates
+            dep_df = self._drop_system_columns(dep_df)
+
+            # Calculate qualified join key names
+            # For chained dependencies, use key_source pipeline for left-side key resolution
+            left_pipeline = (
+                dep.key_source
+                if dep.key_source and dep.key_source != "seed"
+                else seed_pipeline
+            )
+
+            # right_key already defined above for dedup/normalize
+
+            seed_join_key, dep_join_key, seed_join_key_qualified = (
+                self._resolve_join_key_names_asymmetric(
+                    left_key=primary_key,
+                    right_key=right_key,
+                    left_pipeline=left_pipeline,
+                    right_pipeline=dep.pipeline,
+                    merged_columns=result.columns,
+                )
+            )
+
+            # Detect and resolve conflicts
+            join_key_set = {seed_join_key, dep_join_key}
+            if seed_join_key_qualified and seed_join_key_qualified != seed_join_key:
+                join_key_set.add(seed_join_key_qualified)
+            result, dep_df = self._detect_and_resolve_conflicts(
+                result, dep_df, join_key_set
+            )
+
+            # Apply join using shared helper
+            result = self._execute_polars_join(
+                result, dep_df, seed_join_key, dep_join_key, dep.pipeline
+            )
+
+            self._logger.debug(
+                "Joined dependency",
+                dependency=dep.pipeline,
+                seed_join_key=seed_join_key,
+                dep_join_key=dep_join_key,
+                result_rows=len(result),
+            )
+
+        return result
+
+    def _resolve_composite_join_keys(
+        self,
+        join_keys_list: list[str],
+        left_pipeline: str | None,
+        right_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[list[str], list[str], set[str]]:
+        """Resolve qualified join key names for composite key join.
+
+        Args:
+            join_keys_list: Raw join key names.
+            left_pipeline: Pipeline name for left-side key resolution.
+            right_pipeline: Pipeline name for right-side key resolution.
+            merged_columns: Available columns in the merged DataFrame.
+
+        Returns:
+            Tuple of (left_keys, right_keys, all_join_key_set).
+        """
+        left_keys: list[str] = []
+        right_keys: list[str] = []
+        all_join_key_set: set[str] = set()
+
+        for key in join_keys_list:
+            seed_key, dep_key, seed_key_qualified = (
+                self._resolve_join_key_names_asymmetric(
+                    left_key=key,
+                    right_key=key,
+                    left_pipeline=left_pipeline,
+                    right_pipeline=right_pipeline,
+                    merged_columns=merged_columns,
+                )
+            )
+            left_keys.append(seed_key)
+            right_keys.append(dep_key)
+            all_join_key_set.add(seed_key)
+            all_join_key_set.add(dep_key)
+            if seed_key_qualified and seed_key_qualified != seed_key:
+                all_join_key_set.add(seed_key_qualified)
+
+        return left_keys, right_keys, all_join_key_set
+
+    def _execute_composite_key_join(
+        self,
+        left_df: pl.DataFrame,
+        right_df: pl.DataFrame,
+        left_keys: list[str],
+        right_keys: list[str],
+        pipeline_name: str,
+    ) -> pl.DataFrame:
+        """Execute a Polars join on multiple keys.
+
+        Args:
+            left_df: Left DataFrame.
+            right_df: Right DataFrame.
+            left_keys: Column names in left_df for join.
+            right_keys: Column names in right_df for join.
+            pipeline_name: Pipeline name for suffix.
+
+        Returns:
+            Joined DataFrame.
+        """
+        import polars as pl
+
+        how = self._get_polars_join_type()
+
+        if left_keys == right_keys:
+            return left_df.join(
+                right_df,
+                on=left_keys,
+                how=how,
+                suffix=f"_{pipeline_name}",
+            )
+
+        # Different column names — use temp columns for right-side
+        temp_cols = []
+        for lk, rk in zip(left_keys, right_keys, strict=True):
+            if lk != rk:
+                temp_col = f"__temp_join_{pipeline_name}_{rk}"
+                right_df = right_df.with_columns(pl.col(rk).alias(temp_col))
+                temp_cols.append(temp_col)
+            else:
+                temp_cols.append(rk)
+
+        return left_df.join(
+            right_df,
+            left_on=left_keys,
+            right_on=temp_cols,
+            how=how,
+            suffix=f"_{pipeline_name}",
+        )
+
+    def _apply_composite_key_dependency_join(
+        self,
+        merged_df: pl.DataFrame,
+        dep_df: pl.DataFrame,
+        dep: DependencyConfig,
+        seed_pipeline: str | None = None,
+    ) -> pl.DataFrame:
+        """Apply composite key join for multi-field filter dependencies.
+
+        Used when a dependency filters by multiple fields (e.g., compound_record
+        filtered by both molecule_chembl_id and document_chembl_id). Joins on
+        all join_keys simultaneously to produce precise 1:1 matches.
+
+        Args:
+            merged_df: DataFrame with seed data.
+            dep_df: Dependency DataFrame to join.
+            dep: Dependency configuration with multiple filter_fields.
+            seed_pipeline: Seed pipeline name for join key resolution.
+
+        Returns:
+            DataFrame with dependency joined on composite key.
+        """
+        join_keys_list = list(dep.join_keys)
+
+        # Deduplicate on all join keys (composite dedup)
+        dep_df = self._deduplicator.deduplicate(
+            enricher_df=dep_df,
+            join_keys=join_keys_list,
+            enricher_name=dep.pipeline,
+        )
+
+        # Normalize join key columns
+        merged_df = self._normalize_join_key_columns(
+            merged_df, join_keys_list, pipeline=seed_pipeline
+        )
+        dep_df = self._normalize_join_key_columns(dep_df, join_keys_list, pipeline=None)
+
+        # Rename dependency columns to qualified format
+        dep_df = self._renamer.rename_dataframe(
+            dep_df, dep.pipeline, exclude_join_keys=False
+        )
+
+        # Drop system columns from dependency
+        dep_df = self._drop_system_columns(dep_df)
+
+        # Resolve qualified join key names for each key
+        left_pipeline = (
+            dep.key_source
+            if dep.key_source and dep.key_source != "seed"
+            else seed_pipeline
+        )
+        left_keys, right_keys, all_join_key_set = self._resolve_composite_join_keys(
+            join_keys_list, left_pipeline, dep.pipeline, merged_df.columns
+        )
+
+        # Detect and resolve conflicts (excluding all join keys)
+        merged_df, dep_df = self._detect_and_resolve_conflicts(
+            merged_df, dep_df, all_join_key_set
+        )
+
+        # Verify all join keys exist
+        missing_left = [k for k in left_keys if k not in merged_df.columns]
+        missing_right = [k for k in right_keys if k not in dep_df.columns]
+        if missing_left or missing_right:
+            self._logger.warning(
+                "Composite key join skipped: missing columns",
+                dependency=dep.pipeline,
+                missing_left=missing_left,
+                missing_right=missing_right,
+            )
+            return merged_df
+
+        result = self._execute_composite_key_join(
+            merged_df, dep_df, left_keys, right_keys, dep.pipeline
+        )
+
+        self._logger.debug(
+            "Joined dependency with composite key",
+            dependency=dep.pipeline,
+            left_keys=left_keys,
+            right_keys=right_keys,
+            result_rows=len(result),
+        )
+
+        return result
 
     def _get_polars_join_type(self) -> JoinHow:
         """Convert MergeStrategy to Polars join type."""
@@ -3312,6 +4068,51 @@ class MergeService:
 
         return seed_join_key, enricher_join_key, seed_join_key_qualified
 
+    def _resolve_join_key_names_asymmetric(
+        self,
+        left_key: str,
+        right_key: str,
+        left_pipeline: str | None,
+        right_pipeline: str,
+        merged_columns: list[str],
+    ) -> tuple[str, str, str | None]:
+        """Resolve qualified join key names with different keys for left/right.
+
+        Used when join key has different names in source and target tables.
+        E.g., protein_classification_id (in target_component) -> protein_class_id (in protein_class).
+
+        Args:
+            left_key: Unqualified join key name in left (merged) DataFrame.
+            right_key: Unqualified join key name in right (dependency) DataFrame.
+            left_pipeline: Pipeline name for left-side qualification (key_source or seed).
+            right_pipeline: Pipeline name for right-side qualification.
+            merged_columns: Current merged DataFrame columns.
+
+        Returns:
+            Tuple of (left_join_key, right_join_key, left_join_key_qualified).
+        """
+        left_join_key_qualified: str | None = None
+        left_join_key = left_key
+
+        # Resolve left-side key (from key_source or seed)
+        if left_pipeline is not None:
+            try:
+                left_provider, left_entity = self._parse_pipeline_name(left_pipeline)
+                left_join_key_qualified = f"{left_provider}.{left_entity}.{left_key}"
+                if left_join_key_qualified in merged_columns:
+                    left_join_key = left_join_key_qualified
+            except ValueError:
+                pass
+
+        # Resolve right-side key (from dependency)
+        try:
+            right_provider, right_entity = self._parse_pipeline_name(right_pipeline)
+            right_join_key = f"{right_provider}.{right_entity}.{right_key}"
+        except ValueError:
+            right_join_key = right_key
+
+        return left_join_key, right_join_key, left_join_key_qualified
+
     def _get_enricher_prefix(
         self,
         enricher_pipeline: str,
@@ -3371,6 +4172,19 @@ class MergeService:
         Returns:
             DataFrame with conflicts resolved.
         """
+        # Skip coalescing if preserve_all_sources is enabled
+        # This keeps all provider-qualified columns (e.g., chembl.publication.title,
+        # crossref.publication.title) instead of merging them
+        if self._config.preserve_all_sources:
+            qualified_cols = [
+                c for c in df.columns if "." in c and not c.startswith("_")
+            ]
+            self._logger.info(
+                "Skipping conflict resolution - preserve_all_sources=True",
+                qualified_columns=len(qualified_cols),
+            )
+            return df
+
         match self._config.conflict_resolution:
             case ConflictResolution.SEED_PRIORITY:
                 return self._coalesce_prefer_seed(df, enrichers, seed_pipeline)
@@ -3828,6 +4642,28 @@ class MergeService:
                 pl.lit(datetime.now(tz=UTC).isoformat()).alias("_lineage_created_at"),
             ]
         )
+
+    def _drop_excluded_fields(self, df: pl.DataFrame) -> pl.DataFrame:
+        """Drop columns configured for exclusion in merge config."""
+        if not self._config.exclude_fields:
+            return df
+
+        from fnmatch import fnmatch
+
+        excluded = [
+            col
+            for col in df.columns
+            if any(fnmatch(col, pattern) for pattern in self._config.exclude_fields)
+        ]
+        if not excluded:
+            return df
+
+        self._logger.info(
+            "Dropping excluded fields from merged output",
+            excluded_count=len(excluded),
+            excluded_fields=excluded[:10],
+        )
+        return df.drop(excluded)
 
     def _count_enriched_records(
         self,
@@ -4570,6 +5406,7 @@ from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_helpers import (
     add_not_run_results,
     calculate_had_warnings,
+    get_mergeable_dependencies,
     get_mergeable_enrichers,
     log_enrichment_summary,
 )
@@ -4615,6 +5452,13 @@ class CompositeRuntimeConfig:
         required_only: Skip optional enrichers.
         force_enricher: Force re-run of specified enricher.
         seed_limit: Optional limit for seed pipeline.
+        use_cached_bronze: Load data from Bronze cache instead of API (master switch).
+        cached_bronze_path: Explicit path to Bronze cache directory.
+        cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD).
+        cached_bronze_enrichers: Override cached Bronze for enrichers.
+            None=follow master, True=force cache, False=force API.
+        cached_bronze_dependencies: Override cached Bronze for dependencies.
+            None=follow master, True=force cache, False=force API.
     """
 
     resume: bool = False
@@ -4623,6 +5467,11 @@ class CompositeRuntimeConfig:
     required_only: bool = False
     force_enricher: str | None = None
     seed_limit: int | None = None
+    use_cached_bronze: bool = True
+    cached_bronze_path: str | None = None
+    cached_bronze_date: str | None = None
+    cached_bronze_enrichers: bool | None = None
+    cached_bronze_dependencies: bool | None = None
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""
@@ -4833,196 +5682,231 @@ class CompositePipelineRunner:
         if self._runtime.resume and state.is_resumable:
             self._fsm.log_resume_context(state)
 
-        # Track results
-        seed_result: SeedResult | None = None
-        enrichment_results: dict[str, EnrichmentResult] = {}
-        merge_result: MergeResult | None = None
-
-        # Step 1: Run seed (if not completed)
-        if not state.seed_completed:
-            # Validate and transition to SEED_RUNNING before starting seed
-            previous_state = state.state
-            self._fsm.validate_fsm_transition(
-                previous_state, CompositePipelineState.SEED_RUNNING
-            )
-            state = state.with_state(CompositePipelineState.SEED_RUNNING)
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.SEED_RUNNING,
-                stage="seed_start",
-            )
-            # Log phase event for seed start
-            self._logger.info(
-                PipelineEvent.phase_started("seed"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-            )
-            await self._save_checkpoint_safe(state, "seed_running")
-
-            # Execute seed with error handling
-            try:
-                seed_result = await self._run_seed()
-            except Exception as e:
-                # Seed failed - transition to FAILED state
-                self._logger.error(
-                    "Seed pipeline failed",
-                    composite=self._config.name,
-                    run_id=self._run_id_str,
-                    seed_pipeline=self._config.seed.pipeline,
-                    error=str(e),
-                )
-                self._fsm.log_fsm_transition(
-                    from_state=CompositePipelineState.SEED_RUNNING,
-                    to_state=CompositePipelineState.FAILED,
-                    stage="seed_failed",
-                    error=str(e),
-                )
-                # Save FAILED state to checkpoint for resume awareness
-                failed_state = state.with_state(CompositePipelineState.FAILED)
-                await self._save_checkpoint_safe(failed_state, "seed_failed")
-                # Re-raise to trigger outer error handling and lock release
-                raise
-
-            # Seed succeeded - transition to SEED_COMPLETED
-            state = state.with_seed_completed(seed_result)
-            self._fsm.log_fsm_transition(
-                from_state=CompositePipelineState.SEED_RUNNING,
-                to_state=CompositePipelineState.SEED_COMPLETED,
-                stage="seed_complete",
-                records_extracted=seed_result.records_extracted,
-                records_silver=seed_result.records_silver,
-            )
-            # Log phase event for seed completion
-            self._logger.info(
-                PipelineEvent.phase_completed("seed"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                records_extracted=seed_result.records_extracted,
-                records_silver=seed_result.records_silver,
-            )
-            await self._save_checkpoint_safe(state, "seed_completed")
-        else:
-            # Resume: seed already completed
-            self._logger.info(
-                "Seed already completed, resuming from checkpoint",
-                composite=self._config.name,
-                run_id=self._run_id_str,
-            )
-            # Ensure FSM state reflects SEED_COMPLETED when resuming
-            if state.state != CompositePipelineState.SEED_COMPLETED:
-                previous_state = state.state
-                state = state.with_state(CompositePipelineState.SEED_COMPLETED)
-                self._fsm.log_fsm_transition(
-                    from_state=previous_state,
-                    to_state=CompositePipelineState.SEED_COMPLETED,
-                    stage="seed_resume",
-                )
-            seed_result = SeedResult(
-                pipeline_name=self._config.seed.pipeline,
-                resumed=True,
-            )
+        # Step 1: Run seed phase
+        state, seed_result = await self._execute_seed_phase(state)
 
         # Step 2: Extract keys from seed Silver
         keys_df = await self._key_extractor.extract(
             silver_table=self._config.seed.silver_table,
             keys=self._config.seed.output_keys,
         )
-
         self._logger.info(
             "Extracted keys for enrichment",
             composite=self._config.name,
             keys_count=len(keys_df),
         )
 
-        # Track dependency results
-        dependency_results: dict[str, DependencyResult] = {}
+        # Step 3: Run dependencies phase
+        state, dependency_results = await self._execute_dependencies_phase(
+            state, keys_df
+        )
 
-        # Step 3: Run dependencies (if any)
-        if (
+        # Step 4: Run enrichment phase
+        state, enrichment_results = await self._execute_enrichment_phase(state, keys_df)
+
+        # Step 5: Transition to ENRICHMENT_COMPLETED
+        state = await self._transition_to_enrichment_completed(state)
+
+        # Step 6: Execute merge or skip in dry run mode
+        state, merge_result = await self._execute_merge_stage(
+            state, enrichment_results, dependency_results
+        )
+
+        # Step 7: Finalize - set COMPLETED and cleanup checkpoint
+        await self._finalize_pipeline(state)
+
+        return self._build_composite_result(
+            seed_result, dependency_results, enrichment_results, merge_result
+        )
+
+    async def _execute_seed_phase(
+        self, state: CompositeCheckpointState
+    ) -> tuple[CompositeCheckpointState, SeedResult]:
+        """Execute the seed phase or resume from checkpoint."""
+        if not state.seed_completed:
+            return await self._run_seed_with_fsm(state)
+
+        # Resume: seed already completed
+        self._logger.info(
+            "Seed already completed, resuming from checkpoint",
+            composite=self._config.name,
+            run_id=self._run_id_str,
+        )
+        if state.state != CompositePipelineState.SEED_COMPLETED:
+            previous_state = state.state
+            state = state.with_state(CompositePipelineState.SEED_COMPLETED)
+            self._fsm.log_fsm_transition(
+                from_state=previous_state,
+                to_state=CompositePipelineState.SEED_COMPLETED,
+                stage="seed_resume",
+            )
+        return state, SeedResult(pipeline_name=self._config.seed.pipeline, resumed=True)
+
+    async def _run_seed_with_fsm(
+        self, state: CompositeCheckpointState
+    ) -> tuple[CompositeCheckpointState, SeedResult]:
+        """Run seed pipeline with FSM state transitions."""
+        previous_state = state.state
+        self._fsm.validate_fsm_transition(
+            previous_state, CompositePipelineState.SEED_RUNNING
+        )
+        state = state.with_state(CompositePipelineState.SEED_RUNNING)
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.SEED_RUNNING,
+            stage="seed_start",
+        )
+        self._logger.info(
+            PipelineEvent.phase_started("seed"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+        )
+        await self._save_checkpoint_safe(state, "seed_running")
+
+        try:
+            seed_result = await self._run_seed()
+        except Exception as e:
+            self._logger.error(
+                "Seed pipeline failed",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                seed_pipeline=self._config.seed.pipeline,
+                error=str(e),
+            )
+            self._fsm.log_fsm_transition(
+                from_state=CompositePipelineState.SEED_RUNNING,
+                to_state=CompositePipelineState.FAILED,
+                stage="seed_failed",
+                error=str(e),
+            )
+            failed_state = state.with_state(CompositePipelineState.FAILED)
+            await self._save_checkpoint_safe(failed_state, "seed_failed")
+            raise
+
+        state = state.with_seed_completed(seed_result)
+        self._fsm.log_fsm_transition(
+            from_state=CompositePipelineState.SEED_RUNNING,
+            to_state=CompositePipelineState.SEED_COMPLETED,
+            stage="seed_complete",
+            records_extracted=seed_result.records_extracted,
+            records_silver=seed_result.records_silver,
+        )
+        self._logger.info(
+            PipelineEvent.phase_completed("seed"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            records_extracted=seed_result.records_extracted,
+            records_silver=seed_result.records_silver,
+        )
+        await self._save_checkpoint_safe(state, "seed_completed")
+        return state, seed_result
+
+    def _has_dependencies_configured(self) -> bool:
+        """Check if dependencies phase is configured and ready."""
+        return bool(
             self._config.dependencies
             and self._dependency_coordinator
             and self._dependencies_runner_factory
-        ):
-            # Validate and transition to DEPENDENCIES_RUNNING
-            previous_state = state.state
-            self._fsm.validate_fsm_transition(
-                previous_state, CompositePipelineState.DEPENDENCIES_RUNNING
-            )
-            state = state.with_state(CompositePipelineState.DEPENDENCIES_RUNNING)
+        )
+
+    def _find_required_failures(
+        self, results: dict[str, DependencyResult]
+    ) -> list[str]:
+        """Find required dependencies that failed."""
+        failed = []
+        for name, result in results.items():
+            if result.is_success:
+                continue
+            dep_cfg = self._config.get_dependency(name)
+            if dep_cfg and dep_cfg.required:
+                failed.append(name)
+        return failed
+
+    async def _execute_dependencies_phase(
+        self,
+        state: CompositeCheckpointState,
+        keys_df: pl.DataFrame,
+    ) -> tuple[CompositeCheckpointState, dict[str, DependencyResult]]:
+        """Execute the dependencies phase if configured."""
+        dependency_results: dict[str, DependencyResult] = {}
+        if not self._has_dependencies_configured():
+            return state, dependency_results
+
+        assert self._dependency_coordinator is not None
+        assert self._dependencies_runner_factory is not None
+
+        previous_state = state.state
+        self._fsm.validate_fsm_transition(
+            previous_state, CompositePipelineState.DEPENDENCIES_RUNNING
+        )
+        state = state.with_state(CompositePipelineState.DEPENDENCIES_RUNNING)
+        await self._checkpoint_manager.save(state)
+
+        dep_pipelines = [d.pipeline for d in self._config.dependencies]
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.DEPENDENCIES_RUNNING,
+            stage="dependencies_start",
+            dependencies=dep_pipelines,
+            count=len(dep_pipelines),
+        )
+        self._logger.info(
+            PipelineEvent.phase_started("dependencies"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            dependencies=dep_pipelines,
+            count=len(dep_pipelines),
+        )
+
+        dependency_results = await self._dependency_coordinator.run_dependencies(
+            keys=keys_df,
+            dependencies=self._config.dependencies,
+            completed=state.completed_dependencies,
+            runner_factory=self._dependencies_runner_factory,
+            dependency_configs={d.pipeline: d for d in self._config.dependencies},
+        )
+
+        for dep_name, dep_result in dependency_results.items():
+            if dep_result.is_success:
+                state = state.with_dependency_completed(dep_name, dep_result)
+
+        required_failed = self._find_required_failures(dependency_results)
+        if required_failed:
+            state = state.with_state(CompositePipelineState.FAILED)
             await self._checkpoint_manager.save(state)
+            raise RuntimeError(f"Required dependencies failed: {required_failed}")
 
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.DEPENDENCIES_RUNNING,
-                stage="dependencies_start",
-                dependencies=[d.pipeline for d in self._config.dependencies],
-                count=len(self._config.dependencies),
-            )
+        previous_state = state.state
+        state = state.with_state(CompositePipelineState.DEPENDENCIES_COMPLETED)
+        succeeded = sum(1 for r in dependency_results.values() if r.is_success)
+        failed = len(dependency_results) - succeeded
+        self._fsm.log_fsm_transition(
+            from_state=previous_state,
+            to_state=CompositePipelineState.DEPENDENCIES_COMPLETED,
+            stage="dependencies_complete",
+            succeeded=succeeded,
+            failed=failed,
+        )
+        self._logger.info(
+            PipelineEvent.phase_completed("dependencies"),
+            composite=self._config.name,
+            run_id=self._run_id_str,
+            succeeded=succeeded,
+            failed=failed,
+        )
+        await self._checkpoint_manager.save(state)
+        return state, dependency_results
 
-            self._logger.info(
-                PipelineEvent.phase_started("dependencies"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                dependencies=[d.pipeline for d in self._config.dependencies],
-                count=len(self._config.dependencies),
-            )
-
-            # Execute dependencies
-            dependency_results = await self._dependency_coordinator.run_dependencies(
-                keys=keys_df,
-                dependencies=self._config.dependencies,
-                completed=state.completed_dependencies,
-                runner_factory=self._dependencies_runner_factory,
-            )
-
-            # Update checkpoint with completed dependencies
-            for dep_name, dep_result in dependency_results.items():
-                if dep_result.is_success:
-                    state = state.with_dependency_completed(dep_name, dep_result)
-
-            # Check for required dependency failures
-            required_failed = [
-                dep_name
-                for dep_name, dep_result in dependency_results.items()
-                if not dep_result.is_success
-                and self._config.get_dependency(dep_name)
-                and self._config.get_dependency(dep_name).required  # type: ignore[union-attr]
-            ]
-            if required_failed:
-                # Required dependency failed - transition to FAILED
-                state = state.with_state(CompositePipelineState.FAILED)
-                await self._checkpoint_manager.save(state)
-                raise RuntimeError(f"Required dependencies failed: {required_failed}")
-
-            # Transition to DEPENDENCIES_COMPLETED
-            previous_state = state.state
-            state = state.with_state(CompositePipelineState.DEPENDENCIES_COMPLETED)
-            self._fsm.log_fsm_transition(
-                from_state=previous_state,
-                to_state=CompositePipelineState.DEPENDENCIES_COMPLETED,
-                stage="dependencies_complete",
-                succeeded=len([r for r in dependency_results.values() if r.is_success]),
-                failed=len(
-                    [r for r in dependency_results.values() if not r.is_success]
-                ),
-            )
-            self._logger.info(
-                PipelineEvent.phase_completed("dependencies"),
-                composite=self._config.name,
-                run_id=self._run_id_str,
-                succeeded=len([r for r in dependency_results.values() if r.is_success]),
-                failed=len(
-                    [r for r in dependency_results.values() if not r.is_success]
-                ),
-            )
-            await self._checkpoint_manager.save(state)
-
-        # Step 4: Determine which enrichers to run
+    async def _execute_enrichment_phase(
+        self,
+        state: CompositeCheckpointState,
+        keys_df: pl.DataFrame,
+    ) -> tuple[CompositeCheckpointState, dict[str, EnrichmentResult]]:
+        """Execute the enrichment phase."""
         enrichers_to_run = self._get_enrichers_to_run(state)
+        enrichment_results: dict[str, EnrichmentResult] = {}
 
-        # Step 5: Run enrichers (fan-out) with FSM state management
         if enrichers_to_run:
-            # Validate and transition to ENRICHING state before starting enrichments
             enricher_names = [e.pipeline for e in enrichers_to_run]
             previous_state = state.state
             self._fsm.validate_fsm_transition(
@@ -5031,7 +5915,6 @@ class CompositePipelineRunner:
             state = state.with_state(CompositePipelineState.ENRICHING)
             await self._checkpoint_manager.save(state)
 
-            # Log FSM transition to ENRICHING
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.ENRICHING,
@@ -5039,7 +5922,6 @@ class CompositePipelineRunner:
                 enrichers=enricher_names,
                 count=len(enrichers_to_run),
             )
-            # Log phase event for enrichment start
             self._logger.info(
                 PipelineEvent.phase_started("enrichment"),
                 composite=self._config.name,
@@ -5055,26 +5937,21 @@ class CompositePipelineRunner:
                 runner_factory=self._enricher_runner_factory,
             )
 
-            # Update checkpoint with completed enrichers
             for name, result in enrichment_results.items():
                 if result.is_success or result.status == EnrichmentStatus.SKIPPED:
                     state = state.with_enricher_completed(name, result)
             await self._checkpoint_manager.save(state)
 
-            # Log aggregated enrichment results
             log_enrichment_summary(enrichment_results, self._config.name, self._logger)
         else:
-            # No enrichers to run - skip enrichment stage
             self._logger.info(
                 "No enrichers to run, skipping enrichment stage",
                 composite=self._config.name,
                 reason="all_completed_or_filtered",
             )
 
-        # Merge with previously completed enrichers
         enrichment_results.update(state.enrichment_results)
 
-        # Step 4b: Add NOT_RUN results for optional enrichers skipped due to required_only
         enrichment_results = add_not_run_results(
             enrichment_results,
             enrichers_to_run,
@@ -5085,22 +5962,18 @@ class CompositePipelineRunner:
             self._logger,
         )
 
-        # Step 6: Check required enrichers with FSM FAILED transition on error
+        # Check required enrichers with FSM FAILED transition on error
         try:
             self._check_required_enrichers(enrichment_results)
         except RuntimeError as e:
-            # Required enricher failed - transition to FAILED state
             previous_state = state.state
             state = state.with_state(CompositePipelineState.FAILED)
-
-            # Log FSM transition to FAILED
             self._fsm.log_fsm_transition(
                 from_state=previous_state,
                 to_state=CompositePipelineState.FAILED,
                 stage="required_enricher_failed",
                 error=str(e),
             )
-
             try:
                 await self._checkpoint_manager.save(state)
             except Exception as save_error:
@@ -5110,7 +5983,6 @@ class CompositePipelineRunner:
                     run_id=self._run_id_str,
                     error=str(save_error),
                 )
-
             self._logger.error(
                 "Required enricher failed, pipeline transitioning to FAILED",
                 composite=self._config.name,
@@ -5119,20 +5991,20 @@ class CompositePipelineRunner:
             )
             raise
 
-        # Step 5b: Transition to ENRICHMENT_COMPLETED
-        state = await self._transition_to_enrichment_completed(state)
+        return state, enrichment_results
 
-        # Step 7: Execute merge or skip in dry run mode
-        state, merge_result = await self._execute_merge_stage(state, enrichment_results)
-
-        # Step 8: Finalize - set COMPLETED and cleanup checkpoint
-        await self._finalize_pipeline(state)
-
+    def _build_composite_result(
+        self,
+        seed_result: SeedResult,
+        dependency_results: dict[str, DependencyResult],
+        enrichment_results: dict[str, EnrichmentResult],
+        merge_result: MergeResult | None,
+    ) -> CompositeResult:
+        """Build the final CompositeResult."""
         completed_at = datetime.now(tz=UTC)
-        started = self._started_at or completed_at  # Fallback if not set
+        started = self._started_at or completed_at
         total_duration = (completed_at - started).total_seconds()
 
-        # Calculate if we had warnings from optional enricher failures
         had_warnings = calculate_had_warnings(
             enrichment_results,
             frozenset(self._config.required_enrichers),
@@ -5140,7 +6012,6 @@ class CompositePipelineRunner:
             self._logger,
         )
 
-        # Log completion with appropriate status
         if had_warnings:
             self._logger.info(
                 PipelineEvent.COMPLETE,
@@ -5227,6 +6098,7 @@ class CompositePipelineRunner:
         self,
         state: CompositeCheckpointState,
         enrichment_results: dict[str, EnrichmentResult],
+        dependency_results: dict[str, DependencyResult] | None = None,
     ) -> tuple[CompositeCheckpointState, MergeResult | None]:
         """Execute merge stage or skip in dry run mode.
 
@@ -5264,11 +6136,21 @@ class CompositePipelineRunner:
                     enrichment_results, self._config.enrichers, self._logger
                 )
 
+                # Get only dependencies with data to merge
+                mergeable_dependencies = get_mergeable_dependencies(
+                    dependency_results or {},
+                    self._config.dependencies,
+                    self._logger,
+                )
+
                 merge_result = await self._merger.merge(
                     seed_table=self._config.seed.silver_table,
                     enrichers=mergeable_enrichers,
                     enrichment_results=enrichment_results,
                     run_id=self._run_id_str,
+                    seed_pipeline=self._config.seed.pipeline,
+                    dependencies=mergeable_dependencies,
+                    dependency_results=dependency_results,
                 )
 
                 # Log phase event for merge completion
@@ -5606,12 +6488,17 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
-from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
+from bioetl.domain.composite.result import (
+    DependencyResult,
+    DependencyStatus,
+    EnrichmentResult,
+    EnrichmentStatus,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Set
 
-    from bioetl.domain.composite.config import EnricherConfig
+    from bioetl.domain.composite.config import DependencyConfig, EnricherConfig
     from bioetl.domain.ports import LoggerPort
 
 
@@ -5829,6 +6716,62 @@ def get_mergeable_enrichers(
 
     return mergeable
 
+
+def get_mergeable_dependencies(
+    dependency_results: dict[str, DependencyResult],
+    all_dependencies: Iterable[DependencyConfig],
+    logger: LoggerPort,
+) -> list[DependencyConfig]:
+    """Get list of dependencies that should be included in merge.
+
+    Excludes dependencies with SKIPPED status or without silver_table since
+    they have no data to merge. This prevents file I/O errors when trying
+    to read non-existent or empty Silver tables.
+
+    Args:
+        dependency_results: All dependency results.
+        all_dependencies: All dependency configs.
+        logger: Logger port for structured logging.
+
+    Returns:
+        List of DependencyConfig for dependencies that have data to merge.
+    """
+    mergeable: list[DependencyConfig] = []
+    for dep_cfg in all_dependencies:
+        result = dependency_results.get(dep_cfg.pipeline)
+
+        # If no result, don't include in merge
+        if result is None:
+            logger.debug(
+                "Excluding dependency from merge",
+                dependency=dep_cfg.pipeline,
+                reason="no_result",
+            )
+            continue
+
+        # If status indicates skipped, don't include in merge
+        if result.status == DependencyStatus.SKIPPED:
+            logger.debug(
+                "Excluding dependency from merge",
+                dependency=dep_cfg.pipeline,
+                status=result.status.value,
+                reason="skipped",
+            )
+            continue
+
+        # If no silver_table configured, can't read data
+        if not dep_cfg.silver_table:
+            logger.debug(
+                "Excluding dependency from merge",
+                dependency=dep_cfg.pipeline,
+                reason="no_silver_table",
+            )
+            continue
+
+        mergeable.append(dep_cfg)
+
+    return mergeable
+
 ================================================================================
 File: __init__.py
 Path: core\__init__.py
@@ -5863,6 +6806,15 @@ from bioetl.application.core.cleanup_service import (
     CleanupService,
     LayerInfo,
 )
+from bioetl.application.core.dict_transformers import (
+    aggregate_nested_lists,
+    extract_list_field,
+    flatten_nested_dict,
+    normalize_string,
+    parse_date_field,
+    safe_extract,
+    validate_smiles,
+)
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.postrun_service import (
@@ -5881,15 +6833,6 @@ from bioetl.application.core.shutdown import (
     ShutdownService,
     ShutdownSignal,
     create_shutdown_service,
-)
-from bioetl.application.core.transform_utils import (
-    aggregate_nested_lists,
-    extract_list_field,
-    flatten_nested_dict,
-    normalize_string,
-    parse_date_field,
-    safe_extract,
-    validate_smiles,
 )
 from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
 from bioetl.application.services.medallion_types import (
@@ -6285,6 +7228,7 @@ class BaseTransformer(ABC):
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -6297,6 +7241,8 @@ class BaseTransformer(ABC):
             entity_type: Entity type for metrics labels (e.g., 'activity', 'compound').
             tracer: Tracing port for distributed tracing. Defaults to NoOpTracing.
             metrics: Metrics port for duration/error tracking. Defaults to NoOpMetrics.
+            silver_filters: Optional domain-level filter configuration for Silver layer.
+                Applied AFTER transformation but BEFORE writing to Silver.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
                 Defaults to a new IdentityService instance.
@@ -6310,6 +7256,7 @@ class BaseTransformer(ABC):
         self.entity_type = entity_type or "unknown"
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
         self._metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
+        self._silver_filters = silver_filters
         self._gold_filters = gold_filters
         self._identity: IdentityService = (
             identity_service if identity_service is not None else IdentityService()
@@ -6485,6 +7432,17 @@ class BaseTransformer(ABC):
 
         try:
             result = await self._transform_impl(context, record, index)
+            if result is not None and not self.should_write_silver(
+                context,
+                result,  # type: ignore[arg-type]  # SilverRecord is dict at runtime
+            ):
+                context.logger.debug(
+                    "silver_filter_excluded",
+                    provider=self.provider,
+                    entity_type=self.entity_type,
+                    record_index=index,
+                )
+                return None
             return result
         except TransformationError as e:
             error_type = "transformation_error"
@@ -6566,6 +7524,26 @@ class BaseTransformer(ABC):
 
         """
         ...
+
+    def should_write_silver(
+        self, _context: PipelineContext, record: dict[str, Any]
+    ) -> bool:
+        """Determine if a transformed record should be written to Silver.
+
+        Uses silver_filters from config if configured, otherwise passes all records.
+        Applied AFTER transformation but BEFORE writing to Silver layer.
+
+        Args:
+            _context: Pipeline context (unused in base implementation).
+            record: Transformed record to evaluate.
+
+        Returns:
+            True if record passes domain-level silver filters.
+
+        """
+        if self._silver_filters is None or self._silver_filters.is_empty():
+            return True
+        return self._silver_filters.should_include(record)
 
     def should_write_gold(
         self, _context: PipelineContext, record: dict[str, Any]
@@ -7651,6 +8629,9 @@ class BatchExecutor:
 
             return pl.DataFrame(records)
         except Exception:
+            # Catch all: Polars import failure OR DataFrame construction errors
+            # (malformed data, type mismatches). Graceful degradation: return None
+            # so DQ analysis can proceed with fallback logic.
             return None
 
     def _get_dq_thresholds(self) -> tuple[float, float]:
@@ -8562,12 +9543,14 @@ Safety Guard (RULES.md §4.6):
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 import orjson
 
+from bioetl.application.composite.column_orderer import ColumnOrderer
+from bioetl.domain.composite.config import DataSchemaConfig
 from bioetl.domain.exceptions import SchemaViolationError
 from bioetl.domain.locking import LockNotHeldError
 
@@ -8608,6 +9591,7 @@ class BatchWriter:
         batch_metrics: BatchMetricsRecorder,
         tracer: TracingPort | None = None,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
+        data_schema_config: DataSchemaConfig | None = None,
     ) -> None:
         """Initialize batch writer.
 
@@ -8622,6 +9606,7 @@ class BatchWriter:
             lock_validator: Async callable that validates lock ownership.
                 Returns True if lock is still held, False otherwise.
                 If None, lock validation is skipped (for tests).
+            data_schema_config: Optional layer-specific column configuration.
 
         """
         self._storage = storage
@@ -8639,6 +9624,13 @@ class BatchWriter:
         self._silver_schema = config.silver_schema
         self._table_config = config.table_config
         self._gold_schema = config.gold_schema
+        self._column_groups = config.column_groups
+        self._data_schema = data_schema_config
+        self._column_orderer = (
+            ColumnOrderer(self._context.logger, column_groups=self._column_groups)
+            if self._column_groups
+            else None
+        )
 
         # Pre-calculate table names and write modes to avoid repeated logic in hot paths
         self._silver_table_name = (
@@ -8840,6 +9832,19 @@ class BatchWriter:
             for r in records:
                 r["_source_batch_id"] = batch_id_str
 
+            available_cols = (
+                list(self._silver_schema.names)
+                if self._silver_schema is not None
+                else self._collect_record_columns(records)
+            )
+            column_order, rename_map = self._resolve_layer_columns(
+                "silver", available_cols
+            )
+
+            # Apply renames to records if specified
+            if rename_map:
+                records = self._apply_renames_to_records(records, rename_map)
+
             silver_result = await self._storage.write_silver(
                 table_name=self._silver_table_name,
                 records=records,
@@ -8847,6 +9852,7 @@ class BatchWriter:
                 schema=self._silver_schema,
                 mode=self._silver_mode,
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
+                column_order=column_order,
                 bronze_refs=bronze_refs,
             )
             self._end_span(span)
@@ -8895,11 +9901,25 @@ class BatchWriter:
                     }
                     for r in records
                 ]
+            available_cols = (
+                list(schema_columns)
+                if schema_columns
+                else self._collect_record_columns(records)
+            )
 
-            # Validate Gold records
+            # Validate Gold records (before renames)
             result = self._gold_validator.validate(records)
             if not result.valid:
                 raise SchemaViolationError("gold", result.errors)
+
+            # Resolve column order and renames for Gold layer
+            column_order, rename_map = self._resolve_layer_columns(
+                "gold", available_cols
+            )
+
+            # Apply renames to records if specified
+            if rename_map:
+                records = self._apply_renames_to_records(records, rename_map)
 
             # Pass ingestion_ts, run_id, and silver_refs for audit and lineage (ADR-014, REQ-LINEAGE-002)
             await self._storage.write_gold(
@@ -8908,6 +9928,7 @@ class BatchWriter:
                 schema=self._gold_schema,
                 primary_keys=list(self._table_config.primary_keys),
                 mode=self._gold_mode,
+                column_order=column_order,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
                 silver_refs=silver_refs,
@@ -8933,6 +9954,8 @@ class BatchWriter:
                 converted = schema.to_schema()
                 return set(converted.columns.keys())
             except Exception:
+                # Catch all: to_schema() may fail for invalid/incomplete schema definitions.
+                # Fall through to next schema type check for graceful degradation.
                 pass
 
         # Handle Pandera DataFrameSchema (instance with columns dict)
@@ -8940,6 +9963,114 @@ class BatchWriter:
             return set(schema.columns.keys())
 
         return None
+
+    def _collect_record_columns(self, records: list[dict[str, Any]]) -> list[str]:
+        """Collect columns from records in a stable, first-seen order."""
+        columns: list[str] = []
+        seen: set[str] = set()
+        for record in records:
+            for key in record:
+                if key not in seen:
+                    seen.add(key)
+                    columns.append(key)
+        return columns
+
+    def _get_column_order(self, columns: Sequence[str]) -> list[str] | None:
+        """Resolve explicit column order from YAML groups if configured."""
+        if not self._column_orderer:
+            return None
+        ordered = self._column_orderer.order_column_names(columns)
+        return self._apply_system_prefix_order(ordered)
+
+    def _apply_renames_to_records(
+        self, records: list[dict[str, Any]], rename_map: dict[str, str]
+    ) -> list[dict[str, Any]]:
+        """Apply column renames to records.
+
+        Args:
+            records: List of record dictionaries.
+            rename_map: Mapping of old_name -> new_name.
+
+        Returns:
+            List of records with renamed keys.
+        """
+        if not rename_map:
+            return records
+
+        renamed_records = []
+        for record in records:
+            renamed = {}
+            for key, value in record.items():
+                new_key = rename_map.get(key, key)
+                renamed[new_key] = value
+            renamed_records.append(renamed)
+        return renamed_records
+
+    def _resolve_layer_columns(
+        self, layer: Literal["silver", "gold"], available_columns: Sequence[str]
+    ) -> tuple[list[str] | None, dict[str, str]]:
+        """Resolve column order and renames for a specific medallion layer.
+
+        Resolution order:
+        1. If data_schema has layer-specific config → apply filtering + renames
+        2. Otherwise → use shared column_groups via ColumnOrderer
+
+        Args:
+            layer: Layer name ("silver" or "gold").
+            available_columns: Available columns in the DataFrame/records.
+
+        Returns:
+            Tuple of (ordered_columns, rename_map).
+            - ordered_columns: Ordered list of columns, or None if no configuration.
+            - rename_map: Dict of old_name -> new_name for renaming.
+        """
+        if not self._data_schema:
+            # Fallback to shared column_groups
+            return self._get_column_order(available_columns), {}
+
+        layer_config = getattr(self._data_schema, layer, None)
+        if not layer_config:
+            # No layer-specific config → use shared groups
+            return self._get_column_order(available_columns), {}
+
+        # Apply layer-specific filtering
+        if not self._column_orderer:
+            # No orderer → can't filter by groups, use explicit columns only
+            if layer_config.columns:
+                return (
+                    [c for c in layer_config.columns if c in available_columns],
+                    layer_config.rename_fields,
+                )
+            return None, {}
+
+        # Get filtered and ordered columns (with renames applied to column names)
+        ordered_columns = self._column_orderer.filter_by_layer_config(
+            available_columns, layer_config
+        )
+        ordered_columns = self._apply_system_prefix_order(ordered_columns)
+        return ordered_columns, layer_config.rename_fields
+
+    def _apply_system_prefix_order(self, columns: list[str]) -> list[str]:
+        """Ensure system prefix fields are first and DQ fields are last."""
+        from bioetl.domain.schemas.column_order import (
+            DQ_FIELDS_SUFFIX,
+            LOOKUP_FIELDS_PREFIX,
+            SYSTEM_FIELDS_PREFIX,
+        )
+
+        if not columns:
+            return columns
+
+        column_set = set(columns)
+        prefix = [c for c in SYSTEM_FIELDS_PREFIX if c in column_set]
+        lookup = [c for c in LOOKUP_FIELDS_PREFIX if c in column_set]
+        suffix = [c for c in DQ_FIELDS_SUFFIX if c in column_set]
+        middle = [
+            c
+            for c in columns
+            if c not in prefix and c not in lookup and c not in suffix
+        ]
+        return prefix + lookup + middle + suffix
 
     def log_and_track_write_error(
         self, layer: str, error: Exception, batch_id: BatchID
@@ -9026,13 +10157,15 @@ class CheckpointManager:
         self._run_id = run_id
         self._resume = resume
         self._force_full_scan = force_full_scan
-        # Resolve loading_strategy: explicit value takes precedence
+        # Resolve loading_strategy: explicit value takes precedence, then force_full_scan
         if loading_strategy is not None:
-            self._loading_strategy = loading_strategy
-        else:
+            self._loading_strategy: LoadingStrategy | None = loading_strategy
+        elif force_full_scan:
             self._loading_strategy = LoadingStrategy.from_force_full_scan(
                 force_full_scan
             )
+        else:
+            self._loading_strategy = None
 
     async def load_checkpoint(self) -> dict[str, Any] | None:
         """Load checkpoint if resuming.
@@ -9047,7 +10180,11 @@ class CheckpointManager:
 
         """
         # Block resume for FULL_SCAN_ONLY loading strategy (ADR-030, ADR-031)
-        if self._resume and not self._loading_strategy.allows_checkpoint_resume:
+        if (
+            self._resume
+            and self._loading_strategy is not None
+            and not self._loading_strategy.allows_checkpoint_resume
+        ):
             self._logger.warning(
                 "Checkpoint resume blocked for full_scan_only pipeline. "
                 "Each run performs a full scan; deduplication via content_hash on Silver. "
@@ -9344,6 +10481,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
 
 if TYPE_CHECKING:
@@ -9362,6 +10500,7 @@ class RecordProcessorConfig:
     dq_config: DQConfig | None = None
     table_config: TableConfig = field(default_factory=TableConfig)
     memory_config: MemoryConfig = field(default_factory=MemoryConfig)
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
     # DQ report output paths (for flat_structure support)
     bronze_output_path: str | None = None
     silver_output_path: str | None = None
@@ -9437,6 +10576,333 @@ class LockConfig:
         )
 
 ================================================================================
+File: dict_transformers.py
+Path: core\dict_transformers.py
+================================================================================
+"""Common transformation utilities for all pipelines.
+
+Реализует общие паттерны трансформации для уменьшения дублирования
+в ChEMBL и других трансформерах.
+
+Функции:
+- flatten_nested_dict: Разворачивание вложенных словарей с префиксом
+- extract_list_field: Извлечение поля из списка словарей
+- aggregate_nested_lists: Агрегация вложенных списков
+- normalize_string: Нормализация строковых полей (delegated to domain)
+- parse_date_field: Парсинг даты с обработкой ошибок (delegated to domain)
+- validate_smiles: Валидация SMILES строки (delegated to domain)
+
+Note: Business logic functions are delegated to domain layer per REFACTOR-004.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from datetime import date
+from typing import Any, TypeVar
+
+from bioetl.domain.normalization import normalize_string as _domain_normalize_string
+from bioetl.domain.normalization import parse_date_field as _domain_parse_date_field
+from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
+
+T = TypeVar("T")
+
+
+def flatten_nested_dict(
+    data: dict[str, Any] | None,
+    prefix: str,
+    field_mapping: dict[str, Callable[[Any], Any] | None],
+    renames: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Разворачивает вложенный словарь в плоскую структуру с префиксом.
+
+    Используется для извлечения полей из вложенных структур API
+    (molecule_properties, molecule_hierarchy, ligand_efficiency и т.д.).
+
+    Args:
+        data: Вложенный словарь для разворачивания. Если None, возвращает
+              словарь с None значениями для всех ключей.
+        prefix: Префикс для результирующих ключей (e.g., "property_", "hierarchy_").
+        field_mapping: Словарь {исходный_ключ: конвертер}.
+                       Конвертер может быть safe_float, safe_int или None (без конвертация).
+        renames: Опциональный словарь {старый_ключ: новый_ключ} для переименования
+                 полей после разворачивания. Ключи должны включать префикс.
+
+    Returns:
+        Плоский словарь с префиксами и сконвертированными значениями.
+
+    Example:
+        >>> data = {"alogp": "3.5", "hba": 2}
+        >>> mapping = {"alogp": safe_float, "hba": safe_int}
+        >>> flatten_nested_dict(data, "property_", mapping)
+        {'property_alogp': 3.5, 'property_hba': 2}
+
+        >>> flatten_nested_dict(None, "property_", mapping)
+        {'property_alogp': None, 'property_hba': None}
+
+        >>> # With renames parameter
+        >>> data = {"molecule_chembl_id": "CHEMBL25"}
+        >>> mapping = {"molecule_chembl_id": None}
+        >>> renames = {"hierarchy_molecule_chembl_id": "hierarchy_child_chembl_id"}
+        >>> flatten_nested_dict(data, "hierarchy_", mapping, renames)
+        {'hierarchy_child_chembl_id': 'CHEMBL25'}
+
+    """
+    if not data or not isinstance(data, dict):
+        result = {f"{prefix}{key}": None for key in field_mapping}
+    else:
+        result = {}
+        for source_key, converter in field_mapping.items():
+            value = data.get(source_key)
+            if converter is not None and value is not None:
+                result[f"{prefix}{source_key}"] = converter(value)
+            else:
+                result[f"{prefix}{source_key}"] = value
+
+    # Apply renames if provided
+    if renames:
+        for old_key, new_key in renames.items():
+            if old_key in result:
+                result[new_key] = result.pop(old_key)
+
+    return result
+
+
+def extract_list_field(
+    items: list[dict[str, Any]] | None,
+    field: str,
+    converter: Callable[[Any], T] | None = None,
+) -> list[T] | None:
+    """Извлекает значения поля из списка словарей.
+
+    Используется для агрегации полей из компонентов, классификаций и т.д.
+
+    Args:
+        items: Список словарей для обработки.
+        field: Имя поля для извлечения.
+        converter: Опциональный конвертер (safe_int, safe_float и т.д.).
+                   Если None, значения возвращаются как есть.
+
+    Returns:
+        Список значений или None, если результат пустой.
+
+    Example:
+        >>> items = [{"id": "1"}, {"id": "2"}, {"id": None}]
+        >>> extract_list_field(items, "id")
+        ['1', '2']
+
+        >>> extract_list_field(items, "id", safe_int)
+        [1, 2]
+
+    """
+    if not items or not isinstance(items, list):
+        return None
+
+    values: list[T] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        raw_value = item.get(field)
+        if raw_value is None:
+            continue
+
+        if converter is not None:
+            converted = converter(raw_value)
+            if converted is not None:
+                values.append(converted)
+        else:
+            values.append(raw_value)
+
+    return values if values else None
+
+
+def _extract_nested_values(items: list[dict[str, Any]], field: str) -> list[Any]:
+    """Extract all nested list values from a field across items."""
+    values: list[Any] = []
+    for item in items:
+        if isinstance(item, dict):
+            nested = item.get(field)
+            if isinstance(nested, list):
+                values.extend(nested)
+    return values
+
+
+def aggregate_nested_lists(
+    items: list[dict[str, Any]] | None,
+    field: str,
+    deduplicate: bool = True,
+) -> list[Any] | None:
+    """Агрегирует вложенные списки из списка словарей.
+
+    Используется для сбора synonyms, xrefs и других вложенных списков
+    из множества компонентов в один плоский список.
+
+    Args:
+        items: Список словарей, каждый из которых может содержать вложенный список.
+        field: Имя поля со вложенным списком.
+        deduplicate: Если True, удаляет дубликаты из результирующего списка (по умолчанию True).
+
+    Returns:
+        Объединённый список или None, если результат пустой.
+
+    Example:
+        >>> items = [
+        ...     {"synonyms": ["a", "b"]},
+        ...     {"synonyms": ["c", "a"]},
+        ...     {"other": "data"}
+        ... ]
+        >>> aggregate_nested_lists(items, "synonyms")
+        ['a', 'b', 'c']
+
+    """
+    if not isinstance(items, list) or not items:
+        return None
+
+    values = _extract_nested_values(items, field)
+    if not values:
+        return None
+
+    if deduplicate:
+        seen: set[str] = set()
+        unique: list[Any] = []
+        for val in values:
+            key = str(val)
+            if key not in seen:
+                seen.add(key)
+                unique.append(val)
+        return unique if unique else None
+
+    return values
+
+
+def normalize_string(value: str | None) -> str | None:
+    """Нормализует строковое поле.
+
+    Удаляет пробельные символы по краям и возвращает None для пустых строк.
+
+    Note: Delegated to domain.normalization.normalize_string per REFACTOR-004.
+
+    Args:
+        value: Строка для нормализации.
+
+    Returns:
+        Нормализованная строка или None.
+
+    Example:
+        >>> normalize_string("  hello world  ")
+        'hello world'
+        >>> normalize_string("   ")
+        None
+        >>> normalize_string(None)
+        None
+
+    """
+    return _domain_normalize_string(value)
+
+
+def parse_date_field(
+    value: str | None,
+    fmt: str = "%Y-%m-%d",
+) -> date | None:
+    """Парсит строку даты в объект date.
+
+    Безопасный парсинг с обработкой ошибок и невалидных форматов.
+
+    Note: Delegated to domain.normalization.parse_date_field per REFACTOR-004.
+
+    Args:
+        value: Строка с датой или None.
+        fmt: Формат даты (по умолчанию ISO: YYYY-MM-DD).
+
+    Returns:
+        Объект date или None при ошибке парсинга.
+
+    Example:
+        >>> parse_date_field("2024-01-15")
+        datetime.date(2024, 1, 15)
+        >>> parse_date_field("invalid")
+        None
+        >>> parse_date_field("15/01/2024", "%d/%m/%Y")
+        datetime.date(2024, 1, 15)
+
+    """
+    return _domain_parse_date_field(value, fmt)
+
+
+def validate_smiles(smiles: str | None) -> bool:
+    """Проверяет валидность SMILES строки.
+
+    Выполняет базовую синтаксическую проверку без полного парсинга молекулы.
+    Для полной валидации используйте RDKit или другую химическую библиотеку.
+
+    Note: Delegated to domain.validation.validate_smiles per REFACTOR-004.
+
+    Args:
+        smiles: SMILES строка для проверки.
+
+    Returns:
+        True если строка соответствует базовому синтаксису SMILES.
+
+    Example:
+        >>> validate_smiles("CCO")  # Ethanol
+        True
+        >>> validate_smiles("C1=CC=CC=C1")  # Benzene
+        True
+        >>> validate_smiles("")
+        False
+        >>> validate_smiles(None)
+        False
+        >>> validate_smiles("invalid smiles with spaces")
+        False
+
+    """
+    return _domain_validate_smiles(smiles)
+
+
+def safe_extract(
+    record: dict[str, Any],
+    key: str,
+    default: T | None = None,
+) -> T | Any | None:
+    """Безопасно извлекает значение из словаря с логированием.
+
+    Обёртка над dict.get() для унифицированного извлечения полей.
+    Для использования с логированием используйте в связке с контекстом.
+
+    Args:
+        record: Словарь для извлечения.
+        key: Ключ для поиска.
+        default: Значение по умолчанию (None).
+
+    Returns:
+        Значение по ключу или default.
+
+    Example:
+        >>> record = {"name": "test", "value": 42}
+        >>> safe_extract(record, "name")
+        'test'
+        >>> safe_extract(record, "missing", "default")
+        'default'
+
+    """
+    return record.get(key, default)
+
+
+# Re-export safe_float and safe_int for convenience
+__all__ = [
+    "aggregate_nested_lists",
+    "extract_list_field",
+    "flatten_nested_dict",
+    "normalize_string",
+    "parse_date_field",
+    "safe_extract",
+    "safe_float",
+    "safe_int",
+    "validate_smiles",
+]
+
+================================================================================
 File: field_specs.py
 Path: core\field_specs.py
 ================================================================================
@@ -9480,8 +10946,8 @@ STR: Callable[[Any], str] = str
 def normalize_pmid(value: Any) -> str | None:
     """Normalize PubMed ID to string format.
 
-    Converts int or string PMID to normalized string representation.
-    Returns None for invalid inputs.
+    Delegates to PubMedId.from_raw() Value Object for validation
+    and normalization (strip leading zeros, int→str, upper-bound < 10^10).
 
     Args:
         value: Raw PMID value (int, str, or None).
@@ -9496,36 +10962,17 @@ def normalize_pmid(value: Any) -> str | None:
         '12345678'
         >>> normalize_pmid("  12345678  ")
         '12345678'
+        >>> normalize_pmid("0012345")
+        '12345'
         >>> normalize_pmid(None)
         None
         >>> normalize_pmid("abc")
         None
     """
-    if value is None:
-        return None
+    from bioetl.domain.value_objects.publications import PubMedId
 
-    # Convert to string and strip whitespace
-    if isinstance(value, bool):
-        # Reject booleans explicitly (isinstance(True, int) is True)
-        return None
-    if isinstance(value, int):
-        str_value = str(value)
-    elif isinstance(value, str):
-        str_value = value.strip()
-    else:
-        return None
-
-    # Validate: must be non-empty and contain only digits
-    if not str_value or not str_value.isdigit():
-        return None
-
-    # Validate: must be positive (no "0" alone)
-    int_value = int(str_value)
-    if int_value <= 0:
-        return None
-
-    # Normalize: remove leading zeros
-    return str(int_value)
+    vo = PubMedId.from_raw(value)
+    return str(vo) if vo else None
 
 
 PMID: Callable[[Any], str | None] = normalize_pmid
@@ -9545,7 +10992,7 @@ class FieldSpec:
     Example:
         >>> spec = FieldSpec("molecule_id", target="molecule_chembl_id", converter=str)
         >>> spec = FieldSpec("value", converter=FLOAT, required=True)
-        >>> spec = FieldSpec("description", default="N/A")
+        >>> spec = FieldSpec("description", default="Unknown")
     """
 
     source: str
@@ -9873,6 +11320,11 @@ class FilteredDataSource:
         if not self._filter_config.enabled:
             return self
 
+        # Check for direct multi-field filter IDs (composite dual-key mode)
+        if self._filter_config.direct_multi_filter_ids:
+            self._load_direct_multi_filter_ids()
+            return self
+
         # Check for direct filter IDs (composite mode - no CSV needed)
         if self._filter_config.direct_filter_ids:
             self._load_direct_filter_ids()
@@ -9881,6 +11333,27 @@ class FilteredDataSource:
         # Pre-load filter IDs from CSV
         await self._load_csv_filter_ids()
         return self
+
+    def _load_direct_multi_filter_ids(self) -> None:
+        """Load direct multi-field filter IDs from composite mode configuration.
+
+        Sets up multi-column filtering state for AND-logic API queries.
+        E.g., molecule_chembl_id AND document_chembl_id simultaneously.
+        """
+        multi_ids = self._filter_config.direct_multi_filter_ids or {}
+        self._multi_filter_ids = {field: list(ids) for field, ids in multi_ids.items()}
+        self._filter_fields = tuple(multi_ids.keys())
+        self._valid_combinations = self._filter_config.direct_valid_combinations
+        if self._logger:
+            self._logger.info(
+                "direct_multi_filter_ids_loaded",
+                fields=list(self._filter_fields),
+                counts={f: len(ids) for f, ids in multi_ids.items()},
+                valid_combinations_count=len(self._valid_combinations)
+                if self._valid_combinations
+                else 0,
+                pipeline=self._pipeline_name,
+            )
 
     def _load_direct_filter_ids(self) -> None:
         """Load direct filter IDs from composite mode configuration."""
@@ -10291,8 +11764,9 @@ if TYPE_CHECKING:
 class IDMappingDataSource:
     """Data source for ChEMBL → UniProt ID mapping.
 
-    Reads target_chembl_id values from input CSV file and maps them
-    to UniProt accessions using the UniProt ID Mapping REST API.
+    Reads target_chembl_id values from seed filter IDs (composite mode)
+    or input CSV file (standalone mode), then maps them to UniProt
+    accessions using the UniProt ID Mapping REST API.
 
     Implements DataSourcePort protocol for integration with GenericPipeline.
 
@@ -10317,16 +11791,20 @@ class IDMappingDataSource:
         from_db: str = "ChEMBL",
         to_db: str = "UniProtKB",
         id_column: str = "target_chembl_id",
+        seed_ids: list[str] | None = None,
     ) -> None:
         """Initialize ID Mapping data source.
 
         Args:
             idmapping_client: UniProt ID Mapping client for API calls.
             input_path: Path to CSV file containing ChEMBL target IDs.
+                Used as fallback when seed_ids is not provided.
             logger: LoggerPort for structured logging.
             from_db: Source database for ID mapping (default: 'ChEMBL').
             to_db: Target database for ID mapping (default: 'UniProtKB').
             id_column: Column name in CSV containing ChEMBL IDs.
+            seed_ids: Pre-extracted ChEMBL target IDs from composite seed phase.
+                When provided, CSV file is not read.
         """
         self._client = idmapping_client
         self._input_path = input_path
@@ -10334,6 +11812,7 @@ class IDMappingDataSource:
         self._from_db = from_db
         self._to_db = to_db
         self._id_column = id_column
+        self._seed_ids = seed_ids
         self._is_open = False
 
     async def __aenter__(self) -> Self:
@@ -10369,25 +11848,28 @@ class IDMappingDataSource:
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch ID mapping records.
 
-        Reads ChEMBL IDs from CSV and maps them to UniProt accessions.
-        Returns records with target_chembl_id and uniprot_accession fields.
+        Resolves ChEMBL IDs from one of three sources (priority order):
+        1. seed_ids from constructor (composite pipeline mode)
+        2. filter_ids parameter (if passed by caller)
+        3. CSV file at input_path (standalone mode)
+
+        Then maps them to UniProt accessions via UniProt ID Mapping API.
 
         Args:
             entity_type: Entity type (should be 'idmapping').
             limit: Optional limit on number of records.
             query: Unused (for interface compatibility).
-            filter_ids: Unused (IDs come from CSV).
-            filter_field: Unused.
+            filter_ids: Optional ChEMBL IDs passed by caller.
+            filter_field: Unused (for interface compatibility).
 
         Yields:
             Dicts with target_chembl_id and uniprot_accession fields.
 
         Raises:
-            FileNotFoundError: If input CSV file doesn't exist.
+            FileNotFoundError: If input CSV file doesn't exist (standalone mode).
             ValueError: If required column is missing from CSV.
         """
-        # Ignore unused parameters (interface compatibility)
-        _ = query, filter_ids, filter_field
+        _ = query, filter_field
 
         if entity_type != "idmapping":
             self._logger.warning(
@@ -10396,8 +11878,21 @@ class IDMappingDataSource:
                 received=entity_type,
             )
 
-        # Step 1: Read ChEMBL IDs from CSV (async to avoid blocking event loop)
-        chembl_ids = await self._read_chembl_ids_async()
+        # Step 1: Resolve ChEMBL IDs — seed_ids > filter_ids > CSV
+        if self._seed_ids:
+            chembl_ids = list(self._seed_ids)
+            self._logger.info(
+                "idmapping_using_seed_ids",
+                count=len(chembl_ids),
+            )
+        elif filter_ids:
+            chembl_ids = list(filter_ids)
+            self._logger.info(
+                "idmapping_using_filter_ids",
+                count=len(chembl_ids),
+            )
+        else:
+            chembl_ids = await self._read_chembl_ids_async()
 
         # Apply limit if specified
         if limit is not None:
@@ -10407,8 +11902,10 @@ class IDMappingDataSource:
             self._logger.warning("no_ids_to_map", input_path=str(self._input_path))
             return
 
+        source = "seed" if self._seed_ids else "csv"
         self._logger.info(
             "idmapping_fetch_started",
+            source=source,
             input_path=str(self._input_path),
             chembl_id_count=len(chembl_ids),
         )
@@ -10423,14 +11920,17 @@ class IDMappingDataSource:
         # Step 3: Yield records for each ChEMBL ID
         found_count = 0
         for chembl_id in chembl_ids:
-            uniprot_accession = mapping_results.get(chembl_id)
-            if uniprot_accession:
+            entry_data = mapping_results.get(chembl_id)
+            if entry_data is not None and isinstance(entry_data, dict):
                 found_count += 1
-
-            yield {
-                "target_chembl_id": chembl_id,
-                "uniprot_accession": uniprot_accession,
-            }
+                result: dict[str, Any] = {"target_chembl_id": chembl_id}
+                result.update(entry_data)
+                yield result
+            else:
+                yield {
+                    "target_chembl_id": chembl_id,
+                    "uniprot_accession": None,
+                }
 
         self._logger.info(
             "idmapping_fetch_completed",
@@ -10486,22 +11986,23 @@ class IDMappingDataSource:
         """Check data source health.
 
         Verifies:
-        1. Input file exists
+        1. Input file exists (only in standalone mode, skipped when seed_ids provided)
         2. ID Mapping API is healthy
 
         Returns:
             HealthStatus indicating overall health.
         """
-        # Check input file (async to avoid blocking event loop)
-        loop = asyncio.get_running_loop()
-        file_exists = await loop.run_in_executor(None, self._input_path.exists)
-        if not file_exists:
-            self._logger.warning(
-                "health_check_failed",
-                reason="input_file_missing",
-                path=str(self._input_path),
-            )
-            return HealthStatus.UNHEALTHY
+        # Skip file check when seed_ids are provided (composite mode)
+        if not self._seed_ids:
+            loop = asyncio.get_running_loop()
+            file_exists = await loop.run_in_executor(None, self._input_path.exists)
+            if not file_exists:
+                self._logger.warning(
+                    "health_check_failed",
+                    reason="input_file_missing",
+                    path=str(self._input_path),
+                )
+                return HealthStatus.UNHEALTHY
 
         # Check API health
         api_status = await self._client.health_check()
@@ -10793,36 +12294,6 @@ class LockManager:
     ) -> None:
         """Context manager exit: release lock."""
         await self.release()
-
-================================================================================
-File: memory_monitor.py
-Path: core\memory_monitor.py
-================================================================================
-"""Backward compatibility shim for memory monitoring types.
-
-The MemoryMonitor implementation has been moved to infrastructure layer:
-bioetl.infrastructure.system.memory_monitor
-
-This module re-exports domain types (MemoryConfig, MemoryStats) for backward compatibility.
-
-For MemoryMonitor implementation, import from:
-- bioetl.infrastructure.system.memory_monitor (in composition layer)
-- Or use MemoryMonitorPort (domain/ports/memory.py) for type hints in application layer
-
-Note:
-    Memory monitoring involves system-level operations (reading /proc/meminfo,
-    using psutil) which belong in the infrastructure layer per Hexagonal Architecture.
-    Application layer should depend on MemoryMonitorPort (abstract interface), not
-    on the concrete MemoryMonitor class.
-"""
-
-from __future__ import annotations
-
-# Re-export domain types for backward compatibility
-from bioetl.domain.config import MemoryConfig
-from bioetl.domain.ports import MemoryStats
-
-__all__ = ["MemoryConfig", "MemoryStats"]
 
 ================================================================================
 File: pipeline_services.py
@@ -13464,331 +14935,527 @@ __all__ = [
 ]
 
 ================================================================================
-File: transform_utils.py
-Path: core\transform_utils.py
+File: subcellular_fraction_data_source.py
+Path: core\subcellular_fraction_data_source.py
 ================================================================================
-"""Common transformation utilities for all pipelines.
+"""Subcellular Fraction Data Source wrapper.
 
-Реализует общие паттерны трансформации для уменьшения дублирования
-в ChEMBL и других трансформерах.
+Wraps a DataSourcePort to extract unique subcellular fractions from ChEMBL Assay records.
+This is a derived entity pattern - subcellular_fraction entities are extracted
+from the assay_subcellular_fraction field in assay records.
 
-Функции:
-- flatten_nested_dict: Разворачивание вложенных словарей с префиксом
-- extract_list_field: Извлечение поля из списка словарей
-- aggregate_nested_lists: Агрегация вложенных списков
-- normalize_string: Нормализация строковых полей (delegated to domain)
-- parse_date_field: Парсинг даты с обработкой ошибок (delegated to domain)
-- validate_smiles: Валидация SMILES строки (delegated to domain)
+Architecture:
+    ChEMBL API (assay endpoint)
+           ↓
+    SubcellularFractionDataSource (wrapper)
+      - fetch("subcellular_fraction") → wrapped.fetch("assay")
+      - extracts unique subcellular_fraction values
+      - aggregates assay count per fraction
+           ↓
+    Pipeline receives subcellular_fraction records
 
-Note: Business logic functions are delegated to domain layer per REFACTOR-004.
+Note: ChEMBL does NOT have a dedicated /subcellular_fraction endpoint.
+This wrapper extracts and deduplicates values from /assay responses.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from datetime import date
-from typing import Any, TypeVar
+import hashlib
+from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.normalization import normalize_string as _domain_normalize_string
-from bioetl.domain.normalization import parse_date_field as _domain_parse_date_field
-from bioetl.domain.transformations import safe_float, safe_int
-from bioetl.domain.validation import validate_smiles as _domain_validate_smiles
+from bioetl.domain.ports import FilterableDataSourcePort
 
-T = TypeVar("T")
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
+    from bioetl.domain.ports import DataSourcePort
+    from bioetl.domain.types import HealthStatus
 
 
-def flatten_nested_dict(
-    data: dict[str, Any] | None,
-    prefix: str,
-    field_mapping: dict[str, Callable[[Any], Any] | None],
-    renames: dict[str, str] | None = None,
-) -> dict[str, Any]:
-    """Разворачивает вложенный словарь в плоскую структуру с префиксом.
+class SubcellularFractionDataSource:
+    """Wraps a DataSourcePort to extract unique subcellular fractions from assay records.
 
-    Используется для извлечения полей из вложенных структур API
-    (molecule_properties, molecule_hierarchy, ligand_efficiency и т.д.).
+    This is a Decorator pattern implementation that transforms the assay
+    entity into derived subcellular_fraction entities. For each batch of assays
+    fetched from the wrapped adapter, unique subcellular fractions are extracted
+    and deduplicated.
 
-    Args:
-        data: Вложенный словарь для разворачивания. Если None, возвращает
-              словарь с None значениями для всех ключей.
-        prefix: Префикс для результирующих ключей (e.g., "property_", "hierarchy_").
-        field_mapping: Словарь {исходный_ключ: конвертер}.
-                       Конвертер может быть safe_float, safe_int или None (без конвертация).
-        renames: Опциональный словарь {старый_ключ: новый_ключ} для переименования
-                 полей после разворачивания. Ключи должны включать префикс.
-
-    Returns:
-        Плоский словарь с префиксами и сконвертированными значениями.
+    The wrapper:
+    1. Intercepts fetch("subcellular_fraction") calls
+    2. Fetches assays from the wrapped adapter via fetch("assay")
+    3. Extracts unique subcellular_fraction values (M:1 relationship)
+    4. Yields individual fraction records with computed entity_id
+    5. Delegates all other operations to the wrapped adapter
 
     Example:
-        >>> data = {"alogp": "3.5", "hba": 2}
-        >>> mapping = {"alogp": safe_float, "hba": safe_int}
-        >>> flatten_nested_dict(data, "property_", mapping)
-        {'property_alogp': 3.5, 'property_hba': 2}
-
-        >>> flatten_nested_dict(None, "property_", mapping)
-        {'property_alogp': None, 'property_hba': None}
-
-        >>> # With renames parameter
-        >>> data = {"molecule_chembl_id": "CHEMBL25"}
-        >>> mapping = {"molecule_chembl_id": None}
-        >>> renames = {"hierarchy_molecule_chembl_id": "hierarchy_child_chembl_id"}
-        >>> flatten_nested_dict(data, "hierarchy_", mapping, renames)
-        {'hierarchy_child_chembl_id': 'CHEMBL25'}
+        >>> wrapped = SubcellularFractionDataSource(chembl_adapter)
+        >>> async with wrapped:
+        ...     async for fraction in wrapped.fetch("subcellular_fraction", limit=100):
+        ...         process_fraction(fraction)
 
     """
-    if not data or not isinstance(data, dict):
-        result = {f"{prefix}{key}": None for key in field_mapping}
-    else:
-        result = {}
-        for source_key, converter in field_mapping.items():
-            value = data.get(source_key)
-            if converter is not None and value is not None:
-                result[f"{prefix}{source_key}"] = converter(value)
-            else:
-                result[f"{prefix}{source_key}"] = value
 
-    # Apply renames if provided
-    if renames:
-        for old_key, new_key in renames.items():
-            if old_key in result:
-                result[new_key] = result.pop(old_key)
+    # Source entity type to fetch from wrapped adapter
+    SOURCE_ENTITY_TYPE = "assay"
+    # Target entity type this wrapper provides
+    TARGET_ENTITY_TYPE = "subcellular_fraction"
+    # Multiplier for assay limit estimation.
+    # Not all assays have subcellular_fraction (many are cell-based or whole organism).
+    # Analysis shows ~10-15% of ChEMBL assays have this field populated.
+    # Using 100x multiplier ensures we fetch enough assays to get good coverage.
+    ASSAY_LIMIT_MULTIPLIER = 100
 
-    return result
+    def __init__(
+        self,
+        data_source: DataSourcePort,
+    ) -> None:
+        """Initialize subcellular fraction data source wrapper.
 
+        Args:
+            data_source: The underlying data source adapter to wrap (ChemblAdapter).
 
-def extract_list_field(
-    items: list[dict[str, Any]] | None,
-    field: str,
-    converter: Callable[[Any], T] | None = None,
-) -> list[T] | None:
-    """Извлекает значения поля из списка словарей.
+        """
+        self._data_source = data_source
+        # Cache seen fractions for deduplication within a fetch session
+        self._seen_fractions: set[str] = set()
 
-    Используется для агрегации полей из компонентов, классификаций и т.д.
+    @property
+    def provider_name(self) -> str:
+        """Provider name from the wrapped data source."""
+        return self._data_source.provider_name
 
-    Args:
-        items: Список словарей для обработки.
-        field: Имя поля для извлечения.
-        converter: Опциональный конвертер (safe_int, safe_float и т.д.).
-                   Если None, значения возвращаются как есть.
+    async def __aenter__(self) -> Self:
+        """Enter async context."""
+        await self._data_source.__aenter__()
+        # Reset deduplication cache on new context
+        self._seen_fractions = set()
+        return self
 
-    Returns:
-        Список значений или None, если результат пустой.
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: Any,
+    ) -> None:
+        """Exit async context."""
+        await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
 
-    Example:
-        >>> items = [{"id": "1"}, {"id": "2"}, {"id": None}]
-        >>> extract_list_field(items, "id")
-        ['1', '2']
+    async def fetch(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records, extracting subcellular fractions if entity_type matches.
 
-        >>> extract_list_field(items, "id", safe_int)
-        [1, 2]
+        For subcellular_fraction entity type:
+        - Fetches assays from wrapped adapter
+        - Extracts unique subcellular_fraction values
+        - Yields individual fraction records (deduplicated)
 
-    """
-    if not items or not isinstance(items, list):
-        return None
+        For other entity types:
+        - Delegates directly to wrapped adapter
 
-    values: list[T] = []
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-        raw_value = item.get(field)
-        if raw_value is None:
-            continue
+        Args:
+            entity_type: Type of entity to fetch.
+            limit: Maximum number of records (for subcellular_fraction, limits unique fractions).
+            query: Optional search query.
+            filter_ids: Optional filter IDs (passed to wrapped adapter).
+            filter_field: Optional filter field (passed to wrapped adapter).
 
-        if converter is not None:
-            converted = converter(raw_value)
-            if converted is not None:
-                values.append(converted)
+        Yields:
+            Records from the data source.
+
+        """
+        if entity_type == self.TARGET_ENTITY_TYPE:
+            # Reset deduplication cache for new fetch
+            self._seen_fractions = set()
+            async for fraction in self._fetch_subcellular_fractions(
+                limit, filter_ids, filter_field
+            ):
+                yield fraction
         else:
-            values.append(raw_value)
+            # Delegate to wrapped adapter for other entity types
+            async for record in self._data_source.fetch(
+                entity_type=entity_type,
+                limit=limit,
+                query=query,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+            ):
+                yield record
 
-    return values if values else None
+    async def _fetch_subcellular_fractions(
+        self,
+        limit: int | None,
+        filter_ids: list[str] | None,
+        filter_field: str | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch assays and extract unique subcellular fractions.
 
+        Args:
+            limit: Maximum number of unique fraction records to yield.
+            filter_ids: Optional assay IDs to filter by.
+            filter_field: Optional field for filtering (typically assay_chembl_id).
 
-def _extract_nested_values(items: list[dict[str, Any]], field: str) -> list[Any]:
-    """Extract all nested list values from a field across items."""
-    values: list[Any] = []
-    for item in items:
-        if isinstance(item, dict):
-            nested = item.get(field)
-            if isinstance(nested, list):
-                values.extend(nested)
-    return values
+        Yields:
+            Subcellular fraction records extracted from assays.
 
+        """
+        fraction_count = 0
+        # Track counts per fraction for statistics
+        fraction_stats: dict[str, dict[str, Any]] = {}
 
-def aggregate_nested_lists(
-    items: list[dict[str, Any]] | None,
-    field: str,
-    deduplicate: bool = True,
-) -> list[Any] | None:
-    """Агрегирует вложенные списки из списка словарей.
+        # Estimate assay limit based on fraction limit.
+        # We need to fetch more assays than unique fractions because:
+        # 1. Not all assays have subcellular_fraction populated
+        # 2. Many assays share the same subcellular_fraction value
+        assay_limit = limit * self.ASSAY_LIMIT_MULTIPLIER if limit else None
 
-    Используется для сбора synonyms, xrefs и других вложенных списков
-    из множества компонентов в один плоский список.
+        async for assay in self._data_source.fetch(
+            entity_type=self.SOURCE_ENTITY_TYPE,
+            limit=assay_limit,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+        ):
+            fraction_record = self._extract_fraction_from_assay(assay)
+            if fraction_record is None:
+                continue
 
-    Args:
-        items: Список словарей, каждый из которых может содержать вложенный список.
-        field: Имя поля со вложенным списком.
-        deduplicate: Если True, удаляет дубликаты из результирующего списка (по умолчанию True).
+            fraction_key = fraction_record["subcellular_fraction"].lower().strip()
 
-    Returns:
-        Объединённый список или None, если результат пустой.
+            # Track statistics (always update count even if already seen)
+            if fraction_key not in fraction_stats:
+                fraction_stats[fraction_key] = {
+                    "record": fraction_record,
+                    "count": 0,
+                }
+            fraction_stats[fraction_key]["count"] += 1
 
-    Example:
-        >>> items = [
-        ...     {"synonyms": ["a", "b"]},
-        ...     {"synonyms": ["c", "a"]},
-        ...     {"other": "data"}
-        ... ]
-        >>> aggregate_nested_lists(items, "synonyms")
-        ['a', 'b', 'c']
+            # Deduplicate: only yield new fractions
+            if fraction_key in self._seen_fractions:
+                continue
 
-    """
-    if not isinstance(items, list) or not items:
+            self._seen_fractions.add(fraction_key)
+
+            # Update count in record before yielding
+            fraction_record["assay_count"] = fraction_stats[fraction_key]["count"]
+
+            yield fraction_record
+            fraction_count += 1
+
+            if limit and fraction_count >= limit:
+                return
+
+    def _extract_fraction_from_assay(
+        self,
+        assay: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        """Extract subcellular fraction from an assay record.
+
+        Args:
+            assay: Raw assay record from ChEMBL API.
+
+        Returns:
+            Subcellular fraction dictionary if present, None otherwise.
+
+        """
+        raw_fraction = assay.get("assay_subcellular_fraction")
+        if not raw_fraction:
+            return None
+
+        fraction = str(raw_fraction).strip()
+        if not fraction:
+            return None
+
+        assay_chembl_id = assay.get("assay_chembl_id")
+
+        # Compute entity_id from normalized fraction name
+        entity_id = self._compute_entity_id(fraction)
+
+        return {
+            "entity_id": entity_id,
+            "subcellular_fraction": fraction,
+            "example_assay_chembl_id": str(assay_chembl_id)
+            if assay_chembl_id
+            else None,
+            "assay_count": 1,  # Will be updated with actual count
+        }
+
+    def _compute_entity_id(
+        self,
+        subcellular_fraction: str,
+    ) -> str:
+        """Compute entity ID for a subcellular fraction.
+
+        Entity ID is SHA256 hash of: subcellular_fraction:normalized_name
+
+        Args:
+            subcellular_fraction: Subcellular fraction name (will be normalized).
+
+        Returns:
+            Entity ID string (first 16 chars of SHA256 hex digest).
+
+        """
+        normalized = subcellular_fraction.lower().strip()
+        composite = f"subcellular_fraction:{normalized}"
+        return hashlib.sha256(composite.encode()).hexdigest()[:16]
+
+    async def health_check(self) -> HealthStatus:
+        """Delegate health check to wrapped adapter."""
+        return await self._data_source.health_check()
+
+    async def aclose(self) -> None:
+        """Delegate close to wrapped adapter."""
+        await self._data_source.aclose()
+
+    # FilterableDataSourcePort implementation (delegates to wrapped adapter)
+
+    def _ensure_filterable(self, method_name: str) -> FilterableDataSourcePort:
+        """Check that wrapped adapter implements FilterableDataSourcePort.
+
+        Args:
+            method_name: Name of the method being called (for error message).
+
+        Returns:
+            Wrapped adapter cast to FilterableDataSourcePort.
+
+        Raises:
+            TypeError: If wrapped adapter doesn't implement FilterableDataSourcePort.
+
+        """
+        if not isinstance(self._data_source, FilterableDataSourcePort):
+            raise TypeError(
+                f"Wrapped adapter {self._data_source.provider_name} does not implement "
+                f"FilterableDataSourcePort. {method_name}() requires a filterable adapter."
+            )
+        return self._data_source
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch filtered records.
+
+        Implements FilterableDataSourcePort.fetch_filtered().
+
+        For subcellular_fraction entity type:
+        - Delegates to wrapped adapter's fetch_filtered("assay", ...)
+        - Extracts unique subcellular fractions
+
+        For other entity types:
+        - Delegates directly to wrapped adapter
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filter_ids: List of IDs to filter by.
+            filter_field: Field name to filter on.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching the filter criteria.
+
+        """
+        filterable = self._ensure_filterable("fetch_filtered")
+
+        if entity_type == self.TARGET_ENTITY_TYPE:
+            # Reset deduplication cache
+            self._seen_fractions = set()
+            async for fraction in self._fetch_filtered_subcellular_fractions(
+                filterable, filter_ids, filter_field, limit
+            ):
+                yield fraction
+        else:
+            # Delegate to wrapped adapter for other entity types
+            async for record in filterable.fetch_filtered(
+                entity_type=entity_type,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                limit=limit,
+            ):
+                yield record
+
+    async def _fetch_filtered_subcellular_fractions(
+        self,
+        filterable: FilterableDataSourcePort,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch filtered assays and extract unique subcellular fractions.
+
+        Args:
+            filterable: Wrapped adapter that implements FilterableDataSourcePort.
+            filter_ids: Assay ChEMBL IDs to filter by.
+            filter_field: Field name (typically assay_chembl_id).
+            limit: Maximum number of fraction records to yield.
+
+        Yields:
+            Subcellular fraction records extracted from filtered assays.
+
+        """
+        fraction_count = 0
+        assay_limit = limit * self.ASSAY_LIMIT_MULTIPLIER if limit else None
+
+        async for assay in filterable.fetch_filtered(
+            entity_type=self.SOURCE_ENTITY_TYPE,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=assay_limit,
+        ):
+            fraction_record = self._extract_fraction_from_assay(assay)
+            if fraction_record is None:
+                continue
+
+            fraction_key = fraction_record["subcellular_fraction"].lower().strip()
+            if fraction_key in self._seen_fractions:
+                continue
+
+            self._seen_fractions.add(fraction_key)
+            yield fraction_record
+            fraction_count += 1
+
+            if limit and fraction_count >= limit:
+                return
+
+    async def fetch_multi_filtered(
+        self,
+        entity_type: str,
+        filters: dict[str, list[str]],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records filtered by multiple fields (AND logic).
+
+        Implements FilterableDataSourcePort.fetch_multi_filtered().
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filters: Mapping from filter_field to list of IDs.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching ALL filter criteria.
+
+        """
+        filterable = self._ensure_filterable("fetch_multi_filtered")
+
+        if entity_type == self.TARGET_ENTITY_TYPE:
+            self._seen_fractions = set()
+            fraction_count = 0
+            assay_limit = limit * self.ASSAY_LIMIT_MULTIPLIER if limit else None
+
+            async for assay in filterable.fetch_multi_filtered(
+                entity_type=self.SOURCE_ENTITY_TYPE,
+                filters=filters,
+                limit=assay_limit,
+            ):
+                fraction_record = self._extract_fraction_from_assay(assay)
+                if fraction_record is None:
+                    continue
+
+                fraction_key = fraction_record["subcellular_fraction"].lower().strip()
+                if fraction_key in self._seen_fractions:
+                    continue
+
+                self._seen_fractions.add(fraction_key)
+                yield fraction_record
+                fraction_count += 1
+
+                if limit and fraction_count >= limit:
+                    return
+        else:
+            async for record in filterable.fetch_multi_filtered(
+                entity_type=entity_type,
+                filters=filters,
+                limit=limit,
+            ):
+                yield record
+
+    async def fetch_filtered_with_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch records with fallback search when primary lookup fails.
+
+        Implements FilterableDataSourcePort.fetch_filtered_with_fallback().
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filter_ids: List of primary IDs to filter by.
+            filter_field: Field name for primary filtering.
+            fallback_mapping: Mapping from primary ID to fallback value.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records found via primary lookup or fallback search.
+
+        """
+        filterable = self._ensure_filterable("fetch_filtered_with_fallback")
+
+        if entity_type == self.TARGET_ENTITY_TYPE:
+            self._seen_fractions = set()
+            fraction_count = 0
+            assay_limit = limit * self.ASSAY_LIMIT_MULTIPLIER if limit else None
+
+            async for assay in filterable.fetch_filtered_with_fallback(
+                entity_type=self.SOURCE_ENTITY_TYPE,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                fallback_mapping=fallback_mapping,
+                limit=assay_limit,
+            ):
+                fraction_record = self._extract_fraction_from_assay(assay)
+                if fraction_record is None:
+                    continue
+
+                fraction_key = fraction_record["subcellular_fraction"].lower().strip()
+                if fraction_key in self._seen_fractions:
+                    continue
+
+                self._seen_fractions.add(fraction_key)
+                yield fraction_record
+                fraction_count += 1
+
+                if limit and fraction_count >= limit:
+                    return
+        else:
+            async for record in filterable.fetch_filtered_with_fallback(
+                entity_type=entity_type,
+                filter_ids=filter_ids,
+                filter_field=filter_field,
+                fallback_mapping=fallback_mapping,
+                limit=limit,
+            ):
+                yield record
+
+    def get_source_metadata(self, api_version: str | None = None) -> Any:
+        """Delegate get_source_metadata to wrapped data source.
+
+        Returns API request metadata collected by the underlying adapter.
+        Used by BatchExecutor to enrich Bronze layer metadata.
+
+        Args:
+            api_version: Optional API version string.
+
+        Returns:
+            SourceMetadata with request details, or None if not supported.
+        """
+        get_metadata = getattr(self._data_source, "get_source_metadata", None)
+        if get_metadata is not None and callable(get_metadata):
+            return get_metadata(api_version)
         return None
 
-    values = _extract_nested_values(items, field)
-    if not values:
-        return None
 
-    if deduplicate:
-        seen: set[str] = set()
-        unique: list[Any] = []
-        for val in values:
-            key = str(val)
-            if key not in seen:
-                seen.add(key)
-                unique.append(val)
-        return unique if unique else None
-
-    return values
-
-
-def normalize_string(value: str | None) -> str | None:
-    """Нормализует строковое поле.
-
-    Удаляет пробельные символы по краям и возвращает None для пустых строк.
-
-    Note: Delegated to domain.normalization.normalize_string per REFACTOR-004.
-
-    Args:
-        value: Строка для нормализации.
-
-    Returns:
-        Нормализованная строка или None.
-
-    Example:
-        >>> normalize_string("  hello world  ")
-        'hello world'
-        >>> normalize_string("   ")
-        None
-        >>> normalize_string(None)
-        None
-
-    """
-    return _domain_normalize_string(value)
-
-
-def parse_date_field(
-    value: str | None,
-    fmt: str = "%Y-%m-%d",
-) -> date | None:
-    """Парсит строку даты в объект date.
-
-    Безопасный парсинг с обработкой ошибок и невалидных форматов.
-
-    Note: Delegated to domain.normalization.parse_date_field per REFACTOR-004.
-
-    Args:
-        value: Строка с датой или None.
-        fmt: Формат даты (по умолчанию ISO: YYYY-MM-DD).
-
-    Returns:
-        Объект date или None при ошибке парсинга.
-
-    Example:
-        >>> parse_date_field("2024-01-15")
-        datetime.date(2024, 1, 15)
-        >>> parse_date_field("invalid")
-        None
-        >>> parse_date_field("15/01/2024", "%d/%m/%Y")
-        datetime.date(2024, 1, 15)
-
-    """
-    return _domain_parse_date_field(value, fmt)
-
-
-def validate_smiles(smiles: str | None) -> bool:
-    """Проверяет валидность SMILES строки.
-
-    Выполняет базовую синтаксическую проверку без полного парсинга молекулы.
-    Для полной валидации используйте RDKit или другую химическую библиотеку.
-
-    Note: Delegated to domain.validation.validate_smiles per REFACTOR-004.
-
-    Args:
-        smiles: SMILES строка для проверки.
-
-    Returns:
-        True если строка соответствует базовому синтаксису SMILES.
-
-    Example:
-        >>> validate_smiles("CCO")  # Ethanol
-        True
-        >>> validate_smiles("C1=CC=CC=C1")  # Benzene
-        True
-        >>> validate_smiles("")
-        False
-        >>> validate_smiles(None)
-        False
-        >>> validate_smiles("invalid smiles with spaces")
-        False
-
-    """
-    return _domain_validate_smiles(smiles)
-
-
-def safe_extract(
-    record: dict[str, Any],
-    key: str,
-    default: T | None = None,
-) -> T | Any | None:
-    """Безопасно извлекает значение из словаря с логированием.
-
-    Обёртка над dict.get() для унифицированного извлечения полей.
-    Для использования с логированием используйте в связке с контекстом.
-
-    Args:
-        record: Словарь для извлечения.
-        key: Ключ для поиска.
-        default: Значение по умолчанию (None).
-
-    Returns:
-        Значение по ключу или default.
-
-    Example:
-        >>> record = {"name": "test", "value": 42}
-        >>> safe_extract(record, "name")
-        'test'
-        >>> safe_extract(record, "missing", "default")
-        'default'
-
-    """
-    return record.get(key, default)
-
-
-# Re-export safe_float and safe_int for convenience
-__all__ = [
-    "aggregate_nested_lists",
-    "extract_list_field",
-    "flatten_nested_dict",
-    "normalize_string",
-    "parse_date_field",
-    "safe_extract",
-    "safe_float",
-    "safe_int",
-    "validate_smiles",
-]
+__all__ = ["SubcellularFractionDataSource"]
 
 ================================================================================
 File: __init__.py
@@ -13848,7 +15515,7 @@ from __future__ import annotations
 
 import time
 from contextlib import AbstractContextManager
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.shutdown import PipelineShutdownError
@@ -13861,7 +15528,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunID, RunType
 
 
-class LifecyclePhase(str, Enum):
+class LifecyclePhase(StrEnum):
     """Pipeline lifecycle phases for structured observability.
 
     Each phase represents a distinct stage in pipeline execution
@@ -14369,16 +16036,27 @@ Usage:
 
 from __future__ import annotations
 
-# Pipeline classes
-from bioetl.application.pipelines.chembl.activity import ChEMBLActivityPipeline
+# Pipeline classes (consolidated in _pipelines.py)
+from bioetl.application.pipelines.chembl._pipelines import (
+    ChEMBLActivityPipeline,
+    ChEMBLAssayParametersPipeline,
+    ChEMBLAssayPipeline,
+    ChEMBLCellLinePipeline,
+    ChEMBLCompoundRecordPipeline,
+    ChEMBLMoleculePipeline,
+    ChEMBLProteinClassPipeline,
+    ChEMBLPublicationPipeline,
+    ChEMBLPublicationSimilarityPipeline,
+    ChEMBLPublicationTermPipeline,
+    ChEMBLSubcellularFractionPipeline,
+    ChEMBLTargetComponentPipeline,
+    ChEMBLTargetPipeline,
+    ChEMBLTissuePipeline,
+)
 
 # Transformers
 from bioetl.application.pipelines.chembl.activity_transformer import (
     ActivityTransformer,
-)
-from bioetl.application.pipelines.chembl.assay import ChEMBLAssayPipeline
-from bioetl.application.pipelines.chembl.assay_parameters import (
-    ChEMBLAssayParametersPipeline,
 )
 from bioetl.application.pipelines.chembl.assay_parameters_transformer import (
     AssayParametersTransformer,
@@ -14387,37 +16065,20 @@ from bioetl.application.pipelines.chembl.assay_transformer import AssayTransform
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
-from bioetl.application.pipelines.chembl.cell_line import ChEMBLCellLinePipeline
 from bioetl.application.pipelines.chembl.cell_line_transformer import (
     CellLineTransformer,
-)
-from bioetl.application.pipelines.chembl.compound_record import (
-    ChEMBLCompoundRecordPipeline,
 )
 from bioetl.application.pipelines.chembl.compound_record_transformer import (
     CompoundRecordTransformer,
 )
-from bioetl.application.pipelines.chembl.molecule import ChEMBLMoleculePipeline
 from bioetl.application.pipelines.chembl.molecule_transformer import (
     MoleculeTransformer,
-)
-from bioetl.application.pipelines.chembl.protein_class import (
-    ChEMBLProteinClassPipeline,
 )
 from bioetl.application.pipelines.chembl.protein_class_transformer import (
     ProteinClassTransformer,
 )
-
-# Publication pipelines
-from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPipeline
-from bioetl.application.pipelines.chembl.publication_similarity import (
-    ChEMBLPublicationSimilarityPipeline,
-)
 from bioetl.application.pipelines.chembl.publication_similarity_transformer import (
     PublicationSimilarityTransformer,
-)
-from bioetl.application.pipelines.chembl.publication_term import (
-    ChEMBLPublicationTermPipeline,
 )
 from bioetl.application.pipelines.chembl.publication_term_transformer import (
     PublicationTermTransformer,
@@ -14425,14 +16086,14 @@ from bioetl.application.pipelines.chembl.publication_term_transformer import (
 from bioetl.application.pipelines.chembl.publication_transformer import (
     PublicationTransformer,
 )
-from bioetl.application.pipelines.chembl.target import ChEMBLTargetPipeline
-from bioetl.application.pipelines.chembl.target_component import (
-    ChEMBLTargetComponentPipeline,
+from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
+    SubcellularFractionTransformer,
 )
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
 
 __all__ = [
     "ActivityTransformer",
@@ -14450,31 +16111,33 @@ __all__ = [
     "ChEMBLPublicationPipeline",
     "ChEMBLPublicationSimilarityPipeline",
     "ChEMBLPublicationTermPipeline",
+    "ChEMBLSubcellularFractionPipeline",
     "ChEMBLTargetComponentPipeline",
     "ChEMBLTargetPipeline",
+    "ChEMBLTissuePipeline",
     "CompoundRecordTransformer",
     "MoleculeTransformer",
     "ProteinClassTransformer",
     "PublicationSimilarityTransformer",
     "PublicationTermTransformer",
     "PublicationTransformer",
+    "SubcellularFractionTransformer",
     "TargetComponentTransformer",
     "TargetTransformer",
+    "TissueTransformer",
 ]
 
 ================================================================================
-File: activity.py
-Path: pipelines\chembl\activity.py
+File: _pipelines.py
+Path: pipelines\chembl\_pipelines.py
 ================================================================================
-"""ChEMBL Activity Pipeline.
+"""ChEMBL pipeline class definitions.
 
-Fetches bioactivity data from ChEMBL database and processes it through
-Bronze → Silver → Gold layers.
+All ChEMBL entity pipelines inherit 100% of their logic from BasePipeline.
+Transformers are injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
+Individual classes exist for type identity and IDE discoverability.
 
-Entity: Bioactivity measurements (IC50, Ki, EC50, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
+Consolidated from 14 individual files per audit-package-structure-2026-02-07.
 """
 
 from __future__ import annotations
@@ -14483,13 +16146,71 @@ from bioetl.application.core.base import BasePipeline
 
 
 class ChEMBLActivityPipeline(BasePipeline):
-    """Pipeline for ChEMBL bioactivity data.
+    """Pipeline for ChEMBL bioactivity data (IC50, Ki, EC50, etc.)."""
 
-    Transformer is injected via DI from GenericPipelineFactory.
+
+class ChEMBLAssayPipeline(BasePipeline):
+    """Pipeline for ChEMBL assay definitions (binding, functional, ADMET)."""
+
+
+class ChEMBLAssayParametersPipeline(BasePipeline):
+    """Pipeline for ChEMBL assay parameters."""
+
+
+class ChEMBLCellLinePipeline(BasePipeline):
+    """Pipeline for ChEMBL cell line data (in vitro experiment objects)."""
+
+
+class ChEMBLCompoundRecordPipeline(BasePipeline):
+    """Pipeline for ChEMBL compound records (molecule-document links)."""
+
+
+class ChEMBLMoleculePipeline(BasePipeline):
+    """Pipeline for ChEMBL molecule data (small molecules, antibodies)."""
+
+
+class ChEMBLProteinClassPipeline(BasePipeline):
+    """Pipeline for ChEMBL protein classification hierarchy."""
+
+
+class ChEMBLPublicationPipeline(BasePipeline):
+    """Pipeline for ChEMBL publication data."""
+
+
+class ChEMBLPublicationSimilarityPipeline(BasePipeline):
+    """Pipeline for ChEMBL publication similarity (Tanimoto coefficients).
+
+    .. versionchanged:: 2.0.0
+        Renamed from ChEMBLDocumentSimilarityPipeline (ADR-024).
     """
 
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
+
+class ChEMBLPublicationTermPipeline(BasePipeline):
+    """Pipeline for ChEMBL publication terms (MeSH headings, keywords).
+
+    .. versionchanged:: 2.0.0
+        Renamed from ChEMBLDocumentTermPipeline (ADR-024).
+    """
+
+
+class ChEMBLSubcellularFractionPipeline(BasePipeline):
+    """Pipeline for ChEMBL subcellular fraction data (derived from Assay).
+
+    .. versionadded:: 2.1.0
+        Added as derived entity pipeline (ADR-030).
+    """
+
+
+class ChEMBLTargetPipeline(BasePipeline):
+    """Pipeline for ChEMBL biological targets (proteins, complexes)."""
+
+
+class ChEMBLTargetComponentPipeline(BasePipeline):
+    """Pipeline for ChEMBL target component data (protein sequences)."""
+
+
+class ChEMBLTissuePipeline(BasePipeline):
+    """Pipeline for ChEMBL tissue data (anatomical structures)."""
 
 ================================================================================
 File: activity_transformer.py
@@ -14505,6 +16226,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
     FieldSpec,
@@ -14513,7 +16235,6 @@ from bioetl.application.core.field_specs import (
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -14714,69 +16435,6 @@ class ActivityTransformer(BaseChemblTransformer):
         }
 
 ================================================================================
-File: assay.py
-Path: pipelines\chembl\assay.py
-================================================================================
-"""ChEMBL Assay Pipeline.
-
-Fetches assay definitions from ChEMBL database and processes them through
-Bronze → Silver → Gold layers.
-
-Entity: Bioassay definitions (binding, functional, ADMET, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLAssayPipeline(BasePipeline):
-    """Pipeline for ChEMBL assay data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
-File: assay_parameters.py
-Path: pipelines\chembl\assay_parameters.py
-================================================================================
-# src/bioetl/application/pipelines/chembl/assay_parameters.py
-"""ChEMBL Assay Parameters Pipeline.
-
-Fetches assay parameters from ChEMBL database and processes through
-Bronze -> Silver -> Gold layers.
-
-Entity: Assay Parameters (experimental conditions for bioassays)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLAssayParametersPipeline(BasePipeline):
-    """Pipeline for ChEMBL assay parameters data.
-
-    Assay parameters contain experimental conditions such as concentrations,
-    pH, temperature, incubation time, etc. for bioassays.
-    M:1 relationship with Assay (many parameters -> one assay via assay_chembl_id FK).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
 File: assay_parameters_transformer.py
 Path: pipelines\chembl\assay_parameters_transformer.py
 ================================================================================
@@ -14965,6 +16623,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
     FieldSpec,
@@ -14972,7 +16631,6 @@ from bioetl.application.core.field_specs import (
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -15204,6 +16862,7 @@ class BaseChemblTransformer(BaseTransformer):
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -15217,6 +16876,7 @@ class BaseChemblTransformer(BaseTransformer):
                 entity_class name (e.g., Activity → "activity").
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional domain-level filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -15234,6 +16894,7 @@ class BaseChemblTransformer(BaseTransformer):
             entity_type=resolved_entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -15323,38 +16984,6 @@ class BaseChemblTransformer(BaseTransformer):
         ...
 
 ================================================================================
-File: cell_line.py
-Path: pipelines\chembl\cell_line.py
-================================================================================
-"""ChEMBL Cell Line Pipeline.
-
-Fetches cell lines from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Cell Lines (biological objects for in vitro experiments)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLCellLinePipeline(BasePipeline):
-    """Pipeline for ChEMBL cell line data.
-
-    Cell lines are biological objects used for in vitro experiments.
-    They have M:N relationship with Assay (via assay.cell_chembl_id FK).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
 File: cell_line_transformer.py
 Path: pipelines\chembl\cell_line_transformer.py
 ================================================================================
@@ -15439,38 +17068,6 @@ class CellLineTransformer(BaseChemblTransformer):
             "cl_lincs_id": normalizer.normalize_to_string(record.get("cl_lincs_id")),
             "efo_id": normalizer.normalize_to_string(record.get("efo_id")),
         }
-
-================================================================================
-File: compound_record.py
-Path: pipelines\chembl\compound_record.py
-================================================================================
-"""ChEMBL Compound Record Pipeline.
-
-Fetches compound records from ChEMBL database and processes through
-Bronze -> Silver -> Gold layers.
-
-Entity: Compound Records (links molecules to documents with original names)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLCompoundRecordPipeline(BasePipeline):
-    """Pipeline for ChEMBL compound record data.
-
-    Compound records link molecules to documents and contain the original
-    compound name as it appears in the publication.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: compound_record_transformer.py
@@ -15560,35 +17157,6 @@ class CompoundRecordTransformer(BaseChemblTransformer):
         }
 
 ================================================================================
-File: molecule.py
-Path: pipelines\chembl\molecule.py
-================================================================================
-"""ChEMBL Molecule Pipeline.
-
-Fetches molecules from ChEMBL database and processes through
-Bronze -> Silver -> Gold layers.
-
-Entity: Chemical Compounds (small molecules, antibodies, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLMoleculePipeline(BasePipeline):
-    """Pipeline for ChEMBL molecule data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
 File: molecule_transformer.py
 Path: pipelines\chembl\molecule_transformer.py
 ================================================================================
@@ -15602,13 +17170,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
     int_fields,
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import flatten_nested_dict
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -15799,39 +17367,6 @@ class MoleculeTransformer(BaseChemblTransformer):
         }
 
 ================================================================================
-File: protein_class.py
-Path: pipelines\chembl\protein_class.py
-================================================================================
-"""ChEMBL Protein Classification Pipeline.
-
-Fetches protein classification hierarchy from ChEMBL database and processes
-through Bronze -> Silver -> Gold layers.
-
-Entity: Protein Classification hierarchy (enzyme classes, receptor types, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLProteinClassPipeline(BasePipeline):
-    """Pipeline for ChEMBL protein classification data.
-
-    Hierarchical classification of protein targets (enzymes, receptors,
-    ion channels, transporters, etc.). Self-referencing structure with
-    up to 8 levels of depth. Reference table (~1,500 records).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
 File: protein_class_transformer.py
 Path: pipelines\chembl\protein_class_transformer.py
 ================================================================================
@@ -15920,81 +17455,6 @@ class ProteinClassTransformer(BaseChemblTransformer):
             # Declarative field groups
             **map_field_groups(record, _PROTEIN_CLASS_GROUPS),
         }
-
-================================================================================
-File: publication.py
-Path: pipelines\chembl\publication.py
-================================================================================
-"""ChEMBL Publication Pipeline.
-
-Fetches scientific publications from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Scientific Publications (journal articles, patents)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-
-.. versionchanged:: 2.0.0
-    Renamed from document to publication (ADR-024).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLPublicationPipeline(BasePipeline):
-    """Pipeline for ChEMBL publication data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-
-    .. versionchanged:: 2.0.0
-        Renamed from ChEMBLDocumentPipeline (ADR-024).
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
-
-================================================================================
-File: publication_similarity.py
-Path: pipelines\chembl\publication_similarity.py
-================================================================================
-"""ChEMBL Publication Similarity Pipeline.
-
-Fetches publication similarity data from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
-
-Entity: Publication Similarity (Tanimoto coefficients between publications)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-
-.. versionchanged:: 2.0.0
-    Renamed from document_similarity to publication_similarity (ADR-024).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLPublicationSimilarityPipeline(BasePipeline):
-    """Pipeline for ChEMBL publication similarity data.
-
-    Extracts precomputed similarity relationships between publications
-    based on Tanimoto coefficients calculated from:
-    - Molecules described in publications (mol_tani)
-    - Targets described in publications (tid_tani)
-
-    Transformer is injected via DI from GenericPipelineFactory.
-
-    .. versionchanged:: 2.0.0
-        Renamed from ChEMBLDocumentSimilarityPipeline (ADR-024).
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: publication_similarity_transformer.py
@@ -16087,51 +17547,6 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
             "avg_tani": avg_tani,
             "max_tani": max_tani,
         }
-
-================================================================================
-File: publication_term.py
-Path: pipelines\chembl\publication_term.py
-================================================================================
-"""ChEMBL Publication Term Pipeline.
-
-Extracts terms (MeSH headings, keywords, concepts) from ChEMBL Publication
-records and processes through Bronze → Silver → Gold layers.
-
-Entity: Publication Terms (derived from Publication)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-This is a derived entity pipeline - it extracts nested term data
-from Publication (ChEMBL Document) API responses and flattens the 1:M relationship.
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-
-.. versionchanged:: 2.0.0
-    Renamed from document_term to publication_term (ADR-024).
-"""
-
-from __future__ import annotations
-
-from bioetl.application.core.base import BasePipeline
-
-
-class ChEMBLPublicationTermPipeline(BasePipeline):
-    """Pipeline for ChEMBL publication term data.
-
-    This pipeline extracts and flattens term data from Publication records:
-    - MeSH headings and qualifiers
-    - Author keywords
-    - ChEMBL concepts
-
-    Each Publication may produce multiple Term records (1:M relationship).
-
-    Transformer is injected via DI from GenericPipelineFactory.
-
-    .. versionchanged:: 2.0.0
-        Renamed from ChEMBLDocumentTermPipeline (ADR-024).
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
 
 ================================================================================
 File: publication_term_transformer.py
@@ -16492,7 +17907,15 @@ _PUBLICATION_IDS = FieldGroup(
 
 _CORE_METADATA = FieldGroup(
     name="core_metadata",
-    fields=simple_fields("title", "authors", "abstract", "doc_type"),
+    fields=simple_fields("title", "authors", "abstract"),
+)
+
+_PUBLICATION_TYPE = FieldGroup(
+    name="publication_type",
+    fields=(
+        # Unified field: doc_type → publication_type
+        FieldSpec("doc_type", target="publication_type"),
+    ),
 )
 
 _JOURNAL_INFO = FieldGroup(
@@ -16500,13 +17923,14 @@ _JOURNAL_INFO = FieldGroup(
     fields=(
         *simple_fields(
             "journal",
-            "journal_full_title",
             "volume",
             "issue",
-            "first_page",
-            "last_page",
         ),
-        *int_fields("year"),
+        # Unified pagination fields
+        FieldSpec("first_page", target="page_first"),
+        FieldSpec("last_page", target="page_last"),
+        # Unified temporal field
+        FieldSpec("year", target="publication_year", converter=int),
     ),
 )
 
@@ -16519,6 +17943,7 @@ _SOURCE_INFO = FieldGroup(
 _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
     _PUBLICATION_IDS,
     _CORE_METADATA,
+    _PUBLICATION_TYPE,
     _JOURNAL_INFO,
     _SOURCE_INFO,
 )
@@ -16543,6 +17968,7 @@ class PublicationTransformer(BaseChemblTransformer):
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -16556,6 +17982,7 @@ class PublicationTransformer(BaseChemblTransformer):
                 entity_class name.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -16567,6 +17994,7 @@ class PublicationTransformer(BaseChemblTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -16603,9 +18031,10 @@ class PublicationTransformer(BaseChemblTransformer):
         data["doi"] = str(doi) if doi else None
 
         # Validate year using PublicationYear Value Object
-        year_vo = PublicationYear.from_raw(data.get("year"))
-        validated_year = year_vo.value if year_vo else None
-        data["year"] = validated_year
+        # Note: field_specs already maps year → publication_year
+        data["publication_year"] = self.validate_value_object(
+            PublicationYear, data.get("publication_year"), as_string=False
+        )
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
@@ -16634,10 +18063,25 @@ class PublicationTransformer(BaseChemblTransformer):
         # System field: data source identifier
         data["_source"] = "chembl"
 
-        # Unified publication fields (always NULL for ChEMBL)
-        data["citation_count"] = None
-        data["is_oa"] = None
+        # Унифицированные поля публикации (в ChEMBL есть только citation_count)
+        citation_count = record.get("citation_count")
+        if citation_count is not None:
+            try:
+                data["citations_received"] = int(str(citation_count))
+            except (TypeError, ValueError):
+                data["citations_received"] = None
+        else:
+            data["citations_received"] = None
+        data["citations_made"] = None
+
+        # Fields from PublicationBaseSchema that ChEMBL API doesn't provide
+        data["pmc_id"] = None
+        data["affiliation_list"] = None
+        data["author_orcids"] = None
+        data["publication_date"] = None
         data["language"] = None
+        data["is_oa"] = None
+        data["oa_status"] = None
 
         # DQ flags (default: no warnings or errors)
         data["_dq_warn"] = False
@@ -16647,86 +18091,230 @@ class PublicationTransformer(BaseChemblTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding unused fields.
+        """Convert Domain Entity to SilverRecord.
 
-        Overrides base implementation to remove fields not collected for ChEMBL.
+        ChEMBL-specific fields are set to None in _extract_business_data() for
+        fields not available from ChEMBL API (pmc_id, affiliation_list, etc.).
+        These None values satisfy the PublicationBaseSchema inheritance requirement.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without affiliations, pmc_id, publication_date.
+            SilverRecord with all PublicationBaseSchema fields (ChEMBL-unavailable
+            fields are None).
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
-        # Get base silver record
+        # Get base silver record (includes all fields with None values)
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields
-        silver_record.pop("affiliations", None)
-        silver_record.pop("pmc_id", None)
-        silver_record.pop("publication_date", None)
+        # Remove fields not in unified publication schema (ChEMBL-specific exclusions)
+        silver_record.pop("issn", None)
+        silver_record.pop("publisher", None)
+        silver_record.pop("oa_status", None)
+
+        # Note: pmc_id, affiliation_list, author_orcids, publication_date, language,
+        # and is_oa are kept (with None values) to satisfy PublicationBaseSchema
 
         return silver_record
 
 ================================================================================
-File: target.py
-Path: pipelines\chembl\target.py
+File: subcellular_fraction_transformer.py
+Path: pipelines\chembl\subcellular_fraction_transformer.py
 ================================================================================
-"""ChEMBL Target Pipeline.
+"""ChEMBL Subcellular Fraction Transformer.
 
-Fetches biological targets from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
+Transforms Assay records to extract and deduplicate subcellular fraction values.
+This is a derived entity transformer - it extracts unique assay_subcellular_fraction
+values from Assay API responses and creates a lookup/reference table.
 
-Entity: Biological Targets (proteins, complexes, organisms)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
-
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
+Uses declarative field_specs DSL for mapping.
 """
 
 from __future__ import annotations
 
-from bioetl.application.core.base import BasePipeline
+import hashlib
+from typing import TYPE_CHECKING, Any, cast
+
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
+from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFraction
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
-class ChEMBLTargetPipeline(BasePipeline):
-    """Pipeline for ChEMBL target data.
+class SubcellularFractionTransformer(BaseChemblTransformer):
+    """Transforms ChEMBL assay records to extract unique subcellular fraction records.
 
-    Transformer is injected via DI from GenericPipelineFactory.
+    This transformer extracts unique subcellular_fraction values from Assay
+    API responses, creating a lookup/reference table for biological context.
+
+    Subcellular fractions describe the cellular compartment or preparation
+    used in bioassay experiments (e.g., "Microsomes", "Cytosol", "Mitochondria").
+
+    Entity ID is computed as SHA256 hash of normalized subcellular_fraction name.
+
+    Note: This transformer expects pre-extracted records from
+    SubcellularFractionDataSource, which handles deduplication at fetch level.
     """
 
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
+    entity_class = SubcellularFraction
+    primary_id_field = "subcellular_fraction"
 
-================================================================================
-File: target_component.py
-Path: pipelines\chembl\target_component.py
-================================================================================
-"""ChEMBL Target Component Pipeline.
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Override base implementation to use subcellular_fraction as entity_id.
 
-Fetches target components from ChEMBL database and processes through
-Bronze → Silver → Gold layers.
+        SubcellularFraction is a derived entity with single-field primary key.
+        The entity_id is computed from the normalized subcellular_fraction name.
 
-Entity: Target Components (protein sequences, etc.)
-Provider: ChEMBL (https://www.ebi.ac.uk/chembl/)
+        If record contains pre-computed entity_id (from SubcellularFractionDataSource),
+        use it directly. Otherwise, compute entity_id from subcellular_fraction.
 
-Transformer is injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
-"""
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Bronze record (pre-extracted fraction or raw assay).
+            index: Sequential index of the record in the pipeline run.
 
-from __future__ import annotations
+        Returns:
+            SilverRecord if transformation successful, None if skipped.
 
-from bioetl.application.core.base import BasePipeline
+        """
+        # 1. Validate primary ID (subcellular_fraction)
+        primary_id = self._get_required_field(record, self.primary_id_field)
+        if not primary_id:
+            return None
+
+        # 2. Extract business data
+        business_data = self._extract_business_data(record, primary_id)
+
+        # 3. Compute entity_id
+        # Priority: pre-computed entity_id from record > computed from subcellular_fraction
+        pre_computed_id = record.get("entity_id")
+        if pre_computed_id:
+            entity_id = str(pre_computed_id)
+        else:
+            entity_id = self.compute_fraction_entity_id(str(primary_id))
+
+        # 4. Compute content hash
+        content_hash = self.compute_content_hash(business_data, exclude_none=True)
+
+        # 5. Create domain entity
+        entity = self._create_entity(
+            self.entity_class,
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            index=index,
+            **business_data,
+        )
+
+        # 6. Convert to SilverRecord
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
+
+    def _extract_business_data(
+        self,
+        record: BronzeRecord,
+        primary_id: Any,
+    ) -> dict[str, Any]:
+        """Extract subcellular fraction data from the record.
+
+        Handles two cases:
+        1. Pre-extracted fraction records (from SubcellularFractionDataSource) - pass through
+        2. Raw assay records - extract subcellular_fraction field
+
+        Args:
+            record: Bronze record (either fraction record or assay record).
+            primary_id: Validated subcellular_fraction value.
+
+        Returns:
+            Dictionary of fraction business fields.
+
+        """
+        # Normalize the fraction name
+        fraction = str(primary_id).strip()
+
+        # Get optional fields
+        assay_count = record.get("assay_count")
+        example_assay = record.get("example_assay_chembl_id")
+
+        return {
+            "subcellular_fraction": fraction,
+            "assay_count": int(cast(Any, assay_count))
+            if assay_count is not None
+            else None,
+            "example_assay_chembl_id": (
+                str(example_assay).strip() if example_assay else None
+            ),
+        }
+
+    def compute_fraction_entity_id(
+        self,
+        subcellular_fraction: str,
+    ) -> str:
+        """Compute entity ID for a subcellular fraction.
+
+        Entity ID is SHA256 hash of: subcellular_fraction:normalized_name
+
+        Args:
+            subcellular_fraction: Subcellular fraction name (will be normalized).
+
+        Returns:
+            Entity ID string (first 16 chars of SHA256 hex digest).
+
+        """
+        normalized = (
+            subcellular_fraction.lower().strip() if subcellular_fraction else ""
+        )
+        composite = f"subcellular_fraction:{normalized}"
+        return hashlib.sha256(composite.encode()).hexdigest()[:16]
+
+    def extract_fraction_from_assay(
+        self,
+        record: BronzeRecord,
+    ) -> dict[str, Any] | None:
+        """Extract subcellular fraction from a raw Assay record.
+
+        This method is used when processing raw assay records directly
+        (without SubcellularFractionDataSource wrapper).
+
+        Args:
+            record: Raw Bronze record from ChEMBL API /assay endpoint.
+
+        Returns:
+            Dictionary of fraction fields if assay_subcellular_fraction is present,
+            None otherwise.
+
+        """
+        raw_fraction = record.get("assay_subcellular_fraction")
+        if not raw_fraction:
+            return None
+
+        fraction = str(raw_fraction).strip()
+        if not fraction:
+            return None
+
+        assay_chembl_id = record.get("assay_chembl_id")
+
+        return {
+            "subcellular_fraction": fraction,
+            "example_assay_chembl_id": str(assay_chembl_id)
+            if assay_chembl_id
+            else None,
+            "assay_count": 1,
+        }
 
 
-class ChEMBLTargetComponentPipeline(BasePipeline):
-    """Pipeline for ChEMBL target component data.
-
-    Transformer is injected via DI from GenericPipelineFactory.
-    """
-
-    # transform_bronze_to_silver() is inherited from BasePipeline
-    # should_write_gold() is inherited from BasePipeline (uses config.gold_filters)
+__all__ = ["SubcellularFractionTransformer"]
 
 ================================================================================
 File: target_component_transformer.py
@@ -16742,13 +18330,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.dict_transformers import extract_list_field
 from bioetl.application.core.field_specs import (
     FieldGroup,
     FieldSpec,
     map_field_groups,
     simple_fields,
 )
-from bioetl.application.core.transform_utils import extract_list_field
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -16811,10 +18399,19 @@ class TargetComponentTransformer(BaseChemblTransformer):
             # JSON serialization using helper method
             **self.serialize_json_fields(rec, _JSON_FIELDS),
             # Flattened fields (extracted from protein_classifications)
-            "protein_classification_ids": extract_list_field(
-                cast("list[dict[str, Any]] | None", rec.get("protein_classifications")),
-                "protein_classification_id",
-                safe_int,
+            "protein_classification_ids": (
+                classification_ids := extract_list_field(
+                    cast(
+                        "list[dict[str, Any]] | None",
+                        rec.get("protein_classifications"),
+                    ),
+                    "protein_classification_id",
+                    safe_int,
+                )
+            ),
+            # Primary classification ID (for enricher join key)
+            "protein_classification_id": (
+                classification_ids[0] if classification_ids else None
             ),
         }
 
@@ -16831,7 +18428,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.transform_utils import (
+from bioetl.application.core.dict_transformers import (
     aggregate_nested_lists,
     extract_list_field,
 )
@@ -16882,26 +18479,12 @@ class TargetTransformer(BaseChemblTransformer):
             "component_types": None,
             "component_relationships": None,
             "component_descriptions": None,
-            "component_organisms": None,
-            # Standardized to 'taxonomy_ids' for NCBI consistency
-            "component_taxonomy_ids": None,
         }
 
     def _extract_basic_component_fields(
         self, components: list[dict[str, Any]]
     ) -> dict[str, list[Any] | None]:
-        """Extract basic fields from component list via transform_utils."""
-        # Extract taxonomy IDs and validate using TaxonomyId Value Object
-        raw_tax_ids = extract_list_field(components, "tax_id", safe_int)
-        validated_tax_ids: list[int] | None = None
-        if raw_tax_ids:
-            validated_list: list[int] = []
-            for tid in raw_tax_ids:
-                vo = TaxonomyId.from_raw(tid)
-                if vo is not None:
-                    validated_list.append(vo.value)
-            validated_tax_ids = validated_list if validated_list else None
-
+        """Extract basic fields from component list via dict_transformers."""
         return {
             "component_accessions": extract_list_field(components, "accession"),
             "component_ids": extract_list_field(components, "component_id", safe_int),
@@ -16910,9 +18493,6 @@ class TargetTransformer(BaseChemblTransformer):
             "component_descriptions": extract_list_field(
                 components, "component_description"
             ),
-            "component_organisms": extract_list_field(components, "organism"),
-            # Standardized to 'taxonomy_ids' for NCBI consistency
-            "component_taxonomy_ids": validated_tax_ids,
         }
 
     def _aggregate_synonyms(
@@ -16920,7 +18500,7 @@ class TargetTransformer(BaseChemblTransformer):
     ) -> str | int | float | bool | None:
         """Aggregate synonyms from all components into a single JSON list.
 
-        Uses aggregate_nested_lists from transform_utils.
+        Uses aggregate_nested_lists from dict_transformers.
 
         Args:
             components: List of component dicts from ChEMBL API.
@@ -16937,7 +18517,7 @@ class TargetTransformer(BaseChemblTransformer):
     ) -> str | int | float | bool | None:
         """Aggregate cross-references from all target components.
 
-        Uses aggregate_nested_lists from transform_utils.
+        Uses aggregate_nested_lists from dict_transformers.
         ChEMBL API stores cross-references inside each component's
         target_component_xrefs field, not at the target level.
 
@@ -16974,6 +18554,10 @@ class TargetTransformer(BaseChemblTransformer):
         # Extract flattened components
         flattened_components = self._flatten_target_components(target_components)
 
+        # Extract primary component_id (first element) for enricher join key
+        component_ids = flattened_components.get("component_ids")
+        primary_component_id = component_ids[0] if component_ids else None
+
         # Handle downgraded field: convert to bool if it's 0/1
         # Use safe_int to handle "0"/"1" strings correctly
         downgraded_val = safe_int(record.get("downgraded"))
@@ -16990,6 +18574,8 @@ class TargetTransformer(BaseChemblTransformer):
         return {
             # Primary identifier
             "target_chembl_id": str(primary_id),
+            # Primary component ID (for target_component enricher join)
+            "component_id": primary_component_id,
             # Core metadata
             "pref_name": record.get("pref_name"),
             "target_type": record.get("target_type"),
@@ -16997,18 +18583,74 @@ class TargetTransformer(BaseChemblTransformer):
             # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
             "taxonomy_id": taxonomy_id,
             "species_group_flag": record.get("species_group_flag"),
-            "description": record.get("description"),
             "downgraded": downgraded,
-            # Optional fields (present for specific target types)
-            "dap_id": safe_int(record.get("dap_id")),
             "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),
-            "target_constraints": self.serialize_json(record.get("target_constraints")),
             # Complex fields (JSON serialized)
             "target_components": self.serialize_json(target_components),
             "target_component_synonyms": self._aggregate_synonyms(target_components),
             "cross_references": self._aggregate_component_xrefs(target_components),
             # Flattened components
             **flattened_components,
+        }
+
+================================================================================
+File: tissue_transformer.py
+Path: pipelines\chembl\tissue_transformer.py
+================================================================================
+"""ChEMBL Tissue Transformer.
+
+Transforms Bronze records to Silver format (Tissue entity inflation).
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
+from bioetl.domain.entities.chembl_tissue import Tissue
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import BronzeRecord
+
+
+class TissueTransformer(BaseChemblTransformer):
+    """Transforms ChEMBL bronze tissue records to silver.
+
+    Tissues are anatomical structures used in assay experiments.
+    They have 1:M relationship with Assay (via assay.tissue_chembl_id FK).
+    """
+
+    entity_class = Tissue
+    primary_id_field = "tissue_chembl_id"
+
+    def _extract_business_data(
+        self,
+        record: BronzeRecord,
+        primary_id: Any,
+    ) -> dict[str, Any]:
+        """Extract Tissue business data from bronze record.
+
+        Args:
+            record: Raw Bronze record from ChEMBL API.
+            primary_id: Validated tissue_chembl_id value.
+
+        Returns:
+            Dictionary of Tissue business fields.
+        """
+        normalizer = self._data_normalizer
+
+        return {
+            # Primary identifier
+            "tissue_chembl_id": str(primary_id),
+            # Core metadata (required)
+            "pref_name": normalizer.normalize_to_string(record.get("pref_name")),
+            # External ontology identifiers (optional)
+            "bto_id": normalizer.normalize_to_string(record.get("bto_id")),
+            "caloha_id": normalizer.normalize_to_string(record.get("caloha_id")),
+            "efo_id": normalizer.normalize_to_string(record.get("efo_id")),
+            "uberon_id": normalizer.normalize_to_string(record.get("uberon_id")),
         }
 
 ================================================================================
@@ -17060,6 +18702,9 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.mapping.publication_type_classification import (
+    classify_publication_type,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -17243,43 +18888,40 @@ class BasePublicationTransformer(BaseTransformer):
         # 8. Convert to SilverRecord
         return cast("SilverRecord", self.entity_to_silver_record(entity))
 
-    def _normalize_partial_date(self, date_str: str | None) -> str | None:
-        """Normalize partial date to YYYY-MM-DD format (end of period).
+    def _classify_publication_type(
+        self,
+        provider: str,
+        raw_type: str | None = None,
+        raw_types_list: list[str] | None = None,
+    ) -> dict[str, str | None]:
+        """Classify publication type using the unified 3-level hierarchy.
 
-        Common logic for provider APIs that return partial dates:
-        - Full date: "2024-05-15" (YYYY-MM-DD)
-        - Month precision: "2024-05" (YYYY-MM) -> "2024-05-30"
-        - Year precision: "2024" (YYYY) -> "2024-12-31"
-
-        Partial dates are normalized to end of period for consistency across BioETL.
+        Delegates to domain classification module.
 
         Args:
-            date_str: Raw date string from provider API.
+            provider: Provider name ("openalex", "crossref", "pubmed", "semanticscholar").
+            raw_type: Single raw type string (for OpenAlex / CrossRef).
+            raw_types_list: List of raw type strings (for PubMed / S2).
 
         Returns:
-            Normalized ISO date string (YYYY-MM-DD) or None.
+            Dict with keys publication_type_unified, publication_subclass,
+            publication_class (all str | None).
 
         """
-        if not date_str:
-            return None
-
-        date_str = str(date_str).strip()
-
-        # Full ISO format (YYYY-MM-DD) - return as-is
-        # Check length and separators strictly to avoid false positives
-        if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-            return date_str
-
-        # Partial date: YYYY-MM → YYYY-MM-30 (end of month approximation)
-        if len(date_str) == 7 and date_str[4] == "-":
-            return f"{date_str}-30"
-
-        # Partial date: YYYY → YYYY-12-31 (end of year)
-        if len(date_str) == 4 and date_str.isdigit():
-            return f"{date_str}-12-31"
-
-        # Unknown format - return None for invalid dates
-        return None
+        entry = classify_publication_type(
+            provider, raw_type=raw_type, raw_types_list=raw_types_list
+        )
+        if entry is None:
+            return {
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
+            }
+        return {
+            "publication_type_unified": entry.unified_type,
+            "publication_subclass": entry.subclass,
+            "publication_class": entry.class_code,
+        }
 
 ================================================================================
 File: extractors.py
@@ -17394,7 +19036,6 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_page_info,
     extract_published_date,
     extract_references,
-    extract_year,
 )
 from bioetl.application.pipelines.crossref.transformer import (
     CrossRefPublicationTransformer,
@@ -17413,7 +19054,6 @@ __all__ = [
     "extract_page_info",
     "extract_published_date",
     "extract_references",
-    "extract_year",
 ]
 
 ================================================================================
@@ -17574,7 +19214,6 @@ from bioetl.domain.normalization import (
     format_date_parts,
     parse_page_range,
 )
-from bioetl.domain.value_objects import PublicationYear
 
 # Re-exports for backward compatibility
 __all__ = [
@@ -17589,7 +19228,6 @@ __all__ = [
     "extract_page_info",
     "extract_published_date",
     "extract_references",
-    "extract_year",
 ]
 
 
@@ -17681,39 +19319,6 @@ def extract_affiliations(publication: dict[str, Any]) -> list[str]:
     return sorted(affiliations)
 
 
-def extract_year(publication: dict[str, Any]) -> int | None:
-    """Extract publication year from date-parts.
-
-    Tries published-print, then published-online, then issued.
-    Validates using PublicationYear Value Object for consistent range checking.
-
-    Args:
-        publication: CrossRef publication record.
-
-    Returns:
-        Publication year if valid (1800-2100), None otherwise.
-
-    Example:
-        >>> extract_year({"published-print": {"date-parts": [[2023, 6, 15]]}})
-        2023
-        >>> extract_year({"issued": {"date-parts": [[2021]]}})
-        2021
-        >>> extract_year({})
-        None
-
-    """
-    for date_field in ["published-print", "published-online", "issued"]:
-        date_info = publication.get(date_field, {})
-        date_parts = date_info.get("date-parts", [[]])
-        if date_parts and date_parts[0] and len(date_parts[0]) > 0:
-            raw_year = date_parts[0][0]
-            if isinstance(raw_year, int):
-                year_vo = PublicationYear.from_raw(raw_year)
-                if year_vo:
-                    return year_vo.value
-    return None
-
-
 def extract_license_url(publication: dict[str, Any]) -> str | None:
     """Extract first license URL from publication.
 
@@ -17778,13 +19383,13 @@ def extract_journal_info(publication: dict[str, Any]) -> dict[str, Any]:
 def extract_page_info(publication: dict[str, Any]) -> dict[str, Any]:
     """Extract pagination information from publication.
 
-    Parses page range string (e.g., "123-145") into first_page and last_page.
+    Parses page range string (e.g., "123-145") into page_first and page_last.
 
     Args:
         publication: CrossRef publication record.
 
     Returns:
-        Dictionary with volume, issue, first_page, last_page fields.
+        Dictionary with volume, issue, page_first, page_last fields.
 
     Example:
         >>> extract_page_info({
@@ -17792,19 +19397,19 @@ def extract_page_info(publication: dict[str, Any]) -> dict[str, Any]:
         ...     "issue": "3",
         ...     "page": "123-145"
         ... })
-        {'volume': '42', 'issue': '3', 'first_page': '123', 'last_page': '145'}
+        {'volume': '42', 'issue': '3', 'page_first': '123', 'page_last': '145'}
         >>> extract_page_info({"page": "42"})
-        {'volume': None, 'issue': None, 'first_page': '42', 'last_page': None}
+        {'volume': None, 'issue': None, 'page_first': '42', 'page_last': None}
         >>> extract_page_info({})
-        {'volume': None, 'issue': None, 'first_page': None, 'last_page': None}
+        {'volume': None, 'issue': None, 'page_first': None, 'page_last': None}
 
     """
     first_page, last_page = parse_page_range(publication.get("page"))
     return {
         "volume": publication.get("volume"),
         "issue": publication.get("issue"),
-        "first_page": first_page,
-        "last_page": last_page,
+        "page_first": first_page,
+        "page_last": last_page,
     }
 
 
@@ -18080,12 +19685,11 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_page_info,
     extract_published_date,
     extract_references,
-    extract_year,
 )
 from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
-from bioetl.domain.value_objects import DOI
+from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -18120,6 +19724,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -18132,6 +19737,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -18143,6 +19749,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -18204,6 +19811,15 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             dates.get("published_online"),
         )
 
+        # Extract raw year from date-parts for validation
+        raw_year = None
+        for date_field in ["published-print", "published-online", "issued"]:
+            date_info = rec.get(date_field, {})
+            date_parts = date_info.get("date-parts", [[]])
+            if date_parts and date_parts[0] and len(date_parts[0]) > 0:
+                raw_year = date_parts[0][0]
+                break
+
         return {
             "doi": doi,
             "title": extract_first_string(rec.get("title", [])),
@@ -18211,14 +19827,17 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             **journal_info,
             **page_info,
             **dates,
-            "year": extract_year(rec),
+            "publication_year": self.validate_value_object(
+                PublicationYear, raw_year, as_string=False
+            ),
             "publication_date": publication_date,
-            "type": rec.get("type"),  # Raw CrossRef type preserved
-            "citation_count": rec.get("is-referenced-by-count"),
-            "reference_count": rec.get("references-count"),
+            "publication_type": rec.get("type"),  # Raw CrossRef type
+            **self._classify_publication_type("crossref", raw_type=rec.get("type")),
+            "citations_received": rec.get("is-referenced-by-count"),
+            "citations_made": rec.get("references-count"),
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
-            "subjects": rec.get("subject", []),
+            "subject_keywords": rec.get("subject", []),
             "_source": "crossref",
             # Excluded fields (always NULL, not written to Delta Lake):
             # - is_oa: CrossRef doesn't provide Open Access info
@@ -18227,19 +19846,21 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             # Lookup metadata (from adapter fallback handler)
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
-            # DQ flags (default: no warnings or errors)
-            "_dq_warn": False,
-            "_dq_error": False,
-            # NEW: Additional CrossRef fields
+            # Additional CrossRef fields
             "alternative_id": rec.get("alternative-id", []) or [],
-            "short_container_title": rec.get("short-container-title", []) or [],
+            "journal_name_short": extract_first_string(
+                rec.get("short-container-title")
+            ),
             "published": published_date,
             **content_domain,
             **issn_by_type,
-            # NEW: Author and reference data (per PROMPT 3 enhancement)
+            # Author and reference data
             "author_orcids": serialized_orcids,
             "author_details": serialized_author_details,
             "references": serialized_references,
+            # DQ flags (MUST be last, per RULES.md §2.4)
+            "_dq_warn": False,
+            "_dq_error": False,
         }
 
     def _get_primary_id_field(self) -> str:
@@ -18374,7 +19995,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """Convert Domain Entity to SilverRecord, excluding unused fields.
 
         Overrides base implementation to remove fields not collected for CrossRef.
-        CrossRef uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).
@@ -18390,10 +20010,19 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         # Remove excluded fields (CrossRef doesn't provide these)
         silver_record.pop("abstract", None)
-        silver_record.pop("affiliations", None)
+        silver_record.pop("affiliation_list", None)
         silver_record.pop("pmid", None)
         silver_record.pop("pmc_id", None)
-        silver_record.pop("doc_type", None)  # CrossRef uses raw 'type' instead
+
+        # Convert ISSN list to scalar + JSON array (unification with other providers)
+        issn_raw = silver_record.get("issn")
+        if isinstance(issn_raw, list):
+            silver_record["issn"] = issn_raw[0] if issn_raw else None
+            silver_record["issn_list"] = (
+                BaseTransformer.serialize_json_list(issn_raw) if issn_raw else None
+            )
+        else:
+            silver_record.setdefault("issn_list", None)
 
         return silver_record
 
@@ -18486,7 +20115,6 @@ Contains transformer and extractors for OpenAlex Works API data.
 
 from bioetl.application.pipelines.openalex.extractors import (
     extract_authors,
-    extract_concepts,
     extract_doi,
     extract_journal_info,
     reconstruct_abstract,
@@ -18498,7 +20126,6 @@ from bioetl.application.pipelines.openalex.transformer import (
 __all__ = [
     "OpenAlexPublicationTransformer",
     "extract_authors",
-    "extract_concepts",
     "extract_doi",
     "extract_journal_info",
     "reconstruct_abstract",
@@ -18511,13 +20138,37 @@ Path: pipelines\openalex\extractors.py
 """Field extraction functions for OpenAlex records.
 
 Pure functions for extracting/normalizing fields from OpenAlex API responses.
-Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
 """
 
 from __future__ import annotations
 
-import warnings
+import re
 from typing import Any
+
+# ORCID format: XXXX-XXXX-XXXX-XXXX (last char can be X for checksum)
+_ORCID_PATTERN = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
+
+__all__ = [
+    "extract_affiliations",
+    "extract_author_ids",
+    "extract_author_orcids",
+    "extract_authors",
+    "extract_biblio_info",
+    "extract_doi",
+    "extract_external_ids",
+    "extract_grants",
+    "extract_institution_country_codes",
+    "extract_institution_ids",
+    "extract_institution_ror_ids",
+    "extract_journal_info",
+    "extract_keywords",
+    "extract_mesh_terms",
+    "extract_open_access_info",
+    "extract_openalex_id",
+    "extract_primary_topic",
+    "extract_topics",
+    "reconstruct_abstract",
+]
 
 
 def _extract_id_from_url(url: str | None) -> str | None:
@@ -18531,7 +20182,7 @@ def _extract_id_from_url(url: str | None) -> str | None:
     """
     if not url or not isinstance(url, str):
         return None
-    return url.split("/")[-1] if "/" in url else url
+    return url.rstrip("/").split("/")[-1] if "/" in url else url
 
 
 def _get_nested_display_name(obj: Any) -> str | None:
@@ -18609,6 +20260,80 @@ def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
     return authors
 
 
+def _extract_orcid_from_url(url: str | None) -> str:
+    """Extract and validate ORCID from URL (helper function).
+
+    Args:
+        url: ORCID URL (e.g., "https://orcid.org/0000-0001-2345-6789") or None.
+
+    Returns:
+        Extracted ORCID ID if valid, empty string otherwise.
+    """
+    if not url or not isinstance(url, str):
+        return ""
+
+    # Remove URL prefix if present
+    orcid = url
+    if url.startswith("https://orcid.org/"):
+        orcid = url[18:]
+    elif url.startswith("http://orcid.org/"):
+        orcid = url[17:]
+
+    # Validate format
+    if _ORCID_PATTERN.match(orcid):
+        return orcid
+
+    return ""
+
+
+def extract_author_ids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract OpenAlex author IDs from authorships (preserving order).
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        List of OpenAlex author IDs (e.g., ["A1234567890", "", "A9876543210"]).
+    """
+    author_ids: list[str] = []
+    for authorship in authorships:
+        author = authorship.get("author", {})
+        if not isinstance(author, dict):
+            author_ids.append("")
+            continue
+        raw_id = author.get("id")
+        extracted = _extract_id_from_url(raw_id)
+        author_ids.append(extracted or "")
+    return author_ids
+
+
+def extract_author_orcids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract ORCID identifiers from authorships (preserving order).
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        List of ORCID IDs (empty string for missing), same length as input.
+
+    Example:
+        >>> extract_author_orcids([
+        ...     {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
+        ...     {"author": {"orcid": None}},
+        ... ])
+        ['0000-0001-2345-6789', '']
+    """
+    orcids: list[str] = []
+    for authorship in authorships:
+        author = authorship.get("author", {})
+        if not isinstance(author, dict):
+            orcids.append("")
+            continue
+        orcid_url = author.get("orcid")
+        orcids.append(_extract_orcid_from_url(orcid_url))
+    return orcids
+
+
 def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
     """Extract unique affiliations from authorships (sorted)."""
     affiliations: set[str] = set()
@@ -18675,29 +20400,51 @@ def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list
     return sorted(codes)
 
 
-def extract_concepts(
-    concepts: list[dict[str, Any]],
-    max_count: int = 10,
-    *,
-    warn_deprecated: bool = False,
-) -> list[str]:
-    """Extract top concept names (DEPRECATED: use extract_topics instead)."""
-    if warn_deprecated:
-        warnings.warn(
-            "extract_concepts() is deprecated. OpenAlex deprecated the 'concepts' "
-            "field in 2024 in favor of 'topics'. Use extract_topics() and "
-            "extract_primary_topic() instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-    result = []
-    for concept in concepts[:max_count]:
-        if not isinstance(concept, dict):
+def extract_institution_ror_ids(authorships: list[dict[str, Any]]) -> list[str]:
+    """Extract unique ROR IDs from authorships institutions.
+
+    ROR (Research Organization Registry) provides persistent identifiers for
+    research institutions. OpenAlex includes ROR IDs in institution objects
+    when available.
+
+    Args:
+        authorships: List of authorship dicts from OpenAlex API.
+
+    Returns:
+        Sorted list of unique ROR IDs (full URL format, e.g.,
+        ["https://ror.org/0123456789", "https://ror.org/9876543210"]).
+
+    Note:
+        OpenAlex Works API may not return `ror` field by default depending
+        on the API endpoint and select parameters. If `ror` is missing from
+        institution objects, this returns an empty list.
+
+        For comprehensive ROR coverage, consider:
+        - Using PubMed structured affiliations (preferred, has explicit ROR)
+        - Enriching via OpenAlex Institutions API (separate lookup)
+        - Building OpenAlex ID → ROR mapping from data snapshot
+
+    Example:
+        >>> authorships = [
+        ...     {"institutions": [{"ror": "https://ror.org/0123456789"}]},
+        ...     {"institutions": [{"ror": "https://ror.org/9876543210"}]},
+        ... ]
+        >>> extract_institution_ror_ids(authorships)
+        ['https://ror.org/0123456789', 'https://ror.org/9876543210']
+
+    """
+    ror_ids: set[str] = set()
+    for authorship in authorships:
+        institutions = authorship.get("institutions", [])
+        if not isinstance(institutions, list):
             continue
-        name = concept.get("display_name")
-        if name and isinstance(name, str):
-            result.append(name.strip())
-    return result
+        for inst in institutions:
+            if not isinstance(inst, dict):
+                continue
+            ror = inst.get("ror")
+            if ror and isinstance(ror, str) and ror.startswith("https://ror.org/"):
+                ror_ids.add(ror)
+    return sorted(ror_ids)
 
 
 def extract_topics(
@@ -18768,7 +20515,7 @@ def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
 
 
 def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract journal info (journal_name, issn, publisher) from primary_location."""
+    """Extract journal info (journal, issn, publisher) from primary_location."""
     if not primary_location or not isinstance(primary_location, dict):
         return {"journal": None, "issn": None, "publisher": None}
 
@@ -18821,27 +20568,23 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
     if not ids or not isinstance(ids, dict):
         return {"pmid": None, "pmcid": None, "mag_id": None}
 
-    # Extract PMID from URL
-    # Format: https://pubmed.ncbi.nlm.nih.gov/12345678
-    pmid = None
-    pmid_url = ids.get("pmid")
-    if pmid_url and isinstance(pmid_url, str):
-        pmid = pmid_url.rstrip("/").split("/")[-1] if "/" in pmid_url else pmid_url
+    from bioetl.domain.value_objects.publications import PubMedId
 
-    # Extract PMCID from URL
-    # Format: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456
-    pmcid = None
-    pmcid_url = ids.get("pmcid")
-    if pmcid_url and isinstance(pmcid_url, str):
-        pmcid = pmcid_url.rstrip("/").split("/")[-1] if "/" in pmcid_url else pmcid_url
+    # PMID: normalize via PubMedId VO (strips leading zeros, validates bounds)
+    raw_pmid = _extract_id_from_url(ids.get("pmid"))
+    pmid_vo = PubMedId.from_raw(raw_pmid)
 
-    # Extract MAG ID (can be int or string)
-    mag_id = None
+    # PMCID: extract from URL (e.g. https://...pmc/articles/PMC123456)
+    pmcid = _extract_id_from_url(ids.get("pmcid"))
+
+    # MAG ID (can be int or string)
     mag_raw = ids.get("mag")
-    if mag_raw is not None:
-        mag_id = str(mag_raw)
 
-    return {"pmid": pmid, "pmcid": pmcid, "mag_id": mag_id}
+    return {
+        "pmid": str(pmid_vo) if pmid_vo else None,
+        "pmcid": pmcid,
+        "mag_id": str(mag_raw) if mag_raw is not None else None,
+    }
 
 
 def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
@@ -18880,19 +20623,19 @@ def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
 
 
 def extract_biblio_info(biblio: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract bibliographic info (volume, issue, first_page, last_page)."""
+    """Extract bibliographic info (volume, issue, page_first, page_last)."""
     if not biblio or not isinstance(biblio, dict):
         return {
             "volume": None,
             "issue": None,
-            "first_page": None,
-            "last_page": None,
+            "page_first": None,
+            "page_last": None,
         }
     return {
         "volume": biblio.get("volume"),
         "issue": biblio.get("issue"),
-        "first_page": biblio.get("first_page"),
-        "last_page": biblio.get("last_page"),
+        "page_first": biblio.get("first_page"),
+        "page_last": biblio.get("last_page"),
     }
 
 ================================================================================
@@ -18921,13 +20664,15 @@ from typing import TYPE_CHECKING, Any, cast
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
+    extract_author_ids,
+    extract_author_orcids,
     extract_authors,
     extract_biblio_info,
-    extract_concepts,
     extract_external_ids,
     extract_grants,
     extract_institution_country_codes,
     extract_institution_ids,
+    extract_institution_ror_ids,
     extract_journal_info,
     extract_keywords,
     extract_mesh_terms,
@@ -18963,10 +20708,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - authors: authorships (extraction + PII hashing)
     - journal: primary_location.source.display_name
     - year: publication_year
-    - topics: topics (hierarchical 4-level classification)
+    - subject_topics: topics (hierarchical 4-level classification)
     - primary_topic: primary_topic (single most relevant topic)
     - grants: grants (funding information)
-    - concepts: concepts (DEPRECATED - kept for backward compatibility)
 
     Handles lookup metadata:
     - _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
@@ -18977,11 +20721,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - Automatic primary ID validation and fallback logging
     - Content hash computation (excluding metadata)
     - Tracing and metrics observability (O1)
-
-    Note on Topics vs Concepts:
-    - OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
-    - Both fields are extracted during the transition period
-    - New downstream code should use `topics` and `primary_topic`
     """
 
     def __init__(
@@ -18990,6 +20729,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -19002,6 +20742,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md S5.4).
@@ -19013,6 +20754,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -19057,8 +20799,15 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         hashed_authors = self.hash_pii_list(raw_authors) or []
 
         # Extract affiliations
-        raw_affiliations = extract_affiliations(rec.get("authorships", []))
-        serialized_affiliations = self.serialize_json_list(raw_affiliations)
+        authorships = rec.get("authorships")
+        raw_affiliations = (
+            extract_affiliations(authorships) if isinstance(authorships, list) else None
+        )
+        serialized_affiliations = (
+            self.serialize_json(raw_affiliations)
+            if raw_affiliations is not None
+            else None
+        )
 
         # Extract institution IDs and country codes (for cross-referencing and geographic analysis)
         institution_ids = extract_institution_ids(rec.get("authorships", []))
@@ -19066,20 +20815,24 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             rec.get("authorships", [])
         )
 
+        # Extract ROR IDs (may be empty if not returned by Works API)
+        ror_ids = extract_institution_ror_ids(rec.get("authorships", []))
+
+        # Extract author identifiers (ORCID and OpenAlex IDs)
+        author_orcids = extract_author_orcids(rec.get("authorships", []))
+        author_openalex_ids = extract_author_ids(rec.get("authorships", []))
+
         # Extract journal info
         journal_info = extract_journal_info(rec.get("primary_location", {}))
 
         # Extract topics (hierarchical classification - replaces deprecated concepts)
-        topics = extract_topics(rec.get("topics", []))
+        subject_topics = extract_topics(rec.get("topics", []))
 
         # Extract primary topic (single most relevant topic)
         primary_topic = extract_primary_topic(rec.get("primary_topic"))
 
         # Extract grants/funding information
         grants = extract_grants(rec.get("grants", []))
-
-        # Extract concepts (DEPRECATED - kept for backward compatibility)
-        concepts = extract_concepts(rec.get("concepts", []))
 
         # Extract Open Access info
         oa_info = extract_open_access_info(rec.get("open_access", {}))
@@ -19088,10 +20841,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         external_ids = extract_external_ids(rec.get("ids", {}))
 
         # Extract MeSH terms
-        mesh_terms = extract_mesh_terms(rec.get("mesh", []))
+        subject_mesh = extract_mesh_terms(rec.get("mesh", []))
 
         # Extract keywords
-        keywords = extract_keywords(rec.get("keywords", []))
+        subject_keywords = extract_keywords(rec.get("keywords", []))
 
         # Extract bibliographic info (volume, issue, pages)
         biblio_info = extract_biblio_info(rec.get("biblio", {}))
@@ -19113,40 +20866,54 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "title": rec.get("title"),
             "abstract": abstract,
             "authors": self.serialize_json_list(hashed_authors),
-            "affiliations": serialized_affiliations,
+            "affiliation_list": serialized_affiliations,
             "institution_ids": institution_ids,
             "institution_country_codes": institution_country_codes,
-            "journal": journal_info.get("journal_name"),
+            # ROR IDs (may be empty if not returned by Works API)
+            "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
+            "author_orcids": (
+                self.serialize_json_list(author_orcids) if any(author_orcids) else None
+            ),
+            "author_openalex_ids": (
+                self.serialize_json_list(author_openalex_ids)
+                if any(author_openalex_ids)
+                else None
+            ),
+            "journal": journal_info.get("journal"),
             "issn": journal_info.get("issn"),
             "publisher": journal_info.get("publisher"),
-            "year": year,
-            "publication_date": self._normalize_partial_date(
+            "publication_year": year,
+            "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publication_date")
             ),
-            "type": rec.get("type"),
+            "publication_type": rec.get("type"),  # Raw OpenAlex type
+            **self._classify_publication_type("openalex", raw_type=rec.get("type")),
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),
             # OpenAlex source field: cited_by_count
-            # Unified BioETL field: citation_count (standardized across all providers)
-            "citation_count": rec.get("cited_by_count"),
+            # Unified BioETL field: citations_received (standardized across all providers)
+            "citations_received": rec.get("cited_by_count"),
             # Topics (hierarchical classification - replaces deprecated concepts)
-            "topics": topics,
-            "primary_topic": primary_topic,
-            # Grants/funding information
-            "grants": grants,
-            # Concepts (DEPRECATED - kept for backward compatibility)
-            "concepts": concepts,
-            "mesh": mesh_terms,
-            "keywords": keywords,
+            # Serialized to JSON string for schema compliance
+            "subject_topics": (
+                self.serialize_json_list(subject_topics) if subject_topics else None
+            ),
+            "primary_topic": self.serialize_json(primary_topic)
+            if primary_topic
+            else None,
+            # Grants/funding information (serialized to JSON string)
+            "grants": self.serialize_json_list(grants) if grants else None,
+            "subject_mesh": subject_mesh,
+            "subject_keywords": subject_keywords,
             "language": rec.get("language"),
             # Bibliographic info (from biblio object)
             "volume": biblio_info.get("volume"),
             "issue": biblio_info.get("issue"),
-            "first_page": biblio_info.get("first_page"),
-            "last_page": biblio_info.get("last_page"),
+            "page_first": biblio_info.get("page_first"),
+            "page_last": biblio_info.get("page_last"),
             # Additional metrics
             "fwci": rec.get("fwci"),
-            "referenced_works_count": rec.get("referenced_works_count"),
+            "citations_made": rec.get("referenced_works_count"),
             # Quality indicators
             "is_retracted": rec.get("is_retracted", False),
             "_lookup_method": lookup_method,
@@ -19177,10 +20944,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding pmc_id and doc_type.
+        """Convert Domain Entity to SilverRecord, excluding pmc_id.
 
         Overrides base implementation to remove fields not collected for OpenAlex.
-        OpenAlex uses raw 'type' field instead of mapped 'doc_type'.
 
         Args:
             entity: Domain entity (dataclass).
@@ -19196,7 +20962,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         # Remove excluded fields
         silver_record.pop("pmc_id", None)
-        silver_record.pop("doc_type", None)  # OpenAlex uses raw 'type' instead
 
         return silver_record
 
@@ -19216,8 +20981,16 @@ Main Components:
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.pubchem.compound import PubChemCompoundPipeline
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
+
+
+class PubChemCompoundPipeline(BasePipeline):
+    """Pipeline for processing PubChem compounds.
+
+    Transformer is injected via DI from GenericPipelineFactory.
+    """
+
 
 __all__ = [
     "PubChemCompoundPipeline",
@@ -19296,6 +21069,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         entity_type: str = "compound",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -19308,6 +21082,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'compound'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher. Not typically used for molecules
@@ -19320,6 +21095,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -19464,8 +21240,16 @@ Main Components:
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
+
+
+class PubMedPublicationPipeline(BasePipeline):
+    """Пайплайн для данных о публикациях из PubMed.
+
+    Transformer is injected via DI from GenericPipelineFactory.
+    """
+
 
 __all__ = [
     "PubMedPublicationPipeline",
@@ -19490,6 +21274,7 @@ from __future__ import annotations
 from bioetl.application.pipelines.pubmed.extractors.abstract import AbstractExtractor
 from bioetl.application.pipelines.pubmed.extractors.author import (
     AuthorExtractor,
+    RawAuthor,
     StructuredAffiliation,
 )
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -19512,6 +21297,7 @@ __all__ = [
     "DateExtractor",
     "ELocationIds",
     "IdentifierExtractor",
+    "RawAuthor",
     "StructuredAffiliation",
 ]
 
@@ -19629,6 +21415,14 @@ Path: pipelines\pubmed\extractors\author.py
 
 Handles parsing of author lists including individual and collective authors.
 Supports structured affiliation extraction with institutional identifiers.
+
+PII Safety (RULES.md §5.4):
+    Author names and email addresses extracted here are PII fields.
+    Salted SHA-256 hashing is applied at the transformer level
+    (PubMedPublicationTransformer) before any data reaches the Silver layer:
+    - Author names → hash_pii_list() → hashed before Silver storage
+    - Email addresses → PiiHasherPort.hash_value() → stored as email_hash
+    Raw PII values MUST NOT persist beyond the Bronze→Silver transformation.
 """
 
 from __future__ import annotations
@@ -19638,7 +21432,7 @@ from typing import TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 
 # Email pattern for detection and extraction
 EMAIL_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
@@ -19649,12 +21443,22 @@ class StructuredAffiliation(TypedDict, total=False):
 
     MEDLINE AffiliationInfo can contain Identifier elements linking to
     institutional databases like ROR (Research Organization Registry) or GRID.
+
+    Attributes:
+        text: Affiliation text.
+        identifier: Raw identifier value (any source).
+        identifier_source: Source of identifier (ROR, GRID, ISNI, etc.).
+        email: Extracted email for correspondence authors.
+        ror_id: ROR identifier if source is ROR (convenience field).
+        grid_id: GRID identifier if source is GRID (convenience field).
     """
 
     text: str
     identifier: str | None
     identifier_source: str | None
-    email: str | None  # Extracted email for correspondence authors
+    email: str | None
+    ror_id: str | None  # Duplicated from identifier if source == "ROR"
+    grid_id: str | None  # Duplicated from identifier if source == "GRID"
 
 
 class RawAuthor(TypedDict, total=False):
@@ -19726,6 +21530,27 @@ class AuthorExtractor(BaseFieldExtractor):
 
         return raw_authors if raw_authors else None
 
+    def _find_identifier(self, aff_info: Element) -> tuple[str | None, str | None]:
+        """Find the best identifier from AffiliationInfo, preferring ROR > GRID > ISNI > RINGGOLD.
+
+        Args:
+            aff_info: AffiliationInfo XML element.
+
+        Returns:
+            Tuple of (identifier_value, identifier_source) or (None, None).
+        """
+        for source in ["ROR", "GRID", "ISNI", "RINGGOLD"]:
+            for id_elem in aff_info.findall("Identifier"):
+                if id_elem.get("Source") == source and id_elem.text:
+                    return id_elem.text.strip(), source
+
+        # Fallback: take the first available identifier
+        for id_elem in aff_info.findall("Identifier"):
+            if id_elem.text:
+                return id_elem.text.strip(), id_elem.get("Source")
+
+        return None, None
+
     def _extract_structured_affiliation(
         self, aff_info: Element
     ) -> StructuredAffiliation | None:
@@ -19750,27 +21575,7 @@ class AuthorExtractor(BaseFieldExtractor):
         if not aff_text:
             return None
 
-        # Extract identifier if present (prefer ROR, then GRID, then others)
-        identifier = None
-        identifier_source = None
-
-        # Try to find identifiers in priority order
-        for source in ["ROR", "GRID", "ISNI", "RINGGOLD"]:
-            for id_elem in aff_info.findall("Identifier"):
-                if id_elem.get("Source") == source and id_elem.text:
-                    identifier = id_elem.text.strip()
-                    identifier_source = source
-                    break
-            if identifier:
-                break
-
-        # If no prioritized identifier found, take the first available
-        if not identifier:
-            for id_elem in aff_info.findall("Identifier"):
-                if id_elem.text:
-                    identifier = id_elem.text.strip()
-                    identifier_source = id_elem.get("Source")
-                    break
+        identifier, identifier_source = self._find_identifier(aff_info)
 
         # Extract email if present in affiliation text
         email = self._extract_email_from_text(aff_text)
@@ -19780,6 +21585,8 @@ class AuthorExtractor(BaseFieldExtractor):
             identifier=identifier,
             identifier_source=identifier_source,
             email=email,
+            ror_id=identifier if identifier_source == "ROR" else None,
+            grid_id=identifier if identifier_source == "GRID" else None,
         )
 
     def _extract_email_from_text(self, text: str) -> str | None:
@@ -20271,7 +22078,7 @@ from typing import ClassVar, TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 
 
 class RawDate(TypedDict):
@@ -21014,9 +22821,10 @@ from bioetl.application.pipelines.pubmed.extractors import (
     ClassificationExtractor,
     DateExtractor,
     IdentifierExtractor,
+    RawAuthor,
     StructuredAffiliation,
 )
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.services import IdentityService
@@ -21069,6 +22877,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -21081,6 +22890,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -21092,6 +22902,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -21214,28 +23025,92 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             len(ref_list.findall(".//Reference")) if ref_list is not None else 0
         )
 
-        return {"grant_count": grant_count, "reference_count": reference_count}
+        return {"grant_count": grant_count, "citations_made": reference_count}
 
     def _extract_classification_data(
         self, article: ET.Element, medline: ET.Element | None
     ) -> dict[str, Any]:
         """Extract classification-related fields."""
         publication_types = ClassificationExtractor.parse_publication_types(article)
-        keywords = ClassificationExtractor.parse_keywords(medline)
-        mesh_terms = ClassificationExtractor.parse_mesh_terms(medline)
+        subject_keywords = ClassificationExtractor.parse_keywords(medline)
+        subject_mesh = ClassificationExtractor.parse_mesh_terms(medline)
         chemicals = ClassificationExtractor.parse_chemicals(medline)
 
         return {
             "publication_types": publication_types,
             "publication_type_list": self.serialize_json_list(publication_types),
-            "keywords": keywords,
-            "keyword_count": len(keywords) if keywords else 0,
-            "mesh_terms": mesh_terms,
-            "mesh_heading_count": len(mesh_terms) if mesh_terms else 0,
+            "subject_keywords": subject_keywords,
+            "keyword_count": len(subject_keywords) if subject_keywords else 0,
+            "subject_mesh": subject_mesh,
+            "mesh_heading_count": len(subject_mesh) if subject_mesh else 0,
             "chemicals": chemicals,
             "chemical_count": len(chemicals) if chemicals else 0,
             "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
             "databanks": ClassificationExtractor.parse_databanks(medline),
+        }
+
+    def _extract_author_block(
+        self, article: ET.Element, raw_author_data: list[RawAuthor]
+    ) -> dict[str, Any]:
+        """Extract and process author-related fields from article XML."""
+        normalized_authors = (
+            AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
+        )
+        hashed_authors = self.hash_pii_list(normalized_authors) or []
+
+        authors_with_affiliations = self._build_authors_with_affiliations(
+            raw_author_data
+        )
+
+        # Unique affiliations across all authors
+        affiliation_values: list[str] = []
+        for author in raw_author_data:
+            affiliation_values.extend(
+                aff for aff in (author.get("affiliations") or []) if aff
+            )
+        unique_affiliations = sorted(set(affiliation_values))
+
+        # Structured affiliations with identifiers
+        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
+        processed = self._process_structured_affiliations(structured_affs)
+
+        return {
+            "authors": self.serialize_json_list(hashed_authors),
+            "authors_with_affiliations": (
+                self.serialize_json_list(authors_with_affiliations)
+                if authors_with_affiliations
+                else None
+            ),
+            "affiliation_list": (
+                self.serialize_json_list(unique_affiliations)
+                if unique_affiliations
+                else None
+            ),
+            "affiliation_structured": self.serialize_json_list(processed),
+            "author_count": len(hashed_authors),
+        }
+
+    def _extract_identifiers(self, root: ET.Element) -> dict[str, Any]:
+        """Extract and normalize all identifier fields from PubMed XML root."""
+        raw_pmid = get_text(root.find(".//PMID"))
+        pmid_vo = PubMedId.from_raw(raw_pmid)
+
+        raw_doi = IdentifierExtractor.extract_doi(root)
+        doi_vo = DOI.from_raw(raw_doi)
+
+        return {
+            "pmid": str(pmid_vo) if pmid_vo else None,
+            "doi": str(doi_vo) if doi_vo else None,
+            "pii": self._data_normalizer.normalize_to_string(
+                IdentifierExtractor.extract_pii(root)
+            ),
+            "mid": self._data_normalizer.normalize_to_string(
+                IdentifierExtractor.extract_mid(root)
+            ),
+            "publisher_id": self._data_normalizer.normalize_to_string(
+                IdentifierExtractor.extract_publisher_id(root)
+            ),
+            "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
         }
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
@@ -21254,73 +23129,36 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if root is None:
             return {"pmid": None}
 
-        raw_pmid = get_text(root.find(".//PMID"))
-        pmid_vo = PubMedId.from_raw(raw_pmid)
-        pmid = str(pmid_vo) if pmid_vo else None
+        identifiers = self._extract_identifiers(root)
+
+        article = root.find(".//Article")
+        if article is None:
+            return {"pmid": identifiers["pmid"]}
 
         medline = root.find(".//MedlineCitation")
-        article = root.find(".//Article")
         pubmed_data = root.find(".//PubmedData")
 
-        if article is None:
-            return {"pmid": pmid}
-
-        # Extract and hash authors
-        raw_authors = AuthorExtractor.parse_authors(article)
-        hashed_authors = self.hash_pii_list(raw_authors) or []
-
-        # Extract structured affiliations with identifiers (affiliations field excluded)
-        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
-        processed_structured_affs = self._process_structured_affiliations(
-            structured_affs
-        )
-        serialized_structured_affs = self.serialize_json_list(processed_structured_affs)
-
-        # Validate DOI
-        raw_doi = IdentifierExtractor.extract_doi(root)
-        doi_vo = DOI.from_raw(raw_doi)
-        normalized_doi = str(doi_vo) if doi_vo else None
-
-        # Extract and normalize additional identifiers.
-        # Using normalize_to_string ensures that empty strings ("") become None,
-        # which provides consistent handling in downstream processing and
-        # prevents inconsistent content_hash computation for equivalent records.
-        pii = self._data_normalizer.normalize_to_string(
-            IdentifierExtractor.extract_pii(root)
-        )
-        mid = self._data_normalizer.normalize_to_string(
-            IdentifierExtractor.extract_mid(root)
-        )
-        publisher_id = self._data_normalizer.normalize_to_string(
-            IdentifierExtractor.extract_publisher_id(root)
-        )
+        raw_author_data = AuthorExtractor().extract(article) or []
 
         return {
-            "pmid": pmid,
-            "doi": normalized_doi,
-            "pii": pii,
-            "mid": mid,
-            "publisher_id": publisher_id,
+            **identifiers,
             "title": get_text(article.find(".//ArticleTitle")),
-            # vernacular_title excluded per user request
             "abstract": self._data_normalizer.strip_html_tags(
                 AbstractExtractor.extract_abstract(article)
             ),
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
-            "authors": self.serialize_json_list(hashed_authors),
-            # affiliations excluded per user request
-            "structured_affiliations": serialized_structured_affs,
-            "author_count": len(hashed_authors),
+            **self._extract_author_block(article, raw_author_data),
             **self._extract_journal_data(article),
             **self._extract_date_data(article, pubmed_data, medline),
             **self._extract_classification_data(article, medline),
             **self._extract_medline_metadata(medline, pubmed_data),
             **self._extract_counts(article, pubmed_data),
             "language": get_text(article.find(".//Language")),
-            "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
             "_source": "pubmed",
-            "doc_type": "PUBLICATION",
-            "citation_count": None,
+            **self._build_pubmed_classification(
+                ClassificationExtractor.parse_publication_types(article),
+            ),
+            "citations_received": None,
             "is_oa": None,
             "_lookup_method": cast("dict[str, Any]", record).get(
                 "_lookup_method", "pmid"
@@ -21329,6 +23167,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "_dq_warn": False,
             "_dq_error": False,
         }
+
+    def _build_pubmed_classification(
+        self, pub_types: list[str]
+    ) -> dict[str, str | None]:
+        """Build publication_type and classification fields for PubMed.
+
+        Joins raw types with ``|`` for the raw ``publication_type`` field,
+        then uses the unified classifier to pick the most specific match.
+
+        Args:
+            pub_types: List of raw publication type strings from XML.
+
+        Returns:
+            Dict with publication_type and the 3 classification fields.
+
+        """
+        raw_type = "|".join(pub_types) if pub_types else None
+        classification = self._classify_publication_type(
+            "pubmed",
+            raw_types_list=pub_types,
+        )
+        return {"publication_type": raw_type, **classification}
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
@@ -21350,6 +23210,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 "text": aff.get("text"),
                 "identifier": aff.get("identifier"),
                 "identifier_source": aff.get("identifier_source"),
+                "ror_id": aff.get("ror_id"),
+                "grid_id": aff.get("grid_id"),
             }
             # Hash email if present (PII protection)
             email = aff.get("email")
@@ -21360,6 +23222,69 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
             processed.append(processed_aff)
         return processed
+
+    def _build_authors_with_affiliations(
+        self, raw_authors: list[RawAuthor]
+    ) -> list[dict[str, Any]]:
+        """Build structured author-affiliation mapping.
+
+        Links each author to their specific affiliations with identifiers.
+        Author names are hashed for PII compliance (RULES.md §5.4).
+
+        Args:
+            raw_authors: List of raw author dicts from AuthorExtractor.
+
+        Returns:
+            List of author objects with hashed names and affiliations.
+        """
+        result: list[dict[str, Any]] = []
+
+        for author in raw_authors:
+            # Build author name for hashing
+            last_name = author.get("last_name")
+            initials = author.get("initials")
+            fore_name = author.get("fore_name")
+            collective = author.get("collective_name")
+
+            # Determine display name
+            if last_name:
+                if initials:
+                    name = f"{last_name}, {initials}"
+                elif fore_name:
+                    name = f"{last_name}, {fore_name}"
+                else:
+                    name = last_name
+            elif collective:
+                name = collective
+            else:
+                continue  # Skip authors without any name
+
+            # Hash the name for PII compliance
+            name_hash = self._pii_hasher.hash_value(name) if self._pii_hasher else None
+
+            # Process affiliations for this author (use pre-computed ror_id/grid_id)
+            affiliations: list[dict[str, Any]] = []
+            structured_affs = author.get("structured_affiliations") or []
+
+            for aff in structured_affs:
+                aff_entry: dict[str, Any] = {
+                    "text": aff.get("text"),
+                    "ror_id": aff.get("ror_id"),
+                    "grid_id": aff.get("grid_id"),
+                    "identifier": aff.get("identifier"),
+                    "identifier_source": aff.get("identifier_source"),
+                }
+                affiliations.append(aff_entry)
+
+            result.append(
+                {
+                    "name_hash": name_hash,
+                    "initials": initials,
+                    "affiliations": affiliations,
+                }
+            )
+
+        return result
 
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for PubMed publications.
@@ -21396,46 +23321,44 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _extract_journal_data(self, article: ET.Element) -> dict[str, Any]:
         """Extract journal-related data from article XML."""
-        journal = article.find(".//Journal")
+        journal_elem = article.find(".//Journal")
         pages = get_text(article.find(".//Pagination/MedlinePgn"))
         first_page, last_page = parse_page_range(pages)
 
-        if not journal:
+        if not journal_elem:
             return {
                 "journal": None,
-                "journal_title": None,
-                "journal_abbrev": None,
+                "journal_name_short": None,
                 "journal_iso_abbrev": None,
                 "journal_issn_type": None,
                 "issn": None,
                 "volume": None,
                 "issue": None,
-                "pages": pages,
+                "page_range": pages,
                 "medline_pgn": pages,
-                "first_page": first_page,
-                "last_page": last_page,
+                "page_first": first_page,
+                "page_last": last_page,
             }
 
-        journal_issue = journal.find("JournalIssue")
-        journal_name = get_text(journal.find("Title"))
-        journal_abbrev = get_text(journal.find("ISOAbbreviation"))
-        issn_elem = journal.find("ISSN")
+        journal_issue = journal_elem.find("JournalIssue")
+        journal_title = get_text(journal_elem.find("Title"))
+        journal_abbrev = get_text(journal_elem.find("ISOAbbreviation"))
+        issn_elem = journal_elem.find("ISSN")
         issn = get_text(issn_elem)
         issn_type = issn_elem.get("IssnType") if issn_elem is not None else None
 
         return {
-            "journal": journal_name,
-            "journal_title": journal_name,  # Alias for Gold schema
-            "journal_abbrev": journal_abbrev,
+            "journal": journal_title,
+            "journal_name_short": journal_abbrev,
             "journal_iso_abbrev": journal_abbrev,  # Alias for Gold schema
             "journal_issn_type": issn_type,
             "issn": issn,
             "volume": get_text(journal_issue.find("Volume")) if journal_issue else None,
             "issue": get_text(journal_issue.find("Issue")) if journal_issue else None,
-            "pages": pages,
+            "page_range": pages,
             "medline_pgn": pages,  # Alias for Gold schema
-            "first_page": first_page,
-            "last_page": last_page,
+            "page_first": first_page,
+            "page_last": last_page,
         }
 
     def _compute_publication_date(
@@ -21460,7 +23383,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Priority 2: pub_date (may be partial, normalize it)
         if pub_date:
-            return self._normalize_partial_date(pub_date)
+            return self._data_normalizer.normalize_partial_date(pub_date)
 
         # Priority 3: Construct from year (end of year)
         if year:
@@ -21544,8 +23467,12 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
 
-        year_vo = PublicationYear.from_raw(raw_year)
-        validated_year = year_vo.value if year_vo else None
+        _validated_year = self.validate_value_object(
+            PublicationYear, raw_year, as_string=False
+        )
+        validated_year: int | None = (
+            int(_validated_year) if _validated_year is not None else None
+        )
 
         raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
 
@@ -21576,7 +23503,6 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "pub_month": pub_month,
             "pub_day": pub_day,
             "publication_date": publication_date,
-            "year": validated_year,
             "publication_year": validated_year,
             # Excluded per user request: accepted_date, received_date, revised_date, epub_date
             "date_completed": date_completed,
@@ -21601,18 +23527,20 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         # Get base silver record
         silver_record = BaseTransformer.entity_to_silver_record(entity)
 
-        # Remove excluded fields per user request
+        # Remove excluded fields (API deprecated or not available)
         silver_record.pop("vernacular_title", None)
         silver_record.pop("epub_date", None)
         silver_record.pop("received_date", None)
         silver_record.pop("revised_date", None)
         silver_record.pop("accepted_date", None)
+        silver_record.pop("citations_received", None)
+        silver_record.pop("is_oa", None)
 
         return silver_record
 
 ================================================================================
-File: xml_utils.py
-Path: pipelines\pubmed\xml_utils.py
+File: xml_parser.py
+Path: pipelines\pubmed\xml_parser.py
 ================================================================================
 """Common XML utilities for PubMed extractors.
 
@@ -21723,233 +23651,19 @@ __all__ = [
 ]
 
 ================================================================================
-File: extractors.py
-Path: pipelines\semanticscholar\extractors.py
+File: _author_extractors.py
+Path: pipelines\semanticscholar\_author_extractors.py
 ================================================================================
-# src/bioetl/application/pipelines/semanticscholar/extractors.py
-"""Field extraction functions for Semantic Scholar records.
+"""Author data extraction for Semantic Scholar records.
 
-Provides pure functions for extracting and normalizing fields from
-Semantic Scholar API responses.
+Pure functions for extracting author names, IDs, ORCIDs, h-indices,
+and affiliations from S2 API responses.
+Split from extractors.py per audit-package-structure-2026-02-07.
 """
 
 from __future__ import annotations
 
-import re
 from typing import Any
-
-from bioetl.domain.config import ValidationConfig
-from bioetl.domain.value_objects import PublicationYear
-
-# Semantic Scholar-specific config with min_year=1500 for historical publications
-_SS_VALIDATION_CONFIG = ValidationConfig(min_publication_year=1500)
-
-
-# =============================================================================
-# Volume/Issue Parsing
-# =============================================================================
-
-# Patterns for parsing combined volume/issue strings from S2 API.
-# The API sometimes returns both values in the volume field (e.g., "32 4").
-_VOLUME_ISSUE_PATTERNS = [
-    # "32 4" → vol=32, issue=4 (space-separated, common S2 format)
-    re.compile(r"^(\d+)\s+(\d+)$"),
-    # "32(4)" or "32 (4)" → vol=32, issue=4
-    re.compile(r"^(\d+)\s*\((\d+)\)$"),
-    # "Vol. 32, No. 4" or "Vol 32 No 4"
-    re.compile(r"^[Vv]ol\.?\s*(\d+)[,\s]+[Nn]o\.?\s*(\d+)$"),
-    # "32:4" → vol=32, issue=4
-    re.compile(r"^(\d+):(\d+)$"),
-]
-
-
-def parse_volume_issue(volume_str: str | None) -> tuple[str | None, str | None]:
-    """Parse volume string that may contain issue number.
-
-    Semantic Scholar API sometimes returns combined volume/issue in the
-    volume field (e.g., "32 4" for volume 32, issue 4).
-
-    Args:
-        volume_str: Raw volume string from S2 API.
-
-    Returns:
-        Tuple of (volume, issue). Issue is None if not embedded.
-
-    Examples:
-        >>> parse_volume_issue("32 4")
-        ('32', '4')
-        >>> parse_volume_issue("523")
-        ('523', None)
-        >>> parse_volume_issue("40(3)")
-        ('40', '3')
-        >>> parse_volume_issue(None)
-        (None, None)
-
-    """
-    if not volume_str:
-        return (None, None)
-
-    cleaned = volume_str.strip()
-    if not cleaned:
-        return (None, None)
-
-    # Try each pattern for combined volume/issue
-    for pattern in _VOLUME_ISSUE_PATTERNS:
-        match = pattern.match(cleaned)
-        if match:
-            return (match.group(1), match.group(2))
-
-    # No issue found - return volume as-is
-    return (cleaned, None)
-
-
-# =============================================================================
-# Page Range Parsing
-# =============================================================================
-
-
-def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
-    """Expand abbreviated last page number.
-
-    Academic publishing often abbreviates page ranges:
-    - "737-9" means 737-739 (not 737-9)
-    - "737-39" means 737-739
-    - "199-3" means 199-203 (rollover case)
-
-    Algorithm:
-    1. If tmp_last_page has >= digits than first_page, return as-is
-    2. Otherwise: last_page = (first_page // 10^n2) * 10^n2 + tmp_last_page
-    3. Handle rollover: if expanded < first_page, add 10^n2
-
-    Args:
-        first_page: First page (e.g., "737")
-        tmp_last_page: Potentially abbreviated last page (e.g., "9", "39", "839")
-
-    Returns:
-        Expanded last page string.
-
-    """
-    # Extract numeric parts only for calculation
-    first_digits = "".join(c for c in first_page if c.isdigit())
-    last_digits = "".join(c for c in tmp_last_page if c.isdigit())
-
-    # If either is non-numeric, return as-is (e.g., "S1-S5")
-    if not first_digits or not last_digits:
-        return tmp_last_page
-
-    n1 = len(first_digits)  # digits in first_page
-    n2 = len(last_digits)  # digits in tmp_last_page
-
-    # If last page has same or more digits, it's a full number
-    if n2 >= n1:
-        return tmp_last_page
-
-    # Expand abbreviated page number
-    # last_page = int(first_page / 10^n2) * 10^n2 + tmp_last_page
-    first_num = int(first_digits)
-    last_num = int(last_digits)
-    divisor = 10**n2
-
-    expanded = (first_num // divisor) * divisor + last_num
-
-    # Handle rollover case: "199-3" should be "199-203", not "199-193"
-    if expanded < first_num:
-        expanded += divisor
-
-    # Preserve any prefix from tmp_last_page (e.g., "S" in "S5")
-    prefix = "".join(c for c in tmp_last_page if not c.isdigit())
-    return f"{prefix}{expanded}" if prefix else str(expanded)
-
-
-def parse_page_range(pages_str: str | None) -> tuple[str | None, str | None]:
-    """Parse page range with abbreviated last page expansion.
-
-    Academic publishing often abbreviates page ranges:
-    - "737-9" means 737-739 (not 737-9)
-    - "737-39" means 737-739
-    - "737-839" means 737-839 (full number, no expansion)
-
-    Also handles whitespace, en-dashes (–), and em-dashes (—).
-
-    Args:
-        pages_str: Raw pages string (e.g., "737-9", "123-145").
-
-    Returns:
-        Tuple of (first_page, last_page). Both are strings or None.
-
-    Examples:
-        >>> parse_page_range("737-9")
-        ('737', '739')
-        >>> parse_page_range("737-39")
-        ('737', '739')
-        >>> parse_page_range("737-839")
-        ('737', '839')
-        >>> parse_page_range("123")
-        ('123', None)
-        >>> parse_page_range("S1-S5")
-        ('S1', 'S5')
-
-    """
-    if not pages_str:
-        return (None, None)
-
-    cleaned = pages_str.strip()
-    if not cleaned:
-        return (None, None)
-
-    # Normalize various dash types to hyphen
-    # EN DASH (U+2013) and EM DASH (U+2014) → HYPHEN-MINUS (U+002D)
-    cleaned = cleaned.replace("\u2013", "-").replace("\u2014", "-")
-
-    # Split on "-" (only first occurrence)
-    parts = cleaned.split("-", 1)
-
-    first_page = parts[0].strip()
-    if not first_page:
-        return (None, None)
-
-    # No range separator - single page
-    if len(parts) == 1:
-        return (first_page, None)
-
-    tmp_last_page = parts[1].strip()
-    if not tmp_last_page:
-        return (first_page, None)
-
-    # Expand abbreviated page number
-    last_page = _expand_abbreviated_page(first_page, tmp_last_page)
-
-    return (first_page, last_page)
-
-
-def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract all external identifiers from S2 response.
-
-    Args:
-        external_ids: Dict of external IDs from S2 response.
-
-    Returns:
-        Dict with normalized keys: doi, pmid, pmcid, arxiv, corpus_id, mag, dblp, acl.
-
-    Example:
-        >>> ids = {"DOI": "10.1038/...", "PubMed": "12345678", "CorpusId": 123}
-        >>> extract_external_ids(ids)
-        {'doi': '10.1038/...', 'pmid': '12345678', 'corpus_id': 123, ...}
-
-    """
-    if not external_ids:
-        return {}
-
-    return {
-        "doi": external_ids.get("DOI"),
-        "pmid": external_ids.get("PubMed"),
-        "pmcid": external_ids.get("PMCID") or external_ids.get("PubMedCentral"),
-        "arxiv": external_ids.get("ArXiv"),
-        "corpus_id": external_ids.get("CorpusId"),
-        "mag": external_ids.get("MAG"),
-        "dblp": external_ids.get("DBLP"),
-        "acl": external_ids.get("ACL"),
-    }
 
 
 def extract_authors(authors: list[dict[str, Any]] | None) -> list[str]:
@@ -22115,6 +23829,288 @@ def extract_author_h_indices(authors: list[dict[str, Any]] | None) -> list[int |
     return result
 
 
+def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
+    """Extract affiliations from authors list.
+
+    Semantic Scholar authors may have affiliations as a list of strings.
+
+    Args:
+        authors: List of author objects from S2.
+
+    Returns:
+        List of unique affiliation strings (sorted).
+
+    Example:
+        >>> authors = [{"name": "John", "affiliations": ["Univ A"]}, {"name": "Jane", "affiliations": ["Univ B", "Univ A"]}]
+        >>> extract_affiliations(authors)
+        ['Univ A', 'Univ B']
+    """
+    if not authors:
+        return []
+
+    affiliations: set[str] = set()
+    for author in authors:
+        author_affs = author.get("affiliations")
+        if not author_affs or not isinstance(author_affs, list):
+            continue
+
+        for aff in author_affs:
+            if aff and isinstance(aff, str) and aff.strip():
+                affiliations.add(aff.strip())
+
+    return sorted(affiliations)
+
+================================================================================
+File: _page_parsing.py
+Path: pipelines\semanticscholar\_page_parsing.py
+================================================================================
+"""Volume/issue and page range parsing for Semantic Scholar records.
+
+Handles S2 API quirks like combined volume/issue strings ("32 4")
+and abbreviated page ranges ("737-9" → 737-739).
+Split from extractors.py per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+import re
+
+# Patterns for parsing combined volume/issue strings from S2 API.
+# The API sometimes returns both values in the volume field (e.g., "32 4").
+_VOLUME_ISSUE_PATTERNS = [
+    # "32 4" → vol=32, issue=4 (space-separated, common S2 format)
+    re.compile(r"^(\d+)\s+(\d+)$"),
+    # "32(4)" or "32 (4)" → vol=32, issue=4
+    re.compile(r"^(\d+)\s*\((\d+)\)$"),
+    # "Vol. 32, No. 4" or "Vol 32 No 4"
+    re.compile(r"^[Vv]ol\.?\s*(\d+)[,\s]+[Nn]o\.?\s*(\d+)$"),
+    # "32:4" → vol=32, issue=4
+    re.compile(r"^(\d+):(\d+)$"),
+]
+
+
+def parse_volume_issue(volume_str: str | None) -> tuple[str | None, str | None]:
+    """Parse volume string that may contain issue number.
+
+    Semantic Scholar API sometimes returns combined volume/issue in the
+    volume field (e.g., "32 4" for volume 32, issue 4).
+
+    Args:
+        volume_str: Raw volume string from S2 API.
+
+    Returns:
+        Tuple of (volume, issue). Issue is None if not embedded.
+
+    Examples:
+        >>> parse_volume_issue("32 4")
+        ('32', '4')
+        >>> parse_volume_issue("523")
+        ('523', None)
+        >>> parse_volume_issue("40(3)")
+        ('40', '3')
+        >>> parse_volume_issue(None)
+        (None, None)
+
+    """
+    if not volume_str:
+        return (None, None)
+
+    cleaned = volume_str.strip()
+    if not cleaned:
+        return (None, None)
+
+    # Try each pattern for combined volume/issue
+    for pattern in _VOLUME_ISSUE_PATTERNS:
+        match = pattern.match(cleaned)
+        if match:
+            return (match.group(1), match.group(2))
+
+    # No issue found - return volume as-is
+    return (cleaned, None)
+
+
+def _extract_digits(s: str) -> str:
+    """Extract only digit characters from a string."""
+    return "".join(c for c in s if c.isdigit())
+
+
+def _extract_non_digits(s: str) -> str:
+    """Extract only non-digit characters from a string."""
+    return "".join(c for c in s if not c.isdigit())
+
+
+def _expand_abbreviated_page(first_page: str, tmp_last_page: str) -> str:
+    """Expand abbreviated last page number.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    - "199-3" means 199-203 (rollover case)
+
+    Algorithm:
+    1. If tmp_last_page has >= digits than first_page, return as-is
+    2. Otherwise: last_page = (first_page // 10^n2) * 10^n2 + tmp_last_page
+    3. Handle rollover: if expanded < first_page, add 10^n2
+
+    Args:
+        first_page: First page (e.g., "737")
+        tmp_last_page: Potentially abbreviated last page (e.g., "9", "39", "839")
+
+    Returns:
+        Expanded last page string.
+
+    """
+    first_digits = _extract_digits(first_page)
+    last_digits = _extract_digits(tmp_last_page)
+
+    # If either is non-numeric, return as-is (e.g., "S1-S5")
+    if not first_digits or not last_digits:
+        return tmp_last_page
+
+    # If last page has same or more digits, it's a full number
+    if len(last_digits) >= len(first_digits):
+        return tmp_last_page
+
+    # Expand abbreviated page number
+    first_num = int(first_digits)
+    last_num = int(last_digits)
+    divisor = 10 ** len(last_digits)
+
+    expanded = (first_num // divisor) * divisor + last_num
+
+    # Handle rollover case: "199-3" should be "199-203", not "199-193"
+    if expanded < first_num:
+        expanded += divisor
+
+    # Preserve any prefix from tmp_last_page (e.g., "S" in "S5")
+    prefix = _extract_non_digits(tmp_last_page)
+    return f"{prefix}{expanded}" if prefix else str(expanded)
+
+
+def parse_page_range(pages_str: str | None) -> tuple[str | None, str | None]:
+    """Parse page range with abbreviated last page expansion.
+
+    Academic publishing often abbreviates page ranges:
+    - "737-9" means 737-739 (not 737-9)
+    - "737-39" means 737-739
+    - "737-839" means 737-839 (full number, no expansion)
+
+    Also handles whitespace, en-dashes (–), and em-dashes (—).
+
+    Args:
+        pages_str: Raw pages string (e.g., "737-9", "123-145").
+
+    Returns:
+        Tuple of (first_page, last_page). Both are strings or None.
+
+    Examples:
+        >>> parse_page_range("737-9")
+        ('737', '739')
+        >>> parse_page_range("737-39")
+        ('737', '739')
+        >>> parse_page_range("737-839")
+        ('737', '839')
+        >>> parse_page_range("123")
+        ('123', None)
+        >>> parse_page_range("S1-S5")
+        ('S1', 'S5')
+
+    """
+    if not pages_str:
+        return (None, None)
+
+    cleaned = pages_str.strip()
+    if not cleaned:
+        return (None, None)
+
+    # Normalize various dash types to hyphen
+    # EN DASH (U+2013) and EM DASH (U+2014) → HYPHEN-MINUS (U+002D)
+    cleaned = cleaned.replace("\u2013", "-").replace("\u2014", "-")
+
+    # Split on "-" (only first occurrence)
+    parts = cleaned.split("-", 1)
+
+    first_page = parts[0].strip()
+    if not first_page:
+        return (None, None)
+
+    # No range separator - single page
+    if len(parts) == 1:
+        return (first_page, None)
+
+    tmp_last_page = parts[1].strip()
+    if not tmp_last_page:
+        return (first_page, None)
+
+    # Expand abbreviated page number
+    last_page = _expand_abbreviated_page(first_page, tmp_last_page)
+
+    return (first_page, last_page)
+
+================================================================================
+File: extractors.py
+Path: pipelines\semanticscholar\extractors.py
+================================================================================
+# src/bioetl/application/pipelines/semanticscholar/extractors.py
+"""Field extraction functions for Semantic Scholar records.
+
+Provides pure functions for extracting and normalizing fields from
+Semantic Scholar API responses.
+
+Split into submodules per audit-package-structure-2026-02-07:
+- _page_parsing: Volume/issue and page range parsing
+- _author_extractors: Author name, ID, ORCID, h-index, affiliation extraction
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+# Re-export from submodules for backward compatibility
+from bioetl.application.pipelines.semanticscholar._author_extractors import (
+    extract_affiliations,
+    extract_author_h_indices,
+    extract_author_ids,
+    extract_author_orcids,
+    extract_author_s2_ids,
+    extract_authors,
+)
+from bioetl.application.pipelines.semanticscholar._page_parsing import (
+    parse_page_range,
+    parse_volume_issue,
+)
+
+
+def extract_external_ids(external_ids: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract all external identifiers from S2 response.
+
+    Args:
+        external_ids: Dict of external IDs from S2 response.
+
+    Returns:
+        Dict with normalized keys: doi, pmid, pmcid, arxiv, corpus_id, mag, dblp, acl.
+
+    Example:
+        >>> ids = {"DOI": "10.1038/...", "PubMed": "12345678", "CorpusId": 123}
+        >>> extract_external_ids(ids)
+        {'doi': '10.1038/...', 'pmid': '12345678', 'corpus_id': 123, ...}
+
+    """
+    if not external_ids:
+        return {}
+
+    return {
+        "doi": external_ids.get("DOI"),
+        "pmid": external_ids.get("PubMed"),
+        "pmcid": external_ids.get("PMCID") or external_ids.get("PubMedCentral"),
+        "arxiv": external_ids.get("ArXiv"),
+        "corpus_id": external_ids.get("CorpusId"),
+        "mag": external_ids.get("MAG"),
+        "dblp": external_ids.get("DBLP"),
+        "acl": external_ids.get("ACL"),
+    }
+
+
 def extract_citation_contexts(
     citations: list[dict[str, Any]] | None,
     max_contexts: int = 100,
@@ -22159,38 +24155,6 @@ def extract_citation_contexts(
     return result
 
 
-def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
-    """Extract affiliations from authors list.
-
-    Semantic Scholar authors may have affiliations as a list of strings.
-
-    Args:
-        authors: List of author objects from S2.
-
-    Returns:
-        List of unique affiliation strings (sorted).
-
-    Example:
-        >>> authors = [{"name": "John", "affiliations": ["Univ A"]}, {"name": "Jane", "affiliations": ["Univ B", "Univ A"]}]
-        >>> extract_affiliations(authors)
-        ['Univ A', 'Univ B']
-    """
-    if not authors:
-        return []
-
-    affiliations: set[str] = set()
-    for author in authors:
-        author_affs = author.get("affiliations")
-        if not author_affs or not isinstance(author_affs, list):
-            continue
-
-        for aff in author_affs:
-            if aff and isinstance(aff, str) and aff.strip():
-                affiliations.add(aff.strip())
-
-    return sorted(affiliations)
-
-
 def extract_journal_info(
     journal: dict[str, Any] | None,
     venue: str | None,
@@ -22205,15 +24169,15 @@ def extract_journal_info(
         venue: Venue string (fallback if journal is empty).
 
     Returns:
-        Dict with journal_name, volume, issue, pages, first_page, last_page.
+        Dict with journal, volume, issue, page_range, page_first, page_last.
 
     Example:
         >>> journal = {"name": "Nature", "volume": "629", "pages": "123-130"}
         >>> extract_journal_info(journal, "Nature")
-        {'journal_name': 'Nature', 'volume': '629', 'issue': None, 'pages': '123-130', 'first_page': '123', 'last_page': '130'}
+        {'journal_name': 'Nature', 'volume': '629', 'issue': None, 'page_range': '123-130', 'page_first': '123', 'page_last': '130'}
         >>> journal = {"name": "J Med Chem", "volume": "32 4", "pages": "737-9"}
         >>> extract_journal_info(journal, None)
-        {'journal_name': 'J Med Chem', 'volume': '32', 'issue': '4', 'pages': '737-9', 'first_page': '737', 'last_page': '739'}
+        {'journal_name': 'J Med Chem', 'volume': '32', 'issue': '4', 'page_range': '737-9', 'page_first': '737', 'page_last': '739'}
 
     """
     if journal:
@@ -22230,20 +24194,20 @@ def extract_journal_info(
         pages = raw_pages.strip() if raw_pages else None
 
         return {
-            "journal_name": journal.get("name") or venue,
+            "journal": journal.get("name") or venue,
             "volume": volume,
             "issue": issue,
-            "pages": pages,
-            "first_page": first_page,
-            "last_page": last_page,
+            "page_range": pages,
+            "page_first": first_page,
+            "page_last": last_page,
         }
     return {
-        "journal_name": venue,
+        "journal": venue,
         "volume": None,
         "issue": None,
-        "pages": None,
-        "first_page": None,
-        "last_page": None,
+        "page_range": None,
+        "page_first": None,
+        "page_last": None,
     }
 
 
@@ -22393,23 +24357,24 @@ def extract_fields_of_study(
     return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 
-def validate_year(year: int | None) -> int | None:
-    """Validate publication year using PublicationYear Value Object.
-
-    Uses Semantic Scholar-specific ValidationConfig with min_year=1500
-    to support historical publications.
-
-    Args:
-        year: Year from S2 response.
-
-    Returns:
-        Year if valid (1500-2100), None otherwise.
-
-    """
-    if year is None:
-        return None
-    year_vo = PublicationYear.from_raw(year, config=_SS_VALIDATION_CONFIG)
-    return year_vo.value if year_vo else None
+__all__ = [
+    "VALID_OA_STATUS_VALUES",
+    "extract_affiliations",
+    "extract_author_h_indices",
+    "extract_author_ids",
+    "extract_author_orcids",
+    "extract_author_s2_ids",
+    "extract_authors",
+    "extract_citation_contexts",
+    "extract_external_ids",
+    "extract_fields_of_study",
+    "extract_journal_info",
+    "extract_open_access_info",
+    "extract_tldr",
+    "normalize_oa_status",
+    "parse_page_range",
+    "parse_volume_issue",
+]
 
 ================================================================================
 File: transformer.py
@@ -22428,8 +24393,8 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
+    extract_affiliations,
     extract_author_h_indices,
-    extract_author_ids,
     extract_author_orcids,
     extract_author_s2_ids,
     extract_citation_contexts,
@@ -22438,10 +24403,9 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_journal_info,
     extract_open_access_info,
     extract_tldr,
-    validate_year,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
-from bioetl.domain.value_objects import DOI, PubMedId
+from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
@@ -22465,7 +24429,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - arxiv_id: externalIds.ArXiv
     - dblp_id: externalIds.DBLP
     - title: title
-    - abstract: abstract
+    - abstract: abstract (fallback to tldr.text if missing)
     - tldr: tldr.text (AI-generated summary)
     - authors: authors.name (extraction + optional PII hashing)
     - author_s2_ids: authors.authorId (S2 author IDs for disambiguation)
@@ -22480,7 +24444,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - is_oa: isOpenAccess (normalized)
     - oa_status: openAccessPdf.status (normalized to lowercase)
     - open_access_url: openAccessPdf.url
-    - fields_of_study: fieldsOfStudy
+    - subject_fields: fieldsOfStudy
+    - publication_type: publicationTypes joined by "|"
     - publication_types: publicationTypes
     - citation_contexts: citations.contexts (citing sentences, when available)
 
@@ -22501,6 +24466,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -22513,6 +24479,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
@@ -22524,11 +24491,57 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
         )
+
+    def _resolve_publication_type(self, publication_types: Any) -> str:
+        """Resolve raw publication types list to a unified scalar string."""
+        if not isinstance(publication_types, list):
+            return "PUBLICATION"
+        cleaned = [
+            str(item).strip()
+            for item in publication_types
+            if item is not None and str(item).strip()
+        ]
+        return "|".join(cleaned) if cleaned else "PUBLICATION"
+
+    def _extract_validated_ids(self, rec: dict[str, Any]) -> dict[str, Any]:
+        """Extract and validate external identifiers using Value Objects."""
+        external_ids = extract_external_ids(rec.get("externalIds"))
+        doi_vo = DOI.from_raw(external_ids.get("doi"))
+        pmid_vo = PubMedId.from_raw(external_ids.get("pmid"))
+        return {
+            "paper_id": rec.get("paperId"),
+            "doi": str(doi_vo) if doi_vo else None,
+            "pmid": str(pmid_vo) if pmid_vo else None,
+            "dblp_id": external_ids.get("dblp"),
+            "corpus_id": external_ids.get("corpus_id"),
+        }
+
+    def _extract_author_metadata(self, authors_list: Any) -> dict[str, Any]:
+        """Extract author identifiers, h-indices, and affiliations."""
+        author_s2_ids = extract_author_s2_ids(authors_list)
+        author_orcids = extract_author_orcids(authors_list)
+        author_h_indices = extract_author_h_indices(authors_list)
+        affiliations = extract_affiliations(authors_list)
+        return {
+            "author_s2_ids": self.serialize_json_list(author_s2_ids)
+            if author_s2_ids
+            else None,
+            "author_orcids": self.serialize_json_list(author_orcids)
+            if any(author_orcids)
+            else None,
+            "author_h_indices": self.serialize_json_list(author_h_indices)
+            if any(h is not None for h in author_h_indices)
+            else None,
+            "affiliation_list": self.serialize_json_list(affiliations)
+            if affiliations
+            else None,
+        }
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract and normalize fields from Semantic Scholar record.
@@ -22542,115 +24555,67 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         """
         rec = cast("dict[str, Any]", record)
 
-        # Primary key - S2 Paper ID
-        paper_id = rec.get("paperId")
+        ids = self._extract_validated_ids(rec)
+        author_meta = self._extract_author_metadata(rec.get("authors"))
 
-        # External identifiers
-        external_ids = extract_external_ids(rec.get("externalIds"))
-
-        # Validate DOI using Value Object (returns None for invalid/empty)
-        raw_doi = external_ids.get("doi")
-        doi_vo = DOI.from_raw(raw_doi)
-        doi = str(doi_vo) if doi_vo else None
-
-        # Validate PMID using Value Object (returns None for invalid/empty)
-        raw_pmid = external_ids.get("pmid")
-        pmid_vo = PubMedId.from_raw(raw_pmid)
-        pmid = str(pmid_vo) if pmid_vo else None
-
-        # Get authors list for multiple extractions
-        authors_list = rec.get("authors")
-
-        # Extract author IDs
-        author_ids = extract_author_ids(rec.get("authors"))
-
-        # Extract author identifiers (for author-level analytics)
-        author_s2_ids = extract_author_s2_ids(authors_list)
-        author_orcids = extract_author_orcids(authors_list)
-        author_h_indices = extract_author_h_indices(authors_list)
-
-        # Extract citation contexts (if available from citations/references endpoint)
-        # Note: contexts are only available when requesting citation details
         citation_contexts = extract_citation_contexts(rec.get("citations"))
-
-        # Journal/venue info with parsed volume/issue and pages
-        # extract_journal_info now parses combined volume/issue (e.g., "32 4")
-        # and expands abbreviated page ranges (e.g., "737-9" → 737-739)
-        journal_info = extract_journal_info(
-            rec.get("journal"),
-            rec.get("venue"),
-        )
-
-        # Open access info
+        journal_info = extract_journal_info(rec.get("journal"), rec.get("venue"))
         oa_info = extract_open_access_info(
-            rec.get("isOpenAccess"),
-            rec.get("openAccessPdf"),
+            rec.get("isOpenAccess"), rec.get("openAccessPdf")
         )
 
-        # TLDR summary
-        tldr = extract_tldr(rec.get("tldr"))
+        tldr = self._data_normalizer.normalize_string(extract_tldr(rec.get("tldr")))
+        abstract = self._data_normalizer.normalize_string(rec.get("abstract"))
+        if abstract is None:
+            abstract = tldr
 
-        # Fields of study
-        fields_of_study = extract_fields_of_study(rec.get("fieldsOfStudy"))
-
-        # Validate year
-        year = validate_year(rec.get("year"))
-
-        # Lookup metadata (from adapter)
-        lookup_method = rec.get("_lookup_method", "unknown")
-        original_id = rec.get("_original_id")
+        publication_types = rec.get("publicationTypes")
 
         return {
-            "paper_id": paper_id,
-            "doi": doi,
-            "pmid": pmid,  # Use validated PMID from PubMedId Value Object
-            "dblp_id": external_ids.get("dblp"),
-            "corpus_id": external_ids.get("corpus_id"),
+            **ids,
             "title": rec.get("title"),
-            # abstract, authors excluded per user request
+            "abstract": abstract,
             "tldr": tldr,
-            "author_ids": self.serialize_json(author_ids),
-            # Author identifiers (for author-level analytics and disambiguation)
-            "author_s2_ids": self.serialize_json_list(author_s2_ids)
-            if author_s2_ids
-            else None,
-            "author_orcids": self.serialize_json_list(author_orcids)
-            if any(author_orcids)
-            else None,
-            "author_h_indices": self.serialize_json(author_h_indices)
-            if any(h is not None for h in author_h_indices)
-            else None,
-            # Citation context (for citation sentiment analysis)
+            **author_meta,
             "citation_contexts": self.serialize_json_list(citation_contexts)
             if citation_contexts
             else None,
-            # affiliations excluded per user request
             "journal": journal_info.get("journal"),
             "volume": journal_info.get("volume"),
-            "issue": journal_info.get("issue"),  # Parsed from combined "32 4" format
-            "pages": journal_info.get("pages"),  # Original pages string (cleaned)
-            "first_page": journal_info.get(
-                "first_page"
-            ),  # Parsed with abbreviation expansion
-            "last_page": journal_info.get("last_page"),  # Expanded (e.g., "9" → "739")
-            "venue": rec.get("venue"),
-            "year": year,
-            "publication_date": self._normalize_partial_date(
+            "issue": journal_info.get("issue"),
+            "page_range": journal_info.get("page_range"),
+            "page_first": journal_info.get("page_first"),
+            "page_last": journal_info.get("page_last"),
+            "publication_year": self.validate_value_object(
+                PublicationYear, rec.get("year"), as_string=False
+            ),
+            "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publicationDate")
             ),
-            "citation_count": rec.get("citationCount"),
-            "reference_count": rec.get("referenceCount"),
+            "citations_received": rec.get("citationCount"),
+            "citations_made": rec.get("referenceCount"),
             "influential_citation_count": rec.get("influentialCitationCount"),
             "is_oa": oa_info.get("is_oa"),
             "open_access_url": oa_info.get("url"),
             "oa_status": oa_info.get("oa_status"),
-            "fields_of_study": self.serialize_json(fields_of_study),
-            "publication_types": self.serialize_json(rec.get("publicationTypes")),
+            "subject_fields": self.serialize_json(
+                extract_fields_of_study(rec.get("fieldsOfStudy"))
+            ),
+            "publication_type": self._resolve_publication_type(publication_types),
+            **self._classify_publication_type(
+                "semanticscholar",
+                raw_types_list=[
+                    str(t).strip()
+                    for t in publication_types
+                    if t is not None and str(t).strip()
+                ]
+                if isinstance(publication_types, list)
+                else None,
+            ),
+            "publication_types": self.serialize_json(publication_types),
             "_source": "semanticscholar",
-            # Lookup metadata
-            "_lookup_method": lookup_method,
-            "_original_id": original_id,
-            # DQ flags (default: no warnings or errors)
+            "_lookup_method": rec.get("_lookup_method", "unknown"),
+            "_original_id": rec.get("_original_id"),
             "_dq_warn": False,
             "_dq_error": False,
         }
@@ -22683,15 +24648,12 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without abstract, affiliations, authors.
+            SilverRecord dictionary without pmc_id/arxiv_id.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
         silver_record = BaseTransformer.entity_to_silver_record(entity)
-        silver_record.pop("abstract", None)
-        silver_record.pop("affiliations", None)
-        silver_record.pop("authors", None)
         silver_record.pop("pmc_id", None)
         silver_record.pop("arxiv_id", None)
         return silver_record
@@ -22713,11 +24675,19 @@ Main Components:
 
 from __future__ import annotations
 
+from bioetl.application.core.base import BasePipeline
 from bioetl.application.pipelines.uniprot.idmapping_transformer import (
     IDMappingTransformer,
 )
-from bioetl.application.pipelines.uniprot.protein import UniProtProteinPipeline
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
+
+
+class UniProtProteinPipeline(BasePipeline):
+    """Pipeline for processing UniProt proteins.
+
+    Transformer is injected via DI from GenericPipelineFactory.
+    """
+
 
 __all__ = [
     "IDMappingTransformer",
@@ -22738,6 +24708,7 @@ from bioetl.application.pipelines.uniprot.extractors.comments import CommentExtr
 from bioetl.application.pipelines.uniprot.extractors.crossrefs import CrossRefExtractor
 from bioetl.application.pipelines.uniprot.extractors.features import FeatureExtractor
 from bioetl.application.pipelines.uniprot.extractors.genes import GeneExtractor
+from bioetl.application.pipelines.uniprot.extractors.taxonomy import TaxonomyExtractor
 from bioetl.application.pipelines.uniprot.extractors.utils import ExtractorUtils
 
 __all__ = [
@@ -22746,6 +24717,7 @@ __all__ = [
     "ExtractorUtils",
     "FeatureExtractor",
     "GeneExtractor",
+    "TaxonomyExtractor",
 ]
 
 ================================================================================
@@ -23211,6 +25183,126 @@ class CommentExtractor:
         """
         return cls.extract_by_type(comments, "INDUCTION")
 
+    @staticmethod
+    def extract_isoform_details(comments: Any) -> dict[str, str | None]:
+        """Extract detailed isoform information from ALTERNATIVE PRODUCTS.
+
+        Parses isoform data to extract names, IDs, and synonyms separately.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            Dict with keys:
+                - isoform_names: JSON array of isoform names
+                - isoform_ids: JSON array of isoform IDs (e.g., P12345-1)
+                - isoform_synonyms: JSON array of synonyms
+        """
+        result: dict[str, str | None] = {
+            "isoform_names": None,
+            "isoform_ids": None,
+            "isoform_synonyms": None,
+        }
+
+        if not comments or not isinstance(comments, list):
+            return result
+
+        names: list[str] = []
+        ids: list[str] = []
+        synonyms: list[str] = []
+
+        for comment in comments:
+            if not _is_comment_of_type(comment, "ALTERNATIVE PRODUCTS"):
+                continue
+
+            isoforms = comment.get("isoforms", [])
+            if not isinstance(isoforms, list):
+                continue
+
+            for iso in isoforms:
+                if not isinstance(iso, dict):
+                    continue
+
+                # Extract isoform IDs
+                isoform_ids = iso.get("isoformIds", [])
+                if isinstance(isoform_ids, list):
+                    for iso_id in isoform_ids:
+                        if iso_id:
+                            ids.append(str(iso_id))
+
+                # Extract isoform name
+                name = iso.get("name", {})
+                if isinstance(name, dict) and name.get("value"):
+                    names.append(str(name["value"]))
+
+                # Extract synonyms
+                iso_synonyms = iso.get("synonyms", [])
+                if isinstance(iso_synonyms, list):
+                    for syn in iso_synonyms:
+                        if isinstance(syn, dict) and syn.get("value"):
+                            synonyms.append(str(syn["value"]))
+
+        if names:
+            result["isoform_names"] = serialize_to_json(names, ensure_ascii=False)
+        if ids:
+            result["isoform_ids"] = serialize_to_json(ids, ensure_ascii=False)
+        if synonyms:
+            result["isoform_synonyms"] = serialize_to_json(synonyms, ensure_ascii=False)
+
+        return result
+
+    @staticmethod
+    def extract_reactions(comments: Any) -> str | None:
+        """Extract reaction names from CATALYTIC ACTIVITY comments.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            JSON array of reaction name strings, or None.
+        """
+        if not comments or not isinstance(comments, list):
+            return None
+
+        reactions: list[str] = []
+        for comment in comments:
+            if not _is_comment_of_type(comment, "CATALYTIC ACTIVITY"):
+                continue
+
+            reaction = comment.get("reaction", {})
+            if isinstance(reaction, dict):
+                name = reaction.get("name")
+                if name:
+                    reactions.append(str(name))
+
+        return serialize_to_json(reactions, ensure_ascii=False) if reactions else None
+
+    @staticmethod
+    def extract_reaction_ec_numbers(comments: Any) -> str | None:
+        """Extract EC numbers from CATALYTIC ACTIVITY comments.
+
+        Args:
+            comments: List of comment objects.
+
+        Returns:
+            JSON array of EC number strings, or None.
+        """
+        if not comments or not isinstance(comments, list):
+            return None
+
+        ec_numbers: list[str] = []
+        for comment in comments:
+            if not _is_comment_of_type(comment, "CATALYTIC ACTIVITY"):
+                continue
+
+            reaction = comment.get("reaction", {})
+            if isinstance(reaction, dict):
+                ec_number = reaction.get("ecNumber")
+                if ec_number:
+                    ec_numbers.append(str(ec_number))
+
+        return serialize_to_json(ec_numbers, ensure_ascii=False) if ec_numbers else None
+
 ================================================================================
 File: crossrefs.py
 Path: pipelines\uniprot\extractors\crossrefs.py
@@ -23388,6 +25480,209 @@ class CrossRefExtractor:
 
         return serialize_to_json(pdb_refs, ensure_ascii=False) if pdb_refs else None
 
+    @classmethod
+    def _build_interpro_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build an InterPro entry from a cross-reference dict."""
+        interpro_id = xref.get("id")
+        if not interpro_id:
+            return None
+
+        interpro_entry: dict[str, Any] = {"id": str(interpro_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        if props.get("EntryName"):
+            interpro_entry["name"] = props["EntryName"]
+
+        return interpro_entry
+
+    @classmethod
+    def extract_interpro_xrefs(cls, xrefs: Any) -> str | None:
+        """Extract InterPro cross-references with domain family information.
+
+        InterPro provides protein domain and family classification based on
+        predictive models. Valuable for functional annotation.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of InterPro reference objects with id and name, or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        interpro_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "InterPro"
+            for entry in [cls._build_interpro_entry(xref)]
+            if entry is not None
+        ]
+
+        return (
+            serialize_to_json(interpro_refs, ensure_ascii=False)
+            if interpro_refs
+            else None
+        )
+
+    @classmethod
+    def _build_pfam_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build a Pfam entry from a cross-reference dict."""
+        pfam_id = xref.get("id")
+        if not pfam_id:
+            return None
+
+        pfam_entry: dict[str, Any] = {"id": str(pfam_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        if props.get("EntryName"):
+            pfam_entry["name"] = props["EntryName"]
+        if props.get("MatchStatus"):
+            pfam_entry["match_status"] = props["MatchStatus"]
+
+        return pfam_entry
+
+    @classmethod
+    def extract_pfam_xrefs(cls, xrefs: Any) -> str | None:
+        """Extract Pfam cross-references with protein family information.
+
+        Pfam is a database of protein families represented by multiple
+        sequence alignments and hidden Markov models.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of Pfam reference objects with id, name, and match_status,
+            or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        pfam_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "Pfam"
+            for entry in [cls._build_pfam_entry(xref)]
+            if entry is not None
+        ]
+
+        return serialize_to_json(pfam_refs, ensure_ascii=False) if pfam_refs else None
+
+    @classmethod
+    def _build_reactome_entry(cls, xref: dict[str, Any]) -> dict[str, Any] | None:
+        """Build a Reactome entry from a cross-reference dict."""
+        reactome_id = xref.get("id")
+        if not reactome_id:
+            return None
+
+        reactome_entry: dict[str, Any] = {"id": str(reactome_id)}
+        props = cls._parse_properties(xref.get("properties", []))
+
+        if props.get("PathwayName"):
+            reactome_entry["pathway_name"] = props["PathwayName"]
+
+        return reactome_entry
+
+    @classmethod
+    def extract_reactome_xrefs(cls, xrefs: Any) -> str | None:
+        """Extract Reactome cross-references with pathway information.
+
+        Reactome is a free, open-source, curated and peer-reviewed pathway
+        database. Valuable for understanding protein involvement in pathways.
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of Reactome reference objects with id and pathway_name,
+            or None.
+        """
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        reactome_refs = [
+            entry
+            for xref in xrefs
+            if isinstance(xref, dict) and xref.get("database") == "Reactome"
+            for entry in [cls._build_reactome_entry(xref)]
+            if entry is not None
+        ]
+
+        return (
+            serialize_to_json(reactome_refs, ensure_ascii=False)
+            if reactome_refs
+            else None
+        )
+
+    @classmethod
+    def extract_go_by_aspect(cls, xrefs: Any, aspect: str) -> str | None:
+        """Extract GO terms filtered by aspect.
+
+        Args:
+            xrefs: List of cross-reference objects.
+            aspect: GO aspect to filter by (F, P, or C).
+
+        Returns:
+            JSON array of GO terms with matching aspect, or None.
+        """
+        if aspect not in cls.GO_ASPECTS:
+            return None
+
+        if not xrefs or not isinstance(xrefs, list):
+            return None
+
+        go_terms: list[dict[str, Any]] = []
+        for xref in xrefs:
+            if not isinstance(xref, dict):
+                continue
+            if xref.get("database") != "GO":
+                continue
+
+            go_id = xref.get("id")
+            if not go_id:
+                continue
+
+            props = cls._parse_properties(xref.get("properties", []))
+            parsed_aspect, term = cls._parse_go_term_value(props.get("GoTerm", ""))
+
+            if parsed_aspect != aspect:
+                continue
+
+            go_terms.append(
+                {
+                    "id": go_id,
+                    "term": term,
+                    "evidence": props.get("GoEvidenceType"),
+                }
+            )
+
+        return serialize_to_json(go_terms, ensure_ascii=False) if go_terms else None
+
+    @classmethod
+    def extract_molecular_function(cls, xrefs: Any) -> str | None:
+        """Extract GO terms for molecular function (F aspect).
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of molecular function GO terms, or None.
+        """
+        return cls.extract_go_by_aspect(xrefs, "F")
+
+    @classmethod
+    def extract_cellular_component(cls, xrefs: Any) -> str | None:
+        """Extract GO terms for cellular component (C aspect).
+
+        Args:
+            xrefs: List of cross-reference objects.
+
+        Returns:
+            JSON array of cellular component GO terms, or None.
+        """
+        return cls.extract_go_by_aspect(xrefs, "C")
+
 ================================================================================
 File: features.py
 Path: pipelines\uniprot\extractors\features.py
@@ -23396,7 +25691,7 @@ Path: pipelines\uniprot\extractors\features.py
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 from bioetl.domain.serialization import serialize_to_json
 
@@ -23464,6 +25759,26 @@ def _build_keyword_dict(kw: dict[str, Any]) -> dict[str, Any]:
 class FeatureExtractor:
     """Extracts sequence features and keywords from UniProt records."""
 
+    # Mapping of feature names to UniProt feature types
+    FEATURE_TYPES: ClassVar[dict[str, str]] = {
+        "topology": "Topological domain",
+        "transmembrane": "Transmembrane",
+        "intramembrane": "Intramembrane",
+        "glycosylation": "Glycosylation",
+        "lipidation": "Lipidation",
+        "disulfide_bond": "Disulfide bond",
+        "modified_residue": "Modified residue",
+        "signal_peptide": "Signal peptide",
+        "propeptide": "Propeptide",
+    }
+
+    # PTM patterns for filtering modified residues by description
+    PTM_PATTERNS: ClassVar[dict[str, tuple[str, ...]]] = {
+        "phosphorylation": ("phospho", "phosphoryl"),
+        "acetylation": ("acetyl", "n-acetyl"),
+        "ubiquitination": ("ubiquitin", "sumo"),
+    }
+
     @staticmethod
     def extract_features(features: Any) -> str | None:
         """Extract sequence features.
@@ -23509,6 +25824,266 @@ class FeatureExtractor:
                 extracted.append(kw_data)
 
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+
+    @classmethod
+    def extract_features_by_type(cls, features: Any, feature_type: str) -> str | None:
+        """Extract sequence features by type.
+
+        Args:
+            features: List of feature objects.
+            feature_type: Type of features to extract (e.g., "Domain", "Active site").
+
+        Returns:
+            JSON array of matching features or None.
+        """
+        if not features or not isinstance(features, list):
+            return None
+
+        extracted: list[dict[str, Any]] = []
+        for feature in features:
+            if not isinstance(feature, dict):
+                continue
+            if feature.get("type") == feature_type:
+                feature_data = _build_feature_dict(feature)
+                if feature_data:
+                    extracted.append(feature_data)
+
+        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+
+    @classmethod
+    def extract_domains(cls, features: Any) -> str | None:
+        """Extract protein domain features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of domain features or None.
+        """
+        return cls.extract_features_by_type(features, "Domain")
+
+    @classmethod
+    def extract_binding_sites(cls, features: Any) -> str | None:
+        """Extract binding site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of binding site features or None.
+        """
+        return cls.extract_features_by_type(features, "Binding site")
+
+    @classmethod
+    def extract_active_sites(cls, features: Any) -> str | None:
+        """Extract active site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of active site features or None.
+        """
+        return cls.extract_features_by_type(features, "Active site")
+
+    @classmethod
+    def extract_topology(cls, features: Any) -> str | None:
+        """Extract topological domain features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of topological domain features or None.
+        """
+        return cls.extract_features_by_type(features, cls.FEATURE_TYPES["topology"])
+
+    @classmethod
+    def extract_transmembrane(cls, features: Any) -> str | None:
+        """Extract transmembrane region features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of transmembrane features or None.
+        """
+        return cls.extract_features_by_type(
+            features, cls.FEATURE_TYPES["transmembrane"]
+        )
+
+    @classmethod
+    def extract_intramembrane(cls, features: Any) -> str | None:
+        """Extract intramembrane region features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of intramembrane features or None.
+        """
+        return cls.extract_features_by_type(
+            features, cls.FEATURE_TYPES["intramembrane"]
+        )
+
+    @classmethod
+    def extract_glycosylation(cls, features: Any) -> str | None:
+        """Extract glycosylation site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of glycosylation features or None.
+        """
+        return cls.extract_features_by_type(
+            features, cls.FEATURE_TYPES["glycosylation"]
+        )
+
+    @classmethod
+    def extract_lipidation(cls, features: Any) -> str | None:
+        """Extract lipidation site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of lipidation features or None.
+        """
+        return cls.extract_features_by_type(features, cls.FEATURE_TYPES["lipidation"])
+
+    @classmethod
+    def extract_disulfide_bonds(cls, features: Any) -> str | None:
+        """Extract disulfide bond features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of disulfide bond features or None.
+        """
+        return cls.extract_features_by_type(
+            features, cls.FEATURE_TYPES["disulfide_bond"]
+        )
+
+    @classmethod
+    def extract_modified_residues(cls, features: Any) -> str | None:
+        """Extract modified residue features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of modified residue features or None.
+        """
+        return cls.extract_features_by_type(
+            features, cls.FEATURE_TYPES["modified_residue"]
+        )
+
+    @classmethod
+    def extract_signal_peptide(cls, features: Any) -> str | None:
+        """Extract signal peptide features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of signal peptide features or None.
+        """
+        return cls.extract_features_by_type(
+            features, cls.FEATURE_TYPES["signal_peptide"]
+        )
+
+    @classmethod
+    def extract_propeptide(cls, features: Any) -> str | None:
+        """Extract propeptide features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of propeptide features or None.
+        """
+        return cls.extract_features_by_type(features, cls.FEATURE_TYPES["propeptide"])
+
+    @classmethod
+    def extract_ptm_by_pattern(
+        cls, features: Any, patterns: tuple[str, ...]
+    ) -> str | None:
+        """Extract modified residue features matching PTM patterns.
+
+        Filters modified residues by checking if description contains
+        any of the given patterns (case-insensitive).
+
+        Args:
+            features: List of feature objects.
+            patterns: Tuple of pattern strings to match in description.
+
+        Returns:
+            JSON array of matching modified residue features or None.
+        """
+        if not features or not isinstance(features, list):
+            return None
+
+        if not patterns:
+            return None
+
+        mod_res_type = cls.FEATURE_TYPES["modified_residue"]
+        extracted: list[dict[str, Any]] = []
+
+        for feature in features:
+            if not isinstance(feature, dict):
+                continue
+            if feature.get("type") != mod_res_type:
+                continue
+
+            description = feature.get("description", "")
+            if not isinstance(description, str):
+                continue
+
+            description_lower = description.lower()
+            if any(pattern.lower() in description_lower for pattern in patterns):
+                feature_data = _build_feature_dict(feature)
+                if feature_data:
+                    extracted.append(feature_data)
+
+        return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
+
+    @classmethod
+    def extract_phosphorylation(cls, features: Any) -> str | None:
+        """Extract phosphorylation site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of phosphorylation features or None.
+        """
+        return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["phosphorylation"])
+
+    @classmethod
+    def extract_acetylation(cls, features: Any) -> str | None:
+        """Extract acetylation site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of acetylation features or None.
+        """
+        return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["acetylation"])
+
+    @classmethod
+    def extract_ubiquitination(cls, features: Any) -> str | None:
+        """Extract ubiquitination site features.
+
+        Args:
+            features: List of feature objects.
+
+        Returns:
+            JSON array of ubiquitination features or None.
+        """
+        return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["ubiquitination"])
 
 ================================================================================
 File: genes.py
@@ -23629,6 +26204,130 @@ class GeneExtractor:
         return serialize_to_json(all_orf, ensure_ascii=False) if all_orf else None
 
 ================================================================================
+File: taxonomy.py
+Path: pipelines\uniprot\extractors\taxonomy.py
+================================================================================
+"""Taxonomy lineage extraction for UniProt records."""
+
+from __future__ import annotations
+
+from typing import Any
+
+
+class TaxonomyExtractor:
+    """Extracts taxonomy lineage components from UniProt organism data.
+
+    UniProt API returns organism.lineage as a list of taxonomic ranks:
+    Superkingdom -> Phylum -> Class -> Order -> Family -> Genus -> Species
+
+    Index positions:
+        - Superkingdom: index 0 (Bacteria, Archaea, Eukaryota, Viruses)
+        - Phylum: index 1
+        - Genus: second-to-last element (len-2)
+    """
+
+    # Known superkingdoms (domains of life)
+    SUPERKINGDOMS = frozenset(("Bacteria", "Archaea", "Eukaryota", "Viruses"))
+
+    @staticmethod
+    def _is_valid_lineage(lineage: Any) -> bool:
+        """Check if lineage is a valid non-empty list.
+
+        Args:
+            lineage: Value to validate.
+
+        Returns:
+            True if lineage is a non-empty list, False otherwise.
+        """
+        return isinstance(lineage, list) and len(lineage) > 0
+
+    @staticmethod
+    def extract_superkingdom(lineage: Any) -> str | None:
+        """Extract superkingdom (domain of life) from taxonomy lineage.
+
+        Superkingdom is always at index 0 in the lineage list.
+
+        Args:
+            lineage: List of taxonomic ranks from UniProt API.
+
+        Returns:
+            Superkingdom name (Bacteria, Archaea, Eukaryota, Viruses) or None.
+        """
+        if not TaxonomyExtractor._is_valid_lineage(lineage):
+            return None
+
+        superkingdom = lineage[0]
+        if not isinstance(superkingdom, str) or not superkingdom.strip():
+            return None
+
+        return superkingdom.strip()
+
+    @staticmethod
+    def extract_phylum(lineage: Any) -> str | None:
+        """Extract phylum from taxonomy lineage.
+
+        Phylum is at index 1 in the lineage list.
+
+        Args:
+            lineage: List of taxonomic ranks from UniProt API.
+
+        Returns:
+            Phylum name or None if not available.
+        """
+        if not TaxonomyExtractor._is_valid_lineage(lineage):
+            return None
+
+        if len(lineage) < 2:
+            return None
+
+        phylum = lineage[1]
+        if not isinstance(phylum, str) or not phylum.strip():
+            return None
+
+        return phylum.strip()
+
+    @staticmethod
+    def extract_genus(lineage: Any) -> str | None:
+        """Extract genus from taxonomy lineage.
+
+        Genus is the second-to-last element in the lineage list (index len-2).
+        Requires at least 2 elements to distinguish from species.
+
+        Args:
+            lineage: List of taxonomic ranks from UniProt API.
+
+        Returns:
+            Genus name or None if lineage is too short.
+        """
+        if not TaxonomyExtractor._is_valid_lineage(lineage):
+            return None
+
+        if len(lineage) < 2:
+            return None
+
+        genus = lineage[-2]
+        if not isinstance(genus, str) or not genus.strip():
+            return None
+
+        return genus.strip()
+
+    @classmethod
+    def extract_all(cls, lineage: Any) -> dict[str, str | None]:
+        """Extract all taxonomy components at once.
+
+        Args:
+            lineage: List of taxonomic ranks from UniProt API.
+
+        Returns:
+            Dict with keys 'superkingdom', 'phylum', 'genus' and their values.
+        """
+        return {
+            "superkingdom": cls.extract_superkingdom(lineage),
+            "phylum": cls.extract_phylum(lineage),
+            "genus": cls.extract_genus(lineage),
+        }
+
+================================================================================
 File: utils.py
 Path: pipelines\uniprot\extractors\utils.py
 ================================================================================
@@ -23666,7 +26365,8 @@ class ExtractorUtils:
         """
         if not value or not isinstance(value, list):
             return None
-        return orjson.dumps(value).decode("utf-8")
+        result: str = orjson.dumps(value).decode("utf-8")
+        return result
 
     @staticmethod
     def count_list(value: Any) -> int | None:
@@ -23858,6 +26558,7 @@ class IDMappingTransformer(BaseTransformer):
         entity_type: str = "idmapping",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -23870,6 +26571,7 @@ class IDMappingTransformer(BaseTransformer):
             entity_type: Entity type for metrics labels (default: 'idmapping').
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing sensitive data.
@@ -23880,6 +26582,7 @@ class IDMappingTransformer(BaseTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -23896,7 +26599,7 @@ class IDMappingTransformer(BaseTransformer):
 
         Args:
             context: Pipeline context with run_id, run_type, logger.
-            record: Bronze-like record with target_chembl_id and uniprot_accession.
+            record: Bronze-like record with target_chembl_id and entry metadata.
             index: Sequential index of the record in the pipeline run.
 
         Returns:
@@ -23909,15 +26612,33 @@ class IDMappingTransformer(BaseTransformer):
         # Step 1: Extract required field
         target_chembl_id = self._get_required_field(record, "target_chembl_id")
         uniprot_accession = record.get("uniprot_accession")  # Can be None
+        all_mappings = record.get("all_mappings")
 
         # Step 2: Determine mapping status
-        mapping_status = "found" if uniprot_accession else "not_found"
+        if all_mappings:
+            mapping_status = "multiple"
+        elif uniprot_accession:
+            mapping_status = "found"
+        else:
+            mapping_status = "not_found"
 
         # Step 3: Build business data dictionary for content hash
         business_data: dict[str, Any] = {
             "target_chembl_id": target_chembl_id,
             "uniprot_accession": uniprot_accession,
             "mapping_status": mapping_status,
+            # UniProt entry metadata
+            "uniprot_entry_name": record.get("uniprot_entry_name"),
+            "organism_scientific": record.get("organism_scientific"),
+            "organism_common": record.get("organism_common"),
+            "taxonomy_id": record.get("taxonomy_id"),
+            "protein_name": record.get("protein_name"),
+            "gene_primary": record.get("gene_primary"),
+            "sequence_length": record.get("sequence_length"),
+            "sequence_mass": record.get("sequence_mass"),
+            "reviewed": record.get("reviewed"),
+            "annotation_score": record.get("annotation_score"),
+            "all_mappings": all_mappings,
         }
 
         # Step 4: Generate entity_id using IdentityService (RULES.md §2.8)
@@ -23943,7 +26664,7 @@ class IDMappingTransformer(BaseTransformer):
         silver_record = self.entity_to_silver_record(entity)
 
         # Step 8: Set DQ warning flag for not_found mappings
-        silver_record["_dq_warn"] = mapping_status != "found"
+        silver_record["_dq_warn"] = mapping_status == "not_found"
 
         return cast("SilverRecord", silver_record)
 
@@ -23998,6 +26719,7 @@ from bioetl.application.pipelines.uniprot.extractors import (
     ExtractorUtils,
     FeatureExtractor,
     GeneExtractor,
+    TaxonomyExtractor,
 )
 from bioetl.domain.entities import UniprotTarget
 from bioetl.domain.services import IdentityService
@@ -24057,6 +26779,7 @@ class UniProtProteinTransformer(BaseTransformer):
         entity_type: str = "protein",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -24069,6 +26792,7 @@ class UniProtProteinTransformer(BaseTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'protein'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names and other PII.
@@ -24079,6 +26803,7 @@ class UniProtProteinTransformer(BaseTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -24133,12 +26858,17 @@ class UniProtProteinTransformer(BaseTransformer):
         self._add_protein_names(record, data)
         self._add_gene_data(record, data)
         self._add_organism_data(record, data)
+        self._add_taxonomy_components(record, data)
         self._add_evidence_data(record, data)
         self._add_sequence_data(record, data)
         self._add_audit_data(record, data)
         self._add_functional_annotations(record, data)
         self._add_cross_references(record, data)
+        self._add_go_components(record, data)
         self._add_features_and_keywords(record, data)
+        self._add_ptm_features(record, data)
+        self._add_isoform_details(record, data)
+        self._add_reaction_data(record, data)
         self._add_counts(record, data)
 
         # Legacy compatibility
@@ -24293,12 +27023,23 @@ class UniProtProteinTransformer(BaseTransformer):
             xrefs, "GuidetoPHARMACOLOGY"
         )
         data["pdb_xrefs"] = CrossRefExtractor.extract_pdb_xrefs(xrefs)
+        # Extended cross-references for drug discovery
+        data["interpro_xrefs"] = CrossRefExtractor.extract_interpro_xrefs(xrefs)
+        data["pfam_xrefs"] = CrossRefExtractor.extract_pfam_xrefs(xrefs)
+        data["reactome_xrefs"] = CrossRefExtractor.extract_reactome_xrefs(xrefs)
 
     def _add_features_and_keywords(
         self, record: BronzeRecord, data: dict[str, Any]
     ) -> None:
         """Add feature and keyword fields."""
-        data["features"] = FeatureExtractor.extract_features(record.get("features"))
+        features = record.get("features")
+        # All features combined (forensic)
+        data["features_json"] = FeatureExtractor.extract_features(features)
+        # Specific feature types for analysis
+        data["domains"] = FeatureExtractor.extract_domains(features)
+        data["binding_sites"] = FeatureExtractor.extract_binding_sites(features)
+        data["active_sites"] = FeatureExtractor.extract_active_sites(features)
+        # Keywords
         data["keywords"] = FeatureExtractor.extract_keywords(record.get("keywords"))
 
     def _add_counts(self, record: BronzeRecord, data: dict[str, Any]) -> None:
@@ -24309,6 +27050,54 @@ class UniProtProteinTransformer(BaseTransformer):
         data["feature_count"] = ExtractorUtils.count_list(record.get("features"))
         data["keyword_count"] = ExtractorUtils.count_list(record.get("keywords"))
         data["isoform_count"] = CommentExtractor.count_isoforms(comments)
+
+    def _add_taxonomy_components(
+        self, record: BronzeRecord, data: dict[str, Any]
+    ) -> None:
+        """Add parsed taxonomy lineage components."""
+        lineage = self._extract_by_path(record, self._ORGANISM_LINEAGE_PATH)
+        taxonomy = TaxonomyExtractor.extract_all(lineage)
+        data["superkingdom"] = taxonomy["superkingdom"]
+        data["phylum"] = taxonomy["phylum"]
+        data["genus"] = taxonomy["genus"]
+
+    def _add_go_components(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add GO terms separated by aspect."""
+        xrefs = record.get("uniProtKBCrossReferences")
+        data["molecular_function"] = CrossRefExtractor.extract_molecular_function(xrefs)
+        data["cellular_component"] = CrossRefExtractor.extract_cellular_component(xrefs)
+
+    def _add_ptm_features(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add PTM and structural features."""
+        features = record.get("features")
+        data["topology"] = FeatureExtractor.extract_topology(features)
+        data["transmembrane"] = FeatureExtractor.extract_transmembrane(features)
+        data["intramembrane"] = FeatureExtractor.extract_intramembrane(features)
+        data["signal_peptide"] = FeatureExtractor.extract_signal_peptide(features)
+        data["propeptide"] = FeatureExtractor.extract_propeptide(features)
+        data["glycosylation"] = FeatureExtractor.extract_glycosylation(features)
+        data["lipidation"] = FeatureExtractor.extract_lipidation(features)
+        data["disulfide_bond"] = FeatureExtractor.extract_disulfide_bonds(features)
+        data["modified_residue"] = FeatureExtractor.extract_modified_residues(features)
+        data["phosphorylation"] = FeatureExtractor.extract_phosphorylation(features)
+        data["acetylation"] = FeatureExtractor.extract_acetylation(features)
+        data["ubiquitination"] = FeatureExtractor.extract_ubiquitination(features)
+
+    def _add_isoform_details(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add detailed isoform information."""
+        comments = record.get("comments")
+        isoform_data = CommentExtractor.extract_isoform_details(comments)
+        data["isoform_names"] = isoform_data["isoform_names"]
+        data["isoform_ids"] = isoform_data["isoform_ids"]
+        data["isoform_synonyms"] = isoform_data["isoform_synonyms"]
+
+    def _add_reaction_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
+        """Add reaction information from catalytic activity."""
+        comments = record.get("comments")
+        data["reactions"] = CommentExtractor.extract_reactions(comments)
+        data["reaction_ec_numbers"] = CommentExtractor.extract_reaction_ec_numbers(
+            comments
+        )
 
     def _extract_protein_name(self, record: BronzeRecord) -> str | None:
         """Extract protein name (optional field)."""
@@ -25340,6 +28129,643 @@ __all__ = [
 ]
 
 ================================================================================
+File: _checks_basic.py
+Path: services\dq\_checks_basic.py
+================================================================================
+"""Basic Gold DQ checks: record count, completeness, data freshness.
+
+Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+
+import polars as pl
+
+from bioetl.domain.value_objects.dq_report import (
+    CompletenessResult,
+    DataFreshnessResult,
+    DQCheckStatus,
+    RecordCountResult,
+)
+
+# Freshness thresholds from RULES.md §3.4.1
+FRESHNESS_WARNING_HOURS = 24
+FRESHNESS_CRITICAL_HOURS = 72
+
+
+def check_record_count(
+    df: pl.DataFrame, baseline_stats: dict[str, object] | None
+) -> RecordCountResult:
+    """Check record count against baseline."""
+    current = len(df)
+    baseline = (
+        baseline_stats.get("record_count_ma30", current) if baseline_stats else current
+    )
+    if not isinstance(baseline, (int, float)):
+        baseline = current
+    delta = (current - baseline) / baseline if baseline > 0 else 0.0
+
+    status = DQCheckStatus.PASS
+    if delta < -0.5:
+        status = DQCheckStatus.FAIL
+    elif delta < -0.3:
+        status = DQCheckStatus.WARN
+
+    return RecordCountResult(
+        value=current,
+        status=status,
+        delta_from_last_run=int(current - baseline) if baseline else None,
+    )
+
+
+def check_completeness(
+    df: pl.DataFrame,
+    required_fields: list[str],
+    threshold: float,
+) -> CompletenessResult:
+    """Check completeness of required fields."""
+    if not required_fields:
+        return CompletenessResult(
+            required_fields={},
+            overall_completeness_score=1.0,
+            minimum_threshold=threshold,
+            status=DQCheckStatus.PASS,
+        )
+
+    field_rates: dict[str, float] = {}
+    total_rate = 0.0
+    count = 0
+
+    for field in required_fields:
+        if field in df.columns:
+            null_count = df[field].null_count()
+            rate = 1.0 - (null_count / len(df)) if len(df) > 0 else 0.0
+            field_rates[field] = round(rate, 4)
+            total_rate += rate
+            count += 1
+        else:
+            field_rates[field] = 0.0
+
+    overall_score = total_rate / count if count > 0 else 0.0
+
+    status = DQCheckStatus.PASS if overall_score >= threshold else DQCheckStatus.FAIL
+
+    return CompletenessResult(
+        required_fields=field_rates,
+        overall_completeness_score=round(overall_score, 4),
+        minimum_threshold=threshold,
+        status=status,
+    )
+
+
+def check_data_freshness(
+    df: pl.DataFrame, current_time: datetime
+) -> DataFreshnessResult:
+    """Check data freshness based on timestamp columns."""
+    timestamp_cols = ["_updated_at", "updated_at", "_ingestion_ts", "created_at"]
+    max_ts = None
+
+    for col in timestamp_cols:
+        if col in df.columns:
+            try:
+                col_max = df[col].max()
+                if col_max is not None:
+                    if isinstance(col_max, datetime):
+                        max_ts = col_max
+                    break
+            except Exception:
+                # Catch all: column may not exist, wrong type, or max() unsupported.
+                # Try next candidate column for graceful fallback.
+                pass
+
+    if max_ts is None:
+        return DataFreshnessResult(
+            max_updated_at=None,
+            freshness_lag_seconds=0.0,
+            freshness_lag_hours=0.0,
+            status=DQCheckStatus.PASS,
+        )
+
+    lag_seconds = (current_time - max_ts).total_seconds()
+    lag_hours = lag_seconds / 3600
+
+    if lag_hours > FRESHNESS_CRITICAL_HOURS:
+        status = DQCheckStatus.FAIL
+    elif lag_hours > FRESHNESS_WARNING_HOURS:
+        status = DQCheckStatus.WARN
+    else:
+        status = DQCheckStatus.PASS
+
+    return DataFreshnessResult(
+        max_updated_at=max_ts,
+        freshness_lag_seconds=round(lag_seconds, 2),
+        freshness_lag_hours=round(lag_hours, 2),
+        status=status,
+    )
+
+================================================================================
+File: _checks_business.py
+Path: services\dq\_checks_business.py
+================================================================================
+"""Business rules DQ checks for Gold layer.
+
+Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+import polars as pl
+
+from bioetl.domain.value_objects.dq_report import (
+    BusinessRuleResult,
+    BusinessRulesResult,
+    DQCheckStatus,
+)
+
+
+def _check_not_null_rule(df: pl.DataFrame, column: str) -> tuple[bool, int | None]:
+    """Check not_null rule for a column."""
+    violations = df[column].null_count()
+    return violations == 0, violations
+
+
+def _check_range_rule(
+    df: pl.DataFrame,
+    column: str,
+    min_val: Any | None,
+    max_val: Any | None,
+) -> tuple[bool, int]:
+    """Check range rule for a column."""
+    violations = 0
+    col_data = df[column].drop_nulls()
+    if min_val is not None:
+        violations += (col_data < min_val).sum()
+    if max_val is not None:
+        violations += (col_data > max_val).sum()
+    return violations == 0, violations
+
+
+def _check_in_list_rule(
+    df: pl.DataFrame, column: str, allowed: list[Any]
+) -> tuple[bool, int | None]:
+    """Check in_list rule for a column."""
+    if not allowed:
+        return True, 0
+    violations = int((~df[column].is_in(allowed)).sum())
+    return violations == 0, violations
+
+
+def _check_regex_rule(
+    df: pl.DataFrame, column: str, pattern: str
+) -> tuple[bool, int | None]:
+    """Check regex rule for a column."""
+    if not pattern:
+        return True, 0
+    violations = int((~df[column].str.contains(pattern, literal=False)).sum())
+    return violations == 0, violations
+
+
+def _evaluate_single_rule(
+    df: pl.DataFrame, rule: dict[str, Any]
+) -> tuple[bool, int | None]:
+    """Evaluate a single business rule."""
+    column = rule.get("column")
+    condition = rule.get("condition")
+
+    if not column or column not in df.columns:
+        return True, 0
+
+    if condition == "not_null":
+        return _check_not_null_rule(df, column)
+    if condition == "range":
+        return _check_range_rule(df, column, rule.get("min"), rule.get("max"))
+    if condition == "in_list":
+        return _check_in_list_rule(df, column, rule.get("values", []))
+    if condition == "regex":
+        return _check_regex_rule(df, column, rule.get("pattern", ""))
+    return True, 0
+
+
+def check_business_rules(
+    df: pl.DataFrame, rules: list[dict[str, Any]]
+) -> BusinessRulesResult:
+    """Validate business rules."""
+    if not rules:
+        return BusinessRulesResult(
+            rules_evaluated=0,
+            rules_passed=0,
+            rules_failed=0,
+            rules=(),
+            status=DQCheckStatus.PASS,
+        )
+
+    results = []
+    rules_passed = 0
+    rules_failed = 0
+
+    for rule in rules:
+        try:
+            passed, violations = _evaluate_single_rule(df, rule)
+        except Exception:
+            # Catch all: rule evaluation may fail due to missing columns, type errors,
+            # or malformed rule expressions. Treat as rule failure for DQ reporting.
+            passed, violations = False, None
+
+        if passed:
+            rules_passed += 1
+        else:
+            rules_failed += 1
+
+        results.append(
+            BusinessRuleResult(
+                rule_id=rule.get("rule_id", ""),
+                name=rule.get("name", ""),
+                description=rule.get("description", ""),
+                passed=passed,
+                violations=violations,
+            )
+        )
+
+    status = DQCheckStatus.PASS if rules_failed == 0 else DQCheckStatus.FAIL
+
+    return BusinessRulesResult(
+        rules_evaluated=len(rules),
+        rules_passed=rules_passed,
+        rules_failed=rules_failed,
+        rules=tuple(results),
+        status=status,
+    )
+
+================================================================================
+File: _checks_integrity.py
+Path: services\dq\_checks_integrity.py
+================================================================================
+"""Integrity DQ checks: referential integrity, SCD integrity.
+
+Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+import polars as pl
+import pyarrow as pa
+
+from bioetl.domain.value_objects.dq_report import (
+    DQCheckStatus,
+    ForeignKeyResult,
+    ReferentialIntegrityResult,
+    SCDIntegrityResult,
+)
+
+
+def check_referential_integrity(
+    df: pl.DataFrame, reference_tables: dict[str, pl.DataFrame | pa.Table]
+) -> ReferentialIntegrityResult:
+    """Check foreign key references."""
+    if not reference_tables:
+        return ReferentialIntegrityResult(
+            foreign_keys={},
+            status=DQCheckStatus.PASS,
+        )
+
+    fk_results: dict[str, ForeignKeyResult] = {}
+    has_failures = False
+    has_warnings = False
+
+    for ref_key, ref_table in reference_tables.items():
+        parts = ref_key.split("->")
+        if len(parts) != 2:
+            continue
+
+        local_col = parts[0].strip()
+        ref_parts = parts[1].strip().split(".")
+        if len(ref_parts) != 2:
+            continue
+
+        ref_col = ref_parts[1]
+
+        if local_col not in df.columns:
+            continue
+
+        if isinstance(ref_table, pa.Table):
+            ref_df: pl.DataFrame = pl.from_arrow(ref_table)  # type: ignore[assignment]
+        else:
+            ref_df = ref_table
+
+        if ref_col not in ref_df.columns:
+            continue
+
+        local_values = df[local_col].drop_nulls()
+        ref_values = ref_df[ref_col].unique()
+
+        total_refs = len(local_values)
+        valid_refs = int(local_values.is_in(ref_values).sum())
+        orphans = total_refs - valid_refs
+
+        if orphans > 0:
+            if orphans / total_refs > 0.01:
+                status = DQCheckStatus.FAIL
+                has_failures = True
+            else:
+                status = DQCheckStatus.WARN
+                has_warnings = True
+        else:
+            status = DQCheckStatus.PASS
+
+        fk_results[ref_key] = ForeignKeyResult(
+            reference=ref_key,
+            total_references=total_refs,
+            valid_references=valid_refs,
+            orphan_records=orphans,
+            status=status,
+        )
+
+    overall_status = DQCheckStatus.PASS
+    if has_failures:
+        overall_status = DQCheckStatus.FAIL
+    elif has_warnings:
+        overall_status = DQCheckStatus.WARN
+
+    return ReferentialIntegrityResult(
+        foreign_keys=fk_results,
+        status=overall_status,
+    )
+
+
+def check_scd_integrity(
+    df: pl.DataFrame, scd_config: dict[str, Any] | None
+) -> SCDIntegrityResult:
+    """Check SCD (Slowly Changing Dimension) integrity."""
+    if not scd_config:
+        return SCDIntegrityResult(
+            scd_type=2,
+            total_entities=len(df),
+            entities_with_history=0,
+            avg_versions_per_entity=1.0,
+            version_gaps=0,
+            temporal_conflicts=0,
+            overlapping_validity_periods=0,
+            status=DQCheckStatus.PASS,
+        )
+
+    scd_type = scd_config.get("type", 2)
+    entity_key = scd_config.get("entity_key")
+    valid_from = scd_config.get("valid_from_col", "_valid_from")
+    valid_to = scd_config.get("valid_to_col", "_valid_to")
+
+    if not entity_key or entity_key not in df.columns:
+        return SCDIntegrityResult(
+            scd_type=scd_type,
+            total_entities=len(df),
+            entities_with_history=0,
+            avg_versions_per_entity=1.0,
+            version_gaps=0,
+            temporal_conflicts=0,
+            overlapping_validity_periods=0,
+            status=DQCheckStatus.PASS,
+        )
+
+    unique_entities = df[entity_key].n_unique()
+    total_records = len(df)
+
+    version_counts = df.group_by(entity_key).agg(pl.count().alias("versions"))
+    entities_with_history = int((version_counts["versions"] > 1).sum())
+    avg_versions = total_records / unique_entities if unique_entities > 0 else 1.0
+
+    version_gaps = 0
+    temporal_conflicts = 0
+    overlapping = 0
+
+    if valid_from in df.columns and valid_to in df.columns:
+        try:
+            for entity in df[entity_key].unique().to_list()[:100]:
+                entity_records = df.filter(pl.col(entity_key) == entity).sort(
+                    valid_from
+                )
+                if len(entity_records) > 1:
+                    for i in range(len(entity_records) - 1):
+                        current_to = entity_records[valid_to][i]
+                        next_from = entity_records[valid_from][i + 1]
+                        if (
+                            current_to is not None
+                            and next_from is not None
+                            and current_to > next_from
+                        ):
+                            overlapping += 1
+        except Exception:
+            # Catch all: entity group processing may fail due to missing/invalid
+            # temporal fields or sort errors. Skip entity for SCD overlap check.
+            pass
+
+    status = DQCheckStatus.PASS if overlapping == 0 else DQCheckStatus.WARN
+
+    return SCDIntegrityResult(
+        scd_type=scd_type,
+        total_entities=unique_entities,
+        entities_with_history=entities_with_history,
+        avg_versions_per_entity=round(avg_versions, 2),
+        version_gaps=version_gaps,
+        temporal_conflicts=temporal_conflicts,
+        overlapping_validity_periods=overlapping,
+        status=status,
+    )
+
+================================================================================
+File: _checks_statistical.py
+Path: services\dq\_checks_statistical.py
+================================================================================
+"""Statistical DQ checks: statistical profile, anomaly detection.
+
+Extracted from GoldDQAnalyzer per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+import polars as pl
+
+from bioetl.domain.value_objects.dq_report import (
+    AnomalyDetectionResult,
+    AnomalyMetric,
+    DQCheckStatus,
+    StatisticalMetric,
+    StatisticalProfileResult,
+)
+
+# Thresholds from RULES.md §3.4.1
+NULL_RATE_WARNING_MULTIPLIER = 2.0
+NULL_RATE_CRITICAL_MULTIPLIER = 5.0
+RECORD_COUNT_WARNING_THRESHOLD = 0.70
+RECORD_COUNT_CRITICAL_THRESHOLD = 0.50
+
+
+def check_statistical_profile(
+    df: pl.DataFrame, baseline_stats: dict[str, Any] | None
+) -> StatisticalProfileResult:
+    """Compare statistics against baseline (MA30)."""
+    if not baseline_stats:
+        return StatisticalProfileResult(
+            baseline_period_days=30,
+            metrics={},
+            status=DQCheckStatus.PASS,
+        )
+
+    metrics: dict[str, StatisticalMetric] = {}
+
+    if "null_rate_ma30" in baseline_stats:
+        total_nulls = sum(df[col].null_count() for col in df.columns)
+        total_cells = len(df) * len(df.columns)
+        current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
+        baseline_null_rate = baseline_stats["null_rate_ma30"]
+
+        ratio = (
+            current_null_rate / baseline_null_rate if baseline_null_rate > 0 else 1.0
+        )
+
+        if ratio > NULL_RATE_CRITICAL_MULTIPLIER:
+            status = DQCheckStatus.FAIL
+        elif ratio > NULL_RATE_WARNING_MULTIPLIER:
+            status = DQCheckStatus.WARN
+        else:
+            status = DQCheckStatus.PASS
+
+        metrics["null_rate_avg"] = StatisticalMetric(
+            current=round(current_null_rate, 4),
+            baseline=round(baseline_null_rate, 4),
+            ratio=round(ratio, 4),
+            threshold_warning=NULL_RATE_WARNING_MULTIPLIER,
+            threshold_critical=NULL_RATE_CRITICAL_MULTIPLIER,
+            status=status,
+        )
+
+    if "record_count_ma30" in baseline_stats:
+        current_count = len(df)
+        baseline_count = baseline_stats["record_count_ma30"]
+
+        ratio = current_count / baseline_count if baseline_count > 0 else 1.0
+
+        if ratio < RECORD_COUNT_CRITICAL_THRESHOLD:
+            status = DQCheckStatus.FAIL
+        elif ratio < RECORD_COUNT_WARNING_THRESHOLD:
+            status = DQCheckStatus.WARN
+        else:
+            status = DQCheckStatus.PASS
+
+        metrics["record_count_daily"] = StatisticalMetric(
+            current=float(current_count),
+            baseline=float(baseline_count),
+            ratio=round(ratio, 4),
+            threshold_warning=RECORD_COUNT_WARNING_THRESHOLD,
+            threshold_critical=RECORD_COUNT_CRITICAL_THRESHOLD,
+            status=status,
+        )
+
+    overall_status = DQCheckStatus.PASS
+    for metric in metrics.values():
+        if metric.status == DQCheckStatus.FAIL:
+            overall_status = DQCheckStatus.FAIL
+            break
+        elif metric.status == DQCheckStatus.WARN:
+            overall_status = DQCheckStatus.WARN
+
+    return StatisticalProfileResult(
+        baseline_period_days=30,
+        metrics=metrics,
+        status=overall_status,
+    )
+
+
+def check_anomaly_detection(
+    df: pl.DataFrame, baseline_stats: dict[str, Any] | None
+) -> AnomalyDetectionResult:
+    """Detect anomalies using baseline comparison."""
+    cold_start_days = 30
+    current_day = baseline_stats.get("days_since_start", 0) if baseline_stats else 0
+    cold_start_mode = current_day < cold_start_days
+
+    if cold_start_mode or not baseline_stats:
+        return AnomalyDetectionResult(
+            cold_start_days=cold_start_days,
+            current_day=current_day,
+            cold_start_mode=True,
+            anomalies_detected=(),
+            metrics_monitored=(),
+            status=DQCheckStatus.PASS,
+        )
+
+    anomalies: list[str] = []
+    metrics_monitored: list[AnomalyMetric] = []
+
+    # Null rate anomaly
+    total_nulls = sum(df[col].null_count() for col in df.columns)
+    total_cells = len(df) * len(df.columns)
+    current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
+    baseline_null_rate = baseline_stats.get("null_rate_ma30", current_null_rate)
+
+    null_zscore = (
+        (current_null_rate - baseline_null_rate) / baseline_null_rate
+        if baseline_null_rate > 0
+        else 0.0
+    )
+
+    if abs(null_zscore) > 3:
+        anomalies.append("null_rate")
+        null_status = "anomaly"
+    else:
+        null_status = "normal"
+
+    metrics_monitored.append(
+        AnomalyMetric(
+            metric="null_rate",
+            current_value=round(current_null_rate, 4),
+            baseline_value=round(baseline_null_rate, 4),
+            zscore=round(null_zscore, 2),
+            status=null_status,
+        )
+    )
+
+    # Record count anomaly
+    current_count = float(len(df))
+    baseline_count = baseline_stats.get("record_count_ma30", current_count)
+    count_zscore = (
+        (current_count - baseline_count) / baseline_count if baseline_count > 0 else 0.0
+    )
+
+    if abs(count_zscore) > 3:
+        anomalies.append("record_count")
+        count_status = "anomaly"
+    else:
+        count_status = "normal"
+
+    metrics_monitored.append(
+        AnomalyMetric(
+            metric="record_count",
+            current_value=current_count,
+            baseline_value=baseline_count,
+            zscore=round(count_zscore, 2),
+            status=count_status,
+        )
+    )
+
+    status = DQCheckStatus.WARN if anomalies else DQCheckStatus.PASS
+
+    return AnomalyDetectionResult(
+        cold_start_days=cold_start_days,
+        current_day=current_day,
+        cold_start_mode=False,
+        anomalies_detected=tuple(anomalies),
+        metrics_monitored=tuple(metrics_monitored),
+        status=status,
+    )
+
+================================================================================
 File: bronze_analyzer.py
 Path: services\dq\bronze_analyzer.py
 ================================================================================
@@ -25365,12 +28791,12 @@ from typing import Any
 
 import orjson
 
-from bioetl.application.services.dq.utils import (
+from bioetl.application.services.dq.dq_report_builders import (
     build_summary,
-    result_to_dict,
     update_counts,
 )
 from bioetl.domain.ports import BronzeDQConfigPort
+from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (
     BronzeDQCheckType,
     BronzeDQReport,
@@ -25427,7 +28853,7 @@ class BronzeDQAnalyzer:
         # Record count check
         if BronzeDQCheckType.RECORD_COUNT in enabled_checks:
             record_count_result = self._check_record_count(record_list)
-            checks["record_count"] = result_to_dict(record_count_result)
+            checks["record_count"] = to_dict(record_count_result)
             passed, failed, warnings = update_counts(
                 record_count_result.status, passed, failed, warnings
             )
@@ -25435,7 +28861,7 @@ class BronzeDQAnalyzer:
         # File integrity check
         if BronzeDQCheckType.FILE_INTEGRITY in enabled_checks:
             file_integrity_result = self._check_file_integrity(record_list)
-            checks["file_integrity"] = result_to_dict(file_integrity_result)
+            checks["file_integrity"] = to_dict(file_integrity_result)
             passed, failed, warnings = update_counts(
                 file_integrity_result.status, passed, failed, warnings
             )
@@ -25443,7 +28869,7 @@ class BronzeDQAnalyzer:
         # Schema snapshot
         if BronzeDQCheckType.SCHEMA_SNAPSHOT in enabled_checks:
             schema_snapshot_result = self._check_schema_snapshot(record_list)
-            checks["schema_snapshot"] = result_to_dict(schema_snapshot_result)
+            checks["schema_snapshot"] = to_dict(schema_snapshot_result)
             passed, failed, warnings = update_counts(
                 schema_snapshot_result.status, passed, failed, warnings
             )
@@ -25458,7 +28884,7 @@ class BronzeDQAnalyzer:
         # Encoding validation
         if BronzeDQCheckType.ENCODING_VALIDATION in enabled_checks:
             encoding_result = self._check_encoding(record_list)
-            checks["encoding_validation"] = result_to_dict(encoding_result)
+            checks["encoding_validation"] = to_dict(encoding_result)
             passed, failed, warnings = update_counts(
                 encoding_result.status, passed, failed, warnings
             )
@@ -25599,21 +29025,136 @@ class BronzeDQAnalyzer:
 __all__ = ["BronzeDQAnalyzer"]
 
 ================================================================================
+File: dq_report_builders.py
+Path: services\dq\dq_report_builders.py
+================================================================================
+"""Common utilities for DQ analyzers.
+
+Provides shared functions used by Bronze, Silver, and Gold DQ analyzers.
+Extracted to reduce code duplication per refactoring analysis 2026-01-25.
+"""
+
+from __future__ import annotations
+
+from dataclasses import fields, is_dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any
+
+from bioetl.domain.value_objects.dq_report import (
+    DQCheckStatus,
+    DQReportStatus,
+    DQReportSummary,
+)
+
+
+def convert_value(value: Any) -> Any:
+    """Convert a value for serialization.
+
+    Handles dataclasses, enums, datetimes, and collection types.
+
+    Args:
+        value: Value to convert.
+
+    Returns:
+        Serializable representation of the value.
+    """
+    if is_dataclass(value) and not isinstance(value, type):
+        return {
+            field.name: convert_value(getattr(value, field.name))
+            for field in fields(value)
+        }
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, dict):
+        return {key: convert_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [convert_value(item) for item in value]
+    return value
+
+
+def update_counts(
+    status: DQCheckStatus,
+    passed: int,
+    failed: int,
+    warnings: int,
+) -> tuple[int, int, int]:
+    """Update check counts based on status.
+
+    Args:
+        status: Result status of the check.
+        passed: Current count of passed checks.
+        failed: Current count of failed checks.
+        warnings: Current count of warning checks.
+
+    Returns:
+        Updated tuple of (passed, failed, warnings).
+    """
+    if status == DQCheckStatus.PASS:
+        return passed + 1, failed, warnings
+    if status == DQCheckStatus.FAIL:
+        return passed, failed + 1, warnings
+    return passed, failed, warnings + 1
+
+
+def build_summary(
+    passed: int,
+    failed: int,
+    warnings: int,
+    threshold_status: DQCheckStatus | None = None,
+) -> DQReportSummary:
+    """Build DQ report summary with overall status.
+
+    Args:
+        passed: Number of passed checks.
+        failed: Number of failed checks.
+        warnings: Number of warning checks.
+        threshold_status: Optional status from threshold calculation
+            (used by Silver analyzer).
+
+    Returns:
+        DQReportSummary with overall status.
+    """
+    if failed > 0 or (threshold_status == DQCheckStatus.FAIL):
+        overall_status = DQReportStatus.FAIL
+    elif warnings > 0 or (threshold_status == DQCheckStatus.WARN):
+        overall_status = DQReportStatus.WARNING
+    else:
+        overall_status = DQReportStatus.PASS
+
+    return DQReportSummary(
+        total_checks=passed + failed + warnings,
+        passed=passed,
+        failed=failed,
+        warnings=warnings,
+        overall_status=overall_status,
+    )
+
+
+__all__ = [
+    "build_summary",
+    "convert_value",
+    "update_counts",
+]
+
+================================================================================
 File: gold_analyzer.py
 Path: services\dq\gold_analyzer.py
 ================================================================================
 """Gold layer DQ analyzer.
 
-Implements strict validation for Gold data marts:
-- Record count with baseline comparison
-- Completeness checks for required fields
-- Business rules validation
-- Referential integrity checks
-- Statistical profiling with MA30 baseline
-- Anomaly detection
-- SCD (Slowly Changing Dimension) integrity
+Orchestrates strict validation for Gold data marts by delegating to
+specialized check modules:
+- _checks_basic: record count, completeness, data freshness
+- _checks_business: business rules validation
+- _checks_integrity: referential integrity, SCD integrity
+- _checks_statistical: statistical profiling, anomaly detection
 
 Follows RULES.md §3.1 DQ strategy for Gold layer.
+
+Split from monolithic 761-LOC class per audit-package-structure-2026-02-07.
 """
 
 from __future__ import annotations
@@ -25624,29 +29165,30 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
-from bioetl.application.services.dq.utils import (
+from bioetl.application.services.dq._checks_basic import (
+    check_completeness,
+    check_data_freshness,
+    check_record_count,
+)
+from bioetl.application.services.dq._checks_business import check_business_rules
+from bioetl.application.services.dq._checks_integrity import (
+    check_referential_integrity,
+    check_scd_integrity,
+)
+from bioetl.application.services.dq._checks_statistical import (
+    check_anomaly_detection,
+    check_statistical_profile,
+)
+from bioetl.application.services.dq.dq_report_builders import (
     build_summary,
-    result_to_dict,
     update_counts,
 )
 from bioetl.domain.ports import GoldDQConfigPort
+from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (
-    AnomalyDetectionResult,
-    AnomalyMetric,
-    BusinessRuleResult,
-    BusinessRulesResult,
-    CompletenessResult,
-    DataFreshnessResult,
-    DQCheckStatus,
-    ForeignKeyResult,
     GoldDQCheckType,
     GoldDQReport,
     MedallionLayer,
-    RecordCountResult,
-    ReferentialIntegrityResult,
-    SCDIntegrityResult,
-    StatisticalMetric,
-    StatisticalProfileResult,
 )
 
 
@@ -25655,15 +29197,11 @@ class GoldDQAnalyzer:
 
     Performs strict validation on data marts for business-critical metrics.
     Implements GoldDQAnalyzerPort.
-    """
 
-    # Anomaly detection thresholds from RULES.md §3.4.1
-    NULL_RATE_WARNING_MULTIPLIER = 2.0
-    NULL_RATE_CRITICAL_MULTIPLIER = 5.0
-    RECORD_COUNT_WARNING_THRESHOLD = 0.70
-    RECORD_COUNT_CRITICAL_THRESHOLD = 0.50
-    FRESHNESS_WARNING_HOURS = 24
-    FRESHNESS_CRITICAL_HOURS = 72
+    Delegates individual checks to specialized modules in
+    ``_checks_basic``, ``_checks_business``, ``_checks_integrity``,
+    ``_checks_statistical``.
+    """
 
     def _execute_checks(
         self,
@@ -25676,75 +29214,57 @@ class GoldDQAnalyzer:
         baseline_stats: dict[str, Any] | None,
         scd_config: dict[str, Any] | None,
     ) -> tuple[dict[str, Any], int, int, int]:
-        """Execute all enabled DQ checks and collect results.
-
-        Args:
-            df: Polars DataFrame with Gold data.
-            enabled_checks: Set of enabled check types.
-            required_fields: List of required fields for completeness.
-            completeness_threshold: Minimum completeness score threshold.
-            business_rules: List of business rule definitions.
-            reference_tables: Tables for referential integrity checks.
-            baseline_stats: Historical baseline for anomaly detection.
-            scd_config: SCD configuration if applicable.
-
-        Returns:
-            Tuple of (checks dict, passed count, failed count, warnings count).
-        """
+        """Execute all enabled DQ checks and collect results."""
         checks: dict[str, Any] = {}
         passed, failed, warnings = 0, 0, 0
 
         if GoldDQCheckType.RECORD_COUNT in enabled_checks:
-            record_count_result = self._check_record_count(df, baseline_stats)
-            checks["record_count"] = result_to_dict(record_count_result)
+            rc = check_record_count(df, baseline_stats)
+            checks["record_count"] = to_dict(rc)
             passed, failed, warnings = update_counts(
-                record_count_result.status, passed, failed, warnings
+                rc.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.COMPLETENESS in enabled_checks:
-            completeness_result = self._check_completeness(
-                df, required_fields, completeness_threshold
-            )
-            checks["completeness"] = result_to_dict(completeness_result)
+            comp = check_completeness(df, required_fields, completeness_threshold)
+            checks["completeness"] = to_dict(comp)
             passed, failed, warnings = update_counts(
-                completeness_result.status, passed, failed, warnings
+                comp.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.BUSINESS_RULES in enabled_checks:
-            business_rules_result = self._check_business_rules(df, business_rules)
-            checks["business_rules"] = result_to_dict(business_rules_result)
+            br = check_business_rules(df, business_rules)
+            checks["business_rules"] = to_dict(br)
             passed, failed, warnings = update_counts(
-                business_rules_result.status, passed, failed, warnings
+                br.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.REFERENTIAL_INTEGRITY in enabled_checks:
-            ref_integrity_result = self._check_referential_integrity(
-                df, reference_tables
-            )
-            checks["referential_integrity"] = result_to_dict(ref_integrity_result)
+            ri = check_referential_integrity(df, reference_tables)
+            checks["referential_integrity"] = to_dict(ri)
             passed, failed, warnings = update_counts(
-                ref_integrity_result.status, passed, failed, warnings
+                ri.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.STATISTICAL_PROFILE in enabled_checks:
-            stat_profile_result = self._check_statistical_profile(df, baseline_stats)
-            checks["statistical_profile"] = result_to_dict(stat_profile_result)
+            sp = check_statistical_profile(df, baseline_stats)
+            checks["statistical_profile"] = to_dict(sp)
             passed, failed, warnings = update_counts(
-                stat_profile_result.status, passed, failed, warnings
+                sp.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.ANOMALY_DETECTION in enabled_checks:
-            anomaly_result = self._check_anomaly_detection(df, baseline_stats)
-            checks["anomaly_detection"] = result_to_dict(anomaly_result)
+            ad = check_anomaly_detection(df, baseline_stats)
+            checks["anomaly_detection"] = to_dict(ad)
             passed, failed, warnings = update_counts(
-                anomaly_result.status, passed, failed, warnings
+                ad.status, passed, failed, warnings
             )
 
         if GoldDQCheckType.SCD_INTEGRITY in enabled_checks:
-            scd_result = self._check_scd_integrity(df, scd_config)
-            checks["scd_integrity"] = result_to_dict(scd_result)
+            scd = check_scd_integrity(df, scd_config)
+            checks["scd_integrity"] = to_dict(scd)
             passed, failed, warnings = update_counts(
-                scd_result.status, passed, failed, warnings
+                scd.status, passed, failed, warnings
             )
 
         return checks, passed, failed, warnings
@@ -25784,7 +29304,6 @@ class GoldDQAnalyzer:
         Returns:
             GoldDQReport: Complete DQ report for Gold layer.
         """
-        # Convert PyArrow to Polars for consistent processing
         if isinstance(data, pa.Table):
             df: pl.DataFrame = pl.from_arrow(data)  # type: ignore[assignment]
         else:
@@ -25792,7 +29311,6 @@ class GoldDQAnalyzer:
 
         enabled_checks = set(config.get_checks_enums())
 
-        # Execute all enabled checks
         checks, passed, failed, warnings = self._execute_checks(
             df=df,
             enabled_checks=enabled_checks,
@@ -25804,10 +29322,7 @@ class GoldDQAnalyzer:
             scd_config=scd_config,
         )
 
-        # Data freshness check
-        data_freshness = self._check_data_freshness(df, timestamp)
-
-        # Build summary
+        data_freshness = check_data_freshness(df, timestamp)
         summary = build_summary(passed, failed, warnings)
 
         return GoldDQReport(
@@ -25819,549 +29334,6 @@ class GoldDQAnalyzer:
             checks=checks,
             data_freshness=data_freshness,
             summary=summary,
-        )
-
-    def _check_record_count(
-        self, df: pl.DataFrame, baseline_stats: dict[str, Any] | None
-    ) -> RecordCountResult:
-        """Check record count against baseline."""
-        current = len(df)
-        baseline = (
-            baseline_stats.get("record_count_ma30", current)
-            if baseline_stats
-            else current
-        )
-        delta = (current - baseline) / baseline if baseline > 0 else 0.0
-
-        # Check for significant drop
-        status = DQCheckStatus.PASS
-        if delta < -0.5:  # >50% drop
-            status = DQCheckStatus.FAIL
-        elif delta < -0.3:  # >30% drop
-            status = DQCheckStatus.WARN
-
-        return RecordCountResult(
-            value=current,
-            status=status,
-            delta_from_last_run=int(current - baseline) if baseline else None,
-        )
-
-    def _check_completeness(
-        self,
-        df: pl.DataFrame,
-        required_fields: list[str],
-        threshold: float,
-    ) -> CompletenessResult:
-        """Check completeness of required fields."""
-        if not required_fields:
-            return CompletenessResult(
-                required_fields={},
-                overall_completeness_score=1.0,
-                minimum_threshold=threshold,
-                status=DQCheckStatus.PASS,
-            )
-
-        field_rates = {}
-        total_rate = 0.0
-        count = 0
-
-        for field in required_fields:
-            if field in df.columns:
-                null_count = df[field].null_count()
-                rate = 1.0 - (null_count / len(df)) if len(df) > 0 else 0.0
-                field_rates[field] = round(rate, 4)
-                total_rate += rate
-                count += 1
-            else:
-                field_rates[field] = 0.0
-
-        overall_score = total_rate / count if count > 0 else 0.0
-
-        status = (
-            DQCheckStatus.PASS if overall_score >= threshold else DQCheckStatus.FAIL
-        )
-
-        return CompletenessResult(
-            required_fields=field_rates,
-            overall_completeness_score=round(overall_score, 4),
-            minimum_threshold=threshold,
-            status=status,
-        )
-
-    def _check_not_null_rule(
-        self, df: pl.DataFrame, column: str
-    ) -> tuple[bool, int | None]:
-        """Check not_null rule for a column."""
-        violations = df[column].null_count()
-        return violations == 0, violations
-
-    def _check_range_rule(
-        self,
-        df: pl.DataFrame,
-        column: str,
-        min_val: Any | None,
-        max_val: Any | None,
-    ) -> tuple[bool, int]:
-        """Check range rule for a column."""
-        violations = 0
-        col_data = df[column].drop_nulls()
-        if min_val is not None:
-            violations += (col_data < min_val).sum()
-        if max_val is not None:
-            violations += (col_data > max_val).sum()
-        return violations == 0, violations
-
-    def _check_in_list_rule(
-        self, df: pl.DataFrame, column: str, allowed: list[Any]
-    ) -> tuple[bool, int | None]:
-        """Check in_list rule for a column."""
-        if not allowed:
-            return True, 0
-        violations = int((~df[column].is_in(allowed)).sum())
-        return violations == 0, violations
-
-    def _check_regex_rule(
-        self, df: pl.DataFrame, column: str, pattern: str
-    ) -> tuple[bool, int | None]:
-        """Check regex rule for a column."""
-        if not pattern:
-            return True, 0
-        violations = int((~df[column].str.contains(pattern, literal=False)).sum())
-        return violations == 0, violations
-
-    def _evaluate_single_rule(
-        self, df: pl.DataFrame, rule: dict[str, Any]
-    ) -> tuple[bool, int | None]:
-        """Evaluate a single business rule."""
-        column = rule.get("column")
-        condition = rule.get("condition")
-
-        if not column or column not in df.columns:
-            return True, 0
-
-        if condition == "not_null":
-            return self._check_not_null_rule(df, column)
-        if condition == "range":
-            return self._check_range_rule(df, column, rule.get("min"), rule.get("max"))
-        if condition == "in_list":
-            return self._check_in_list_rule(df, column, rule.get("values", []))
-        if condition == "regex":
-            return self._check_regex_rule(df, column, rule.get("pattern", ""))
-        return True, 0
-
-    def _check_business_rules(
-        self, df: pl.DataFrame, rules: list[dict[str, Any]]
-    ) -> BusinessRulesResult:
-        """Validate business rules."""
-        if not rules:
-            return BusinessRulesResult(
-                rules_evaluated=0,
-                rules_passed=0,
-                rules_failed=0,
-                rules=(),
-                status=DQCheckStatus.PASS,
-            )
-
-        results = []
-        rules_passed = 0
-        rules_failed = 0
-
-        for rule in rules:
-            try:
-                passed, violations = self._evaluate_single_rule(df, rule)
-            except Exception:
-                passed, violations = False, None
-
-            if passed:
-                rules_passed += 1
-            else:
-                rules_failed += 1
-
-            results.append(
-                BusinessRuleResult(
-                    rule_id=rule.get("rule_id", ""),
-                    name=rule.get("name", ""),
-                    description=rule.get("description", ""),
-                    passed=passed,
-                    violations=violations,
-                )
-            )
-
-        status = DQCheckStatus.PASS if rules_failed == 0 else DQCheckStatus.FAIL
-
-        return BusinessRulesResult(
-            rules_evaluated=len(rules),
-            rules_passed=rules_passed,
-            rules_failed=rules_failed,
-            rules=tuple(results),
-            status=status,
-        )
-
-    def _check_referential_integrity(
-        self, df: pl.DataFrame, reference_tables: dict[str, pl.DataFrame | pa.Table]
-    ) -> ReferentialIntegrityResult:
-        """Check foreign key references."""
-        if not reference_tables:
-            return ReferentialIntegrityResult(
-                foreign_keys={},
-                status=DQCheckStatus.PASS,
-            )
-
-        fk_results: dict[str, ForeignKeyResult] = {}
-        has_failures = False
-        has_warnings = False
-
-        for ref_key, ref_table in reference_tables.items():
-            # Parse reference: "local_col -> ref_table.ref_col"
-            parts = ref_key.split("->")
-            if len(parts) != 2:
-                continue
-
-            local_col = parts[0].strip()
-            ref_parts = parts[1].strip().split(".")
-            if len(ref_parts) != 2:
-                continue
-
-            ref_col = ref_parts[1]
-
-            if local_col not in df.columns:
-                continue
-
-            # Convert reference table to Polars if needed
-            if isinstance(ref_table, pa.Table):
-                ref_df: pl.DataFrame = pl.from_arrow(ref_table)  # type: ignore[assignment]
-            else:
-                ref_df = ref_table
-
-            if ref_col not in ref_df.columns:
-                continue
-
-            # Count references
-            local_values = df[local_col].drop_nulls()
-            ref_values = ref_df[ref_col].unique()
-
-            total_refs = len(local_values)
-            valid_refs = int(local_values.is_in(ref_values).sum())
-            orphans = total_refs - valid_refs
-
-            if orphans > 0:
-                if orphans / total_refs > 0.01:  # >1% orphans
-                    status = DQCheckStatus.FAIL
-                    has_failures = True
-                else:
-                    status = DQCheckStatus.WARN
-                    has_warnings = True
-            else:
-                status = DQCheckStatus.PASS
-
-            fk_results[ref_key] = ForeignKeyResult(
-                reference=ref_key,
-                total_references=total_refs,
-                valid_references=valid_refs,
-                orphan_records=orphans,
-                status=status,
-            )
-
-        overall_status = DQCheckStatus.PASS
-        if has_failures:
-            overall_status = DQCheckStatus.FAIL
-        elif has_warnings:
-            overall_status = DQCheckStatus.WARN
-
-        return ReferentialIntegrityResult(
-            foreign_keys=fk_results,
-            status=overall_status,
-        )
-
-    def _check_statistical_profile(
-        self, df: pl.DataFrame, baseline_stats: dict[str, Any] | None
-    ) -> StatisticalProfileResult:
-        """Compare statistics against baseline (MA30)."""
-        if not baseline_stats:
-            return StatisticalProfileResult(
-                baseline_period_days=30,
-                metrics={},
-                status=DQCheckStatus.PASS,
-            )
-
-        metrics: dict[str, StatisticalMetric] = {}
-
-        # Check null rate
-        if "null_rate_ma30" in baseline_stats:
-            total_nulls = sum(df[col].null_count() for col in df.columns)
-            total_cells = len(df) * len(df.columns)
-            current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
-            baseline_null_rate = baseline_stats["null_rate_ma30"]
-
-            ratio = (
-                current_null_rate / baseline_null_rate
-                if baseline_null_rate > 0
-                else 1.0
-            )
-
-            if ratio > self.NULL_RATE_CRITICAL_MULTIPLIER:
-                status = DQCheckStatus.FAIL
-            elif ratio > self.NULL_RATE_WARNING_MULTIPLIER:
-                status = DQCheckStatus.WARN
-            else:
-                status = DQCheckStatus.PASS
-
-            metrics["null_rate_avg"] = StatisticalMetric(
-                current=round(current_null_rate, 4),
-                baseline=round(baseline_null_rate, 4),
-                ratio=round(ratio, 4),
-                threshold_warning=self.NULL_RATE_WARNING_MULTIPLIER,
-                threshold_critical=self.NULL_RATE_CRITICAL_MULTIPLIER,
-                status=status,
-            )
-
-        # Check record count
-        if "record_count_ma30" in baseline_stats:
-            current_count = len(df)
-            baseline_count = baseline_stats["record_count_ma30"]
-
-            ratio = current_count / baseline_count if baseline_count > 0 else 1.0
-
-            if ratio < self.RECORD_COUNT_CRITICAL_THRESHOLD:
-                status = DQCheckStatus.FAIL
-            elif ratio < self.RECORD_COUNT_WARNING_THRESHOLD:
-                status = DQCheckStatus.WARN
-            else:
-                status = DQCheckStatus.PASS
-
-            metrics["record_count_daily"] = StatisticalMetric(
-                current=float(current_count),
-                baseline=float(baseline_count),
-                ratio=round(ratio, 4),
-                threshold_warning=self.RECORD_COUNT_WARNING_THRESHOLD,
-                threshold_critical=self.RECORD_COUNT_CRITICAL_THRESHOLD,
-                status=status,
-            )
-
-        overall_status = DQCheckStatus.PASS
-        for metric in metrics.values():
-            if metric.status == DQCheckStatus.FAIL:
-                overall_status = DQCheckStatus.FAIL
-                break
-            elif metric.status == DQCheckStatus.WARN:
-                overall_status = DQCheckStatus.WARN
-
-        return StatisticalProfileResult(
-            baseline_period_days=30,
-            metrics=metrics,
-            status=overall_status,
-        )
-
-    def _check_anomaly_detection(
-        self, df: pl.DataFrame, baseline_stats: dict[str, Any] | None
-    ) -> AnomalyDetectionResult:
-        """Detect anomalies using baseline comparison."""
-        cold_start_days = 30
-        current_day = baseline_stats.get("days_since_start", 0) if baseline_stats else 0
-        cold_start_mode = current_day < cold_start_days
-
-        if cold_start_mode or not baseline_stats:
-            return AnomalyDetectionResult(
-                cold_start_days=cold_start_days,
-                current_day=current_day,
-                cold_start_mode=True,
-                anomalies_detected=(),
-                metrics_monitored=(),
-                status=DQCheckStatus.PASS,
-            )
-
-        anomalies = []
-        metrics_monitored = []
-
-        # Check null rate anomaly
-        total_nulls = sum(df[col].null_count() for col in df.columns)
-        total_cells = len(df) * len(df.columns)
-        current_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
-        baseline_null_rate = baseline_stats.get("null_rate_ma30", current_null_rate)
-
-        null_zscore = (
-            (current_null_rate - baseline_null_rate) / baseline_null_rate
-            if baseline_null_rate > 0
-            else 0.0
-        )
-
-        if abs(null_zscore) > 3:
-            anomalies.append("null_rate")
-            null_status = "anomaly"
-        else:
-            null_status = "normal"
-
-        metrics_monitored.append(
-            AnomalyMetric(
-                metric="null_rate",
-                current_value=round(current_null_rate, 4),
-                baseline_value=round(baseline_null_rate, 4),
-                zscore=round(null_zscore, 2),
-                status=null_status,
-            )
-        )
-
-        # Check record count anomaly
-        current_count = float(len(df))
-        baseline_count = baseline_stats.get("record_count_ma30", current_count)
-        count_zscore = (
-            (current_count - baseline_count) / baseline_count
-            if baseline_count > 0
-            else 0.0
-        )
-
-        if abs(count_zscore) > 3:
-            anomalies.append("record_count")
-            count_status = "anomaly"
-        else:
-            count_status = "normal"
-
-        metrics_monitored.append(
-            AnomalyMetric(
-                metric="record_count",
-                current_value=current_count,
-                baseline_value=baseline_count,
-                zscore=round(count_zscore, 2),
-                status=count_status,
-            )
-        )
-
-        status = DQCheckStatus.WARN if anomalies else DQCheckStatus.PASS
-
-        return AnomalyDetectionResult(
-            cold_start_days=cold_start_days,
-            current_day=current_day,
-            cold_start_mode=False,
-            anomalies_detected=tuple(anomalies),
-            metrics_monitored=tuple(metrics_monitored),
-            status=status,
-        )
-
-    def _check_scd_integrity(
-        self, df: pl.DataFrame, scd_config: dict[str, Any] | None
-    ) -> SCDIntegrityResult:
-        """Check SCD (Slowly Changing Dimension) integrity."""
-        if not scd_config:
-            return SCDIntegrityResult(
-                scd_type=2,
-                total_entities=len(df),
-                entities_with_history=0,
-                avg_versions_per_entity=1.0,
-                version_gaps=0,
-                temporal_conflicts=0,
-                overlapping_validity_periods=0,
-                status=DQCheckStatus.PASS,
-            )
-
-        scd_type = scd_config.get("type", 2)
-        entity_key = scd_config.get("entity_key")
-        valid_from = scd_config.get("valid_from_col", "_valid_from")
-        valid_to = scd_config.get("valid_to_col", "_valid_to")
-
-        if not entity_key or entity_key not in df.columns:
-            return SCDIntegrityResult(
-                scd_type=scd_type,
-                total_entities=len(df),
-                entities_with_history=0,
-                avg_versions_per_entity=1.0,
-                version_gaps=0,
-                temporal_conflicts=0,
-                overlapping_validity_periods=0,
-                status=DQCheckStatus.PASS,
-            )
-
-        # Count unique entities
-        unique_entities = df[entity_key].n_unique()
-        total_records = len(df)
-
-        # Entities with multiple versions
-        version_counts = df.group_by(entity_key).agg(pl.count().alias("versions"))
-        entities_with_history = int((version_counts["versions"] > 1).sum())
-        avg_versions = total_records / unique_entities if unique_entities > 0 else 1.0
-
-        # Check temporal integrity if columns exist
-        version_gaps = 0
-        temporal_conflicts = 0
-        overlapping = 0
-
-        if valid_from in df.columns and valid_to in df.columns:
-            # Check for overlapping validity periods
-            # This is a simplified check
-            try:
-                for entity in df[entity_key].unique().to_list()[:100]:  # Sample
-                    entity_records = df.filter(pl.col(entity_key) == entity).sort(
-                        valid_from
-                    )
-                    if len(entity_records) > 1:
-                        # Check for overlaps
-                        for i in range(len(entity_records) - 1):
-                            current_to = entity_records[valid_to][i]
-                            next_from = entity_records[valid_from][i + 1]
-                            if (
-                                current_to is not None
-                                and next_from is not None
-                                and current_to > next_from
-                            ):
-                                overlapping += 1
-            except Exception:
-                pass
-
-        status = DQCheckStatus.PASS if overlapping == 0 else DQCheckStatus.WARN
-
-        return SCDIntegrityResult(
-            scd_type=scd_type,
-            total_entities=unique_entities,
-            entities_with_history=entities_with_history,
-            avg_versions_per_entity=round(avg_versions, 2),
-            version_gaps=version_gaps,
-            temporal_conflicts=temporal_conflicts,
-            overlapping_validity_periods=overlapping,
-            status=status,
-        )
-
-    def _check_data_freshness(
-        self, df: pl.DataFrame, current_time: datetime
-    ) -> DataFreshnessResult:
-        """Check data freshness based on timestamp columns."""
-        # Try to find timestamp column
-        timestamp_cols = ["_updated_at", "updated_at", "_ingestion_ts", "created_at"]
-        max_ts = None
-
-        for col in timestamp_cols:
-            if col in df.columns:
-                try:
-                    col_max = df[col].max()
-                    if col_max is not None:
-                        if isinstance(col_max, datetime):
-                            max_ts = col_max
-                        break
-                except Exception:
-                    pass
-
-        if max_ts is None:
-            return DataFreshnessResult(
-                max_updated_at=None,
-                freshness_lag_seconds=0.0,
-                freshness_lag_hours=0.0,
-                status=DQCheckStatus.PASS,
-            )
-
-        # Calculate lag
-        lag_seconds = (current_time - max_ts).total_seconds()
-        lag_hours = lag_seconds / 3600
-
-        if lag_hours > self.FRESHNESS_CRITICAL_HOURS:
-            status = DQCheckStatus.FAIL
-        elif lag_hours > self.FRESHNESS_WARNING_HOURS:
-            status = DQCheckStatus.WARN
-        else:
-            status = DQCheckStatus.PASS
-
-        return DataFreshnessResult(
-            max_updated_at=max_ts,
-            freshness_lag_seconds=round(lag_seconds, 2),
-            freshness_lag_hours=round(lag_hours, 2),
-            status=status,
         )
 
 
@@ -26394,12 +29366,12 @@ from typing import Any
 import polars as pl
 import pyarrow as pa
 
-from bioetl.application.services.dq.utils import (
+from bioetl.application.services.dq.dq_report_builders import (
     build_summary,
-    result_to_dict,
     update_counts,
 )
 from bioetl.domain.ports import SilverDQConfigPort
+from bioetl.domain.services.dq_serializer import to_dict
 from bioetl.domain.value_objects.dq_report import (
     CategoricalDistribution,
     ContentHashIntegrityResult,
@@ -26456,7 +29428,7 @@ class SilverDQAnalyzer:
             record_count_result = self._check_record_count(
                 df, input_record_count, quarantined_count
             )
-            checks["record_count"] = result_to_dict(record_count_result)
+            checks["record_count"] = to_dict(record_count_result)
             passed, failed, warnings = update_counts(
                 record_count_result.status, passed, failed, warnings
             )
@@ -26464,7 +29436,7 @@ class SilverDQAnalyzer:
         if SilverDQCheckType.NULL_RATE in enabled_checks:
             null_results, overall_rate = self._check_null_rates(df)
             checks["null_rate"] = {
-                "columns": {r.column_name: result_to_dict(r) for r in null_results},
+                "columns": {r.column_name: to_dict(r) for r in null_results},
                 "overall_null_rate": overall_rate,
                 "status": DQCheckStatus.PASS.value,
             }
@@ -26472,14 +29444,14 @@ class SilverDQAnalyzer:
 
         if SilverDQCheckType.UNIQUENESS in enabled_checks:
             uniqueness_result = self._check_uniqueness(df, primary_keys)
-            checks["uniqueness"] = result_to_dict(uniqueness_result)
+            checks["uniqueness"] = to_dict(uniqueness_result)
             passed, failed, warnings = update_counts(
                 uniqueness_result.status, passed, failed, warnings
             )
 
         if SilverDQCheckType.TYPE_CONFORMANCE in enabled_checks:
             conformance_result = self._check_type_conformance(df)
-            checks["type_conformance"] = result_to_dict(conformance_result)
+            checks["type_conformance"] = to_dict(conformance_result)
             passed, failed, warnings = update_counts(
                 conformance_result.status, passed, failed, warnings
             )
@@ -26493,7 +29465,7 @@ class SilverDQAnalyzer:
 
         if SilverDQCheckType.SCHEMA_DRIFT in enabled_checks:
             drift_result = self._check_schema_drift(df, previous_schema)
-            checks["schema_drift"] = result_to_dict(drift_result)
+            checks["schema_drift"] = to_dict(drift_result)
             passed, failed, warnings = update_counts(
                 drift_result.status, passed, failed, warnings
             )
@@ -26502,14 +29474,14 @@ class SilverDQAnalyzer:
             dedup_result = self._check_deduplication(
                 df, primary_keys, input_record_count or len(df)
             )
-            checks["deduplication_stats"] = result_to_dict(dedup_result)
+            checks["deduplication_stats"] = to_dict(dedup_result)
             passed, failed, warnings = update_counts(
                 dedup_result.status, passed, failed, warnings
             )
 
         if SilverDQCheckType.CONTENT_HASH_INTEGRITY in enabled_checks:
             hash_result = self._check_content_hash_integrity(df)
-            checks["content_hash_integrity"] = result_to_dict(hash_result)
+            checks["content_hash_integrity"] = to_dict(hash_result)
             passed, failed, warnings = update_counts(
                 hash_result.status, passed, failed, warnings
             )
@@ -26735,6 +29707,8 @@ class SilverDQAnalyzer:
                     else 0.0,
                 }
             except Exception:
+                # Catch all: cardinality calculation may fail for unhashable types
+                # or invalid column access. Skip column from cardinality metrics.
                 pass
 
         status = DQCheckStatus.PASS if duplicate_rate == 0 else DQCheckStatus.WARN
@@ -26798,6 +29772,8 @@ class SilverDQAnalyzer:
                             else None,
                         )
                 except Exception:
+                    # Catch all: numeric stats may fail for mixed types, NaN/Inf,
+                    # or non-numeric data in numeric column. Skip column profiling.
                     pass
 
             elif dtype in (pl.Utf8, pl.Categorical):
@@ -26820,6 +29796,8 @@ class SilverDQAnalyzer:
                         cardinality=cardinality,
                     )
                 except Exception:
+                    # Catch all: value_counts() may fail for unhashable types or
+                    # large cardinality. Skip column from categorical profiling.
                     pass
 
         return ValueDistributionResult(
@@ -26937,7 +29915,7 @@ class SilverDQAnalyzer:
         }
 
         for col, numeric_dist in result.numeric_columns.items():
-            output["numeric_columns"][col] = result_to_dict(numeric_dist)
+            output["numeric_columns"][col] = to_dict(numeric_dist)
 
         for col, categorical_dist in result.categorical_columns.items():
             output["categorical_columns"][col] = {
@@ -26951,149 +29929,29 @@ class SilverDQAnalyzer:
 __all__ = ["SilverDQAnalyzer"]
 
 ================================================================================
-File: utils.py
-Path: services\dq\utils.py
-================================================================================
-"""Common utilities for DQ analyzers.
-
-Provides shared functions used by Bronze, Silver, and Gold DQ analyzers.
-Extracted to reduce code duplication per refactoring analysis 2026-01-25.
-"""
-
-from __future__ import annotations
-
-from datetime import datetime
-from typing import Any
-
-from bioetl.domain.value_objects.dq_report import (
-    DQCheckStatus,
-    DQReportStatus,
-    DQReportSummary,
-)
-
-
-def update_counts(
-    status: DQCheckStatus,
-    passed: int,
-    failed: int,
-    warnings: int,
-) -> tuple[int, int, int]:
-    """Update check counts based on status.
-
-    Args:
-        status: Result status of the check.
-        passed: Current count of passed checks.
-        failed: Current count of failed checks.
-        warnings: Current count of warning checks.
-
-    Returns:
-        Updated tuple of (passed, failed, warnings).
-    """
-    if status == DQCheckStatus.PASS:
-        return passed + 1, failed, warnings
-    if status == DQCheckStatus.FAIL:
-        return passed, failed + 1, warnings
-    return passed, failed, warnings + 1
-
-
-def convert_value(value: Any) -> Any:
-    """Convert a value to serializable format.
-
-    Handles nested dataclasses, enums, datetimes, and collections.
-
-    Args:
-        value: Any value to convert.
-
-    Returns:
-        JSON-serializable value.
-    """
-    if hasattr(value, "value"):  # Enum
-        return value.value
-    if hasattr(value, "__dataclass_fields__"):
-        return result_to_dict(value)
-    if isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, (list, tuple)):
-        return [convert_value(v) for v in value]
-    if isinstance(value, dict):
-        return {k: convert_value(v) for k, v in value.items()}
-    return value
-
-
-def result_to_dict(result: Any) -> dict[str, Any]:
-    """Convert dataclass result to dict for serialization.
-
-    Args:
-        result: Dataclass result object.
-
-    Returns:
-        Dictionary representation suitable for JSON serialization.
-    """
-    if hasattr(result, "__dataclass_fields__"):
-        return {
-            field: convert_value(getattr(result, field))
-            for field in result.__dataclass_fields__
-            if not field.startswith("_")
-        }
-    return {"value": result}
-
-
-def build_summary(
-    passed: int,
-    failed: int,
-    warnings: int,
-    threshold_status: DQCheckStatus | None = None,
-) -> DQReportSummary:
-    """Build DQ report summary with overall status.
-
-    Args:
-        passed: Number of passed checks.
-        failed: Number of failed checks.
-        warnings: Number of warning checks.
-        threshold_status: Optional status from threshold calculation
-            (used by Silver analyzer).
-
-    Returns:
-        DQReportSummary with overall status.
-    """
-    if failed > 0 or (threshold_status == DQCheckStatus.FAIL):
-        overall_status = DQReportStatus.FAIL
-    elif warnings > 0 or (threshold_status == DQCheckStatus.WARN):
-        overall_status = DQReportStatus.WARNING
-    else:
-        overall_status = DQReportStatus.PASS
-
-    return DQReportSummary(
-        total_checks=passed + failed + warnings,
-        passed=passed,
-        failed=failed,
-        warnings=warnings,
-        overall_status=overall_status,
-    )
-
-
-__all__ = [
-    "build_summary",
-    "convert_value",
-    "result_to_dict",
-    "update_counts",
-]
-
-================================================================================
 File: dq_metrics_calculator.py
 Path: services\dq_metrics_calculator.py
 ================================================================================
 """Re-export DQMetricsCalculator from domain layer.
 
-This module re-exports DQMetricsCalculator and DQMetricsInput from the domain
-layer for backward compatibility. The actual implementation has been moved to
-bioetl.domain.services.dq_metrics_calculator to fix architecture violations
-(infrastructure layer cannot import from application layer).
+.. deprecated::
+    This module re-exports DQMetricsCalculator and DQMetricsInput from the domain
+    layer for backward compatibility. The actual implementation has been moved to
+    ``bioetl.domain.services.dq_metrics_calculator``.
 
-New code should import directly from bioetl.domain.services.
+    New code should import directly from ``bioetl.domain.services``.
 """
 
-from bioetl.domain.services.dq_metrics_calculator import (
+import warnings
+
+warnings.warn(
+    "bioetl.application.services.dq_metrics_calculator is deprecated. "
+    "Import from bioetl.domain.services instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
+from bioetl.domain.services.dq_metrics_calculator import (  # noqa: E402
     DQMetricsCalculator,
     DQMetricsInput,
 )
@@ -29238,11 +32096,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
 from bioetl.domain.context import (
+    CachedBronzeContext,
     InputFilterContext,
     PipelineRunContext,
     VacuumConfig,
@@ -29258,7 +32117,7 @@ if TYPE_CHECKING:
     )
 
 
-class RunStatus(str, Enum):
+class RunStatus(StrEnum):
     """Pipeline run completion status.
 
     Attributes:
@@ -29353,10 +32212,17 @@ class RunOptions:
         filter_column: Column name in CSV containing filter IDs.
         filter_field: API field name to filter by.
         filter_ids: Direct filter IDs (e.g., DOIs) without CSV file.
+        multi_filter_ids: Multi-field filter IDs for AND-logic filtering.
+            Maps field name to list of IDs. Used for composite dependencies
+            that need to filter by multiple fields simultaneously.
         vacuum_after_run: Enable automatic VACUUM after successful run.
         vacuum_retention_days: Minimum age of files to remove during VACUUM.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
         ignore_yaml_filter: Ignore input_filter from YAML config (for composite mode).
+        skip_gold: Skip Gold layer writing (for composite sub-pipelines).
+        use_cached_bronze: Load data from cached Bronze layer instead of API.
+        cached_bronze_path: Explicit path to Bronze cache directory.
+        cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD format).
     """
 
     run_type: str = "incremental"
@@ -29367,12 +32233,20 @@ class RunOptions:
     filter_column: str | None = None
     filter_field: str | None = None
     filter_ids: tuple[str, ...] | None = None  # Direct filter IDs (no CSV)
+    multi_filter_ids: dict[str, tuple[str, ...]] | None = (
+        None  # Multi-field (AND logic)
+    )
     fallback_column: str | None = None  # Column name for fallback search (CSV mode)
     fallback_mapping: dict[str, str] | None = None  # Direct mapping (composite mode)
     vacuum_after_run: bool | None = None
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
+    skip_gold: bool = False  # Skip Gold layer writing (composite sub-pipelines)
+    # Cached Bronze mode options
+    use_cached_bronze: bool = True
+    cached_bronze_path: str | None = None
+    cached_bronze_date: str | None = None  # YYYY-MM-DD format
 
 
 class PipelineNotFoundError(ValueError):
@@ -29578,6 +32452,15 @@ class PipelineRunnerService:
             retention_days=options.vacuum_retention_days or 7,
         )
 
+        # Build CachedBronzeContext
+        if options.use_cached_bronze:
+            cached_bronze = CachedBronzeContext.from_options(
+                path=options.cached_bronze_path,
+                date=options.cached_bronze_date,
+            )
+        else:
+            cached_bronze = CachedBronzeContext.disabled()
+
         return PipelineRunContext(
             pipeline_name=pipeline_name,
             run_id=run_id,
@@ -29588,6 +32471,7 @@ class PipelineRunnerService:
             input_filter=input_filter,
             vacuum=vacuum,
             log_level=options.log_level,
+            cached_bronze=cached_bronze,
         )
 
     async def _execute_pipeline(

@@ -68,7 +68,7 @@ interactions:
     uri: https://rest.uniprot.org/idmapping/results/test_job_001
   response:
     body:
-      string: '{"results":[{"from":"CHEMBL204","to":{"primaryAccession":"P00742"}}]}'
+      string: '{"results":[{"from":"CHEMBL204","to":{"primaryAccession":"P00742","uniProtkbId":"FA10_HUMAN","entryType":"UniProtKB reviewed (Swiss-Prot)","organism":{"scientificName":"Homo sapiens","commonName":"Human","taxonId":9606},"proteinDescription":{"recommendedName":{"fullName":{"value":"Coagulation factor X"}}},"genes":[{"geneName":{"value":"F10"}}],"sequence":{"length":488,"molWeight":54724},"annotationScore":5}}]}'
     headers:
       content-type:
       - application/json

@@ -10,11 +10,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
 from bioetl.domain.context import (
+    CachedBronzeContext,
     InputFilterContext,
     PipelineRunContext,
     VacuumConfig,
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
     )
 
 
-class RunStatus(str, Enum):
+class PipelineRunResult(StrEnum):
     """Pipeline run completion status.
 
     Attributes:
@@ -71,13 +72,13 @@ class RunResult:
 
     Example:
         >>> result = await service.run("chembl_activity")
-        >>> if result.status == RunStatus.SUCCESS:
+        >>> if result.status == PipelineRunResult.SUCCESS:
         ...     logger.info("pipeline_success", records_silver=result.records_silver)
-        >>> elif result.status == RunStatus.FAILED:
+        >>> elif result.status == PipelineRunResult.FAILED:
         ...     logger.error("pipeline_failed", error_message=result.error_message)
     """
 
-    status: RunStatus
+    status: PipelineRunResult
     pipeline_name: str
     run_id: str
     run_type: str
@@ -106,7 +107,7 @@ class RunResult:
     @property
     def is_success(self) -> bool:
         """Check if run was successful (or dry_run)."""
-        return self.status in (RunStatus.SUCCESS, RunStatus.DRY_RUN)
+        return self.status in (PipelineRunResult.SUCCESS, PipelineRunResult.DRY_RUN)
 
 
 @dataclass(frozen=True)
@@ -125,10 +126,17 @@ class RunOptions:
         filter_column: Column name in CSV containing filter IDs.
         filter_field: API field name to filter by.
         filter_ids: Direct filter IDs (e.g., DOIs) without CSV file.
+        multi_filter_ids: Multi-field filter IDs for AND-logic filtering.
+            Maps field name to list of IDs. Used for composite dependencies
+            that need to filter by multiple fields simultaneously.
         vacuum_after_run: Enable automatic VACUUM after successful run.
         vacuum_retention_days: Minimum age of files to remove during VACUUM.
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
         ignore_yaml_filter: Ignore input_filter from YAML config (for composite mode).
+        skip_gold: Skip Gold layer writing (for composite sub-pipelines).
+        use_cached_bronze: Load data from cached Bronze layer instead of API.
+        cached_bronze_path: Explicit path to Bronze cache directory.
+        cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD format).
     """
 
     run_type: str = "incremental"
@@ -139,12 +147,20 @@ class RunOptions:
     filter_column: str | None = None
     filter_field: str | None = None
     filter_ids: tuple[str, ...] | None = None  # Direct filter IDs (no CSV)
+    multi_filter_ids: dict[str, tuple[str, ...]] | None = (
+        None  # Multi-field (AND logic)
+    )
     fallback_column: str | None = None  # Column name for fallback search (CSV mode)
     fallback_mapping: dict[str, str] | None = None  # Direct mapping (composite mode)
     vacuum_after_run: bool | None = None
     vacuum_retention_days: int | None = None
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
+    skip_gold: bool = False  # Skip Gold layer writing (composite sub-pipelines)
+    # Cached Bronze mode options
+    use_cached_bronze: bool = True
+    cached_bronze_path: str | None = None
+    cached_bronze_date: str | None = None  # YYYY-MM-DD format
 
 
 class PipelineNotFoundError(ValueError):
@@ -216,7 +232,7 @@ class PipelineRunnerService:
 
         Example:
             >>> result = await service.run("chembl_activity", dry_run=True)
-            >>> if result.status == RunStatus.DRY_RUN:
+            >>> if result.status == PipelineRunResult.DRY_RUN:
             ...     logger.info("dry_run_complete", pipeline="chembl_activity")
         """
         started_at = datetime.now(tz=UTC)
@@ -249,7 +265,7 @@ class PipelineRunnerService:
                 run_id=str(effective_run_id),
             )
             return RunResult(
-                status=RunStatus.DRY_RUN,
+                status=PipelineRunResult.DRY_RUN,
                 pipeline_name=pipeline_name,
                 run_id=str(effective_run_id),
                 run_type=effective_options.run_type,
@@ -350,6 +366,15 @@ class PipelineRunnerService:
             retention_days=options.vacuum_retention_days or 7,
         )
 
+        # Build CachedBronzeContext
+        if options.use_cached_bronze:
+            cached_bronze = CachedBronzeContext.from_options(
+                path=options.cached_bronze_path,
+                date=options.cached_bronze_date,
+            )
+        else:
+            cached_bronze = CachedBronzeContext.disabled()
+
         return PipelineRunContext(
             pipeline_name=pipeline_name,
             run_id=run_id,
@@ -360,6 +385,7 @@ class PipelineRunnerService:
             input_filter=input_filter,
             vacuum=vacuum,
             log_level=options.log_level,
+            cached_bronze=cached_bronze,
         )
 
     async def _execute_pipeline(
@@ -387,7 +413,7 @@ class PipelineRunnerService:
         # -> application/core/shutdown.py -> application/services/shutdown_service.py
         from bioetl.application.core.shutdown import PipelineShutdownError
 
-        status = RunStatus.SUCCESS
+        status = PipelineRunResult.SUCCESS
         error_message: str | None = None
         error_type: str | None = None
 
@@ -399,14 +425,14 @@ class PipelineRunnerService:
                 run_id=str(run_id),
             )
         except PipelineShutdownError:
-            status = RunStatus.SHUTDOWN
+            status = PipelineRunResult.SHUTDOWN
             self.logger.warning(
                 "Pipeline was gracefully shut down",
                 pipeline=pipeline_name,
                 run_id=str(run_id),
             )
         except Exception as e:
-            status = RunStatus.FAILED
+            status = PipelineRunResult.FAILED
             error_message = str(e)
             error_type = type(e).__name__
             self.logger.exception(

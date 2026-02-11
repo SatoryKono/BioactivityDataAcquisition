@@ -10,11 +10,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
+from bioetl.domain.types import DriftLevel
 
-class DQReportFormat(str, Enum):
+
+class DQReportFormat(StrEnum):
     """Output format for DQ reports."""
 
     JSON = "json"
@@ -22,7 +24,7 @@ class DQReportFormat(str, Enum):
     HTML = "html"
 
 
-class DQCheckStatus(str, Enum):
+class DQCheckStatus(StrEnum):
     """Status of individual DQ check."""
 
     PASS = "pass"
@@ -30,7 +32,7 @@ class DQCheckStatus(str, Enum):
     FAIL = "fail"
 
 
-class DQReportStatus(str, Enum):
+class DQReportStatus(StrEnum):
     """Overall status of DQ report."""
 
     PASS = "pass"
@@ -38,15 +40,7 @@ class DQReportStatus(str, Enum):
     FAIL = "fail"
 
 
-class DriftLevel(str, Enum):
-    """Schema drift severity level."""
-
-    INFO = "info"
-    WARN = "warn"
-    CRITICAL = "critical"
-
-
-class MedallionLayer(str, Enum):
+class MedallionLayer(StrEnum):
     """Medallion architecture layer."""
 
     BRONZE = "bronze"
@@ -59,7 +53,7 @@ class MedallionLayer(str, Enum):
 # =============================================================================
 
 
-class BronzeDQCheckType(str, Enum):
+class BronzeDQCheckType(StrEnum):
     """Types of DQ checks for Bronze layer."""
 
     RECORD_COUNT = "record_count"
@@ -74,7 +68,7 @@ class BronzeDQCheckType(str, Enum):
 # =============================================================================
 
 
-class SilverDQCheckType(str, Enum):
+class SilverDQCheckType(StrEnum):
     """Types of DQ checks for Silver layer."""
 
     RECORD_COUNT = "record_count"
@@ -92,7 +86,7 @@ class SilverDQCheckType(str, Enum):
 # =============================================================================
 
 
-class GoldDQCheckType(str, Enum):
+class GoldDQCheckType(StrEnum):
     """Types of DQ checks for Gold layer."""
 
     RECORD_COUNT = "record_count"

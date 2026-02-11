@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
@@ -35,6 +36,7 @@ class PipelineFactoryProtocol(Protocol):
 
     pipeline_name: str
     silver_schema: pa.Schema | None
+    pandera_silver_schema: Any
 
     def create_with_services(
         self,
@@ -47,6 +49,7 @@ class PipelineFactoryProtocol(Protocol):
         tracer: TracingPort | None = ...,
         dq_monitor: DQMonitorPort | None = ...,
         metrics: MetricsPort | None = ...,
+        cached_bronze: CachedBronzeContext | None = ...,
     ) -> BasePipeline:
         """Create pipeline with services."""
         ...
@@ -59,6 +62,7 @@ class PipelineFactoryProtocol(Protocol):
         observability: ObservabilityBundle,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
         """Create pipeline runner."""
         ...
@@ -75,6 +79,9 @@ class PipelineDefinition(NamedTuple):
 
     gold_schema: Any
     """Pandera schema for Gold layer validation (required)."""
+
+    pandera_silver_schema: Any = None
+    """Pandera DataFrameModel class for Silver layer validation."""
 
 
 class PipelineRegistry:
@@ -133,6 +140,7 @@ class PipelineRegistry:
                 factory=factory,
                 silver_schema=factory.silver_schema,
                 gold_schema=gold_schema,
+                pandera_silver_schema=getattr(factory, "pandera_silver_schema", None),
             )
 
     def get(self, pipeline_name: str) -> PipelineDefinition:
@@ -211,6 +219,7 @@ class PipelineRegistry:
                 factory=value,
                 silver_schema=value.silver_schema,
                 gold_schema=gold_schema,
+                pandera_silver_schema=getattr(value, "pandera_silver_schema", None),
             )
 
     def list_keys(self) -> list[str]:

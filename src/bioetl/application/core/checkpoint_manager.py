@@ -58,13 +58,15 @@ class CheckpointManager:
         self._run_id = run_id
         self._resume = resume
         self._force_full_scan = force_full_scan
-        # Resolve loading_strategy: explicit value takes precedence
+        # Resolve loading_strategy: explicit value takes precedence, then force_full_scan
         if loading_strategy is not None:
-            self._loading_strategy = loading_strategy
-        else:
+            self._loading_strategy: LoadingStrategy | None = loading_strategy
+        elif force_full_scan:
             self._loading_strategy = LoadingStrategy.from_force_full_scan(
                 force_full_scan
             )
+        else:
+            self._loading_strategy = None
 
     async def load_checkpoint(self) -> dict[str, Any] | None:
         """Load checkpoint if resuming.
@@ -79,7 +81,11 @@ class CheckpointManager:
 
         """
         # Block resume for FULL_SCAN_ONLY loading strategy (ADR-030, ADR-031)
-        if self._resume and not self._loading_strategy.allows_checkpoint_resume:
+        if (
+            self._resume
+            and self._loading_strategy is not None
+            and not self._loading_strategy.allows_checkpoint_resume
+        ):
             self._logger.warning(
                 "Checkpoint resume blocked for full_scan_only pipeline. "
                 "Each run performs a full scan; deduplication via content_hash on Silver. "

@@ -1,4 +1,4 @@
-column_groups_file: ../../data_schema/chembl/activity.yaml
+data_schema_file: ../../data_schema/chembl/activity.yaml
 # configs/pipelines/chembl/activity.yaml
 # =============================================================================
 # ChEMBL Activity Pipeline Configuration
@@ -25,6 +25,18 @@ description: "Extract biological activity records from ChEMBL API"
 primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
+
+# -----------------------------------------------------------------------------
+# Sink Configuration (ADR-014, ADR-025)
+# -----------------------------------------------------------------------------
+sink:
+  silver:
+    primary_key: ["activity_id"]
+    sort_by:
+      columns: ["activity_id"]
+  gold:
+    sort_by:
+      columns: ["activity_id"]
 
 # -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)

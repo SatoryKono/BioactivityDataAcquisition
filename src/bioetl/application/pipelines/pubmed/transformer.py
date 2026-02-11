@@ -22,7 +22,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     RawAuthor,
     StructuredAffiliation,
 )
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.services import IdentityService
@@ -75,6 +75,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -87,6 +88,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -98,6 +100,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -352,7 +355,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             **self._extract_counts(article, pubmed_data),
             "language": get_text(article.find(".//Language")),
             "_source": "pubmed",
-            "publication_type": "PUBLICATION",
+            **self._build_pubmed_classification(
+                ClassificationExtractor.parse_publication_types(article),
+            ),
             "citations_received": None,
             "is_oa": None,
             "_lookup_method": cast("dict[str, Any]", record).get(
@@ -362,6 +367,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "_dq_warn": False,
             "_dq_error": False,
         }
+
+    def _build_pubmed_classification(
+        self, pub_types: list[str]
+    ) -> dict[str, str | None]:
+        """Build publication_type and classification fields for PubMed.
+
+        Joins raw types with ``|`` for the raw ``publication_type`` field,
+        then uses the unified classifier to pick the most specific match.
+
+        Args:
+            pub_types: List of raw publication type strings from XML.
+
+        Returns:
+            Dict with publication_type and the 3 classification fields.
+
+        """
+        raw_type = "|".join(pub_types) if pub_types else None
+        classification = self._classify_publication_type(
+            "pubmed",
+            raw_types_list=pub_types,
+        )
+        return {"publication_type": raw_type, **classification}
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
@@ -556,7 +583,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Priority 2: pub_date (may be partial, normalize it)
         if pub_date:
-            return self._normalize_partial_date(pub_date)
+            return self._data_normalizer.normalize_partial_date(pub_date)
 
         # Priority 3: Construct from year (end of year)
         if year:
@@ -640,8 +667,12 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
 
-        year_vo = PublicationYear.from_raw(raw_year)
-        validated_year = year_vo.value if year_vo else None
+        _validated_year = self.validate_value_object(
+            PublicationYear, raw_year, as_string=False
+        )
+        validated_year: int | None = (
+            int(_validated_year) if _validated_year is not None else None
+        )
 
         raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
 
@@ -703,6 +734,5 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("revised_date", None)
         silver_record.pop("accepted_date", None)
         silver_record.pop("citations_received", None)
-        silver_record.pop("is_oa", None)
 
         return silver_record

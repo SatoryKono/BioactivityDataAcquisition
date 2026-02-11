@@ -100,20 +100,52 @@ class DependencyConfig:
     - Derived entities that need full API data (e.g., publication_term from /document)
     - Pipelines with force_full_scan that don't work with enricher filtering
     - Data that must be pre-populated before enrichment phase
+    - Chained dependencies where one dependency provides keys for another
 
     Attributes:
         pipeline: Name of the dependency pipeline (e.g., "chembl_publication_term").
-        join_keys: Keys to extract from seed for filtering API calls.
+        join_keys: Keys to extract for filtering API calls.
             Used to limit the scope of data fetched from the API.
+            For chained dependencies, these are column names in key_source table.
         required: If True, failure causes composite failure.
         timeout_seconds: Maximum time for dependency execution.
         silver_table: Path to dependency's Silver table.
+        key_source: Source of join keys. Options:
+            - None or "seed": Use keys from seed pipeline (default)
+            - Pipeline name: Read keys from that dependency's Silver table
+            This enables chained dependencies where one populates data
+            that provides keys for the next.
+        filter_field: Field name to use when filtering the target API.
+            If None, uses the first join_key. Useful when source column name
+            differs from target API field name (e.g., protein_classification_id
+            in source table vs protein_class_id in API).
+        filter_fields: Multiple field names for multi-field API filtering.
+            When set, ALL specified fields are passed as AND-filters to the API.
+            Example: ("molecule_chembl_id", "document_chembl_id") produces
+            ?molecule_chembl_id__in=...&document_chembl_id__in=...
+            Takes precedence over filter_field.
 
     Example:
+        >>> # Standard dependency using seed keys
         >>> config = DependencyConfig(
         ...     pipeline="chembl_publication_term",
         ...     join_keys=("document_chembl_id",),
         ...     silver_table="silver/chembl/publication_term",
+        ... )
+        >>> # Chained dependency with field mapping
+        >>> config = DependencyConfig(
+        ...     pipeline="chembl_protein_class",
+        ...     join_keys=("protein_classification_id",),  # Source column
+        ...     filter_field="protein_class_id",           # Target API field
+        ...     key_source="chembl_target_component",
+        ...     silver_table="silver/chembl/protein_class",
+        ... )
+        >>> # Dual-field filtering (compound_record by molecule + document)
+        >>> config = DependencyConfig(
+        ...     pipeline="chembl_compound_record",
+        ...     join_keys=("molecule_chembl_id", "document_chembl_id"),
+        ...     filter_fields=("molecule_chembl_id", "document_chembl_id"),
+        ...     silver_table="silver/chembl/compound_record",
         ... )
     """
 
@@ -122,11 +154,19 @@ class DependencyConfig:
     required: bool = False
     timeout_seconds: int = 600
     silver_table: str | None = None
+    key_source: str | None = None  # None = seed, or pipeline name for chained deps
+    filter_field: str | None = None  # API filter field (defaults to first join_key)
+    filter_fields: tuple[str, ...] | None = (
+        None  # Multi-field API filtering (AND logic)
+    )
+    key_filter: str | None = None  # SQL-like condition to filter key_source records
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.join_keys, list):
             object.__setattr__(self, "join_keys", tuple(self.join_keys))
+        if isinstance(self.filter_fields, list):
+            object.__setattr__(self, "filter_fields", tuple(self.filter_fields))
         self._validate()
 
     def _validate(self) -> None:
@@ -136,11 +176,38 @@ class DependencyConfig:
         _validate_positive(
             self.timeout_seconds, f"dependency {self.pipeline} timeout_seconds"
         )
+        if self.filter_fields and self.filter_field:
+            raise ValueError(
+                f"Dependency {self.pipeline}: filter_fields and filter_field "
+                "are mutually exclusive. Use filter_fields for multi-field filtering."
+            )
 
     @property
     def primary_join_key(self) -> str:
         """Get the primary (first) join key."""
         return self.join_keys[0]
+
+    @property
+    def uses_seed_keys(self) -> bool:
+        """Check if this dependency uses keys from seed (default behavior)."""
+        return self.key_source is None or self.key_source == "seed"
+
+    @property
+    def effective_filter_fields(self) -> tuple[str, ...]:
+        """Resolve effective filter fields.
+
+        Priority: filter_fields > filter_field > first join_key.
+        """
+        if self.filter_fields:
+            return self.filter_fields
+        if self.filter_field:
+            return (self.filter_field,)
+        return (self.join_keys[0],)
+
+    @property
+    def is_multi_field_filter(self) -> bool:
+        """Check if this dependency uses multi-field API filtering."""
+        return len(self.effective_filter_fields) > 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -482,6 +549,8 @@ class MergeConfig:
             Example: {"title": ["chembl", "crossref"]}
         field_mappings: Mapping to rename fields during merge.
             Example: {"crossref_title": "title"}
+        exclude_fields: Columns to drop from merged output.
+            Supports exact names and glob patterns.
         preserve_all_sources: If True, keep all provider-qualified columns
             for common fields instead of coalescing them. Default: False.
             When enabled, columns like chembl.publication.title and
@@ -504,6 +573,7 @@ class MergeConfig:
     field_priorities: dict[str, tuple[str, ...]] = field(default_factory=dict)
     field_mappings: dict[str, str] = field(default_factory=dict)
     column_groups: tuple[ColumnGroupConfig, ...] = ()
+    exclude_fields: tuple[str, ...] = ()
     preserve_all_sources: bool = False
 
     def __post_init__(self) -> None:
@@ -512,6 +582,7 @@ class MergeConfig:
         self._convert_conflict_resolution()
         self._convert_field_priorities()
         self._convert_column_groups()
+        self._convert_exclude_fields()
         self._validate()
 
     def _convert_strategy(self) -> None:
@@ -547,6 +618,11 @@ class MergeConfig:
                 for g in self.column_groups
             )
             object.__setattr__(self, "column_groups", converted)
+
+    def _convert_exclude_fields(self) -> None:
+        """Convert list of exclude_fields to tuple."""
+        if isinstance(self.exclude_fields, list):
+            object.__setattr__(self, "exclude_fields", tuple(self.exclude_fields))
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
@@ -766,8 +842,8 @@ class CompositeConfig:
             raise ValueError("composite name cannot be empty")
         if not self.version:
             raise ValueError("composite version cannot be empty")
-        if not self.enrichers:
-            raise ValueError("composite must have at least one enricher")
+        if not self.enrichers and not self.dependencies:
+            raise ValueError("composite must have at least one enricher or dependency")
         self._validate_join_keys()
         self._validate_dependency_join_keys()
         self._validate_unique_enrichers()
@@ -775,6 +851,8 @@ class CompositeConfig:
 
     def _validate_join_keys(self) -> None:
         """Validate that enricher join keys exist in seed output_keys."""
+        if not self.enrichers:
+            return  # Skip if no enrichers
         seed_keys = set(self.seed.output_keys)
         for enricher in self.enrichers:
             for key in enricher.join_keys:
@@ -786,15 +864,27 @@ class CompositeConfig:
 
     def _validate_unique_enrichers(self) -> None:
         """Validate that enricher pipeline names are unique."""
-        names = [e.pipeline for e in self.enrichers]
-        if len(names) != len(set(names)):
-            duplicates = [n for n in names if names.count(n) > 1]
-            raise ValueError(f"Duplicate enricher pipelines: {set(duplicates)}")
+        if not self.enrichers:
+            return  # Skip if no enrichers
+        seen: set[str] = set()
+        duplicates: set[str] = set()
+        for e in self.enrichers:
+            (duplicates if e.pipeline in seen else seen).add(e.pipeline)
+        if duplicates:
+            raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
 
     def _validate_dependency_join_keys(self) -> None:
-        """Validate that dependency join keys exist in seed output_keys."""
+        """Validate that dependency join keys exist in seed output_keys.
+
+        For chained dependencies (key_source != None and != "seed"),
+        join_keys are taken from the key_source's Silver table,
+        so they are NOT validated against seed output_keys.
+        """
         seed_keys = set(self.seed.output_keys)
         for dep in self.dependencies:
+            # Skip validation for chained dependencies
+            if not dep.uses_seed_keys:
+                continue
             for key in dep.join_keys:
                 if key not in seed_keys:
                     raise ValueError(
@@ -875,6 +965,11 @@ class CompositeConfig:
                     "required": d.required,
                     "timeout_seconds": d.timeout_seconds,
                     "silver_table": d.silver_table,
+                    **(
+                        {"filter_fields": list(d.filter_fields)}
+                        if d.filter_fields
+                        else {}
+                    ),
                 }
                 for d in self.dependencies
             ],

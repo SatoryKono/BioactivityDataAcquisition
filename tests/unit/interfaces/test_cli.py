@@ -283,10 +283,15 @@ class TestCliCommands:
         self, mock_asyncio_run, mock_register, cli_runner, mock_registry
     ):
         """Test that valid pipeline is executed."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (RunStatus.SUCCESS, None, None, "test-run-id")
+        mock_asyncio_run.return_value = (
+            PipelineRunResult.SUCCESS,
+            None,
+            None,
+            "test-run-id",
+        )
 
         result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
@@ -306,11 +311,11 @@ class TestCliCommands:
         mock_registry,
     ):
         """Test that --limit is passed correctly."""
-        from bioetl.application.services import RunOptions, RunResult, RunStatus
+        from bioetl.application.services import RunOptions, RunResult, PipelineRunResult
 
         mock_service = MagicMock()
         mock_result = RunResult(
-            status=RunStatus.SUCCESS,
+            status=PipelineRunResult.SUCCESS,
             pipeline_name="chembl_activity",
             run_id="test-run-id",
             run_type="incremental",
@@ -324,7 +329,15 @@ class TestCliCommands:
             side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
         ):
             result = cli_runner.invoke(
-                cli, ["run", "--pipeline", "chembl_activity", "--limit", "100"]
+                cli,
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--limit",
+                    "100",
+                    "--no-health-server",
+                ],
             )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"
@@ -350,11 +363,11 @@ class TestCliCommands:
         mock_registry,
     ):
         """Test that --resume flag is passed correctly."""
-        from bioetl.application.services import RunOptions, RunResult, RunStatus
+        from bioetl.application.services import RunOptions, RunResult, PipelineRunResult
 
         mock_service = MagicMock()
         mock_result = RunResult(
-            status=RunStatus.SUCCESS,
+            status=PipelineRunResult.SUCCESS,
             pipeline_name="chembl_activity",
             run_id="test-run-id",
             run_type="incremental",
@@ -368,7 +381,14 @@ class TestCliCommands:
             side_effect=lambda coro: asyncio.new_event_loop().run_until_complete(coro),
         ):
             result = cli_runner.invoke(
-                cli, ["run", "--pipeline", "chembl_activity", "--resume"]
+                cli,
+                [
+                    "run",
+                    "--pipeline",
+                    "chembl_activity",
+                    "--resume",
+                    "--no-health-server",
+                ],
             )
 
         assert result.exit_code == 0, f"Command failed: {result.output}"

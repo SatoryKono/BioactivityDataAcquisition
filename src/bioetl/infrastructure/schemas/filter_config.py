@@ -16,17 +16,18 @@ Structure:
 Usage:
     >>> from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
     >>> config = FilterConfigFile.model_validate(yaml_data)
-    >>> input_filter, gold_filters = config.to_domain()
+    >>> input_filter, silver_filters, gold_filters, extraction_params = config.to_domain()
 """
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.domain.filtering import (
     InputFilterConfig as DomainInputFilterConfig,
 )
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
     BaseGoldColumnFilterConfig,
@@ -83,6 +84,30 @@ class InputFilterFileConfig(BaseInputFilterConfig):
         return super().to_domain()
 
 
+class SilverFiltersFileConfig(BaseGoldFiltersConfig):
+    """Silver filter configuration for domain-level quality gates.
+
+    Applied AFTER transformation but BEFORE writing to Silver layer.
+    Reuses the same filter engine as GoldFiltersFileConfig.
+
+    Attributes:
+        columns: Column value filters with operator support.
+        ranges: Numeric range filters.
+        list_lengths: List length filters.
+        list_contains: List contains filters.
+        required_fields: Required non-null fields.
+        exclude_if_present: Exclude if field has value.
+    """
+
+    def to_domain(self) -> GoldFilterConfig:
+        """Convert to domain GoldFilterConfig dataclass.
+
+        Returns:
+            GoldFilterConfig: Immutable domain filter configuration.
+        """
+        return super().to_domain()
+
+
 class GoldFiltersFileConfig(BaseGoldFiltersConfig):
     """Gold filter configuration for standalone filter files.
 
@@ -122,6 +147,7 @@ class FilterConfigFile(BaseModel):
         provider: Provider name (for provider/entity configs).
         entity: Entity name (for entity configs).
         input_filter: Input filtering configuration.
+        silver_filters: Silver layer domain-level filter configuration.
         gold_filters: Gold layer filter configuration.
     """
 
@@ -141,20 +167,55 @@ class FilterConfigFile(BaseModel):
         default_factory=InputFilterFileConfig,
         description="Input filtering configuration",
     )
+    silver_filters: SilverFiltersFileConfig = Field(
+        default_factory=SilverFiltersFileConfig,
+        description="Silver layer domain-level filter configuration",
+    )
     gold_filters: GoldFiltersFileConfig = Field(
         default_factory=GoldFiltersFileConfig,
         description="Gold layer filter configuration",
     )
+    extraction_params: dict[str, str | int | bool] = Field(
+        default_factory=dict,
+        description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
+    )
 
-    def to_domain(self) -> tuple[DomainInputFilterConfig, GoldFilterConfig]:
+    @field_validator("extraction_params")
+    @classmethod
+    def validate_extraction_params(
+        cls,
+        v: dict[str, str | int | bool],
+    ) -> dict[str, str | int | bool]:
+        """Validate extraction params keys and values."""
+        for key, value in v.items():
+            if not key or not isinstance(key, str):
+                raise ValueError(
+                    f"Extraction param key must be non-empty string, got: {key!r}"
+                )
+            if not isinstance(value, (str, int, bool)):
+                raise ValueError(
+                    f"Extraction param '{key}' value must be str|int|bool, "
+                    f"got {type(value).__name__}: {value!r}"
+                )
+        return v
+
+    def to_domain(
+        self,
+    ) -> tuple[
+        DomainInputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams
+    ]:
         """Convert to domain objects.
 
         Returns:
-            Tuple of (InputFilterConfig, GoldFilterConfig).
+            Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
+            ExtractionParams).  Silver and Gold filters both use GoldFilterConfig
+            as the domain type — only their YAML section differs.
         """
         return (
             self.input_filter.to_domain(),
+            self.silver_filters.to_domain(),
             self.gold_filters.to_domain(),
+            ExtractionParams(params=self.extraction_params),
         )
 
 
@@ -167,4 +228,5 @@ __all__ = [
     "GoldListLengthFilterConfig",
     "GoldRangeFilterConfig",
     "InputFilterFileConfig",
+    "SilverFiltersFileConfig",
 ]

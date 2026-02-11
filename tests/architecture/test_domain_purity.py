@@ -244,6 +244,7 @@ class TestDomainComplexity:
             "complete": 7,  # PipelineRun state transition with validation
             "_validate": 8,  # Value object validation with multiple checks
             "_validate_enabled_fields": 8,  # CC=7 - InputFilterConfig validation with multiple modes
+            "_validate_unique_enrichers": 7,  # CC=6 - CompositeConfig enricher uniqueness validation
             "PubMedId": 9,  # Value object with multiple format validation
             "PubChemCid": 9,  # Value object with multiple format validation
             # Domain services (activity aggregation, normalization)
@@ -275,6 +276,10 @@ class TestDomainComplexity:
             "_ensure_immutability": 7,  # CC=6 - Config immutability with nested type checks
             # Domain DataSchemaConfig/LayerColumnConfig validation
             "LayerColumnConfig": 10,  # CC=8 - LayerColumnConfig __post_init__ with mutual exclusivity + type coercion
+            # Publication type classification (domain taxonomy mapping)
+            "classify_publication_type": 10,  # CC=9 - Publication type classification with multi-level taxonomy lookup
+            # Page range abbreviation expansion (normalization)
+            "_expand_abbreviated_page": 7,  # CC=6 - Page range expansion with digit extraction and rollover
         }
 
         violations = []

@@ -134,7 +134,12 @@ class MemoryMonitor:
         return self._get_stats_estimate()
 
     def _get_stats_resource(self) -> MemoryStats:
-        """Get memory stats using resource module (Unix only)."""
+        """Get memory stats using resource module (Unix only).
+
+        Note:
+            This method is only called on Unix platforms (guarded by
+            sys.platform check in _get_stats_fallback).
+        """
         import resource
 
         # Get process memory usage (Unix-only attributes)

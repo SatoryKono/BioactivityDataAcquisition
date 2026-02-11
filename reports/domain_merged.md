@@ -29,7 +29,7 @@ from bioetl.domain import contracts
 from bioetl.domain import constants
 
 # Domain registry (publication entity mappings, ADR-024)
-from bioetl.domain import registry
+from bioetl.domain import registry  # noqa: F401
 from bioetl.domain.registry import (
     LEGACY_PUBLICATION_ALIASES,
     PUBLICATION_ENTITY_TYPES,
@@ -97,12 +97,17 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     PublicationRecord,
     # SemanticScholar
     SemanticScholarPublicationEntity,
+    SubcellularFraction,
     Target,
     TargetComponent,
     TargetComponentRecord,
     TargetRecord,
+    Tissue,
     UniprotTarget,
 )
+
+# Domain mapping (entity relation mappings)
+from bioetl.domain import mapping  # noqa: F401
 
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -117,6 +122,7 @@ from bioetl.domain.exceptions import (
     BioETLError,
     BronzeValidationError,
     BucketNotFoundError,
+    CachedBronzeEmptyError,
     CheckpointConflictError,
     CircuitBreakerOpenError,
     ConfigurationError,
@@ -157,6 +163,9 @@ from bioetl.domain.exceptions import (
     UploadError,
     ValidationError,
 )
+
+# Extraction filtering (ADR-028 §3)
+from bioetl.domain.models import ExtractionParams
 
 # Filter configuration
 from bioetl.domain.filtering import (
@@ -250,8 +259,6 @@ from bioetl.domain.ports import (
     TracingPort,
     UnitConverterPort,
     ValueValidatorPort,
-    WatermarkStrategyPort,
-    NoOpWatermarkStrategy,
 )
 
 # Resilience (domain value objects)
@@ -335,6 +342,10 @@ from bioetl.domain.value_objects import (
     UniProtId,
     ValueObject,
 )
+from bioetl.domain.value_objects.publication_field_groups import (
+    FIELD_TO_GROUP_MAPPING,
+    PublicationFieldGroup,
+)
 
 __all__ = [
     # Composite pipeline (subpackage)
@@ -343,17 +354,6 @@ __all__ = [
     "contracts",
     # Constants
     "constants",
-    # Registry (publication entity mappings, ADR-024)
-    "registry",
-    "LEGACY_PUBLICATION_ALIASES",
-    "PUBLICATION_ENTITY_TYPES",
-    "PublicationMapping",
-    "get_publication_mapping",
-    "is_legacy_publication_alias",
-    "is_publication_entity",
-    "validate_publication_entity_type",
-    # Contracts (Gold layer Pandera schemas)
-    "contracts",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
@@ -404,8 +404,10 @@ __all__ = [
     "PublicationEntityBase",
     # SemanticScholar
     "SemanticScholarPublicationEntity",
+    "SubcellularFraction",
     "Target",
     "TargetComponent",
+    "Tissue",
     "UniprotTarget",
     # Error classifier
     "ErrorClassifier",
@@ -416,6 +418,7 @@ __all__ = [
     "AuthFailureError",
     "BioETLError",
     "BronzeValidationError",
+    "CachedBronzeEmptyError",
     "CriticalError",
     "DataQualityError",
     "RecoverableError",
@@ -461,6 +464,8 @@ __all__ = [
     "InvalidDataFormatError",
     "MissingRequiredFieldError",
     "SchemaViolationError",
+    # Extraction filtering (ADR-028)
+    "ExtractionParams",
     # Filters
     "FilterLoadResult",
     "GoldColumnFilter",
@@ -535,8 +540,14 @@ __all__ = [
     "TracingPort",
     "UnitConverterPort",
     "ValueValidatorPort",
-    "WatermarkStrategyPort",
-    "NoOpWatermarkStrategy",
+    # Registry (publication entity types, ADR-024)
+    "LEGACY_PUBLICATION_ALIASES",
+    "PUBLICATION_ENTITY_TYPES",
+    "PublicationMapping",
+    "get_publication_mapping",
+    "is_legacy_publication_alias",
+    "is_publication_entity",
+    "validate_publication_entity_type",
     # Resilience
     "CircuitBreakerConfig",
     "RetryConfig",
@@ -612,6 +623,8 @@ __all__ = [
     "PublicationYear",
     "UniProtId",
     "ValueObject",
+    "FIELD_TO_GROUP_MAPPING",
+    "PublicationFieldGroup",
 ]
 
 ================================================================================
@@ -686,7 +699,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import InvalidStateError
@@ -696,7 +709,7 @@ if TYPE_CHECKING:
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 
 
-class BatchStatus(str, Enum):
+class BatchStatus(StrEnum):
     """Status of a batch."""
 
     OPEN = "open"
@@ -1478,7 +1491,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import InvalidStateError
@@ -1488,7 +1501,7 @@ if TYPE_CHECKING:
 from bioetl.domain.types import RunID, RunType
 
 
-class StageStatus(str, Enum):
+class StageStatus(StrEnum):
     """Status of a pipeline stage."""
 
     PENDING = "pending"
@@ -1498,7 +1511,7 @@ class StageStatus(str, Enum):
     SKIPPED = "skipped"
 
 
-class RunStatus(str, Enum):
+class RunStatus(StrEnum):
     """Status of a pipeline run."""
 
     PENDING = "pending"
@@ -2063,7 +2076,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.exceptions import InvalidStateError
@@ -2073,7 +2086,7 @@ if TYPE_CHECKING:
 from bioetl.domain.types import BatchID, ContentHash, RunID
 
 
-class QuarantineStatus(str, Enum):
+class QuarantineStatus(StrEnum):
     """Status of a quarantine entry."""
 
     NEW = "new"
@@ -2586,6 +2599,13 @@ from bioetl.domain.composite.config import (
     MergeConfig,
     SeedConfig,
 )
+from bioetl.domain.composite.field_groups import (
+    FieldGroupDefinition,
+    FieldGroupId,
+    FieldGroupRegistry,
+    FieldMapping,
+    build_field_group_registry,
+)
 from bioetl.domain.composite.lineage import (
     EnrichmentStatusRecord,
     FieldSource,
@@ -2626,6 +2646,10 @@ __all__ = [
     "EnrichmentStatus",
     "EnrichmentStatusRecord",
     "FallbackStrategy",
+    "FieldGroupDefinition",
+    "FieldGroupId",
+    "FieldGroupRegistry",
+    "FieldMapping",
     "FieldSource",
     "LineageMetadata",
     "MergeConfig",
@@ -2634,6 +2658,7 @@ __all__ = [
     "SeedConfig",
     "SeedResult",
     "TransitionRules",
+    "build_field_group_registry",
     "can_transition",
     "get_transition_rules",
     "validate_transition",
@@ -2862,10 +2887,12 @@ __all__ = [
     "CompositeConfig",
     "CompositeDQConfig",
     "DQOverrideConfig",
+    "DataSchemaConfig",
     "DependencyConfig",
     "EnricherCardinality",
     "EnricherConfig",
     "ExecutionConfig",
+    "LayerColumnConfig",
     "LineageConfig",
     "MergeConfig",
     "SeedConfig",
@@ -2924,20 +2951,52 @@ class DependencyConfig:
     - Derived entities that need full API data (e.g., publication_term from /document)
     - Pipelines with force_full_scan that don't work with enricher filtering
     - Data that must be pre-populated before enrichment phase
+    - Chained dependencies where one dependency provides keys for another
 
     Attributes:
         pipeline: Name of the dependency pipeline (e.g., "chembl_publication_term").
-        join_keys: Keys to extract from seed for filtering API calls.
+        join_keys: Keys to extract for filtering API calls.
             Used to limit the scope of data fetched from the API.
+            For chained dependencies, these are column names in key_source table.
         required: If True, failure causes composite failure.
         timeout_seconds: Maximum time for dependency execution.
         silver_table: Path to dependency's Silver table.
+        key_source: Source of join keys. Options:
+            - None or "seed": Use keys from seed pipeline (default)
+            - Pipeline name: Read keys from that dependency's Silver table
+            This enables chained dependencies where one populates data
+            that provides keys for the next.
+        filter_field: Field name to use when filtering the target API.
+            If None, uses the first join_key. Useful when source column name
+            differs from target API field name (e.g., protein_classification_id
+            in source table vs protein_class_id in API).
+        filter_fields: Multiple field names for multi-field API filtering.
+            When set, ALL specified fields are passed as AND-filters to the API.
+            Example: ("molecule_chembl_id", "document_chembl_id") produces
+            ?molecule_chembl_id__in=...&document_chembl_id__in=...
+            Takes precedence over filter_field.
 
     Example:
+        >>> # Standard dependency using seed keys
         >>> config = DependencyConfig(
         ...     pipeline="chembl_publication_term",
         ...     join_keys=("document_chembl_id",),
         ...     silver_table="silver/chembl/publication_term",
+        ... )
+        >>> # Chained dependency with field mapping
+        >>> config = DependencyConfig(
+        ...     pipeline="chembl_protein_class",
+        ...     join_keys=("protein_classification_id",),  # Source column
+        ...     filter_field="protein_class_id",           # Target API field
+        ...     key_source="chembl_target_component",
+        ...     silver_table="silver/chembl/protein_class",
+        ... )
+        >>> # Dual-field filtering (compound_record by molecule + document)
+        >>> config = DependencyConfig(
+        ...     pipeline="chembl_compound_record",
+        ...     join_keys=("molecule_chembl_id", "document_chembl_id"),
+        ...     filter_fields=("molecule_chembl_id", "document_chembl_id"),
+        ...     silver_table="silver/chembl/compound_record",
         ... )
     """
 
@@ -2946,11 +3005,19 @@ class DependencyConfig:
     required: bool = False
     timeout_seconds: int = 600
     silver_table: str | None = None
+    key_source: str | None = None  # None = seed, or pipeline name for chained deps
+    filter_field: str | None = None  # API filter field (defaults to first join_key)
+    filter_fields: tuple[str, ...] | None = (
+        None  # Multi-field API filtering (AND logic)
+    )
+    key_filter: str | None = None  # SQL-like condition to filter key_source records
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
         if isinstance(self.join_keys, list):
             object.__setattr__(self, "join_keys", tuple(self.join_keys))
+        if isinstance(self.filter_fields, list):
+            object.__setattr__(self, "filter_fields", tuple(self.filter_fields))
         self._validate()
 
     def _validate(self) -> None:
@@ -2960,11 +3027,38 @@ class DependencyConfig:
         _validate_positive(
             self.timeout_seconds, f"dependency {self.pipeline} timeout_seconds"
         )
+        if self.filter_fields and self.filter_field:
+            raise ValueError(
+                f"Dependency {self.pipeline}: filter_fields and filter_field "
+                "are mutually exclusive. Use filter_fields for multi-field filtering."
+            )
 
     @property
     def primary_join_key(self) -> str:
         """Get the primary (first) join key."""
         return self.join_keys[0]
+
+    @property
+    def uses_seed_keys(self) -> bool:
+        """Check if this dependency uses keys from seed (default behavior)."""
+        return self.key_source is None or self.key_source == "seed"
+
+    @property
+    def effective_filter_fields(self) -> tuple[str, ...]:
+        """Resolve effective filter fields.
+
+        Priority: filter_fields > filter_field > first join_key.
+        """
+        if self.filter_fields:
+            return self.filter_fields
+        if self.filter_field:
+            return (self.filter_field,)
+        return (self.join_keys[0],)
+
+    @property
+    def is_multi_field_filter(self) -> bool:
+        """Check if this dependency uses multi-field API filtering."""
+        return len(self.effective_filter_fields) > 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -3064,6 +3158,179 @@ class EnricherConfig:
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
 
+def _coerce_to_tuple(obj: object, attr: str) -> None:
+    """Coerce a list attribute to tuple on a frozen dataclass."""
+    val = getattr(obj, attr, None)
+    if val is not None and isinstance(val, list):
+        object.__setattr__(obj, attr, tuple(val))
+
+
+def _coerce_column_groups(obj: object, attr: str) -> None:
+    """Coerce column_groups list to tuple of ColumnGroupConfig."""
+    val = getattr(obj, attr, None)
+    if val is not None and isinstance(val, list):
+        object.__setattr__(
+            obj,
+            attr,
+            tuple(ColumnGroupConfig(**g) if isinstance(g, dict) else g for g in val),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class LayerColumnConfig:
+    """Column configuration for a single medallion layer (Silver or Gold).
+
+    Supports three modes:
+    1. Explicit column list (columns parameter)
+    2. Filtering existing groups (include_groups/exclude_fields)
+    3. Layer-specific column groups (column_groups parameter)
+
+    Attributes:
+        columns: Explicit list of columns for this layer.
+            Takes precedence over other configuration.
+        column_groups: Layer-specific column groups.
+            If provided, overrides shared column_groups for this layer.
+        include_groups: Filter shared column_groups by group names.
+            Only groups with names in this list are included.
+        exclude_fields: Fields to exclude after group/pattern matching.
+            Supports glob patterns (e.g., "_dq_*", "*_internal").
+        rename_fields: Mapping of old_name -> new_name for renaming columns.
+            Applied after filtering but before ordering.
+
+            IMPORTANT: For Gold layer, use column names AFTER silver.rename_fields.
+            Gold reads from Silver, so renames must reference Silver output schema.
+
+            Example with rename chain:
+                silver:
+                  rename_fields: {"document_chembl_id": "chembl_doc_id"}
+                gold:
+                  rename_fields: {"chembl_doc_id": "publication_id"}
+                  # ↑ Uses Silver output name, not original!
+
+    Example:
+        >>> # Explicit columns for Gold layer
+        >>> gold_config = LayerColumnConfig(
+        ...     columns=("entity_id", "doi", "title", "year"),
+        ... )
+        >>> # Filter by groups with renaming
+        >>> gold_config = LayerColumnConfig(
+        ...     include_groups=("system", "identifiers", "title", "year"),
+        ...     exclude_fields=("abstract", "_dq_*"),
+        ...     rename_fields={"_run_id": "pipeline_run_id", "pmid": "pubmed_id"},
+        ... )
+    """
+
+    columns: tuple[str, ...] | None = None
+    column_groups: tuple[ColumnGroupConfig, ...] | None = None
+    include_groups: tuple[str, ...] | None = None
+    exclude_fields: tuple[str, ...] | None = None
+    rename_fields: dict[str, str] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        _coerce_to_tuple(self, "columns")
+        _coerce_to_tuple(self, "include_groups")
+        _coerce_to_tuple(self, "exclude_fields")
+        _coerce_column_groups(self, "column_groups")
+        if not isinstance(self.rename_fields, dict):
+            object.__setattr__(self, "rename_fields", dict(self.rename_fields))
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate configuration invariants."""
+        # At most one of: columns, include_groups, column_groups
+        modes = sum(
+            [
+                self.columns is not None,
+                self.include_groups is not None,
+                self.column_groups is not None,
+            ]
+        )
+        if modes > 1:
+            raise ValueError(
+                "LayerColumnConfig: only one of columns/include_groups/column_groups allowed"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class DataSchemaConfig:
+    """Multi-layer column schema configuration.
+
+    Defines column ordering and filtering for different medallion layers.
+    Supports backward compatibility with shared column_groups.
+
+    Attributes:
+        column_groups: Shared column groups for all layers (legacy/default).
+        silver: Silver layer-specific column configuration.
+        gold: Gold layer-specific column configuration.
+
+    Resolution order:
+    1. If layer.columns is set → use explicit list
+    2. If layer.include_groups is set → filter shared column_groups
+    3. If layer.column_groups is set → use layer-specific groups
+    4. Otherwise → use shared column_groups
+
+    Example:
+        >>> # Backward compatible (shared groups)
+        >>> config = DataSchemaConfig(
+        ...     column_groups=(ColumnGroupConfig(...), ...),
+        ... )
+        >>> # Layer-specific filtering
+        >>> config = DataSchemaConfig(
+        ...     column_groups=(ColumnGroupConfig(...), ...),
+        ...     silver=LayerColumnConfig(
+        ...         include_groups=("system", "identifiers", "title", "abstract"),
+        ...     ),
+        ...     gold=LayerColumnConfig(
+        ...         include_groups=("system", "identifiers", "title"),
+        ...         exclude_fields=("_dq_*", "_composite_*"),
+        ...     ),
+        ... )
+    """
+
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
+    silver: LayerColumnConfig | None = None
+    gold: LayerColumnConfig | None = None
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        _coerce_column_groups(self, "column_groups")
+        if isinstance(self.silver, dict):
+            object.__setattr__(self, "silver", LayerColumnConfig(**self.silver))
+        if isinstance(self.gold, dict):
+            object.__setattr__(self, "gold", LayerColumnConfig(**self.gold))
+
+    def get_layer_groups(self, layer: str) -> tuple[ColumnGroupConfig, ...]:
+        """Get effective column groups for a layer.
+
+        Args:
+            layer: Layer name ("silver" or "gold").
+
+        Returns:
+            Tuple of ColumnGroupConfig for the layer.
+            Returns layer-specific groups if defined, otherwise shared groups.
+        """
+        layer_config: LayerColumnConfig | None = getattr(self, layer, None)
+        if layer_config and layer_config.column_groups:
+            return layer_config.column_groups
+        return self.column_groups
+
+    def should_include_group(self, layer: str, group_name: str) -> bool:
+        """Check if a group should be included for a layer.
+
+        Args:
+            layer: Layer name ("silver" or "gold").
+            group_name: Name of the column group.
+
+        Returns:
+            True if group should be included, False otherwise.
+        """
+        layer_config = getattr(self, layer, None)
+        if not layer_config or not layer_config.include_groups:
+            return True  # No filter → include all groups
+        return group_name in layer_config.include_groups
+
+
 @dataclass(frozen=True, slots=True)
 class ColumnGroupConfig:
     """Configuration for a column group in output ordering.
@@ -3133,6 +3400,12 @@ class MergeConfig:
             Example: {"title": ["chembl", "crossref"]}
         field_mappings: Mapping to rename fields during merge.
             Example: {"crossref_title": "title"}
+        exclude_fields: Columns to drop from merged output.
+            Supports exact names and glob patterns.
+        preserve_all_sources: If True, keep all provider-qualified columns
+            for common fields instead of coalescing them. Default: False.
+            When enabled, columns like chembl.publication.title and
+            crossref.publication.title are both preserved in the output.
 
     Example:
         >>> config = MergeConfig(
@@ -3140,6 +3413,7 @@ class MergeConfig:
         ...     conflict_resolution=ConflictResolution.SEED_PRIORITY,
         ...     output_silver_path="silver/composite/publication",
         ...     output_gold_path="gold/publication_enriched",
+        ...     preserve_all_sources=True,  # Keep all provider columns
         ... )
     """
 
@@ -3150,6 +3424,8 @@ class MergeConfig:
     field_priorities: dict[str, tuple[str, ...]] = field(default_factory=dict)
     field_mappings: dict[str, str] = field(default_factory=dict)
     column_groups: tuple[ColumnGroupConfig, ...] = ()
+    exclude_fields: tuple[str, ...] = ()
+    preserve_all_sources: bool = False
 
     def __post_init__(self) -> None:
         """Validate and convert types."""
@@ -3157,6 +3433,7 @@ class MergeConfig:
         self._convert_conflict_resolution()
         self._convert_field_priorities()
         self._convert_column_groups()
+        self._convert_exclude_fields()
         self._validate()
 
     def _convert_strategy(self) -> None:
@@ -3192,6 +3469,11 @@ class MergeConfig:
                 for g in self.column_groups
             )
             object.__setattr__(self, "column_groups", converted)
+
+    def _convert_exclude_fields(self) -> None:
+        """Convert list of exclude_fields to tuple."""
+        if isinstance(self.exclude_fields, list):
+            object.__setattr__(self, "exclude_fields", tuple(self.exclude_fields))
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
@@ -3411,8 +3693,8 @@ class CompositeConfig:
             raise ValueError("composite name cannot be empty")
         if not self.version:
             raise ValueError("composite version cannot be empty")
-        if not self.enrichers:
-            raise ValueError("composite must have at least one enricher")
+        if not self.enrichers and not self.dependencies:
+            raise ValueError("composite must have at least one enricher or dependency")
         self._validate_join_keys()
         self._validate_dependency_join_keys()
         self._validate_unique_enrichers()
@@ -3420,6 +3702,8 @@ class CompositeConfig:
 
     def _validate_join_keys(self) -> None:
         """Validate that enricher join keys exist in seed output_keys."""
+        if not self.enrichers:
+            return  # Skip if no enrichers
         seed_keys = set(self.seed.output_keys)
         for enricher in self.enrichers:
             for key in enricher.join_keys:
@@ -3431,15 +3715,27 @@ class CompositeConfig:
 
     def _validate_unique_enrichers(self) -> None:
         """Validate that enricher pipeline names are unique."""
-        names = [e.pipeline for e in self.enrichers]
-        if len(names) != len(set(names)):
-            duplicates = [n for n in names if names.count(n) > 1]
-            raise ValueError(f"Duplicate enricher pipelines: {set(duplicates)}")
+        if not self.enrichers:
+            return  # Skip if no enrichers
+        seen: set[str] = set()
+        duplicates: set[str] = set()
+        for e in self.enrichers:
+            (duplicates if e.pipeline in seen else seen).add(e.pipeline)
+        if duplicates:
+            raise ValueError(f"Duplicate enricher pipelines: {duplicates}")
 
     def _validate_dependency_join_keys(self) -> None:
-        """Validate that dependency join keys exist in seed output_keys."""
+        """Validate that dependency join keys exist in seed output_keys.
+
+        For chained dependencies (key_source != None and != "seed"),
+        join_keys are taken from the key_source's Silver table,
+        so they are NOT validated against seed output_keys.
+        """
         seed_keys = set(self.seed.output_keys)
         for dep in self.dependencies:
+            # Skip validation for chained dependencies
+            if not dep.uses_seed_keys:
+                continue
             for key in dep.join_keys:
                 if key not in seed_keys:
                     raise ValueError(
@@ -3520,6 +3816,11 @@ class CompositeConfig:
                     "required": d.required,
                     "timeout_seconds": d.timeout_seconds,
                     "silver_table": d.silver_table,
+                    **(
+                        {"filter_fields": list(d.filter_fields)}
+                        if d.filter_fields
+                        else {}
+                    ),
                 }
                 for d in self.dependencies
             ],
@@ -3572,6 +3873,403 @@ def _validate_threshold_order(soft: float | None, hard: float | None) -> None:
     """Validate that soft threshold is less than hard threshold."""
     if soft is not None and hard is not None and soft >= hard:
         raise ValueError("soft_fail_threshold must be less than hard_fail_threshold")
+
+================================================================================
+File: field_groups.py
+Path: composite\field_groups.py
+================================================================================
+"""Field group domain models for Composite Publication Pipeline.
+
+Provides semantic grouping of publication fields across providers for:
+- Column ordering in merged output (groups appear in enum order)
+- Gold layer filtering (excluding trash group)
+- Provider-to-field mapping with qualified column tracking
+
+Domain models:
+- FieldMapping: Maps base field name to provider-qualified columns
+- FieldGroupDefinition: Defines a semantic group with its fields
+- FieldGroupRegistry: Central registry for field group operations
+
+See ADR-026 for Composite Publication Pipeline rationale.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Final
+
+from bioetl.domain.value_objects.publication_field_groups import (
+    PublicationFieldGroup,
+)
+
+# Re-export for convenience (canonical type used throughout)
+FieldGroupId = PublicationFieldGroup
+
+__all__ = [
+    "DEFAULT_PROVIDER_ORDER",
+    "FieldGroupDefinition",
+    "FieldGroupId",
+    "FieldGroupRegistry",
+    "FieldMapping",
+    "build_field_group_registry",
+]
+
+DEFAULT_PROVIDER_ORDER: Final[tuple[str, ...]] = (
+    "chembl",
+    "crossref",
+    "openalex",
+    "pubmed",
+    "semanticscholar",
+)
+
+
+@dataclass(frozen=True, slots=True)
+class FieldMapping:
+    """Maps a base field name to its provider-qualified columns and group.
+
+    Each field can appear in multiple providers with qualified column names
+    following the ``{provider}.{entity}.{field}`` convention.
+
+    Attributes:
+        base_name: Base field name (e.g., "title", "doi").
+        provider_columns: Qualified column names from each provider
+            (e.g., ("chembl.publication.title", "crossref.publication.title")).
+        group: Semantic group this field belongs to.
+
+    Example:
+        >>> mapping = FieldMapping(
+        ...     base_name="title",
+        ...     provider_columns=("chembl.publication.title", "crossref.publication.title"),
+        ...     group=FieldGroupId.BIBLIOGRAPHY,
+        ... )
+        >>> mapping.providers
+        ('chembl', 'crossref')
+        >>> mapping.has_provider("crossref")
+        True
+    """
+
+    base_name: str
+    provider_columns: tuple[str, ...] = ()
+    group: FieldGroupId = FieldGroupId.TRASH
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.provider_columns, list):
+            object.__setattr__(self, "provider_columns", tuple(self.provider_columns))
+        if not self.base_name:
+            raise ValueError("base_name cannot be empty")
+
+    @property
+    def providers(self) -> tuple[str, ...]:
+        """Extract provider names from qualified columns."""
+        result: list[str] = []
+        for col in self.provider_columns:
+            parts = col.split(".")
+            if len(parts) == 3 and parts[0] not in result:
+                result.append(parts[0])
+        return tuple(result)
+
+    @property
+    def provider_count(self) -> int:
+        """Number of providers that have this field."""
+        return len(self.providers)
+
+    def has_provider(self, provider: str) -> bool:
+        """Check if a specific provider has this field."""
+        return provider.lower() in (p.lower() for p in self.providers)
+
+    def get_column(self, provider: str) -> str | None:
+        """Get qualified column name for a specific provider."""
+        provider_lower = provider.lower()
+        for col in self.provider_columns:
+            parts = col.split(".")
+            if len(parts) == 3 and parts[0].lower() == provider_lower:
+                return col
+        return None
+
+
+@dataclass(frozen=True, slots=True)
+class FieldGroupDefinition:
+    """Defines a semantic group with its fields.
+
+    Attributes:
+        group_id: The semantic group identifier.
+        display_name: Human-readable name for the group.
+        include_in_gold: Whether fields in this group are included in Gold layer.
+        fields: Tuple of FieldMapping objects belonging to this group.
+
+    Example:
+        >>> group = FieldGroupDefinition(
+        ...     group_id=FieldGroupId.BIBLIOGRAPHY,
+        ...     display_name="Bibliography",
+        ...     include_in_gold=True,
+        ...     fields=(
+        ...         FieldMapping("title", ("chembl.publication.title",), FieldGroupId.BIBLIOGRAPHY),
+        ...     ),
+        ... )
+        >>> group.base_field_names
+        ('title',)
+    """
+
+    group_id: FieldGroupId
+    display_name: str
+    include_in_gold: bool = True
+    fields: tuple[FieldMapping, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Convert types."""
+        if isinstance(self.fields, list):
+            object.__setattr__(self, "fields", tuple(self.fields))
+
+    @property
+    def base_field_names(self) -> tuple[str, ...]:
+        """Get all base field names in this group."""
+        return tuple(f.base_name for f in self.fields)
+
+    @property
+    def all_columns(self) -> tuple[str, ...]:
+        """Get all provider-qualified columns across all fields in this group."""
+        result: list[str] = []
+        for f in self.fields:
+            result.extend(f.provider_columns)
+        return tuple(result)
+
+    @property
+    def field_count(self) -> int:
+        """Number of fields in this group."""
+        return len(self.fields)
+
+
+class FieldGroupRegistry:
+    """Central registry for field group operations.
+
+    Provides efficient lookup, filtering, and ordering of publication
+    fields based on semantic groups and provider sources.
+
+    This registry is built from YAML configuration and injected into
+    services that need field group awareness (MergeService, GoldWriter).
+
+    Example:
+        >>> registry = FieldGroupRegistry(groups=(...), provider_order=(...))
+        >>> registry.get_group("title")
+        <PublicationFieldGroup.BIBLIOGRAPHY: 'bibliography'>
+        >>> gold_cols = registry.get_gold_columns(["chembl.publication.title", "content_hash"])
+        >>> gold_cols
+        ['chembl.publication.title']
+    """
+
+    def __init__(
+        self,
+        groups: tuple[FieldGroupDefinition, ...],
+        provider_order: tuple[str, ...] = DEFAULT_PROVIDER_ORDER,
+        default_group: FieldGroupId = FieldGroupId.TRASH,
+    ) -> None:
+        self._groups = groups
+        self._provider_order = provider_order
+        self._default_group = default_group
+
+        # Build indices for fast lookup
+        self._field_to_group: dict[str, FieldGroupId] = {}
+        self._column_to_group: dict[str, FieldGroupId] = {}
+        self._field_to_mapping: dict[str, FieldMapping] = {}
+        self._group_to_def: dict[FieldGroupId, FieldGroupDefinition] = {}
+
+        for group_def in groups:
+            self._group_to_def[group_def.group_id] = group_def
+            for fm in group_def.fields:
+                self._field_to_group[fm.base_name.lower()] = fm.group
+                self._field_to_mapping[fm.base_name.lower()] = fm
+                for col in fm.provider_columns:
+                    self._column_to_group[col.lower()] = fm.group
+
+    @property
+    def groups(self) -> tuple[FieldGroupDefinition, ...]:
+        """All group definitions."""
+        return self._groups
+
+    @property
+    def provider_order(self) -> tuple[str, ...]:
+        """Provider priority order."""
+        return self._provider_order
+
+    @property
+    def field_count(self) -> int:
+        """Total number of mapped base fields."""
+        return len(self._field_to_group)
+
+    @property
+    def column_count(self) -> int:
+        """Total number of mapped provider columns."""
+        return len(self._column_to_group)
+
+    def get_group(self, column: str) -> FieldGroupId:
+        """Get semantic group for a column or field name.
+
+        Handles both qualified (provider.entity.field) and
+        unqualified (field) column names.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            FieldGroupId for the column.
+        """
+        # Try exact match on qualified column
+        col_lower = column.lower()
+        if col_lower in self._column_to_group:
+            return self._column_to_group[col_lower]
+
+        # Try base field name extraction
+        field_name = self._extract_field(column)
+        return self._field_to_group.get(field_name, self._default_group)
+
+    def get_field_mapping(self, base_name: str) -> FieldMapping | None:
+        """Get FieldMapping for a base field name."""
+        return self._field_to_mapping.get(base_name.lower())
+
+    def get_group_definition(
+        self, group_id: FieldGroupId
+    ) -> FieldGroupDefinition | None:
+        """Get FieldGroupDefinition for a group ID."""
+        return self._group_to_def.get(group_id)
+
+    def is_gold_field(self, column: str) -> bool:
+        """Check if a column should be included in Gold layer."""
+        return self.get_group(column).include_in_gold
+
+    def get_gold_columns(self, columns: list[str]) -> list[str]:
+        """Filter columns to only those included in Gold layer.
+
+        System columns (starting with ``_``) are always included.
+
+        Args:
+            columns: List of column names.
+
+        Returns:
+            Filtered list of Gold-layer columns.
+        """
+        return [c for c in columns if c.startswith("_") or self.is_gold_field(c)]
+
+    def get_trash_columns(self, columns: list[str]) -> list[str]:
+        """Get columns that would be excluded from Gold layer.
+
+        Args:
+            columns: List of column names.
+
+        Returns:
+            List of trash columns (excluding system columns).
+        """
+        return [
+            c for c in columns if not c.startswith("_") and not self.is_gold_field(c)
+        ]
+
+    def get_columns_by_group(
+        self, columns: list[str], group: FieldGroupId
+    ) -> list[str]:
+        """Get columns belonging to a specific group."""
+        return [c for c in columns if self.get_group(c) == group]
+
+    def get_ordered_columns(self, columns: list[str]) -> list[str]:
+        """Sort columns by semantic group and provider priority.
+
+        Ordering:
+        1. Semantic group (enum order)
+        2. Provider priority (per provider_order)
+        3. Field name (alphabetical)
+
+        System columns (``_*``) are appended at the end.
+
+        Args:
+            columns: List of column names to sort.
+
+        Returns:
+            Sorted list of columns.
+        """
+        system_cols = [c for c in columns if c.startswith("_")]
+        data_cols = [c for c in columns if not c.startswith("_")]
+
+        group_order = list(FieldGroupId)
+
+        def sort_key(column: str) -> tuple[int, int, str]:
+            group = self.get_group(column)
+            try:
+                group_idx = group_order.index(group)
+            except ValueError:
+                group_idx = len(group_order)
+
+            provider_rank = self._get_provider_rank(column)
+            field_name = self._extract_field(column)
+            return (group_idx, provider_rank, field_name)
+
+        sorted_data = sorted(data_cols, key=sort_key)
+        return sorted_data + sorted(system_cols)
+
+    def validate_columns(self, columns: list[str]) -> dict[str, list[str]]:
+        """Validate columns against the registry.
+
+        Returns:
+            Dict with keys 'mapped', 'unmapped', 'system' listing columns.
+        """
+        mapped: list[str] = []
+        unmapped: list[str] = []
+        system: list[str] = []
+
+        for col in columns:
+            if col.startswith("_"):
+                system.append(col)
+            elif self.get_group(col) != self._default_group:
+                mapped.append(col)
+            else:
+                # Check if the extracted field name is mapped
+                field_name = self._extract_field(col)
+                if field_name in self._field_to_group:
+                    mapped.append(col)
+                else:
+                    unmapped.append(col)
+
+        return {"mapped": mapped, "unmapped": unmapped, "system": system}
+
+    def _get_provider_rank(self, column: str) -> int:
+        """Get provider rank for ordering within semantic group."""
+        parts = column.split(".")
+        if len(parts) == 3:
+            provider = parts[0].lower()
+            try:
+                return self._provider_order.index(provider)
+            except ValueError:
+                return 999
+        # Unqualified columns come first (seed)
+        return -1
+
+    @staticmethod
+    def _extract_field(column: str) -> str:
+        """Extract base field name from column (qualified or unqualified)."""
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2].lower()
+        return column.lower()
+
+
+def build_field_group_registry(
+    groups: tuple[FieldGroupDefinition, ...],
+    provider_order: tuple[str, ...] = DEFAULT_PROVIDER_ORDER,
+    default_group: FieldGroupId = FieldGroupId.TRASH,
+) -> FieldGroupRegistry:
+    """Factory function to create a FieldGroupRegistry.
+
+    Args:
+        groups: Tuple of FieldGroupDefinition objects.
+        provider_order: Provider priority order for column sorting.
+        default_group: Default group for unmapped fields.
+
+    Returns:
+        Configured FieldGroupRegistry instance.
+    """
+    return FieldGroupRegistry(
+        groups=groups,
+        provider_order=provider_order,
+        default_group=default_group,
+    )
 
 ================================================================================
 File: lineage.py
@@ -3751,14 +4449,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.composite.lineage import LineageMetadata
 
 
-class EnrichmentStatus(str, Enum):
+class EnrichmentStatus(StrEnum):
     """Status of enrichment pipeline execution."""
 
     SUCCESS = "success"
@@ -3924,7 +4622,7 @@ class SeedResult:
         return self.records_silver > 0 or self.resumed
 
 
-class DependencyStatus(str, Enum):
+class DependencyStatus(StrEnum):
     """Status of dependency pipeline execution."""
 
     SUCCESS = "success"
@@ -4224,10 +4922,10 @@ DEPENDENCIES_COMPLETED).
 from __future__ import annotations
 
 from collections.abc import Mapping
-from enum import Enum
+from enum import StrEnum
 
 
-class CompositePipelineState(str, Enum):
+class CompositePipelineState(StrEnum):
     """State of composite pipeline execution.
 
     States: NOT_STARTED, SEED_RUNNING, SEED_COMPLETED, DEPENDENCIES_RUNNING,
@@ -4422,10 +5120,10 @@ See ADR-026 for architectural decisions.
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 
-class MergeStrategy(str, Enum):
+class MergeStrategy(StrEnum):
     """Strategy for merging enriched data from multiple sources.
 
     Defines how records from seed and enricher pipelines are combined.
@@ -4473,7 +5171,7 @@ class MergeStrategy(str, Enum):
             ) from None
 
 
-class ConflictResolution(str, Enum):
+class ConflictResolution(StrEnum):
     """Strategy for resolving field conflicts between sources.
 
     When the same field is populated by multiple sources (e.g., 'title'
@@ -4526,7 +5224,7 @@ class ConflictResolution(str, Enum):
             ) from None
 
 
-class FallbackStrategy(str, Enum):
+class FallbackStrategy(StrEnum):
     """Strategy for handling enricher failures.
 
     Defines behavior when an optional enricher fails or times out.
@@ -4593,6 +5291,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
+from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 from bioetl.domain.types import RunType
 
@@ -4616,9 +5315,8 @@ class ValidationConfig:
     - Single source of truth for validation rules
 
     Attributes:
-        min_publication_year: Minimum valid publication year. Default 1800
-            covers modern scientific publications. Use 1500 for historical
-            databases like Semantic Scholar.
+        min_publication_year: Minimum valid publication year. Default 1500
+            covers historical scientific publications.
         max_publication_year: Maximum valid publication year. Default 2100.
         min_molecular_weight: Minimum molecular weight in Daltons. Default 10.0.
         max_molecular_weight: Maximum molecular weight in Daltons. Default 10000.0
@@ -4632,16 +5330,12 @@ class ValidationConfig:
     Example:
         >>> config = ValidationConfig()
         >>> config.min_publication_year
-        1800
-        >>> # Override for Semantic Scholar (older publications)
-        >>> ss_config = ValidationConfig(min_publication_year=1500)
-        >>> ss_config.min_publication_year
         1500
 
     """
 
     # Publication year range
-    min_publication_year: int = 1800
+    min_publication_year: int = 1500
     max_publication_year: int = 2100
 
     # Molecular properties
@@ -4696,26 +5390,33 @@ class FieldValidation:
 
     Supports multiple validation types:
     - required: Field must be present and non-null
+    - not_null: Field should not be null (typically used with severity=warn)
     - range: Numeric range validation (min/max)
     - pattern: Regex pattern matching
     - enum: Allowed values validation
+    - max_length: Maximum string length validation
     - custom: Custom validator function reference
 
     Attributes:
         field: Field name to validate.
-        validation_type: Type of validation (required, range, pattern, enum, custom).
+        validation_type: Type of validation.
         nullable: Whether field can be null/None. Default: True.
+        severity: Severity level (error or warn). Default: error.
         min_value: Minimum value for range validation.
         max_value: Maximum value for range validation.
         pattern: Regex pattern for pattern validation.
         allowed: Allowed values for enum validation.
+        max_length: Maximum string length for max_length validation.
         validator: Validator function name for custom validation.
         error_message: Custom error message template.
     """
 
     field: str
-    validation_type: Literal["required", "range", "pattern", "enum", "custom"]
+    validation_type: Literal[
+        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+    ]
     nullable: bool = True
+    severity: Literal["error", "warn"] = "error"
     # Range validation
     min_value: float | None = None
     max_value: float | None = None
@@ -4723,6 +5424,8 @@ class FieldValidation:
     pattern: str | None = None
     # Enum validation
     allowed: tuple[str, ...] = ()
+    # Max length validation
+    max_length: int | None = None
     # Custom validation
     validator: str | None = None
     # Custom error message
@@ -4992,10 +5695,12 @@ class PipelineConfig:
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
     # Processing
+    silver_filters: GoldFilterConfig | None = None  # Domain-level Silver layer filters
     gold_filters: GoldFilterConfig | None = None  # Configurable Gold layer filters
     batch_size: int = 100
     checkpoint_interval: int = 1000
     fields: tuple[str, ...] = ()
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
 
     # Data Quality
     dq: DQConfig = field(default_factory=DQConfig)
@@ -5013,7 +5718,6 @@ class PipelineConfig:
     # Loading strategy (ADR-031)
     # Explicit formalization of data loading approach.
     # - FULL_SCAN_ONLY: Each run performs full scan, checkpoint resume disabled
-    # - WATERMARK_BASED: Incremental loading via watermark (placeholder, not implemented)
     # If not specified, derived from force_full_scan for backward compatibility.
     loading_strategy: LoadingStrategy | str | None = None
 
@@ -5026,14 +5730,16 @@ class PipelineConfig:
 
     def _ensure_immutability(self) -> None:
         """Convert incoming lists to tuples for immutability."""
-        if isinstance(self.primary_keys, list):
-            object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
-        if isinstance(self.partition_cols, list):
-            object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
-        if isinstance(self.fields, list):
-            object.__setattr__(self, "fields", tuple(self.fields))
-        if isinstance(self.transform_steps, list):
-            object.__setattr__(self, "transform_steps", tuple(self.transform_steps))
+        for attr in (
+            "primary_keys",
+            "partition_cols",
+            "fields",
+            "column_groups",
+            "transform_steps",
+        ):
+            val = getattr(self, attr)
+            if isinstance(val, list):
+                object.__setattr__(self, attr, tuple(val))
 
     def _convert_write_modes(self) -> None:
         """Convert string write modes to enums (backward compatibility)."""
@@ -5143,6 +5849,11 @@ class RuntimeConfig:
     # When False (default), missing Gold schema skips validation
     # Use False during migration, True for production readiness
     strict_gold_validation: bool = False
+
+    # Skip Gold layer writing (composite sub-pipelines)
+    # When True, Gold filter returns False for all records,
+    # preventing individual Gold writes during composite execution
+    skip_gold: bool = False
 
     def __post_init__(self) -> None:
         """Validate runtime config."""
@@ -5343,6 +6054,20 @@ class TransformDict(TypedDict, total=False):
 
 
 # =============================================================================
+# Column Ordering Configuration TypedDicts
+# =============================================================================
+
+
+class ColumnGroupDict(TypedDict, total=False):
+    """YAML structure for column group ordering."""
+
+    name: Required[str]
+    fields: list[str]
+    pattern: str
+    provider_order: list[str]
+
+
+# =============================================================================
 # DQ Configuration TypedDicts (Extended)
 # =============================================================================
 
@@ -5368,12 +6093,18 @@ class FieldValidationDict(TypedDict, total=False):
     """YAML structure for field validation rule."""
 
     field: Required[str]
-    type: Required[Literal["required", "range", "pattern", "enum", "custom"]]
+    type: Required[
+        Literal[
+            "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+        ]
+    ]
     nullable: bool
+    severity: Literal["error", "warn"]
     min: float
     max: float
     pattern: str
     allowed: list[str]
+    max_length: int
     validator: str
     error_message: str
 
@@ -5570,6 +6301,7 @@ class PipelineConfigDict(TypedDict, total=False):
 
     # Transform
     transform: TransformDict
+    column_groups: list[ColumnGroupDict]
 
     # Sink
     sink: SinkDict
@@ -5849,6 +6581,7 @@ Provides context objects for pipeline execution with strict typing:
 - PipelineRunContext: Full launch parameters from CLI/Orchestrator
 - InputFilterContext: Optional filter configuration for input-based filtering
 - VacuumConfig: Vacuum operation settings with explicit defaults
+- CachedBronzeContext: Configuration for loading from cached Bronze layer
 """
 
 from __future__ import annotations
@@ -5867,12 +6600,92 @@ def _now_utc() -> datetime:
 
 
 @dataclass(frozen=True, slots=True)
+class CachedBronzeContext:
+    """Configuration for loading data from cached Bronze layer.
+
+    When enabled, the pipeline reads from existing Bronze files instead of
+    making API calls. This is useful for re-processing without network access
+    or for testing transformations on previously fetched data.
+
+    Attributes:
+        enabled: Whether to use cached Bronze data instead of API.
+        bronze_path: Explicit path to Bronze cache directory. If None,
+            uses convention-based path: data/output/bronze/{provider}/{entity}.
+        bronze_date: Optional date filter in YYYY-MM-DD format. When set,
+            only reads batches from that specific date directory.
+
+    Example:
+        >>> # Disabled (default - use API)
+        >>> ctx = CachedBronzeContext.disabled()
+
+        >>> # Enabled with convention-based path
+        >>> ctx = CachedBronzeContext.from_options(path=None, date=None)
+
+        >>> # Enabled with specific date
+        >>> ctx = CachedBronzeContext.from_options(path=None, date="2026-01-20")
+
+        >>> # Enabled with explicit path
+        >>> ctx = CachedBronzeContext.from_options(
+        ...     path="./data/bronze/chembl/activity",
+        ...     date="2026-01-20"
+        ... )
+    """
+
+    enabled: bool = False
+    bronze_path: str | None = None
+    bronze_date: str | None = None
+
+    @classmethod
+    def disabled(cls) -> CachedBronzeContext:
+        """Create a disabled context (use API, not cache)."""
+        return cls(enabled=False, bronze_path=None, bronze_date=None)
+
+    @classmethod
+    def from_options(
+        cls,
+        path: str | None = None,
+        date: str | None = None,
+    ) -> CachedBronzeContext:
+        """Create an enabled context from CLI/config options.
+
+        Args:
+            path: Explicit Bronze cache path, or None to use convention.
+            date: Optional date filter in YYYY-MM-DD format.
+
+        Returns:
+            Enabled CachedBronzeContext.
+        """
+        return cls(enabled=True, bronze_path=path, bronze_date=date)
+
+    def __post_init__(self) -> None:
+        """Validate cached bronze configuration."""
+        if not self.enabled:
+            return
+        # Validate date format if provided
+        if self.bronze_date is not None:
+            self._validate_date_format()
+
+    def _validate_date_format(self) -> None:
+        """Validate bronze_date is in YYYY-MM-DD format."""
+        if self.bronze_date is None:
+            return
+        try:
+            datetime.strptime(self.bronze_date, "%Y-%m-%d")
+        except ValueError as e:
+            raise ValueError(
+                f"bronze_date must be in YYYY-MM-DD format, got '{self.bronze_date}'"
+            ) from e
+
+
+@dataclass(frozen=True, slots=True)
 class InputFilterContext:
     """Input filter configuration for CSV-based or direct ID filtering.
 
     All fields are required when filtering is enabled via CSV.
     For direct IDs, only filter_ids and filter_field are required.
-    Create via InputFilterContext.from_csv(), from_ids(), or disabled().
+    For multi-field IDs, use multi_filter_ids (dict of field -> IDs).
+    Create via InputFilterContext.from_csv(), from_ids(), from_multi_ids(),
+    or disabled().
     """
 
     enabled: bool
@@ -5880,6 +6693,8 @@ class InputFilterContext:
     column_name: str
     filter_field: str
     filter_ids: tuple[str, ...] | None = None
+    multi_filter_ids: dict[str, tuple[str, ...]] | None = None
+    valid_combinations: frozenset[tuple[str, ...]] | None = None
     fallback_mapping: dict[str, str] | None = None
     fallback_column: str | None = None
 
@@ -5892,6 +6707,8 @@ class InputFilterContext:
             column_name="",
             filter_field="",
             filter_ids=None,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=None,
             fallback_column=None,
         )
@@ -5911,6 +6728,8 @@ class InputFilterContext:
             column_name=column_name,
             filter_field=filter_field,
             filter_ids=None,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=None,
             fallback_column=fallback_column,
         )
@@ -5932,7 +6751,39 @@ class InputFilterContext:
             column_name="",
             filter_field=filter_field,
             filter_ids=filter_ids,
+            multi_filter_ids=None,
+            valid_combinations=None,
             fallback_mapping=fallback_mapping,
+            fallback_column=None,
+        )
+
+    @classmethod
+    def from_multi_ids(
+        cls,
+        multi_filter_ids: dict[str, tuple[str, ...]],
+        valid_combinations: frozenset[tuple[str, ...]] | None = None,
+    ) -> InputFilterContext:
+        """Create an enabled filter context from multi-field IDs.
+
+        Used for composite dependencies that filter by multiple fields
+        simultaneously (AND logic). E.g., compound_record filtered by both
+        molecule_chembl_id and document_chembl_id.
+
+        Args:
+            multi_filter_ids: Mapping of field name to tuple of IDs.
+            valid_combinations: Optional set of valid (field1, field2, ...)
+                tuples for client-side combination filtering.
+        """
+        fields = list(multi_filter_ids.keys())
+        return cls(
+            enabled=True,
+            source_path="",
+            column_name="",
+            filter_field=fields[0] if fields else "",
+            filter_ids=None,
+            multi_filter_ids=multi_filter_ids,
+            valid_combinations=valid_combinations,
+            fallback_mapping=None,
             fallback_column=None,
         )
 
@@ -5940,10 +6791,17 @@ class InputFilterContext:
         """Validate filter configuration."""
         if not self.enabled:
             return
-        if self.filter_ids is not None:
+        if self.multi_filter_ids is not None:
+            self._validate_multi_ids_mode()
+        elif self.filter_ids is not None:
             self._validate_direct_ids_mode()
         else:
             self._validate_csv_mode()
+
+    def _validate_multi_ids_mode(self) -> None:
+        """Validate multi-field IDs mode configuration."""
+        if not self.multi_filter_ids:
+            raise ValueError("multi_filter_ids must be non-empty when set")
 
     def _validate_direct_ids_mode(self) -> None:
         """Validate direct IDs mode configuration."""
@@ -5951,13 +6809,13 @@ class InputFilterContext:
             raise ValueError("filter_field is required when filter_ids is set")
 
     def _validate_csv_mode(self) -> None:
-        """Validate CSV-based filter configuration."""
+        """Validate CSV-based filter configuration.
+
+        Note: column_name and filter_field can be empty here; they will be
+        resolved from YAML configuration during the bootstrap phase.
+        """
         if not self.source_path:
             raise ValueError("source_path is required when filter is enabled")
-        if not self.column_name:
-            raise ValueError("column_name is required when filter is enabled")
-        if not self.filter_field:
-            raise ValueError("filter_field is required when filter is enabled")
 
 
 @dataclass(frozen=True, slots=True)
@@ -6062,6 +6920,9 @@ class PipelineRunContext:
     input_filter: InputFilterContext = field(
         default_factory=InputFilterContext.disabled
     )
+    cached_bronze: CachedBronzeContext = field(
+        default_factory=CachedBronzeContext.disabled
+    )
 
     # Truly optional fields (None means "not specified, use config default")
     limit: int | None = None
@@ -6073,10 +6934,18 @@ class PipelineRunContext:
     # Composite mode: ignore YAML input_filter config (use only CLI filter)
     ignore_yaml_filter: bool = False
 
+    # Composite mode: skip Gold layer writing (sub-pipelines produce merged Gold separately)
+    skip_gold: bool = False
+
     @property
     def has_input_filter(self) -> bool:
         """Check if input filtering is enabled."""
         return self.input_filter.enabled
+
+    @property
+    def has_cached_bronze(self) -> bool:
+        """Check if cached Bronze mode is enabled."""
+        return self.cached_bronze.enabled
 
     @property
     def vacuum_enabled(self) -> bool | None:
@@ -6138,8 +7007,10 @@ from bioetl.domain.contracts.gold import (
     ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLProteinClassGoldSchema,
+    ChEMBLSubcellularFractionGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    ChEMBLTissueGoldSchema,
     # CrossRef schemas
     CrossRefPublicationGoldSchema,
     # OpenAlex schemas
@@ -6172,8 +7043,10 @@ __all__ = [
     "ChEMBLDocumentTermGoldSchema",
     "ChEMBLMoleculeGoldSchema",
     "ChEMBLProteinClassGoldSchema",
+    "ChEMBLSubcellularFractionGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
+    "ChEMBLTissueGoldSchema",
     # CrossRef
     "CrossRefPublicationGoldSchema",
     # OpenAlex
@@ -6203,6 +7076,7 @@ Submodules:
     pubchem: PubChem compound schemas
     uniprot: UniProt protein database schemas
     publications: Cross-provider publication schemas (PubMed, CrossRef, OpenAlex, SemanticScholar)
+    composite: Composite pipeline schemas (merged multi-source entities)
 
 Example usage:
     >>> from bioetl.domain.contracts.gold import chembl
@@ -6211,6 +7085,9 @@ Example usage:
 
     >>> from bioetl.domain.contracts.gold.publications import PubMedPublicationGoldSchema
     >>> PubMedPublicationGoldSchema.validate(pubmed_df)
+
+    >>> from bioetl.domain.contracts.gold.composite import CompositePublicationGoldSchema
+    >>> CompositePublicationGoldSchema.validate(composite_df)
 """
 
 from __future__ import annotations
@@ -6227,8 +7104,13 @@ from bioetl.domain.contracts.gold.chembl import (
     ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLProteinClassGoldSchema,
+    ChEMBLSubcellularFractionGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    ChEMBLTissueGoldSchema,
+)
+from bioetl.domain.contracts.gold.composite import (
+    CompositePublicationGoldSchema,
 )
 from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
 from bioetl.domain.contracts.gold.publications import (
@@ -6253,8 +7135,11 @@ __all__ = [
     "ChEMBLDocumentTermGoldSchema",
     "ChEMBLMoleculeGoldSchema",
     "ChEMBLProteinClassGoldSchema",
+    "ChEMBLSubcellularFractionGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
+    "ChEMBLTissueGoldSchema",
+    "CompositePublicationGoldSchema",
     "CrossRefPublicationGoldSchema",
     "OpenAlexPublicationGoldSchema",
     "PubChemCompoundGoldSchema",
@@ -6618,25 +7503,22 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
-    doc_type: Series[str] = pa.Field(nullable=True)
+    publication_type: Series[str] = pa.Field(nullable=True)
     journal: Series[str] = pa.Field(nullable=True)
-    journal_full_title: Series[str] = pa.Field(nullable=True)
-    year: Series[float] = pa.Field(nullable=True, coerce=True)
+    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
-    first_page: Series[str] = pa.Field(nullable=True)
-    last_page: Series[str] = pa.Field(nullable=True)
+    page_first: Series[str] = pa.Field(nullable=True)
+    page_last: Series[str] = pa.Field(nullable=True)
+    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
 
     # ChEMBL release metadata
     chembl_release: Series[str] = pa.Field(nullable=True)
     creation_date: Series[str] = pa.Field(nullable=True)
 
-    # Unified publication fields (for cross-provider data linking)
-    # Note: ChEMBL doesn't provide these natively, but included for schema consistency
-    citation_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
-    language: Series[str] = pa.Field(nullable=True)
+    # Примечание: citation_count маппится в citations_received; is_oa и language исключены
 
     # System field (per SYSTEM_FIELDS_PREFIX)
     source: Series[str] = pa.Field(nullable=True, alias="_source")
@@ -6869,23 +7751,18 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
         nullable=True, coerce=True
     )  # Standardized name
     species_group_flag: Series[bool] = pa.Field(nullable=True)
-    description: Series[str] = pa.Field(nullable=True)
     downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)
-    dap_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     pipeline_stages: Series[str] = pa.Field(nullable=True)
-    target_constraints: Series[str] = pa.Field(nullable=True)
     target_components: Series[str] = pa.Field(nullable=True)
     cross_references: Series[str] = pa.Field(nullable=True)
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
     component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int → float (nullable)
     component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
     component_types: Series[object] = pa.Field(nullable=True)  # list[str]
     component_relationships: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_descriptions: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_organisms: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_taxonomy_ids: Series[object] = pa.Field(
-        nullable=True
-    )  # Standardized name, list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -6916,7 +7793,118 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
     target_component_xrefs: Series[str] = pa.Field(nullable=True)
     protein_classifications: Series[str] = pa.Field(nullable=True)
+    protein_classification_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int → float (nullable)
     protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLTissueGoldSchema(pa.DataFrameModel):
+    """Gold schema for ChEMBL Tissue entity.
+
+    Validates:
+    - tissue_chembl_id: Required, CHEMBL format
+    - pref_name: Required, non-empty
+    - Ontology IDs: Optional, format validation
+    """
+
+    # Primary key
+    tissue_chembl_id: Series[str] = pa.Field(
+        nullable=False,
+        str_matches=r"^CHEMBL\d+$",
+        description="ChEMBL tissue ID",
+    )
+
+    # Core metadata
+    pref_name: Series[str] = pa.Field(
+        nullable=False,
+        str_length={"min_value": 1, "max_value": 200},
+        description="Preferred tissue name",
+    )
+
+    # Ontology identifiers (optional)
+    bto_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^BTO:\d{7}$",
+        description="BRENDA Tissue Ontology ID",
+    )
+    caloha_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^TS-\d{4}$",
+        description="CALIPHO ID",
+    )
+    efo_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^EFO:\d{7}$",
+        description="Experimental Factor Ontology ID",
+    )
+    uberon_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^UBERON:\d{7}$",
+        description="Uberon Ontology ID",
+    )
+
+    # Metadata
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    class Config:
+        """Pandera configuration for strict schema validation."""
+
+        strict = True
+
+
+class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
+    """Gold schema for ChEMBL Subcellular Fraction entity.
+
+    Derived entity: unique subcellular fractions extracted from Assay records.
+    Creates a lookup/reference table for biological context normalization.
+
+    Validates:
+    - entity_id: Required, 16-char SHA256 prefix
+    - subcellular_fraction: Required, non-empty
+    - assay_count: Optional, non-negative
+    - example_assay_chembl_id: Optional, CHEMBL format
+    """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Primary key (normalized subcellular fraction name)
+    subcellular_fraction: Series[str] = pa.Field(
+        nullable=False,
+        str_length={"min_value": 1, "max_value": 200},
+        description="Subcellular fraction name",
+    )
+
+    # Statistics
+    assay_count: Series[float] = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Number of assays using this fraction",
+    )
+
+    # Example reference
+    example_assay_chembl_id: Series[str] = pa.Field(
+        nullable=True,
+        description="Example assay ChEMBL ID",
+    )
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -6942,8 +7930,237 @@ __all__ = [
     "ChEMBLDocumentTermGoldSchema",
     "ChEMBLMoleculeGoldSchema",
     "ChEMBLProteinClassGoldSchema",
+    "ChEMBLSubcellularFractionGoldSchema",
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
+    "ChEMBLTissueGoldSchema",
+]
+
+================================================================================
+File: composite.py
+Path: contracts\gold\composite.py
+================================================================================
+"""Composite Gold layer data contracts.
+
+Contains Pandera DataFrameModel schemas for composite pipeline entities in the Gold layer:
+- CompositePublicationGoldSchema: Merged publication from multiple providers
+- CompositeMoleculeGoldSchema: Merged molecule from ChEMBL + PubChem
+
+Composite schemas use qualified column names in format: {provider}.{entity}.{field}
+This allows tracking which source contributed each value.
+
+Int→Float coercion note:
+    Fields marked with `coerce=True` and `Series[float]` that are `int64` in Silver
+    use float to handle nullable integers. This is a deliberate design decision
+    documented in RULES.md §2.6.
+
+Note on strict mode:
+    Composite schemas use `strict = False` because the actual columns depend on
+    which enrichers succeeded. The schema validates core required fields while
+    allowing additional qualified columns from enrichers.
+"""
+
+from __future__ import annotations
+
+import pandera.pandas as pa
+from pandera.typing import Series
+
+
+class CompositePublicationGoldSchema(pa.DataFrameModel):
+    """Schema for Composite Publication in Gold layer.
+
+    Merged publication entity combining data from multiple providers:
+    - Seed: chembl_publication
+    - Enrichers: crossref, openalex, pubmed, semanticscholar
+
+    Column naming:
+        Business columns use qualified format: {provider}.{entity}.{field}
+        Example: chembl.publication.title, crossref.publication.citation_count
+
+    Required fields:
+        - System fields (entity_id, content_hash)
+        - Seed primary key (document_chembl_id via qualified name)
+        - Title (required for valid publication)
+        - Lineage metadata (_composite_run_id, etc.)
+
+    Note: Uses strict=False to allow variable enricher columns.
+    """
+
+    # =========================================================================
+    # System Fields (from seed)
+    # =========================================================================
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # =========================================================================
+    # DQ Fields (from seed)
+    # =========================================================================
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
+    # =========================================================================
+    # Lineage Metadata (from seed)
+    # =========================================================================
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    # Source tracking (from seed)
+    source: Series[str] = pa.Field(nullable=True, alias="_source")
+
+    # Lookup metadata (from seed)
+    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # =========================================================================
+    # Composite Lineage Metadata (added by MergeService)
+    # =========================================================================
+    composite_run_id: Series[str] = pa.Field(nullable=False, alias="_composite_run_id")
+    source_providers: Series[str] = pa.Field(
+        nullable=False, alias="_source_providers"
+    )  # JSON list
+    enrichment_status: Series[str] = pa.Field(
+        nullable=False, alias="_enrichment_status"
+    )  # JSON dict
+    lineage_created_at: Series[str] = pa.Field(
+        nullable=False, alias="_lineage_created_at"
+    )  # ISO timestamp
+
+    # =========================================================================
+    # Seed Primary Key (ChEMBL document ID)
+    # =========================================================================
+    # Note: Qualified column name from seed
+    # In the merged output, this appears as: chembl.publication.document_chembl_id
+    # The unqualified version may also be present depending on merge configuration
+
+    # =========================================================================
+    # Core Business Fields (may be qualified or coalesced)
+    # =========================================================================
+    # Note: These fields may appear with qualified names depending on merge strategy.
+    # With coalesce/seed_priority, the winning value uses the seed column name.
+    # With no coalesce, all provider columns are preserved with qualified names.
+    #
+    # Example qualified names:
+    # - chembl.publication.title
+    # - chembl.publication.document_chembl_id
+    # - crossref.publication.citations_received
+    # - pubmed.publication.subject_mesh
+    # - openalex.publication.subject_topics
+    # - semanticscholar.publication.tldr
+    #
+    # Since columns are dynamically determined by enrichers, we use strict=False
+
+    class Config:
+        """Pandera configuration.
+
+        Note: strict=False allows additional columns from enrichers.
+        The actual columns depend on which enrichers succeeded and the merge strategy.
+        """
+
+        strict = False  # Allow additional qualified columns from enrichers
+        coerce = True  # Enable type coercion for nullable integers
+
+
+class CompositeMoleculeGoldSchema(pa.DataFrameModel):
+    """Schema for Composite Molecule in Gold layer.
+
+    Merged molecule entity combining data from multiple providers:
+    - Seed: chembl_molecule (pharmaceutical compounds with clinical data)
+    - Enrichers: pubchem_compound (chemical properties and synonyms)
+
+    Column naming:
+        Business columns use qualified format: {provider}.{entity}.{field}
+        Example: chembl.molecule.canonical_smiles, pubchem.compound.molecular_weight
+
+    Join keys:
+        - Primary: inchikey (IUPAC standard, 27 characters)
+        - Fallback: canonical_smiles (less reliable due to canonization differences)
+
+    Required fields:
+        - System fields (entity_id, content_hash)
+        - Seed primary key (molecule_chembl_id)
+        - Lineage metadata (_composite_run_id, etc.)
+
+    Note: Uses strict=False to allow variable enricher columns.
+    """
+
+    # =========================================================================
+    # System Fields (from seed)
+    # =========================================================================
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # =========================================================================
+    # DQ Fields (from seed)
+    # =========================================================================
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
+    # =========================================================================
+    # Lineage Metadata (from seed)
+    # =========================================================================
+    run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
+    run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
+    source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
+    ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
+    index: Series[int] = pa.Field(nullable=False, alias="_index")
+
+    # Source tracking (from seed)
+    source: Series[str] = pa.Field(nullable=True, alias="_source")
+
+    # =========================================================================
+    # Composite Lineage Metadata (added by MergeService)
+    # =========================================================================
+    composite_run_id: Series[str] = pa.Field(nullable=False, alias="_composite_run_id")
+    source_providers: Series[str] = pa.Field(
+        nullable=False, alias="_source_providers"
+    )  # JSON list
+    enrichment_status: Series[str] = pa.Field(
+        nullable=False, alias="_enrichment_status"
+    )  # JSON dict
+    lineage_created_at: Series[str] = pa.Field(
+        nullable=False, alias="_lineage_created_at"
+    )  # ISO timestamp
+
+    # =========================================================================
+    # Seed Primary Key (ChEMBL molecule ID)
+    # =========================================================================
+    # Note: In merged output, this appears as: chembl.molecule.molecule_chembl_id
+    # The unqualified version may also be present depending on merge configuration
+
+    # =========================================================================
+    # Core Business Fields (may be qualified or coalesced)
+    # =========================================================================
+    # Note: These fields may appear with qualified names depending on merge strategy.
+    #
+    # Example qualified names:
+    # - chembl.molecule.molecule_chembl_id
+    # - chembl.molecule.canonical_smiles
+    # - chembl.molecule.inchi_key
+    # - chembl.molecule.max_phase
+    # - pubchem.compound.cid
+    # - pubchem.compound.molecular_weight
+    # - pubchem.compound.xlogp
+    # - pubchem.compound.iupac_name
+    #
+    # Since columns are dynamically determined by enrichers, we use strict=False
+
+    class Config:
+        """Pandera configuration.
+
+        Note: strict=False allows additional columns from enrichers.
+        The actual columns depend on which enrichers succeeded and the merge strategy.
+        """
+
+        strict = False  # Allow additional qualified columns from enrichers
+        coerce = True  # Enable type coercion for nullable integers
+
+
+__all__ = [
+    "CompositeMoleculeGoldSchema",
+    "CompositePublicationGoldSchema",
 ]
 
 ================================================================================
@@ -7026,6 +8243,12 @@ from __future__ import annotations
 import pandera.pandas as pa
 from pandera.typing import Series
 
+from bioetl.domain.schemas.common.publication_base import (
+    LOOKUP_METHODS,
+    OA_STATUS_VALUES,
+)
+from bioetl.domain.validation import DOI_REGEX_PATTERN
+
 
 class PubMedPublicationGoldSchema(pa.DataFrameModel):
     """Schema for PubMed Publication in Gold layer.
@@ -7037,9 +8260,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
     pmid: Series[str] = pa.Field(nullable=False)
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     pmc_id: Series[str] = pa.Field(nullable=True)
-    title: Series[str] = pa.Field(nullable=True)
+    title: Series[str] = pa.Field(nullable=False)
     abstract: Series[str] = pa.Field(nullable=True)
     abstract_structured: Series[bool] = pa.Field(
         nullable=True
@@ -7048,9 +8271,9 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
 
     # Journal information
     journal: Series[str] = pa.Field(nullable=True)
-    journal_abbrev: Series[str] = pa.Field(nullable=True)
+
+    journal_name_short: Series[str] = pa.Field(nullable=True)
     # PubMed-specific journal fields (forensic retention)
-    journal_title: Series[str] = pa.Field(nullable=True)  # Full journal name (PubMed)
     journal_iso_abbrev: Series[str] = pa.Field(nullable=True)  # ISO abbreviation
     journal_issn_type: Series[str] = pa.Field(
         nullable=True
@@ -7061,23 +8284,35 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     issue: Series[str] = pa.Field(nullable=True)
 
     # Page information
-    pages: Series[str] = pa.Field(nullable=True)  # Legacy: medline_pgn format
+    page_range: Series[str] = pa.Field(nullable=True)  # Page range string
     medline_pgn: Series[str] = pa.Field(nullable=True)  # Original PubMed pagination
-    first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
 
-    # Authors (affiliations excluded per user request)
+    # Authors and affiliations
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    affiliation_list: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of unique affiliations
+    authors_with_affiliations: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array: author -> affiliations
+    affiliation_structured: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array with ROR/GRID identifiers
+
+    # Additional identifiers (PubMed-specific)
+    pii: Series[str] = pa.Field(nullable=True)  # Publisher Item Identifier
+    mid: Series[str] = pa.Field(nullable=True)  # Manuscript ID (PMC submission)
+    publisher_id: Series[str] = pa.Field(nullable=True)  # Publisher-specific identifier
 
     # Date fields
-    pub_date: Series[str] = pa.Field(nullable=True)
     pub_month: Series[float] = pa.Field(nullable=True, coerce=True)  # Month (1-12)
     pub_day: Series[float] = pa.Field(nullable=True, coerce=True)  # Day (1-31)
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
-    year: Series[float] = pa.Field(nullable=True, coerce=True)
     publication_year: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # Legacy alias
+        nullable=True, ge=1500, le=2100, coerce=True
+    )
     # Note: accepted_date, received_date, revised_date, epub_date excluded per design
     # MEDLINE-specific dates
     date_completed: Series[str] = pa.Field(
@@ -7094,11 +8329,12 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     publication_type_list: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of pub types
+    publication_type: Series[object] = pa.Field(nullable=True)  # list[str]
     publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Classification
-    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
-    mesh_terms: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_mesh: Series[object] = pa.Field(nullable=True)  # list[str]
     chemicals: Series[object] = pa.Field(nullable=True)  # list[str]
     databanks: Series[object] = pa.Field(nullable=True)  # list[str]
     gene_symbols: Series[object] = pa.Field(nullable=True)  # list[str]
@@ -7113,16 +8349,15 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     mesh_heading_count: Series[float] = pa.Field(nullable=True, coerce=True)
     keyword_count: Series[float] = pa.Field(nullable=True, coerce=True)
     grant_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    reference_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -7154,41 +8389,41 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
 
     # Primary identifier
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
-    doi: Series[str] = pa.Field(nullable=False)
+    doi: Series[str] = pa.Field(nullable=False, str_matches=DOI_REGEX_PATTERN)
 
-    # Cross-reference IDs for linking publications across providers
-    # pmid: PubMed ID (numeric string: "12345678") - Always NULL for CrossRef
-    pmid: Series[str] = pa.Field(nullable=True)
-    # pmc_id: PubMed Central ID (format: "PMC1234567") - Always NULL for CrossRef
-    pmc_id: Series[str] = pa.Field(nullable=True)
+    # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
+    # and transformer explicitly removes these fields from output
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     journal: Series[str] = pa.Field(nullable=True)
-    issn: Series[object] = pa.Field(nullable=True)  # list[str]
+    issn: Series[str] = pa.Field(nullable=True)  # Primary ISSN (scalar)
+    issn_list: Series[str] = pa.Field(nullable=True)  # JSON array of all ISSNs
     publisher: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
-    first_page: Series[str] = pa.Field(nullable=True)
-    last_page: Series[str] = pa.Field(nullable=True)
+    page_first: Series[str] = pa.Field(nullable=True)
+    page_last: Series[str] = pa.Field(nullable=True)
 
     # Date fields
-    year: Series[float] = pa.Field(nullable=True, ge=1900, le=2100, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )
     publication_date: Series[str] = pa.Field(nullable=True)  # Unified: YYYY-MM-DD
     published_print: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
     published_online: Series[str] = pa.Field(nullable=True)  # Legacy: provider-specific
 
     # Metadata
-    # Note: doc_type excluded; CrossRef uses raw 'type' field instead
-    type: Series[str] = pa.Field(
+    # Raw CrossRef type (journal-article, etc.) - unified field name
+    publication_type: Series[str] = pa.Field(
         nullable=True
     )  # Raw CrossRef type (journal-article, etc.)
-    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
-    reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
     license_url: Series[str] = pa.Field(nullable=True)
-    subjects: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Content domain (Crossmark/license restrictions)
     content_domain_domains: Series[object] = pa.Field(nullable=True)  # list[str]
@@ -7203,19 +8438,29 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     published: Series[str] = pa.Field(nullable=True)
 
     # Short container title
-    short_container_title: Series[object] = pa.Field(nullable=True)  # list[str]
+    journal_name_short: Series[str] = pa.Field(nullable=True)
 
     # ISSN by type
     issn_print: Series[str] = pa.Field(nullable=True)
     issn_electronic: Series[str] = pa.Field(nullable=True)
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    # Author identifiers
+    author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCID IDs
+    author_details: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of author objects (given, family, orcid, sequence, affiliations)
+
+    # Bibliographic references
+    references: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of cited references (DOI, title, author, year)
+
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -7250,50 +8495,81 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
 
     # Cross-reference IDs for linking publications across providers
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
     # Note: pmc_id excluded from transformer output per design
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
-    affiliations: Series[object] = pa.Field(nullable=True)  # list[str]
-    concepts: Series[object] = pa.Field(nullable=True)  # list[str]
-    mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
-    keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
+    # NOTE: concepts field removed - OpenAlex deprecated concepts in 2024, use topics instead
+    subject_mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
+    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
     mag_id: Series[str] = pa.Field(nullable=True)  # Microsoft Academic Graph ID
 
     # Journal info
     journal: Series[str] = pa.Field(nullable=True)
     issn: Series[str] = pa.Field(nullable=True)
     publisher: Series[str] = pa.Field(nullable=True)
+    volume: Series[str] = pa.Field(nullable=True)
+    issue: Series[str] = pa.Field(nullable=True)
 
-    # Page fields (nullable - OpenAlex API doesn't typically provide page information)
-    # Added for schema consistency across all publication providers
-    first_page: Series[str] = pa.Field(nullable=True)
-    last_page: Series[str] = pa.Field(nullable=True)
+    # Page fields (from biblio object)
+    page_first: Series[str] = pa.Field(nullable=True)
+    page_last: Series[str] = pa.Field(nullable=True)
 
     # Date fields
-    year: Series[float] = pa.Field(nullable=True, ge=1500, le=2100, coerce=True)
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Metadata
-    # Note: doc_type excluded; OpenAlex uses raw 'type' field instead
-    type: Series[str] = pa.Field(nullable=True)  # Raw OpenAlex type (article, etc.)
+    # Raw OpenAlex type (article, book, etc.) - unified field name
+    publication_type: Series[str] = pa.Field(
+        nullable=True
+    )  # Raw OpenAlex type (article, etc.)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
-    oa_status: Series[str] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True, isin=OA_STATUS_VALUES)
+    is_retracted: Series[bool] = pa.Field(
+        nullable=False, coerce=True
+    )  # Quality indicator
     # OpenAlex source field: cited_by_count
-    # Unified BioETL field: citation_count (standardized across all providers)
-    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
+    # Unified BioETL field: citations_received (standardized across all providers)
+    citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
 
-    # Source tracking (maps to _source column in DataFrame)
+    # Metrics
+    fwci: Series[float] = pa.Field(
+        nullable=True, ge=0
+    )  # Field-Weighted Citation Impact
+    citations_made: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )  # Number of references
+
+    # Topics (hierarchical 4-level classification - replaces deprecated concepts)
+    subject_topics: Series[str] = pa.Field(nullable=True)  # JSON array
+    primary_topic: Series[str] = pa.Field(nullable=True)  # JSON object
+
+    # Grants/funding information
+    grants: Series[str] = pa.Field(nullable=True)  # JSON array
+
+    # Institution identifiers
+    institution_ids: Series[object] = pa.Field(nullable=True)  # list[str]
+    institution_country_codes: Series[object] = pa.Field(nullable=True)  # list[str]
+    ror_ids: Series[str] = pa.Field(nullable=True)  # JSON array of ROR URLs
+
+    # Author identifiers
+    author_openalex_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
+    author_orcids: Series[str] = pa.Field(nullable=True)  # ORCID IDs
+
     source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=False, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -7327,48 +8603,69 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     paper_id: Series[str] = pa.Field(nullable=False)
 
     # External IDs
-    doi: Series[str] = pa.Field(nullable=True)
+    doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     pmid: Series[str] = pa.Field(nullable=True)
     # Note: pmc_id and arxiv_id excluded from transformer output per design
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Core fields
     title: Series[str] = pa.Field(nullable=True)
-    # abstract excluded per user request
+    abstract: Series[str] = pa.Field(nullable=True)
+    authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     tldr: Series[str] = pa.Field(nullable=True)
-    year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    publication_year: Series[float] = pa.Field(
+        nullable=True, ge=1500, le=2100, coerce=True
+    )  # int64
     publication_date: Series[str] = pa.Field(nullable=True)
 
     # Journal/Venue
     journal: Series[str] = pa.Field(nullable=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)  # Parsed from combined volume/issue
-    pages: Series[str] = pa.Field(nullable=True)  # Legacy: "first-last" format
-    first_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    last_page: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
-    venue: Series[str] = pa.Field(nullable=True)
+    page_range: Series[str] = pa.Field(nullable=True)  # Page range: "first-last" format
+    page_first: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    page_last: Series[str] = pa.Field(nullable=True)  # Unified: parsed from pages
+    # Note: venue excluded - transformer maps venue → journal via extract_journal_info
 
     # Metrics
-    citation_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
-    reference_count: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+    citations_received: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )  # int64
+    citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)  # int64
+    influential_citation_count: Series[float] = pa.Field(
+        nullable=True, ge=0, coerce=True
+    )  # int64
 
     # Open Access
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     open_access_url: Series[str] = pa.Field(nullable=True)
-    oa_status: Series[str] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(nullable=True, isin=OA_STATUS_VALUES)
 
     # Classification (JSON strings)
-    fields_of_study: Series[str] = pa.Field(nullable=True)
-    publication_types: Series[str] = pa.Field(nullable=True)
-    # authors, affiliations excluded per user request
+    subject_fields: Series[str] = pa.Field(nullable=True)
+    publication_type: Series[str] = pa.Field(nullable=True)
+    publication_types: Series[str] = pa.Field(nullable=True)  # JSON array
+    citation_contexts: Series[str] = pa.Field(nullable=True)  # JSON array
 
-    # Source tracking (maps to _source column in DataFrame)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    # Author affiliations
+    affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
+
+    # Author identifiers
+    author_s2_ids: Series[str] = pa.Field(nullable=True)  # JSON array (40-char hex)
+    author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCIDs
+    author_h_indices: Series[str] = pa.Field(
+        nullable=True
+    )  # JSON array of h-index values
+
+    # External identifiers
+    dblp_id: Series[str] = pa.Field(nullable=True)  # DBLP publication key
+
+    source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
-    # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
+    lookup_method: Series[str] = pa.Field(
+        nullable=False, alias="_lookup_method", isin=LOOKUP_METHODS
+    )
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
     # DQ fields
@@ -7418,16 +8715,61 @@ from pandera.typing import Series
 
 
 class UniProtProteinGoldSchema(pa.DataFrameModel):
-    """Schema for UniProt Protein in Gold layer."""
+    """Schema for UniProt Protein in Gold layer.
 
+    Extended schema with functional annotations, cross-references, and quality metrics.
+    See Silver schema in infrastructure/schemas/silver.py for field descriptions.
+    """
+
+    # System fields
     entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
+
+    # Core identifiers
     accession: Series[str] = pa.Field(nullable=False)
     entry_name: Series[str] = pa.Field(nullable=True)
-    protein_name: Series[str] = pa.Field(nullable=True)
+
+    # Structural features (JSON)
+    active_sites: Series[str] = pa.Field(nullable=True)  # ft_act_site features
+    binding_sites: Series[str] = pa.Field(nullable=True)  # ft_binding features
+    domains: Series[str] = pa.Field(nullable=True)  # ft_domain features
+    features_json: Series[str] = pa.Field(nullable=True)  # All features (forensic)
+
+    # Functional annotations
+    activity_regulation: Series[str] = pa.Field(nullable=True)
+    catalytic_activity: Series[str] = pa.Field(nullable=True)
+    disease_involvement: Series[str] = pa.Field(nullable=True)
+    function_comment: Series[str] = pa.Field(nullable=True)
+    pathway: Series[str] = pa.Field(nullable=True)
+    similarity_comment: Series[str] = pa.Field(nullable=True)
+    subcellular_location: Series[str] = pa.Field(nullable=True)
+    tissue_specificity: Series[str] = pa.Field(nullable=True)
+
+    # Cross-references (JSON arrays)
+    chembl_ids: Series[str] = pa.Field(nullable=True)
+    drugbank_ids: Series[str] = pa.Field(nullable=True)
+    go_terms: Series[str] = pa.Field(nullable=True)
+    interpro_xrefs: Series[str] = pa.Field(nullable=True)
+    pdb_xrefs: Series[str] = pa.Field(nullable=True)
+    pfam_xrefs: Series[str] = pa.Field(nullable=True)
+    reactome_xrefs: Series[str] = pa.Field(nullable=True)
+
+    # Basic protein data
     gene_names: Series[object] = pa.Field(nullable=True)  # list[str]
-    organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    sequence_length: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    content_hash: Series[str] = pa.Field(nullable=False)
+    organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 → float
+    protein_name: Series[str] = pa.Field(nullable=True)
+    sequence_length: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 → float
+
+    # Quality metrics
+    annotation_score: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 → float
+    protein_existence: Series[str] = pa.Field(nullable=True)  # Evidence level string
+    reviewed: Series[bool] = pa.Field(
+        nullable=True, coerce=True
+    )  # Swiss-Prot vs TrEMBL
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -7445,7 +8787,7 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
 class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     """Schema for UniProt ID Mapping in Gold layer.
 
-    Maps ChEMBL target IDs to UniProt accessions.
+    Maps ChEMBL target IDs to UniProt accessions with entry metadata.
     Records with mapping_status='not_found' have null uniprot_accession.
     """
 
@@ -7459,8 +8801,23 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     # Mapped identifier (nullable - None if not found)
     uniprot_accession: Series[str] = pa.Field(nullable=True)
 
-    # Mapping status: 'found', 'not_found', 'error'
+    # Mapping status: 'found', 'not_found', 'error', 'multiple'
     mapping_status: Series[str] = pa.Field(nullable=False)
+
+    # UniProt entry metadata
+    uniprot_entry_name: Series[str] = pa.Field(nullable=True)
+    organism_scientific: Series[str] = pa.Field(nullable=True)
+    organism_common: Series[str] = pa.Field(nullable=True)
+    taxonomy_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int → float
+    protein_name: Series[str] = pa.Field(nullable=True)
+    gene_primary: Series[str] = pa.Field(nullable=True)
+    sequence_length: Series[float] = pa.Field(nullable=True, coerce=True)  # int → float
+    sequence_mass: Series[float] = pa.Field(nullable=True, coerce=True)  # int → float
+    reviewed: Series[bool] = pa.Field(nullable=True, coerce=True)  # nullable bool
+    annotation_score: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int → float
+    all_mappings: Series[str] = pa.Field(nullable=True)
 
     # DQ warning flag (True for not_found)
     dq_warn: Series[bool] = pa.Field(nullable=False, alias="_dq_warn")
@@ -7537,6 +8894,8 @@ from bioetl.domain.entities.chembl_structures import (
     Target,
     TargetComponent,
 )
+from bioetl.domain.entities.chembl_subcellular_fraction import SubcellularFraction
+from bioetl.domain.entities.chembl_tissue import Tissue
 
 # CrossRef DTO + Entity
 from bioetl.domain.entities.crossref import (
@@ -7596,10 +8955,12 @@ __all__ = [
     "PublicationEntityBase",
     "PublicationRecord",
     "SemanticScholarPublicationEntity",
+    "SubcellularFraction",
     "Target",
     "TargetComponent",
     "TargetComponentRecord",
     "TargetRecord",
+    "Tissue",
     "UniprotTarget",
 ]
 
@@ -7696,7 +9057,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
@@ -7744,7 +9105,7 @@ def _safe_json(val: Any) -> str | None:
     return serialize_to_json(val) if val else None
 
 
-class BioactivityState(str, Enum):
+class BioactivityState(StrEnum):
     """Processing state: RAW -> NORMALIZED -> VALIDATED."""
 
     RAW = "raw"
@@ -8488,9 +9849,6 @@ class TargetRecord(BaseModel):
     component_descriptions: list[str] | None = Field(
         default=None, description="Component descriptions"
     )
-    component_organisms: list[str] | None = Field(
-        default=None, description="Component organisms"
-    )
     component_tax_ids: list[int] | None = Field(
         default=None, description="Component taxonomy IDs"
     )
@@ -8540,9 +9898,6 @@ class ChemblPublicationRecord(BaseModel):
 
     # Journal information
     journal: str | None = Field(default=None, description="Journal name")
-    journal_full_title: str | None = Field(
-        default=None, description="Full journal title"
-    )
     year: int | None = Field(default=None, description="Publication year")
     volume: str | None = Field(default=None, description="Volume number")
     issue: str | None = Field(default=None, description="Issue number")
@@ -9004,50 +10359,25 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain.entities.base import BaseEntity
-from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
+from bioetl.domain.entities.publication_base import PublicationEntityBase
 
 
 @dataclass(frozen=True, kw_only=True)
-class ChemblPublication(BaseEntity):
+class ChemblPublication(PublicationEntityBase):
     """Represents a scientific document/publication (ChEMBL Document).
 
     Maps to ChEMBL API endpoint: /document
 
-    Contains all fields from ChEMBL document API endpoint.
+    Содержит только поля ChEMBL; общие поля публикации наследуются
+    из PublicationEntityBase.
     See: https://www.ebi.ac.uk/chembl/api/data/document
     """
 
     # Primary identifier
     document_chembl_id: str
 
-    # Publication identifiers
-    # Standardized to 'pmid' for cross-provider JOIN consistency (was 'pubmed_id')
-    pmid: str | None = None  # Numeric string for cross-provider consistency
-    doi: str | None = None
-
-    # Core metadata
-    title: str | None = None
-    authors: str | None = None  # JSON array of hashed author names
-    abstract: str | None = None
-    doc_type: str | None = None  # PUBLICATION, PATENT, DATASET, BOOK
-
-    # Journal information
-    journal: str | None = None
-    journal_full_title: str | None = None
-    year: int | None = None
-    publication_date: str | None = None  # Always NULL for ChEMBL (excluded from output)
     volume: str | None = None
     issue: str | None = None
-    first_page: str | None = None
-    last_page: str | None = None
-
-    # Cross-reference IDs (pmc_id always NULL for ChEMBL, excluded from output)
-    pmc_id: str | None = None
-
-    # Unified publication fields (always NULL for ChEMBL, excluded from output)
-    citation_count: int | None = None
-    is_oa: bool | None = None
-    language: str | None = None  # Excluded from PyArrow/Gold schemas
 
     # Source information
     src_id: int | None = None
@@ -9055,13 +10385,6 @@ class ChemblPublication(BaseEntity):
     # ChEMBL release metadata
     chembl_release: str | None = None  # e.g., CHEMBL_1, CHEMBL_34
     creation_date: str | None = None  # Record creation date in ChEMBL (YYYY-MM-DD)
-
-    # System fields
-    _source: str = "chembl"  # Data source identifier
-
-    # Lookup metadata (tracks resolution strategy)
-    _lookup_method: str = "direct"  # ChEMBL uses direct extraction
-    _original_id: str | None = None
 
     # Note: _dq_warn and _dq_error are inherited from BaseEntity
 
@@ -9072,13 +10395,6 @@ class ChemblPublication(BaseEntity):
     def _validate_invariants(self) -> None:
         if not self.document_chembl_id:
             raise ValueError("ChemblPublication document_chembl_id is required")
-        if self.year is not None and not (
-            MIN_PUBLICATION_YEAR <= self.year <= MAX_PUBLICATION_YEAR
-        ):
-            raise ValueError(
-                f"Year must be between {MIN_PUBLICATION_YEAR}-{MAX_PUBLICATION_YEAR}, "
-                f"got {self.year}"
-            )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -9140,13 +10456,8 @@ class Target(BaseEntity):
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: int | None = None
     species_group_flag: bool | None = None
-    description: str | None = None  # General target description
     downgraded: bool | None = None  # Flag for deprecated/downgraded records
-
-    # Optional fields (present for specific target types)
-    dap_id: int | None = None  # Drug-Affinity Panel ID (if available)
     pipeline_stages: str | None = None  # JSON string (for complexes/families)
-    target_constraints: str | None = None  # JSON string (if available)
 
     # Complex fields (JSON serialized)
     target_components: str | None = None  # JSON string of array
@@ -9155,13 +10466,11 @@ class Target(BaseEntity):
 
     # Flattened component fields (aggregated lists)
     component_accessions: list[str] | None = None
+    component_id: int | None = None  # Primary component ID (component_ids[0])
     component_ids: list[int] | None = None
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
-    component_organisms: list[str] | None = None  # Organisms from components
-    # Standardized to 'taxonomy_ids' for NCBI consistency (was 'tax_ids')
-    component_taxonomy_ids: list[int] | None = None  # Taxonomy IDs from components
 
     # Note: protein_classifications are NOT available in /target endpoint.
     # They are only available via /target_component endpoint (TargetComponent entity).
@@ -9200,6 +10509,9 @@ class TargetComponent(BaseEntity):
     protein_classifications: str | None = None  # JSON string of list (forensic)
 
     # Flattened fields (extracted from protein_classifications)
+    protein_classification_id: int | None = (
+        None  # Primary classification (first from list)
+    )
     protein_classification_ids: list[int] | None = None
 
     def __post_init__(self) -> None:
@@ -9486,6 +10798,124 @@ __all__ = [
 ]
 
 ================================================================================
+File: chembl_subcellular_fraction.py
+Path: entities\chembl_subcellular_fraction.py
+================================================================================
+"""ChEMBL Subcellular Fraction domain entity.
+
+Derived entity: extracts unique subcellular fractions from Assay records.
+This is a reference/lookup entity for biological context normalization.
+
+Source: assay_subcellular_fraction field from ChEMBL API /assay endpoint
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from bioetl.domain.entities.base import BaseEntity
+
+
+@dataclass(frozen=True, kw_only=True)
+class SubcellularFraction(BaseEntity):
+    """Represents a subcellular fraction used in ChEMBL assays.
+
+    Subcellular fractions describe the cellular compartment or preparation
+    used in bioassay experiments (e.g., "Microsomes", "Cytosol", "Mitochondria").
+
+    This is a derived entity that extracts and deduplicates unique subcellular
+    fraction values from Assay records, creating a lookup/reference table.
+
+    Composite Key: subcellular_fraction (normalized)
+    Source: Nested in ChEMBL API /assay response (assay_subcellular_fraction field)
+    See: https://www.ebi.ac.uk/chembl/api/data/assay
+
+    Example values:
+    - Microsomes
+    - Cytosol
+    - Mitochondria
+    - Membrane
+    - Cell lysate
+    - S9 fraction
+    """
+
+    # === Primary Key Field ===
+    subcellular_fraction: str  # Normalized subcellular fraction name
+
+    # === Statistics (aggregated from source assays) ===
+    assay_count: int | None = None  # Number of assays using this fraction
+
+    # === Example Source Reference ===
+    example_assay_chembl_id: str | None = None  # One assay using this fraction
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.subcellular_fraction:
+            raise ValueError("Subcellular fraction name is required")
+        if not self.subcellular_fraction.strip():
+            raise ValueError("Subcellular fraction cannot be empty or whitespace")
+        if self.assay_count is not None and self.assay_count < 0:
+            raise ValueError(
+                f"assay_count must be non-negative, got {self.assay_count}"
+            )
+
+
+__all__ = ["SubcellularFraction"]
+
+================================================================================
+File: chembl_tissue.py
+Path: entities\chembl_tissue.py
+================================================================================
+"""ChEMBL Tissue domain entity.
+
+Represents tissue classification from ChEMBL database.
+See: https://www.ebi.ac.uk/chembl/api/data/tissue
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from bioetl.domain.entities.base import BaseEntity
+
+
+@dataclass(frozen=True, kw_only=True)
+class Tissue(BaseEntity):
+    """Represents a tissue type (ChEMBL Tissue).
+
+    Tissues are anatomical structures used in assay experiments.
+    They have 1:M relationship with Assay (via assay.tissue_chembl_id FK).
+
+    Contains all fields from ChEMBL tissue API endpoint.
+    See: https://www.ebi.ac.uk/chembl/api/data/tissue
+    """
+
+    # Primary identifier (REQUIRED)
+    tissue_chembl_id: str
+
+    # Core metadata (REQUIRED)
+    pref_name: str
+
+    # External ontology identifiers (API-OPTIONAL)
+    bto_id: str | None = None  # BRENDA Tissue Ontology
+    caloha_id: str | None = None  # CALIPHO tissue ontology
+    efo_id: str | None = None  # Experimental Factor Ontology
+    uberon_id: str | None = None  # Uberon multi-species anatomy ontology
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._validate_invariants()
+
+    def _validate_invariants(self) -> None:
+        if not self.tissue_chembl_id:
+            raise ValueError("Tissue ChEMBL ID is required")
+        if not self.pref_name:
+            raise ValueError("Tissue pref_name is required")
+
+================================================================================
 File: crossref.py
 Path: entities\crossref.py
 ================================================================================
@@ -9518,68 +10948,6 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
-
-# Document type mapping from CrossRef types to BioETL unified types.
-# See: https://api.crossref.org/types for complete list (30 types).
-#
-# Unified types (aligned with chembl/publication.py schema):
-# - PUBLICATION: Journal articles, conference papers, peer reviews
-# - BOOK: Books, monographs, book chapters, dissertations, reference entries
-# - PREPRINT: Pre-publication works (posted-content)
-# - DATASET: Research data and databases
-# - OTHER: Reports, standards, container types, supplementary materials, funding, unclassified
-#
-# Rationale:
-# - BOOK includes dissertations (thesis = monograph) and reference entries
-# - Reports/standards → OTHER (technical documents, not scholarly publications)
-# - "component" → OTHER (supplementary material, not standalone scholarly work)
-# - Container types → OTHER (metadata records, not scholarly content)
-CROSSREF_TYPE_MAP: dict[str, str] = {
-    # === Journal/Conference Articles → PUBLICATION ===
-    "journal-article": "PUBLICATION",
-    "proceedings-article": "PUBLICATION",
-    "peer-review": "PUBLICATION",  # Published peer review
-    # === Books & Book Parts → BOOK ===
-    "book": "BOOK",
-    "monograph": "BOOK",
-    "edited-book": "BOOK",
-    "reference-book": "BOOK",  # Dictionary, encyclopedia
-    "book-chapter": "BOOK",
-    "book-section": "BOOK",
-    "book-part": "BOOK",
-    "book-track": "BOOK",  # Audio book track
-    "dissertation": "BOOK",  # Thesis/monograph
-    "reference-entry": "BOOK",  # Dictionary/encyclopedia entry
-    # === Pre-publication → PREPRINT ===
-    "posted-content": "PREPRINT",
-    # === Research Data → DATASET ===
-    "dataset": "DATASET",
-    "database": "DATASET",
-    # === Reports & Standards → OTHER ===
-    "report": "OTHER",  # Technical report
-    "report-component": "OTHER",  # Part of a report
-    "standard": "OTHER",  # Technical standard
-    # === Supplementary Material → OTHER ===
-    "component": "OTHER",  # Figures, tables, supplementary files
-    # === Container/Series Types → OTHER ===
-    # (Metadata records for series, not individual works)
-    "journal": "OTHER",
-    "journal-volume": "OTHER",
-    "journal-issue": "OTHER",
-    "proceedings": "OTHER",
-    "proceedings-series": "OTHER",
-    "book-series": "OTHER",
-    "book-set": "OTHER",
-    "report-series": "OTHER",
-    # === Funding → OTHER ===
-    "grant": "OTHER",
-    # === Unclassified → OTHER ===
-    "other": "OTHER",  # Unclassified content
-}
-
-# Default type for unknown CrossRef types (conservative fallback)
-CROSSREF_TYPE_DEFAULT = "PUBLICATION"
-
 
 # === Pydantic DTO Model ===
 
@@ -9683,22 +11051,22 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     - Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
     - Business analysts can understand the model without knowing CrossRef API specifics
 
-    Inherited from PublicationEntityBase:
-        doi, pmid, title, abstract, authors, journal, issn (str), publisher,
-        year, publication_date, citation_count, doc_type, language, is_oa,
+    Inherited from PublicationEntityBase (unified field names):
+        doi, pmid, title, abstract, authors, affiliation_list, journal, issn (str), publisher,
+        page_first, page_last, publication_year, publication_date,
+        citations_received, citations_made, publication_type, language, is_oa,
         oa_status, _lookup_method, _original_id.
 
     CrossRef-specific Attributes:
         issn: List of ISSNs (overrides base str|None with list[str]).
         volume: Volume number.
         issue: Issue number.
-        first_page: First page number.
-        last_page: Last page number.
         published_print: Print publication date (ISO format).
         published_online: Online publication date (ISO format).
-        reference_count: Number of references in the publication.
         license_url: License URL.
-        subjects: Subject areas.
+        journal_name_short: Short journal/container title (unified field name).
+        subject_keywords: Subject areas (unified field name).
+        publication_type: Raw CrossRef type (e.g., "journal-article"), inherited from base.
 
     Note: doi is required for CrossRef publications and validated in __post_init__.
 
@@ -9715,18 +11083,21 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # CrossRef-specific publication details
     volume: str | None = None
     issue: str | None = None
-    # first_page and last_page inherited from PublicationEntityBase
+    # page_first and page_last inherited from PublicationEntityBase (unified names)
 
     # CrossRef-specific dates
     published_print: str | None = None  # ISO date: YYYY-MM-DD or YYYY-MM or YYYY
     published_online: str | None = None  # ISO date
 
     # CrossRef-specific metrics
-    reference_count: int | None = None  # references-count
+    # Note: citations_received and citations_made inherited from base (unified names)
+    # reference_count removed - mapped to citations_made in base
 
     # CrossRef-specific metadata
     license_url: str | None = None
-    subjects: list[str] = field(default_factory=list)
+    subject_keywords: list[str] = field(
+        default_factory=list
+    )  # Unified field name (was: subjects)
 
     # Content domain (Crossmark/license restrictions)
     content_domain_domains: list[str] = field(default_factory=list)
@@ -9738,8 +11109,8 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # Canonical publication date (preferred over print/online)
     published: str | None = None
 
-    # Short journal/container title
-    short_container_title: list[str] = field(default_factory=list)
+    # Short journal/container title (unified field name)
+    journal_name_short: str | None = None  # Was: short_container_title
 
     # ISSN by type (split from generic ISSN list)
     issn_print: str | None = None
@@ -9754,9 +11125,8 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     # Bibliographic references (JSON array of citation data)
     references: str | None = None
 
-    # Raw document type from CrossRef API (e.g., "journal-article", "book-chapter")
-    # Unlike doc_type (unified mapping), this preserves the original CrossRef type value
-    type: str | None = None
+    # Note: publication_type inherited from PublicationEntityBase
+    # Stores raw CrossRef type (e.g., "journal-article", "book-chapter")
 
     # Override: Default source for CrossRef
     _source: str = "crossref"
@@ -9772,8 +11142,6 @@ class CrossRefPublicationEntity(PublicationEntityBase):
 
 
 __all__ = [
-    "CROSSREF_TYPE_DEFAULT",
-    "CROSSREF_TYPE_MAP",
     "CrossRefPublicationEntity",
     "PublicationRecord",
 ]
@@ -9785,7 +11153,7 @@ Path: entities\openalex.py
 """OpenAlex domain entities.
 
 Contains OpenAlexPublicationRecord (DTO) and OpenAlexPublicationEntity (domain).
-Topics vs Concepts: OpenAlex deprecated concepts in 2024; use topics instead.
+Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 """
 
 from __future__ import annotations
@@ -9797,28 +11165,6 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
-
-# Document type mapping from OpenAlex types to internal types
-OPENALEX_TYPE_MAP = {
-    "article": "PUBLICATION",
-    "journal-article": "PUBLICATION",
-    "book-chapter": "PUBLICATION",
-    "book": "PUBLICATION",
-    "dissertation": "PUBLICATION",
-    "dataset": "DATASET",
-    "preprint": "PREPRINT",
-    "posted-content": "PREPRINT",
-    "proceedings": "PUBLICATION",
-    "proceedings-article": "PUBLICATION",
-    "report": "PUBLICATION",
-    "standard": "PUBLICATION",
-    "peer-review": "PUBLICATION",
-    "editorial": "PUBLICATION",
-    "erratum": "PUBLICATION",
-    "letter": "PUBLICATION",
-    "review": "PUBLICATION",
-    "other": "OTHER",
-}
 
 # Lookup method values for tracking DOI resolution strategy
 LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
@@ -9902,15 +11248,8 @@ class OpenAlexPublicationRecord(BaseModel):
         default_factory=list, description="Funding/grant information"
     )
 
-    # Concepts (DEPRECATED - kept for backward compatibility)
-    # OpenAlex deprecated concepts in 2024 in favor of topics
-    concepts: list[str] = PydanticField(
-        default_factory=list,
-        description="Top concept names (DEPRECATED: use topics instead)",
-    )
-
     # MeSH terms (Medical Subject Headings)
-    mesh: list[str] = PydanticField(
+    mesh_terms: list[str] = PydanticField(
         default_factory=list, description="MeSH descriptor names"
     )
 
@@ -9937,6 +11276,21 @@ class OpenAlexPublicationRecord(BaseModel):
         default_factory=list,
         description="ISO 2-letter country codes of affiliated institutions",
     )
+    ror_ids: list[str] = PydanticField(
+        default_factory=list,
+        description="ROR IDs of affiliated institutions (full URL format). "
+        "May be empty if not returned by Works API.",
+    )
+
+    # Author identifiers (JSON-serialized lists preserving author order)
+    author_orcids: str | None = PydanticField(
+        default=None,
+        description="ORCID IDs as JSON array (empty string for missing)",
+    )
+    author_openalex_ids: str | None = PydanticField(
+        default=None,
+        description="OpenAlex author IDs as JSON array (empty string for missing)",
+    )
 
     # Additional metadata
     language: str | None = PydanticField(default=None, description="Language code")
@@ -9951,7 +11305,7 @@ class OpenAlexPublicationRecord(BaseModel):
     fwci: float | None = PydanticField(
         default=None, description="Field-Weighted Citation Impact"
     )
-    referenced_works_count: int | None = PydanticField(
+    reference_count: int | None = PydanticField(
         default=None, description="Number of works referenced"
     )
 
@@ -9990,10 +11344,17 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Institution identifiers (for cross-referencing and geographic analysis)
     institution_ids: list[str] = field(default_factory=list)
     institution_country_codes: list[str] = field(default_factory=list)
+    ror_ids: list[str] = field(default_factory=list)  # ROR IDs (may be empty)
+
+    # Author identifiers (JSON-serialized lists preserving author order)
+    author_orcids: str | None = None  # ORCID IDs (empty string for missing)
+    author_openalex_ids: str | None = (
+        None  # OpenAlex author IDs (empty string for missing)
+    )
 
     # Topics (hierarchical classification - replaces deprecated concepts)
     # Each topic dict has: id, display_name, score, subfield, field, domain
-    topics: list[dict[str, Any]] = field(default_factory=list)
+    subject_topics: list[dict[str, Any]] = field(default_factory=list)
 
     # Primary topic (single most relevant topic for quick categorization)
     # Dict with: id, display_name, score, subfield, field, domain
@@ -10003,15 +11364,11 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     # Each grant dict has: funder, funder_display_name, award_id
     grants: list[dict[str, Any]] = field(default_factory=list)
 
-    # OpenAlex-specific: Concepts (DEPRECATED - kept for backward compatibility)
-    # OpenAlex deprecated concepts in 2024 in favor of topics
-    concepts: list[str] = field(default_factory=list)
-
     # MeSH terms (Medical Subject Headings)
-    mesh: list[str] = field(default_factory=list)
+    subject_mesh: list[str] = field(default_factory=list)
 
     # Keywords (author-assigned)
-    keywords: list[str] = field(default_factory=list)
+    subject_keywords: list[str] = field(default_factory=list)
 
     # Bibliographic info (from biblio object)
     volume: str | None = None
@@ -10019,14 +11376,12 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Additional metrics
     fwci: float | None = None  # Field-Weighted Citation Impact
-    referenced_works_count: int | None = None
 
     # Quality indicators
     is_retracted: bool = False
 
-    # Raw document type from OpenAlex API (e.g., "article", "preprint", "book-chapter")
-    # Unlike doc_type (unified mapping), this preserves the original OpenAlex type value
-    type: str | None = None
+    # Note: publication_type inherited from PublicationEntityBase
+    # Stores raw OpenAlex type (e.g., "article", "preprint", "book-chapter")
 
     # Override: Default source for OpenAlex
     _source: str = "openalex"
@@ -10043,7 +11398,6 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
 __all__ = [
     "LOOKUP_METHODS",
-    "OPENALEX_TYPE_MAP",
     "OpenAlexPublicationEntity",
     "OpenAlexPublicationRecord",
 ]
@@ -10374,15 +11728,20 @@ class PublicationEntityBase(BaseEntity):
         title: Publication title.
         abstract: Publication abstract (HTML tags stripped).
         authors: JSON-serialized list of author names (hashed for PII compliance).
+        affiliation_list: JSON-serialized list of unique affiliations (unified field name).
         journal: Journal/venue name.
         issn: International Standard Serial Number.
         publisher: Publisher name.
-        first_page: First page number (unified across providers).
-        last_page: Last page number (unified across providers).
-        year: Publication year.
+        page_first: First page number (unified field name).
+        page_last: Last page number (unified field name).
+        publication_year: Publication year (unified field name).
         publication_date: Publication date (ISO format: YYYY-MM-DD).
-        citation_count: Number of citations.
-        doc_type: Document type (PUBLICATION, PREPRINT, etc.).
+        citations_received: Number of citations TO this publication (unified field name).
+        citations_made: Number of references FROM this publication (unified field name).
+        publication_type: Raw provider type string (preserved for forensic/debug).
+        publication_type_unified: Unified type Level 3 (e.g. "Journal Article").
+        publication_subclass: Unified type Level 2 (e.g. "Original Experimental Data").
+        publication_class: Unified type Level 1 ("EXP", "REV", or "PEER").
         language: Publication language code.
         is_oa: Whether the publication is Open Access.
         oa_status: OA status (gold, green, hybrid, bronze, closed).
@@ -10406,26 +11765,34 @@ class PublicationEntityBase(BaseEntity):
     title: str | None = None
     abstract: str | None = None
     authors: str | None = None  # JSON-serialized list, PII hashed
-    affiliations: str | None = None  # JSON-serialized list of unique affiliations
+    affiliation_list: str | None = (
+        None  # JSON-serialized list of unique affiliations (unified field name)
+    )
 
     # Journal information
     journal: str | None = None
     issn: str | None = None
     publisher: str | None = None
 
-    # Pagination (unified across providers)
-    first_page: str | None = None
-    last_page: str | None = None
+    # Pagination (unified field names)
+    page_first: str | None = None
+    page_last: str | None = None
 
     # Dates
-    year: int | None = None
+    publication_year: int | None = None
     publication_date: str | None = None  # ISO format: YYYY-MM-DD
 
-    # Metrics
-    citation_count: int | None = None
+    # Metrics (unified field names)
+    citations_received: int | None = None  # Number of citations TO this publication
+    citations_made: int | None = None  # Number of references FROM this publication
 
     # Classification
-    doc_type: str = "PUBLICATION"
+    publication_type: str | None = None  # Raw provider type (forensic/debug)
+    publication_type_unified: str | None = None  # Level 3: "Journal Article", etc.
+    publication_subclass: str | None = (
+        None  # Level 2: "Original Experimental Data", etc.
+    )
+    publication_class: str | None = None  # Level 1: "EXP" | "REV" | "PEER"
     language: str | None = None
 
     # Open Access status
@@ -10469,7 +11836,7 @@ DTO Design:
 - Adapters return DTOs, transformers convert to Domain Entities
 
 Note: PubMedPublicationEntity inherits common fields from PublicationEntityBase.
-Provider-specific fields (pmc_id, journal_abbrev, etc.) are defined here.
+Provider-specific fields (pmc_id, journal_name_short, etc.) are defined here.
 """
 
 from __future__ import annotations
@@ -10546,7 +11913,7 @@ class ArticleRecord(BaseModel):
         default=None, description="Publication date (ISO format)"
     )
     year: int | None = PydanticField(
-        default=None, description="Publication year (1800-2100)"
+        default=None, description="Publication year (1500-2100)"
     )
     # Note: accepted_date, received_date, revised_date, epub_date excluded from
     # transformer output per design (PubMed pipeline field exclusions)
@@ -10607,14 +11974,15 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     PubMed-specific Attributes:
         pmc_id: PubMed Central ID.
-        journal_abbrev: Journal abbreviation (ISO).
+        journal_name: Full journal title (unified field name).
+        journal_name_short: Journal abbreviation (unified field name).
         volume: Volume number.
         issue: Issue number.
-        pages: Page numbers.
+        page_range: Page numbers.
         pub_date: Publication date (ISO format).
         publication_year: Alias for year (legacy field).
-        mesh_terms: MeSH terms (list).
-        keywords: Keywords (list).
+        subject_mesh: MeSH terms (list).
+        subject_keywords: Keywords (list).
         publication_types: Publication types (list).
         country: Country of publication.
 
@@ -10634,10 +12002,11 @@ class PubMedPublicationEntity(PublicationEntityBase):
     publisher_id: str | None = None  # Publisher-specific identifier
 
     # PubMed-specific journal information
-    journal_abbrev: str | None = None
+    journal: str | None = None
+    journal_name_short: str | None = None
     volume: str | None = None
     issue: str | None = None
-    pages: str | None = None  # Legacy: medline_pgn format ("123-456")
+    page_range: str | None = None  # Unified page range (e.g., "123-456")
     # first_page and last_page inherited from PublicationEntityBase
 
     # PubMed-specific dates (stored as ISO strings YYYY-MM-DD or partial)
@@ -10647,8 +12016,8 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # PubMed-specific classification
     publication_types: list[str] = field(default_factory=list)
-    keywords: list[str] = field(default_factory=list)
-    mesh_terms: list[str] = field(default_factory=list)
+    subject_keywords: list[str] = field(default_factory=list)
+    subject_mesh: list[str] = field(default_factory=list)
 
     # PubMed-specific chemical and genetic data
     chemicals: list[str] = field(default_factory=list)  # ChemicalList/NameOfSubstance
@@ -10661,11 +12030,12 @@ class PubMedPublicationEntity(PublicationEntityBase):
     abstract_structured: bool = False  # Whether abstract has labeled sections (NLM)
 
     # Additional journal fields (Gold schema forensic retention)
-    journal_title: str | None = None  # Full journal name (alias for journal)
-    journal_iso_abbrev: str | None = None  # ISO abbreviation (alias for journal_abbrev)
+    journal_iso_abbrev: str | None = (
+        None  # ISO abbreviation (alias for journal_name_short)
+    )
     journal_issn_type: str | None = None  # ISSN type: Print/Electronic/Linking
     nlm_unique_id: str | None = None  # NLM catalog ID
-    medline_pgn: str | None = None  # Original PubMed pagination (alias for pages)
+    medline_pgn: str | None = None  # Original PubMed pagination (alias for page_range)
 
     # Additional date fields
     pub_month: int | None = None  # Publication month (1-12)
@@ -10679,18 +12049,17 @@ class PubMedPublicationEntity(PublicationEntityBase):
     citation_subset: str | None = None  # Citation subset codes (e.g., 'AIM')
 
     # Enhanced affiliation data (for institutional analysis)
-    structured_affiliations: str | None = None  # JSON array with identifier metadata
+    affiliation_structured: str | None = None  # JSON array with identifier metadata
+    authors_with_affiliations: str | None = (
+        None  # JSON array: author-affiliation mapping
+    )
 
     # Denormalized counts (Gold schema)
     author_count: int | None = None
     mesh_heading_count: int | None = None
     keyword_count: int | None = None
     grant_count: int | None = None
-    reference_count: int | None = None
     chemical_count: int | None = None
-
-    # Legacy field (kept for backward compatibility)
-    publication_year: int | None = None  # Alias for year
 
     # Override: Default source for PubMed
     _source: str = "pubmed"
@@ -10758,13 +12127,12 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         tldr: AI-generated summary (TL;DR).
         volume: Journal volume (parsed from combined format like "32 4").
         issue: Journal issue number (parsed from combined volume/issue).
-        pages: Page numbers.
+        page_range: Page numbers.
         venue: Venue name (conference/journal).
-        reference_count: Number of references.
         influential_citation_count: Number of influential citations.
         open_access_url: URL to open access PDF.
-        fields_of_study: JSON string of fields of study.
-        publication_types: JSON string of publication types.
+        subject_fields: JSON string of fields of study.
+        publication_type: JSON string of publication types.
         author_s2_ids: JSON string of S2 author IDs (40-char hex).
         author_orcids: JSON string of ORCID identifiers.
         author_h_indices: JSON string of h-index values.
@@ -10786,28 +12154,26 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
     # SemanticScholar-specific: AI-generated summary
     tldr: str | None = None
 
-    # SemanticScholar-specific journal/venue information
+    # SemanticScholar-specific journal information
     volume: str | None = None
     issue: str | None = (
         None  # Parsed from combined volume/issue (e.g., "32 4" → issue=4)
     )
-    pages: str | None = None  # Legacy: "first-last" format
+    page_range: str | None = None  # Legacy: "first-last" format
     # first_page and last_page inherited from PublicationEntityBase
-    venue: str | None = None
 
     # SemanticScholar-specific metrics
-    reference_count: int | None = None
+    # Note: citations_made inherited from PublicationEntityBase
     influential_citation_count: int | None = None
 
     # SemanticScholar-specific OA URL
     open_access_url: str | None = None
 
     # SemanticScholar-specific classification (JSON strings)
-    fields_of_study: str | None = None
-    publication_types: str | None = None
+    subject_fields: str | None = None
+    publication_types: str | None = None  # JSON array of publication types
 
     # Author identifiers (for author-level analytics and disambiguation)
-    author_ids: str | None = None  # JSON array of author IDs
     author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)
     author_orcids: str | None = None  # JSON array of ORCID identifiers
     author_h_indices: str | None = None  # JSON array of h-index values
@@ -10856,19 +12222,49 @@ class IDMappingResult(BaseEntity):
     """Result of UniProt ID Mapping operation.
 
     Maps ChEMBL target IDs to UniProt accessions using UniProt ID Mapping REST API.
+    Extracts comprehensive metadata from UniProt entries when mapping is found.
 
     Required fields: target_chembl_id, mapping_status
-    Optional fields: uniprot_accession (None if mapping not found)
+    Optional fields: All others (None if mapping not found or data unavailable)
 
     Attributes:
         target_chembl_id: Source ChEMBL target identifier (e.g., CHEMBL204)
         uniprot_accession: Mapped UniProt accession (e.g., P00742) or None if not found
-        mapping_status: Status of mapping operation: 'found', 'not_found', 'error'
+        mapping_status: Status of mapping: 'found', 'not_found', 'error', 'multiple'
+        uniprot_entry_name: UniProt entry name (e.g., FA10_HUMAN)
+        organism_scientific: Scientific organism name (e.g., Homo sapiens)
+        organism_common: Common organism name (e.g., Human)
+        taxonomy_id: NCBI Taxonomy ID (e.g., 9606)
+        protein_name: Recommended protein name
+        gene_primary: Primary gene name
+        sequence_length: Protein sequence length
+        sequence_mass: Molecular weight in Daltons
+        reviewed: True if Swiss-Prot (reviewed), False if TrEMBL (unreviewed)
+        annotation_score: Quality score 1-5 (5 = best annotated)
+        all_mappings: JSON array of all accessions when multiple mappings found
     """
 
+    # Primary key (input)
     target_chembl_id: str
+
+    # Core mapping result
     uniprot_accession: str | None = None
-    mapping_status: Literal["found", "not_found", "error"] = "not_found"
+    mapping_status: Literal["found", "not_found", "error", "multiple"] = "not_found"
+
+    # UniProt entry metadata
+    uniprot_entry_name: str | None = None
+    organism_scientific: str | None = None
+    organism_common: str | None = None
+    taxonomy_id: int | None = None
+    protein_name: str | None = None
+    gene_primary: str | None = None
+    sequence_length: int | None = None
+    sequence_mass: int | None = None
+    reviewed: bool | None = None
+    annotation_score: int | None = None
+
+    # Multiple mappings (JSON array)
+    all_mappings: str | None = None
 
     def __post_init__(self) -> None:
         """Validate required fields."""
@@ -10879,15 +12275,35 @@ class IDMappingResult(BaseEntity):
         """Validate domain-specific invariants."""
         if not self.target_chembl_id:
             raise ValueError("target_chembl_id is required")
-        if self.mapping_status not in ("found", "not_found", "error"):
+        if self.mapping_status not in ("found", "not_found", "error", "multiple"):
             raise ValueError(
                 f"Invalid mapping_status: {self.mapping_status}. "
-                "Must be one of: 'found', 'not_found', 'error'"
+                "Must be one of: 'found', 'not_found', 'error', 'multiple'"
             )
-        # If status is 'found', accession should be present
-        if self.mapping_status == "found" and not self.uniprot_accession:
+        # If status is 'found' or 'multiple', accession should be present
+        if self.mapping_status in ("found", "multiple") and not self.uniprot_accession:
             raise ValueError(
-                "uniprot_accession is required when mapping_status is 'found'"
+                "uniprot_accession is required when mapping_status is 'found' or 'multiple'"
+            )
+        self._validate_annotation_score()
+        self._validate_sequence_fields()
+
+    def _validate_annotation_score(self) -> None:
+        """Validate annotation_score is 1-5 if present."""
+        if self.annotation_score is not None and not 1 <= self.annotation_score <= 5:
+            raise ValueError(
+                f"annotation_score must be 1-5, got {self.annotation_score}"
+            )
+
+    def _validate_sequence_fields(self) -> None:
+        """Validate sequence_length and sequence_mass are positive if present."""
+        if self.sequence_length is not None and self.sequence_length <= 0:
+            raise ValueError(
+                f"sequence_length must be positive, got {self.sequence_length}"
+            )
+        if self.sequence_mass is not None and self.sequence_mass <= 0:
+            raise ValueError(
+                f"sequence_mass must be positive, got {self.sequence_mass}"
             )
 
 
@@ -10982,10 +12398,50 @@ class UniprotTarget(BaseEntity):
     chembl_ids: str | None = None
     guidetopharmacology_ids: str | None = None
     pdb_xrefs: str | None = None  # JSON array of PDB cross-references
+    interpro_xrefs: str | None = None  # JSON array of InterPro domain entries
+    pfam_xrefs: str | None = None  # JSON array of Pfam family entries
+    reactome_xrefs: str | None = None  # JSON array of Reactome pathway entries
 
     # Features & Keywords (JSON arrays)
-    features: str | None = None
+    features_json: str | None = None  # All features combined (forensic)
+    domains: str | None = None  # ft_domain features
+    binding_sites: str | None = None  # ft_binding features
+    active_sites: str | None = None  # ft_act_site features
     keywords: str | None = None
+
+    # Taxonomy components (parsed from lineage)
+    superkingdom: str | None = None
+    phylum: str | None = None
+    genus: str | None = None
+
+    # GO components (filtered by aspect)
+    molecular_function: str | None = None  # JSON array, aspect F
+    cellular_component: str | None = None  # JSON array, aspect C
+
+    # Structural features
+    topology: str | None = None  # JSON array
+    transmembrane: str | None = None  # JSON array
+    intramembrane: str | None = None  # JSON array
+    signal_peptide: str | None = None  # JSON array
+    propeptide: str | None = None  # JSON array
+
+    # PTM features
+    glycosylation: str | None = None  # JSON array
+    lipidation: str | None = None  # JSON array
+    disulfide_bond: str | None = None  # JSON array
+    modified_residue: str | None = None  # JSON array
+    phosphorylation: str | None = None  # JSON array
+    acetylation: str | None = None  # JSON array
+    ubiquitination: str | None = None  # JSON array
+
+    # Isoform details (parsed from ALTERNATIVE PRODUCTS)
+    isoform_names: str | None = None  # JSON array
+    isoform_ids: str | None = None  # JSON array
+    isoform_synonyms: str | None = None  # JSON array
+
+    # Reaction data (parsed from CATALYTIC ACTIVITY)
+    reactions: str | None = None  # JSON array
+    reaction_ec_numbers: str | None = None  # JSON array
 
     # Counts
     cross_reference_count: int | None = None
@@ -11074,6 +12530,7 @@ _ERROR_KEYWORDS: list[tuple[tuple[str, ...], ErrorType]] = [
             "ReadError",
             "WriteError",
             "ConnectError",
+            "ProtocolError",
             "DecodingError",
             "TransportError",
             "StreamError",
@@ -11347,6 +12804,7 @@ from bioetl.domain.exceptions.data_quality import (
 from bioetl.domain.exceptions.infrastructure import (
     BronzeValidationError,
     BucketNotFoundError,
+    CachedBronzeEmptyError,
     ConfigurationError,
     DeltaOptimizeError,
     DeltaSchemaValidationError,
@@ -11411,6 +12869,7 @@ __all__ = [
     "BioETLError",
     "BronzeValidationError",
     "BucketNotFoundError",
+    "CachedBronzeEmptyError",
     "CheckpointConflictError",
     "CircuitBreakerOpenError",
     "ConfigurationError",
@@ -12048,6 +13507,59 @@ class BronzeValidationError(StorageError):
         if original_error is not None:
             parts.append(f"error={original_error}")
         super().__init__(", ".join(parts))
+
+
+class CachedBronzeEmptyError(StorageError):
+    """Raised when cached Bronze data is requested but not found.
+
+    This error indicates that no Bronze batch files exist for the requested
+    provider/entity combination, or the specified date filter matches no data.
+    Used in cached Bronze mode when the pipeline attempts to read from
+    previously saved Bronze files instead of making API calls.
+
+    Attributes:
+        provider: Provider name (e.g., 'chembl').
+        entity_type: Entity type (e.g., 'activity').
+        bronze_path: Path that was searched for Bronze files.
+        date_filter: Optional date filter that was applied.
+
+    Example:
+        >>> raise CachedBronzeEmptyError(
+        ...     provider="chembl",
+        ...     entity_type="activity",
+        ...     bronze_path="/data/bronze/chembl/activity",
+        ...     date_filter="2026-01-20"
+        ... )
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        provider: str,
+        entity_type: str,
+        bronze_path: str,
+        date_filter: str | None = None,
+    ) -> None:
+        """Initialize CachedBronzeEmptyError.
+
+        Args:
+            provider: Provider name (e.g., 'chembl').
+            entity_type: Entity type (e.g., 'activity').
+            bronze_path: Path that was searched for Bronze files.
+            date_filter: Optional date filter in YYYY-MM-DD format.
+        """
+        self.provider = provider
+        self.entity_type = entity_type
+        self.bronze_path = bronze_path
+        self.date_filter = date_filter
+
+        date_info = f" for date {date_filter}" if date_filter else ""
+        message = (
+            f"No Bronze data found for {provider}/{entity_type}{date_info}. "
+            f"Searched path: {bronze_path}"
+        )
+        super().__init__(message)
 
 
 # =============================================================================
@@ -13270,10 +14782,10 @@ Provides filtering by column values using multiple operators:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class FilterOperator(str, Enum):
+class FilterOperator(StrEnum):
     """Операторы сравнения для column filters.
 
     Attributes:
@@ -13653,6 +15165,8 @@ class InputFilterConfig:
     fallback_column: str | None = None
     direct_filter_ids: tuple[str, ...] | None = None
     direct_fallback_mapping: dict[str, str] | None = None
+    direct_multi_filter_ids: dict[str, tuple[str, ...]] | None = None
+    direct_valid_combinations: frozenset[tuple[str, ...]] | None = None
 
     def __post_init__(self) -> None:
         """Validate configuration consistency."""
@@ -13663,10 +15177,17 @@ class InputFilterConfig:
         """Validate fields required when filtering is enabled."""
         if not self.enabled:
             return
-        if self.direct_filter_ids is not None:
+        if self.direct_multi_filter_ids is not None:
+            self._validate_direct_multi_ids_mode()
+        elif self.direct_filter_ids is not None:
             self._validate_direct_ids_mode()
         else:
             self._validate_csv_mode()
+
+    def _validate_direct_multi_ids_mode(self) -> None:
+        """Validate direct multi-field filter IDs mode configuration."""
+        if not self.direct_multi_filter_ids:
+            raise ValueError("direct_multi_filter_ids must be non-empty when set")
 
     def _validate_direct_ids_mode(self) -> None:
         """Validate direct filter IDs mode configuration."""
@@ -13709,6 +15230,11 @@ class InputFilterConfig:
     def is_direct_filter(self) -> bool:
         """Check if direct filter IDs mode is active (no CSV file)."""
         return self.direct_filter_ids is not None
+
+    @property
+    def is_direct_multi_filter(self) -> bool:
+        """Check if direct multi-field filter IDs mode is active."""
+        return self.direct_multi_filter_ids is not None
 
     def get_columns(self) -> tuple[FilterColumn, ...]:
         """Get filter columns (resolves single-column to columns format).
@@ -14078,6 +15604,1968 @@ class LockContextHolder:
         self._context = None
 
 ================================================================================
+File: __init__.py
+Path: mapping\__init__.py
+================================================================================
+"""Domain mapping utilities for cross-provider field unification."""
+
+from bioetl.domain.mapping.publication_fields import (
+    PUBLICATION_FIELD_MAPPING,
+    UNIFIED_TO_PROVIDER,
+    apply_field_mapping,
+    get_provider_name,
+    get_unified_name,
+)
+from bioetl.domain.mapping.publication_type_classification import (
+    PublicationTypeEntry,
+    classify_publication_type,
+)
+
+__all__ = [
+    "PUBLICATION_FIELD_MAPPING",
+    "UNIFIED_TO_PROVIDER",
+    "PublicationTypeEntry",
+    "apply_field_mapping",
+    "classify_publication_type",
+    "get_provider_name",
+    "get_unified_name",
+]
+
+================================================================================
+File: publication_fields.py
+Path: mapping\publication_fields.py
+================================================================================
+"""Publication field mapping for cross-provider unification.
+
+Provides bidirectional mapping between provider-specific field names
+and unified canonical names for publication entities across ChEMBL,
+CrossRef, OpenAlex, PubMed, and SemanticScholar.
+
+Rationale (ADR-TBD: Cross-Provider Field Unification):
+- Eliminates semantic duplication (doc_type vs source_type, year vs publication_year)
+- Enables seamless composite pipeline aggregation
+- Maintains backward compatibility via field_aliases in YAML configs
+- Follows principle: "Uniform interface, diverse implementations"
+
+Usage:
+    >>> from bioetl.domain.mapping import PUBLICATION_FIELD_MAPPING
+    >>> mapping = PUBLICATION_FIELD_MAPPING["chembl"]
+    >>> mapping["doc_type"]  # Returns: "publication_type"
+
+    >>> from bioetl.domain.mapping import get_unified_name
+    >>> get_unified_name("chembl", "year")  # Returns: "publication_year"
+"""
+
+from __future__ import annotations
+
+from typing import Any, Final, Literal
+
+# Provider type for type safety
+ProviderName = Literal["chembl", "crossref", "openalex", "pubmed", "semanticscholar"]
+
+
+# ============================================================================
+# PROVIDER → UNIFIED MAPPINGS
+# ============================================================================
+
+_CHEMBL_MAPPING: Final[dict[str, str]] = {
+    # Document type
+    "doc_type": "publication_type",
+    # Temporal fields
+    "year": "publication_year",
+    # Note: ChEMBL uses 'journal' (already canonical)
+    # Note: ChEMBL uses 'abstract' (already canonical)
+}
+
+_CROSSREF_MAPPING: Final[dict[str, str]] = {
+    # Document type
+    "source_type": "publication_type",
+    # Temporal fields
+    "year": "publication_year",
+    # Journal fields
+    "short_container_title": "journal_name_short",
+    # Pagination
+    "first_page": "page_first",
+    "last_page": "page_last",
+    # Citations
+    "citation_count": "citations_received",
+    "reference_count": "citations_made",
+    # Subjects (generic)
+    "subjects": "subject_keywords",
+}
+
+_OPENALEX_MAPPING: Final[dict[str, str]] = {
+    # Document type
+    "source_type": "publication_type",
+    # Temporal fields
+    "year": "publication_year",
+    # Journal name (OpenAlex uses 'journal' - already canonical)
+    # Pagination
+    "first_page": "page_first",
+    "last_page": "page_last",
+    # Citations
+    "citation_count": "citations_received",
+    "reference_count": "citations_made",
+    # Subjects
+    "topics": "subject_topics",
+    "keywords": "subject_keywords",
+    # Affiliations
+    "affiliations": "affiliation_list",
+}
+
+_PUBMED_MAPPING: Final[dict[str, str]] = {
+    # Temporal fields
+    "year": "publication_year",
+    # Journal fields (canonicalize to unified names)
+    "journal_title": "journal",
+    "journal_abbrev": "journal_name_short",
+    # Pagination
+    "first_page": "page_first",
+    "last_page": "page_last",
+    "pages": "page_range",
+    # Citations
+    "reference_count": "citations_made",
+    # Subjects
+    "keywords": "subject_keywords",
+    "mesh_terms": "subject_mesh",
+    # Affiliations
+    "affiliations": "affiliation_list",
+    "structured_affiliations": "affiliation_structured",
+}
+
+_SEMANTICSCHOLAR_MAPPING: Final[dict[str, str]] = {
+    # Document type
+    # Note: SemanticScholar doesn't have doc_type - inferred from venue/journal
+    # Temporal fields
+    "year": "publication_year",
+    # Pagination
+    "first_page": "page_first",
+    "last_page": "page_last",
+    "pages": "page_range",
+    # Citations
+    "citation_count": "citations_received",
+    "reference_count": "citations_made",
+    # Subjects
+    "fields_of_study": "subject_fields",
+    # Affiliations
+    "affiliations": "affiliation_list",
+}
+
+
+# Aggregate mapping: Provider → Old Field → New Field
+PUBLICATION_FIELD_MAPPING: Final[dict[ProviderName, dict[str, str]]] = {
+    "chembl": _CHEMBL_MAPPING,
+    "crossref": _CROSSREF_MAPPING,
+    "openalex": _OPENALEX_MAPPING,
+    "pubmed": _PUBMED_MAPPING,
+    "semanticscholar": _SEMANTICSCHOLAR_MAPPING,
+}
+
+
+# ============================================================================
+# UNIFIED → PROVIDER MAPPINGS (Reverse mapping for backward compatibility)
+# ============================================================================
+
+
+def _build_reverse_mapping() -> dict[ProviderName, dict[str, str]]:
+    """Build reverse mapping: Provider → Unified → Original."""
+    reverse: dict[ProviderName, dict[str, str]] = {}
+    for provider, mapping in PUBLICATION_FIELD_MAPPING.items():
+        reverse[provider] = {unified: original for original, unified in mapping.items()}
+    return reverse
+
+
+UNIFIED_TO_PROVIDER: Final[dict[ProviderName, dict[str, str]]] = (
+    _build_reverse_mapping()
+)
+
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+
+def get_unified_name(provider: ProviderName, field_name: str) -> str:
+    """Get unified field name for a provider-specific field.
+
+    Args:
+        provider: Provider name (chembl, crossref, openalex, pubmed, semanticscholar).
+        field_name: Provider-specific field name.
+
+    Returns:
+        Unified field name. If no mapping exists, returns the original field_name.
+
+    Example:
+        >>> get_unified_name("chembl", "doc_type")
+        "publication_type"
+        >>> get_unified_name("chembl", "title")  # No mapping needed
+        "title"
+    """
+    mapping = PUBLICATION_FIELD_MAPPING.get(provider, {})
+    return mapping.get(field_name, field_name)
+
+
+def get_provider_name(provider: ProviderName, unified_field: str) -> str:
+    """Get provider-specific field name for a unified field (reverse lookup).
+
+    Args:
+        provider: Provider name.
+        unified_field: Unified field name.
+
+    Returns:
+        Provider-specific field name. If no mapping exists, returns unified_field.
+
+    Example:
+        >>> get_provider_name("chembl", "publication_type")
+        "doc_type"
+        >>> get_provider_name("chembl", "title")  # No mapping needed
+        "title"
+    """
+    mapping = UNIFIED_TO_PROVIDER.get(provider, {})
+    return mapping.get(unified_field, unified_field)
+
+
+def apply_field_mapping(
+    record: dict[str, Any],
+    provider: ProviderName,
+) -> dict[str, Any]:
+    """Apply field name mapping to a record (provider → unified names).
+
+    Renames fields according to PUBLICATION_FIELD_MAPPING for the given provider.
+    Fields not in mapping are preserved as-is.
+
+    Args:
+        record: Record dictionary with provider-specific field names.
+        provider: Provider name.
+
+    Returns:
+        New dictionary with unified field names.
+
+    Example:
+        >>> record = {"doc_type": "article", "year": 2020, "title": "Test"}
+        >>> apply_field_mapping(record, "chembl")
+        {"publication_type": "article", "publication_year": 2020, "title": "Test"}
+    """
+    mapping = PUBLICATION_FIELD_MAPPING.get(provider, {})
+    result = {}
+
+    for key, value in record.items():
+        # Map to unified name if mapping exists, otherwise keep original
+        unified_key = mapping.get(key, key)
+        result[unified_key] = value
+
+    return result
+
+
+# ============================================================================
+# UNIFIED FIELD CATALOG (Documentation)
+# ============================================================================
+
+# Canonical unified field names (for reference):
+#
+# IDENTIFIERS:
+#   - doi, pmid (already unified across providers)
+#   - Provider-specific IDs kept as-is (document_chembl_id, openalex_id, etc.)
+#
+# CORE METADATA:
+#   - title (unified)
+#   - abstract (unified)
+#   - publication_type (was: doc_type in ChEMBL, source_type in CrossRef/OpenAlex)
+#
+# AUTHORS & AFFILIATIONS:
+#   - authors (unified)
+#   - author_orcids (unified structure for ORCID identifiers)
+#   - affiliation_list (unified, was: affiliations in all)
+#   - affiliation_structured (PubMed-specific structured data)
+#
+# JOURNAL:
+#   - journal_name (was: journal in most, journal_title in PubMed)
+#   - journal_name_short (was: short_container_title in CrossRef, journal_abbrev in PubMed)
+#   - issn (unified)
+#
+# TEMPORAL:
+#   - publication_year (was: year in all)
+#   - publication_date (unified)
+#
+# PAGINATION:
+#   - page_first (was: first_page)
+#   - page_last (was: last_page)
+#   - page_range (was: pages in PubMed/SemanticScholar)
+#   - volume, issue (unified)
+#
+# CITATIONS:
+#   - citations_received (was: citation_count)
+#   - citations_made (was: reference_count)
+#
+# SUBJECTS & CLASSIFICATION:
+#   - subject_keywords (was: subjects in CrossRef, keywords in others)
+#   - subject_mesh (was: mesh_terms)
+#   - subject_topics (was: topics in OpenAlex)
+#   - subject_fields (was: fields_of_study in SemanticScholar)
+#
+# OPEN ACCESS:
+#   - is_oa (unified)
+#   - oa_status (unified)
+#
+# MISCELLANEOUS:
+#   - publisher (unified)
+#   - language (unified)
+
+================================================================================
+File: publication_type_classification.py
+Path: mapping\publication_type_classification.py
+================================================================================
+"""Unified publication type classification for cross-provider harmonization.
+
+Maps raw publication type strings from each provider (OpenAlex, CrossRef,
+PubMed, Semantic Scholar) to a 3-level unified hierarchy:
+
+- Level 1 (class_code): EXP | REV | PEER  (3 values)
+- Level 2 (subclass): ~25 groupings (e.g. "Original Experimental Data")
+- Level 3 (unified_type): 214 specific types (e.g. "Journal Article")
+
+Reference CSV: configs/data_schema/publication_type_classification.csv
+
+The lookup tables are built at import time from a pure Python constant
+(no I/O). Keys are normalized to lowercase for case-insensitive matching.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Final
+
+__all__ = [
+    "PublicationTypeEntry",
+    "classify_publication_type",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class PublicationTypeEntry:
+    """Single entry in the unified publication type classification.
+
+    Attributes:
+        unified_type: Level 3 type name (e.g. "Journal Article").
+        subclass: Level 2 grouping (e.g. "Original Experimental Data").
+        class_code: Level 1 code: "EXP", "REV", or "PEER".
+        specificity: Row number from CSV (higher = more specific).
+
+    """
+
+    unified_type: str
+    subclass: str
+    class_code: str
+    specificity: int
+
+
+# ============================================================================
+# Classification table: 214 entries translated from unified_classification.csv
+#
+# Each tuple: (unified_type, subclass, class_code,
+#               openalex_keys, crossref_keys, pubmed_keys, s2_keys)
+#
+# Keys use "—" for no mapping.  Asterisk suffix (e.g. "article*") means
+# the key is an additional/secondary mapping (asterisk stripped in lookup).
+# ============================================================================
+
+_ClassificationRow = tuple[str, str, str, str, str, str, str]
+
+_CLASSIFICATION_TABLE: Final[tuple[_ClassificationRow, ...]] = (
+    # 1
+    ("Peer Review", "Peer Review", "PEER", "peer-review", "peer-review", "—", "—"),
+    # 2
+    (
+        "Journal Article",
+        "Original Experimental Data",
+        "EXP",
+        "article",
+        "journal-article",
+        "Journal Article",
+        "JournalArticle",
+    ),
+    # 3
+    (
+        "Conference Paper",
+        "Original Experimental Data",
+        "EXP",
+        "article*",
+        "proceedings-article",
+        "Congress",
+        "Conference",
+    ),
+    # 4
+    (
+        "Preprint",
+        "Original Experimental Data",
+        "EXP",
+        "preprint",
+        "posted-content",
+        "Preprint",
+        "—",
+    ),
+    # 5
+    (
+        "Dataset",
+        "Original Experimental Data",
+        "EXP",
+        "dataset",
+        "dataset",
+        "Dataset",
+        "Dataset",
+    ),
+    # 6
+    (
+        "Database",
+        "Original Experimental Data",
+        "EXP",
+        "database",
+        "database",
+        "Database",
+        "—",
+    ),
+    # 7
+    (
+        "Dissertation",
+        "Original Experimental Data",
+        "EXP",
+        "dissertation",
+        "dissertation",
+        "Academic Dissertation",
+        "—",
+    ),
+    # 8
+    (
+        "Report",
+        "Original Experimental Data",
+        "EXP",
+        "report",
+        "report",
+        "Technical Report",
+        "—",
+    ),
+    # 9
+    (
+        "Report Component",
+        "Original Experimental Data",
+        "EXP",
+        "report-component",
+        "report-component",
+        "—",
+        "—",
+    ),
+    # 10
+    (
+        "Component (figure/table/suppl)",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "component",
+        "—",
+        "—",
+    ),
+    # 11
+    (
+        "Supplementary Materials",
+        "Original Experimental Data",
+        "EXP",
+        "supplementary-materials",
+        "—",
+        "Electronic Supplementary Materials",
+        "—",
+    ),
+    # 12
+    ("Software", "Original Experimental Data", "EXP", "software", "—", "—", "—"),
+    # 13
+    ("Patent", "Original Experimental Data", "EXP", "—", "—", "Patent", "—"),
+    # 14
+    (
+        "Case Report",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Case Reports",
+        "CaseReport",
+    ),
+    # 15
+    (
+        "Clinical Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Study",
+        "Study",
+    ),
+    # 16
+    (
+        "Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial",
+        "ClinicalTrial",
+    ),
+    # 17
+    (
+        "Clinical Trial Protocol",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial Protocol",
+        "—",
+    ),
+    # 18
+    (
+        "Clinical Trial, Phase I",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase I",
+        "—",
+    ),
+    # 19
+    (
+        "Clinical Trial, Phase II",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase II",
+        "—",
+    ),
+    # 20
+    (
+        "Clinical Trial, Phase III",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase III",
+        "—",
+    ),
+    # 21
+    (
+        "Clinical Trial, Phase IV",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Phase IV",
+        "—",
+    ),
+    # 22
+    (
+        "Clinical Trial, Veterinary",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Trial, Veterinary",
+        "—",
+    ),
+    # 23
+    (
+        "Adaptive Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Adaptive Clinical Trial",
+        "—",
+    ),
+    # 24
+    (
+        "Pragmatic Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Pragmatic Clinical Trial",
+        "—",
+    ),
+    # 25
+    (
+        "Equivalence Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Equivalence Trial",
+        "—",
+    ),
+    # 26
+    (
+        "Randomized Controlled Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Randomized Controlled Trial",
+        "—",
+    ),
+    # 27
+    (
+        "Randomized Controlled Trial, Vet",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Randomized Controlled Trial, Veterinary",
+        "—",
+    ),
+    # 28
+    (
+        "Controlled Clinical Trial",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Controlled Clinical Trial",
+        "—",
+    ),
+    # 29
+    (
+        "Observational Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Observational Study",
+        "—",
+    ),
+    # 30
+    (
+        "Observational Study, Veterinary",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Observational Study, Veterinary",
+        "—",
+    ),
+    # 31
+    (
+        "Comparative Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Comparative Study",
+        "—",
+    ),
+    # 32
+    (
+        "Validation Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Validation Study",
+        "—",
+    ),
+    # 33
+    (
+        "Evaluation Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Evaluation Study",
+        "—",
+    ),
+    # 34
+    (
+        "Multicenter Study",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Multicenter Study",
+        "—",
+    ),
+    # 35
+    ("Twin Study", "Original Experimental Data", "EXP", "—", "—", "Twin Study", "—"),
+    # 36
+    (
+        "Clinical Conference",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Clinical Conference",
+        "—",
+    ),
+    # 37
+    (
+        "Annual Report",
+        "Original Experimental Data",
+        "EXP",
+        "—",
+        "—",
+        "Annual Report",
+        "—",
+    ),
+    # 38
+    ("Statistics", "Original Experimental Data", "EXP", "—", "—", "Statistics", "—"),
+    # 39
+    ("Review", "Reviews & Syntheses", "REV", "review", "—", "Review", "Review"),
+    # 40
+    (
+        "Systematic Review",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Systematic Review",
+        "—",
+    ),
+    # 41
+    (
+        "Meta-Analysis",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Meta-Analysis",
+        "MetaAnalysis",
+    ),
+    # 42
+    (
+        "Network Meta-Analysis",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Network Meta-Analysis",
+        "—",
+    ),
+    # 43
+    ("Scoping Review", "Reviews & Syntheses", "REV", "—", "—", "Scoping Review", "—"),
+    # 44
+    (
+        "Scientific Integrity Review",
+        "Reviews & Syntheses",
+        "REV",
+        "—",
+        "—",
+        "Scientific Integrity Review",
+        "—",
+    ),
+    # 45
+    (
+        "Editorial",
+        "Editorial & Commentary",
+        "REV",
+        "editorial",
+        "—",
+        "Editorial",
+        "Editorial",
+    ),
+    # 46
+    (
+        "Letter",
+        "Editorial & Commentary",
+        "REV",
+        "letter",
+        "—",
+        "Letter",
+        "LettersAndComments",
+    ),
+    # 47
+    (
+        "Comment",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Comment",
+        "LettersAndComments",
+    ),
+    # 48
+    ("News", "Editorial & Commentary", "REV", "—", "—", "News", "News"),
+    # 49
+    (
+        "Newspaper Article",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Newspaper Article",
+        "—",
+    ),
+    # 50
+    ("Interview", "Editorial & Commentary", "REV", "—", "—", "Interview", "—"),
+    # 51
+    ("Address", "Editorial & Commentary", "REV", "—", "—", "Address", "—"),
+    # 52
+    (
+        "Introductory Journal Article",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Introductory Journal Article",
+        "—",
+    ),
+    # 53
+    (
+        "Meeting Abstract",
+        "Editorial & Commentary",
+        "REV",
+        "—",
+        "—",
+        "Meeting Abstract",
+        "—",
+    ),
+    # 54
+    ("Popular Work", "Editorial & Commentary", "REV", "—", "—", "Popular Work", "—"),
+    # 55
+    ("Blog", "Editorial & Commentary", "REV", "—", "—", "Blog", "—"),
+    # 56
+    ("Webcast", "Editorial & Commentary", "REV", "—", "—", "Webcast", "—"),
+    # 57
+    (
+        "Erratum",
+        "Corrections & Retractions",
+        "REV",
+        "erratum",
+        "—",
+        "Published Erratum",
+        "—",
+    ),
+    # 58
+    (
+        "Retraction notice",
+        "Corrections & Retractions",
+        "REV",
+        "retraction",
+        "—",
+        "Retraction of Publication",
+        "—",
+    ),
+    # 59
+    (
+        "Retracted Publication",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Retracted Publication",
+        "—",
+    ),
+    # 60
+    (
+        "Corrected and Republished Article",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Corrected and Republished Article",
+        "—",
+    ),
+    # 61
+    (
+        "Expression of Concern",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Expression of Concern",
+        "—",
+    ),
+    # 62
+    (
+        "Duplicate Publication",
+        "Corrections & Retractions",
+        "REV",
+        "—",
+        "—",
+        "Duplicate Publication",
+        "—",
+    ),
+    # 63
+    ("Book", "Books & Monographs", "REV", "book", "book", "—", "Book"),
+    # 64
+    (
+        "Book Chapter",
+        "Books & Monographs",
+        "REV",
+        "book-chapter",
+        "book-chapter",
+        "—",
+        "BookSection",
+    ),
+    # 65
+    (
+        "Book Section",
+        "Books & Monographs",
+        "REV",
+        "book-section",
+        "book-section",
+        "—",
+        "—",
+    ),
+    # 66
+    ("Book Part", "Books & Monographs", "REV", "—", "book-part", "—", "—"),
+    # 67
+    ("Book Track", "Books & Monographs", "REV", "—", "book-track", "—", "—"),
+    # 68
+    ("Book Set", "Books & Monographs", "REV", "—", "book-set", "—", "—"),
+    # 69
+    ("Book Series", "Books & Monographs", "REV", "—", "book-series", "—", "—"),
+    # 70
+    ("Edited Book", "Books & Monographs", "REV", "—", "edited-book", "—", "—"),
+    # 71
+    ("Reference Book", "Books & Monographs", "REV", "—", "reference-book", "—", "—"),
+    # 72
+    ("Monograph", "Books & Monographs", "REV", "—", "monograph", "Monograph", "—"),
+    # 73
+    ("Book Review", "Books & Monographs", "REV", "—", "—", "Book Review", "—"),
+    # 74
+    (
+        "Book Illustrations",
+        "Books & Monographs",
+        "REV",
+        "—",
+        "—",
+        "Book Illustrations",
+        "—",
+    ),
+    # 75
+    ("Collected Work", "Books & Monographs", "REV", "—", "—", "Collected Work", "—"),
+    # 76
+    ("Collection", "Books & Monographs", "REV", "—", "—", "Collection", "—"),
+    # 77
+    ("Festschrift", "Books & Monographs", "REV", "—", "—", "Festschrift", "—"),
+    # 78
+    (
+        "Reference Entry",
+        "Reference & Encyclopedic",
+        "REV",
+        "reference-entry",
+        "reference-entry",
+        "—",
+        "—",
+    ),
+    # 79
+    ("Encyclopedia", "Reference & Encyclopedic", "REV", "—", "—", "Encyclopedia", "—"),
+    # 80
+    ("Dictionary", "Reference & Encyclopedic", "REV", "—", "—", "Dictionary", "—"),
+    # 81
+    (
+        "Dictionary, Chemical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Chemical",
+        "—",
+    ),
+    # 82
+    (
+        "Dictionary, Classical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Classical",
+        "—",
+    ),
+    # 83
+    (
+        "Dictionary, Dental",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Dental",
+        "—",
+    ),
+    # 84
+    (
+        "Dictionary, Medical",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Medical",
+        "—",
+    ),
+    # 85
+    (
+        "Dictionary, Pharmaceutic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Pharmaceutic",
+        "—",
+    ),
+    # 86
+    (
+        "Dictionary, Polyglot",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Dictionary, Polyglot",
+        "—",
+    ),
+    # 87
+    ("Terminology", "Reference & Encyclopedic", "REV", "—", "—", "Terminology", "—"),
+    # 88
+    ("Atlas", "Reference & Encyclopedic", "REV", "—", "—", "Atlas", "—"),
+    # 89
+    (
+        "Pharmacopoeia",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Pharmacopoeia",
+        "—",
+    ),
+    # 90
+    (
+        "Pharmacopoeia, Homeopathic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Pharmacopoeia, Homeopathic",
+        "—",
+    ),
+    # 91
+    ("Formulary", "Reference & Encyclopedic", "REV", "—", "—", "Formulary", "—"),
+    # 92
+    (
+        "Formulary, Dental",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Dental",
+        "—",
+    ),
+    # 93
+    (
+        "Formulary, Homeopathic",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Homeopathic",
+        "—",
+    ),
+    # 94
+    (
+        "Formulary, Hospital",
+        "Reference & Encyclopedic",
+        "REV",
+        "—",
+        "—",
+        "Formulary, Hospital",
+        "—",
+    ),
+    # 95
+    ("Dispensatory", "Reference & Encyclopedic", "REV", "—", "—", "Dispensatory", "—"),
+    # 96
+    ("Herbal", "Reference & Encyclopedic", "REV", "—", "—", "Herbal", "—"),
+    # 97
+    ("Guideline", "Guidelines & Consensus", "REV", "—", "—", "Guideline", "—"),
+    # 98
+    (
+        "Practice Guideline",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Practice Guideline",
+        "—",
+    ),
+    # 99
+    (
+        "Consensus Development Conference",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Consensus Development Conference",
+        "—",
+    ),
+    # 100
+    (
+        "Consensus Development Conference, NIH",
+        "Guidelines & Consensus",
+        "REV",
+        "—",
+        "—",
+        "Consensus Development Conference, NIH",
+        "—",
+    ),
+    # 101
+    ("Standard", "Standards", "REV", "standard", "standard", "—", "—"),
+    # 102
+    (
+        "Paratext",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "paratext",
+        "—",
+        "—",
+        "—",
+    ),
+    # 103
+    (
+        "Libguides",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "libguides",
+        "—",
+        "—",
+        "—",
+    ),
+    # 104
+    (
+        "Journal (container)",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal",
+        "—",
+        "—",
+    ),
+    # 105
+    (
+        "Journal Issue",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal-issue",
+        "—",
+        "—",
+    ),
+    # 106
+    (
+        "Journal Volume",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "journal-volume",
+        "—",
+        "—",
+    ),
+    # 107
+    (
+        "Proceedings (container)",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "proceedings",
+        "—",
+        "—",
+    ),
+    # 108
+    (
+        "Proceedings Series",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "proceedings-series",
+        "—",
+        "—",
+    ),
+    # 109
+    (
+        "Report Series",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "report-series",
+        "—",
+        "—",
+    ),
+    # 110
+    (
+        "Periodical",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "—",
+        "Periodical",
+        "—",
+    ),
+    # 111
+    (
+        "Periodical Index",
+        "Journal / Proceedings Infrastructure",
+        "REV",
+        "—",
+        "—",
+        "Periodical Index",
+        "—",
+    ),
+    # 112
+    ("Grant", "Grants & Funding", "REV", "grant", "grant", "—", "—"),
+    # 113
+    (
+        "Research Support, ARRA",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, American Recovery and Reinvestment Act",
+        "—",
+    ),
+    # 114
+    (
+        "Research Support, NIH Extramural",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, N.I.H., Extramural",
+        "—",
+    ),
+    # 115
+    (
+        "Research Support, NIH Intramural",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, N.I.H., Intramural",
+        "—",
+    ),
+    # 116
+    (
+        "Research Support, Non-U.S. Gov't",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, Non-U.S. Gov't",
+        "—",
+    ),
+    # 117
+    (
+        "Research Support, U.S. Gov't Non-PHS",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Gov't, Non-P.H.S.",
+        "—",
+    ),
+    # 118
+    (
+        "Research Support, U.S. Gov't PHS",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Gov't, P.H.S.",
+        "—",
+    ),
+    # 119
+    (
+        "Research Support, U.S. Government",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Research Support, U.S. Government",
+        "—",
+    ),
+    # 120
+    (
+        "Support of Research",
+        "Grants & Funding",
+        "REV",
+        "—",
+        "—",
+        "Support of Research",
+        "—",
+    ),
+    # 121
+    ("Biography", "Biographical & Historical", "REV", "—", "—", "Biography", "—"),
+    # 122
+    (
+        "Autobiography",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Autobiography",
+        "—",
+    ),
+    # 123
+    (
+        "Biobibliography",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Biobibliography",
+        "—",
+    ),
+    # 124
+    ("Bibliography", "Biographical & Historical", "REV", "—", "—", "Bibliography", "—"),
+    # 125
+    (
+        "Classical Article",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Classical Article",
+        "—",
+    ),
+    # 126
+    (
+        "Historical Article",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Historical Article",
+        "—",
+    ),
+    # 127
+    (
+        "Personal Narrative",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Personal Narrative",
+        "—",
+    ),
+    # 128
+    ("Eulogy", "Biographical & Historical", "REV", "—", "—", "Eulogy", "—"),
+    # 129
+    ("Portrait", "Biographical & Historical", "REV", "—", "—", "Portrait", "—"),
+    # 130
+    ("Diary", "Biographical & Historical", "REV", "—", "—", "Diary", "—"),
+    # 131
+    (
+        "Collected Correspondence",
+        "Biographical & Historical",
+        "REV",
+        "—",
+        "—",
+        "Collected Correspondence",
+        "—",
+    ),
+    # 132
+    ("Textbook", "Educational & Instructional", "REV", "—", "—", "Textbook", "—"),
+    # 133
+    ("Handbook", "Educational & Instructional", "REV", "—", "—", "Handbook", "—"),
+    # 134
+    (
+        "Laboratory Manual",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Laboratory Manual",
+        "—",
+    ),
+    # 135
+    ("Study Guide", "Educational & Instructional", "REV", "—", "—", "Study Guide", "—"),
+    # 136
+    (
+        "Resource Guide",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Resource Guide",
+        "—",
+    ),
+    # 137
+    ("Guidebook", "Educational & Instructional", "REV", "—", "—", "Guidebook", "—"),
+    # 138
+    ("Lecture", "Educational & Instructional", "REV", "—", "—", "Lecture", "—"),
+    # 139
+    (
+        "Lecture Note",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Lecture Note",
+        "—",
+    ),
+    # 140
+    (
+        "Nurses Instruction",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Nurses Instruction",
+        "—",
+    ),
+    # 141
+    (
+        "Patient Education Handout",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Patient Education Handout",
+        "—",
+    ),
+    # 142
+    (
+        "Interactive Tutorial",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Interactive Tutorial",
+        "—",
+    ),
+    # 143
+    (
+        "Programmed Instruction",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Programmed Instruction",
+        "—",
+    ),
+    # 144
+    (
+        "Examination Questions",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Examination Questions",
+        "—",
+    ),
+    # 145
+    (
+        "Problems and Exercises",
+        "Educational & Instructional",
+        "REV",
+        "—",
+        "—",
+        "Problems and Exercises",
+        "—",
+    ),
+    # 146
+    ("Cookbook", "Educational & Instructional", "REV", "—", "—", "Cookbook", "—"),
+    # 147
+    ("Photograph", "Visual / Media", "REV", "—", "—", "Photograph", "—"),
+    # 148
+    ("Drawing", "Visual / Media", "REV", "—", "—", "Drawing", "—"),
+    # 149
+    ("Pictorial Work", "Visual / Media", "REV", "—", "—", "Pictorial Work", "—"),
+    # 150
+    ("Caricature", "Visual / Media", "REV", "—", "—", "Caricature", "—"),
+    # 151
+    ("Cartoon", "Visual / Media", "REV", "—", "—", "Cartoon", "—"),
+    # 152
+    ("Graphic Novel", "Visual / Media", "REV", "—", "—", "Graphic Novel", "—"),
+    # 153
+    ("Map", "Visual / Media", "REV", "—", "—", "Map", "—"),
+    # 154
+    ("Poster", "Visual / Media", "REV", "—", "—", "Poster", "—"),
+    # 155
+    ("Postcard", "Visual / Media", "REV", "—", "—", "Postcard", "—"),
+    # 156
+    ("Bookplate", "Visual / Media", "REV", "—", "—", "Bookplate", "—"),
+    # 157
+    ("Broadside", "Visual / Media", "REV", "—", "—", "Broadside", "—"),
+    # 158
+    (
+        "Architectural Drawing",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Architectural Drawing",
+        "—",
+    ),
+    # 159
+    ("Animation", "Visual / Media", "REV", "—", "—", "Animation", "—"),
+    # 160
+    (
+        "Documentaries and Factual Films",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Documentaries and Factual Films",
+        "—",
+    ),
+    # 161
+    (
+        "Instructional Film and Video",
+        "Visual / Media",
+        "REV",
+        "—",
+        "—",
+        "Instructional Film and Video",
+        "—",
+    ),
+    # 162
+    ("Unedited Footage", "Visual / Media", "REV", "—", "—", "Unedited Footage", "—"),
+    # 163
+    ("Video-Audio Media", "Visual / Media", "REV", "—", "—", "Video-Audio Media", "—"),
+    # 164
+    ("Essay", "Literary / Miscellaneous", "REV", "—", "—", "Essay", "—"),
+    # 165
+    ("Poetry", "Literary / Miscellaneous", "REV", "—", "—", "Poetry", "—"),
+    # 166
+    (
+        "Fictional Work",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Fictional Work",
+        "—",
+    ),
+    # 167
+    (
+        "Juvenile Literature",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Juvenile Literature",
+        "—",
+    ),
+    # 168
+    (
+        "Wit and Humor",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Wit and Humor",
+        "—",
+    ),
+    # 169
+    ("Anecdotes", "Literary / Miscellaneous", "REV", "—", "—", "Anecdotes", "—"),
+    # 170
+    (
+        "Aphorisms and Proverbs",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Aphorisms and Proverbs",
+        "—",
+    ),
+    # 171
+    ("Phrases", "Literary / Miscellaneous", "REV", "—", "—", "Phrases", "—"),
+    # 172
+    ("Sermon", "Literary / Miscellaneous", "REV", "—", "—", "Sermon", "—"),
+    # 173
+    (
+        "Funeral Sermon",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Funeral Sermon",
+        "—",
+    ),
+    # 174
+    (
+        "Movable Books",
+        "Literary / Miscellaneous",
+        "REV",
+        "—",
+        "—",
+        "Movable Books",
+        "—",
+    ),
+    # 175
+    ("Catalog", "Administrative / Catalogs / Legal", "REV", "—", "—", "Catalog", "—"),
+    # 176
+    (
+        "Catalog, Bookseller",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Bookseller",
+        "—",
+    ),
+    # 177
+    (
+        "Catalog, Commercial",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Commercial",
+        "—",
+    ),
+    # 178
+    (
+        "Catalog, Drug",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Drug",
+        "—",
+    ),
+    # 179
+    (
+        "Catalog, Publisher",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Publisher",
+        "—",
+    ),
+    # 180
+    (
+        "Catalog, Union",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Catalog, Union",
+        "—",
+    ),
+    # 181
+    (
+        "Directory",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Directory",
+        "—",
+    ),
+    # 182
+    ("Index", "Administrative / Catalogs / Legal", "REV", "—", "—", "Index", "—"),
+    # 183
+    (
+        "Union List",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Union List",
+        "—",
+    ),
+    # 184
+    (
+        "Price List",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Price List",
+        "—",
+    ),
+    # 185
+    (
+        "Legal Case",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Legal Case",
+        "—",
+    ),
+    # 186
+    (
+        "Legislation",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Legislation",
+        "—",
+    ),
+    # 187
+    (
+        "Government Publication",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Government Publication",
+        "—",
+    ),
+    # 188
+    (
+        "Public Service Announcement",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Public Service Announcement",
+        "—",
+    ),
+    # 189
+    (
+        "Advertisement",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Advertisement",
+        "—",
+    ),
+    # 190
+    (
+        "Prospectus",
+        "Administrative / Catalogs / Legal",
+        "REV",
+        "—",
+        "—",
+        "Prospectus",
+        "—",
+    ),
+    # 191
+    ("Other", "Format / Meta-types", "REV", "other", "other", "—", "—"),
+    # 192
+    ("Abbreviations", "Format / Meta-types", "REV", "—", "—", "Abbreviations", "—"),
+    # 193
+    ("Abstracts", "Format / Meta-types", "REV", "—", "—", "Abstracts", "—"),
+    # 194
+    (
+        "English Abstract",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "English Abstract",
+        "—",
+    ),
+    # 195
+    ("Chart", "Format / Meta-types", "REV", "—", "—", "Chart", "—"),
+    # 196
+    ("Chronology", "Format / Meta-types", "REV", "—", "—", "Chronology", "—"),
+    # 197
+    ("Tables", "Format / Meta-types", "REV", "—", "—", "Tables", "—"),
+    # 198
+    ("Form", "Format / Meta-types", "REV", "—", "—", "Form", "—"),
+    # 199
+    ("Outline", "Format / Meta-types", "REV", "—", "—", "Outline", "—"),
+    # 200
+    ("Almanac", "Format / Meta-types", "REV", "—", "—", "Almanac", "—"),
+    # 201
+    ("Calendar", "Format / Meta-types", "REV", "—", "—", "Calendar", "—"),
+    # 202
+    ("Ephemera", "Format / Meta-types", "REV", "—", "—", "Ephemera", "—"),
+    # 203
+    ("Program", "Format / Meta-types", "REV", "—", "—", "Program", "—"),
+    # 204
+    ("Manuscript", "Format / Meta-types", "REV", "—", "—", "Manuscript", "—"),
+    # 205
+    (
+        "Manuscript, Medical",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Manuscript, Medical",
+        "—",
+    ),
+    # 206
+    ("Incunabula", "Format / Meta-types", "REV", "—", "—", "Incunabula", "—"),
+    # 207
+    (
+        "Unpublished Work",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Unpublished Work",
+        "—",
+    ),
+    # 208
+    ("Web Archive", "Format / Meta-types", "REV", "—", "—", "Web Archive", "—"),
+    # 209
+    ("Account Book", "Format / Meta-types", "REV", "—", "—", "Account Book", "—"),
+    # 210
+    ("Overall", "Format / Meta-types", "REV", "—", "—", "Overall", "—"),
+    # 211
+    (
+        "Publication Components",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Publication Components",
+        "—",
+    ),
+    # 212
+    (
+        "Publication Formats",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Publication Formats",
+        "—",
+    ),
+    # 213
+    (
+        "Study Characteristics",
+        "Format / Meta-types",
+        "REV",
+        "—",
+        "—",
+        "Study Characteristics",
+        "—",
+    ),
+    # 214
+    ("Exhibition", "Format / Meta-types", "REV", "—", "—", "Exhibition", "—"),
+)
+
+# Total number of entries (used by architecture sync test)
+CLASSIFICATION_TABLE_SIZE: Final[int] = len(_CLASSIFICATION_TABLE)
+
+# ============================================================================
+# Build reverse-lookup dicts at import time (pure code, no I/O)
+# ============================================================================
+
+_DASH = "—"
+
+
+def _build_lookups() -> tuple[
+    dict[str, PublicationTypeEntry],
+    dict[str, PublicationTypeEntry],
+    dict[str, PublicationTypeEntry],
+    dict[str, PublicationTypeEntry],
+]:
+    """Build four provider-specific lookup dicts from the classification table.
+
+    Keys are normalized to lowercase.  Asterisk suffix (``*``) is stripped
+    and the key is added as an *additional* mapping (does not replace the
+    primary key without asterisk, if any).
+
+    Returns:
+        Tuple of (openalex, crossref, pubmed, s2) lookup dicts.
+
+    """
+    openalex: dict[str, PublicationTypeEntry] = {}
+    crossref: dict[str, PublicationTypeEntry] = {}
+    pubmed: dict[str, PublicationTypeEntry] = {}
+    s2: dict[str, PublicationTypeEntry] = {}
+
+    for row_idx, row in enumerate(_CLASSIFICATION_TABLE, start=1):
+        unified_type, subclass, class_code, oa_keys, cr_keys, pm_keys, s2_keys = row
+        entry = PublicationTypeEntry(
+            unified_type=unified_type,
+            subclass=subclass,
+            class_code=class_code,
+            specificity=row_idx,
+        )
+
+        for raw_key, target in (
+            (oa_keys, openalex),
+            (cr_keys, crossref),
+            (pm_keys, pubmed),
+            (s2_keys, s2),
+        ):
+            if raw_key == _DASH:
+                continue
+            # Strip asterisk (secondary mapping) and normalize to lowercase
+            key = raw_key.rstrip("*").lower()
+            # Only set if not already present (primary key wins over secondary)
+            if key not in target:
+                target[key] = entry
+
+    return openalex, crossref, pubmed, s2
+
+
+_OPENALEX_LOOKUP, _CROSSREF_LOOKUP, _PUBMED_LOOKUP, _S2_LOOKUP = _build_lookups()
+
+
+# ============================================================================
+# Public API
+# ============================================================================
+
+
+def classify_publication_type(
+    provider: str,
+    raw_type: str | None = None,
+    raw_types_list: list[str] | None = None,
+) -> PublicationTypeEntry | None:
+    """Classify a publication type using the unified 3-level hierarchy.
+
+    For single-value providers (OpenAlex, CrossRef): uses ``raw_type`` for
+    a direct lookup.
+
+    For multi-value providers (PubMed, Semantic Scholar): iterates
+    ``raw_types_list``, collects all matches, and returns the entry with
+    the highest specificity (largest row number = most specific type).
+
+    Args:
+        provider: Provider name ("openalex", "crossref", "pubmed",
+            "semanticscholar").
+        raw_type: Single raw type string (for OpenAlex / CrossRef).
+        raw_types_list: List of raw type strings (for PubMed / S2).
+
+    Returns:
+        The matching ``PublicationTypeEntry``, or ``None`` if no match.
+
+    """
+    lookup = _get_lookup(provider)
+    if lookup is None:
+        return None
+
+    # Single-value lookup (OpenAlex, CrossRef)
+    if raw_type is not None:
+        return lookup.get(raw_type.lower())
+
+    # Multi-value lookup (PubMed, Semantic Scholar)
+    if raw_types_list is not None:
+        return _best_match(lookup, raw_types_list)
+
+    return None
+
+
+def _best_match(
+    lookup: dict[str, PublicationTypeEntry],
+    raw_types: list[str],
+) -> PublicationTypeEntry | None:
+    """Return the most specific match from a list of raw type strings."""
+    matches = [
+        entry
+        for raw in raw_types
+        if raw and (entry := lookup.get(raw.strip().lower())) is not None
+    ]
+    return max(matches, key=lambda e: e.specificity, default=None)
+
+
+_PROVIDER_LOOKUPS: dict[str, dict[str, PublicationTypeEntry]] = {
+    "openalex": _OPENALEX_LOOKUP,
+    "crossref": _CROSSREF_LOOKUP,
+    "pubmed": _PUBMED_LOOKUP,
+    "semanticscholar": _S2_LOOKUP,
+    "semantic_scholar": _S2_LOOKUP,
+    "s2": _S2_LOOKUP,
+}
+
+
+def _get_lookup(provider: str) -> dict[str, PublicationTypeEntry] | None:
+    """Return the lookup dict for the given provider."""
+    return _PROVIDER_LOOKUPS.get(provider.lower())
+
+================================================================================
 File: medallion.py
 Path: medallion.py
 ================================================================================
@@ -14090,7 +17578,7 @@ These are pure domain objects with no dependencies on infrastructure.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.domain.exceptions import PolicyViolationError
@@ -14099,7 +17587,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunType
 
 
-class Layer(str, Enum):
+class Layer(StrEnum):
     """Medallion architecture layers.
 
     Attributes:
@@ -14113,7 +17601,7 @@ class Layer(str, Enum):
     GOLD = "gold"
 
 
-class WriteMode(str, Enum):
+class WriteMode(StrEnum):
     """Write mode for data operations.
 
     Attributes:
@@ -14127,7 +17615,7 @@ class WriteMode(str, Enum):
     OVERWRITE = "overwrite"
 
 
-class SilverWriteMode(str, Enum):
+class SilverWriteMode(StrEnum):
     """Allowed write modes for Silver layer.
 
     Domain enum consolidating Silver layer write semantics.
@@ -14165,7 +17653,7 @@ class SilverWriteMode(str, Enum):
             ) from None
 
 
-class GoldWriteMode(str, Enum):
+class GoldWriteMode(StrEnum):
     """Allowed write modes for Gold layer.
 
     Domain enum consolidating Gold layer write semantics.
@@ -14248,7 +17736,7 @@ class WriteModePolicy:
             )
 
 
-class LoadingStrategy(str, Enum):
+class LoadingStrategy(StrEnum):
     """Loading strategy for pipeline data extraction.
 
     Determines how the pipeline handles incremental vs full data loading.
@@ -14259,17 +17747,11 @@ class LoadingStrategy(str, Enum):
             Checkpoint-based resume is disabled. Deduplication is handled
             on Silver layer via content_hash. Required for entities with
             unstable API pagination (e.g., publications).
-        WATERMARK_BASED: Incremental loading based on watermark field.
-            NOT YET IMPLEMENTED - placeholder for future watermark support.
-            Requires confirmed watermark field availability in source API.
 
     Example:
         >>> strategy = LoadingStrategy.FULL_SCAN_ONLY
         >>> strategy.allows_checkpoint_resume
         False
-        >>> strategy = LoadingStrategy.WATERMARK_BASED
-        >>> strategy.allows_checkpoint_resume
-        True
 
     See Also:
         ADR-030: Publication pagination strategy (force_full_scan)
@@ -14279,9 +17761,6 @@ class LoadingStrategy(str, Enum):
     FULL_SCAN_ONLY = "full_scan_only"
     """Full scan on each run. No checkpoint resume. Deduplication via content_hash."""
 
-    WATERMARK_BASED = "watermark_based"
-    """Incremental loading via watermark. Placeholder - NOT YET IMPLEMENTED."""
-
     @property
     def allows_checkpoint_resume(self) -> bool:
         """Check if this strategy allows checkpoint-based resume.
@@ -14289,14 +17768,14 @@ class LoadingStrategy(str, Enum):
         Returns:
             True if checkpoint resume is allowed, False otherwise.
         """
-        return self != LoadingStrategy.FULL_SCAN_ONLY
+        return False
 
     @classmethod
     def from_string(cls, value: str) -> LoadingStrategy:
         """Convert string to LoadingStrategy with validation.
 
         Args:
-            value: String value (e.g., "full_scan_only", "watermark_based")
+            value: String value (e.g., "full_scan_only")
 
         Returns:
             Corresponding LoadingStrategy enum value
@@ -14313,7 +17792,7 @@ class LoadingStrategy(str, Enum):
             ) from None
 
     @classmethod
-    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:
+    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:  # noqa: ARG003
         """Convert legacy force_full_scan flag to LoadingStrategy.
 
         Provides backward compatibility with existing configs using
@@ -14323,12 +17802,12 @@ class LoadingStrategy(str, Enum):
             force_full_scan: Legacy boolean flag
 
         Returns:
-            FULL_SCAN_ONLY if force_full_scan is True, WATERMARK_BASED otherwise
+            FULL_SCAN_ONLY (always, since watermark-based loading was removed)
         """
-        return cls.FULL_SCAN_ONLY if force_full_scan else cls.WATERMARK_BASED
+        return cls.FULL_SCAN_ONLY
 
 
-class ClearPolicy(str, Enum):
+class ClearPolicy(StrEnum):
     """Policy for clearing medallion layers.
 
     Determines which layers should be cleared before a pipeline run.
@@ -14428,6 +17907,7 @@ Contains Pydantic models for structured data that requires validation.
 These models define data contracts for metadata sidecar files.
 """
 
+from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     ColumnMetrics,
@@ -14454,6 +17934,7 @@ __all__ = [
     "DQSummary",
     "DeltaMetrics",
     "EnvironmentMetadata",
+    "ExtractionParams",
     "FileOutputMetadata",
     "GoldMetadata",
     "LayerType",
@@ -14467,6 +17948,71 @@ __all__ = [
     "SilverMetadata",
     "SourceMetadata",
 ]
+
+================================================================================
+File: filter.py
+Path: models\filter.py
+================================================================================
+"""Extraction filtering domain models.
+
+Provides immutable value objects for API-level extraction filtering.
+Part of ADR-028 §3: Extraction-Level Filtering.
+
+Domain layer — no infrastructure or application imports allowed.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractionParams:
+    """Server-side query parameters for API extraction filtering.
+
+    Immutable value object. Provider-agnostic container —
+    concrete syntax (__in, __isnull) is defined in YAML config.
+
+    Attributes:
+        params: Mapping of query parameter names to values.
+                Keys are provider-specific (e.g., 'standard_type__in').
+                Values are primitives only.
+
+    Example:
+        >>> ep = ExtractionParams(params={
+        ...     "standard_type__in": "IC50,Ki",
+        ...     "standard_units": "nM",
+        ...     "pchembl_value__isnull": False,
+        ... })
+        >>> ep.to_query_dict()
+        {'standard_type__in': 'IC50,Ki', 'standard_units': 'nM', ...}
+    """
+
+    params: Mapping[str, str | int | bool]
+
+    def to_query_dict(self) -> dict[str, str | int | bool]:
+        """Return params as mutable dict for adapter consumption."""
+        return dict(self.params)
+
+    def to_query_string(self) -> str:
+        """Serialize for SourceMetadata.query_string audit field.
+
+        Returns:
+            URL-encoded-like string with sorted keys for determinism.
+        """
+        parts = [f"{k}={v}" for k, v in sorted(self.params.items())]
+        return "&".join(parts)
+
+    @property
+    def is_empty(self) -> bool:
+        """Check if no extraction params are configured."""
+        return len(self.params) == 0
+
+    @classmethod
+    def empty(cls) -> ExtractionParams:
+        """Create an empty ExtractionParams instance."""
+        return cls(params={})
 
 ================================================================================
 File: metadata.py
@@ -14490,13 +18036,13 @@ Version: 1.1
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
-class LayerType(str, Enum):
+class LayerType(StrEnum):
     """Medallion architecture layer type."""
 
     BRONZE = "bronze"
@@ -14504,7 +18050,7 @@ class LayerType(str, Enum):
     GOLD = "gold"
 
 
-class RunTypeEnum(str, Enum):
+class RunTypeEnum(StrEnum):
     """Type of pipeline run (mirrors domain.types.RunType)."""
 
     INCREMENTAL = "incremental"
@@ -14761,8 +18307,6 @@ class SourceMetadata(BaseModel):
         file_path: File path for file sources.
         query_string: Query string used for data source filtering
             (e.g., 'assay_type=B&standard_type=IC50').
-        watermark_before: Previous watermark timestamp.
-        watermark_after: New watermark timestamp after ingestion.
         api_version: Provider API version.
         api_requests: List of detailed API request information.
         total_requests: Total number of API requests made.
@@ -14778,12 +18322,6 @@ class SourceMetadata(BaseModel):
     query_string: str | None = Field(
         default=None,
         description="Query string used for data source filtering (e.g., 'assay_type=B')",
-    )
-    watermark_before: datetime | None = Field(
-        default=None, description="Previous watermark"
-    )
-    watermark_after: datetime | None = Field(
-        default=None, description="New watermark after ingestion"
     )
     api_version: str | None = Field(default=None, description="Provider API version")
     api_requests: list[APIRequestDetails] = Field(
@@ -15601,7 +19139,6 @@ This package contains all port definitions organized by domain:
 - normalization: UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort
 - data_normalization: DataNormalizationPort for text/data normalization
 - delta_reader: DeltaReaderPort for read-only Delta table access
-- watermark: WatermarkStrategyPort for incremental loading (ADR-031, placeholder)
 """
 
 from bioetl.domain.ports.audit import (
@@ -15680,7 +19217,6 @@ from bioetl.domain.ports.serialization import JsonEncoderPort
 from bioetl.domain.ports.shutdown import ShutdownPort
 from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
-from bioetl.domain.ports.watermark import NoOpWatermarkStrategy, WatermarkStrategyPort
 
 __all__ = [
     "ActivityAggregatorPort",
@@ -15725,7 +19261,6 @@ __all__ = [
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
-    "NoOpWatermarkStrategy",
     "NormalizationServicePort",
     "OutlierFilterPort",
     "PiiHasherPort",
@@ -15743,7 +19278,6 @@ __all__ = [
     "TracingPort",
     "UnitConverterPort",
     "ValueValidatorPort",
-    "WatermarkStrategyPort",
 ]
 
 ================================================================================
@@ -15764,13 +19298,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Protocol, runtime_checkable
 
 from bioetl.domain.types import RunID
 
 
-class AuditOperation(str, Enum):
+class AuditOperation(StrEnum):
     """Types of auditable write operations."""
 
     WRITE = "write"
@@ -15789,7 +19323,7 @@ class AuditOperation(str, Enum):
     """Full overwrite operation."""
 
 
-class AuditLayer(str, Enum):
+class AuditLayer(StrEnum):
     """Medallion layers for audit tracking."""
 
     BRONZE = "bronze"
@@ -16029,7 +19563,7 @@ class DataNormalizationPort(Protocol):
         ...
 
     def normalize_year(self, year: int | None) -> tuple[int | None, bool]:
-        """Validate publication year against range [1800, 2100].
+        """Validate publication year against range [1500, 2100].
 
         Returns (year, is_warning). Warning is True if year is outside valid range.
         """
@@ -16096,6 +19630,7 @@ for adapters that support server-side filtering.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from types import TracebackType
 from typing import Any, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
@@ -16123,7 +19658,7 @@ class DataSourcePort(Protocol):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit the async context manager."""
         ...
@@ -17232,7 +20767,7 @@ class IDMappingPort(Protocol):
         from_db: str,
         to_db: str,
         ids: list[str],
-    ) -> Mapping[str, str | None]:
+    ) -> Mapping[str, dict[str, Any] | None]:
         """Map identifiers from source database to target database.
 
         Args:
@@ -17241,7 +20776,7 @@ class IDMappingPort(Protocol):
             ids: List of identifiers to map.
 
         Returns:
-            Dictionary mapping each input ID to its mapped value,
+            Dictionary mapping each input ID to its entry data dict,
             or None if no mapping was found.
 
         Raises:
@@ -19703,6 +23238,7 @@ class StoragePort(Protocol):
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to the Silver layer.
@@ -19718,6 +23254,7 @@ class StoragePort(Protocol):
                 - 'error': Raise SchemaEvolutionError (default)
                 - 'evolve': Allow schema evolution (add new columns)
                 - 'ignore': Proceed without changes (filter to existing schema)
+            column_order: Optional explicit column order to apply.
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
@@ -19743,6 +23280,7 @@ class StoragePort(Protocol):
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
+        column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[Any] | None = None,
@@ -19755,6 +23293,7 @@ class StoragePort(Protocol):
             schema: Pandera DataFrameSchema for strict validation (required).
             primary_keys: Optional list of column names for sorting/deduplication.
             mode: The write mode (e.g., 'overwrite', 'append', 'scd2').
+            column_order: Optional explicit column order to apply.
             ingestion_ts: Ingestion timestamp from application layer
                          (single source of time per ADR-014). Required for audit.
             run_id: Run identifier for audit correlation across layers.
@@ -19798,6 +23337,7 @@ class StoragePort(Protocol):
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -19810,6 +23350,9 @@ class StoragePort(Protocol):
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
 
         Note:
             This method bypasses strict schema validation since merged data
@@ -19825,6 +23368,7 @@ class StoragePort(Protocol):
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -19837,6 +23381,9 @@ class StoragePort(Protocol):
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical_column_order()
+                and preserve the column order from records (e.g. semantic
+                ordering applied by ColumnOrderer in composite pipelines).
 
         Note:
             This method bypasses Pandera validation since merged data
@@ -20080,140 +23627,6 @@ class GoldValidatorPort(Protocol):
             ValidationResult with valid flag and any error messages.
         """
         ...
-
-================================================================================
-File: watermark.py
-Path: ports\watermark.py
-================================================================================
-"""Watermark strategy port for incremental data loading.
-
-This module defines the interface for watermark-based incremental loading.
-Currently a placeholder for future implementation (ADR-031).
-
-IMPORTANT: Watermark-based loading requires:
-1. Confirmed watermark field availability in source API
-2. Reliable timestamp/version tracking on the source side
-3. Proper handling of late-arriving data
-
-Do NOT implement without confirming API support for watermark fields.
-"""
-
-from __future__ import annotations
-
-from abc import abstractmethod
-from datetime import datetime
-from typing import Any, Protocol, runtime_checkable
-
-
-@runtime_checkable
-class WatermarkStrategyPort(Protocol):
-    """Port for watermark-based incremental loading strategy.
-
-    Defines the interface for managing watermarks that track the progress
-    of incremental data extraction. Watermarks are typically timestamps
-    or version numbers that identify the last successfully processed record.
-
-    This is a PLACEHOLDER interface for future implementation.
-    Current status: NOT IMPLEMENTED.
-
-    Requirements for implementation:
-    1. Source API must provide a reliable watermark field (e.g., updated_at)
-    2. Watermark field must be monotonically increasing
-    3. Source must support filtering by watermark (e.g., WHERE updated_at > watermark)
-
-    Example usage (future):
-        >>> strategy = WatermarkStrategy(checkpoint_port, "updated_at")
-        >>> last_watermark = await strategy.get_watermark("chembl_activity")
-        >>> # Fetch records WHERE updated_at > last_watermark
-        >>> await strategy.update_watermark("chembl_activity", new_watermark)
-
-    See Also:
-        ADR-030: Publication pagination strategy (full_scan_only)
-        ADR-031: Loading strategy formalization
-        LoadingStrategy: Enum controlling which strategy is used
-    """
-
-    @abstractmethod
-    async def get_watermark(self, pipeline_name: str) -> datetime | int | str | None:
-        """Get the current watermark for a pipeline.
-
-        Args:
-            pipeline_name: Name of the pipeline to get watermark for.
-
-        Returns:
-            The current watermark value (timestamp, version number, or ID),
-            or None if no watermark exists (first run).
-        """
-        ...
-
-    @abstractmethod
-    async def update_watermark(
-        self,
-        pipeline_name: str,
-        watermark: datetime | int | str,
-        metadata: dict[str, Any] | None = None,
-    ) -> None:
-        """Update the watermark after successful processing.
-
-        Args:
-            pipeline_name: Name of the pipeline to update watermark for.
-            watermark: New watermark value to store.
-            metadata: Optional metadata about the processing run.
-        """
-        ...
-
-    @abstractmethod
-    async def clear_watermark(self, pipeline_name: str) -> None:
-        """Clear the watermark for a pipeline (triggers full reload).
-
-        Args:
-            pipeline_name: Name of the pipeline to clear watermark for.
-        """
-        ...
-
-
-class NoOpWatermarkStrategy:
-    """No-operation implementation of WatermarkStrategyPort.
-
-    Used as a placeholder when watermark-based loading is not available.
-    Always returns None for watermark and does nothing on update.
-
-    This is the DEFAULT implementation until watermark support is added.
-    """
-
-    async def get_watermark(self, _pipeline_name: str) -> None:
-        """Always returns None (no watermark available).
-
-        Args:
-            _pipeline_name: Ignored (intentionally unused in no-op).
-
-        Returns:
-            None, indicating no watermark support.
-        """
-        return None
-
-    async def update_watermark(
-        self,
-        _pipeline_name: str,
-        _watermark: datetime | int | str,
-        _metadata: dict[str, Any] | None = None,
-    ) -> None:
-        """No-op: does nothing.
-
-        Args:
-            _pipeline_name: Ignored (intentionally unused in no-op).
-            _watermark: Ignored (intentionally unused in no-op).
-            _metadata: Ignored (intentionally unused in no-op).
-        """
-        pass
-
-    async def clear_watermark(self, _pipeline_name: str) -> None:
-        """No-op: does nothing.
-
-        Args:
-            _pipeline_name: Ignored (intentionally unused in no-op).
-        """
-        pass
 
 ================================================================================
 File: __init__.py
@@ -20796,6 +24209,8 @@ Provides:
 - Base Pandera schemas for validation
 - Canonical column ordering utilities
 - Provider-specific schema definitions
+- JSON validators for schema checks
+- Centralized constants for schema validation
 """
 
 from __future__ import annotations
@@ -20807,14 +24222,314 @@ from bioetl.domain.schemas.column_order import (
     SYSTEM_FIELDS_PREFIX,
     canonical_column_order,
 )
+from bioetl.domain.schemas.constants import (
+    ACTIVITY_STANDARD_TYPES,
+    ASSAY_CATEGORIES,
+    ASSAY_TEST_TYPES,
+    ASSAY_TYPES,
+    BAO_ID_PATTERN,
+    CELLOSAURUS_ID_PATTERN,
+    CHEMBL_ID_PATTERN,
+    CLO_ID_PATTERN,
+    DATA_VALIDITY_COMMENTS,
+    EFO_ID_PATTERN,
+    ISO_DATE_PATTERN,
+    MAX_PHASE_VALUES,
+    MOLECULE_TYPES,
+    PUBLICATION_TYPES,
+    RELATIONSHIP_TYPES,
+    STANDARD_RELATIONS,
+    STRUCTURE_TYPES,
+    TARGET_COMPONENT_RELATIONSHIPS,
+    TARGET_TYPES,
+    UO_ID_PATTERN,
+)
+from bioetl.domain.schemas.validators import (
+    # Registered check methods (imported for side-effect registration)
+    in_closed_range,
+    is_non_negative,
+    is_positive,
+    json_array_check,
+    json_check,
+    json_object_check,
+    max_str_length,
+    str_matches_pattern,
+    str_starts_with,
+)
 
 __all__ = [
+    "ACTIVITY_STANDARD_TYPES",
+    # Column ordering
     "ALL_SYSTEM_FIELDS",
+    "ASSAY_CATEGORIES",
+    "ASSAY_TEST_TYPES",
+    # Assay enums
+    "ASSAY_TYPES",
+    "BAO_ID_PATTERN",
+    "CELLOSAURUS_ID_PATTERN",
+    # Regex patterns
+    "CHEMBL_ID_PATTERN",
+    "CLO_ID_PATTERN",
+    "DATA_VALIDITY_COMMENTS",
     "DQ_FIELDS_SUFFIX",
+    "EFO_ID_PATTERN",
+    "ISO_DATE_PATTERN",
     "LOOKUP_FIELDS_PREFIX",
+    "MAX_PHASE_VALUES",
+    # Molecule enums
+    "MOLECULE_TYPES",
+    # Publication enums
+    "PUBLICATION_TYPES",
+    "RELATIONSHIP_TYPES",
+    # Activity enums
+    "STANDARD_RELATIONS",
+    "STRUCTURE_TYPES",
     "SYSTEM_FIELDS_PREFIX",
+    "TARGET_COMPONENT_RELATIONSHIPS",
+    # Target enums
+    "TARGET_TYPES",
+    "UO_ID_PATTERN",
     "canonical_column_order",
+    # Registered check methods
+    "in_closed_range",
+    "is_non_negative",
+    "is_positive",
+    # JSON validators
+    "json_array_check",
+    "json_check",
+    "json_object_check",
+    "max_str_length",
+    "str_matches_pattern",
+    "str_starts_with",
 ]
+
+================================================================================
+File: _field_orders.py
+Path: schemas\_field_orders.py
+================================================================================
+"""Canonical field orders for composite pipeline schemas.
+
+Defines the authoritative field ordering for composite publication output.
+The order is derived from docs/schemas/publication_field_order.csv and
+used by ColumnOrderer and tests to ensure deterministic column ordering.
+
+Categories (6 groups, 179 fully-qualified fields):
+  - id (1-24): Identifiers, content hashes, entity IDs
+  - bibliography (25-83): Title, abstract, journal, pagination, year
+  - author_and_affiliation (84-104): Authors, affiliations, institutions
+  - date (105-114): Publication and revision dates
+  - topics_and_keywords (115-130): MeSH, topics, keywords, chemicals
+  - publication (131-179): Citations, OA, types, language, misc
+"""
+
+from __future__ import annotations
+
+from typing import Final
+
+__all__ = [
+    "PUBLICATION_CANONICAL_CATEGORIES",
+    "PUBLICATION_FIELD_ORDER",
+]
+
+# Canonical order of all 179 fully-qualified publication fields.
+# Source of truth: docs/schemas/publication_field_order.csv
+PUBLICATION_FIELD_ORDER: Final[tuple[str, ...]] = (
+    # === id (1-24) ===
+    "crossref.publication.alternative_id",
+    "chembl.publication.chembl_release",
+    "chembl.publication.content_hash",
+    "crossref.publication.content_hash",
+    "openalex.publication.content_hash",
+    "pubmed.publication.content_hash",
+    "semanticscholar.publication.content_hash",
+    "semanticscholar.publication.corpus_id",
+    "semanticscholar.publication.dblp_id",
+    "chembl.publication.document_chembl_id",
+    "chembl.publication.entity_id",
+    "crossref.publication.entity_id",
+    "openalex.publication.entity_id",
+    "pubmed.publication.entity_id",
+    "semanticscholar.publication.entity_id",
+    "openalex.publication.mag_id",
+    "pubmed.publication.nlm_unique_id",
+    "openalex.publication.openalex_id",
+    "semanticscholar.publication.paper_id",
+    "pubmed.publication.pmc_id",
+    "chembl.publication.pmid",
+    "openalex.publication.pmid",
+    "semanticscholar.publication.pmid",
+    "chembl.publication.src_id",
+    # === bibliography (25-83) ===
+    "chembl.publication.abstract",
+    "openalex.publication.abstract",
+    "pubmed.publication.abstract",
+    "semanticscholar.publication.abstract",
+    "pubmed.publication.abstract_structured",
+    "chembl.publication.doi",
+    "pubmed.publication.doi",
+    "crossref.publication.issn",
+    "openalex.publication.issn",
+    "pubmed.publication.issn",
+    "crossref.publication.issn_electronic",
+    "crossref.publication.issn_list",
+    "crossref.publication.issn_print",
+    "chembl.publication.issue",
+    "crossref.publication.issue",
+    "openalex.publication.issue",
+    "pubmed.publication.issue",
+    "semanticscholar.publication.issue",
+    "chembl.publication.journal",
+    "crossref.publication.journal",
+    "openalex.publication.journal",
+    "pubmed.publication.journal",
+    "semanticscholar.publication.journal",
+    "pubmed.publication.journal_iso_abbrev",
+    "pubmed.publication.journal_issn_type",
+    "crossref.publication.journal_name_short",
+    "pubmed.publication.journal_name_short",
+    "chembl.publication.page_first",
+    "crossref.publication.page_first",
+    "openalex.publication.page_first",
+    "pubmed.publication.page_first",
+    "semanticscholar.publication.page_first",
+    "chembl.publication.page_last",
+    "crossref.publication.page_last",
+    "openalex.publication.page_last",
+    "pubmed.publication.page_last",
+    "semanticscholar.publication.page_last",
+    "pubmed.publication.page_range",
+    "semanticscholar.publication.page_range",
+    "crossref.publication.published",
+    "crossref.publication.published_online",
+    "crossref.publication.published_print",
+    "crossref.publication.publisher",
+    "openalex.publication.publisher",
+    "chembl.publication.publication_year",
+    "crossref.publication.publication_year",
+    "openalex.publication.publication_year",
+    "pubmed.publication.publication_year",
+    "semanticscholar.publication.publication_year",
+    "chembl.publication.title",
+    "crossref.publication.title",
+    "openalex.publication.title",
+    "pubmed.publication.title",
+    "semanticscholar.publication.title",
+    "chembl.publication.volume",
+    "crossref.publication.volume",
+    "openalex.publication.volume",
+    "pubmed.publication.volume",
+    "semanticscholar.publication.volume",
+    # === author_and_affiliation (84-104) ===
+    "pubmed.publication.affiliation_list",
+    "openalex.publication.affiliation_list",
+    "semanticscholar.publication.affiliation_list",
+    "pubmed.publication.affiliation_structured",
+    "pubmed.publication.author_count",
+    "crossref.publication.author_details",
+    "semanticscholar.publication.author_h_indices",
+    "openalex.publication.author_openalex_ids",
+    "crossref.publication.author_orcids",
+    "openalex.publication.author_orcids",
+    "semanticscholar.publication.author_orcids",
+    "semanticscholar.publication.author_s2_ids",
+    "chembl.publication.authors",
+    "crossref.publication.authors",
+    "openalex.publication.authors",
+    "pubmed.publication.authors",
+    "pubmed.publication.authors_with_affiliations",
+    "pubmed.publication.country",
+    "openalex.publication.institution_country_codes",
+    "openalex.publication.institution_ids",
+    "openalex.publication.ror_ids",
+    # === date (105-114) ===
+    "chembl.publication.creation_date",
+    "pubmed.publication.date_completed",
+    "pubmed.publication.date_revised",
+    "pubmed.publication.pub_date",
+    "pubmed.publication.pub_day",
+    "pubmed.publication.pub_month",
+    "crossref.publication.publication_date",
+    "openalex.publication.publication_date",
+    "pubmed.publication.publication_date",
+    "semanticscholar.publication.publication_date",
+    # === topics_and_keywords (115-130) ===
+    "pubmed.publication.chemical_count",
+    "pubmed.publication.chemicals",
+    "pubmed.publication.citation_subset",
+    "pubmed.publication.databanks",
+    "openalex.publication.fwci",
+    "pubmed.publication.gene_symbols",
+    "pubmed.publication.keyword_count",
+    "pubmed.publication.mesh_heading_count",
+    "openalex.publication.primary_topic",
+    "semanticscholar.publication.subject_fields",
+    "crossref.publication.subject_keywords",
+    "openalex.publication.subject_keywords",
+    "pubmed.publication.subject_keywords",
+    "openalex.publication.subject_mesh",
+    "pubmed.publication.subject_mesh",
+    "openalex.publication.subject_topics",
+    # === publication (131-167) ===
+    "semanticscholar.publication.citation_contexts",
+    "chembl.publication.citations_made",
+    "crossref.publication.citations_made",
+    "openalex.publication.citations_made",
+    "pubmed.publication.citations_made",
+    "semanticscholar.publication.citations_made",
+    "chembl.publication.citations_received",
+    "crossref.publication.citations_received",
+    "openalex.publication.citations_received",
+    "semanticscholar.publication.citations_received",
+    "crossref.publication.content_domain_crossmark_restriction",
+    "crossref.publication.content_domain_domains",
+    "pubmed.publication.grant_count",
+    "openalex.publication.grants",
+    "semanticscholar.publication.influential_citation_count",
+    "openalex.publication.is_oa",
+    "semanticscholar.publication.is_oa",
+    "openalex.publication.is_retracted",
+    "crossref.publication.language",
+    "openalex.publication.language",
+    "pubmed.publication.language",
+    "crossref.publication.license_url",
+    "pubmed.publication.medline_pgn",
+    "openalex.publication.oa_status",
+    "semanticscholar.publication.oa_status",
+    "semanticscholar.publication.open_access_url",
+    "pubmed.publication.publication_status",
+    "chembl.publication.publication_type",
+    "crossref.publication.publication_type",
+    "openalex.publication.publication_type",
+    "pubmed.publication.publication_type",
+    "semanticscholar.publication.publication_type",
+    "crossref.publication.publication_type_unified",
+    "openalex.publication.publication_type_unified",
+    "pubmed.publication.publication_type_unified",
+    "semanticscholar.publication.publication_type_unified",
+    "crossref.publication.publication_subclass",
+    "openalex.publication.publication_subclass",
+    "pubmed.publication.publication_subclass",
+    "semanticscholar.publication.publication_subclass",
+    "crossref.publication.publication_class",
+    "openalex.publication.publication_class",
+    "pubmed.publication.publication_class",
+    "semanticscholar.publication.publication_class",
+    "pubmed.publication.publication_type_list",
+    "pubmed.publication.publication_types",
+    "semanticscholar.publication.publication_types",
+    "crossref.publication.references",
+    "semanticscholar.publication.tldr",
+)
+
+# Canonical categories with their field ranges (1-indexed, inclusive).
+PUBLICATION_CANONICAL_CATEGORIES: Final[dict[str, tuple[int, int]]] = {
+    "id": (1, 24),
+    "bibliography": (25, 83),
+    "author_and_affiliation": (84, 104),
+    "date": (105, 114),
+    "topics_and_keywords": (115, 130),
+    "publication": (131, 179),
+}
 
 ================================================================================
 File: base.py
@@ -20851,7 +24566,7 @@ class ETLRecordSchema(pa.DataFrameModel):
     )
 
     # === Lineage & DQ Fields (from RULES.md §2.4) ===
-    run_id: Series[object] = pa.Field(
+    run_id: Series[str] = pa.Field(
         alias="_run_id",
         nullable=False,
         description="Correlation ID for the pipeline run.",
@@ -20863,7 +24578,7 @@ class ETLRecordSchema(pa.DataFrameModel):
         description="Type of pipeline run.",
     )
 
-    source_batch_id: Series[object] | None = pa.Field(
+    source_batch_id: Series[str] | None = pa.Field(
         alias="_source_batch_id",
         nullable=True,
         description="Batch context ID from the source.",
@@ -20916,6 +24631,15 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    ACTIVITY_STANDARD_TYPES,
+    BAO_ID_PATTERN,
+    CHEMBL_ID_PATTERN,
+    DATA_VALIDITY_COMMENTS,
+    STANDARD_RELATIONS,
+    UO_ID_PATTERN,
+)
+from bioetl.domain.validation import MAX_PUBLICATION_YEAR, MIN_PUBLICATION_YEAR
 
 
 class ActivitySchema(ETLRecordSchema):
@@ -20927,29 +24651,29 @@ class ActivitySchema(ETLRecordSchema):
     # === Foreign Keys ===
     assay_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to assay.",
     )
     molecule_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to molecule.",
     )
     target_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to target.",
     )
     document_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to document.",
     )
 
     # === Standardized Values ===
     standard_relation: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["=", "<", "<=", ">", ">="],
+        isin=list(STANDARD_RELATIONS),
         description="Standardized operator.",
     )
     standard_value: Series[float] | None = pa.Field(
@@ -20962,22 +24686,7 @@ class ActivitySchema(ETLRecordSchema):
     )
     standard_type: Series[str] | None = pa.Field(
         nullable=True,
-        # Expanded list to avoid false positives on valid data
-        isin=[
-            "IC50",
-            "EC50",
-            "Ki",
-            "Kd",
-            "AC50",
-            "GI50",
-            "Potency",
-            "Inhibition",
-            "% Inhibition",
-            "Activity",
-            "Ratio",
-            "ED50",
-            "ID50",
-        ],
+        isin=list(ACTIVITY_STANDARD_TYPES),
         description="Standardized measurement type.",
     )
     standard_flag: Series[int] | None = pa.Field(
@@ -20997,15 +24706,7 @@ class ActivitySchema(ETLRecordSchema):
     # === Comments & Quality ===
     data_validity_comment: Series[str] | None = pa.Field(
         nullable=True,
-        isin=[
-            "Potential missing data",
-            "Potential author error",
-            "Manually validated",
-            "Potential transcription error",
-            "Outside typical range",
-            "Non standard unit for type",
-            "Author confirmed error",
-        ],
+        isin=list(DATA_VALIDITY_COMMENTS),
         description="Data quality comment.",
     )
     activity_comment: Series[str] | None = pa.Field(
@@ -21020,12 +24721,12 @@ class ActivitySchema(ETLRecordSchema):
     # === Ontologies ===
     bao_endpoint: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^BAO:\d+$",
+        str_matches=BAO_ID_PATTERN,
         description="BAO ID.",
     )
     uo_units: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^UO:\d+$",
+        str_matches=UO_ID_PATTERN,
         description="Units Ontology ID.",
     )
     qudt_units: Series[str] | None = pa.Field(nullable=True, description="QUDT unit.")
@@ -21051,51 +24752,96 @@ class ActivitySchema(ETLRecordSchema):
     standard_upper_value: Series[float] | None = pa.Field(
         nullable=True, description="Standardized upper bound."
     )
-    toid: Series[int] | None = pa.Field(nullable=True, description="Test Occasion ID.")
-    manual_curation_flag: Series[int] | None = pa.Field(
-        nullable=True,
-        isin=[0, 1],
-        description="Manual curation flag indicating record was manually reviewed.",
+    toid: Series[float] | None = pa.Field(
+        nullable=True, description="Test Occasion ID (float for nullable int)."
     )
-    original_activity_id: Series[int] | None = pa.Field(
-        nullable=True, description="Original activity ID for traceability."
+    manual_curation_flag: Series[float] | None = pa.Field(
+        nullable=True,
+        isin=[0.0, 1.0],
+        description="Manual curation flag (float for nullable int).",
+    )
+    original_activity_id: Series[float] | None = pa.Field(
+        nullable=True, description="Original activity ID (float for nullable int)."
     )
     data_validity_description: Series[str] | None = pa.Field(
         nullable=True, description="Human-readable data validity explanation."
     )
 
     # === Flattened Fields (from JSON) ===
-    ligand_efficiency_bei: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_le: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_lle: Series[float] | None = pa.Field(nullable=True)
-    ligand_efficiency_sei: Series[float] | None = pa.Field(nullable=True)
+    ligand_efficiency_bei: Series[float] | None = pa.Field(
+        nullable=True, description="Binding Efficiency Index (BEI)."
+    )
+    ligand_efficiency_le: Series[float] | None = pa.Field(
+        nullable=True, description="Ligand Efficiency (LE)."
+    )
+    ligand_efficiency_lle: Series[float] | None = pa.Field(
+        nullable=True, description="Lipophilic Ligand Efficiency (LLE)."
+    )
+    ligand_efficiency_sei: Series[float] | None = pa.Field(
+        nullable=True, description="Surface Efficiency Index (SEI)."
+    )
 
-    action_type_action_type: Series[str] | None = pa.Field(nullable=True)
-    action_type_description: Series[str] | None = pa.Field(nullable=True)
-    action_type_parent_type: Series[str] | None = pa.Field(nullable=True)
+    action_type_action_type: Series[str] | None = pa.Field(
+        nullable=True, description="Action type classification."
+    )
+    action_type_description: Series[str] | None = pa.Field(
+        nullable=True, description="Action type description."
+    )
+    action_type_parent_type: Series[str] | None = pa.Field(
+        nullable=True, description="Parent action type category."
+    )
 
     activity_properties: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of activity properties."
     )
 
     # === Additional Fields from Silver Schema ===
-    canonical_smiles: Series[str] | None = pa.Field(nullable=True)
-    molecule_pref_name: Series[str] | None = pa.Field(nullable=True)
-    parent_molecule_chembl_id: Series[str] | None = pa.Field(nullable=True)
-    target_pref_name: Series[str] | None = pa.Field(nullable=True)
-    target_organism: Series[str] | None = pa.Field(nullable=True)
+    canonical_smiles: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical SMILES of molecule."
+    )
+    molecule_pref_name: Series[str] | None = pa.Field(
+        nullable=True, description="Molecule preferred name."
+    )
+    parent_molecule_chembl_id: Series[str] | None = pa.Field(
+        nullable=True, description="Parent molecule ChEMBL ID."
+    )
+    target_pref_name: Series[str] | None = pa.Field(
+        nullable=True, description="Target preferred name."
+    )
+    target_organism: Series[str] | None = pa.Field(
+        nullable=True, description="Target organism."
+    )
     target_taxonomy_id: Series[str] | None = pa.Field(
         nullable=True,
         description="Target taxonomy ID. Standardized name (was target_tax_id).",
     )
-    assay_type: Series[str] | None = pa.Field(nullable=True)
-    assay_description: Series[str] | None = pa.Field(nullable=True)
-    assay_variant_accession: Series[str] | None = pa.Field(nullable=True)
-    assay_variant_mutation: Series[str] | None = pa.Field(nullable=True)
-    bao_format: Series[str] | None = pa.Field(nullable=True)
-    bao_label: Series[str] | None = pa.Field(nullable=True)
-    document_journal: Series[str] | None = pa.Field(nullable=True)
-    document_year: Series[int] | None = pa.Field(nullable=True)
+    assay_type: Series[str] | None = pa.Field(
+        nullable=True, description="Assay type (B/F/A/T/P/U)."
+    )
+    assay_description: Series[str] | None = pa.Field(
+        nullable=True, description="Assay description text."
+    )
+    assay_variant_accession: Series[str] | None = pa.Field(
+        nullable=True, description="Assay variant protein accession."
+    )
+    assay_variant_mutation: Series[str] | None = pa.Field(
+        nullable=True, description="Assay variant mutation description."
+    )
+    bao_format: Series[str] | None = pa.Field(
+        nullable=True, description="BioAssay Ontology format ID."
+    )
+    bao_label: Series[str] | None = pa.Field(
+        nullable=True, description="BioAssay Ontology label."
+    )
+    document_journal: Series[str] | None = pa.Field(
+        nullable=True, description="Publication journal name."
+    )
+    document_year: Series[int] | None = pa.Field(
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="Publication year.",
+    )
 
     class Config:
         """Pandera configuration."""
@@ -21119,6 +24865,14 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    ASSAY_CATEGORIES,
+    ASSAY_TEST_TYPES,
+    ASSAY_TYPES,
+    BAO_ID_PATTERN,
+    CHEMBL_ID_PATTERN,
+    RELATIONSHIP_TYPES,
+)
 
 
 class AssaySchema(ETLRecordSchema):
@@ -21133,7 +24887,7 @@ class AssaySchema(ETLRecordSchema):
     # === Identifiers ===
     assay_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
 
@@ -21143,17 +24897,20 @@ class AssaySchema(ETLRecordSchema):
     )
     assay_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["B", "F", "A", "T", "P", "U"],
+        isin=list(ASSAY_TYPES),
         description="Assay type.",
+    )
+    assay_type_description: Series[str] | None = pa.Field(
+        nullable=True, description="Assay type description."
     )
     assay_test_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["In vivo", "In vitro", "Ex vivo"],
+        isin=list(ASSAY_TEST_TYPES),
         description="Assay test type.",
     )
     assay_category: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["screening", "confirmatory", "panel", "summary", "other"],
+        isin=list(ASSAY_CATEGORIES),
         description="Assay category.",
     )
     assay_group: Series[str] | None = pa.Field(
@@ -21164,9 +24921,9 @@ class AssaySchema(ETLRecordSchema):
     assay_organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    assay_taxonomy_id: Series[int] | None = pa.Field(
+    assay_taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
-        description="NCBI Taxonomy ID. Standardized name (was assay_tax_id).",
+        description="NCBI Taxonomy ID (float for nullable int).",
     )
     assay_strain: Series[str] | None = pa.Field(nullable=True, description="Strain.")
     assay_tissue: Series[str] | None = pa.Field(nullable=True, description="Tissue.")
@@ -21180,12 +24937,12 @@ class AssaySchema(ETLRecordSchema):
     # === Target & Relationship ===
     target_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Target ChEMBL ID.",
     )
     relationship_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["D", "H", "M", "N", "S", "U"],
+        isin=list(RELATIONSHIP_TYPES),
         description="Relationship type.",
     )
     relationship_description: Series[str] | None = pa.Field(
@@ -21216,7 +24973,7 @@ class AssaySchema(ETLRecordSchema):
     )
     document_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Document ChEMBL ID.",
     )
     assay_pref_name: Series[str] | None = pa.Field(
@@ -21238,7 +24995,7 @@ class AssaySchema(ETLRecordSchema):
     # === Other Fields ===
     bao_format: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^BAO:\d+$",
+        str_matches=BAO_ID_PATTERN,
         description="BAO format.",
     )
     bao_label: Series[str] | None = pa.Field(nullable=True, description="BAO label.")
@@ -21278,16 +25035,28 @@ class AssaySchema(ETLRecordSchema):
     # )
 
     # === Variant Information (Flattened) ===
-    variant_accession: Series[str] | None = pa.Field(nullable=True)
-    variant_isoform: Series[str] | None = pa.Field(nullable=True)
-    variant_mutation: Series[str] | None = pa.Field(nullable=True)
-    variant_organism: Series[str] | None = pa.Field(nullable=True)
-    variant_sequence: Series[str] | None = pa.Field(nullable=True)
-    variant_taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True,
-        description="Variant taxonomy ID. Standardized name (was variant_tax_id).",
+    variant_accession: Series[str] | None = pa.Field(
+        nullable=True, description="Variant protein accession number."
     )
-    variant_sequence_json: Series[str] | None = pa.Field(nullable=True)
+    variant_isoform: Series[str] | None = pa.Field(
+        nullable=True, description="Variant isoform identifier."
+    )
+    variant_mutation: Series[str] | None = pa.Field(
+        nullable=True, description="Variant mutation description."
+    )
+    variant_organism: Series[str] | None = pa.Field(
+        nullable=True, description="Variant organism name."
+    )
+    variant_sequence: Series[str] | None = pa.Field(
+        nullable=True, description="Variant amino acid sequence."
+    )
+    variant_taxonomy_id: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Variant taxonomy ID (float for nullable int).",
+    )
+    variant_sequence_json: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of variant sequence details."
+    )
 
     # === Complex Fields (JSON) ===
     assay_classifications: Series[str] | None = pa.Field(
@@ -21320,6 +25089,10 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    ASSAY_PARAMETER_STANDARD_TYPES,
+    STANDARD_RELATIONS,
+)
 
 
 class AssayParametersSchema(ETLRecordSchema):
@@ -21382,11 +25155,13 @@ class AssayParametersSchema(ETLRecordSchema):
     standard_type: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
-        description="Standardized type.",
+        isin=list(ASSAY_PARAMETER_STANDARD_TYPES),
+        description="Standardized type (IC50, EC50, CONC, PH, TEMP, etc.).",
     )
     standard_relation: Series[str] | None = pa.Field(
         nullable=True,
         coerce=True,
+        isin=list(STANDARD_RELATIONS),
         description="Standardized relation.",
     )
     standard_value: Series[float] | None = pa.Field(
@@ -21431,6 +25206,12 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import (
+    CELLOSAURUS_ID_PATTERN,
+    CHEMBL_ID_PATTERN,
+    CLO_ID_PATTERN,
+    EFO_ID_PATTERN,
+)
 
 
 class CellLineSchema(ETLRecordSchema):
@@ -21443,7 +25224,7 @@ class CellLineSchema(ETLRecordSchema):
     # === Primary Key ===
     cell_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         unique=True,
         description="ChEMBL ID for cell line (PK).",
     )
@@ -21482,12 +25263,12 @@ class CellLineSchema(ETLRecordSchema):
     # === External Identifiers ===
     cellosaurus_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CVCL_[A-Z0-9]+$",
+        str_matches=CELLOSAURUS_ID_PATTERN,
         description="Cellosaurus ID (external reference).",
     )
     clo_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CLO_\d+$",
+        str_matches=CLO_ID_PATTERN,
         description="Cell Line Ontology ID.",
     )
     cl_lincs_id: Series[str] | None = pa.Field(
@@ -21496,7 +25277,7 @@ class CellLineSchema(ETLRecordSchema):
     )
     efo_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^EFO_\d+$",
+        str_matches=EFO_ID_PATTERN,
         description="EFO ontology ID.",
     )
 
@@ -21523,6 +25304,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN
 
 
 class CompoundRecordSchema(ETLRecordSchema):
@@ -21547,12 +25329,12 @@ class CompoundRecordSchema(ETLRecordSchema):
     # === Foreign Keys ===
     molecule_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="FK → Molecule.",
     )
     document_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="FK → Publication.",
     )
     src_id: Series[int] = pa.Field(
@@ -21597,7 +25379,17 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.validation import INCHI_KEY_REGEX_PATTERN
+from bioetl.domain.schemas.constants import (
+    CHEMBL_ID_PATTERN,
+    MAX_PHASE_VALUES,
+    MOLECULE_TYPES,
+    STRUCTURE_TYPES,
+)
+from bioetl.domain.validation import (
+    INCHI_KEY_REGEX_PATTERN,
+    MAX_PUBLICATION_YEAR,
+    MIN_PUBLICATION_YEAR,
+)
 
 
 class MoleculeSchema(ETLRecordSchema):
@@ -21612,7 +25404,7 @@ class MoleculeSchema(ETLRecordSchema):
     # === Identifiers ===
     molecule_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
     structure_standard_inchi_key: Series[str] | None = pa.Field(
@@ -21633,34 +25425,21 @@ class MoleculeSchema(ETLRecordSchema):
     )
     max_phase: Series[float] | None = pa.Field(
         nullable=True,
-        isin=[-1, 0, 0.5, 1, 2, 3, 4],
+        isin=list(MAX_PHASE_VALUES),
         description="Maximum clinical phase.",
     )
     structure_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["MOL", "SEQ", "BOTH", "NONE"],
+        isin=list(STRUCTURE_TYPES),
         description="Structure type.",
     )
     molecule_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=[
-            "Small molecule",
-            "Inorganic small molecule",
-            "Polymeric small molecule",
-            "Antibody",
-            "Antibody drug conjugate",
-            "Protein",
-            "Oligonucleotide",
-            "Oligosaccharide",
-            "Cell",
-            "Enzyme",
-            "Unknown",
-            "Unclassified",
-        ],
+        isin=list(MOLECULE_TYPES),
         description="Molecule type.",
     )
-    first_approval: Series[int] | None = pa.Field(
-        nullable=True, description="Year of first approval."
+    first_approval: Series[float] | None = pa.Field(
+        nullable=True, description="Year of first approval (float for nullable int)."
     )
     # chirality: Optional[Series[int]] = pa.Field(
     #     nullable=True,
@@ -21691,13 +25470,13 @@ class MoleculeSchema(ETLRecordSchema):
         nullable=True, isin=[-1, 0, 1], description="Natural product flag."
     )
     first_in_class: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="First in class flag."
+        nullable=True, isin=[-1, 0, 1], description="First in class flag (-1=unknown)."
     )
     prodrug: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="Prodrug flag."
+        nullable=True, isin=[-1, 0, 1], description="Prodrug flag (-1=unknown)."
     )
     inorganic_flag: Series[int] | None = pa.Field(
-        nullable=True, isin=[0, 1], description="Inorganic flag."
+        nullable=True, isin=[-1, 0, 1], description="Inorganic flag (-1=unknown)."
     )
     polymer_flag: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Polymer flag."
@@ -21724,8 +25503,11 @@ class MoleculeSchema(ETLRecordSchema):
     availability_type: Series[int] | None = pa.Field(
         nullable=True, isin=[-2, -1, 0, 1, 2], description="Availability type."
     )
-    usan_year: Series[int] | None = pa.Field(
-        nullable=True, description="USAN approval year."
+    usan_year: Series[float] | None = pa.Field(
+        nullable=True,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
+        description="USAN approval year (float for nullable int).",
     )
     usan_stem: Series[str] | None = pa.Field(
         nullable=True, description="USAN stem name."
@@ -21746,17 +25528,17 @@ class MoleculeSchema(ETLRecordSchema):
     # === Hierarchy Fields (flattened from molecule_hierarchy) ===
     hierarchy_parent_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Parent molecule ChEMBL ID in hierarchy.",
     )
     hierarchy_active_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Active molecule ChEMBL ID in hierarchy.",
     )
     hierarchy_child_chembl_id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="Child molecule ChEMBL ID in hierarchy.",
     )
 
@@ -21956,65 +25738,69 @@ Aligned with RULES.md v5.10, ChEMBL 34 schema, and Publication Schema Unificatio
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     PublicationBaseSchema,
+)
+from bioetl.domain.schemas.constants import (
+    CHEMBL_ID_PATTERN,
+    ISO_DATE_PATTERN,
+    PUBLICATION_TYPES,
 )
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
-__all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "ChemblPublicationSchema"]
+__all__ = ["DOI_REGEX_PATTERN", "ChemblPublicationSchema"]
 
 
 class ChemblPublicationSchema(PublicationBaseSchema):
     """ChEMBL Publication validation schema for Silver layer.
 
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi, pmc_id
+    - Cross-references: pmid, doi
     - Core content: title, abstract, authors
-    - Metadata: journal, year, publication_date, doc_type (overridden), language
-    - Metrics: citation_count
-    - Open Access: is_oa
-    - Lookup tracking: lookup_method (overridden), original_id, source
+    - Metadata: journal, year, doc_type (overridden)
+    - Lookup tracking: lookup_method, original_id, source
 
-    Note: pmc_id, publication_date, citation_count, is_oa are always NULL for ChEMBL
-    (not available from ChEMBL API) and excluded from PyArrow/Gold schemas.
+    Fields excluded from PyArrow/Gold schemas (not available from ChEMBL API):
+    - pmc_id: ChEMBL API does not return PMC ID
+    - publication_date: Only year is available, full date not provided
+    - citation_count: Citation metrics not available from ChEMBL
+    - is_oa: Open Access status not provided
+    - language: Publication language not returned by ChEMBL
     """
 
     # === Primary Key (ChEMBL-specific) ===
     document_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL Document ID.",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: direct for ChEMBL ID lookup",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
-    # === Override doc_type with ChEMBL-specific values ===
-    doc_type: Series[str] = pa.Field(
+    # === Unified field names (ChEMBL-specific overrides) ===
+    # Note: old fields 'year' and 'doc_type' removed - replaced by unified names
+    publication_type: Series[str] = pa.Field(
         nullable=True,
-        isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
-        description="Document type.",
+        isin=list(PUBLICATION_TYPES),
+        description="Document type (unified field name).",
     )
 
     # === System Fields ===
     _source: Series[str] = pa.Field(
         nullable=False,
-        default="chembl",
+        eq="chembl",
         description="Data source identifier.",
     )
 
     # === Provider-specific Identifiers ===
-    src_id: Series[int] = pa.Field(nullable=True, description="Source ID.")
+    src_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Source ID."
+    )
 
     # === ChEMBL Release Metadata ===
     chembl_release: Series[str] = pa.Field(
@@ -22023,33 +25809,27 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     )
     creation_date: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{2}-\d{2}$",
+        str_matches=ISO_DATE_PATTERN,
         description="Record creation date in ChEMBL database (YYYY-MM-DD).",
     )
 
     # === Provider-specific Journal Fields ===
-    journal_full_title: Series[str] = pa.Field(
-        nullable=True, description="Full journal title."
-    )
     volume: Series[str] = pa.Field(nullable=True, description="Volume.")
     issue: Series[str] = pa.Field(nullable=True, description="Issue.")
-    first_page: Series[str] = pa.Field(nullable=True, description="First page.")
-    last_page: Series[str] = pa.Field(nullable=True, description="Last page.")
+    page_first: Series[str] = pa.Field(nullable=True, description="First page.")
+    page_last: Series[str] = pa.Field(nullable=True, description="Last page.")
 
-    # === DQ Fields ===
-    _dq_warn: Series[bool] = pa.Field(
-        nullable=True, default=False, description="DQ warning flag."
-    )
-    _dq_error: Series[bool] = pa.Field(
-        nullable=True, default=False, description="DQ error flag."
-    )
+    # DQ fields (_dq_warn, _dq_error) inherited from ETLRecordSchema as bool, nullable=False
 
     class Config:
         """Pandera configuration."""
 
-        strict = False  # Allow missing columns and extra columns
+        strict = False  # Allow extra columns beyond schema definition
         ordered = False
         coerce = True
+        # Note: Fields from PublicationBaseSchema that ChEMBL doesn't provide
+        # (pmc_id, affiliation_list, author_orcids, publication_date, language, is_oa)
+        # are set to None by the transformer to satisfy schema inheritance
 
 ================================================================================
 File: publication_similarity.py
@@ -22208,6 +25988,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, TARGET_TYPES
 
 
 class TargetSchema(ETLRecordSchema):
@@ -22222,29 +26003,14 @@ class TargetSchema(ETLRecordSchema):
     # === Identifiers ===
     target_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
 
     # === Classification ===
     target_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=[
-            "SINGLE PROTEIN",
-            "PROTEIN FAMILY",
-            "PROTEIN COMPLEX",
-            "PROTEIN COMPLEX GROUP",
-            "SELECTIVITY GROUP",
-            "CHIMERIC PROTEIN",
-            "CELL-LINE",
-            "TISSUE",
-            "ORGANISM",
-            "MACROMOLECULE",
-            "SMALL MOLECULE",
-            "LIPID",
-            "METAL",
-            "UNKNOWN",
-        ],
+        isin=list(TARGET_TYPES),
         description="Target type.",
     )
     # target_parent_type: Optional[Series[str]] = pa.Field(
@@ -22257,11 +26023,8 @@ class TargetSchema(ETLRecordSchema):
     pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    description: Series[str] | None = pa.Field(
-        nullable=True, description="Target description."
-    )
-    taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True, description="NCBI Taxonomy ID. Standardized name (was tax_id)."
+    taxonomy_id: Series[float] | None = pa.Field(
+        nullable=True, description="NCBI Taxonomy ID (float for nullable int)."
     )
     organism: Series[str] | None = pa.Field(nullable=True, description="Organism.")
     species_group_flag: Series[bool] | None = pa.Field(
@@ -22271,11 +26034,6 @@ class TargetSchema(ETLRecordSchema):
     downgraded: Series[bool] | None = pa.Field(
         nullable=True,
         description="Downgraded flag.",
-    )
-
-    # === Optional Target Fields ===
-    dap_id: Series[int] | None = pa.Field(
-        nullable=True, description="Drug affinity prediction ID."
     )
 
     # === Complex Fields (JSON Strings) ===
@@ -22288,9 +26046,6 @@ class TargetSchema(ETLRecordSchema):
     pipeline_stages: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of pipeline stages."
     )
-    target_constraints: Series[str] | None = pa.Field(
-        nullable=True, description="JSON string of target constraints."
-    )
     target_component_synonyms: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of aggregated component synonyms."
     )
@@ -22300,6 +26055,14 @@ class TargetSchema(ETLRecordSchema):
     component_accessions: Series[object] | None = pa.Field(
         nullable=True, description="List of component accessions."
     )
+    component_descriptions: Series[object] | None = pa.Field(
+        nullable=True, description="List of component descriptions."
+    )
+    component_id: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Primary component ID (first from list).",
+    )
     component_ids: Series[object] | None = pa.Field(
         nullable=True, description="List of component IDs."
     )
@@ -22308,15 +26071,6 @@ class TargetSchema(ETLRecordSchema):
     )
     component_relationships: Series[object] | None = pa.Field(
         nullable=True, description="List of component relationships."
-    )
-    component_descriptions: Series[object] | None = pa.Field(
-        nullable=True, description="List of component descriptions."
-    )
-    component_organisms: Series[object] | None = pa.Field(
-        nullable=True, description="List of component organisms."
-    )
-    component_taxonomy_ids: Series[object] | None = pa.Field(
-        nullable=True, description="List of component NCBI taxonomy IDs."
     )
 
     class Config:
@@ -22341,6 +26095,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import TARGET_COMPONENT_RELATIONSHIPS
 
 
 class TargetComponentSchema(ETLRecordSchema):
@@ -22358,7 +26113,7 @@ class TargetComponentSchema(ETLRecordSchema):
     # === Metadata ===
     relationship: Series[str] | None = pa.Field(
         nullable=True,
-        isin=["SINGLE PROTEIN", "PROTEIN SUBUNIT", "RNA", "INTERACTING PROTEIN"],
+        isin=list(TARGET_COMPONENT_RELATIONSHIPS),
         description="Relationship type.",
     )
     stoichiometry: Series[int] | None = pa.Field(
@@ -22471,11 +26226,11 @@ PUBLICATION_METADATA_FIELDS: Final[tuple[str, ...]] = (
     "authors",
     "title",
     "journal",
-    "year",
+    "publication_year",  # was: year
     "volume",
     "issue",
-    "first_page",
-    "last_page",
+    "page_first",  # was: first_page
+    "page_last",  # was: last_page
     "language",
 )
 
@@ -22488,18 +26243,19 @@ PUBLICATION_CROSSREF_FIELDS: Final[tuple[str, ...]] = (
 
 
 PUBLICATION_UNIFIED_FIELDS: Final[tuple[str, ...]] = (
-    "doc_type",
+    "publication_type",  # was: doc_type
     "is_oa",
     "abstract",
-    "citation_count",
+    "citations_received",  # was: citation_count
+    "citations_made",  # added: reference_count equivalent
     "publication_date",
 )
 
 # DQ flags that MUST appear last (in order), if present
 # Not all schemas have these fields
 DQ_FIELDS_SUFFIX: Final[tuple[str, ...]] = (
-    "_dq_warn",
     "_dq_error",
+    "_dq_warn",
 )
 
 
@@ -22528,7 +26284,7 @@ def canonical_column_order(columns: list[str] | tuple[str, ...]) -> list[str]:
     Order:
     1. System prefix fields (entity_id, content_hash, _run_id, ...)
     2. Business fields (sorted alphabetically)
-    3. DQ suffix fields (_dq_warn, _dq_error) if present
+    3. DQ suffix fields (_dq_error, _dq_warn) if present
 
     Args:
         columns: Unordered list/tuple of column names.
@@ -22594,11 +26350,16 @@ Provides unified field set for cross-provider publication analysis.
 
 from __future__ import annotations
 
+import json
+import re
+from typing import cast
+
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import ORCID_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
     MAX_PUBLICATION_YEAR,
@@ -22618,22 +26379,26 @@ class PublicationBaseSchema(ETLRecordSchema):
     Provider-specific schemas inherit from this and add their own fields.
     This unified schema ensures cross-provider analysis compatibility.
 
-    Field Categories:
+    Field Categories (unified field names):
     - Cross-reference IDs: pmid, doi, pmc_id
-    - Core content: title, abstract, authors
-    - Publication metadata: journal, year, publication_date, doc_type, language
-    - Metrics: citation_count
+    - Core content: title, abstract, authors, affiliation_list
+    - Publication metadata: journal, publication_year, publication_date, publication_type, language
+    - Pagination: page_first, page_last
+    - Metrics: citations_received, citations_made
     - Open Access: is_oa
     - Lookup tracking: _lookup_method, _original_id
     - System: _source (data source identifier)
+
+    Note: Old field names (year, doc_type, citation_count, first_page, last_page)
+    have been replaced with unified names for cross-provider consistency.
     """
 
     # === Cross-reference IDs (common to all providers) ===
     # Note: PubMed overrides pmid to be int type instead of str
     pmid: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d+$",
-        description="PubMed ID (numeric string)",
+        str_matches=r"^[1-9]\d*$",
+        description="PubMed ID (positive numeric string)",
     )
     doi: Series[str] = pa.Field(
         nullable=True,
@@ -22653,38 +26418,75 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of author names (PII hashed)",
     )
+    affiliation_list: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of unique affiliations (unified field name)",
+    )
+    author_orcids: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
+    )
 
     # === Publication metadata (common to all providers) ===
     journal: Series[str] = pa.Field(
         nullable=True,
         description="Journal name",
     )
-    year: Series[int] = pa.Field(
+    publication_year: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
-        description="Publication year",
+        description="Publication year (unified field name)",
     )
     publication_date: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^\d{4}-\d{2}-\d{2}$",
         description="Publication date (YYYY-MM-DD)",
     )
-    doc_type: Series[str] = pa.Field(
+    publication_type: Series[str] = pa.Field(
         nullable=True,
-        description="Document type (PUBLICATION, PREPRINT, PATENT, etc.)",
+        description="Raw provider type string (preserved for forensic/debug)",
+    )
+    publication_type_unified: Series[str] = pa.Field(
+        nullable=True,
+        description="Unified type Level 3: 'Journal Article', 'Preprint', 'Clinical Trial', etc.",
+    )
+    publication_subclass: Series[str] = pa.Field(
+        nullable=True,
+        description="Subclass Level 2: 'Original Experimental Data', 'Reviews & Syntheses', etc.",
+    )
+    publication_class: Series[str] = pa.Field(
+        nullable=True,
+        isin=["EXP", "REV", "PEER"],
+        description="Class Level 1: EXP (experimental), REV (reviews/secondary), PEER (peer review)",
     )
     language: Series[str] = pa.Field(
         nullable=True,
+        str_length={"min_value": 2, "max_value": 3},
         description="Language code (ISO 639-1 or MARC)",
     )
 
-    # === Metrics (common to all providers) ===
+    # === Pagination (unified field names) ===
+    page_first: Series[str] = pa.Field(
+        nullable=True,
+        description="First page number (unified field name)",
+    )
+    page_last: Series[str] = pa.Field(
+        nullable=True,
+        description="Last page number (unified field name)",
+    )
+
+    # === Metrics (unified field names) ===
     # Use pd.Int64Dtype for nullable integer support
-    citation_count: Series[pd.Int64Dtype] = pa.Field(
+    citations_received: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
-        description="Number of citations (provider-dependent availability)",
+        description="Number of citations TO this publication (unified field name)",
+    )
+    citations_made: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Number of references FROM this publication (unified field name)",
     )
 
     # === Open Access (common to all providers) ===
@@ -22697,7 +26499,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     # Note: alias maps Python attribute name to DataFrame column name
     lookup_method: Series[str] = pa.Field(
         alias="_lookup_method",
-        nullable=True,
+        nullable=False,
         isin=LOOKUP_METHODS,
         description="How record was resolved: direct, doi, pmid, title_fallback, title_only",
     )
@@ -22713,12 +26515,271 @@ class PublicationBaseSchema(ETLRecordSchema):
         description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
 
+    @pa.check("title", name="title_not_empty")  # type: ignore[untyped-decorator]
+    def _check_title(cls, series: Series[str]) -> Series[bool]:
+        """Validate title is not empty when present (null is allowed)."""
+        return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
+
+    @pa.check("author_orcids", name="orcid_format")  # type: ignore[untyped-decorator]
+    def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
+        """Validate ORCID format in JSON array elements."""
+        _pattern = re.compile(ORCID_PATTERN)
+
+        def _valid(val: object) -> bool:
+            if pd.isna(val):
+                return True
+            try:
+                items = json.loads(str(val))
+                return all(
+                    not item or _pattern.match(item) is not None for item in items
+                )
+            except (json.JSONDecodeError, TypeError):
+                return False
+
+        return cast("Series[bool]", series.apply(_valid))
+
     class Config:
         """Pandera configuration."""
 
         strict = False  # Allow extra columns
         ordered = False
         coerce = True
+
+================================================================================
+File: constants.py
+Path: schemas\constants.py
+================================================================================
+"""Centralized constants for schema validation.
+
+Provides regex patterns and enum values used across multiple schemas.
+All values are immutable (frozenset/tuple) to prevent accidental modification.
+
+Usage:
+    from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, ASSAY_TYPES
+"""
+
+from __future__ import annotations
+
+# =============================================================================
+# REGEX PATTERNS
+# =============================================================================
+
+# ChEMBL identifiers
+CHEMBL_ID_PATTERN = r"^CHEMBL\d+$"
+
+# Ontology identifiers
+# ChEMBL API returns underscore format (BAO_0000190), not colon format (BAO:0000190)
+BAO_ID_PATTERN = r"^BAO[_:]\d+$"  # BioAssay Ontology (accepts both _ and :)
+UO_ID_PATTERN = r"^UO[_:]\d+$"  # Units Ontology (accepts both _ and :)
+CLO_ID_PATTERN = r"^CLO_\d+$"  # Cell Line Ontology
+EFO_ID_PATTERN = r"^EFO_\d+$"  # Experimental Factor Ontology
+
+# External database identifiers
+CELLOSAURUS_ID_PATTERN = r"^CVCL_[A-Z0-9]+$"
+
+# Date patterns
+ISO_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
+
+# Publication identifier patterns
+ISSN_PATTERN = r"^\d{4}-\d{3}[\dX]$"
+ORCID_PATTERN = r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$"
+
+# =============================================================================
+# CHEMBL ACTIVITY ENUMS
+# =============================================================================
+
+STANDARD_RELATIONS: frozenset[str] = frozenset(["=", "<", "<=", ">", ">="])
+
+ACTIVITY_STANDARD_TYPES: frozenset[str] = frozenset(
+    [
+        "IC50",
+        "EC50",
+        "Ki",
+        "Kd",
+        "AC50",
+        "GI50",
+        "Potency",
+        "Inhibition",
+        "% Inhibition",
+        "Activity",
+        "Ratio",
+        "ED50",
+        "ID50",
+    ]
+)
+
+# Assay parameter standard types (superset of activity types + parameter-specific)
+ASSAY_PARAMETER_STANDARD_TYPES: frozenset[str] = frozenset(
+    [
+        # Measurement types (from ACTIVITY_STANDARD_TYPES)
+        "IC50",
+        "EC50",
+        "Ki",
+        "Kd",
+        "AC50",
+        "GI50",
+        "Potency",
+        "Inhibition",
+        "% Inhibition",
+        "Activity",
+        "Ratio",
+        "ED50",
+        "ID50",
+        # Parameter-specific types
+        "CONC",  # Concentration
+        "PH",  # pH level
+        "TEMP",  # Temperature
+        "TIME",  # Incubation time
+        "DOSE",  # Dose
+        "VOLUME",  # Volume
+        "WAVELENGTH",  # Wavelength
+        "PERCENT",  # Percentage
+        "PRESSURE",  # Pressure
+        "HUMIDITY",  # Humidity
+        "CELL_COUNT",  # Cell count
+        "CELL_DENSITY",  # Cell density
+        "SERUM",  # Serum percentage
+    ]
+)
+
+DATA_VALIDITY_COMMENTS: frozenset[str] = frozenset(
+    [
+        "Potential missing data",
+        "Potential author error",
+        "Manually validated",
+        "Potential transcription error",
+        "Outside typical range",
+        "Non standard unit for type",
+        "Author confirmed error",
+    ]
+)
+
+# =============================================================================
+# CHEMBL ASSAY ENUMS
+# =============================================================================
+
+ASSAY_TYPES: frozenset[str] = frozenset(["B", "F", "A", "T", "P", "U"])
+
+ASSAY_TEST_TYPES: frozenset[str] = frozenset(["In vivo", "In vitro", "Ex vivo"])
+
+ASSAY_CATEGORIES: frozenset[str] = frozenset(
+    [
+        "screening",
+        "confirmatory",
+        "panel",
+        "summary",
+        "other",
+    ]
+)
+
+RELATIONSHIP_TYPES: frozenset[str] = frozenset(["D", "H", "M", "N", "S", "U"])
+
+# =============================================================================
+# CHEMBL MOLECULE ENUMS
+# =============================================================================
+
+MOLECULE_TYPES: frozenset[str] = frozenset(
+    [
+        "Small molecule",
+        "Inorganic small molecule",
+        "Polymeric small molecule",
+        "Antibody",
+        "Antibody drug conjugate",
+        "Protein",
+        "Oligonucleotide",
+        "Oligosaccharide",
+        "Cell",
+        "Enzyme",
+        "Unknown",
+        "Unclassified",
+    ]
+)
+
+STRUCTURE_TYPES: frozenset[str] = frozenset(["MOL", "SEQ", "BOTH", "NONE"])
+
+# max_phase uses float for 0.5, so tuple instead of frozenset
+MAX_PHASE_VALUES: tuple[float, ...] = (-1, 0, 0.5, 1, 2, 3, 4)
+
+# =============================================================================
+# CHEMBL TARGET ENUMS
+# =============================================================================
+
+TARGET_TYPES: frozenset[str] = frozenset(
+    [
+        "SINGLE PROTEIN",
+        "PROTEIN FAMILY",
+        "PROTEIN COMPLEX",
+        "PROTEIN COMPLEX GROUP",
+        "SELECTIVITY GROUP",
+        "CHIMERIC PROTEIN",
+        "CELL-LINE",
+        "TISSUE",
+        "ORGANISM",
+        "MACROMOLECULE",
+        "SMALL MOLECULE",
+        "LIPID",
+        "METAL",
+        "UNKNOWN",
+    ]
+)
+
+TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset(
+    [
+        "SINGLE PROTEIN",
+        "PROTEIN SUBUNIT",
+        "RNA",
+        "INTERACTING PROTEIN",
+    ]
+)
+
+# =============================================================================
+# CHEMBL PUBLICATION ENUMS
+# =============================================================================
+
+PUBLICATION_TYPES: frozenset[str] = frozenset(
+    [
+        "PUBLICATION",
+        "PATENT",
+        "DATASET",
+        "BOOK",
+    ]
+)
+
+# =============================================================================
+# EXPORTS (for explicit re-export in __init__.py)
+# =============================================================================
+
+__all__ = [
+    "ACTIVITY_STANDARD_TYPES",
+    "ASSAY_CATEGORIES",
+    "ASSAY_PARAMETER_STANDARD_TYPES",
+    "ASSAY_TEST_TYPES",
+    # Assay enums
+    "ASSAY_TYPES",
+    "BAO_ID_PATTERN",
+    "CELLOSAURUS_ID_PATTERN",
+    # Regex patterns
+    "CHEMBL_ID_PATTERN",
+    "CLO_ID_PATTERN",
+    "DATA_VALIDITY_COMMENTS",
+    "EFO_ID_PATTERN",
+    "ISO_DATE_PATTERN",
+    "ISSN_PATTERN",
+    "MAX_PHASE_VALUES",
+    # Molecule enums
+    "MOLECULE_TYPES",
+    "ORCID_PATTERN",
+    # Publication enums
+    "PUBLICATION_TYPES",
+    "RELATIONSHIP_TYPES",
+    # Activity enums
+    "STANDARD_RELATIONS",
+    "STRUCTURE_TYPES",
+    "TARGET_COMPONENT_RELATIONSHIPS",
+    # Target enums
+    "TARGET_TYPES",
+    "UO_ID_PATTERN",
+]
 
 ================================================================================
 File: __init__.py
@@ -22778,7 +26839,7 @@ class AuthorSchema(ETLRecordSchema):
     # === Foreign Key ===
     doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="FK to Publication.doi",
     )
 
@@ -22867,7 +26928,7 @@ class FunderSchema(ETLRecordSchema):
     # === Foreign Key ===
     doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="FK to Publication.doi",
     )
 
@@ -22920,7 +26981,6 @@ Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 
 from __future__ import annotations
 
-import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -22928,6 +26988,7 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
@@ -22942,12 +27003,17 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
 
     Represents publication metadata from CrossRef API with citation enrichment.
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi (overridden to non-nullable), pmc_id
+    - Cross-references: doi (overridden to non-nullable)
     - Core content: title, abstract, authors
-    - Metadata: journal, year, publication_date, doc_type (overridden), language
+    - Metadata: journal, year, publication_date, language
     - Metrics: citation_count
     - Open Access: is_oa
     - Lookup tracking: _lookup_method, _original_id, source (overridden)
+
+    Fields excluded from PyArrow/Gold schemas (not available from CrossRef API):
+    - pmid: CrossRef API doesn't provide PubMed IDs
+    - pmc_id: CrossRef API doesn't provide PMC IDs
+    - doc_type: CrossRef uses raw 'type' field instead (journal-article, etc.)
     """
 
     # === Primary Key (override doi to be non-nullable) ===
@@ -22958,7 +27024,14 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Fields ===
-    issn: Series[str] = pa.Field(nullable=True, description="JSON array of ISSNs")
+    issn: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=ISSN_PATTERN,
+        description="Primary ISSN (first from ISSN array)",
+    )
+    issn_list: Series[str] = pa.Field(
+        nullable=True, description="JSON array of all ISSNs"
+    )
     publisher: Series[str] = pa.Field(nullable=True, description="Publisher name")
 
     # === Dates (CrossRef-specific) ===
@@ -22969,11 +27042,10 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         nullable=True, description="Online publication date (ISO format)"
     )
 
-    # === Override doc_type with CrossRef-specific values ===
-    doc_type: Series[str] = pa.Field(
-        nullable=False,
-        isin=DOCUMENT_TYPES,
-        description="Document type: PUBLICATION or PREPRINT",
+    # === Raw CrossRef Type (replaces doc_type) ===
+    publication_type: Series[str] = pa.Field(
+        nullable=True,
+        description="Raw CrossRef type (journal-article, book, etc.)",
     )
 
     # === Override _source to be non-nullable with fixed value ===
@@ -22983,8 +27055,8 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
 
     # === Additional Metadata (CrossRef-specific) ===
     license_url: Series[str] = pa.Field(nullable=True, description="License URL")
-    subjects: Series[str] = pa.Field(
-        nullable=True, description="JSON array of subject areas"
+    subject_keywords: Series[str] = pa.Field(
+        nullable=True, description="JSON array of subject areas (unified field name)"
     )
 
     # === Content Domain ===
@@ -23010,34 +27082,26 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         description="Canonical publication date (YYYY-MM-DD)",
     )
 
-    # === Short Container Title ===
-    short_container_title: Series[object] = pa.Field(
+    # === Short Container Title (unified field name) ===
+    journal_name_short: Series[str] = pa.Field(
         nullable=True,
-        description="Short journal/container title (list of strings)",
+        description="Short journal/container title (unified field name)",
     )
 
     # === ISSN by Type ===
     issn_print: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="Print ISSN (format: XXXX-XXXX)",
     )
     issn_electronic: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="Electronic ISSN (format: XXXX-XXXX)",
     )
 
-    # === Metrics ===
-    reference_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of references (from references-count field)",
-    )
-
-    # === Author ORCID Identifiers ===
-    author_orcids: Series[str] = pa.Field(
-        nullable=True,
-        description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
-    )
+    # === Author ORCID Identifiers (inherited from base, kept for clarity) ===
+    # author_orcids: inherited from PublicationBaseSchema
 
     # === Full Author Details ===
     author_details: Series[str] = pa.Field(
@@ -23091,7 +27155,7 @@ class ReferenceSchema(ETLRecordSchema):
     # === Foreign Key ===
     source_doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="DOI of citing publication (FK to Publication.doi)",
     )
 
@@ -23105,7 +27169,7 @@ class ReferenceSchema(ETLRecordSchema):
     # === Target Reference ===
     target_doi: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^10\.\d{4,}/.*$",
+        str_matches=r"^10\.\d{4,}/\S+$",
         description="DOI of cited publication (if resolved)",
     )
     unstructured: Series[str] | None = pa.Field(
@@ -23129,7 +27193,7 @@ class ReferenceSchema(ETLRecordSchema):
     )
     year: Series[int] | None = pa.Field(
         nullable=True,
-        ge=1800,
+        ge=1500,
         le=2100,
         description="Publication year",
     )
@@ -23355,30 +27419,24 @@ Path: schemas\openalex\publication.py
 Aligned with RULES.md v5.10 and Publication Schema Unification spec.
 Includes lookup metadata fields for DOI/title resolution tracking.
 
-Topics vs Concepts (2024 Migration):
-- OpenAlex deprecated the `concepts` field in 2024 in favor of `topics`
-- Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic
-- The `concepts` field is kept for backward compatibility during transition
-- New code should use `topics` and `primary_topic` fields
+Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 """
 
 from __future__ import annotations
 
-import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import DOI_REGEX_PATTERN
 
 # Re-export for backwards compatibility
 __all__ = [
     "DOI_REGEX_PATTERN",
-    "LOOKUP_METHODS",
     "OA_STATUS_VALUES",
     "OpenAlexPublicationSchema",
 ]
@@ -23390,11 +27448,12 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     Validates publication records from OpenAlex Works API.
     Inherits common fields from PublicationBaseSchema:
     - Cross-references: pmid, doi, pmc_id
-    - Core content: title, abstract, authors
-    - Metadata: journal, year (overridden), publication_date, doc_type (overridden), language
-    - Metrics: citation_count (overridden for nullable int)
+    - Core content: title, abstract, authors, affiliation_list
+    - Metadata: journal, publication_year (overridden), publication_date, publication_type, language
+    - Pagination: page_first, page_last
+    - Metrics: citations_received, citations_made
     - Open Access: is_oa
-    - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+    - Lookup tracking: lookup_method, original_id, source (overridden)
     """
 
     # === Primary Key (OpenAlex-specific) ===
@@ -23404,45 +27463,28 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="OpenAlex Work ID (e.g., W2148763428)",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
-    # === Override year with pd.Int64Dtype for nullable int ===
-    year: Series[pd.Int64Dtype] = pa.Field(
+    # === Raw OpenAlex Type (replaces doc_type) ===
+    publication_type: Series[str] = pa.Field(
         nullable=True,
-        ge=1800,
-        le=2100,
-        description="Publication year (1800-2100).",
+        description="Raw OpenAlex type (article, book, dataset, etc.)",
     )
 
-    # === Override doc_type to be non-nullable ===
-    doc_type: Series[str] = pa.Field(
-        nullable=False,
-        description="Publication type (PUBLICATION, PREPRINT, etc.)",
-    )
-
-    # === Override citation_count with pd.Int64Dtype for nullable int ===
-    citation_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of citations (from OpenAlex cited_by_count).",
-    )
+    # Note: citations_received and citations_made inherited from base as pd.Int64Dtype
 
     # === Override _source to be non-nullable ===
     _source: Series[str] = pa.Field(
         nullable=False,
+        eq="openalex",
         description="Data source identifier",
     )
 
     # === Provider-specific Fields ===
     issn: Series[str] = pa.Field(
         nullable=True,
-        description="ISSN-L",
+        str_matches=ISSN_PATTERN,
+        description="ISSN-L (format: XXXX-XXXX)",
     )
 
     publisher: Series[str] = pa.Field(
@@ -23468,17 +27510,12 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     )
 
     # === Additional Metrics ===
-    fwci: Series[float] = pa.Field(
+    fwci: Series[float] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Field-Weighted Citation Impact (must be non-negative)",
     )
-
-    referenced_works_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of works referenced (must be non-negative)",
-    )
+    # Note: reference_count removed — now inherited from base as citations_made
 
     # === Quality Indicators ===
     is_retracted: Series[bool] = pa.Field(
@@ -23488,7 +27525,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
 
     # === Topics (hierarchical classification - replaces deprecated concepts) ===
     # Stored as JSON-serialized string for DataFrame compatibility
-    topics: Series[str] = pa.Field(
+    subject_topics: Series[str] = pa.Field(
         nullable=True,
         description="Hierarchical topic classification (JSON array)",
     )
@@ -23508,19 +27545,14 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     )
 
     # === Classification Fields (extracted by transformer) ===
-    concepts: Series[str] = pa.Field(
+    subject_mesh: Series[str] = pa.Field(
         nullable=True,
-        description="OpenAlex concepts (JSON array, DEPRECATED: use topics)",
+        description="MeSH terms (JSON array of descriptor names, unified field name)",
     )
 
-    mesh: Series[str] = pa.Field(
+    subject_keywords: Series[str] = pa.Field(
         nullable=True,
-        description="MeSH terms (JSON array of descriptor names)",
-    )
-
-    keywords: Series[str] = pa.Field(
-        nullable=True,
-        description="Keywords (JSON array)",
+        description="Keywords (JSON array, unified field name)",
     )
 
     # === External Identifier ===
@@ -23529,21 +27561,33 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
         description="Microsoft Academic Graph ID (legacy)",
     )
 
-    # === Bibliographic Page Info ===
-    first_page: Series[str] = pa.Field(
+    # Note: page_first, page_last inherited from base (unified field names)
+    # Note: affiliation_list inherited from base (unified field name)
+
+    # === Author Identifiers ===
+    # author_orcids: inherited from PublicationBaseSchema
+
+    author_openalex_ids: Series[str] = pa.Field(
         nullable=True,
-        description="First page number (from biblio object)",
+        description="OpenAlex author IDs as JSON array (empty string for missing)",
     )
 
-    last_page: Series[str] = pa.Field(
+    # === Institution Identifiers ===
+    institution_ids: Series[str] = pa.Field(
         nullable=True,
-        description="Last page number (from biblio object)",
+        description="OpenAlex institution IDs (JSON array, e.g., I1234567890)",
     )
 
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
+    institution_country_codes: Series[str] = pa.Field(
         nullable=True,
-        description="Author affiliations (JSON array)",
+        description="ISO 2-letter country codes of affiliated institutions (JSON array)",
+    )
+
+    # === ROR Identifiers (Research Organization Registry) ===
+    ror_ids: Series[str] = pa.Field(
+        nullable=True,
+        description="ROR IDs of affiliated institutions (JSON array, full URL format). "
+        "May be empty if not returned by Works API.",
     )
 
     class Config:
@@ -23580,12 +27624,12 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    cid: Series[int] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
+    cid: Series[str] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
 
     @pa.check("cid", name="cid_positive")
-    def _check_cid(cls, series: Series[int]) -> Series[bool]:
-        """Validate CID is positive."""
-        return cast("Series[bool]", series >= 1)
+    def _check_cid(cls, series: Series[str]) -> Series[bool]:
+        """Validate CID is a positive integer string."""
+        return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === Structural Identifiers ===
     canonical_smiles: Series[str] | None = pa.Field(
@@ -23969,9 +28013,10 @@ PubMedPublicationSchema replaces ArticleSchema for consistency with other provid
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import datetime
 from typing import cast
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -23979,10 +28024,9 @@ from bioetl.domain.schemas.common.publication_base import (
     LOOKUP_METHODS,
     PublicationBaseSchema,
 )
+from bioetl.domain.schemas.constants import ISSN_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
-    MAX_PUBLICATION_YEAR,
-    MIN_PUBLICATION_YEAR,
 )
 
 # Re-export for backwards compatibility
@@ -24000,30 +28044,33 @@ class PubMedPublicationSchema(PublicationBaseSchema):
 
     Note: Renamed from ArticleSchema per ADR-024 for consistency with
     entity_type='publication' in pipeline configs and other providers.
+
+    Fields excluded from PyArrow/Gold schemas (API deprecated 2026-01):
+    - vernacular_title: Original non-English title (deprecated)
+    - epub_date: Electronic publication date (deprecated)
+    - received_date: Manuscript received date (deprecated)
+    - revised_date: Manuscript revised date (deprecated)
+    - accepted_date: Manuscript accepted date (deprecated)
+
+    Fields excluded (not available from PubMed API):
+    - citation_count: PubMed doesn't provide citation metrics
+    - is_oa: Open Access status not available directly
+    - oa_status: OA status requires external enrichment
     """
 
     # === Primary Key (str for cross-provider consistency) ===
     pmid: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^\d+$",
+        str_matches=r"^[1-9]\d*$",
         description="PubMed ID (PK, numeric string)",
     )
-
-    @pa.check("pmid", name="pmid_positive")
-    def _check_pmid(cls, series: Series[str]) -> Series[bool]:
-        """Validate PMID represents a positive integer."""
-        return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === External Identifiers (override doi for check method) ===
     doi: Series[str] = pa.Field(
         nullable=True,
+        str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier",
     )
-
-    @pa.check("doi", name="doi_format")
-    def _check_doi(cls, series: Series[str]) -> Series[bool]:
-        """Validate DOI format."""
-        return cast("Series[bool]", series.isna() | series.str.match(DOI_REGEX_PATTERN))
 
     @pa.check("pmc_id", name="pmc_id_format")
     def _check_pmc_id(cls, series: Series[str]) -> Series[bool]:
@@ -24050,46 +28097,29 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Article title (required)",
     )
 
-    @pa.check("title", name="title_not_empty")
-    def _check_title(cls, series: Series[str]) -> Series[bool]:
-        """Validate title is not empty."""
-        return cast("Series[bool]", series.str.len() >= 1)
+    # title_not_empty: inherited from PublicationBaseSchema
 
     abstract_structured: Series[bool] = pa.Field(
         nullable=True, description="Whether abstract has NLM sections"
     )
     # Note: vernacular_title excluded from transformer output per design
-    language: Series[str] = pa.Field(
-        nullable=True,
-        description="MARC language code (e.g., 'eng')",
-    )
-
-    @pa.check("language", name="language_length")
-    def _check_language(cls, series: Series[str]) -> Series[bool]:
-        """Validate language code length."""
-        return cast(
-            "Series[bool]",
-            series.isna() | ((series.str.len() >= 2) & (series.str.len() <= 3)),
-        )
+    # language: inherited from PublicationBaseSchema (MARC codes fit str_length 2..3)
 
     # === Journal Information (PubMed-specific) ===
-    journal_title: Series[str] = pa.Field(
-        nullable=True, description="Full journal name"
+    journal: Series[str] = pa.Field(
+        nullable=True, description="Full journal title (unified field name)"
+    )
+    journal_name_short: Series[str] = pa.Field(
+        nullable=True, description="Journal abbreviation (unified field name)"
     )
     journal_iso_abbrev: Series[str] = pa.Field(
         nullable=True, description="ISO journal abbreviation"
     )
     issn: Series[str] = pa.Field(
         nullable=True,
+        str_matches=ISSN_PATTERN,
         description="ISSN (print or electronic)",
     )
-
-    @pa.check("issn", name="issn_format")
-    def _check_issn(cls, series: Series[str]) -> Series[bool]:
-        """Validate ISSN format."""
-        return cast(
-            "Series[bool]", series.isna() | series.str.match(r"^\d{4}-\d{3}[\dX]$")
-        )
 
     journal_issn_type: Series[str] = pa.Field(nullable=True, description="ISSN type")
 
@@ -24107,27 +28137,25 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     medline_pgn: Series[str] = pa.Field(
         nullable=True, description="Page numbers (MEDLINE format)"
     )
+    page_range: Series[str] = pa.Field(
+        nullable=True, description="Page numbers (unified field name)"
+    )
 
-    @pa.check("year", name="year_range")
-    def _check_year(cls, series: Series[int]) -> Series[bool]:
-        """Validate publication year range."""
-        return cast(
-            "Series[bool]",
-            series.isna()
-            | ((series >= MIN_PUBLICATION_YEAR) & (series <= MAX_PUBLICATION_YEAR)),
-        )
-
-    pub_month: Series[int] = pa.Field(nullable=True, description="Publication month")
+    pub_month: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Publication month"
+    )
 
     @pa.check("pub_month", name="pub_month_range")
-    def _check_pub_month(cls, series: Series[int]) -> Series[bool]:
+    def _check_pub_month(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication month range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 12)))
 
-    pub_day: Series[int] = pa.Field(nullable=True, description="Publication day")
+    pub_day: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Publication day"
+    )
 
     @pa.check("pub_day", name="pub_day_range")
-    def _check_pub_day(cls, series: Series[int]) -> Series[bool]:
+    def _check_pub_day(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate publication day range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 31)))
 
@@ -24145,10 +28173,10 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Dates ===
-    date_completed: Series[date] = pa.Field(
+    date_completed: Series[datetime] = pa.Field(
         nullable=True, description="MEDLINE processing completion date"
     )
-    date_revised: Series[date] = pa.Field(
+    date_revised: Series[datetime] = pa.Field(
         nullable=True, description="Record revision date"
     )
 
@@ -24158,7 +28186,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Affiliation Data (enhanced for institutional analysis) ===
-    structured_affiliations: Series[str] = pa.Field(
+    affiliation_structured: Series[str] = pa.Field(
         nullable=True,
         description=(
             "JSON array of structured affiliations with identifier metadata. "
@@ -24167,58 +28195,53 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Counts (denormalized for query efficiency) ===
-    author_count: Series[int] = pa.Field(nullable=True, description="Number of authors")
+    author_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of authors"
+    )
 
     @pa.check("author_count", name="author_count_non_negative")
-    def _check_author_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_author_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate author count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    mesh_heading_count: Series[int] = pa.Field(
+    mesh_heading_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of MeSH headings"
     )
 
     @pa.check("mesh_heading_count", name="mesh_heading_count_non_negative")
-    def _check_mesh_heading_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_mesh_heading_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate MeSH heading count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    keyword_count: Series[int] = pa.Field(
+    keyword_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of keywords"
     )
 
     @pa.check("keyword_count", name="keyword_count_non_negative")
-    def _check_keyword_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_keyword_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate keyword count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    grant_count: Series[int] = pa.Field(nullable=True, description="Number of grants")
+    grant_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of grants"
+    )
 
     @pa.check("grant_count", name="grant_count_non_negative")
-    def _check_grant_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_grant_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate grant count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    reference_count: Series[int] = pa.Field(
-        nullable=True, description="Number of references"
-    )
-
-    @pa.check("reference_count", name="reference_count_non_negative")
-    def _check_reference_count(cls, series: Series[int]) -> Series[bool]:
-        """Validate reference count is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
-
-    chemical_count: Series[int] = pa.Field(
+    chemical_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of chemicals"
     )
 
     @pa.check("chemical_count", name="chemical_count_non_negative")
-    def _check_chemical_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_chemical_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate chemical count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
     # === Classification Data (JSON arrays extracted by transformer) ===
-    mesh_terms: Series[str] = pa.Field(
+    subject_mesh: Series[str] = pa.Field(
         nullable=True,
         description="MeSH terms (JSON array of descriptor/qualifier strings)",
     )
@@ -24228,7 +28251,7 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Chemical substances (JSON array of name/registry pairs)",
     )
 
-    keywords: Series[str] = pa.Field(
+    subject_keywords: Series[str] = pa.Field(
         nullable=True,
         description="Author keywords (JSON array)",
     )
@@ -24248,13 +28271,22 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         description="Publication types (JSON array, e.g., Journal Article, Review)",
     )
 
+    # === System Fields ===
+    _source: Series[str] = pa.Field(
+        nullable=False,
+        eq="pubmed",
+        description="Data source identifier",
+    )
+
     # Note: accepted_date, received_date, revised_date, epub_date excluded from
     # transformer output per design (PubMed pipeline field exclusions)
 
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
+    # Note: affiliation_list inherited from base (unified field name)
+
+    # === Structured Author-Affiliation Mapping ===
+    authors_with_affiliations: Series[str] = pa.Field(
         nullable=True,
-        description="Author affiliations (JSON array)",
+        description="JSON array of authors with their affiliations and identifiers",
     )
 
     class Config:
@@ -24311,7 +28343,6 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.common.publication_base import (
-    LOOKUP_METHODS,
     OA_STATUS_VALUES,
     PublicationBaseSchema,
 )
@@ -24320,7 +28351,6 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Re-export for backwards compatibility
 __all__ = [
     "DOI_REGEX_PATTERN",
-    "LOOKUP_METHODS",
     "OA_STATUS_VALUES",
     "SemanticScholarPublicationSchema",
 ]
@@ -24331,12 +28361,18 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
 
     Validates publication records from Semantic Scholar Academic Graph API.
     Inherits common fields from PublicationBaseSchema:
-    - Cross-references: pmid, doi, pmc_id
+    - Cross-references: pmid, doi
     - Core content: title, abstract, authors
-    - Metadata: journal, year, publication_date, doc_type, language
+    - Metadata: journal, year, publication_date
     - Metrics: citation_count
     - Open Access: is_oa
-    - Lookup tracking: lookup_method (overridden), original_id, source (overridden)
+    - Lookup tracking: lookup_method, original_id, source (overridden)
+
+    Fields excluded from PyArrow/Gold schemas:
+    - pmc_id: Excluded per design (2026-01)
+    - arxiv_id: Excluded per design (2026-01)
+    - language: S2 API doesn't return language
+    - doc_type: S2 uses publication_type (JSON array) instead
     """
 
     # === Primary Key (SemanticScholar-specific) ===
@@ -24346,13 +28382,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Semantic Scholar Paper ID (40-char hex)",
     )
 
-    # === Override lookup_method to be non-nullable ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
-        nullable=False,
-        isin=LOOKUP_METHODS,
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
+    # _lookup_method: inherited from PublicationBaseSchema (non-nullable, isin=LOOKUP_METHODS)
 
     # === Override _source to be non-nullable with fixed value ===
     _source: Series[str] = pa.Field(
@@ -24362,17 +28392,14 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Identifiers ===
-    arxiv_id: Series[str] = pa.Field(
-        nullable=True,
-        description="ArXiv ID",
-    )
+    # Note: arxiv_id excluded per design (2026-01)
 
     dblp_id: Series[str] = pa.Field(
         nullable=True,
         description="DBLP publication key",
     )
 
-    corpus_id: Series[pd.Int64Dtype] = pa.Field(
+    corpus_id: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="S2 Corpus ID",
@@ -24389,34 +28416,14 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         nullable=True,
         description="Volume",
     )
-    pages: Series[str] = pa.Field(
+    page_range: Series[str] = pa.Field(
         nullable=True,
         description="Page range (legacy format, e.g., '123-456')",
     )
 
-    first_page: Series[str] = pa.Field(
-        nullable=True,
-        description="First page number (parsed from pages)",
-    )
-
-    last_page: Series[str] = pa.Field(
-        nullable=True,
-        description="Last page number (parsed from pages)",
-    )
-
-    venue: Series[str] = pa.Field(
-        nullable=True,
-        description="Publication venue",
-    )
-
     # === Provider-specific Metrics ===
-    reference_count: Series[pd.Int64Dtype] = pa.Field(
-        nullable=True,
-        ge=0,
-        description="Number of references",
-    )
 
-    influential_citation_count: Series[pd.Int64Dtype] = pa.Field(
+    influential_citation_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         description="Number of influential citations",
@@ -24435,20 +28442,19 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     )
 
     # === Provider-specific Classification ===
-    fields_of_study: Series[str] = pa.Field(
+    subject_fields: Series[str] = pa.Field(
         nullable=True,
         description="Fields of study (JSON array)",
+    )
+
+    publication_type: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication types (pipe-delimited string)",
     )
 
     publication_types: Series[str] = pa.Field(
         nullable=True,
         description="Publication types (JSON array)",
-    )
-
-    # === Author Affiliations ===
-    affiliations: Series[str] = pa.Field(
-        nullable=True,
-        description="Author affiliations (JSON array)",
     )
 
     # === Author Identifiers (for author-level analytics and disambiguation) ===
@@ -24457,10 +28463,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description="Semantic Scholar author IDs (JSON array of 40-char hex IDs)",
     )
 
-    author_orcids: Series[str] = pa.Field(
-        nullable=True,
-        description="Author ORCID identifiers (JSON array, empty string for missing)",
-    )
+    # author_orcids: inherited from PublicationBaseSchema
 
     author_h_indices: Series[str] = pa.Field(
         nullable=True,
@@ -24506,13 +28509,14 @@ from pandera.typing import Series
 from bioetl.domain.schemas.base import ETLRecordSchema
 
 # === Fixed Value Constants ===
-MAPPING_STATUSES = ["found", "not_found", "error"]
+MAPPING_STATUSES = ["found", "not_found", "error", "multiple"]
 
 
 class IDMappingSchema(ETLRecordSchema):
     """UniProt ID Mapping validation schema for Silver layer.
 
     Validates mapping results from ChEMBL targets to UniProt accessions.
+    Includes comprehensive UniProt entry metadata when mapping is found.
     """
 
     # === Primary Key ===
@@ -24541,13 +28545,79 @@ class IDMappingSchema(ETLRecordSchema):
 
     mapping_status: Series[str] = pa.Field(
         nullable=False,
-        description="Status of mapping: 'found', 'not_found', or 'error'",
+        description="Status of mapping: 'found', 'not_found', 'error', or 'multiple'",
     )
 
     @pa.check("mapping_status", name="mapping_status_values")
     def _check_mapping_status(cls, series: Series[str]) -> Series[bool]:
         """Validate mapping status is one of the allowed values."""
         return cast("Series[bool]", series.isin(MAPPING_STATUSES))
+
+    # === UniProt Entry Metadata ===
+    uniprot_entry_name: Series[str] | None = pa.Field(
+        nullable=True,
+        description="UniProt entry name (e.g., FA10_HUMAN)",
+    )
+
+    organism_scientific: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Scientific organism name (e.g., Homo sapiens)",
+    )
+
+    organism_common: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Common organism name (e.g., Human)",
+    )
+
+    taxonomy_id: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        ge=1,
+        description="NCBI Taxonomy ID",
+    )
+
+    protein_name: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Recommended protein name",
+    )
+
+    gene_primary: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Primary gene name",
+    )
+
+    sequence_length: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        ge=1,
+        description="Protein sequence length",
+    )
+
+    sequence_mass: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        ge=1,
+        description="Molecular weight in Daltons",
+    )
+
+    reviewed: Series[bool] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="True if Swiss-Prot (reviewed), False if TrEMBL",
+    )
+
+    annotation_score: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        ge=1,
+        le=5,
+        description="Quality score 1-5 (5 = best annotated)",
+    )
+
+    all_mappings: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of all accessions when multiple mappings found",
+    )
 
     class Config:
         """Pandera configuration."""
@@ -24943,13 +29013,134 @@ class UniprotTargetSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of PDB cross-references with structure details",
     )
+    interpro_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of InterPro domain entries with id and name",
+    )
+    pfam_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of Pfam family entries with id, name, and match_status",
+    )
+    reactome_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of Reactome pathway entries with id and pathway_name",
+    )
 
     # === Features & Keywords ===
-    features: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of sequence features"
+    features_json: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of all sequence features"
+    )
+    domains: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of protein domain features"
+    )
+    binding_sites: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of binding site features"
+    )
+    active_sites: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of active site features"
     )
     keywords: Series[str] | None = pa.Field(
         nullable=True, description="JSON array of UniProt keywords"
+    )
+
+    # === Taxonomy Components ===
+    superkingdom: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Superkingdom/Domain (Bacteria, Archaea, Eukaryota, Viruses)",
+    )
+    phylum: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Phylum from taxonomic lineage",
+    )
+    genus: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Genus from taxonomic lineage",
+    )
+
+    # === GO Components ===
+    molecular_function: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of GO molecular function terms (aspect F)",
+    )
+    cellular_component: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of GO cellular component terms (aspect C)",
+    )
+
+    # === Structural Features ===
+    topology: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of topological domain features (TOPO_DOM)",
+    )
+    transmembrane: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of transmembrane regions (TRANSMEM)",
+    )
+    intramembrane: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of intramembrane regions (INTRAMEM)",
+    )
+    signal_peptide: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of signal peptide features (SIGNAL)",
+    )
+    propeptide: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of propeptide features (PROPEP)",
+    )
+
+    # === PTM Features ===
+    glycosylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of glycosylation sites (CARBOHYD)",
+    )
+    lipidation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of lipidation sites (LIPID)",
+    )
+    disulfide_bond: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of disulfide bonds (DISULFID)",
+    )
+    modified_residue: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of all modified residues (MOD_RES)",
+    )
+    phosphorylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of phosphorylation sites",
+    )
+    acetylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of acetylation sites",
+    )
+    ubiquitination: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of ubiquitination sites",
+    )
+
+    # === Isoform Details ===
+    isoform_names: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform names",
+    )
+    isoform_ids: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform IDs (e.g., P12345-2)",
+    )
+    isoform_synonyms: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform synonyms",
+    )
+
+    # === Reaction Data ===
+    reactions: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of reaction names from catalytic activity",
+    )
+    reaction_ec_numbers: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of EC numbers from catalytic activity reactions",
     )
 
     # === Counts ===
@@ -25011,6 +29202,229 @@ class UniprotTargetSchema(ETLRecordSchema):
 __all__ = [
     "UniprotTargetSchema",
 ]
+
+================================================================================
+File: validators.py
+Path: schemas\validators.py
+================================================================================
+"""Custom Pandera checks for schema validation.
+
+Provides reusable validation checks for:
+- JSON fields stored as strings
+- Numeric range validations (registered via pandera.extensions)
+- String format validations
+
+Usage in DataFrameModel schemas:
+    class MySchema(pa.DataFrameModel):
+        mass: Series[float] = pa.Field(nullable=True, is_non_negative=True)
+        score: Series[int] = pa.Field(nullable=True, in_range={"min_val": 0, "max_val": 100})
+        smiles: Series[str] = pa.Field(nullable=True, max_str_length=10000)
+"""
+
+from __future__ import annotations
+
+import json
+from typing import TYPE_CHECKING
+
+import pandas as pd
+import pandera as pa
+from pandera.extensions import register_check_method  # type: ignore[attr-defined]
+
+if TYPE_CHECKING:
+    pass
+
+__all__ = [
+    "in_closed_range",
+    # Registered check methods (use in pa.Field)
+    "is_non_negative",
+    "is_positive",
+    # JSON validators
+    "is_valid_json",
+    "is_valid_json_array",
+    "is_valid_json_object",
+    "json_array_check",
+    "json_check",
+    "json_object_check",
+    "max_str_length",
+    "str_matches_pattern",
+    "str_starts_with",
+]
+
+
+def is_valid_json(series: pd.Series) -> pd.Series:
+    """Check that non-null values are valid JSON.
+
+    Args:
+        series: Pandas Series to validate.
+
+    Returns:
+        Boolean Series indicating validity.
+    """
+
+    def check(val: object) -> bool:
+        if pd.isna(val):
+            return True
+        try:
+            json.loads(str(val))
+            return True
+        except (json.JSONDecodeError, TypeError):
+            return False
+
+    return series.apply(check)
+
+
+def is_valid_json_array(series: pd.Series) -> pd.Series:
+    """Check that non-null values are valid JSON arrays.
+
+    Args:
+        series: Pandas Series to validate.
+
+    Returns:
+        Boolean Series indicating validity.
+    """
+
+    def check(val: object) -> bool:
+        if pd.isna(val):
+            return True
+        try:
+            parsed = json.loads(str(val))
+            return isinstance(parsed, list)
+        except (json.JSONDecodeError, TypeError):
+            return False
+
+    return series.apply(check)
+
+
+def is_valid_json_object(series: pd.Series) -> pd.Series:
+    """Check that non-null values are valid JSON objects.
+
+    Args:
+        series: Pandas Series to validate.
+
+    Returns:
+        Boolean Series indicating validity.
+    """
+
+    def check(val: object) -> bool:
+        if pd.isna(val):
+            return True
+        try:
+            parsed = json.loads(str(val))
+            return isinstance(parsed, dict)
+        except (json.JSONDecodeError, TypeError):
+            return False
+
+    return series.apply(check)
+
+
+# Pre-built checks for use in schema definitions
+json_check = pa.Check(is_valid_json, name="valid_json")
+json_array_check = pa.Check(is_valid_json_array, name="valid_json_array")
+json_object_check = pa.Check(is_valid_json_object, name="valid_json_object")
+
+
+# =============================================================================
+# REGISTERED CHECK METHODS (for use in pa.Field)
+# =============================================================================
+# These are registered via pandera.extensions.register_check_method
+# and can be used in pa.Field() as keyword arguments.
+
+
+@register_check_method(
+    statistics=["min_value"],
+    supported_types=(pd.Series,),
+)
+def is_non_negative(pandas_obj: pd.Series, *, min_value: float | bool = 0) -> pd.Series:
+    """Check that values are non-negative (>= 0).
+
+    Usage in schema:
+        field: Series[float] = pa.Field(is_non_negative=True)
+
+    Args:
+        pandas_obj: Series to validate.
+        min_value: When True (from is_non_negative=True), defaults to 0.
+    """
+    # When used as is_non_negative=True, min_value comes in as True
+    actual_min = 0 if min_value is True else min_value
+    return pandas_obj.isna() | (pandas_obj >= actual_min)
+
+
+@register_check_method(
+    statistics=["min_value"],
+    supported_types=(pd.Series,),
+)
+def is_positive(pandas_obj: pd.Series, *, min_value: int | bool = 1) -> pd.Series:
+    """Check that values are positive (>= 1).
+
+    Usage in schema:
+        field: Series[int] = pa.Field(is_positive=True)
+
+    Args:
+        pandas_obj: Series to validate.
+        min_value: When True (from is_positive=True), defaults to 1.
+    """
+    # When used as is_positive=True, min_value comes in as True
+    actual_min = 1 if min_value is True else min_value
+    return pandas_obj.isna() | (pandas_obj >= actual_min)
+
+
+@register_check_method(
+    statistics=["min_val", "max_val"],
+    supported_types=(pd.Series,),
+)
+def in_closed_range(
+    pandas_obj: pd.Series,
+    *,
+    min_val: int | float,
+    max_val: int | float,
+) -> pd.Series:
+    """Check that values are within inclusive range [min_val, max_val].
+
+    Allows nulls. Use when pa.Field(ge=, le=) is not sufficient.
+
+    Usage in schema:
+        field: Series[int] = pa.Field(in_closed_range={"min_val": 0, "max_val": 100})
+    """
+    return pandas_obj.isna() | ((pandas_obj >= min_val) & (pandas_obj <= max_val))
+
+
+@register_check_method(
+    statistics=["max_len"],
+    supported_types=(pd.Series,),
+)
+def max_str_length(pandas_obj: pd.Series, *, max_len: int) -> pd.Series:
+    """Check that string length is within limit.
+
+    Usage in schema:
+        field: Series[str] = pa.Field(max_str_length={"max_len": 10000})
+    """
+    return pandas_obj.isna() | (pandas_obj.str.len() <= max_len)
+
+
+@register_check_method(
+    statistics=["prefix"],
+    supported_types=(pd.Series,),
+)
+def str_starts_with(pandas_obj: pd.Series, *, prefix: str) -> pd.Series:
+    """Check that strings start with a prefix.
+
+    Usage in schema:
+        field: Series[str] = pa.Field(str_starts_with={"prefix": "InChI="})
+    """
+    return pandas_obj.isna() | pandas_obj.str.startswith(prefix)
+
+
+@register_check_method(
+    statistics=["pattern"],
+    supported_types=(pd.Series,),
+)
+def str_matches_pattern(pandas_obj: pd.Series, *, pattern: str) -> pd.Series:
+    """Check that strings match a regex pattern.
+
+    Usage in schema:
+        field: Series[str] = pa.Field(str_matches_pattern={"pattern": r"^CHEMBL\\d+$"})
+    """
+    return pandas_obj.isna() | pandas_obj.str.match(pattern)
 
 ================================================================================
 File: serialization.py
@@ -25160,8 +29574,9 @@ def _has_non_ascii(text: str) -> bool:
 def _get_orjson_options(sort_keys: bool) -> int:
     """Get orjson options based on configuration."""
     assert orjson is not None
-    options = orjson.OPT_SERIALIZE_NUMPY
-    return options | orjson.OPT_SORT_KEYS if sort_keys else options
+    options: int = orjson.OPT_SERIALIZE_NUMPY
+    result: int = options | orjson.OPT_SORT_KEYS if sort_keys else options
+    return result
 
 
 def _serialize_with_orjson(
@@ -25380,7 +29795,7 @@ import math
 import statistics
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from bioetl.domain.value_objects.activity_values import (
@@ -25392,7 +29807,7 @@ if TYPE_CHECKING:
     from bioetl.domain.services.normalization_config import NormalizationConfig
 
 
-class AggregationMethod(str, Enum):
+class AggregationMethod(StrEnum):
     """Supported aggregation methods for bioactivity values."""
 
     MEAN = "mean"
@@ -25786,7 +30201,7 @@ class DataNormalizationConfig:
     Example:
         >>> config = DataNormalizationConfig()
         >>> config.min_publication_year
-        1800
+        1500
         >>> config.max_publication_year
         2100
 
@@ -25795,7 +30210,7 @@ class DataNormalizationConfig:
         1900
     """
 
-    min_publication_year: int = 1800
+    min_publication_year: int = 1500
     max_publication_year: int = 2100
     default_pii_salt: str = ""
 
@@ -25810,7 +30225,7 @@ class DataNormalizationConfig:
     def for_scientific_publications(cls) -> DataNormalizationConfig:
         """Create configuration for scientific publications.
 
-        Uses standard year range [1800, 2100] for scientific literature.
+        Uses standard year range [1500, 2100] for scientific literature.
 
         Returns:
             DataNormalizationConfig with scientific publication defaults.
@@ -26254,7 +30669,7 @@ This is a domain service that handles format conversion without I/O.
 
 from __future__ import annotations
 
-from dataclasses import asdict, is_dataclass
+from dataclasses import fields, is_dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, cast
@@ -26267,6 +30682,57 @@ from bioetl.domain.value_objects.dq_report import (
     GoldDQReport,
     SilverDQReport,
 )
+
+
+def to_dict(obj: Any) -> dict[str, Any]:
+    """Convert an object to a dictionary suitable for serialization.
+
+    Handles dataclasses, enums, datetimes, and collection types.
+
+    Args:
+        obj: Object to convert.
+
+    Returns:
+        Dictionary representation of the object.
+    """
+    if is_dataclass(obj) and not isinstance(obj, type):
+        return cast(dict[str, Any], _serialize_value(obj))
+    if isinstance(obj, dict):
+        return cast(dict[str, Any], _serialize_value(obj))
+    return {"value": _serialize_value(obj)}
+
+
+def _serialize_dataclass(value: Any) -> dict[str, Any]:
+    """Serialize a dataclass instance to dict."""
+    return {
+        field.name: _serialize_value(getattr(value, field.name))
+        for field in fields(value)
+    }
+
+
+def _serialize_collection(value: dict[str, Any] | list[Any] | tuple[Any, ...]) -> Any:
+    """Serialize dict/list/tuple recursively."""
+    if isinstance(value, dict):
+        return {key: _serialize_value(item) for key, item in value.items()}
+    return [_serialize_value(item) for item in value]
+
+
+def _is_dataclass_instance(value: Any) -> bool:
+    """Check if value is a dataclass instance (not a class)."""
+    return is_dataclass(value) and not isinstance(value, type)
+
+
+def _serialize_value(value: Any) -> Any:
+    """Serialize a value with dataclass/enum/datetime/collection support."""
+    if _is_dataclass_instance(value):
+        return _serialize_dataclass(value)
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, (dict, list, tuple)):
+        return _serialize_collection(value)
+    return value
 
 
 class DQReportSerializer:
@@ -26301,62 +30767,25 @@ class DQReportSerializer:
     def to_dict(
         self, report: BronzeDQReport | SilverDQReport | GoldDQReport
     ) -> dict[str, Any]:
-        """Convert report to dictionary.
-
-        Args:
-            report: DQ report to convert.
-
-        Returns:
-            Dictionary representation of report.
-        """
-        return cast(dict[str, Any], self._dataclass_to_dict(report))
+        """Convert report to dictionary."""
+        return to_dict(report)
 
     def _to_json(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to JSON with pretty formatting."""
-        data = self._dataclass_to_dict(report)
-        return orjson.dumps(
+        data = to_dict(report)
+        result: str = orjson.dumps(
             data,
             option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
         ).decode("utf-8")
+        return result
 
     def _to_yaml(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
-        """Serialize to YAML format.
-
-        Uses simple YAML serialization without external dependencies.
-        For production use, consider using ruamel.yaml or PyYAML.
-        """
-        data = self._dataclass_to_dict(report)
-        return self._dict_to_yaml(data)
+        """Serialize to YAML format (simple, no external dependencies)."""
+        return self._dict_to_yaml(to_dict(report))
 
     def _to_html(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
-        """Serialize to HTML report.
-
-        Generates a simple HTML report with styling.
-        """
-        data = self._dataclass_to_dict(report)
-        return self._generate_html(data, report)
-
-    def _dataclass_to_dict(self, obj: Any) -> Any:
-        """Recursively convert dataclass to dict with enum/datetime handling."""
-        if is_dataclass(obj) and not isinstance(obj, type):
-            return {k: self._dataclass_to_dict(v) for k, v in asdict(obj).items()}
-        return self._convert_value(obj)
-
-    def _convert_value(self, obj: Any) -> Any:
-        """Convert a single value to serializable format."""
-        if isinstance(obj, Enum):
-            return obj.value
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        return self._convert_collection(obj)
-
-    def _convert_collection(self, obj: Any) -> Any:
-        """Convert collection types to serializable format."""
-        if isinstance(obj, (tuple, list)):
-            return [self._dataclass_to_dict(item) for item in obj]
-        if isinstance(obj, dict):
-            return {k: self._dataclass_to_dict(v) for k, v in obj.items()}
-        return obj
+        """Serialize to HTML report with styling."""
+        return self._generate_html(to_dict(report), report)
 
     def _dict_to_yaml(self, data: dict[str, Any], indent: int = 0) -> str:
         """Simple YAML serialization without external dependencies."""
@@ -26655,22 +31084,19 @@ class DQReportSerializer:
         """Render thresholds card as HTML."""
         if not thresholds:
             return ""
-
         status = thresholds.get("threshold_status", "pass")
         status_class = self._status_color(status)
-
-        soft_threshold = thresholds.get("soft_fail_threshold")
-        hard_threshold = thresholds.get("hard_fail_threshold")
-        error_rate = thresholds.get("current_error_rate")
-
+        soft = thresholds.get("soft_fail_threshold")
+        hard = thresholds.get("hard_fail_threshold")
+        rate = thresholds.get("current_error_rate")
         return f"""
     <div class="card">
         <h2>DQ Thresholds</h2>
         <div class="check-item {status_class}">
             <table>
-                <tr><td><strong>Soft Fail Threshold</strong></td><td>{soft_threshold if soft_threshold is not None else "—"}</td></tr>
-                <tr><td><strong>Hard Fail Threshold</strong></td><td>{hard_threshold if hard_threshold is not None else "—"}</td></tr>
-                <tr><td><strong>Current Error Rate</strong></td><td>{error_rate if error_rate is not None else "—"}</td></tr>
+                <tr><td><strong>Soft Fail Threshold</strong></td><td>{soft if soft is not None else "—"}</td></tr>
+                <tr><td><strong>Hard Fail Threshold</strong></td><td>{hard if hard is not None else "—"}</td></tr>
+                <tr><td><strong>Current Error Rate</strong></td><td>{rate if rate is not None else "—"}</td></tr>
                 <tr><td><strong>Status</strong></td><td><span class="status-badge status-{status_class}">{status}</span></td></tr>
             </table>
         </div>
@@ -28343,7 +32769,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict
 from uuid import UUID
 
@@ -28387,7 +32813,7 @@ class SilverRecord(TypedDict, total=False):
     # Other fields are dynamic based on entity type
 
 
-class RunType(str, Enum):
+class RunType(StrEnum):
     """Type of pipeline run (RULES.md §2.4).
 
     Determines merge priority: REBUILD > BACKFILL > INCREMENTAL
@@ -28412,7 +32838,7 @@ class RunType(str, Enum):
         return priorities[self]
 
 
-class DriftLevel(str, Enum):
+class DriftLevel(StrEnum):
     """Schema drift severity levels (RULES.md §2.2).
 
     - INFO: New optional fields appear
@@ -28430,7 +32856,7 @@ class DriftLevel(str, Enum):
     """Critical drift (missing required fields), blocks pipeline."""
 
 
-class HealthStatus(str, Enum):
+class HealthStatus(StrEnum):
     """Provider health status (RULES.md §3.5).
 
     State transitions:
@@ -28458,7 +32884,7 @@ class HealthStatus(str, Enum):
         }[self]
 
 
-class CircuitBreakerState(str, Enum):
+class CircuitBreakerState(StrEnum):
     """Circuit breaker state (RULES.md §3.1.4).
 
     State machine:
@@ -28485,7 +32911,7 @@ class CircuitBreakerState(str, Enum):
         }[self]
 
 
-class DataClassification(str, Enum):
+class DataClassification(StrEnum):
     """Data sensitivity classification (RULES.md §5.4)."""
 
     PUBLIC = "PUBLIC"
@@ -28498,7 +32924,7 @@ class DataClassification(str, Enum):
     """Contains PII or sensitive data, requires encryption/hashing."""
 
 
-class ErrorType(str, Enum):
+class ErrorType(StrEnum):
     """Error classification (RULES.md §3.1.1).
 
     Determines pipeline behavior:
@@ -28574,7 +33000,7 @@ class ErrorType(str, Enum):
         }
 
 
-class QuarantineRecordStatus(str, Enum):
+class QuarantineRecordStatus(StrEnum):
     """Status of a quarantine record in Delta Lake storage (RULES.md §2.6).
 
     This enum represents the persisted status of quarantine records.
@@ -28791,8 +33217,7 @@ def validate_smiles(smiles: str | None) -> bool:
 # =============================================================================
 
 # Standard publication year range for scientific publications.
-# First scientific journals appeared in XVII century, but systematic
-# publications began in XIX century.
+# covers historical scientific journals from XVII century
 #
 # These constants use DEFAULT_VALIDATION_CONFIG for the authoritative values.
 # For custom ranges, use ValidationConfig directly or PublicationYear Value Object.
@@ -28806,8 +33231,8 @@ def _get_default_config() -> ValidationConfig:
 
 
 # Backward-compatible constants that reference DEFAULT_VALIDATION_CONFIG
-MIN_PUBLICATION_YEAR: int = 1800  # DEFAULT_VALIDATION_CONFIG.min_publication_year
-MAX_PUBLICATION_YEAR: int = 2100  # DEFAULT_VALIDATION_CONFIG.max_publication_year
+MIN_PUBLICATION_YEAR: int = 1950
+MAX_PUBLICATION_YEAR: int = 2050
 
 
 # =============================================================================
@@ -28847,17 +33272,17 @@ def validate_positive_int(value: Any) -> int | None:
 
 def validate_year_range(
     year: int | None,
-    min_year: int = 1800,
-    max_year: int = 2100,
+    min_year: int = MIN_PUBLICATION_YEAR,
+    max_year: int = MAX_PUBLICATION_YEAR,
 ) -> bool:
     """Validate year is within a reasonable range.
 
-    Default range [1800, 2100] covers scientific publications.
+    Default range [1950, CURRENT_YEAR+1] covers scientific publications.
 
     Args:
         year: Year to validate.
-        min_year: Minimum valid year (inclusive). Default 1800.
-        max_year: Maximum valid year (inclusive). Default 2100.
+        min_year: Minimum valid year (inclusive). Default 1950.
+        max_year: Maximum valid year (inclusive). Default CURRENT_YEAR + 1.
 
     Returns:
         True if year is within range.
@@ -28865,9 +33290,7 @@ def validate_year_range(
     Example:
         >>> validate_year_range(2024)
         True
-        >>> validate_year_range(1799)
-        False
-        >>> validate_year_range(2101)
+        >>> validate_year_range(1949)
         False
         >>> validate_year_range(None)
         False
@@ -28900,16 +33323,10 @@ def validate_publication_year(
     Example:
         >>> validate_publication_year(2020)
         (2020, False)
-        >>> validate_publication_year(1800)
-        (1800, False)
-        >>> validate_publication_year(2100)
-        (2100, False)
-        >>> validate_publication_year(1799)
-        (1799, True)
-        >>> validate_publication_year(2101)
-        (2101, True)
-        >>> validate_publication_year(1500)
-        (1500, True)
+        >>> validate_publication_year(1950)
+        (1950, False)
+        >>> validate_publication_year(1949)
+        (1949, True)
         >>> validate_publication_year(None)
         (None, False)
         >>> # With custom config
@@ -29074,8 +33491,9 @@ def validate_non_empty_string(value: str | None) -> str | None:
 # Format: 10.XXXX/suffix where:
 #   - 10. is the fixed prefix
 #   - XXXX is registrant code (minimum 4 digits)
-#   - suffix is the identifier (minimum 1 character)
-DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/.+$"
+#   - suffix is the identifier (minimum 1 non-whitespace character)
+# Aligned with DOI Value Object: \S+ forbids whitespace in DOI suffix.
+DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/\S+$"
 _DOI_PATTERN = re.compile(DOI_REGEX_PATTERN)
 
 
@@ -29293,6 +33711,12 @@ from bioetl.domain.value_objects.identifiers import (
     PubChemCid,
     UniProtId,
 )
+from bioetl.domain.value_objects.publication_field_groups import (
+    DEFAULT_FIELD_GROUP_CONFIG,
+    FIELD_TO_GROUP_MAPPING,
+    FieldGroupConfig,
+    PublicationFieldGroup,
+)
 from bioetl.domain.value_objects.publications import (
     DOI,
     PubMedId,
@@ -29307,7 +33731,9 @@ from bioetl.domain.value_objects.taxonomy_id import (
 
 __all__ = [
     "DEFAULT_COLUMN_ORDER",
+    "DEFAULT_FIELD_GROUP_CONFIG",
     "DOI",
+    "FIELD_TO_GROUP_MAPPING",
     "ISSN",
     "JOIN_KEY_COLUMNS",
     "ORCID",
@@ -29349,6 +33775,7 @@ __all__ = [
     "DeduplicationStatsResult",
     "DriftLevel",
     "EncodingValidationResult",
+    "FieldGroupConfig",
     "FieldPresenceResult",
     "FileIntegrityResult",
     "ForeignKeyResult",
@@ -29363,6 +33790,7 @@ __all__ = [
     "PChemblValue",
     "PubChemCid",
     "PubMedId",
+    "PublicationFieldGroup",
     "PublicationYear",
     "RecordCountResult",
     "ReferentialIntegrityResult",
@@ -29662,14 +34090,14 @@ These Value Objects encapsulate validation and comparison logic.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.value_objects.activity_values import Concentration
 
 
-class RelationOperator(str, Enum):
+class RelationOperator(StrEnum):
     """Comparison operators for activity values.
 
     Used to express the relationship between a measured value
@@ -30000,10 +34428,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class ConcentrationUnit(str, Enum):
+class ConcentrationUnit(StrEnum):
     """Concentration units commonly used in bioactivity data.
 
     Ordered from largest to smallest for easy comparison.
@@ -30160,7 +34588,7 @@ class Concentration:
         return f"{self.value} {self.unit.value}"
 
 
-class ActivityType(str, Enum):
+class ActivityType(StrEnum):
     """Types of bioactivity measurements in drug discovery.
 
     Categorizes different assay endpoints used to measure compound activity.
@@ -30871,7 +35299,7 @@ class PublicationYear(ValueObject[int]):
     scientific publications.
 
     The validation range can be customized via ValidationConfig:
-    - Default range: [1800, 2100] for standard scientific publications
+    - Default range: [1500, 2100] for standard scientific publications
     - Semantic Scholar: [1500, 2100] for historical publications
 
     Examples: 1953 (Watson & Crick), 2020 (COVID papers)
@@ -30889,7 +35317,7 @@ class PublicationYear(ValueObject[int]):
     _config: ValidationConfig
 
     # Class-level defaults for backward compatibility
-    _DEFAULT_MIN_YEAR = 1800
+    _DEFAULT_MIN_YEAR = 1500
     _DEFAULT_MAX_YEAR = 2100
 
     def __init__(
@@ -31303,7 +35731,6 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "institutions": SemanticGroup.AUTHORS,
     # Journal/Source
     "journal": SemanticGroup.JOURNAL,
-    "journal_name": SemanticGroup.JOURNAL,
     "journal_title": SemanticGroup.JOURNAL,
     "source": SemanticGroup.JOURNAL,
     "publisher": SemanticGroup.JOURNAL,
@@ -31604,14 +36031,14 @@ These Value Objects encapsulate source-specific validation and normalization.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Literal, Self
 
 from bioetl.domain.value_objects.base import ValueObject
 from bioetl.domain.value_objects.identifiers import ChemblId, PubChemCid
 
 
-class CompoundSource(str, Enum):
+class CompoundSource(StrEnum):
     """Source database for compound identifiers.
 
     Represents the origin database of a compound identifier.
@@ -32297,11 +36724,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class DQReportFormat(str, Enum):
+class DQReportFormat(StrEnum):
     """Output format for DQ reports."""
 
     JSON = "json"
@@ -32309,7 +36736,7 @@ class DQReportFormat(str, Enum):
     HTML = "html"
 
 
-class DQCheckStatus(str, Enum):
+class DQCheckStatus(StrEnum):
     """Status of individual DQ check."""
 
     PASS = "pass"
@@ -32317,7 +36744,7 @@ class DQCheckStatus(str, Enum):
     FAIL = "fail"
 
 
-class DQReportStatus(str, Enum):
+class DQReportStatus(StrEnum):
     """Overall status of DQ report."""
 
     PASS = "pass"
@@ -32325,7 +36752,7 @@ class DQReportStatus(str, Enum):
     FAIL = "fail"
 
 
-class DriftLevel(str, Enum):
+class DriftLevel(StrEnum):
     """Schema drift severity level."""
 
     INFO = "info"
@@ -32333,7 +36760,7 @@ class DriftLevel(str, Enum):
     CRITICAL = "critical"
 
 
-class MedallionLayer(str, Enum):
+class MedallionLayer(StrEnum):
     """Medallion architecture layer."""
 
     BRONZE = "bronze"
@@ -32346,7 +36773,7 @@ class MedallionLayer(str, Enum):
 # =============================================================================
 
 
-class BronzeDQCheckType(str, Enum):
+class BronzeDQCheckType(StrEnum):
     """Types of DQ checks for Bronze layer."""
 
     RECORD_COUNT = "record_count"
@@ -32361,7 +36788,7 @@ class BronzeDQCheckType(str, Enum):
 # =============================================================================
 
 
-class SilverDQCheckType(str, Enum):
+class SilverDQCheckType(StrEnum):
     """Types of DQ checks for Silver layer."""
 
     RECORD_COUNT = "record_count"
@@ -32379,7 +36806,7 @@ class SilverDQCheckType(str, Enum):
 # =============================================================================
 
 
-class GoldDQCheckType(str, Enum):
+class GoldDQCheckType(StrEnum):
     """Types of DQ checks for Gold layer."""
 
     RECORD_COUNT = "record_count"
@@ -32953,11 +37380,11 @@ Note:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class DQEvaluationStatus(str, Enum):
+class DQEvaluationStatus(StrEnum):
     """Status of Data Quality evaluation.
 
     Represents the outcome of DQ threshold checks during pipeline execution.
@@ -33289,6 +37716,437 @@ class PubChemCid(ValueObject[int]):
             return cls(int(raw))
         except ValueError:
             return None
+
+================================================================================
+File: publication_field_groups.py
+Path: value_objects\publication_field_groups.py
+================================================================================
+"""Publication field group definitions for Composite Publication Pipeline.
+
+Defines semantic grouping of publication fields across providers for:
+- Column ordering in merged output
+- Gold layer filtering (excluding trash group)
+- Analytical views and reporting
+
+See ADR-026 for Composite Publication Pipeline rationale.
+
+Providers:
+- ChEMBL (seed)
+- CrossRef, OpenAlex, PubMed, SemanticScholar (enrichers)
+
+Field naming convention: {provider}.publication.{field}
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import StrEnum
+from typing import Final
+
+__all__ = [
+    "DEFAULT_FIELD_GROUP_CONFIG",
+    "FIELD_TO_GROUP_MAPPING",
+    "FieldGroupConfig",
+    "PublicationFieldGroup",
+]
+
+
+class PublicationFieldGroup(StrEnum):
+    """Semantic groups for publication fields.
+
+    Groups are used for:
+    1. Column ordering in composite output (groups appear in enum order)
+    2. Gold layer filtering (trash group is excluded)
+    3. Analytical views and field selection
+
+    Attributes:
+        ID_AND_STATUS: Identifiers, DOIs, PMIDs, status flags
+        BIBLIOGRAPHY: Title, abstract, journal, volume, issue, pages
+        AUTHOR_AND_AFFILIATIONS: Authors, affiliations, institutions
+        TERMS_AND_KEYWORDS_AND_TOPICS: Keywords, MeSH, topics, classification
+        CITATIONS_AND_REFERENCE: Citation counts, references
+        DATE_AND_PLACES: Publication dates, countries, locations
+        PUBLICATION_TYPES: Document types, publication types
+        TRASH: Excluded from Gold layer (internal, redundant, low-value)
+    """
+
+    ID_AND_STATUS = "id_and_status"
+    BIBLIOGRAPHY = "bibliography"
+    AUTHOR_AND_AFFILIATIONS = "author_and_affiliations"
+    TERMS_AND_KEYWORDS_AND_TOPICS = "terms_and_keywords_and_topics"
+    CITATIONS_AND_REFERENCE = "citations_and_reference"
+    DATE_AND_PLACES = "date_and_places"
+    PUBLICATION_TYPES = "publication_types"
+    TRASH = "trash"
+
+    @property
+    def display_name(self) -> str:
+        """Human-readable display name for the group."""
+        return _GROUP_DISPLAY_NAMES[self]
+
+    @property
+    def include_in_gold(self) -> bool:
+        """Check if fields in this group should be included in Gold layer."""
+        return self != PublicationFieldGroup.TRASH
+
+    @classmethod
+    def from_string(cls, value: str) -> PublicationFieldGroup:
+        """Parse group from string value.
+
+        Args:
+            value: Group identifier (case-insensitive).
+
+        Returns:
+            Matching PublicationFieldGroup.
+
+        Raises:
+            ValueError: If value doesn't match any group.
+        """
+        normalized = value.lower().strip()
+        try:
+            return cls(normalized)
+        except ValueError:
+            valid = ", ".join(g.value for g in cls)
+            raise ValueError(
+                f"Invalid field group: '{value}'. Valid groups: {valid}"
+            ) from None
+
+    @classmethod
+    def gold_groups(cls) -> tuple[PublicationFieldGroup, ...]:
+        """Get all groups that should be included in Gold layer."""
+        return tuple(g for g in cls if g.include_in_gold)
+
+    @classmethod
+    def excluded_groups(cls) -> tuple[PublicationFieldGroup, ...]:
+        """Get all groups excluded from Gold layer."""
+        return tuple(g for g in cls if not g.include_in_gold)
+
+
+# Display names for each group
+_GROUP_DISPLAY_NAMES: Final[dict[PublicationFieldGroup, str]] = {
+    PublicationFieldGroup.ID_AND_STATUS: "ID & Status",
+    PublicationFieldGroup.BIBLIOGRAPHY: "Bibliography",
+    PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS: "Author & Affiliations",
+    PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS: "Terms & Keywords & Topics",
+    PublicationFieldGroup.CITATIONS_AND_REFERENCE: "Citations & Reference",
+    PublicationFieldGroup.DATE_AND_PLACES: "Date & Places",
+    PublicationFieldGroup.PUBLICATION_TYPES: "Publication Types",
+    PublicationFieldGroup.TRASH: "Trash (Excluded)",
+}
+
+
+# Field base name to group mapping
+# Keys are base field names (without provider.entity prefix)
+# This mapping covers all fields from 5 providers:
+# - chembl, crossref, openalex, pubmed, semanticscholar
+#
+# Entries are ordered by canonical category (docs/schemas/publication_field_order.csv):
+#   id → bibliography → author_and_affiliation → date →
+#   topics_and_keywords → publication
+FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
+    # ===== canonical: id (1-24) =====
+    "alternative_id": PublicationFieldGroup.ID_AND_STATUS,
+    "chembl_release": PublicationFieldGroup.ID_AND_STATUS,
+    "content_hash": PublicationFieldGroup.TRASH,
+    "corpus_id": PublicationFieldGroup.ID_AND_STATUS,
+    "dblp_id": PublicationFieldGroup.ID_AND_STATUS,
+    "document_chembl_id": PublicationFieldGroup.ID_AND_STATUS,
+    "doi": PublicationFieldGroup.ID_AND_STATUS,
+    "entity_id": PublicationFieldGroup.ID_AND_STATUS,
+    "mag_id": PublicationFieldGroup.ID_AND_STATUS,
+    "nlm_unique_id": PublicationFieldGroup.ID_AND_STATUS,
+    "openalex_id": PublicationFieldGroup.ID_AND_STATUS,
+    "paper_id": PublicationFieldGroup.ID_AND_STATUS,
+    "pmc_id": PublicationFieldGroup.ID_AND_STATUS,
+    "pmid": PublicationFieldGroup.ID_AND_STATUS,
+    "src_id": PublicationFieldGroup.TRASH,
+    # ===== canonical: bibliography (25-83) =====
+    "abstract": PublicationFieldGroup.BIBLIOGRAPHY,
+    "abstract_structured": PublicationFieldGroup.BIBLIOGRAPHY,
+    "issn": PublicationFieldGroup.BIBLIOGRAPHY,
+    "issn_electronic": PublicationFieldGroup.BIBLIOGRAPHY,
+    "issn_list": PublicationFieldGroup.BIBLIOGRAPHY,
+    "issn_print": PublicationFieldGroup.BIBLIOGRAPHY,
+    "issue": PublicationFieldGroup.BIBLIOGRAPHY,
+    "journal": PublicationFieldGroup.BIBLIOGRAPHY,
+    "journal_full_title": PublicationFieldGroup.BIBLIOGRAPHY,
+    "journal_iso_abbrev": PublicationFieldGroup.BIBLIOGRAPHY,
+    "journal_issn_type": PublicationFieldGroup.BIBLIOGRAPHY,
+    "journal_name_short": PublicationFieldGroup.BIBLIOGRAPHY,
+    "page_first": PublicationFieldGroup.BIBLIOGRAPHY,
+    "page_last": PublicationFieldGroup.BIBLIOGRAPHY,
+    "page_range": PublicationFieldGroup.BIBLIOGRAPHY,
+    "published": PublicationFieldGroup.DATE_AND_PLACES,
+    "published_online": PublicationFieldGroup.DATE_AND_PLACES,
+    "published_print": PublicationFieldGroup.DATE_AND_PLACES,
+    "publisher": PublicationFieldGroup.BIBLIOGRAPHY,
+    "publication_year": PublicationFieldGroup.DATE_AND_PLACES,
+    "title": PublicationFieldGroup.BIBLIOGRAPHY,
+    "venue": PublicationFieldGroup.BIBLIOGRAPHY,
+    "volume": PublicationFieldGroup.BIBLIOGRAPHY,
+    # ===== canonical: author_and_affiliation (84-104) =====
+    "affiliation_list": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "affiliation_structured": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "author_count": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "author_details": PublicationFieldGroup.TRASH,
+    "author_h_indices": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "author_openalex_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "author_orcids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "author_s2_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "authors": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "authors_with_affiliations": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "country": PublicationFieldGroup.DATE_AND_PLACES,
+    "institution_country_codes": PublicationFieldGroup.DATE_AND_PLACES,
+    "institution_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "ror_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    # ===== canonical: date (105-114) =====
+    "creation_date": PublicationFieldGroup.DATE_AND_PLACES,
+    "date_completed": PublicationFieldGroup.DATE_AND_PLACES,
+    "date_revised": PublicationFieldGroup.DATE_AND_PLACES,
+    "pub_date": PublicationFieldGroup.DATE_AND_PLACES,
+    "pub_day": PublicationFieldGroup.DATE_AND_PLACES,
+    "pub_month": PublicationFieldGroup.DATE_AND_PLACES,
+    "publication_date": PublicationFieldGroup.DATE_AND_PLACES,
+    # ===== canonical: topics_and_keywords (115-130) =====
+    "chemical_count": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "chemicals": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "citation_subset": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "databanks": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "fwci": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "gene_symbols": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "keyword_count": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "mesh": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "mesh_heading_count": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "primary_topic": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "subject_fields": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "subject_keywords": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "subject_mesh": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    "subject_topics": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+    # ===== canonical: publication (131-167) =====
+    "citation_contexts": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "citations_made": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "citations_received": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "content_domain_crossmark_restriction": PublicationFieldGroup.TRASH,
+    "content_domain_domains": PublicationFieldGroup.TRASH,
+    "grant_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "grants": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "influential_citation_count": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "is_oa": PublicationFieldGroup.ID_AND_STATUS,
+    "is_retracted": PublicationFieldGroup.ID_AND_STATUS,
+    "language": PublicationFieldGroup.TRASH,
+    "license_url": PublicationFieldGroup.TRASH,
+    "medline_pgn": PublicationFieldGroup.TRASH,
+    "oa_status": PublicationFieldGroup.ID_AND_STATUS,
+    "open_access_url": PublicationFieldGroup.ID_AND_STATUS,
+    "publication_status": PublicationFieldGroup.ID_AND_STATUS,
+    "publication_type": PublicationFieldGroup.ID_AND_STATUS,
+    "publication_type_list": PublicationFieldGroup.PUBLICATION_TYPES,
+    "publication_types": PublicationFieldGroup.PUBLICATION_TYPES,
+    "references": PublicationFieldGroup.CITATIONS_AND_REFERENCE,
+    "tldr": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
+}
+
+
+@dataclass(frozen=True, slots=True)
+class FieldGroupConfig:
+    """Configuration for field grouping operations.
+
+    Provides lookup and filtering capabilities for publication fields
+    based on semantic groups.
+
+    Attributes:
+        field_groups: Mapping of field base names to groups.
+        provider_priority: Order of providers for column ordering within groups.
+        default_group: Group for unmapped fields (default: TRASH).
+
+    Example:
+        >>> config = FieldGroupConfig()
+        >>> config.get_group("title")
+        <PublicationFieldGroup.BIBLIOGRAPHY: 'bibliography'>
+        >>> config.get_group("chembl.publication.doi")
+        <PublicationFieldGroup.ID_AND_STATUS: 'id_and_status'>
+        >>> config.is_gold_field("content_hash")
+        False
+    """
+
+    field_groups: dict[str, PublicationFieldGroup] = field(
+        default_factory=lambda: dict(FIELD_TO_GROUP_MAPPING)
+    )
+    provider_priority: tuple[str, ...] = (
+        "chembl",
+        "crossref",
+        "openalex",
+        "pubmed",
+        "semanticscholar",
+    )
+    default_group: PublicationFieldGroup = PublicationFieldGroup.TRASH
+
+    def get_group(self, column: str) -> PublicationFieldGroup:
+        """Get semantic group for a column.
+
+        Handles both qualified (provider.entity.field) and
+        unqualified (field) column names.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            PublicationFieldGroup for the column.
+        """
+        field_name = self._extract_field(column)
+        return self.field_groups.get(field_name, self.default_group)
+
+    def is_gold_field(self, column: str) -> bool:
+        """Check if a column should be included in Gold layer.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            True if field should be included in Gold layer.
+        """
+        return self.get_group(column).include_in_gold
+
+    def get_gold_columns(self, columns: list[str]) -> list[str]:
+        """Filter columns to only those included in Gold layer.
+
+        Args:
+            columns: List of column names.
+
+        Returns:
+            Filtered list of columns (Gold layer only).
+        """
+        return [c for c in columns if self.is_gold_field(c)]
+
+    def get_trash_columns(self, columns: list[str]) -> list[str]:
+        """Get columns that would be excluded from Gold layer.
+
+        Args:
+            columns: List of column names.
+
+        Returns:
+            List of trash columns.
+        """
+        return [c for c in columns if not self.is_gold_field(c)]
+
+    def get_columns_by_group(
+        self, columns: list[str], group: PublicationFieldGroup
+    ) -> list[str]:
+        """Get columns belonging to a specific group.
+
+        Args:
+            columns: List of column names.
+            group: Target group.
+
+        Returns:
+            Columns belonging to the specified group.
+        """
+        return [c for c in columns if self.get_group(c) == group]
+
+    def group_columns(
+        self, columns: list[str]
+    ) -> dict[PublicationFieldGroup, list[str]]:
+        """Group columns by their semantic groups.
+
+        Args:
+            columns: List of column names.
+
+        Returns:
+            Dictionary mapping groups to their columns.
+        """
+        result: dict[PublicationFieldGroup, list[str]] = {
+            g: [] for g in PublicationFieldGroup
+        }
+        for column in columns:
+            group = self.get_group(column)
+            result[group].append(column)
+        return result
+
+    def get_provider_rank(self, column: str) -> int:
+        """Get provider rank for ordering within semantic group.
+
+        Args:
+            column: Column name (qualified or unqualified).
+
+        Returns:
+            Provider rank (lower = higher priority).
+            Returns -1 for unqualified columns (seed).
+            Returns 999 for unknown providers.
+        """
+        parts = column.split(".")
+        if len(parts) == 3:
+            provider = parts[0].lower()
+            try:
+                return self.provider_priority.index(provider)
+            except ValueError:
+                return 999
+        return -1
+
+    def sort_columns(self, columns: list[str]) -> list[str]:
+        """Sort columns by semantic group and provider priority.
+
+        Columns are sorted by:
+        1. Semantic group (enum order)
+        2. Provider priority (seed first, then by provider_priority)
+        3. Field name (alphabetical)
+
+        Args:
+            columns: List of column names to sort.
+
+        Returns:
+            Sorted list of columns.
+        """
+
+        def sort_key(column: str) -> tuple[int, int, str]:
+            group = self.get_group(column)
+            provider_rank = self.get_provider_rank(column)
+            field_name = self._extract_field(column)
+            return (list(PublicationFieldGroup).index(group), provider_rank, field_name)
+
+        return sorted(columns, key=sort_key)
+
+    def _extract_field(self, column: str) -> str:
+        """Extract field name from column (qualified or unqualified).
+
+        Args:
+            column: Column name.
+
+        Returns:
+            Base field name.
+        """
+        parts = column.split(".")
+        if len(parts) == 3:
+            return parts[2].lower()
+        return column.lower()
+
+    def get_field_providers(self, field_name: str) -> list[str]:
+        """Get providers that supply a given field.
+
+        Based on the mapping, returns which providers have this field.
+
+        Args:
+            field_name: Base field name (e.g., "title", "doi").
+
+        Returns:
+            List of provider names that have this field.
+
+        Note:
+            This returns providers from provider_priority that are expected
+            to have this field. For exact provider coverage, see the
+            field mapping documentation.
+        """
+        # This is a simplified implementation
+        # Full implementation would track provider->field mapping
+        normalized = field_name.lower()
+        if normalized in self.field_groups:
+            # Return all providers in priority order
+            # Real implementation should filter by actual field presence
+            return list(self.provider_priority)
+        return []
+
+
+# Default configuration instance
+DEFAULT_FIELD_GROUP_CONFIG: Final[FieldGroupConfig] = FieldGroupConfig()
 
 ================================================================================
 File: publications.py

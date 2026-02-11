@@ -127,6 +127,8 @@ class HttpClientFactory:
             # Client settings (timeout and retries)
             timeout = source_config.timeout_sec
             max_retries = source_config.max_retries
+            base_delay = source_config.retry_base_delay
+            max_delay = source_config.retry_max_delay
         else:
             # Fallback to ProviderRegistry
             http_config = ProviderRegistry.get_http_config(provider)
@@ -145,6 +147,8 @@ class HttpClientFactory:
                 recovery_timeout = 300  # Default
                 timeout = 30.0  # Default
                 max_retries = 3  # Default
+            base_delay = 1.0  # RetryConfig default
+            max_delay = 60.0  # RetryConfig default
 
         # Apply rate overrides based on settings (API key boosts)
         http_config = ProviderRegistry.get_http_config(provider)
@@ -163,7 +167,11 @@ class HttpClientFactory:
                 recovery_timeout=recovery_timeout,
                 metrics=metrics,
             ),
-            retry_config=RetryConfig(max_attempts=max_retries),
+            retry_config=RetryConfig(
+                max_attempts=max_retries,
+                base_delay=base_delay,
+                max_delay=max_delay,
+            ),
             timeout=timeout,
             provider=provider,
             run_id=run_id,

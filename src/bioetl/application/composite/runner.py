@@ -18,6 +18,7 @@ from bioetl.application.composite.checkpoint import CompositeCheckpointState
 from bioetl.application.composite.runner_helpers import (
     add_not_run_results,
     calculate_had_warnings,
+    get_mergeable_dependencies,
     get_mergeable_enrichers,
     log_enrichment_summary,
 )
@@ -63,6 +64,16 @@ class CompositeRuntimeConfig:
         required_only: Skip optional enrichers.
         force_enricher: Force re-run of specified enricher.
         seed_limit: Optional limit for seed pipeline.
+        use_cached_bronze: Load data from Bronze cache instead of API (master switch).
+        cached_bronze_path: Explicit path to Bronze cache directory.
+        cached_bronze_date: Filter Bronze cache by date (YYYY-MM-DD).
+        cached_bronze_enrichers: Override cached Bronze for enrichers.
+            None=follow master, True=force cache, False=force API.
+        cached_bronze_dependencies: Override cached Bronze for dependencies.
+            None=follow master, True=force cache, False=force API.
+            Defaults to False because dependencies (e.g. IDMapping) must call
+            APIs with seed IDs; reading from Bronze cache would silently
+            produce empty results when no prior standalone run exists.
     """
 
     resume: bool = False
@@ -71,6 +82,11 @@ class CompositeRuntimeConfig:
     required_only: bool = False
     force_enricher: str | None = None
     seed_limit: int | None = None
+    use_cached_bronze: bool = True
+    cached_bronze_path: str | None = None
+    cached_bronze_date: str | None = None
+    cached_bronze_enrichers: bool | None = None
+    cached_bronze_dependencies: bool = False
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""
@@ -307,7 +323,9 @@ class CompositePipelineRunner:
         state = await self._transition_to_enrichment_completed(state)
 
         # Step 6: Execute merge or skip in dry run mode
-        state, merge_result = await self._execute_merge_stage(state, enrichment_results)
+        state, merge_result = await self._execute_merge_stage(
+            state, enrichment_results, dependency_results
+        )
 
         # Step 7: Finalize - set COMPLETED and cleanup checkpoint
         await self._finalize_pipeline(state)
@@ -460,6 +478,7 @@ class CompositePipelineRunner:
             dependencies=self._config.dependencies,
             completed=state.completed_dependencies,
             runner_factory=self._dependencies_runner_factory,
+            dependency_configs={d.pipeline: d for d in self._config.dependencies},
         )
 
         for dep_name, dep_result in dependency_results.items():
@@ -694,6 +713,7 @@ class CompositePipelineRunner:
         self,
         state: CompositeCheckpointState,
         enrichment_results: dict[str, EnrichmentResult],
+        dependency_results: dict[str, DependencyResult] | None = None,
     ) -> tuple[CompositeCheckpointState, MergeResult | None]:
         """Execute merge stage or skip in dry run mode.
 
@@ -731,11 +751,21 @@ class CompositePipelineRunner:
                     enrichment_results, self._config.enrichers, self._logger
                 )
 
+                # Get only dependencies with data to merge
+                mergeable_dependencies = get_mergeable_dependencies(
+                    dependency_results or {},
+                    self._config.dependencies,
+                    self._logger,
+                )
+
                 merge_result = await self._merger.merge(
                     seed_table=self._config.seed.silver_table,
                     enrichers=mergeable_enrichers,
                     enrichment_results=enrichment_results,
                     run_id=self._run_id_str,
+                    seed_pipeline=self._config.seed.pipeline,
+                    dependencies=mergeable_dependencies,
+                    dependency_results=dependency_results,
                 )
 
                 # Log phase event for merge completion

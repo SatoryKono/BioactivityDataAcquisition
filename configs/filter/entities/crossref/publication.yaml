@@ -29,10 +29,10 @@ input_filter:
 gold_filters:
   # Numeric range filters
   ranges:
-    # Reasonable year range
-    year:
-      min: 1900
-      max: 2100
+    # Standardized publication year filter (1950..2050 inclusive)
+    publication_year:
+      min: 1950
+      max: 2050
 
   # Required fields
   required_fields:

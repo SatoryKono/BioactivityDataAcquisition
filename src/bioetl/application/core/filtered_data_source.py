@@ -82,6 +82,11 @@ class FilteredDataSource:
         if not self._filter_config.enabled:
             return self
 
+        # Check for direct multi-field filter IDs (composite dual-key mode)
+        if self._filter_config.direct_multi_filter_ids:
+            self._load_direct_multi_filter_ids()
+            return self
+
         # Check for direct filter IDs (composite mode - no CSV needed)
         if self._filter_config.direct_filter_ids:
             self._load_direct_filter_ids()
@@ -90,6 +95,27 @@ class FilteredDataSource:
         # Pre-load filter IDs from CSV
         await self._load_csv_filter_ids()
         return self
+
+    def _load_direct_multi_filter_ids(self) -> None:
+        """Load direct multi-field filter IDs from composite mode configuration.
+
+        Sets up multi-column filtering state for AND-logic API queries.
+        E.g., molecule_chembl_id AND document_chembl_id simultaneously.
+        """
+        multi_ids = self._filter_config.direct_multi_filter_ids or {}
+        self._multi_filter_ids = {field: list(ids) for field, ids in multi_ids.items()}
+        self._filter_fields = tuple(multi_ids.keys())
+        self._valid_combinations = self._filter_config.direct_valid_combinations
+        if self._logger:
+            self._logger.info(
+                "direct_multi_filter_ids_loaded",
+                fields=list(self._filter_fields),
+                counts={f: len(ids) for f, ids in multi_ids.items()},
+                valid_combinations_count=len(self._valid_combinations)
+                if self._valid_combinations
+                else 0,
+                pipeline=self._pipeline_name,
+            )
 
     def _load_direct_filter_ids(self) -> None:
         """Load direct filter IDs from composite mode configuration."""

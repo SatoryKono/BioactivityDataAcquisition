@@ -43,6 +43,7 @@ class IDMappingTransformer(BaseTransformer):
         entity_type: str = "idmapping",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -55,6 +56,7 @@ class IDMappingTransformer(BaseTransformer):
             entity_type: Entity type for metrics labels (default: 'idmapping').
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing sensitive data.
@@ -65,6 +67,7 @@ class IDMappingTransformer(BaseTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -81,7 +84,7 @@ class IDMappingTransformer(BaseTransformer):
 
         Args:
             context: Pipeline context with run_id, run_type, logger.
-            record: Bronze-like record with target_chembl_id and uniprot_accession.
+            record: Bronze-like record with target_chembl_id and entry metadata.
             index: Sequential index of the record in the pipeline run.
 
         Returns:
@@ -94,15 +97,33 @@ class IDMappingTransformer(BaseTransformer):
         # Step 1: Extract required field
         target_chembl_id = self._get_required_field(record, "target_chembl_id")
         uniprot_accession = record.get("uniprot_accession")  # Can be None
+        all_mappings = record.get("all_mappings")
 
         # Step 2: Determine mapping status
-        mapping_status = "found" if uniprot_accession else "not_found"
+        if all_mappings:
+            mapping_status = "multiple"
+        elif uniprot_accession:
+            mapping_status = "found"
+        else:
+            mapping_status = "not_found"
 
         # Step 3: Build business data dictionary for content hash
         business_data: dict[str, Any] = {
             "target_chembl_id": target_chembl_id,
             "uniprot_accession": uniprot_accession,
             "mapping_status": mapping_status,
+            # UniProt entry metadata
+            "uniprot_entry_name": record.get("uniprot_entry_name"),
+            "organism_scientific": record.get("organism_scientific"),
+            "organism_common": record.get("organism_common"),
+            "taxonomy_id": record.get("taxonomy_id"),
+            "protein_name": record.get("protein_name"),
+            "gene_primary": record.get("gene_primary"),
+            "sequence_length": record.get("sequence_length"),
+            "sequence_mass": record.get("sequence_mass"),
+            "reviewed": record.get("reviewed"),
+            "annotation_score": record.get("annotation_score"),
+            "all_mappings": all_mappings,
         }
 
         # Step 4: Generate entity_id using IdentityService (RULES.md §2.8)
@@ -128,6 +149,6 @@ class IDMappingTransformer(BaseTransformer):
         silver_record = self.entity_to_silver_record(entity)
 
         # Step 8: Set DQ warning flag for not_found mappings
-        silver_record["_dq_warn"] = mapping_status != "found"
+        silver_record["_dq_warn"] = mapping_status == "not_found"
 
         return cast("SilverRecord", silver_record)

@@ -116,6 +116,7 @@ class BaseTransformer(ABC):
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -128,6 +129,8 @@ class BaseTransformer(ABC):
             entity_type: Entity type for metrics labels (e.g., 'activity', 'compound').
             tracer: Tracing port for distributed tracing. Defaults to NoOpTracing.
             metrics: Metrics port for duration/error tracking. Defaults to NoOpMetrics.
+            silver_filters: Optional domain-level filter configuration for Silver layer.
+                Applied AFTER transformation but BEFORE writing to Silver.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
                 Defaults to a new IdentityService instance.
@@ -141,6 +144,7 @@ class BaseTransformer(ABC):
         self.entity_type = entity_type or "unknown"
         self._tracer: TracingPort = tracer if tracer is not None else NoOpTracing()
         self._metrics: MetricsPort = metrics if metrics is not None else NoOpMetrics()
+        self._silver_filters = silver_filters
         self._gold_filters = gold_filters
         self._identity: IdentityService = (
             identity_service if identity_service is not None else IdentityService()
@@ -316,6 +320,17 @@ class BaseTransformer(ABC):
 
         try:
             result = await self._transform_impl(context, record, index)
+            if result is not None and not self.should_write_silver(
+                context,
+                result,  # type: ignore[arg-type]  # SilverRecord is dict at runtime
+            ):
+                context.logger.debug(
+                    "silver_filter_excluded",
+                    provider=self.provider,
+                    entity_type=self.entity_type,
+                    record_index=index,
+                )
+                return None
             return result
         except TransformationError as e:
             error_type = "transformation_error"
@@ -397,6 +412,26 @@ class BaseTransformer(ABC):
 
         """
         ...
+
+    def should_write_silver(
+        self, _context: PipelineContext, record: dict[str, Any]
+    ) -> bool:
+        """Determine if a transformed record should be written to Silver.
+
+        Uses silver_filters from config if configured, otherwise passes all records.
+        Applied AFTER transformation but BEFORE writing to Silver layer.
+
+        Args:
+            _context: Pipeline context (unused in base implementation).
+            record: Transformed record to evaluate.
+
+        Returns:
+            True if record passes domain-level silver filters.
+
+        """
+        if self._silver_filters is None or self._silver_filters.is_empty():
+            return True
+        return self._silver_filters.should_include(record)
 
     def should_write_gold(
         self, _context: PipelineContext, record: dict[str, Any]

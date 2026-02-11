@@ -78,7 +78,7 @@ composite:
         - title
       required: false    # Optional - seed may not have DOIs
       filter_condition: "doi IS NOT NULL"
-      timeout_seconds: 900
+      timeout_seconds: 3600
       silver_table: silver/crossref/publication
 
     # OpenAlex: Academic topics and institutions
@@ -89,7 +89,7 @@ composite:
         - title          # Fallback key if doi not found
       required: false    # Optional - needs doi or pmid
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
-      timeout_seconds: 600
+      timeout_seconds: 3600
       silver_table: silver/openalex/publication
 
     # PubMed: MeSH terms and medical metadata
@@ -100,7 +100,7 @@ composite:
         - doi
       required: false    # Optional - only for records with pmid
       filter_condition: "pmid IS NOT NULL"
-      timeout_seconds: 600
+      timeout_seconds: 3600
       silver_table: silver/pubmed/publication
 
     # Semantic Scholar: AI/ML embeddings and TLDR (mapped to abstract)
@@ -111,8 +111,8 @@ composite:
         - title
       required: false    # Optional - high rate limits, ok to skip
       filter_condition: "doi IS NOT NULL OR title IS NOT NULL"
-      timeout_seconds: 1200
-      fallback_strategy: skip  # Skip on failure (high rate limits)
+      timeout_seconds: 7200
+      #fallback_strategy: skip  # Skip on failure (high rate limits)
       silver_table: silver/semanticscholar/publication
 
   # ---------------------------------------------------------------------------
@@ -130,6 +130,11 @@ composite:
     # When true, keeps columns like chembl.publication.title, crossref.publication.title
     # instead of coalescing them into a single 'title' column
     preserve_all_sources: true
+
+    # Output paths for merged data
+    output:
+      silver: data/output/silver/composite/publication
+      gold: data/output/gold/composite/publication
 
     # Field-level priority overrides (when using explicit_rules)
     # Maps field name to ordered list of source preferences
@@ -240,12 +245,18 @@ composite:
         - openalex       # OpenAlex MAG legacy ID
 
     # -------------------------------------------------------------------------
-    # Column Ordering by Semantic Groups
+    # Column Ordering by Canonical Categories
     # -------------------------------------------------------------------------
     # Defines the order of columns in the merged output.
-    # Columns are grouped semantically, with seed columns first within each group.
+    # Categories and field order follow docs/schemas/publication_field_order.csv
+    # (6 canonical categories, 167 fully-qualified fields).
+    #
+    # The "system" group MUST be first: it captures ETL metadata columns
+    # (entity_id, content_hash, _run_id, etc.) that would otherwise fall
+    # into the "remaining" bucket at the end of the output.
     column_groups:
-      - name: identifiers
+      # === System / ETL metadata (MUST be first) ===
+      - name: system
         fields:
           - entity_id
           - content_hash
@@ -257,137 +268,149 @@ composite:
           - _index
           - _lookup_method
           - _original_id
-          - document_chembl_id
-          - doi
-          - pmid
-          - pmc_id
-          - openalex_id
-          - paper_id
-          - corpus_id
-          - src_id
-          - chembl_release
-          - nlm_unique_id
-          - mag_id
-          - dblp_id
-          - alternative_id
-          - pii
-          - mid
-          - publisher_id
         pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: core_content
+
+      # === Provider identifiers ===
+      - name: provider_ids
         fields:
-          - title
+          - alternative_id
+          - chembl_release
+          - corpus_id
+          - dblp_id
+          - document_chembl_id
+          - mag_id
+          - nlm_unique_id
+          - openalex_id
+          - paper_id
+          - pmc_id
+          - pmid
+          - src_id
+        provider_order: [semanticscholar, openalex, pubmed, chembl, crossref]
+
+      # === Journal / Venue information ===
+      - name: journal
+        fields:
           - abstract
           - abstract_structured
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+          - doi
+          - issn
+          - issn_electronic
+          - issn_list
+          - issn_print
+          - issue
+          - journal
+          - journal_iso_abbrev
+          - journal_issn_type
+          - journal_name_short
+          - publisher
+          - title
+          - venue
+          - volume
+        provider_order: [pubmed, semanticscholar, chembl, crossref, openalex]
+
+      # === Pagination ===
+      - name: pagination
+        fields:
+          - medline_pgn
+          - page_first
+          - page_last
+          - page_range
+        provider_order: [pubmed, chembl, crossref, openalex, semanticscholar]
+
+      # === Authors ===
       - name: authors
         fields:
-          - authors
           - author_count
-          - authors_with_affiliations
-          - author_orcids
           - author_details
-          - author_openalex_ids
-          - author_s2_ids
           - author_h_indices
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+          - author_openalex_ids
+          - author_orcids
+          - author_s2_ids
+          - authors
+          - authors_with_affiliations
+        provider_order: [pubmed, semanticscholar, openalex, chembl, crossref]
+
+      # === Affiliations ===
       - name: affiliations
         fields:
           - affiliation_list
           - affiliation_structured
-          - institution_ids
           - institution_country_codes
+          - institution_ids
           - ror_ids
           - country
-        provider_order: [pubmed, openalex, semanticscholar, crossref, chembl]
-      - name: journal
+        provider_order: [pubmed, openalex, semanticscholar, chembl, crossref]
+
+      # === Date ===
+      - name: date
         fields:
-          - journal
-          - journal_name
-          - journal_name_short
-          - journal_iso_abbrev
-          - journal_issn_type
-          - issn
-          - issn_print
-          - issn_electronic
-          - publisher
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: temporal
-        fields:
-          - publication_year
-          - publication_date
-          - published
-          - published_print
-          - published_online
-          - pub_month
-          - pub_day
+          - creation_date
           - date_completed
           - date_revised
-          - creation_date
+          - pub_date
+          - pub_day
+          - pub_month
+          - publication_date
+          - publication_year
         provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: pagination
-        fields:
-          - volume
-          - issue
-          - page_first
-          - page_last
-          - page_range
-          - medline_pgn
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: citations
-        fields:
-          - citations_received
-          - citations_made
-          - influential_citation_count
-          - references
-          - citation_contexts
-          - citation_subset
-        provider_order: [crossref, openalex, pubmed, semanticscholar, chembl]
+
+      # === Subjects / Topics ===
       - name: subjects
         fields:
-          - subject_topics
+          - keyword_count
+          - mesh_heading_count
           - primary_topic
           - subject_fields
-          - subject_mesh
-          - mesh_heading_count
           - subject_keywords
-          - keyword_count
+          - subject_mesh
+          - subject_topics
+          - tldr
+        provider_order: [pubmed, openalex, semanticscholar, crossref, chembl]
+
+      # === Biomedical (NEW) ===
+      - name: biomedical
+        fields:
           - chemicals
           - chemical_count
           - gene_symbols
           - databanks
           - grants
           - grant_count
-        provider_order: [openalex, pubmed, semanticscholar, crossref, chembl]
-      - name: open_access
+        provider_order: [pubmed, openalex, chembl]
+
+      # === Citations / Metrics ===
+      - name: citations
         fields:
+          - citation_contexts
+          - citation_subset
+          - citations_made
+          - citations_received
+          - fwci
+          - influential_citation_count
+          - references
+        provider_order: [semanticscholar, crossref, openalex, pubmed, chembl]
+
+      # === Document type and status ===
+      - name: doc_type
+        fields:
+          - content_domain_crossmark_restriction
+          - content_domain_domains
           - is_oa
+          - is_retracted
+          - language
+          - license_url
           - oa_status
           - open_access_url
-          - license_url
-        provider_order: [openalex, semanticscholar, crossref]
-      - name: document_type
-        fields:
-          - publication_type
-          - publication_types
-          - publication_type_list
           - publication_status
-        provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
-      - name: language
-        fields:
-          - language
-        provider_order: [crossref, openalex, pubmed]
-      - name: quality
-        fields:
-          - is_retracted
-          - fwci
-          - content_domain_domains
-          - content_domain_crossmark_restriction
-        provider_order: [openalex, crossref]
-    output:
-      silver: data/output/silver/composite/publication
-      gold: data/output/gold/composite/publication
+          - publication_type
+          - publication_type_list
+          - publication_types
+        provider_order: [semanticscholar, pubmed, chembl, crossref, openalex]
+
+    # Note: output paths auto-computed per ADR-029 convention-based resolution
+    # silver: data/output/silver/composite/publication (auto)
+    # gold: data/output/gold/composite/publication (auto)
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
