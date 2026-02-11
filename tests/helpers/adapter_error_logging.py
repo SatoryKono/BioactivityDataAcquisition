@@ -1,7 +1,10 @@
-"""Logging utilities for adapters.
+"""Logging utilities for adapters (test helper).
 
 Provides standardized error logging format across all data source adapters.
 Implements RULES.md §3.2.1 Log Schema with mandatory stage field.
+
+Moved from src/bioetl/infrastructure/adapters/adapter_error_logging.py
+because this utility is only used in tests.
 """
 
 from __future__ import annotations
@@ -26,12 +29,6 @@ def log_adapter_error(
     **context: Any,
 ) -> None:
     """Log adapter error in standardized format with Log Schema fields.
-
-    Формат сообщения: "{provider} {operation} failed"
-
-    Implements RULES.md §3.2.1 - mandatory fields:
-    - stage: Pipeline stage (default: "extract" for adapter operations)
-    - error_type: Error classification
 
     Args:
         logger: LoggerPort-compatible logger instance
