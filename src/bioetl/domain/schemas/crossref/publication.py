@@ -19,9 +19,6 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Re-export for backwards compatibility
 __all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "PublicationEnrichedSchema"]
 
-# === Fixed Value Constants ===
-DOCUMENT_TYPES = ["PUBLICATION", "PREPRINT"]
-
 
 class PublicationEnrichedSchema(PublicationBaseSchema):
     """CrossRef-enriched Publication validation schema for Silver layer.

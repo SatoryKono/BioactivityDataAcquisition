@@ -32,7 +32,6 @@ if TYPE_CHECKING:
 # Type aliases for common converters
 INT: Callable[[Any], int | None] = safe_int
 FLOAT: Callable[[Any], float | None] = safe_float
-STR: Callable[[Any], str] = str
 
 
 def normalize_pmid(value: Any) -> str | None:
@@ -310,7 +309,6 @@ __all__ = [
     "FLOAT",
     "INT",
     "PMID",
-    "STR",
     "FieldGroup",
     "FieldSpec",
     "float_fields",
