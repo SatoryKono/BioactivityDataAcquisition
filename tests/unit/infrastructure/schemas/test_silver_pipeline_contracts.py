@@ -41,17 +41,10 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("ligand_efficiency_le", pa.float64()),
         ("ligand_efficiency_lle", pa.float64()),
         ("ligand_efficiency_sei", pa.float64()),
-<<<<<<< HEAD
         ("manual_curation_flag", pa.float64()),  # Float for nullable int
         ("molecule_chembl_id", pa.string()),
         ("molecule_pref_name", pa.string()),
         ("original_activity_id", pa.float64()),  # Float for nullable int
-=======
-        ("manual_curation_flag", pa.float64()),
-        ("molecule_chembl_id", pa.string()),
-        ("molecule_pref_name", pa.string()),
-        ("original_activity_id", pa.float64()),
->>>>>>> d8adf082371f5d320a49ed46dd81cc775885513a
         ("parent_molecule_chembl_id", pa.string()),
         ("pchembl_value", pa.float64()),
         ("potential_duplicate", pa.int64()),
@@ -71,11 +64,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_pref_name", pa.string()),
         ("target_taxonomy_id", pa.string()),
         ("text_value", pa.string()),
-<<<<<<< HEAD
         ("toid", pa.float64()),  # Float for nullable int
-=======
-        ("toid", pa.float64()),
->>>>>>> d8adf082371f5d320a49ed46dd81cc775885513a
         ("type", pa.string()),
         ("units", pa.string()),
         ("uo_units", pa.string()),
@@ -103,11 +92,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("assay_pref_name", pa.string()),
         ("assay_strain", pa.string()),
         ("assay_subcellular_fraction", pa.string()),
-<<<<<<< HEAD
         ("assay_taxonomy_id", pa.float64()),  # Float for nullable int
-=======
-        ("assay_taxonomy_id", pa.float64()),
->>>>>>> d8adf082371f5d320a49ed46dd81cc775885513a
         ("assay_test_type", pa.string()),
         ("assay_tissue", pa.string()),
         ("assay_type", pa.string()),
@@ -132,11 +117,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("variant_organism", pa.string()),
         ("variant_sequence", pa.string()),
         ("variant_sequence_json", pa.string()),
-<<<<<<< HEAD
         ("variant_taxonomy_id", pa.float64()),  # Float for nullable int
-=======
-        ("variant_taxonomy_id", pa.float64()),
->>>>>>> d8adf082371f5d320a49ed46dd81cc775885513a
         ("_dq_error", pa.bool_()),
         ("_dq_warn", pa.bool_()),
     ],
@@ -294,11 +275,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("chirality", pa.int64()),
         ("cross_references", pa.string()),
         ("dosed_ingredient", pa.int64()),
-<<<<<<< HEAD
         ("first_approval", pa.float64()),  # Float for nullable int
-=======
-        ("first_approval", pa.float64()),
->>>>>>> d8adf082371f5d320a49ed46dd81cc775885513a
         ("first_in_class", pa.int64()),
         ("helm_notation", pa.string()),
         ("hierarchy_active_chembl_id", pa.string()),
@@ -340,11 +317,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("usan_stem", pa.string()),
         ("usan_stem_definition", pa.string()),
         ("usan_substem", pa.string()),
-<<<<<<< HEAD
         ("usan_year", pa.float64()),  # Float for nullable int
-=======
-        ("usan_year", pa.float64()),
->>>>>>> d8adf082371f5d320a49ed46dd81cc775885513a
         ("withdrawn_flag", pa.bool_()),
         ("_dq_error", pa.bool_()),
         ("_dq_warn", pa.bool_()),
@@ -373,11 +346,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_component_synonyms", pa.string()),
         ("target_components", pa.string()),
         ("target_type", pa.string()),
-<<<<<<< HEAD
         ("taxonomy_id", pa.float64()),  # Float for nullable int
-=======
-        ("taxonomy_id", pa.float64()),
->>>>>>> d8adf082371f5d320a49ed46dd81cc775885513a
         ("_dq_error", pa.bool_()),
         ("_dq_warn", pa.bool_()),
     ],
@@ -653,6 +622,8 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("_index", pa.int64()),
         ("_lookup_method", pa.string()),
         ("_original_id", pa.string()),
+        ("abstract", pa.string()),  # Not available from CrossRef (None values)
+        ("affiliation_list", pa.string()),  # Not available from CrossRef (None values)
         ("alternative_id", pa.list_(pa.string())),
         ("author_details", pa.string()),
         ("author_orcids", pa.string()),
@@ -673,6 +644,8 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("license_url", pa.string()),
         ("page_first", pa.string()),
         ("page_last", pa.string()),
+        ("pmc_id", pa.string()),  # Not available from CrossRef (None values)
+        ("pmid", pa.string()),  # Not available from CrossRef (None values)
         ("publication_class", pa.string()),
         ("publication_date", pa.string()),
         ("publication_subclass", pa.string()),
@@ -775,6 +748,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("page_last", pa.string()),
         ("page_range", pa.string()),
         ("paper_id", pa.string()),
+        ("pmc_id", pa.string()),  # Not available from Semantic Scholar (None values)
         ("pmid", pa.string()),
         ("publication_class", pa.string()),
         ("publication_date", pa.string()),
