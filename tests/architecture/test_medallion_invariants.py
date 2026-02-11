@@ -182,3 +182,57 @@ class TestSilverLayerInvariants:
                 pytest.fail(
                     f"SilverWriter seems to use raw '{method}()'. MUST use write_deltalake()."
                 )
+
+
+from unittest.mock import AsyncMock, Mock
+
+from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
+from bioetl.domain.medallion import MedallionPolicy
+from bioetl.domain.types import RunType
+
+
+class TestMedallionClearPolicy:
+    async def test_rebuild_clears_silver_and_gold(self) -> None:
+        storage = Mock()
+        storage.clear_silver = AsyncMock(return_value=1)
+        storage.clear_gold = AsyncMock(return_value=1)
+        service = MedallionLifecycleService(storage=storage, logger=Mock())
+
+        await service.clear(
+            policy=MedallionPolicy.for_run_type(RunType.REBUILD),
+            silver_table="chembl.activity",
+            gold_table="chembl.activity",
+        )
+
+        storage.clear_silver.assert_awaited_once()
+        storage.clear_gold.assert_awaited_once()
+
+    async def test_backfill_clears_silver_and_gold(self) -> None:
+        storage = Mock()
+        storage.clear_silver = AsyncMock(return_value=1)
+        storage.clear_gold = AsyncMock(return_value=1)
+        service = MedallionLifecycleService(storage=storage, logger=Mock())
+
+        await service.clear(
+            policy=MedallionPolicy.for_run_type(RunType.BACKFILL),
+            silver_table="chembl.activity",
+            gold_table="chembl.activity",
+        )
+
+        storage.clear_silver.assert_awaited_once()
+        storage.clear_gold.assert_awaited_once()
+
+    async def test_incremental_does_not_clear_silver_and_gold(self) -> None:
+        storage = Mock()
+        storage.clear_silver = AsyncMock(return_value=1)
+        storage.clear_gold = AsyncMock(return_value=1)
+        service = MedallionLifecycleService(storage=storage, logger=Mock())
+
+        await service.clear(
+            policy=MedallionPolicy.for_run_type(RunType.INCREMENTAL),
+            silver_table="chembl.activity",
+            gold_table="chembl.activity",
+        )
+
+        storage.clear_silver.assert_not_awaited()
+        storage.clear_gold.assert_not_awaited()
