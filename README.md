@@ -313,7 +313,7 @@ Please review our **[Security Policy](SECURITY.md)** for:
 
 ## Contributing
 
-Please read **[RULES.md](docs/RULES.md)** before contributing.
+Please read **[RULES.md](docs/00-project/RULES.md)** before contributing.
 
 1. Ensure all tests pass: `make test`
 2. Check types and linting: `make lint`
