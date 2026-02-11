@@ -37,7 +37,7 @@
 |---------|---------------|-------------|------------|
 | **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 14 entities, 3 req/sec. Mixins: `PaginatedFetcherMixin`, `FilterableStubMixin` |
 | **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec. Mixin: `PaginatedFetcherMixin` |
-| **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
+| **PubMedAdapter** | `@dataclass` + `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
 | **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec. Mixin: `NotSupportedMultiFilterMixin` |
 | **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool. Mixin: `PaginatedFetcherMixin` |
 | **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec. Mixin: `PaginatedFetcherMixin` |
@@ -89,7 +89,7 @@ PubMedAdapter                         (pubchempy)
 Вспомогательные модули:
 - **`BaseDeltaWriter`** (`base_delta_writer.py`): Базовый класс для Delta Lake writers (Silver, Gold).
 - **`DeltaReader`** (`delta_reader.py`): Чтение Delta Lake таблиц.
-- **`ArrowConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.
+- **`ArrowDataConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.
 - **`MetadataBuilder`** / **`MetadataWriter`**: Генерация и запись метаданных.
 - **`RetentionManager`** (`retention_manager.py`): Управление политиками хранения данных.
 

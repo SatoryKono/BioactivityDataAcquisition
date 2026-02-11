@@ -204,22 +204,6 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
         """Return Semantic Scholar paper ID for logging."""
         return ("found_paper_id", str(result.get("paperId", "unknown")))
 
-    def _process_found_result(
-        self, result: dict[str, Any], original_doi: str
-    ) -> dict[str, Any]:
-        """Add lookup method metadata to found publication.
-
-        Args:
-            result: The found publication record.
-            original_doi: The DOI that was originally searched.
-
-        Returns:
-            Publication with _lookup_method and _original_id added.
-        """
-        result["_lookup_method"] = "title_fallback"
-        result["_original_id"] = original_doi
-        return result
-
 
 # Backwards compatibility alias
 TitleFallbackHandler = SemanticScholarTitleFallbackHandler

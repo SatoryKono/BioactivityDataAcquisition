@@ -26,14 +26,14 @@ from pydantic import (
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+from bioetl.infrastructure.schemas.base_schemas import (
+    BaseGoldFiltersConfig,
+    BaseInputFilterConfig,
+)
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
-    from bioetl.domain.filtering.gold_config import GoldFilterConfig
-    from bioetl.domain.filtering.input_config import (
-        InputFilterConfig as DomainInputFilterConfig,
-    )
     from bioetl.domain.models.metadata import GovernanceMetadata
 
 
@@ -302,8 +302,10 @@ class FilterColumnSchema(BaseModel):
     filter_field: str = Field(description="API field name to filter by")
 
 
-class InputFilterConfig(BaseModel):
+class InputFilterConfig(BaseInputFilterConfig):
     """Configuration for input ID filtering from CSV.
+
+    Inherits to_domain() and validate_column_config from BaseInputFilterConfig.
 
     Supports both single-column and multi-column filtering modes:
     - Single-column: Use column_name and filter_field directly
@@ -312,89 +314,11 @@ class InputFilterConfig(BaseModel):
     Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
     """
 
-    enabled: bool = False
-    source_path: str | None = Field(
-        default=None,
-        description="Path to CSV file with filter IDs",
-    )
-    # Single-column mode (backward compatibility)
-    column_name: str | None = Field(
-        default=None,
-        description="Column name in CSV containing filter IDs (single-column mode)",
-    )
-    filter_field: str | None = Field(
-        default=None,
-        description="API field name to filter by (single-column mode)",
-    )
-    # Multi-column mode
+    # Override columns type to use pipeline-specific FilterColumnSchema
     columns: list[FilterColumnSchema] | None = Field(
         default=None,
         description="List of column configurations for multi-column filtering",
     )
-    batch_size: int = Field(
-        default=100,
-        ge=1,
-        le=1000,
-        description="Number of IDs per API request",
-    )
-    # Fallback support (e.g., DOI → title search)
-    fallback_column: str | None = Field(
-        default=None,
-        description="Column name for fallback search when primary lookup fails",
-    )
-
-    @model_validator(mode="after")
-    def validate_column_config(self) -> InputFilterConfig:
-        """Validate that either columns or column_name/filter_field is provided."""
-        if not self.enabled:
-            return self
-        if self.columns:
-            # Multi-column mode - columns provided
-            return self
-        if self.column_name and self.filter_field:
-            # Single-column mode - backward compatibility
-            return self
-        # Neither mode configured - raise error
-        raise ValueError(
-            "Either 'columns' list or both 'column_name' and 'filter_field' "
-            "must be provided when filter is enabled"
-        )
-
-    def to_domain(self) -> DomainInputFilterConfig:
-        """Convert to domain InputFilterConfig dataclass.
-
-        Returns:
-            DomainInputFilterConfig: Immutable domain configuration.
-        """
-        from bioetl.domain.filtering.input_config import (
-            FilterColumn as DomainFilterColumn,
-        )
-        from bioetl.domain.filtering.input_config import (
-            InputFilterConfig as DomainInputFilterConfigImpl,
-        )
-
-        # Convert columns list to domain FilterColumn tuple
-        domain_columns: tuple[DomainFilterColumn, ...] = ()
-        if self.columns:
-            domain_columns = tuple(
-                DomainFilterColumn(
-                    column_name=col.column_name,
-                    filter_field=col.filter_field,
-                )
-                for col in self.columns
-            )
-
-        return DomainInputFilterConfigImpl(
-            enabled=self.enabled,
-            source_path=self.source_path,
-            column_name=self.column_name if self.enabled and not self.columns else None,
-            filter_field=(
-                self.filter_field if self.enabled and not self.columns else None
-            ),
-            columns=domain_columns,
-            batch_size=self.batch_size,
-            fallback_column=self.fallback_column,
-        )
 
 
 class MaintenanceConfig(BaseModel):
@@ -761,10 +685,10 @@ class GoldColumnFilterConfig(BaseModel):
         return self
 
 
-class GoldFiltersConfig(BaseModel):
+class GoldFiltersConfig(BaseGoldFiltersConfig):
     """Schema for gold_filters in YAML.
 
-    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+    Inherits to_domain() from BaseGoldFiltersConfig.
 
     Supports two formats for columns:
     - Legacy format: {"column_name": ["value1", "value2"]} (IN operator)
@@ -785,74 +709,11 @@ class GoldFiltersConfig(BaseModel):
               operator: is_not_null
     """
 
+    # Override column types to use pipeline-specific config classes
     columns: dict[str, list[str] | GoldColumnFilterConfig] = Field(default_factory=dict)
     ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
     list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
     list_contains: dict[str, GoldListContainsFilterConfig] = Field(default_factory=dict)
-    required_fields: list[str] = Field(default_factory=list)
-    exclude_if_present: list[str] = Field(default_factory=list)
-
-    def to_domain(self) -> GoldFilterConfig:
-        """Convert to domain GoldFilterConfig dataclass.
-
-        Returns:
-            GoldFilterConfig: Immutable domain configuration.
-        """
-        from bioetl.domain.filtering import (
-            FilterOperator,
-            GoldColumnFilter,
-            GoldFilterConfig,
-            GoldListContainsFilter,
-            GoldListLengthFilter,
-            GoldRangeFilter,
-        )
-
-        column_filters: list[GoldColumnFilter] = []
-        for col, cfg in self.columns.items():
-            if isinstance(cfg, list):
-                # Legacy format: list of values -> IN operator
-                column_filters.append(
-                    GoldColumnFilter(
-                        column=col,
-                        operator=FilterOperator.IN,
-                        values=frozenset(cfg),
-                    )
-                )
-            else:
-                # New format: GoldColumnFilterConfig
-                column_filters.append(
-                    GoldColumnFilter(
-                        column=col,
-                        operator=FilterOperator(cfg.operator),
-                        values=frozenset(cfg.values) if cfg.values else None,
-                    )
-                )
-
-        return GoldFilterConfig(
-            column_filters=tuple(column_filters),
-            range_filters=tuple(
-                GoldRangeFilter(
-                    column=col,
-                    min_value=r.min,
-                    max_value=r.max,
-                    include_min=r.include_min,
-                    include_max=r.include_max,
-                )
-                for col, r in self.ranges.items()
-            ),
-            list_length_filters=tuple(
-                GoldListLengthFilter(column=col, min_length=r.min, max_length=r.max)
-                for col, r in self.list_lengths.items()
-            ),
-            list_contains_filters=tuple(
-                GoldListContainsFilter(
-                    column=col, values=frozenset(r.values), mode=r.mode
-                )
-                for col, r in self.list_contains.items()
-            ),
-            required_fields=tuple(self.required_fields),
-            exclude_if_present=tuple(self.exclude_if_present),
-        )
 
 
 # Regex for semver validation (allows optional 'v' prefix)
