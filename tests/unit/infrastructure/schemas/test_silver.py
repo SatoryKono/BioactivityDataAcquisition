@@ -947,6 +947,57 @@ class TestPublicationSchemaUnifiedDateAndPageFields:
             )
 
 
+class TestPublicationSchemaClassificationFields:
+    """Test that all publication schemas have classification fields.
+
+    Classification fields provide a unified 3-level hierarchy:
+    - publication_class: Level 1 (EXP, REV, PEER)
+    - publication_subclass: Level 2 (~25 groupings)
+    - publication_type_unified: Level 3 (214 specific types)
+
+    These fields are populated by BasePublicationTransformer._classify_publication_type()
+    using the unified classification mapping from publication_type_classification.py.
+    """
+
+    CLASSIFICATION_FIELDS = frozenset(
+        {"publication_type_unified", "publication_subclass", "publication_class"}
+    )
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_schema_has_classification_fields(self, schema, name):
+        """All publication schemas must have 3-level classification fields."""
+        field_names = {f.name for f in schema}
+        missing = self.CLASSIFICATION_FIELDS - field_names
+        assert not missing, f"{name} missing classification fields: {missing}"
+
+    @pytest.mark.parametrize(
+        "schema,name",
+        [
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication"),
+            (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication"),
+            (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication"),
+            (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication"),
+            (SEMANTICSCHOLAR_PUBLICATION_SCHEMA, "SemanticScholar Publication"),
+        ],
+    )
+    def test_classification_fields_are_string(self, schema, name):
+        """Classification fields must be string type."""
+        for field_name in self.CLASSIFICATION_FIELDS:
+            field = schema.field(field_name)
+            assert field.type == pa.string(), (
+                f"{name}.{field_name} should be string, got {field.type}"
+            )
+
+
 class TestAllPublicationSchemas:
     """Test completeness of all publication schemas."""
 
