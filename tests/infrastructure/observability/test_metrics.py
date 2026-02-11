@@ -6,7 +6,7 @@ import warnings
 
 import pytest
 
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import (
     COUNTERS,
     HISTOGRAMS,

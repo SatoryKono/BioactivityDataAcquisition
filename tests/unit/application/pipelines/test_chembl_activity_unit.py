@@ -14,7 +14,7 @@ from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.config import get_pipeline_config
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.domain.ports import NoOpMetrics
 
 
 @pytest.fixture

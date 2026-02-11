@@ -490,7 +490,7 @@ class TestBootstrapMetrics:
         disabled, NoOpMetrics is used as a silent fallback.
         """
         from bioetl.composition.bootstrap import bootstrap_metrics
-        from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+        from bioetl.domain.ports import NoOpMetrics
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False

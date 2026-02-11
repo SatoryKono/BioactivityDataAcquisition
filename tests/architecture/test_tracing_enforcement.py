@@ -106,13 +106,13 @@ class TestTracingPortContract:
 
     def test_noop_tracing_exists(self):
         """NoOpTracing implementation should exist for testing."""
-        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+        from bioetl.domain.ports import NoOpTracing
 
         assert NoOpTracing is not None
 
     def test_noop_tracing_is_valid_implementation(self):
         """NoOpTracing should implement TracingPort."""
-        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+        from bioetl.domain.ports import NoOpTracing
 
         noop = NoOpTracing()
         # Should be usable as TracingPort
@@ -321,7 +321,7 @@ class TestTracingConfiguration:
 
     def test_tracing_can_be_disabled(self):
         """Tracing should be optional (NoOp for tests)."""
-        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+        from bioetl.domain.ports import NoOpTracing
 
         # NoOpTracing allows running without real tracing
         noop = NoOpTracing()
