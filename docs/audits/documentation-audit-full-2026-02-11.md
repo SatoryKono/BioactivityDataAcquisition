@@ -25,6 +25,7 @@
 9. [ADR документы](#9-adr-документы)
 10. [Гайды и справочники](#10-гайды-и-справочники)
 11. [Сводка несоответствий](#11-сводка-несоответствий)
+12. [Промты для исправления документации](#12-промты-для-исправления-документации)
 
 ---
 
@@ -303,6 +304,347 @@
 | Средние проблемы | 7 |
 | Проверенных документов | 15+ |
 | Проверенных ADR | 6 |
+
+---
+
+## 12. Промты для исправления документации
+
+Ниже приведены готовые промты, сгруппированные по приоритету. Каждый промт — самодостаточная инструкция для модификации конкретного документа.
+
+---
+
+### 12.1. CRITICAL — Исправление битых ссылок в README.md
+
+**Файл:** `README.md`
+**Проблемы:** #1 (битые пути), #6 (orchestration), #7 (провайдеры), #5 (ADR count), #3 (coverage badge)
+
+```
+Внеси следующие правки в README.md:
+
+1. ПУТИ К ДОКУМЕНТАМ. Замени все вхождения:
+   - `docs/RULES.md` → `docs/00-project/RULES.md`
+   - `docs/glossary.md` → `docs/00-project/glossary.md`
+   - `docs/00-map.md` → `docs/00-project/00-map.md`
+   Эти пути встречаются примерно в строках 80-83 и 252-314.
+
+2. PROJECT STRUCTURE SECTION. В секции Project Structure (≈строка 250):
+   - Замени «ADRs (32 decisions)» → «ADRs (33 decisions)»
+   - Замени описание orchestration/:
+     OLD: «orchestration/ — Signal handlers for graceful shutdown»
+     NEW: «orchestration/ — Reserved (empty; signal handlers removed 2025-12-31, shutdown logic in application/core/shutdown.py)»
+   - В описании pipelines/ добавь недостающих провайдеров:
+     OLD: «pipelines/ — ChEMBL, PubChem, UniProt, PubMed»
+     NEW: «pipelines/ — ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, Semantic Scholar (+ common utilities)»
+
+3. COVERAGE BADGE. Замени badge coverage:
+   OLD: `>80%`
+   NEW: `≥85%`
+
+Не меняй ничего кроме указанных фрагментов.
+```
+
+---
+
+### 12.2. CRITICAL — Исправление DataSourcePort.fetch в RULES.md
+
+**Файл:** `docs/00-project/RULES.md`
+**Проблема:** #3 (упрощённая сигнатура)
+
+```
+В файле docs/00-project/RULES.md найди упрощённый пример сигнатуры DataSourcePort.fetch.
+Текущий (неверный) пример:
+
+    def fetch(self, query: Query) -> Iterator[RawRecord]
+
+Замени его на реальную сигнатуру из src/bioetl/domain/ports/data_source.py:43-67:
+
+    def fetch(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+    ) -> AsyncIterator[dict[str, Any]]
+
+Если в RULES.md есть несколько упоминаний упрощённой сигнатуры, обнови все.
+Добавь комментарий: «Async generator, yields dict records per API page.»
+```
+
+---
+
+### 12.3. CRITICAL — Schema Drift уровни в RULES.md
+
+**Файл:** `docs/00-project/RULES.md`
+**Проблема:** #4 (WARN >3 полей не реализован)
+
+```
+В файле docs/00-project/RULES.md найди секцию о Schema Drift Detection.
+Текущий текст утверждает три уровня:
+- Info: новые опциональные поля
+- Warn: >3 новых полей
+- Critical: пропавшее обязательное поле
+
+Фактическая реализация (src/bioetl/application/services/dq/silver_analyzer.py:227-257)
+использует только два уровня: INFO (любые новые поля) и CRITICAL (пропавшие поля / смена типов).
+Порог >3 для WARN не реализован.
+
+Обнови документ одним из двух способов (выбери подходящий):
+
+ВАРИАНТ A — Привести документ в соответствие с кодом:
+  Замени таблицу на:
+  | Уровень  | Условие                                  |
+  |----------|------------------------------------------|
+  | Info     | Новые поля (любое количество)            |
+  | Critical | Пропавшее обязательное поле / смена типа |
+
+ВАРИАНТ B — Пометить как TODO для реализации:
+  Добавь после таблицы:
+  > **TODO**: Уровень Warn (>3 новых полей) описан в спецификации,
+  > но не реализован в коде. См. silver_analyzer.py:227.
+```
+
+---
+
+### 12.4. HIGH — Обновление чисел в 01-domain-layer.md
+
+**Файл:** `docs/02-architecture/01-domain-layer.md`
+**Проблемы:** #3, #17-20, #22, #26-27
+
+```
+Внеси следующие числовые правки в docs/02-architecture/01-domain-layer.md:
+
+1. ПОРТЫ (строка 23-25):
+   OLD: «Пакет содержит 26 protocol-файлов (актуально на 2026-02-11)»
+   NEW: «Пакет содержит 24 protocol-файла (актуально на 2026-02-11)»
+
+2. AGGREGATES LOC (строки 84-87):
+   OLD: «batch.py             # Batch Aggregate (530 LOC)»
+   NEW: «batch.py             # Batch Aggregate (536 LOC)»
+
+   OLD: «pipeline_run.py      # PipelineRun Aggregate (566 LOC)»
+   NEW: «pipeline_run.py      # PipelineRun Aggregate (574 LOC)»
+
+   OLD: «events.py            # Domain Events (260 LOC)»
+   NEW: «events.py            # Domain Events (197 LOC)»
+
+3. VALUE OBJECTS (строка 119):
+   OLD: «Неизменяемые доменные примитивы с типобезопасностью (19 файлов).»
+   NEW: «Неизменяемые доменные примитивы с типобезопасностью (18 файлов).»
+
+4. EXCEPTIONS (строка 180):
+   OLD: «7 файлов с иерархией ошибок (актуально на 2026-02-11)»
+   NEW: «6 файлов с иерархией ошибок (актуально на 2026-02-11)»
+
+5. SCHEMAS (строка 185):
+   OLD: «37 файлов для всех провайдеров (актуально на 2026-02-11)»
+   NEW: «25 файлов для всех провайдеров (актуально на 2026-02-11)»
+
+Не меняй ничего кроме указанных чисел и дат.
+```
+
+---
+
+### 12.5. HIGH — Обновление таблицы трансформеров в 02-application-layer.md
+
+**Файл:** `docs/02-architecture/02-application-layer.md`
+**Проблемы:** #2, #6, #13
+
+```
+Внеси следующие правки в docs/02-architecture/02-application-layer.md:
+
+1. CORE FILE COUNT (строка 40):
+   OLD: «Содержит базовые классы и общие компоненты, используемые пайплайнами (27 файлов):»
+   NEW: «Содержит базовые классы и общие компоненты, используемые пайплайнами (28 файлов):»
+
+2. BATCH EXECUTOR LOC (строка 48):
+   OLD: «`BatchExecutor` (`batch_executor.py`, 783 LOC)»
+   NEW: «`BatchExecutor` (`batch_executor.py`, 786 LOC)»
+
+3. ТАБЛИЦА ТРАНСФОРМЕРОВ (строки 96-109). Дополни таблицу недостающими
+   трансформерами — добавь после существующих строк:
+
+   | ChEMBL | `AssayParametersTransformer` | `pipelines/chembl/assay_parameters_transformer.py` |
+   | ChEMBL | `CellLineTransformer` | `pipelines/chembl/cell_line_transformer.py` |
+   | ChEMBL | `CompoundRecordTransformer` | `pipelines/chembl/compound_record_transformer.py` |
+   | ChEMBL | `ProteinClassTransformer` | `pipelines/chembl/protein_class_transformer.py` |
+   | ChEMBL | `PublicationSimilarityTransformer` | `pipelines/chembl/publication_similarity_transformer.py` |
+   | ChEMBL | `PublicationTermTransformer` | `pipelines/chembl/publication_term_transformer.py` |
+   | ChEMBL | `SubcellularFractionTransformer` | `pipelines/chembl/subcellular_fraction_transformer.py` |
+   | ChEMBL | `TargetComponentTransformer` | `pipelines/chembl/target_component_transformer.py` |
+   | ChEMBL | `TissueTransformer` | `pipelines/chembl/tissue_transformer.py` |
+   | ChEMBL | `BaseChemblTransformer` | `pipelines/chembl/base_chembl_transformer.py` |
+   | UniProt | `IDMappingTransformer` | `pipelines/uniprot/idmapping_transformer.py` |
+   | Common | `BasePublicationTransformer` | `pipelines/common/base_publication_transformer.py` |
+
+   Перед таблицей обнови заголовок:
+   OLD: «**Доступные трансформеры:**»
+   NEW: «**Доступные трансформеры (23 класса):**»
+```
+
+---
+
+### 12.6. HIGH — Обновление провайдеров и pipeline count в 05-composition-layer.md
+
+**Файл:** `docs/02-architecture/05-composition-layer.md`
+**Проблемы:** #12, #13, #15
+
+```
+Внеси следующие правки в docs/02-architecture/05-composition-layer.md:
+
+1. PROVIDER COUNT (строка 66):
+   OLD: «Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):»
+   Оставить как есть — число 8 верно (7 + uniprot_idmapping).
+
+   НО в строке 82:
+   OLD: «**Зарегистрированные провайдеры (7 шт):**»
+   NEW: «**Зарегистрированные провайдеры (8 шт, включая uniprot_idmapping):**»
+
+   Добавь строку в таблицу провайдеров после semanticscholar:
+   | uniprot_idmapping | IDMappingDataSource | id_mapping | — |
+
+2. CHEMBL PIPELINE COUNT. В таблице провайдеров:
+   OLD: «activity, assay, molecule, target, document, target_component (13)»
+   NEW: «activity, assay, assay_parameters, cell_line, compound_record, molecule, target, target_component, protein_class, publication, publication_similarity, publication_term, tissue, subcellular_fraction (14)»
+
+3. ROOT-LEVEL FILES. После упоминания _pipeline_execution.py, _resource_management.py, _services.py
+   добавь примечание:
+   «Также в корне composition/ находятся: bootstrap_contexts.py, bootstrap_logger.py,
+   builders.py, entrypoints.py, observability.py, registry.py, types.py.»
+```
+
+---
+
+### 12.7. MEDIUM — Исправление имени класса в 03-infrastructure-layer.md
+
+**Файл:** `docs/02-architecture/03-infrastructure-layer.md`
+**Проблемы:** #11 (ArrowConverter), #3 (PubMed)
+
+```
+Внеси следующие правки в docs/02-architecture/03-infrastructure-layer.md:
+
+1. ARROW CONVERTER (строка 92):
+   OLD: «**`ArrowConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.»
+   NEW: «**`ArrowDataConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.»
+
+2. PUBMED ADAPTER (строка 40, таблица адаптеров):
+   OLD: «**PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec»
+   NEW: «**PubMedAdapter** | `@dataclass` + `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec»
+```
+
+---
+
+### 12.8. MEDIUM — Исправление glossary.md
+
+**Файл:** `docs/00-project/glossary.md`
+**Проблема:** #22 (deprecated aliases)
+
+```
+В файле docs/00-project/glossary.md найди секцию v2.0 Migration Notes
+(примерно строки 20-23), где утверждается:
+
+  - `Compound` → `PubchemMolecule` (deprecated alias retained)
+  - `Document` → `ChemblPublication` (deprecated alias retained)
+  - `Protein` → `UniprotTarget` (deprecated alias retained)
+
+В коде deprecated aliases НЕ существуют — классы Compound, Document, Protein
+не найдены нигде в кодовой базе. Миграция завершена полностью.
+
+Замени на:
+
+  - ~~`Compound`~~ → `PubchemMolecule` (migration complete, old name removed)
+  - ~~`Document`~~ → `ChemblPublication` (migration complete, old name removed)
+  - ~~`Protein`~~ → `UniprotTarget` (migration complete, old name removed)
+
+  > **Note:** Deprecated aliases были удалены. Используйте только новые имена.
+```
+
+---
+
+### 12.9. MEDIUM — Обновление DQ file count в pipeline-configuration.md
+
+**Файл:** `docs/03-guides/pipeline-configuration.md`
+**Проблема:** #21
+
+```
+В файле docs/03-guides/pipeline-configuration.md найди упоминание
+количества DQ-конфигурационных файлов.
+
+OLD: «30 DQ файлов» (или аналогичная формулировка с числом 30)
+NEW: «31 DQ файл» (или аналогичная формулировка с числом 31)
+
+Фактический подсчёт: configs/dq/ содержит 31 файл
+(1 defaults + 7 providers + 22 entities + 1 _schema.json).
+```
+
+---
+
+### 12.10. Мета-промт: массовое обновление LOC-подсчётов
+
+**Файлы:** Все документы с упоминанием LOC
+
+```
+Выполни обновление всех LOC-подсчётов в документации проекта.
+
+Для каждого файла, упомянутого с пометкой LOC в docs/02-architecture/,
+выполни `wc -l` и обнови число в документе.
+
+Минимальный набор файлов для проверки:
+- domain/aggregates/batch.py (сейчас в доке: 530, факт: 536)
+- domain/aggregates/pipeline_run.py (сейчас: 566, факт: 574)
+- domain/aggregates/events.py (сейчас: 260, факт: 197)
+- application/core/batch_executor.py (сейчас: 783, факт: 786)
+- domain/value_objects/activity.py (проверить 329)
+
+Формат замены: найди «(NNN LOC)» и замени на актуальное значение.
+Не меняй ничего кроме числа в скобках.
+```
+
+---
+
+### 12.11. Мета-промт: массовое обновление file counts
+
+**Файлы:** Все документы с количествами файлов
+
+```
+Выполни обновление всех подсчётов файлов в документации.
+
+Для каждого упоминания «N файлов» выполни:
+  find <dir> -name "*.py" -not -name "__init__.py" | wc -l
+
+Минимальный набор:
+| Документ | Директория | В доке | Факт |
+|----------|-----------|--------|------|
+| 01-domain-layer.md | domain/ports/ | 26 | 24 |
+| 01-domain-layer.md | domain/value_objects/ | 19 | 18 |
+| 01-domain-layer.md | domain/exceptions/ | 7 | 6 |
+| 01-domain-layer.md | domain/schemas/ | 37 | 25 |
+| 02-application-layer.md | application/core/ | 27 | 28 |
+| 05-composition-layer.md | composition/factories/ | 12 | 12 ✓ |
+
+Формат замены: найди строку с числом и директорией, обнови число.
+Если число верно (✓), не трогай.
+```
+
+---
+
+### 12.12. Верификационный промт (запуск после всех правок)
+
+```
+Выполни верификацию всех исправлений документации, сделанных по аудиту
+docs/audits/documentation-audit-full-2026-02-11.md.
+
+Для каждого из 23 несоответствий из секции «Сводка несоответствий»:
+1. Прочитай документ и найди исправленное место.
+2. Выполни команду проверки (grep, wc -l, find) для подтверждения.
+3. Если несоответствие всё ещё присутствует — пометь как UNFIXED.
+4. Если исправлено — пометь как FIXED.
+
+Результат представь в виде таблицы:
+| # | Документ | Проблема | Статус (FIXED/UNFIXED) |
+
+В конце выведи: «FIXED: N/23, UNFIXED: M/23».
+```
 
 ---
 
