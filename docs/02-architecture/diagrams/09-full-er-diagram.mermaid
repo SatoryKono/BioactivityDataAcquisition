@@ -9,8 +9,8 @@ erDiagram
     Target ||--o{ TargetComponent : "has components"
     LineageLog ||--o{ Activity : "batch contains"
     Quarantine ||--o| LineageLog : "bronze_batch_id FK"
-    ChemblPublication ..o| PubMedPublication : "pmid match"
-    ChemblPublication ..o| CrossRefPublication : "doi match"
+    ChemblPublication |o..o| PubMedPublication : "pmid match"
+    ChemblPublication |o..o| CrossRefPublication : "doi match"
 
     Activity {
         string activity_id PK "ChEMBL activity ID"
