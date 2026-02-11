@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import warnings
 
-from bioetl.domain.ports.noop import NoOpMetrics as _DomainNoOpMetrics
+from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import NoOpMetrics as _DomainNoOpMetrics
 
 
-class NoOpMetrics(_DomainNoOpMetrics):
+class NoOpMetrics(_DomainNoOpMetrics, MetricsPort):
     """No-operation metrics with optional startup warning.
 
     Inherits all no-op metric methods from domain.ports.noop.NoOpMetrics.

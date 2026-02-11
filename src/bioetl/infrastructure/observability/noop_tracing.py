@@ -8,6 +8,6 @@ See also: bioetl.domain.ports.noop.NoOpTracing
 
 from __future__ import annotations
 
-from bioetl.domain.ports.noop import NoOpTracing
+from bioetl.domain.ports import NoOpTracing
 
 __all__ = ["NoOpTracing"]

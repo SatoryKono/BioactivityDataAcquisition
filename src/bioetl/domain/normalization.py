@@ -54,18 +54,9 @@ def _extract_date_parts(date_parts: list[list[int]] | None) -> list[int] | None:
 
 
 def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
-    """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD string.
+    """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD.
 
-    Uses end-of-period normalization for partial dates:
-    - Complete date [[2024, 3, 15]]: returns "2024-03-15"
-    - Month-only [[2024, 3]]: returns "2024-03-31" (last day of month)
-    - Year-only [[2024]]: returns "2024-12-31" (last day of year)
-
-    Args:
-        date_parts: CrossRef date-parts array [[year, month?, day?]].
-
-    Returns:
-        ISO date string (YYYY-MM-DD) or None if input is invalid.
+    Uses end-of-period normalization: month-only -> last day, year-only -> Dec 31.
     """
     parts = _extract_date_parts(date_parts)
     if not parts:
@@ -102,21 +93,7 @@ _WHITESPACE_PATTERN = re.compile(r"\s+")
 
 
 def strip_html_tags(text: str | None) -> str | None:
-    """Remove HTML tags and decode entities from text.
-
-    Performs the following normalization steps:
-    1. Remove HTML tags (including JATS tags like <jats:p>)
-    2. Decode HTML entities (&amp; → &, &lt; → <, etc.)
-    3. Normalize whitespace (collapse multiple spaces to single space)
-    4. Strip leading/trailing whitespace
-
-    Args:
-        text: Input text possibly containing HTML.
-
-    Returns:
-        Clean text without HTML tags, or None if input is None/empty.
-
-    """
+    """Remove HTML/JATS tags, decode entities, normalize whitespace."""
     if not text:
         return None
 
@@ -137,23 +114,12 @@ def _to_none_if_empty(s: str) -> str | None:
     return s.strip() or None
 
 
-# Pattern for electronic/article page identifiers that should NOT be split on hyphen.
-# Examples: e-123, E-456, e123 (electronic articles)
+# Electronic page identifiers (e-123, E-456, e123) -- not page ranges.
 _ELECTRONIC_PAGE_PATTERN = re.compile(r"^[eE]-?\d+$")
 
 
 def _is_electronic_page(page: str) -> bool:
-    """Check if page is electronic article number that shouldn't be split.
-
-    Electronic page identifiers like 'e-123' or 'e123' represent article
-    numbers, not page ranges. The hyphen in 'e-123' is part of the identifier.
-
-    Args:
-        page: Stripped page string.
-
-    Returns:
-        True if page matches electronic article pattern.
-    """
+    """Check if page is electronic article number (e.g., 'e-123', 'e123')."""
     return bool(_ELECTRONIC_PAGE_PATTERN.match(page))
 
 
@@ -168,25 +134,7 @@ def _extract_non_digits(s: str) -> str:
 
 
 def _expand_abbreviated_page(first_page: str, last_page_raw: str) -> str:
-    """Expand abbreviated last page number.
-
-    Academic publishing often abbreviates page ranges:
-    - "737-9" means 737-739 (not 737-9)
-    - "737-39" means 737-739
-    - "199-3" means 199-203 (rollover case)
-
-    Algorithm:
-    1. If last_page_raw has >= digits than first_page, return as-is.
-    2. Otherwise: expanded = (first_num // 10^n) * 10^n + last_num.
-    3. Handle rollover: if expanded < first_num, add 10^n.
-
-    Args:
-        first_page: First page (e.g., "737").
-        last_page_raw: Potentially abbreviated last page (e.g., "9", "39", "839").
-
-    Returns:
-        Expanded last page string.
-    """
+    """Expand abbreviated last page (e.g., 737-9 -> 739, 199-3 -> 203)."""
     first_digits = _extract_digits(first_page)
     last_digits = _extract_digits(last_page_raw)
 
@@ -214,86 +162,51 @@ def _expand_abbreviated_page(first_page: str, last_page_raw: str) -> str:
     return f"{prefix}{expanded}" if prefix else str(expanded)
 
 
+def _normalize_and_split_pages(page: str) -> tuple[str, str | None]:
+    """Normalize dashes and split page string on first hyphen.
+
+    Returns (first_page, raw_last_page_or_None). Caller must handle
+    empty first_page.
+    """
+    normalized = page.replace("\u2013", "-").replace("\u2014", "-")
+    parts = normalized.split("-", 1)
+    first = parts[0].strip()
+    last = parts[1].strip() if len(parts) > 1 else None
+    return first, last or None
+
+
+def _prepare_page_input(page: str | None) -> str | None:
+    """Strip and return page string, or None if empty."""
+    if not page:
+        return None
+    stripped = page.strip()
+    return stripped if stripped else None
+
+
 def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
     """Parse page range string to (first, last) tuple.
 
-    Handles various page formats including abbreviated ranges common
-    in academic publishing:
-    - Standard ranges: "123-456" -> ("123", "456")
-    - Abbreviated ranges: "737-9" -> ("737", "739")
-    - Rollover abbreviations: "199-3" -> ("199", "203")
-    - Single pages: "42" -> ("42", None)
-    - Electronic pages: "e12345", "e-123" -> (original, None)
-    - Article numbers: "100234" -> ("100234", None)
-    - Supplements: "S1-S15" -> ("S1", "S15")
-    - En-dash/em-dash: normalized to hyphen before parsing
-
-    Args:
-        page: Page string from publication metadata.
-
-    Returns:
-        Tuple of (first_page, last_page). last_page is None for single pages
-        or electronic article identifiers.
+    Handles standard ranges, abbreviated ranges (737-9 -> 739), electronic
+    pages (e-123), supplements (S1-S15), and en/em-dash normalization.
     """
-    if not page:
+    stripped = _prepare_page_input(page)
+    if stripped is None:
         return None, None
-
-    stripped = page.strip()
-    if not stripped:
-        return None, None
-
-    # Electronic article numbers: don't split on hyphen (e.g., e-123)
     if _is_electronic_page(stripped):
         return stripped, None
 
-    # Normalize various dash types to hyphen
-    # EN DASH (U+2013) and EM DASH (U+2014) -> HYPHEN-MINUS (U+002D)
-    stripped = stripped.replace("\u2013", "-").replace("\u2014", "-")
-
-    # Split on first hyphen only
-    parts = stripped.split("-", 1)
-
-    first_page = parts[0].strip()
+    first_page, last_page_raw = _normalize_and_split_pages(stripped)
     if not first_page:
         return None, None
 
-    # No range separator - single page
-    if len(parts) == 1:
-        return first_page, None
-
-    last_page_raw = parts[1].strip()
-    if not last_page_raw:
-        return first_page, None
-
-    # Expand abbreviated page number (e.g., 737-9 -> 737-739)
-    last_page = _expand_abbreviated_page(first_page, last_page_raw)
-
+    last_page = (
+        _expand_abbreviated_page(first_page, last_page_raw) if last_page_raw else None
+    )
     return first_page, last_page
 
 
 def normalize_pmc_id(pmc_id: str | None) -> str | None:
-    """Normalize PMC ID to uppercase with 'PMC' prefix.
-
-    Ensures PMC IDs are consistently formatted across providers
-    for cross-referencing publications.
-
-    Args:
-        pmc_id: Raw PMC ID (may or may not have 'PMC' prefix).
-
-    Returns:
-        Normalized PMC ID with 'PMC' prefix in uppercase,
-        or None if input is empty.
-
-    Examples:
-        >>> normalize_pmc_id("PMC1234567")
-        'PMC1234567'
-        >>> normalize_pmc_id("1234567")
-        'PMC1234567'
-        >>> normalize_pmc_id("pmc1234567")
-        'PMC1234567'
-        >>> normalize_pmc_id(None)
-
-    """
+    """Normalize PMC ID to uppercase with 'PMC' prefix."""
     if not pmc_id:
         return None
     pmc_id = pmc_id.strip()
@@ -366,33 +279,7 @@ def _parse_authors_string(text: str) -> list[str]:
 
 
 def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
-    """Parse various author input formats into a list of author names.
-
-    Supports:
-    - list[str]: Direct list of authors (returned as-is with stripping)
-    - str (JSON): JSON-serialized list (e.g., '["John Doe", "Jane Smith"]')
-    - str (concatenated): Semicolon or comma-separated string
-      (e.g., "John Doe; Jane Smith" or "John Doe, Jane Smith")
-
-    Args:
-        authors: Raw author data in various formats.
-
-    Returns:
-        List of individual author names (empty list if None or empty).
-        Each name is stripped of whitespace.
-
-    Example:
-        >>> parse_authors_to_list(["John Doe", "Jane Smith"])
-        ['John Doe', 'Jane Smith']
-        >>> parse_authors_to_list('["John Doe", "Jane Smith"]')
-        ['John Doe', 'Jane Smith']
-        >>> parse_authors_to_list("John Doe; Jane Smith")
-        ['John Doe', 'Jane Smith']
-        >>> parse_authors_to_list("John Doe, Jane Smith")
-        ['John Doe', 'Jane Smith']
-        >>> parse_authors_to_list(None)
-        []
-    """
+    """Parse author input (list, JSON string, or delimited string) to list."""
     if authors is None:
         return []
     if isinstance(authors, list):
