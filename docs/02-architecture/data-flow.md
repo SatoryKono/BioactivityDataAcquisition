@@ -69,7 +69,7 @@ flowchart LR
 > Для распределённого развёртывания (future) — S3/MinIO.
 
 ```
-data/                              # Local-Only (current)
+data/output/                       # Local-Only (current)
 ├── bronze/
 │   └── {provider}/{entity}/{date}/
 │       ├── batch_001.jsonl.zst
@@ -81,7 +81,7 @@ data/                              # Local-Only (current)
 │           └── _delta_log/
 │
 ├── gold/
-│   └── {provider}/{entity}_aggregated/
+│   └── {provider}/{entity}/
 │       └── _delta_log/
 │
 ├── quarantine/

@@ -38,7 +38,7 @@ The `semanticscholar_publication` pipeline ingests scholarly publication records
 | **Entity Type** | `publication` |
 | **Primary Key** | `paper_id` (40-char hex S2 ID) |
 | **Loading Strategy** | `full_scan_only` (ADR-030, ADR-031) |
-| **Batch Size** | 100 records |
+| **Batch Size** | 50 records |
 
 ### Primary Key Format
 
@@ -798,6 +798,6 @@ The following fields are created by the transformer but not defined in Silver sc
 
 - [Semantic Scholar API Documentation](https://api.semanticscholar.org/api-docs/graph)
 - [S2 Paper Object Schema](https://api.semanticscholar.org/api-docs/graph#tag/Paper-Data/operation/get_graph_get_paper)
-- [ADR-030: API Offset Stability](../02-architecture/decisions/ADR-030-api-offset-stability.md)
-- [ADR-031: Full Scan Loading Strategy](../02-architecture/decisions/ADR-031-full-scan-loading.md)
+- [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+- [ADR-031: Loading Strategy Formalization](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
 - [RULES.md: Medallion Architecture](../RULES.md#2-medallion-architecture)
