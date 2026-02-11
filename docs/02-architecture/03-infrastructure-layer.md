@@ -35,12 +35,12 @@
 
 | Адаптер | Базовый класс | HTTP-клиент | Примечание |
 |---------|---------------|-------------|------------|
-| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 13 entities |
-| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec |
+| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 13 entities. Mixins: `PaginatedFetcherMixin`, `FilterableStubMixin` |
+| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec. Mixin: `PaginatedFetcherMixin` |
 | **PubMedAdapter** | `@dataclass` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
-| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec |
-| **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool |
-| **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec |
+| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec. Mixin: `NotSupportedMultiFilterMixin` |
+| **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool. Mixin: `PaginatedFetcherMixin` |
+| **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec. Mixin: `PaginatedFetcherMixin` |
 | **SemanticScholarAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/5min |
 
 **Архитектура HTTP-адаптеров:**
@@ -80,9 +80,18 @@ PubMedAdapter                         (pubchempy)
 
 Реализует `StoragePort` для работы с различными уровнями данных (Bronze, Silver, Gold).
 
-- **`BronzeStorageAdapter`**: Отвечает за запись сырых данных (JSONL) в файловое хранилище (например, локальный диск; объектное хранилище — только в future-режиме).
-- **`SilverStorageAdapter`**: Управляет записью в Delta Lake таблицы, реализуя логику `merge` (upsert) для обеспечения идемпотентности.
-- **`GoldStorageAdapter`**: Записывает агрегированные витрины данных.
+Реализация разделена на три отдельных writer-а:
+
+- **`BronzeWriter`** (`bronze_writer.py`): Запись сырых данных в формате JSONL + zstd. Atomic writes через temp file + rename, генерация checksums.
+- **`SilverWriter`** (`silver_writer.py`): Запись в Delta Lake таблицы с ACID-транзакциями, логикой merge/upsert для идемпотентности, поддержкой Time Travel и 7-дневным VACUUM retention.
+- **`GoldWriter`** (`gold_writer.py`): Запись бизнес-готовых данных с наследованием от `BaseDeltaWriter`, строгой валидацией через Pandera, поддержкой SCD Type 2 и контрактов данных.
+
+Вспомогательные модули:
+- **`BaseDeltaWriter`** (`base_delta_writer.py`): Базовый класс для Delta Lake writers (Silver, Gold).
+- **`DeltaReader`** (`delta_reader.py`): Чтение Delta Lake таблиц.
+- **`ArrowConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.
+- **`MetadataBuilder`** / **`MetadataWriter`**: Генерация и запись метаданных.
+- **`RetentionManager`** (`retention_manager.py`): Управление политиками хранения данных.
 
 ### 2.3. `locking/` — Реализация Блокировок
 
@@ -133,10 +142,10 @@ Redis-адаптер без изменения domain/application слоёв.
 | Диаграмма | Файл | Описание |
 |-----------|------|----------|
 | Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure |
-| Provider Adapters | [../diagrams/mermaid/23_provider_adapters_overview.mmd](../diagrams/mermaid/23_provider_adapters_overview.mmd) | Обзор 7 провайдеров и их rate limits |
-| HTTP Infrastructure | [../diagrams/mermaid/14_http_infrastructure.mmd](../diagrams/mermaid/14_http_infrastructure.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Provider Adapters | [diagrams/mermaid/23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd) | Обзор 7 провайдеров и их rate limits |
+| HTTP Infrastructure | [diagrams/mermaid/14_http_infrastructure.mmd](diagrams/mermaid/14_http_infrastructure.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
 | Circuit Breaker | [07-circuit-breaker-states.mermaid](diagrams/07-circuit-breaker-states.mermaid) | Состояния Circuit Breaker |
-| Storage Architecture | [../diagrams/mermaid/13_storage_architecture.mmd](../diagrams/mermaid/13_storage_architecture.mmd) | Bronze, Silver, Gold writers |
+| Storage Architecture | [diagrams/mermaid/13_storage_architecture.mmd](diagrams/mermaid/13_storage_architecture.mmd) | Bronze, Silver, Gold writers |
 | MemoryLock | [16-memory-lock-class.mermaid](diagrams/16-memory-lock-class.mermaid) | Класс MemoryLock |
 
 ### Связанные ADR

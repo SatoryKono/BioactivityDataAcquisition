@@ -31,7 +31,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 - [diagrams/](diagrams/) — 35 Mermaid diagram files
 - [diagrams/diagrams-index.md](diagrams/diagrams-index.md) — Full diagram index
 - [diagrams.md](diagrams.md) — Inline diagram collection
-- [../diagrams/mermaid/](../diagrams/mermaid/) — Additional 26 diagrams (includes Composite Pipeline workflow)
+- [diagrams/mermaid/](diagrams/mermaid/) — Additional 26 diagrams (includes Composite Pipeline workflow)
 
 ### Architecture Decision Records (ADRs)
 
@@ -103,10 +103,10 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 | Diagram | Description | File |
 |---------|-------------|------|
-| Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](../diagrams/mermaid/01_five_layer_architecture.mmd) |
+| Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) |
 | Layers Interaction | How layers communicate | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid) |
-| Composite Pipeline | ADR-026 workflow: seed → enrich → merge | [26_composite_pipeline_workflow.mmd](../diagrams/mermaid/26_composite_pipeline_workflow.mmd) |
-| Provider Adapters | 7 providers with rate limits | [23_provider_adapters_overview.mmd](../diagrams/mermaid/23_provider_adapters_overview.mmd) |
+| Composite Pipeline | ADR-026 workflow: seed → enrich → merge | [26_composite_pipeline_workflow.mmd](diagrams/mermaid/26_composite_pipeline_workflow.mmd) |
+| Provider Adapters | 7 providers with rate limits | [23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd) |
 | Pipeline Hierarchy | Pipeline/Transformer inheritance | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid) |
 
 ---

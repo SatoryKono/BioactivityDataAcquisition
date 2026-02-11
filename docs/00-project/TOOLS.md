@@ -332,6 +332,38 @@ python scripts/render_diagrams.py
 
 ---
 
+### config_gap_analysis.py
+
+**Назначение:** Анализ расхождений между конфигурациями пайплайнов и фактическим кодом.
+
+**Использование:**
+```bash
+python scripts/config_gap_analysis.py
+```
+
+**Что анализирует:**
+- Пропущенные entity configs для зарегистрированных пайплайнов
+- Несоответствия между конфигурацией и кодовой базой
+- Отсутствующие поля в entity configs
+
+---
+
+### validate_pipeline_configs.py
+
+**Назначение:** Валидация всех pipeline configs против JSON Schema.
+
+**Использование:**
+```bash
+python scripts/validate_pipeline_configs.py
+```
+
+**Что проверяет:**
+- Соответствие `_schema.json` для всех entity configs
+- Обязательные поля (`pipeline_name`, `provider`, `entity_type`, etc.)
+- Корректность `sink` путей и `sort_by` конфигурации
+
+---
+
 ## Бенчмарки
 
 Директория `src/tools/benchmarks/` содержит performance-тесты для критических операций.
@@ -482,6 +514,8 @@ if __name__ == "__main__":
 | `naming_audit.py` | scripts/ | Нет | `make audit-naming` |
 | `lint_terminology.py` | scripts/ | Нет | — |
 | `render_diagrams.py` | scripts/ | Нет | — |
+| `config_gap_analysis.py` | scripts/ | Нет | — |
+| `validate_pipeline_configs.py` | scripts/ | Нет | — |
 
 ---
 
@@ -496,6 +530,7 @@ if __name__ == "__main__":
 | RULES.md §3.4.1 | `dq_baseline_update.py` |
 | RULES.md §5.4.1 | `salt_rotate.py` |
 | docs/glossary.md | `lint_terminology.py` |
+| 03-file-policy.md (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py` |
 
 ---
 

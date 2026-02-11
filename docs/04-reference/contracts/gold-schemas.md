@@ -620,9 +620,18 @@ validated = ChEMBLActivityGoldSchema.validate(df.to_pandas())
 
 ---
 
-## JSON Contracts
+## Gold Schema Implementation
 
-JSON exports for Gold schemas are stored in `docs/contracts/gold/`:
+Gold-схемы реализованы как **Python Pandera DataFrameModel** классы в `src/bioetl/domain/contracts/gold/`.
+
+Каждая Gold-схема определяет:
+- Строгую валидацию типов (`strict=True`)
+- Nullable/non-nullable поля
+- Coercion rules (например, `int→float` для nullable integers)
+
+### JSON Contract Exports
+
+JSON exports для Gold-схем хранятся в `docs/04-reference/contracts/gold/`:
 
 - `chembl_activity_v1.0.json`
 - `chembl_assay_parameters_v1.0.json`
@@ -643,7 +652,6 @@ JSON exports for Gold schemas are stored in `docs/contracts/gold/`:
 - `pubmed_publication_v1.0.json`
 - `semanticscholar_publication_v1.0.json`
 - `uniprot_idmapping_v1.0.json`
-- `uniprot_protein_v1.0.json`
 
 ## Связанные документы
 
@@ -651,7 +659,7 @@ JSON exports for Gold schemas are stored in `docs/contracts/gold/`:
 - [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
 - [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
 - [Data Layers](../02-architecture/data-layers.md)
-- [Existing JSON Contracts](../contracts/gold/)
+- [JSON Contract Exports](gold/)
 
 ---
 
