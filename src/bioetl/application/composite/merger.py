@@ -1793,10 +1793,10 @@ class MergeService:
         # Build enrichment status dict (enrichers + dependencies)
         status_dict: dict[str, str] = {}
         if dependency_results:
-            for name, result in dependency_results.items():
-                status_dict[name] = result.status.value
-        for name, result in enrichment_results.items():
-            status_dict[name] = result.status.value
+            for name, dep_result in dependency_results.items():
+                status_dict[name] = dep_result.status.value
+        for name, enrich_result in enrichment_results.items():
+            status_dict[name] = enrich_result.status.value
 
         # Add lineage columns
         return df.with_columns(

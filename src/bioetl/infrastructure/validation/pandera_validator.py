@@ -94,9 +94,7 @@ class BasePanderaValidator:
             df_to_validate = df
             if hasattr(self._schema, "columns"):
                 missing = [
-                    name
-                    for name in self._schema.columns.keys()
-                    if name not in df.columns
+                    name for name in self._schema.columns if name not in df.columns
                 ]
                 if missing:
                     df_to_validate = df.copy()

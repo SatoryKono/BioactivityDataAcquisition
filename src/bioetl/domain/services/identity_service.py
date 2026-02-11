@@ -21,7 +21,6 @@ from typing import Any
 from bioetl.domain.constants import META_FIELDS as META_FIELDS  # re-export for tests
 from bioetl.domain.transformations import (
     generate_content_hash,
-    generate_entity_id,
     normalize_for_hash,
 )
 from bioetl.domain.types import ContentHash, EntityID
