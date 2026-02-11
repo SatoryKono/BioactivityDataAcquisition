@@ -17,7 +17,7 @@ from bioetl.application.services.pipeline_runner_service import (
     PipelineRunnerService,
     RunOptions,
     RunResult,
-    RunStatus,
+    PipelineRunResult,
 )
 
 
@@ -141,7 +141,7 @@ class TestRunResult:
     def test_success_result(self):
         """Test successful run result."""
         result = RunResult(
-            status=RunStatus.SUCCESS,
+            status=PipelineRunResult.SUCCESS,
             pipeline_name="test_pipeline",
             run_id="12345",
             run_type="incremental",
@@ -150,7 +150,7 @@ class TestRunResult:
             records_quarantined=5,
         )
 
-        assert result.status == RunStatus.SUCCESS
+        assert result.status == PipelineRunResult.SUCCESS
         assert result.is_success is True
         assert result.success_rate == 0.95
         assert result.error_message is None
@@ -158,7 +158,7 @@ class TestRunResult:
     def test_failed_result(self):
         """Test failed run result."""
         result = RunResult(
-            status=RunStatus.FAILED,
+            status=PipelineRunResult.FAILED,
             pipeline_name="test_pipeline",
             run_id="12345",
             run_type="incremental",
@@ -166,7 +166,7 @@ class TestRunResult:
             error_type="NetworkError",
         )
 
-        assert result.status == RunStatus.FAILED
+        assert result.status == PipelineRunResult.FAILED
         assert result.is_success is False
         assert result.error_message == "Connection refused"
         assert result.error_type == "NetworkError"
@@ -174,25 +174,25 @@ class TestRunResult:
     def test_dry_run_result(self):
         """Test dry-run result."""
         result = RunResult(
-            status=RunStatus.DRY_RUN,
+            status=PipelineRunResult.DRY_RUN,
             pipeline_name="test_pipeline",
             run_id="12345",
             run_type="rebuild",
         )
 
-        assert result.status == RunStatus.DRY_RUN
+        assert result.status == PipelineRunResult.DRY_RUN
         assert result.is_success is True
 
     def test_shutdown_result(self):
         """Test shutdown result."""
         result = RunResult(
-            status=RunStatus.SHUTDOWN,
+            status=PipelineRunResult.SHUTDOWN,
             pipeline_name="test_pipeline",
             run_id="12345",
             run_type="incremental",
         )
 
-        assert result.status == RunStatus.SHUTDOWN
+        assert result.status == PipelineRunResult.SHUTDOWN
         assert result.is_success is False
 
     def test_duration_calculation(self):
@@ -201,7 +201,7 @@ class TestRunResult:
         completed = datetime(2024, 1, 1, 10, 5, 30, tzinfo=UTC)
 
         result = RunResult(
-            status=RunStatus.SUCCESS,
+            status=PipelineRunResult.SUCCESS,
             pipeline_name="test_pipeline",
             run_id="12345",
             run_type="incremental",
@@ -214,7 +214,7 @@ class TestRunResult:
     def test_success_rate_zero_fetched(self):
         """Test success_rate when no records fetched."""
         result = RunResult(
-            status=RunStatus.SUCCESS,
+            status=PipelineRunResult.SUCCESS,
             pipeline_name="test_pipeline",
             run_id="12345",
             run_type="incremental",
@@ -263,7 +263,7 @@ class TestPipelineRunnerServiceRun:
         """Test successful pipeline execution."""
         result = await service.run("test_pipeline")
 
-        assert result.status == RunStatus.SUCCESS
+        assert result.status == PipelineRunResult.SUCCESS
         assert result.pipeline_name == "test_pipeline"
         assert result.records_fetched == 100
         assert result.records_silver == 90
@@ -284,7 +284,7 @@ class TestPipelineRunnerServiceRun:
 
         result = await service.run("test_pipeline", options=options)
 
-        assert result.status == RunStatus.SUCCESS
+        assert result.status == PipelineRunResult.SUCCESS
         assert result.run_type == "backfill"
         # Verify context was built with correct options
         call_args = mock_runner_factory.create.call_args
@@ -312,7 +312,7 @@ class TestPipelineRunnerServiceRun:
 
         result = await service.run("test_pipeline", options=options)
 
-        assert result.status == RunStatus.DRY_RUN
+        assert result.status == PipelineRunResult.DRY_RUN
         assert result.is_success is True
         # Runner should not be created in dry-run mode
         mock_runner_factory.create.assert_not_called()
@@ -339,7 +339,7 @@ class TestPipelineRunnerServiceRun:
 
         result = await service.run("test_pipeline")
 
-        assert result.status == RunStatus.SHUTDOWN
+        assert result.status == PipelineRunResult.SHUTDOWN
         assert result.is_success is False
         # Metrics should still be extracted
         mock_metrics_extractor.extract_metrics.assert_called_once()
@@ -351,7 +351,7 @@ class TestPipelineRunnerServiceRun:
 
         result = await service.run("test_pipeline")
 
-        assert result.status == RunStatus.FAILED
+        assert result.status == PipelineRunResult.FAILED
         assert result.error_message == "Invalid configuration"
         assert result.error_type == "ValueError"
         mock_metrics_extractor.extract_metrics.assert_called_once()
@@ -403,7 +403,7 @@ class TestRunOptionsMerging:
         """Test merging dry_run flag from parameter."""
         result = await service.run("test_pipeline", dry_run=True)
 
-        assert result.status == RunStatus.DRY_RUN
+        assert result.status == PipelineRunResult.DRY_RUN
 
     @pytest.mark.asyncio
     async def test_options_override_dry_run_flag(self, service, mock_runner):
@@ -414,7 +414,7 @@ class TestRunOptionsMerging:
         result = await service.run("test_pipeline", dry_run=True, options=options)
 
         # Options should take precedence
-        assert result.status == RunStatus.SUCCESS
+        assert result.status == PipelineRunResult.SUCCESS
         mock_runner.run.assert_called_once()
 
 

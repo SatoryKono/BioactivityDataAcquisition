@@ -12,8 +12,8 @@ import click
 
 from bioetl.application.services import (
     PipelineNotFoundError,
+    PipelineRunResult,
     RunOptions,
-    RunStatus,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.interfaces.cli.commands.health_server_integration import (
@@ -34,8 +34,10 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
 
-def _map_status_to_exit_code(status: RunStatus, error_type: str | None) -> ExitCode:
-    """Map RunStatus to CLI exit code.
+def _map_status_to_exit_code(
+    status: PipelineRunResult, error_type: str | None
+) -> ExitCode:
+    """Map PipelineRunResult to CLI exit code.
 
     Args:
         status: Run status from service.
@@ -44,11 +46,11 @@ def _map_status_to_exit_code(status: RunStatus, error_type: str | None) -> ExitC
     Returns:
         Appropriate ExitCode for the status.
     """
-    if status == RunStatus.SUCCESS:
+    if status == PipelineRunResult.SUCCESS:
         return ExitCode.OK
-    if status == RunStatus.DRY_RUN:
+    if status == PipelineRunResult.DRY_RUN:
         return ExitCode.OK
-    if status == RunStatus.SHUTDOWN:
+    if status == PipelineRunResult.SHUTDOWN:
         return ExitCode.SIGINT
     # FAILED status - map based on error type
     if error_type:
@@ -74,7 +76,7 @@ async def _run_pipeline_async(
     options: RunOptions,
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
-) -> tuple[RunStatus, str | None, str | None, str]:
+) -> tuple[PipelineRunResult, str | None, str | None, str]:
     """Run pipeline asynchronously via service.
 
     Args:
@@ -98,7 +100,9 @@ async def _run_pipeline_async(
         return result.status, result.error_message, result.error_type, result.run_id
 
 
-def _echo_run_result(status: RunStatus, error_message: str | None, run_id: str) -> None:
+def _echo_run_result(
+    status: PipelineRunResult, error_message: str | None, run_id: str
+) -> None:
     """Output run result message based on status.
 
     Args:
@@ -110,16 +114,16 @@ def _echo_run_result(status: RunStatus, error_message: str | None, run_id: str) 
     short_run_id = run_id[:8] if len(run_id) > 8 else run_id
 
     status_handlers = {
-        RunStatus.SUCCESS: lambda: echo_info(
+        PipelineRunResult.SUCCESS: lambda: echo_info(
             f"Pipeline completed successfully (run_id: {short_run_id})"
         ),
-        RunStatus.DRY_RUN: lambda: echo_info(
+        PipelineRunResult.DRY_RUN: lambda: echo_info(
             f"Dry-run completed (no changes made) (run_id: {short_run_id})"
         ),
-        RunStatus.SHUTDOWN: lambda: echo_warning(
+        PipelineRunResult.SHUTDOWN: lambda: echo_warning(
             f"Pipeline was gracefully shut down (run_id: {short_run_id})"
         ),
-        RunStatus.FAILED: lambda: echo_error(
+        PipelineRunResult.FAILED: lambda: echo_error(
             f"Pipeline failed (run_id: {short_run_id})",
             error_message or "Unknown error",
         ),
