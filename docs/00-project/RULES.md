@@ -62,7 +62,13 @@
 Интерфейсы определяются в пакете `domain/ports/` через `typing.Protocol`:
 
 - **Design-time**: `mypy --strict` проверяет соответствие типов во время сборки. Основной механизм контроля.
-- **Runtime Boundary**: Опционально использовать `@runtime_checkable` только для критичных адаптеров (boundary validation). Семантика поведения в runtime не проверяется типами.
+- **Runtime Boundary**: Следующие порты **SHOULD** быть `@runtime_checkable` для boundary validation в composition layer:
+  - `DataSourcePort` — для проверки адаптеров при регистрации
+  - `FilterableDataSourcePort` — для проверки расширенных адаптеров
+  - `HealthCheckPort` — для проверки health-check capability
+  - `StoragePort` — для проверки storage backends
+
+  Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) используют structural subtyping без runtime проверок и **MAY** не иметь `@runtime_checkable`. Семантика поведения в runtime не проверяется типами.
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
 
 ```python
@@ -254,7 +260,10 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 **Причина**: Pandas/Polars исторически не поддерживали nullable integers без специального типа `Int64` (с заглавной I). Float — единственный способ представить `int + NULL` без потери данных для больших значений. `NaN` используется для отсутствующих значений.
 
-**Затронутые поля (34 occurrences)**:
+**Затронутые поля (~34 occurrences)**:
+
+> **Примечание**: Для получения актуального числа occurrences:
+> `grep -rn "coerce=True" src/bioetl/infrastructure/schemas/ src/bioetl/domain/schemas/ --include="*.py" | grep -c "Series\[float\]"`
 
 | Сущность        | Поля                                                                                   |
 | --------------- | -------------------------------------------------------------------------------------- |
@@ -894,6 +903,12 @@ from __future__ import annotations
 1. `from __future__ import annotations` ← сразу после docstring
 1. Другие импорты
 
+> **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
+> и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
+> они не содержат type annotations, требующих отложенной эвалюации.
+> Текущее состояние: 468 из 499 файлов (93.8%) содержат импорт;
+> 31 файл без импорта — все `__init__.py`.
+
 #### 4.4.2. Type Hints
 
 - **MUST** использовать новый стиль типов: `list[str]` вместо `List[str]`
@@ -1505,7 +1520,7 @@ fields:
 - **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve_all_sources` feature, column groups и merge strategies. Ссылка на ADR-026.
 - **5.13** (2026-01-28): ADR Registry Update. Добавлены ADR-029..031 в реестр (Приложение F): Output Metadata Unification, Publication Pagination Strategy, Loading Strategy Formalization.
 - **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).
-- **5.11** (2026-01-20): Int→Float Coercion Documentation. Добавлена §2.6 "Int→Float Coercion для Nullable Integers" — документация паттерна Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (34 occurrences). Это осознанное архитектурное решение для обработки nullable integers в Pandas/Polars.
+- **5.11** (2026-01-20): Int→Float Coercion Documentation. Добавлена §2.6 "Int→Float Coercion для Nullable Integers" — документация паттерна Gold-схем с `Series[float]` + `coerce=True` для nullable integer полей (~34 occurrences на момент 5.11; актуальное число может отличаться). Это осознанное архитектурное решение для обработки nullable integers в Pandas/Polars.
 - **5.10** (2026-01-06): TTL/Heartbeat Values Correction. Исправлены значения Lock TTL (90s) и Heartbeat (30s) в §3.3 для соответствия реализации в `domain/config.py:238,241`. Синхронизация всех документов.
 - **5.9** (2026-01-01): TTL/Heartbeat Sync Fix. Добавлены явные значения Lock TTL и Heartbeat в §3.3.
 - **5.8** (2025-12-29): TTL/Heartbeat Sync. Добавлены явные значения Lock TTL и Heartbeat в §3.3 "Текущая реализация". Синхронизация с CLAUDE.md §5.
