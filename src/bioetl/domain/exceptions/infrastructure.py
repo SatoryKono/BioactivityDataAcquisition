@@ -15,6 +15,7 @@ from __future__ import annotations
 from bioetl.domain.exceptions.base import CriticalError, RecoverableError
 from bioetl.domain.types import ErrorType
 
+
 # =============================================================================
 # Base Infrastructure Exception
 # =============================================================================
@@ -306,7 +307,7 @@ class CachedBronzeEmptyError(StorageError):
         >>> raise CachedBronzeEmptyError(
         ...     provider="chembl",
         ...     entity_type="activity",
-        ...     bronze_path="/data/bronze/chembl/activity",
+        ...     bronze_path="/data/output/bronze/chembl/activity",
         ...     date_filter="2026-01-20"
         ... )
     """
@@ -361,7 +362,7 @@ class DeltaWriteConflictError(StorageError):
 
     Example:
         >>> raise DeltaWriteConflictError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     operation="merge",
         ...     conflicting_version=42
         ... )
@@ -404,7 +405,7 @@ class DeltaTransactionError(CriticalError):
 
     Example:
         >>> raise DeltaTransactionError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     reason="Transaction log corrupted",
         ...     version=42
         ... )
@@ -493,7 +494,7 @@ class DeltaSchemaValidationError(CriticalError):
 
     Example:
         >>> raise DeltaSchemaValidationError(
-        ...     "/data/gold/chembl_activity",
+        ...     "/data/output/gold/chembl_activity",
         ...     expected_columns=["id", "name", "value"],
         ...     actual_columns=["id", "name"],
         ...     type_mismatches={"id": ("int64", "string")}
@@ -545,7 +546,7 @@ class DeltaOptimizeError(StorageError):
 
     Example:
         >>> raise DeltaOptimizeError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     operation="vacuum",
         ...     reason="Concurrent operation in progress"
         ... )

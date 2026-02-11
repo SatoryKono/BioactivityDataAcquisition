@@ -537,7 +537,15 @@ from typing import Protocol, runtime_checkable
 
 @runtime_checkable
 class DataSourcePort(Protocol):
-    def fetch(self, query: Query) -> Iterator[RawRecord]: ...
+    # Async generator, yields dict records per API page.
+    def fetch(
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        query: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
+    ) -> AsyncIterator[dict[str, Any]]: ...
 ```
 
 ---

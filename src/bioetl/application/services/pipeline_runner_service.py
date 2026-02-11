@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     )
 
 
-class RunStatus(StrEnum):
+class PipelineRunResult(StrEnum):
     """Pipeline run completion status.
 
     Attributes:
@@ -72,13 +72,13 @@ class RunResult:
 
     Example:
         >>> result = await service.run("chembl_activity")
-        >>> if result.status == RunStatus.SUCCESS:
+        >>> if result.status == PipelineRunResult.SUCCESS:
         ...     logger.info("pipeline_success", records_silver=result.records_silver)
-        >>> elif result.status == RunStatus.FAILED:
+        >>> elif result.status == PipelineRunResult.FAILED:
         ...     logger.error("pipeline_failed", error_message=result.error_message)
     """
 
-    status: RunStatus
+    status: PipelineRunResult
     pipeline_name: str
     run_id: str
     run_type: str
@@ -107,7 +107,7 @@ class RunResult:
     @property
     def is_success(self) -> bool:
         """Check if run was successful (or dry_run)."""
-        return self.status in (RunStatus.SUCCESS, RunStatus.DRY_RUN)
+        return self.status in (PipelineRunResult.SUCCESS, PipelineRunResult.DRY_RUN)
 
 
 @dataclass(frozen=True)
@@ -232,7 +232,7 @@ class PipelineRunnerService:
 
         Example:
             >>> result = await service.run("chembl_activity", dry_run=True)
-            >>> if result.status == RunStatus.DRY_RUN:
+            >>> if result.status == PipelineRunResult.DRY_RUN:
             ...     logger.info("dry_run_complete", pipeline="chembl_activity")
         """
         started_at = datetime.now(tz=UTC)
@@ -265,7 +265,7 @@ class PipelineRunnerService:
                 run_id=str(effective_run_id),
             )
             return RunResult(
-                status=RunStatus.DRY_RUN,
+                status=PipelineRunResult.DRY_RUN,
                 pipeline_name=pipeline_name,
                 run_id=str(effective_run_id),
                 run_type=effective_options.run_type,
@@ -413,7 +413,7 @@ class PipelineRunnerService:
         # -> application/core/shutdown.py -> application/services/shutdown_service.py
         from bioetl.application.core.shutdown import PipelineShutdownError
 
-        status = RunStatus.SUCCESS
+        status = PipelineRunResult.SUCCESS
         error_message: str | None = None
         error_type: str | None = None
 
@@ -425,14 +425,14 @@ class PipelineRunnerService:
                 run_id=str(run_id),
             )
         except PipelineShutdownError:
-            status = RunStatus.SHUTDOWN
+            status = PipelineRunResult.SHUTDOWN
             self.logger.warning(
                 "Pipeline was gracefully shut down",
                 pipeline=pipeline_name,
                 run_id=str(run_id),
             )
         except Exception as e:
-            status = RunStatus.FAILED
+            status = PipelineRunResult.FAILED
             error_message = str(e)
             error_type = type(e).__name__
             self.logger.exception(

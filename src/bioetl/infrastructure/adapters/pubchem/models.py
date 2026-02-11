@@ -16,14 +16,21 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class PubchemMoleculeRecord(BaseModel):
-    """Normalized molecule record from PubChem.
+class PubchemMoleculeApiRecord(BaseModel):
+    """Normalized molecule record from PubChem API (infrastructure model).
+
+    This is the infrastructure-layer API response model with extra='ignore'
+    and cid as int. NOT the same as the domain entity PubchemMoleculeRecord
+    (domain/entities/pubchem.py) which uses extra='forbid', cid as str,
+    and has 35+ fields vs ~15 here.
 
     Represents data extracted from a pubchempy.Compound object
     via the adapter's _compound_to_dict method.
 
     Note: Renamed from PubChemCompoundRecord per ADR-024.
     'Molecule' is the canonical term for chemical compounds.
+    Renamed from PubchemMoleculeRecord to PubchemMoleculeApiRecord
+    to resolve naming collision with the domain entity.
     """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
@@ -136,7 +143,7 @@ class PubchemMoleculeDetailRecord(BaseModel):
     # Primary Key
     cid: int = Field(description="PubChem Compound ID")
 
-    # Basic Properties (from PubchemMoleculeRecord)
+    # Basic Properties (from PubchemMoleculeApiRecord)
     molecular_formula: str | None = Field(default=None)
     molecular_weight: float | None = Field(default=None)
     canonical_smiles: str | None = Field(default=None)
@@ -226,8 +233,8 @@ class PubChemBioactivityRecord(BaseModel):
 # Mapping from entity type to record model
 # Note: Keys match PubChem entity types, not Ubiquitous Language
 PUBCHEM_RECORD_MODELS: dict[str, type[BaseModel]] = {
-    "compound": PubchemMoleculeRecord,  # ADR-024: Molecule is canonical
-    "molecule": PubchemMoleculeRecord,  # Canonical alias
+    "compound": PubchemMoleculeApiRecord,  # ADR-024: Molecule is canonical
+    "molecule": PubchemMoleculeApiRecord,  # Canonical alias
     "substance": PubChemSubstanceRecord,
     "assay": PubChemAssayRecord,
 }

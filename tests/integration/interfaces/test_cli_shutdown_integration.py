@@ -72,14 +72,14 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that SHUTDOWN status results in exit code 130."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SHUTDOWN,
+                PipelineRunResult.SHUTDOWN,
                 None,
                 None,
                 "test-run-id",
@@ -98,14 +98,14 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that normal completion returns exit code 0."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SUCCESS,
+                PipelineRunResult.SUCCESS,
                 None,
                 None,
                 "test-run-id",
@@ -195,14 +195,14 @@ class TestRunnerShutdownIntegration:
         temp_env: dict[str, str],
     ):
         """Test that SHUTDOWN status results in shutdown warning."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SHUTDOWN,
+                PipelineRunResult.SHUTDOWN,
                 None,
                 None,
                 "test-run-id",
@@ -225,14 +225,14 @@ class TestRunnerShutdownIntegration:
         temp_env: dict[str, str],
     ):
         """Test that service-based architecture handles shutdown correctly."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SUCCESS,
+                PipelineRunResult.SUCCESS,
                 None,
                 None,
                 "test-run-id",
@@ -262,14 +262,14 @@ class TestLockReleaseOnShutdown:
         temp_env: dict[str, str],
     ):
         """Test that lock is released even after shutdown error."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SHUTDOWN,
+                PipelineRunResult.SHUTDOWN,
                 None,
                 None,
                 "test-run-id",

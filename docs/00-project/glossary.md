@@ -18,9 +18,11 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Publication** | PubMed: Publication, ChEMBL: Document, CrossRef: Publication | `Publication`, `ChemblPublication` | Scientific document |
 
 > **v2.0 Migration Notes:**
-> - `Compound` → `PubchemMolecule` (deprecated alias retained)
-> - `Document` → `ChemblPublication` (deprecated alias retained)
-> - `Protein` → `UniprotTarget` (deprecated alias retained)
+> - ~~`Compound`~~ → `PubchemMolecule` (migration complete, old name removed)
+> - ~~`Document`~~ → `ChemblPublication` (migration complete, old name removed)
+> - ~~`Protein`~~ → `UniprotTarget` (migration complete, old name removed)
+>
+> **Note:** Deprecated aliases were removed. Use only the new names.
 
 ### Operations Terms
 
@@ -43,7 +45,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Molecule** | A chemical entity that can be characterized by a molecular structure (small molecule, peptide, antibody, etc.) | ChEMBL: `Molecule` (API endpoint `/molecule`), **PubChem: `PubchemMolecule`** | `Molecule`, `PubchemMolecule` | `drug`, `substance`, `ligand` (in general context) |
 
 > **Migration Note (v2.0)**: PubChem `Compound` entity renamed to `PubchemMolecule`.
-> The deprecated `Compound` alias remains for backward compatibility.
+> Migration complete — deprecated `Compound` alias removed.
 
 **Note**: ChEMBL uses `Molecule` and PubChem uses `PubchemMolecule` as canonical domain entity names:
 - ChEMBL API returns `molecule_chembl_id`
@@ -66,7 +68,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Target Component** | A molecular component of a multi-component target | ChEMBL: `TargetComponent` | `TargetComponent` | `subunit` |
 
 > **Migration Note (v2.0)**: UniProt `Protein` entity renamed to `UniprotTarget`.
-> The deprecated `Protein` alias remains for backward compatibility.
+> Migration complete — deprecated `Protein` alias removed.
 
 ### Publications
 
@@ -75,7 +77,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Publication** | A scientific document (article, patent, etc.) | PubMed: `Publication`, CrossRef: `PublicationEntity`, **ChEMBL: `ChemblPublication`** | `Publication`, `ChemblPublication`, `PublicationEntity` | `paper`, `article` (as class names), `Work` (deprecated CrossRef API term) |
 
 > **Migration Note (v2.0)**: ChEMBL `Document` entity renamed to `ChemblPublication`.
-> The deprecated `Document` alias remains for backward compatibility.
+> Migration complete — deprecated `Document` alias removed.
 
 **Note**: CrossRef's API uses the term "Work" but our codebase uses "Publication" as the canonical term for Ubiquitous Language. The deprecated alias `Work` is kept for backward compatibility.
 

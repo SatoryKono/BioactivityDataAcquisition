@@ -117,63 +117,46 @@ class NoOpTracing:
 class NoOpMetrics:
     """No-op implementation of MetricsPort.
 
-    Used when metrics collection is disabled or not configured.
-    All operations are silently ignored.
-
-    Implements:
-        MetricsPort: Domain port for metrics collection.
-
-    Example:
-        >>> metrics = NoOpMetrics()
-        >>> metrics.observe_histogram("duration", 1.5, {"entity": "activity"})
-        >>> metrics.increment_counter("errors", 1, {"type": "validation"})
-
+    All operations are silently ignored. Supports optional warn_on_use
+    flag for composition/CLI layers to alert when metrics are disabled.
     """
 
+    _warned: bool = False
+
+    def __init__(self, warn_on_use: bool = False) -> None:
+        """Initialize NoOpMetrics.
+
+        Args:
+            warn_on_use: Whether to warn about disabled metrics.
+
+        """
+        if warn_on_use and not NoOpMetrics._warned:
+            import warnings
+
+            warnings.warn(
+                "NoOpMetrics is being used - metrics are NOT being collected. "
+                "Set BIOETL_METRICS_ENABLED=true or inject PrometheusMetrics "
+                "to enable metrics collection.",
+                UserWarning,
+                stacklevel=2,
+            )
+            NoOpMetrics._warned = True
+
+    @classmethod
+    def reset_warning(cls) -> None:
+        """Reset warning state (for testing)."""
+        cls._warned = False
+
     def observe_histogram(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
+        self, name: str, value: float, labels: dict[str, str]
     ) -> None:
-        """Observe a value for a histogram metric (no-op).
+        """Observe a value for a histogram metric (no-op)."""
 
-        Args:
-            name: The name of the histogram metric.
-            value: The value to observe.
-            labels: A dictionary of label names to label values.
+    def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
+        """Increment a counter metric (no-op)."""
 
-        """
-
-    def increment_counter(
-        self,
-        name: str,
-        value: int,
-        labels: dict[str, str],
-    ) -> None:
-        """Increment a counter metric (no-op).
-
-        Args:
-            name: The name of the counter metric.
-            value: The amount to increment by.
-            labels: A dictionary of label names to label values.
-
-        """
-
-    def set_gauge(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """Set a gauge metric to a specific value (no-op).
-
-        Args:
-            name: The name of the gauge metric.
-            value: The value to set.
-            labels: A dictionary of label names to label values.
-
-        """
+    def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
+        """Set a gauge metric to a specific value (no-op)."""
 
     def close(self) -> None:
         """No-op close. Idempotent."""

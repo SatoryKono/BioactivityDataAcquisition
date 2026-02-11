@@ -20,7 +20,7 @@ from bioetl.composition.observability import (
     ObservabilityBundle,
     ObservabilityContractError,
 )
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+from bioetl.domain.ports import NoOpMetrics
 
 
 @pytest.mark.unit
@@ -349,7 +349,7 @@ class TestObservabilityPreflightValidation:
         from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
-        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+        from bioetl.domain.ports import NoOpTracing
 
         mock_logger = MagicMock()
         mock_metrics = MagicMock()
@@ -373,7 +373,7 @@ class TestObservabilityPreflightValidation:
         from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
-        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+        from bioetl.domain.ports import NoOpTracing
 
         mock_logger = MagicMock()
         noop_metrics = NoOpMetrics(warn_on_use=False)
@@ -398,7 +398,7 @@ class TestObservabilityPreflightValidation:
         from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
-        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+        from bioetl.domain.ports import NoOpTracing
 
         mock_logger = MagicMock()
         noop_tracer = NoOpTracing()
@@ -419,7 +419,7 @@ class TestObservabilityPreflightValidation:
         from bioetl.composition.bootstrap.runtime.observability import (
             validate_observability_preflight,
         )
-        from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+        from bioetl.domain.ports import NoOpTracing
 
         mock_logger = MagicMock()
         noop_tracer = NoOpTracing()

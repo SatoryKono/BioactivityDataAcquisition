@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from bioetl.application.services import RunResult, RunStatus
+from bioetl.application.services import RunResult, PipelineRunResult
 from bioetl.interfaces.cli.commands.run_all import (
     BatchRunResult,
     _filter_pipelines_by_provider,
@@ -241,7 +241,7 @@ class TestRunAllCommand:
             failed=0,
             results=[
                 RunResult(
-                    status=RunStatus.SUCCESS,
+                    status=PipelineRunResult.SUCCESS,
                     pipeline_name=f"chembl_{entity}",
                     run_id="test-run-id",
                     run_type="incremental",
@@ -271,7 +271,7 @@ class TestRunAllCommand:
             skipped=4,
             results=[
                 RunResult(
-                    status=RunStatus.DRY_RUN,
+                    status=PipelineRunResult.DRY_RUN,
                     pipeline_name=f"chembl_{entity}",
                     run_id="test-run-id",
                     run_type="incremental",
@@ -311,7 +311,7 @@ class TestRunAllCommand:
             failed=0,
             results=[
                 RunResult(
-                    status=RunStatus.SUCCESS,
+                    status=PipelineRunResult.SUCCESS,
                     pipeline_name=f"chembl_{entity}",
                     run_id="test-run-id",
                     run_type="rebuild",
@@ -367,7 +367,7 @@ class TestRunAllExitCodes:
             failed=0,
             results=[
                 RunResult(
-                    status=RunStatus.SUCCESS,
+                    status=PipelineRunResult.SUCCESS,
                     pipeline_name=f"chembl_{entity}",
                     run_id="test-run-id",
                     run_type="incremental",
@@ -393,26 +393,26 @@ class TestRunAllExitCodes:
             failed_pipelines=["chembl_assay"],
             results=[
                 RunResult(
-                    status=RunStatus.SUCCESS,
+                    status=PipelineRunResult.SUCCESS,
                     pipeline_name="chembl_activity",
                     run_id="test-run-id",
                     run_type="incremental",
                 ),
                 RunResult(
-                    status=RunStatus.FAILED,
+                    status=PipelineRunResult.FAILED,
                     pipeline_name="chembl_assay",
                     run_id="test-run-id",
                     run_type="incremental",
                     error_message="Test error",
                 ),
                 RunResult(
-                    status=RunStatus.SUCCESS,
+                    status=PipelineRunResult.SUCCESS,
                     pipeline_name="chembl_molecule",
                     run_id="test-run-id",
                     run_type="incremental",
                 ),
                 RunResult(
-                    status=RunStatus.SUCCESS,
+                    status=PipelineRunResult.SUCCESS,
                     pipeline_name="chembl_target",
                     run_id="test-run-id",
                     run_type="incremental",

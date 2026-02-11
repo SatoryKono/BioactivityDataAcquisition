@@ -141,7 +141,7 @@ class SilverWriter(BaseDeltaWriter):
 
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            from bioetl.domain.ports import NoOpTracing
 
             tracing = NoOpTracing()
 

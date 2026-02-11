@@ -23,10 +23,15 @@ from uuid import UUID, uuid4
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.exceptions import MetricsServerError
-from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
-from bioetl.infrastructure.observability import (
+from bioetl.domain.ports import (
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
     NoOpMetrics,
     NoOpTracing,
+    TracingPort,
+)
+from bioetl.infrastructure.observability import (
     OpenTelemetryTracer,
     PrometheusMetrics,
     UnifiedLogger,

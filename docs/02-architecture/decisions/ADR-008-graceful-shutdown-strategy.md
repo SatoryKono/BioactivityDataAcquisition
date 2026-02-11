@@ -4,7 +4,7 @@
 
 # ADR-008: Graceful Shutdown Strategy
 
-**Status:** Accepted
+**Status:** Superseded
 **Date:** 2025-12-22
 **Last Updated:** 2026-01-02
 **Decision makers:** @BioETL-Team

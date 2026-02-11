@@ -62,7 +62,7 @@ configs/
 │       ├── molecule.yaml        # chembl_molecule + enrichers
 │       ├── publication.yaml     # chembl_publication + enrichers
 │       └── target.yaml          # chembl_target + enrichers
-├── dq/                           # Data Quality правила (30 файлов)
+├── dq/                           # Data Quality правила (31 файл)
 │   ├── _defaults.yaml           # Глобальные DQ defaults (soft_fail=0.05, hard_fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
 │   │   ├── chembl.yaml
@@ -117,7 +117,7 @@ configs/
 | ------------------------- | ---------- | -------------------------------------- |
 | Pipeline configs (entity) | 21         | Regular ETL pipelines                  |
 | Composite configs         | 5          | Multi-provider pipelines (ADR-026)     |
-| DQ configs                | 30         | 1 defaults + 7 providers + 22 entities |
+| DQ configs                | 31         | 1 defaults + 7 providers + 22 entities + 1 schema |
 | Filter configs            | 8          | 1 defaults + 7 providers               |
 | Source configs            | 7          | Один на провайдера                     |
 | **Итого**                 | **71**     | Все конфиги валидированы               |

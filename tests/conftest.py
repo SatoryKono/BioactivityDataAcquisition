@@ -491,7 +491,7 @@ def noop_metrics():
 
     Module-scoped for performance: NoOpMetrics is stateless.
     """
-    from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
+    from bioetl.domain.ports import NoOpMetrics
 
     return NoOpMetrics()
 
@@ -502,7 +502,7 @@ def noop_tracer():
 
     Module-scoped for performance: NoOpTracing is stateless.
     """
-    from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+    from bioetl.domain.ports import NoOpTracing
 
     return NoOpTracing()
 
