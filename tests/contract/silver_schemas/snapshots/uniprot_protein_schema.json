@@ -134,7 +134,7 @@
     ],
     "coerce": false,
     "description": "Annotation quality (1-5 stars)",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -224,7 +224,7 @@
     ],
     "coerce": false,
     "description": "Number of database cross-references",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -278,7 +278,7 @@
     "checks": [],
     "coerce": false,
     "description": "Entry creation date",
-    "dtype": "date",
+    "dtype": "datetime64[ns]",
     "nullable": true,
     "required": false,
     "unique": false
@@ -287,7 +287,7 @@
     "checks": [],
     "coerce": false,
     "description": "Entry last modified date",
-    "dtype": "date",
+    "dtype": "datetime64[ns]",
     "nullable": true,
     "required": false,
     "unique": false
@@ -326,7 +326,7 @@
     ],
     "coerce": false,
     "description": "Entry version number",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -339,7 +339,7 @@
     ],
     "coerce": false,
     "description": "Number of sequence features",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -473,7 +473,7 @@
     ],
     "coerce": false,
     "description": "Number of isoforms",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -513,7 +513,7 @@
     ],
     "coerce": false,
     "description": "Number of keywords",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -701,7 +701,7 @@
     ],
     "coerce": false,
     "description": "Number of publications",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -781,7 +781,7 @@
     ],
     "coerce": false,
     "description": "Sequence length",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": false,
     "required": true,
     "unique": false
@@ -794,7 +794,7 @@
     ],
     "coerce": false,
     "description": "Molecular mass (Da)",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -803,7 +803,7 @@
     "checks": [],
     "coerce": false,
     "description": "Sequence last modified date",
-    "dtype": "date",
+    "dtype": "datetime64[ns]",
     "nullable": true,
     "required": false,
     "unique": false
@@ -861,7 +861,7 @@
     ],
     "coerce": false,
     "description": "NCBI Taxonomy ID",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false

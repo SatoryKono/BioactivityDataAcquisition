@@ -61,8 +61,12 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
             "publication_subclass", pa.string()
         ),  # Level 2: "Original Experimental Data", etc.
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
-        pa.field("publication_date", pa.string()),  # Not available from ChEMBL API (None values)
-        pa.field("language", pa.string()),  # Not available from ChEMBL API (None values)
+        pa.field(
+            "publication_date", pa.string()
+        ),  # Not available from ChEMBL API (None values)
+        pa.field(
+            "language", pa.string()
+        ),  # Not available from ChEMBL API (None values)
         pa.field("is_oa", pa.bool_()),  # Not available from ChEMBL API (None values)
         pa.field("src_id", pa.int64()),
         # === Unified citation metrics ===
@@ -170,9 +174,9 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         pa.field("canonical_smiles", pa.string()),
         pa.field("cid", pa.string()),  # Domain entity uses str for cid
+        pa.field("complexity", pa.float64()),
         pa.field("conformer_count_3d", pa.float64()),  # Float for nullable int
         pa.field("conformer_rmsd_3d", pa.float64()),
-        pa.field("complexity", pa.float64()),
         pa.field("effective_rotor_count_3d", pa.float64()),
         pa.field("exact_mass", pa.float64()),
         pa.field("feature_acceptor_count_3d", pa.float64()),  # Float for nullable int
@@ -413,9 +417,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_pref_name", pa.string()),
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
-        pa.field(
-            "assay_taxonomy_id", pa.float64()
-        ),  # Float for nullable int
+        pa.field("assay_taxonomy_id", pa.float64()),  # Float for nullable int
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string()),
@@ -441,9 +443,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_organism", pa.string()),
         pa.field("variant_sequence", pa.string()),
         pa.field("variant_sequence_json", pa.string()),  # Forensic: original JSON
-        pa.field(
-            "variant_taxonomy_id", pa.float64()
-        ),  # Float for nullable int
+        pa.field("variant_taxonomy_id", pa.float64()),  # Float for nullable int
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),

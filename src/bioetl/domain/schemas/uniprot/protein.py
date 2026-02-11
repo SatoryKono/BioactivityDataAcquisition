@@ -424,7 +424,9 @@ class UniprotTargetSchema(ETLRecordSchema):
     )
 
     @pa.check("cross_reference_count", name="cross_reference_count_non_negative")
-    def _check_cross_reference_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+    def _check_cross_reference_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate cross-reference count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 

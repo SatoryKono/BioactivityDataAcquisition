@@ -170,7 +170,9 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     )
 
     @pa.check("h_bond_acceptor_count", name="h_bond_acceptor_count_range")
-    def _check_h_bond_acceptor_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+    def _check_h_bond_acceptor_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate H-bond acceptor count range."""
         return cast("Series[bool]", series.isna() | ((series >= 0) & (series <= 50)))
 
@@ -200,7 +202,9 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     @pa.check(
         "defined_atom_stereo_count", name="defined_atom_stereo_count_non_negative"
     )
-    def _check_defined_atom_stereo_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+    def _check_defined_atom_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate defined atom stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
@@ -211,7 +215,9 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     @pa.check(
         "undefined_atom_stereo_count", name="undefined_atom_stereo_count_non_negative"
     )
-    def _check_undefined_atom_stereo_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+    def _check_undefined_atom_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate undefined atom stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
@@ -231,7 +237,9 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     @pa.check(
         "defined_bond_stereo_count", name="defined_bond_stereo_count_non_negative"
     )
-    def _check_defined_bond_stereo_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+    def _check_defined_bond_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate defined bond stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
@@ -242,7 +250,9 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     @pa.check(
         "undefined_bond_stereo_count", name="undefined_bond_stereo_count_non_negative"
     )
-    def _check_undefined_bond_stereo_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+    def _check_undefined_bond_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate undefined bond stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
@@ -284,7 +294,8 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         return cast("Series[bool]", series.isna() | (series >= 0))
 
     feature_acceptor_count_3d: Series[float] | None = pa.Field(
-        nullable=True, description="3D H-bond acceptor features (float for nullable int)"
+        nullable=True,
+        description="3D H-bond acceptor features (float for nullable int)",
     )
 
     @pa.check(
@@ -377,7 +388,8 @@ class PubchemMoleculeSchema(ETLRecordSchema):
 
     # === 3D Feature Count (total pharmacophore features) ===
     feature_count_3d: Series[float] | None = pa.Field(
-        nullable=True, description="Total count of 3D pharmacophore features (float for nullable int)"
+        nullable=True,
+        description="Total count of 3D pharmacophore features (float for nullable int)",
     )
 
     @pa.check("feature_count_3d", name="feature_count_3d_non_negative")

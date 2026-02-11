@@ -86,6 +86,15 @@
     "required": false,
     "unique": false
   },
+  "component_descriptions": {
+    "checks": [],
+    "coerce": false,
+    "description": "List of component descriptions.",
+    "dtype": "object",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "component_id": {
     "checks": [],
     "coerce": true,
@@ -248,8 +257,8 @@
   "taxonomy_id": {
     "checks": [],
     "coerce": false,
-    "description": "NCBI Taxonomy ID. Standardized name (was tax_id).",
-    "dtype": "int64",
+    "description": "NCBI Taxonomy ID (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false

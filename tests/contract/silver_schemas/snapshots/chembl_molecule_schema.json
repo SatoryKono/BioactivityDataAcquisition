@@ -186,8 +186,8 @@
   "first_approval": {
     "checks": [],
     "coerce": false,
-    "description": "Year of first approval.",
-    "dtype": "int64",
+    "description": "Year of first approval (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -200,7 +200,7 @@
       }
     ],
     "coerce": false,
-    "description": "First in class flag.",
+    "description": "First in class flag (-1=unknown).",
     "dtype": "int64",
     "nullable": true,
     "required": false,
@@ -279,7 +279,7 @@
       }
     ],
     "coerce": false,
-    "description": "Inorganic flag.",
+    "description": "Inorganic flag (-1=unknown).",
     "dtype": "int64",
     "nullable": true,
     "required": false,
@@ -435,7 +435,7 @@
       }
     ],
     "coerce": false,
-    "description": "Prodrug flag.",
+    "description": "Prodrug flag (-1=unknown).",
     "dtype": "int64",
     "nullable": true,
     "required": false,
@@ -705,8 +705,8 @@
       }
     ],
     "coerce": false,
-    "description": "USAN approval year.",
-    "dtype": "int64",
+    "description": "USAN approval year (float for nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false

@@ -85,7 +85,7 @@
     ],
     "coerce": false,
     "description": "Total stereocenters",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -98,7 +98,7 @@
     ],
     "coerce": false,
     "description": "Total E/Z bonds",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -124,7 +124,7 @@
     ],
     "coerce": false,
     "description": "Formal charge",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -162,8 +162,8 @@
       }
     ],
     "coerce": false,
-    "description": "Number of 3D conformers",
-    "dtype": "int64",
+    "description": "Number of 3D conformers (float for nullable int)",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -203,7 +203,7 @@
     ],
     "coerce": false,
     "description": "Number of covalent units",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -216,7 +216,7 @@
     ],
     "coerce": false,
     "description": "Defined stereocenters",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -229,7 +229,7 @@
     ],
     "coerce": false,
     "description": "Defined E/Z bonds",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -276,8 +276,8 @@
       }
     ],
     "coerce": false,
-    "description": "3D H-bond acceptor features",
-    "dtype": "int64",
+    "description": "3D H-bond acceptor features (float for nullable int)",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -289,8 +289,8 @@
       }
     ],
     "coerce": false,
-    "description": "3D anion features",
-    "dtype": "int64",
+    "description": "3D anion features (float for nullable int)",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -302,8 +302,8 @@
       }
     ],
     "coerce": false,
-    "description": "3D cation features",
-    "dtype": "int64",
+    "description": "3D cation features (float for nullable int)",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -315,8 +315,8 @@
       }
     ],
     "coerce": false,
-    "description": "Total count of 3D pharmacophore features",
-    "dtype": "int64",
+    "description": "Total count of 3D pharmacophore features (float for nullable int)",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -328,8 +328,8 @@
       }
     ],
     "coerce": false,
-    "description": "3D H-bond donor features",
-    "dtype": "int64",
+    "description": "3D H-bond donor features (float for nullable int)",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -341,8 +341,8 @@
       }
     ],
     "coerce": false,
-    "description": "3D hydrophobic features",
-    "dtype": "int64",
+    "description": "3D hydrophobic features (float for nullable int)",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -354,8 +354,8 @@
       }
     ],
     "coerce": false,
-    "description": "3D ring features",
-    "dtype": "int64",
+    "description": "3D ring features (float for nullable int)",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -368,7 +368,7 @@
     ],
     "coerce": false,
     "description": "Hydrogen bond acceptor count",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -381,7 +381,7 @@
     ],
     "coerce": false,
     "description": "Hydrogen bond donor count",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -394,7 +394,7 @@
     ],
     "coerce": false,
     "description": "Non-hydrogen atom count",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -446,7 +446,7 @@
     ],
     "coerce": false,
     "description": "Isotopic atom count",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -508,7 +508,7 @@
     ],
     "coerce": false,
     "description": "Rotatable bond count",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -534,7 +534,7 @@
     ],
     "coerce": false,
     "description": "Undefined stereocenters",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -547,7 +547,7 @@
     ],
     "coerce": false,
     "description": "Undefined E/Z bonds",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
