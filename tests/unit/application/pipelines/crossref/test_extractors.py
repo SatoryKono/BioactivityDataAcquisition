@@ -634,7 +634,9 @@ class TestExtractAuthorDetails:
     def test_invalid_ormolecule_id_format_ignored(self) -> None:
         """Should return None for invalid ORCID format."""
         publication = {
-            "author": [{"given": "John", "family": "Doe", "ORCID": "invalid-ormolecule_id"}]
+            "author": [
+                {"given": "John", "family": "Doe", "ORCID": "invalid-ormolecule_id"}
+            ]
         }
         result = extract_author_details(publication)
         assert result[0]["ormolecule_id"] is None

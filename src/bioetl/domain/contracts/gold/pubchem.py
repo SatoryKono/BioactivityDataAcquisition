@@ -23,7 +23,9 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     """
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    molecule_id: Series[str] = pa.Field(nullable=False)  # Canonical molecule id (was cid)
+    molecule_id: Series[str] = pa.Field(
+        nullable=False
+    )  # Canonical molecule id (was cid)
     molecular_formula: Series[str] = pa.Field(nullable=True)
     molecular_weight: Series[float] = pa.Field(
         nullable=True, coerce=True

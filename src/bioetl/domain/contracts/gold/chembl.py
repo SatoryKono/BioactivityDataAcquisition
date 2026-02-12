@@ -52,7 +52,9 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     # Target data
     target_pref_name: Series[str] = pa.Field(nullable=True)
     target_organism: Series[str] = pa.Field(nullable=True)
-    taxonomy_id: Series[float] = pa.Field(nullable=True, coerce=True)  # Standardized name
+    taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
 
     # Assay data
     assay_type: Series[str] = pa.Field(nullable=True)
@@ -491,9 +493,7 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
         nullable=True, coerce=True
     )  # int64
     heavy_atom_count: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    aromatic_ring_count: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64
+    aromatic_ring_count: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     hba_count: Series[float] = pa.Field(nullable=True, coerce=True)
     hbd_count: Series[float] = pa.Field(nullable=True, coerce=True)
     property_qed_weighted: Series[float] = pa.Field(nullable=True, coerce=True)

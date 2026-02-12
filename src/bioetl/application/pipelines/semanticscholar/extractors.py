@@ -19,9 +19,11 @@ from bioetl.application.pipelines.semanticscholar._author_extractors import (
     extract_author_h_indices,
     extract_author_ids,
     extract_author_orcids,
-    extract_author_orcids as extract_author_ormolecule_ids,
     extract_author_s2_ids,
     extract_authors,
+)
+from bioetl.application.pipelines.semanticscholar._author_extractors import (
+    extract_author_orcids as extract_author_ormolecule_ids,
 )
 from bioetl.application.pipelines.semanticscholar._page_parsing import (
     parse_page_range,

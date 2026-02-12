@@ -217,7 +217,10 @@ class PubChemFetchStrategies:
                 )
 
     async def fetch_by_molecule_ids(
-        self, molecule_id_list: list[str], limit: int | None = None, batch_size: int = 50
+        self,
+        molecule_id_list: list[str],
+        limit: int | None = None,
+        batch_size: int = 50,
     ) -> AsyncIterator[dict[str, Any]]:
         """Backward-compatible alias for CID-based fetch."""
         async for record in self.fetch_by_cids(

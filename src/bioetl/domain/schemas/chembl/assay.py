@@ -129,9 +129,7 @@ class AssaySchema(ETLRecordSchema):
     cell_id: Series[str] | None = pa.Field(
         nullable=True, description="FK to cell_line."
     )
-    tissue_id: Series[str] | None = pa.Field(
-        nullable=True, description="FK to tissue."
-    )
+    tissue_id: Series[str] | None = pa.Field(nullable=True, description="FK to tissue.")
     # variant_id: Optional[Series[int]] = pa.Field(
     #     nullable=True, description="FK to variant_sequences."
     # )

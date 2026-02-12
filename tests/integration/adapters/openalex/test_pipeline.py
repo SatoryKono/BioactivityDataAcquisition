@@ -132,9 +132,17 @@ class TestOpenAlexPublicationTransformerIntegration:
         )
 
         authorships = [
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"}},
+            {
+                "author": {
+                    "ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"
+                }
+            },
             {"author": {"ormolecule_id": None}},
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0002-3456-789X"}},
+            {
+                "author": {
+                    "ormolecule_id": "https://ormolecule_id.org/0000-0002-3456-789X"
+                }
+            },
         ]
 
         result = extract_author_ormolecule_ids(authorships)

@@ -125,7 +125,9 @@ class SubcellularFractionDataSource:
     @staticmethod
     def _compute_entity_id(subcellular_fraction: str) -> str:
         """Compute entity ID for a subcellular fraction."""
-        normalized = subcellular_fraction.lower().strip() if subcellular_fraction else ""
+        normalized = (
+            subcellular_fraction.lower().strip() if subcellular_fraction else ""
+        )
         composite = f"subcellular_fraction:{normalized}"
         return hashlib.sha256(composite.encode()).hexdigest()[:16]
 

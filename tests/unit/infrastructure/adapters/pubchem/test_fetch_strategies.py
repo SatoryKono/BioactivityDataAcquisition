@@ -47,7 +47,10 @@ def mock_entity_mapper():
     """Create a mock PubChemEntityMapper."""
     mapper = MagicMock()
     mapper.compound_to_dict = MagicMock(
-        side_effect=lambda c: {"molecule_id": getattr(c, "molecule_id", 1), "name": "test_compound"}
+        side_effect=lambda c: {
+            "molecule_id": getattr(c, "molecule_id", 1),
+            "name": "test_compound",
+        }
     )
     mapper.substance_to_dict = MagicMock(
         side_effect=lambda s: {"sid": getattr(s, "sid", 1), "name": "test_substance"}
@@ -307,7 +310,9 @@ class TestParseValidCids:
 
         assert result == [2244, 3672, 5988]
 
-    def test_parse_valid_molecule_ids_skips_invalid_molecule_ids(self, fetch_strategies, mock_logger):
+    def test_parse_valid_molecule_ids_skips_invalid_molecule_ids(
+        self, fetch_strategies, mock_logger
+    ):
         """Test that _parse_valid_molecule_ids skips invalid CIDs and logs warning."""
         molecule_id_list = ["2244", "invalid", "3672", ""]
 
@@ -348,7 +353,9 @@ class TestFetchByCids:
         # Create list with more CIDs than batch size
         molecule_id_list = [str(i) for i in range(120)]
         await collect_async_iterator(
-            fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=None, batch_size=50)
+            fetch_strategies.fetch_by_molecule_ids(
+                molecule_id_list, limit=None, batch_size=50
+            )
         )
 
         # Should have made 3 batches (50 + 50 + 20)
@@ -364,7 +371,9 @@ class TestFetchByCids:
 
         molecule_id_list = [str(i) for i in range(100)]
         results = await collect_async_iterator(
-            fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=5, batch_size=50)
+            fetch_strategies.fetch_by_molecule_ids(
+                molecule_id_list, limit=5, batch_size=50
+            )
         )
 
         assert len(results) == 5

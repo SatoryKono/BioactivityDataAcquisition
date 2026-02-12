@@ -85,7 +85,9 @@ class SaltConfig:
         current = os.getenv("BIOETL_PII_SALT_CURRENT", "")
         raw_next = os.getenv("BIOETL_PII_SALT_NEXT")
         next_salt = raw_next or None
-        rotation_active = os.getenv("BIOETL_SALT_ROTATION_ACTIVE", "").strip().lower() in {
+        rotation_active = os.getenv(
+            "BIOETL_SALT_ROTATION_ACTIVE", ""
+        ).strip().lower() in {
             "1",
             "true",
             "yes",

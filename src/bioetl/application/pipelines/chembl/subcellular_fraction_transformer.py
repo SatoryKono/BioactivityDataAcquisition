@@ -126,9 +126,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
             "assay_count": int(cast(Any, assay_count))
             if assay_count is not None
             else None,
-            "example_assay_id": (
-                str(example_assay).strip() if example_assay else None
-            ),
+            "example_assay_id": (str(example_assay).strip() if example_assay else None),
         }
 
     def compute_fraction_entity_id(
@@ -181,9 +179,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
 
         return {
             "subcellular_fraction": fraction,
-            "example_assay_id": str(assay_id)
-            if assay_id
-            else None,
+            "example_assay_id": str(assay_id) if assay_id else None,
             "assay_count": 1,
         }
 

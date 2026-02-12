@@ -51,9 +51,7 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
 _IDENTIFIERS = FieldGroup(
     name="identifiers",
     fields=(
-        *simple_fields(
-            "target_id", "assay_id", "publication_id"
-        ),
+        *simple_fields("target_id", "assay_id", "publication_id"),
         *int_fields("record_id", "src_id"),
     ),
 )
@@ -241,20 +239,20 @@ class ActivityTransformer(BaseChemblTransformer):
         }
 
         # Backward-compatible aliases from legacy ChEMBL field names.
-        business_data["target_id"] = (
-            business_data.get("target_id") or record.get("target_chembl_id")
+        business_data["target_id"] = business_data.get("target_id") or record.get(
+            "target_chembl_id"
         )
-        business_data["assay_id"] = (
-            business_data.get("assay_id") or record.get("assay_chembl_id")
+        business_data["assay_id"] = business_data.get("assay_id") or record.get(
+            "assay_chembl_id"
         )
-        business_data["publication_id"] = (
-            business_data.get("publication_id") or record.get("document_chembl_id")
-        )
-        business_data["publication_year"] = (
-            business_data.get("publication_year") or safe_int(record.get("document_year"))
-        )
-        business_data["journal"] = (
-            business_data.get("journal") or record.get("document_journal")
+        business_data["publication_id"] = business_data.get(
+            "publication_id"
+        ) or record.get("document_chembl_id")
+        business_data["publication_year"] = business_data.get(
+            "publication_year"
+        ) or safe_int(record.get("document_year"))
+        business_data["journal"] = business_data.get("journal") or record.get(
+            "document_journal"
         )
 
         return business_data
