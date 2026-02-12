@@ -104,6 +104,14 @@ def vcr(vcr_config: dict[str, object]) -> Any:  # type: ignore[override]
     return vcr_instance
 
 
+@pytest.fixture
+def noop_logger():
+    """Minimal no-op logger for tests."""
+    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
+    return NoOpLogger()
+
+
 # --- Publication Fixtures (Minimal DataFrames for Validation) ---
 
 # Columns from ETLRecordSchema (with aliases)
