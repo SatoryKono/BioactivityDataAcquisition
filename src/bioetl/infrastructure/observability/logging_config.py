@@ -200,8 +200,22 @@ def is_logging_configured() -> bool:
         return _configured
 
 
+def reset_logging_config() -> None:
+    """Reset the logging configuration state.
+
+    ONLY FOR USE IN TESTS. Resets internal state to allow configure_logging()
+    to be called again. Note that structlog.configure() itself cannot be
+    fully undone, but this allows re-calling our configuration wrapper.
+    """
+    global _configured, _current_format
+    with _config_lock:
+        _configured = False
+        _current_format = None
+
+
 __all__ = [
     "configure_logging",
     "is_logging_configured",
+    "reset_logging_config",
     "secret_filter_processor",
 ]

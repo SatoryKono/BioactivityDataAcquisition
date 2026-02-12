@@ -27,22 +27,22 @@ class ActivitySchema(ETLRecordSchema):
     activity_id: Series[str] = pa.Field(nullable=False, description="Primary key.")
 
     # === Foreign Keys ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to assay.",
     )
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to molecule.",
     )
-    target_chembl_id: Series[str] | None = pa.Field(
+    target_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to target.",
     )
-    document_chembl_id: Series[str] | None = pa.Field(
+    publication_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to document.",
@@ -159,7 +159,7 @@ class ActivitySchema(ETLRecordSchema):
         nullable=True, description="Surface Efficiency Index (SEI)."
     )
 
-    action_type_action_type: Series[str] | None = pa.Field(
+    action_type: Series[str] | None = pa.Field(
         nullable=True, description="Action type classification."
     )
     action_type_description: Series[str] | None = pa.Field(
@@ -180,7 +180,7 @@ class ActivitySchema(ETLRecordSchema):
     molecule_pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Molecule preferred name."
     )
-    parent_molecule_chembl_id: Series[str] | None = pa.Field(
+    parent_molecule_id: Series[str] | None = pa.Field(
         nullable=True, description="Parent molecule ChEMBL ID."
     )
     target_pref_name: Series[str] | None = pa.Field(
@@ -189,9 +189,9 @@ class ActivitySchema(ETLRecordSchema):
     target_organism: Series[str] | None = pa.Field(
         nullable=True, description="Target organism."
     )
-    target_taxonomy_id: Series[str] | None = pa.Field(
+    taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
-        description="Target taxonomy ID. Standardized name (was target_tax_id).",
+        description="Target taxonomy ID (nullable int pattern).",
     )
     assay_type: Series[str] | None = pa.Field(
         nullable=True, description="Assay type (B/F/A/T/P/U)."
@@ -211,10 +211,19 @@ class ActivitySchema(ETLRecordSchema):
     bao_label: Series[str] | None = pa.Field(
         nullable=True, description="BioAssay Ontology label."
     )
-    document_journal: Series[str] | None = pa.Field(
+    journal: Series[str] | None = pa.Field(
         nullable=True, description="Publication journal name."
     )
-    document_year: Series[int] | None = pa.Field(
+    publication_doi: Series[str] | None = pa.Field(
+        nullable=True, description="Publication DOI."
+    )
+    publication_pmid: Series[str] | None = pa.Field(
+        nullable=True, description="Publication PubMed ID."
+    )
+    publication_pmc_id: Series[str] | None = pa.Field(
+        nullable=True, description="Publication PubMed Central ID."
+    )
+    publication_year: Series[int] | None = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,

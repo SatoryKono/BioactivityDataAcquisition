@@ -12,10 +12,13 @@ Environment variables:
 from __future__ import annotations
 
 import hashlib
-import os
 import unicodedata
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config import Settings
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,20 +45,26 @@ class SaltConfig:
             )
 
     @classmethod
-    def from_env(cls) -> SaltConfig:
-        """Create SaltConfig from environment variables.
+    def from_settings(cls, settings: Settings) -> SaltConfig:
+        """Create SaltConfig from application settings.
 
         Raises:
-            ValueError: If BIOETL_PII_SALT_CURRENT is not set or too short.
+            ValueError: If pii_salt_current is not set or too short.
 
         Returns:
             SaltConfig instance.
         """
-        current = os.environ.get("BIOETL_PII_SALT_CURRENT", "")
-        next_salt = os.environ.get("BIOETL_PII_SALT_NEXT") or None
-        rotation_active = os.environ.get(
-            "BIOETL_SALT_ROTATION_ACTIVE", "false"
-        ).lower() in ("true", "1", "yes")
+        current = (
+            settings.pii_salt_current.get_secret_value()
+            if settings.pii_salt_current
+            else ""
+        )
+        next_salt = (
+            settings.pii_salt_next.get_secret_value()
+            if settings.pii_salt_next
+            else None
+        )
+        rotation_active = settings.pii_salt_rotation_active
 
         return cls(
             current_salt=current,
@@ -182,13 +191,13 @@ class Sha256PiiHasher:
         return self._salt_id
 
     @classmethod
-    def from_env(cls) -> Sha256PiiHasher:
-        """Create hasher from environment variables.
+    def from_settings(cls, settings: Settings) -> Sha256PiiHasher:
+        """Create hasher from application settings.
 
         Raises:
-            ValueError: If BIOETL_PII_SALT_CURRENT is not set.
+            ValueError: If pii_salt_current is not set.
 
         Returns:
             Configured Sha256PiiHasher instance.
         """
-        return cls(salt_config=SaltConfig.from_env())
+        return cls(salt_config=SaltConfig.from_settings(settings))

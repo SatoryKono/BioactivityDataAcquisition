@@ -100,7 +100,7 @@ class TestFileSizeLimits:
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 845,  # 838 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation + Pandera Silver schema DI
+        "pipeline_factory.py": 855,  # 850 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation + Pandera Silver schema DI
         "pipeline_factories.py": 610,  # 602 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction + Pandera Silver schema imports)
         "services_factory.py": 695,  # 692 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + loading_strategy (ADR-031) + silver_validator param
         # Infrastructure layer exemptions

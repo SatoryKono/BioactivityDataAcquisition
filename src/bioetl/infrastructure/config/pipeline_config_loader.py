@@ -47,15 +47,19 @@ class ConfigLoader:
         self,
         configs_root: Path,
         dq_loader: DQConfigLoader | None = None,
+        relaxed_dq: bool = False,
     ) -> None:
         """Initialize loader with configs root directory.
 
         Args:
             configs_root: Path to configs/ directory.
             dq_loader: Optional DQ config loader. Created automatically if None.
+            relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
         self._configs_root = configs_root
-        self._dq_loader = dq_loader or DQConfigLoader(configs_root)
+        self._dq_loader = dq_loader or DQConfigLoader(
+            configs_root, relaxed_dq=relaxed_dq
+        )
 
     def load_pipeline_config(self, pipeline_name: str) -> PipelineYamlConfig:
         """Load pipeline configuration from YAML file.

@@ -71,17 +71,20 @@ ______________________________________________________________________
 
 **Файл:** `src/bioetl/domain/entities/bioactivity.py`
 
-Сущность `Activity` содержит **57 полей**, сгруппированных по категориям:
+Сущность `Bioactivity` содержит **63 dataclass-поля** (включая унаследованные служебные поля `BaseEntity`), сгруппированных по категориям:
 
 #### Идентификаторы
 
 | Поле                 | Тип   | Обязательное | Описание                                   |
 | -------------------- | ----- | ------------ | ------------------------------------------ |
 | `activity_id`        | `str` | **Да**       | Уникальный идентификатор записи активности |
-| `molecule_chembl_id` | `str` | **Да**       | ChEMBL ID молекулы (например, `CHEMBL25`)  |
-| `target_chembl_id`   | `str` | Нет          | ChEMBL ID мишени                           |
-| `assay_chembl_id`    | `str` | Нет          | ChEMBL ID анализа                          |
-| `document_chembl_id` | `str` | Нет          | ChEMBL ID публикации                       |
+| `molecule_id`        | `str` | **Да**       | Канонический ID молекулы (например, `CHEMBL25`) |
+| `target_id`          | `str` | Нет          | Канонический ID мишени                     |
+| `assay_id`           | `str` | Нет          | Канонический ID анализа                    |
+| `publication_id`     | `str` | Нет          | Канонический ID публикации (provider PK)   |
+| `publication_doi`    | `str` | Нет          | DOI публикации                             |
+| `publication_pmid`   | `str` | Нет          | PubMed ID                                  |
+| `publication_pmc_id` | `str` | Нет          | PubMed Central ID                          |
 | `record_id`          | `int` | Нет          | Внутренний ID записи                       |
 | `src_id`             | `int` | Нет          | ID источника данных                        |
 
@@ -91,25 +94,27 @@ ______________________________________________________________________
 | --------------------------- | ----- | ---------------------------------- |
 | `canonical_smiles`          | `str` | SMILES-формула молекулы            |
 | `molecule_pref_name`        | `str` | Предпочтительное название молекулы |
-| `parent_molecule_chembl_id` | `str` | ID родительской молекулы           |
+| `parent_molecule_id`        | `str` | ID родительской молекулы           |
 
 #### Данные мишени
 
-| Поле               | Тип   | Описание           |
-| ------------------ | ----- | ------------------ |
-| `target_pref_name` | `str` | Название мишени    |
-| `target_organism`  | `str` | Организм мишени    |
-| `target_tax_id`    | `str` | Таксономический ID |
+|Поле|Тип|Описание|
+|---|---|---|
+|`target_pref_name`|`str`|Название мишени|
+|`target_organism`|`str`|Организм мишени|
+|`taxonomy_id`|`float`|NCBI Taxonomy ID (nullable int pattern)|
 
 #### Данные анализа
 
-| Поле                | Тип   | Описание                    |
-| ------------------- | ----- | --------------------------- |
-| `assay_type`        | `str` | Тип анализа (B, F, A, T, P) |
-| `assay_description` | `str` | Описание анализа            |
-| `bao_endpoint`      | `str` | BAO endpoint (онтология)    |
-| `bao_format`        | `str` | BAO format                  |
-| `bao_label`         | `str` | BAO label                   |
+|Поле|Тип|Описание|
+|---|---|---|
+|`assay_type`|`str`|Тип анализа (B, F, A, T, P)|
+|`assay_description`|`str`|Описание анализа|
+|`assay_variant_accession`|`str`|Accession варианта белка в анализе|
+|`assay_variant_mutation`|`str`|Мутация варианта в анализе|
+|`bao_endpoint`|`str`|BAO endpoint (онтология)|
+|`bao_format`|`str`|BAO format|
+|`bao_label`|`str`|BAO label|
 
 #### Сырые значения активности
 
@@ -121,6 +126,8 @@ ______________________________________________________________________
 | `relation`    | `str`   | Отношение (`=`, `<`, `>`, `~`) |
 | `upper_value` | `float` | Верхняя граница диапазона      |
 | `text_value`  | `str`   | Текстовое значение             |
+| `qudt_units`  | `str`   | Единицы из онтологии QUDT      |
+| `uo_units`    | `str`   | Единицы из онтологии UO        |
 
 #### Стандартизированные значения
 
@@ -131,6 +138,7 @@ ______________________________________________________________________
 | `standard_units`       | `str`   | Единицы: nM, uM, и др.                                               |
 | `standard_relation`    | `str`   | Отношение                                                            |
 | `standard_upper_value` | `float` | Верхняя граница                                                      |
+| `standard_text_value`  | `str`   | Текстовое стандартизированное значение                               |
 | `standard_flag`        | `int`   | Флаг стандартизации                                                  |
 
 #### Вычисляемые метрики
@@ -150,22 +158,31 @@ ______________________________________________________________________
 
 > **Примечание**: Все метрики ligand_efficiency вычисляются ChEMBL и предоставляются через API. В Silver слое они разворачиваются из вложенного словаря в отдельные колонки для удобства аналитики.
 
+#### Данные публикации (Document/Publication data)
+
+| Поле               | Тип   | Описание                              |
+| ------------------ | ----- | ------------------------------------- |
+| `journal`          | `str` | Журнал публикации                     |
+| `publication_year` | `int` | Год публикации                        |
+
 #### Метаданные качества
 
-| Поле                        | Тип   | Описание                      |
-| --------------------------- | ----- | ----------------------------- |
-| `activity_comment`          | `str` | Комментарий к активности      |
-| `data_validity_comment`     | `str` | Комментарий о валидности      |
-| `data_validity_description` | `str` | Описание проблемы с данными   |
-| `potential_duplicate`       | `int` | Флаг потенциального дубликата |
+|Поле|Тип|Описание|
+|---|---|---|
+|`activity_comment`|`str`|Комментарий к активности|
+|`data_validity_comment`|`str`|Комментарий о валидности|
+|`data_validity_description`|`str`|Описание проблемы с данными|
+|`potential_duplicate`|`int`|Флаг потенциального дубликата|
+|`manual_curation_flag`|`int`|Флаг ручной кураторской проверки (0/1)|
+|`original_activity_id`|`int`|ID исходной записи активности (traceability)|
 
 #### Тип действия (Action Type)
 
 Поля развёрнуты из вложенного словаря ChEMBL API (`action_type`):
 
-| Поле                      | Тип   | Описание                                            |
-| ------------------------- | ----- | --------------------------------------------------- |
-| `action_type_action_type` | `str` | Тип действия: INHIBITOR, AGONIST, ANTAGONIST и др.  |
+| Поле               | Тип   | Описание                                            |
+| ------------------ | ----- | --------------------------------------------------- |
+| `action_type`      | `str` | Тип действия: INHIBITOR, AGONIST, ANTAGONIST и др.  |
 | `action_type_description` | `str` | Описание типа действия                              |
 | `action_type_parent_type` | `str` | Родительская группа типа действия (может быть null) |
 
@@ -190,7 +207,7 @@ ______________________________________________________________________
 def _validate_invariants(self) -> None:
     if not self.activity_id:
         raise ValueError("Activity ID is required")
-    if not self.molecule_chembl_id:
+    if not self.molecule_id:
         raise ValueError("Molecule ID is required")
     if self.pchembl_value is not None and self.pchembl_value < 0:
         raise ValueError("pChemBL value must be non-negative")
@@ -272,7 +289,7 @@ ______________________________________________________________________
 
 1. **`standard_value` > 0** — не null, не отрицательный
 1. **`standard_type`** ∈ {IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, EC50, Kd, ...}
-1. **`molecule_chembl_id`** соответствует regex `^CHEMBL\d+$`
+1. **`molecule_id`** соответствует regex `^CHEMBL\d+$`
 
 ### 5.3. Пороги ошибок
 
@@ -341,8 +358,15 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("entity_id", pa.string()),
         pa.field("content_hash", pa.string()),
         pa.field("activity_id", pa.string()),
-        pa.field("molecule_chembl_id", pa.string()),
-        pa.field("target_chembl_id", pa.string()),
+        pa.field("molecule_id", pa.string()),
+        pa.field("target_id", pa.string()),
+        pa.field("assay_id", pa.string()),
+        pa.field("publication_id", pa.string()),
+        pa.field("publication_doi", pa.string()),
+        pa.field("publication_pmid", pa.string()),
+        pa.field("publication_pmc_id", pa.string()),
+        pa.field("journal", pa.string()),
+        pa.field("publication_year", pa.int64()),
         pa.field("standard_type", pa.string()),
         pa.field("standard_value", pa.float64()),
         pa.field("standard_units", pa.string()),
@@ -350,7 +374,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("_run_id", pa.string()),
         pa.field("_run_type", pa.string()),
         pa.field("_ingestion_ts", pa.string()),
-        # ... всего 57 полей (включая action_type_*)
+        # ... всего 62 поля (включая action_type*)
     ]
 )
 ```
@@ -376,7 +400,7 @@ def should_include(self, context, record) -> bool:
         [
             record.get("standard_value") is not None,  # Есть значение
             record.get("standard_units"),  # Есть единицы
-            record.get("target_chembl_id"),  # Есть мишень
+            record.get("target_id"),  # Есть мишень
             record.get("standard_type") in {"IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"},  # 9 типов
             not record.get("data_validity_comment"),  # Нет флагов проблем
         ]
@@ -397,13 +421,13 @@ def should_include(self, context, record) -> bool:
 {
     "required": [
         "activity_id",
-        "molecule_chembl_id",
+        "molecule_id",
         "_content_hash",
         "_ingestion_ts"
     ],
     "properties": {
         "activity_id": {"type": "integer"},
-        "molecule_chembl_id": {"type": "string", "pattern": "^CHEMBL\\d+$"},
+        "molecule_id": {"type": "string", "pattern": "^CHEMBL\\d+$"},
         "standard_type": {"type": "string"},
         "standard_value": {"type": ["number", "null"]},
         "pchembl_value": {"type": ["number", "null"]}
@@ -438,7 +462,7 @@ ChEMBL API (/activity.json)
 │  ─────────────────────────────────────  │
 │  • Формат: Delta Lake                   │
 │  • Merge by: activity_id                │
-│  • Schema: 57 полей (PyArrow)           │
+│  • Schema: 62 поля (PyArrow)            │
 │  • Партиции: year/month                 │
 └─────────────────────────────────────────┘
          │

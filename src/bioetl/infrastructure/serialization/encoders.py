@@ -23,7 +23,6 @@ Feature Flag:
 from __future__ import annotations
 
 import json
-import os
 import types
 from functools import lru_cache
 from typing import Any
@@ -199,14 +198,15 @@ class OrjsonEncoder:
 
 
 @lru_cache(maxsize=1)
-def get_json_encoder() -> JsonEncoderPort:
+def get_json_encoder(encoder_type: str | None = None) -> JsonEncoderPort:
     """Get the configured JSON encoder instance.
 
     Selection logic:
-    1. Check BIOETL_JSON_ENCODER environment variable
-       - "orjson": Use OrjsonEncoder (error if not available)
-       - "stdlib": Use StdLibJsonEncoder
-    2. If not set, use orjson if available, otherwise stdlib
+    1. Use provided encoder_type if not None
+    2. If None, use orjson if available, otherwise stdlib
+
+    Args:
+        encoder_type: Optional encoder type ('orjson' or 'stdlib').
 
     Returns:
         JsonEncoderPort implementation
@@ -215,22 +215,22 @@ def get_json_encoder() -> JsonEncoderPort:
         ImportError: If orjson is requested but not installed
         ValueError: If unknown encoder type is specified
     """
-    encoder_type = os.environ.get("BIOETL_JSON_ENCODER", "").lower()
+    effective_type = (encoder_type or "").lower()
 
-    if encoder_type == "orjson":
+    if effective_type == "orjson":
         if not ORJSON_AVAILABLE:
             raise ImportError(
-                "BIOETL_JSON_ENCODER=orjson but orjson is not installed. "
+                "JSON encoder 'orjson' requested but not installed. "
                 "Install with: pip install orjson"
             )
         return OrjsonEncoder()
 
-    if encoder_type == "stdlib":
+    if effective_type == "stdlib":
         return StdLibJsonEncoder()
 
-    if encoder_type and encoder_type not in ("orjson", "stdlib", ""):
+    if effective_type and effective_type not in ("orjson", "stdlib", ""):
         raise ValueError(
-            f"Unknown JSON encoder type: {encoder_type}. "
+            f"Unknown JSON encoder type: {effective_type}. "
             "Valid options: 'orjson', 'stdlib'"
         )
 

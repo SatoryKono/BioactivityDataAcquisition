@@ -31,7 +31,7 @@ source .venv/bin/activate  # Linux/macOS
 bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 
 # Data will be stored in:
-# - data/output/bronze/chembl/activity/{date}/
+# - data/output/bronze/chembl/activity/
 # - data/output/silver/chembl/activity/
 # - data/output/gold/chembl/activity/
 ```
@@ -60,7 +60,7 @@ make lint
 
 ## Project Structure (Data)
 
-```
+```text
 data/
 └── output/
     ├── bronze/          # Raw API responses (JSONL + zstd)

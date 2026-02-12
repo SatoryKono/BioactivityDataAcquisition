@@ -2,6 +2,86 @@
 
 *Версия: 2.1.0 | Дата: 2026-02-11 | Обновлено с учётом main (3ba7aea)*
 
+**Новые артефакты:** 
+- `docs/03-data-model/field-catalog-source-pipelines.md` — полный каталог бизнес-полей source-пайплайнов.
+- `docs/03-data-model/field-naming-unification-matrix.md` — матрица расхождений и целевая номенклатура.
+- `docs/03-data-model/field-migration-checklist.md` — поэтапный план внедрения и проверок.
+
+---
+
+## Промты для модификации кода (без обратной совместимости)
+
+Использовать при выполнении миграции: оставляем только канонические имена, legacy-колонки не сохраняем.
+
+**Промт: единое имя поля**
+```
+Задача: переименовать поле {old_name} в {new_name} в пайплайне {pipeline} без сохранения старого имени.
+Контекст:
+- Привести трансформер и Pandera схемы (silver/gold) к {new_name};
+- Перед записью Silver/Gold — валидировать против Pandera-схемы; при ошибке запись не выполнять;
+- Обновить data_schema, DQ, composite field_groups под {new_name};
+- Обновить join/field_groups/configs в composite; выполнить REBUILD затронутых таблиц;
+- Обновить mapping/field_groups, если используют {old_name}.
+Требования:
+- Тип и nullability сохранить;
+- Порядок колонок по RULES.md §2.9.4 (Column order) + стабильная сортировка строк по бизнес-ключам;
+- Тесты: обновить/добавить golden/unit на новый набор колонок; убедиться, что повторный прогон даёт бит-в-бит идентичный результат;
+- Удалить упоминания {old_name} в коде и документации.
+
+Полный список переименований (без обратной совместимости):
+- publication ids: `doi`→`publication_doi`, `pmid`→`publication_pmid`, `pmc_id`→`publication_pmc_id`, `document_chembl_id`/`paper_id`/`openalex_id`→`publication_id`.
+- publication контекст: `document_year`→`publication_year`, `document_journal`→`journal`.
+- taxonomy: `target_taxonomy_id`/`assay_taxonomy_id`/`variant_taxonomy_id`/`cell_source_taxonomy_id`/`organism_id`→`taxonomy_id` (float, nullable int pattern).
+- activity action: `action_type_action_type`→`action_type`.
+- molecule ids: `molecule_chembl_id`/`cid`→`molecule_id`.
+- molecule структуры: `structure_standard_inchi_key`→`inchi_key`.
+- molecule компоненты: `component_id`→`primary_component_id`.
+- молекулярные свойства:
+  - `property_full_mwt`→`molecular_weight`;
+  - `property_alogp`/`xlogp`→`logp` (+`logp_method`);
+  - `property_psa`/`tpsa`→`polar_surface_area`;
+  - `property_rtb`→`rotatable_bond_count`;
+  - `property_heavy_atoms`→`heavy_atom_count`;
+  - `property_aromatic_rings`→`aromatic_ring_count`;
+  - `property_hba`→`hba_count`; `property_hbd`→`hbd_count`.
+```
+
+**Промт: нормализация таксономии**
+```
+Цель: унифицировать taxonomy поля в {pipelines} к `taxonomy_id:int64`.
+Шаги:
+- В трансформерах конвертировать все варианты ({variants}) → taxonomy_id:int64;
+- В схемах заменить поля на taxonomy_id:int64;
+- Обновить все join/lookup на taxonomy_id;
+- Удалить legacy поля {legacy_fields};
+- Обновить DQ (валидировать положительное int) и data_schema.
+```
+
+**Промт: молекулярные свойства**
+```
+Цель: унифицировать свойства к канону:
+- molecular_weight (float64) — alias property_full_mwt/molecular_weight;
+- logp (float64) + logp_method (string: alogp|xlogp);
+- polar_surface_area (float64) — alias property_psa/tpsa.
+Действия:
+- В трансформерах: rename + derive logp_method;
+- В схемах: оставить только канон, удалить legacy;
+- В документации/field_groups обновить имена;
+- Тесты: golden по колонкам и типам.
+```
+
+**Промт: публикационные идентификаторы**
+```
+Цель: привести ключи публикаций к канону:
+- publication_id (provider PK);
+- publication_doi, publication_pmid, publication_pmc_id.
+Шаги:
+- В трансформерах: map provider PK → publication_id, убрать document_* и paper_id/openalex_id;
+- В схемах: оставить только canonical поля;
+- В composite/pipelines: обновить join-ключи;
+- Тесты: golden + валидация на уникальность publication_id.
+```
+
 ---
 
 ## 0. Контекст: Publication Unification Precedent
@@ -52,7 +132,7 @@ Molecule cross-provider naming (N-06).
 | N-06 | MEDIUM | Cross-provider naming: physicochemical properties | ChEMBL: `property_alogp`, PubChem: `xlogp` |
 | N-07 | MEDIUM | Inconsistent flatten prefixes | `property_*`, `hierarchy_*`, `ligand_efficiency_*`, но `canonical_smiles` без prefix |
 | N-08 | LOW | Singular/plural ambiguity | `component_id` (scalar) vs `component_ids` (list) |
-| N-09 | LOW | InChI Key dual naming | `structure_standard_inchi_key` (top-level alias) vs `inchikey` (flattened) |
+| N-09 | LOW | InChI Key dual naming | `structure_standard_inchi_key` (top-level alias) vs `inchi_key` (flattened) |
 | N-10 | HIGH | Publication ↔ Activity context naming gap | Activity: `document_year`, Publication unified: `publication_year`; Activity: `document_journal`, Publication: `journal` |
 
 ---
@@ -149,9 +229,9 @@ Composite Molecule pipeline объединяет ChEMBL и PubChem данные 
 | Polar Surface Area | `property_psa` | `tpsa` | Оба сохранены |
 | H-Bond Acceptors | `property_hba` | `hba` | Оба сохранены |
 | H-Bond Donors | `property_hbd` | `hbd` | Оба сохранены |
-| Rotatable Bonds | `property_rtb` | `rotatable_bonds` | Оба сохранены |
+| Rotatable Bonds | `property_rtb` | `rotatable_bond_count` | Каноническое имя: `rotatable_bond_count`; в PubChem поле отсутствует |
 | Heavy Atoms | `property_heavy_atoms` | `heavy_atom_count` | Оба сохранены |
-| Aromatic Rings | `property_aromatic_rings` | `aromatic_rings` | Оба сохранены |
+| Aromatic Rings | `property_aromatic_rings` | `aromatic_ring_count` | Каноническое имя: `aromatic_ring_count` |
 | Molecular Weight | `property_full_mwt` | `molecular_weight` | Оба сохранены |
 
 **Текущий подход:** `preserve_all_sources: true` — сохраняются обе колонки. Это осознанное решение (данные отличаются: ALogP ≠ XLogP3, разные методы расчёта). Но naming convention всё равно нуждается в стандартизации.
@@ -164,7 +244,7 @@ Composite Molecule pipeline объединяет ChEMBL и PubChem данные 
 |--------------|--------|---------|
 | `molecule_properties` | `property_` | `property_alogp`, `property_hba` |
 | `molecule_hierarchy` | `hierarchy_` | `hierarchy_parent_chembl_id` |
-| `molecule_structures` | `""` (пусто) | `canonical_smiles`, `inchikey` |
+| `molecule_structures` | `""` (пусто) | `canonical_smiles`, `inchi_key` |
 | `ligand_efficiency` | `ligand_efficiency_` | `ligand_efficiency_bei` |
 | `action_type` | `action_type_` | `action_type_description` |
 | `variant_sequence` | `variant_` | `variant_accession` |
@@ -189,9 +269,9 @@ Composite Molecule pipeline объединяет ChEMBL и PubChem данные 
 | Поле | Источник | Слой |
 |------|----------|------|
 | `structure_standard_inchi_key` | Top-level alias от ChEMBL API | Silver (Molecule schema, line 41) |
-| `inchikey` | Flattened из `molecule_structures` | Silver + Gold (Molecule schema, line 229) |
+| `inchi_key` | Flattened из `molecule_structures` | Silver + Gold (Molecule schema, line 229) |
 
-Два поля содержат одни и те же данные. `structure_standard_inchi_key` — это top-level alias, `inchikey` — результат flatten.
+Два поля содержат одни и те же данные. `structure_standard_inchi_key` — это top-level alias, `inchi_key` — результат flatten.
 
 ---
 
@@ -369,15 +449,17 @@ _PUBCHEM_MOLECULE_MAPPING: Final[dict[str, str]] = {
 
 **Проблема:** Activity использует `document_year` / `document_journal`, а Publication ecosystem — `publication_year` / `journal`.
 
-**Стратегия:** НЕ переименовывать Activity поля (breaking change с малой пользой). Вместо этого:
+**Стратегия (breaking-now):** Переименовать Activity поля сразу в unified naming (`publication_year`, `journal`, `publication_id`, `publication_doi`/`publication_pmid`/`publication_pmc_id`) без сохранения `document_*`.
 
 | Шаг | Действие |
 |-----|----------|
-| 1 | В будущем Composite Activity + Publication merge, добавить field_mapping: `document_year` → `publication_year` |
-| 2 | Документировать маппинг в `configs/pipelines/composite/activity.yaml` merge section |
-| 3 | В Gold Composite Activity schema использовать unified name `publication_year` |
+| 1 | В `activity_transformer.py` генерировать publication_* поля и `publication_id`; удалить `document_*` |
+| 2 | В Activity Silver/Gold схемах оставить только unified имена |
+| 3 | В `composite/activity.yaml` обновить join/field_groups/validations на publication_* |
+| 4 | Обновить DQ/data_schema/field_groups на publication_* |
+| 5 | Обновить тесты и REBUILD Activity Silver/Gold |
 
-**Обоснование:** Activity Silver хранит денормализованные контекстные поля (prefix `document_*`). Publication Silver использует unified naming. Reconciliation происходит в Composite merge layer, не в отдельных Silver-схемах. Это согласуется с паттерном Publication unification, где rename тоже выполняется через `FIELD_MAPPING`, а не через переименование в исходном Silver.
+**Обоснование:** Принята стратегия breaking rename без legacy. Unified naming выравнивает Activity с Publication pipelines и убирает дубли контекстных полей.
 
 ---
 
@@ -395,12 +477,12 @@ _PUBCHEM_MOLECULE_MAPPING: Final[dict[str, str]] = {
 
 #### RF-NAMING-08: Удалить `structure_standard_inchi_key` alias
 
-Поле `structure_standard_inchi_key` в Molecule Silver schema дублирует `inchikey`. Одно из них нужно удалить.
+Поле `structure_standard_inchi_key` в Molecule Silver schema дублирует `inchi_key`. Одно из них нужно удалить.
 
 | Шаг | Действие |
 |-----|----------|
 | 1 | Проверить, используется ли `structure_standard_inchi_key` downstream |
-| 2 | Если нет — удалить из Silver schema, оставить `inchikey` |
+| 2 | Если нет — удалить из Silver schema, оставить `inchi_key` |
 | 3 | Если да — deprecate с forward alias в Gold |
 
 ---
@@ -435,7 +517,7 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
      ├── RF-NAMING-06 (flatten prefix doc)
      │
      ├── RF-NAMING-07 (component_id rename)
-     └── RF-NAMING-08 (inchikey dedup)
+     └── RF-NAMING-08 (inchi_key dedup)
 ```
 
 ---
@@ -471,7 +553,7 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
 6. **RF-NAMING-06** — flatten prefix documentation
 
 ### Batch 4 (Low — polish)
-7. **RF-NAMING-07** + **RF-NAMING-08** — component_id + inchikey cleanup
+7. **RF-NAMING-07** + **RF-NAMING-08** — component_id + inchi_key cleanup
 
 ### Post-migration
 8. Один REBUILD для Activity + CellLine + Target + Molecule (можно объединить)

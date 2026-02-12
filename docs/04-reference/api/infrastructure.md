@@ -123,17 +123,20 @@ All HTTP adapters use `UnifiedHTTPClient` for consistent behavior:
 - Retry with exponential backoff
 - Request/response metrics
 - Structured logging
+- Composition over Inheritance: resilience and observability are injected via ports (ADR-032)
+
+Constructor dependencies (dependency injection):
 
 ```python
 from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
+from bioetl.domain.ports import CircuitBreakerPort, MetricsPort, RateLimiterPort
+from bioetl.domain.resilience import RetryConfig
 
 client = UnifiedHTTPClient(
-    rate_limiter=rate_limiter,
-    circuit_breaker=circuit_breaker,
-    retry_config=retry_config,
-    metrics=metrics,
-    logger=logger,
-    tracer=tracer,
+    rate_limiter=rate_limiter,      # RateLimiterPort
+    circuit_breaker=circuit_breaker,  # CircuitBreakerPort
+    retry_config=retry_config,      # RetryConfig
+    metrics=metrics,                # MetricsPort
 )
 ```
 
