@@ -49,13 +49,12 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # Legacy compatibility aliases kept during naming migration
         pa.field("doi", pa.string()),
         pa.field("pmid", pa.string()),
-        pa.field("publication_doi", pa.string()),
-        pa.field("publication_pmc_id", pa.string()),  # Not available from ChEMBL API (None values)
-        pa.field("publication_pmid", pa.string()),  # Unified: from pubmed_id
+        pa.field("doi", pa.string()),
+        pa.field("pmc_id", pa.string()),  # Not available from ChEMBL API (None values)
+        pa.field("pmid", pa.string()),
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("affiliation_list", pa.string()),  # JSON array (None for ChEMBL)
-        pa.field("author_orcids", pa.string()),  # JSON array (None for ChEMBL)
         pa.field("author_ormolecule_ids", pa.string()),
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
         pa.field(
@@ -101,14 +100,14 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("action_type", pa.string()),
+        pa.field("action_type_action_type", pa.string()),
         pa.field("action_type_description", pa.string()),
         pa.field("action_type_parent_type", pa.string()),
         pa.field("activity_comment", pa.string()),
         pa.field("activity_id", pa.string()),
         pa.field("activity_properties", pa.string()),  # JSON string
-        pa.field("assay_description", pa.string()),
         pa.field("assay_id", pa.string()),
+        pa.field("assay_description", pa.string()),
         pa.field("assay_type", pa.string()),
         pa.field("assay_variant_accession", pa.string()),
         pa.field("assay_variant_mutation", pa.string()),
@@ -118,6 +117,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("canonical_smiles", pa.string()),
         pa.field("data_validity_comment", pa.string()),
         pa.field("data_validity_description", pa.string()),
+        pa.field("publication_id", pa.string()),
         pa.field("journal", pa.string()),
         pa.field("ligand_efficiency_bei", pa.float64()),
         pa.field("ligand_efficiency_le", pa.float64()),
@@ -130,10 +130,6 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("parent_molecule_id", pa.string()),
         pa.field("pchembl_value", pa.float64()),
         pa.field("potential_duplicate", pa.int64()),
-        pa.field("publication_doi", pa.string()),
-        pa.field("publication_id", pa.string()),
-        pa.field("publication_pmc_id", pa.string()),
-        pa.field("publication_pmid", pa.string()),
         pa.field("publication_year", pa.int64()),
         pa.field("qudt_units", pa.string()),
         pa.field("record_id", pa.int64()),
@@ -469,23 +465,21 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Flattened component fields
         pa.field("component_accessions", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
-        pa.field("primary_component_id", pa.float64()),  # Float for nullable int
         pa.field("component_ids", pa.list_(pa.int64())),
         pa.field("component_relationships", pa.list_(pa.string())),
         pa.field("component_types", pa.list_(pa.string())),
-        # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
         pa.field("downgraded", pa.bool_()),
         pa.field("organism", pa.string()),
         pa.field("pipeline_stages", pa.string()),
         pa.field("pref_name", pa.string()),
+        pa.field("primary_component_id", pa.float64()),  # Float for nullable int
         pa.field("species_group_flag", pa.bool_()),
-        pa.field("target_id", pa.string()),
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_components", pa.string()),
+        pa.field("target_id", pa.string()),
         pa.field("target_type", pa.string()),
         pa.field("taxonomy_id", pa.float64()),  # Float for nullable int
         # Note: protein_classifications not available in /target endpoint
@@ -617,9 +611,8 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("publication_id", pa.string()),
-        # MeSH-specific fields
         pa.field("mesh_id", pa.string()),
+        pa.field("publication_id", pa.string()),
         pa.field("qualifier", pa.string()),
         pa.field("term", pa.string()),
         pa.field("term_type", pa.string()),
@@ -646,17 +639,14 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("atc_classifications", pa.string()),
         pa.field("availability_type", pa.float64()),  # Float for nullable int
         pa.field("black_box_warning", pa.int64()),
-        # Flattened Structures (unified naming without structure_ prefix)
         pa.field("canonical_smiles", pa.string()),
         pa.field("chirality", pa.int64()),
-        # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
         pa.field("dosed_ingredient", pa.int64()),
         pa.field("first_approval", pa.float64()),  # Float for nullable int
         pa.field("first_in_class", pa.int64()),
-        pa.field("helm_notation", pa.string()),
         pa.field("heavy_atom_count", pa.int64()),
-        # Flattened Hierarchy
+        pa.field("helm_notation", pa.string()),
         pa.field("hierarchy_active_chembl_id", pa.string()),
         pa.field("hierarchy_child_chembl_id", pa.string()),
         pa.field("hierarchy_parent_chembl_id", pa.string()),
@@ -665,6 +655,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("logp", pa.float64()),
         pa.field("logp_method", pa.string()),
         pa.field("max_phase", pa.int64()),
+        pa.field("molecular_weight", pa.float64()),
         pa.field("molecule_hierarchy", pa.string()),
         pa.field("molecule_id", pa.string()),
         pa.field("molecule_properties", pa.string()),
@@ -672,9 +663,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("molecule_structures", pa.string()),
         pa.field("molecule_synonyms", pa.string()),
         pa.field("molecule_type", pa.string()),
-        pa.field("molecular_weight", pa.float64()),
         pa.field("natural_product", pa.int64()),
-        # Flags
         pa.field("oral", pa.bool_()),
         pa.field("parenteral", pa.bool_()),
         pa.field("polar_surface_area", pa.float64()),
@@ -691,7 +680,6 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("structure_type", pa.string()),
         pa.field("therapeutic_flag", pa.bool_()),
         pa.field("topical", pa.bool_()),
-        # USAN naming
         pa.field("usan_stem", pa.string()),
         pa.field("usan_stem_definition", pa.string()),
         pa.field("usan_substem", pa.string()),
@@ -1043,7 +1031,7 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         # Foreign key
-        pa.field("assay_chembl_id", pa.string()),
+        pa.field("assay_id", pa.string()),
         # Primary identifier (surrogate)
         pa.field("assay_param_id", pa.int64()),
         pa.field("comments", pa.string()),
