@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
+from typing import Any
 
 import pytest
-from hypothesis import settings, Verbosity
+from hypothesis import settings
 
 # --- Hypothesis Configuration ---
 # Profiles defined in docs/03-guides/testing.md
@@ -35,9 +36,26 @@ def src_dir(project_root: Path) -> Path:
         pytest.skip("Source directory not found: src")
     return src_path
 
+
+@pytest.fixture
+def isolated_registry() -> Any:
+    """Return a fresh pipeline registry instance for test isolation."""
+    from bioetl.composition.registry import create_registry
+
+    return create_registry()
+
+
+@pytest.fixture
+def populated_isolated_registry(isolated_registry: Any) -> Any:
+    """Return isolated registry pre-populated with all pipelines."""
+    from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+
+    register_all_pipelines(registry=isolated_registry)
+    return isolated_registry
+
 # --- VCR Configuration ---
 @pytest.fixture(scope="module")
-def vcr_config():
+def vcr_config() -> dict[str, object]:
     """VCR configuration for integration tests."""
     return {
         "filter_headers": ["authorization", "x-api-key", "cookie"],

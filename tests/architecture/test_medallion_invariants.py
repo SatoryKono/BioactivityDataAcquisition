@@ -192,6 +192,7 @@ from bioetl.domain.types import RunType
 
 
 class TestMedallionClearPolicy:
+    @pytest.mark.asyncio
     async def test_rebuild_clears_silver_and_gold(self) -> None:
         storage = Mock()
         storage.clear_silver = AsyncMock(return_value=1)
@@ -207,6 +208,7 @@ class TestMedallionClearPolicy:
         storage.clear_silver.assert_awaited_once()
         storage.clear_gold.assert_awaited_once()
 
+    @pytest.mark.asyncio
     async def test_backfill_clears_silver_and_gold(self) -> None:
         storage = Mock()
         storage.clear_silver = AsyncMock(return_value=1)
@@ -222,6 +224,7 @@ class TestMedallionClearPolicy:
         storage.clear_silver.assert_awaited_once()
         storage.clear_gold.assert_awaited_once()
 
+    @pytest.mark.asyncio
     async def test_incremental_does_not_clear_silver_and_gold(self) -> None:
         storage = Mock()
         storage.clear_silver = AsyncMock(return_value=1)
