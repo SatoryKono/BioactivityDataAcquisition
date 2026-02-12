@@ -50,7 +50,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     """
 
     # === Cross-reference IDs (common to all providers) ===
-    # Note: PubMed overrides pmid to be int type instead of str
+    # Note: PubMed overrides pubmed_id to be int type instead of str
     pmid: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^[1-9]\d*$",
@@ -66,6 +66,13 @@ class PublicationBaseSchema(ETLRecordSchema):
         str_matches=r"^PMC\d+$",
         description="PubMed Central ID",
     )
+    pubmed_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^[1-9]\d*$",
+        description="PubMed ID (positive numeric string)",
+    )
+
+
 
     # === Core content (common to all providers) ===
     title: Series[str] = pa.Field(nullable=True, description="Publication title")
