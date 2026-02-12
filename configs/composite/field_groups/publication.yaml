@@ -535,6 +535,10 @@ groups:
     display_name: "Trash (Excluded)"
     include_in_gold: false
     fields:
+      - base_name: author_details
+        columns:
+          - crossref.publication.author_details
+
       - base_name: content_domain_crossmark_restriction
         columns:
           - crossref.publication.content_domain_crossmark_restriction

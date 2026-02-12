@@ -98,6 +98,7 @@ class TestCrossRefYearValidation:
             # Author affiliations
             "affiliation_list": None,
             # Author and reference fields
+            "author_orcids": None,
             "author_ormolecule_ids": None,
             "author_details": None,
             "references": None,
