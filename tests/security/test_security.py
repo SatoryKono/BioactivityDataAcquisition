@@ -333,6 +333,9 @@ class TestPIIHandling:
             "_base.py",  # NCBI API tool identification (default_email in Settings)
             "config.py",  # NCBI API tool identification (default_email)
             "pubmed_client.py",  # NCBI API tool identification
+            "_health.py",  # PubMed adapter (NCBI required email)
+            "_search.py",  # PubMed adapter (NCBI required email)
+            "_fetch.py",  # PubMed adapter (NCBI required email)
             "pipeline_config.py",  # NCBI API source config
             "client.py",  # User-Agent header identification
             "source_config.py",  # NCBI API default_email for PubMed
@@ -376,6 +379,8 @@ class TestPIIHandling:
         files_with_pii = []
         for py_file in all_files:
             content = py_file.read_text(encoding="utf-8")
+            if py_file.name in self.KNOWN_TECHNICAL_EMAIL_FILES:
+                continue
             for regex_pattern, pattern_name in pii_patterns:
                 if re.search(regex_pattern, content, re.IGNORECASE):
                     # Skip known technical email files (documented as NOT PII)
