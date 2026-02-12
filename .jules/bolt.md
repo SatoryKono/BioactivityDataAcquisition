@@ -5,3 +5,7 @@
 ## 2026-05-25 - [Static Dictionary Lookup Optimization]
 **Learning:** Re-defining a constant dictionary inside a method that is called repeatedly (e.g., `_parse_month` in a transformer) creates unnecessary overhead. Moving it to a class constant (`ClassVar`) avoids this recreation cost.
 **Action:** Move static lookup dictionaries to class-level constants. Observed a ~4x speedup in the `_parse_month` method benchmark.
+
+## 2026-05-26 - [String Normalization in Hot Loops]
+**Learning:** Calling `.lower()` on constant patterns or search terms inside a tight loop (e.g., PTM extraction for features) can add significant overhead (~7%). This is especially true when processing large arrays of features per record.
+**Action:** Pre-normalize constant patterns outside the loop. Use the walrus operator `:=` to avoid redundant dictionary lookups in transformer/extractor methods.
