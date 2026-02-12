@@ -12,11 +12,11 @@ entity: assay
 # -----------------------------------------------------------------------------
 # Input Filter
 # -----------------------------------------------------------------------------
-# Filter assays by assay_id from CSV
+# Filter assays by assay_chembl_id from CSV
 input_filter:
   enabled: true
   source_path: "data/input/assay.csv"
-  column_name: "assay_id"
+  column_name: "assay_chembl_id"
   filter_field: "assay_id"
   batch_size: 20
 
