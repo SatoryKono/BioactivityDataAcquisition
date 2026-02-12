@@ -29,18 +29,13 @@ class MoleculeSchema(ETLRecordSchema):
     # molregno: Series[int] = pa.Field(
     #     nullable=False, description="Primary key."
     # )
-    # Removed molregno as it is not in Silver schema. molecule_chembl_id is the PK.
+    # Removed molregno as it is not in Silver schema. molecule_id is the PK.
 
     # === Identifiers ===
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
-        description="ChEMBL ID.",
-    )
-    structure_standard_inchi_key: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=INCHI_KEY_REGEX_PATTERN,
-        description="Standard InChI Key (27 characters, format: XXXX-YYYY-Z).",
+        description="Canonical molecule ID (ChEMBL ID).",
     )
     # chebi_id: Optional[Series[int]] = pa.Field(
     #     nullable=True, description="ChEBI ID."
@@ -175,25 +170,24 @@ class MoleculeSchema(ETLRecordSchema):
     )
 
     # === Property Fields (flattened from molecule_properties) ===
-    property_alogp: Series[float] | None = pa.Field(
-        nullable=True, description="Calculated ALogP (partition coefficient)."
+    logp: Series[float] | None = pa.Field(
+        nullable=True, description="Partition coefficient (ALogP/XlogP)."
+    )
+    logp_method: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=["alogp", "xlogp"],
+        description="Source method for logp.",
+    )
+    molecular_weight: Series[float] | None = pa.Field(
+        nullable=True, description="Full molecular weight including salts."
     )
     property_mw_freebase: Series[float] | None = pa.Field(
         nullable=True, description="Molecular weight of parent compound."
     )
-    property_full_mwt: Series[float] | None = pa.Field(
-        nullable=True, description="Full molecular weight including salts."
+    polar_surface_area: Series[float] | None = pa.Field(
+        nullable=True, ge=0, description="Polar surface area (PSA/tPSA)."
     )
-    property_hba: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Hydrogen bond acceptors count."
-    )
-    property_hbd: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Hydrogen bond donors count."
-    )
-    property_psa: Series[float] | None = pa.Field(
-        nullable=True, ge=0, description="Polar surface area (PSA)."
-    )
-    property_rtb: Series[int] | None = pa.Field(
+    rotatable_bond_count: Series[int] | None = pa.Field(
         nullable=True, ge=0, description="Rotatable bonds count."
     )
     property_ro5_violations: Series[int] | None = pa.Field(
@@ -202,10 +196,16 @@ class MoleculeSchema(ETLRecordSchema):
         le=4,
         description="Number of Lipinski rule-of-5 violations.",
     )
-    property_heavy_atoms: Series[int] | None = pa.Field(
+    heavy_atom_count: Series[int] | None = pa.Field(
         nullable=True, ge=0, description="Heavy (non-hydrogen) atoms count."
     )
-    property_aromatic_rings: Series[int] | None = pa.Field(
+    hba_count: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Hydrogen bond acceptors count."
+    )
+    hbd_count: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Hydrogen bond donors count."
+    )
+    aromatic_ring_count: Series[int] | None = pa.Field(
         nullable=True, ge=0, description="Aromatic rings count."
     )
     property_qed_weighted: Series[float] | None = pa.Field(
@@ -225,7 +225,7 @@ class MoleculeSchema(ETLRecordSchema):
     standard_inchi: Series[str] | None = pa.Field(
         nullable=True, description="Standard InChI representation."
     )
-    inchikey: Series[str] | None = pa.Field(
+    inchi_key: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=INCHI_KEY_REGEX_PATTERN,
         description="Standard InChI Key (27 characters, XXXX-YYYY-Z format).",

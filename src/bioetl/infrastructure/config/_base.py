@@ -296,6 +296,9 @@ class PipelineSettings(BaseSettings):
     checkpoint_interval: int = Field(default=1000, ge=100)
     """Save checkpoint every N records."""
 
+    relaxed_dq: bool = Field(default=False)
+    """When True, DQ thresholds are relaxed (soft=0.99, hard=1.0) for testing."""
+
     max_concurrent_batches: int = Field(default=4, ge=1, le=16)
     """Maximum concurrent batch writes."""
 
@@ -338,6 +341,26 @@ class Settings(BaseSettings):
 
     pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
+
+    # Security settings (PII hashing)
+    pii_salt_current: SecretStr | None = Field(
+        default=None,
+        description="Current salt for PII hashing (BIOETL_PII_SALT_CURRENT)",
+    )
+    pii_salt_next: SecretStr | None = Field(
+        default=None,
+        description="Next salt for rotation (BIOETL_PII_SALT_NEXT)",
+    )
+    pii_salt_rotation_active: bool = Field(
+        default=False,
+        description="Whether salt rotation is active (BIOETL_SALT_ROTATION_ACTIVE)",
+    )
+
+    # Serialization settings
+    json_encoder: Literal["orjson", "stdlib", ""] = Field(
+        default="",
+        description="JSON encoder implementation (orjson or stdlib) (BIOETL_JSON_ENCODER)",
+    )
 
     # Provider-specific settings
     # NOTE: default_email is NOT PII (Personally Identifiable Information).

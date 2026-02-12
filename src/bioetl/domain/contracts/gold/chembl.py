@@ -37,22 +37,22 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     activity_id: Series[str] = pa.Field(nullable=False)
 
     # Core identifiers
-    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
-    target_chembl_id: Series[str] = pa.Field(nullable=True)
-    assay_chembl_id: Series[str] = pa.Field(nullable=True)
-    document_chembl_id: Series[str] = pa.Field(nullable=True)
+    molecule_id: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=True)
+    assay_id: Series[str] = pa.Field(nullable=True)
+    publication_id: Series[str] = pa.Field(nullable=True)
     record_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
 
     # Molecule data
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     molecule_pref_name: Series[str] = pa.Field(nullable=True)
-    parent_molecule_chembl_id: Series[str] = pa.Field(nullable=True)
+    parent_molecule_id: Series[str] = pa.Field(nullable=True)
 
     # Target data
     target_pref_name: Series[str] = pa.Field(nullable=True)
     target_organism: Series[str] = pa.Field(nullable=True)
-    target_taxonomy_id: Series[str] = pa.Field(nullable=True)  # Standardized name
+    taxonomy_id: Series[float] = pa.Field(nullable=True, coerce=True)  # Standardized name
 
     # Assay data
     assay_type: Series[str] = pa.Field(nullable=True)
@@ -96,8 +96,11 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     uo_units: Series[str] = pa.Field(nullable=True)
 
     # Document/Publication data
-    document_journal: Series[str] = pa.Field(nullable=True)
-    document_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    journal: Series[str] = pa.Field(nullable=True)
+    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    publication_doi: Series[str] = pa.Field(nullable=True)
+    publication_pmid: Series[str] = pa.Field(nullable=True)
+    publication_pmc_id: Series[str] = pa.Field(nullable=True)
 
     # Quality annotations
     activity_comment: Series[str] = pa.Field(nullable=True)
@@ -106,7 +109,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     potential_duplicate: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Action type
-    action_type_action_type: Series[str] = pa.Field(nullable=True)
+    action_type: Series[str] = pa.Field(nullable=True)
     action_type_description: Series[str] = pa.Field(nullable=True)
     action_type_parent_type: Series[str] = pa.Field(nullable=True)
 
@@ -132,9 +135,9 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    assay_chembl_id: Series[str] = pa.Field(nullable=False)
-    target_chembl_id: Series[str] = pa.Field(nullable=True)
-    document_chembl_id: Series[str] = pa.Field(nullable=True)
+    assay_id: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=True)
+    publication_id: Series[str] = pa.Field(nullable=True)
     cell_chembl_id: Series[str] = pa.Field(nullable=True)
     tissue_chembl_id: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
@@ -146,7 +149,7 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     assay_test_type: Series[str] = pa.Field(nullable=True)
     assay_group: Series[str] = pa.Field(nullable=True)
     assay_organism: Series[str] = pa.Field(nullable=True)
-    assay_taxonomy_id: Series[float] = pa.Field(
+    taxonomy_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Standardized name
     assay_cell_type: Series[str] = pa.Field(nullable=True)
@@ -167,9 +170,7 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     variant_mutation: Series[str] = pa.Field(nullable=True)
     variant_organism: Series[str] = pa.Field(nullable=True)
     variant_sequence: Series[str] = pa.Field(nullable=True)
-    variant_taxonomy_id: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # Standardized name
+    variant_taxonomy_id: Series[float] = pa.Field(nullable=True, coerce=True)
     variant_sequence_json: Series[str] = pa.Field(nullable=True)
     assay_classifications: Series[str] = pa.Field(nullable=True)
     assay_parameters: Series[str] = pa.Field(nullable=True)

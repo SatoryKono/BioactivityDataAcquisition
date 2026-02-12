@@ -12,7 +12,6 @@ Implements RULES.md §3.1.2 DQ Thresholds.
 from __future__ import annotations
 
 import copy
-import os
 from pathlib import Path
 from typing import Any
 
@@ -33,14 +32,16 @@ class DQConfigLoader:
         _cache: Cache of loaded configs keyed by "provider:entity".
     """
 
-    def __init__(self, configs_root: Path) -> None:
+    def __init__(self, configs_root: Path, relaxed_dq: bool = False) -> None:
         """Initialize loader with configs root directory.
 
         Args:
             configs_root: Path to configs/ directory.
+            relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
         self._configs_root = configs_root
         self._dq_root = configs_root / "dq"
+        self._relaxed_dq = relaxed_dq
         self._cache: dict[str, DQConfig] = {}
 
     def load(
@@ -70,9 +71,8 @@ class DQConfigLoader:
             ValidationError: If merged config fails validation.
         """
         # Cache only when no inline overrides (they may change)
-        # Include env var in key so test vs prod configs don't mix
-        relaxed = os.environ.get("BIOETL_TEST_RELAXED_DQ") == "1"
-        cache_key = f"{provider}:{entity}:relaxed={relaxed}"
+        # Include relaxed flag in key so test vs prod configs don't mix
+        cache_key = f"{provider}:{entity}:relaxed={self._relaxed_dq}"
 
         if inline_overrides is None and cache_key in self._cache:
             return self._cache[cache_key]
@@ -104,7 +104,7 @@ class DQConfigLoader:
 
         # 5. Test override: relax DQ thresholds for e2e/integration tests
         # (soft_fail < hard_fail required by ThresholdsConfig validator)
-        if os.environ.get("BIOETL_TEST_RELAXED_DQ") == "1":
+        if self._relaxed_dq:
             merged = self._deep_merge(
                 merged,
                 {"thresholds": {"soft_fail": 0.99, "hard_fail": 1.0}},

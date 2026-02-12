@@ -94,7 +94,7 @@ bioetl run --pipeline chembl_activity --limit 100
 This command will:
 
 1. Fetch 100 records from the ChEMBL API.
-1. Save raw data to the **Bronze** layer (`data/output/bronze/chembl/activity/{date}/`).
+1. Save raw data to the **Bronze** layer (`data/output/bronze/chembl/activity/`).
 1. Normalize and save to the **Silver** layer (`data/output/silver/chembl/activity/`).
 1. Aggregate to the **Gold** layer (`data/output/gold/chembl/activity/`).
 
@@ -102,11 +102,11 @@ This command will:
 
 After running a pipeline, your data directory will look like:
 
-```
+```text
 data/
 └── output/
     ├── bronze/
-    │   └── chembl/activity/{date}/
+    │   └── chembl/activity/
     │       └── batch_001.jsonl.zst
     ├── silver/
     │   └── chembl/activity/

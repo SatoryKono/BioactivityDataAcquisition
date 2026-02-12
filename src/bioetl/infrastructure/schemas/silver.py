@@ -2,7 +2,7 @@
 
 Defines the PyArrow schemas for various entities in the Silver layer.
 
-Column Order Convention (per RULES.md §2.4 and ADR-014):
+Column Order Convention (per RULES.md §2.9.4 and ADR-014):
 1. System prefix fields (entity_id, content_hash, _run_id, _run_type,
    _source_batch_id, _ingestion_ts, _index) - MUST be first
 2. Business fields - sorted alphabetically
@@ -45,10 +45,10 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_first", pa.string()),  # Unified: from first_page
         pa.field("page_last", pa.string()),  # Unified: from last_page
         # === PUBLICATION_CROSSREF_FIELDS ===
-        pa.field("document_chembl_id", pa.string()),  # Primary key
-        pa.field("doi", pa.string()),
-        pa.field("pmc_id", pa.string()),  # Not available from ChEMBL API (None values)
-        pa.field("pmid", pa.string()),  # Unified: from pubmed_id
+        pa.field("publication_id", pa.string()),  # Primary key (provider)
+        pa.field("publication_doi", pa.string()),
+        pa.field("publication_pmc_id", pa.string()),  # Not available from ChEMBL API (None values)
+        pa.field("publication_pmid", pa.string()),  # Unified: from pubmed_id
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("affiliation_list", pa.string()),  # JSON array (None for ChEMBL)
@@ -97,14 +97,14 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("action_type_action_type", pa.string()),
+        pa.field("action_type", pa.string()),
         pa.field("action_type_description", pa.string()),
         pa.field("action_type_parent_type", pa.string()),
         pa.field("activity_comment", pa.string()),
         pa.field("activity_id", pa.string()),
         pa.field("activity_properties", pa.string()),  # JSON string
-        pa.field("assay_chembl_id", pa.string()),
         pa.field("assay_description", pa.string()),
+        pa.field("assay_id", pa.string()),
         pa.field("assay_type", pa.string()),
         pa.field("assay_variant_accession", pa.string()),
         pa.field("assay_variant_mutation", pa.string()),
@@ -114,20 +114,23 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("canonical_smiles", pa.string()),
         pa.field("data_validity_comment", pa.string()),
         pa.field("data_validity_description", pa.string()),
-        pa.field("document_chembl_id", pa.string()),
-        pa.field("document_journal", pa.string()),
-        pa.field("document_year", pa.int64()),
+        pa.field("journal", pa.string()),
         pa.field("ligand_efficiency_bei", pa.float64()),
         pa.field("ligand_efficiency_le", pa.float64()),
         pa.field("ligand_efficiency_lle", pa.float64()),
         pa.field("ligand_efficiency_sei", pa.float64()),
         pa.field("manual_curation_flag", pa.float64()),  # Float for nullable int
-        pa.field("molecule_chembl_id", pa.string()),
+        pa.field("molecule_id", pa.string()),
         pa.field("molecule_pref_name", pa.string()),
         pa.field("original_activity_id", pa.float64()),  # Float for nullable int
-        pa.field("parent_molecule_chembl_id", pa.string()),
+        pa.field("parent_molecule_id", pa.string()),
         pa.field("pchembl_value", pa.float64()),
         pa.field("potential_duplicate", pa.int64()),
+        pa.field("publication_doi", pa.string()),
+        pa.field("publication_id", pa.string()),
+        pa.field("publication_pmc_id", pa.string()),
+        pa.field("publication_pmid", pa.string()),
+        pa.field("publication_year", pa.int64()),
         pa.field("qudt_units", pa.string()),
         pa.field("record_id", pa.int64()),
         pa.field("relation", pa.string()),
@@ -139,12 +142,10 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("standard_units", pa.string()),
         pa.field("standard_upper_value", pa.float64()),
         pa.field("standard_value", pa.float64()),
-        pa.field("target_chembl_id", pa.string()),
+        pa.field("target_id", pa.string()),
         pa.field("target_organism", pa.string()),
         pa.field("target_pref_name", pa.string()),
-        pa.field(
-            "target_taxonomy_id", pa.string()
-        ),  # Standardized name (was target_tax_id)
+        pa.field("taxonomy_id", pa.float64()),
         pa.field("text_value", pa.string()),
         pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),

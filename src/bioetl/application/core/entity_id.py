@@ -31,3 +31,21 @@ def compute_publication_term_entity_id(
     normalized_term = term.lower().strip() if term else ""
     composite = f"{document_chembl_id}:{term_type}:{normalized_term}"
     return hashlib.sha256(composite.encode()).hexdigest()[:16]
+
+
+def compute_subcellular_fraction_entity_id(
+    subcellular_fraction: str,
+) -> str:
+    """Compute entity ID for a subcellular fraction based on its name.
+
+    Entity ID is SHA256 hash of: normalized_fraction_name
+
+    Args:
+        subcellular_fraction: Name of the subcellular fraction.
+
+    Returns:
+        Entity ID string (first 16 chars of SHA256 hex digest).
+
+    """
+    normalized = subcellular_fraction.lower().strip()
+    return hashlib.sha256(normalized.encode()).hexdigest()[:16]

@@ -556,7 +556,9 @@ def create_pipeline_with_services(
         silver_validator=silver_validator,
     )
 
-    config_loader = ConfigLoader(Path("configs"))
+    config_loader = ConfigLoader(
+        Path("configs"), relaxed_dq=settings.pipeline.relaxed_dq
+    )
     resolved_dq = config_loader.resolve_dq_config(yaml_config)
     domain_config = yaml_config_to_domain(yaml_config, resolved_dq_config=resolved_dq)
 

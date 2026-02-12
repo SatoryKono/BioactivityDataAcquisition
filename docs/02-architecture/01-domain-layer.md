@@ -87,7 +87,7 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 
 **Структура:**
 
-```
+```text
 src/bioetl/domain/aggregates/
 ├── __init__.py
 ├── batch.py             # Batch Aggregate (536 LOC)
@@ -102,9 +102,22 @@ src/bioetl/domain/aggregates/
 | ----------------- | ----------------------------------------------- | ---------------------------------------------------- |
 | `Batch`           | Records sealed before write; sequential indices | OPEN → SEALED → WRITING → COMMITTED/FAILED           |
 | `PipelineRun`     | COMPLETED only if all stages SUCCESS            | NEW → RUNNING → COMPLETED/FAILED/SHUTDOWN            |
-| `QuarantineEntry` | Atomic retry increment                          | NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED |
+| `QuarantineEntry` | Controlled resolution lifecycle                 | NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED |
 
-`QuarantineStatus(StrEnum)`: `NEW`, `UNDER_REVIEW`, `IGNORED`, `REPROCESSED`, `EXPIRED`.
+`QuarantineStatus(StrEnum)` (актуально по `quarantine_entry.py`):
+
+- `NEW`
+- `UNDER_REVIEW`
+- `IGNORED`
+- `REPROCESSED`
+- `EXPIRED`
+
+Допустимые переходы:
+
+- `NEW` → `UNDER_REVIEW`
+- `NEW` или `UNDER_REVIEW` → `IGNORED`
+- `NEW` или `UNDER_REVIEW` → `REPROCESSED`
+- `NEW` или `UNDER_REVIEW` → `EXPIRED`
 
 **Пример использования:**
 

@@ -288,6 +288,21 @@ def float_fields(*field_names: str) -> tuple[FieldSpec, ...]:
     return tuple(FieldSpec(name, converter=FLOAT) for name in field_names)
 
 
+def pmid_fields(*field_names: str) -> tuple[FieldSpec, ...]:
+    """Create field specs with PMID converter for PubMed IDs.
+
+    Args:
+        *field_names: Variable number of field names.
+
+    Returns:
+        Tuple of FieldSpec objects with PMID converter.
+
+    Example:
+        >>> specs = pmid_fields("pubmed_id", "pubmed_id1")
+    """
+    return tuple(FieldSpec(name, converter=PMID) for name in field_names)
+
+
 __all__ = [
     "FLOAT",
     "INT",
@@ -302,5 +317,6 @@ __all__ = [
     "map_field_groups",
     "map_fields",
     "normalize_pmid",
+    "pmid_fields",
     "simple_fields",
 ]

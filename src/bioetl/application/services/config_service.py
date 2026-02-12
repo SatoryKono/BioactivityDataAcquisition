@@ -9,12 +9,118 @@ Implements RULES.md §1.1 - Application layer depends only on Domain.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from bioetl.domain.config import PipelineConfig
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+
+
+@runtime_checkable
+class PipelineSettingsProtocol(Protocol):
+    """Protocol for pipeline-specific settings."""
+
+    batch_size: int
+    relaxed_dq: bool
+
+
+@runtime_checkable
+class SettingsProtocol(Protocol):
+    """Protocol for application settings."""
+
+    env: str
+    data_dir: str | Path
+    debug: bool
+    test_mode: bool
+    metrics_enabled: bool
+    metrics_port: int
+    pipeline: PipelineSettingsProtocol
+
+    @property
+    def bronze_path(self) -> str | Path:
+        """Path for Bronze layer storage."""
+        ...
+
+    @property
+    def silver_path(self) -> str | Path:
+        """Path for Silver layer storage."""
+        ...
+
+    @property
+    def gold_path(self) -> str | Path:
+        """Path for Gold layer storage."""
+        ...
+
+    @property
+    def checkpoint_path(self) -> str | Path:
+        """Path for checkpoint storage."""
+        ...
+
+    @property
+    def quarantine_path(self) -> str | Path:
+        """Path for quarantine storage."""
+        ...
+
+    def model_dump(self) -> dict[str, Any]:
+        """Convert settings to dictionary."""
+        ...
+
+
+@runtime_checkable
+class PipelineYamlConfigProtocol(Protocol):
+    """Protocol for pipeline YAML configuration."""
+
+    provider: str
+    entity_type: str
+    silver_table: str
+    gold_table: str | None
+
+    def model_dump(self) -> dict[str, Any]:
+        """Convert configuration to dictionary."""
+        ...
+
+
+@runtime_checkable
+class PipelineRegistryProtocol(Protocol):
+    """Protocol for pipeline registry."""
+
+    def list_pipelines(self) -> list[str]:
+        """List all registered pipeline names."""
+        ...
+
+
+class SettingsLoaderProtocol(Protocol):
+    """Protocol for loading application settings."""
+
+    def __call__(self) -> SettingsProtocol:
+        """Load settings."""
+        ...
+
+
+class PipelineConfigLoaderProtocol(Protocol):
+    """Protocol for loading pipeline YAML configuration."""
+
+    def __call__(self, pipeline_name: str) -> PipelineYamlConfigProtocol:
+        """Load pipeline configuration."""
+        ...
+
+
+class DomainConfigMapperProtocol(Protocol):
+    """Protocol for mapping YAML configuration to domain configuration."""
+
+    def __call__(self, yaml_config: PipelineYamlConfigProtocol) -> PipelineConfig:
+        """Map YAML config to domain config."""
+        ...
+
+
+class RegistryAccessorProtocol(Protocol):
+    """Protocol for accessing the pipeline registry."""
+
+    def __call__(self) -> PipelineRegistryProtocol:
+        """Access registry."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,10 +199,10 @@ class ConfigService:
     """
 
     logger: LoggerPort
-    _settings_loader: Any  # Callable[[], Settings]
-    _pipeline_config_loader: Any  # Callable[[str], PipelineYamlConfig]
-    _domain_config_mapper: Any  # Callable[[PipelineYamlConfig], PipelineConfig]
-    _registry_accessor: Any  # Callable[[], PipelineRegistry]
+    _settings_loader: SettingsLoaderProtocol
+    _pipeline_config_loader: PipelineConfigLoaderProtocol
+    _domain_config_mapper: DomainConfigMapperProtocol
+    _registry_accessor: RegistryAccessorProtocol
 
     def get_settings(self) -> SettingsInfo:
         """Get application settings.
@@ -190,11 +296,12 @@ class ConfigService:
 
         yaml_config = self._pipeline_config_loader(pipeline_name)
 
-        # Convert Pydantic model to dict
+        # Convert to dict using protocol method if available, fallback to dict()
         if hasattr(yaml_config, "model_dump"):
-            config_dict: dict[str, Any] = yaml_config.model_dump()
+            config_dict = yaml_config.model_dump()
         else:
-            config_dict = dict(yaml_config)
+            # Fallback for plain dicts (used in some tests)
+            config_dict = dict(yaml_config)  # type: ignore
 
         self.logger.info("Got pipeline YAML config", pipeline=pipeline_name)
         return config_dict
