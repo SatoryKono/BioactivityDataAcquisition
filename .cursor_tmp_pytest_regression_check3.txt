@@ -1,0 +1,85 @@
+﻿python : ERROR: found no collectors for E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\infrastructure\s
+chemas\test_gold.py::TestGoldSchemaValidation::test_chembl_document_validates_correct_data
+At C:\Users\Fedor\AppData\Local\Temp\ps-script-7efceb73-3299-4d4e-ad8f-aa06cf0a16ad.ps1:88 char:1
++ python -m pytest tests/unit/infrastructure/schemas/test_gold.py::Test ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ERROR: found no...es_correct_data:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+=================================== ERRORS ====================================
+_______ ERROR collecting tests/unit/infrastructure/schemas/test_gold.py _______
+tests\unit\infrastructure\schemas\test_gold.py:13: in <module>
+    from bioetl.domain.contracts import (
+src\bioetl\domain\__init__.py:22: in <module>
+    from bioetl.domain import contracts
+src\bioetl\domain\contracts\__init__.py:34: in <module>
+    from bioetl.domain.contracts.gold import (
+src\bioetl\domain\contracts\gold\__init__.py:28: in <module>
+    from bioetl.domain.contracts.gold.chembl import (
+src\bioetl\domain\contracts\gold\chembl.py:29: in <module>
+    class ChEMBLActivityGoldSchema(pa.DataFrameModel):
+src\bioetl\domain\contracts\gold\chembl.py:103: in ChEMBLActivityGoldSchema
+    publication_doi: Series[str] = pa.Field(nullable=True, required=False)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandera\api\dataframe\model_components.py:188: in Field
+    raise SchemaInitError(
+E   pandera.errors.SchemaInitError: custom check 'required' is not available. Make sure you use pandera.extensions.register_check_method decorator to register your custom check method.
+____ ERROR collecting tests/integration/pipelines/test_chembl_activity.py _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:935: in _load_unlocked
+    ???
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\assertion\rewrite.py:197: in exec_module
+    exec(co, module.__dict__)
+E:\google_drive\05_AI\github\BioactivityDataAcquisition2\tests\integration\pipelines\test_chembl_activity.py:30: in <module>
+    ???
+src\bioetl\composition\factories\__init__.py:21: in <module>
+    from bioetl.composition.factories.data_source_factory import (
+src\bioetl\composition\factories\data_source_factory.py:20: in <module>
+    from bioetl.composition.providers import (
+src\bioetl\composition\providers\__init__.py:22: in <module>
+    from bioetl.composition.providers.loader import (
+src\bioetl\composition\providers\loader.py:10: in <module>
+    from bioetl.composition.providers.registration import register_all_providers
+src\bioetl\composition\providers\registration.py:12: in <module>
+    from bioetl.application.core.idmapping_data_source import IDMappingDataSource
+src\bioetl\application\core\__init__.py:14: in <module>
+    from bioetl.application.core.base import BasePipeline
+src\bioetl\application\core\base.py:16: in <module>
+    from bioetl.application.core.shutdown import ShutdownSignal
+src\bioetl\application\core\shutdown.py:17: in <module>
+    from bioetl.application.services.shutdown_service import (
+src\bioetl\application\services\__init__.py:26: in <module>
+    from bioetl.application.services.config_service import (
+src\bioetl\application\services\config_service.py:15: in <module>
+    from bioetl.domain.config import PipelineConfig
+src\bioetl\domain\__init__.py:22: in <module>
+    from bioetl.domain import contracts
+src\bioetl\domain\contracts\__init__.py:34: in <module>
+    from bioetl.domain.contracts.gold import (
+src\bioetl\domain\contracts\gold\__init__.py:28: in <module>
+    from bioetl.domain.contracts.gold.chembl import (
+src\bioetl\domain\contracts\gold\chembl.py:29: in <module>
+    class ChEMBLActivityGoldSchema(pa.DataFrameModel):
+src\bioetl\domain\contracts\gold\chembl.py:103: in ChEMBLActivityGoldSchema
+    publication_doi: Series[str] = pa.Field(nullable=True, required=False)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pandera\api\dataframe\model_components.py:188: in Field
+    raise SchemaInitError(
+E   pandera.errors.SchemaInitError: custom check 'required' is not available. Make sure you use pandera.extensions.register_check_method decorator to register your custom check method.
+=========================== short test summary info ===========================
+ERROR tests/unit/infrastructure/schemas/test_gold.py - pandera.errors.SchemaI...
+ERROR tests/integration/pipelines/test_chembl_activity.py - pandera.errors.Sc...
+2 errors in 2.37s
+
+ERROR: found no collectors for E:\g-drive\05_AI\github\BioactivityDataAcquisition2\tests\integration\pipelines\test_che
+mbl_activity.py::TestChemblActivityPipeline::test_chembl_activity_happy_path
+
