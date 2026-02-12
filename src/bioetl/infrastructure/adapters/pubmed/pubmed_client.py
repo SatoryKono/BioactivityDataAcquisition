@@ -28,7 +28,10 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 )
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
-from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.pubmed.fallback import (
+    ExtendedFallbackHandler,
+    TitleFallbackHandler,
+)
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
@@ -88,6 +91,9 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
     _fallback_handler: TitleFallbackHandler | None = field(
         default=None, init=False, repr=False
     )
+    _extended_fallback_handler: ExtendedFallbackHandler | None = field(
+        default=None, init=False, repr=False
+    )
     """Title fallback handler for resolving publications when PMID lookup fails."""
 
     _request_collector: APIRequestCollector = field(
@@ -107,6 +113,11 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
         self._fallback_handler = TitleFallbackHandler(
             logger=self.logger,
             search_fn=self._search_by_title,
+        )
+        self._extended_fallback_handler = ExtendedFallbackHandler(
+            logger=self.logger,
+            search_fn=self._search_by_title,
+            alternate_search_fn=self._search_by_doi,
         )
 
     async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
@@ -251,6 +262,35 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
 
     # fetch_multi_filtered is provided by NotSupportedMultiFilterMixin
 
+    async def _search_by_doi(self, doi: str) -> dict[str, Any] | None:
+        """Search PubMed by DOI using esearch + efetch."""
+        clean_doi = doi.strip()
+        # DOI search term: "{doi}[DOI]"
+        search_term = f"{clean_doi}[DOI]"
+
+        try:
+            # Step 1: esearch to get PMIDs
+            pmids = await self._get_pmids(search_term, 1)
+
+            if not pmids:
+                return None
+
+            # Step 2: efetch to get full record
+            results: list[dict[str, Any]] = []
+            async for record in self._yield_articles_from_pmids(pmids, 1):
+                results.append(record)
+
+            if results:
+                return results[0]
+
+        except Exception as e:
+            self.logger.debug(
+                "pubmed_doi_search_failed",
+                doi=clean_doi,
+                error=str(e),
+            )
+        return None
+
     async def _search_by_title(
         self, title: str, limit: int = 3
     ) -> list[dict[str, Any]]:
@@ -371,6 +411,88 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
         # Phase 3: Title-only entries (using handler)
         if self._fallback_handler:
             async for record in self._fallback_handler.process_title_only_entries(
+                entries=title_only_entries,
+                fallback_mapping=fallback_mapping,
+                limit=limit,
+                fetched=fetched,
+            ):
+                yield record
+
+    async def fetch_filtered_with_extended_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        alternate_id_mapping: dict[str, str] | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with 4-phase fallback: Primary → Alternate ID → Title → Title-Only.
+
+        Phase 1: Primary (PMID) lookup
+        Phase 2: Alternate ID (DOI) lookup for missing PMIDs
+        Phase 3: Title fallback
+        Phase 4: Title-only
+        """
+        if entity_type != "publication":
+            raise ValueError("PubMedAdapter only supports 'publication'")
+
+        valid_ids = [id_ for id_ in filter_ids if id_.strip()]
+        title_only_entries = [id_ for id_ in filter_ids if not id_.strip()]
+
+        fetched = 0
+        found_ids: set[str] = set()
+
+        # Phase 1: Primary PMID lookup
+        if valid_ids:
+            async for record in self.fetch_filtered(
+                entity_type=entity_type,
+                filter_ids=valid_ids,
+                filter_field=filter_field,
+                limit=limit,
+            ):
+                record["_lookup_method"] = "pmid"
+                found_id = str(record.get("pmid", ""))
+                if found_id:
+                    found_ids.add(found_id.lower())
+                fetched += 1
+                yield record
+                if limit and fetched >= limit:
+                    return
+
+        # Phase 2: Alternate ID (DOI) lookup
+        if self._extended_fallback_handler and alternate_id_mapping:
+            async for record in self._extended_fallback_handler.process_missing_by_alternate_id(
+                ids=valid_ids,
+                found_ids=found_ids,
+                alternate_id_mapping=alternate_id_mapping,
+                normalize_fn=lambda x: x.lower().strip(),
+                limit=limit,
+                fetched=fetched,
+            ):
+                fetched += 1
+                yield record
+                if limit and fetched >= limit:
+                    return
+
+        # Phase 3: Title fallback
+        if self._extended_fallback_handler:
+            async for record in self._extended_fallback_handler.process_missing_dois(
+                dois=valid_ids,
+                found_dois=found_ids,
+                fallback_mapping=fallback_mapping,
+                normalize_fn=lambda x: x.lower().strip(),
+                limit=limit,
+                fetched=fetched,
+            ):
+                fetched += 1
+                yield record
+                if limit and fetched >= limit:
+                    return
+
+        # Phase 4: Title-only
+        if self._extended_fallback_handler:
+            async for record in self._extended_fallback_handler.process_title_only_entries(
                 entries=title_only_entries,
                 fallback_mapping=fallback_mapping,
                 limit=limit,

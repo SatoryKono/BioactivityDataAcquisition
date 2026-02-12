@@ -6,7 +6,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from bioetl.domain.exceptions import CriticalError, ExternalServiceError, RateLimitError
+from bioetl.domain.exceptions import (
+    CriticalError,
+    ExternalServiceError,
+    RateLimitError,
+    RetryExhaustedError,
+)
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.domain.types import CircuitBreakerState, ErrorType, HealthStatus
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -215,13 +220,14 @@ async def test_health_check_healthy(adapter, mock_http_client):
 
 @pytest.mark.asyncio
 async def test_health_check_unhealthy(adapter, mock_http_client):
-    """Test unhealthy check with circuit breaker in UNHEALTHY state.
+    """Test unhealthy check with circuit breaker in OPEN state.
 
-    Health status is now derived from circuit breaker state, not consecutive errors.
+    Health status is derived from circuit breaker state: OPEN = UNHEALTHY.
     """
     mock_http_client.get_once = AsyncMock(side_effect=Exception("Down"))
-    # Configure circuit breaker to report UNHEALTHY state (failure_count > 2)
-    mock_http_client.circuit_breaker.get_failure_count.return_value = 3
+    # Configure circuit breaker OPEN state (threshold reached)
+    mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.OPEN
+    mock_http_client.circuit_breaker.get_failure_count.return_value = 5
 
     status = await adapter.health_check()
     # Falls back to circuit breaker state when exception occurs
@@ -378,12 +384,12 @@ class TestChemblAdapterHealthAwareBatchSize:
     @pytest.mark.asyncio
     async def test_unhealthy_raises_critical_error(self, mock_http_client, mock_logger):
         """Test that UNHEALTHY status raises CriticalError."""
-        # Configure circuit breaker for UNHEALTHY state (failure_count > 2)
+        # Configure circuit breaker for UNHEALTHY state (OPEN = threshold reached)
         mock_http_client.circuit_breaker = MagicMock()
         mock_http_client.circuit_breaker.get_state.return_value = (
-            CircuitBreakerState.CLOSED
+            CircuitBreakerState.OPEN
         )
-        mock_http_client.circuit_breaker.get_failure_count.return_value = 3
+        mock_http_client.circuit_breaker.get_failure_count.return_value = 5
 
         adapter = ChemblAdapter(
             http_client=mock_http_client,
@@ -756,3 +762,271 @@ class TestChemblAdapterBatchReduction:
         ]
         # Should have warnings for: 4->2+2, then 2->1+1 twice
         assert len(warning_calls) >= 3
+
+
+@pytest.mark.unit
+class TestChemblAdapterDirectEndpointFallback:
+    """Tests for direct endpoint fallback when filter endpoint fails."""
+
+    @pytest.mark.asyncio
+    async def test_direct_endpoint_fallback_on_filter_500(
+        self, mock_http_client, mock_logger
+    ):
+        """Test fallback to direct endpoint when filter endpoint returns 500.
+
+        ChEMBL API has two code paths:
+        1. Filter: /target?target_chembl_id__in=CHEMBL123 (may fail with 500)
+        2. Direct: /target/CHEMBL123 (often works when filter fails)
+        """
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+        call_count = 0
+
+        async def mock_get(url, params=None):
+            nonlocal call_count
+            call_count += 1
+
+            # Filter endpoint (has __in param) - always fails with 500
+            if params and "target_chembl_id__in" in params:
+                raise RetryExhaustedError(
+                    url, attempts=3, last_error=Exception("500 Internal Server Error")
+                )
+
+            # Direct endpoint (no __in param, URL contains ID) - succeeds
+            if "/target/CHEMBL123" in url:
+                mock_response = MagicMock()
+                mock_response.json.return_value = {
+                    "target_chembl_id": "CHEMBL123",
+                    "target_type": "SINGLE PROTEIN",
+                    "pref_name": "Test Target",
+                }
+                return mock_response
+
+            # Unknown endpoint
+            raise Exception(f"Unexpected URL: {url}")
+
+        mock_http_client.get = mock_get
+
+        records = []
+        async for record in adapter.fetch_filtered(
+            entity_type="target",
+            filter_ids=["CHEMBL123"],
+            filter_field="target_chembl_id",
+        ):
+            records.append(record)
+
+        # Should get 1 record via direct endpoint fallback
+        assert len(records) == 1
+        assert records[0]["target_chembl_id"] == "CHEMBL123"
+
+        # Verify direct_endpoint_fallback_success was logged
+        info_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and c.args[0] == "direct_endpoint_fallback_success"
+        ]
+        assert len(info_calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_direct_endpoint_fallback_also_fails(
+        self, mock_http_client, mock_logger
+    ):
+        """Test logging when both filter and direct endpoints fail."""
+        adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+        async def mock_get(url, params=None):
+            # Both endpoints fail
+            raise RetryExhaustedError(
+                url, attempts=3, last_error=Exception("500 Internal Server Error")
+            )
+
+        mock_http_client.get = mock_get
+
+        records = []
+        async for record in adapter.fetch_filtered(
+            entity_type="target",
+            filter_ids=["CHEMBL123"],
+            filter_field="target_chembl_id",
+        ):
+            records.append(record)
+
+        # No records returned
+        assert len(records) == 0
+
+        # Verify direct_endpoint_fallback_failed was logged
+        warning_calls = [
+            c
+            for c in mock_logger.warning.call_args_list
+            if c.args and c.args[0] == "direct_endpoint_fallback_failed"
+        ]
+        assert len(warning_calls) == 1
+
+        # Verify single_id_fetch_failed was logged (final failure)
+        error_calls = [
+            c
+            for c in mock_logger.error.call_args_list
+            if c.args and c.args[0] == "single_id_fetch_failed"
+        ]
+        assert len(error_calls) == 1
+
+
+@pytest.mark.unit
+class TestChemblAdapterExtractionParams:
+    """Tests for extraction_params support in ChemblAdapter."""
+
+    def test_build_params_without_extraction_params(
+        self, mock_http_client, mock_logger
+    ):
+        """Regression: _build_params returns only format+limit+offset without extraction_params."""
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=500),
+        )
+
+        params = adapter._build_params(offset=0)
+
+        assert params == {"format": "json", "limit": 500, "offset": 0}
+
+    def test_build_params_with_extraction_params(self, mock_http_client, mock_logger):
+        """Test that extraction_params are merged into _build_params output."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50,Ki",
+                "pchembl_value__isnull": False,
+            }
+        )
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=500),
+            extraction_params=ep,
+        )
+
+        params = adapter._build_params(offset=0)
+
+        assert params["format"] == "json"
+        assert params["limit"] == 500
+        assert params["offset"] == 0
+        assert params["standard_type__in"] == "IC50,Ki"
+        assert params["pchembl_value__isnull"] is False
+
+    def test_build_params_extraction_params_merged_with_pagination(
+        self, mock_http_client, mock_logger
+    ):
+        """Test extraction_params merge with pagination for non-paginated entity."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams(params={"standard_units": "nM"})
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            extraction_params=ep,
+        )
+
+        # "target" is in _NO_PAGINATION_ENTITIES, so no limit/offset
+        params = adapter._build_params(offset=0, entity_type="target")
+
+        assert params["format"] == "json"
+        assert "limit" not in params
+        assert "offset" not in params
+        assert params["standard_units"] == "nM"
+
+    def test_build_params_empty_extraction_params_no_effect(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that empty ExtractionParams doesn't add extra keys."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams.empty()
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            adapter_config=AdapterConfig(page_size=500),
+            extraction_params=ep,
+        )
+
+        params = adapter._build_params(offset=0)
+
+        assert params == {"format": "json", "limit": 500, "offset": 0}
+
+    def test_init_logs_extraction_params_when_configured(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that non-empty extraction_params are logged at init."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50,Ki",
+                "pchembl_value__isnull": False,
+            }
+        )
+        ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            extraction_params=ep,
+        )
+
+        info_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and c.args[0] == "chembl_extraction_params_configured"
+        ]
+        assert len(info_calls) == 1
+        kwargs = info_calls[0].kwargs
+        assert kwargs["provider"] == "chembl"
+        assert kwargs["param_count"] == 2
+        assert "standard_type__in" in kwargs["query_string"]
+
+    def test_init_no_log_when_extraction_params_empty(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that empty extraction_params don't trigger logging."""
+        ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+        )
+
+        info_calls = [
+            c
+            for c in mock_logger.info.call_args_list
+            if c.args and c.args[0] == "chembl_extraction_params_configured"
+        ]
+        assert len(info_calls) == 0
+
+    def test_get_source_metadata_includes_query_string(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that get_source_metadata sets query_string from extraction_params."""
+        from bioetl.domain.models.filter import ExtractionParams
+
+        ep = ExtractionParams(
+            params={
+                "standard_type__in": "IC50",
+                "standard_units": "nM",
+            }
+        )
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+            extraction_params=ep,
+        )
+
+        metadata = adapter.get_source_metadata()
+
+        assert metadata.query_string == "standard_type__in=IC50&standard_units=nM"
+
+    def test_get_source_metadata_no_query_string_when_empty(
+        self, mock_http_client, mock_logger
+    ):
+        """Test that get_source_metadata has no query_string when extraction_params empty."""
+        adapter = ChemblAdapter(
+            http_client=mock_http_client,
+            logger=mock_logger,
+        )
+
+        metadata = adapter.get_source_metadata()
+
+        assert metadata.query_string is None

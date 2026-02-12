@@ -50,6 +50,8 @@ class FilteredDataSource:
         self._filter_fields: tuple[str, ...] | None = None
         # Fallback mapping state (e.g., DOI → title)
         self._fallback_mapping: dict[str, str] | None = None
+        # Alternate ID mapping state (e.g., DOI → PMID)
+        self._alternate_id_mapping: dict[str, str] | None = None
 
     @property
     def provider_name(self) -> str:
@@ -82,6 +84,11 @@ class FilteredDataSource:
         if not self._filter_config.enabled:
             return self
 
+        # Check for direct multi-field filter IDs (composite dual-key mode)
+        if self._filter_config.direct_multi_filter_ids:
+            self._load_direct_multi_filter_ids()
+            return self
+
         # Check for direct filter IDs (composite mode - no CSV needed)
         if self._filter_config.direct_filter_ids:
             self._load_direct_filter_ids()
@@ -90,6 +97,27 @@ class FilteredDataSource:
         # Pre-load filter IDs from CSV
         await self._load_csv_filter_ids()
         return self
+
+    def _load_direct_multi_filter_ids(self) -> None:
+        """Load direct multi-field filter IDs from composite mode configuration.
+
+        Sets up multi-column filtering state for AND-logic API queries.
+        E.g., molecule_chembl_id AND document_chembl_id simultaneously.
+        """
+        multi_ids = self._filter_config.direct_multi_filter_ids or {}
+        self._multi_filter_ids = {field: list(ids) for field, ids in multi_ids.items()}
+        self._filter_fields = tuple(multi_ids.keys())
+        self._valid_combinations = self._filter_config.direct_valid_combinations
+        if self._logger:
+            self._logger.info(
+                "direct_multi_filter_ids_loaded",
+                fields=list(self._filter_fields),
+                counts={f: len(ids) for f, ids in multi_ids.items()},
+                valid_combinations_count=len(self._valid_combinations)
+                if self._valid_combinations
+                else 0,
+                pipeline=self._pipeline_name,
+            )
 
     def _load_direct_filter_ids(self) -> None:
         """Load direct filter IDs from composite mode configuration."""
@@ -149,7 +177,22 @@ class FilteredDataSource:
         """Load single-column filter from CSV."""
         assert self._filter_reader is not None
         assert self._filter_config.column_name is not None
-        if self._filter_config.fallback_column:
+
+        if (
+            self._filter_config.fallback_column
+            and self._filter_config.alternate_id_column
+        ):
+            (
+                self._filter_result,
+                self._fallback_mapping,
+                self._alternate_id_mapping,
+            ) = await self._filter_reader.load_filter_with_extended_fallback(
+                source_path=source_path,
+                primary_column=self._filter_config.column_name,
+                fallback_column=self._filter_config.fallback_column,
+                alternate_id_column=self._filter_config.alternate_id_column,
+            )
+        elif self._filter_config.fallback_column:
             (
                 self._filter_result,
                 self._fallback_mapping,
@@ -273,13 +316,14 @@ class FilteredDataSource:
                 "when filtering is enabled."
             )
 
-        # Check if we have fallback mapping (adapter implements FilterableDataSourcePort)
-        if self._fallback_mapping:
-            async for record in self._data_source.fetch_filtered_with_fallback(
+        # Check if we have fallback/alternate mappings (extended fallback covers both cases)
+        if self._fallback_mapping or self._alternate_id_mapping:
+            async for record in self._data_source.fetch_filtered_with_extended_fallback(
                 entity_type=entity_type,
                 filter_ids=self._filter_ids,  # type: ignore[arg-type]
                 filter_field=config_filter_field,
-                fallback_mapping=self._fallback_mapping,
+                fallback_mapping=self._fallback_mapping or {},
+                alternate_id_mapping=self._alternate_id_mapping,
                 limit=limit,
             ):
                 yield record

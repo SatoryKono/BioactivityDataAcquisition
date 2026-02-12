@@ -4,9 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![Coverage](https://img.shields.io/badge/coverage-%3E80%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/version-5.9.0-blue)](CHANGELOG.md)
-[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development%20(55%25)-yellow)](IMPLEMENTATION_ROADMAP.md)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
+[![Version](https://img.shields.io/badge/version-5.14.0-blue)](CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](SECURITY.md)
 
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data
@@ -14,15 +13,18 @@ from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, 
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-* **Medallion Architecture**: Structured data flow (Bronze → Silver → Gold) ensuring data quality and traceability.
+* **Medallion Architecture**: Structured data flow (Bronze -> Silver -> Gold) ensuring data quality and traceability.
 * **Delta Lake Core**: ACID transactions, schema enforcement, and time travel capabilities.
 * **Resilience**: Built-in circuit breakers, exponential backoff retries, and dead-letter queues (Quarantine).
-* **Local-First Design**: In-memory locking, local file storage — no external services required ([ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
+* **Local-First Design**: In-memory locking, local file storage -- no external services required ([ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
+* **Deterministic Writes**: Reproducible outputs and deterministic retries ([ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md)).
+* **Observability by Design**: Metrics, tracing, and logging ports ([ADR-017](docs/02-architecture/decisions/ADR-017-observability-architecture.md)).
+* **Unified HTTP Client**: Standardized rate limiting, retry, and telemetry ([ADR-032](docs/02-architecture/decisions/ADR-032-unified-http-client.md)).
 * **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.
 
-## 🏗 Architecture Overview
+## Architecture Overview
 
 BioETL follows **Hexagonal Architecture** (Ports & Adapters) with **Domain-Driven Design** patterns:
 
@@ -44,7 +46,7 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with **Domain-Drive
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Data Flow**: External API → Bronze (JSONL+zstd) → Silver (Delta Lake) → Gold (Analytics)
+**Data Flow**: External API -> Bronze (JSONL+zstd) -> Silver (Delta Lake) -> Gold (Analytics)
 
 ### Domain Layer (DDD)
 
@@ -58,33 +60,37 @@ The domain layer implements Domain-Driven Design patterns:
 | **Entities** | Domain entities per provider (`domain/entities/`) |
 | **Schemas** | Pydantic models for data validation (`domain/schemas/`) |
 
-## 📊 Supported Providers
+## Supported Providers
 
 | Provider | Entity Types | Status | Rate Limit |
 |----------|-------------|--------|------------|
-| **ChEMBL** | Activity, Assay, Molecule, Target, Document | Production | None |
+| **ChEMBL** | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity | Production | None |
 | **PubChem** | Compound | Production | 5 req/sec |
-| **UniProt** | Protein | Production | 100 req/sec |
+| **UniProt** | Protein, ID Mapping | Production | 100 req/sec |
 | **PubMed** | Publication | Production | 3 req/sec |
+| **CrossRef** | Publication | Production | Polite pool |
+| **OpenAlex** | Publication | Production | ~10 req/sec |
+| **Semantic Scholar** | Publication | Production | 100 req/5min |
 
-## 📚 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
 | [API Reference](docs/04-reference/api/index.md) | Full API documentation with mkdocstrings |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 20 ADRs explaining design choices |
-| [Ubiquitous Language](docs/glossary.md) | Domain terminology and canonical naming |
-| [RULES.md](docs/RULES.md) | Project governance and requirements (v5.10) |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 33 ADRs explaining design choices |
+| [Ubiquitous Language](docs/00-project/glossary.md) | Domain terminology and canonical naming |
+| [RULES.md](docs/00-project/RULES.md) | Project governance and requirements (v5.17) |
+| [Project Map](docs/00-project/00-map.md) | Documentation navigator and code map |
 | [CLI Reference](docs/04-reference/cli.md) | Command-line interface documentation |
 | [Operations Runbooks](docs/05-operations/runbooks/) | Incident response and procedures |
 
-## ⚡ Quick Start
+## Quick Start
 
 ### Prerequisites
 
 * **Python**: Version 3.11 or higher.
 * **Make**: For running automation commands.
-* **Docker**: *Optional* — only for legacy distributed mode (see [Legacy Setup](#legacy-distributed-mode-optional)).
+* **Docker**: Optional, legacy-only (see [Legacy Distributed Mode](#legacy-distributed-mode-rejected--unsupported)).
 
 ### Installation
 
@@ -160,7 +166,7 @@ bioetl quarantine inspect --pipeline chembl_activity --limit 10
 bioetl checkpoint list
 ```
 
-## 🛠 Development
+## Development
 
 ### Testing
 
@@ -235,15 +241,17 @@ make docs-serve
 
 Access the docs at `http://localhost:8000`.
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
-│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (20 decisions)
-│   ├── glossary.md           # Ubiquitous Language glossary
-│   └── RULES.md              # Project governance (v5.10)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (33 decisions)
+│   ├── 00-project/
+│   │   ├── glossary.md       # Ubiquitous Language glossary
+│   │   └── RULES.md          # Project governance (v5.17)
+│   └── ...
 ├── src/
 │   └── bioetl/
 │       ├── domain/           # Pure business logic (DDD), NO I/O
@@ -255,7 +263,7 @@ Access the docs at `http://localhost:8000`.
 │       │   └── exceptions/   # Classified exceptions (Critical/Recoverable/DQ)
 │       ├── application/      # Pipeline orchestration & services
 │       │   ├── core/         # PipelineRunner, Executor, BaseTransformer
-│       │   ├── pipelines/    # Concrete pipelines (ChEMBL, PubChem, UniProt, PubMed)
+│       │   ├── pipelines/    # ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, Semantic Scholar (+ common utilities)
 │       │   └── services/     # Application services (lifecycle, vacuum, cleanup)
 │       ├── composition/      # Composition Root (DI, bootstrap)
 │       │   ├── factories/    # Pipeline, storage, data source factories
@@ -267,7 +275,7 @@ Access the docs at `http://localhost:8000`.
 │       │   └── observability/ # Metrics, tracing, logging
 │       └── interfaces/       # External interfaces
 │           ├── cli/          # Click CLI commands
-│           └── orchestration/ # Signal handlers for graceful shutdown
+│           └── orchestration/ # Reserved (empty; signal handlers removed 2025-12-31, shutdown logic in application/core/shutdown.py)
 ├── tests/                    # Unit, Integration, Architecture & E2E tests
 ├── scripts/                  # Utility scripts (lint_terminology.py, etc.)
 ├── dev_setup.sh              # Automated development environment setup
@@ -275,7 +283,7 @@ Access the docs at `http://localhost:8000`.
 └── pyproject.toml            # Dependencies & Tool configuration
 ```
 
-## 🐳 Legacy Distributed Mode (REJECTED / UNSUPPORTED)
+## Legacy Distributed Mode (REJECTED / UNSUPPORTED)
 
 > **CRITICAL WARNING**: Distributed deployment and Redis Locking are **STRICTLY PROHIBITED** by [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md).
 > The instructions below are for historical reference only and must NOT be used for new deployments.
@@ -295,7 +303,7 @@ make docker-down
 
 > **Decision**: We have officially abandoned Redis Locks in favor of a strictly Local-Only architecture.
 
-## 🔒 Security
+## Security
 
 Please review our **[Security Policy](SECURITY.md)** for:
 - Threat model and trust boundaries
@@ -303,14 +311,14 @@ Please review our **[Security Policy](SECURITY.md)** for:
 - Data validation architecture
 - Vulnerability reporting process
 
-## 🤝 Contributing
+## Contributing
 
-Please read **[RULES.md](docs/RULES.md)** before contributing.
+Please read **[RULES.md](docs/00-project/RULES.md)** before contributing.
 
 1. Ensure all tests pass: `make test`
 2. Check types and linting: `make lint`
 3. Follow the **RFC 2119** keywords in requirements.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.

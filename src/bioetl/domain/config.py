@@ -41,9 +41,8 @@ class ValidationConfig:
     - Single source of truth for validation rules
 
     Attributes:
-        min_publication_year: Minimum valid publication year. Default 1800
-            covers modern scientific publications. Use 1500 for historical
-            databases like Semantic Scholar.
+        min_publication_year: Minimum valid publication year. Default 1500
+            covers historical scientific publications.
         max_publication_year: Maximum valid publication year. Default 2100.
         min_molecular_weight: Minimum molecular weight in Daltons. Default 10.0.
         max_molecular_weight: Maximum molecular weight in Daltons. Default 10000.0
@@ -57,16 +56,12 @@ class ValidationConfig:
     Example:
         >>> config = ValidationConfig()
         >>> config.min_publication_year
-        1800
-        >>> # Override for Semantic Scholar (older publications)
-        >>> ss_config = ValidationConfig(min_publication_year=1500)
-        >>> ss_config.min_publication_year
         1500
 
     """
 
     # Publication year range
-    min_publication_year: int = 1800
+    min_publication_year: int = 1500
     max_publication_year: int = 2100
 
     # Molecular properties
@@ -121,26 +116,33 @@ class FieldValidation:
 
     Supports multiple validation types:
     - required: Field must be present and non-null
+    - not_null: Field should not be null (typically used with severity=warn)
     - range: Numeric range validation (min/max)
     - pattern: Regex pattern matching
     - enum: Allowed values validation
+    - max_length: Maximum string length validation
     - custom: Custom validator function reference
 
     Attributes:
         field: Field name to validate.
-        validation_type: Type of validation (required, range, pattern, enum, custom).
+        validation_type: Type of validation.
         nullable: Whether field can be null/None. Default: True.
+        severity: Severity level (error or warn). Default: error.
         min_value: Minimum value for range validation.
         max_value: Maximum value for range validation.
         pattern: Regex pattern for pattern validation.
         allowed: Allowed values for enum validation.
+        max_length: Maximum string length for max_length validation.
         validator: Validator function name for custom validation.
         error_message: Custom error message template.
     """
 
     field: str
-    validation_type: Literal["required", "range", "pattern", "enum", "custom"]
+    validation_type: Literal[
+        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+    ]
     nullable: bool = True
+    severity: Literal["error", "warn"] = "error"
     # Range validation
     min_value: float | None = None
     max_value: float | None = None
@@ -148,6 +150,8 @@ class FieldValidation:
     pattern: str | None = None
     # Enum validation
     allowed: tuple[str, ...] = ()
+    # Max length validation
+    max_length: int | None = None
     # Custom validation
     validator: str | None = None
     # Custom error message
@@ -417,6 +421,7 @@ class PipelineConfig:
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
 
     # Processing
+    silver_filters: GoldFilterConfig | None = None  # Domain-level Silver layer filters
     gold_filters: GoldFilterConfig | None = None  # Configurable Gold layer filters
     batch_size: int = 100
     checkpoint_interval: int = 1000
@@ -439,7 +444,6 @@ class PipelineConfig:
     # Loading strategy (ADR-031)
     # Explicit formalization of data loading approach.
     # - FULL_SCAN_ONLY: Each run performs full scan, checkpoint resume disabled
-    # - WATERMARK_BASED: Incremental loading via watermark (placeholder, not implemented)
     # If not specified, derived from force_full_scan for backward compatibility.
     loading_strategy: LoadingStrategy | str | None = None
 
@@ -452,16 +456,16 @@ class PipelineConfig:
 
     def _ensure_immutability(self) -> None:
         """Convert incoming lists to tuples for immutability."""
-        if isinstance(self.primary_keys, list):
-            object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
-        if isinstance(self.partition_cols, list):
-            object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
-        if isinstance(self.fields, list):
-            object.__setattr__(self, "fields", tuple(self.fields))
-        if isinstance(self.column_groups, list):
-            object.__setattr__(self, "column_groups", tuple(self.column_groups))
-        if isinstance(self.transform_steps, list):
-            object.__setattr__(self, "transform_steps", tuple(self.transform_steps))
+        for attr in (
+            "primary_keys",
+            "partition_cols",
+            "fields",
+            "column_groups",
+            "transform_steps",
+        ):
+            val = getattr(self, attr)
+            if isinstance(val, list):
+                object.__setattr__(self, attr, tuple(val))
 
     def _convert_write_modes(self) -> None:
         """Convert string write modes to enums (backward compatibility)."""
@@ -571,6 +575,11 @@ class RuntimeConfig:
     # When False (default), missing Gold schema skips validation
     # Use False during migration, True for production readiness
     strict_gold_validation: bool = False
+
+    # Skip Gold layer writing (composite sub-pipelines)
+    # When True, Gold filter returns False for all records,
+    # preventing individual Gold writes during composite execution
+    skip_gold: bool = False
 
     def __post_init__(self) -> None:
         """Validate runtime config."""

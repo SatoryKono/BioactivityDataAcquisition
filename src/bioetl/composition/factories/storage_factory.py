@@ -13,9 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpMetadataWriter
+from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
@@ -112,6 +111,7 @@ class StorageFactory:
         bronze_flat_structure: bool = False,
         silver_flat_structure: bool = False,
         gold_flat_structure: bool = False,
+        silver_validator: Any = None,
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -159,6 +159,7 @@ class StorageFactory:
                 logger=logger,
                 tracing=effective_tracing,
                 csv_exporter=silver_csv_exporter,
+                silver_validator=silver_validator,
                 metadata_writer=silver_metadata_writer,
                 metadata_coordinator=metadata_coordinator,
                 transform_version=transform_version,
@@ -186,6 +187,7 @@ class StorageFactory:
         metrics: MetricsPort,
         tracing: TracingPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: Any = None,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -198,6 +200,8 @@ class StorageFactory:
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation. If provided, ensures consistent
                                 run_id and timestamps across Bronze, Silver, Gold.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
 
         Returns:
             StorageContext with adapter and paths
@@ -260,9 +264,20 @@ class StorageFactory:
         transform_steps = tuple(config.transform.steps)
 
         # Extract flat_structure settings
-        bronze_flat_structure = bronze_config.flat_structure if bronze_config else False
-        silver_flat_structure = silver_config.flat_structure if silver_config else False
-        gold_flat_structure = gold_config.flat_structure if gold_config else False
+        # In test mode (use_yaml_paths=False), settings paths don't include
+        # provider/entity segments, so flat_structure must be False to ensure
+        # each pipeline writes to its own subdirectory (base_path/table_name).
+        # In production, YAML paths already include provider/entity per ADR-029,
+        # so flat_structure=true correctly writes directly to the configured path.
+        bronze_flat_structure = (
+            bronze_config.flat_structure if bronze_config else False
+        ) and use_yaml_paths
+        silver_flat_structure = (
+            silver_config.flat_structure if silver_config else False
+        ) and use_yaml_paths
+        gold_flat_structure = (
+            gold_config.flat_structure if gold_config else False
+        ) and use_yaml_paths
 
         adapter = StorageFactory._create_storage_adapter(
             bronze_path=bronze_path,
@@ -282,6 +297,7 @@ class StorageFactory:
             bronze_flat_structure=bronze_flat_structure,
             silver_flat_structure=silver_flat_structure,
             gold_flat_structure=gold_flat_structure,
+            silver_validator=silver_validator,
         )
 
         return StorageContext(

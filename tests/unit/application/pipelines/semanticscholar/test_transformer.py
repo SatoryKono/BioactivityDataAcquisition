@@ -153,18 +153,17 @@ class TestSemanticScholarPublicationTransformer:
         )
 
     @pytest.mark.asyncio
-    async def test_transform_authors_excluded(
+    async def test_transform_authors_present(
         self,
         transformer: SemanticScholarPublicationTransformer,
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that authors field is excluded per user request."""
+        """Test that authors field is present in silver record."""
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        # Authors excluded per user request
-        assert "authors" not in result
+        assert "authors" in result
 
     @pytest.mark.asyncio
     async def test_transform_subject_fields_serialized(
@@ -190,7 +189,7 @@ class TestSemanticScholarPublicationTransformer:
         sample_record: dict[str, Any],
         publication_types: list[str] | None,
     ) -> None:
-        """Test that publication_type is None when publicationTypes is empty/null."""
+        """Test that publication_type defaults to PUBLICATION when publicationTypes is empty/null."""
         if publication_types is None:
             sample_record.pop("publicationTypes", None)
         else:
@@ -199,7 +198,7 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["publication_type"] is None
+        assert result["publication_type"] == "PUBLICATION"
 
     @pytest.mark.asyncio
     async def test_transform_publication_type_joined(
@@ -377,12 +376,12 @@ class TestTransformerWithPiiHasher:
     """Tests for transformer with PII hasher."""
 
     @pytest.mark.asyncio
-    async def test_transform_without_pii_fields(
+    async def test_transform_with_pii_hasher(
         self,
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that transformer works without PII fields (authors excluded)."""
+        """Test that transformer applies PII hasher to authors."""
         mock_pii_hasher = MagicMock()
         mock_pii_hasher.hash_list = MagicMock(return_value=["hash1", "hash2"])
 
@@ -391,9 +390,7 @@ class TestTransformerWithPiiHasher:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        # Authors excluded per user request, so PII hasher should not be called
-        mock_pii_hasher.hash_list.assert_not_called()
-        assert "authors" not in result
+        assert "authors" in result
 
 
 class TestSemanticScholarDoiNormalization:

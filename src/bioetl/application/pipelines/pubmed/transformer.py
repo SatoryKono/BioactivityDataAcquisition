@@ -22,7 +22,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
     RawAuthor,
     StructuredAffiliation,
 )
-from bioetl.application.pipelines.pubmed.xml_utils import get_text
+from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.services import IdentityService
@@ -75,6 +75,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -87,6 +88,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics labels. Defaults to 'publication'.
             tracer: Optional tracing port for distributed tracing (O1 observability).
             metrics: Optional metrics port for duration/error tracking (O1 observability).
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
@@ -98,6 +100,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -244,6 +247,70 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "databanks": ClassificationExtractor.parse_databanks(medline),
         }
 
+    def _extract_author_block(
+        self, article: ET.Element, raw_author_data: list[RawAuthor]
+    ) -> dict[str, Any]:
+        """Extract and process author-related fields from article XML."""
+        normalized_authors = (
+            AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
+        )
+        hashed_authors = self.hash_pii_list(normalized_authors) or []
+
+        authors_with_affiliations = self._build_authors_with_affiliations(
+            raw_author_data
+        )
+
+        # Unique affiliations across all authors
+        affiliation_values: list[str] = []
+        for author in raw_author_data:
+            affiliation_values.extend(
+                aff for aff in (author.get("affiliations") or []) if aff
+            )
+        unique_affiliations = sorted(set(affiliation_values))
+
+        # Structured affiliations with identifiers
+        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
+        processed = self._process_structured_affiliations(structured_affs)
+
+        return {
+            "authors": self.serialize_json_list(hashed_authors),
+            "authors_with_affiliations": (
+                self.serialize_json_list(authors_with_affiliations)
+                if authors_with_affiliations
+                else None
+            ),
+            "affiliation_list": (
+                self.serialize_json_list(unique_affiliations)
+                if unique_affiliations
+                else None
+            ),
+            "affiliation_structured": self.serialize_json_list(processed),
+            "author_count": len(hashed_authors),
+        }
+
+    def _extract_identifiers(self, root: ET.Element) -> dict[str, Any]:
+        """Extract and normalize all identifier fields from PubMed XML root."""
+        raw_pmid = get_text(root.find(".//PMID"))
+        pmid_vo = PubMedId.from_raw(raw_pmid)
+
+        raw_doi = IdentifierExtractor.extract_doi(root)
+        doi_vo = DOI.from_raw(raw_doi)
+
+        return {
+            "pmid": str(pmid_vo) if pmid_vo else None,
+            "doi": str(doi_vo) if doi_vo else None,
+            "pii": self._data_normalizer.normalize_to_string(
+                IdentifierExtractor.extract_pii(root)
+            ),
+            "mid": self._data_normalizer.normalize_to_string(
+                IdentifierExtractor.extract_mid(root)
+            ),
+            "publisher_id": self._data_normalizer.normalize_to_string(
+                IdentifierExtractor.extract_publisher_id(root)
+            ),
+            "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
+        }
+
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract all business fields from PubMed XML.
 
@@ -260,100 +327,35 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if root is None:
             return {"pmid": None}
 
-        raw_pmid = get_text(root.find(".//PMID"))
-        pmid_vo = PubMedId.from_raw(raw_pmid)
-        pmid = str(pmid_vo) if pmid_vo else None
+        identifiers = self._extract_identifiers(root)
+
+        article = root.find(".//Article")
+        if article is None:
+            return {"pmid": identifiers["pmid"]}
 
         medline = root.find(".//MedlineCitation")
-        article = root.find(".//Article")
         pubmed_data = root.find(".//PubmedData")
 
-        if article is None:
-            return {"pmid": pmid}
-
-        # Extract raw author data with affiliations
-        author_extractor = AuthorExtractor()
-        raw_author_data = author_extractor.extract(article) or []
-
-        # Normalize and hash authors (legacy format for backward compatibility)
-        normalized_authors = (
-            author_extractor.normalize(raw_author_data) if raw_author_data else []
-        )
-        hashed_authors = self.hash_pii_list(normalized_authors) or []
-
-        # Build structured author-affiliation mapping
-        authors_with_affiliations = self._build_authors_with_affiliations(
-            raw_author_data
-        )
-
-        # Extract unique affiliations list (unified field name)
-        affiliation_values: list[str] = []
-        for author in raw_author_data:
-            affiliations = author.get("affiliations") or []
-            affiliation_values.extend(aff for aff in affiliations if aff)
-        unique_affiliations = sorted(set(affiliation_values))
-        serialized_affiliations = (
-            self.serialize_json_list(unique_affiliations)
-            if unique_affiliations
-            else None
-        )
-
-        # Extract structured affiliations with identifiers
-        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
-        processed_structured_affs = self._process_structured_affiliations(
-            structured_affs
-        )
-        serialized_structured_affs = self.serialize_json_list(processed_structured_affs)
-
-        # Validate DOI
-        raw_doi = IdentifierExtractor.extract_doi(root)
-        doi_vo = DOI.from_raw(raw_doi)
-        normalized_doi = str(doi_vo) if doi_vo else None
-
-        # Extract and normalize additional identifiers.
-        # Using normalize_to_string ensures that empty strings ("") become None,
-        # which provides consistent handling in downstream processing and
-        # prevents inconsistent content_hash computation for equivalent records.
-        pii = self._data_normalizer.normalize_to_string(
-            IdentifierExtractor.extract_pii(root)
-        )
-        mid = self._data_normalizer.normalize_to_string(
-            IdentifierExtractor.extract_mid(root)
-        )
-        publisher_id = self._data_normalizer.normalize_to_string(
-            IdentifierExtractor.extract_publisher_id(root)
-        )
+        raw_author_data = AuthorExtractor().extract(article) or []
 
         return {
-            "pmid": pmid,
-            "doi": normalized_doi,
-            "pii": pii,
-            "mid": mid,
-            "publisher_id": publisher_id,
+            **identifiers,
             "title": get_text(article.find(".//ArticleTitle")),
-            # vernacular_title excluded per user request
             "abstract": self._data_normalizer.strip_html_tags(
                 AbstractExtractor.extract_abstract(article)
             ),
             "abstract_structured": AbstractExtractor.is_abstract_structured(article),
-            "authors": self.serialize_json_list(hashed_authors),
-            "authors_with_affiliations": (
-                self.serialize_json_list(authors_with_affiliations)
-                if authors_with_affiliations
-                else None
-            ),
-            "affiliation_list": serialized_affiliations,
-            "affiliation_structured": serialized_structured_affs,
-            "author_count": len(hashed_authors),
+            **self._extract_author_block(article, raw_author_data),
             **self._extract_journal_data(article),
             **self._extract_date_data(article, pubmed_data, medline),
             **self._extract_classification_data(article, medline),
             **self._extract_medline_metadata(medline, pubmed_data),
             **self._extract_counts(article, pubmed_data),
             "language": get_text(article.find(".//Language")),
-            "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
             "_source": "pubmed",
-            "publication_type": "PUBLICATION",
+            **self._build_pubmed_classification(
+                ClassificationExtractor.parse_publication_types(article),
+            ),
             "citations_received": None,
             "is_oa": None,
             "_lookup_method": cast("dict[str, Any]", record).get(
@@ -363,6 +365,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "_dq_warn": False,
             "_dq_error": False,
         }
+
+    def _build_pubmed_classification(
+        self, pub_types: list[str]
+    ) -> dict[str, str | None]:
+        """Build publication_type and classification fields for PubMed.
+
+        Joins raw types with ``|`` for the raw ``publication_type`` field,
+        then uses the unified classifier to pick the most specific match.
+
+        Args:
+            pub_types: List of raw publication type strings from XML.
+
+        Returns:
+            Dict with publication_type and the 3 classification fields.
+
+        """
+        raw_type = "|".join(pub_types) if pub_types else None
+        classification = self._classify_publication_type(
+            "pubmed",
+            raw_types_list=pub_types,
+        )
+        return {"publication_type": raw_type, **classification}
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
@@ -557,7 +581,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Priority 2: pub_date (may be partial, normalize it)
         if pub_date:
-            return self._normalize_partial_date(pub_date)
+            return self._data_normalizer.normalize_partial_date(pub_date)
 
         # Priority 3: Construct from year (end of year)
         if year:
@@ -641,8 +665,12 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         pub_month, pub_day = self._parse_month_day(pub_date_node)
 
-        year_vo = PublicationYear.from_raw(raw_year)
-        validated_year = year_vo.value if year_vo else None
+        _validated_year = self.validate_value_object(
+            PublicationYear, raw_year, as_string=False
+        )
+        validated_year: int | None = (
+            int(_validated_year) if _validated_year is not None else None
+        )
 
         raw_epub_date = DateExtractor.extract_article_date(article, "Electronic")
 
@@ -704,6 +732,5 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("revised_date", None)
         silver_record.pop("accepted_date", None)
         silver_record.pop("citations_received", None)
-        silver_record.pop("is_oa", None)
 
         return silver_record

@@ -20,13 +20,6 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class HasProviderName(Protocol):
-    """Protocol for adapters that have a provider_name attribute."""
-
-    provider_name: str
-
-
-@runtime_checkable
 class HasFetchFiltered(Protocol):
     """Protocol for adapters that implement fetch_filtered method."""
 
@@ -131,6 +124,42 @@ class DelegatingFallbackMixin:
 
         """
         del fallback_mapping  # Unused - primary IDs are always resolvable
+        async for record in self.fetch_filtered(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            limit=limit,
+        ):
+            yield record
+
+    async def fetch_filtered_with_extended_fallback(
+        self: HasFetchFiltered,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        alternate_id_mapping: dict[str, str] | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Extended fallback not needed - delegates to fetch_filtered().
+
+        The fallback_mapping and alternate_id_mapping parameters are ignored.
+
+        Args:
+            entity_type: Type of entity to fetch.
+            filter_ids: List of IDs to filter by.
+            filter_field: Field name to filter on.
+            fallback_mapping: Ignored.
+            alternate_id_mapping: Ignored.
+            limit: Maximum number of records to fetch.
+
+        Yields:
+            Dictionary records matching the filter criteria.
+        """
+        # Unused params
+        del fallback_mapping
+        del alternate_id_mapping
+
         async for record in self.fetch_filtered(
             entity_type=entity_type,
             filter_ids=filter_ids,

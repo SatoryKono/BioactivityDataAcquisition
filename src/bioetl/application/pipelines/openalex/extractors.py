@@ -45,7 +45,7 @@ def _extract_id_from_url(url: str | None) -> str | None:
     """
     if not url or not isinstance(url, str):
         return None
-    return url.split("/")[-1] if "/" in url else url
+    return url.rstrip("/").split("/")[-1] if "/" in url else url
 
 
 def _get_nested_display_name(obj: Any) -> str | None:
@@ -431,27 +431,23 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
     if not ids or not isinstance(ids, dict):
         return {"pmid": None, "pmcid": None, "mag_id": None}
 
-    # Extract PMID from URL
-    # Format: https://pubmed.ncbi.nlm.nih.gov/12345678
-    pmid = None
-    pmid_url = ids.get("pmid")
-    if pmid_url and isinstance(pmid_url, str):
-        pmid = pmid_url.rstrip("/").split("/")[-1] if "/" in pmid_url else pmid_url
+    from bioetl.domain.value_objects.publications import PubMedId
 
-    # Extract PMCID from URL
-    # Format: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC123456
-    pmcid = None
-    pmcid_url = ids.get("pmcid")
-    if pmcid_url and isinstance(pmcid_url, str):
-        pmcid = pmcid_url.rstrip("/").split("/")[-1] if "/" in pmcid_url else pmcid_url
+    # PMID: normalize via PubMedId VO (strips leading zeros, validates bounds)
+    raw_pmid = _extract_id_from_url(ids.get("pmid"))
+    pmid_vo = PubMedId.from_raw(raw_pmid)
 
-    # Extract MAG ID (can be int or string)
-    mag_id = None
+    # PMCID: extract from URL (e.g. https://...pmc/articles/PMC123456)
+    pmcid = _extract_id_from_url(ids.get("pmcid"))
+
+    # MAG ID (can be int or string)
     mag_raw = ids.get("mag")
-    if mag_raw is not None:
-        mag_id = str(mag_raw)
 
-    return {"pmid": pmid, "pmcid": pmcid, "mag_id": mag_id}
+    return {
+        "pmid": str(pmid_vo) if pmid_vo else None,
+        "pmcid": pmcid,
+        "mag_id": str(mag_raw) if mag_raw is not None else None,
+    }
 
 
 def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:

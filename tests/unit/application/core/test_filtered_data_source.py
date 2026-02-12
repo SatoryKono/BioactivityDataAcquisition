@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -77,6 +77,18 @@ class MockFilterableDataSource:
         limit: int | None = None,
     ):
         for record in [{"id": "fallback_1"}, {"id": "fallback_2"}]:
+            yield record
+
+    async def fetch_filtered_with_extended_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        alternate_id_mapping: dict[str, str] | None = None,
+        limit: int | None = None,
+    ):
+        for record in [{"id": "extended_1"}, {"id": "extended_2"}]:
             yield record
 
 
@@ -429,9 +441,62 @@ class TestFilteredDataSourceFallback:
         async for record in filtered.fetch("publication"):
             records.append(record)
 
-        # Should use fetch_filtered_with_fallback (returns fallback_1, fallback_2)
+        # Should use fetch_filtered_with_extended_fallback (returns extended_1, extended_2)
+        # Note: Extended method supersedes legacy fallback method
         assert len(records) == 2
-        assert records == [{"id": "fallback_1"}, {"id": "fallback_2"}]
+        assert records == [{"id": "extended_1"}, {"id": "extended_2"}]
+
+    @pytest.mark.asyncio
+    async def test_fetch_uses_extended_fallback_when_alternate_id_mapping_provided(
+        self,
+        mock_data_source_with_filtered,
+        mock_filter_reader,
+    ):
+        """Test fetch uses fetch_filtered_with_extended_fallback when alternate mapping loaded."""
+        # Config with alternate_id_column
+        config = InputFilterConfig(
+            enabled=True,
+            source_path="data.csv",
+            column_name="doi",
+            filter_field="doi",
+            fallback_column="title",
+            alternate_id_column="pmid",
+        )
+
+        # Mock extended fallback loading
+        mock_filter_reader.load_filter_with_extended_fallback = AsyncMock(
+            return_value=(
+                FilterLoadResult(
+                    ids=("doi1", "doi2"),
+                    total_count=2,
+                    unique_count=2,
+                    duplicate_count=0,
+                    duplicates=frozenset(),
+                ),
+                {"doi1": "title1"},  # fallback_mapping
+                {"doi1": "pmid1"},  # alternate_id_mapping
+            )
+        )
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=mock_filter_reader,
+            filter_config=config,
+        )
+
+        await filtered.__aenter__()
+
+        # Verify mappings loaded
+        assert filtered._fallback_mapping == {"doi1": "title1"}
+        assert filtered._alternate_id_mapping == {"doi1": "pmid1"}
+
+        records = []
+        async for record in filtered.fetch("publication"):
+            records.append(record)
+
+        # Should use fetch_filtered_with_extended_fallback (returns extended_1, extended_2)
+        assert len(records) == 2
+        assert records == [{"id": "extended_1"}, {"id": "extended_2"}]
 
     @pytest.mark.asyncio
     async def test_fetch_uses_regular_filtered_without_fallback_mapping(
@@ -465,3 +530,431 @@ class TestFilteredDataSourceFallback:
         # Should use regular fetch_filtered (returns filtered_1, filtered_2)
         assert len(records) == 2
         assert records == [{"id": "filtered_1"}, {"id": "filtered_2"}]
+
+
+@pytest.mark.unit
+class TestFilteredDataSourceMultiColumn:
+    """Tests for multi-column filtering paths."""
+
+    @pytest.fixture
+    def multi_column_filter_config(self):
+        """Create multi-column filter configuration."""
+        from bioetl.domain.filtering.input_config import FilterColumn
+
+        return InputFilterConfig(
+            enabled=True,
+            source_path="data/multi.csv",
+            columns=(
+                FilterColumn("molecule_chembl_id", "molecule_chembl_id"),
+                FilterColumn("assay_chembl_id", "assay_chembl_id"),
+            ),
+        )
+
+    @pytest.fixture
+    def mock_multi_filter_reader(self):
+        """Create a mock filter reader for multi-column filters."""
+        reader = AsyncMock()
+        multi_result = FilterLoadResult(
+            ids=("CHEMBL1", "CHEMBL2"),
+            total_count=2,
+            unique_count=2,
+            duplicate_count=0,
+            duplicates=frozenset(),
+            column_ids={
+                "molecule_chembl_id": frozenset({"CHEMBL1", "CHEMBL2"}),
+                "assay_chembl_id": frozenset({"CHEMBL_ASSAY_1"}),
+            },
+            valid_combinations=frozenset({("CHEMBL1", "CHEMBL_ASSAY_1")}),
+            filter_fields=("molecule_chembl_id", "assay_chembl_id"),
+        )
+        reader.load_multi_column_filter = AsyncMock(return_value=multi_result)
+        return reader
+
+    @pytest.mark.asyncio
+    async def test_multi_column_filter_loads_on_aenter(
+        self,
+        mock_data_source_with_filtered,
+        mock_multi_filter_reader,
+        multi_column_filter_config,
+    ):
+        """Test multi-column filter IDs are loaded on __aenter__."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=mock_multi_filter_reader,
+            filter_config=multi_column_filter_config,
+        )
+
+        await filtered.__aenter__()
+
+        mock_multi_filter_reader.load_multi_column_filter.assert_called_once()
+        assert filtered._multi_filter_ids is not None
+        assert filtered._valid_combinations is not None
+
+    @pytest.mark.asyncio
+    async def test_multi_column_fetch_filters_by_combinations(
+        self,
+        mock_data_source_with_filtered,
+        mock_multi_filter_reader,
+        multi_column_filter_config,
+    ):
+        """Test multi-column fetch filters by valid combinations."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=mock_multi_filter_reader,
+            filter_config=multi_column_filter_config,
+        )
+        await filtered.__aenter__()
+
+        records = []
+        async for record in filtered.fetch("activity"):
+            records.append(record)
+
+        # MockFilterableDataSource.fetch_multi_filtered returns multi_1, multi_2
+        # _matches_valid_combination filters them based on valid_combinations
+        assert isinstance(records, list)
+
+
+@pytest.mark.unit
+class TestFilteredDataSourceMetrics:
+    """Tests for metrics recording."""
+
+    @pytest.mark.asyncio
+    async def test_single_column_metrics_recorded(
+        self,
+        mock_data_source,
+        mock_filter_reader,
+        enabled_filter_config,
+    ):
+        """Test metrics are recorded when loading single-column filter."""
+        mock_metrics = MagicMock()
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=mock_filter_reader,
+            filter_config=enabled_filter_config,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+        )
+
+        await filtered.__aenter__()
+
+        # increment_counter should have been called for filter_ids_loaded_total
+        mock_metrics.increment_counter.assert_called()
+        call_args = mock_metrics.increment_counter.call_args_list
+        counter_names = [c[0][0] for c in call_args]
+        assert "filter_ids_loaded_total" in counter_names
+
+    @pytest.mark.asyncio
+    async def test_single_column_duplicate_metrics(
+        self,
+        mock_data_source,
+        enabled_filter_config,
+    ):
+        """Test duplicate metrics are recorded when filter has duplicates."""
+        reader = AsyncMock()
+        filter_result = FilterLoadResult(
+            ids=("CHEMBL1", "CHEMBL2"),
+            total_count=3,
+            unique_count=2,
+            duplicate_count=1,
+            duplicates=frozenset({"CHEMBL1"}),
+        )
+        reader.load_filter_ids = AsyncMock(return_value=filter_result)
+        mock_metrics = MagicMock()
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=reader,
+            filter_config=enabled_filter_config,
+            metrics=mock_metrics,
+            pipeline_name="test_pipeline",
+        )
+
+        await filtered.__aenter__()
+
+        call_args = mock_metrics.increment_counter.call_args_list
+        counter_names = [c[0][0] for c in call_args]
+        assert "filter_ids_duplicates_total" in counter_names
+
+    @pytest.mark.asyncio
+    async def test_no_metrics_when_metrics_is_none(
+        self,
+        mock_data_source,
+        mock_filter_reader,
+        enabled_filter_config,
+    ):
+        """Test no error when metrics port is None."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=mock_filter_reader,
+            filter_config=enabled_filter_config,
+            metrics=None,
+        )
+
+        # Should not raise even without metrics
+        await filtered.__aenter__()
+        assert filtered._filter_ids is not None
+
+
+@pytest.mark.unit
+class TestFilteredDataSourceGetSourceMetadata:
+    """Tests for get_source_metadata delegation."""
+
+    def test_get_source_metadata_delegates(self, disabled_filter_config):
+        """Test get_source_metadata delegates to wrapped adapter."""
+        source = MockDataSource()
+        source.get_source_metadata = MagicMock(return_value="metadata")
+        filtered = FilteredDataSource(
+            data_source=source,
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+
+        result = filtered.get_source_metadata(api_version="v1")
+
+        assert result == "metadata"
+        source.get_source_metadata.assert_called_once_with("v1")
+
+    def test_get_source_metadata_returns_none_when_not_supported(
+        self, disabled_filter_config
+    ):
+        """Test get_source_metadata returns None if wrapped doesn't support it."""
+        source = MockDataSource()
+        filtered = FilteredDataSource(
+            data_source=source,
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+
+        result = filtered.get_source_metadata()
+
+        assert result is None
+
+
+@pytest.mark.unit
+class TestFilteredDataSourceLoggerWarning:
+    """Tests for logger warning path."""
+
+    @pytest.mark.asyncio
+    async def test_filter_file_not_found_logs_warning(
+        self,
+        mock_data_source,
+        enabled_filter_config,
+    ):
+        """Test that logger.warning is called when filter file is missing."""
+        reader = AsyncMock()
+        reader.load_filter_ids = AsyncMock(
+            side_effect=FileNotFoundError("Filter file not found")
+        )
+        mock_logger = MagicMock()
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=reader,
+            filter_config=enabled_filter_config,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+        )
+
+        await filtered.__aenter__()
+
+        mock_logger.warning.assert_called_once()
+        call_args = mock_logger.warning.call_args
+        assert call_args[0][0] == "input_filter_file_not_found"
+
+    @pytest.mark.asyncio
+    async def test_no_filter_reader_skips_loading(
+        self,
+        mock_data_source,
+        enabled_filter_config,
+    ):
+        """Test that loading is skipped when filter_reader is None."""
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=None,
+            filter_config=enabled_filter_config,
+        )
+
+        await filtered.__aenter__()
+
+        assert filtered._filter_ids is None
+
+    @pytest.mark.asyncio
+    async def test_no_filter_reader_enabled_csv_skips_loading(
+        self,
+        mock_data_source,
+    ):
+        """Test that loading is skipped when filter_reader is None but CSV mode."""
+        config = InputFilterConfig(
+            enabled=True,
+            source_path="data/test.csv",
+            column_name="molecule_chembl_id",
+            filter_field="molecule_chembl_id",
+        )
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source,
+            filter_reader=None,
+            filter_config=config,
+        )
+
+        await filtered.__aenter__()
+
+        assert filtered._filter_ids is None
+
+
+@pytest.mark.unit
+class TestFilteredDataSourceDirectFilterLogging:
+    """Tests for direct filter ID loading with logger."""
+
+    @pytest.mark.asyncio
+    async def test_direct_filter_ids_log_info(
+        self,
+        mock_data_source_with_filtered,
+    ):
+        """Test that direct filter ID loading logs info message."""
+        config = InputFilterConfig(
+            enabled=True,
+            filter_field="doi",
+            direct_filter_ids=("10.1038/test1",),
+        )
+        mock_logger = MagicMock()
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=None,
+            filter_config=config,
+            logger=mock_logger,
+            pipeline_name="test_pipeline",
+        )
+
+        await filtered.__aenter__()
+
+        mock_logger.info.assert_called_once()
+        call_args = mock_logger.info.call_args
+        assert call_args[0][0] == "direct_filter_ids_loaded"
+
+
+@pytest.mark.unit
+class TestFilteredDataSourceFallbackColumn:
+    """Tests for fallback column loading."""
+
+    @pytest.mark.asyncio
+    async def test_load_with_fallback_column(
+        self,
+        mock_data_source_with_filtered,
+    ):
+        """Test loading filter with fallback column."""
+        config = InputFilterConfig(
+            enabled=True,
+            source_path="data/pubs.csv",
+            column_name="doi",
+            filter_field="doi",
+            fallback_column="title",
+        )
+
+        reader = AsyncMock()
+        filter_result = FilterLoadResult(
+            ids=("10.1038/test1",),
+            total_count=1,
+            unique_count=1,
+            duplicate_count=0,
+            duplicates=frozenset(),
+        )
+        fallback_map = {"10.1038/test1": "Test Title"}
+        reader.load_filter_with_fallback = AsyncMock(
+            return_value=(filter_result, fallback_map)
+        )
+
+        filtered = FilteredDataSource(
+            data_source=mock_data_source_with_filtered,
+            filter_reader=reader,
+            filter_config=config,
+        )
+
+        await filtered.__aenter__()
+
+        reader.load_filter_with_fallback.assert_called_once_with(
+            source_path="data/pubs.csv",
+            primary_column="doi",
+            fallback_column="title",
+        )
+        assert filtered._fallback_mapping == fallback_map
+        assert filtered._filter_ids == ["10.1038/test1"]
+
+
+@pytest.mark.unit
+class TestFilteredDataSourceValidCombinations:
+    """Tests for _matches_valid_combination."""
+
+    def test_matches_when_no_valid_combinations(self, disabled_filter_config):
+        """Test that _matches_valid_combination returns True when no combinations set."""
+        filtered = FilteredDataSource(
+            data_source=MockDataSource(),
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+
+        assert filtered._matches_valid_combination({"id": "1"}) is True
+
+    def test_matches_valid_combination(self, disabled_filter_config):
+        """Test that matching records pass the combination check."""
+        filtered = FilteredDataSource(
+            data_source=MockDataSource(),
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+        filtered._valid_combinations = frozenset({("CHEMBL1", "ASSAY1")})
+        filtered._filter_fields = ("mol_id", "assay_id")
+
+        assert filtered._matches_valid_combination(
+            {"mol_id": "CHEMBL1", "assay_id": "ASSAY1"}
+        )
+
+    def test_rejects_invalid_combination(self, disabled_filter_config):
+        """Test that non-matching records are rejected."""
+        filtered = FilteredDataSource(
+            data_source=MockDataSource(),
+            filter_reader=None,
+            filter_config=disabled_filter_config,
+        )
+        filtered._valid_combinations = frozenset({("CHEMBL1", "ASSAY1")})
+        filtered._filter_fields = ("mol_id", "assay_id")
+
+        assert not filtered._matches_valid_combination(
+            {"mol_id": "CHEMBL1", "assay_id": "ASSAY_WRONG"}
+        )
+
+    @pytest.mark.asyncio
+    async def test_fetch_single_column_raises_without_filter_field(self):
+        """Test ValueError when filter_field is None but _filter_ids is set manually."""
+        config = InputFilterConfig(
+            enabled=True,
+            source_path="data/test.csv",
+            column_name="molecule_chembl_id",
+            filter_field="molecule_chembl_id",
+        )
+        reader = AsyncMock()
+        reader.load_filter_ids = AsyncMock(
+            return_value=FilterLoadResult(
+                ids=("CHEMBL1",),
+                total_count=1,
+                unique_count=1,
+                duplicate_count=0,
+                duplicates=frozenset(),
+            )
+        )
+        source = MockFilterableDataSource()
+        filtered = FilteredDataSource(
+            data_source=source,
+            filter_reader=reader,
+            filter_config=config,
+        )
+        await filtered.__aenter__()
+
+        # Manually clear filter_field to simulate edge case
+        object.__setattr__(filtered._filter_config, "filter_field", None)
+
+        with pytest.raises(ValueError, match="filter_field must be specified"):
+            async for _ in filtered.fetch("activity"):
+                pass

@@ -9,6 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
+from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, TARGET_TYPES
 
 
 class TargetSchema(ETLRecordSchema):
@@ -23,29 +24,14 @@ class TargetSchema(ETLRecordSchema):
     # === Identifiers ===
     target_chembl_id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )
 
     # === Classification ===
     target_type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=[
-            "SINGLE PROTEIN",
-            "PROTEIN FAMILY",
-            "PROTEIN COMPLEX",
-            "PROTEIN COMPLEX GROUP",
-            "SELECTIVITY GROUP",
-            "CHIMERIC PROTEIN",
-            "CELL-LINE",
-            "TISSUE",
-            "ORGANISM",
-            "MACROMOLECULE",
-            "SMALL MOLECULE",
-            "LIPID",
-            "METAL",
-            "UNKNOWN",
-        ],
+        isin=list(TARGET_TYPES),
         description="Target type.",
     )
     # target_parent_type: Optional[Series[str]] = pa.Field(
@@ -58,11 +44,8 @@ class TargetSchema(ETLRecordSchema):
     pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
-    description: Series[str] | None = pa.Field(
-        nullable=True, description="Target description."
-    )
-    taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True, description="NCBI Taxonomy ID. Standardized name (was tax_id)."
+    taxonomy_id: Series[float] | None = pa.Field(
+        nullable=True, description="NCBI Taxonomy ID (float for nullable int)."
     )
     organism: Series[str] | None = pa.Field(nullable=True, description="Organism.")
     species_group_flag: Series[bool] | None = pa.Field(
@@ -72,11 +55,6 @@ class TargetSchema(ETLRecordSchema):
     downgraded: Series[bool] | None = pa.Field(
         nullable=True,
         description="Downgraded flag.",
-    )
-
-    # === Optional Target Fields ===
-    dap_id: Series[int] | None = pa.Field(
-        nullable=True, description="Drug affinity prediction ID."
     )
 
     # === Complex Fields (JSON Strings) ===
@@ -89,9 +67,6 @@ class TargetSchema(ETLRecordSchema):
     pipeline_stages: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of pipeline stages."
     )
-    target_constraints: Series[str] | None = pa.Field(
-        nullable=True, description="JSON string of target constraints."
-    )
     target_component_synonyms: Series[str] | None = pa.Field(
         nullable=True, description="JSON string of aggregated component synonyms."
     )
@@ -101,6 +76,14 @@ class TargetSchema(ETLRecordSchema):
     component_accessions: Series[object] | None = pa.Field(
         nullable=True, description="List of component accessions."
     )
+    component_descriptions: Series[object] | None = pa.Field(
+        nullable=True, description="List of component descriptions."
+    )
+    component_id: Series[float] | None = pa.Field(
+        nullable=True,
+        coerce=True,
+        description="Primary component ID (first from list).",
+    )
     component_ids: Series[object] | None = pa.Field(
         nullable=True, description="List of component IDs."
     )
@@ -109,15 +92,6 @@ class TargetSchema(ETLRecordSchema):
     )
     component_relationships: Series[object] | None = pa.Field(
         nullable=True, description="List of component relationships."
-    )
-    component_descriptions: Series[object] | None = pa.Field(
-        nullable=True, description="List of component descriptions."
-    )
-    component_organisms: Series[object] | None = pa.Field(
-        nullable=True, description="List of component organisms."
-    )
-    component_taxonomy_ids: Series[object] | None = pa.Field(
-        nullable=True, description="List of component NCBI taxonomy IDs."
     )
 
     class Config:

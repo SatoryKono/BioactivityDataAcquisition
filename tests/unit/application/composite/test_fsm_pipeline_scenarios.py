@@ -340,6 +340,9 @@ class FakeMergeService:
         enrichers: Any,
         enrichment_results: dict[str, EnrichmentResult],
         run_id: str,
+        seed_pipeline: str | None = None,
+        dependencies: Any | None = None,
+        dependency_results: Any | None = None,
     ) -> MergeResult:
         self.execution_count += 1
         if self.should_fail:

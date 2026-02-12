@@ -8,7 +8,7 @@ graph TD
     subgraph Silver["Silver Layer"]
         S1[Normalized Data - Delta Lake]
         S2[Merge by entity_id]
-        S3[Schema Enforcement]
+        LocalFS[Schema Enforcement]
     end
 
     subgraph Gold["Gold Layer"]

@@ -71,20 +71,14 @@ PUBLICATION_UNIFIED_FIELDS: Final[tuple[str, ...]] = (
 # DQ flags that MUST appear last (in order), if present
 # Not all schemas have these fields
 DQ_FIELDS_SUFFIX: Final[tuple[str, ...]] = (
-    "_dq_warn",
     "_dq_error",
+    "_dq_warn",
 )
 
 
 # All system fields (prefix + suffix) for quick membership check
 ALL_SYSTEM_FIELDS: Final[frozenset[str]] = frozenset(
     SYSTEM_FIELDS_PREFIX + LOOKUP_FIELDS_PREFIX + DQ_FIELDS_SUFFIX
-)
-
-ALL_PUBLICATION_FIELDS: Final[frozenset[str]] = frozenset(
-    PUBLICATION_METADATA_FIELDS
-    + PUBLICATION_CROSSREF_FIELDS
-    + PUBLICATION_UNIFIED_FIELDS
 )
 
 
@@ -101,7 +95,7 @@ def canonical_column_order(columns: list[str] | tuple[str, ...]) -> list[str]:
     Order:
     1. System prefix fields (entity_id, content_hash, _run_id, ...)
     2. Business fields (sorted alphabetically)
-    3. DQ suffix fields (_dq_warn, _dq_error) if present
+    3. DQ suffix fields (_dq_error, _dq_warn) if present
 
     Args:
         columns: Unordered list/tuple of column names.

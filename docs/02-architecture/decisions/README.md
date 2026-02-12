@@ -35,6 +35,10 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-027](ADR-027-dq-rules-externalization.md) | DQ Rules Externalization | Accepted | Data Quality | 2026-01-19 |
 | [ADR-028](ADR-028-filter-rules-externalization.md) | Filter Rules Externalization | Accepted | Configuration | 2026-01-20 |
 | [ADR-029](ADR-029-output-metadata-unification.md) | Output Metadata Unification | Accepted | Data Modeling | 2026-01-23 |
+| [ADR-030](ADR-030-publication-pagination-strategy.md) | Publication Pagination Strategy | Accepted | Data Fetching | 2026-01-25 |
+| [ADR-031](ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | Data Loading | 2026-01-26 |
+| [ADR-032](ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | Accepted | HTTP/Networking | 2026-01-28 |
+| [ADR-033](ADR-033-publication-validation-strategy.md) | Publication Metadata Validation Strategy | Proposed | Data Quality | 2026-02-06 |
 
 ## ADRs by Category
 
@@ -53,6 +57,7 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Resilience & Error Handling
 - [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation
 - [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy
+- [ADR-032](ADR-032-unified-http-client.md): Unified HTTP Client Pattern — Centralized HTTP with rate limiting and retry
 
 ### Observability
 - [ADR-006](ADR-006-logger-metrics-ports.md): Logger and Metrics Ports
@@ -68,6 +73,7 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Data Quality
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation
 - [ADR-027](ADR-027-dq-rules-externalization.md): DQ Rules Externalization — Hierarchical DQ config
+- [ADR-033](ADR-033-publication-validation-strategy.md): Publication Metadata Validation Strategy — 5-level validation for publication data
 
 ### Domain Model
 - [ADR-004](ADR-004-pydantic-vs-dataclasses.md): Pydantic vs Dataclasses
@@ -77,6 +83,8 @@ This directory contains Architecture Decision Records documenting significant ar
 ### Data Fetching
 - [ADR-009](ADR-009-paginated-fetcher-mixin.md): PaginatedFetcherMixin Design
 - [ADR-011](ADR-011-remove-watermark-mechanism.md): Remove Watermark Mechanism
+- [ADR-030](ADR-030-publication-pagination-strategy.md): Publication Pagination Strategy
+- [ADR-031](ADR-031-loading-strategy-formalization.md): Loading Strategy Formalization
 
 ### Deployment
 - [ADR-010](ADR-010-local-only-deployment.md): Local-Only Deployment

@@ -35,6 +35,7 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.semanticscholar.fallback import (
+    ExtendedFallbackHandler,
     SemanticScholarTitleFallbackHandler,
 )
 
@@ -103,6 +104,13 @@ class SemanticScholarAdapter(BaseHttpAdapter):
 
         # Initialize helper component for fallback handling
         self._fallback_handler = SemanticScholarTitleFallbackHandler(
+            http_client=self.http_client,
+            logger=self.logger,
+            metrics=self._adapter_metrics,
+            api_key=self.api_key,
+            fields=self.fields,
+        )
+        self._extended_fallback_handler = ExtendedFallbackHandler(
             http_client=self.http_client,
             logger=self.logger,
             metrics=self._adapter_metrics,
@@ -343,6 +351,77 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             fetched=fetched,
         ):
             yield record
+
+    async def fetch_filtered_with_extended_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        alternate_id_mapping: dict[str, str] | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with 4-phase fallback: Primary → Alternate ID → Title → Title-Only.
+
+        Phase 1: Batch DOI lookup
+        Phase 2: Alternate ID (PMID) lookup
+        Phase 3: Title fallback
+        Phase 4: Title-only lookup
+        """
+        fetched = 0
+        resolved_dois: set[str] = set()
+
+        valid_dois = [d for d in filter_ids if d and d.strip()]
+        title_only_entries = [d for d in filter_ids if not d or not d.strip()]
+
+        # Phase 1: Batch DOI lookup
+        async for record in self._batch_doi_phase(
+            valid_dois, resolved_dois, limit, fetched
+        ):
+            yield record
+            fetched += 1
+            if limit and fetched >= limit:
+                return
+
+        # Phase 2: Alternate ID (PMID) lookup
+        if self._extended_fallback_handler and alternate_id_mapping:
+            async for record in self._extended_fallback_handler.process_missing_by_alternate_id(
+                ids=valid_dois,
+                found_ids=resolved_dois,
+                alternate_id_mapping=alternate_id_mapping,
+                normalize_fn=lambda x: x,
+                limit=limit,
+                fetched=fetched,
+            ):
+                yield record
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
+        # Phase 3: Title fallback
+        if self._extended_fallback_handler:
+            async for record in self._extended_fallback_handler.process_missing_dois(
+                dois=valid_dois,
+                found_dois=resolved_dois,
+                fallback_mapping=fallback_mapping,
+                normalize_fn=lambda x: x,
+                limit=limit,
+                fetched=fetched,
+            ):
+                yield record
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
+        # Phase 4: Title-only
+        if self._extended_fallback_handler:
+            async for record in self._extended_fallback_handler.process_title_only_entries(
+                entries=title_only_entries,
+                fallback_mapping=fallback_mapping,
+                limit=limit,
+                fetched=fetched,
+            ):
+                yield record
 
     async def fetch_multi_filtered(
         self,

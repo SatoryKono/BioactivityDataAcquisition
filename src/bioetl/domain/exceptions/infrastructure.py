@@ -54,66 +54,6 @@ class InfrastructureError(CriticalError):
         super().__init__(message)
 
 
-class ConfigurationError(InfrastructureError):
-    """Raised when system configuration is invalid or missing.
-
-    This error indicates that the pipeline cannot start due to
-    configuration problems that must be resolved first.
-
-    Attributes:
-        config_key: Name of the problematic configuration key.
-
-    Example:
-        >>> raise ConfigurationError("BIOETL_CHEMBL_API_KEY")
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, config_key: str) -> None:
-        """Initialize ConfigurationError.
-
-        Args:
-            config_key: Name of the problematic configuration key.
-        """
-        self.config_key = config_key
-        super().__init__(f"Missing or invalid configuration: {config_key}")
-
-
-class FileSystemError(InfrastructureError):
-    """Raised when filesystem operations fail.
-
-    This error indicates problems with local file I/O operations
-    such as reading, writing, or directory operations.
-
-    Attributes:
-        path: Path that caused the error.
-        operation: Type of operation that failed (read, write, delete).
-        reason: Description of why the operation failed.
-
-    Example:
-        >>> raise FileSystemError(
-        ...     "/data/bronze",
-        ...     operation="write",
-        ...     reason="Permission denied"
-        ... )
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, path: str, operation: str, reason: str) -> None:
-        """Initialize FileSystemError.
-
-        Args:
-            path: Path that caused the error.
-            operation: Type of operation that failed.
-            reason: Description of why the operation failed.
-        """
-        self.path = path
-        self.operation = operation
-        self.reason = reason
-        super().__init__(f"Filesystem {operation} failed for '{path}': {reason}")
-
-
 # =============================================================================
 # Storage Exceptions
 # =============================================================================
@@ -348,6 +288,59 @@ class BronzeValidationError(StorageError):
         super().__init__(", ".join(parts))
 
 
+class CachedBronzeEmptyError(StorageError):
+    """Raised when cached Bronze data is requested but not found.
+
+    This error indicates that no Bronze batch files exist for the requested
+    provider/entity combination, or the specified date filter matches no data.
+    Used in cached Bronze mode when the pipeline attempts to read from
+    previously saved Bronze files instead of making API calls.
+
+    Attributes:
+        provider: Provider name (e.g., 'chembl').
+        entity_type: Entity type (e.g., 'activity').
+        bronze_path: Path that was searched for Bronze files.
+        date_filter: Optional date filter that was applied.
+
+    Example:
+        >>> raise CachedBronzeEmptyError(
+        ...     provider="chembl",
+        ...     entity_type="activity",
+        ...     bronze_path="/data/output/bronze/chembl/activity",
+        ...     date_filter="2026-01-20"
+        ... )
+    """
+
+    error_type = ErrorType.INVALID_DATA
+
+    def __init__(
+        self,
+        provider: str,
+        entity_type: str,
+        bronze_path: str,
+        date_filter: str | None = None,
+    ) -> None:
+        """Initialize CachedBronzeEmptyError.
+
+        Args:
+            provider: Provider name (e.g., 'chembl').
+            entity_type: Entity type (e.g., 'activity').
+            bronze_path: Path that was searched for Bronze files.
+            date_filter: Optional date filter in YYYY-MM-DD format.
+        """
+        self.provider = provider
+        self.entity_type = entity_type
+        self.bronze_path = bronze_path
+        self.date_filter = date_filter
+
+        date_info = f" for date {date_filter}" if date_filter else ""
+        message = (
+            f"No Bronze data found for {provider}/{entity_type}{date_info}. "
+            f"Searched path: {bronze_path}"
+        )
+        super().__init__(message)
+
+
 # =============================================================================
 # Delta Lake Specific Errors (Granular Classification)
 # =============================================================================
@@ -368,7 +361,7 @@ class DeltaWriteConflictError(StorageError):
 
     Example:
         >>> raise DeltaWriteConflictError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     operation="merge",
         ...     conflicting_version=42
         ... )
@@ -411,7 +404,7 @@ class DeltaTransactionError(CriticalError):
 
     Example:
         >>> raise DeltaTransactionError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     reason="Transaction log corrupted",
         ...     version=42
         ... )
@@ -500,7 +493,7 @@ class DeltaSchemaValidationError(CriticalError):
 
     Example:
         >>> raise DeltaSchemaValidationError(
-        ...     "/data/gold/chembl_activity",
+        ...     "/data/output/gold/chembl_activity",
         ...     expected_columns=["id", "name", "value"],
         ...     actual_columns=["id", "name"],
         ...     type_mismatches={"id": ("int64", "string")}
@@ -552,7 +545,7 @@ class DeltaOptimizeError(StorageError):
 
     Example:
         >>> raise DeltaOptimizeError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     operation="vacuum",
         ...     reason="Concurrent operation in progress"
         ... )

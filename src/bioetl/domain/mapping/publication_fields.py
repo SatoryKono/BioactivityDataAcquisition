@@ -21,7 +21,7 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Final, Literal
+from typing import Any, Final, Literal
 
 # Provider type for type safety
 ProviderName = Literal["chembl", "crossref", "openalex", "pubmed", "semanticscholar"]
@@ -189,9 +189,9 @@ def get_provider_name(provider: ProviderName, unified_field: str) -> str:
 
 
 def apply_field_mapping(
-    record: dict[str, any],
+    record: dict[str, Any],
     provider: ProviderName,
-) -> dict[str, any]:
+) -> dict[str, Any]:
     """Apply field name mapping to a record (provider → unified names).
 
     Renames fields according to PUBLICATION_FIELD_MAPPING for the given provider.
@@ -237,7 +237,7 @@ def apply_field_mapping(
 #
 # AUTHORS & AFFILIATIONS:
 #   - authors (unified)
-#   - author_orcid_list (unified structure for ORCID identifiers)
+#   - author_orcids (unified structure for ORCID identifiers)
 #   - affiliation_list (unified, was: affiliations in all)
 #   - affiliation_structured (PubMed-specific structured data)
 #

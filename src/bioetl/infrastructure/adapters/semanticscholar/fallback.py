@@ -12,7 +12,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
+from bioetl.infrastructure.adapters.common import (
+    BaseAlternateIdFallbackHandler,
+    BaseTitleFallbackHandler,
+    titles_match,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -21,6 +25,7 @@ if TYPE_CHECKING:
 
 # Re-export for backwards compatibility
 __all__ = [
+    "ExtendedFallbackHandler",
     "SemanticScholarTitleFallbackHandler",
     "TitleFallbackHandler",
     "titles_match",
@@ -33,6 +38,78 @@ DEFAULT_SEARCH_FIELDS = (
     "venue,authors,citationCount,referenceCount,isOpenAccess,"
     "openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal"
 )
+
+
+class ExtendedFallbackHandler(BaseAlternateIdFallbackHandler):
+    """Extended fallback handler for Semantic Scholar API.
+
+    Handles fallback search by title and alternate ID (PMID).
+    delegates title search to SemanticScholarTitleFallbackHandler to avoid duplication.
+    """
+
+    def __init__(
+        self,
+        http_client: UnifiedHTTPClient,
+        logger: LoggerPort,
+        metrics: AdapterMetrics | None = None,
+        api_key: str = "",
+        fields: str = DEFAULT_SEARCH_FIELDS,
+    ) -> None:
+        """Initialize fallback handler."""
+        super().__init__(logger, provider_prefix="semanticscholar")
+        self._title_handler = SemanticScholarTitleFallbackHandler(
+            http_client, logger, metrics, api_key, fields
+        )
+        self._http_client = http_client
+        self._metrics = metrics
+        self._api_key = api_key
+        self._fields = fields
+
+    def _build_headers(self) -> dict[str, str]:
+        """Build request headers with API key if available."""
+        headers = {
+            "User-Agent": "BioETL/1.0",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
+        if self._api_key:
+            headers["x-api-key"] = self._api_key
+        return headers
+
+    async def _search_by_title(self, title: str) -> dict[str, Any] | None:
+        """Search for publication by title (delegate)."""
+        return await self._title_handler._search_by_title(title)
+
+    async def _search_by_alternate_id(self, alt_id: str) -> dict[str, Any] | None:
+        """Search for publication by PMID."""
+        try:
+            url = f"{SEMANTICSCHOLAR_BASE_URL}/paper/batch?fields={self._fields}"
+            json_body = {"ids": [f"PMID:{alt_id}"]}
+
+            if self._metrics:
+                with self._metrics.measure_request("/paper/batch"):
+                    response = await self._http_client.post(
+                        url, json=json_body, headers=self._build_headers()
+                    )
+            else:
+                response = await self._http_client.post(
+                    url, json=json_body, headers=self._build_headers()
+                )
+
+            data = response.json()
+            if data and len(data) > 0 and data[0]:
+                return cast("dict[str, Any]", data[0])
+        except Exception as e:
+            self._logger.debug(
+                "semanticscholar_pmid_search_failed",
+                pmid=alt_id,
+                error=str(e),
+            )
+        return None
+
+    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
+        """Return Semantic Scholar paper ID for logging."""
+        return ("found_paper_id", str(result.get("paperId", "unknown")))
 
 
 class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
@@ -203,22 +280,6 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
     def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
         """Return Semantic Scholar paper ID for logging."""
         return ("found_paper_id", str(result.get("paperId", "unknown")))
-
-    def _process_found_result(
-        self, result: dict[str, Any], original_doi: str
-    ) -> dict[str, Any]:
-        """Add lookup method metadata to found publication.
-
-        Args:
-            result: The found publication record.
-            original_doi: The DOI that was originally searched.
-
-        Returns:
-            Publication with _lookup_method and _original_id added.
-        """
-        result["_lookup_method"] = "title_fallback"
-        result["_original_id"] = original_doi
-        return result
 
 
 # Backwards compatibility alias

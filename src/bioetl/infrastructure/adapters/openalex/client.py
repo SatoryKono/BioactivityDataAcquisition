@@ -31,7 +31,10 @@ from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
-from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
+from bioetl.infrastructure.adapters.openalex.fallback import (
+    ExtendedFallbackHandler,
+    TitleFallbackHandler,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -87,6 +90,11 @@ class OpenAlexAdapter(BaseHttpAdapter):
         self._fallback_handler = TitleFallbackHandler(
             logger=self.logger,
             search_fn=self._search_by_title,
+        )
+        self._extended_fallback_handler = ExtendedFallbackHandler(
+            logger=self.logger,
+            search_fn=self._search_by_title,
+            alternate_search_fn=self._search_by_pmid,
         )
 
     def _build_headers(self) -> dict[str, str]:
@@ -388,6 +396,104 @@ class OpenAlexAdapter(BaseHttpAdapter):
         ):
             yield work
 
+    async def fetch_filtered_with_extended_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        alternate_id_mapping: dict[str, str] | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with 4-phase fallback: Primary → Alternate ID → Title → Title-Only.
+
+        Phase 1: Batch DOI lookup
+        Phase 2: Alternate ID (PMID) lookup for missing DOIs
+        Phase 3: Title fallback for missing DOIs
+        Phase 4: Title-only lookup
+        """
+        if entity_type not in ("work", "publication"):
+            raise ValueError(
+                f"OpenAlexAdapter supports 'work'/'publication', got: {entity_type}"
+            )
+
+        if filter_field != "doi":
+            self.logger.warning(
+                "unsupported_filter_field_for_fallback",
+                field=filter_field,
+                msg="OpenAlex fallback only supports 'doi' filtering, skipping",
+            )
+            return
+
+        fetched = 0
+        found_dois: set[str] = set()
+
+        valid_dois = [
+            d
+            for d in filter_ids
+            if d and d.strip() and not d.startswith("__title_only_")
+        ]
+        title_only_entries = [
+            d
+            for d in filter_ids
+            if not d or not d.strip() or d.startswith("__title_only_")
+        ]
+
+        # Phase 1: Batch DOI lookup
+        async for work in self._batch_doi_lookup(
+            valid_dois, found_dois, limit, fetched
+        ):
+            yield work
+            fetched += 1
+            if limit and fetched >= limit:
+                return
+
+        if valid_dois:
+            self.logger.info(
+                "openalex_doi_lookup_summary",
+                total_dois=len(valid_dois),
+                found_by_doi=len(found_dois),
+                missing_dois=len(valid_dois) - len(found_dois),
+            )
+
+        # Phase 2: Alternate ID (PMID) lookup
+        if alternate_id_mapping:
+            async for work in self._extended_fallback_handler.process_missing_by_alternate_id(
+                ids=valid_dois,
+                found_ids=found_dois,
+                alternate_id_mapping=alternate_id_mapping,
+                normalize_fn=self._normalize_doi,
+                limit=limit,
+                fetched=fetched,
+            ):
+                yield work
+                fetched += 1
+                if limit and fetched >= limit:
+                    return
+
+        # Phase 3: Title fallback
+        async for work in self._extended_fallback_handler.process_missing_dois(
+            dois=valid_dois,
+            found_dois=found_dois,
+            fallback_mapping=fallback_mapping,
+            normalize_fn=self._normalize_doi,
+            limit=limit,
+            fetched=fetched,
+        ):
+            yield work
+            fetched += 1
+            if limit and fetched >= limit:
+                return
+
+        # Phase 4: Title-only entries
+        async for work in self._extended_fallback_handler.process_title_only_entries(
+            entries=title_only_entries,
+            fallback_mapping=fallback_mapping,
+            limit=limit,
+            fetched=fetched,
+        ):
+            yield work
+
     async def fetch(
         self,
         entity_type: str,
@@ -531,6 +637,41 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
         for work in results:
             yield work
+
+    async def _search_by_pmid(self, pmid: str) -> dict[str, Any] | None:
+        """Search work by PMID using filter=ids.pmid:{pmid}."""
+        if not pmid:
+            return None
+
+        params = self._build_base_params()
+        params.update({"filter": f"ids.pmid:{pmid}"})
+
+        self.logger.debug("openalex_pmid_search", pmid=pmid)
+
+        try:
+            url = f"{OPENALEX_API_BASE}/works"
+            start_time = time.perf_counter()
+            with self._adapter_metrics.measure_request("/works"):
+                response = await self.http_client.get(
+                    url, params=params, headers=self._build_headers()
+                )
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
+            data = response.json()
+            results = data.get("results", [])
+            if results:
+                return results[0]
+
+        except Exception as e:
+            self.logger.debug(
+                "openalex_pmid_search_failed",
+                pmid=pmid,
+                error=str(e),
+            )
+        return None
 
     async def _search_by_title(
         self, title: str, limit: int = 3

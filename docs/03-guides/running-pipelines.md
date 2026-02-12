@@ -2,8 +2,8 @@
 
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
-**Версия:** 5.9.0
-**Дата обновления:** 2026-01-26
+**Версия:** 5.14.0
+**Дата обновления:** 2026-02-10
 
 ---
 
@@ -34,13 +34,13 @@
 
 ```bash
 # Список доступных пайплайнов
-python -m bioetl.main config list-pipelines
+bioetl config list-pipelines
 
 # Запуск пайплайна с ограничением (для тестирования)
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 
 # Запуск полного пайплайна
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 ```
 
 ---
@@ -58,7 +58,7 @@ python -m bioetl.main run --pipeline chembl_activity
 Обрабатывает только новые записи с момента последнего успешного запуска:
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 ```
 
 ### Backfill Run
@@ -67,13 +67,13 @@ python -m bioetl.main run --pipeline chembl_activity
 
 ```bash
 # С подтверждением
-python -m bioetl.main run --pipeline chembl_activity --run-type backfill
+bioetl run --pipeline chembl_activity --run-type backfill
 
 # Без подтверждения
-python -m bioetl.main run --pipeline chembl_activity --run-type backfill --yes
+bioetl run --pipeline chembl_activity --run-type backfill --yes
 
 # Предпросмотр очистки
-python -m bioetl.main run --pipeline chembl_activity --run-type backfill --dry-run
+bioetl run --pipeline chembl_activity --run-type backfill --dry-run
 ```
 
 ### Full Rebuild
@@ -82,13 +82,13 @@ python -m bioetl.main run --pipeline chembl_activity --run-type backfill --dry-r
 
 ```bash
 # С подтверждением
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl_activity --run-type rebuild
 
 # Без подтверждения
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --yes
+bioetl run --pipeline chembl_activity --run-type rebuild --yes
 
 # Предпросмотр очистки
-python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 ```
 
 ---
@@ -100,7 +100,7 @@ python -m bioetl.main run --pipeline chembl_activity --run-type rebuild --dry-ru
 Для тестирования ограничьте количество обрабатываемых записей:
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 ```
 
 ### Resume (продолжение прерванного запуска)
@@ -108,13 +108,34 @@ python -m bioetl.main run --pipeline chembl_activity --limit 100
 Если пайплайн был прерван, продолжите с checkpoint:
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl_activity --resume
 ```
 
 ### Debug логирование
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug
+```
+
+### Bronze Cache (use_cached_bronze)
+
+BioETL поддерживает запуск пайплайнов на основе локального кеша Bronze-слоя вместо выполнения HTTP-запросов к API. Это полезно для быстрой отладки трансформаций и тестирования DQ-правил на ранее загруженных данных.
+
+> **Note:** С версии 5.9.0 опция `--use-cached-bronze` **включена по умолчанию**.
+> Пайплайн сначала ищет данные в `data/output/bronze/{provider}/{entity}`.
+
+```bash
+# Использовать кеш (по умолчанию)
+bioetl run --pipeline chembl_activity
+
+# Принудительно запросить свежие данные из API
+bioetl run --pipeline chembl_activity --no-cached-bronze
+
+# Фильтрация кеша по дате
+bioetl run --pipeline chembl_activity --cached-bronze-date 2026-01-20
+
+# Указание кастомного пути к кешу
+bioetl run --pipeline chembl_activity --cached-bronze-path ./my_cache
 ```
 
 ### Фильтрация по CSV
@@ -122,7 +143,7 @@ python -m bioetl.main run --pipeline chembl_activity --debug
 Обрабатывать только записи с указанными ID:
 
 ```bash
-python -m bioetl.main run --pipeline chembl_activity \
+bioetl run --pipeline chembl_activity \
     --input-csv data/filter_ids.csv \
     --filter-column molecule_id \
     --filter-field molecule_chembl_id
@@ -153,13 +174,13 @@ configs/
 
 ```bash
 # Показать конфигурацию пайплайна
-python -m bioetl.main config show chembl_activity
+bioetl config show chembl_activity
 
 # В формате JSON
-python -m bioetl.main config show chembl_activity --format json
+bioetl config show chembl_activity --format json
 
 # Валидация конфигурации
-python -m bioetl.main config validate chembl_activity
+bioetl config validate chembl_activity
 ```
 
 ### Структура YAML-конфига
@@ -198,7 +219,7 @@ BioETL использует **in-memory блокировки** для предо
 ### Проверка статуса блокировки
 
 ```bash
-python -m bioetl.main lock check --pipeline chembl_activity --run-id <UUID>
+bioetl lock check --pipeline chembl_activity --run-id <UUID>
 ```
 
 ### Освобождение зависшей блокировки
@@ -206,7 +227,7 @@ python -m bioetl.main lock check --pipeline chembl_activity --run-id <UUID>
 Если пайплайн завершился аварийно и не освободил блокировку:
 
 ```bash
-python -m bioetl.main lock release --pipeline chembl_activity --run-id <UUID>
+bioetl lock release --pipeline chembl_activity --run-id <UUID>
 ```
 
 > **Внимание:** Используйте только если уверены, что пайплайн не выполняется.
@@ -225,11 +246,11 @@ python -m bioetl.main lock release --pipeline chembl_activity --run-id <UUID>
 
 ```bash
 # Via флаг
-python -m bioetl.main run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug
 
 # Via переменную окружения
 export BIOETL_LOG_LEVEL=DEBUG
-python -m bioetl.main run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity
 ```
 
 | Уровень | Использование |
@@ -277,10 +298,10 @@ export BIOETL_METRICS_ENABLED=false
 
 ```bash
 # Включён по умолчанию на порту 8080
-python -m bioetl.main run --pipeline chembl_activity --health-port 8080
+bioetl run --pipeline chembl_activity --health-port 8080
 
 # Отключить
-python -m bioetl.main run --pipeline chembl_activity --no-health-server
+bioetl run --pipeline chembl_activity --no-health-server
 ```
 
 **Endpoints:**
@@ -291,7 +312,7 @@ python -m bioetl.main run --pipeline chembl_activity --no-health-server
 ### Standalone Health Server
 
 ```bash
-python -m bioetl.main health server --port 8080
+bioetl health server --port 8080
 ```
 
 ---
@@ -302,23 +323,24 @@ python -m bioetl.main health server --port 8080
 
 | Слой | Путь | Формат | Retention |
 |------|------|--------|-----------|
-| **Bronze** | `data/bronze/{provider}/{entity}/{date}/` | JSONL + zstd | 90 дней |
-| **Silver** | `data/silver/{provider}/{entity}/` | Delta Lake | Permanent |
-| **Gold** | `data/gold/{provider}/{entity}/` | Delta Lake / Parquet | Permanent |
+| **Bronze** | `data/output/bronze/{provider}/{entity}/{date}/` | JSONL + zstd | 90 дней |
+| **Silver** | `data/output/silver/{provider}/{entity}/` | Delta Lake | Permanent |
+| **Gold** | `data/output/gold/{provider}/{entity}/` | Delta Lake | Permanent |
 
 ### Структура директорий
 
 ```
 data/
-├── bronze/
-│   └── chembl/activity/2026-01-26/
-│       └── batch_001.jsonl.zst
-├── silver/
-│   └── chembl/activity/
-│       └── _delta_log/
-├── gold/
-│   └── chembl/activity/
-│       └── _delta_log/
+├── output/
+│   ├── bronze/
+│   │   └── chembl/activity/2026-01-26/
+│   │       └── batch_001.jsonl.zst
+│   ├── silver/
+│   │   └── chembl/activity/
+│   │       └── _delta_log/
+│   └── gold/
+│       └── chembl/activity/
+│           └── _delta_log/
 ├── checkpoints/
 │   └── chembl_activity.json
 └── quarantine/
@@ -329,16 +351,16 @@ data/
 
 ```bash
 # Список доступных таблиц
-python -m bioetl.main export --list
+bioetl export --list
 
 # Экспорт в CSV
-python -m bioetl.main export chembl.activity
+bioetl export chembl.activity
 
 # Экспорт в Excel
-python -m bioetl.main export chembl.activity --format xlsx
+bioetl export chembl.activity --format xlsx
 
 # Экспорт Gold слоя
-python -m bioetl.main export chembl.activity --layer gold
+bioetl export chembl.activity --layer gold
 ```
 
 ---
@@ -349,16 +371,16 @@ python -m bioetl.main export chembl.activity --layer gold
 
 ```bash
 # VACUUM одной таблицы
-python -m bioetl.main maintenance vacuum chembl.activity
+bioetl maintenance vacuum chembl.activity
 
 # VACUUM всех таблиц
-python -m bioetl.main maintenance vacuum-all
+bioetl maintenance vacuum-all
 
 # С кастомным retention
-python -m bioetl.main maintenance vacuum-all --retention-days 30
+bioetl maintenance vacuum-all --retention-days 30
 
 # Предпросмотр
-python -m bioetl.main maintenance vacuum-all --dry-run
+bioetl maintenance vacuum-all --dry-run
 ```
 
 ### Bronze Cleanup
@@ -366,8 +388,8 @@ python -m bioetl.main maintenance vacuum-all --dry-run
 Удаление старых Bronze файлов (по умолчанию >90 дней):
 
 ```bash
-python -m bioetl.main maintenance bronze-cleanup
-python -m bioetl.main maintenance bronze-cleanup --retention-days 60 --dry-run
+bioetl maintenance bronze-cleanup
+bioetl maintenance bronze-cleanup --retention-days 60 --dry-run
 ```
 
 ---
@@ -380,26 +402,26 @@ python -m bioetl.main maintenance bronze-cleanup --retention-days 60 --dry-run
 
 ```bash
 # Статистика
-python -m bioetl.main quarantine stats --pipeline chembl_activity
+bioetl quarantine stats --pipeline chembl_activity
 
 # Просмотр записей
-python -m bioetl.main quarantine inspect --pipeline chembl_activity --limit 50
+bioetl quarantine inspect --pipeline chembl_activity --limit 50
 
 # Фильтрация по коду ошибки
-python -m bioetl.main quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
+bioetl quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
 ```
 
 ### Повторная обработка
 
 ```bash
-python -m bioetl.main quarantine replay --pipeline chembl_activity --dry-run
-python -m bioetl.main quarantine replay --pipeline chembl_activity --max-age-days 7
+bioetl quarantine replay --pipeline chembl_activity --dry-run
+bioetl quarantine replay --pipeline chembl_activity --max-age-days 7
 ```
 
 ### Очистка карантина
 
 ```bash
-python -m bioetl.main quarantine purge --pipeline chembl_activity --older-than-days 30 --dry-run
+bioetl quarantine purge --pipeline chembl_activity --older-than-days 30 --dry-run
 ```
 
 ---
@@ -423,13 +445,13 @@ python -m bioetl.main quarantine purge --pipeline chembl_activity --older-than-d
 
 ```bash
 # Список пайплайнов
-python -m bioetl.main run-all --source chembl --list-only
+bioetl run-all --source chembl --list-only
 
 # Запуск всех
-python -m bioetl.main run-all --source chembl
+bioetl run-all --source chembl
 
 # С ограничением
-python -m bioetl.main run-all --source chembl --limit 100
+bioetl run-all --source chembl --limit 100
 ```
 
 ### Композитные пайплайны
@@ -437,8 +459,8 @@ python -m bioetl.main run-all --source chembl --limit 100
 Для сущностей с обогащением из нескольких источников (например, publications):
 
 ```bash
-python -m bioetl.main run-composite --composite publication
-python -m bioetl.main run-composite --composite publication --seed-limit 100
+bioetl run-composite --composite publication
+bioetl run-composite --composite publication --seed-limit 100
 ```
 
 ---

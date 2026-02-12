@@ -1,8 +1,8 @@
 # mkdocs.yml
 site_name: BioETL Project
-site_url: https://SatoryKono.github.io/BioactivityDataAcquisition/
-repo_url: https://github.com/SatoryKono/BioactivityDataAcquisition
-repo_name: SatoryKono/BioactivityDataAcquisition
+site_url: https://SatoryKono.github.io/BioactivityDataAcquisition2/
+repo_url: https://github.com/SatoryKono/BioactivityDataAcquisition2
+repo_name: SatoryKono/BioactivityDataAcquisition2
 edit_uri: "edit/main/docs/"
 
 theme:
@@ -51,44 +51,55 @@ markdown_extensions:
     -   toc:
             permalink: true
 
-# Add local vendored mermaid assets to ensure offline builds use the local files
+# Mermaid init (theme sync). Mermaid runtime is provided by the theme/plugin.
 extra_javascript:
-    - 'assets/javascripts/mermaid.min.js'
     - 'assets/javascripts/mermaid-init.js'
-    - 'assets/javascripts/mermaid-loader.js'
-
-extra_css:
-    - 'assets/stylesheets/mermaid.css'
 
 # Navigation structure
 nav:
-    -   Home: index.md
-    -   "Project Map": 00-map.md
+    -   Home: 00-project/index.md
+    -   "Project Map": 00-project/00-map.md
     -   "Project Rules":
-            -   "Summary": 00-project-rules/00-rules-summary.md
-            -   "Full Rules": 00-project-rules/01-project-rules.md
-            -   "User Rules": 00-project-rules/02-user-rules.md
-            -   "File Policy": 00-project-rules/03-file-policy.md
-            -   "Extending BioETL": 00-project-rules/04-extending-bioetl.md
-            -   "Cleanup Policy": 00-project-rules/05-cleanup-policy.md
-            -   "Rules Mapping": 00-project-rules/06-rules-mapping.md
-            -   "Consistency Check": 00-project-rules/07-consistency-check.md
-            -   "Audit Report": 00-project-rules/AUDIT-REPORT.md
+            -   "RULES": 00-project/RULES.md
+            -   "Requirements": 01-requirements/REQUIREMENTS.md
+            -   "Rules Summary": 00-project/rules-summary.md
+            -   "File Policy": 00-project/governance/03-file-policy.md
+            -   "Extending BioETL": 00-project/governance/04-extending-bioetl.md
     -   Architecture:
+            -   "Overview": 02-architecture/00-overview.md
             -   "System Context": 02-architecture/system-context.md
+            -   "Container Diagram": 02-architecture/container-diagram.md
             -   "Data Flow": 02-architecture/data-flow.md
-            -   "Diagramming Policy": 02-architecture/diagrams/00-diagramming-policy.md
+            -   "Data Layers": 02-architecture/data-layers.md
+            -   "Observability Layers": 02-architecture/observability-layers.md
             -   "Diagrams": 02-architecture/diagrams.md
-            -   Decisions:
-                    -   "ADR-001: Delta Lake": 02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md
-                    -   "ADR-002: Medallion": 02-architecture/decisions/ADR-002-medallion-architecture.md
-                    -   "ADR-003: Redis Locking": 02-architecture/decisions/ADR-003-redis-for-distributed-locking.md
-                    -   "ADR-004: Pydantic": 02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md
+            -   "Diagramming Policy": 02-architecture/diagrams/00-diagramming-policy.md
+            -   "Decisions": 02-architecture/decisions/README.md
     -   Guides:
             -   "Getting Started": 03-guides/getting-started.md
             -   "Quick Start": 03-guides/quick-start.md
             -   "Running Pipelines": 03-guides/running-pipelines.md
+            -   "Pipeline Configuration": 03-guides/pipeline-configuration.md
+            -   "Pipeline Lifecycle": 03-guides/pipeline-lifecycle.md
+            -   "DQ Configuration": 03-guides/dq-configuration.md
+            -   "Date Handling": 03-guides/date-handling.md
+            -   "Local Storage Layout": 03-guides/local-storage-layout.md
+            -   "Metrics & Monitoring": 03-guides/metrics-monitoring.md
+            -   "Testing": 03-guides/testing.md
             -   "Troubleshooting": 03-guides/troubleshooting.md
+            -   "Add New Source": 03-guides/add-new-source.md
+            -   "Add Pipeline (Existing Source)": 03-guides/add-pipeline-existing-source.md
+            -   "Cleanup Policy": 03-guides/cleanup-policy.md
+            -   "Registry Pattern": 03-guides/registry-pattern.md
+            -   "File Path Audit Report": 03-guides/file-path-audit-report.md
+    -   Providers:
+            -   "Overview": providers/README.md
+    -   Pipelines:
+            -   "Overview": 04-reference/pipelines/README.md
+            -   "Publication Pipelines": 04-reference/pipelines/INDEX.md
+    -   "Data Contracts":
+            -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
+            -   "Observability Metrics": 04-reference/contracts/observability.md
     -   Reference:
             -   CLI: 04-reference/cli.md
             -   API:
@@ -114,19 +125,16 @@ nav:
                             -   Overview: 04-reference/api/composition.md
                             -   Bootstrap: 04-reference/api/composition/bootstrap.md
                             -   Factories: 04-reference/api/composition/factories.md
-            -   Pipelines:
-                    -   "ChEMBL Activity": 04-reference/pipelines/chembl-activity.md
+            -   "Pipelines Reference": 04-reference/pipelines/README.md
+            -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
+            -   "Tools": 00-project/TOOLS.md
     -   Operations:
-            -   Overview: 05-operations/runbooks/index.md
-            -   "Incident Response": 05-operations/runbooks/incident-response.md
-            -   "Data Recovery": 05-operations/runbooks/data-recovery.md
-            -   "Scaling": 05-operations/runbooks/scaling.md
-            -   "Pipeline Failure: Critical Error": 05-operations/runbooks/pipeline-failure-critical.md
-            -   "Pipeline Failure: High DQ Rate": 05-operations/runbooks/pipeline-failure-dq.md
-            -   "Stale Lock Detected": 05-operations/runbooks/stale-lock.md
-            -   "Backfill and Rebuild": 05-operations/runbooks/backfill-rebuild.md
-            -   "Quarantine Management": 05-operations/runbooks/quarantine-management.md
-            -   "Schema Evolution": 05-operations/runbooks/schema-evolution.md
-    -   "Mermaid Test": mermaid-test.md
-    -   "RULES": RULES.md
-    -   "Governance Rules": 01-governance/rules.md
+            -   Overview: 05-operations/README.md
+            -   "Runbooks": 05-operations/runbooks/index.md
+            -   "Release Checklist": 05-operations/RELEASE_CHECKLIST.md
+            -   "Performance Baselines": 05-operations/performance-baselines.md
+            -   "VACUUM & Retention": 05-operations/vacuum-retention.md
+    -   Verification:
+            -   "Publication Field Mapping": verification/publication-field-mapping-report.md
+            -   "PubMed Extraction": verification/pubmed-extraction-verification-report.md
+            -   "SemanticScholar Publication": verification/semanticscholar-publication-pipeline-verification.md

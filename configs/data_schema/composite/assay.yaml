@@ -1,0 +1,252 @@
+# configs/data_schema/composite/assay.yaml
+# =============================================================================
+# Data Schema for Composite Assay Pipeline
+# =============================================================================
+#
+# Defines field mappings between ChEMBL assay, cell_line, and tissue schemas.
+# Used for column ordering, field renaming, and merge configuration.
+#
+# Source Entities:
+#   - ChEMBL Assay: seed fields (AssaySchema)
+#   - ChEMBL Cell Line: enricher fields (CellLineSchema)
+#   - ChEMBL Tissue: enricher fields (TissueSchema)
+#
+# Reference: ADR-029 (Data Schema Externalization)
+# Version: 1.0.0
+# Last Updated: 2026-02-04
+#
+# =============================================================================
+
+version: "1.0.0"
+entity: assay
+
+# =============================================================================
+# Field Conflict Resolution Table
+# =============================================================================
+#
+# | Source Entity | Original Field | Renamed Field     | Reason              |
+# |---------------|----------------|-------------------|---------------------|
+# | cell_line     | efo_id         | cell_efo_id       | Conflicts tissue    |
+# | tissue        | efo_id         | tissue_efo_id     | Conflicts cell_line |
+# | tissue        | pref_name      | tissue_pref_name  | Clarity             |
+# | tissue        | uberon_id      | tissue_uberon_id  | Namespace clarity   |
+# | tissue        | bto_id         | tissue_bto_id     | Namespace clarity   |
+# | tissue        | caloha_id      | tissue_caloha_id  | Namespace clarity   |
+#
+# =============================================================================
+
+# Field renaming rules for enrichers
+field_renames:
+  "chembl.cell_line.efo_id": "cell_efo_id"
+  "chembl.tissue.efo_id": "tissue_efo_id"
+  "chembl.tissue.pref_name": "tissue_pref_name"
+  "chembl.tissue.uberon_id": "tissue_uberon_id"
+  "chembl.tissue.bto_id": "tissue_bto_id"
+  "chembl.tissue.caloha_id": "tissue_caloha_id"
+
+# Column groups for semantic ordering
+column_groups:
+  # 1. System fields (always first)
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _source
+      - _ingestion_ts
+      - _index
+      - _lookup_method
+      - _original_id
+
+  # 2. Lineage metadata
+  - name: lineage
+    pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_"
+
+  # 3. Primary identifiers (assay)
+  - name: identifiers
+    fields:
+      - assay_chembl_id
+      - cell_chembl_id
+      - tissue_chembl_id
+      - target_chembl_id
+      - document_chembl_id
+      - src_id
+      - src_assay_id
+      - aidx
+    provider_order: [chembl]
+
+  # 4. Assay classification
+  - name: classification
+    fields:
+      - assay_type
+      - assay_category
+      - assay_test_type
+      - assay_group
+      - assay_pref_name
+      - relationship_type
+      - relationship_description
+      - confidence_score
+      - confidence_description
+    provider_order: [chembl]
+
+  # 5. Biological context (from seed)
+  - name: biological_context
+    fields:
+      - assay_organism
+      - assay_taxonomy_id
+      - assay_strain
+      - assay_tissue
+      - assay_cell_type
+      - assay_subcellular_fraction
+    provider_order: [chembl]
+
+  # 6. Assay description
+  - name: description
+    fields:
+      - description
+      - score
+    provider_order: [chembl]
+
+  # 7. BAO ontology
+  - name: ontology
+    fields:
+      - bao_format
+      - bao_label
+    provider_order: [chembl]
+
+  # 8. Cell line context (enricher)
+  - name: cell_line
+    fields:
+      - cell_name
+      - cell_description
+      - cell_type
+      - cell_source_tissue
+      - cell_source_organism
+      - cell_source_taxonomy_id
+      - cellosaurus_id
+      - clo_id
+      - cl_lincs_id
+      - cell_efo_id
+    provider_order: [chembl]
+
+  # 9. Tissue context (enricher)
+  - name: tissue
+    fields:
+      - tissue_pref_name
+      - tissue_uberon_id
+      - tissue_bto_id
+      - tissue_caloha_id
+      - tissue_efo_id
+    provider_order: [chembl]
+
+  # 10. Variant information
+  - name: variant
+    fields:
+      - variant_accession
+      - variant_isoform
+      - variant_mutation
+      - variant_organism
+      - variant_sequence
+      - variant_taxonomy_id
+    provider_order: [chembl]
+
+  # 11. Complex JSON fields
+  - name: complex
+    fields:
+      - assay_classifications
+      - assay_parameters
+      - variant_sequence_json
+    provider_order: [chembl]
+
+# Layer-specific overrides
+silver:
+  include_all_groups: true
+  exclude_groups: []
+
+gold:
+  exclude_groups: []
+  exclude_fields:
+    # Exclude large JSON fields from Gold
+    - assay_parameters
+    - assay_classifications
+    - variant_sequence_json
+    # Exclude rarely used cell line field
+    - clo_id
+
+# Join Key Configuration
+join_keys:
+  cell_line:
+    seed_field: cell_chembl_id
+    enricher_field: cell_chembl_id
+    description: "ChEMBL cell line ID for cell line enrichment"
+    validation: "^CHEMBL\\d+$"
+    nullable: true
+    # Cardinality: one_to_one (each assay FK points to at most one cell line)
+
+  tissue:
+    seed_field: tissue_chembl_id
+    enricher_field: tissue_chembl_id
+    description: "ChEMBL tissue ID for tissue enrichment"
+    validation: "^CHEMBL\\d+$"
+    nullable: true
+    # Cardinality: one_to_one (each assay FK points to at most one tissue)
+
+# All business fields for Gold layer (excluding system/lineage)
+gold_columns:
+  # Identifiers
+  - assay_chembl_id
+  - cell_chembl_id
+  - tissue_chembl_id
+  - target_chembl_id
+  - document_chembl_id
+  - src_id
+  - src_assay_id
+  - aidx
+  # Classification
+  - assay_type
+  - assay_category
+  - assay_test_type
+  - assay_group
+  - assay_pref_name
+  - relationship_type
+  - relationship_description
+  - confidence_score
+  - confidence_description
+  # Biological context
+  - assay_organism
+  - assay_taxonomy_id
+  - assay_strain
+  - assay_tissue
+  - assay_cell_type
+  - assay_subcellular_fraction
+  # Description
+  - description
+  - score
+  # Ontology
+  - bao_format
+  - bao_label
+  # Cell line (enricher)
+  - cell_name
+  - cell_description
+  - cell_type
+  - cell_source_tissue
+  - cell_source_organism
+  - cell_source_taxonomy_id
+  - cellosaurus_id
+  - cl_lincs_id
+  - cell_efo_id
+  # Tissue (enricher)
+  - tissue_pref_name
+  - tissue_uberon_id
+  - tissue_bto_id
+  - tissue_caloha_id
+  - tissue_efo_id
+  # Variant
+  - variant_accession
+  - variant_isoform
+  - variant_mutation
+  - variant_organism
+  - variant_sequence
+  - variant_taxonomy_id

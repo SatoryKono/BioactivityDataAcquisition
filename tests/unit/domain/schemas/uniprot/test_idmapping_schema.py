@@ -116,10 +116,11 @@ class TestMappingStatusValidation:
         assert "found" in MAPPING_STATUSES
         assert "not_found" in MAPPING_STATUSES
         assert "error" in MAPPING_STATUSES
+        assert "multiple" in MAPPING_STATUSES
 
     def test_mapping_statuses_count(self) -> None:
-        """Test exactly 3 mapping statuses exist."""
-        assert len(MAPPING_STATUSES) == 3
+        """Test exactly 4 mapping statuses exist (found, not_found, error, multiple)."""
+        assert len(MAPPING_STATUSES) == 4
 
 
 class TestSchemaFieldDefinitions:

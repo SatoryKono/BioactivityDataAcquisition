@@ -7,6 +7,7 @@ for adapters that support server-side filtering.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from types import TracebackType
 from typing import Any, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
@@ -34,7 +35,7 @@ class DataSourcePort(Protocol):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit the async context manager."""
         ...
@@ -164,5 +165,33 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
 
         Yields:
             Dictionary records found via primary lookup or fallback search.
+        """
+        ...
+
+    def fetch_filtered_with_extended_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        alternate_id_mapping: dict[str, str] | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with 4-phase fallback: Primary → Alternate ID → Title → Title-Only.
+
+        Extension of fetch_filtered_with_fallback that adds an intermediate
+        alternate ID lookup phase between primary batch and title fallback.
+
+        Args:
+            entity_type: The type of entity to fetch.
+            filter_ids: List of primary IDs to filter by.
+            filter_field: Field name for primary filtering (e.g., 'doi').
+            fallback_mapping: Mapping from primary ID to fallback value (e.g., title).
+            alternate_id_mapping: Optional mapping {primary_id: alternate_id}
+                e.g., {doi: pmid} or {pmid: doi} for cross-identifier resolution.
+            limit: Optional maximum number of records to fetch.
+
+        Yields:
+            Dictionary records found via any of the fallback phases.
         """
         ...

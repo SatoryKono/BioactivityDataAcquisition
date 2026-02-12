@@ -74,14 +74,14 @@ class TestCliRunIncremental:
 
         Uses mocked service to verify CLI bootstrapping and execution flow.
         """
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SUCCESS,
+                PipelineRunResult.SUCCESS,
                 None,
                 None,
                 "test-run-id",
@@ -101,14 +101,14 @@ class TestCliRunIncremental:
         temp_env: dict[str, str],
     ):
         """Test incremental run with --resume flag."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SUCCESS,
+                PipelineRunResult.SUCCESS,
                 None,
                 None,
                 "test-run-id",
@@ -194,14 +194,14 @@ class TestCliRunTypes:
         temp_env: dict[str, str],
     ):
         """Test that -y skips confirmation for backfill."""
-        from bioetl.application.services import RunStatus
+        from bioetl.application.services import PipelineRunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
             # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
             mock_asyncio_run.return_value = (
-                RunStatus.SUCCESS,
+                PipelineRunResult.SUCCESS,
                 None,
                 None,
                 "test-run-id",

@@ -178,3 +178,28 @@ class InputFilterPort(Protocol):
                         record = await pubmed.search_by_title(fallback_map[doi])
         """
         ...
+
+    async def load_filter_with_extended_fallback(
+        self,
+        source_path: str,
+        primary_column: str,
+        fallback_column: str,
+        alternate_id_column: str,
+    ) -> tuple[FilterLoadResult, dict[str, str], dict[str, str]]:
+        """Load filter IDs, fallback mapping, and alternate ID mapping from source.
+
+        Extension of load_filter_with_fallback that loads an additional
+        alternate ID column (e.g., PMID) for intermediate lookup.
+
+        Args:
+            source_path: Path to the filter source.
+            primary_column: Name of the primary filter column.
+            fallback_column: Name of the fallback column (title).
+            alternate_id_column: Name of the alternate ID column.
+
+        Returns:
+            Tuple of (FilterLoadResult, fallback_mapping, alternate_id_mapping).
+            fallback_mapping: primary -> title
+            alternate_id_mapping: primary -> alternate_id
+        """
+        ...

@@ -213,9 +213,10 @@ class EnrichmentCoordinator:
     ) -> str | None:
         """Find column name with case-insensitive matching."""
         column_lower = column.lower()
-        for col in df.columns:
-            if col.lower() == column_lower:
-                return col
+        col_name: str
+        for col_name in df.columns:
+            if col_name.lower() == column_lower:
+                return col_name
         return None
 
     async def _return_skipped(self, enricher: EnricherConfig) -> EnrichmentResult:

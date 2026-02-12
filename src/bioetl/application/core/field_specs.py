@@ -38,8 +38,8 @@ STR: Callable[[Any], str] = str
 def normalize_pmid(value: Any) -> str | None:
     """Normalize PubMed ID to string format.
 
-    Converts int or string PMID to normalized string representation.
-    Returns None for invalid inputs.
+    Delegates to PubMedId.from_raw() Value Object for validation
+    and normalization (strip leading zeros, int→str, upper-bound < 10^10).
 
     Args:
         value: Raw PMID value (int, str, or None).
@@ -54,36 +54,17 @@ def normalize_pmid(value: Any) -> str | None:
         '12345678'
         >>> normalize_pmid("  12345678  ")
         '12345678'
+        >>> normalize_pmid("0012345")
+        '12345'
         >>> normalize_pmid(None)
         None
         >>> normalize_pmid("abc")
         None
     """
-    if value is None:
-        return None
+    from bioetl.domain.value_objects.publications import PubMedId
 
-    # Convert to string and strip whitespace
-    if isinstance(value, bool):
-        # Reject booleans explicitly (isinstance(True, int) is True)
-        return None
-    if isinstance(value, int):
-        str_value = str(value)
-    elif isinstance(value, str):
-        str_value = value.strip()
-    else:
-        return None
-
-    # Validate: must be non-empty and contain only digits
-    if not str_value or not str_value.isdigit():
-        return None
-
-    # Validate: must be positive (no "0" alone)
-    int_value = int(str_value)
-    if int_value <= 0:
-        return None
-
-    # Normalize: remove leading zeros
-    return str(int_value)
+    vo = PubMedId.from_raw(value)
+    return str(vo) if vo else None
 
 
 PMID: Callable[[Any], str | None] = normalize_pmid
@@ -103,7 +84,7 @@ class FieldSpec:
     Example:
         >>> spec = FieldSpec("molecule_id", target="molecule_chembl_id", converter=str)
         >>> spec = FieldSpec("value", converter=FLOAT, required=True)
-        >>> spec = FieldSpec("description", default="N/A")
+        >>> spec = FieldSpec("description", default="Unknown")
     """
 
     source: str

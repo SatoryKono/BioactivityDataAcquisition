@@ -13,8 +13,8 @@ source:
         provider: pubmed
         base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
         auth_type: api_key  # Optional API key for higher rate limits
-        api_key_env: BIOETL_NCBI_API_KEY
-        email_env: BIOETL_NCBI_EMAIL  # Required by NCBI guidelines
+        api_key_env: BIOETL_PUBMED_API_KEY
+        email_env: BIOETL_PUBMED_EMAIL  # Required by NCBI guidelines
         client:
             timeout_sec: 60.0
             max_retries: 3

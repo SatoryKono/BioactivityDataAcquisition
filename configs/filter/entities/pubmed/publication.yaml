@@ -21,12 +21,20 @@ input_filter:
   filter_field: "pmid"
   batch_size: 100
   fallback_column: "title"  # Search by title if PMID not found or empty
+  alternate_id_column: "doi"
 
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------
 # Criteria for valid publications
 gold_filters:
+  # Numeric range filters
+  ranges:
+    # Standardized publication year filter (1950..2050 inclusive)
+    publication_year:
+      min: 1950
+      max: 2050
+
   # Required fields
   required_fields:
     - pmid

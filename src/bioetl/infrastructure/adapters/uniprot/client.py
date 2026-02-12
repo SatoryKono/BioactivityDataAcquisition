@@ -43,6 +43,59 @@ if TYPE_CHECKING:
 # Maximum IDs per batch for UniProt OR-query (API recommendation)
 UNIPROT_BATCH_SIZE = 100
 
+# Fields to request from UniProt protein API
+_PROTEIN_FETCH_FIELDS: tuple[str, ...] = (
+    "accession",
+    "id",
+    "protein_name",
+    "gene_names",  # identifiers
+    "organism_name",
+    "organism_id",
+    "lineage",
+    "sequence",
+    "length",
+    "mass",
+    "protein_existence",
+    "annotation_score",
+    "reviewed",  # quality
+    "date_created",
+    "date_modified",
+    "version",  # metadata
+    "cc_function",
+    "cc_catalytic_activity",
+    "cc_activity_regulation",  # comments
+    "cc_subunit",
+    "cc_pathway",
+    "cc_subcellular_location",
+    "cc_tissue_specificity",
+    "cc_alternative_products",
+    "cc_disease",
+    "cc_cofactor",
+    "ph_dependence",
+    "temp_dependence",
+    "kinetics",
+    "absorption",
+    "redox_potential",
+    "cc_induction",
+    "cc_caution",
+    "cc_similarity",
+    "cc_pharmaceutical",
+    "ft_domain",
+    "ft_binding",
+    "ft_site",
+    "ft_act_site",
+    "ft_mod_res",  # features
+    "xref_pdb",
+    "xref_chembl",
+    "xref_drugbank",
+    "xref_guidetopharmacology",
+    "go_id",
+    "xref_interpro",
+    "xref_pfam",
+    "xref_reactome",
+    "keyword",  # xrefs
+)
+
 
 class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
     """UniProt API adapter implementing DataSourcePort.
@@ -413,25 +466,11 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         self, query: str, size: int, fetched: int, limit: int | None, cursor: str | None
     ) -> dict[str, Any]:
         """Build the parameter dictionary for a protein fetch request."""
-        fields = [
-            "accession",
-            "id",
-            "gene_names",
-            "organism_name",
-            "organism_id",
-            "protein_name",
-            "length",
-            "sequence",
-            "cc_function",
-            "ft_domain",
-            "xref_pdb",
-            "xref_chembl",
-        ]
         params = {
             "query": query,
             "size": min(size, (limit - fetched) if limit else size),
             "format": "json",
-            "fields": ",".join(fields),
+            "fields": ",".join(_PROTEIN_FETCH_FIELDS),
         }
         if cursor:
             params["cursor"] = cursor

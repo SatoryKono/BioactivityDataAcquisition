@@ -10,12 +10,57 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
+from bioetl.infrastructure.adapters.common import (
+    BaseAlternateIdFallbackHandler,
+    BaseTitleFallbackHandler,
+    titles_match,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
     from bioetl.domain.ports import LoggerPort
+
+
+class ExtendedFallbackHandler(BaseAlternateIdFallbackHandler):
+    """Handles fallback search by title and alternate ID (DOI)."""
+
+    def __init__(
+        self,
+        logger: LoggerPort,
+        search_fn: Callable[[str, int], Coroutine[Any, Any, list[dict[str, Any]]]],
+        alternate_search_fn: Callable[
+            [str], Coroutine[Any, Any, dict[str, Any] | None]
+        ],
+    ) -> None:
+        super().__init__(logger, provider_prefix="pubmed")
+        self._search_fn = search_fn
+        self._alternate_search_fn = alternate_search_fn
+
+    async def _search_by_title(self, title: str) -> dict[str, Any] | None:
+        # Replicated logic from TitleFallbackHandler
+        clean_title = title.strip()[:200]
+        try:
+            results = await self._search_fn(clean_title, 3)
+            for publication in results:
+                pub_title = publication.get("article_title", "")
+                if pub_title and titles_match(clean_title, pub_title):
+                    return publication
+            if results:
+                return results[0]
+        except Exception as e:
+            self._logger.debug(
+                "pubmed_title_search_failed", title=clean_title[:50], error=str(e)
+            )
+        return None
+
+    async def _search_by_alternate_id(self, alt_id: str) -> dict[str, Any] | None:
+        """Search by DOI."""
+        return await self._alternate_search_fn(alt_id)
+
+    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
+        """Return PubMed PMID for logging."""
+        return ("found_pmid", str(result.get("pmid", "unknown")))
 
 
 class TitleFallbackHandler(BaseTitleFallbackHandler):

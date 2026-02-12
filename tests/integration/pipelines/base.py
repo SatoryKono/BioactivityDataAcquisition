@@ -19,8 +19,8 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import MetricsPort
 from bioetl.infrastructure.config import Settings
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.ports import NoOpTracing
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
@@ -76,6 +76,7 @@ class IntegrationPipelineTestCase:
         metrics: MetricsPort,
         tracing: Any = None,
         metadata_coordinator: Any = None,
+        silver_validator: Any = None,
     ) -> StorageContext:
         """Create a StorageContext pointing to local temp paths."""
         # Create real writers pointing to local paths

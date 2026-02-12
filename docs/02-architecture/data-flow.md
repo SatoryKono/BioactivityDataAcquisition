@@ -1,6 +1,6 @@
 # Data Flow
 
-*Aligned with RULES.md v5.15 (Local-Only Deployment)*
+*Aligned with RULES.md v5.17 (Local-Only Deployment)*
 
 ## Overview
 
@@ -29,7 +29,7 @@ flowchart LR
     direction TB
     S1["Delta Lake"]
     S2["Merge/Upsert"]
-    S3["Permanent"]
+    S_perm["Permanent"]
   end
 
   subgraph Gold["Gold Layer"]
@@ -69,7 +69,7 @@ flowchart LR
 > Для распределённого развёртывания (future) — S3/MinIO.
 
 ```
-data/                              # Local-Only (current)
+data/output/                       # Local-Only (current)
 ├── bronze/
 │   └── {provider}/{entity}/{date}/
 │       ├── batch_001.jsonl.zst
@@ -81,7 +81,7 @@ data/                              # Local-Only (current)
 │           └── _delta_log/
 │
 ├── gold/
-│   └── {provider}/{entity}_aggregated/
+│   └── {provider}/{entity}/
 │       └── _delta_log/
 │
 ├── quarantine/
@@ -130,7 +130,7 @@ flowchart TB
     E1["Safety Guard<br/>(validate lock)"]
     E2["Delta Lake Write<br/>(Silver)"]
     E3["Gold Transform<br/>(exclude JSON fields)"]
-    E4["Delta Lake Write<br/>(Gold)"]
+    E4["Delta Lake Write<br/>(Gold)<br/><i>skipped if skip_gold=True</i>"]
   end
 
   subgraph Finalize
@@ -172,7 +172,7 @@ flowchart TB
    - `molecule_synonyms`, `cross_references`, `atc_classifications`
 3. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
 
-**Code Reference**: `src/bioetl/application/core/base.py` → `transform_for_gold()`
+**Code Reference**: `src/bioetl/application/core/base_transformer.py` → `BaseTransformer.transform_for_gold()`
 
 ---
 

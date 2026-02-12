@@ -39,21 +39,36 @@ def to_dict(obj: Any) -> dict[str, Any]:
     return {"value": _serialize_value(obj)}
 
 
+def _serialize_dataclass(value: Any) -> dict[str, Any]:
+    """Serialize a dataclass instance to dict."""
+    return {
+        field.name: _serialize_value(getattr(value, field.name))
+        for field in fields(value)
+    }
+
+
+def _serialize_collection(value: dict[str, Any] | list[Any] | tuple[Any, ...]) -> Any:
+    """Serialize dict/list/tuple recursively."""
+    if isinstance(value, dict):
+        return {key: _serialize_value(item) for key, item in value.items()}
+    return [_serialize_value(item) for item in value]
+
+
+def _is_dataclass_instance(value: Any) -> bool:
+    """Check if value is a dataclass instance (not a class)."""
+    return is_dataclass(value) and not isinstance(value, type)
+
+
 def _serialize_value(value: Any) -> Any:
     """Serialize a value with dataclass/enum/datetime/collection support."""
-    if is_dataclass(value) and not isinstance(value, type):
-        return {
-            field.name: _serialize_value(getattr(value, field.name))
-            for field in fields(value)
-        }
+    if _is_dataclass_instance(value):
+        return _serialize_dataclass(value)
     if isinstance(value, Enum):
         return value.value
     if isinstance(value, datetime):
         return value.isoformat()
-    if isinstance(value, dict):
-        return {key: _serialize_value(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_serialize_value(item) for item in value]
+    if isinstance(value, (dict, list, tuple)):
+        return _serialize_collection(value)
     return value
 
 
@@ -89,40 +104,25 @@ class DQReportSerializer:
     def to_dict(
         self, report: BronzeDQReport | SilverDQReport | GoldDQReport
     ) -> dict[str, Any]:
-        """Convert report to dictionary.
-
-        Args:
-            report: DQ report to convert.
-
-        Returns:
-            Dictionary representation of report.
-        """
+        """Convert report to dictionary."""
         return to_dict(report)
 
     def _to_json(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
         """Serialize to JSON with pretty formatting."""
         data = to_dict(report)
-        return orjson.dumps(
+        result: str = orjson.dumps(
             data,
             option=orjson.OPT_INDENT_2 | orjson.OPT_SORT_KEYS,
         ).decode("utf-8")
+        return result
 
     def _to_yaml(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
-        """Serialize to YAML format.
-
-        Uses simple YAML serialization without external dependencies.
-        For production use, consider using ruamel.yaml or PyYAML.
-        """
-        data = to_dict(report)
-        return self._dict_to_yaml(data)
+        """Serialize to YAML format (simple, no external dependencies)."""
+        return self._dict_to_yaml(to_dict(report))
 
     def _to_html(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:
-        """Serialize to HTML report.
-
-        Generates a simple HTML report with styling.
-        """
-        data = to_dict(report)
-        return self._generate_html(data, report)
+        """Serialize to HTML report with styling."""
+        return self._generate_html(to_dict(report), report)
 
     def _dict_to_yaml(self, data: dict[str, Any], indent: int = 0) -> str:
         """Simple YAML serialization without external dependencies."""
@@ -421,22 +421,19 @@ class DQReportSerializer:
         """Render thresholds card as HTML."""
         if not thresholds:
             return ""
-
         status = thresholds.get("threshold_status", "pass")
         status_class = self._status_color(status)
-
-        soft_threshold = thresholds.get("soft_fail_threshold")
-        hard_threshold = thresholds.get("hard_fail_threshold")
-        error_rate = thresholds.get("current_error_rate")
-
+        soft = thresholds.get("soft_fail_threshold")
+        hard = thresholds.get("hard_fail_threshold")
+        rate = thresholds.get("current_error_rate")
         return f"""
     <div class="card">
         <h2>DQ Thresholds</h2>
         <div class="check-item {status_class}">
             <table>
-                <tr><td><strong>Soft Fail Threshold</strong></td><td>{soft_threshold if soft_threshold is not None else "—"}</td></tr>
-                <tr><td><strong>Hard Fail Threshold</strong></td><td>{hard_threshold if hard_threshold is not None else "—"}</td></tr>
-                <tr><td><strong>Current Error Rate</strong></td><td>{error_rate if error_rate is not None else "—"}</td></tr>
+                <tr><td><strong>Soft Fail Threshold</strong></td><td>{soft if soft is not None else "—"}</td></tr>
+                <tr><td><strong>Hard Fail Threshold</strong></td><td>{hard if hard is not None else "—"}</td></tr>
+                <tr><td><strong>Current Error Rate</strong></td><td>{rate if rate is not None else "—"}</td></tr>
                 <tr><td><strong>Status</strong></td><td><span class="status-badge status-{status_class}">{status}</span></td></tr>
             </table>
         </div>

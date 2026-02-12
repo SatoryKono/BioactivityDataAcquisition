@@ -57,7 +57,7 @@ curl "https://www.ebi.ac.uk/chembl/api/data/activity?limit=1" | jq '.page_meta.t
 import polars as pl
 from deltalake import DeltaTable
 
-dt = DeltaTable("data/silver/chembl_activity")
+dt = DeltaTable("data/output/silver/chembl/activity")
 df = pl.scan_delta(str(dt)).collect()
 
 # Check for duplicates
@@ -128,7 +128,7 @@ touch data/checkpoints/test && rm data/checkpoints/test
 If schema version mismatch is intentional:
 ```bash
 # Full refresh with new schema
-bioetl run --provider chembl --entity activity --full-refresh
+bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
 ## Manual Checkpoint Operations
@@ -190,8 +190,8 @@ from deltalake import DeltaTable
 def validate_checkpoint(provider: str, entity: str):
     """Validate checkpoint against Silver table state."""
 
-    checkpoint_path = Path(f"data/checkpoints/{provider}_{entity}.json")
-    table_path = Path(f"data/silver/{provider}_{entity}")
+    checkpoint_path = Path(f"data/output/checkpoints/{provider}_{entity}.json")
+    table_path = Path(f"data/output/silver/{provider}/{entity}")
 
     # Load checkpoint
     with open(checkpoint_path) as f:

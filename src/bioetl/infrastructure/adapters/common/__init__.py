@@ -8,6 +8,9 @@ from __future__ import annotations
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
+from bioetl.infrastructure.adapters.common.base_alternate_id_fallback import (
+    BaseAlternateIdFallbackHandler,
+)
 from bioetl.infrastructure.adapters.common.base_title_fallback import (
     BaseTitleFallbackHandler,
 )
@@ -18,6 +21,7 @@ from bioetl.infrastructure.adapters.common.title_matching import (
 
 __all__ = [
     "APIRequestCollector",
+    "BaseAlternateIdFallbackHandler",
     "BaseTitleFallbackHandler",
     "normalize_title",
     "titles_match",

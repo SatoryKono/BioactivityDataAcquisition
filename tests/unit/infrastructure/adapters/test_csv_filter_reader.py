@@ -631,3 +631,68 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
 
         with pytest.raises(ValueError, match="Column 'nonexistent' not found"):
             await csv_reader.load_multi_column_filter(multi_column_csv, columns)
+
+
+@pytest.mark.unit
+class TestCsvFilterReaderLoadExtendedFallback:
+    """Tests for load_filter_with_extended_fallback method."""
+
+    @pytest.mark.asyncio
+    async def test_load_extended_fallback_missing_alternate_column(
+        self, csv_reader_with_logger, mock_logger
+    ):
+        """Verify regression fix: 2-column CSV works even if 3 columns requested."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("doi,title\n")
+            f.write("10.1038/test,Test Title\n")
+            path = f.name
+
+        try:
+            result, fallback, alternate = (
+                await csv_reader_with_logger.load_filter_with_extended_fallback(
+                    path, "doi", "title", "pmid"
+                )
+            )
+
+            assert len(result.ids) == 1
+            assert result.ids[0] == "10.1038/test"
+            assert fallback == {"10.1038/test": "Test Title"}
+            assert alternate == {}  # Graceful degradation
+
+            # Verify alternate_id_column_missing was logged
+            found = False
+            for call in mock_logger.info.call_args_list:
+                if call[0][0] == "alternate_id_column_missing":
+                    found = True
+                    break
+            assert found, "alternate_id_column_missing event not logged"
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+    @pytest.mark.asyncio
+    async def test_load_extended_fallback_missing_fallback_column(
+        self, csv_reader_with_logger, mock_logger
+    ):
+        """Verify graceful degradation when fallback column missing."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write("doi,pmid\n")
+            f.write("10.1038/test,12345\n")
+            path = f.name
+
+        try:
+            result, fallback, alternate = (
+                await csv_reader_with_logger.load_filter_with_extended_fallback(
+                    path, "doi", "title", "pmid"
+                )
+            )
+
+            assert len(result.ids) == 1
+            assert result.ids[0] == "10.1038/test"
+            assert fallback == {}
+            assert alternate == {"10.1038/test": "12345"}
+
+            mock_logger.warning.assert_called()
+            call_args = mock_logger.warning.call_args
+            assert call_args[0][0] == "fallback_column_missing"
+        finally:
+            Path(path).unlink(missing_ok=True)

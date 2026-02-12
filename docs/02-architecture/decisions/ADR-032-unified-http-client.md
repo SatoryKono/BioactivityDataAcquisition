@@ -176,7 +176,8 @@ class ChEMBLAdapter(BaseHttpAdapter):
 ## Related ADRs
 
 - [ADR-007](ADR-007-circuit-breaker-implementation.md): Circuit Breaker Implementation
-- [ADR-008](ADR-008-graceful-shutdown.md): Graceful Shutdown (client cleanup)
+- [ADR-008](ADR-008-graceful-shutdown-strategy.md): Graceful Shutdown Strategy (client cleanup)
 - [ADR-009](ADR-009-paginated-fetcher-mixin.md): Paginated Fetcher (uses HTTP client)
-- [ADR-016](ADR-016-error-handling-classification.md): Error Handling (retry classification)
-- [ADR-022](ADR-022-observability-ports.md): Observability Ports (TracingPort, MetricsPort)
+- [ADR-016](ADR-016-error-handling-strategy.md): Error Handling Strategy (retry classification)
+- [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement (TracingPort, MetricsPort)
+- [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing for Local-Only

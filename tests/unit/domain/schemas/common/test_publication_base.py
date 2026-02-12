@@ -47,11 +47,15 @@ def valid_base_record() -> dict:
         "abstract": "This is a test abstract for the publication.",
         "authors": '["John Doe", "Jane Smith"]',  # JSON array
         "affiliation_list": '["University of Testing"]',  # JSON array (unified)
+        "author_orcids": '["0000-0001-2345-6789"]',  # JSON array of ORCID IDs
         # === Publication metadata ===
         "journal": "Journal of Testing",
         "publication_year": 2024,
         "publication_date": "2024-06-15",
         "publication_type": "PUBLICATION",
+        "publication_type_unified": None,
+        "publication_subclass": None,
+        "publication_class": None,
         "language": "en",
         # === Pagination (unified field names) ===
         "page_first": "1",
@@ -217,8 +221,9 @@ class TestPublicationBaseSchemaFieldValidation:
                 PublicationBaseSchema.validate(df)
 
     def test_year_range_valid(self, valid_base_record: dict) -> None:
-        """Year should be within valid range (1800-2100)."""
-        valid_years = [1800, 1900, 2000, 2024, 2100]
+        """Year should be within valid range (1950-CURRENT_YEAR+1)."""
+        current_year = datetime.now(UTC).year
+        valid_years = [1950, 1990, 2000, 2024, current_year + 1]
 
         for year in valid_years:
             record = valid_base_record.copy()
@@ -228,9 +233,9 @@ class TestPublicationBaseSchemaFieldValidation:
             assert validated["publication_year"].iloc[0] == year
 
     def test_year_below_minimum_fails(self, valid_base_record: dict) -> None:
-        """Year below minimum (1800) should fail."""
+        """Year below minimum (1500) should fail."""
         record = valid_base_record.copy()
-        record["publication_year"] = 1799
+        record["publication_year"] = 1499
 
         df = pd.DataFrame([record])
 
@@ -238,7 +243,7 @@ class TestPublicationBaseSchemaFieldValidation:
             PublicationBaseSchema.validate(df)
 
     def test_year_above_maximum_fails(self, valid_base_record: dict) -> None:
-        """Year above maximum (2100) should fail."""
+        """Year above 2100 should fail."""
         record = valid_base_record.copy()
         record["publication_year"] = 2101
 
@@ -333,7 +338,7 @@ class TestPublicationBaseSchemaMultipleRecords:
         """Lazy validation should collect all errors."""
         record1 = valid_base_record.copy()
         record1["pmid"] = "INVALID1"  # Invalid PMID
-        record1["publication_year"] = 1799  # Invalid year
+        record1["publication_year"] = 1499  # Invalid year
 
         record2 = valid_base_record.copy()
         record2["entity_id"] = "test_pub_002"

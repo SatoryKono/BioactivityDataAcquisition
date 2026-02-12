@@ -25,7 +25,7 @@ from bioetl.domain import contracts
 from bioetl.domain import constants
 
 # Domain registry (publication entity mappings, ADR-024)
-from bioetl.domain import registry
+from bioetl.domain import registry  # noqa: F401
 from bioetl.domain.registry import (
     LEGACY_PUBLICATION_ALIASES,
     PUBLICATION_ENTITY_TYPES,
@@ -93,12 +93,17 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     PublicationRecord,
     # SemanticScholar
     SemanticScholarPublicationEntity,
+    SubcellularFraction,
     Target,
     TargetComponent,
     TargetComponentRecord,
     TargetRecord,
+    Tissue,
     UniprotTarget,
 )
+
+# Domain mapping (entity relation mappings)
+from bioetl.domain import mapping  # noqa: F401
 
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -113,9 +118,9 @@ from bioetl.domain.exceptions import (
     BioETLError,
     BronzeValidationError,
     BucketNotFoundError,
+    CachedBronzeEmptyError,
     CheckpointConflictError,
     CircuitBreakerOpenError,
-    ConfigurationError,
     CriticalError,
     DataQualityError,
     DataQualityThresholdError,
@@ -125,9 +130,7 @@ from bioetl.domain.exceptions import (
     DeltaTransactionError,
     DeltaWriteConflictError,
     ExternalServiceError,
-    FileSystemError,
     InfrastructureError,
-    InternalError,
     InvalidDataFormatError,
     InvalidStateError,
     LockAcquisitionError,
@@ -153,6 +156,9 @@ from bioetl.domain.exceptions import (
     UploadError,
     ValidationError,
 )
+
+# Extraction filtering (ADR-028 §3)
+from bioetl.domain.models import ExtractionParams
 
 # Filter configuration
 from bioetl.domain.filtering import (
@@ -187,7 +193,6 @@ from bioetl.domain.normalization import (
 
 # Ports
 from bioetl.domain.ports import (
-    ActivityAggregatorPort,
     AuditEntry,
     AuditLayer,
     AuditOperation,
@@ -229,8 +234,6 @@ from bioetl.domain.ports import (
     NoOpMetrics,
     NoOpPiiHasher,
     NoOpTracing,
-    NormalizationServicePort,
-    OutlierFilterPort,
     PiiHasherPort,
     QuarantinePort,
     RateLimiterPort,
@@ -244,10 +247,6 @@ from bioetl.domain.ports import (
     SilverValidatorPort,
     StoragePort,
     TracingPort,
-    UnitConverterPort,
-    ValueValidatorPort,
-    WatermarkStrategyPort,
-    NoOpWatermarkStrategy,
 )
 
 # Resilience (domain value objects)
@@ -331,6 +330,10 @@ from bioetl.domain.value_objects import (
     UniProtId,
     ValueObject,
 )
+from bioetl.domain.value_objects.publication_field_groups import (
+    FIELD_TO_GROUP_MAPPING,
+    PublicationFieldGroup,
+)
 
 __all__ = [
     # Composite pipeline (subpackage)
@@ -339,17 +342,6 @@ __all__ = [
     "contracts",
     # Constants
     "constants",
-    # Registry (publication entity mappings, ADR-024)
-    "registry",
-    "LEGACY_PUBLICATION_ALIASES",
-    "PUBLICATION_ENTITY_TYPES",
-    "PublicationMapping",
-    "get_publication_mapping",
-    "is_legacy_publication_alias",
-    "is_publication_entity",
-    "validate_publication_entity_type",
-    # Contracts (Gold layer Pandera schemas)
-    "contracts",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
@@ -400,8 +392,10 @@ __all__ = [
     "PublicationEntityBase",
     # SemanticScholar
     "SemanticScholarPublicationEntity",
+    "SubcellularFraction",
     "Target",
     "TargetComponent",
+    "Tissue",
     "UniprotTarget",
     # Error classifier
     "ErrorClassifier",
@@ -412,6 +406,7 @@ __all__ = [
     "AuthFailureError",
     "BioETLError",
     "BronzeValidationError",
+    "CachedBronzeEmptyError",
     "CriticalError",
     "DataQualityError",
     "RecoverableError",
@@ -422,13 +417,10 @@ __all__ = [
     "ServiceAuthenticationError",
     "DataValidationError",
     # Exceptions - Internal/Critical
-    "InternalError",
     "BucketNotFoundError",
     "CheckpointConflictError",
-    "ConfigurationError",
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
-    "FileSystemError",
     "InfrastructureError",
     "InvalidStateError",
     "LockAcquisitionError",
@@ -457,6 +449,8 @@ __all__ = [
     "InvalidDataFormatError",
     "MissingRequiredFieldError",
     "SchemaViolationError",
+    # Extraction filtering (ADR-028)
+    "ExtractionParams",
     # Filters
     "FilterLoadResult",
     "GoldColumnFilter",
@@ -472,7 +466,6 @@ __all__ = [
     "ClearPolicy",
     "MedallionPolicy",
     # Ports
-    "ActivityAggregatorPort",
     "AuditEntry",
     "AuditLayer",
     "AuditOperation",
@@ -514,8 +507,6 @@ __all__ = [
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
-    "NormalizationServicePort",
-    "OutlierFilterPort",
     "PiiHasherPort",
     "QuarantinePort",
     "RateLimiterPort",
@@ -529,10 +520,14 @@ __all__ = [
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
-    "UnitConverterPort",
-    "ValueValidatorPort",
-    "WatermarkStrategyPort",
-    "NoOpWatermarkStrategy",
+    # Registry (publication entity types, ADR-024)
+    "LEGACY_PUBLICATION_ALIASES",
+    "PUBLICATION_ENTITY_TYPES",
+    "PublicationMapping",
+    "get_publication_mapping",
+    "is_legacy_publication_alias",
+    "is_publication_entity",
+    "validate_publication_entity_type",
     # Resilience
     "CircuitBreakerConfig",
     "RetryConfig",
@@ -608,4 +603,6 @@ __all__ = [
     "PublicationYear",
     "UniProtId",
     "ValueObject",
+    "FIELD_TO_GROUP_MAPPING",
+    "PublicationFieldGroup",
 ]

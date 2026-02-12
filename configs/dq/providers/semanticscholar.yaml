@@ -27,12 +27,12 @@ provider_field_validations:
   # DOI format validation
   - field: doi
     type: pattern
-    pattern: '^10\.\d{4,}/.*$'
+    pattern: '^10\.\d{4,}/\S+$'
     nullable: true
-    error_message: "Invalid DOI format (must start with 10. prefix)"
+    error_message: "Invalid DOI format (must match 10.XXXX/suffix, no whitespace)"
 
   # Year range validation
-  - field: year
+  - field: publication_year
     type: range
     min: 1500
     max: 2100
@@ -40,7 +40,7 @@ provider_field_validations:
     error_message: "Publication year out of valid range"
 
   # Citation counts must be non-negative
-  - field: citation_count
+  - field: citations_received
     type: range
     min: 0
     nullable: true

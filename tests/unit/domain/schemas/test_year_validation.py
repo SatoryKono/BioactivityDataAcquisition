@@ -1,6 +1,6 @@
 """Unit tests for year validation across all publication schemas.
 
-Tests unified year validation range (1800-2100) per RULES.md §2.3.2.
+Tests unified year validation range (1950-CURRENT_YEAR+1) per RULES.md §2.3.2.
 """
 
 from __future__ import annotations
@@ -61,6 +61,9 @@ class TestCrossRefYearValidation:
             "publication_year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
             "publication_type": "journal-article",  # Raw CrossRef type (unified field name)
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
             "language": "en",
             # Metrics (unified field names)
             "citations_received": 100,
@@ -101,7 +104,7 @@ class TestCrossRefYearValidation:
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
-        """Should accept year at boundaries (1800 and 2100)."""
+        """Should accept year at boundaries."""
         from bioetl.domain.schemas.crossref.publication import (
             PublicationEnrichedSchema,
         )
@@ -154,6 +157,9 @@ class TestSemanticScholarYearValidation:
             "publication_year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
             "publication_type": "PUBLICATION",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
             "language": None,
             # Metrics (unified field names)
             "citations_received": 100,
@@ -189,7 +195,7 @@ class TestSemanticScholarYearValidation:
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
-        """Should accept year at boundaries (1800 and 2100)."""
+        """Should accept year at boundaries."""
         from bioetl.domain.schemas.semanticscholar.publication import (
             SemanticScholarPublicationSchema,
         )
@@ -206,7 +212,7 @@ class TestSemanticScholarYearValidation:
             SemanticScholarPublicationSchema,
         )
 
-        # Year below minimum (was 1500, now 1800)
+        # Year below minimum
         valid_record["publication_year"] = MIN_PUBLICATION_YEAR - 1
         df = pd.DataFrame([valid_record])
         with pytest.raises(SchemaError):
@@ -242,6 +248,9 @@ class TestChemblYearValidation:
             "publication_year": 2020,
             "publication_date": None,  # Always NULL for ChEMBL
             "publication_type": "PUBLICATION",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
             "language": None,
             # Affiliations (unified field name)
             "affiliation_list": None,
@@ -262,13 +271,15 @@ class TestChemblYearValidation:
             "issue": "1",
             "page_first": "1",
             "page_last": "10",
+            # Author identifiers
+            "author_orcids": None,
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-15",
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
-        """Should accept year at boundaries (1800 and 2100)."""
+        """Should accept year at boundaries."""
         from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
@@ -326,6 +337,9 @@ class TestPubMedYearValidation:
             "publication_year": 2020,
             "publication_date": "2020-05-15",  # Unified date field
             "publication_type": "PUBLICATION",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
             "language": "eng",
             # Affiliations (unified field name)
             "affiliation_list": None,
@@ -374,12 +388,14 @@ class TestPubMedYearValidation:
             "gene_symbols": None,
             "publication_types": None,
             # Note: affiliation_list inherited from base (unified field name)
+            # Author identifiers
+            "author_orcids": None,
             # Author-affiliation mapping
             "authors_with_affiliations": None,
         }
 
     def test_year_boundary_values(self, valid_record: dict) -> None:
-        """Should accept year at boundaries (1800 and 2100)."""
+        """Should accept year at boundaries."""
         from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
 
         for year in [MIN_PUBLICATION_YEAR, MAX_PUBLICATION_YEAR]:
@@ -423,11 +439,9 @@ class TestYearValidationConstants:
 
     def test_constants_are_consistent(self) -> None:
         """Verify MIN and MAX publication year constants are correct."""
-        assert MIN_PUBLICATION_YEAR == 1800
-        assert MAX_PUBLICATION_YEAR == 2100
+        assert MIN_PUBLICATION_YEAR == 1950
+        assert MAX_PUBLICATION_YEAR == 2050
 
     def test_valid_year_range(self) -> None:
         """Test that constants define a valid range."""
         assert MIN_PUBLICATION_YEAR < MAX_PUBLICATION_YEAR
-        # Range should cover reasonable scientific publication history
-        assert MAX_PUBLICATION_YEAR - MIN_PUBLICATION_YEAR == 300

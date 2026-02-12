@@ -213,6 +213,104 @@ class CsvFilterReader:
 
         return result, fallback_mapping
 
+    async def load_filter_with_extended_fallback(
+        self,
+        source_path: str,
+        primary_column: str,
+        fallback_column: str,
+        alternate_id_column: str,
+    ) -> tuple[FilterLoadResult, dict[str, str], dict[str, str]]:
+        """Load filter IDs, fallback mapping, and alternate ID mapping from CSV.
+
+        Extension of load_filter_with_fallback that loads an additional
+        alternate ID column (e.g., PMID) for intermediate lookup.
+
+        Args:
+            source_path: Path to the CSV file.
+            primary_column: Name of the primary filter column.
+            fallback_column: Name of the fallback column (title).
+            alternate_id_column: Name of the alternate ID column.
+
+        Returns:
+            Tuple of (FilterLoadResult, fallback_mapping, alternate_id_mapping).
+        """
+        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
+
+        fallback_mapping: dict[str, str] = {}
+        alternate_id_mapping: dict[str, str] = {}
+        all_ids: list[str] = []
+        title_only_count = 0
+
+        # Check columns existence and degrade gracefully
+        has_fallback = fallback_column in df.columns
+        has_alternate = alternate_id_column in df.columns
+
+        if not has_fallback and self._logger:
+            self._logger.warning(
+                "fallback_column_missing",
+                source_path=source_path,
+                column=fallback_column,
+                available_columns=df.columns,
+            )
+
+        if not has_alternate and self._logger:
+            self._logger.info(
+                "alternate_id_column_missing",
+                source_path=source_path,
+                column=alternate_id_column,
+                available_columns=df.columns,
+                msg="Proceeding without alternate ID lookup",
+            )
+
+        for row in df.iter_rows(named=True):
+            primary_val = row.get(primary_column)
+            fallback_val = row.get(fallback_column) if has_fallback else None
+            alternate_val = row.get(alternate_id_column) if has_alternate else None
+
+            primary_str = str(primary_val).strip() if primary_val else ""
+            fallback_str = str(fallback_val).strip() if fallback_val else ""
+            alternate_str = str(alternate_val).strip() if alternate_val else ""
+
+            if primary_str:
+                all_ids.append(primary_str)
+                if fallback_str:
+                    fallback_mapping[primary_str] = fallback_str
+                if alternate_str:
+                    alternate_id_mapping[primary_str] = alternate_str
+            elif fallback_str:
+                # Title only
+                marker = f"__title_only_{title_only_count}__"
+                all_ids.append(marker)
+                fallback_mapping[marker] = fallback_str
+                if alternate_str:
+                    alternate_id_mapping[marker] = alternate_str
+                title_only_count += 1
+
+        if self._logger:
+            self._logger.info(
+                "extended_fallback_loaded",
+                source_path=source_path,
+                primary_count=len([i for i in all_ids if not i.startswith("__")]),
+                title_only_count=title_only_count,
+                fallback_map_size=len(fallback_mapping),
+                alternate_map_size=len(alternate_id_mapping),
+            )
+
+        # Compute stats
+        unique_ids, unique_count, duplicate_count, duplicates = (
+            self._compute_duplicate_stats([id_ for id_ in all_ids if id_])
+        )
+
+        result = FilterLoadResult(
+            ids=unique_ids,
+            total_count=len(all_ids),
+            unique_count=unique_count,
+            duplicate_count=duplicate_count,
+            duplicates=duplicates,
+        )
+
+        return result, fallback_mapping, alternate_id_mapping
+
     def _log_multi_column_filter(
         self,
         source_path: str,

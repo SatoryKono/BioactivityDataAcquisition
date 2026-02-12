@@ -25,6 +25,16 @@ PUBLICATION_ENTITY_TYPES = {
     "work",  # CrossRef uses "work" for publications
 }
 
+# Derived entity types that require force_full_scan for deduplication
+# These entities are extracted from parent records and need full scans
+# to ensure comprehensive deduplication at Silver layer
+DERIVED_ENTITY_TYPES = {
+    "subcellular_fraction",  # Derived from assay records
+}
+
+# All entity types that legitimately require force_full_scan
+FORCE_FULL_SCAN_ENTITY_TYPES = PUBLICATION_ENTITY_TYPES | DERIVED_ENTITY_TYPES
+
 # All publication pipeline configs that MUST have force_full_scan=true
 PUBLICATION_PIPELINE_CONFIGS = [
     "configs/pipelines/chembl/publication.yaml",
@@ -151,8 +161,11 @@ class TestForceFullScanNonPublicationConfigs:
             entity_type = config.get("entity_type", "")
             force_full_scan = config.get("force_full_scan", False)
 
-            # Non-publication entities shouldn't have force_full_scan=true
-            if entity_type not in PUBLICATION_ENTITY_TYPES and force_full_scan is True:
+            # Only publication and derived entities should have force_full_scan=true
+            if (
+                entity_type not in FORCE_FULL_SCAN_ENTITY_TYPES
+                and force_full_scan is True
+            ):
                 incorrectly_enabled.append(f"{yaml_file} (entity_type={entity_type})")
 
         if incorrectly_enabled:

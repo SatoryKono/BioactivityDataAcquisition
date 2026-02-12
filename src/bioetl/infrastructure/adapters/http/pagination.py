@@ -6,30 +6,9 @@ Provides PaginatedFetcherMixin to standardize loop logic for offset/cursor based
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Awaitable, Callable
-from typing import Any, Protocol, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
-
-
-class PageFetcher(Protocol[T]):
-    """Protocol for the fetch function passed to paginated_fetch."""
-
-    async def __call__(
-        self, cursor: Any | None, fetched: int
-    ) -> tuple[list[T], Any | None]:
-        """Fetch a page of items.
-
-        Args:
-            cursor: The cursor/offset for the next page.
-            fetched: Number of items already fetched (for adaptive page sizing).
-
-        Returns:
-            A tuple containing:
-                - List of items fetched.
-                - Next cursor (or None if no more pages).
-
-        """
-        ...
 
 
 class PaginatedFetcherMixin:

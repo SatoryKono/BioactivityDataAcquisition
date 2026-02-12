@@ -274,24 +274,34 @@ class GoldWriter(BaseDeltaWriter):
         records: list[dict[str, Any]],
         primary_keys: list[str] | None = None,
         *,
+        schema: DataFrameSchema | None = None,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
     ) -> None:
-        """Write merged records to Gold layer without Pandera schema.
+        """Write merged records to Gold layer with optional strict validation.
 
-        Used by composite pipelines where schema is dynamically determined
-        by the merge operation. No Pandera validation is performed.
+        Used by composite pipelines where schema may be dynamically determined
+        by the merge operation. When a schema is provided, strict Pandera
+        validation is enforced (same as write_gold). When no schema is provided,
+        basic structural validation is performed.
 
         Args:
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
+            schema: Optional Pandera schema for strict validation.
+                When provided, must have strict=True and all records
+                are validated before writing (REQ-DATA-009).
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical_column_order()
                 and preserve the column order from records (e.g. semantic
                 ordering applied by ColumnOrderer in composite pipelines).
+
+        Raises:
+            ValueError: If records are empty, schema is not strict, or
+                records fail schema validation.
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -301,6 +311,11 @@ class GoldWriter(BaseDeltaWriter):
                 table_name=table_name,
             )
             return
+
+        # Validate against schema if provided (REQ-DATA-009)
+        if schema is not None:
+            self._validate_schema_strict(schema)
+            await self._validate_records_against_schema(records, schema)
 
         # Convert to Arrow and apply column order
         arrow_table = pa.Table.from_pylist(records)
@@ -700,18 +715,16 @@ class GoldWriter(BaseDeltaWriter):
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path,
-                    data=arrow_data,
-                    mode=mode,
-                    partition_by=partition_cols,
-                    schema_mode=schema_mode: write_deltalake(
-                        table_or_uri=table_or_uri,
-                        data=pa.RecordBatchReader.from_batches(
-                            data.schema, data.to_batches()
-                        ),
-                        mode=mode,
-                        partition_by=partition_by,
-                        schema_mode=schema_mode,
+                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, schema_mode=schema_mode: (
+                        write_deltalake(
+                            table_or_uri=table_or_uri,
+                            data=pa.RecordBatchReader.from_batches(
+                                data.schema, data.to_batches()
+                            ),
+                            mode=mode,
+                            partition_by=partition_by,
+                            schema_mode=schema_mode,
+                        )
                     )
                 )
                 break
@@ -792,16 +805,15 @@ class GoldWriter(BaseDeltaWriter):
                         records, column_order=column_order
                     )
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path,
-                        data=arrow_data,
-                        mode="append",
-                        partition_by=partition_cols: write_deltalake(
-                            table_or_uri=table_or_uri,
-                            data=pa.RecordBatchReader.from_batches(
-                                data.schema, data.to_batches()
-                            ),
-                            mode=mode,
-                            partition_by=partition_by,
+                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: (
+                            write_deltalake(
+                                table_or_uri=table_or_uri,
+                                data=pa.RecordBatchReader.from_batches(
+                                    data.schema, data.to_batches()
+                                ),
+                                mode=mode,
+                                partition_by=partition_by,
+                            )
                         )
                     )
                 break

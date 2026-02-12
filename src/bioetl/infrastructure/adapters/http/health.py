@@ -19,12 +19,13 @@ from bioetl.domain.types import HealthStatus
 def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
     """Determine adapter health status from circuit breaker state.
 
-    Maps circuit breaker state and failure count to a HealthStatus value
-    for use in adapter health checks. The mapping follows these rules:
+    Maps circuit breaker state to a HealthStatus value for use in adapter
+    health checks. The mapping respects the circuit breaker's own configured
+    failure_threshold rather than using hardcoded counts:
 
     - HEALTHY: Circuit is CLOSED with zero failures (normal operation)
-    - DEGRADED: Circuit has 1-2 failures (experiencing intermittent issues)
-    - UNHEALTHY: Circuit has 3+ failures or is OPEN/HALF_OPEN
+    - DEGRADED: Circuit is CLOSED with some failures, or HALF_OPEN (recovering)
+    - UNHEALTHY: Circuit is OPEN (failure_threshold reached, blocking requests)
 
     This function expects a circuit breaker implementing CircuitBreakerPort
     with get_state() and get_failure_count() methods.
@@ -38,15 +39,15 @@ def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
         HealthStatus enum value:
         - HEALTHY: Adapter is fully operational
         - DEGRADED: Adapter is functional but experiencing issues
-        - UNHEALTHY: Adapter is not operational or has critical failures
+        - UNHEALTHY: Adapter is not operational (circuit breaker tripped)
 
     Example:
         >>> from bioetl.infrastructure.adapters.http import CircuitBreaker
         >>> cb = CircuitBreaker(provider="chembl", failure_threshold=5)
         >>> assess_health_from_circuit_breaker(cb)
         <HealthStatus.HEALTHY: 'healthy'>
-        >>> # After some failures:
-        >>> cb._failure_count = 2  # Simulated failures
+        >>> # After some failures (below threshold):
+        >>> cb._failure_count = 3  # Below threshold of 5
         >>> assess_health_from_circuit_breaker(cb)
         <HealthStatus.DEGRADED: 'degraded'>
 
@@ -58,9 +59,11 @@ def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
     cb_state = circuit_breaker.get_state()
     failure_count = circuit_breaker.get_failure_count()
 
-    if cb_state.value == "CLOSED" and failure_count == 0:
-        return HealthStatus.HEALTHY
-    elif failure_count <= 2:
-        return HealthStatus.DEGRADED
-    else:
+    if cb_state.value == "OPEN":
         return HealthStatus.UNHEALTHY
+    if cb_state.value == "HALF_OPEN":
+        return HealthStatus.DEGRADED
+    # CLOSED state
+    if failure_count == 0:
+        return HealthStatus.HEALTHY
+    return HealthStatus.DEGRADED

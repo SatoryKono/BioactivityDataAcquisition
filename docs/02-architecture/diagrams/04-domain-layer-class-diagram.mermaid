@@ -118,7 +118,7 @@ classDiagram
             +pref_name: str?
             +molecule_type: str
             +canonical_smiles: str?
-            +standard_inchi_key: str?
+            +inchi_key: str?
             +molecular_weight: float?
             +parent_molecule_id: str?
         }
@@ -140,12 +140,23 @@ classDiagram
             +uniprot_accessions: list~str~?
         }
 
-        class Document {
-            +document_id: str
-            +doc_type: str
+        class PublicationEntityBase {
+            <<abstract>>
             +doi: str?
-            +pmid: int?
+            +pmid: str?
             +title: str?
+            +publication_year: int?
+            +citations_received: int?
+            +citations_made: int?
+            +author_orcids: str?
+            +_source: str
+        }
+
+        class ChemblPublication {
+            +document_chembl_id: str
+            +publication_type: str
+            +volume: str?
+            +src_id: int?
         }
     }
 
@@ -220,7 +231,8 @@ classDiagram
     BaseEntity <|-- Molecule
     BaseEntity <|-- Assay
     BaseEntity <|-- Target
-    BaseEntity <|-- Document
+    BaseEntity <|-- PublicationEntityBase
+    PublicationEntityBase <|-- ChemblPublication
 
     FilterableDataSourcePort --|> DataSourcePort
 

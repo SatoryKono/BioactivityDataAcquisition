@@ -264,6 +264,37 @@ class CrossRefAdapter(BaseHttpAdapter):
         ):
             yield pub
 
+    async def fetch_filtered_with_extended_fallback(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        fallback_mapping: dict[str, str],
+        alternate_id_mapping: dict[str, str] | None = None,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Fetch with 4-phase fallback: Primary → Alternate ID → Title → Title-Only.
+
+        Note: CrossRef does not support PMID lookup (Phase 2), so this phase is skipped.
+        This method delegates to fetch_filtered_with_fallback for phases 1, 3, and 4.
+        """
+        # Phase 2 is not supported for CrossRef as it doesn't have a PMID API
+        if alternate_id_mapping:
+            self.logger.info(
+                "crossref_no_pmid_api_support",
+                message="CrossRef does not support PMID lookup. Phase 2 skipped.",
+            )
+
+        # Delegate to 3-phase fallback (Phase 1, 3, 4)
+        async for record in self.fetch_filtered_with_fallback(
+            entity_type=entity_type,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            fallback_mapping=fallback_mapping,
+            limit=limit,
+        ):
+            yield record
+
     async def fetch(
         self,
         entity_type: str,

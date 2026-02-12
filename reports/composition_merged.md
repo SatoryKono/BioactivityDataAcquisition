@@ -24,6 +24,788 @@ See Also:
 """
 
 ================================================================================
+File: _pipeline_execution.py
+Path: _pipeline_execution.py
+================================================================================
+"""Pipeline execution entrypoints.
+
+Core functions for building, configuring, and running ETL pipelines.
+Split from entrypoints.py per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, cast
+from uuid import uuid4
+
+from bioetl.application.core.shutdown import PipelineShutdownError
+from bioetl.application.services import RunOptions, RunResult, RunStatus
+from bioetl.composition.bootstrap import (
+    bootstrap_pipeline,
+    maybe_start_metrics_server,
+)
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.providers.registration import register_all_providers
+from bioetl.domain.context import (
+    CachedBronzeContext,
+    InputFilterContext,
+    PipelineRunContext,
+    VacuumConfig,
+)
+from bioetl.domain.types import RunID, RunType
+from bioetl.infrastructure.config import get_settings
+
+if TYPE_CHECKING:
+    from bioetl.application.core.runner import PipelineRunner
+
+
+def ensure_metrics_server_started() -> bool:
+    """Ensure metrics server is started if enabled in settings.
+
+    This function should be called at the start of pipeline execution
+    to start the Prometheus HTTP server. It's idempotent - calling it
+    multiple times is safe.
+
+    Returns:
+        True if server was started or already running, False if disabled.
+
+    Example:
+        >>> ensure_metrics_server_started()
+        True  # Server started on configured port
+    """
+    settings = get_settings()
+    return maybe_start_metrics_server(settings)
+
+
+@dataclass(frozen=True)
+class VacuumOptions:
+    """Options for vacuum operation.
+
+    Attributes:
+        retention_days: Minimum age of files to remove (days).
+        dry_run: Preview mode showing what would be removed.
+    """
+
+    retention_days: int = 7
+    dry_run: bool = False
+
+
+@dataclass(frozen=True)
+class ArchiveOptions:
+    """Options for archive operation.
+
+    Attributes:
+        target_path: Destination path for archive.
+        remove_source: Remove source table after archiving.
+    """
+
+    target_path: str
+    remove_source: bool = False
+
+
+def _ensure_registrations() -> None:
+    """Ensure all providers and pipelines are registered.
+
+    This is idempotent and safe to call multiple times.
+    """
+    register_all_providers()
+    register_all_pipelines()
+
+
+def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext:
+    """Build a PipelineRunContext from user-facing options.
+
+    Args:
+        name: Pipeline name (e.g., 'chembl_activity').
+        options: User-facing run options.
+
+    Returns:
+        PipelineRunContext ready for bootstrap_pipeline.
+    """
+    # Build InputFilterContext from CLI options
+    # Priority: multi_filter_ids > filter_ids > input_csv > disabled
+    # - multi_filter_ids: Multi-field AND filtering (composite dependencies)
+    # - filter_ids: Direct IDs for composite mode (no CSV file needed)
+    # - input_csv: CSV file path, column_name/filter_field from YAML defaults
+    if options.multi_filter_ids:
+        # Multi-field filtering mode (composite dependencies with AND logic)
+        input_filter = InputFilterContext.from_multi_ids(
+            multi_filter_ids=options.multi_filter_ids,
+        )
+    elif options.filter_ids:
+        # Direct IDs mode (composite pipelines)
+        input_filter = InputFilterContext.from_ids(
+            filter_ids=options.filter_ids,
+            filter_field=options.filter_field
+            or "doi",  # Default to DOI for publications
+            fallback_mapping=options.fallback_mapping,  # Title fallback for OpenAlex etc.
+        )
+    elif options.input_csv:
+        # CSV-based filtering
+        input_filter = InputFilterContext(
+            enabled=True,
+            source_path=options.input_csv,
+            column_name=options.filter_column or "",
+            filter_field=options.filter_field or "",
+        )
+    else:
+        input_filter = InputFilterContext.disabled()
+
+    # Build VacuumConfig from CLI options (None means use YAML default)
+    # Note: VacuumConfig here only captures CLI overrides.
+    # The final merge with YAML config happens in bootstrap_pipeline.
+    # Tri-state logic:
+    #   - None: No CLI override, use YAML default
+    #   - True: CLI explicitly enables vacuum (--vacuum)
+    #   - False: CLI explicitly disables vacuum (--no-vacuum)
+    vacuum = VacuumConfig(
+        enabled=options.vacuum_after_run,  # Preserve None for tri-state
+        retention_days=options.vacuum_retention_days or 7,
+    )
+
+    # Build CachedBronzeContext from CLI options
+    if options.use_cached_bronze:
+        cached_bronze = CachedBronzeContext.from_options(
+            path=options.cached_bronze_path,
+            date=options.cached_bronze_date,
+        )
+    else:
+        cached_bronze = CachedBronzeContext.disabled()
+
+    return PipelineRunContext(
+        pipeline_name=name,
+        run_id=cast(RunID, uuid4()),
+        run_type=RunType(options.run_type),
+        resume=options.resume,
+        limit=options.limit,
+        dry_run=options.dry_run,
+        input_filter=input_filter,
+        vacuum=vacuum,
+        log_level=options.log_level,
+        ignore_yaml_filter=options.ignore_yaml_filter,
+        skip_gold=options.skip_gold,
+        cached_bronze=cached_bronze,
+    )
+
+
+def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
+    """Create a pipeline runner for the given pipeline and options.
+
+    This is the main entrypoint for pipeline execution. It handles:
+    - Registration of providers and pipelines
+    - Building the pipeline context
+    - Bootstrapping the runner with all dependencies
+
+    Args:
+        name: Pipeline name (e.g., 'chembl_activity').
+        options: User-facing run options.
+
+    Returns:
+        PipelineRunner ready for execution via runner.run().
+
+    Raises:
+        ValueError: If pipeline name is unknown or options are invalid.
+        FileNotFoundError: If pipeline config file is missing.
+
+    Example:
+        >>> options = RunOptions(run_type="incremental", limit=100)
+        >>> runner = create_pipeline_runner("chembl_activity", options)
+        >>> await runner.run()
+    """
+    _ensure_registrations()
+    ctx = build_pipeline_context(name, options)
+    return bootstrap_pipeline(ctx)
+
+
+async def run_pipeline(name: str, options: RunOptions) -> RunResult:
+    """Run a pipeline with the given options.
+
+    Unified pipeline execution interface that creates a runner, executes the
+    pipeline, and returns structured results. This is the recommended way to
+    run pipelines programmatically from any orchestration layer.
+
+    For lower-level control over execution (e.g., signal handling, custom
+    logging), use create_pipeline_runner() directly.
+
+    Args:
+        name: Pipeline name (e.g., 'chembl_activity').
+        options: User-facing run options.
+
+    Returns:
+        RunResult with execution metrics and status.
+
+    Raises:
+        ValueError: If pipeline name is unknown or options are invalid.
+        FileNotFoundError: If pipeline config file is missing.
+
+    Example:
+        >>> options = RunOptions(run_type="incremental", limit=100)
+        >>> result = await run_pipeline("chembl_activity", options)
+        >>> if result.status == RunStatus.SUCCESS:
+        ...     logger.info("pipeline_success", records_silver=result.records_silver)
+        >>> elif result.status == RunStatus.SHUTDOWN:
+        ...     logger.info("pipeline_shutdown", pipeline="chembl_activity")
+        >>> else:
+        ...     logger.error("pipeline_failed", error_message=result.error_message)
+    """
+    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
+    settings = get_settings()
+    maybe_start_metrics_server(settings)
+
+    started_at = datetime.now(tz=UTC)
+    runner = create_pipeline_runner(name, options)
+
+    # Extract run context for result
+    run_id = str(runner._context.run_id)
+    run_type = options.run_type
+
+    status = RunStatus.SUCCESS
+    error_message: str | None = None
+    error_type: str | None = None
+
+    try:
+        await runner.run()
+    except PipelineShutdownError:
+        status = RunStatus.SHUTDOWN
+    except Exception as e:
+        status = RunStatus.FAILED
+        error_message = str(e)
+        error_type = type(e).__name__
+
+    completed_at = datetime.now(tz=UTC)
+
+    # Extract metrics from executor (composition layer has access to internals)
+    executor = runner._executor
+    return RunResult(
+        status=status,
+        pipeline_name=name,
+        run_id=run_id,
+        run_type=run_type,
+        records_fetched=executor.records_fetched,
+        records_bronze=executor.records_bronze,
+        records_silver=executor.records_silver,
+        records_gold=executor.records_gold,
+        records_quarantined=executor.records_quarantined,
+        started_at=started_at,
+        completed_at=completed_at,
+        error_message=error_message,
+        error_type=error_type,
+    )
+
+================================================================================
+File: _resource_management.py
+Path: _resource_management.py
+================================================================================
+"""Resource management entrypoints.
+
+Legacy managers, maintenance operations (vacuum, archive),
+and inspection functions (quarantine, checkpoints).
+Split from entrypoints.py per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+from bioetl.composition._pipeline_execution import (
+    ArchiveOptions,
+    VacuumOptions,
+    _ensure_registrations,
+)
+from bioetl.composition.bootstrap import (
+    bootstrap_checkpoint_manager,
+    bootstrap_cleanup,
+    bootstrap_lifecycle_service,
+    bootstrap_quarantine_manager,
+    load_pipeline_config,
+)
+
+if TYPE_CHECKING:
+    from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.cleanup_service import CleanupPreview
+    from bioetl.application.core.quarantine_manager import QuarantineManager
+    from bioetl.application.services.medallion_lifecycle import (
+        MedallionLifecycleService,
+    )
+
+
+def get_quarantine_manager(pipeline: str) -> QuarantineManager:
+    """Get a quarantine manager for the given pipeline.
+
+    Used for inspecting and managing quarantined (failed) records.
+
+    Args:
+        pipeline: Pipeline name (e.g., 'chembl_activity').
+
+    Returns:
+        QuarantineManager instance for the pipeline.
+
+    Example:
+        >>> manager = get_quarantine_manager("chembl_activity")
+        >>> records = await manager.inspect(limit=100)
+    """
+    _ensure_registrations()
+    return bootstrap_quarantine_manager(pipeline)
+
+
+def get_checkpoint_manager(pipeline: str) -> CheckpointManager:
+    """Get a checkpoint manager for the given pipeline.
+
+    Used for listing, loading, and managing pipeline checkpoints.
+
+    Args:
+        pipeline: Pipeline name (e.g., 'chembl_activity').
+
+    Returns:
+        CheckpointManager instance for the pipeline.
+
+    Example:
+        >>> manager = get_checkpoint_manager("chembl_activity")
+        >>> checkpoints = await manager.list_all()
+    """
+    _ensure_registrations()
+    return bootstrap_checkpoint_manager(pipeline)
+
+
+def get_lifecycle_service() -> MedallionLifecycleService:
+    """Get the lifecycle service for maintenance operations.
+
+    Used for vacuum and archive operations on Delta tables.
+
+    Returns:
+        MedallionLifecycleService instance.
+
+    Example:
+        >>> service = get_lifecycle_service()
+        >>> removed = await service.vacuum("chembl.activity", retention_days=7)
+    """
+    _ensure_registrations()
+    return bootstrap_lifecycle_service()
+
+
+async def vacuum_table(table: str, options: VacuumOptions) -> int:
+    """Vacuum a Delta table to reclaim storage space.
+
+    Args:
+        table: Table name in format "provider.entity" (e.g., 'chembl.activity').
+        options: Vacuum options including retention and dry_run.
+
+    Returns:
+        Number of files removed (or would be removed in dry_run mode).
+
+    Example:
+        >>> options = VacuumOptions(retention_days=30, dry_run=True)
+        >>> files_removed = await vacuum_table("chembl.activity", options)
+    """
+    service = get_lifecycle_service()
+    result: int = await service.vacuum(
+        table=table,
+        retention_days=options.retention_days,
+        dry_run=options.dry_run,
+    )
+    return result
+
+
+async def archive_table(table: str, options: ArchiveOptions) -> int:
+    """Archive a Delta table to cold storage.
+
+    Args:
+        table: Table name to archive.
+        options: Archive options including target path and remove_source.
+
+    Returns:
+        Number of files archived.
+
+    Example:
+        >>> options = ArchiveOptions(target_path="/archive/chembl", remove_source=False)
+        >>> files_archived = await archive_table("chembl.activity", options)
+    """
+    service = get_lifecycle_service()
+    result: int = await service.archive(
+        table=table,
+        target_path=options.target_path,
+        remove_source=options.remove_source,
+    )
+    return result
+
+
+async def preview_cleanup(pipeline: str) -> CleanupPreview:
+    """Preview what data would be cleared for a pipeline.
+
+    Used for dry-run mode of rebuild/backfill operations.
+
+    Args:
+        pipeline: Pipeline name (e.g., 'chembl_activity').
+
+    Returns:
+        CleanupPreview with information about what would be cleared.
+
+    Example:
+        >>> preview = await preview_cleanup("chembl_activity")
+        >>> preview.total_files  # Number of files to clear
+        42
+    """
+    _ensure_registrations()
+    config = load_pipeline_config(pipeline)
+    cleanup_service = bootstrap_cleanup()
+    return await cleanup_service.preview(
+        silver_table=config.silver_table,
+        gold_table=config.gold_table,
+    )
+
+
+async def inspect_quarantine(pipeline: str, limit: int = 100) -> list[dict[str, Any]]:
+    """Inspect quarantined records for a pipeline.
+
+    Convenience function for quick quarantine inspection.
+
+    Args:
+        pipeline: Pipeline name (e.g., 'chembl_activity').
+        limit: Maximum number of records to return.
+
+    Returns:
+        List of quarantine record dictionaries.
+
+    Example:
+        >>> records = await inspect_quarantine("chembl_activity", limit=50)
+        >>> [rec['error_code'] for rec in records]  # List of error codes
+        ['DQ_MISSING_FIELD', 'DQ_INVALID_SMILES']
+    """
+    manager = get_quarantine_manager(pipeline)
+    records: list[dict[str, Any]] = await manager.inspect(limit=limit)
+    return records
+
+
+async def list_checkpoints(pipeline: str) -> list[str]:
+    """List all checkpoints for a pipeline.
+
+    Convenience function for quick checkpoint listing.
+
+    Args:
+        pipeline: Pipeline name (e.g., 'chembl_activity').
+
+    Returns:
+        List of checkpoint identifiers.
+
+    Example:
+        >>> checkpoints = await list_checkpoints("chembl_activity")
+        >>> checkpoints  # List of checkpoint identifiers
+        ['checkpoint_2024_01_15', 'checkpoint_2024_01_16']
+    """
+    manager = get_checkpoint_manager(pipeline)
+    checkpoints: list[str] = await manager.list_all()
+    return checkpoints
+
+================================================================================
+File: _services.py
+Path: _services.py
+================================================================================
+"""Service factory entrypoints.
+
+Application and infrastructure service getters for CLI and other interfaces.
+Split from entrypoints.py per audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from bioetl.composition._pipeline_execution import _ensure_registrations
+from bioetl.composition.bootstrap import (
+    HealthServerDependencies,
+    bootstrap_bronze_cleanup_service,
+    bootstrap_checkpoint_service,
+    bootstrap_config_service,
+    bootstrap_export_service,
+    bootstrap_health_server_dependencies,
+    bootstrap_health_service,
+    bootstrap_lock_service,
+    bootstrap_metrics_service,
+    bootstrap_pipeline_runner_service,
+    bootstrap_quarantine,
+    bootstrap_quarantine_service,
+    bootstrap_vacuum_service,
+)
+
+if TYPE_CHECKING:
+    from bioetl.application.services import (
+        BronzeCleanupService,
+        CheckpointService,
+        CleanupResult,
+        ConfigService,
+        ExportService,
+        HealthService,
+        MetricsService,
+        PipelineRunnerService,
+        QuarantineService,
+        VacuumService,
+    )
+    from bioetl.application.services.lock_service import LockService
+    from bioetl.domain.ports import QuarantinePort
+
+
+def get_checkpoint_service() -> CheckpointService:
+    """Get a checkpoint service for administrative operations.
+
+    Used for listing, deleting, and inspecting checkpoints across all pipelines.
+    This is the recommended way to manage checkpoints from CLI or other interfaces.
+
+    Returns:
+        CheckpointService instance.
+
+    Example:
+        >>> service = get_checkpoint_service()
+        >>> checkpoints = await service.list_checkpoints()
+        >>> for cp in checkpoints:
+        ...     logger.info("checkpoint", pipeline=cp.pipeline_name, metadata=cp.metadata)
+    """
+    _ensure_registrations()
+    return bootstrap_checkpoint_service()
+
+
+def get_quarantine_service() -> QuarantineService:
+    """Get a quarantine service for administrative operations.
+
+    Used for inspecting, replaying, and purging quarantine records.
+    This is the recommended way to manage quarantine from CLI or other interfaces.
+
+    Returns:
+        QuarantineService instance.
+
+    Example:
+        >>> service = get_quarantine_service()
+        >>> records = await service.inspect("chembl_activity", limit=10)
+        >>> for rec in records:
+        ...     logger.info("quarantine_record", error_code=rec.error_code, payload=rec.payload)
+    """
+    _ensure_registrations()
+    return bootstrap_quarantine_service()
+
+
+def get_bronze_cleanup_service() -> BronzeCleanupService:
+    """Get a bronze cleanup service for maintenance operations.
+
+    Used for Bronze layer retention cleanup per RULES.md §2.1.
+    This is the recommended way to manage Bronze cleanup from CLI.
+
+    Returns:
+        BronzeCleanupService instance.
+
+    Example:
+        >>> service = get_bronze_cleanup_service()
+        >>> result = await service.cleanup(retention_days=90, dry_run=True)
+        >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
+    """
+    _ensure_registrations()
+    return bootstrap_bronze_cleanup_service()
+
+
+def get_vacuum_service() -> VacuumService:
+    """Get a vacuum service for batch vacuum operations.
+
+    Used for vacuuming multiple Delta tables at once.
+    This is the recommended way to vacuum tables from CLI.
+
+    Returns:
+        VacuumService instance.
+
+    Example:
+        >>> service = get_vacuum_service()
+        >>> tables = service.collect_tables(layer="all")
+        >>> result = await service.vacuum_all(tables, retention_days=7)
+        >>> logger.info("vacuum_complete", files_removed=result.total_files_removed)
+    """
+    _ensure_registrations()
+    return bootstrap_vacuum_service()
+
+
+def get_export_service() -> ExportService:
+    """Get an export service for exporting Delta Lake tables.
+
+    Used for exporting Silver/Gold Delta tables to CSV, XLSX, and TSV formats.
+    This is the recommended way to export tables from CLI.
+
+    Returns:
+        ExportService instance.
+
+    Example:
+        >>> service = get_export_service()
+        >>> tables = service.list_tables(layer="silver")
+        >>> result = await service.export("chembl.activity", layer="silver")
+        >>> logger.info("export_complete", output=result.output_path)
+    """
+    _ensure_registrations()
+    return bootstrap_export_service()
+
+
+def get_lock_service() -> LockService:
+    """Get a lock service for administrative lock operations.
+
+    Used for releasing stale locks and checking lock status.
+    This is the recommended way to manage locks from CLI.
+
+    Note: Uses in-memory locking which only affects the current process.
+    Lock operations are local to this process instance.
+
+    Returns:
+        LockService instance.
+
+    Example:
+        >>> service = get_lock_service()
+        >>> released = await service.release_lock("chembl_activity", run_id)
+        >>> logger.info("lock_released", pipeline="chembl_activity", released=released)
+    """
+    _ensure_registrations()
+    return bootstrap_lock_service()
+
+
+async def cleanup_bronze(
+    retention_days: int = 90,
+    dry_run: bool = False,
+) -> CleanupResult:
+    """Clean up old Bronze files based on retention policy.
+
+    Convenience function for Bronze cleanup operations.
+    Removes files older than the specified retention period.
+
+    Args:
+        retention_days: Files older than this will be removed (default: 90).
+        dry_run: If True, only show what would be removed.
+
+    Returns:
+        CleanupResult with cleanup statistics.
+
+    Example:
+        >>> result = await cleanup_bronze(retention_days=90, dry_run=True)
+        >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
+    """
+    service = get_bronze_cleanup_service()
+    result: CleanupResult = await service.cleanup(
+        retention_days=retention_days,
+        dry_run=dry_run,
+    )
+    return result
+
+
+def get_pipeline_runner_service() -> PipelineRunnerService:
+    """Get a pipeline runner service for universal pipeline execution.
+
+    This is the recommended way to run pipelines programmatically from
+    any interface (CLI, REST API, Airflow, etc.). The service provides
+    a clean, stateless API for pipeline execution.
+
+    Returns:
+        PipelineRunnerService instance ready for use.
+
+    Example:
+        >>> from bioetl.application.services import RunOptions
+        >>> service = get_pipeline_runner_service()
+        >>> options = RunOptions(run_type="incremental", limit=100)
+        >>> result = await service.run("chembl_activity", options=options)
+        >>> if result.is_success:
+        ...     logger.info("pipeline_success", records_silver=result.records_silver)
+    """
+    _ensure_registrations()
+    return bootstrap_pipeline_runner_service()
+
+
+def get_config_service() -> ConfigService:
+    """Get a configuration service for accessing application configuration.
+
+    Provides a clean interface for configuration access from CLI or other
+    interfaces. Abstracts infrastructure configuration loading.
+
+    Returns:
+        ConfigService instance for configuration operations.
+
+    Example:
+        >>> service = get_config_service()
+        >>> settings = service.get_settings()
+        >>> logger.info("environment", env=settings.env)
+        >>> config = service.load_pipeline_config("chembl_activity")
+        >>> logger.info("pipeline", provider=config.provider)
+    """
+    _ensure_registrations()
+    return bootstrap_config_service()
+
+
+def get_health_service() -> HealthService:
+    """Get a health service for checking provider health.
+
+    Provides a clean interface for health checking from CLI or other
+    interfaces. Abstracts data source factory and adapter creation.
+
+    Returns:
+        HealthService instance for health check operations.
+
+    Example:
+        >>> service = get_health_service()
+        >>> summary = await service.check_providers()
+        >>> if summary.all_healthy:
+        ...     logger.info("All providers healthy")
+        >>> else:
+        ...     for name, result in summary.results.items():
+        ...         if result.is_unhealthy:
+        ...             logger.error("Provider unhealthy", provider=name, error=result.error)
+    """
+    _ensure_registrations()
+    return bootstrap_health_service()
+
+
+def get_health_server_dependencies() -> HealthServerDependencies:
+    """Get dependencies for HealthServer via composition root.
+
+    Returns HealthServerDependencies with PrometheusMetrics and
+    ProviderHealthMonitor. HealthServer is created in interfaces layer.
+    """
+    _ensure_registrations()
+    return bootstrap_health_server_dependencies()
+
+
+def get_metrics_service() -> MetricsService:
+    """Get a metrics service for managing the Prometheus metrics server.
+
+    Provides a clean interface for metrics server management from CLI or
+    other interfaces. Abstracts infrastructure metrics server operations.
+
+    Returns:
+        MetricsService instance for metrics server operations.
+
+    Example:
+        >>> service = get_metrics_service()
+        >>> result = service.start(port=8000)
+        >>> if result.success:
+        ...     logger.info("Metrics server started", port=result.port)
+        >>> status = service.get_status()
+        >>> logger.info("Server status", running=status.running)
+    """
+    _ensure_registrations()
+    return bootstrap_metrics_service()
+
+
+def get_quarantine_store(pipeline: str) -> QuarantinePort:
+    """Get a quarantine store (port) for direct quarantine operations.
+
+    This provides direct access to the QuarantinePort for low-level
+    quarantine operations. For most use cases, prefer get_quarantine_service()
+    which provides a higher-level interface.
+
+    Args:
+        pipeline: Pipeline name (used for context, actual store is shared).
+
+    Returns:
+        QuarantinePort instance for quarantine operations.
+
+    Example:
+        >>> store = get_quarantine_store("chembl_activity")
+        >>> records = await store.inspect("chembl_activity", limit=10)
+    """
+    _ensure_registrations()
+    return bootstrap_quarantine()
+
+================================================================================
 File: __init__.py
 Path: bootstrap\__init__.py
 ================================================================================
@@ -1374,6 +2156,7 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
 
 if TYPE_CHECKING:
@@ -1388,6 +2171,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "VacuumSettings",
+    "assemble_cached_bronze_context",
     "assemble_filter_config",
     "assemble_runtime_config",
     "assemble_vacuum_settings",
@@ -1473,6 +2257,7 @@ def assemble_runtime_config(
     dry_run: bool,
     heartbeat_interval: int,
     vacuum: VacuumSettings,
+    skip_gold: bool = False,
 ) -> RuntimeConfig:
     """Assemble RuntimeConfig from resolved parameters.
 
@@ -1517,6 +2302,7 @@ def assemble_runtime_config(
         dry_run=dry_run,
         vacuum_after_run=vacuum.enabled,
         vacuum_retention_days=vacuum.retention_days,
+        skip_gold=skip_gold,
     )
 
 
@@ -1567,7 +2353,51 @@ def assemble_filter_config(
         test_mode=effective_test_mode,
         direct_filter_ids=ctx.input_filter.filter_ids,
         direct_fallback_mapping=ctx.input_filter.fallback_mapping,
+        direct_multi_filter_ids=ctx.input_filter.multi_filter_ids,
+        direct_valid_combinations=ctx.input_filter.valid_combinations,
     )
+
+
+def assemble_cached_bronze_context(
+    ctx: PipelineRunContext,
+) -> CachedBronzeContext:
+    """Assemble CachedBronzeContext from PipelineRunContext.
+
+    Extracts cached bronze settings from the run context. The context
+    is already populated from CLI options via RunOptions.
+
+    Args:
+        ctx: Pipeline run context with cached_bronze settings.
+
+    Returns:
+        CachedBronzeContext - either disabled or enabled with path/date.
+
+    Example:
+        >>> # When cached bronze is not requested
+        >>> ctx = PipelineRunContext(
+        ...     pipeline_name="chembl_activity",
+        ...     run_id=uuid4(),
+        ...     run_type=RunType.INCREMENTAL,
+        ... )
+        >>> result = assemble_cached_bronze_context(ctx)
+        >>> result.enabled
+        False
+
+        >>> # When cached bronze is requested
+        >>> ctx = PipelineRunContext(
+        ...     pipeline_name="chembl_activity",
+        ...     run_id=uuid4(),
+        ...     run_type=RunType.INCREMENTAL,
+        ...     cached_bronze=CachedBronzeContext.from_options(
+        ...         path="/data/bronze/chembl/activity",
+        ...         date="2026-01-20"
+        ...     ),
+        ... )
+        >>> result = assemble_cached_bronze_context(ctx)
+        >>> result.enabled
+        True
+    """
+    return ctx.cached_bronze
 
 ================================================================================
 File: composite.py
@@ -1605,8 +2435,17 @@ from bioetl.application.composite.runner import (
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger_port
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
-from bioetl.domain.composite.config import CompositeConfig
+from bioetl.domain.composite.config import (
+    CompositeConfig,
+    DependencyConfig,
+    EnricherConfig,
+)
+from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
+from bioetl.infrastructure.config.field_group_loader import (
+    FieldGroupLoadError,
+    load_field_groups,
+)
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
@@ -1616,7 +2455,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.infrastructure.config import Settings
 
 __all__ = [
@@ -1630,6 +2469,7 @@ __all__ = [
 
 # Default composite config path
 COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
+FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
 
 
 def load_composite_config(name: str) -> CompositeConfig:
@@ -1652,17 +2492,181 @@ def load_composite_config(name: str) -> CompositeConfig:
     if not config_path.exists():
         raise FileNotFoundError(f"Composite config not found: {config_path}")
 
-    with config_path.open() as f:
+    with config_path.open(encoding="utf-8") as f:
         raw = yaml.safe_load(f)
+
+    merge = (raw or {}).get("composite", {}).get("merge", {})
+    column_groups_file = merge.get("column_groups_file")
+    if column_groups_file and "column_groups" not in merge:
+        groups_path = config_path.parent / column_groups_file
+        if groups_path.exists():
+            with groups_path.open(encoding="utf-8") as f:
+                groups_raw = yaml.safe_load(f) or {}
+            if isinstance(groups_raw, list):
+                merge["column_groups"] = groups_raw
+            elif isinstance(groups_raw, dict):
+                merge["column_groups"] = groups_raw.get("column_groups", [])
 
     try:
         # Validate using Pydantic schema
         schema = CompositeConfigFileSchema.model_validate(raw)
         # Convert to immutable domain objects
-        return schema.to_domain()
+        config: CompositeConfig = schema.to_domain()
+        return config
     except ValidationError as e:
         # Convert Pydantic errors to ValueError for consistent API
         raise ValueError(f"Invalid composite config '{name}': {e}") from e
+
+
+def _build_fallback_mapping(
+    keys: pl.DataFrame,
+    filter_key: str,
+    join_keys: tuple[str, ...],
+) -> dict[str, str] | None:
+    """Build ID -> Title fallback mapping if title is in join keys."""
+    if "title" not in join_keys or "title" not in keys.columns:
+        return None
+    pairs = (
+        keys.select([filter_key, "title"])
+        .drop_nulls()
+        .unique(subset=[filter_key])
+        .iter_rows()
+    )
+    return {str(k): str(t) for k, t in pairs}
+
+
+def _find_filter_key(
+    join_keys: tuple[str, ...],
+    columns: list[str],
+) -> str | None:
+    """Find the first usable join key (skip title if alternatives exist)."""
+    for key in join_keys:
+        if key == "title" and len(join_keys) > 1:
+            continue
+        if key in columns:
+            return key
+    return None
+
+
+def _extract_filter_ids_from_keys(
+    enricher_cfg: EnricherConfig,
+    keys: pl.DataFrame,
+    logger: LoggerPort | None = None,
+) -> tuple[tuple[str, ...] | None, str | None, dict[str, str] | None]:
+    """Extract filter IDs from seed keys for an enricher."""
+    if keys is None or len(keys) == 0:
+        if logger:
+            logger.debug(
+                "No keys available for enricher",
+                pipeline=enricher_cfg.pipeline,
+            )
+        return None, None, None
+    filter_key = _find_filter_key(enricher_cfg.join_keys, keys.columns)
+    if filter_key is None:
+        if logger:
+            logger.warning(
+                "Join key not found in keys columns",
+                pipeline=enricher_cfg.pipeline,
+                join_keys=list(enricher_cfg.join_keys),
+                available_columns=list(keys.columns),
+            )
+        return None, None, None
+    key_values = keys.select(filter_key).drop_nulls().unique().to_series().to_list()
+    if not key_values:
+        return None, None, None
+    filter_ids = tuple(str(v) for v in key_values)
+    fallback = _build_fallback_mapping(keys, filter_key, enricher_cfg.join_keys)
+    return filter_ids, filter_key, fallback
+
+
+def _extract_field_values(
+    keys: pl.DataFrame,
+    field: str,
+) -> tuple[str, ...] | None:
+    """Extract unique non-null values for a single field from keys DataFrame.
+
+    Returns:
+        Tuple of string values, or None if field missing or empty.
+    """
+    if field not in keys.columns:
+        return None
+    values = keys.select(field).drop_nulls().unique().to_series().to_list()
+    if not values:
+        return None
+    return tuple(str(v) for v in values)
+
+
+def _extract_multi_filter_ids(
+    dep_cfg: DependencyConfig,
+    keys: pl.DataFrame,
+    logger: LoggerPort | None = None,
+) -> dict[str, tuple[str, ...]] | None:
+    """Extract multi-field filter IDs from seed keys for a dependency.
+
+    For dual-key filtering (e.g., molecule_chembl_id + document_chembl_id),
+    extracts unique values for each filter field from the keys DataFrame.
+
+    Args:
+        dep_cfg: Dependency configuration with filter_fields.
+        keys: DataFrame containing seed keys.
+        logger: Optional logger.
+
+    Returns:
+        Dict mapping field name to tuple of unique IDs, or None if extraction fails.
+    """
+    if keys is None or len(keys) == 0:
+        return None
+
+    result: dict[str, tuple[str, ...]] = {}
+    for field in dep_cfg.effective_filter_fields:
+        values = _extract_field_values(keys, field)
+        if values is None:
+            if logger:
+                logger.warning(
+                    "Multi-filter field missing or empty",
+                    pipeline=dep_cfg.pipeline,
+                    field=field,
+                    available_columns=list(keys.columns),
+                )
+            return None
+        result[field] = values
+
+    if logger:
+        logger.info(
+            "Extracted multi-field filter IDs",
+            pipeline=dep_cfg.pipeline,
+            fields=list(result.keys()),
+            counts={f: len(ids) for f, ids in result.items()},
+        )
+
+    return result
+
+
+def _resolve_bronze_opts(
+    runtime: CompositeRuntimeConfig,
+    phase_override: bool | None,
+) -> dict[str, object]:
+    """Resolve cached Bronze options for a specific pipeline phase.
+
+    Tri-state resolution: phase_override takes precedence over master switch.
+    - None: use master switch (runtime.use_cached_bronze)
+    - True/False: override master switch
+
+    Args:
+        runtime: Composite runtime configuration with master switch.
+        phase_override: Per-phase override (None=follow master).
+
+    Returns:
+        Dict with use_cached_bronze, cached_bronze_path, cached_bronze_date.
+    """
+    effective = (
+        phase_override if phase_override is not None else runtime.use_cached_bronze
+    )
+    return {
+        "use_cached_bronze": effective,
+        "cached_bronze_path": runtime.cached_bronze_path if effective else None,
+        "cached_bronze_date": runtime.cached_bronze_date if effective else None,
+    }
 
 
 def bootstrap_composite_runner(
@@ -1705,20 +2709,22 @@ def bootstrap_composite_runner(
     # Bootstrap lock (using in-memory lock for local execution)
     lock = MemoryLock()
 
-    # Create seed runner factory
+    # Per-phase cached bronze RunOptions kwargs
+    _seed_bronze_opts = _resolve_bronze_opts(runtime, phase_override=None)
+    _enricher_bronze_opts = _resolve_bronze_opts(
+        runtime, phase_override=runtime.cached_bronze_enrichers
+    )
+    _dependency_bronze_opts = _resolve_bronze_opts(
+        runtime, phase_override=runtime.cached_bronze_dependencies
+    )
+
     def seed_runner_factory() -> PipelineRunner:
-        """Create PipelineRunner for the seed phase.
-
-        The seed pipeline runs first to fetch primary entities (e.g., publications)
-        which provide join keys (DOI, PMID) for subsequent enricher pipelines.
-
-        Returns:
-            PipelineRunner configured for seed pipeline execution with
-            optional limit from runtime config.
-        """
+        """Create PipelineRunner for the seed phase."""
         options = RunOptions(
             run_type="incremental",
             limit=runtime.seed_limit,
+            skip_gold=True,
+            **_seed_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(config.seed.pipeline, options)
         return bootstrap_pipeline_runner(ctx)
@@ -1726,90 +2732,48 @@ def bootstrap_composite_runner(
     # Build enricher config lookup for fast access
     enricher_configs = {e.pipeline: e for e in config.enrichers}
 
-    # Create enricher runner factory
     def enricher_runner_factory(
         pipeline_name: str, keys: pl.DataFrame
     ) -> PipelineRunner:
-        """Create PipelineRunner for an enricher phase.
-
-        Enricher pipelines fetch supplementary data (citations, metadata) using
-        join keys extracted from seed results. This factory applies composite-specific
-        configuration per ADR-026.
-
-        Configuration adjustments:
-        - Disables YAML input_filter to prevent enrichers from using their own
-          filter files (e.g., data/input/dois.csv)
-        - Extracts join key values (DOI, PMID) from seed results DataFrame
-        - Passes extracted IDs as filter_ids to limit API calls to relevant records
-
-        Args:
-            pipeline_name: Name of the enricher pipeline to instantiate.
-            keys: DataFrame containing seed results with join key columns.
-
-        Returns:
-            PipelineRunner configured for enricher pipeline execution with
-            programmatic filtering based on seed results.
-        """
-        # For enrichers in composite mode:
-        # 1. Disable YAML input_filter - we don't want enrichers to use their
-        #    own filter files (e.g., data/input/dois.csv).
-        # 2. Extract DOIs/PMIDs from keys DataFrame based on enricher's join_keys
-        #    and pass them as filter_ids to limit API calls.
-
-        # Get enricher config to determine join keys
+        """Create PipelineRunner for an enricher phase (ADR-026)."""
         enricher_cfg = enricher_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
         fallback_mapping: dict[str, str] | None = None
 
-        if enricher_cfg and keys is not None and len(keys) > 0:
-            # Use the first join key (usually 'doi' or 'pmid')
-            join_keys = enricher_cfg.join_keys
-            for key in join_keys:
-                # Skip title as primary filter key if other keys exist
-                if key == "title" and len(join_keys) > 1:
-                    continue
+        if enricher_cfg:
+            filter_ids, filter_field, fallback_mapping = _extract_filter_ids_from_keys(
+                enricher_cfg, keys, logger
+            )
 
-                if key in keys.columns:
-                    # Extract unique non-null values from the keys DataFrame
-                    key_values = (
-                        keys.select(key).drop_nulls().unique().to_series().to_list()
-                    )
-                    if key_values:
-                        filter_ids = tuple(str(v) for v in key_values)
-                        filter_field = key
+        # Debug logging for enricher filter configuration
+        logger.debug(
+            "Creating enricher runner",
+            pipeline=pipeline_name,
+            keys_columns=list(keys.columns) if keys is not None else [],
+            keys_count=len(keys) if keys is not None else 0,
+            join_keys=list(enricher_cfg.join_keys) if enricher_cfg else [],
+            filter_field=filter_field,
+            filter_ids_count=len(filter_ids) if filter_ids else 0,
+            filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+        )
 
-                        # Build fallback mapping (ID -> Title) if configured
-                        # Only if 'title' is in join_keys and available in data
-                        if "title" in join_keys and "title" in keys.columns:
-                            # Extract pairs (id, title)
-                            # Use unique(subset=[key]) to ensure one title per ID
-                            pairs = (
-                                keys.select([key, "title"])
-                                .drop_nulls()
-                                .unique(subset=[key])
-                                .iter_rows()
-                            )
-                            fallback_mapping = {str(k): str(t) for k, t in pairs}
-
-                        break
-
-        # For many_to_one enrichers, don't limit records since they return
-        # multiple rows per seed record (e.g., publication_term returns M terms per publication).
-        # For one_to_one enrichers, limit to seed record count.
+        # many_to_one: no limit; one_to_one: limit to seed count
         limit: int | None = None
         if enricher_cfg and enricher_cfg.is_many_to_one:
-            limit = None  # No limit for 1:M enrichers
+            limit = None
         elif keys is not None:
             limit = len(keys)
 
         options = RunOptions(
             run_type="incremental",
             limit=limit,
-            ignore_yaml_filter=True,  # Disable YAML input_filter for composite mode
+            ignore_yaml_filter=True,
+            skip_gold=True,
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
+            **_enricher_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -1826,14 +2790,19 @@ def bootstrap_composite_runner(
         Dependencies run after the seed to populate Silver tables before enrichers.
         Unlike enrichers which read from Silver, dependencies call APIs to fetch data.
 
+        Note: Chained dependencies (key_source) are handled by DependencyCoordinator
+        which provides the correct keys from the source dependency's Silver table.
+
         Configuration:
-        - Extracts join key values from seed results DataFrame
+        - Extracts join key values from provided keys DataFrame
         - Passes extracted IDs as filter_ids to limit API calls
-        - Does NOT use ignore_yaml_filter (dependencies may have their own configs)
+        - Uses filter_field from config if set (for field name mapping)
+        - For multi-field filtering (filter_fields), extracts all fields
+          and passes as multi_filter_ids with valid combinations
 
         Args:
             pipeline_name: Name of the dependency pipeline to instantiate.
-            keys: DataFrame containing seed results with join key columns.
+            keys: DataFrame containing keys for filtering (from seed or chained source).
 
         Returns:
             PipelineRunner configured for dependency pipeline execution.
@@ -1841,24 +2810,56 @@ def bootstrap_composite_runner(
         dep_cfg = dependency_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None
+        multi_filter_ids: dict[str, tuple[str, ...]] | None = None
 
         if dep_cfg and keys is not None and len(keys) > 0:
-            # Extract filter IDs from seed keys
-            for key in dep_cfg.join_keys:
-                if key in keys.columns:
-                    key_values = (
-                        keys.select(key).drop_nulls().unique().to_series().to_list()
-                    )
-                    if key_values:
-                        filter_ids = tuple(str(v) for v in key_values)
-                        filter_field = key
-                        break
+            if dep_cfg.is_multi_field_filter:
+                # Multi-field filtering: extract all filter fields
+                multi_filter_ids = _extract_multi_filter_ids(dep_cfg, keys, logger)
+            else:
+                # Single-field filtering (existing logic)
+                for key in dep_cfg.join_keys:
+                    if key in keys.columns:
+                        key_values = (
+                            keys.select(key).drop_nulls().unique().to_series().to_list()
+                        )
+                        if key_values:
+                            filter_ids = tuple(str(v) for v in key_values)
+                            # Use filter_field from config if set, otherwise use join_key
+                            filter_field = dep_cfg.filter_field or key
+                            break
+
+        # Debug logging for dependency filter configuration
+        logger.debug(
+            "Creating dependency runner",
+            pipeline=pipeline_name,
+            keys_columns=list(keys.columns) if keys is not None else [],
+            keys_count=len(keys) if keys is not None else 0,
+            join_keys=list(dep_cfg.join_keys) if dep_cfg else [],
+            filter_field=filter_field,
+            filter_ids_count=len(filter_ids) if filter_ids else 0,
+            filter_ids_sample=list(filter_ids)[:5] if filter_ids else [],
+            multi_filter_fields=list(multi_filter_ids.keys())
+            if multi_filter_ids
+            else [],
+            multi_filter_counts={f: len(ids) for f, ids in multi_filter_ids.items()}
+            if multi_filter_ids
+            else {},
+            is_chained=dep_cfg.key_source is not None if dep_cfg else False,
+            key_source=dep_cfg.key_source if dep_cfg else None,
+        )
 
         options = RunOptions(
             run_type="incremental",
-            limit=len(keys) if filter_ids else None,
+            limit=len(keys)
+            if (filter_ids or multi_filter_ids) and keys is not None
+            else None,
             filter_ids=filter_ids,
             filter_field=filter_field,
+            multi_filter_ids=multi_filter_ids,
+            ignore_yaml_filter=True,
+            skip_gold=True,
+            **_dependency_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
         return bootstrap_pipeline_runner(ctx)
@@ -1880,6 +2881,7 @@ def bootstrap_composite_runner(
 
     dependency_coordinator = DependencyCoordinator(
         logger=logger,
+        delta_reader=delta_reader,
     )
 
     coordinator = EnrichmentCoordinator(
@@ -1888,11 +2890,15 @@ def bootstrap_composite_runner(
         max_concurrency=config.execution.max_concurrency,
     )
 
+    # Load field group registry for semantic column grouping and Gold filtering
+    field_group_registry = _load_field_group_registry(config.name, logger)
+
     merger = MergeService(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
         delta_reader=delta_reader,
+        field_group_registry=field_group_registry,
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"
@@ -1945,6 +2951,56 @@ def bootstrap_composite_pipeline(
         CompositePipelineRunner ready for execution.
     """
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
+
+
+def _load_field_group_registry(
+    composite_name: str,
+    logger: LoggerPort,
+) -> FieldGroupRegistry | None:
+    """Load field group registry for a composite pipeline.
+
+    Attempts to load field group configuration from YAML. Returns None
+    if no configuration is found (graceful degradation).
+
+    Args:
+        composite_name: Composite pipeline name (e.g., "composite_publication").
+        logger: Structured logger.
+
+    Returns:
+        FieldGroupRegistry if config found, None otherwise.
+    """
+    # Extract entity from composite name (e.g., "composite_publication" -> "publication")
+    entity = (
+        composite_name.replace("composite_", "")
+        if "_" in composite_name
+        else composite_name
+    )
+    config_path = FIELD_GROUP_CONFIG_DIR / f"{entity}.yaml"
+
+    if not config_path.exists():
+        logger.debug(
+            "No field group config found, skipping",
+            config_path=str(config_path),
+        )
+        return None
+
+    try:
+        registry = load_field_groups(config_path)
+        logger.info(
+            "Loaded field group registry",
+            config_path=str(config_path),
+            groups=len(registry.groups),
+            fields=registry.field_count,
+            columns=registry.column_count,
+        )
+        return registry
+    except (FieldGroupLoadError, FileNotFoundError) as e:
+        logger.warning(
+            "Failed to load field group config, continuing without it",
+            error=str(e),
+            config_path=str(config_path),
+        )
+        return None
 
 
 def _create_dq_report_service(
@@ -2447,6 +3503,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime.assembly import (
+    assemble_cached_bronze_context,
     assemble_filter_config,
     assemble_runtime_config,
     assemble_vacuum_settings,
@@ -2549,6 +3606,7 @@ def bootstrap_pipeline_runner(
         dry_run=ctx.dry_run,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         vacuum=vacuum,
+        skip_gold=ctx.skip_gold,
     )
 
     # Assemble filter config (CLI/direct IDs override YAML)
@@ -2567,6 +3625,16 @@ def bootstrap_pipeline_runner(
             source="cli" if ctx.input_filter.enabled else "config",
         )
 
+    # Assemble cached bronze context
+    cached_bronze = assemble_cached_bronze_context(ctx)
+
+    if cached_bronze.enabled:
+        observability.logger.info(
+            "cached_bronze_mode_enabled",
+            bronze_path=cached_bronze.bronze_path,
+            bronze_date=cached_bronze.bronze_date,
+        )
+
     # Resolve pipeline factory and delegate runner creation
     pipeline_def = effective_registry.get(ctx.pipeline_name)
     factory = pipeline_def.factory
@@ -2578,6 +3646,7 @@ def bootstrap_pipeline_runner(
         observability=observability,
         filter_config=filter_config,
         config=yaml_config,
+        cached_bronze=cached_bronze,
     )
 
 
@@ -3046,6 +4115,31 @@ class FilterConfigBuilder:
         )
 
     @staticmethod
+    def from_direct_multi_ids(
+        multi_filter_ids: dict[str, tuple[str, ...]],
+        valid_combinations: frozenset[tuple[str, ...]] | None = None,
+        batch_size: int = 100,
+    ) -> InputFilterConfig:
+        """Build config for direct multi-field filter IDs mode.
+
+        Used for composite dependencies that filter by multiple fields
+        simultaneously (AND logic). E.g., compound_record filtered by both
+        molecule_chembl_id and document_chembl_id.
+
+        Args:
+            multi_filter_ids: Mapping of field name to tuple of IDs.
+            valid_combinations: Valid (field1, field2, ...) tuples for
+                client-side combination filtering.
+            batch_size: Number of IDs per API request.
+        """
+        return InputFilterConfig(
+            enabled=True,
+            direct_multi_filter_ids=multi_filter_ids,
+            direct_valid_combinations=valid_combinations,
+            batch_size=batch_size,
+        )
+
+    @staticmethod
     def build(
         yaml_filter: YamlInputFilter,
         cli_csv: str | None = None,
@@ -3056,13 +4150,16 @@ class FilterConfigBuilder:
         test_mode: bool = False,
         direct_filter_ids: tuple[str, ...] | None = None,
         direct_fallback_mapping: dict[str, str] | None = None,
+        direct_multi_filter_ids: dict[str, tuple[str, ...]] | None = None,
+        direct_valid_combinations: frozenset[tuple[str, ...]] | None = None,
     ) -> InputFilterConfig | None:
         """Build InputFilterConfig by merging YAML config and CLI overrides.
 
         Priority:
-        1. direct_filter_ids: Direct IDs (highest priority, for composite mode)
-        2. cli_csv: CSV path from CLI
-        3. yaml_filter: YAML config (disabled in test_mode)
+        1. direct_multi_filter_ids: Multi-field AND filtering (highest, composite)
+        2. direct_filter_ids: Direct IDs (composite mode)
+        3. cli_csv: CSV path from CLI
+        4. yaml_filter: YAML config (disabled in test_mode)
 
         Multi-column mode (columns list in YAML) is used as-is, CLI overrides ignored.
 
@@ -3079,10 +4176,21 @@ class FilterConfigBuilder:
             test_mode: If True, YAML-based filters are disabled
             direct_filter_ids: Direct filter IDs (no CSV file, for composite mode)
             direct_fallback_mapping: Direct fallback mapping (DOI->Title)
+            direct_multi_filter_ids: Multi-field filter IDs (AND logic, composite)
+            direct_valid_combinations: Valid (field1, field2) tuples for
+                client-side combination filtering
 
         Returns:
             Configured InputFilterConfig or None if filtering is disabled
         """
+        # Direct multi-field filter IDs take highest priority
+        if direct_multi_filter_ids is not None:
+            return FilterConfigBuilder.from_direct_multi_ids(
+                multi_filter_ids=direct_multi_filter_ids,
+                valid_combinations=direct_valid_combinations,
+                batch_size=yaml_filter.batch_size,
+            )
+
         # Direct filter IDs take highest priority (composite mode)
         if direct_filter_ids is not None:
             return FilterConfigBuilder.from_direct_ids(
@@ -3122,20 +4230,55 @@ orchestration layer without direct dependency on bootstrap functions.
 
 This module provides the unified pipeline execution interface (REQ-ARCH-041).
 Any orchestration layer should use these entrypoints instead of bootstrap.
+
+Split into submodules per audit-package-structure-2026-02-07:
+- _pipeline_execution: Core pipeline build/run functions
+- _resource_management: Legacy managers, maintenance, inspection
+- _services: Application and infrastructure service factories
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, cast
-from uuid import uuid4
-
 # Re-export canonical DTO classes from application.services (H1 refactoring)
 # These are the single source of truth for pipeline execution interfaces.
-from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.services import RunOptions, RunResult, RunStatus
-from bioetl.infrastructure.config import get_settings
+from bioetl.composition._pipeline_execution import (
+    ArchiveOptions,
+    VacuumOptions,
+    build_pipeline_context,
+    create_pipeline_runner,
+    ensure_metrics_server_started,
+    run_pipeline,
+)
+from bioetl.composition._resource_management import (
+    archive_table,
+    get_checkpoint_manager,
+    get_lifecycle_service,
+    get_quarantine_manager,
+    inspect_quarantine,
+    list_checkpoints,
+    preview_cleanup,
+    vacuum_table,
+)
+from bioetl.composition._services import (
+    cleanup_bronze,
+    get_bronze_cleanup_service,
+    get_checkpoint_service,
+    get_config_service,
+    get_export_service,
+    get_health_server_dependencies,
+    get_health_service,
+    get_lock_service,
+    get_metrics_service,
+    get_pipeline_runner_service,
+    get_quarantine_service,
+    get_quarantine_store,
+    get_vacuum_service,
+)
+from bioetl.composition.bootstrap import (
+    load_pipeline_config,
+    maybe_start_metrics_server,
+)
 
 __all__ = [
     # Configuration
@@ -3180,711 +4323,6 @@ __all__ = [
     "ensure_metrics_server_started",
     "maybe_start_metrics_server",
 ]
-
-from bioetl.composition.bootstrap import (
-    HealthServerDependencies,
-    bootstrap_bronze_cleanup_service,
-    bootstrap_checkpoint_manager,
-    bootstrap_checkpoint_service,
-    bootstrap_cleanup,
-    bootstrap_config_service,
-    bootstrap_export_service,
-    bootstrap_health_server_dependencies,
-    bootstrap_health_service,
-    bootstrap_lifecycle_service,
-    bootstrap_lock_service,
-    bootstrap_metrics_service,
-    bootstrap_pipeline,
-    bootstrap_pipeline_runner_service,
-    bootstrap_quarantine,
-    bootstrap_quarantine_manager,
-    bootstrap_quarantine_service,
-    bootstrap_vacuum_service,
-    load_pipeline_config,
-    maybe_start_metrics_server,
-)
-from bioetl.composition.factories.pipeline_factories import register_all_pipelines
-from bioetl.composition.providers.registration import register_all_providers
-from bioetl.domain.context import InputFilterContext, PipelineRunContext, VacuumConfig
-from bioetl.domain.types import RunID, RunType
-
-if TYPE_CHECKING:
-    from bioetl.application.core.checkpoint_manager import CheckpointManager
-    from bioetl.application.core.cleanup_service import CleanupPreview
-    from bioetl.application.core.quarantine_manager import QuarantineManager
-    from bioetl.application.core.runner import PipelineRunner
-    from bioetl.application.services import (
-        BronzeCleanupService,
-        CheckpointService,
-        CleanupResult,
-        ConfigService,
-        ExportService,
-        HealthService,
-        MetricsService,
-        PipelineRunnerService,
-        QuarantineService,
-        VacuumService,
-    )
-    from bioetl.application.services.lock_service import LockService
-    from bioetl.application.services.medallion_lifecycle import (
-        MedallionLifecycleService,
-    )
-    from bioetl.domain.ports import QuarantinePort
-
-
-def ensure_metrics_server_started() -> bool:
-    """Ensure metrics server is started if enabled in settings.
-
-    This function should be called at the start of pipeline execution
-    to start the Prometheus HTTP server. It's idempotent - calling it
-    multiple times is safe.
-
-    Returns:
-        True if server was started or already running, False if disabled.
-
-    Example:
-        >>> ensure_metrics_server_started()
-        True  # Server started on configured port
-    """
-    settings = get_settings()
-    return maybe_start_metrics_server(settings)
-
-
-@dataclass(frozen=True)
-class VacuumOptions:
-    """Options for vacuum operation.
-
-    Attributes:
-        retention_days: Minimum age of files to remove (days).
-        dry_run: Preview mode showing what would be removed.
-    """
-
-    retention_days: int = 7
-    dry_run: bool = False
-
-
-@dataclass(frozen=True)
-class ArchiveOptions:
-    """Options for archive operation.
-
-    Attributes:
-        target_path: Destination path for archive.
-        remove_source: Remove source table after archiving.
-    """
-
-    target_path: str
-    remove_source: bool = False
-
-
-def _ensure_registrations() -> None:
-    """Ensure all providers and pipelines are registered.
-
-    This is idempotent and safe to call multiple times.
-    """
-    register_all_providers()
-    register_all_pipelines()
-
-
-def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext:
-    """Build a PipelineRunContext from user-facing options.
-
-    Args:
-        name: Pipeline name (e.g., 'chembl_activity').
-        options: User-facing run options.
-
-    Returns:
-        PipelineRunContext ready for bootstrap_pipeline.
-    """
-    # Build InputFilterContext from CLI options
-    # Priority: filter_ids > input_csv > disabled
-    # - filter_ids: Direct IDs for composite mode (no CSV file needed)
-    # - input_csv: CSV file path, column_name/filter_field from YAML defaults
-    if options.filter_ids:
-        # Direct IDs mode (composite pipelines)
-        input_filter = InputFilterContext.from_ids(
-            filter_ids=options.filter_ids,
-            filter_field=options.filter_field
-            or "doi",  # Default to DOI for publications
-            fallback_mapping=options.fallback_mapping,  # Title fallback for OpenAlex etc.
-        )
-    elif options.input_csv:
-        # CSV-based filtering
-        input_filter = InputFilterContext(
-            enabled=True,
-            source_path=options.input_csv,
-            column_name=options.filter_column or "",  # Empty = use YAML default
-            filter_field=options.filter_field or "",  # Empty = use YAML default
-        )
-    else:
-        input_filter = InputFilterContext.disabled()
-
-    # Build VacuumConfig from CLI options (None means use YAML default)
-    # Note: VacuumConfig here only captures CLI overrides.
-    # The final merge with YAML config happens in bootstrap_pipeline.
-    # Tri-state logic:
-    #   - None: No CLI override, use YAML default
-    #   - True: CLI explicitly enables vacuum (--vacuum)
-    #   - False: CLI explicitly disables vacuum (--no-vacuum)
-    vacuum = VacuumConfig(
-        enabled=options.vacuum_after_run,  # Preserve None for tri-state
-        retention_days=options.vacuum_retention_days or 7,
-    )
-
-    return PipelineRunContext(
-        pipeline_name=name,
-        run_id=cast(RunID, uuid4()),
-        run_type=RunType(options.run_type),
-        resume=options.resume,
-        limit=options.limit,
-        dry_run=options.dry_run,
-        input_filter=input_filter,
-        vacuum=vacuum,
-        log_level=options.log_level,
-        ignore_yaml_filter=options.ignore_yaml_filter,
-    )
-
-
-def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
-    """Create a pipeline runner for the given pipeline and options.
-
-    This is the main entrypoint for pipeline execution. It handles:
-    - Registration of providers and pipelines
-    - Building the pipeline context
-    - Bootstrapping the runner with all dependencies
-
-    Args:
-        name: Pipeline name (e.g., 'chembl_activity').
-        options: User-facing run options.
-
-    Returns:
-        PipelineRunner ready for execution via runner.run().
-
-    Raises:
-        ValueError: If pipeline name is unknown or options are invalid.
-        FileNotFoundError: If pipeline config file is missing.
-
-    Example:
-        >>> options = RunOptions(run_type="incremental", limit=100)
-        >>> runner = create_pipeline_runner("chembl_activity", options)
-        >>> await runner.run()
-    """
-    _ensure_registrations()
-    ctx = build_pipeline_context(name, options)
-    return bootstrap_pipeline(ctx)
-
-
-async def run_pipeline(name: str, options: RunOptions) -> RunResult:
-    """Run a pipeline with the given options.
-
-    Unified pipeline execution interface that creates a runner, executes the
-    pipeline, and returns structured results. This is the recommended way to
-    run pipelines programmatically from any orchestration layer.
-
-    For lower-level control over execution (e.g., signal handling, custom
-    logging), use create_pipeline_runner() directly.
-
-    Args:
-        name: Pipeline name (e.g., 'chembl_activity').
-        options: User-facing run options.
-
-    Returns:
-        RunResult with execution metrics and status.
-
-    Raises:
-        ValueError: If pipeline name is unknown or options are invalid.
-        FileNotFoundError: If pipeline config file is missing.
-
-    Example:
-        >>> options = RunOptions(run_type="incremental", limit=100)
-        >>> result = await run_pipeline("chembl_activity", options)
-        >>> if result.status == RunStatus.SUCCESS:
-        ...     logger.info("pipeline_success", records_silver=result.records_silver)
-        >>> elif result.status == RunStatus.SHUTDOWN:
-        ...     logger.info("pipeline_shutdown", pipeline="chembl_activity")
-        >>> else:
-        ...     logger.error("pipeline_failed", error_message=result.error_message)
-    """
-    # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
-    settings = get_settings()
-    maybe_start_metrics_server(settings)
-
-    started_at = datetime.now(tz=UTC)
-    runner = create_pipeline_runner(name, options)
-
-    # Extract run context for result
-    run_id = str(runner._context.run_id)
-    run_type = options.run_type
-
-    status = RunStatus.SUCCESS
-    error_message: str | None = None
-    error_type: str | None = None
-
-    try:
-        await runner.run()
-    except PipelineShutdownError:
-        status = RunStatus.SHUTDOWN
-    except Exception as e:
-        status = RunStatus.FAILED
-        error_message = str(e)
-        error_type = type(e).__name__
-
-    completed_at = datetime.now(tz=UTC)
-
-    # Extract metrics from executor (composition layer has access to internals)
-    executor = runner._executor
-    return RunResult(
-        status=status,
-        pipeline_name=name,
-        run_id=run_id,
-        run_type=run_type,
-        records_fetched=executor.records_fetched,
-        records_bronze=executor.records_bronze,
-        records_silver=executor.records_silver,
-        records_gold=executor.records_gold,
-        records_quarantined=executor.records_quarantined,
-        started_at=started_at,
-        completed_at=completed_at,
-        error_message=error_message,
-        error_type=error_type,
-    )
-
-
-def get_quarantine_manager(pipeline: str) -> QuarantineManager:
-    """Get a quarantine manager for the given pipeline.
-
-    Used for inspecting and managing quarantined (failed) records.
-
-    Args:
-        pipeline: Pipeline name (e.g., 'chembl_activity').
-
-    Returns:
-        QuarantineManager instance for the pipeline.
-
-    Example:
-        >>> manager = get_quarantine_manager("chembl_activity")
-        >>> records = await manager.inspect(limit=100)
-    """
-    _ensure_registrations()
-    return bootstrap_quarantine_manager(pipeline)
-
-
-def get_checkpoint_manager(pipeline: str) -> CheckpointManager:
-    """Get a checkpoint manager for the given pipeline.
-
-    Used for listing, loading, and managing pipeline checkpoints.
-
-    Args:
-        pipeline: Pipeline name (e.g., 'chembl_activity').
-
-    Returns:
-        CheckpointManager instance for the pipeline.
-
-    Example:
-        >>> manager = get_checkpoint_manager("chembl_activity")
-        >>> checkpoints = await manager.list_all()
-    """
-    _ensure_registrations()
-    return bootstrap_checkpoint_manager(pipeline)
-
-
-def get_lifecycle_service() -> MedallionLifecycleService:
-    """Get the lifecycle service for maintenance operations.
-
-    Used for vacuum and archive operations on Delta tables.
-
-    Returns:
-        MedallionLifecycleService instance.
-
-    Example:
-        >>> service = get_lifecycle_service()
-        >>> removed = await service.vacuum("chembl.activity", retention_days=7)
-    """
-    _ensure_registrations()
-    return bootstrap_lifecycle_service()
-
-
-async def vacuum_table(table: str, options: VacuumOptions) -> int:
-    """Vacuum a Delta table to reclaim storage space.
-
-    Args:
-        table: Table name in format "provider.entity" (e.g., 'chembl.activity').
-        options: Vacuum options including retention and dry_run.
-
-    Returns:
-        Number of files removed (or would be removed in dry_run mode).
-
-    Example:
-        >>> options = VacuumOptions(retention_days=30, dry_run=True)
-        >>> files_removed = await vacuum_table("chembl.activity", options)
-    """
-    service = get_lifecycle_service()
-    result: int = await service.vacuum(
-        table=table,
-        retention_days=options.retention_days,
-        dry_run=options.dry_run,
-    )
-    return result
-
-
-async def archive_table(table: str, options: ArchiveOptions) -> int:
-    """Archive a Delta table to cold storage.
-
-    Args:
-        table: Table name to archive.
-        options: Archive options including target path and remove_source.
-
-    Returns:
-        Number of files archived.
-
-    Example:
-        >>> options = ArchiveOptions(target_path="/archive/chembl", remove_source=False)
-        >>> files_archived = await archive_table("chembl.activity", options)
-    """
-    service = get_lifecycle_service()
-    result: int = await service.archive(
-        table=table,
-        target_path=options.target_path,
-        remove_source=options.remove_source,
-    )
-    return result
-
-
-async def preview_cleanup(pipeline: str) -> CleanupPreview:
-    """Preview what data would be cleared for a pipeline.
-
-    Used for dry-run mode of rebuild/backfill operations.
-
-    Args:
-        pipeline: Pipeline name (e.g., 'chembl_activity').
-
-    Returns:
-        CleanupPreview with information about what would be cleared.
-
-    Example:
-        >>> preview = await preview_cleanup("chembl_activity")
-        >>> preview.total_files  # Number of files to clear
-        42
-    """
-    _ensure_registrations()
-    config = load_pipeline_config(pipeline)
-    cleanup_service = bootstrap_cleanup()
-    return await cleanup_service.preview(
-        silver_table=config.silver_table,
-        gold_table=config.gold_table,
-    )
-
-
-async def inspect_quarantine(pipeline: str, limit: int = 100) -> list[dict[str, Any]]:
-    """Inspect quarantined records for a pipeline.
-
-    Convenience function for quick quarantine inspection.
-
-    Args:
-        pipeline: Pipeline name (e.g., 'chembl_activity').
-        limit: Maximum number of records to return.
-
-    Returns:
-        List of quarantine record dictionaries.
-
-    Example:
-        >>> records = await inspect_quarantine("chembl_activity", limit=50)
-        >>> [rec['error_code'] for rec in records]  # List of error codes
-        ['DQ_MISSING_FIELD', 'DQ_INVALID_SMILES']
-    """
-    manager = get_quarantine_manager(pipeline)
-    records: list[dict[str, Any]] = await manager.inspect(limit=limit)
-    return records
-
-
-async def list_checkpoints(pipeline: str) -> list[str]:
-    """List all checkpoints for a pipeline.
-
-    Convenience function for quick checkpoint listing.
-
-    Args:
-        pipeline: Pipeline name (e.g., 'chembl_activity').
-
-    Returns:
-        List of checkpoint identifiers.
-
-    Example:
-        >>> checkpoints = await list_checkpoints("chembl_activity")
-        >>> checkpoints  # List of checkpoint identifiers
-        ['checkpoint_2024_01_15', 'checkpoint_2024_01_16']
-    """
-    manager = get_checkpoint_manager(pipeline)
-    checkpoints: list[str] = await manager.list_all()
-    return checkpoints
-
-
-# =============================================================================
-# New Application Services (replacing direct infrastructure access)
-# =============================================================================
-
-
-def get_checkpoint_service() -> CheckpointService:
-    """Get a checkpoint service for administrative operations.
-
-    Used for listing, deleting, and inspecting checkpoints across all pipelines.
-    This is the recommended way to manage checkpoints from CLI or other interfaces.
-
-    Returns:
-        CheckpointService instance.
-
-    Example:
-        >>> service = get_checkpoint_service()
-        >>> checkpoints = await service.list_checkpoints()
-        >>> for cp in checkpoints:
-        ...     logger.info("checkpoint", pipeline=cp.pipeline_name, metadata=cp.metadata)
-    """
-    _ensure_registrations()
-    return bootstrap_checkpoint_service()
-
-
-def get_quarantine_service() -> QuarantineService:
-    """Get a quarantine service for administrative operations.
-
-    Used for inspecting, replaying, and purging quarantine records.
-    This is the recommended way to manage quarantine from CLI or other interfaces.
-
-    Returns:
-        QuarantineService instance.
-
-    Example:
-        >>> service = get_quarantine_service()
-        >>> records = await service.inspect("chembl_activity", limit=10)
-        >>> for rec in records:
-        ...     logger.info("quarantine_record", error_code=rec.error_code, payload=rec.payload)
-    """
-    _ensure_registrations()
-    return bootstrap_quarantine_service()
-
-
-def get_bronze_cleanup_service() -> BronzeCleanupService:
-    """Get a bronze cleanup service for maintenance operations.
-
-    Used for Bronze layer retention cleanup per RULES.md §2.1.
-    This is the recommended way to manage Bronze cleanup from CLI.
-
-    Returns:
-        BronzeCleanupService instance.
-
-    Example:
-        >>> service = get_bronze_cleanup_service()
-        >>> result = await service.cleanup(retention_days=90, dry_run=True)
-        >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
-    """
-    _ensure_registrations()
-    return bootstrap_bronze_cleanup_service()
-
-
-def get_vacuum_service() -> VacuumService:
-    """Get a vacuum service for batch vacuum operations.
-
-    Used for vacuuming multiple Delta tables at once.
-    This is the recommended way to vacuum tables from CLI.
-
-    Returns:
-        VacuumService instance.
-
-    Example:
-        >>> service = get_vacuum_service()
-        >>> tables = service.collect_tables(layer="all")
-        >>> result = await service.vacuum_all(tables, retention_days=7)
-        >>> logger.info("vacuum_complete", files_removed=result.total_files_removed)
-    """
-    _ensure_registrations()
-    return bootstrap_vacuum_service()
-
-
-def get_export_service() -> ExportService:
-    """Get an export service for exporting Delta Lake tables.
-
-    Used for exporting Silver/Gold Delta tables to CSV, XLSX, and TSV formats.
-    This is the recommended way to export tables from CLI.
-
-    Returns:
-        ExportService instance.
-
-    Example:
-        >>> service = get_export_service()
-        >>> tables = service.list_tables(layer="silver")
-        >>> result = await service.export("chembl.activity", layer="silver")
-        >>> logger.info("export_complete", output=result.output_path)
-    """
-    _ensure_registrations()
-    return bootstrap_export_service()
-
-
-def get_lock_service() -> LockService:
-    """Get a lock service for administrative lock operations.
-
-    Used for releasing stale locks and checking lock status.
-    This is the recommended way to manage locks from CLI.
-
-    Note: Uses in-memory locking which only affects the current process.
-    Lock operations are local to this process instance.
-
-    Returns:
-        LockService instance.
-
-    Example:
-        >>> service = get_lock_service()
-        >>> released = await service.release_lock("chembl_activity", run_id)
-        >>> logger.info("lock_released", pipeline="chembl_activity", released=released)
-    """
-    _ensure_registrations()
-    return bootstrap_lock_service()
-
-
-async def cleanup_bronze(
-    retention_days: int = 90,
-    dry_run: bool = False,
-) -> CleanupResult:
-    """Clean up old Bronze files based on retention policy.
-
-    Convenience function for Bronze cleanup operations.
-    Removes files older than the specified retention period.
-
-    Args:
-        retention_days: Files older than this will be removed (default: 90).
-        dry_run: If True, only show what would be removed.
-
-    Returns:
-        CleanupResult with cleanup statistics.
-
-    Example:
-        >>> result = await cleanup_bronze(retention_days=90, dry_run=True)
-        >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
-    """
-    service = get_bronze_cleanup_service()
-    result: CleanupResult = await service.cleanup(
-        retention_days=retention_days,
-        dry_run=dry_run,
-    )
-    return result
-
-
-def get_pipeline_runner_service() -> PipelineRunnerService:
-    """Get a pipeline runner service for universal pipeline execution.
-
-    This is the recommended way to run pipelines programmatically from
-    any interface (CLI, REST API, Airflow, etc.). The service provides
-    a clean, stateless API for pipeline execution.
-
-    Returns:
-        PipelineRunnerService instance ready for use.
-
-    Example:
-        >>> from bioetl.application.services import RunOptions
-        >>> service = get_pipeline_runner_service()
-        >>> options = RunOptions(run_type="incremental", limit=100)
-        >>> result = await service.run("chembl_activity", options=options)
-        >>> if result.is_success:
-        ...     logger.info("pipeline_success", records_silver=result.records_silver)
-    """
-    _ensure_registrations()
-    return bootstrap_pipeline_runner_service()
-
-
-# =============================================================================
-# Configuration and Health Services
-# =============================================================================
-
-
-def get_config_service() -> ConfigService:
-    """Get a configuration service for accessing application configuration.
-
-    Provides a clean interface for configuration access from CLI or other
-    interfaces. Abstracts infrastructure configuration loading.
-
-    Returns:
-        ConfigService instance for configuration operations.
-
-    Example:
-        >>> service = get_config_service()
-        >>> settings = service.get_settings()
-        >>> logger.info("environment", env=settings.env)
-        >>> config = service.load_pipeline_config("chembl_activity")
-        >>> logger.info("pipeline", provider=config.provider)
-    """
-    _ensure_registrations()
-    return bootstrap_config_service()
-
-
-def get_health_service() -> HealthService:
-    """Get a health service for checking provider health.
-
-    Provides a clean interface for health checking from CLI or other
-    interfaces. Abstracts data source factory and adapter creation.
-
-    Returns:
-        HealthService instance for health check operations.
-
-    Example:
-        >>> service = get_health_service()
-        >>> summary = await service.check_providers()
-        >>> if summary.all_healthy:
-        ...     logger.info("All providers healthy")
-        >>> else:
-        ...     for name, result in summary.results.items():
-        ...         if result.is_unhealthy:
-        ...             logger.error("Provider unhealthy", provider=name, error=result.error)
-    """
-    _ensure_registrations()
-    return bootstrap_health_service()
-
-
-def get_health_server_dependencies() -> HealthServerDependencies:
-    """Get dependencies for HealthServer via composition root.
-
-    Returns HealthServerDependencies with PrometheusMetrics and
-    ProviderHealthMonitor. HealthServer is created in interfaces layer.
-    """
-    _ensure_registrations()
-    return bootstrap_health_server_dependencies()
-
-
-def get_metrics_service() -> MetricsService:
-    """Get a metrics service for managing the Prometheus metrics server.
-
-    Provides a clean interface for metrics server management from CLI or
-    other interfaces. Abstracts infrastructure metrics server operations.
-
-    Returns:
-        MetricsService instance for metrics server operations.
-
-    Example:
-        >>> service = get_metrics_service()
-        >>> result = service.start(port=8000)
-        >>> if result.success:
-        ...     logger.info("Metrics server started", port=result.port)
-        >>> status = service.get_status()
-        >>> logger.info("Server status", running=status.running)
-    """
-    _ensure_registrations()
-    return bootstrap_metrics_service()
-
-
-def get_quarantine_store(pipeline: str) -> QuarantinePort:
-    """Get a quarantine store (port) for direct quarantine operations.
-
-    This provides direct access to the QuarantinePort for low-level
-    quarantine operations. For most use cases, prefer get_quarantine_service()
-    which provides a higher-level interface.
-
-    Args:
-        pipeline: Pipeline name (used for context, actual store is shared).
-
-    Returns:
-        QuarantinePort instance for quarantine operations.
-
-    Example:
-        >>> store = get_quarantine_store("chembl_activity")
-        >>> records = await store.inspect("chembl_activity", limit=10)
-    """
-    _ensure_registrations()
-    return bootstrap_quarantine()
 
 ================================================================================
 File: __init__.py
@@ -4458,6 +4896,8 @@ class HttpClientFactory:
             # Client settings (timeout and retries)
             timeout = source_config.timeout_sec
             max_retries = source_config.max_retries
+            base_delay = source_config.retry_base_delay
+            max_delay = source_config.retry_max_delay
         else:
             # Fallback to ProviderRegistry
             http_config = ProviderRegistry.get_http_config(provider)
@@ -4476,6 +4916,8 @@ class HttpClientFactory:
                 recovery_timeout = 300  # Default
                 timeout = 30.0  # Default
                 max_retries = 3  # Default
+            base_delay = 1.0  # RetryConfig default
+            max_delay = 60.0  # RetryConfig default
 
         # Apply rate overrides based on settings (API key boosts)
         http_config = ProviderRegistry.get_http_config(provider)
@@ -4494,7 +4936,11 @@ class HttpClientFactory:
                 recovery_timeout=recovery_timeout,
                 metrics=metrics,
             ),
-            retry_config=RetryConfig(max_attempts=max_retries),
+            retry_config=RetryConfig(
+                max_attempts=max_retries,
+                base_delay=base_delay,
+                max_delay=max_delay,
+            ),
             timeout=timeout,
             provider=provider,
             run_id=run_id,
@@ -4584,10 +5030,14 @@ from bioetl.application.pipelines.chembl.publication_term_transformer import (
 from bioetl.application.pipelines.chembl.publication_transformer import (
     PublicationTransformer,
 )
+from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
+    SubcellularFractionTransformer,
+)
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
 from bioetl.application.pipelines.chembl.target_transformer import TargetTransformer
+from bioetl.application.pipelines.chembl.tissue_transformer import TissueTransformer
 from bioetl.application.pipelines.crossref.transformer import (
     CrossRefPublicationTransformer,
 )
@@ -4604,6 +5054,7 @@ from bioetl.application.pipelines.uniprot.idmapping_transformer import (
     IDMappingTransformer,
 )
 from bioetl.application.pipelines.uniprot.transformer import UniProtProteinTransformer
+from bioetl.composition.factories.data_source_factory import DataSourceRegistry
 from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 
@@ -4620,8 +5071,10 @@ from bioetl.domain.contracts import (
     ChEMBLDocumentTermGoldSchema,
     ChEMBLMoleculeGoldSchema,
     ChEMBLProteinClassGoldSchema,
+    ChEMBLSubcellularFractionGoldSchema,
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
+    ChEMBLTissueGoldSchema,
     CrossRefPublicationGoldSchema,
     OpenAlexPublicationGoldSchema,
     PubChemCompoundGoldSchema,
@@ -4630,6 +5083,33 @@ from bioetl.domain.contracts import (
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
+
+# Pandera Silver schemas (DataFrameModel classes for validation)
+from bioetl.domain.schemas.chembl.activity import ActivitySchema
+from bioetl.domain.schemas.chembl.assay import AssaySchema
+from bioetl.domain.schemas.chembl.assay_parameters import AssayParametersSchema
+from bioetl.domain.schemas.chembl.cell_line import CellLineSchema
+from bioetl.domain.schemas.chembl.compound_record import CompoundRecordSchema
+from bioetl.domain.schemas.chembl.molecule import MoleculeSchema
+from bioetl.domain.schemas.chembl.protein_classification import (
+    ProteinClassificationSchema,
+)
+from bioetl.domain.schemas.chembl.publication import ChemblPublicationSchema
+from bioetl.domain.schemas.chembl.publication_similarity import (
+    PublicationSimilaritySchema,
+)
+from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
+from bioetl.domain.schemas.chembl.target import TargetSchema
+from bioetl.domain.schemas.chembl.target_component import TargetComponentSchema
+from bioetl.domain.schemas.crossref.publication import PublicationEnrichedSchema
+from bioetl.domain.schemas.openalex.publication import OpenAlexPublicationSchema
+from bioetl.domain.schemas.pubchem.compound import PubchemMoleculeSchema
+from bioetl.domain.schemas.pubmed.publication import PubMedPublicationSchema
+from bioetl.domain.schemas.semanticscholar.publication import (
+    SemanticScholarPublicationSchema,
+)
+from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
+from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
 
 # Silver schemas (optional PyArrow schemas)
 from bioetl.infrastructure.schemas.silver import (
@@ -4643,8 +5123,10 @@ from bioetl.infrastructure.schemas.silver import (
     CHEMBL_MOLECULE_SCHEMA,
     CHEMBL_PROTEIN_CLASS_SCHEMA,
     CHEMBL_PUBLICATION_SCHEMA,
+    CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
     CHEMBL_TARGET_COMPONENT_SCHEMA,
     CHEMBL_TARGET_SCHEMA,
+    CHEMBL_TISSUE_SCHEMA,
     CROSSREF_PUBLICATION_SCHEMA,
     OPENALEX_PUBLICATION_SCHEMA,
     PUBCHEM_COMPOUND_SCHEMA,
@@ -4658,6 +5140,7 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.composition.factories.data_source_factory import DataSourceCreator
 
 
 # =============================================================================
@@ -4673,10 +5156,18 @@ class PipelineFactoryConfig(NamedTuple):
 
     Attributes:
         pipeline_name: Unique identifier for the pipeline (e.g., "chembl_activity")
-        provider: Data provider name (e.g., "chembl", "pubchem")
+        provider: Data provider name (e.g., "chembl", "pubchem").
+            Used for transformer metadata (content hash, entity ID, tracing).
         transformer_class: Transformer class for Bronze→Silver transformation
         silver_schema: PyArrow schema for Silver layer validation
         gold_schema: Pandera schema for Gold layer validation (required)
+        pandera_silver_schema: Pandera DataFrameModel class for Silver validation.
+            If provided, PanderaSilverValidator is created and injected into
+            SilverWriter for pre-write validation.
+        data_source_provider: Override provider name for DataSourceRegistry lookup.
+            When set, data source is created using this provider name instead of
+            ``provider``. Use when the ProviderRegistry key differs from the
+            transformer provider (e.g., "uniprot_idmapping" vs "uniprot").
     """
 
     pipeline_name: str
@@ -4684,6 +5175,8 @@ class PipelineFactoryConfig(NamedTuple):
     transformer_class: type[BaseTransformer]
     silver_schema: pa.Schema | None
     gold_schema: Any  # Pandera schema class
+    pandera_silver_schema: Any = None  # Pandera DataFrameModel class
+    data_source_provider: str | None = None
 
 
 # Consolidated pipeline definitions - single source of truth
@@ -4695,6 +5188,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=ActivityTransformer,
         silver_schema=CHEMBL_ACTIVITY_SCHEMA,
         gold_schema=ChEMBLActivityGoldSchema,
+        pandera_silver_schema=ActivitySchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_assay",
@@ -4702,6 +5196,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=AssayTransformer,
         silver_schema=CHEMBL_ASSAY_SCHEMA,
         gold_schema=ChEMBLAssayGoldSchema,
+        pandera_silver_schema=AssaySchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_assay_parameters",
@@ -4709,6 +5204,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=AssayParametersTransformer,
         silver_schema=CHEMBL_ASSAY_PARAMETERS_SCHEMA,
         gold_schema=ChEMBLAssayParametersGoldSchema,
+        pandera_silver_schema=AssayParametersSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_cell_line",
@@ -4716,6 +5212,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=CellLineTransformer,
         silver_schema=CHEMBL_CELL_LINE_SCHEMA,
         gold_schema=ChEMBLCellLineGoldSchema,
+        pandera_silver_schema=CellLineSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_compound_record",
@@ -4723,6 +5220,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=CompoundRecordTransformer,
         silver_schema=CHEMBL_COMPOUND_RECORD_SCHEMA,
         gold_schema=ChEMBLCompoundRecordGoldSchema,
+        pandera_silver_schema=CompoundRecordSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_publication",
@@ -4730,6 +5228,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PublicationTransformer,
         silver_schema=CHEMBL_PUBLICATION_SCHEMA,
         gold_schema=ChEMBLDocumentGoldSchema,
+        pandera_silver_schema=ChemblPublicationSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_publication_similarity",
@@ -4737,6 +5236,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PublicationSimilarityTransformer,
         silver_schema=CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
         gold_schema=ChEMBLDocumentSimilarityGoldSchema,
+        pandera_silver_schema=PublicationSimilaritySchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_publication_term",
@@ -4744,6 +5244,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PublicationTermTransformer,
         silver_schema=CHEMBL_DOCUMENT_TERM_SCHEMA,
         gold_schema=ChEMBLDocumentTermGoldSchema,
+        pandera_silver_schema=PublicationTermSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_molecule",
@@ -4751,6 +5252,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=MoleculeTransformer,
         silver_schema=CHEMBL_MOLECULE_SCHEMA,
         gold_schema=ChEMBLMoleculeGoldSchema,
+        pandera_silver_schema=MoleculeSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_target",
@@ -4758,6 +5260,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=TargetTransformer,
         silver_schema=CHEMBL_TARGET_SCHEMA,
         gold_schema=ChEMBLTargetGoldSchema,
+        pandera_silver_schema=TargetSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_target_component",
@@ -4765,6 +5268,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=TargetComponentTransformer,
         silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
         gold_schema=ChEMBLTargetComponentGoldSchema,
+        pandera_silver_schema=TargetComponentSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="chembl_protein_class",
@@ -4772,6 +5276,21 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=ProteinClassTransformer,
         silver_schema=CHEMBL_PROTEIN_CLASS_SCHEMA,
         gold_schema=ChEMBLProteinClassGoldSchema,
+        pandera_silver_schema=ProteinClassificationSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_tissue",
+        provider="chembl",
+        transformer_class=TissueTransformer,
+        silver_schema=CHEMBL_TISSUE_SCHEMA,
+        gold_schema=ChEMBLTissueGoldSchema,
+    ),
+    PipelineFactoryConfig(
+        pipeline_name="chembl_subcellular_fraction",
+        provider="chembl",
+        transformer_class=SubcellularFractionTransformer,
+        silver_schema=CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
+        gold_schema=ChEMBLSubcellularFractionGoldSchema,
     ),
     # PubChem pipeline
     PipelineFactoryConfig(
@@ -4780,6 +5299,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PubChemCompoundTransformer,
         silver_schema=PUBCHEM_COMPOUND_SCHEMA,
         gold_schema=PubChemCompoundGoldSchema,
+        pandera_silver_schema=PubchemMoleculeSchema,
     ),
     # UniProt pipelines
     PipelineFactoryConfig(
@@ -4788,6 +5308,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=UniProtProteinTransformer,
         silver_schema=UNIPROT_PROTEIN_SCHEMA,
         gold_schema=UniProtProteinGoldSchema,
+        pandera_silver_schema=UniprotTargetSchema,
     ),
     PipelineFactoryConfig(
         pipeline_name="uniprot_idmapping",
@@ -4795,6 +5316,8 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=IDMappingTransformer,
         silver_schema=UNIPROT_ID_MAPPING_SCHEMA,
         gold_schema=UniProtIDMappingGoldSchema,
+        pandera_silver_schema=IDMappingSchema,
+        data_source_provider="uniprot_idmapping",
     ),
     # PubMed pipeline
     PipelineFactoryConfig(
@@ -4803,6 +5326,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=PubMedPublicationTransformer,
         silver_schema=PUBMED_PUBLICATION_SCHEMA,
         gold_schema=PubMedPublicationGoldSchema,
+        pandera_silver_schema=PubMedPublicationSchema,
     ),
     # CrossRef pipeline
     PipelineFactoryConfig(
@@ -4811,6 +5335,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=CrossRefPublicationTransformer,
         silver_schema=CROSSREF_PUBLICATION_SCHEMA,
         gold_schema=CrossRefPublicationGoldSchema,
+        pandera_silver_schema=PublicationEnrichedSchema,
     ),
     # OpenAlex pipeline
     PipelineFactoryConfig(
@@ -4819,6 +5344,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=OpenAlexPublicationTransformer,
         silver_schema=OPENALEX_PUBLICATION_SCHEMA,
         gold_schema=OpenAlexPublicationGoldSchema,
+        pandera_silver_schema=OpenAlexPublicationSchema,
     ),
     # Semantic Scholar pipeline
     PipelineFactoryConfig(
@@ -4827,6 +5353,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
         transformer_class=SemanticScholarPublicationTransformer,
         silver_schema=SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
         gold_schema=SemanticScholarPublicationGoldSchema,
+        pandera_silver_schema=SemanticScholarPublicationSchema,
     ),
 )
 
@@ -4842,13 +5369,20 @@ def _create_factory(
     Returns:
         Configured GenericPipelineFactory instance
     """
+    # Resolve data source creator: use data_source_provider override if set
+    data_source_creator: DataSourceCreator | None = None
+    if config.data_source_provider:
+        data_source_creator = DataSourceRegistry.get(config.data_source_provider)
+
     return GenericPipelineFactory(
         pipeline_name=config.pipeline_name,
         pipeline_class=GenericPipeline,
         provider=config.provider,
         silver_schema=config.silver_schema,
         gold_schema=config.gold_schema,
+        pandera_silver_schema=config.pandera_silver_schema,
         transformer_class=config.transformer_class,
+        data_source_creator=data_source_creator,
     )
 
 
@@ -4873,6 +5407,8 @@ chembl_publication_term_factory = _factories["chembl_publication_term"]
 chembl_molecule_factory = _factories["chembl_molecule"]
 chembl_target_factory = _factories["chembl_target"]
 chembl_target_component_factory = _factories["chembl_target_component"]
+chembl_tissue_factory = _factories["chembl_tissue"]
+chembl_subcellular_fraction_factory = _factories["chembl_subcellular_fraction"]
 chembl_protein_class_factory = _factories["chembl_protein_class"]
 pubchem_compound_factory = _factories["pubchem_compound"]
 uniprot_protein_factory = _factories["uniprot_protein"]
@@ -5016,8 +5552,10 @@ __all__ = [
     "chembl_publication_factory",
     "chembl_publication_similarity_factory",
     "chembl_publication_term_factory",
+    "chembl_subcellular_fraction_factory",
     "chembl_target_component_factory",
     "chembl_target_factory",
+    "chembl_tissue_factory",
     "crossref_publication_factory",
     "get_factory",
     "is_registered",
@@ -5084,6 +5622,7 @@ if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
     from bioetl.domain.ports import (
         DataSourcePort,
@@ -5137,6 +5676,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: The pipeline class to instantiate
         silver_schema: PyArrow schema for Silver layer
         gold_schema: Pandera schema for Gold layer
+        pandera_silver_schema: Pandera DataFrameModel class for Silver validation
     """
 
     def __init__(
@@ -5146,6 +5686,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         provider: str,
         silver_schema: pa.Schema | None = None,
         gold_schema: Any = None,
+        pandera_silver_schema: Any = None,
         data_source_creator: DataSourceCreator | None = None,
         transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
@@ -5164,6 +5705,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.provider = provider
         self.silver_schema = silver_schema
         self.gold_schema = gold_schema
+        self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
 
         # Use custom creator or look up from registry
@@ -5175,6 +5717,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -5184,6 +5727,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         Args:
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional domain-level filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
@@ -5199,6 +5743,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             entity_type=_extract_entity_type(self.pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -5213,7 +5758,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> DataSourcePort:
         """Create data source using the configured creator."""
         return self._create_data_source(
-            settings, pipeline_config, logger, filter_config
+            settings,
+            pipeline_config,
+            logger,
+            filter_config,
+            pipeline_name=self.pipeline_name,
         )
 
     def build_services(
@@ -5248,6 +5797,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metrics: MetricsPort | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
         """Create pipeline instance with services and optional transformer."""
         return cast(
@@ -5258,6 +5808,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 provider=self.provider,
                 create_data_source_fn=self._create_data_source,
                 transformer_class=self.transformer_class,
+                pandera_silver_schema=self.pandera_silver_schema,
                 run_id=run_id,
                 runtime=runtime,
                 settings=settings,
@@ -5267,6 +5818,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 tracer=tracer,
                 dq_monitor=dq_monitor,
                 metrics=metrics,
+                cached_bronze=cached_bronze,
             ),
         )
 
@@ -5278,6 +5830,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         observability: ObservabilityBundle,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
         """Create a fully configured PipelineRunner with all components."""
         # Load config once if not provided
@@ -5295,6 +5848,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             tracer=observability.tracer,
             dq_monitor=observability.dq_monitor,
             metrics=observability.metrics,
+            cached_bronze=cached_bronze,
         )
 
         # Delegate runner assembly to dedicated function
@@ -5314,6 +5868,7 @@ def create_pipeline_factory(
     provider: str,
     silver_schema: pa.Schema | None = None,
     gold_schema: Any = None,
+    pandera_silver_schema: Any = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories."""
@@ -5323,6 +5878,7 @@ def create_pipeline_factory(
         provider=provider,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
+        pandera_silver_schema=pandera_silver_schema,
         transformer_class=transformer_class,
     )
 
@@ -5338,6 +5894,7 @@ def _create_data_source(
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
+    pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create data source using the provided creator function.
 
@@ -5347,11 +5904,68 @@ def _create_data_source(
         pipeline_config: Pipeline configuration
         logger: Structured logger
         filter_config: Optional filter configuration
+        pipeline_name: Pipeline name for logging context
 
     Returns:
         Configured DataSourcePort
     """
-    return create_data_source_fn(settings, pipeline_config, logger, filter_config)
+    return create_data_source_fn(
+        settings, pipeline_config, logger, filter_config, pipeline_name=pipeline_name
+    )
+
+
+def _create_cached_bronze_data_source(
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    cached_bronze: CachedBronzeContext,
+) -> DataSourcePort:
+    """Create CachedBronzeDataSource for reading from Bronze cache.
+
+    Creates a data source that reads from existing Bronze layer files
+    instead of making API calls. Used when cached_bronze mode is enabled.
+
+    Args:
+        settings: Application settings (for resolving base paths).
+        pipeline_config: Pipeline configuration (for provider/entity).
+        logger: Structured logger.
+        cached_bronze: CachedBronzeContext with path/date settings.
+
+    Returns:
+        CachedBronzeDataSource implementing DataSourcePort.
+    """
+    from pathlib import Path
+
+    from bioetl.domain.ports import NoOpMetrics
+    from bioetl.infrastructure.adapters import CachedBronzeDataSource
+    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+    provider = pipeline_config.provider
+    entity_type = pipeline_config.entity_type
+
+    # Resolve Bronze path: explicit or convention-based
+    if cached_bronze.bronze_path:
+        bronze_path = Path(cached_bronze.bronze_path)
+    else:
+        # Convention: data/output/bronze/{provider}/{entity_type}
+        bronze_path = settings.bronze_path / provider / entity_type
+
+    # Create BronzeWriter as reader (reusing read_bronze/list_batches methods)
+    # flat_structure=True because convention path already includes provider/entity
+    bronze_reader = BronzeWriter(
+        base_path=bronze_path,
+        logger=logger,
+        metrics=NoOpMetrics(),
+        flat_structure=True,
+    )
+
+    return CachedBronzeDataSource(
+        bronze_reader=bronze_reader,
+        provider=provider,
+        entity_type=entity_type,
+        logger=logger,
+        bronze_date=cached_bronze.bronze_date,
+    )
 
 
 def build_pipeline_services(
@@ -5364,6 +5978,8 @@ def build_pipeline_services(
     tracer: TracingPort | None = None,
     dq_monitor: DQMonitorPort | None = None,
     metadata_coordinator: MetadataCoordinator | None = None,
+    cached_bronze: CachedBronzeContext | None = None,
+    silver_validator: Any = None,
 ) -> PipelineServices:
     """Build PipelineServices from settings.
 
@@ -5378,14 +5994,40 @@ def build_pipeline_services(
         dq_monitor: Optional data quality monitor for anomaly detection
         metadata_coordinator: Optional MetadataCoordinator for centralized
                             metadata creation across Bronze, Silver, Gold.
+        cached_bronze: Optional CachedBronzeContext for reading from Bronze
+                      cache instead of API. When enabled, creates
+                      CachedBronzeDataSource instead of the normal data source.
+        silver_validator: Optional SilverValidatorPort for Pandera validation
+            in SilverWriter. Created from Pandera Silver schema.
 
     Returns:
         Configured PipelineServices instance
     """
     pipeline_config = config or load_pipeline_config(pipeline_name)
-    data_source = _create_data_source(
-        create_data_source_fn, settings, pipeline_config, logger, filter_config
-    )
+
+    # Choose data source based on cached_bronze mode
+    if cached_bronze is not None and cached_bronze.enabled:
+        data_source = _create_cached_bronze_data_source(
+            settings=settings,
+            pipeline_config=pipeline_config,
+            logger=logger,
+            cached_bronze=cached_bronze,
+        )
+        logger.info(
+            "using_cached_bronze_mode",
+            pipeline=pipeline_name,
+            bronze_path=cached_bronze.bronze_path,
+            bronze_date=cached_bronze.bronze_date,
+        )
+    else:
+        data_source = _create_data_source(
+            create_data_source_fn,
+            settings,
+            pipeline_config,
+            logger,
+            filter_config,
+            pipeline_name=pipeline_name,
+        )
 
     return BaseServicesFactory.create_common_services(
         settings=settings,
@@ -5395,6 +6037,7 @@ def build_pipeline_services(
         tracer=tracer,
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
+        silver_validator=silver_validator,
     )
 
 
@@ -5413,6 +6056,8 @@ def create_pipeline_with_services(
     tracer: TracingPort | None = None,
     dq_monitor: DQMonitorPort | None = None,
     metrics: MetricsPort | None = None,
+    cached_bronze: CachedBronzeContext | None = None,
+    pandera_silver_schema: Any = None,
 ) -> BasePipeline:
     """Create pipeline instance with services.
 
@@ -5434,12 +6079,26 @@ def create_pipeline_with_services(
         tracer: Optional tracer for distributed tracing
         dq_monitor: Optional data quality monitor
         metrics: Optional metrics port for transformer observability
+        cached_bronze: Optional CachedBronzeContext for reading from Bronze
+                      cache instead of API.
+        pandera_silver_schema: Optional Pandera DataFrameModel class for Silver
+            validation. If provided, PanderaSilverValidator is created and
+            injected into SilverWriter.
 
     Returns:
         Configured pipeline instance
     """
     yaml_config = config or load_pipeline_config(pipeline_name)
     entity = _extract_entity_type(pipeline_name) or pipeline_name
+
+    # Create Silver validator from Pandera schema if provided (DI pattern)
+    silver_validator = None
+    if pandera_silver_schema is not None:
+        from bioetl.infrastructure.validation.pandera_validator import (
+            PanderaSilverValidator,
+        )
+
+        silver_validator = PanderaSilverValidator(pandera_silver_schema.to_schema())
 
     # Create RunContext with versioning metadata for MetadataCoordinator
     run_context = RunContext.create(
@@ -5464,6 +6123,8 @@ def create_pipeline_with_services(
         tracer=tracer,
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
+        cached_bronze=cached_bronze,
+        silver_validator=silver_validator,
     )
 
     domain_config = yaml_config_to_domain(yaml_config)
@@ -5476,6 +6137,7 @@ def create_pipeline_with_services(
             entity_type=_extract_entity_type(pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            silver_filters=domain_config.silver_filters,
             gold_filters=domain_config.gold_filters,
             # identity_service and pii_hasher use defaults in transformer
         )
@@ -5950,6 +6612,7 @@ from bioetl.application.core.record_processor import RecordProcessor
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 from bioetl.composition.factories.dq_factory import DQServicesFactory
 from bioetl.composition.factories.storage import StorageContext, StorageFactory
+from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.medallion import LoadingStrategy
@@ -6064,6 +6727,7 @@ class BaseServicesFactory:
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: Any = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -6076,6 +6740,8 @@ class BaseServicesFactory:
             dq_monitor: Optional data quality monitor for anomaly detection
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation across Bronze, Silver, Gold.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
 
         Returns:
             PipelineServices with all dependencies configured
@@ -6089,6 +6755,7 @@ class BaseServicesFactory:
             logger,
             metrics=metrics,
             metadata_coordinator=metadata_coordinator,
+            silver_validator=silver_validator,
         )
 
         lock = cls._create_lock()
@@ -6356,6 +7023,7 @@ class ServicesBuilder:
         *,
         strict_gold_validation: bool = False,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
+        column_groups: tuple[ColumnGroupConfig, ...] = (),
     ) -> RecordProcessor:
         """Create configured RecordProcessor.
 
@@ -6405,6 +7073,7 @@ class ServicesBuilder:
             gold_schema=gold_schema,
             dq_config=dq_config,
             table_config=table_config,
+            column_groups=column_groups,
         )
 
         # Create Gold validator from schema (DI pattern)
@@ -6474,6 +7143,7 @@ class ServicesBuilder:
             gold_transform_callback=callbacks.gold_transform,
             strict_gold_validation=strict_gold_validation,
             lock_validator=lock_validator,
+            column_groups=tuple(pipeline.config.column_groups),
         )
 
     @staticmethod
@@ -6516,6 +7186,8 @@ class ServicesBuilder:
             Configured BatchExecutor instance.
         """
         callbacks = extract_pipeline_callbacks(pipeline)
+        skip = pipeline.runtime.skip_gold
+        gold_filter = (lambda _c, _r: False) if skip else callbacks.gold_filter
 
         # Build configuration
         error_classifier = ErrorClassifier()
@@ -6541,6 +7213,7 @@ class ServicesBuilder:
             silver_output_path=silver_output_path,
             gold_output_path=gold_output_path,
             flat_structure=flat_structure,
+            column_groups=pipeline.config.column_groups,
         )
 
         # Create Gold validator
@@ -6554,7 +7227,7 @@ class ServicesBuilder:
             config=processor_config,
             error_classifier=error_classifier,
             transform_callback=callbacks.transform,
-            gold_filter_callback=callbacks.gold_filter,
+            gold_filter_callback=gold_filter,
             gold_transform_callback=callbacks.gold_transform,
             gold_validator=gold_validator,
             checkpoint_manager=checkpoint_manager,
@@ -6764,6 +7437,7 @@ class StorageAdapter:
         mode: Literal["merge", "append", "delete"] = "merge",
         partition_cols: list[str] | None = None,
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+        column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to Silver layer.
@@ -6776,6 +7450,7 @@ class StorageAdapter:
             mode: The write mode (e.g., 'merge', 'append', 'delete').
             partition_cols: Optional list of columns to partition by.
             on_schema_mismatch: How to handle schema drift.
+            column_order: Optional explicit column order to apply.
             bronze_refs: Optional list of BronzeWriteResult from Bronze writes.
                 If provided, bronze_paths will be populated in Silver metadata
                 for complete lineage tracking (REQ-LINEAGE-001).
@@ -6796,6 +7471,7 @@ class StorageAdapter:
             mode=mode,
             partition_cols=partition_cols,
             on_schema_mismatch=on_schema_mismatch,
+            column_order=column_order,
             bronze_refs=bronze_refs,
         )
 
@@ -6807,6 +7483,7 @@ class StorageAdapter:
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
+        column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
         silver_refs: list[Any] | None = None,
@@ -6819,6 +7496,7 @@ class StorageAdapter:
             schema: Pandera schema for validation
             primary_keys: Optional primary key columns
             mode: Write mode
+            column_order: Optional explicit column order to apply.
             ingestion_ts: Ingestion timestamp for audit (ADR-014)
             run_id: Run identifier for audit correlation
             silver_refs: Optional list of SilverWriteResult from Silver writes.
@@ -6835,6 +7513,7 @@ class StorageAdapter:
             schema=schema,
             primary_keys=primary_keys,
             mode=mode,
+            column_order=column_order,
             ingestion_ts=ingestion_ts,
             run_id=run_id,
             silver_refs=silver_refs,
@@ -6867,6 +7546,7 @@ class StorageAdapter:
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Silver layer without explicit schema.
 
@@ -6878,6 +7558,7 @@ class StorageAdapter:
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical reordering.
         """
         await self.silver.write_silver_merged(
             table_name,
@@ -6885,6 +7566,7 @@ class StorageAdapter:
             primary_keys,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=preserve_column_order,
         )
 
     async def write_gold_merged(
@@ -6895,6 +7577,7 @@ class StorageAdapter:
         *,
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        preserve_column_order: bool = False,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -6906,6 +7589,7 @@ class StorageAdapter:
             primary_keys: Optional list of column names for sorting.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
+            preserve_column_order: If True, skip canonical reordering.
         """
         await self.gold.write_gold_merged(
             table_name,
@@ -6913,6 +7597,7 @@ class StorageAdapter:
             primary_keys,
             run_id=run_id,
             sources_used=sources_used,
+            preserve_column_order=preserve_column_order,
         )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
@@ -7410,6 +8095,7 @@ class StorageFactory:
         bronze_flat_structure: bool = False,
         silver_flat_structure: bool = False,
         gold_flat_structure: bool = False,
+        silver_validator: Any = None,
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -7457,6 +8143,7 @@ class StorageFactory:
                 logger=logger,
                 tracing=effective_tracing,
                 csv_exporter=silver_csv_exporter,
+                silver_validator=silver_validator,
                 metadata_writer=silver_metadata_writer,
                 metadata_coordinator=metadata_coordinator,
                 transform_version=transform_version,
@@ -7484,6 +8171,7 @@ class StorageFactory:
         metrics: MetricsPort,
         tracing: TracingPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: Any = None,
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 
@@ -7496,6 +8184,8 @@ class StorageFactory:
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation. If provided, ensures consistent
                                 run_id and timestamps across Bronze, Silver, Gold.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
 
         Returns:
             StorageContext with adapter and paths
@@ -7558,9 +8248,20 @@ class StorageFactory:
         transform_steps = tuple(config.transform.steps)
 
         # Extract flat_structure settings
-        bronze_flat_structure = bronze_config.flat_structure if bronze_config else False
-        silver_flat_structure = silver_config.flat_structure if silver_config else False
-        gold_flat_structure = gold_config.flat_structure if gold_config else False
+        # In test mode (use_yaml_paths=False), settings paths don't include
+        # provider/entity segments, so flat_structure must be False to ensure
+        # each pipeline writes to its own subdirectory (base_path/table_name).
+        # In production, YAML paths already include provider/entity per ADR-029,
+        # so flat_structure=true correctly writes directly to the configured path.
+        bronze_flat_structure = (
+            bronze_config.flat_structure if bronze_config else False
+        ) and use_yaml_paths
+        silver_flat_structure = (
+            silver_config.flat_structure if silver_config else False
+        ) and use_yaml_paths
+        gold_flat_structure = (
+            gold_config.flat_structure if gold_config else False
+        ) and use_yaml_paths
 
         adapter = StorageFactory._create_storage_adapter(
             bronze_path=bronze_path,
@@ -7580,6 +8281,7 @@ class StorageFactory:
             bronze_flat_structure=bronze_flat_structure,
             silver_flat_structure=silver_flat_structure,
             gold_flat_structure=gold_flat_structure,
+            silver_validator=silver_validator,
         )
 
         return StorageContext(
@@ -7677,6 +8379,7 @@ def create_transformer(
     entity_type: str,
     tracer: TracingPort | None = None,
     metrics: MetricsPort | None = None,
+    silver_filters: GoldFilterConfig | None = None,
     gold_filters: GoldFilterConfig | None = None,
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
@@ -7692,6 +8395,7 @@ def create_transformer(
         entity_type: Entity type (e.g., 'activity', 'compound').
         tracer: Optional tracing port for distributed tracing (O1 observability).
         metrics: Optional metrics port for duration/error tracking (O1 observability).
+        silver_filters: Optional domain-level filter configuration for Silver layer.
         gold_filters: Optional filter configuration for Gold layer.
         identity_service: Service for computing entity IDs and content hashes.
             Defaults to a new IdentityService instance in BaseTransformer.
@@ -7726,6 +8430,7 @@ def create_transformer(
         entity_type=entity_type,
         tracer=tracer,
         metrics=metrics,
+        silver_filters=silver_filters,
         gold_filters=gold_filters,
         identity_service=identity_service,
         pii_hasher=pii_hasher,
@@ -7785,6 +8490,9 @@ def register_all_transformers() -> None:
     from bioetl.application.pipelines.chembl.publication_transformer import (
         PublicationTransformer,
     )
+    from bioetl.application.pipelines.chembl.subcellular_fraction_transformer import (
+        SubcellularFractionTransformer,
+    )
     from bioetl.application.pipelines.chembl.target_component_transformer import (
         TargetComponentTransformer,
     )
@@ -7823,6 +8531,9 @@ def register_all_transformers() -> None:
     )
     register_transformer("chembl", "document_term", PublicationTermTransformer)
     register_transformer("chembl", "molecule", MoleculeTransformer)
+    register_transformer(
+        "chembl", "subcellular_fraction", SubcellularFractionTransformer
+    )
     register_transformer("chembl", "protein_class", ProteinClassTransformer)
     register_transformer("chembl", "target", TargetTransformer)
     register_transformer("chembl", "target_component", TargetComponentTransformer)
@@ -8029,6 +8740,148 @@ __all__ = [
     "register_all_providers",
     "register_provider",
 ]
+
+================================================================================
+File: _config_helpers.py
+Path: providers\_config_helpers.py
+================================================================================
+"""Configuration helpers for provider registration.
+
+Utility functions for loading and extracting provider configuration
+from YAML source configs. Split from registration.py per
+audit-package-structure-2026-02-07.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from bioetl.application.core.filtered_data_source import FilteredDataSource
+from bioetl.composition.bootstrap_contexts import (
+    CircuitBreakerConfig,
+    RateLimitConfig,
+)
+from bioetl.domain.resilience import AdapterConfig
+from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
+from bioetl.infrastructure.config import load_source_config
+
+if TYPE_CHECKING:
+    from typing import Any
+
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+
+def _get_factories() -> tuple[Any, Any]:
+    """Lazy import factories to avoid circular imports."""
+    from bioetl.composition.factories.data_source_factory import DataSourceFactory
+    from bioetl.composition.factories.http_client_factory import HttpClientFactory
+
+    return DataSourceFactory, HttpClientFactory
+
+
+def _get_source_config(provider: str) -> SourceYamlConfig | None:
+    """Load config from configs/sources/{provider}.yaml or return None.
+
+    Returns:
+        SourceYamlConfig if found, None if config file does not exist.
+
+    Raises:
+        ValueError: If config file exists but is invalid.
+    """
+    from pathlib import Path
+
+    config_path = Path(f"configs/sources/{provider}.yaml")
+    if not config_path.exists():
+        return None
+    return load_source_config(provider)
+
+
+def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
+    """Get batch size from source config or return default."""
+    source_config = _get_source_config(provider)
+    return source_config.batch_size if source_config else default
+
+
+def _get_rate_limit_from_config(provider: str) -> RateLimitConfig:
+    """Get rate limit configuration from source config or defaults.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+
+    Returns:
+        RateLimitConfig with rate and capacity values.
+    """
+    source_config = _get_source_config(provider)
+    if source_config:
+        return RateLimitConfig(
+            rate=source_config.rate_limit.requests_per_second,
+            capacity=source_config.rate_limit.burst,
+        )
+    return RateLimitConfig(rate=5.0, capacity=10)
+
+
+def _get_circuit_breaker_from_config(provider: str) -> CircuitBreakerConfig:
+    """Get circuit breaker configuration from source config or defaults.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem').
+
+    Returns:
+        CircuitBreakerConfig with failure_threshold and recovery_timeout.
+    """
+    source_config = _get_source_config(provider)
+    if source_config:
+        return CircuitBreakerConfig(
+            failure_threshold=source_config.circuit_breaker.failure_threshold,
+            recovery_timeout=source_config.circuit_breaker.recovery_timeout,
+        )
+    return CircuitBreakerConfig(failure_threshold=5, recovery_timeout=300)
+
+
+def _get_adapter_config(provider: str, default_page_size: int = 1000) -> AdapterConfig:
+    """Get AdapterConfig from source YAML config.
+
+    This is the single source of truth for adapter parameters (RULES.md §12.1.2).
+    Loads from configs/sources/{provider}.yaml and converts to domain dataclass.
+
+    Args:
+        provider: Provider name (e.g., 'chembl', 'pubchem')
+        default_page_size: Default page size if not specified in config
+
+    Returns:
+        AdapterConfig: Immutable adapter configuration
+
+    Raises:
+        ValueError: If source config file exists but is invalid.
+    """
+    source_config = _get_source_config(provider)
+    if source_config is not None:
+        return source_config.to_adapter_config(default_page_size=default_page_size)
+
+    # Fallback to domain defaults when config file does not exist
+    return AdapterConfig(page_size=default_page_size)
+
+
+def _wrap_with_filter(
+    data_source: DataSourcePort,
+    filter_config: InputFilterConfig | None,
+    logger: LoggerPort | None = None,
+    metrics: MetricsPort | None = None,
+    pipeline_name: str = "unknown",
+) -> DataSourcePort:
+    """Wrap data source with FilteredDataSource if filter is enabled."""
+    if filter_config and filter_config.enabled:
+        return FilteredDataSource(
+            data_source=data_source,
+            filter_reader=CsvFilterReader(logger=logger),
+            filter_config=filter_config,
+            metrics=metrics,
+            pipeline_name=pipeline_name,
+            logger=logger,
+        )
+    return data_source
 
 ================================================================================
 File: decorators.py
@@ -8558,6 +9411,7 @@ Path: providers\registration.py
 """Explicit provider registration for Composition layer.
 
 Loads config from configs/sources/*.yaml. HttpConfig serves as fallback.
+Config helpers extracted to _config_helpers.py per audit-package-structure-2026-02-07.
 """
 
 from __future__ import annotations
@@ -8565,21 +9419,24 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.application.core.idmapping_data_source import IDMappingDataSource
 from bioetl.application.core.publication_term_data_source import (
     PublicationTermDataSource,
 )
-from bioetl.composition.bootstrap_contexts import (
-    CircuitBreakerConfig,
-    RateLimitConfig,
+from bioetl.composition.providers._config_helpers import (
+    _get_adapter_config,
+    _get_batch_size_from_config,
+    _get_circuit_breaker_from_config,
+    _get_factories,
+    _get_rate_limit_from_config,
+    _wrap_with_filter,
 )
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
     ProviderConfig,
     ProviderRegistry,
 )
-from bioetl.domain.resilience import AdapterConfig
+from bioetl.domain.models.filter import ExtractionParams
 
 # Import adapter classes from Infrastructure (allowed direction)
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
@@ -8589,7 +9446,6 @@ from bioetl.infrastructure.adapters.crossref.client import (
 )
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
-from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
 from bioetl.infrastructure.adapters.openalex.client import (
     OpenAlexAdapter,
     _create_openalex_adapter,
@@ -8606,7 +9462,6 @@ from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
 from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
     UniProtIDMappingClient,
 )
-from bioetl.infrastructure.config import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
@@ -8614,118 +9469,40 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-    from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
-def _get_factories() -> tuple[Any, Any]:
-    """Lazy import factories to avoid circular imports."""
-    from bioetl.composition.factories.data_source_factory import DataSourceFactory
-    from bioetl.composition.factories.http_client_factory import HttpClientFactory
+def _validate_extraction_input_filter_overlap(
+    extraction_params: ExtractionParams,
+    input_filter: InputFilterConfig,
+    logger: LoggerPort,
+) -> None:
+    """Warn if input_filter field overlaps extraction_params keys.
 
-    return DataSourceFactory, HttpClientFactory
-
-
-def _get_source_config(provider: str) -> SourceYamlConfig | None:
-    """Load config from configs/sources/{provider}.yaml or return None.
-
-    Returns:
-        SourceYamlConfig if found, None if config file does not exist.
-
-    Raises:
-        ValueError: If config file exists but is invalid.
+    Both are applied as AND in API query. Overlap means one might
+    shadow the other. Log WARNING but do not block.
     """
-    from pathlib import Path
+    if not input_filter.enabled or extraction_params.is_empty:
+        return
 
-    config_path = Path(f"configs/sources/{provider}.yaml")
-    if not config_path.exists():
-        return None
-    return load_source_config(provider)
-
-
-def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
-    """Get batch size from source config or return default."""
-    source_config = _get_source_config(provider)
-    return source_config.batch_size if source_config else default
-
-
-def _get_rate_limit_from_config(provider: str) -> RateLimitConfig:
-    """Get rate limit configuration from source config or defaults.
-
-    Args:
-        provider: Provider name (e.g., 'chembl', 'pubchem').
-
-    Returns:
-        RateLimitConfig with rate and capacity values.
-    """
-    source_config = _get_source_config(provider)
-    if source_config:
-        return RateLimitConfig(
-            rate=source_config.rate_limit.requests_per_second,
-            capacity=source_config.rate_limit.burst,
+    filter_field = input_filter.filter_field
+    if filter_field and filter_field in extraction_params.params:
+        logger.warning(
+            "extraction_params_input_filter_overlap",
+            overlap_field=filter_field,
+            extraction_value=str(extraction_params.params[filter_field]),
+            resolution="input_filter will override extraction_params for this field",
         )
-    return RateLimitConfig(rate=5.0, capacity=10)
 
-
-def _get_circuit_breaker_from_config(provider: str) -> CircuitBreakerConfig:
-    """Get circuit breaker configuration from source config or defaults.
-
-    Args:
-        provider: Provider name (e.g., 'chembl', 'pubchem').
-
-    Returns:
-        CircuitBreakerConfig with failure_threshold and recovery_timeout.
-    """
-    source_config = _get_source_config(provider)
-    if source_config:
-        return CircuitBreakerConfig(
-            failure_threshold=source_config.circuit_breaker.failure_threshold,
-            recovery_timeout=source_config.circuit_breaker.recovery_timeout,
-        )
-    return CircuitBreakerConfig(failure_threshold=5, recovery_timeout=300)
-
-
-def _get_adapter_config(provider: str, default_page_size: int = 1000) -> AdapterConfig:
-    """Get AdapterConfig from source YAML config.
-
-    This is the single source of truth for adapter parameters (RULES.md §12.1.2).
-    Loads from configs/sources/{provider}.yaml and converts to domain dataclass.
-
-    Args:
-        provider: Provider name (e.g., 'chembl', 'pubchem')
-        default_page_size: Default page size if not specified in config
-
-    Returns:
-        AdapterConfig: Immutable adapter configuration
-
-    Raises:
-        ValueError: If source config file exists but is invalid.
-    """
-    source_config = _get_source_config(provider)
-    if source_config is not None:
-        return source_config.to_adapter_config(default_page_size=default_page_size)
-
-    # Fallback to domain defaults when config file does not exist
-    return AdapterConfig(page_size=default_page_size)
-
-
-def _wrap_with_filter(
-    data_source: DataSourcePort,
-    filter_config: InputFilterConfig | None,
-    logger: LoggerPort | None = None,
-    metrics: MetricsPort | None = None,
-    pipeline_name: str = "unknown",
-) -> DataSourcePort:
-    """Wrap data source with FilteredDataSource if filter is enabled."""
-    if filter_config and filter_config.enabled:
-        return FilteredDataSource(
-            data_source=data_source,
-            filter_reader=CsvFilterReader(logger=logger),
-            filter_config=filter_config,
-            metrics=metrics,
-            pipeline_name=pipeline_name,
-            logger=logger,
-        )
-    return data_source
+    # Check multi-column mode
+    if input_filter.columns:
+        for col in input_filter.columns:
+            if col.filter_field in extraction_params.params:
+                logger.warning(
+                    "extraction_params_input_filter_overlap",
+                    overlap_field=col.filter_field,
+                    extraction_value=str(extraction_params.params[col.filter_field]),
+                    resolution="input_filter will override",
+                )
 
 
 def _create_chembl_data_source(
@@ -8750,12 +9527,22 @@ def _create_chembl_data_source(
     # Load adapter configuration from YAML (single source of truth)
     adapter_config = _get_adapter_config("chembl", default_page_size=1000)
 
+    # Build ExtractionParams from pipeline config (ADR-028 §3)
+    extraction_params = ExtractionParams(params=pipeline_config.extraction_params)
+
+    # Validate overlap between extraction_params and input_filter
+    if filter_config is not None:
+        _validate_extraction_input_filter_overlap(
+            extraction_params, filter_config, logger
+        )
+
     base_adapter = DataSourceFactory.create(
         "chembl",
         http_client=http_client,
         logger=logger,
         adapter_config=adapter_config,
         metrics=metrics,
+        extraction_params=extraction_params,
     )
 
     # Wrap with PublicationTermDataSource for derived entity extraction
@@ -9045,9 +9832,6 @@ def _create_uniprot_idmapping_data_source(
     """
     from pathlib import Path
 
-    # Ignore filter_config - the input file IS the data source
-    _ = filter_config
-
     _, HttpClientFactory = _get_factories()
 
     # Create HTTP client for ID Mapping API
@@ -9079,12 +9863,18 @@ def _create_uniprot_idmapping_data_source(
         from_db = getattr(pipeline_config.source.api, "from_db", from_db)
         to_db = getattr(pipeline_config.source.api, "to_db", to_db)
 
+    # Extract seed IDs from filter_config (composite mode)
+    seed_ids: list[str] | None = None
+    if filter_config and filter_config.direct_filter_ids:
+        seed_ids = list(filter_config.direct_filter_ids)
+
     return IDMappingDataSource(
         idmapping_client=idmapping_client,
         input_path=input_path,
         logger=logger,
         from_db=from_db,
         to_db=to_db,
+        seed_ids=seed_ids,
     )
 
 
@@ -9296,6 +10086,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.domain.config import RuntimeConfig
+    from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID
@@ -9309,6 +10100,7 @@ class PipelineFactoryProtocol(Protocol):
 
     pipeline_name: str
     silver_schema: pa.Schema | None
+    pandera_silver_schema: Any
 
     def create_with_services(
         self,
@@ -9321,6 +10113,7 @@ class PipelineFactoryProtocol(Protocol):
         tracer: TracingPort | None = ...,
         dq_monitor: DQMonitorPort | None = ...,
         metrics: MetricsPort | None = ...,
+        cached_bronze: CachedBronzeContext | None = ...,
     ) -> BasePipeline:
         """Create pipeline with services."""
         ...
@@ -9333,6 +10126,7 @@ class PipelineFactoryProtocol(Protocol):
         observability: ObservabilityBundle,
         filter_config: InputFilterConfig | None = None,
         config: PipelineYamlConfig | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
         """Create pipeline runner."""
         ...
@@ -9349,6 +10143,9 @@ class PipelineDefinition(NamedTuple):
 
     gold_schema: Any
     """Pandera schema for Gold layer validation (required)."""
+
+    pandera_silver_schema: Any = None
+    """Pandera DataFrameModel class for Silver layer validation."""
 
 
 class PipelineRegistry:
@@ -9407,6 +10204,7 @@ class PipelineRegistry:
                 factory=factory,
                 silver_schema=factory.silver_schema,
                 gold_schema=gold_schema,
+                pandera_silver_schema=getattr(factory, "pandera_silver_schema", None),
             )
 
     def get(self, pipeline_name: str) -> PipelineDefinition:
@@ -9485,6 +10283,7 @@ class PipelineRegistry:
                 factory=value,
                 silver_schema=value.silver_schema,
                 gold_schema=gold_schema,
+                pandera_silver_schema=getattr(value, "pandera_silver_schema", None),
             )
 
     def list_keys(self) -> list[str]:
@@ -9947,6 +10746,8 @@ class MetadataCoordinator:
                     idx = file_path.find("src/bioetl")
                     contract_path = file_path[idx:]
         except Exception:
+            # Catch all: module may not have __file__, or path extraction may fail
+            # for dynamically generated modules. Use default contract_path = None.
             pass
 
         # Extract schema version from Config if defined

@@ -6,7 +6,6 @@ to prevent fan-out when enricher has duplicate values by join keys.
 
 from __future__ import annotations
 
-from datetime import date, datetime, time, timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -62,8 +61,9 @@ class EnricherDeduplicator:
         missing_cols = [c for c in key_columns if c not in df.columns]
         if missing_cols:
             return False
-        unique_count = df.select(key_columns).n_unique()
-        return unique_count < len(df)
+        unique_count: int = df.select(key_columns).n_unique()
+        has_duplicates: bool = unique_count < len(df)
+        return has_duplicates
 
     def _aggregate_duplicates(
         self,
@@ -153,7 +153,8 @@ class EnricherDeduplicator:
         conflicts = conflict_check.filter(
             (pl.col("n_unique") > 1) | (pl.col("has_null") & ~pl.col("all_null"))
         )
-        return conflicts.height > 0
+        has_conflicts: bool = conflicts.height > 0
+        return has_conflicts
 
     def _build_concat_expr(self, column: str, dtype: pl.DataType) -> pl.Expr:
         """Build expression that concatenates values with |.
@@ -212,30 +213,3 @@ class EnricherDeduplicator:
             records_after=records_after,
             columns_with_conflicts=columns_with_conflicts,
         )
-
-
-def value_to_string(value: object, dtype: pl.DataType) -> str:
-    """Convert a single value to string representation.
-
-    Args:
-        value: Value to convert.
-        dtype: Original data type.
-
-    Returns:
-        String representation.
-    """
-    if value is None:
-        return "null"
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, date) and not isinstance(value, datetime):
-        return value.isoformat()
-    if isinstance(value, datetime):
-        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
-    if isinstance(value, time):
-        return value.isoformat()
-    if isinstance(value, timedelta):
-        return str(value)
-    if isinstance(value, (list, dict)):
-        return str(value)
-    return str(value)

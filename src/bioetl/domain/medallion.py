@@ -7,7 +7,7 @@ These are pure domain objects with no dependencies on infrastructure.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.domain.exceptions import PolicyViolationError
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import RunType
 
 
-class Layer(str, Enum):
+class Layer(StrEnum):
     """Medallion architecture layers.
 
     Attributes:
@@ -30,7 +30,7 @@ class Layer(str, Enum):
     GOLD = "gold"
 
 
-class WriteMode(str, Enum):
+class WriteMode(StrEnum):
     """Write mode for data operations.
 
     Attributes:
@@ -44,7 +44,7 @@ class WriteMode(str, Enum):
     OVERWRITE = "overwrite"
 
 
-class SilverWriteMode(str, Enum):
+class SilverWriteMode(StrEnum):
     """Allowed write modes for Silver layer.
 
     Domain enum consolidating Silver layer write semantics.
@@ -82,7 +82,7 @@ class SilverWriteMode(str, Enum):
             ) from None
 
 
-class GoldWriteMode(str, Enum):
+class GoldWriteMode(StrEnum):
     """Allowed write modes for Gold layer.
 
     Domain enum consolidating Gold layer write semantics.
@@ -165,7 +165,7 @@ class WriteModePolicy:
             )
 
 
-class LoadingStrategy(str, Enum):
+class LoadingStrategy(StrEnum):
     """Loading strategy for pipeline data extraction.
 
     Determines how the pipeline handles incremental vs full data loading.
@@ -176,17 +176,11 @@ class LoadingStrategy(str, Enum):
             Checkpoint-based resume is disabled. Deduplication is handled
             on Silver layer via content_hash. Required for entities with
             unstable API pagination (e.g., publications).
-        WATERMARK_BASED: Incremental loading based on watermark field.
-            NOT YET IMPLEMENTED - placeholder for future watermark support.
-            Requires confirmed watermark field availability in source API.
 
     Example:
         >>> strategy = LoadingStrategy.FULL_SCAN_ONLY
         >>> strategy.allows_checkpoint_resume
         False
-        >>> strategy = LoadingStrategy.WATERMARK_BASED
-        >>> strategy.allows_checkpoint_resume
-        True
 
     See Also:
         ADR-030: Publication pagination strategy (force_full_scan)
@@ -196,9 +190,6 @@ class LoadingStrategy(str, Enum):
     FULL_SCAN_ONLY = "full_scan_only"
     """Full scan on each run. No checkpoint resume. Deduplication via content_hash."""
 
-    WATERMARK_BASED = "watermark_based"
-    """Incremental loading via watermark. Placeholder - NOT YET IMPLEMENTED."""
-
     @property
     def allows_checkpoint_resume(self) -> bool:
         """Check if this strategy allows checkpoint-based resume.
@@ -206,14 +197,14 @@ class LoadingStrategy(str, Enum):
         Returns:
             True if checkpoint resume is allowed, False otherwise.
         """
-        return self != LoadingStrategy.FULL_SCAN_ONLY
+        return False
 
     @classmethod
     def from_string(cls, value: str) -> LoadingStrategy:
         """Convert string to LoadingStrategy with validation.
 
         Args:
-            value: String value (e.g., "full_scan_only", "watermark_based")
+            value: String value (e.g., "full_scan_only")
 
         Returns:
             Corresponding LoadingStrategy enum value
@@ -230,7 +221,7 @@ class LoadingStrategy(str, Enum):
             ) from None
 
     @classmethod
-    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:
+    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:  # noqa: ARG003
         """Convert legacy force_full_scan flag to LoadingStrategy.
 
         Provides backward compatibility with existing configs using
@@ -240,12 +231,12 @@ class LoadingStrategy(str, Enum):
             force_full_scan: Legacy boolean flag
 
         Returns:
-            FULL_SCAN_ONLY if force_full_scan is True, WATERMARK_BASED otherwise
+            FULL_SCAN_ONLY (always, since watermark-based loading was removed)
         """
-        return cls.FULL_SCAN_ONLY if force_full_scan else cls.WATERMARK_BASED
+        return cls.FULL_SCAN_ONLY
 
 
-class ClearPolicy(str, Enum):
+class ClearPolicy(StrEnum):
     """Policy for clearing medallion layers.
 
     Determines which layers should be cleared before a pipeline run.
