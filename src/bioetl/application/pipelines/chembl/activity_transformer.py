@@ -22,10 +22,11 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.transformations import safe_float, safe_int
-from bioetl.domain.value_objects import validate_taxonomy_id
+from bioetl.domain.value_objects import validate_taxonomy_id_str
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 # Mapping for ligand efficiency fields extraction (nested dict)
@@ -73,7 +74,7 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
         FieldSpec(
             "target_tax_id",
             target="taxonomy_id",
-            converter=validate_taxonomy_id,
+            converter=validate_taxonomy_id_str,
         ),
         *simple_fields(
             "assay_type",
@@ -186,6 +187,21 @@ class ActivityTransformer(BaseChemblTransformer):
             _ACTION_TYPE_FIELDS,
             renames={"action_type_action_type": "action_type"},
         )
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Transform and emit legacy action-type alias for compatibility."""
+        transformed = await super()._transform_impl(context, record, index)
+        if transformed is None:
+            return None
+        # Keep legacy Silver field name expected by existing contracts/tests.
+        transformed["action_type_action_type"] = transformed.get("action_type")
+        transformed.pop("action_type", None)
+        return transformed
 
     def _extract_business_data(
         self,

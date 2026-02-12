@@ -81,11 +81,9 @@ class PubChemCompoundTransformer(BaseTransformer):
         self, record: BronzeRecord
     ) -> dict[str, float | int | None]:
         """Extract and validate computed molecular descriptors."""
-        logp_val = safe_float(record.get("xlogp"))  # Can be negative
         return {
-            "logp": logp_val,
-            "logp_method": "xlogp" if logp_val is not None else None,
-            "polar_surface_area": validate_non_negative(record.get("tpsa")),
+            "xlogp": safe_float(record.get("xlogp")),  # Can be negative
+            "tpsa": validate_non_negative(record.get("tpsa")),
             "complexity": validate_non_negative(record.get("complexity")),
             "charge": safe_int(record.get("charge")),  # Can be negative
         }
@@ -165,7 +163,15 @@ class PubChemCompoundTransformer(BaseTransformer):
             SilverRecord if transformation successful, None if skipped.
 
         """
-        cid = self._get_required_field(record, "cid")
+        cid = record.get("cid")
+        if cid is None:
+            cid = record.get("molecule_id")
+        if cid is None:
+            context.logger.warning(
+                "Skipping PubChem compound: missing compound identifier",
+                index=index,
+            )
+            return None
 
         # Build business data with all physicochemical properties
         business_data: dict[str, Any] = {
@@ -173,7 +179,9 @@ class PubChemCompoundTransformer(BaseTransformer):
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),
             "inchi": record.get("inchi"),
-            "inchi_key": self.validate_value_object(InChIKey, record.get("inchikey")),
+            "inchi_key": self.validate_value_object(
+                InChIKey, record.get("inchikey") or record.get("inchi_key")
+            ),
             "molecular_formula": record.get("molecular_formula"),
             "iupac_name": record.get("iupac_name"),
             "molecular_weight": validate_molecular_weight(

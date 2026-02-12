@@ -101,7 +101,7 @@ _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
         canonical_name="publication",
         api_resource="document",
         plural_key="documents",
-        primary_key_field="document_chembl_id",
+        primary_key_field="publication_id",
     ),
     PublicationMapping(
         canonical_name="publication_similarity",
@@ -116,10 +116,10 @@ _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
         canonical_name="publication_term",
         api_resource="document",  # Derived from publication endpoint
         plural_key="documents",
-        primary_key_field="document_chembl_id",
+        primary_key_field="publication_id",
         # Composite key for uniqueness: document + term type + term text
         # Note: entity_id is SHA256 hash of this composite key
-        primary_key_fields=("document_chembl_id", "term_type", "term"),
+        primary_key_fields=("publication_id", "term_type", "term"),
     ),
     # Legacy aliases (backward compatibility ONLY)
     # DO NOT use in new code. Will be deprecated.

@@ -135,7 +135,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
             # Primary identifier (integer)
             "assay_param_id": int(primary_id),
             # Foreign key
-            "assay_chembl_id": record.get("assay_chembl_id"),
+            "assay_id": record.get("assay_id") or record.get("assay_chembl_id"),
             # Normalized type
             "type": normalized_type,
         }
