@@ -15,10 +15,10 @@ from bioetl.domain.mapping.publication_type_classification import (
 )
 
 __all__ = [
-    "PUBLICATION_FIELD_MAPPING",
-    "UNIFIED_TO_PROVIDER",
     "ACTIVITY_FIELD_MAPPING",
     "MOLECULE_FIELD_MAPPING",
+    "PUBLICATION_FIELD_MAPPING",
+    "UNIFIED_TO_PROVIDER",
     "PublicationTypeEntry",
     "apply_field_mapping",
     "classify_publication_type",

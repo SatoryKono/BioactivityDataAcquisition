@@ -4,11 +4,10 @@ import csv
 import os
 import re
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterable
-
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC_DIRS = [
@@ -117,7 +116,14 @@ RISK_LOW_HINTS = {
     "navigation",
     "навигация",
 }
-NOISY_PATH_PARTS = {"fixtures", "vcr", "cassette", "cassette_library", "snapshots", "fixtures-data"}
+NOISY_PATH_PARTS = {
+    "fixtures",
+    "vcr",
+    "cassette",
+    "cassette_library",
+    "snapshots",
+    "fixtures-data",
+}
 
 
 @dataclass(frozen=True)
@@ -130,7 +136,10 @@ class Evidence:
 
 def iter_doc_files() -> list[Path]:
     files = sorted((ROOT / "docs").rglob("*.md"))
-    for extra in (ROOT / "README.md", ROOT / "docs" / "01-requirements" / "REQUIREMENTS.md"):
+    for extra in (
+        ROOT / "README.md",
+        ROOT / "docs" / "01-requirements" / "REQUIREMENTS.md",
+    ):
         if extra.exists():
             files.append(extra)
     # Deduplicate preserving deterministic order
@@ -150,7 +159,11 @@ def clean_markdown_line(line: str) -> str:
     s = re.sub(r"^\s*[-*+]\s+", "", s)
     s = re.sub(r"^\s*\d+\.\s+", "", s)
     if "|" in s and re.search(r"\|", s):
-        s = " ".join(part.strip() for part in s.split("|") if part.strip() and not set(part.strip()) <= {"-"})
+        s = " ".join(
+            part.strip()
+            for part in s.split("|")
+            if part.strip() and not set(part.strip()) <= {"-"}
+        )
     s = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1", s)
     s = re.sub(r"<[^>]+>", " ", s)
     s = re.sub(r"\s+", " ", s).strip()
@@ -261,7 +274,9 @@ def find_evidence(
     probe_tokens = ranked_tokens[:5]
 
     candidate_ids: set[int] = set()
-    postings = [inverted.get(token, set()) for token in probe_tokens if token in inverted]
+    postings = [
+        inverted.get(token, set()) for token in probe_tokens if token in inverted
+    ]
     postings = sorted(postings, key=len)
     if len(postings) >= 2:
         candidate_ids = postings[0] & postings[1]
@@ -273,14 +288,18 @@ def find_evidence(
     # Fast path lookup for explicit backtick file references.
     for bt in backticks:
         bt_norm = bt.strip().replace("\\", "/")
-        if "/" in bt_norm or bt_norm.endswith((".py", ".md", ".yml", ".yaml", ".toml", ".json")):
+        if "/" in bt_norm or bt_norm.endswith(
+            (".py", ".md", ".yml", ".yaml", ".toml", ".json")
+        ):
             abs_path = (ROOT / bt_norm).resolve()
             if abs_path.exists():
                 key = str(abs_path).replace("\\", "/").lower()
                 if key in first_line_idx_by_path:
                     idx = first_line_idx_by_path[key]
                     path, line_no, line = lines[idx]
-                    return Evidence(path=path, line_no=line_no, line=line.strip(), score=10)
+                    return Evidence(
+                        path=path, line_no=line_no, line=line.strip(), score=10
+                    )
 
     if not candidate_ids:
         return None
@@ -303,11 +322,15 @@ def find_evidence(
             candidate.line_no,
         )
         current_tuple = (
-            best.score,
-            path_weight(best.path),
-            str(best.path),
-            best.line_no,
-        ) if best is not None else None
+            (
+                best.score,
+                path_weight(best.path),
+                str(best.path),
+                best.line_no,
+            )
+            if best is not None
+            else None
+        )
         if best is None or best_tuple > current_tuple:
             best = candidate
     return best
@@ -373,7 +396,9 @@ def generate() -> None:
         text = read_text_robust(doc)
         sentences = extract_sentences(text)
         for i, sentence in enumerate(sentences, start=1):
-            evidence = find_evidence(sentence, inverted, lines, freq, first_line_idx_by_path)
+            evidence = find_evidence(
+                sentence, inverted, lines, freq, first_line_idx_by_path
+            )
             status, reason = evaluate_status(sentence, evidence)
             risk = classify_risk(sentence)
             code_link = ""
@@ -422,7 +447,11 @@ def generate() -> None:
     ok = sum(1 for r in rows if r["описание соответствует кода (да/нет)"] == "да")
     bad = total - ok
     high_total = sum(1 for r in rows if r["risk"] == "high")
-    high_ok = sum(1 for r in rows if r["risk"] == "high" and r["описание соответствует кода (да/нет)"] == "да")
+    high_ok = sum(
+        1
+        for r in rows
+        if r["risk"] == "high" and r["описание соответствует кода (да/нет)"] == "да"
+    )
     high_bad = high_total - high_ok
 
     generated_at = generated_at_iso()
@@ -433,10 +462,16 @@ def generate() -> None:
         f.write(f"- Проверено предложений: {total}\n")
         f.write(f"- Соответствует коду: {ok}\n")
         f.write(f"- Не соответствует / не подтверждено автоматически: {bad}\n")
-        f.write(f"- High-risk предложений: {high_total} (да: {high_ok}, нет: {high_bad})\n")
+        f.write(
+            f"- High-risk предложений: {high_total} (да: {high_ok}, нет: {high_bad})\n"
+        )
         f.write(f"- Полный CSV: `{rel(OUT_CSV)}`\n\n")
         f.write("## Топ-20 документов с максимальным числом несоответствий\n\n")
-        bad_by_doc = Counter(r["документ"] for r in rows if r["описание соответствует кода (да/нет)"] == "нет")
+        bad_by_doc = Counter(
+            r["документ"]
+            for r in rows
+            if r["описание соответствует кода (да/нет)"] == "нет"
+        )
         f.write("| Документ | Несоответствий |\n")
         f.write("|---|---:|\n")
         for doc_name, cnt in bad_by_doc.most_common(20):
@@ -446,7 +481,9 @@ def generate() -> None:
         f.write("# Набор промптов для модификации документов\n\n")
         f.write("Ниже шаблоны для каждого документа, где найдены несоответствия.\n\n")
         for doc_name in sorted(prompt_map):
-            mismatches = sorted(prompt_map[doc_name], key=lambda m: int(m["номер предложения"]))
+            mismatches = sorted(
+                prompt_map[doc_name], key=lambda m: int(m["номер предложения"])
+            )
             f.write(f"## {doc_name}\n\n")
             f.write("```text\n")
             f.write(
@@ -465,14 +502,20 @@ def generate() -> None:
                     f"  - Причина статуса: {m['причина']}\n"
                 )
             if len(mismatches) > 50:
-                f.write(f"- ... и еще {len(mismatches) - 50} предложений (см. полный CSV-отчет)\n")
+                f.write(
+                    f"- ... и еще {len(mismatches) - 50} предложений (см. полный CSV-отчет)\n"
+                )
             f.write("```\n\n")
 
     with OUT_PROMPTS_HIGH.open("w", encoding="utf-8") as f:
         f.write("# High-risk промпты для модификации документов\n\n")
-        f.write("Сфокусируйтесь на утверждениях, влияющих на контракты, схемы, API, политики.\n\n")
+        f.write(
+            "Сфокусируйтесь на утверждениях, влияющих на контракты, схемы, API, политики.\n\n"
+        )
         for doc_name in sorted(prompt_map_high):
-            mismatches = sorted(prompt_map_high[doc_name], key=lambda m: int(m["номер предложения"]))
+            mismatches = sorted(
+                prompt_map_high[doc_name], key=lambda m: int(m["номер предложения"])
+            )
             f.write(f"## {doc_name}\n\n")
             f.write("```text\n")
             f.write(
@@ -491,7 +534,9 @@ def generate() -> None:
                     f"  - Причина статуса: {m['причина']}\n"
                 )
             if len(mismatches) > 50:
-                f.write(f"- ... и еще {len(mismatches) - 50} предложений (см. полный CSV-отчет)\n")
+                f.write(
+                    f"- ... и еще {len(mismatches) - 50} предложений (см. полный CSV-отчет)\n"
+                )
             f.write("```\n\n")
 
 

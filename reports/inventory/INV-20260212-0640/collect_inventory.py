@@ -3,6 +3,7 @@
 Builds object registry, reference counts, duplicate detection, and
 dependency map for src/bioetl and renders markdown report.
 """
+
 from __future__ import annotations
 
 # ruff: noqa
@@ -57,7 +58,9 @@ def format_args(args: ast.arguments) -> str:
 
     positional = list(args.posonlyargs) + list(args.args)
     defaults_raw = [fmt_default(d) for d in args.defaults]
-    defaults: List[Optional[str]] = [None] * (len(positional) - len(defaults_raw)) + defaults_raw
+    defaults: List[Optional[str]] = [None] * (
+        len(positional) - len(defaults_raw)
+    ) + defaults_raw
 
     for idx, (arg, default) in enumerate(zip(positional, defaults)):
         items.append(fmt_arg(arg, default))
@@ -65,7 +68,11 @@ def format_args(args: ast.arguments) -> str:
             items.append("/")
 
     if args.vararg:
-        var_ann = ast.unparse(args.vararg.annotation).strip() if args.vararg.annotation else ""
+        var_ann = (
+            ast.unparse(args.vararg.annotation).strip()
+            if args.vararg.annotation
+            else ""
+        )
         var_piece = f"*{args.vararg.arg}"
         if var_ann:
             var_piece += f": {var_ann}"
@@ -74,10 +81,14 @@ def format_args(args: ast.arguments) -> str:
         items.append("*")
 
     kw_defaults = [fmt_default(d) for d in args.kw_defaults]
-    items.extend(fmt_arg(arg, default) for arg, default in zip(args.kwonlyargs, kw_defaults))
+    items.extend(
+        fmt_arg(arg, default) for arg, default in zip(args.kwonlyargs, kw_defaults)
+    )
 
     if args.kwarg:
-        kw_ann = ast.unparse(args.kwarg.annotation).strip() if args.kwarg.annotation else ""
+        kw_ann = (
+            ast.unparse(args.kwarg.annotation).strip() if args.kwarg.annotation else ""
+        )
         kw_piece = f"**{args.kwarg.arg}"
         if kw_ann:
             kw_piece += f": {kw_ann}"
@@ -87,7 +98,17 @@ def format_args(args: ast.arguments) -> str:
 
 
 def class_suffix(name: str) -> Optional[str]:
-    suffixes = ["Factory", "Client", "Port", "Service", "Transformer", "Error", "Exception", "Schema", "Config"]
+    suffixes = [
+        "Factory",
+        "Client",
+        "Port",
+        "Service",
+        "Transformer",
+        "Error",
+        "Exception",
+        "Schema",
+        "Config",
+    ]
     for suffix in suffixes:
         if name.endswith(suffix):
             return suffix
@@ -101,13 +122,25 @@ def is_upper_constant(name: str) -> bool:
 def is_type_alias(name: str, value_src: str) -> bool:
     if not re.fullmatch(r"[A-Z][A-Za-z0-9_]*", name):
         return False
-    patterns = ["TypeAlias", "TypeVar", "ParamSpec", "Annotated", "Union", "dict[", "list[", "tuple["]
+    patterns = [
+        "TypeAlias",
+        "TypeVar",
+        "ParamSpec",
+        "Annotated",
+        "Union",
+        "dict[",
+        "list[",
+        "tuple[",
+    ]
     return any(pat in value_src for pat in patterns)
 
 
 def strip_docstring(body: List[ast.stmt]) -> List[ast.stmt]:
-    if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and isinstance(
-        body[0].value.value, str
+    if (
+        body
+        and isinstance(body[0], ast.Expr)
+        and isinstance(body[0].value, ast.Constant)
+        and isinstance(body[0].value.value, str)
     ):
         return body[1:]
     return body
@@ -144,7 +177,9 @@ class ObjectRecord:
         return f"{self.module}.{self.name}"
 
 
-def parse_file(path: Path) -> Tuple[List[ObjectRecord], Counter, Counter, List[str], List[str]]:
+def parse_file(
+    path: Path,
+) -> Tuple[List[ObjectRecord], Counter, Counter, List[str], List[str]]:
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source)
     layer, module = path_to_module(path)
@@ -189,7 +224,9 @@ def parse_file(path: Path) -> Tuple[List[ObjectRecord], Counter, Counter, List[s
             objects.append(obj)
             defined_names.append(node.name)
         elif isinstance(node, ast.ClassDef):
-            bases = [ast.unparse(base).strip() for base in node.bases] if node.bases else []
+            bases = (
+                [ast.unparse(base).strip() for base in node.bases] if node.bases else []
+            )
             public_methods: List[str] = []
             private_methods: List[str] = []
             for m in node.body:
@@ -222,16 +259,21 @@ def parse_file(path: Path) -> Tuple[List[ObjectRecord], Counter, Counter, List[s
                 value_src = ast.unparse(node.value).strip() if node.value else ""
             else:
                 targets = [node.target]
-                value_src = ast.unparse(node.annotation).strip() if node.annotation else ""
+                value_src = (
+                    ast.unparse(node.annotation).strip() if node.annotation else ""
+                )
             for t in targets:
                 if isinstance(t, ast.Name):
                     name = t.id
                     if name == "__all__":
-                        if isinstance(node, ast.Assign) and isinstance(node.value, (ast.List, ast.Tuple)):
+                        if isinstance(node, ast.Assign) and isinstance(
+                            node.value, (ast.List, ast.Tuple)
+                        ):
                             exports = [
                                 elt.value
                                 for elt in node.value.elts
-                                if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+                                if isinstance(elt, ast.Constant)
+                                and isinstance(elt.value, str)
                             ]
                             all_exports.extend(exports)
                             objects.append(
@@ -287,17 +329,26 @@ def collect_objects() -> Tuple[List[ObjectRecord], dict, dict, dict]:
 
     for layer in LAYER_ORDER:
         for path in sorted((SRC / layer).rglob("*.py")):
-            obj_list, names_counter, attrs_counter, defined_names, all_exports = parse_file(path)
+            obj_list, names_counter, attrs_counter, defined_names, all_exports = (
+                parse_file(path)
+            )
             objects.extend(obj_list)
             file_name_counts[str(path)] = names_counter
             file_attr_counts[str(path)] = attrs_counter
             module_defined[str(path)] = defined_names
             module_all_exports[str(path)] = all_exports
     objects.sort(key=lambda o: (LAYER_ORDER.index(o.layer), o.module, o.type, o.name))
-    return objects, file_name_counts, file_attr_counts, {"defined": module_defined, "exports": module_all_exports}
+    return (
+        objects,
+        file_name_counts,
+        file_attr_counts,
+        {"defined": module_defined, "exports": module_all_exports},
+    )
 
 
-def collect_usage_counts(file_name_counts: dict[str, Counter], file_attr_counts: dict[str, Counter]) -> Tuple[Counter, Counter, Counter, Counter]:
+def collect_usage_counts(
+    file_name_counts: dict[str, Counter], file_attr_counts: dict[str, Counter]
+) -> Tuple[Counter, Counter, Counter, Counter]:
     prod_name = Counter()
     prod_attr = Counter()
     test_name = Counter()
@@ -316,10 +367,20 @@ def collect_usage_counts(file_name_counts: dict[str, Counter], file_attr_counts:
     return prod_name, prod_attr, test_name, test_attr
 
 
-def classify_object(obj: ObjectRecord, prod_name: Counter, prod_attr: Counter, test_name: Counter, test_attr: Counter, file_name_counts: dict[str, Counter], file_attr_counts: dict[str, Counter]) -> dict:
+def classify_object(
+    obj: ObjectRecord,
+    prod_name: Counter,
+    prod_attr: Counter,
+    test_name: Counter,
+    test_attr: Counter,
+    file_name_counts: dict[str, Counter],
+    file_attr_counts: dict[str, Counter],
+) -> dict:
     prod_refs = prod_name.get(obj.name, 0) + prod_attr.get(obj.name, 0)
     test_refs = test_name.get(obj.name, 0) + test_attr.get(obj.name, 0)
-    self_refs = file_name_counts.get(obj.file, Counter()).get(obj.name, 0) + file_attr_counts.get(obj.file, Counter()).get(obj.name, 0)
+    self_refs = file_name_counts.get(obj.file, Counter()).get(
+        obj.name, 0
+    ) + file_attr_counts.get(obj.file, Counter()).get(obj.name, 0)
 
     classification: str
     if prod_refs > 0 and test_refs > 0:
@@ -335,7 +396,11 @@ def classify_object(obj: ObjectRecord, prod_name: Counter, prod_attr: Counter, t
 
     exempt_reason: Optional[str] = None
     if classification == "DEAD":
-        if obj.type == "class" and (obj.name.endswith("Port") or obj.name.endswith("Schema") or "Protocol" in (obj.base_classes or [])):
+        if obj.type == "class" and (
+            obj.name.endswith("Port")
+            or obj.name.endswith("Schema")
+            or "Protocol" in (obj.base_classes or [])
+        ):
             exempt_reason = "Protocol/Port/Schema exemption"
         if obj.type == "__all__":
             exempt_reason = "__all__ facade"
@@ -383,7 +448,15 @@ def detect_orphans(objects: List[ObjectRecord]) -> List[dict]:
             loc = sum(1 for _ in Path(file).read_text(encoding="utf-8").splitlines())
             layer = module.split(".")[1] if "." in module else "unknown"
             defined = [obj.name for obj in objects if obj.module == module]
-            orphans.append({"module": module, "file": file, "layer": layer, "loc": loc, "objects": defined})
+            orphans.append(
+                {
+                    "module": module,
+                    "file": file,
+                    "layer": layer,
+                    "loc": loc,
+                    "objects": defined,
+                }
+            )
     orphans.sort(key=lambda x: (LAYER_ORDER.index(x["layer"]), x["module"]))
     return orphans
 
@@ -418,7 +491,9 @@ def detect_duplicates(objects: List[ObjectRecord]) -> List[dict]:
                     "file": g.file,
                     "loc": g.loc,
                 }
-                for g in sorted(group, key=lambda x: (LAYER_ORDER.index(x.layer), x.module, x.name))
+                for g in sorted(
+                    group, key=lambda x: (LAYER_ORDER.index(x.layer), x.module, x.name)
+                )
             ],
         }
         duplicates.append(entry)
@@ -449,7 +524,11 @@ def build_dependency_map() -> dict:
             for node in ast.walk(tree):
                 targets: List[str] = []
                 if isinstance(node, ast.Import):
-                    targets = [alias.name for alias in node.names if alias.name.startswith("bioetl.")]
+                    targets = [
+                        alias.name
+                        for alias in node.names
+                        if alias.name.startswith("bioetl.")
+                    ]
                 elif isinstance(node, ast.ImportFrom):
                     if node.level and node.module:
                         resolved = resolve_relative(module, node.level, node.module)
@@ -528,11 +607,19 @@ def build_dependency_map() -> dict:
     }
 
 
-def render_report(objects: List[ObjectRecord], refs: List[dict], duplicates: List[dict], orphans: List[dict], depmap: dict) -> str:
+def render_report(
+    objects: List[ObjectRecord],
+    refs: List[dict],
+    duplicates: List[dict],
+    orphans: List[dict],
+    depmap: dict,
+) -> str:
     total_classes = sum(1 for o in objects if o.type == "class")
     total_functions = sum(1 for o in objects if o.type == "function")
     total_constants = sum(1 for o in objects if o.type == "constant")
-    dead_objects = [r for r in refs if r["classification"] == "DEAD" and r["exempt_reason"] is None]
+    dead_objects = [
+        r for r in refs if r["classification"] == "DEAD" and r["exempt_reason"] is None
+    ]
     summary = [
         "| Метрика | Значение |",
         "|---------|----------|",
@@ -560,7 +647,9 @@ def render_report(objects: List[ObjectRecord], refs: List[dict], duplicates: Lis
                     details.append(f"public={','.join(o.public_methods)}")
             if o.type == "function" and o.signature:
                 details.append(o.signature)
-            lines.append(f"| {o.type} | {o.name} | {o.module} | {o.loc} | {'; '.join(details)} |")
+            lines.append(
+                f"| {o.type} | {o.name} | {o.module} | {o.loc} | {'; '.join(details)} |"
+            )
         return "\n".join(lines) if len(lines) > 2 else "_no objects_"
 
     dead_section = [
@@ -568,7 +657,9 @@ def render_report(objects: List[ObjectRecord], refs: List[dict], duplicates: Lis
         "|---|--------|------|-------|------|",
     ]
     for idx, obj in enumerate(dead_objects, 1):
-        dead_section.append(f"| {idx} | {obj['qualname']} | {obj['type']} | {obj['layer']} | {obj['file']} |")
+        dead_section.append(
+            f"| {idx} | {obj['qualname']} | {obj['type']} | {obj['layer']} | {obj['file']} |"
+        )
     if len(dead_section) == 2:
         dead_section.append("| – | – | – | – | – |")
 
@@ -577,7 +668,9 @@ def render_report(objects: List[ObjectRecord], refs: List[dict], duplicates: Lis
         "|---|------|-----|----------------|",
     ]
     for idx, entry in enumerate(orphans, 1):
-        orphan_section.append(f"| {idx} | {entry['file']} | {entry['loc']} | {', '.join(entry['objects'])} |")
+        orphan_section.append(
+            f"| {idx} | {entry['file']} | {entry['loc']} | {', '.join(entry['objects'])} |"
+        )
     if len(orphan_section) == 2:
         orphan_section.append("| – | – | – | – |")
 
@@ -587,15 +680,18 @@ def render_report(objects: List[ObjectRecord], refs: List[dict], duplicates: Lis
     ]
     for idx, entry in enumerate(duplicates, 1):
         objs = "; ".join([o["qualname"] for o in entry["objects"]])
-        dup_section.append(f"| {idx} | {entry['hash'][:12]} | {entry['loc']} | {entry['severity']} | {objs} |")
+        dup_section.append(
+            f"| {idx} | {entry['hash'][:12]} | {entry['loc']} | {entry['severity']} | {objs} |"
+        )
     if len(dup_section) == 2:
         dup_section.append("| – | – | – | – | – |")
 
     fanout_top = sorted(depmap["fan_out"].items(), key=lambda x: -x[1])[:10]
     fanin_top = sorted(depmap["fan_in"].items(), key=lambda x: -x[1])[:10]
-    fanout_lines = ["| Object | Dependencies Count |", "|--------|-------------------|"] + [
-        f"| {k} | {v} |" for k, v in fanout_top
-    ]
+    fanout_lines = [
+        "| Object | Dependencies Count |",
+        "|--------|-------------------|",
+    ] + [f"| {k} | {v} |" for k, v in fanout_top]
     fanin_lines = ["| Object | Dependents Count |", "|--------|-----------------|"] + [
         f"| {k} | {v} |" for k, v in fanin_top
     ]
@@ -617,7 +713,9 @@ def render_report(objects: List[ObjectRecord], refs: List[dict], duplicates: Lis
     ]
 
     for layer in LAYER_ORDER:
-        report_parts.append(f"### 1.{LAYER_ORDER.index(layer)+1} {layer.capitalize()} Layer")
+        report_parts.append(
+            f"### 1.{LAYER_ORDER.index(layer) + 1} {layer.capitalize()} Layer"
+        )
         report_parts.append(layer_table(layer))
         report_parts.append("")
 
@@ -655,10 +753,20 @@ def render_report(objects: List[ObjectRecord], refs: List[dict], duplicates: Lis
 
 def main() -> None:
     objects, file_name_counts, file_attr_counts, module_info = collect_objects()
-    prod_name, prod_attr, test_name, test_attr = collect_usage_counts(file_name_counts, file_attr_counts)
+    prod_name, prod_attr, test_name, test_attr = collect_usage_counts(
+        file_name_counts, file_attr_counts
+    )
 
     refs = [
-        classify_object(obj, prod_name, prod_attr, test_name, test_attr, file_name_counts, file_attr_counts)
+        classify_object(
+            obj,
+            prod_name,
+            prod_attr,
+            test_name,
+            test_attr,
+            file_name_counts,
+            file_attr_counts,
+        )
         for obj in objects
     ]
 
@@ -666,8 +774,14 @@ def main() -> None:
     duplicates = detect_duplicates(objects)
     depmap = build_dependency_map()
 
-    atomic_write(OUT_DIR / "objects.json", json.dumps([asdict(o) | {"qualname": o.qualname} for o in objects], indent=2))
-    atomic_write(OUT_DIR / "references.json", json.dumps({"objects": refs, "orphans": orphans}, indent=2))
+    atomic_write(
+        OUT_DIR / "objects.json",
+        json.dumps([asdict(o) | {"qualname": o.qualname} for o in objects], indent=2),
+    )
+    atomic_write(
+        OUT_DIR / "references.json",
+        json.dumps({"objects": refs, "orphans": orphans}, indent=2),
+    )
     atomic_write(OUT_DIR / "duplicates.json", json.dumps(duplicates, indent=2))
     atomic_write(OUT_DIR / "dependency-map.json", json.dumps(depmap, indent=2))
 
