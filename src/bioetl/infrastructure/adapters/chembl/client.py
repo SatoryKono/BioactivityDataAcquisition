@@ -955,7 +955,9 @@ class ChemblAdapter(BaseHttpAdapter):
 
         # Prepare batches for each filter field
         filter_keys = list(filters.keys())
-        api_filter_keys = [self._normalize_filter_field(entity_type, k) for k in filter_keys]
+        api_filter_keys = [
+            self._normalize_filter_field(entity_type, k) for k in filter_keys
+        ]
         filter_batches = [
             list(self._batch_ids(filters[k], batch_size)) for k in filter_keys
         ]
