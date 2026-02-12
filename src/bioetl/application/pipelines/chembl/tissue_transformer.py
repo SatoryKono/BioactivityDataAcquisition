@@ -24,7 +24,7 @@ class TissueTransformer(BaseChemblTransformer):
     """
 
     entity_class = Tissue
-    primary_id_field = "tissue_chembl_id"
+    primary_id_field = "tissue_id"
 
     def _extract_business_data(
         self,
@@ -35,7 +35,7 @@ class TissueTransformer(BaseChemblTransformer):
 
         Args:
             record: Raw Bronze record from ChEMBL API.
-            primary_id: Validated tissue_chembl_id value.
+            primary_id: Validated tissue_id value.
 
         Returns:
             Dictionary of Tissue business fields.
@@ -44,7 +44,7 @@ class TissueTransformer(BaseChemblTransformer):
 
         return {
             # Primary identifier
-            "tissue_chembl_id": str(primary_id),
+            "tissue_id": str(primary_id),
             # Core metadata (required)
             "pref_name": normalizer.normalize_to_string(record.get("pref_name")),
             # External ontology identifiers (optional)

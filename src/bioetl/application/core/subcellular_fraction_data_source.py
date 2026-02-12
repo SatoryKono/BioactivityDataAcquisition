@@ -106,7 +106,7 @@ class SubcellularFractionDataSource:
             else:
                 record["assay_count"] = int(record["assay_count"]) + 1
                 if record["example_assay_id"] is None:
-                    assay_id = assay.get("assay_chembl_id")
+                    assay_id = assay.get("assay_id") or assay.get("assay_chembl_id")
                     record["example_assay_id"] = (
                         str(assay_id).strip() if assay_id else None
                     )
@@ -135,7 +135,7 @@ class SubcellularFractionDataSource:
         fraction: str,
     ) -> dict[str, Any]:
         """Create a subcellular fraction record."""
-        assay_id = assay.get("assay_chembl_id")
+        assay_id = assay.get("assay_id") or assay.get("assay_chembl_id")
         return {
             "entity_id": self._compute_entity_id(fraction),
             "subcellular_fraction": fraction,
@@ -276,7 +276,7 @@ class SubcellularFractionDataSource:
             else:
                 record["assay_count"] = int(record["assay_count"]) + 1
                 if record["example_assay_id"] is None:
-                    assay_id = assay.get("assay_chembl_id")
+                    assay_id = assay.get("assay_id") or assay.get("assay_chembl_id")
                     record["example_assay_id"] = (
                         str(assay_id).strip() if assay_id else None
                     )
