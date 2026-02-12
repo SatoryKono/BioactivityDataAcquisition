@@ -86,18 +86,15 @@ class Bioactivity(BaseEntity):
     record_id: int | None = None
     src_id: int | None = None
 
-    # Molecule data
     canonical_smiles: str | None = None
     molecule_pref_name: str | None = None
     parent_molecule_id: str | None = None
 
-    # Target data
     target_pref_name: str | None = None
     target_organism: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: str | None = None
 
-    # Assay data
     assay_type: str | None = None
     assay_description: str | None = None
     assay_variant_accession: str | None = None
@@ -108,7 +105,6 @@ class Bioactivity(BaseEntity):
     bao_format: str | None = None
     bao_label: str | None = None
 
-    # Raw activity values
     type: str | None = None
     value: float | None = None
     units: str | None = None
