@@ -5,10 +5,10 @@ Scope: src/bioetl/ (all layers)
 ## Executive Summary
 | Метрика | Значение |
 |---------|----------|
-| Всего классов | 864 |
-| Всего функций (module-level) | 560 |
-| Всего констант | 186 |
-| Мёртвых объектов (DEAD) | 11 |
+| Всего классов | 863 |
+| Всего функций (module-level) | 558 |
+| Всего констант | 191 |
+| Мёртвых объектов (DEAD) | 0 |
 | Дублей (confirmed) | 1 |
 | Дублей (suspected) | 0 |
 
@@ -112,7 +112,7 @@ Scope: src/bioetl/ (all layers)
 | class | TableConfig | bioetl.domain.config.table | 35 |  |
 | class | ConditionalValidation | bioetl.domain.config.validation | 22 |  |
 | class | CrossFieldValidation | bioetl.domain.config.validation | 31 |  |
-| class | FieldValidation | bioetl.domain.config.validation | 49 |  |
+| class | FieldValidation | bioetl.domain.config.validation | 57 |  |
 | class | ValidationConfig | bioetl.domain.config.validation | 73 |  |
 | constant | DEFAULT_VALIDATION_CONFIG | bioetl.domain.config.validation | 1 |  |
 | __all__ | __all__ | bioetl.domain.configs.__init__ | 1 |  |
@@ -278,6 +278,7 @@ Scope: src/bioetl/ (all layers)
 | class | LockContextHolder | bioetl.domain.locking | 50 | public=clear,get,set |
 | class | LockNotHeldError | bioetl.domain.locking | 20 | bases=Exception |
 | __all__ | __all__ | bioetl.domain.mapping.__init__ | 1 |  |
+| constant | ACTIVITY_FIELD_MAPPING | bioetl.domain.mapping.activity_fields | 1 |  |
 | constant | MOLECULE_FIELD_MAPPING | bioetl.domain.mapping.molecule_fields | 1 |  |
 | constant | PUBLICATION_FIELD_MAPPING | bioetl.domain.mapping.publication_fields | 1 |  |
 | constant | UNIFIED_TO_PROVIDER | bioetl.domain.mapping.publication_fields | 1 |  |
@@ -612,6 +613,7 @@ Scope: src/bioetl/ (all layers)
 | constant | MAX_PUBLICATION_YEAR | bioetl.domain.validation | 1 |  |
 | constant | MIN_MOLECULAR_WEIGHT | bioetl.domain.validation | 1 |  |
 | constant | MIN_PUBLICATION_YEAR | bioetl.domain.validation | 1 |  |
+| constant | VALIDATION_API | bioetl.domain.validation | 1 |  |
 | function | _get_default_config | bioetl.domain.validation | 5 | () |
 | function | validate_doi | bioetl.domain.validation | 25 | (doi: str | None) |
 | function | validate_inchi_key | bioetl.domain.validation | 28 | (key: str | None) |
@@ -619,7 +621,7 @@ Scope: src/bioetl/ (all layers)
 | function | validate_non_empty_string | bioetl.domain.validation | 22 | (value: str | None) |
 | function | validate_non_negative | bioetl.domain.validation | 31 | (value: Any) |
 | function | validate_positive_int | bioetl.domain.validation | 28 | (value: Any) |
-| function | validate_publication_year | bioetl.domain.validation | 28 | (year: int | None, min_year: int | None = None, max_year: int | None = None) |
+| function | validate_publication_year | bioetl.domain.validation | 30 | (year: int | None, config: ValidationConfig | None = None) |
 | function | validate_smiles | bioetl.domain.validation | 33 | (smiles: str | None) |
 | function | validate_year_range | bioetl.domain.validation | 29 | (year: int | None, min_year: int = MIN_PUBLICATION_YEAR, max_year: int = MAX_PUBLICATION_YEAR) |
 | __all__ | __all__ | bioetl.domain.value_objects.__init__ | 1 |  |
@@ -804,7 +806,6 @@ Scope: src/bioetl/ (all layers)
 | function | map_field_groups | bioetl.application.core.field_specs | 19 | (record: BronzeRecord, groups: Sequence[FieldGroup]) |
 | function | map_fields | bioetl.application.core.field_specs | 32 | (record: BronzeRecord, specs: Sequence[FieldSpec]) |
 | function | normalize_pmid | bioetl.application.core.field_specs | 30 | (value: Any) |
-| function | pmid_fields | bioetl.application.core.field_specs | 13 | (*field_names: str) |
 | function | simple_fields | bioetl.application.core.field_specs | 15 | (*field_names: str) |
 | class | FilteredDataSource | bioetl.application.core.filtered_data_source | 348 | public=aclose,fetch,filter_result,get_source_metadata,health_check,provider_name |
 | __all__ | __all__ | bioetl.application.core.heartbeat | 1 |  |
@@ -832,9 +833,6 @@ Scope: src/bioetl/ (all layers)
 | __all__ | __all__ | bioetl.application.core.shutdown | 1 |  |
 | class | ShutdownSignal | bioetl.application.core.shutdown | 93 | public=initiate_shutdown,is_requested,is_shutting_down,mark_completed,request,reset,wait,wait_for_completion |
 | function | create_shutdown_service | bioetl.application.core.shutdown | 17 | (logger: LoggerPort, metrics: MetricsPort | None = None) |
-| __all__ | __all__ | bioetl.application.core.subcellular_fraction_data_source | 1 |  |
-| class | SubcellularFractionDataSource | bioetl.application.core.subcellular_fraction_data_source | 259 | public=aclose,fetch,fetch_filtered,fetch_filtered_with_fallback,fetch_multi_filtered,get_source_metadata,health_check,provider_name |
-| function | _compute_fraction_entity_id | bioetl.application.core.subcellular_fraction_data_source | 5 | (subcellular_fraction: str) |
 | __all__ | __all__ | bioetl.application.observability.__init__ | 1 |  |
 | class | LifecyclePhase | bioetl.application.observability.observer | 13 | bases=StrEnum |
 | class | PipelineObserver | bioetl.application.observability.observer | 319 | bases=AbstractContextManager['PipelineObserver']; public=emit_dq_anomaly,emit_event,emit_health_check_result,emit_phase_completed,emit_phase_started,emit_vacuum_result |
@@ -856,7 +854,7 @@ Scope: src/bioetl/ (all layers)
 | class | ChEMBLTargetComponentPipeline | bioetl.application.pipelines.chembl._pipelines | 2 | bases=BasePipeline |
 | class | ChEMBLTargetPipeline | bioetl.application.pipelines.chembl._pipelines | 2 | bases=BasePipeline |
 | class | ChEMBLTissuePipeline | bioetl.application.pipelines.chembl._pipelines | 2 | bases=BasePipeline |
-| class | ActivityTransformer | bioetl.application.pipelines.chembl.activity_transformer | 81 | bases=BaseChemblTransformer |
+| class | ActivityTransformer | bioetl.application.pipelines.chembl.activity_transformer | 75 | bases=BaseChemblTransformer |
 | __all__ | __all__ | bioetl.application.pipelines.chembl.assay_parameters_transformer | 1 |  |
 | class | AssayParametersTransformer | bioetl.application.pipelines.chembl.assay_parameters_transformer | 86 | bases=BaseChemblTransformer |
 | constant | KNOWN_PARAM_TYPES | bioetl.application.pipelines.chembl.assay_parameters_transformer | 1 |  |
@@ -954,6 +952,7 @@ Scope: src/bioetl/ (all layers)
 | class | ELocationIds | bioetl.application.pipelines.pubmed.extractors.identifier | 10 | bases=TypedDict |
 | class | IdentifierExtractor | bioetl.application.pipelines.pubmed.extractors.identifier | 269 | bases=BaseFieldExtractor; public=extract,extract_doi,extract_elocation_ids,extract_mid,extract_pii,extract_pmc_id,extract_publisher_id,normalize,parse_all_article_ids |
 | class | PubMedPublicationTransformer | bioetl.application.pipelines.pubmed.transformer | 694 | bases=BasePublicationTransformer; public=entity_to_silver_record |
+| constant | PARSER_HELPERS | bioetl.application.pipelines.pubmed.xml_parser | 1 |  |
 | function | get_int | bioetl.application.pipelines.pubmed.xml_parser | 36 | (node: ET.Element | None) |
 | function | get_text | bioetl.application.pipelines.pubmed.xml_parser | 28 | (node: ET.Element | None) |
 | __all__ | __all__ | bioetl.application.pipelines.semanticscholar.__init__ | 1 |  |
@@ -1171,6 +1170,7 @@ Scope: src/bioetl/ (all layers)
 | class | HealthCheckProviderMixin | bioetl.infrastructure.adapters.health_check_mixin | 172 | bases=HealthCheckMixin; public=check_health,health_check |
 | __all__ | __all__ | bioetl.infrastructure.adapters.http.__init__ | 1 |  |
 | class | CircuitBreaker | bioetl.infrastructure.adapters.http.circuit_breaker | 169 | public=call,force_open,get_failure_count,get_state,get_trips_total,reset |
+| constant | CIRCUIT_BREAKER_HELPERS | bioetl.infrastructure.adapters.http.circuit_breaker | 1 |  |
 | constant | METRIC_CIRCUIT_BREAKER_STATE | bioetl.infrastructure.adapters.http.circuit_breaker | 1 |  |
 | constant | METRIC_CIRCUIT_BREAKER_TRIPS | bioetl.infrastructure.adapters.http.circuit_breaker | 1 |  |
 | constant | P | bioetl.infrastructure.adapters.http.circuit_breaker | 1 |  |
@@ -1335,6 +1335,7 @@ Scope: src/bioetl/ (all layers)
 | class | AnomalySeverity | bioetl.infrastructure.observability.anomaly.types | 7 | bases=StrEnum |
 | class | AnomalyType | bioetl.infrastructure.observability.anomaly.types | 7 | bases=StrEnum |
 | class | StructlogLogger | bioetl.infrastructure.observability.logging | 84 | public=bind,debug,error,exception,info,warning |
+| constant | LOGGING_API | bioetl.infrastructure.observability.logging | 1 |  |
 | function | create_logger | bioetl.infrastructure.observability.logging | 22 | (pipeline: str, run_id: str | UUID, *, log_level: str = 'INFO', json_format: bool = True) |
 | __all__ | __all__ | bioetl.infrastructure.observability.logging_config | 1 |  |
 | function | _mask_secrets | bioetl.infrastructure.observability.logging_config | 17 | (value: Any) |
@@ -1448,7 +1449,7 @@ Scope: src/bioetl/ (all layers)
 | class | CsvExportConfig | bioetl.infrastructure.schemas.pipeline_config | 8 | bases=BaseModel |
 | class | DQConfig | bioetl.infrastructure.schemas.pipeline_config | 144 | bases=BaseModel; public=to_domain,validate_thresholds |
 | class | DQReportConfig | bioetl.infrastructure.schemas.pipeline_config | 14 | bases=BaseModel |
-| class | FieldValidationConfig | bioetl.infrastructure.schemas.pipeline_config | 27 | bases=BaseModel |
+| class | FieldValidationConfig | bioetl.infrastructure.schemas.pipeline_config | 35 | bases=BaseModel |
 | class | FilterColumnSchema | bioetl.infrastructure.schemas.pipeline_config | 2 | bases=BaseFilterColumnSchema |
 | class | GoldColumnFilterConfig | bioetl.infrastructure.schemas.pipeline_config | 13 | bases=BaseGoldColumnFilterConfig |
 | class | GoldFiltersConfig | bioetl.infrastructure.schemas.pipeline_config | 23 | bases=BaseGoldFiltersConfig |
@@ -1870,26 +1871,14 @@ Scope: src/bioetl/ (all layers)
 ### 2.1 DEAD объекты (0 ссылок)
 | # | Object | Type | Layer | File |
 |---|--------|------|-------|------|
-| 1 | bioetl.domain.validation.validate_inchi_key | function | domain | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\domain\validation.py |
-| 2 | bioetl.domain.validation.validate_publication_year | function | domain | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\domain\validation.py |
-| 3 | bioetl.application.core.field_specs.pmid_fields | function | application | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\application\core\field_specs.py |
-| 4 | bioetl.application.core.subcellular_fraction_data_source.SubcellularFractionDataSource | class | application | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\application\core\subcellular_fraction_data_source.py |
-| 5 | bioetl.application.pipelines.pubmed.xml_parser.get_int | function | application | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\application\pipelines\pubmed\xml_parser.py |
-| 6 | bioetl.infrastructure.adapters.http.circuit_breaker.is_circuit_breaker_error | function | infrastructure | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\infrastructure\adapters\http\circuit_breaker.py |
-| 7 | bioetl.infrastructure.adapters.http.rate_limiter.create_pubchem_bucket | function | infrastructure | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\infrastructure\adapters\http\rate_limiter.py |
-| 8 | bioetl.infrastructure.adapters.http.rate_limiter.create_pubmed_bucket | function | infrastructure | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\infrastructure\adapters\http\rate_limiter.py |
-| 9 | bioetl.infrastructure.observability.logging.create_logger | function | infrastructure | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\infrastructure\observability\logging.py |
-| 10 | bioetl.infrastructure.serialization.encoders.reset_encoder_cache | function | infrastructure | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\infrastructure\serialization\encoders.py |
-| 11 | bioetl.interfaces.cli.commands.health_server_integration.add_health_server_options | function | interfaces | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\interfaces\cli\commands\health_server_integration.py |
+| – | – | – | – | – |
 
 ### 2.4 Orphan-модули (файлы без imports)
 | # | File | LOC | Objects Defined |
 |---|------|-----|----------------|
-| 1 | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\domain\mapping\molecule_fields.py | 18 | MOLECULE_FIELD_MAPPING |
-| 2 | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\application\core\subcellular_fraction_data_source.py | 299 | __all__, SubcellularFractionDataSource, _compute_fraction_entity_id |
-| 3 | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\bootstrap_logger.py | 146 | __all__, BootstrapLogger, BOOTSTRAP_LOGGER_EXPORTS, get_bootstrap_logger, reset_bootstrap_logger |
-| 4 | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\storage_adapter.py | 652 | __all__, StorageAdapter |
-| 5 | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\storage_factory.py | 341 | __all__, StorageContext, StorageFactory |
+| 1 | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\bootstrap_logger.py | 146 | __all__, BootstrapLogger, BOOTSTRAP_LOGGER_EXPORTS, get_bootstrap_logger, reset_bootstrap_logger |
+| 2 | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\storage_adapter.py | 652 | __all__, StorageAdapter |
+| 3 | E:\g-drive\05_AI\github\BioactivityDataAcquisition2\src\bioetl\composition\factories\storage_factory.py | 341 | __all__, StorageContext, StorageFactory |
 
 ## 3. Duplicate Logic
 ### 3.1 Confirmed Duplicates (идентичная логика)
@@ -1904,8 +1893,8 @@ Scope: src/bioetl/ (all layers)
 | bioetl.composition.factories.pipeline_factories | 47 |
 | bioetl.composition.factories.pipeline_factory | 32 |
 | bioetl.composition.factories.services_factory | 27 |
-| bioetl.domain.ports.__init__ | 24 |
 | bioetl.composition.factories.transformer_factory | 24 |
+| bioetl.domain.ports.__init__ | 24 |
 | bioetl.domain.__init__ | 24 |
 | bioetl.composition.bootstrap.runtime.composite | 21 |
 | bioetl.application.core.__init__ | 20 |
@@ -1915,8 +1904,8 @@ Scope: src/bioetl/ (all layers)
 ### 4.2 Объекты с наибольшим fan-in (от них зависят многие)
 | Object | Dependents Count |
 |--------|-----------------|
-| bioetl.domain.ports | 141 |
-| bioetl.domain.types | 123 |
+| bioetl.domain.ports | 140 |
+| bioetl.domain.types | 122 |
 | bioetl.domain.exceptions | 29 |
 | bioetl.domain.context | 29 |
 | bioetl.domain.filtering | 28 |

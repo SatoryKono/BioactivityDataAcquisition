@@ -46,12 +46,20 @@ if TYPE_CHECKING:
 class FieldValidationConfig(BaseModel):
     """Configuration for a single field validation rule.
 
-    Supports: required, not_null, range, pattern, enum, max_length, custom validation types.
+    Supports: required, not_null, range, pattern, enum, max_length,
+    not_empty_list, custom validation types.
     """
 
     field: str = Field(description="Field name to validate")
     type: Literal[
-        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+        "required",
+        "not_null",
+        "range",
+        "pattern",
+        "enum",
+        "max_length",
+        "not_empty_list",
+        "custom",
     ] = Field(description="Validation type")
     nullable: bool = Field(default=True, description="Whether field can be null")
     severity: Literal["error", "warn"] = Field(
