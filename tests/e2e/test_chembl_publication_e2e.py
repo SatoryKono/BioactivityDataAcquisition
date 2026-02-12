@@ -43,6 +43,7 @@ PUBLICATION_TEST_IDS = (
     "CHEMBL1121981",
 )
 
+
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for ChEMBL Publication E2E tests."""

@@ -24,6 +24,20 @@ profile = os.getenv("HYPOTHESIS_PROFILE", "dev")
 settings.load_profile(profile)
 
 
+@pytest.fixture(scope="session", autouse=True)
+def default_vcr_record_mode() -> None:
+    """Set deterministic default VCR mode for local runs.
+
+    - CI remains strict (`none`) to prevent silent cassette rewrites.
+    - Local runs default to `once` to allow recording missing interactions.
+    - Explicit VCR_RECORD_MODE always has priority.
+    """
+    if "VCR_RECORD_MODE" in os.environ:
+        return
+
+    os.environ["VCR_RECORD_MODE"] = "none" if os.getenv("CI") else "once"
+
+
 @pytest.fixture(scope="session")
 def project_root() -> Path:
     """Return repository root for path-based architecture checks."""
@@ -54,6 +68,7 @@ def populated_isolated_registry(isolated_registry: Any) -> Any:
 
     register_all_pipelines(registry=isolated_registry)
     return isolated_registry
+
 
 # --- VCR Configuration ---
 @pytest.fixture(scope="module")
