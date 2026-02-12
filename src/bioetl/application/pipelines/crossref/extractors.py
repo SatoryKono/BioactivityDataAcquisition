@@ -162,8 +162,7 @@ def extract_license_url(publication: dict[str, Any]) -> str | None:
     """
     licenses = publication.get("license", [])
     if licenses and len(licenses) > 0:
-        url: str | None = licenses[0].get("URL")
-        return url
+        return licenses[0].get("URL")
     return None
 
 
