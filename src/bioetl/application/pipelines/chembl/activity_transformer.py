@@ -239,5 +239,20 @@ class ActivityTransformer(BaseChemblTransformer):
         business_data["journal"] = business_data.get("journal") or record.get(
             "document_journal"
         )
+        business_data["publication_doi"] = (
+            record.get("publication_doi")
+            or record.get("doi")
+            or record.get("document_doi")
+        )
+        business_data["publication_pmid"] = (
+            record.get("publication_pmid")
+            or record.get("pmid")
+            or record.get("document_pubmed_id")
+        )
+        business_data["publication_pmc_id"] = (
+            record.get("publication_pmc_id")
+            or record.get("pmc_id")
+            or record.get("document_pubmed_central_id")
+        )
 
         return business_data

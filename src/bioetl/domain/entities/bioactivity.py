@@ -140,6 +140,9 @@ class Bioactivity(BaseEntity):
 
     # Document/Publication data
     journal: str | None = None
+    publication_doi: str | None = None
+    publication_pmid: str | None = None
+    publication_pmc_id: str | None = None
     publication_year: int | None = None
 
     # Quality annotations
@@ -272,6 +275,9 @@ class Bioactivity(BaseEntity):
             pchembl_value=_safe_float(raw_data.get("pchembl_value")),
             # Document data
             journal=_safe_str(raw_data.get("journal")),
+            publication_doi=_safe_str(raw_data.get("publication_doi")),
+            publication_pmid=_safe_str(raw_data.get("publication_pmid")),
+            publication_pmc_id=_safe_str(raw_data.get("publication_pmc_id")),
             publication_year=_safe_int(raw_data.get("publication_year")),
             action_type=_safe_str(raw_data.get("action_type")),
             action_type_description=_safe_str(raw_data.get("action_type_description")),
