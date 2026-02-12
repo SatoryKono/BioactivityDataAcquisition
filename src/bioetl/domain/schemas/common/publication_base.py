@@ -66,11 +66,6 @@ class PublicationBaseSchema(ETLRecordSchema):
         str_matches=r"^PMC\d+$",
         description="PubMed Central ID",
     )
-    pubmed_id: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=r"^[1-9]\d*$",
-        description="PubMed ID (positive numeric string)",
-    )
 
 
 

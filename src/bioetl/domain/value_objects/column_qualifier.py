@@ -14,6 +14,9 @@ __all__ = ["JOIN_KEY_COLUMNS", "ColumnQualifier"]
 # Join keys excluded from renaming (case-insensitive)
 JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset(
     {
+        "doi",
+        "pmid",
+        "pmc_id",
         "publication_id",
         "publication_doi",
         "publication_pmid",

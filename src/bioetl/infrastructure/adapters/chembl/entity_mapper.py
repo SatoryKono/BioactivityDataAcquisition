@@ -72,14 +72,14 @@ _NON_PUBLICATION_ENTITY_PLURAL: dict[str, str] = {
 # Primary key field overrides by entity type
 # Note: Publication PK fields are provided by the registry.
 _NON_PUBLICATION_PK_FIELD_OVERRIDES: dict[str, str] = {
-    "assay": "assay_chembl_id",
+    "assay": "assay_id",
     "assay_parameters": "assay_param_id",
-    "molecule": "molecule_chembl_id",
-    "compound": "molecule_chembl_id",
-    "target": "target_chembl_id",
+    "molecule": "molecule_id",
+    "compound": "molecule_id",
+    "target": "target_id",
     "target_component": "component_id",
-    "cell_line": "cell_chembl_id",
-    "tissue": "tissue_chembl_id",
+    "cell_line": "cell_id",
+    "tissue": "tissue_id",
     "compound_record": "record_id",
     "protein_class": "protein_class_id",
 }
