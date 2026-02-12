@@ -168,6 +168,10 @@ class PubChemFetchStrategies:
                 )
         return valid_cids
 
+    def _parse_valid_molecule_ids(self, molecule_id_list: list[str]) -> list[int]:
+        """Backward-compatible alias for CID parser."""
+        return self._parse_valid_cids(molecule_id_list)
+
     async def _fetch_cid_batch(self, batch: list[int]) -> list[dict[str, Any]]:
         """Fetch a batch of compounds by CID."""
         await self._rate_limiter.acquire()
@@ -205,12 +209,21 @@ class PubChemFetchStrategies:
                     fetched += 1
             except Exception as e:
                 self._logger.warning(
-                    "cid_batch_fetch_failed",
+                    "molecule_id_batch_fetch_failed",
                     provider=self._provider_name,
                     batch_start=batch[0] if batch else None,
                     batch_size=len(batch),
                     error=str(e),
                 )
+
+    async def fetch_by_molecule_ids(
+        self, molecule_id_list: list[str], limit: int | None = None, batch_size: int = 50
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Backward-compatible alias for CID-based fetch."""
+        async for record in self.fetch_by_cids(
+            molecule_id_list, limit=limit, batch_size=batch_size
+        ):
+            yield record
 
     async def _fetch_single_inchikey(self, inchikey: str) -> list[dict[str, Any]]:
         """Fetch compounds for a single InChIKey.

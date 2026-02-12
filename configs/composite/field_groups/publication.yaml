@@ -46,6 +46,10 @@ groups:
         columns:
           - chembl.publication.publication_id
 
+      - base_name: document_chembl_id
+        columns:
+          - chembl.publication.document_chembl_id
+
       - base_name: publication_doi
         columns:
           - chembl.publication.publication_doi
@@ -53,6 +57,14 @@ groups:
           - openalex.publication.publication_doi
           - pubmed.publication.publication_doi
           - semanticscholar.publication.publication_doi
+
+      - base_name: doi
+        columns:
+          - chembl.publication.doi
+          - crossref.publication.doi
+          - openalex.publication.doi
+          - pubmed.publication.doi
+          - semanticscholar.publication.doi
 
       - base_name: entity_id
         columns:
@@ -274,6 +286,12 @@ groups:
           - crossref.publication.author_orcids
           - openalex.publication.author_orcids
           - semanticscholar.publication.author_orcids
+
+      - base_name: author_ormolecule_ids
+        columns:
+          - crossref.publication.author_ormolecule_ids
+          - openalex.publication.author_ormolecule_ids
+          - semanticscholar.publication.author_ormolecule_ids
 
       - base_name: author_s2_ids
         columns:

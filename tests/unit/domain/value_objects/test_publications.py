@@ -409,70 +409,70 @@ class TestISSN:
 class TestORCID:
     """Tests for ORCID Value Object."""
 
-    def test_valid_ormolecule_id_with_hyphens(self) -> None:
+    def test_valid_orcid_with_hyphens(self) -> None:
         """Test creation with valid ORCID with hyphens."""
-        ormolecule_id = ORCID("0000-0002-1825-0097")
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert orcid.value == "0000-0002-1825-0097"
 
-    def test_valid_ormolecule_id_without_hyphens(self) -> None:
+    def test_valid_orcid_without_hyphens(self) -> None:
         """Test creation with valid ORCID without hyphens."""
-        ormolecule_id = ORCID("0000000218250097")
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID("0000000218250097")
+        assert orcid.value == "0000-0002-1825-0097"
 
-    def test_valid_ormolecule_id_with_x_check_digit(self) -> None:
+    def test_valid_orcid_with_x_check_digit(self) -> None:
         """Test ORCID with X check digit."""
-        ormolecule_id = ORCID("0000-0001-5109-370X")
-        assert ormolecule_id.value == "0000-0001-5109-370X"
+        orcid = ORCID("0000-0001-5109-370X")
+        assert orcid.value == "0000-0001-5109-370X"
 
     def test_normalizes_lowercase_x(self) -> None:
         """Test lowercase x is normalized to uppercase."""
-        ormolecule_id = ORCID("0000-0001-5109-370x")
-        assert ormolecule_id.value == "0000-0001-5109-370X"
+        orcid = ORCID("0000-0001-5109-370x")
+        assert orcid.value == "0000-0001-5109-370X"
 
     def test_compact_without_x(self) -> None:
         """Test compact format without hyphens."""
-        ormolecule_id = ORCID("0000000151093700")
-        assert ormolecule_id.value == "0000-0001-5109-3700"
+        orcid = ORCID("0000000151093700")
+        assert orcid.value == "0000-0001-5109-3700"
 
     def test_strips_whitespace(self) -> None:
         """Test whitespace stripping."""
-        ormolecule_id = ORCID("  0000-0002-1825-0097  ")
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID("  0000-0002-1825-0097  ")
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_extracts_from_https_url(self) -> None:
         """Test extraction from HTTPS URL."""
-        ormolecule_id = ORCID("https://ormolecule_id.org/0000-0002-1825-0097")
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID("https://orcid.org/0000-0002-1825-0097")
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_extracts_from_http_url(self) -> None:
         """Test extraction from HTTP URL."""
-        ormolecule_id = ORCID("http://ormolecule_id.org/0000-0002-1825-0097")
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID("http://orcid.org/0000-0002-1825-0097")
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_extracts_from_bare_url(self) -> None:
         """Test extraction from bare URL (no protocol)."""
-        ormolecule_id = ORCID("ormolecule_id.org/0000-0002-1825-0097")
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID("orcid.org/0000-0002-1825-0097")
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_url_case_insensitive(self) -> None:
         """Test URL prefix extraction is case insensitive."""
-        ormolecule_id = ORCID("HTTPS://ORCID.ORG/0000-0002-1825-0097")
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID("HTTPS://ORCID.ORG/0000-0002-1825-0097")
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_url_property(self) -> None:
         """Test url property returns full URL."""
-        ormolecule_id = ORCID("0000-0002-1825-0097")
-        assert ormolecule_id.url == "https://ormolecule_id.org/0000-0002-1825-0097"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert orcid.url == "https://orcid.org/0000-0002-1825-0097"
 
     def test_compact_property(self) -> None:
         """Test compact property returns ORCID without hyphens."""
-        ormolecule_id = ORCID("0000-0002-1825-0097")
-        assert ormolecule_id.compact == "0000000218250097"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert orcid.compact == "0000000218250097"
 
     def test_compact_property_with_x(self) -> None:
         """Test compact property with X check digit."""
-        ormolecule_id = ORCID("0000-0001-5109-370X")
-        assert ormolecule_id.compact == "000000015109370X"
+        orcid = ORCID("0000-0001-5109-370X")
+        assert orcid.compact == "000000015109370X"
 
     def test_empty_raises(self) -> None:
         """Test empty string raises ValueError."""
@@ -511,43 +511,43 @@ class TestORCID:
 
     def test_immutability(self) -> None:
         """Test Value Object is immutable."""
-        ormolecule_id = ORCID("0000-0002-1825-0097")
+        orcid = ORCID("0000-0002-1825-0097")
         with pytest.raises(AttributeError, match="immutable"):
-            ormolecule_id._value = "0000-0000-0000-0000"  # type: ignore[misc]
+            orcid._value = "0000-0000-0000-0000"  # type: ignore[misc]
 
     def test_equality_by_value(self) -> None:
         """Test equality is based on value, not identity."""
-        ormolecule_id1 = ORCID("0000-0002-1825-0097")
-        ormolecule_id2 = ORCID("0000000218250097")
-        assert ormolecule_id1 == ormolecule_id2
-        assert ormolecule_id1 is not ormolecule_id2
+        orcid1 = ORCID("0000-0002-1825-0097")
+        orcid2 = ORCID("0000000218250097")
+        assert orcid1 == orcid2
+        assert orcid1 is not orcid2
 
     def test_equality_with_url(self) -> None:
         """Test equality between plain ID and URL format."""
-        ormolecule_id1 = ORCID("0000-0002-1825-0097")
-        ormolecule_id2 = ORCID("https://ormolecule_id.org/0000-0002-1825-0097")
-        assert ormolecule_id1 == ormolecule_id2
+        orcid1 = ORCID("0000-0002-1825-0097")
+        orcid2 = ORCID("https://orcid.org/0000-0002-1825-0097")
+        assert orcid1 == orcid2
 
     def test_equality_with_x(self) -> None:
         """Test equality with X check digit."""
-        ormolecule_id1 = ORCID("0000-0001-5109-370X")
-        ormolecule_id2 = ORCID("0000-0001-5109-370x")
-        assert ormolecule_id1 == ormolecule_id2
+        orcid1 = ORCID("0000-0001-5109-370X")
+        orcid2 = ORCID("0000-0001-5109-370x")
+        assert orcid1 == orcid2
 
     def test_hash_consistency(self) -> None:
         """Test hash is consistent with equality."""
-        ormolecule_id1 = ORCID("0000-0002-1825-0097")
-        ormolecule_id2 = ORCID("0000000218250097")
-        assert hash(ormolecule_id1) == hash(ormolecule_id2)
+        orcid1 = ORCID("0000-0002-1825-0097")
+        orcid2 = ORCID("0000000218250097")
+        assert hash(orcid1) == hash(orcid2)
 
     def test_can_be_used_in_set(self) -> None:
         """Test Value Object can be used in set."""
-        ormolecule_ids = {
+        orcid_ids = {
             ORCID("0000-0002-1825-0097"),
             ORCID("0000000218250097"),
             ORCID("0000-0001-5109-3700"),
         }
-        assert len(ormolecule_ids) == 2
+        assert len(orcid_ids) == 2
 
     def test_can_be_used_as_dict_key(self) -> None:
         """Test Value Object can be used as dict key."""
@@ -556,31 +556,31 @@ class TestORCID:
 
     def test_repr(self) -> None:
         """Test string representation."""
-        ormolecule_id = ORCID("0000-0002-1825-0097")
-        assert repr(ormolecule_id) == "ORCID('0000-0002-1825-0097')"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert repr(orcid) == "ORCID('0000-0002-1825-0097')"
 
     def test_str(self) -> None:
         """Test string conversion."""
-        ormolecule_id = ORCID("0000-0002-1825-0097")
-        assert str(ormolecule_id) == "0000-0002-1825-0097"
+        orcid = ORCID("0000-0002-1825-0097")
+        assert str(orcid) == "0000-0002-1825-0097"
 
     def test_from_raw_valid(self) -> None:
         """Test from_raw with valid ORCID."""
-        ormolecule_id = ORCID.from_raw("0000-0002-1825-0097")
-        assert ormolecule_id is not None
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID.from_raw("0000-0002-1825-0097")
+        assert orcid is not None
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_from_raw_url(self) -> None:
         """Test from_raw with URL format."""
-        ormolecule_id = ORCID.from_raw("https://ormolecule_id.org/0000-0002-1825-0097")
-        assert ormolecule_id is not None
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID.from_raw("https://orcid.org/0000-0002-1825-0097")
+        assert orcid is not None
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_from_raw_compact(self) -> None:
         """Test from_raw with compact format."""
-        ormolecule_id = ORCID.from_raw("0000000218250097")
-        assert ormolecule_id is not None
-        assert ormolecule_id.value == "0000-0002-1825-0097"
+        orcid = ORCID.from_raw("0000000218250097")
+        assert orcid is not None
+        assert orcid.value == "0000-0002-1825-0097"
 
     def test_from_raw_none(self) -> None:
         """Test from_raw with None."""
