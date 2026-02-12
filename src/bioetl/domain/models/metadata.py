@@ -21,13 +21,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-
-class LayerType(StrEnum):
-    """Medallion architecture layer type."""
-
-    BRONZE = "bronze"
-    SILVER = "silver"
-    GOLD = "gold"
+from bioetl.domain.medallion import Layer
 
 
 class RunTypeEnum(StrEnum):
@@ -677,7 +671,7 @@ class BronzeMetadata(BaseModel):
     """
 
     version: str = Field(default="1.1", description="Metadata schema version")
-    layer: LayerType = Field(default=LayerType.BRONZE, description="Medallion layer")
+    layer: Layer = Field(default=Layer.BRONZE, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
     source: SourceMetadata = Field(
@@ -704,7 +698,7 @@ class SilverMetadata(BaseModel):
     """
 
     version: str = Field(default="1.1", description="Metadata schema version")
-    layer: LayerType = Field(default=LayerType.SILVER, description="Medallion layer")
+    layer: Layer = Field(default=Layer.SILVER, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
     lineage: LineageMetadata = Field(
@@ -742,7 +736,7 @@ class GoldMetadata(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     version: str = Field(default="1.1", description="Metadata schema version")
-    layer: LayerType = Field(default=LayerType.GOLD, description="Medallion layer")
+    layer: Layer = Field(default=Layer.GOLD, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
     lineage: LineageMetadata = Field(

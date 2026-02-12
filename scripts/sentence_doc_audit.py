@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import os
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ OUT_DIR = ROOT / "reports" / "documentation_audit"
 OUT_CSV = OUT_DIR / "sentence_audit_full.csv"
 OUT_MD = OUT_DIR / "sentence_audit_summary.md"
 OUT_PROMPTS = OUT_DIR / "document_update_prompts.md"
+OUT_PROMPTS_HIGH = OUT_DIR / "document_update_prompts_high_risk.md"
 
 
 STOPWORDS = {
@@ -65,6 +67,57 @@ CODE_FILE_GLOBS = ("*.py", "*.yml", "*.yaml", "*.toml", "*.json", "*.ini")
 SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 TOKEN_RE = re.compile(r"[A-Za-zА-Яа-яЁё0-9_][A-Za-zА-Яа-яЁё0-9_\-]{2,}")
 BACKTICK_RE = re.compile(r"`([^`]+)`")
+RISK_HIGH_KEYWORDS = {
+    "must",
+    "should",
+    "shall",
+    "required",
+    "requirement",
+    "обязател",
+    "должен",
+    "контракт",
+    "contract",
+    "schema",
+    "схем",
+    "api",
+    "port",
+    "adapter",
+    "pipeline",
+    "adr",
+    "version",
+    "release",
+    "timeout",
+    "retry",
+    "backoff",
+    "circuit",
+    "qps",
+    "rate limit",
+    "idmapping",
+    "checksum",
+    "hash",
+    "medallion",
+    "bronze",
+    "silver",
+    "gold",
+    "pandera",
+    "validation",
+    "naming",
+    "policy",
+    "governance",
+}
+RISK_LOW_HINTS = {
+    "quick link",
+    "quick links",
+    "see also",
+    "смотри также",
+    "см. также",
+    "toc",
+    "table of contents",
+    "оглавление",
+    "navigation",
+    "навигация",
+}
+NOISY_PATH_PARTS = {"fixtures", "vcr", "cassette", "cassette_library", "snapshots", "fixtures-data"}
 
 
 @dataclass(frozen=True)
@@ -133,6 +186,22 @@ def tokenize(text: str) -> list[str]:
     return [t for t in tokens if len(t) >= 4 and t not in STOPWORDS]
 
 
+def classify_risk(sentence: str) -> str:
+    s_lower = sentence.lower()
+    tokens = set(tokenize(sentence))
+    if any(hint in s_lower for hint in RISK_LOW_HINTS):
+        return "low"
+    if any(kw in s_lower for kw in RISK_HIGH_KEYWORDS):
+        return "high"
+    if re.search(r"\badr-\d{2,3}\b", s_lower):
+        return "high"
+    if re.search(r"\d", sentence):
+        return "high"
+    if any(t in {"api", "ports", "schemas", "contracts"} for t in tokens):
+        return "high"
+    return "medium"
+
+
 def iter_code_files() -> Iterable[Path]:
     for src in SRC_DIRS:
         if src.is_file():
@@ -174,14 +243,32 @@ def find_evidence(
     freq: Counter,
     first_line_idx_by_path: dict[str, int],
 ) -> Evidence | None:
+    def path_weight(path: Path) -> int:
+        parts = {part.lower() for part in path.parts}
+        if any(noisy in parts for noisy in NOISY_PATH_PARTS):
+            return 0
+        if "tests" in parts:
+            return 1
+        if {"configs", "pyproject.toml", "mkdocs.yml"} & parts:
+            return 3
+        if "src" in parts:
+            return 3
+        return 2
+
     backticks = [x.strip() for x in BACKTICK_RE.findall(sentence) if x.strip()]
     sentence_tokens = tokenize(sentence)
     ranked_tokens = sorted(sentence_tokens, key=lambda t: (freq.get(t, 10**9), t))
     probe_tokens = ranked_tokens[:5]
 
     candidate_ids: set[int] = set()
-    for token in probe_tokens:
-        candidate_ids |= inverted.get(token, set())
+    postings = [inverted.get(token, set()) for token in probe_tokens if token in inverted]
+    postings = sorted(postings, key=len)
+    if len(postings) >= 2:
+        candidate_ids = postings[0] & postings[1]
+        if not candidate_ids:
+            candidate_ids = postings[0] | postings[1]
+    elif postings:
+        candidate_ids = postings[0]
 
     # Fast path lookup for explicit backtick file references.
     for bt in backticks:
@@ -199,31 +286,51 @@ def find_evidence(
         return None
 
     best: Evidence | None = None
-    for idx in sorted(candidate_ids):
+    for idx in sorted(candidate_ids)[:400]:
         path, line_no, line = lines[idx]
+        weight = path_weight(path)
+        if weight == 0:
+            continue
         line_tokens = set(tokenize(line))
         score = sum(1 for token in probe_tokens if token in line_tokens)
         if score <= 0:
             continue
         candidate = Evidence(path=path, line_no=line_no, line=line.strip(), score=score)
-        if best is None or (candidate.score, str(candidate.path), candidate.line_no) > (
+        best_tuple = (
+            candidate.score,
+            weight,
+            str(candidate.path),
+            candidate.line_no,
+        )
+        current_tuple = (
             best.score,
+            path_weight(best.path),
             str(best.path),
-            -best.line_no,
-        ):
+            best.line_no,
+        ) if best is not None else None
+        if best is None or best_tuple > current_tuple:
             best = candidate
     return best
 
 
-def status_for(sentence: str, evidence: Evidence | None) -> str:
+def evaluate_status(sentence: str, evidence: Evidence | None) -> tuple[str, str]:
     if evidence is None:
-        return "нет"
+        return "нет", "нет кандидата"
     numbers = re.findall(r"\d+", sentence)
     if numbers and not any(n in evidence.line for n in numbers):
-        return "нет"
+        return "нет", "числа в предложении не найдены в коде"
     if evidence.score >= 2:
-        return "да"
-    return "нет"
+        return "да", "score>=2"
+    return "нет", "score<2 (недостаточно совпадений)"
+
+
+def generated_at_iso() -> str:
+    epoch = os.environ.get("SOURCE_DATE_EPOCH", "0")
+    try:
+        ts = datetime.fromtimestamp(int(epoch), tz=UTC)
+    except ValueError:
+        ts = datetime.fromtimestamp(0, tz=UTC)
+    return ts.isoformat()
 
 
 def plan_for(status: str) -> str:
@@ -260,13 +367,15 @@ def generate() -> None:
 
     rows: list[dict[str, str]] = []
     prompt_map: dict[str, list[dict[str, str]]] = defaultdict(list)
+    prompt_map_high: dict[str, list[dict[str, str]]] = defaultdict(list)
 
     for doc in doc_files:
         text = read_text_robust(doc)
         sentences = extract_sentences(text)
         for i, sentence in enumerate(sentences, start=1):
             evidence = find_evidence(sentence, inverted, lines, freq, first_line_idx_by_path)
-            status = status_for(sentence, evidence)
+            status, reason = evaluate_status(sentence, evidence)
+            risk = classify_risk(sentence)
             code_link = ""
             code_fragment = ""
             if evidence is not None:
@@ -280,10 +389,16 @@ def generate() -> None:
                 "код (фрагмент)": code_fragment,
                 "описание соответствует кода (да/нет)": status,
                 "предлагаемый план устранения несоответствий": plan_for(status),
+                "причина": reason,
+                "risk": risk,
             }
             rows.append(row)
             if status == "нет":
                 prompt_map[rel(doc)].append(row)
+                if risk == "high":
+                    prompt_map_high[rel(doc)].append(row)
+
+    rows.sort(key=lambda r: (r["документ"], int(r["номер предложения"])))
 
     with OUT_CSV.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
@@ -296,6 +411,8 @@ def generate() -> None:
                 "код (фрагмент)",
                 "описание соответствует кода (да/нет)",
                 "предлагаемый план устранения несоответствий",
+                "причина",
+                "risk",
             ],
         )
         writer.writeheader()
@@ -304,8 +421,11 @@ def generate() -> None:
     total = len(rows)
     ok = sum(1 for r in rows if r["описание соответствует кода (да/нет)"] == "да")
     bad = total - ok
+    high_total = sum(1 for r in rows if r["risk"] == "high")
+    high_ok = sum(1 for r in rows if r["risk"] == "high" and r["описание соответствует кода (да/нет)"] == "да")
+    high_bad = high_total - high_ok
 
-    generated_at = datetime.now(UTC).isoformat()
+    generated_at = generated_at_iso()
     with OUT_MD.open("w", encoding="utf-8") as f:
         f.write("# Исчерпывающий аудит документации (sentence-by-sentence)\n\n")
         f.write(f"- Дата (UTC): {generated_at}\n")
@@ -313,6 +433,7 @@ def generate() -> None:
         f.write(f"- Проверено предложений: {total}\n")
         f.write(f"- Соответствует коду: {ok}\n")
         f.write(f"- Не соответствует / не подтверждено автоматически: {bad}\n")
+        f.write(f"- High-risk предложений: {high_total} (да: {high_ok}, нет: {high_bad})\n")
         f.write(f"- Полный CSV: `{rel(OUT_CSV)}`\n\n")
         f.write("## Топ-20 документов с максимальным числом несоответствий\n\n")
         bad_by_doc = Counter(r["документ"] for r in rows if r["описание соответствует кода (да/нет)"] == "нет")
@@ -325,7 +446,7 @@ def generate() -> None:
         f.write("# Набор промптов для модификации документов\n\n")
         f.write("Ниже шаблоны для каждого документа, где найдены несоответствия.\n\n")
         for doc_name in sorted(prompt_map):
-            mismatches = prompt_map[doc_name]
+            mismatches = sorted(prompt_map[doc_name], key=lambda m: int(m["номер предложения"]))
             f.write(f"## {doc_name}\n\n")
             f.write("```text\n")
             f.write(
@@ -339,8 +460,35 @@ def generate() -> None:
             )
             for m in mismatches[:50]:
                 f.write(
+                    f"- [{m['номер предложения']}] (risk={m['risk']}) {m['предложение']}\n"
+                    f"  - Текущее доказательство: {m['ссылка на код (файл строки)'] or 'нет'}\n"
+                    f"  - Причина статуса: {m['причина']}\n"
+                )
+            if len(mismatches) > 50:
+                f.write(f"- ... и еще {len(mismatches) - 50} предложений (см. полный CSV-отчет)\n")
+            f.write("```\n\n")
+
+    with OUT_PROMPTS_HIGH.open("w", encoding="utf-8") as f:
+        f.write("# High-risk промпты для модификации документов\n\n")
+        f.write("Сфокусируйтесь на утверждениях, влияющих на контракты, схемы, API, политики.\n\n")
+        for doc_name in sorted(prompt_map_high):
+            mismatches = sorted(prompt_map_high[doc_name], key=lambda m: int(m["номер предложения"]))
+            f.write(f"## {doc_name}\n\n")
+            f.write("```text\n")
+            f.write(
+                "Обнови документ, начиная с high-risk утверждений.\n"
+                f"Файл: {doc_name}\n\n"
+                "Требования:\n"
+                "1) Для каждого пункта: либо исправь текст, либо создай задачу на реализацию, либо привяжи точную ссылку на код.\n"
+                "2) Не нарушай публичные контракты без migration note.\n"
+                "3) Подтверди схемы/контракты по коду и тестам.\n\n"
+                "Проблемные предложения (high-risk):\n"
+            )
+            for m in mismatches[:50]:
+                f.write(
                     f"- [{m['номер предложения']}] {m['предложение']}\n"
                     f"  - Текущее доказательство: {m['ссылка на код (файл строки)'] or 'нет'}\n"
+                    f"  - Причина статуса: {m['причина']}\n"
                 )
             if len(mismatches) > 50:
                 f.write(f"- ... и еще {len(mismatches) - 50} предложений (см. полный CSV-отчет)\n")

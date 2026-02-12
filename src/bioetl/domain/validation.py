@@ -155,51 +155,6 @@ def validate_year_range(
     return min_year <= year <= max_year
 
 
-def validate_publication_year(
-    year: int | None,
-    config: ValidationConfig | None = None,
-) -> tuple[int | None, bool]:
-    """Validate publication year and flag if out of range.
-
-    Uses validation range from config or DEFAULT_VALIDATION_CONFIG.
-    Values outside this range are preserved but flagged for DQ warnings.
-
-    Args:
-        year: Publication year to validate.
-        config: Optional ValidationConfig for custom ranges.
-            If None, uses DEFAULT_VALIDATION_CONFIG.
-
-    Returns:
-        Tuple of (year, is_warning) where:
-        - year: Original value (preserved even if out of range)
-        - is_warning: True if year is outside valid range (requires DQ warning)
-
-    Example:
-        >>> validate_publication_year(2020)
-        (2020, False)
-        >>> validate_publication_year(1950)
-        (1950, False)
-        >>> validate_publication_year(1949)
-        (1949, True)
-        >>> validate_publication_year(None)
-        (None, False)
-        >>> # With custom config
-        >>> from bioetl.domain.config import ValidationConfig
-        >>> ss_config = ValidationConfig(min_publication_year=1500)
-        >>> validate_publication_year(1600, config=ss_config)
-        (1600, False)
-
-    """
-    if year is None:
-        return None, False
-    resolved_config = config or _get_default_config()
-    min_year = resolved_config.min_publication_year
-    max_year = resolved_config.max_publication_year
-    if min_year <= year <= max_year:
-        return year, False
-    return year, True  # Keep value but flag as warning
-
-
 def validate_non_negative(value: Any) -> float | None:
     """Validate numeric value is non-negative (>= 0) or return None.
 

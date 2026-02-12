@@ -71,6 +71,17 @@ def _normalize_list(value: list[Any]) -> list[Any]:
     return [_normalize_value(v) for v in value]
 
 
+# Keep registry visible for tooling to avoid false dead-code positives.
+_NORMALIZE_DISPATCH = (
+    _normalize_float,
+    _normalize_datetime,
+    _normalize_date,
+    _normalize_str,
+    _normalize_dict,
+    _normalize_list,
+)
+
+
 def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
     """Check if field should be included in hash calculation."""
     if key in META_FIELDS:

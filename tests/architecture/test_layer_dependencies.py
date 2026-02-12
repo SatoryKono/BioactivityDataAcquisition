@@ -194,14 +194,20 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
     if not importlinter_config.exists():
         pytest.skip(".importlinter config not found")
 
-    # Find lint-imports executable (check venv first, then system)
+    # Find lint-imports executable (venv first, then system)
     import shutil
 
     lint_imports_cmd = shutil.which("lint-imports")
     if lint_imports_cmd is None:
-        venv_lint_imports = project_root / ".venv" / "bin" / "lint-imports"
-        if venv_lint_imports.exists():
-            lint_imports_cmd = str(venv_lint_imports)
+        # Unix: .venv/bin/lint-imports, Windows: .venv/Scripts/lint-imports
+        for candidate in (
+            project_root / ".venv" / "bin" / "lint-imports",
+            project_root / ".venv" / "Scripts" / "lint-imports.exe",
+            project_root / ".venv" / "Scripts" / "lint-imports",
+        ):
+            if candidate.exists():
+                lint_imports_cmd = str(candidate)
+                break
         else:
             pytest.skip("lint-imports executable not found")
 
@@ -213,21 +219,26 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
         [lint_imports_cmd, "--config", str(importlinter_config)],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         cwd=str(project_root),
         env=env,
     )
 
     if result.returncode != 0:
-        # Skip on Windows/Python 3.14 encoding issues with rich library
-        if "UnicodeEncodeError" in result.stderr and "charmap" in result.stderr:
+        # Skip on Windows/Python encoding issues with rich library
+        if result.stderr and (
+            "UnicodeEncodeError" in result.stderr or "charmap" in result.stderr
+        ):
             pytest.skip(
-                "Skipping due to Windows/Python 3.14 encoding issue with rich library. "
-                "Run manually with: lint-imports --config .importlinter"
+                "Skipping due to Windows encoding issue with rich library. "
+                "Run manually: lint-imports --config .importlinter"
             )
+        # When output is empty (e.g. Windows console capture), run without capture for diagnostics
+        out = result.stdout.strip() or result.stderr.strip() or "(no output captured)"
         pytest.fail(
-            f"import-linter contracts violated:\n"
-            f"stdout: {result.stdout}\n"
-            f"stderr: {result.stderr}"
+            f"import-linter contracts violated (exit {result.returncode}):\n{out}\n\n"
+            "Run manually: lint-imports --config .importlinter"
         )
 
 

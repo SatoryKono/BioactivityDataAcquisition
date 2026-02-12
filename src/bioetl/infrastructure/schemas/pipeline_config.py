@@ -25,6 +25,7 @@ from pydantic import (
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
+from bioetl.domain.models.metadata import GovernanceLineageConfig, QualityExpectations
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
@@ -484,17 +485,6 @@ class SinkLineageConfig(BaseModel):
     use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
 
 
-class SinkQualityExpectationsConfig(BaseModel):
-    """Quality expectations configuration."""
-
-    completeness: float | None = Field(
-        default=None, ge=0.0, le=1.0, description="Expected completeness (0-1)"
-    )
-    accuracy: float | None = Field(
-        default=None, ge=0.0, le=1.0, description="Expected accuracy (0-1)"
-    )
-
-
 class SinkMetadataConfig(BaseModel):
     """Governance metadata configuration for sink layers.
 
@@ -535,8 +525,8 @@ class SinkMetadataConfig(BaseModel):
         default_factory=SinkLineageConfig,
         description="Static lineage configuration",
     )
-    quality_expectations: SinkQualityExpectationsConfig = Field(
-        default_factory=SinkQualityExpectationsConfig,
+    quality_expectations: QualityExpectations = Field(
+        default_factory=QualityExpectations,
         description="Target quality metrics",
     )
     classification: str | None = Field(
@@ -549,11 +539,7 @@ class SinkMetadataConfig(BaseModel):
         Returns:
             GovernanceMetadata: Domain model for sidecar file.
         """
-        from bioetl.domain.models.metadata import (
-            GovernanceLineageConfig,
-            GovernanceMetadata,
-            QualityExpectations,
-        )
+        from bioetl.domain.models.metadata import GovernanceMetadata
 
         return GovernanceMetadata(
             owner=self.owner,
