@@ -4,7 +4,7 @@ Measures Delta Lake write throughput with merge/append operations.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -46,6 +46,9 @@ def _create_activity_schema() -> pa.Schema:
             pa.field("pchembl_value", pa.float64()),
             pa.field("canonical_smiles", pa.string()),
             pa.field("_content_hash", pa.string()),
+            pa.field("_run_id", pa.string()),
+            pa.field("_run_type", pa.string()),
+            pa.field("_source_batch_id", pa.string()),
             pa.field("_ingestion_ts", pa.timestamp("us")),
         ]
     )
@@ -55,7 +58,8 @@ def _prepare_records_for_delta(
     records: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     """Add required metadata fields to records."""
-    now = datetime.now()
+    now = datetime.now(UTC)
+    run_id = str(uuid4())
     prepared = []
     for record in records:
         rec = {
@@ -68,6 +72,9 @@ def _prepare_records_for_delta(
             "pchembl_value": record.get("pchembl_value"),
             "canonical_smiles": record.get("canonical_smiles", ""),
             "_content_hash": str(uuid4()),
+            "_run_id": run_id,
+            "_run_type": "benchmark",
+            "_source_batch_id": "benchmark_batch_0001",
             "_ingestion_ts": now,
         }
         prepared.append(rec)
