@@ -170,6 +170,35 @@ class MoleculeSchema(ETLRecordSchema):
     )
 
     # === Property Fields (flattened from molecule_properties) ===
+    # Canonical Silver property_* fields
+    property_alogp: Series[float] | None = pa.Field(
+        nullable=True, description="Canonical ALogP value from molecule_properties."
+    )
+    property_full_mwt: Series[float] | None = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Canonical full molecular weight from molecule_properties.",
+    )
+    property_hba: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical H-bond acceptor count."
+    )
+    property_hbd: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical H-bond donor count."
+    )
+    property_psa: Series[float] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical polar surface area."
+    )
+    property_rtb: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical rotatable bond count."
+    )
+    property_heavy_atoms: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical heavy atom count."
+    )
+    property_aromatic_rings: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical aromatic ring count."
+    )
+
+    # Backward-compatible aliases derived from canonical property_* fields
     logp: Series[float] | None = pa.Field(
         nullable=True, description="Partition coefficient (ALogP/XlogP)."
     )
