@@ -7,6 +7,7 @@ for adapters that support server-side filtering.
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from types import TracebackType
 from typing import Any, Protocol, Self, runtime_checkable
 
 from bioetl.domain.types import HealthStatus
@@ -34,7 +35,7 @@ class DataSourcePort(Protocol):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Exit the async context manager."""
         ...

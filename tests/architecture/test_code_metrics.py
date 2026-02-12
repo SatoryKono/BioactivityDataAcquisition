@@ -50,7 +50,6 @@ class TestFileSizeLimits:
         "context.py": 385,  # 380 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
-        "config_types.py": 450,  # 446 LOC - TypedDict definitions for YAML config parsing (DQ config extended)
         "exceptions.py": 550,  # 513 LOC
         # Domain exceptions module reorganization (refactoring into logical categories)
         "infrastructure.py": 640,  # 632 LOC - InfrastructureErrors (storage, filesystem, environment)
@@ -70,8 +69,8 @@ class TestFileSizeLimits:
         "data_normalization.py": 330,  # 321 LOC - DataNormalizationPort with partial date normalization
         "storage.py": 415,  # 409 LOC - StoragePort with read_silver, write_*_merged for composite pipelines + SourceMetadata param + Silver lineage + column_order
         # Domain Pandera schemas (declarative field definitions)
-        "compound.py": 400,  # 397 LOC - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
-        "protein.py": 480,  # 478 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0) + extended extraction helpers
+        "compound.py": 415,  # 412 LOC - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass + nullable int handling
+        "protein.py": 485,  # 481 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0) + extended extraction helpers
         # Domain contracts/gold (Gold layer Pandera schemas)
         "publications.py": 470,  # 464 LOC - Gold layer publication schemas with author/institution identifiers + PubMed pii/mid/publisher_id + CrossRef author_orcids/details/references + S2 authors
         # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
@@ -80,7 +79,7 @@ class TestFileSizeLimits:
         "dq_report.py": 660,  # 646 LOC - DQ report models with validation rules
         "dq_metrics.py": 420,  # 411 LOC - Batch DQ metrics with helpers for CC reduction + _make_hashable for list/dict values
         # Domain registry exemptions
-        "publication_type_classification.py": 1670,  # 1661 LOC - Publication type classification taxonomy (Level 1/2/3 mapping tables + classify_publication_type)
+        "publication_type_classification.py": 1650,  # 1644 LOC - Publication type classification taxonomy (Level 1/2/3 mapping tables + classify_publication_type)
         "publication.py": 340,  # 331 LOC - Publication entity mapping registry with composite key support
         "publication_field_groups.py": 430,  # 424 LOC - Field-to-group mapping for composite publication pipeline (ADR-026)
         "field_groups.py": 400,  # 392 LOC - FieldGroupRegistry domain models with FieldMapping/FieldGroupDefinition (ADR-026)
@@ -88,7 +87,7 @@ class TestFileSizeLimits:
         "batch_writer.py": 565,  # 560 LOC - BatchWriter with Safety Guard + column_order + layer config filtering
         "preflight_service.py": 820,  # 811 LOC - preflight validation (expanded)
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
-        "batch_executor.py": 785,  # 779 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params
+        "batch_executor.py": 790,  # 786 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params + documented exception handlers
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 200,  # 192 LOC - Thin orchestrator (checks extracted to _checks_*.py modules)
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
@@ -101,15 +100,15 @@ class TestFileSizeLimits:
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 820,  # 814 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation
-        "pipeline_factories.py": 555,  # 551 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction)
-        "services_factory.py": 690,  # 687 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030)
+        "pipeline_factory.py": 845,  # 838 LOC - merged generic_factory + runner_assembly + entity_type helper + DQ context factory + flat_structure paths + MetadataCoordinator creation + pipeline_name propagation + Pandera Silver schema DI
+        "pipeline_factories.py": 610,  # 602 LOC - pipeline factory configurations (OpenAlex + SemanticScholar + IDMapping + SubcellularFraction + Pandera Silver schema imports)
+        "services_factory.py": 695,  # 692 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + force_full_scan (ADR-030) + silver_validator param
         # Infrastructure layer exemptions
-        "silver_writer.py": 1155,  # 1151 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
-        "gold_writer.py": 940,  # 934 LOC - SCD Type 2 (metadata/arrow logic extracted to metadata_builder.py, arrow_converter.py) + column_order support
+        "silver_writer.py": 1160,  # 1157 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support
+        "gold_writer.py": 955,  # 953 LOC - SCD Type 2 (metadata/arrow logic extracted) + column_order + write_gold_merged schema validation (REQ-DATA-009)
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 1040,  # 1038 LOC - Silver PyArrow schemas + SubcellularFraction schema
+        "silver.py": 1070,  # 1066 LOC - Silver PyArrow schemas + base schema fields for Crossref/S2 + SubcellularFraction schema + publication classification fields + nullable int handling + PubChem expanded fields
         "client.py": 1175,  # 1169 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication + extraction_params ADR-028), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + force_full_scan (ADR-030) + column_groups + extraction_params + DQ severity/max_length/not_null
@@ -120,7 +119,7 @@ class TestFileSizeLimits:
         "storage_factory.py": 400,  # Extracted from storage.py
         "observability.py": 475,  # Bootstrap observability + deprecated aliases
         # Application layer exemptions
-        "base_transformer.py": 790,  # 786 LOC - BaseTransformer with serialization helpers + validate_value_object() consolidation
+        "base_transformer.py": 825,  # 821 LOC - BaseTransformer with silver_filters + should_write_silver()
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "subcellular_fraction_data_source.py": 520,  # 518 LOC - Derived entity wrapper with FilterableDataSourcePort delegation
         "merger.py": 1895,  # 1887 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
@@ -588,7 +587,7 @@ class TestClassSize:
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
         "StorageAdapter": 625,  # 619 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult
-        "BaseTransformer": 710,  # 703 lines - Template Method with helpers (tracing + PII hashing + serialize_json_list + validate_value_object)
+        "BaseTransformer": 740,  # 735 lines - Template Method with silver_filters + should_write_silver()
         "SilverWriter": 1140,  # 1132 lines - schema drift detection (metadata builder extracted) + column_order
         "GoldWriter": 920,  # 917 lines - SCD Type 2 (metadata/arrow logic extracted) + column_order
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
@@ -642,12 +641,12 @@ class TestClassSize:
         # Domain ports (Protocol definitions with comprehensive docstrings)
         "StoragePort": 380,  # 374 lines - Protocol with read_silver, write_*_merged + SourceMetadata param for Bronze write + SilverWriteResult return + silver_refs param
         # Pandera schemas (declarative field definitions)
-        "PubchemMoleculeSchema": 380,  # 375 lines - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass
+        "PubchemMoleculeSchema": 395,  # 389 lines - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass + nullable int handling
         "UniprotTargetSchema": 435,  # 430 lines - UniProt protein schema with biochemical fields + extended extractors
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
-        "MetadataCoordinator": 435,  # 434 lines - Metadata coordination for Medallion layers + extended lineage
+        "MetadataCoordinator": 440,  # 436 lines - Metadata coordination for Medallion layers + extended lineage
         # Composite pipeline services (ADR-026)
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service

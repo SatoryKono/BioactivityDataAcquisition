@@ -81,12 +81,6 @@ ALL_SYSTEM_FIELDS: Final[frozenset[str]] = frozenset(
     SYSTEM_FIELDS_PREFIX + LOOKUP_FIELDS_PREFIX + DQ_FIELDS_SUFFIX
 )
 
-ALL_PUBLICATION_FIELDS: Final[frozenset[str]] = frozenset(
-    PUBLICATION_METADATA_FIELDS
-    + PUBLICATION_CROSSREF_FIELDS
-    + PUBLICATION_UNIFIED_FIELDS
-)
-
 
 def _filter_present(
     ordered_fields: tuple[str, ...], present: frozenset[str]

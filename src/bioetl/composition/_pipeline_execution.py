@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
 from bioetl.application.core.shutdown import PipelineShutdownError
-from bioetl.application.services import RunOptions, RunResult, RunStatus
+from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline,
     maybe_start_metrics_server,
@@ -214,9 +214,9 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     Example:
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await run_pipeline("chembl_activity", options)
-        >>> if result.status == RunStatus.SUCCESS:
+        >>> if result.status == PipelineRunResult.SUCCESS:
         ...     logger.info("pipeline_success", records_silver=result.records_silver)
-        >>> elif result.status == RunStatus.SHUTDOWN:
+        >>> elif result.status == PipelineRunResult.SHUTDOWN:
         ...     logger.info("pipeline_shutdown", pipeline="chembl_activity")
         >>> else:
         ...     logger.error("pipeline_failed", error_message=result.error_message)
@@ -232,16 +232,16 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     run_id = str(runner._context.run_id)
     run_type = options.run_type
 
-    status = RunStatus.SUCCESS
+    status = PipelineRunResult.SUCCESS
     error_message: str | None = None
     error_type: str | None = None
 
     try:
         await runner.run()
     except PipelineShutdownError:
-        status = RunStatus.SHUTDOWN
+        status = PipelineRunResult.SHUTDOWN
     except Exception as e:
-        status = RunStatus.FAILED
+        status = PipelineRunResult.FAILED
         error_message = str(e)
         error_type = type(e).__name__
 

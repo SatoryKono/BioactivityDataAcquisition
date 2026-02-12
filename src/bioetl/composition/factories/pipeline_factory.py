@@ -44,7 +44,6 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
@@ -100,6 +99,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: The pipeline class to instantiate
         silver_schema: PyArrow schema for Silver layer
         gold_schema: Pandera schema for Gold layer
+        pandera_silver_schema: Pandera DataFrameModel class for Silver validation
     """
 
     def __init__(
@@ -109,6 +109,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         provider: str,
         silver_schema: pa.Schema | None = None,
         gold_schema: Any = None,
+        pandera_silver_schema: Any = None,
         data_source_creator: DataSourceCreator | None = None,
         transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
@@ -127,6 +128,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self.provider = provider
         self.silver_schema = silver_schema
         self.gold_schema = gold_schema
+        self.pandera_silver_schema = pandera_silver_schema
         self.transformer_class = transformer_class
 
         # Use custom creator or look up from registry
@@ -138,6 +140,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -147,6 +150,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         Args:
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional domain-level filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
@@ -162,6 +166,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
             entity_type=_extract_entity_type(self.pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -226,6 +231,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
                 provider=self.provider,
                 create_data_source_fn=self._create_data_source,
                 transformer_class=self.transformer_class,
+                pandera_silver_schema=self.pandera_silver_schema,
                 run_id=run_id,
                 runtime=runtime,
                 settings=settings,
@@ -285,6 +291,7 @@ def create_pipeline_factory(
     provider: str,
     silver_schema: pa.Schema | None = None,
     gold_schema: Any = None,
+    pandera_silver_schema: Any = None,
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories."""
@@ -294,6 +301,7 @@ def create_pipeline_factory(
         provider=provider,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
+        pandera_silver_schema=pandera_silver_schema,
         transformer_class=transformer_class,
     )
 
@@ -394,6 +402,7 @@ def build_pipeline_services(
     dq_monitor: DQMonitorPort | None = None,
     metadata_coordinator: MetadataCoordinator | None = None,
     cached_bronze: CachedBronzeContext | None = None,
+    silver_validator: Any = None,
 ) -> PipelineServices:
     """Build PipelineServices from settings.
 
@@ -411,6 +420,8 @@ def build_pipeline_services(
         cached_bronze: Optional CachedBronzeContext for reading from Bronze
                       cache instead of API. When enabled, creates
                       CachedBronzeDataSource instead of the normal data source.
+        silver_validator: Optional SilverValidatorPort for Pandera validation
+            in SilverWriter. Created from Pandera Silver schema.
 
     Returns:
         Configured PipelineServices instance
@@ -449,6 +460,7 @@ def build_pipeline_services(
         tracer=tracer,
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
+        silver_validator=silver_validator,
     )
 
 
@@ -468,6 +480,7 @@ def create_pipeline_with_services(
     dq_monitor: DQMonitorPort | None = None,
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext | None = None,
+    pandera_silver_schema: Any = None,
 ) -> BasePipeline:
     """Create pipeline instance with services.
 
@@ -491,12 +504,24 @@ def create_pipeline_with_services(
         metrics: Optional metrics port for transformer observability
         cached_bronze: Optional CachedBronzeContext for reading from Bronze
                       cache instead of API.
+        pandera_silver_schema: Optional Pandera DataFrameModel class for Silver
+            validation. If provided, PanderaSilverValidator is created and
+            injected into SilverWriter.
 
     Returns:
         Configured pipeline instance
     """
     yaml_config = config or load_pipeline_config(pipeline_name)
     entity = _extract_entity_type(pipeline_name) or pipeline_name
+
+    # Create Silver validator from Pandera schema if provided (DI pattern)
+    silver_validator = None
+    if pandera_silver_schema is not None:
+        from bioetl.infrastructure.validation.pandera_validator import (
+            PanderaSilverValidator,
+        )
+
+        silver_validator = PanderaSilverValidator(pandera_silver_schema.to_schema())
 
     # Create RunContext with versioning metadata for MetadataCoordinator
     run_context = RunContext.create(
@@ -522,6 +547,7 @@ def create_pipeline_with_services(
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
         cached_bronze=cached_bronze,
+        silver_validator=silver_validator,
     )
 
     domain_config = yaml_config_to_domain(yaml_config)
@@ -534,6 +560,7 @@ def create_pipeline_with_services(
             entity_type=_extract_entity_type(pipeline_name),
             tracer=tracer,
             metrics=metrics,
+            silver_filters=domain_config.silver_filters,
             gold_filters=domain_config.gold_filters,
             # identity_service and pii_hasher use defaults in transformer
         )

@@ -3,8 +3,16 @@ name: Architecture Metrics
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'LICENSE'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'LICENSE'
 
 env:
   # Use CI hypothesis profile for faster property-based tests

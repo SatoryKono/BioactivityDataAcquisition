@@ -84,6 +84,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
+        silver_filters: GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -96,6 +97,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity_type: Entity type for metrics.
             tracer: Optional tracing port for distributed tracing.
             metrics: Optional metrics port for duration/error tracking.
+            silver_filters: Optional filter configuration for Silver layer.
             gold_filters: Optional filter configuration for Gold layer.
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
@@ -107,6 +109,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             entity_type=entity_type,
             tracer=tracer,
             metrics=metrics,
+            silver_filters=silver_filters,
             gold_filters=gold_filters,
             identity_service=identity_service,
             pii_hasher=pii_hasher,
@@ -188,6 +191,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         return {
             **ids,
+            # Field from PublicationBaseSchema that Semantic Scholar doesn't provide
+            # (set to None to satisfy schema inheritance requirement)
+            "pmc_id": None,
             "title": rec.get("title"),
             "abstract": abstract,
             "tldr": tldr,
@@ -204,7 +210,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "publication_year": self.validate_value_object(
                 PublicationYear, rec.get("year"), as_string=False
             ),
-            "publication_date": self._normalize_partial_date(
+            "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publicationDate")
             ),
             "citations_received": rec.get("citationCount"),
@@ -255,20 +261,27 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
     @staticmethod
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord, excluding unused fields.
+        """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
-        Overrides base implementation to remove fields not collected for S2.
+        Note: pmc_id is kept with None value to satisfy PublicationBaseSchema
+        inheritance requirement. arxiv_id is excluded as it's not in the base schema.
 
         Args:
             entity: Domain entity (dataclass).
 
         Returns:
-            SilverRecord dictionary without pmc_id/arxiv_id.
+            SilverRecord dictionary with all base schema fields.
 
         """
         from bioetl.application.core.base_transformer import BaseTransformer
 
         silver_record = BaseTransformer.entity_to_silver_record(entity)
-        silver_record.pop("pmc_id", None)
+
+        # Note: Do NOT remove pmc_id - it inherits from PublicationBaseSchema
+        # and must exist in DataFrame even if set to None (Pandera requires
+        # columns to exist, not just be nullable)
+
+        # Remove arxiv_id only (not part of base schema)
         silver_record.pop("arxiv_id", None)
+
         return silver_record

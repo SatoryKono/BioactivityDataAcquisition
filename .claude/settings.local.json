@@ -80,7 +80,14 @@
       "Bash(VCR_RECORD_MODE=new_episodes python -m pytest:*)",
       "Bash(pip install:*)",
       "Bash(git ls-files:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(for name in DomainError EntityValidationError PipelineError SchemaRegistrationError SchemaNotFoundError)",
+      "Bash(do echo -n \"$name class def: \")",
+      "Bash(for name in CachePort EventBusPort NotificationPort SchedulerPort DistributedLockPort)",
+      "Bash(del \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\src\\\\bioetl\\\\domain\\\\schemas\\\\_field_orders.py\")",
+      "Bash(Select-String -Pattern \"passed|failed\")",
+      "Bash(Select-Object -Last 3)",
+      "Bash(mypy:*)"
     ]
   },
   "enabledPlugins": {

@@ -47,19 +47,27 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("document_chembl_id", pa.string()),  # Primary key
         pa.field("doi", pa.string()),
-        # pmc_id excluded: not available from ChEMBL API
+        pa.field("pmc_id", pa.string()),  # Not available from ChEMBL API (None values)
         pa.field("pmid", pa.string()),  # Unified: from pubmed_id
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
-        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
-        pa.field(
-            "publication_subclass", pa.string()
-        ),  # Level 2: "Original Experimental Data", etc.
+        pa.field("affiliation_list", pa.string()),  # JSON array (None for ChEMBL)
+        pa.field("author_orcids", pa.string()),  # JSON array (None for ChEMBL)
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
         pa.field(
             "publication_type_unified", pa.string()
         ),  # Level 3: "Journal Article", etc.
-        # publication_date excluded: not available from ChEMBL API
+        pa.field(
+            "publication_subclass", pa.string()
+        ),  # Level 2: "Original Experimental Data", etc.
+        pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
+        pa.field(
+            "publication_date", pa.string()
+        ),  # Not available from ChEMBL API (None values)
+        pa.field(
+            "language", pa.string()
+        ),  # Not available from ChEMBL API (None values)
+        pa.field("is_oa", pa.bool_()),  # Not available from ChEMBL API (None values)
         pa.field("src_id", pa.int64()),
         # === Unified citation metrics ===
         pa.field("citations_received", pa.int64()),  # Unified: from citation_count
@@ -113,10 +121,10 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("ligand_efficiency_le", pa.float64()),
         pa.field("ligand_efficiency_lle", pa.float64()),
         pa.field("ligand_efficiency_sei", pa.float64()),
-        pa.field("manual_curation_flag", pa.int64()),
+        pa.field("manual_curation_flag", pa.float64()),  # Float for nullable int
         pa.field("molecule_chembl_id", pa.string()),
         pa.field("molecule_pref_name", pa.string()),
-        pa.field("original_activity_id", pa.int64()),
+        pa.field("original_activity_id", pa.float64()),  # Float for nullable int
         pa.field("parent_molecule_chembl_id", pa.string()),
         pa.field("pchembl_value", pa.float64()),
         pa.field("potential_duplicate", pa.int64()),
@@ -138,7 +146,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
             "target_taxonomy_id", pa.string()
         ),  # Standardized name (was target_tax_id)
         pa.field("text_value", pa.string()),
-        pa.field("toid", pa.int64()),
+        pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),
         pa.field("units", pa.string()),
         pa.field("uo_units", pa.string()),
@@ -166,14 +174,30 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         # === Business fields (alphabetical order) ===
         pa.field("canonical_smiles", pa.string()),
         pa.field("cid", pa.string()),  # Domain entity uses str for cid
+        pa.field("complexity", pa.float64()),
+        pa.field("conformer_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("conformer_rmsd_3d", pa.float64()),
+        pa.field("effective_rotor_count_3d", pa.float64()),
+        pa.field("exact_mass", pa.float64()),
+        pa.field("feature_acceptor_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_anion_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_cation_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_donor_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_hydrophobe_count_3d", pa.float64()),  # Float for nullable int
+        pa.field("feature_ring_count_3d", pa.float64()),  # Float for nullable int
         pa.field("inchi", pa.string()),
-        pa.field("inchikey", pa.string()),  # Matches domain entity field name
+        pa.field("inchikey", pa.string()),  # Matches Pandera field name
         pa.field("isomeric_smiles", pa.string()),
         pa.field("iupac_name", pa.string()),
         pa.field("molecular_formula", pa.string()),
-        pa.field(
-            "molecular_weight", pa.float64()
-        ),  # Transformed to float by transformer
+        pa.field("molecular_weight", pa.float64()),
+        pa.field("monoisotopic_mass", pa.float64()),
+        pa.field("tpsa", pa.float64()),
+        pa.field("x_steric_quadrupole_3d", pa.float64()),
+        pa.field("xlogp", pa.float64()),
+        pa.field("y_steric_quadrupole_3d", pa.float64()),
+        pa.field("z_steric_quadrupole_3d", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
@@ -393,9 +417,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_pref_name", pa.string()),
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
-        pa.field(
-            "assay_taxonomy_id", pa.int64()
-        ),  # Standardized name (was assay_tax_id)
+        pa.field("assay_taxonomy_id", pa.float64()),  # Float for nullable int
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string()),
@@ -421,9 +443,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_organism", pa.string()),
         pa.field("variant_sequence", pa.string()),
         pa.field("variant_sequence_json", pa.string()),  # Forensic: original JSON
-        pa.field(
-            "variant_taxonomy_id", pa.int64()
-        ),  # Standardized name (was variant_tax_id)
+        pa.field("variant_taxonomy_id", pa.float64()),  # Float for nullable int
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
@@ -446,7 +466,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         # Flattened component fields
         pa.field("component_accessions", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
-        pa.field("component_id", pa.int64()),
+        pa.field("component_id", pa.float64()),  # Float for nullable int
         pa.field("component_ids", pa.list_(pa.int64())),
         pa.field("component_relationships", pa.list_(pa.string())),
         pa.field("component_types", pa.list_(pa.string())),
@@ -461,7 +481,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_components", pa.string()),
         pa.field("target_type", pa.string()),
-        pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
+        pa.field("taxonomy_id", pa.float64()),  # Float for nullable int
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
@@ -617,7 +637,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         pa.field("atc_classifications", pa.string()),
-        pa.field("availability_type", pa.int64()),
+        pa.field("availability_type", pa.float64()),  # Float for nullable int
         pa.field("black_box_warning", pa.int64()),
         # Flattened Structures (unified naming without structure_ prefix)
         pa.field("canonical_smiles", pa.string()),
@@ -625,7 +645,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
         pa.field("dosed_ingredient", pa.int64()),
-        pa.field("first_approval", pa.int64()),
+        pa.field("first_approval", pa.float64()),  # Float for nullable int
         pa.field("first_in_class", pa.int64()),
         pa.field("helm_notation", pa.string()),
         # Flattened Hierarchy
@@ -671,7 +691,7 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("usan_stem", pa.string()),
         pa.field("usan_stem_definition", pa.string()),
         pa.field("usan_substem", pa.string()),
-        pa.field("usan_year", pa.int64()),
+        pa.field("usan_year", pa.float64()),  # Float for nullable int
         pa.field("withdrawn_flag", pa.bool_()),
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
@@ -779,7 +799,9 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_last", pa.string()),
         pa.field("page_range", pa.string()),  # Page range: "first-last" format
         pa.field("paper_id", pa.string()),  # Primary key
-        # Note: pmc_id excluded per design (2026-01)
+        pa.field(
+            "pmc_id", pa.string()
+        ),  # PubMed Central ID (inherited from base schema)
         pa.field("pmid", pa.string()),
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
@@ -821,7 +843,11 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # === Business fields (alphabetical order) ===
-        # abstract and affiliations excluded per user request
+        # Note: abstract and affiliation_list not provided by CrossRef but required by PublicationBaseSchema
+        pa.field("abstract", pa.string()),  # Not available from CrossRef (None values)
+        pa.field(
+            "affiliation_list", pa.string()
+        ),  # Not available from CrossRef (None values)
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("author_details", pa.string()),  # JSON array of author objects
         pa.field("author_orcids", pa.string()),  # ORCID IDs (JSON array)
@@ -846,7 +872,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("license_url", pa.string()),
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
-        # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
+        # Note: pmid and pmc_id not provided by CrossRef but required by PublicationBaseSchema
+        pa.field("pmc_id", pa.string()),  # Not available from CrossRef (None values)
+        pa.field("pmid", pa.string()),  # Not available from CrossRef (None values)
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
         pa.field(
@@ -932,12 +960,12 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Unified page fields (from biblio object)
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
-        # Note: pmc_id excluded per design (2026-01)
+        # PubMed Central ID - Not available from OpenAlex API (None values)
+        pa.field("pmc_id", pa.string()),
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
         # Primary topic (single most relevant topic for quick categorization)
         pa.field("primary_topic", pa.string()),  # JSON object
-        # Date fields
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
         pa.field(

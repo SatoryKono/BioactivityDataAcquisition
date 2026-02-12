@@ -2,8 +2,8 @@
 
 Руководство по запуску и управлению ETL-пайплайнами в BioETL.
 
-**Версия:** 5.9.0
-**Дата обновления:** 2026-01-26
+**Версия:** 5.14.0
+**Дата обновления:** 2026-02-10
 
 ---
 
@@ -323,23 +323,24 @@ bioetl health server --port 8080
 
 | Слой | Путь | Формат | Retention |
 |------|------|--------|-----------|
-| **Bronze** | `data/bronze/{provider}/{entity}/{date}/` | JSONL + zstd | 90 дней |
-| **Silver** | `data/silver/{provider}/{entity}/` | Delta Lake | Permanent |
-| **Gold** | `data/gold/{provider}/{entity}/` | Delta Lake / Parquet | Permanent |
+| **Bronze** | `data/output/bronze/{provider}/{entity}/{date}/` | JSONL + zstd | 90 дней |
+| **Silver** | `data/output/silver/{provider}/{entity}/` | Delta Lake | Permanent |
+| **Gold** | `data/output/gold/{provider}/{entity}/` | Delta Lake | Permanent |
 
 ### Структура директорий
 
 ```
 data/
-├── bronze/
-│   └── chembl/activity/2026-01-26/
-│       └── batch_001.jsonl.zst
-├── silver/
-│   └── chembl/activity/
-│       └── _delta_log/
-├── gold/
-│   └── chembl/activity/
-│       └── _delta_log/
+├── output/
+│   ├── bronze/
+│   │   └── chembl/activity/2026-01-26/
+│   │       └── batch_001.jsonl.zst
+│   ├── silver/
+│   │   └── chembl/activity/
+│   │       └── _delta_log/
+│   └── gold/
+│       └── chembl/activity/
+│           └── _delta_log/
 ├── checkpoints/
 │   └── chembl_activity.json
 └── quarantine/

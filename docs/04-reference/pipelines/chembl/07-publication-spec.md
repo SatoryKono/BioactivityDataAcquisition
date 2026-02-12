@@ -1,6 +1,6 @@
 # ChEMBL Publication (Document) Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
 ---
 
@@ -145,7 +145,7 @@ class ChemblPublicationSchema(ETLRecordSchema):
 pipeline_name: chembl_publication
 provider: chembl
 entity_type: document
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["document_chembl_id"]
 silver_table: "chembl_publication"

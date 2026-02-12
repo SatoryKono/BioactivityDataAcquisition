@@ -1,6 +1,6 @@
 # ChEMBL Assay Parameters Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
 ---
 
@@ -120,7 +120,7 @@ class AssayParametersSchema(ETLRecordSchema):
 pipeline_name: chembl_assay_parameters
 provider: chembl
 entity_type: assay_parameters
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["assay_param_id"]
 silver_table: "chembl_assay_parameters"

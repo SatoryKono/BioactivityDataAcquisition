@@ -17,8 +17,9 @@ from __future__ import annotations
 CHEMBL_ID_PATTERN = r"^CHEMBL\d+$"
 
 # Ontology identifiers
-BAO_ID_PATTERN = r"^BAO:\d+$"  # BioAssay Ontology
-UO_ID_PATTERN = r"^UO:\d+$"  # Units Ontology
+# ChEMBL API returns underscore format (BAO_0000190), not colon format (BAO:0000190)
+BAO_ID_PATTERN = r"^BAO[_:]\d+$"  # BioAssay Ontology (accepts both _ and :)
+UO_ID_PATTERN = r"^UO[_:]\d+$"  # Units Ontology (accepts both _ and :)
 CLO_ID_PATTERN = r"^CLO_\d+$"  # Cell Line Ontology
 EFO_ID_PATTERN = r"^EFO_\d+$"  # Experimental Factor Ontology
 

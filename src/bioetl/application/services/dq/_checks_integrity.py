@@ -153,6 +153,8 @@ def check_scd_integrity(
                         ):
                             overlapping += 1
         except Exception:
+            # Catch all: entity group processing may fail due to missing/invalid
+            # temporal fields or sort errors. Skip entity for SCD overlap check.
             pass
 
     status = DQCheckStatus.PASS if overlapping == 0 else DQCheckStatus.WARN

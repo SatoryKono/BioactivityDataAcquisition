@@ -307,9 +307,9 @@ class TestValidateMedallionConfig:
         """Test that valid configuration returns no errors."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
-            bronze_path="/data/bronze",
-            silver_path="/data/silver",
-            gold_path="/data/gold",
+            bronze_path="/data/output/bronze",
+            silver_path="/data/output/silver",
+            gold_path="/data/output/gold",
             silver_format="delta",
             gold_format="delta",
         )
@@ -319,9 +319,9 @@ class TestValidateMedallionConfig:
         """Test that Silver format must be 'delta'."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
-            bronze_path="/data/bronze",
-            silver_path="/data/silver",
-            gold_path="/data/gold",
+            bronze_path="/data/output/bronze",
+            silver_path="/data/output/silver",
+            gold_path="/data/output/gold",
             silver_format="parquet",  # Invalid!
             gold_format="delta",
         )
@@ -348,9 +348,9 @@ class TestValidateMedallionConfig:
         """Test that Gold format 'parquet' is invalid (RULES §2.1)."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
-            bronze_path="/data/bronze",
-            silver_path="/data/silver",
-            gold_path="/data/gold",
+            bronze_path="/data/output/bronze",
+            silver_path="/data/output/silver",
+            gold_path="/data/output/gold",
             silver_format="delta",
             gold_format="parquet",
         )
@@ -364,9 +364,9 @@ class TestValidateMedallionConfig:
         """Test that Gold format 'jsonl' is invalid."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
-            bronze_path="/data/bronze",
-            silver_path="/data/silver",
-            gold_path="/data/gold",
+            bronze_path="/data/output/bronze",
+            silver_path="/data/output/silver",
+            gold_path="/data/output/gold",
             silver_format="delta",
             gold_format="jsonl",  # Invalid!
         )
@@ -383,9 +383,9 @@ class TestValidateMedallionConfig:
         """Test that Bronze and Silver paths must be different."""
         errors = preflight_service.validate_medallion_config(
             runtime=incremental_runtime,
-            bronze_path="/data/shared",
-            silver_path="/data/shared",  # Duplicate!
-            gold_path="/data/gold",
+            bronze_path="/data/output/shared",
+            silver_path="/data/output/shared",  # Duplicate!
+            gold_path="/data/output/gold",
             silver_format="delta",
             gold_format="delta",
         )
@@ -908,9 +908,9 @@ class TestValidatePreflight:
             await preflight_service.validate_preflight(
                 services=mock_services,
                 runtime=strict_runtime,
-                bronze_path="/data/bronze",
-                silver_path="/data/silver",
-                gold_path="/data/gold",
+                bronze_path="/data/output/bronze",
+                silver_path="/data/output/silver",
+                gold_path="/data/output/gold",
                 silver_format="parquet",  # Invalid!
                 gold_format="delta",
             )
@@ -923,9 +923,9 @@ class TestValidatePreflight:
         report = await preflight_service.validate_preflight(
             services=mock_services,
             runtime=incremental_runtime,
-            bronze_path="/data/bronze",
-            silver_path="/data/silver",
-            gold_path="/data/gold",
+            bronze_path="/data/output/bronze",
+            silver_path="/data/output/silver",
+            gold_path="/data/output/gold",
             silver_format="parquet",  # Invalid!
             gold_format="delta",
         )
@@ -941,9 +941,9 @@ class TestValidatePreflight:
         await preflight_service.validate_preflight(
             services=mock_services,
             runtime=incremental_runtime,
-            bronze_path="/data/bronze",
-            silver_path="/data/silver",
-            gold_path="/data/gold",
+            bronze_path="/data/output/bronze",
+            silver_path="/data/output/silver",
+            gold_path="/data/output/gold",
             silver_format="delta",
             gold_format="delta",
         )
@@ -991,9 +991,9 @@ class TestValidatePreflight:
         report = await service.validate_preflight(
             services=mock_services,
             runtime=incremental_runtime,
-            bronze_path="/data/bronze",
-            silver_path="/data/silver",
-            gold_path="/data/gold",
+            bronze_path="/data/output/bronze",
+            silver_path="/data/output/silver",
+            gold_path="/data/output/gold",
             silver_format="delta",
             gold_format="delta",
         )

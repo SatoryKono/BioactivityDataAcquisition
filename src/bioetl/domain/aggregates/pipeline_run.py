@@ -24,8 +24,12 @@ class StageStatus(StrEnum):
     SKIPPED = "skipped"
 
 
-class RunStatus(StrEnum):
-    """Status of a pipeline run."""
+class PipelineRunState(StrEnum):
+    """Lifecycle state of a pipeline run (PENDING -> RUNNING -> terminal).
+
+    Unlike application.services.PipelineRunResult (completion result),
+    this enum tracks the *current state* during execution.
+    """
 
     PENDING = "pending"
     RUNNING = "running"
@@ -35,7 +39,11 @@ class RunStatus(StrEnum):
 
     def is_terminal(self) -> bool:
         """Check if terminal (no more transitions)."""
-        return self in {RunStatus.COMPLETED, RunStatus.FAILED, RunStatus.SHUTDOWN}
+        return self in {
+            PipelineRunState.COMPLETED,
+            PipelineRunState.FAILED,
+            PipelineRunState.SHUTDOWN,
+        }
 
 
 def _validate_stage_name(stage: str) -> None:
@@ -218,7 +226,7 @@ class PipelineRun:
         self._run_id = run_id
         self._run_type = run_type
         self._pipeline_name = pipeline_name
-        self._status = RunStatus.PENDING
+        self._status = PipelineRunState.PENDING
         self._stages: list[StageResult] = []
         self._started_at: datetime | None = None
         self._ended_at: datetime | None = None
@@ -241,7 +249,7 @@ class PipelineRun:
         return self._pipeline_name
 
     @property
-    def status(self) -> RunStatus:
+    def status(self) -> PipelineRunState:
         """Current run status (read-only)."""
         return self._status
 
@@ -299,13 +307,13 @@ class PipelineRun:
         Raises:
             InvalidStateError: If run is not in PENDING status.
         """
-        if self._status != RunStatus.PENDING:
+        if self._status != PipelineRunState.PENDING:
             raise InvalidStateError(
                 f"Cannot start run in status {self._status.value}",
                 current_state=self._status.value,
                 attempted_operation="start",
             )
-        self._status = RunStatus.RUNNING
+        self._status = PipelineRunState.RUNNING
         self._started_at = started_at or datetime.now(UTC)
 
     def record_stage_start(
@@ -400,7 +408,7 @@ class PipelineRun:
         )
 
         # Invariant: First stage failure transitions run to FAILED
-        self._status = RunStatus.FAILED
+        self._status = PipelineRunState.FAILED
         self._ended_at = completed_at or now
 
         # Emit domain event
@@ -453,7 +461,7 @@ class PipelineRun:
         self._assert_can_complete()
 
         now = completed_at or datetime.now(UTC)
-        self._status = RunStatus.COMPLETED
+        self._status = PipelineRunState.COMPLETED
         self._ended_at = now
 
         # Emit domain event
@@ -490,7 +498,7 @@ class PipelineRun:
         """
         self._assert_running("fail")
         now = failed_at or datetime.now(UTC)
-        self._status = RunStatus.FAILED
+        self._status = PipelineRunState.FAILED
         self._ended_at = now
 
         # Emit domain event
@@ -520,7 +528,7 @@ class PipelineRun:
         """
         self._assert_running("shutdown")
         now = shutdown_at or datetime.now(UTC)
-        self._status = RunStatus.SHUTDOWN
+        self._status = PipelineRunState.SHUTDOWN
         self._ended_at = now
 
         # Emit domain event
@@ -551,7 +559,7 @@ class PipelineRun:
         Raises:
             InvalidStateError: If not in RUNNING status.
         """
-        if self._status != RunStatus.RUNNING:
+        if self._status != PipelineRunState.RUNNING:
             raise InvalidStateError(
                 f"Cannot {operation}: run is in status {self._status.value}",
                 current_state=self._status.value,

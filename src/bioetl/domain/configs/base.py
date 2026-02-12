@@ -23,7 +23,6 @@ class RateLimitConfig:
     Consolidates rate limiting fields from:
     - composition/providers/provider_registry.py:HttpConfig
     - infrastructure/schemas/pipeline_config.py:ApiConfig
-    - domain/config_types.py:RateLimitDict
 
     Attributes:
         requests_per_second: Maximum requests per second (default: 5.0).

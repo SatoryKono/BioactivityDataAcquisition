@@ -278,6 +278,8 @@ class TestDomainComplexity:
             "LayerColumnConfig": 10,  # CC=8 - LayerColumnConfig __post_init__ with mutual exclusivity + type coercion
             # Publication type classification (domain taxonomy mapping)
             "classify_publication_type": 10,  # CC=9 - Publication type classification with multi-level taxonomy lookup
+            # Page range abbreviation expansion (normalization)
+            "_expand_abbreviated_page": 7,  # CC=6 - Page range expansion with digit extraction and rollover
         }
 
         violations = []

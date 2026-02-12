@@ -121,7 +121,6 @@ from bioetl.domain.exceptions import (
     CachedBronzeEmptyError,
     CheckpointConflictError,
     CircuitBreakerOpenError,
-    ConfigurationError,
     CriticalError,
     DataQualityError,
     DataQualityThresholdError,
@@ -131,9 +130,7 @@ from bioetl.domain.exceptions import (
     DeltaTransactionError,
     DeltaWriteConflictError,
     ExternalServiceError,
-    FileSystemError,
     InfrastructureError,
-    InternalError,
     InvalidDataFormatError,
     InvalidStateError,
     LockAcquisitionError,
@@ -196,7 +193,6 @@ from bioetl.domain.normalization import (
 
 # Ports
 from bioetl.domain.ports import (
-    ActivityAggregatorPort,
     AuditEntry,
     AuditLayer,
     AuditOperation,
@@ -238,8 +234,6 @@ from bioetl.domain.ports import (
     NoOpMetrics,
     NoOpPiiHasher,
     NoOpTracing,
-    NormalizationServicePort,
-    OutlierFilterPort,
     PiiHasherPort,
     QuarantinePort,
     RateLimiterPort,
@@ -253,8 +247,6 @@ from bioetl.domain.ports import (
     SilverValidatorPort,
     StoragePort,
     TracingPort,
-    UnitConverterPort,
-    ValueValidatorPort,
 )
 
 # Resilience (domain value objects)
@@ -425,13 +417,10 @@ __all__ = [
     "ServiceAuthenticationError",
     "DataValidationError",
     # Exceptions - Internal/Critical
-    "InternalError",
     "BucketNotFoundError",
     "CheckpointConflictError",
-    "ConfigurationError",
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
-    "FileSystemError",
     "InfrastructureError",
     "InvalidStateError",
     "LockAcquisitionError",
@@ -477,7 +466,6 @@ __all__ = [
     "ClearPolicy",
     "MedallionPolicy",
     # Ports
-    "ActivityAggregatorPort",
     "AuditEntry",
     "AuditLayer",
     "AuditOperation",
@@ -519,8 +507,6 @@ __all__ = [
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
-    "NormalizationServicePort",
-    "OutlierFilterPort",
     "PiiHasherPort",
     "QuarantinePort",
     "RateLimiterPort",
@@ -534,8 +520,6 @@ __all__ = [
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
-    "UnitConverterPort",
-    "ValueValidatorPort",
     # Registry (publication entity types, ADR-024)
     "LEGACY_PUBLICATION_ALIASES",
     "PUBLICATION_ENTITY_TYPES",

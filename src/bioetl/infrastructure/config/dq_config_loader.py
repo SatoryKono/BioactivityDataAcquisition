@@ -102,13 +102,13 @@ class DQConfigLoader:
         # Normalize and validate via Pydantic
         normalized = self._normalize_to_file_format(merged)
         validated = DQConfigFile.model_validate(normalized)
-        domain_config = validated.to_domain()
+        domain_config: DQConfig = validated.to_domain()
 
         # Cache result if no inline overrides
         if inline_overrides is None:
             self._cache[cache_key] = domain_config
 
-        return domain_config  # type: ignore[no-any-return]
+        return domain_config
 
     def clear_cache(self) -> None:
         """Clear the configuration cache.

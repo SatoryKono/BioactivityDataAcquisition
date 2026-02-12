@@ -19,9 +19,6 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Re-export for backwards compatibility
 __all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "PublicationEnrichedSchema"]
 
-# === Fixed Value Constants ===
-DOCUMENT_TYPES = ["PUBLICATION", "PREPRINT"]
-
 
 class PublicationEnrichedSchema(PublicationBaseSchema):
     """CrossRef-enriched Publication validation schema for Silver layer.
@@ -40,6 +37,27 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     - pmc_id: CrossRef API doesn't provide PMC IDs
     - doc_type: CrossRef uses raw 'type' field instead (journal-article, etc.)
     """
+
+    # === Override inherited fields to allow missing (align with excluded fields) ===
+    # Note: Fields are already nullable in base schema, just re-declaring here for clarity
+    pmid: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^[1-9]\d*$",
+        description="PubMed ID (positive numeric string)",
+    )
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central ID",
+    )
+    abstract: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication abstract",
+    )
+    affiliation_list: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of unique affiliations (unified field name)",
+    )
 
     # === Primary Key (override doi to be non-nullable) ===
     doi: Series[str] = pa.Field(

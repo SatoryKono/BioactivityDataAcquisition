@@ -28,9 +28,9 @@ from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.quarantine import UnifiedQuarantine
 from bioetl.infrastructure.validation import PanderaGoldValidator
@@ -139,6 +139,7 @@ class BaseServicesFactory:
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: Any = None,
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -151,6 +152,8 @@ class BaseServicesFactory:
             dq_monitor: Optional data quality monitor for anomaly detection
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation across Bronze, Silver, Gold.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
 
         Returns:
             PipelineServices with all dependencies configured
@@ -164,6 +167,7 @@ class BaseServicesFactory:
             logger,
             metrics=metrics,
             metadata_coordinator=metadata_coordinator,
+            silver_validator=silver_validator,
         )
 
         lock = cls._create_lock()
@@ -173,7 +177,7 @@ class BaseServicesFactory:
         # Use provided tracer or fallback to NoOpTracing
         # Tracer should be created via bootstrap_tracer() for consistent configuration
         if tracer is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            from bioetl.domain.ports import NoOpTracing
 
             tracer = NoOpTracing()
 

@@ -5,7 +5,7 @@
 **Версия:** 6.0.0
 **Дата обновления:** 2026-02-03
 
----
+______________________________________________________________________
 
 ## Обзор
 
@@ -19,16 +19,16 @@ BioETL использует **YAML-файлы** для конфигурации 
 - **Pydantic валидация:** Схемы проверяются при загрузке
 - **Immutable Domain Objects:** Конфиги преобразуются в frozen dataclasses
 
----
+______________________________________________________________________
 
 ## Структура директорий
 
 ```
 configs/
-├── pipelines/                    # Конфигурации пайплайнов (21 = 19 entity + 2 composite)
-│   ├── _base.yaml               # Базовая конфигурация v2.0.0 (474 строки)
+├── pipelines/                    # Конфигурации пайплайнов (26 = 21 entity + 5 composite)
+│   ├── _base.yaml               # Базовая конфигурация v2.1.0 (491 строка)
 │   ├── _schema.json             # JSON Schema для валидации
-│   ├── chembl/                  # 12 entity configs
+│   ├── chembl/                  # 14 entity configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
 │   │   ├── assay_parameters.yaml
@@ -39,8 +39,10 @@ configs/
 │   │   ├── publication.yaml
 │   │   ├── publication_similarity.yaml
 │   │   ├── publication_term.yaml
+│   │   ├── subcellular_fraction.yaml
 │   │   ├── target.yaml
-│   │   └── target_component.yaml
+│   │   ├── target_component.yaml
+│   │   └── tissue.yaml
 │   ├── pubchem/                 # 1 entity config
 │   │   └── compound.yaml
 │   ├── uniprot/                 # 2 entity configs
@@ -54,10 +56,13 @@ configs/
 │   │   └── publication.yaml
 │   ├── semanticscholar/         # 1 entity config
 │   │   └── publication.yaml
-│   └── composite/               # 2 composite configs (ADR-026)
+│   └── composite/               # 5 composite configs (ADR-026)
+│       ├── activity.yaml        # chembl_activity + enrichers
+│       ├── assay.yaml           # chembl_assay + enrichers
+│       ├── molecule.yaml        # chembl_molecule + enrichers
 │       ├── publication.yaml     # chembl_publication + enrichers
 │       └── target.yaml          # chembl_target + enrichers
-├── dq/                           # Data Quality правила (21 файлов)
+├── dq/                           # Data Quality правила (31 файл)
 │   ├── _defaults.yaml           # Глобальные DQ defaults (soft_fail=0.05, hard_fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
 │   │   ├── chembl.yaml
@@ -67,11 +72,11 @@ configs/
 │   │   ├── pubmed.yaml
 │   │   ├── semanticscholar.yaml
 │   │   └── uniprot.yaml
-│   └── entities/                # 14 entity-specific DQ
+│   └── entities/                # 22 entity-specific DQ
 │       ├── chembl/
 │       │   ├── activity.yaml
 │       │   ├── assay.yaml
-│       │   └── ...              # 12 entity DQ configs
+│       │   └── ...              # 14 entity DQ configs
 │       ├── crossref/
 │       │   └── publication.yaml
 │       ├── openalex/
@@ -108,16 +113,16 @@ configs/
 
 ### Статистика конфигураций
 
-| Категория | Количество | Описание |
-|-----------|------------|----------|
-| Pipeline configs (entity) | 19 | Regular ETL pipelines |
-| Composite configs | 2 | Multi-provider pipelines (ADR-026) |
-| DQ configs | 21 | 1 defaults + 7 providers + 13 entities |
-| Filter configs | 8 | 1 defaults + 7 providers |
-| Source configs | 7 | Один на провайдера |
-| **Итого** | **58** | Все конфиги валидированы |
+| Категория                 | Количество | Описание                               |
+| ------------------------- | ---------- | -------------------------------------- |
+| Pipeline configs (entity) | 21         | Regular ETL pipelines                  |
+| Composite configs         | 5          | Multi-provider pipelines (ADR-026)     |
+| DQ configs                | 31         | 1 defaults + 7 providers + 22 entities + 1 schema |
+| Filter configs            | 8          | 1 defaults + 7 providers               |
+| Source configs            | 7          | Один на провайдера                     |
+| **Итого**                 | **71**     | Все конфиги валидированы               |
 
----
+______________________________________________________________________
 
 ## Pipeline YAML конфиг
 
@@ -138,24 +143,24 @@ gold_table: "chembl_activity"
 
 ### Полная структура конфига
 
-| Секция | Описание | Обязательно |
-|--------|----------|-------------|
-| `pipeline_name` | Уникальный идентификатор пайплайна | Да |
-| `provider` | Имя провайдера (lowercase) | Да |
-| `entity_type` | Тип сущности | Да |
-| `version` | Semver версия конфига | Да |
-| `primary_keys` | Первичные ключи | Да |
-| `silver_table` | Имя Silver таблицы | Да |
-| `gold_table` | Имя Gold таблицы | Нет |
-| `batch_size` | Размер батча (1-5000) | Нет (default: 100) |
-| `checkpoint_interval` | Интервал checkpoint | Нет (default: 10) |
-| `source` | Конфиг источника | Нет (auto-resolved) |
-| `dq_rules` | Inline DQ переопределения | Нет |
-| `sink` | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved) |
-| `circuit_breaker` | Настройки Circuit Breaker | Нет (from base) |
-| `maintenance` | VACUUM настройки | Нет (from base) |
-| `loading_strategy` | Стратегия загрузки | Нет (default: full) |
-| `force_full_scan` | Отключить checkpoint resume | Нет (default: false) |
+| Секция                | Описание                           | Обязательно          |
+| --------------------- | ---------------------------------- | -------------------- |
+| `pipeline_name`       | Уникальный идентификатор пайплайна | Да                   |
+| `provider`            | Имя провайдера (lowercase)         | Да                   |
+| `entity_type`         | Тип сущности                       | Да                   |
+| `version`             | Semver версия конфига              | Да                   |
+| `primary_keys`        | Первичные ключи                    | Да                   |
+| `silver_table`        | Имя Silver таблицы                 | Да                   |
+| `gold_table`          | Имя Gold таблицы                   | Нет                  |
+| `batch_size`          | Размер батча (1-5000)              | Нет (default: 100)   |
+| `checkpoint_interval` | Интервал checkpoint                | Нет (default: 10)    |
+| `source`              | Конфиг источника                   | Нет (auto-resolved)  |
+| `dq_rules`            | Inline DQ переопределения          | Нет                  |
+| `sink`                | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
+| `circuit_breaker`     | Настройки Circuit Breaker          | Нет (from base)      |
+| `maintenance`         | VACUUM настройки                   | Нет (from base)      |
+| `loading_strategy`    | Стратегия загрузки                 | Нет (default: full)  |
+| `force_full_scan`     | Отключить checkpoint resume        | Нет (default: false) |
 
 ### Пример с переопределениями
 
@@ -181,7 +186,7 @@ dq_rules:
       nullable: true
     - field: standard_type
       type: enum
-      allowed: [IC50, Ki, Kd, EC50, AC50]
+      allowed: [IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, Kd, EC50, AC50]
 
 # Переопределение sink (опционально)
 sink:
@@ -192,7 +197,7 @@ sink:
       include_columns: ["activity_id", "standard_type", "standard_value"]
 ```
 
----
+______________________________________________________________________
 
 ## Composite Pipelines (ADR-026)
 
@@ -230,34 +235,37 @@ composite:
 
 ### Доступные Composite Pipelines
 
-| Composite | Seed | Enrichers | Описание |
-|-----------|------|-----------|----------|
-| `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar | Обогащённые публикации |
-| `composite_target` | `chembl_target` | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets |
+| Composite               | Seed                 | Enrichers                                                           | Описание                      |
+| ----------------------- | -------------------- | ------------------------------------------------------------------- | ----------------------------- |
+| `composite_activity`    | `chembl_activity`    | enrichers                                                           | Обогащённые данные активности |
+| `composite_assay`       | `chembl_assay`       | enrichers                                                           | Обогащённые данные анализов   |
+| `composite_molecule`    | `chembl_molecule`    | pubchem_compound, enrichers                                         | Обогащённые молекулы          |
+| `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
+| `composite_target`      | `chembl_target`      | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
 
 ### Отличия от Regular Pipelines
 
-| Аспект | Regular Pipeline | Composite Pipeline |
-|--------|------------------|-------------------|
-| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:` |
-| Source | Один провайдер | Несколько провайдеров через `enrichers` |
-| Schema | `_schema.json` | Отдельная схема (ADR-026) |
-| Пути | Auto-computed | Определяются в `merge.output` |
+| Аспект        | Regular Pipeline                           | Composite Pipeline                      |
+| ------------- | ------------------------------------------ | --------------------------------------- |
+| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:`                            |
+| Source        | Один провайдер                             | Несколько провайдеров через `enrichers` |
+| Schema        | `_schema.json`                             | Отдельная схема (ADR-026)               |
+| Пути          | Auto-computed                              | Определяются в `merge.output`           |
 
----
+______________________________________________________________________
 
 ## Convention-based Path Resolution (ADR-029)
 
 Пути и ссылки вычисляются автоматически из `provider` и `entity_type`:
 
-| Поле | Auto-computed значение |
-|------|------------------------|
-| `source_file` | `../../sources/{provider}.yaml` |
-| `dq_config_file` | `../../dq/entities/{provider}/{entity_type}.yaml` |
+| Поле                 | Auto-computed значение                                |
+| -------------------- | ----------------------------------------------------- |
+| `source_file`        | `../../sources/{provider}.yaml`                       |
+| `dq_config_file`     | `../../dq/entities/{provider}/{entity_type}.yaml`     |
 | `filter_config_file` | `../../filter/entities/{provider}/{entity_type}.yaml` |
-| `sink.bronze.path` | `data/output/bronze/{provider}/{entity_type}` |
-| `sink.silver.path` | `data/output/silver/{provider}/{entity_type}` |
-| `sink.gold.path` | `data/output/gold/{provider}/{entity_type}` |
+| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`         |
+| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`         |
+| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`           |
 
 ### Авто-пропагация sort_by (ADR-014 compliance)
 
@@ -266,10 +274,7 @@ composite:
 ```python
 # config_loader.py:155-176
 if "sort_by" not in sink_silver:
-    sink_silver["sort_by"] = {
-        "columns": config["primary_keys"],
-        "ascending": True
-    }
+    sink_silver["sort_by"] = {"columns": config["primary_keys"], "ascending": True}
 ```
 
 Это означает, что entity configs **не должны** явно указывать `sort_by` — он пропагируется из `primary_keys`:
@@ -280,9 +285,9 @@ pipeline_name: chembl_activity
 primary_keys: ["activity_id"]  # → sort_by.columns = ["activity_id"]
 ```
 
-> **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения. Все 19 entity configs соответствуют ADR-014 через авто-пропагацию.
+> **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения. Все 21 entity configs соответствуют ADR-014 через авто-пропагацию.
 
----
+______________________________________________________________________
 
 ## Data Quality (DQ) конфигурация
 
@@ -291,9 +296,9 @@ primary_keys: ["activity_id"]  # → sort_by.columns = ["activity_id"]
 DQ правила загружаются в порядке приоритета (позже выигрывают):
 
 1. `configs/dq/_defaults.yaml` — глобальные defaults
-2. `configs/dq/providers/{provider}.yaml` — provider-specific
-3. `configs/dq/entities/{provider}/{entity}.yaml` — entity-specific
-4. Inline `dq_rules` в pipeline конфиге — финальные переопределения
+1. `configs/dq/providers/{provider}.yaml` — provider-specific
+1. `configs/dq/entities/{provider}/{entity}.yaml` — entity-specific
+1. Inline `dq_rules` в pipeline конфиге — финальные переопределения
 
 ### Специальная merge логика
 
@@ -341,7 +346,7 @@ entity_field_validations:
     nullable: true
   - field: standard_type
     type: enum
-    allowed: [IC50, Ki, Kd, EC50, AC50, Potency]
+    allowed: [IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, Kd, EC50, AC50, Potency]
 
 entity_cross_field_validations:
   - name: value_requires_units
@@ -362,16 +367,16 @@ entity_conditional_validations:
 
 ### Типы валидаций
 
-| Тип | Описание | Параметры |
-|-----|----------|-----------|
-| `required` | Обязательное поле | `nullable` |
-| `range` | Числовой диапазон | `min`, `max`, `nullable` |
-| `enum` | Допустимые значения | `allowed`, `nullable` |
-| `pattern` | Regex паттерн | `pattern`, `nullable` |
-| `length` | Длина строки | `min`, `max` |
-| `unique` | Уникальность | — |
+| Тип        | Описание            | Параметры                |
+| ---------- | ------------------- | ------------------------ |
+| `required` | Обязательное поле   | `nullable`               |
+| `range`    | Числовой диапазон   | `min`, `max`, `nullable` |
+| `enum`     | Допустимые значения | `allowed`, `nullable`    |
+| `pattern`  | Regex паттерн       | `pattern`, `nullable`    |
+| `length`   | Длина строки        | `min`, `max`             |
+| `unique`   | Уникальность        | —                        |
 
----
+______________________________________________________________________
 
 ## Filter конфигурация
 
@@ -380,9 +385,9 @@ entity_conditional_validations:
 Аналогично DQ, фильтры загружаются иерархически:
 
 1. `configs/filter/_defaults.yaml`
-2. `configs/filter/providers/{provider}.yaml`
-3. `configs/filter/entities/{provider}/{entity}.yaml`
-4. Inline `filter_rules` в pipeline конфиге
+1. `configs/filter/providers/{provider}.yaml`
+1. `configs/filter/entities/{provider}/{entity}.yaml`
+1. Inline `filter_rules` в pipeline конфиге
 
 ### Input Filter
 
@@ -410,7 +415,7 @@ gold_filters:
   columns:
     standard_type:
       operator: in
-      values: [IC50, Ki]
+      values: [IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50]
     pchembl_value:
       operator: is_not_null
 
@@ -427,16 +432,16 @@ gold_filters:
 
 ### Операторы фильтрации
 
-| Оператор | Описание |
-|----------|----------|
-| `in` | Значение в списке |
-| `not_in` | Значение не в списке |
-| `is_null` | NULL |
-| `is_not_null` | NOT NULL |
-| `is_empty` | Пустая строка или список |
+| Оператор       | Описание                    |
+| -------------- | --------------------------- |
+| `in`           | Значение в списке           |
+| `not_in`       | Значение не в списке        |
+| `is_null`      | NULL                        |
+| `is_not_null`  | NOT NULL                    |
+| `is_empty`     | Пустая строка или список    |
 | `is_not_empty` | Не пустая строка или список |
 
----
+______________________________________________________________________
 
 ## Source конфигурация
 
@@ -468,7 +473,7 @@ source:
     burst: 10
 
   health_check:
-    endpoint: /chembl/api/data/status.json
+    endpoint: /chembl/api/data/status
     timeout: 5
 
 entities:
@@ -481,17 +486,17 @@ entities:
 
 ### Rate Limits по провайдерам (7 source configs)
 
-| Provider | Source Config | Rate Limit | Burst | Batch Size |
-|----------|---------------|------------|-------|------------|
-| ChEMBL | `sources/chembl.yaml` | 5 req/sec | 10 | 20 |
-| PubChem | `sources/pubchem.yaml` | 5 req/sec | 10 | 1 |
-| UniProt | `sources/uniprot.yaml` | 100 req/sec | 200 | 100 |
-| CrossRef | `sources/crossref.yaml` | 10 req/sec | 20 | 50 |
-| OpenAlex | `sources/openalex.yaml` | 10 req/sec | 20 | 50 |
-| PubMed | `sources/pubmed.yaml` | 3 req/sec | 5 | 10 |
-| SemanticScholar | `sources/semanticscholar.yaml` | 100 req/5min | — | 100 |
+| Provider        | Source Config                  | Rate Limit   | Burst | Batch Size |
+| --------------- | ------------------------------ | ------------ | ----- | ---------- |
+| ChEMBL          | `sources/chembl.yaml`          | 5 req/sec    | 10    | 20         |
+| PubChem         | `sources/pubchem.yaml`         | 5 req/sec    | 10    | 1          |
+| UniProt         | `sources/uniprot.yaml`         | 100 req/sec  | 200   | 100        |
+| CrossRef        | `sources/crossref.yaml`        | 10 req/sec   | 20    | 50         |
+| OpenAlex        | `sources/openalex.yaml`        | 10 req/sec   | 20    | 50         |
+| PubMed          | `sources/pubmed.yaml`          | 3 req/sec    | 5     | 10         |
+| SemanticScholar | `sources/semanticscholar.yaml` | 100 req/5min | —     | 100        |
 
----
+______________________________________________________________________
 
 ## Sink конфигурация
 
@@ -535,21 +540,21 @@ sink:
 
 ### Write Modes
 
-| Mode | Bronze | Silver | Gold |
-|------|--------|--------|------|
-| `append` | Только append | — | — |
-| `merge` | — | Upsert по PK | — |
-| `overwrite` | — | Полная перезапись | Полная перезапись |
+| Mode        | Bronze        | Silver            | Gold              |
+| ----------- | ------------- | ----------------- | ----------------- |
+| `append`    | Только append | —                 | —                 |
+| `merge`     | —             | Upsert по PK      | —                 |
+| `overwrite` | —             | Полная перезапись | Полная перезапись |
 
 ### Schema Mismatch Handling
 
-| Режим | Описание |
-|-------|----------|
-| `error` | Падение при несовпадении схемы |
+| Режим    | Описание                                |
+| -------- | --------------------------------------- |
+| `error`  | Падение при несовпадении схемы          |
 | `evolve` | Автоматическое добавление новых колонок |
-| `ignore` | Игнорировать несовпадения |
+| `ignore` | Игнорировать несовпадения               |
 
----
+______________________________________________________________________
 
 ## Circuit Breaker конфигурация
 
@@ -561,11 +566,12 @@ circuit_breaker:
 ```
 
 **Состояния:**
+
 - **Closed:** Нормальная работа
 - **Open:** Все запросы блокируются
 - **Half-Open:** Пробные запросы для recovery
 
----
+______________________________________________________________________
 
 ## Maintenance конфигурация
 
@@ -581,7 +587,7 @@ maintenance:
     retention_days: 90          # Retention для Bronze файлов
 ```
 
----
+______________________________________________________________________
 
 ## Валидация конфигурации
 
@@ -605,15 +611,15 @@ bioetl config list-pipelines
 
 При загрузке конфига выполняются проверки:
 
-| Проверка | Описание |
-|----------|----------|
-| `validate_batch_size` | batch_size ≤ 5000 |
-| `validate_provider` | Provider в lowercase |
-| `validate_entity_type_canonical` | publication* вместо document* |
-| `validate_medallion_formats` | Bronze→JSONL, Silver→Delta, Gold→Delta/Parquet |
-| `validate_thresholds` | soft_fail < hard_fail |
+| Проверка                         | Описание                                       |
+| -------------------------------- | ---------------------------------------------- |
+| `validate_batch_size`            | batch_size ≤ 5000                              |
+| `validate_provider`              | Provider в lowercase                           |
+| `validate_entity_type_canonical` | publication\* вместо document\*                |
+| `validate_medallion_formats`     | Bronze→JSONL, Silver→Delta, Gold→Delta/Parquet |
+| `validate_thresholds`            | soft_fail < hard_fail                          |
 
----
+______________________________________________________________________
 
 ## Примеры конфигураций
 
@@ -676,7 +682,7 @@ sink:
       enabled: true
 ```
 
----
+______________________________________________________________________
 
 ## Миграция с JSON на YAML
 
@@ -684,6 +690,7 @@ sink:
 > Переход на YAML выполнен для улучшения читаемости и поддержки комментариев.
 
 **Было (JSON):**
+
 ```json
 {
   "pipeline_name": "chembl_activity",
@@ -694,6 +701,7 @@ sink:
 ```
 
 **Стало (YAML):**
+
 ```yaml
 pipeline_name: chembl_activity
 provider: chembl
@@ -703,7 +711,7 @@ batch_size: 100
 # Комментарии теперь поддерживаются!
 ```
 
----
+______________________________________________________________________
 
 ## Troubleshooting
 
@@ -715,28 +723,30 @@ bioetl config validate chembl_activity
 
 **Распространённые ошибки:**
 
-| Ошибка | Причина | Решение |
-|--------|---------|---------|
-| `batch_size > 5000` | Слишком большой batch | Уменьшить до ≤5000 |
+| Ошибка                   | Причина                     | Решение                |
+| ------------------------ | --------------------------- | ---------------------- |
+| `batch_size > 5000`      | Слишком большой batch       | Уменьшить до ≤5000     |
 | `provider not lowercase` | Provider в верхнем регистре | Использовать lowercase |
-| `soft_fail >= hard_fail` | Неверные пороги | soft_fail < hard_fail |
-| `unknown field` | Опечатка в имени поля | Проверить spelling |
+| `soft_fail >= hard_fail` | Неверные пороги             | soft_fail < hard_fail  |
+| `unknown field`          | Опечатка в имени поля       | Проверить spelling     |
 
 ### DQ правила не применяются
 
 1. Проверить путь к DQ файлу:
+
    ```bash
    ls configs/dq/entities/{provider}/{entity}.yaml
    ```
 
-2. Проверить merge логику — validation lists **concatenate**, не override.
+1. Проверить merge логику — validation lists **concatenate**, не override.
 
-3. Использовать CLI для просмотра resolved конфига:
+1. Использовать CLI для просмотра resolved конфига:
+
    ```bash
    bioetl config show chembl_activity --format json
    ```
 
----
+______________________________________________________________________
 
 ## См. также
 

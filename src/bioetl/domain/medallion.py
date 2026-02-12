@@ -221,19 +221,18 @@ class LoadingStrategy(StrEnum):
             ) from None
 
     @classmethod
-    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:
+    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:  # noqa: ARG003
         """Convert legacy force_full_scan flag to LoadingStrategy.
 
         Provides backward compatibility with existing configs using
         force_full_scan: true/false.
 
         Args:
-            force_full_scan: Legacy boolean flag (unused)
+            force_full_scan: Legacy boolean flag
 
         Returns:
             FULL_SCAN_ONLY (always, since watermark-based loading was removed)
         """
-        del force_full_scan  # Unused argument
         return cls.FULL_SCAN_ONLY
 
 

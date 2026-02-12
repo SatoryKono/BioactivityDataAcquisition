@@ -26,14 +26,19 @@ from pydantic import (
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+from bioetl.infrastructure.schemas.base_schemas import (
+    BaseFilterColumnSchema,
+    BaseGoldColumnFilterConfig,
+    BaseGoldFiltersConfig,
+    BaseGoldListContainsFilterConfig,
+    BaseGoldListLengthFilterConfig,
+    BaseGoldRangeFilterConfig,
+    BaseInputFilterConfig,
+)
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
-    from bioetl.domain.filtering.gold_config import GoldFilterConfig
-    from bioetl.domain.filtering.input_config import (
-        InputFilterConfig as DomainInputFilterConfig,
-    )
     from bioetl.domain.models.metadata import GovernanceMetadata
 
 
@@ -295,15 +300,14 @@ class CsvExportConfig(BaseModel):
     encoding: str = "utf-8"
 
 
-class FilterColumnSchema(BaseModel):
+class FilterColumnSchema(BaseFilterColumnSchema):
     """Schema for a single filter column configuration."""
 
-    column_name: str = Field(description="Column name in CSV containing filter IDs")
-    filter_field: str = Field(description="API field name to filter by")
 
-
-class InputFilterConfig(BaseModel):
+class InputFilterConfig(BaseInputFilterConfig):
     """Configuration for input ID filtering from CSV.
+
+    Inherits to_domain() and validate_column_config from BaseInputFilterConfig.
 
     Supports both single-column and multi-column filtering modes:
     - Single-column: Use column_name and filter_field directly
@@ -312,89 +316,8 @@ class InputFilterConfig(BaseModel):
     Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
     """
 
-    enabled: bool = False
-    source_path: str | None = Field(
-        default=None,
-        description="Path to CSV file with filter IDs",
-    )
-    # Single-column mode (backward compatibility)
-    column_name: str | None = Field(
-        default=None,
-        description="Column name in CSV containing filter IDs (single-column mode)",
-    )
-    filter_field: str | None = Field(
-        default=None,
-        description="API field name to filter by (single-column mode)",
-    )
-    # Multi-column mode
-    columns: list[FilterColumnSchema] | None = Field(
-        default=None,
-        description="List of column configurations for multi-column filtering",
-    )
-    batch_size: int = Field(
-        default=100,
-        ge=1,
-        le=1000,
-        description="Number of IDs per API request",
-    )
-    # Fallback support (e.g., DOI → title search)
-    fallback_column: str | None = Field(
-        default=None,
-        description="Column name for fallback search when primary lookup fails",
-    )
-
-    @model_validator(mode="after")
-    def validate_column_config(self) -> InputFilterConfig:
-        """Validate that either columns or column_name/filter_field is provided."""
-        if not self.enabled:
-            return self
-        if self.columns:
-            # Multi-column mode - columns provided
-            return self
-        if self.column_name and self.filter_field:
-            # Single-column mode - backward compatibility
-            return self
-        # Neither mode configured - raise error
-        raise ValueError(
-            "Either 'columns' list or both 'column_name' and 'filter_field' "
-            "must be provided when filter is enabled"
-        )
-
-    def to_domain(self) -> DomainInputFilterConfig:
-        """Convert to domain InputFilterConfig dataclass.
-
-        Returns:
-            DomainInputFilterConfig: Immutable domain configuration.
-        """
-        from bioetl.domain.filtering.input_config import (
-            FilterColumn as DomainFilterColumn,
-        )
-        from bioetl.domain.filtering.input_config import (
-            InputFilterConfig as DomainInputFilterConfigImpl,
-        )
-
-        # Convert columns list to domain FilterColumn tuple
-        domain_columns: tuple[DomainFilterColumn, ...] = ()
-        if self.columns:
-            domain_columns = tuple(
-                DomainFilterColumn(
-                    column_name=col.column_name,
-                    filter_field=col.filter_field,
-                )
-                for col in self.columns
-            )
-
-        return DomainInputFilterConfigImpl(
-            enabled=self.enabled,
-            source_path=self.source_path,
-            column_name=self.column_name if self.enabled and not self.columns else None,
-            filter_field=(
-                self.filter_field if self.enabled and not self.columns else None
-            ),
-            columns=domain_columns,
-            batch_size=self.batch_size,
-            fallback_column=self.fallback_column,
-        )
+    # Inherits columns from BaseInputFilterConfig.
+    # FilterColumnSchema extends BaseFilterColumnSchema with no additional fields.
 
 
 class MaintenanceConfig(BaseModel):
@@ -700,39 +623,22 @@ class SinkLayerConfig(BaseModel):
     )
 
 
-class GoldRangeFilterConfig(BaseModel):
+class GoldRangeFilterConfig(BaseGoldRangeFilterConfig):
     """Schema for range filters in YAML."""
 
-    min: float | None = None
-    max: float | None = None
-    include_min: bool = True
-    include_max: bool = True
 
-
-class GoldListLengthFilterConfig(BaseModel):
+class GoldListLengthFilterConfig(BaseGoldListLengthFilterConfig):
     """Schema for list length filters in YAML."""
 
-    min: int | None = None
-    max: int | None = None
 
-
-class GoldListContainsFilterConfig(BaseModel):
+class GoldListContainsFilterConfig(BaseGoldListContainsFilterConfig):
     """Schema for list contains filters in YAML."""
 
-    values: list[str]
-    mode: Literal["all", "any"] = "all"
 
-
-class GoldColumnFilterConfig(BaseModel):
+class GoldColumnFilterConfig(BaseGoldColumnFilterConfig):
     """Column filter config with operator support.
 
-    Supports extended operators for column filtering:
-    - in: value must be in the allowed list (default)
-    - not_in: value must not be in the excluded list
-    - is_null: value must be None or empty string
-    - is_not_null: value must not be None or empty string
-    - is_empty: value must be "empty" (None, "", [], {})
-    - is_not_empty: value must not be "empty"
+    Inherits operator, values fields and validate_operator_values() from base.
 
     Example YAML:
         columns:
@@ -743,28 +649,11 @@ class GoldColumnFilterConfig(BaseModel):
             operator: is_not_null
     """
 
-    operator: Literal[
-        "in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"
-    ] = "in"
-    values: list[str] | None = None
 
-    @model_validator(mode="after")
-    def validate_operator_values(self) -> GoldColumnFilterConfig:
-        """Validate that values are provided for IN/NOT_IN operators."""
-        if self.operator in ("in", "not_in") and not self.values:
-            raise ValueError(f"values required for operator '{self.operator}'")
-        if (
-            self.operator in ("is_null", "is_not_null", "is_empty", "is_not_empty")
-            and self.values is not None
-        ):
-            raise ValueError(f"values must be None for operator '{self.operator}'")
-        return self
-
-
-class GoldFiltersConfig(BaseModel):
+class GoldFiltersConfig(BaseGoldFiltersConfig):
     """Schema for gold_filters in YAML.
 
-    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+    Inherits to_domain() from BaseGoldFiltersConfig.
 
     Supports two formats for columns:
     - Legacy format: {"column_name": ["value1", "value2"]} (IN operator)
@@ -785,74 +674,9 @@ class GoldFiltersConfig(BaseModel):
               operator: is_not_null
     """
 
-    columns: dict[str, list[str] | GoldColumnFilterConfig] = Field(default_factory=dict)
-    ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
-    list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
-    list_contains: dict[str, GoldListContainsFilterConfig] = Field(default_factory=dict)
-    required_fields: list[str] = Field(default_factory=list)
-    exclude_if_present: list[str] = Field(default_factory=list)
-
-    def to_domain(self) -> GoldFilterConfig:
-        """Convert to domain GoldFilterConfig dataclass.
-
-        Returns:
-            GoldFilterConfig: Immutable domain configuration.
-        """
-        from bioetl.domain.filtering import (
-            FilterOperator,
-            GoldColumnFilter,
-            GoldFilterConfig,
-            GoldListContainsFilter,
-            GoldListLengthFilter,
-            GoldRangeFilter,
-        )
-
-        column_filters: list[GoldColumnFilter] = []
-        for col, cfg in self.columns.items():
-            if isinstance(cfg, list):
-                # Legacy format: list of values -> IN operator
-                column_filters.append(
-                    GoldColumnFilter(
-                        column=col,
-                        operator=FilterOperator.IN,
-                        values=frozenset(cfg),
-                    )
-                )
-            else:
-                # New format: GoldColumnFilterConfig
-                column_filters.append(
-                    GoldColumnFilter(
-                        column=col,
-                        operator=FilterOperator(cfg.operator),
-                        values=frozenset(cfg.values) if cfg.values else None,
-                    )
-                )
-
-        return GoldFilterConfig(
-            column_filters=tuple(column_filters),
-            range_filters=tuple(
-                GoldRangeFilter(
-                    column=col,
-                    min_value=r.min,
-                    max_value=r.max,
-                    include_min=r.include_min,
-                    include_max=r.include_max,
-                )
-                for col, r in self.ranges.items()
-            ),
-            list_length_filters=tuple(
-                GoldListLengthFilter(column=col, min_length=r.min, max_length=r.max)
-                for col, r in self.list_lengths.items()
-            ),
-            list_contains_filters=tuple(
-                GoldListContainsFilter(
-                    column=col, values=frozenset(r.values), mode=r.mode
-                )
-                for col, r in self.list_contains.items()
-            ),
-            required_fields=tuple(self.required_fields),
-            exclude_if_present=tuple(self.exclude_if_present),
-        )
+    # Inherits columns, ranges, list_lengths, list_contains from BaseGoldFiltersConfig.
+    # Child filter types (GoldColumnFilterConfig etc.) extend the base types with no
+    # additional fields, so the base field definitions are sufficient.
 
 
 # Regex for semver validation (allows optional 'v' prefix)
@@ -979,6 +803,7 @@ class PipelineYamlConfig(BaseModel):
     primary_keys: list[str] = Field(min_length=1)
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
+    silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
 
     sink: dict[str, SinkLayerConfig] = Field(default_factory=dict)
@@ -1079,10 +904,13 @@ class PipelineYamlConfig(BaseModel):
             bronze_config.format = "jsonl"
 
         # Silver MUST use Delta Lake (RULES.md §2.1)
-        if silver_config and silver_config.format == "parquet":
+        # Strict positive check: only "delta" is allowed. This prevents bypass
+        # with formats like "jsonl" or "csv" that the previous negative check
+        # (format == "parquet") would not catch.
+        if silver_config and silver_config.format != "delta":
             raise ValueError(
-                "Silver layer MUST use 'delta' format (RULES.md §2.1). "
-                "Parquet is not allowed for Silver layer."
+                f"Silver layer MUST use 'delta' format (RULES.md §2.1). "
+                f"Got '{silver_config.format}'. Only Delta Lake is allowed for Silver layer."
             )
 
         # Gold MAY use delta or parquet (RULES.md §2.1) - no validation needed

@@ -4,35 +4,36 @@ Runbooks for common operational scenarios in the BioETL pipeline system.
 
 ## Index
 
-| Runbook | Description | When to Use |
-|---------|-------------|-------------|
+| Runbook                                                   | Description                          | When to Use                       |
+| --------------------------------------------------------- | ------------------------------------ | --------------------------------- |
 | [Pipeline Failure Recovery](pipeline-failure-recovery.md) | Recovering from failed pipeline runs | Pipeline exits with non-zero code |
-| [VACUUM Procedures](vacuum-procedures.md) | Manual Delta Lake maintenance | Table optimization needed |
-| [Checkpoint Debugging](checkpoint-debugging.md) | Troubleshooting checkpoint issues | Pipeline resumes incorrectly |
-| [DQ Failure Investigation](dq-failure-investigation.md) | Data quality issue analysis | DQ threshold exceeded |
+| [VACUUM Procedures](vacuum-procedures.md)                 | Manual Delta Lake maintenance        | Table optimization needed         |
+| [Checkpoint Debugging](checkpoint-debugging.md)           | Troubleshooting checkpoint issues    | Pipeline resumes incorrectly      |
+| [DQ Failure Investigation](dq-failure-investigation.md)   | Data quality issue analysis          | DQ threshold exceeded             |
 
 ## Quick Reference
 
 ### Exit Codes
 
-| Code | Meaning | Action |
-|------|---------|--------|
-| 0 | Success | None required |
-| 1 | General error | Check logs, see [Pipeline Failure Recovery](pipeline-failure-recovery.md) |
-| 2 | Invalid arguments | Check CLI arguments |
-| 10 | Data quality hard threshold | See [DQ Failure Investigation](dq-failure-investigation.md) |
-| 130 | SIGINT (Ctrl+C) | Graceful shutdown, check checkpoint |
-| 143 | SIGTERM | Graceful shutdown, check checkpoint |
+| Code                    | Meaning                     | Action                                                                    |
+| ----------------------- | --------------------------- | ------------------------------------------------------------------------- |
+| 0                       | Success                     | None required                                                             |
+| 1                       | General error               | Check logs, see [Pipeline Failure Recovery](pipeline-failure-recovery.md) |
+| 2                       | Invalid arguments           | Check CLI arguments                                                       |
+| 83 (DATA_QUALITY_ERROR) | Data quality hard threshold | See [DQ Failure Investigation](dq-failure-investigation.md)               |
+| 130                     | SIGINT (Ctrl+C)             | Graceful shutdown, check checkpoint                                       |
+| 143                     | SIGTERM                     | Graceful shutdown, check checkpoint                                       |
 
 ### Key Directories
 
 ```
 data/
-├── bronze/v1/{provider}/{entity}/{date}/   # Raw JSONL files
-├── silver/{table_name}/                     # Delta Lake tables
-├── gold/{table_name}/                       # Aggregated Delta tables
-├── checkpoints/{provider}_{entity}.json    # Pipeline state
-└── quarantine/{provider}/{entity}/         # Failed records
+└── output/
+    ├── bronze/{provider}/{entity}/{date}/   # Raw JSONL files
+    ├── silver/{provider}/{entity}/           # Delta Lake tables
+    ├── gold/{provider}/{entity}/             # Delta Lake tables
+    ├── checkpoints/{pipeline_name}.json      # Pipeline state
+    └── quarantine/{provider}/{entity}/       # Failed records
 ```
 
 ### Useful Commands

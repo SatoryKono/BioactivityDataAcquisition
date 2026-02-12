@@ -4,11 +4,12 @@
 **Version:** 5.14.0
 **Last updated:** 2026-02-10
 
----
+______________________________________________________________________
 
 ## Overview
 
 `UnifiedHTTPClient` provides a standardized HTTP client for all data source adapters. It encapsulates:
+
 - **Rate limiting** (provider-specific)
 - **Circuit breaker** (cascading failure prevention)
 - **Retry logic** (exponential backoff)
@@ -18,7 +19,7 @@ All API adapters **MUST** use `UnifiedHTTPClient` instead of direct `httpx` call
 
 **Related ADR:** [ADR-032: Unified HTTP Client Pattern](../../../02-architecture/decisions/ADR-032-unified-http-client.md)
 
----
+______________________________________________________________________
 
 ## Architecture
 
@@ -49,11 +50,11 @@ flowchart TB
 ### Design Principles
 
 1. **Composition over Inheritance:** Ports injected, not inherited
-2. **SRP Compliance:** Each concern (rate limit, circuit breaker, retry) is a separate component
-3. **Observability Built-in:** Tracing and metrics integrated via ports
-4. **Async-first:** Uses `httpx.AsyncClient` for async HTTP
+1. **SRP Compliance:** Each concern (rate limit, circuit breaker, retry) is a separate component
+1. **Observability Built-in:** Tracing and metrics integrated via ports
+1. **Async-first:** Uses `httpx.AsyncClient` for async HTTP
 
----
+______________________________________________________________________
 
 ## Basic Usage
 
@@ -93,7 +94,7 @@ response = await client.post(
 )
 ```
 
----
+______________________________________________________________________
 
 ## Rate Limiting
 
@@ -101,15 +102,15 @@ response = await client.post(
 
 Each provider has different rate limit policies:
 
-| Provider | Limit | Implementation |
-|----------|-------|----------------|
-| **ChEMBL** | None | `NoOpRateLimiter` |
-| **PubChem** | 5 req/sec | `TokenBucketLimiter(rate=5.0)` |
-| **UniProt** | 100 req/sec | `TokenBucketLimiter(rate=100.0)` |
-| **PubMed** | 3 req/sec (no key) | `TokenBucketLimiter(rate=3.0)` |
-| **CrossRef** | Polite pool (50 req/sec) | `TokenBucketLimiter(rate=50.0)` |
-| **OpenAlex** | ~10 req/sec | `TokenBucketLimiter(rate=10.0)` |
-| **Semantic Scholar** | 100 req/5min | `SlidingWindowLimiter(100, window=300)` |
+| Provider             | Limit                    | Implementation                          |
+| -------------------- | ------------------------ | --------------------------------------- |
+| **ChEMBL**           | None                     | `NoOpRateLimiter`                       |
+| **PubChem**          | 5 req/sec                | `TokenBucketLimiter(rate=5.0)`          |
+| **UniProt**          | 100 req/sec              | `TokenBucketLimiter(rate=100.0)`        |
+| **PubMed**           | 3 req/sec (no key)       | `TokenBucketLimiter(rate=3.0)`          |
+| **CrossRef**         | Polite pool (50 req/sec) | `TokenBucketLimiter(rate=50.0)`         |
+| **OpenAlex**         | ~10 req/sec              | `TokenBucketLimiter(rate=10.0)`         |
+| **Semantic Scholar** | 100 req/5min             | `SlidingWindowLimiter(100, window=300)` |
 
 ### Token Bucket Example
 
@@ -171,7 +172,7 @@ The client automatically respects standard rate limit headers:
 # 3. Wait until reset time if limit exceeded
 ```
 
----
+______________________________________________________________________
 
 ## Circuit Breaker
 
@@ -180,12 +181,12 @@ The client automatically respects standard rate limit headers:
 ### Configuration
 
 ```python
-from bioetl.infrastructure.adapters.circuit_breaker import SimpleCircuitBreaker
+from bioetl.infrastructure.adapters.http import CircuitBreaker
 
-circuit_breaker = SimpleCircuitBreaker(
-    failure_threshold=5,      # Open after 5 consecutive failures
-    success_threshold=2,      # Close after 2 consecutive successes in half-open
-    timeout_seconds=60,       # Try again after 60 seconds
+circuit_breaker = CircuitBreaker(
+    failure_threshold=5,  # Open after 5 consecutive failures
+    success_threshold=2,  # Close after 2 consecutive successes in half-open
+    timeout_seconds=60,  # Try again after 60 seconds
     logger=logger,
     metrics=metrics,
 )
@@ -209,10 +210,10 @@ stateDiagram-v2
     Closed --> Closed: success
 ```
 
-| State | Behavior |
-|-------|----------|
-| **Closed** | Normal operation, all requests pass through |
-| **Open** | Circuit breaker tripped, all requests fail fast |
+| State         | Behavior                                               |
+| ------------- | ------------------------------------------------------ |
+| **Closed**    | Normal operation, all requests pass through            |
+| **Open**      | Circuit breaker tripped, all requests fail fast        |
 | **Half-Open** | Testing if service recovered, limited requests allowed |
 
 ### Exception Types
@@ -228,7 +229,7 @@ except CircuitBreakerOpenError:
     # Fail gracefully or use fallback
 ```
 
----
+______________________________________________________________________
 
 ## Retry Logic
 
@@ -238,10 +239,10 @@ except CircuitBreakerOpenError:
 from bioetl.domain.models.retry_config import RetryConfig
 
 retry_config = RetryConfig(
-    max_attempts=5,       # Maximum 5 attempts total
-    base_delay=1.0,       # Start with 1 second delay
-    max_delay=60.0,       # Cap delay at 60 seconds
-    backoff_factor=2.0,   # Double delay each retry
+    max_attempts=5,  # Maximum 5 attempts total
+    base_delay=1.0,  # Start with 1 second delay
+    max_delay=60.0,  # Cap delay at 60 seconds
+    backoff_factor=2.0,  # Double delay each retry
 )
 
 client = UnifiedHTTPClient(
@@ -257,12 +258,14 @@ client = UnifiedHTTPClient(
 ### Retry Strategy
 
 **Retryable errors:**
+
 - HTTP 429 (Rate Limit)
 - HTTP 500, 502, 503, 504 (Server errors)
 - Network errors (`httpx.NetworkError`)
 - Timeout errors (`httpx.TimeoutException`)
 
 **Non-retryable errors:**
+
 - HTTP 400, 401, 403, 404 (Client errors)
 - HTTP 422 (Unprocessable Entity)
 - JSON decode errors
@@ -279,7 +282,7 @@ except httpx.HTTPStatusError as e:
         logger.error("API server error after retries", exc_info=e)
 ```
 
----
+______________________________________________________________________
 
 ## Observability Integration
 
@@ -340,7 +343,7 @@ All HTTP operations are logged with structured context:
 }
 ```
 
----
+______________________________________________________________________
 
 ## Error Handling
 
@@ -365,6 +368,7 @@ from bioetl.domain.exceptions import (
     RateLimitExceededError,
 )
 import httpx
+
 
 async def fetch_with_error_handling(client: UnifiedHTTPClient, url: str):
     try:
@@ -400,7 +404,7 @@ async def fetch_with_error_handling(client: UnifiedHTTPClient, url: str):
         raise
 ```
 
----
+______________________________________________________________________
 
 ## Testing
 
@@ -411,16 +415,19 @@ import pytest
 import httpx
 import respx
 
+
 @respx.mock
 async def test_unified_http_client_retry():
     """Test retry logic with mocked responses."""
     # First two attempts fail, third succeeds
     route = respx.get("https://api.example.com/data")
-    route.mock(side_effect=[
-        httpx.Response(503),
-        httpx.Response(503),
-        httpx.Response(200, json={"result": "success"}),
-    ])
+    route.mock(
+        side_effect=[
+            httpx.Response(503),
+            httpx.Response(503),
+            httpx.Response(200, json={"result": "success"}),
+        ]
+    )
 
     client = UnifiedHTTPClient(
         base_url="https://api.example.com",
@@ -443,6 +450,7 @@ async def test_unified_http_client_retry():
 import pytest
 import vcr
 
+
 @pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/chembl")
 async def test_chembl_activity_fetch_real():
     """Test with recorded HTTP interactions."""
@@ -457,7 +465,7 @@ async def test_chembl_activity_fetch_real():
     assert "activities" in data
 ```
 
----
+______________________________________________________________________
 
 ## Configuration via YAML
 
@@ -484,13 +492,15 @@ http_config:
 
 **Note:** See [ADR-032 Configuration](../../../02-architecture/decisions/ADR-032-unified-http-client.md#configuration) for full schema.
 
----
+______________________________________________________________________
 
 ## Migration from Direct httpx
 
 **Before (legacy):**
+
 ```python
 import httpx
+
 
 async def fetch_data():
     async with httpx.AsyncClient() as client:
@@ -499,8 +509,10 @@ async def fetch_data():
 ```
 
 **After (unified):**
+
 ```python
 from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
+
 
 class MyAdapter:
     def __init__(self, http_client: UnifiedHTTPClient):
@@ -512,13 +524,14 @@ class MyAdapter:
 ```
 
 **Benefits:**
+
 - ✅ Automatic rate limiting
 - ✅ Circuit breaker protection
 - ✅ Standardized retry logic
 - ✅ Built-in observability
 - ✅ Testability with NoOp implementations
 
----
+______________________________________________________________________
 
 ## See Also
 
