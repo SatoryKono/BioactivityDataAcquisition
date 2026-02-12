@@ -105,9 +105,9 @@ class SubcellularFractionDataSource:
                     break
             else:
                 record["assay_count"] = int(record["assay_count"]) + 1
-                if record["example_assay_chembl_id"] is None:
+                if record["example_assay_id"] is None:
                     assay_id = assay.get("assay_chembl_id")
-                    record["example_assay_chembl_id"] = (
+                    record["example_assay_id"] = (
                         str(assay_id).strip() if assay_id else None
                     )
 
@@ -139,7 +139,7 @@ class SubcellularFractionDataSource:
         return {
             "entity_id": self._compute_entity_id(fraction),
             "subcellular_fraction": fraction,
-            "example_assay_chembl_id": str(assay_id).strip() if assay_id else None,
+            "example_assay_id": str(assay_id).strip() if assay_id else None,
             "assay_count": 1,
         }
 
@@ -275,9 +275,9 @@ class SubcellularFractionDataSource:
                     break
             else:
                 record["assay_count"] = int(record["assay_count"]) + 1
-                if record["example_assay_chembl_id"] is None:
+                if record["example_assay_id"] is None:
                     assay_id = assay.get("assay_chembl_id")
-                    record["example_assay_chembl_id"] = (
+                    record["example_assay_id"] = (
                         str(assay_id).strip() if assay_id else None
                     )
 

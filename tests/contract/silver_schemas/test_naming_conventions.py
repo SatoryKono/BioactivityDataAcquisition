@@ -398,10 +398,26 @@ class TestCrossProviderNaming:
             "semanticscholar": "paper_id",
         }
         schema_overrides = {
+            "chembl_activity": "activity_id",
+            "chembl_assay": "assay_id",
+            "chembl_assay_parameters": "assay_param_id",
+            "chembl_cell_line": "cell_id",
+            "chembl_compound_record": "record_id",
+            "chembl_molecule": "molecule_id",
+            "chembl_publication": "publication_id",
+            "chembl_publication_term": "publication_id",
+            "chembl_target": "target_id",
             "chembl_protein_class": "protein_class_id",
             "chembl_publication_similarity": "sim_id",
             "chembl_subcellular_fraction": "subcellular_fraction",
             "chembl_target_component": "component_id",
+            "pubchem_compound": "molecule_id",
+            "uniprot_protein": "accession",
+            "uniprot_idmapping": "target_id",
+            "pubmed_publication": "pmid",
+            "crossref_publication": "doi",
+            "openalex_publication": "openalex_id",
+            "semanticscholar_publication": "paper_id",
         }
 
         for schema_name, schema_class in SILVER_SCHEMAS.items():
@@ -416,11 +432,18 @@ class TestCrossProviderNaming:
             fields = extract_field_metadata(schema_class)
 
             # Find primary key field
-            pk_fields = [
-                field
-                for field in fields.keys()
-                if expected_id_pattern in field and not field.startswith("_")
-            ]
+            if schema_name in schema_overrides:
+                pk_fields = [
+                    field
+                    for field in fields.keys()
+                    if field == expected_id_pattern and not field.startswith("_")
+                ]
+            else:
+                pk_fields = [
+                    field
+                    for field in fields.keys()
+                    if expected_id_pattern in field and not field.startswith("_")
+                ]
 
             assert pk_fields, (
                 f"{schema_name}: Missing primary key with pattern '{expected_id_pattern}'\n"

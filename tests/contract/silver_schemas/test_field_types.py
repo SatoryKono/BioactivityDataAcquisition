@@ -108,6 +108,7 @@ class TestFieldTypes:
             "protein_class_id",
             "protein_classification_id",
             "protein_classification_ids",
+            "primary_component_id",
             "record_id",
             "sequence_length",
             "sequence_mass",

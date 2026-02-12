@@ -119,14 +119,14 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
 
         # Get optional fields
         assay_count = record.get("assay_count")
-        example_assay = record.get("example_assay_chembl_id")
+        example_assay = record.get("example_assay_id")
 
         return {
             "subcellular_fraction": fraction,
             "assay_count": int(cast(Any, assay_count))
             if assay_count is not None
             else None,
-            "example_assay_chembl_id": (
+            "example_assay_id": (
                 str(example_assay).strip() if example_assay else None
             ),
         }
@@ -181,7 +181,7 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
 
         return {
             "subcellular_fraction": fraction,
-            "example_assay_chembl_id": str(assay_chembl_id)
+            "example_assay_id": str(assay_chembl_id)
             if assay_chembl_id
             else None,
             "assay_count": 1,

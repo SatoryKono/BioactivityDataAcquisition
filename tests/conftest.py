@@ -649,6 +649,10 @@ def minimal_chembl_publication_df() -> Any:
                 "_source_batch_id": None,
                 "_index": 0,
                 # Cross-reference identifiers
+                "pmid": "12345678",
+                "doi": "10.1234/test.2024.001",
+                "pmc_id": "PMC1234567",
+                # Canonical aliases (used in unified schemas)
                 "publication_pmid": "12345678",
                 "publication_doi": "10.1234/test.2024.001",
                 "publication_pmc_id": "PMC1234567",
