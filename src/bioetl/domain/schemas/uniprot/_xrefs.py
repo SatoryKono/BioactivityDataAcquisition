@@ -9,7 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 
-class UniprotXrefSchema(pa.SchemaModel):
+class UniprotXrefSchema(pa.DataFrameModel):
     """Database cross-references, taxonomy and GO components."""
 
     # === Cross-References (Extracted) ===

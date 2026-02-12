@@ -9,7 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 
-class UniprotAnnotationSchema(pa.SchemaModel):
+class UniprotAnnotationSchema(pa.DataFrameModel):
     """Functional annotations, cofactors and biophysicochemical properties."""
 
     # === Functional Annotation ===
