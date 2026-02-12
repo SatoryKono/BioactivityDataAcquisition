@@ -175,6 +175,11 @@ class CompoundId:
             return self._validated_id
         return None
 
+    @property
+    def as_pubchem_molecule_id(self) -> PubChemCid | None:
+        """Backward-compatible alias for PubChem CID accessor."""
+        return self.as_pubchem_cid
+
     def __str__(self) -> str:
         """Return string representation with source prefix."""
         return f"{self.source.value}:{self.value}"

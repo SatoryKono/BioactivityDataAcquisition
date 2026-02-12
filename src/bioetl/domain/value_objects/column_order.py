@@ -53,6 +53,7 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "_sources": SemanticGroup.SYSTEM,
     # Identifiers
     "document_chembl_id": SemanticGroup.IDENTIFIERS,
+    "publication_id": SemanticGroup.IDENTIFIERS,
     "chembl_id": SemanticGroup.IDENTIFIERS,
     "doi": SemanticGroup.IDENTIFIERS,
     "pmid": SemanticGroup.IDENTIFIERS,
