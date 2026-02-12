@@ -58,15 +58,6 @@ def src_dir(project_root: Path) -> Path:
 
 @pytest.fixture(scope="session")
 def pyproject_toml(project_root: Path) -> Path:
-    """Return pyproject.toml path for dependency checks."""
-    pyproject_path = project_root / "pyproject.toml"
-    if not pyproject_path.exists():
-        pytest.skip("pyproject.toml not found")
-    return pyproject_path
-
-
-@pytest.fixture(scope="session")
-def pyproject_toml(project_root: Path) -> Path:
     """Return path to pyproject.toml."""
     return project_root / "pyproject.toml"
 
@@ -342,11 +333,3 @@ def minimal_crossref_publication_df():
     return _create_minimal_df(
         CROSSREF_SPECIFIC, "crossref", "10.1001/test", "doi", "10.1001/test"
     )
-
-
-@pytest.fixture
-def noop_logger():
-    """Return a no-op logger for tests expecting a LoggerPort."""
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-
-    return NoOpLogger()
