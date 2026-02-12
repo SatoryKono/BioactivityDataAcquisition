@@ -25,8 +25,7 @@ from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.value_objects import validate_taxonomy_id_str
 
 if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord
 
 
 # Mapping for ligand efficiency fields extraction (nested dict)

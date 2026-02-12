@@ -336,7 +336,7 @@ class TestGoldPublicationSchemaMetadataFields:
 class TestGoldSchemaValidation:
     """Test Gold schema validation with sample data."""
 
-    def test_pubmed_publication_validates_correct_data(self):
+    def test_pubmed_publication_validates_correct_data(self) -> None:
         """PubMedPublicationGoldSchema should validate correct data."""
         valid_record = {
             "entity_id": "pubmed_12345678",
@@ -412,7 +412,7 @@ class TestGoldSchemaValidation:
         assert len(validated) == 1
         assert validated["pmid"].iloc[0] == "12345678"
 
-    def test_chembl_document_validates_correct_data(self):
+    def test_chembl_document_validates_correct_data(self) -> None:
         """ChEMBLDocumentGoldSchema should validate correct data."""
         valid_record = {
             "entity_id": "chembl_CHEMBL12345",
@@ -421,8 +421,6 @@ class TestGoldSchemaValidation:
             "pmid": "12345678",
             # pmc_id excluded: not available from ChEMBL API
             "doi": "10.1234/test",
-            "publication_pmid": "12345678",
-            "publication_doi": "10.1234/test",
             # patent_id excluded from unified publication schema
             "title": "Test Publication",
             "authors": '["Author One"]',
