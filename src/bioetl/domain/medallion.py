@@ -169,7 +169,6 @@ class LoadingStrategy(StrEnum):
     """Loading strategy for pipeline data extraction.
 
     Determines how the pipeline handles incremental vs full data loading.
-    This formalizes the implicit behavior previously controlled by force_full_scan.
 
     Attributes:
         FULL_SCAN_ONLY: Each run performs a full scan of the data source.
@@ -183,7 +182,6 @@ class LoadingStrategy(StrEnum):
         False
 
     See Also:
-        ADR-030: Publication pagination strategy (force_full_scan)
         ADR-031: Loading strategy formalization
     """
 
@@ -219,21 +217,6 @@ class LoadingStrategy(StrEnum):
             raise ValueError(
                 f"Invalid loading strategy: '{value}'. Valid strategies: {valid}"
             ) from None
-
-    @classmethod
-    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:  # noqa: ARG003
-        """Convert legacy force_full_scan flag to LoadingStrategy.
-
-        Provides backward compatibility with existing configs using
-        force_full_scan: true/false.
-
-        Args:
-            force_full_scan: Legacy boolean flag
-
-        Returns:
-            FULL_SCAN_ONLY (always, since watermark-based loading was removed)
-        """
-        return cls.FULL_SCAN_ONLY
 
 
 class ClearPolicy(StrEnum):

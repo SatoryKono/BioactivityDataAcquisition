@@ -1,6 +1,6 @@
 # CrossRef Publication Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
 ---
 
@@ -202,7 +202,7 @@ class PublicationEnrichedSchema(ETLRecordSchema):
 pipeline_name: crossref_publication
 provider: crossref
 entity_type: publication
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["doi"]
 silver_table: "crossref_publication"

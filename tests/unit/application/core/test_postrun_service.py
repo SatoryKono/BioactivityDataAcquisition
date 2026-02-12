@@ -12,7 +12,7 @@ from bioetl.application.core.postrun_service import (
     VacuumResult,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
@@ -47,8 +47,10 @@ def pipeline_config():
         pipeline_name="test_postrun_pipeline",
         provider="chembl",
         entity_type="activity",
-        primary_keys=["activity_id"],
-        silver_table="test_silver",
+        table=TableConfig(
+            primary_keys=["activity_id"],
+            silver_table="test_silver",
+        ),
     )
 
 

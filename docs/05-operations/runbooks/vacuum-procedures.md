@@ -45,7 +45,7 @@ Before VACUUM, check current table state:
 ```python
 from deltalake import DeltaTable
 
-dt = DeltaTable("data/silver/chembl_activity")
+dt = DeltaTable("data/output/silver/chembl/activity")
 
 # Get table info
 print(f"Version: {dt.version()}")
@@ -65,7 +65,7 @@ from deltalake import DeltaTable
 from datetime import timedelta
 
 # Open table
-dt = DeltaTable("data/silver/chembl_activity")
+dt = DeltaTable("data/output/silver/chembl/activity")
 
 # Dry run first (shows files that would be deleted)
 dt.vacuum(retention_hours=168, dry_run=True, enforce_retention_duration=False)
@@ -111,7 +111,7 @@ In addition to VACUUM, consider running OPTIMIZE for query performance:
 ```python
 from deltalake import DeltaTable
 
-dt = DeltaTable("data/silver/chembl_activity")
+dt = DeltaTable("data/output/silver/chembl/activity")
 
 # Compact small files
 dt.optimize.compact()

@@ -1,6 +1,6 @@
 """OpenAlex domain entities.
 
-Contains OpenAlexPublicationRecord (DTO) and OpenAlexPublicationEntity (domain).
+Contains OpenAlexPublicationEntity (domain).
 Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 """
 
@@ -9,172 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
-from pydantic import Field as PydanticField
-
 from bioetl.domain.entities.publication_base import PublicationEntityBase
-
-# Lookup method values for tracking DOI resolution strategy
-LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
-
-
-# === Pydantic DTO Model ===
-
-
-class OpenAlexPublicationRecord(BaseModel):
-    """Scholarly work DTO from OpenAlex. Required field: openalex_id."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    # Primary identifier (REQUIRED, OpenAlex Work ID)
-    openalex_id: str = PydanticField(description="OpenAlex Work ID (e.g., W2148763428)")
-
-    # DOI (may be None for some works)
-    doi: str | None = PydanticField(
-        default=None, description="Digital Object Identifier (normalized)"
-    )
-
-    # Core metadata
-    title: str | None = PydanticField(default=None, description="Publication title")
-    abstract: str | None = PydanticField(
-        default=None,
-        description="Publication abstract (reconstructed from inverted index)",
-    )
-
-    # Authors (JSON-serialized list of hashed names for PII compliance)
-    authors: str | None = PydanticField(
-        default=None, description="Author names (JSON array, hashed for PII)"
-    )
-
-    # Journal information
-    journal: str | None = PydanticField(
-        default=None, description="Source name (journal/venue)"
-    )
-    issn: str | None = PydanticField(default=None, description="ISSN-L")
-    publisher: str | None = PydanticField(
-        default=None, description="Host organization name"
-    )
-
-    # Dates
-    year: int | None = PydanticField(default=None, description="Publication year")
-    publication_date: str | None = PydanticField(
-        default=None, description="Publication date (YYYY-MM-DD)"
-    )
-
-    # Document type (mapped from OpenAlex type)
-    doc_type: str = PydanticField(default="PUBLICATION", description="Document type")
-
-    # Open Access status
-    is_oa: bool | None = PydanticField(default=None, description="Is Open Access")
-    oa_status: str | None = PydanticField(
-        default=None, description="OA status (gold, green, hybrid, bronze, closed)"
-    )
-
-    # Citation metrics
-    # OpenAlex source field: cited_by_count
-    # Unified BioETL field: citation_count (standardized across all providers)
-    citation_count: int | None = PydanticField(
-        default=None, description="Number of citations (from OpenAlex cited_by_count)"
-    )
-
-    # Topics (hierarchical classification - replaces deprecated concepts)
-    # Each topic dict has: id, display_name, score, subfield, field, domain
-    topics: list[dict[str, Any]] = PydanticField(
-        default_factory=list,
-        description="Hierarchical topic classification (domain/field/subfield/topic)",
-    )
-
-    # Primary topic (single most relevant topic for quick categorization)
-    # Dict with: id, display_name, score, subfield, field, domain
-    primary_topic: dict[str, Any] | None = PydanticField(
-        default=None, description="Primary topic classification"
-    )
-
-    # Grants/funding information
-    # Each grant dict has: funder, funder_display_name, award_id
-    grants: list[dict[str, Any]] = PydanticField(
-        default_factory=list, description="Funding/grant information"
-    )
-
-    # MeSH terms (Medical Subject Headings)
-    mesh_terms: list[str] = PydanticField(
-        default_factory=list, description="MeSH descriptor names"
-    )
-
-    # Keywords
-    keywords: list[str] = PydanticField(
-        default_factory=list, description="Author-assigned keywords"
-    )
-
-    # External identifiers
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: str | None = PydanticField(
-        default=None, description="PubMed Central ID (format: PMC1234567)"
-    )
-    mag_id: str | None = PydanticField(
-        default=None, description="Microsoft Academic Graph ID"
-    )
-
-    # Institution identifiers (for cross-referencing and geographic analysis)
-    institution_ids: list[str] = PydanticField(
-        default_factory=list,
-        description="OpenAlex institution IDs (e.g., I1234567890)",
-    )
-    institution_country_codes: list[str] = PydanticField(
-        default_factory=list,
-        description="ISO 2-letter country codes of affiliated institutions",
-    )
-    ror_ids: list[str] = PydanticField(
-        default_factory=list,
-        description="ROR IDs of affiliated institutions (full URL format). "
-        "May be empty if not returned by Works API.",
-    )
-
-    # Author identifiers (JSON-serialized lists preserving author order)
-    author_orcids: str | None = PydanticField(
-        default=None,
-        description="ORCID IDs as JSON array (empty string for missing)",
-    )
-    author_openalex_ids: str | None = PydanticField(
-        default=None,
-        description="OpenAlex author IDs as JSON array (empty string for missing)",
-    )
-
-    # Additional metadata
-    language: str | None = PydanticField(default=None, description="Language code")
-
-    # Bibliographic info (from biblio object)
-    volume: str | None = PydanticField(
-        default=None, description="Journal volume number"
-    )
-    issue: str | None = PydanticField(default=None, description="Journal issue number")
-
-    # Additional metrics
-    fwci: float | None = PydanticField(
-        default=None, description="Field-Weighted Citation Impact"
-    )
-    reference_count: int | None = PydanticField(
-        default=None, description="Number of works referenced"
-    )
-
-    # Quality indicators
-    is_retracted: bool = PydanticField(
-        default=False, description="Whether the publication has been retracted"
-    )
-
-    # Lookup metadata (from adapter)
-    # Note: Pydantic doesn't allow underscore-prefixed fields, so these use public names
-    lookup_method: str = PydanticField(
-        default="unknown",
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
-    original_doi: str | None = PydanticField(
-        default=None,
-        description="Original DOI from input CSV (for fallback records)",
-    )
-
-    # Note: _source is set by transformer via entity_to_silver_record() mapping
-
+from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 
 # === Dataclass Domain Entity ===
 
@@ -247,5 +83,4 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 __all__ = [
     "LOOKUP_METHODS",
     "OpenAlexPublicationEntity",
-    "OpenAlexPublicationRecord",
 ]

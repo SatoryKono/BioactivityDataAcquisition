@@ -140,8 +140,6 @@ def detect_schema_drift(
     level = DriftLevel.INFO
     if missing_required:
         level = DriftLevel.CRITICAL
-    elif len(added) > 3:
-        level = DriftLevel.WARN
 
     details = {
         "added_fields": added,

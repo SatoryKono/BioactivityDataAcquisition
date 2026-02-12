@@ -115,7 +115,6 @@
     },
     "entity_type": "activity",
     "fields": [],
-    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [
         {
@@ -175,15 +174,8 @@
         "target_chembl_id"
       ]
     },
-    "gold_table": "chembl_activity",
-    "gold_write_mode": "overwrite",
-    "loading_strategy": "full_scan_only",
-    "on_schema_mismatch": "evolve",
-    "partition_cols": [],
+    "loading_strategy": null,
     "pipeline_name": "chembl_activity",
-    "primary_keys": [
-      "activity_id"
-    ],
     "provider": "chembl",
     "silver_filters": {
       "column_filters": [],
@@ -193,10 +185,19 @@
       "range_filters": [],
       "required_fields": []
     },
-    "silver_table": "chembl_activity",
+    "table": {
+      "gold_table": "chembl_activity",
+      "gold_write_mode": "overwrite",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "activity_id"
+      ],
+      "silver_table": "chembl_activity",
+      "silver_write_mode": "merge"
+    },
     "transform_steps": [],
-    "transform_version": null,
-    "write_mode": "merge"
+    "transform_version": null
   },
   "chembl_document": {
     "batch_size": 100,
@@ -446,7 +447,6 @@
     },
     "entity_type": "compound",
     "fields": [],
-    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
@@ -458,15 +458,8 @@
         "molecular_formula"
       ]
     },
-    "gold_table": "pubchem_compound",
-    "gold_write_mode": "overwrite",
-    "loading_strategy": "full_scan_only",
-    "on_schema_mismatch": "evolve",
-    "partition_cols": [],
+    "loading_strategy": null,
     "pipeline_name": "pubchem_compound",
-    "primary_keys": [
-      "cid"
-    ],
     "provider": "pubchem",
     "silver_filters": {
       "column_filters": [],
@@ -476,10 +469,19 @@
       "range_filters": [],
       "required_fields": []
     },
-    "silver_table": "pubchem_compound",
+    "table": {
+      "gold_table": "pubchem_compound",
+      "gold_write_mode": "overwrite",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "cid"
+      ],
+      "silver_table": "pubchem_compound",
+      "silver_write_mode": "merge"
+    },
     "transform_steps": [],
-    "transform_version": null,
-    "write_mode": "merge"
+    "transform_version": null
   },
   "pubmed_publication": {
     "batch_size": 100,
@@ -795,7 +797,6 @@
     },
     "entity_type": "publication",
     "fields": [],
-    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [],
       "exclude_if_present": [],
@@ -815,15 +816,8 @@
         "title"
       ]
     },
-    "gold_table": "pubmed_publication",
-    "gold_write_mode": "overwrite",
     "loading_strategy": "full_scan_only",
-    "on_schema_mismatch": "evolve",
-    "partition_cols": [],
     "pipeline_name": "pubmed_publication",
-    "primary_keys": [
-      "pmid"
-    ],
     "provider": "pubmed",
     "silver_filters": {
       "column_filters": [],
@@ -833,10 +827,19 @@
       "range_filters": [],
       "required_fields": []
     },
-    "silver_table": "pubmed_publication",
+    "table": {
+      "gold_table": "pubmed_publication",
+      "gold_write_mode": "overwrite",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "pmid"
+      ],
+      "silver_table": "pubmed_publication",
+      "silver_write_mode": "merge"
+    },
     "transform_steps": [],
-    "transform_version": null,
-    "write_mode": "merge"
+    "transform_version": null
   },
   "uniprot_protein": {
     "batch_size": 100,
@@ -860,7 +863,6 @@
     },
     "entity_type": "protein",
     "fields": [],
-    "force_full_scan": true,
     "gold_filters": {
       "column_filters": [
         {
@@ -881,15 +883,8 @@
         "organism"
       ]
     },
-    "gold_table": "uniprot_protein",
-    "gold_write_mode": "overwrite",
-    "loading_strategy": "full_scan_only",
-    "on_schema_mismatch": "evolve",
-    "partition_cols": [],
+    "loading_strategy": null,
     "pipeline_name": "uniprot_protein",
-    "primary_keys": [
-      "accession"
-    ],
     "provider": "uniprot",
     "silver_filters": {
       "column_filters": [],
@@ -899,9 +894,18 @@
       "range_filters": [],
       "required_fields": []
     },
-    "silver_table": "uniprot_protein",
+    "table": {
+      "gold_table": "uniprot_protein",
+      "gold_write_mode": "overwrite",
+      "on_schema_mismatch": "evolve",
+      "partition_cols": [],
+      "primary_keys": [
+        "accession"
+      ],
+      "silver_table": "uniprot_protein",
+      "silver_write_mode": "merge"
+    },
     "transform_steps": [],
-    "transform_version": null,
-    "write_mode": "merge"
+    "transform_version": null
   }
 }

@@ -1,6 +1,6 @@
 # PubMed Publication Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
 ---
 
@@ -206,7 +206,7 @@ class ArticleSchema(ETLRecordSchema):
 pipeline_name: pubmed_publication
 provider: pubmed
 entity_type: publications
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["pmid"]
 silver_table: "pubmed_publication"

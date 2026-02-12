@@ -132,20 +132,23 @@ class TargetSchema(ETLRecordSchema):
         nullable=True,
         isin=[
             "SINGLE PROTEIN",
-            "PROTEIN FAMILY",
             "PROTEIN COMPLEX",
-            "PROTEIN COMPLEX GROUP",
+            "PROTEIN FAMILY",
             "SELECTIVITY GROUP",
-            "CHIMERIC PROTEIN",
-            "CELL-LINE",
-            "TISSUE",
             "ORGANISM",
-            "MACROMOLECULE",
-            "SMALL MOLECULE",
-            "LIPID",
-            "METAL",
+            "TISSUE",
+            "CELL-LINE",
+            "SUBCELLULAR",
             "UNKNOWN",
-        ],
+            "CHIMERIC PROTEIN",
+            "PROTEIN-PROTEIN INTERACTION",
+            "NUCLEIC-ACID",
+            "METAL",
+            "LIPID",
+            "MACROMOLECULE",
+            "PHENOTYPE",
+            "ADMET",
+        ],  # 17 target types
     )
 
     # === Metadata ===

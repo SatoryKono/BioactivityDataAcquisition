@@ -164,7 +164,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         # Step 2: Poll for completion (returns redirect URL if detected)
         results_url = await self._poll_until_ready(job_id)
 
-        # Step 3: Retrieve results (use redirect URL or construct default)
+        # Step 3: Retrieve results using redirect URL or default
         return await self._fetch_results(job_id, ids, results_url=results_url)
 
     async def _submit_job(
@@ -241,7 +241,9 @@ class UniProtIDMappingClient(BaseHttpAdapter):
             job_id: Job ID to poll.
 
         Returns:
-            Redirect URL to results if detected, or None.
+            Results URL captured from redirect (e.g.
+            ``/idmapping/uniprotkb/results/{jobId}``), or None if the URL
+            was not detected via redirect.
 
         Raises:
             IDMappingJobError: If the job fails.
@@ -262,6 +264,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     job_id=job_id,
                     attempts=attempt + 1,
                     detected_by="redirect_to_results",
+                    results_url=response_url,
                 )
                 return response_url
 
@@ -333,7 +336,10 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         Args:
             job_id: Job ID to fetch results for.
             original_ids: Original list of IDs for initializing results dict.
-            results_url: Redirect URL from polling phase (avoids re-redirect).
+            results_url: Exact results URL captured from the polling redirect
+                (e.g. ``/idmapping/uniprotkb/results/{jobId}``).
+                When provided, avoids an extra redirect hop.  Falls back to
+                the generic ``/idmapping/results/{jobId}`` when *None*.
 
         Returns:
             Dict mapping source IDs to entry data dicts (None if not found).
