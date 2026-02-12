@@ -293,7 +293,7 @@ class TestActivityTransformerTransform:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["action_type_action_type"] == "INHIBITOR"
+        assert result["action_type"] == "INHIBITOR"
         assert (
             result["action_type_description"]
             == "Compound that inhibits target activity"
@@ -312,7 +312,7 @@ class TestActivityTransformerTransform:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["action_type_action_type"] is None
+        assert result["action_type"] is None
         assert result["action_type_description"] is None
         assert result["action_type_parent_type"] is None
 
