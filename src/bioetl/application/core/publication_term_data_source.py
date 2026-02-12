@@ -184,7 +184,9 @@ class PublicationTermDataSource:
             filter_ids=filter_ids,
             filter_field=filter_field,
         ):
-            publication_id = publication.get("publication_id")
+            publication_id = publication.get("publication_id") or publication.get(
+                "document_chembl_id"
+            )
             if not publication_id:
                 continue
 
@@ -433,7 +435,9 @@ class PublicationTermDataSource:
             filter_field=filter_field,
             limit=publication_limit,
         ):
-            publication_id = publication.get("publication_id")
+            publication_id = publication.get("publication_id") or publication.get(
+                "document_chembl_id"
+            )
             if not publication_id:
                 continue
 
@@ -478,7 +482,9 @@ class PublicationTermDataSource:
                 filters=filters,
                 limit=publication_limit,
             ):
-                publication_id = publication.get("publication_id")
+                publication_id = publication.get("publication_id") or publication.get(
+                    "document_chembl_id"
+                )
                 if not publication_id:
                     continue
 
@@ -539,7 +545,9 @@ class PublicationTermDataSource:
                 fallback_mapping=fallback_mapping,
                 limit=publication_limit,
             ):
-                publication_id = publication.get("publication_id")
+                publication_id = publication.get("publication_id") or publication.get(
+                    "document_chembl_id"
+                )
                 if not publication_id:
                     continue
 
