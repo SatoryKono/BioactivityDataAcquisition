@@ -2,9 +2,9 @@
 
 MOLECULE_FIELD_MAPPING = {
     "chembl": {
-        "property_alogp": "logp",
-        "property_hba": "hba_count",
-        "property_full_mwt": "molecular_weight",
+        "logp": "logp",
+        "hba_count": "hba_count",
+        "molecular_weight": "molecular_weight",
     },
     "pubchem": {
         "xlogp": "logp",
