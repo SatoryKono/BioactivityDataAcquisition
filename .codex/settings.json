@@ -10,11 +10,11 @@
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:/Users/HP3168/Documents/GitHub/BioactivityDataAcquisition2"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "e:/g-drive/05_AI/github/BioactivityDataAcquisition2"]
     },
     "git": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "C:/Users/HP3168/Documents/GitHub/BioactivityDataAcquisition2"]
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "e:/g-drive/05_AI/github/BioactivityDataAcquisition2"]
     },
     "fetch": {
       "command": "npx",
