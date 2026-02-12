@@ -140,12 +140,10 @@ def _extract_orcid_from_url(url: str | None) -> str:
     if not url or not isinstance(url, str):
         return ""
 
-    # Remove URL prefix if present
-    orcid = url
-    if url.startswith("https://orcid.org/"):
-        orcid = url[18:]
-    elif url.startswith("http://orcid.org/"):
-        orcid = url[17:]
+    # Accept raw ORCID or ORCID URL variants (including legacy typo domain)
+    orcid = url.strip().rstrip("/")
+    if "/" in orcid:
+        orcid = orcid.split("/")[-1]
 
     # Validate format
     if _ORCID_PATTERN.match(orcid):
@@ -198,6 +196,8 @@ def extract_author_orcids(authorships: list[dict[str, Any]]) -> list[str]:
             orcids.append("")
             continue
         orcid_url = author.get("orcid")
+        if orcid_url is None:
+            orcid_url = author.get("ormolecule_id")
         orcids.append(_extract_orcid_from_url(orcid_url))
     return orcids
 
@@ -434,7 +434,7 @@ def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, An
 def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
     """Extract external identifiers (pmid, pmcid, mag_id) from ids object."""
     if not ids or not isinstance(ids, dict):
-        return {"pmid": None, "pmcid": None, "mag_id": None}
+        return {"pmid": None, "pmmolecule_id": None, "mag_id": None}
 
     from bioetl.domain.value_objects.publications import PubMedId
 
@@ -442,15 +442,15 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
     raw_pmid = _extract_id_from_url(ids.get("pmid"))
     pmid_vo = PubMedId.from_raw(raw_pmid)
 
-    # PMCID: extract from URL (e.g. https://...pmc/articles/PMC123456)
-    pmcid = _extract_id_from_url(ids.get("pmcid"))
+    # PMCID/legacy pmmolecule_id: extract from URL (e.g. .../PMC123456)
+    pmcid = _extract_id_from_url(ids.get("pmcid") or ids.get("pmmolecule_id"))
 
     # MAG ID (can be int or string)
     mag_raw = ids.get("mag")
 
     return {
         "pmid": str(pmid_vo) if pmid_vo else None,
-        "pmcid": pmcid,
+        "pmmolecule_id": pmcid,
         "mag_id": str(mag_raw) if mag_raw is not None else None,
     }
 

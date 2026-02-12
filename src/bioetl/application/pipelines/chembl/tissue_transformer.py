@@ -5,7 +5,7 @@ Transforms Bronze records to Silver format (Tissue entity inflation).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -13,7 +13,8 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities.chembl_tissue import Tissue
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class TissueTransformer(BaseChemblTransformer):
@@ -25,6 +26,19 @@ class TissueTransformer(BaseChemblTransformer):
 
     entity_class = Tissue
     primary_id_field = "tissue_id"
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Support both unified and legacy tissue identifier field names."""
+        if "tissue_id" not in record and record.get("tissue_chembl_id") is not None:
+            record_with_alias = dict(record)
+            record_with_alias["tissue_id"] = record_with_alias.get("tissue_chembl_id")
+            record = cast("BronzeRecord", record_with_alias)
+        return await super()._transform_impl(context, record, index)
 
     def _extract_business_data(
         self,

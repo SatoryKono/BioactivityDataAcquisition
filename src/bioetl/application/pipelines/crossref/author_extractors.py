@@ -67,6 +67,8 @@ def _build_author_detail(author: dict[str, Any]) -> dict[str, Any] | None:
     if not given and not family and not org_name:
         return None
     authenticated_orcid = author.get("authenticated-orcid")
+    if authenticated_orcid is None:
+        authenticated_orcid = author.get("authenticated-ormolecule_id")
     normalized_orcid = _normalize_orcid(author.get("ORCID"))
     return {
         "given": given,
@@ -76,6 +78,9 @@ def _build_author_detail(author: dict[str, Any]) -> dict[str, Any] | None:
         # Compatibility alias expected by legacy tests/callers
         "ormolecule_id": normalized_orcid,
         "authenticated_orcid": (
+            bool(authenticated_orcid) if authenticated_orcid is not None else None
+        ),
+        "authenticated_ormolecule_id": (
             bool(authenticated_orcid) if authenticated_orcid is not None else None
         ),
         "sequence": _extract_author_sequence(author),

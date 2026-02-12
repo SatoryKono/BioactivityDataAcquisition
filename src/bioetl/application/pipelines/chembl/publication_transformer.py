@@ -37,7 +37,8 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 # Declarative field groups for ChemblPublication entity
@@ -106,7 +107,19 @@ class PublicationTransformer(BaseChemblTransformer):
     """
 
     entity_class = ChemblPublication
-    primary_id_field = "document_chembl_id"
+    primary_id_field = "publication_id"
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Support both unified and legacy publication identifier field names."""
+        if "publication_id" not in record and record.get("document_chembl_id") is not None:
+            record = dict(record)
+            record["publication_id"] = record.get("document_chembl_id")
+        return await super()._transform_impl(context, record, index)
 
     def __init__(
         self,
@@ -156,7 +169,7 @@ class PublicationTransformer(BaseChemblTransformer):
 
         Args:
             record: Raw Bronze record from ChEMBL API.
-            primary_id: Validated document_chembl_id value.
+            primary_id: Validated publication_id value.
 
         Returns:
             Dictionary of ChemblPublication business fields.
@@ -173,14 +186,17 @@ class PublicationTransformer(BaseChemblTransformer):
         data["abstract"] = normalizer.strip_html_tags(data.get("abstract"))
 
         # Validate DOI using Value Object (returns None for invalid/empty)
+        data["publication_pmid"] = data.get("publication_pmid") or record.get("pmid")
         doi = DOI.from_raw(data.get("publication_doi"))
         data["publication_doi"] = str(doi) if doi else None
+        data["doi"] = data["publication_doi"]
 
         # Validate year using PublicationYear Value Object
         # Note: field_specs already maps year → publication_year
         data["publication_year"] = self.validate_value_object(
             PublicationYear, data.get("publication_year"), as_string=False
         )
+        data["pmid"] = data.get("publication_pmid")
 
         # Hash PII field (RULES.md §5.4)
         # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON

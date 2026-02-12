@@ -19,14 +19,27 @@ from bioetl.domain.transformations import safe_int
 from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class TargetTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze target records to silver."""
 
     entity_class = Target
-    primary_id_field = "target_chembl_id"
+    primary_id_field = "target_id"
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Support both unified and legacy target identifier field names."""
+        if "target_id" not in record and record.get("target_chembl_id") is not None:
+            record = dict(record)
+            record["target_id"] = record.get("target_chembl_id")
+        return await super()._transform_impl(context, record, index)
 
     def _flatten_target_components(
         self, components: list[dict[str, Any]] | None
@@ -119,7 +132,7 @@ class TargetTransformer(BaseChemblTransformer):
 
         Args:
             record: Raw Bronze record from ChEMBL API.
-            primary_id: Validated target_chembl_id value.
+            primary_id: Validated target_id value.
 
         Returns:
             Dictionary of Target business fields.

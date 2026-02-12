@@ -23,7 +23,8 @@ from bioetl.domain.transformations import safe_float, safe_int
 from bioetl.domain.value_objects import SMILES, InChIKey
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 # Field mappings for molecule nested structures
@@ -31,11 +32,13 @@ _HIERARCHY_FIELDS: dict[str, Any] = {
     "parent_chembl_id": None,
     "active_chembl_id": None,
     "molecule_chembl_id": None,
+    "molecule_id": None,
 }
 
 # Rename mapping for hierarchy fields (molecule_chembl_id -> child_chembl_id)
 _HIERARCHY_RENAMES: dict[str, str] = {
     "hierarchy_molecule_chembl_id": "hierarchy_child_chembl_id",
+    "hierarchy_molecule_id": "hierarchy_child_chembl_id",
 }
 
 _PROPERTIES_FIELDS: dict[str, Any] = {
@@ -56,14 +59,6 @@ _PROPERTIES_FIELDS: dict[str, Any] = {
 
 # Rename mapping for properties fields (num_ro5_violations -> ro5_violations)
 _PROPERTIES_RENAMES: dict[str, str] = {
-    "property_alogp": "logp",
-    "property_psa": "polar_surface_area",
-    "property_rtb": "rotatable_bond_count",
-    "property_heavy_atoms": "heavy_atom_count",
-    "property_aromatic_rings": "aromatic_ring_count",
-    "property_full_mwt": "molecular_weight",
-    "property_hba": "hba_count",
-    "property_hbd": "hbd_count",
     "property_num_ro5_violations": "property_ro5_violations",
 }
 
@@ -147,7 +142,19 @@ class MoleculeTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze molecule records to silver."""
 
     entity_class = Molecule
-    primary_id_field = "molecule_chembl_id"
+    primary_id_field = "molecule_id"
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Support both unified and legacy molecule identifier field names."""
+        if "molecule_id" not in record and record.get("molecule_chembl_id") is not None:
+            record = dict(record)
+            record["molecule_id"] = record.get("molecule_chembl_id")
+        return await super()._transform_impl(context, record, index)
 
     def _extract_business_data(
         self,
@@ -158,7 +165,7 @@ class MoleculeTransformer(BaseChemblTransformer):
 
         Args:
             record: Raw Bronze record from ChEMBL API.
-            primary_id: Validated molecule_chembl_id value.
+            primary_id: Validated molecule_id value.
 
         Returns:
             Dictionary of Molecule business fields.
@@ -194,7 +201,16 @@ class MoleculeTransformer(BaseChemblTransformer):
             _PROPERTIES_FIELDS,
             renames=_PROPERTIES_RENAMES,
         )
-        if properties.get("logp") is not None:
+        # Legacy convenience aliases derived from canonical property_* fields.
+        properties["logp"] = properties.get("property_alogp")
+        properties["polar_surface_area"] = properties.get("property_psa")
+        properties["rotatable_bond_count"] = properties.get("property_rtb")
+        properties["heavy_atom_count"] = properties.get("property_heavy_atoms")
+        properties["aromatic_ring_count"] = properties.get("property_aromatic_rings")
+        properties["molecular_weight"] = properties.get("property_full_mwt")
+        properties["hba_count"] = properties.get("property_hba")
+        properties["hbd_count"] = properties.get("property_hbd")
+        if properties.get("property_alogp") is not None:
             properties["logp_method"] = "alogp"
 
         return {

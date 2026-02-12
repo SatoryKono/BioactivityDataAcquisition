@@ -16,7 +16,8 @@ from bioetl.domain.entities import CellLine
 from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 class CellLineTransformer(BaseChemblTransformer):
@@ -27,7 +28,19 @@ class CellLineTransformer(BaseChemblTransformer):
     """
 
     entity_class = CellLine
-    primary_id_field = "cell_chembl_id"
+    primary_id_field = "cell_id"
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Support both unified and legacy cell-line identifier field names."""
+        if "cell_id" not in record and record.get("cell_chembl_id") is not None:
+            record = dict(record)
+            record["cell_id"] = record.get("cell_chembl_id")
+        return await super()._transform_impl(context, record, index)
 
     def _extract_business_data(
         self,
@@ -40,7 +53,7 @@ class CellLineTransformer(BaseChemblTransformer):
 
         Args:
             record: Raw Bronze record from ChEMBL API.
-            primary_id: Validated cell_chembl_id value.
+            primary_id: Validated cell_id value.
 
         Returns:
             Dictionary of CellLine business fields.

@@ -27,7 +27,8 @@ from bioetl.domain.transformations import (
 from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
@@ -141,7 +142,19 @@ class AssayTransformer(BaseChemblTransformer):
     """Transforms ChEMBL assay bronze records to silver."""
 
     entity_class = Assay
-    primary_id_field = "assay_chembl_id"
+    primary_id_field = "assay_id"
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Support both unified and legacy assay identifier field names."""
+        if "assay_id" not in record and record.get("assay_chembl_id") is not None:
+            record = dict(record)
+            record["assay_id"] = record.get("assay_chembl_id")
+        return await super()._transform_impl(context, record, index)
 
     def _extract_business_data(
         self,
@@ -152,13 +165,13 @@ class AssayTransformer(BaseChemblTransformer):
 
         Args:
             record: Raw Bronze record from ChEMBL API.
-            primary_id: Validated assay_chembl_id value.
+            primary_id: Validated assay_id value.
 
         Returns:
             Dictionary of Assay business fields.
 
         """
-        return {
+        business_data = {
             # Primary identifier
             "assay_id": str(primary_id),
             # Declarative field groups
@@ -176,3 +189,15 @@ class AssayTransformer(BaseChemblTransformer):
             ),
             "assay_parameters": self.serialize_json(record.get("assay_parameters")),
         }
+        # Support both unified and legacy FK source fields.
+        business_data["target_id"] = business_data.get("target_id") or record.get(
+            "target_id"
+        )
+        business_data["publication_id"] = business_data.get(
+            "publication_id"
+        ) or record.get("publication_id")
+        business_data["cell_id"] = business_data.get("cell_id") or record.get("cell_id")
+        business_data["tissue_id"] = business_data.get("tissue_id") or record.get(
+            "tissue_id"
+        )
+        return business_data

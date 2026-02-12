@@ -54,21 +54,21 @@ class CompoundRecordTransformer(BaseChemblTransformer):
         # Get src_id - required field
         src_id = safe_int(record.get("src_id"))
 
-        # Get molecule_chembl_id and document_chembl_id - required fields
+        # Get molecule_id and publication_id (support legacy ChEMBL names)
         # Use DI normalization service
-        molecule_chembl_id = normalizer.normalize_to_string(
-            record.get("molecule_chembl_id")
+        molecule_id = normalizer.normalize_to_string(
+            record.get("molecule_id") or record.get("molecule_chembl_id")
         )
-        document_chembl_id = normalizer.normalize_to_string(
-            record.get("document_chembl_id")
+        publication_id = normalizer.normalize_to_string(
+            record.get("publication_id") or record.get("document_chembl_id")
         )
 
         return {
             # Primary identifier
             "record_id": record_id,
             # Foreign keys
-            "molecule_chembl_id": molecule_chembl_id,
-            "document_chembl_id": document_chembl_id,
+            "molecule_id": molecule_id,
+            "publication_id": publication_id,
             # Original compound names (strip whitespace, NULL if empty)
             "compound_key": normalizer.normalize_to_string(record.get("compound_key")),
             "compound_name": normalizer.normalize_to_string(

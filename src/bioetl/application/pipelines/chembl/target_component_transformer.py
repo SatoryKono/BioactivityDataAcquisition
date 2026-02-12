@@ -71,7 +71,7 @@ class TargetComponentTransformer(BaseChemblTransformer):
         rec = cast("dict[str, Any]", record)
         return {
             # Primary identifier (int)
-            "primary_component_id": safe_int(primary_id),
+            "component_id": safe_int(primary_id),
             # Declarative field groups (uses BronzeRecord type)
             **map_field_groups(record, _TARGET_COMPONENT_GROUPS),
             # JSON serialization using helper method
