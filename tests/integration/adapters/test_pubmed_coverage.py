@@ -97,7 +97,8 @@ async def test_fetch_filtered_with_fallback(pubmed_adapter: PubMedAdapter):
 
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
         # Primary fetch (pmid 12345)
-        respx_mock.get("efetch.fcgi", params__id_contains="12345").mock(
+        # Use simple params matching
+        respx_mock.get("efetch.fcgi", params={"id": "12345", "db": "pubmed", "retmode": "xml", "rettype": "abstract", "email": "test@example.com"}).mock(
             return_value=Response(200, text=mock_xml)
         )
         # Fallback search by title
@@ -105,7 +106,7 @@ async def test_fetch_filtered_with_fallback(pubmed_adapter: PubMedAdapter):
             return_value=Response(200, json=mock_search_json)
         )
         # Fallback fetch (pmid 67890)
-        respx_mock.get("efetch.fcgi", params__id_contains="67890").mock(
+        respx_mock.get("efetch.fcgi", params={"id": "67890", "db": "pubmed", "retmode": "xml", "rettype": "abstract", "email": "test@example.com"}).mock(
             return_value=Response(200, text=mock_fallback_xml)
         )
 

@@ -25,7 +25,9 @@ from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFil
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
 from bioetl.infrastructure.adapters.pubmed._health import PubMedHealthMixin
 from bioetl.infrastructure.adapters.pubmed._search import PubMedSearchMixin
-from bioetl.infrastructure.adapters.pubmed.constants import ENTREZ_API_BASE
+from bioetl.infrastructure.adapters.pubmed.constants import (
+    ENTREZ_API_BASE as PUBMED_ENTREZ_API_BASE,
+)
 from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
 
 if TYPE_CHECKING:
@@ -39,6 +41,9 @@ if TYPE_CHECKING:
 PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {
     "publication": ArticleRecord,
 }
+
+# Re-export for tests/importers expecting this symbol on the client module.
+ENTREZ_API_BASE = PUBMED_ENTREZ_API_BASE
 
 
 @dataclass
