@@ -73,6 +73,16 @@ class PublicationTermTransformer(BaseChemblTransformer):
             SilverRecord if transformation successful, None if skipped.
 
         """
+        # Support raw ChEMBL API field name for derived publication_term pipeline.
+        # ChEMBL /document endpoint emits document_chembl_id, while pipeline contracts
+        # use canonical publication_id.
+        if (
+            "publication_id" not in record
+            and record.get("document_chembl_id") is not None
+        ):
+            record = dict(record)
+            record["publication_id"] = record.get("document_chembl_id")
+
         # 1. Validate primary ID (publication_id)
         primary_id = self._get_required_field(record, self.primary_id_field)
 

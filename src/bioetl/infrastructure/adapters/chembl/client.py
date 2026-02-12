@@ -226,6 +226,19 @@ class ChemblAdapter(BaseHttpAdapter):
             if ids
         }
 
+    def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
+        """Map canonical filter field names to ChEMBL API field names.
+
+        Publication pipelines use canonical `publication_id` in configs/tests,
+        while ChEMBL /document endpoint expects `document_chembl_id`.
+        """
+        if filter_field == "publication_id" and entity_type in {
+            "publication",
+            "publication_term",
+        }:
+            return "document_chembl_id"
+        return filter_field
+
     def _get_projected_url_length(self, url: str, params: dict[str, Any]) -> int:
         """Estimate the length of the final URL with parameters."""
         # URL-encode parameters to get accurate length (including escaping)
@@ -454,12 +467,13 @@ class ChemblAdapter(BaseHttpAdapter):
             limit: Maximum records to fetch.
             pk_fields: Composite primary key fields for deduplication.
         """
+        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
         offset = start_offset
         while True:
             if limit and offset >= limit:
                 break
             params = self._build_params(offset, entity_type)
-            params[f"{filter_field}__in"] = ",".join(id_batch)
+            params[f"{api_filter_field}__in"] = ",".join(id_batch)
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:
@@ -498,9 +512,10 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
         pk_fields = self._mapper.get_dedup_key_fields(entity_type)
+        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
 
         params = self._build_params(0, entity_type)
-        params[f"{filter_field}__in"] = ",".join(id_batch)
+        params[f"{api_filter_field}__in"] = ",".join(id_batch)
 
         records, has_next = await self._fetch_page(url, params, entity_type)
 
@@ -936,6 +951,7 @@ class ChemblAdapter(BaseHttpAdapter):
 
         # Prepare batches for each filter field
         filter_keys = list(filters.keys())
+        api_filter_keys = [self._normalize_filter_field(entity_type, k) for k in filter_keys]
         filter_batches = [
             list(self._batch_ids(filters[k], batch_size)) for k in filter_keys
         ]
@@ -946,7 +962,7 @@ class ChemblAdapter(BaseHttpAdapter):
         # Iterate over cartesian product of batches to cover all combinations
         # ChEMBL API returns records matching ALL filters in the request (AND logic)
         for batch_combination in itertools.product(*filter_batches):
-            current_filters = dict(zip(filter_keys, batch_combination, strict=True))
+            current_filters = dict(zip(api_filter_keys, batch_combination, strict=True))
             filter_params = self._build_filter_in_params(current_filters)
 
             offset = 0
