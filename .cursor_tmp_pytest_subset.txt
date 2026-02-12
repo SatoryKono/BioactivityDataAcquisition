@@ -1,0 +1,27 @@
+﻿F..                                                                      [100%]
+================================== FAILURES ===================================
+_________ TestFetchByCids.test_fetch_by_molecule_ids_yields_compounds _________
+
+self = <tests.unit.infrastructure.adapters.pubchem.test_fetch_strategies.TestFetchByCids object at 0x00000254B6A73890>
+fetch_strategies = <bioetl.infrastructure.adapters.pubchem.fetch_strategies.PubChemFetchStrategies object at 0x00000254B8E55FD0>
+mock_circuit_breaker = <MagicMock id='2562902545408'>
+
+    @pytest.mark.asyncio
+    async def test_fetch_by_molecule_ids_yields_compounds(
+        self, fetch_strategies, mock_circuit_breaker
+    ):
+        """Test that fetch_by_molecule_ids yields compound dictionaries."""
+        mock_compound = MagicMock(molecule_id=2244)
+        mock_circuit_breaker.call.return_value = [mock_compound]
+    
+        molecule_id_list = ["2244"]
+        results = await collect_async_iterator(
+>           fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=None)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+E       AttributeError: 'PubChemFetchStrategies' object has no attribute 'fetch_by_molecule_ids'
+
+tests\unit\infrastructure\adapters\pubchem\test_fetch_strategies.py:335: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies.py::TestFetchByCids::test_fetch_by_molecule_ids_yields_compounds
+1 failed, 2 passed in 2.99s
