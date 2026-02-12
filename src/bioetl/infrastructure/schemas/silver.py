@@ -415,15 +415,14 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("aidx", pa.string()),
         pa.field("assay_category", pa.string()),
         pa.field("assay_cell_type", pa.string()),
-        pa.field("assay_id", pa.string()),
         pa.field("assay_classifications", pa.string()),  # JSON string
         pa.field("assay_group", pa.string()),
+        pa.field("assay_id", pa.string()),
         pa.field("assay_organism", pa.string()),
         pa.field("assay_parameters", pa.string()),  # JSON string
         pa.field("assay_pref_name", pa.string()),
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
-        pa.field("taxonomy_id", pa.float64()),  # Float for nullable int
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string()),
@@ -441,6 +440,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("src_assay_id", pa.string()),
         pa.field("src_id", pa.int64()),
         pa.field("target_id", pa.string()),
+        pa.field("taxonomy_id", pa.float64()),  # Float for nullable int
         pa.field("tissue_id", pa.string()),
         # Variant information (flattened from ChEMBL API nested structure)
         pa.field("variant_accession", pa.string()),
@@ -716,14 +716,11 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Original compound names from the document
         pa.field("compound_key", pa.string()),
         pa.field("compound_name", pa.string()),
-        # Foreign keys
-        pa.field("publication_id", pa.string()),
         pa.field("molecule_id", pa.string()),
+        pa.field("publication_id", pa.string()),
         pa.field("record_id", pa.int64()),
-        # Source information
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
