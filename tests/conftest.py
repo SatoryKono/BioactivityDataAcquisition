@@ -1,8 +1,10 @@
 import os
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qsl, urlparse
 
 import pytest
+import vcr as vcrpy
 from hypothesis import settings
 
 # --- Hypothesis Configuration ---
@@ -63,3 +65,22 @@ def vcr_config() -> dict[str, object]:
         "ignore_localhost": True,
         "record_mode": "once",
     }
+
+
+def _strip_email_query(uri: str) -> list[tuple[str, str]]:
+    """Return query params excluding email for VCR matching."""
+    query_params = parse_qsl(urlparse(uri).query, keep_blank_values=True)
+    return [(key, value) for key, value in query_params if key.lower() != "email"]
+
+
+def query_ignore_email(request_1: Any, request_2: Any) -> bool:
+    """Custom VCR matcher that ignores email query parameter."""
+    return _strip_email_query(request_1.uri) == _strip_email_query(request_2.uri)
+
+
+@pytest.fixture(scope="module")
+def vcr(vcr_config: dict[str, object]):  # type: ignore[override]
+    """Configure VCR instance with custom matchers."""
+    vcr_instance = vcrpy.VCR(**vcr_config)
+    vcr_instance.register_matcher("query_ignore_email", query_ignore_email)
+    return vcr_instance
