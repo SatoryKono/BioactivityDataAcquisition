@@ -115,7 +115,6 @@ class TestFieldTypes:
             "sim_id",
             "src_id",
             "targcomp_id",
-            "taxonomy_id",
             "tid",
             "toid",  # Target organism ID - ChEMBL numeric taxonomy ID
             "variant_taxonomy_id",
