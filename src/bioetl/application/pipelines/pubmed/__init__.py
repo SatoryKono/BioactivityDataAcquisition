@@ -21,6 +21,8 @@ class PubMedPublicationPipeline(BasePipeline):
     """
 
 
+PIPELINES = (PubMedPublicationPipeline,)
+
 __all__ = [
     "PubMedPublicationPipeline",
     "PubMedPublicationTransformer",

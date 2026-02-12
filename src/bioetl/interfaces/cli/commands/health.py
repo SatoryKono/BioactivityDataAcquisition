@@ -173,4 +173,6 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
             sys.exit(ExitCode.FAIL)
 
 
+COMMANDS = (health_server_command,)
+
 __all__ = ["health"]

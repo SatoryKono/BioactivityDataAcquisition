@@ -311,7 +311,7 @@
   - Текущее доказательство: src/bioetl/domain/registry/publication.py:163
   - Причина статуса: числа в предложении не найдены в коде
 - [16] Уровни Требований (Governance)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:607
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:611
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] В документе используются ключевые слова согласно RFC 2119:
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:126
@@ -595,7 +595,7 @@
   - Текущее доказательство: tests/architecture/test_code_metrics.py:779
   - Причина статуса: числа в предложении не найдены в коде
 - [33] 5 Копирует `.env.example` → `.env`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: числа в предложении не найдены в коде
 - [34] 6 Проверяет импорт модуля и CLI
   - Текущее доказательство: src/bioetl/domain/filtering/load_result.py:61
@@ -890,7 +890,7 @@
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
   - Причина статуса: числа в предложении не найдены в коде
 - [3] Для выполнения задач в проекте BioETL используется команда из **7 субагентов**.
-  - Текущее доказательство: src/bioetl/application/observability/__init__.py:20
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
   - Причина статуса: числа в предложении не найдены в коде
 - [6] I **pyAuditBot** Baseline/final аудит (Hexagonal, Medallion, ADR) `00-audit-baseline.md`, `07-audit-final.md`
   - Текущее доказательство: src/tools/scripts/check_architecture.py:5
@@ -1105,7 +1105,7 @@
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:115
   - Причина статуса: числа в предложении не найдены в коде
 - [7] Согласно ADR-024, для обеспечения согласованности между провайдерами используются следующие канонические термины:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:842
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:846
   - Причина статуса: score<2 (недостаточно совпадений)
 - [18] **MUST**: Использовать префикс провайдера для предотвращения коллизий.
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:49
@@ -1182,7 +1182,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:44
   - Причина статуса: score<2 (недостаточно совпадений)
 - [61] Bronze 90 дней Автоматическая архивация
-  - Текущее доказательство: src/bioetl/domain/ports/storage.py:33
+  - Текущее доказательство: src/bioetl/domain/ports/storage.py:52
   - Причина статуса: числа в предложении не найдены в коде
 - [62] Silver Постоянно Delta Lake VACUUM (7 дней)
   - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:474
@@ -1664,7 +1664,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:6
   - Причина статуса: числа в предложении не найдены в коде
 - [28] ADR-001 Delta Lake vs Parquet §2.1, §3
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [30] ADR-003 In-Memory Locking §6
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/lock.py:4
@@ -1709,7 +1709,7 @@
   - Текущее доказательство: tests/unit/infrastructure/observability/test_tracing.py:155
   - Причина статуса: числа в предложении не найдены в коде
 - [50] ADR-023 Entity Type Patterns
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:57
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:97
   - Причина статуса: числа в предложении не найдены в коде
 - [57] ADR-030 Publication Pagination Strategy
   - Текущее доказательство: src/bioetl/application/pipelines/crossref/extractors.py:197
@@ -1837,7 +1837,7 @@
   - Текущее доказательство: src/bioetl/application/pipelines/pubmed/extractors/classification.py:61
   - Причина статуса: числа в предложении не найдены в коде
 - [96] Domain содержит 11 дополнительных поддиректорий:
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: числа в предложении не найдены в коде
 - [102] `exceptions/` Доменные исключения 7 файлов с иерархией ошибок (актуально на 2026-02-11)
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:229
@@ -1849,7 +1849,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/infrastructure.py:8
   - Причина статуса: числа в предложении не найдены в коде
 - [120] Domain DDD 08-domain-ddd.mermaid DDD-структура домена
-  - Текущее доказательство: src/bioetl/application/services/checkpoint_service.py:15
+  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
   - Причина статуса: числа в предложении не найдены в коде
 - [121] Domain Models 13-domain-models-relationship.mermaid Связи доменных моделей
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_writer.py:23
@@ -2336,7 +2336,7 @@
   - Текущее доказательство: src/tools/scripts/check_architecture.py:5
   - Причина статуса: числа в предложении не найдены в коде
 - [43] **Приоритет:** 9.50 **Тип:** C4 Context Diagram
-  - Текущее доказательство: src/bioetl/domain/entities/base.py:46
+  - Текущее доказательство: src/bioetl/domain/entities/base.py:63
   - Причина статуса: числа в предложении не найдены в коде
 - [45] Ports & Adapters паттерн - ключевой архитектурный принцип проекта.
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:42
@@ -2414,10 +2414,10 @@
   - Текущее доказательство: src/tools/verify_schema_parity.py:60
   - Причина статуса: score<2 (недостаточно совпадений)
 - [205] 3.1 Domain Model Overview
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:724
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:728
   - Причина статуса: числа в предложении не найдены в коде
 - [207] **Приоритет:** 9.31 **Тип:** Class Diagram
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:635
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:687
   - Причина статуса: числа в предложении не найдены в коде
 - [211] **PipelineRun** (574 LOC) - Aggregate root для pipeline execution
   - Текущее доказательство: src/bioetl/domain/aggregates/pipeline_run.py:1
@@ -2642,7 +2642,7 @@
 
 Проблемные предложения (high-risk):
 - [1] ADR-001: Why Delta Lake over Raw Parquet?
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [3] **Date:** 2025-05-20
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:152
@@ -2737,7 +2737,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/_atomic.py:132
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] ADR-001: Delta Lake vs Parquet — storage format choice for Silver/Gold layers (Updated: 2025-05-20)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [41] ADR-010: Local-Only Deployment — simplifies deployment while preserving Medallion architecture (Updated: 2025-12-23)
   - Текущее доказательство: pyproject.toml:400
@@ -3056,7 +3056,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/__main__.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
 - [33] 5xx Server Error Yes Server-side issue, retrying won't help
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:806
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:810
   - Причина статуса: числа в предложении не найдены в коде
 - [34] 429 Rate Limit Yes Need to back off significantly
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:122
@@ -3086,7 +3086,7 @@
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [78] Acceptable for batch pipelines.
-  - Текущее доказательство: src/bioetl/infrastructure/storage/bronze_writer.py:714
+  - Текущее доказательство: src/bioetl/infrastructure/storage/gold_writer.py:67
   - Причина статуса: score<2 (недостаточно совпадений)
 - [80] Related ADRs
   - Текущее доказательство: src/bioetl/infrastructure/storage/_atomic.py:132
@@ -3124,7 +3124,7 @@
   - Текущее доказательство: src/tools/verify_schema_parity.py:27
   - Причина статуса: score<2 (недостаточно совпадений)
 - [75] The 5-minute grace period allows:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:519
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:523
   - Причина статуса: числа в предложении не найдены в коде
 - [76] Current batch to complete (~30s max)
   - Текущее доказательство: src/bioetl/application/services/shutdown_service.py:6
@@ -3195,7 +3195,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/_atomic.py:132
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] ADR-031: Composite Pipeline Pattern (orchestrates paginated fetches across providers)
-  - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:3
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/source_config.py:168
   - Причина статуса: числа в предложении не найдены в коде
 ```
 
@@ -3467,7 +3467,7 @@
   - Текущее доказательство: tests/unit/application/core/test_record_processor.py:393
   - Причина статуса: score<2 (недостаточно совпадений)
 - [10] `_clear_exports()` объявляется как `async def`:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/common/base_title_fallback.py:131
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/fallback.py:61
   - Причина статуса: score<2 (недостаточно совпадений)
 - [24] **Корректная работа** с асинхронным `StoragePort`
   - Текущее доказательство: src/bioetl/domain/ports/storage.py:32
@@ -3662,7 +3662,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/bronze_writer.py:689
   - Причина статуса: score<2 (недостаточно совпадений)
 - [94] Violates ADR-014 principles
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:869
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:873
   - Причина статуса: числа в предложении не найдены в коде
 - [104] **Truncation risk**: Very large records lose data in quarantine (mitigated by Bronze linkage)
   - Текущее доказательство: src/bioetl/infrastructure/adapters/common/base_title_fallback.py:197
@@ -3843,7 +3843,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/health_check_mixin.py:333
   - Причина статуса: числа в предложении не найдены в коде
 - [94] `strict_gold_validation` флаг ✅ Реализован `domain/config.py:259`
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:14
+  - Текущее доказательство: src/bioetl/application/services/config_service.py:86
   - Причина статуса: числа в предложении не найдены в коде
 - [95] `GoldValidatorPort` протокол ✅ Реализован `domain/ports/validation.py:41-61`
   - Текущее доказательство: src/bioetl/domain/ports/__init__.py:91
@@ -3870,10 +3870,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/_atomic.py:132
   - Причина статуса: score<2 (недостаточно совпадений)
 - [104] ADR-001: Delta Lake vs Parquet — Gold layer uses Delta Lake
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [105] ADR-002: Medallion Architecture — Gold layer definition
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:869
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:873
   - Причина статуса: числа в предложении не найдены в коде
 - [106] ADR-004: Pydantic vs Dataclasses — Pydantic/Pandera for validation
   - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:3
@@ -4147,7 +4147,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:152
   - Причина статуса: числа в предложении не найдены в коде
 - [6] При анализе интерфейсов трансформеров выявлено 3 паттерна передачи `entity_type`:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/retry.py:224
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:322
   - Причина статуса: числа в предложении не найдены в коде
 - [15] **A** ChEMBL через `BaseChemblTransformer` (не передаёт entity_type) 12 `"unknown"`
   - Текущее доказательство: tests/architecture/test_pii_hashing.py:104
@@ -4215,7 +4215,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/activity_values.py:11
   - Причина статуса: числа в предложении не найдены в коде
 - [8] Provider API-имя Доменное значение
-  - Текущее доказательство: src/bioetl/application/services/health_service.py:233
+  - Текущее доказательство: src/bioetl/application/services/medallion_lifecycle.py:150
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] **Update (2026-01-21):** Deprecated aliases were **planned but never implemented**.
   - Текущее доказательство: configs/naming_exceptions.yaml:39
@@ -4462,7 +4462,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:99
   - Причина статуса: числа в предложении не найдены в коде
 - [33] Data Passing Mechanism: File-Based (Silver Tables)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:730
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:734
   - Причина статуса: score<2 (недостаточно совпадений)
 - [49] Enricher >20% DQ failures Depends on `required` flag Review DQ report
   - Текущее доказательство: src/bioetl/domain/composite/strategy.py:116
@@ -4477,7 +4477,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/chembl_structures.py:379
   - Причина статуса: числа в предложении не найдены в коде
 - [79] `silver_table` string?
-  - Текущее доказательство: src/bioetl/domain/config/validation.py:121
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/publications.py:274
   - Причина статуса: score<2 (недостаточно совпадений)
 - [89] Child locks allow inspection of individual pipelines
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/quarantine.py:3
@@ -4611,9 +4611,6 @@
 - [29] `_defaults.yaml`: Global thresholds (0.05/0.20), common validations
   - Текущее доказательство: src/bioetl/infrastructure/config/filter_config_loader.py:86
   - Причина статуса: числа в предложении не найдены в коде
-- [36] **Reusability**: Provider-level validations shared across entities
-  - Текущее доказательство: src/bioetl/infrastructure/storage/arrow_converter.py:4
-  - Причина статуса: score<2 (недостаточно совпадений)
 - [38] **Backward compatible**: Inline `dq_rules` still supported as Level 4 override
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:8
   - Причина статуса: числа в предложении не найдены в коде
@@ -4704,7 +4701,7 @@
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:88
   - Причина статуса: score<2 (недостаточно совпадений)
 - [101] `extraction_params`: pre-extract (API-side)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:804
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:808
   - Причина статуса: score<2 (недостаточно совпадений)
 - [105] НЕТ CLI override (детерминизм, ADR-014)
   - Текущее доказательство: src/tools/create_pipeline.py:147
@@ -5035,7 +5032,7 @@
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:2
   - Причина статуса: числа в предложении не найдены в коде
 - [31] Нет верификации по внешним источникам (DOI существует в CrossRef API?)
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] **REQ-VAL-001 (MUST):** Многоуровневая валидация: base → structural → external → logical → semantic.
   - Текущее доказательство: src/bioetl/infrastructure/observability/unified_logger.py:177
@@ -5059,7 +5056,7 @@
   - Текущее доказательство: src/bioetl/domain/filtering/load_result.py:23
   - Причина статуса: числа в предложении не найдены в коде
 - [47] **REQ-VAL-008 (MUST):** Конфигурируемость: DQ-правила в YAML, не хардкод.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:838
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:842
   - Причина статуса: числа в предложении не найдены в коде
 - [49] **ADR-002 (Medallion):** Валидация на Silver-слое (Pandera), Gold (PyArrow strict).
   - Текущее доказательство: src/tools/verify_schema_parity.py:38
@@ -5158,7 +5155,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:224
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] ADR-001 Delta Lake vs Parquet Accepted Storage 2025-05-20
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [6] ADR-002 Medallion Architecture Accepted Architecture 2025-05-20
   - Текущее доказательство: src/bioetl/infrastructure/storage/base_delta_writer.py:6
@@ -5230,7 +5227,7 @@
   - Текущее доказательство: src/bioetl/application/core/pipeline_services.py:3
   - Причина статуса: числа в предложении не найдены в коде
 - [45] ADR-001: Delta Lake vs Parquet
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [46] ADR-012: Storage Clear Contract and Run ID
   - Текущее доказательство: tests/unit/application/core/test_runner.py:78
@@ -5251,7 +5248,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:4
   - Причина статуса: числа в предложении не найдены в коде
 - [57] ADR-023: Entity Type Patterns (transformer entity_type)
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:223
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:288
   - Причина статуса: числа в предложении не найдены в коде
 - [60] ADR-015: Pipeline Services Lifecycle
   - Текущее доказательство: src/bioetl/composition/bootstrap/cli/__init__.py:21
@@ -5293,7 +5290,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:70
   - Причина статуса: score<2 (недостаточно совпадений)
 - [93] Michael Nygard's ADR format
-  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:48
+  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:138
   - Причина статуса: score<2 (недостаточно совпадений)
 ```
 
@@ -5590,7 +5587,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/validation.py:7
   - Причина статуса: числа в предложении не найдены в коде
 - [213] 4.1 Domain Components (20)
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:26
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:29
   - Причина статуса: числа в предложении не найдены в коде
 - [234] 4.2 Application Components (20)
   - Текущее доказательство: src/bioetl/application/observability/__init__.py:1
@@ -5599,7 +5596,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/sync_base.py:85
   - Причина статуса: числа в предложении не найдены в коде
 - [270] **ProviderRegistration** - Sequence - 7 providers
-  - Текущее доказательство: src/bioetl/infrastructure/config/filter_config_loader.py:91
+  - Текущее доказательство: src/bioetl/infrastructure/observability/anomaly/detector.py:20
   - Причина статуса: числа в предложении не найдены в коде
 - [271] 4.4 Infrastructure Components (25)
   - Текущее доказательство: src/bioetl/infrastructure/system/__init__.py:1
@@ -5611,13 +5608,13 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/network.py:9
   - Причина статуса: числа в предложении не найдены в коде
 - [319] 5.1 Layer Interactions (15)
-  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:79
+  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:90
   - Причина статуса: числа в предложении не найдены в коде
 - [335] 5.2 Component Interactions (20)
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:493
   - Причина статуса: числа в предложении не найдены в коде
 - [356] 5.3 Provider Interactions (14)
-  - Текущее доказательство: src/bioetl/composition/_services.py:231
+  - Текущее доказательство: src/bioetl/composition/_services.py:247
   - Причина статуса: числа в предложении не найдены в коде
 - [363] **SemanticScholar API Integration** - Sequence - S2 API
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:6
@@ -5803,7 +5800,7 @@
 
 Проблемные предложения (high-risk):
 - [1] TOP-50 Архитектурных Диаграмм BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: числа в предложении не найдены в коде
 - [2] *Версия: 1.0 Дата: 2026-01-20*
   - Текущее доказательство: src/bioetl/domain/exceptions/infrastructure.py:310
@@ -5944,7 +5941,7 @@
   - Текущее доказательство: tests/integration/interfaces/test_cli_shutdown_integration.py:62
   - Причина статуса: числа в предложении не найдены в коде
 - [88] **25** **PipelineConfig Structure** Class **8.13** Complete pipeline configuration — core для всех pipelines.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:903
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:907
   - Причина статуса: числа в предложении не найдены в коде
 - [89] 100+ поля.
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:30
@@ -6083,7 +6080,7 @@
   - Текущее доказательство: tests/test_architecture.py:48
   - Причина статуса: числа в предложении не найдены в коде
 - [9] Inside BioETL (§1.1)
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: числа в предложении не найдены в коде
 - [21] **Local FS** Medallion layers storage File I/O Active (Local-Only)
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:126
@@ -6214,7 +6211,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/base_schemas.py:395
   - Причина статуса: числа в предложении не найдены в коде
 - [130] 3.4 Raw Activity Values (Activity-specific)
-  - Текущее доказательство: src/bioetl/domain/value_objects/activity.py:22
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/models.py:225
   - Причина статуса: числа в предложении не найдены в коде
 - [141] 3.5 Ligand Efficiency Metrics (Activity-specific)
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:114
@@ -6316,7 +6313,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [30] N-01 CRITICAL Type mismatch: `taxonomy_id` Activity: `str`, все остальные: `float`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:484
+  - Текущее доказательство: src/bioetl/infrastructure/observability/logging_config.py:151
   - Причина статуса: числа в предложении не найдены в коде
 - [31] N-02 CRITICAL Type mismatch: `cell_source_taxonomy_id` Silver: `int`, Gold: `float`
   - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:255
@@ -6681,7 +6678,7 @@
 
 Проблемные предложения (high-risk):
 - [2] Руководство по работе со схемами конфигураций в BioETL.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] *Версия: 1.0.0 Дата: 2026-01-26*
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
@@ -6696,7 +6693,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/source_config.py:24
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] `BaseGoldRangeFilterConfig` Range filter (min/max)
-  - Текущее доказательство: src/bioetl/application/pipelines/chembl/publication_transformer.py:132
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:107
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] `BaseCsvExportConfig` CSV export settings
   - Текущее доказательство: src/bioetl/interfaces/cli/main.py:35
@@ -6758,13 +6755,13 @@
   - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:138
   - Причина статуса: числа в предложении не найдены в коде
 - [50] Step 3: Reference in pipeline config
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:764
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:768
   - Причина статуса: числа в предложении не найдены в коде
 - [77] Inline Overrides (Level 4)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:775
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:779
   - Причина статуса: числа в предложении не найдены в коде
 - [78] For exceptional cases, override DQ rules directly in pipeline config:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [82] Validation
   - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:19
@@ -7038,7 +7035,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:278
   - Причина статуса: числа в предложении не найдены в коде
 - [2] **Target versions:** 5.9.0 → 5.14.0
-  - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:484
+  - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:536
   - Причина статуса: числа в предложении не найдены в коде
 - [3] **Release dates:** 2026-01-06 → 2026-02-09
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:223
@@ -7248,7 +7245,7 @@
   - Текущее доказательство: configs/pipelines/uniprot/idmapping.yaml:38
   - Причина статуса: score<2 (недостаточно совпадений)
 - [97] Иерархическая загрузка (ADR-028)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:806
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:810
   - Причина статуса: score<2 (недостаточно совпадений)
 - [106] Фильтрация данных на Gold слое:
   - Текущее доказательство: src/bioetl/composition/bootstrap/cli/storage.py:194
@@ -7278,7 +7275,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/registration.py:493
   - Причина статуса: числа в предложении не найдены в коде
 - [135] `error` Падение при несовпадении схемы
-  - Текущее доказательство: src/bioetl/domain/ports/quarantine.py:39
+  - Текущее доказательство: src/bioetl/domain/ports/quarantine.py:60
   - Причина статуса: score<2 (недостаточно совпадений)
 ```
 
@@ -7677,7 +7674,7 @@
   - Текущее доказательство: pyproject.toml:170
   - Причина статуса: числа в предложении не найдены в коде
 - [171] Field Types ~3-5 seconds ✅ Yes
-  - Текущее доказательство: src/bioetl/domain/schemas/crossref/work.py:21
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:380
   - Причина статуса: числа в предложении не найдены в коде
 - [172] Validations ~5-10 seconds ✅ Yes
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:69
@@ -7695,7 +7692,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_report_config.py:28
   - Причина статуса: score<2 (недостаточно совпадений)
 - [182] Cleanup deprecated fields Every major release Maintainer
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:716
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:720
   - Причина статуса: score<2 (недостаточно совпадений)
 - [191] **Test Count:** ~185 tests
   - Текущее доказательство: tests/unit/application/services/dq/test_gold_analyzer.py:166
@@ -7845,10 +7842,10 @@
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:622
   - Причина статуса: score<2 (недостаточно совпадений)
 - [276] PipelineConfig
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:903
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:907
   - Причина статуса: score<2 (недостаточно совпадений)
 - [288] Medallion Types
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/http/health.py:16
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/models.py:234
   - Причина статуса: score<2 (недостаточно совпадений)
 - [300] WriteModePolicy
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:149
@@ -8080,9 +8077,6 @@
 - [71] PolicyViolationError
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:557
   - Причина статуса: score<2 (недостаточно совпадений)
-- [91] API rate limit exceeded (HTTP 429).
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/exceptions.py:67
-  - Причина статуса: числа в предложении не найдены в коде
 - [96] TimeoutError
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:82
   - Причина статуса: score<2 (недостаточно совпадений)
@@ -8093,7 +8087,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [109] ChEMBL-specific API error.
-  - Текущее доказательство: src/bioetl/domain/ports/observability.py:128
+  - Текущее доказательство: src/bioetl/domain/ports/observability.py:129
   - Причина статуса: score<2 (недостаточно совпадений)
 - [114] CircuitBreakerOpenError
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:85
@@ -8593,11 +8587,14 @@
 - [18] **Observability Built-in:** Tracing and metrics integrated via ports
   - Текущее доказательство: src/bioetl/infrastructure/config/pipeline_config_loader.py:64
   - Причина статуса: score<2 (недостаточно совпадений)
+- [28] **PubChem** 5 req/sec `TokenBucketLimiter(rate=5.0)`
+  - Текущее доказательство: src/bioetl/domain/exceptions/network.py:322
+  - Причина статуса: числа в предложении не найдены в коде
 - [29] **UniProt** 100 req/sec `TokenBucketLimiter(rate=100.0)`
   - Текущее доказательство: src/bioetl/composition/providers/registration.py:539
   - Причина статуса: числа в предложении не найдены в коде
 - [30] **PubMed** 3 req/sec (no key) `TokenBucketLimiter(rate=3.0)`
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/http/rate_limiter.py:168
+  - Текущее доказательство: tests/unit/composition/providers/test_provider_registry.py:548
   - Причина статуса: числа в предложении не найдены в коде
 - [50] HTTP 429 (Rate Limit)
   - Текущее доказательство: src/bioetl/composition/providers/decorators.py:42
@@ -8751,7 +8748,7 @@
 
 Проблемные предложения (high-risk):
 - [2] Контракты данных для Gold-слоя BioETL.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] > **Версия**: 1.1.0
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
@@ -8787,7 +8784,7 @@
   - Текущее доказательство: src/bioetl/application/composite/merger.py:493
   - Причина статуса: числа в предложении не найдены в коде
 - [36] **ranges** Числовой диапазон `standard_value: {min: 0}`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:663
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:667
   - Причина статуса: числа в предложении не найдены в коде
 - [37] **list_lengths** Длина списка `component_accessions: {min: 1, max: 1}`
   - Текущее доказательство: src/bioetl/domain/filtering/list_filters.py:42
@@ -9121,7 +9118,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_all.py:290
   - Причина статуса: числа в предложении не найдены в коде
 - [40] **PubMed** 1 3 req/sec (10 with key) API Key
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:103
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:133
   - Причина статуса: числа в предложении не найдены в коде
 - [42] **OpenAlex** 1 ~10 req/sec email-based
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:132
@@ -9244,7 +9241,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:1022
   - Причина статуса: числа в предложении не найдены в коде
 - [54] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [58] `protein_class_id` Cast to int `"1"` `1`
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:117
@@ -9334,7 +9331,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/base.py:61
   - Причина статуса: числа в предложении не найдены в коде
 - [126] **Gold Filter:** `downgraded = 0` AND `pref_name IS NOT NULL`
-  - Текущее доказательство: src/bioetl/application/core/protocols.py:29
+  - Текущее доказательство: src/bioetl/application/pipelines/chembl/publication_transformer.py:132
   - Причина статуса: числа в предложении не найдены в коде
 - [131] `INVALID_CLASS_LEVEL` class_level < 1 Schema violation
   - Текущее доказательство: src/bioetl/domain/exceptions/validation.py:53
@@ -9411,13 +9408,13 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:570
   - Причина статуса: числа в предложении не найдены в коде
 - [56] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [60] `cell_chembl_id` Validate regex `"CHEMBL3307641"` `"CHEMBL3307641"`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:538
   - Причина статуса: числа в предложении не найдены в коде
 - [68] `clo_id` Validate regex `"CLO_0002063"` `"CLO_0002063"`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:668
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:672
   - Причина статуса: числа в предложении не найдены в коде
 - [70] `efo_id` Validate regex `"EFO_0002067"` `"EFO_0002067"`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:570
@@ -9465,7 +9462,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/chembl.py:622
   - Причина статуса: числа в предложении не найдены в коде
 - [120] 11 `clo_id` string Yes CLO ID
-  - Текущее доказательство: src/bioetl/domain/services/data_normalization_service.py:201
+  - Текущее доказательство: src/bioetl/domain/services/data_normalization_service.py:219
   - Причина статуса: числа в предложении не найдены в коде
 - [121] 12 `cl_lincs_id` string Yes LINCS ID
   - Текущее доказательство: src/bioetl/domain/entities/chembl.py:623
@@ -9560,7 +9557,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/chembl.py:340
   - Причина статуса: числа в предложении не найдены в коде
 - [56] 18 `molecule_hierarchy` object Yes Yes Hierarchy JSON
-  - Текущее доказательство: src/bioetl/domain/transformations.py:93
+  - Текущее доказательство: src/bioetl/domain/transformations.py:104
   - Причина статуса: числа в предложении не найдены в коде
 - [57] 19 `molecule_properties` object Yes Yes Properties JSON
   - Текущее доказательство: src/bioetl/application/pipelines/uniprot/extractors/comments.py:433
@@ -9578,7 +9575,7 @@
   - Текущее доказательство: src/bioetl/domain/schemas/uniprot/protein.py:276
   - Причина статуса: числа в предложении не найдены в коде
 - [89] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [95] `max_phase` Cast to float `"4"` `4.0`
   - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:454
@@ -9646,7 +9643,7 @@
   - Текущее доказательство: src/bioetl/interfaces/orchestration/__init__.py:6
   - Причина статуса: числа в предложении не найдены в коде
 - [55] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] Validation
   - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:19
@@ -9729,7 +9726,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:128
   - Причина статуса: числа в предложении не найдены в коде
 - [59] 23 `src_id` integer Yes Source ID `1`
-  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:206
+  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:551
   - Причина статуса: числа в предложении не найдены в коде
 - [60] 24 `record_id` integer Yes FK compound_record `12345`
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:83
@@ -9741,7 +9738,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/common/api_request_collector.py:68
   - Причина статуса: числа в предложении не найдены в коде
 - [63] 27 `uo_units` string Yes UO units ID `"UO:0000065"`
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [64] 28 `qudt_units` string Yes QUDT units `"nM"`
   - Текущее доказательство: src/bioetl/domain/schemas/chembl/activity.py:110
@@ -9753,7 +9750,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:380
   - Причина статуса: числа в предложении не найдены в коде
 - [92] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [97] `standard_value` round(10) `50.123456789012` `50.1234567890`
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:185
@@ -9851,7 +9848,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/activity.py:188
   - Причина статуса: числа в предложении не найдены в коде
 - [50] 17 `src_id` integer Yes Source ID
-  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:206
+  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:551
   - Причина статуса: числа в предложении не найдены в коде
 - [51] 18 `src_assay_id` string Yes Source assay ID
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:435
@@ -9881,7 +9878,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:270
   - Причина статуса: числа в предложении не найдены в коде
 - [64] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [75] Validation
   - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:19
@@ -9913,13 +9910,13 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:163
   - Причина статуса: числа в предложении не найдены в коде
 - [31] 3 `src_id` integer Yes Source ID
-  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:206
+  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:551
   - Причина статуса: числа в предложении не найдены в коде
 - [32] 4 `pubmed_id` integer Yes PubMed ID
   - Текущее доказательство: configs/dq/entities/semanticscholar/publication.yaml:26
   - Причина статуса: числа в предложении не найдены в коде
 - [33] 5 `doi` string Yes DOI
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [34] 6 `patent_id` string Yes Patent ID
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:505
@@ -10034,7 +10031,7 @@
   - Текущее доказательство: src/bioetl/application/core/field_specs.py:119
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] 1 `record_id` int No Primary key
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:801
+  - Текущее доказательство: src/bioetl/infrastructure/storage/arrow_converter.py:25
   - Причина статуса: числа в предложении не найдены в коде
 - [30] 2 `molecule_chembl_id` string No FK to molecule
   - Текущее доказательство: src/bioetl/domain/value_objects/chemical.py:190
@@ -10081,7 +10078,7 @@
   - Текущее доказательство: src/bioetl/domain/schemas/chembl/target_component.py:19
   - Причина статуса: числа в предложении не найдены в коде
 - [30] 2 `tid` int No FK to target
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:123
+  - Текущее доказательство: src/tools/verify_schema_parity.py:9
   - Причина статуса: числа в предложении не найдены в коде
 - [31] 3 `component_id` int No FK to component_sequences
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:507
@@ -10337,10 +10334,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:954
   - Причина статуса: числа в предложении не найдены в коде
 - [54] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [55] **Format** DOI (10.xxx/yyy)
-  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:48
+  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:138
   - Причина статуса: числа в предложении не найдены в коде
 - [58] `doi` lowercase, strip `"10.1234/ABC "` `"10.1234/abc"`
   - Текущее доказательство: src/bioetl/infrastructure/security/pii_hasher.py:127
@@ -10402,7 +10399,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/base_metrics.py:95
   - Причина статуса: числа в предложении не найдены в коде
 - [33] Source API
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] **Rate Limit** ~10 req/sec (polite pool)
   - Текущее доказательство: tests/unit/composition/providers/test_provider_registry.py:563
@@ -10530,7 +10527,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:926
   - Причина статуса: числа в предложении не найдены в коде
 - [31] 2 `doi` string Yes DOI
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [33] 4 `display_name` string Yes Display name
   - Текущее доказательство: tests/unit/application/pipelines/common/test_extractors.py:305
@@ -10581,7 +10578,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:315
   - Причина статуса: числа в предложении не найдены в коде
 - [72] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [73] **Format** OpenAlex ID (W[0-9]+)
   - Текущее доказательство: src/bioetl/domain/value_objects/academic_ids.py:56
@@ -10700,7 +10697,7 @@
   - Текущее доказательство: src/bioetl/domain/schemas/pubchem/compound.py:288
   - Причина статуса: score<2 (недостаточно совпадений)
 - [63] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [68] `molecular_weight` round(10) `180.157123456789` `180.1571234568`
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:185
@@ -10801,7 +10798,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:941
   - Причина статуса: числа в предложении не найдены в коде
 - [53] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] Validation
   - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:19
@@ -10848,7 +10845,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/base_metrics.py:95
   - Причина статуса: числа в предложении не найдены в коде
 - [37] Source API
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] **Base URL** `https://api.semanticscholar.org/graph/v1`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:764
@@ -10965,7 +10962,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:228
   - Причина статуса: числа в предложении не найдены в коде
 - [279] Year outside 1500-2100 Warning 1%
-  - Текущее доказательство: src/bioetl/domain/validation.py:175
+  - Текущее доказательство: src/bioetl/domain/validation.py:135
   - Причина статуса: числа в предложении не найдены в коде
 - [280] Year null Info 5%
   - Текущее доказательство: src/bioetl/domain/ports/metadata.py:82
@@ -11052,13 +11049,13 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/academic_ids.py:86
   - Причина статуса: числа в предложении не найдены в коде
 - [69] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [86] Validation
   - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:19
   - Причина статуса: score<2 (недостаточно совпадений)
 - [98] **Public**: 100 requests per 5 minutes
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:533
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:537
   - Причина статуса: числа в предложении не найдены в коде
 ```
 
@@ -11117,7 +11114,7 @@
   - Текущее доказательство: src/bioetl/domain/schemas/uniprot/protein.py:318
   - Причина статуса: числа в предложении не найдены в коде
 - [65] **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] `genes[0].geneName.value` `gene_primary` Extract first
   - Текущее доказательство: src/bioetl/application/pipelines/uniprot/transformer.py:213
@@ -11397,7 +11394,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:429
   - Причина статуса: score<2 (недостаточно совпадений)
 - [129] **B** Binding Анализы связывания (IC50, Ki, Kd)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:658
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:662
   - Причина статуса: score<2 (недостаточно совпадений)
 - [149] *Последнее обновление: 2025-12-24*
   - Текущее доказательство: нет
@@ -11467,7 +11464,7 @@
   - Текущее доказательство: configs/composite/field_groups/publication.yaml:552
   - Причина статуса: числа в предложении не найдены в коде
 - [31] **Primary ID:** `record_id` (int, обязательный)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:801
+  - Текущее доказательство: src/bioetl/infrastructure/storage/arrow_converter.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [38] `record_id` `>= 1` Положительное целое число
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:721
@@ -11631,7 +11628,7 @@
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:37
   - Причина статуса: числа в предложении не найдены в коде
 - [26] Entity ID вычисляется как SHA256-хэш композитного ключа:
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: числа в предложении не найдены в коде
 - [35] **`term`** — обязательное, минимум 1 символ
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:618
@@ -11885,7 +11882,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:225
   - Причина статуса: score<2 (недостаточно совпадений)
 - [38] PubMed API имеет строгие лимиты:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:90
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:124
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] Без API key: 3 запроса/сек
   - Текущее доказательство: нет
@@ -11929,7 +11926,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/semanticscholar.py:44
   - Причина статуса: числа в предложении не найдены в коде
 - [69] `validate_year()` Валидация года (1500-2100)
-  - Текущее доказательство: src/bioetl/domain/entities/pubmed.py:90
+  - Текущее доказательство: src/bioetl/domain/validation.py:138
   - Причина статуса: score<2 (недостаточно совпадений)
 - [81] С API key 1 req/sec (guaranteed) 1.0 req/sec, burst: 5 Стабильно
   - Текущее доказательство: src/tools/create_pipeline.py:44
@@ -12091,7 +12088,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:484
   - Причина статуса: числа в предложении не найдены в коде
 - [29] **CrossRef** 37 `doi` 1 36
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: числа в предложении не найдены в коде
 - [30] **OpenAlex** 39 `openalex_id` 1 38
   - Текущее доказательство: src/bioetl/domain/entities/publication_base.py:13
@@ -12124,7 +12121,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:181
   - Причина статуса: числа в предложении не найдены в коде
 - [60] `doi` string ✅ — `^10\.\d{4,9}/.+$`
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [82] `publication_date` string ✅ — `^\d{4}-\d{2}-\d{2}$`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:970
@@ -12139,7 +12136,7 @@
   - Текущее доказательство: src/bioetl/application/pipelines/chembl/protein_class_transformer.py:59
   - Причина статуса: числа в предложении не найдены в коде
 - [101] `doi` string ✅ — `^10\.\d{4,9}/.+$`
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [117] `issn` string ✅ — `^\d{4}-\d{3}[\dX]$`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:950
@@ -12172,7 +12169,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [178] `author_orcid_list` string ✅ — `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$`
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:93
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:162
   - Причина статуса: числа в предложении не найдены в коде
 - [182] `publication_date` string ✅ — `^\d{4}-\d{2}-\d{2}$`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:970
@@ -12184,7 +12181,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:181
   - Причина статуса: числа в предложении не найдены в коде
 - [206] `doi` string ✅ — `^10\.\d{4,9}/.+$`
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [221] `issn` string ✅ — `^\d{4}-\d{3}[\dX]$`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:950
@@ -12202,7 +12199,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:181
   - Причина статуса: числа в предложении не найдены в коде
 - [255] `doi` string ✅ — `^10\.\d{4,9}/.+$`
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [278] `author_orcids` string ✅ — `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:927
@@ -12429,13 +12426,13 @@
   - Текущее доказательство: src/bioetl/application/pipelines/chembl/assay_transformer.py:51
   - Причина статуса: числа в предложении не найдены в коде
 - [139] `action_type` `action_type_*` `flatten_nested_dict()` → 3 str fields
-  - Текущее доказательство: src/bioetl/application/pipelines/chembl/activity_transformer.py:180
+  - Текущее доказательство: tests/unit/application/pipelines/test_activity_transformer.py:584
   - Причина статуса: числа в предложении не найдены в коде
 - [141] Normalization Rules (RULES.md §2.8.1)
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:7
   - Причина статуса: числа в предложении не найдены в коде
 - [168] Bronze (Raw API Response)
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:63
+  - Текущее доказательство: src/bioetl/domain/ports/dq_config.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [175] `standard_value` > 0
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:1056
@@ -12473,7 +12470,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/models.py:203
   - Причина статуса: числа в предложении не найдены в коде
 - [131] Bronze (Raw API Response)
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:63
+  - Текущее доказательство: src/bioetl/domain/ports/dq_config.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [140] Version Date Changes
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:273
@@ -12520,7 +12517,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:278
   - Причина статуса: числа в предложении не найдены в коде
 - [131] Bronze (Raw API Response)
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:63
+  - Текущее доказательство: src/bioetl/domain/ports/dq_config.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [139] Version Date Changes
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:273
@@ -12564,7 +12561,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [96] Bronze (Raw API Response)
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:63
+  - Текущее доказательство: src/bioetl/domain/ports/dq_config.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [105] Version Date Changes
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:273
@@ -12638,7 +12635,7 @@
   - Текущее доказательство: tests/e2e/test_pipeline_graceful_shutdown_e2e.py:8
   - Причина статуса: числа в предложении не найдены в коде
 - [112] [ ] Golden tests for output validation
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:454
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:806
   - Причина статуса: score<2 (недостаточно совпадений)
 - [113] [ ] Coverage ≥80%
   - Текущее доказательство: src/bioetl/domain/value_objects/publication_field_groups.py:412
@@ -12690,7 +12687,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:162
   - Причина статуса: score<2 (недостаточно совпадений)
 - [6] This checklist documents the pre-release verification completed for BioETL v5.9.0.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:673
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:677
   - Причина статуса: score<2 (недостаточно совпадений)
 - [12] `make lint` ✅ Pass ruff: All checks passed, mypy: 0 issues in 389 files
   - Текущее доказательство: pyproject.toml:435
@@ -13314,7 +13311,7 @@
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:152
   - Причина статуса: числа в предложении не найдены в коде
 - [55] Check API key validity
-  - Текущее доказательство: src/bioetl/domain/services/normalization_service.py:372
+  - Текущее доказательство: src/bioetl/domain/services/value_validator.py:95
   - Причина статуса: score<2 (недостаточно совпадений)
 - [57] Rotate API key if expired
   - Текущее доказательство: src/bioetl/infrastructure/locking/memory_lock.py:243
@@ -13352,7 +13349,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [12] Данный runbook описывает процедуры диагностики и устранения сбоев в **5-уровневой валидационной системе** для публикационных данных BioETL.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: числа в предложении не найдены в коде
 - [13] **Validation Levels:**
   - Текущее доказательство: src/bioetl/domain/schemas/crossref/work.py:18
@@ -13397,13 +13394,13 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/data_quality.py:7
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] **Проблема 1: Regex mismatch**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:668
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:672
   - Причина статуса: числа в предложении не найдены в коде
 - [67] **Проблема 2: NULL в non-nullable полях**
   - Текущее доказательство: src/tools/scripts/config_matrix_generator.py:29
   - Причина статуса: числа в предложении не найдены в коде
 - [69] Фильтровать NULL PK в адаптере перед записью в Bronze:
-  - Текущее доказательство: src/bioetl/composition/factories/storage_factory.py:323
+  - Текущее доказательство: src/bioetl/composition/factories/storage_factory.py:325
   - Причина статуса: score<2 (недостаточно совпадений)
 - [70] **Проблема 3: Неправильный тип данных**
   - Текущее доказательство: src/bioetl/domain/exceptions/validation.py:7
@@ -13418,7 +13415,7 @@
   - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:34
   - Причина статуса: числа в предложении не найдены в коде
 - [84] **Проблема 1: CrossRef API rate limit (HTTP 429)**
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/exceptions.py:67
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/client.py:63
   - Причина статуса: числа в предложении не найдены в коде
 - [88] **Проблема 2: PubMed NCBI API timeout**
   - Текущее доказательство: src/bioetl/infrastructure/schemas/source_config.py:67
@@ -13430,7 +13427,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/validation.py:155
   - Причина статуса: числа в предложении не найдены в коде
 - [103] Если точно ошибка — обновить в Bronze:
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:4
+  - Текущее доказательство: src/bioetl/domain/ports/audit.py:43
   - Причина статуса: score<2 (недостаточно совпадений)
 - [108] Level 5: Semantic Validation Warnings
   - Текущее доказательство: src/bioetl/infrastructure/adapters/validation.py:155
@@ -13514,7 +13511,7 @@
   - Текущее доказательство: src/bioetl/domain/ports/runner.py:99
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] Quarantine data is retained for **30 days** by default.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:519
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:523
   - Причина статуса: числа в предложении не найдены в коде
 ```
 
@@ -13686,7 +13683,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:95
   - Причина статуса: score<2 (недостаточно совпадений)
 - [63] ADR-001: Delta Lake vs Parquet
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [64] ADR-002: Medallion Architecture
   - Текущее доказательство: src/bioetl/infrastructure/storage/base_delta_writer.py:6
@@ -13742,7 +13739,7 @@
   - Текущее доказательство: tests/unit/domain/schemas/test_year_validation.py:441
   - Причина статуса: числа в предложении не найдены в коде
 - [21] ADR-024).
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:842
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:846
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] Finding 1: TYPE_MISMATCH - `authors` Field Type Inconsistency
   - Текущее доказательство: src/bioetl/application/composite/preflight_validator.py:543
@@ -14326,7 +14323,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/quarantine.py:208
   - Причина статуса: score<2 (недостаточно совпадений)
 - [26] Use ADR-031
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:815
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:819
   - Причина статуса: score<2 (недостаточно совпадений)
 ```
 
@@ -14672,7 +14669,7 @@
   - Текущее доказательство: tests/unit/application/composite/test_runner_required_flag.py:526
   - Причина статуса: числа в предложении не найдены в коде
 - [80] OpenAlex 147 passed ✅
-  - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:63
+  - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:162
   - Причина статуса: числа в предложении не найдены в коде
 - [81] PubMed 77 passed ✅
   - Текущее доказательство: tests/unit/application/composite/test_runner_required_flag.py:526
@@ -14929,7 +14926,7 @@
   - Текущее доказательство: src/tools/scripts/config_matrix_generator.py:211
   - Причина статуса: числа в предложении не найдены в коде
 - [31] AUD-004 [SHOULD] Legacy Config Sections
-  - Текущее доказательство: src/bioetl/domain/validation.py:295
+  - Текущее доказательство: src/bioetl/domain/validation.py:280
   - Причина статуса: числа в предложении не найдены в коде
 - [33] **Rule Violated**: ADR-025.
   - Текущее доказательство: src/bioetl/domain/exceptions/internal.py:68
@@ -14982,7 +14979,7 @@
   - Текущее доказательство: src/bioetl/domain/registry/publication.py:329
   - Причина статуса: числа в предложении не найдены в коде
 - [28] **Implementation (Config)**: Выполнить RF-CFG-001.
-  - Текущее доказательство: src/bioetl/composition/bootstrap/cli/__init__.py:68
+  - Текущее доказательство: src/bioetl/composition/bootstrap/cli/config.py:13
   - Причина статуса: числа в предложении не найдены в коде
 - [29] **Implementation (Structure)**: Выполнить RF-STR-001.
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:159
@@ -15076,7 +15073,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:280
   - Причина статуса: числа в предложении не найдены в коде
 - [14] domain 149 36 156 31.8%
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: числа в предложении не найдены в коде
 - [15] application 121 32 625 28.7%
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:13
@@ -15433,8 +15430,8 @@
   - Текущее доказательство: src/bioetl/domain/models/metadata.py:543
   - Причина статуса: score<2 (недостаточно совпадений)
 - [23] **ADR-025** (Config Unification) COMPLIANT `_base.yaml` v2.0.0 inheritance working
-  - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:261
-  - Причина статуса: числа в предложении не найдены в коде
+  - Текущее доказательство: src/bioetl/composition/bootstrap/assembly/storage.py:67
+  - Причина статуса: score<2 (недостаточно совпадений)
 - [24] **ADR-027** (DQ Externalization) COMPLIANT Hierarchical DQ merge working
   - Текущее доказательство: tests/e2e/test_full_pipeline.py:306
   - Причина статуса: числа в предложении не найдены в коде
@@ -15505,7 +15502,7 @@
   - Текущее доказательство: src/bioetl/domain/aggregates/events.py:36
   - Причина статуса: score<2 (недостаточно совпадений)
 - [78] **Recommendation:** Document versioning policy in `_base.yaml` header.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:680
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:684
   - Причина статуса: score<2 (недостаточно совпадений)
 - [82] "pubmed_publication missing sink.silver.primary_key" Auto-propagated by convention (`config_loader.py:167-168`)
   - Текущее доказательство: configs/pipelines/_schema.json:44
@@ -15561,7 +15558,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/gold_writer.py:830
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] ENV-001 `.env.example:43` `BIOETL_SEMANTIC_SCHOLAR_API_KEY` → `BIOETL_SEMANTICSCHOLAR_API_KEY`
-  - Текущее доказательство: src/bioetl/infrastructure/observability/unified_logger.py:25
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:189
   - Причина статуса: числа в предложении не найдены в коде
 - [15] CONFIG-001 `configs/sources/pubmed.yaml:16-17` `BIOETL_NCBI_*` → `BIOETL_PUBMED_*`
   - Текущее доказательство: src/bioetl/composition/providers/registration.py:490
@@ -15621,7 +15618,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/registration.py:493
   - Причина статуса: числа в предложении не найдены в коде
 - [47] `.env.example:42` `BIOETL_SEMANTIC_SCHOLAR_API_KEY` **MISMATCH**
-  - Текущее доказательство: src/bioetl/infrastructure/locking/memory_lock.py:169
+  - Текущее доказательство: src/bioetl/infrastructure/observability/metrics_server_adapter.py:30
   - Причина статуса: числа в предложении не найдены в коде
 - [48] `src/bioetl/composition/providers/registration.py:438` `BIOETL_SEMANTICSCHOLAR_API_KEY` Code
   - Текущее доказательство: src/bioetl/composition/providers/loader.py:10
@@ -15666,7 +15663,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:207
   - Причина статуса: числа в предложении не найдены в коде
 - [70] PubMed 3/10 req/sec 3/10 req/sec OK
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:103
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:133
   - Причина статуса: числа в предложении не найдены в коде
 - [71] SemanticScholar 1 req/sec (w/key) 0.1/1 req/sec OK
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:6
@@ -15711,7 +15708,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:143
   - Причина статуса: числа в предложении не найдены в коде
 - [8] ✅ **ADR-025** (Config Unification): Иерархия `_base.yaml` → provider → entity соблюдена
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:842
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:846
   - Причина статуса: числа в предложении не найдены в коде
 - [13] Критический вывод: система convention-based defaults в `config_loader.py` (строки 151-209) корректно автоматически заполняет:
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:128
@@ -15798,7 +15795,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/config_loader.py:26
   - Причина статуса: числа в предложении не найдены в коде
 - [74] Minimal config support ✅ 3 configs use convention-only
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:625
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:629
   - Причина статуса: числа в предложении не найдены в коде
 - [76] 4.1 Три Стиля Конфигов
   - Текущее доказательство: нет
@@ -15840,7 +15837,7 @@
   - Текущее доказательство: tests/unit/interfaces/test_exit_codes.py:147
   - Причина статуса: числа в предложении не найдены в коде
 - [119] **Конфигурационные файлы BioETL унифицированы и соответствуют ADR.**
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [129] `config_comparison_matrix.csv` Матрица сравнения 19 параметров × 19 configs
   - Текущее доказательство: src/tools/scripts/config_matrix_generator.py:71
@@ -16181,7 +16178,7 @@
 - [101] Date Handling date-handling.md §2.4
   - Текущее доказательство: mkdocs.yml:85
   - Причина статуса: числа в предложении не найдены в коде
-- ... и еще 11090 предложений (см. полный CSV-отчет)
+- ... и еще 11089 предложений (см. полный CSV-отчет)
 ```
 
 ## docs/99-archive/reports/domain_merged.md
@@ -16200,7 +16197,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/chemical.py:500
   - Причина статуса: score<2 (недостаточно совпадений)
 - [36] PipelineConfig,
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:903
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:907
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] ValidationConfig,
   - Текущее доказательство: src/bioetl/domain/value_objects/chemical.py:560
@@ -16513,19 +16510,28 @@
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:34
   - Причина статуса: score<2 (недостаточно совпадений)
 - [1237] class ChemblRateLimitError(ChemblApiError):
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:687
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:693
   - Причина статуса: score<2 (недостаточно совпадений)
+- [1239] Raised when ChEMBL API returns 429 Too Many Requests.
+  - Текущее доказательство: src/bioetl/domain/exceptions/network.py:392
+  - Причина статуса: числа в предложении не найдены в коде
+- [1241] def __init__(self, retry_after: float = 60.0) -> None:
+  - Текущее доказательство: src/bioetl/domain/exceptions/network.py:126
+  - Причина статуса: числа в предложении не найдены в коде
 - [1247] status_code=429,
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:274
   - Причина статуса: числа в предложении не найдены в коде
 - [1249] class ChemblServiceUnavailableError(ChemblApiError):
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:687
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:693
   - Причина статуса: score<2 (недостаточно совпадений)
+- [1251] Raised when ChEMBL API returns 5xx errors or connection fails.
+  - Текущее доказательство: src/bioetl/application/composite/preflight_validator.py:82
+  - Причина статуса: числа в предложении не найдены в коде
 - [1261] class ChemblAuthError(ChemblApiError):
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:687
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:693
   - Причина статуса: score<2 (недостаточно совпадений)
 - [1263] Raised when ChEMBL API returns 401 or 403.
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/exceptions.py:76
+  - Текущее доказательство: src/bioetl/domain/exceptions/network.py:392
   - Причина статуса: числа в предложении не найдены в коде
 - [1265] def __init__(self, status_code: int = 401) -> None:
   - Текущее доказательство: src/bioetl/domain/exceptions/network.py:197
@@ -16545,16 +16551,7 @@
 - [1719] File: api_request_collector.py
   - Текущее доказательство: src/tools/file_merger.py:206
   - Причина статуса: score<2 (недостаточно совпадений)
-- [1733] APIRequestDetails,
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/common/api_request_collector.py:107
-  - Причина статуса: score<2 (недостаточно совпадений)
-- [1746] duration_ms=150.5,
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/uniprot/client.py:609
-  - Причина статуса: числа в предложении не найдены в коде
-- [1747] status_code=200,
-  - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:274
-  - Причина статуса: числа в предложении не найдены в коде
-- ... и еще 832 предложений (см. полный CSV-отчет)
+- ... и еще 843 предложений (см. полный CSV-отчет)
 ```
 
 ## docs/99-archive/reports/interfaces_merged.md
@@ -16627,7 +16624,7 @@
   - Текущее доказательство: src/bioetl/application/core/base_transformer.py:425
   - Причина статуса: score<2 (недостаточно совпадений)
 - [807] if len(records) > 10:
-  - Текущее доказательство: src/bioetl/application/services/medallion_types.py:31
+  - Текущее доказательство: src/bioetl/application/services/quarantine_service.py:171
   - Причина статуса: числа в предложении не найдены в коде
 - [822] pipeline: str,
   - Текущее доказательство: src/bioetl/application/core/base_transformer.py:425
@@ -16926,7 +16923,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:174
   - Причина статуса: score<2 (недостаточно совпадений)
 - [46] 3.1 Add `transform.steps` Documentation
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:680
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:684
   - Причина статуса: числа в предложении не найдены в коде
 - [53] 3.2 Document Empty `partition_by`
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:24
@@ -17035,7 +17032,7 @@
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:30
   - Причина статуса: числа в предложении не найдены в коде
 - [15] 1.1 CrossRef
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: числа в предложении не найдены в коде
 - [23] **Mapping table:** 191 уникальных mappings (строки 59-1423 в classification.py)
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:47
@@ -17047,7 +17044,7 @@
   - Текущее доказательство: src/bioetl/domain/mapping/publication_type_classification.py:1551
   - Причина статуса: числа в предложении не найдены в коде
 - [34] 1.3 PubMed
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:103
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:133
   - Причина статуса: числа в предложении не найдены в коде
 - [39] **Mapping table:** 191 уникальных mappings (column 6 в _CLASSIFICATION_TABLE)
   - Текущее доказательство: src/bioetl/domain/mapping/publication_type_classification.py:1551
@@ -17663,7 +17660,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:87
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] Количество классов `rg '^class ' src/ -g '*.py' \ wc -l` **945**
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:687
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:693
   - Причина статуса: числа в предложении не найдены в коде
 - [15] Количество файлов `.py` `find src/ -name '*.py' \ wc -l` **533**
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:143
@@ -17765,7 +17762,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [78] `print()` в `src/bioetl` не обнаружен (0).
-  - Текущее доказательство: src/bioetl/application/observability/__init__.py:21
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:28
   - Причина статуса: числа в предложении не найдены в коде
 - [79] 8) Тестирование (вес 8%)
   - Текущее доказательство: нет
@@ -17900,7 +17897,7 @@
   - Текущее доказательство: src/bioetl/domain/context.py:273
   - Причина статуса: числа в предложении не найдены в коде
 - [41] Все TYPE_CHECKING guards используются правильно (EXC-001)
-  - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:33
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:31
   - Причина статуса: числа в предложении не найдены в коде
 - [42] **Обоснование:** 0 нарушений границ слоёв → 9-10 по критериям → **10**
   - Текущее доказательство: нет
@@ -18017,7 +18014,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/source_config.py:8
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] конвертации — следствие одинакового целевого domain API, а не copy-paste.
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [41] 1.2 Подтверждённые находки
   - Текущее доказательство: нет
@@ -18047,7 +18044,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:180
   - Причина статуса: score<2 (недостаточно совпадений)
 - [65] FIX-2: Централизовать хеширование publication-term entity ID [HIGH]
-  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:310
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:727
   - Причина статуса: числа в предложении не найдены в коде
 - [69] `application/pipelines/chembl/publication_term_transformer.py:274` `compute_term_entity_id()` public
   - Текущее доказательство: src/bioetl/composition/factories/transformer_factory.py:157
@@ -18335,7 +18332,7 @@
   - Текущее доказательство: tests/architecture/test_documentation_sync.py:32
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] 1 «Расположение: `src/bioetl/domain/`» `src/bioetl/domain/` Директория существует Да —
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: числа в предложении не найдены в коде
 - [29] 2 «Не импортирует модули из application, infrastructure или interfaces» `src/bioetl/domain/**/*.py` grep подтверждает отсутствие запрещённых импортов Да —
   - Текущее доказательство: src/tools/file_merger.py:317
@@ -18386,7 +18383,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:143
   - Причина статуса: числа в предложении не найдены в коде
 - [55] 28 «11 поддиректорий» `src/bioetl/domain/` Все 11 поддиректорий существуют Да —
-  - Текущее доказательство: src/bioetl/composition/factories/pipeline_factories.py:137
+  - Текущее доказательство: src/bioetl/composition/factories/pipeline_factories.py:142
   - Причина статуса: числа в предложении не найдены в коде
 - [56] 29 «Никакого I/O в domain — нет requests, httpx, aiohttp» `src/bioetl/domain/**/*.py` grep подтверждает отсутствие Да —
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:64

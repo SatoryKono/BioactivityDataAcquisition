@@ -455,6 +455,10 @@ class SinkDQReportConfig(BaseModel):
     )
 
 
+# Alias for sink layer quality configuration (same schema as QualityExpectations)
+SinkQualityExpectationsConfig = QualityExpectations
+
+
 class SinkLineageConfig(BaseModel):
     """Lineage configuration within sink metadata.
 
@@ -525,7 +529,7 @@ class SinkMetadataConfig(BaseModel):
         default_factory=SinkLineageConfig,
         description="Static lineage configuration",
     )
-    quality_expectations: QualityExpectations = Field(
+    quality_expectations: SinkQualityExpectationsConfig = Field(
         default_factory=QualityExpectations,
         description="Target quality metrics",
     )

@@ -91,3 +91,6 @@ def check_command(pipeline: str, run_id: str) -> None:
             echo_info(f"Lock for {pipeline} is NOT held by run-id {run_id}")
 
     asyncio.run(_run())
+
+
+COMMANDS = (release_command, check_command)

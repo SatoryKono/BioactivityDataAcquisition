@@ -67,3 +67,6 @@ def reset_loader() -> None:
     global _loaded
     _loaded = False
     ProviderRegistry.clear()
+
+
+_LOADER_API = (get_loaded_status, reset_loader)

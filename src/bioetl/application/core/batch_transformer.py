@@ -183,9 +183,10 @@ class BatchTransformer:
         if not dq_config:
             return
 
-        # Hard fail check
+        # Hard fail check (hard_fail >= 1.0 treated as disabled, e.g. test mode)
         if (
             dq_config.hard_fail_threshold
+            and dq_config.hard_fail_threshold < 1.0
             and error_rate >= dq_config.hard_fail_threshold
         ):
             raise DataQualityThresholdError(error_rate, dq_config.hard_fail_threshold)

@@ -18,12 +18,12 @@ from bioetl.composition.services.metadata_coordinator import (
 )
 from bioetl.domain.ports.metadata_coordinator import SilverRef
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
+from bioetl.domain.medallion import Layer
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     GoldMetadata,
     GovernanceLineageConfig,
     GovernanceMetadata,
-    LayerType,
     QualityExpectations,
     RunTypeEnum,
     SilverMetadata,
@@ -168,7 +168,7 @@ class TestBronzeMetadata:
         metadata = coordinator.create_bronze_metadata(input_data)
 
         assert isinstance(metadata, BronzeMetadata)
-        assert metadata.layer == LayerType.BRONZE
+        assert metadata.layer == Layer.BRONZE
         assert metadata.version == "1.1"  # ADR-029 version bump
 
     def test_bronze_runtime_metadata(self, coordinator: MetadataCoordinator) -> None:
@@ -386,7 +386,7 @@ class TestSilverMetadata:
         metadata = coordinator.create_silver_metadata(input_data)
 
         assert isinstance(metadata, SilverMetadata)
-        assert metadata.layer == LayerType.SILVER
+        assert metadata.layer == Layer.SILVER
         assert metadata.version == "1.1"  # ADR-029 version bump
 
     def test_silver_with_empty_records_raises(
@@ -504,7 +504,7 @@ class TestGoldMetadata:
         metadata = coordinator.create_gold_metadata(input_data)
 
         assert isinstance(metadata, GoldMetadata)
-        assert metadata.layer == LayerType.GOLD
+        assert metadata.layer == Layer.GOLD
         assert metadata.version == "1.1"  # ADR-029 version bump
 
     def test_gold_with_empty_records_raises(

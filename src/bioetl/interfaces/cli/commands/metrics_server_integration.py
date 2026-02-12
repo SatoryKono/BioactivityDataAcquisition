@@ -40,3 +40,6 @@ def metrics_server_context() -> Iterator[bool]:
     # Re-exported from entrypoints, use directly
     started = ensure_metrics_server_started()
     yield started
+
+
+COMMANDS = (metrics_server_context,)

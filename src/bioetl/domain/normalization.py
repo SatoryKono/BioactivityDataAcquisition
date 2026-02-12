@@ -108,6 +108,7 @@ def strip_html_tags(text: str | None) -> str | None:
 
     return clean if clean else None
 
+
 # Electronic page identifiers (e-123, E-456, e123) -- not page ranges.
 _ELECTRONIC_PAGE_PATTERN = re.compile(r"^[eE]-?\d+$")
 

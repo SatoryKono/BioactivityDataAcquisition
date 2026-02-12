@@ -139,31 +139,49 @@ class TokenBucket:
         return False
 
 
-# Pre-configured buckets for known providers
 def create_pubchem_bucket(
+    *,
     metrics: MetricsPort | None = None,
 ) -> TokenBucket:
-    """Create rate limiter for PubChem (5 req/sec).
+    """Create a TokenBucket configured for PubChem API rate limits.
+
+    PubChem: 5 req/sec, burst of 5 (RULES.md Appendix A).
 
     Args:
-        metrics: Optional metrics port for observability
+        metrics: Optional MetricsPort for observing rate limiter metrics.
 
+    Returns:
+        Configured TokenBucket for PubChem.
     """
-    return TokenBucket(rate=5.0, capacity=5, provider="pubchem", metrics=metrics)
+    return TokenBucket(
+        rate=5.0,
+        capacity=5,
+        provider="pubchem",
+        metrics=metrics,
+    )
 
 
 def create_pubmed_bucket(
+    *,
     with_api_key: bool = False,
     metrics: MetricsPort | None = None,
 ) -> TokenBucket:
-    """Create rate limiter for PubMed.
+    """Create a TokenBucket configured for PubMed API rate limits.
+
+    PubMed: 3 req/sec without API key, 10 req/sec with API key (RULES.md Appendix A).
 
     Args:
-        with_api_key: True if using API key (10 req/sec vs 3 req/sec)
-        metrics: Optional metrics port for observability
+        with_api_key: Use higher rate limit (10 req/sec) when API key is available.
+        metrics: Optional MetricsPort for observing rate limiter metrics.
 
+    Returns:
+        Configured TokenBucket for PubMed.
     """
     rate = 10.0 if with_api_key else 3.0
+    capacity = 10 if with_api_key else 3
     return TokenBucket(
-        rate=rate, capacity=int(rate), provider="pubmed", metrics=metrics
+        rate=rate,
+        capacity=capacity,
+        provider="pubmed",
+        metrics=metrics,
     )

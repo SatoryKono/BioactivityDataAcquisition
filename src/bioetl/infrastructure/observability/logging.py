@@ -17,14 +17,36 @@ Requirements:
 
 from __future__ import annotations
 
-import logging
-import sys
 from typing import Any, Self
 from uuid import UUID
 
 import structlog
 
-from bioetl.domain.ports import LoggerPort
+from bioetl.infrastructure.observability.logging_config import configure_logging
+
+
+def create_logger(
+    pipeline: str,
+    run_id: str | UUID,
+    *,
+    log_level: str = "INFO",
+    json_format: bool = True,
+) -> StructlogLogger:
+    """Create a StructlogLogger with bound pipeline and run_id context.
+
+    Args:
+        pipeline: Pipeline name for log context.
+        run_id: Unique run identifier for tracing.
+        log_level: Logging level (default: INFO).
+        json_format: Use JSON output format (default: True).
+
+    Returns:
+        Configured StructlogLogger instance.
+    """
+    configure_logging(json_format=json_format, log_level=log_level)
+    base = structlog.get_logger(f"bioetl.{pipeline}")
+    bound = base.bind(run_id=str(run_id), pipeline=pipeline)
+    return StructlogLogger(bound)
 
 
 class StructlogLogger:
@@ -111,56 +133,3 @@ class StructlogLogger:
             **kwargs: Additional context for the log entry.
         """
         return self._logger.exception(_event, **kwargs)
-
-
-def create_logger(
-    pipeline: str,
-    run_id: UUID,
-    log_level: str = "INFO",
-    json_format: bool = True,
-) -> LoggerPort:
-    """Create a structured logger factory.
-
-    Args:
-        pipeline: Pipeline name for log context.
-        run_id: Unique run identifier for tracing.
-        log_level: Logging level (default: INFO).
-        json_format: Use JSON output format (default: True).
-
-    Returns:
-        StructlogLogger implementing LoggerPort with bound context.
-
-    """
-    processors: list[Any] = [
-        structlog.contextvars.merge_contextvars,
-        structlog.stdlib.add_logger_name,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.PositionalArgumentsFormatter(),
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        structlog.processors.UnicodeDecoder(),
-    ]
-    if json_format:
-        processors.append(structlog.processors.JSONRenderer())
-    else:
-        processors.append(structlog.dev.ConsoleRenderer())
-
-    structlog.configure(
-        processors=processors,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
-        cache_logger_on_first_use=True,
-    )
-
-    logger = structlog.get_logger(f"bioetl.{pipeline}")
-    bound_logger = logger.bind(run_id=str(run_id), pipeline=pipeline)
-
-    # Set the log level for the underlying standard logger
-    logging.basicConfig(
-        level=log_level.upper(),
-        stream=sys.stdout,
-        format="%(message)s",
-    )
-
-    return StructlogLogger(bound_logger)
