@@ -34,9 +34,10 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     isomeric_smiles: Series[str] = pa.Field(nullable=True)
     inchi: Series[str] = pa.Field(nullable=True)
     inchi_key: Series[str] = pa.Field(nullable=True)
-    logp: Series[float] = pa.Field(nullable=True, coerce=True)
-    logp_method: Series[str] = pa.Field(nullable=True)
-    polar_surface_area: Series[float] = pa.Field(nullable=True, coerce=True)
+    logp: Series[float] = pa.Field(nullable=True, coerce=True, alias="xlogp")
+    polar_surface_area: Series[float] = pa.Field(
+        nullable=True, coerce=True, alias="tpsa"
+    )
     iupac_name: Series[str] = pa.Field(nullable=True)
     content_hash: Series[str] = pa.Field(nullable=False)
 

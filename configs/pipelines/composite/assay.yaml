@@ -244,7 +244,7 @@ composite:
 
     # Required fields in final Gold output
     required_fields:
-      - assay_chembl_id
+      - assay_id
       - assay_type
 
     # Field-level validation rules
@@ -338,7 +338,7 @@ composite:
 # -----------------------------------------------------------------------------
 gold_filters:
   required_fields:
-    - assay_chembl_id
+    - assay_id
     - assay_type
 
 # -----------------------------------------------------------------------------
