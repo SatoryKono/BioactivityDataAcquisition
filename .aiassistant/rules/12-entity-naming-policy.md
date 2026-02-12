@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## trigger: model_decision description: USE WHEN naming classes, functions, modules, pipelines, tests, or configs; enforce role suffixes and function prefixes
+---
+trigger: model_decision
+description: USE WHEN naming classes, functions, modules, pipelines, tests, or configs; enforce role suffixes and function prefixes
+---
 
 # Entity Naming Policy
 

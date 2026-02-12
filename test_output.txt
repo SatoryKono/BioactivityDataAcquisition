@@ -1,0 +1,2174 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: E:\g-drive\05_AI\github\BioactivityDataAcquisition2
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.12.0, Faker-37.12.0, hypothesis-6.103.0, archon-0.0.7, asyncio-1.3.0, benchmark-4.0.0, cov-4.1.0, docker-3.2.5, pytest_httpserver-1.1.3, json-report-1.5.0, metadata-3.1.1, mock-3.15.1, timeout-2.4.0, vcr-1.0.2, xdist-3.8.0, respx-0.22.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 11706 items / 7596 deselected / 1 skipped / 4110 selected
+
+tests\integration\adapters\test_chembl.py ..                             [  0%]
+tests\integration\pipelines\test_crossref_date_normalization.py ........ [  0%]
+.                                                                        [  0%]
+tests\integration\pipelines\test_pubmed_date_normalization.py ......     [  0%]
+tests\unit\application\composite\test_coordinator_logging.py .....       [  0%]
+tests\unit\application\composite\test_fsm_pipeline_scenarios.py ........ [  0%]
+.................                                                        [  1%]
+tests\unit\application\composite\test_merger.py ........................ [  1%]
+...............................................................          [  3%]
+tests\unit\application\composite\test_runner_enrichment_fsm.py ......... [  3%]
+.......                                                                  [  3%]
+tests\unit\application\composite\test_runner_fsm_logging.py ............ [  3%]
+......                                                                   [  4%]
+tests\unit\application\core\test_base_transformer.py ................... [  4%]
+...................................................                      [  5%]
+tests\unit\application\core\test_batch_executor.py ....................  [  6%]
+tests\unit\application\core\test_batch_transformer.py .......            [  6%]
+tests\unit\application\core\test_batch_writer.py ......................  [  6%]
+tests\unit\application\core\test_checkpoint_manager.py ...............   [  7%]
+tests\unit\application\core\test_cleanup_service.py .................... [  7%]
+....                                                                     [  7%]
+tests\unit\application\core\test_dq_report_integration.py .............  [  8%]
+tests\unit\application\core\test_filtered_data_source.py ............... [  8%]
+................                                                         [  9%]
+tests\unit\application\core\test_health_aggregator.py .................. [  9%]
+....................                                                     [  9%]
+tests\unit\application\core\test_medallion_policy.py ................... [ 10%]
+...............                                                          [ 10%]
+tests\unit\application\core\test_memory_monitor.py ..................... [ 11%]
+...                                                                      [ 11%]
+tests\unit\application\core\test_pipeline_services.py ........           [ 11%]
+tests\unit\application\core\test_postrun_service.py ................     [ 11%]
+tests\unit\application\core\test_preflight_service.py .................. [ 12%]
+.....................................                                    [ 13%]
+tests\unit\application\core\test_publication_term_data_source.py ....... [ 13%]
+...................................                                      [ 14%]
+tests\unit\application\core\test_record_processor.py ........EE.....     [ 14%]
+tests\unit\application\core\test_record_processor_metrics.py ..          [ 14%]
+tests\unit\application\core\test_run_id_propagation.py ...               [ 14%]
+tests\unit\application\core\test_runner.py .................             [ 15%]
+tests\unit\application\core\test_shutdown.py ..............              [ 15%]
+tests\unit\application\core\test_streaming_batch.py ..........           [ 15%]
+tests\unit\application\core\test_subcellular_fraction_data_source.py ... [ 15%]
+...................................                                      [ 16%]
+tests\unit\application\observability\test_span_helpers.py .............  [ 17%]
+tests\unit\application\pipelines\chembl\test_subcellular_fraction_transformer.py . [ 17%]
+....................                                                     [ 17%]
+tests\unit\application\pipelines\pubmed\test_pubmed_transformer.py ..... [ 17%]
+......................................................                   [ 18%]
+tests\unit\application\pipelines\test_activity_transformer.py .......... [ 19%]
+.....................                                                    [ 19%]
+tests\unit\application\pipelines\test_cell_line_transformer.py ......... [ 19%]
+.....                                                                    [ 20%]
+tests\unit\application\pipelines\test_chembl_assay_parameters.py ....... [ 20%]
+.......................                                                  [ 20%]
+tests\unit\application\pipelines\test_chembl_pipelines.py ............   [ 21%]
+tests\unit\application\pipelines\test_chembl_transformers.py ........... [ 21%]
+.........................................                                [ 22%]
+tests\unit\application\pipelines\test_compound_record_transformer.py ... [ 22%]
+...........                                                              [ 22%]
+tests\unit\application\pipelines\test_date_parsing.py .................. [ 23%]
+..........                                                               [ 23%]
+tests\unit\application\pipelines\test_idmapping_transformer.py ......... [ 23%]
+..........                                                               [ 23%]
+tests\unit\application\pipelines\test_page_parsing.py .................. [ 24%]
+.............................                                            [ 24%]
+tests\unit\application\pipelines\test_pipeline_registrations.py ........ [ 25%]
+..........................                                               [ 25%]
+tests\unit\application\pipelines\test_protein_class_transformer.py ..... [ 25%]
+...........                                                              [ 26%]
+tests\unit\application\pipelines\test_pubchem_transformer.py ........... [ 26%]
+....................................                                     [ 27%]
+tests\unit\application\pipelines\test_publication_similarity_transformer.py . [ 27%]
+..............                                                           [ 27%]
+tests\unit\application\pipelines\test_uniprot_transformer.py ........... [ 27%]
+................................................................         [ 29%]
+tests\unit\application\services\dq\test_logical_validation.py .......... [ 29%]
+........................................................................ [ 31%]
+.                                                                        [ 31%]
+tests\unit\application\services\dq\test_structural_validation.py ....... [ 31%]
+............................................                             [ 32%]
+tests\unit\application\services\test_bronze_cleanup_service.py ......... [ 32%]
+...                                                                      [ 33%]
+tests\unit\application\services\test_checkpoint_service.py ..........    [ 33%]
+tests\unit\application\services\test_config_service.py .............     [ 33%]
+tests\unit\application\services\test_data_quality_service.py ........... [ 33%]
+..........                                                               [ 34%]
+tests\unit\application\services\test_lock_service.py ..........          [ 34%]
+tests\unit\application\services\test_medallion_lifecycle.py ............ [ 34%]
+.................                                                        [ 35%]
+tests\unit\application\services\test_pipeline_runner_service.py ........ [ 35%]
+................                                                         [ 35%]
+tests\unit\application\services\test_quarantine_service.py ............. [ 35%]
+.                                                                        [ 36%]
+tests\unit\application\services\test_shutdown_service.py ............... [ 36%]
+.............                                                            [ 36%]
+tests\unit\application\services\test_vacuum_service.py ................. [ 37%]
+                                                                         [ 37%]
+tests\unit\composition\bootstrap\runtime\test_assembly.py .............. [ 37%]
+.......                                                                  [ 37%]
+tests\unit\composition\bootstrap\test_checkpoint_bootstrap.py .......... [ 37%]
+........                                                                 [ 38%]
+tests\unit\composition\bootstrap\test_health_bootstrap.py ...........    [ 38%]
+tests\unit\composition\bootstrap\test_lock_bootstrap.py .....            [ 38%]
+tests\unit\composition\bootstrap\test_runner_bootstrap.py ..........     [ 38%]
+tests\unit\composition\bootstrap\test_storage_bootstrap.py ............. [ 39%]
+                                                                         [ 39%]
+tests\unit\composition\factories\test_runner_factory.py ................ [ 39%]
+...                                                                      [ 39%]
+tests\unit\composition\test_bootstrap_logger.py ......                   [ 39%]
+tests\unit\composition\test_builders.py .....................            [ 40%]
+tests\unit\composition\test_entrypoints.py ..........................    [ 40%]
+tests\unit\composition\test_observability_contract.py .................. [ 41%]
+.......                                                                  [ 41%]
+tests\unit\contracts\test_contracts_exports.py .........                 [ 41%]
+tests\unit\domain\filtering\test_column_filter.py ...................    [ 42%]
+tests\unit\domain\filtering\test_gold_config.py ........................ [ 42%]
+..........................................................               [ 44%]
+tests\unit\domain\filtering\test_list_filters.py ............            [ 44%]
+tests\unit\domain\filtering\test_load_result.py ........                 [ 44%]
+tests\unit\domain\filtering\test_range_filter.py ..........              [ 44%]
+tests\unit\domain\models\test_filter.py ..........                       [ 45%]
+tests\unit\domain\ports\test_noop.py .............................       [ 45%]
+tests\unit\domain\ports\test_noop_audit.py ....                          [ 45%]
+tests\unit\domain\schemas\chembl\test_chembl_publication_validation.py . [ 45%]
+.....................................................................    [ 47%]
+tests\unit\domain\schemas\common\test_publication_base.py .............. [ 47%]
+.............                                                            [ 48%]
+tests\unit\domain\schemas\crossref\test_crossref_publication_validation.py . [ 48%]
+........................................................................ [ 49%]
+..............                                                           [ 50%]
+tests\unit\domain\schemas\openalex\test_openalex_publication_validation.py . [ 50%]
+........................................................................ [ 52%]
+.....................                                                    [ 52%]
+tests\unit\domain\schemas\pubmed\test_pubmed_publication_validation.py . [ 52%]
+........................................................................ [ 54%]
+..............................................                           [ 55%]
+tests\unit\domain\schemas\semanticscholar\test_semanticscholar_publication_validation.py . [ 55%]
+........................................................................ [ 57%]
+............                                                             [ 57%]
+tests\unit\domain\services\test_dq_metrics_calculator.py ..............  [ 57%]
+tests\unit\domain\test_config.py ..................................      [ 58%]
+tests\unit\domain\test_entities.py ..................................... [ 59%]
+...............................................                          [ 60%]
+tests\unit\domain\test_filter_config.py ................................ [ 61%]
+                                                                         [ 61%]
+tests\unit\domain\test_medallion.py ................                     [ 61%]
+tests\unit\domain\test_pipeline_config.py ..........................     [ 62%]
+tests\unit\domain\test_publication_fields_mapping.py ................... [ 63%]
+                                                                         [ 63%]
+tests\unit\domain\test_runtime_config.py ...............                 [ 63%]
+tests\unit\domain\test_transformations.py .............................. [ 64%]
+......                                                                   [ 64%]
+tests\unit\domain\test_types.py ......                                   [ 64%]
+tests\unit\infrastructure\adapters\chembl\test_chembl_client.py ........ [ 64%]
+....................                                                     [ 65%]
+tests\unit\infrastructure\adapters\common\test_base_title_fallback.py .. [ 65%]
+.......                                                                  [ 65%]
+tests\unit\infrastructure\adapters\http\test_http_client.py ............ [ 65%]
+..............................                                           [ 66%]
+tests\unit\infrastructure\adapters\pubchem\test_fetch_strategies.py .... [ 66%]
+.......................                                                  [ 66%]
+tests\unit\infrastructure\adapters\test_base_metrics.py ........         [ 67%]
+tests\unit\infrastructure\adapters\test_csv_filter_reader.py ........... [ 67%]
+........................                                                 [ 68%]
+tests\unit\infrastructure\adapters\test_validation.py .................. [ 68%]
+........                                                                 [ 68%]
+tests\unit\infrastructure\adapters\uniprot\test_idmapping_client.py .... [ 68%]
+..............                                                           [ 69%]
+tests\unit\infrastructure\audit\test_file_audit.py ...EEEEEEEEEEEEE      [ 69%]
+tests\unit\infrastructure\export\test_csv_exporter.py EE....EEEEEEEEEEE  [ 69%]
+tests\unit\infrastructure\factories\test_factories.py .....              [ 70%]
+tests\unit\infrastructure\factories\test_storage_adapter.py ............ [ 70%]
+..                                                                       [ 70%]
+tests\unit\infrastructure\locking\test_memory_lock.py ..............     [ 70%]
+tests\unit\infrastructure\observability\test_anomaly.py ................ [ 71%]
+............................                                             [ 71%]
+tests\unit\infrastructure\observability\test_logging.py ..........       [ 72%]
+tests\unit\infrastructure\observability\test_logging_config.py ......... [ 72%]
+...............                                                          [ 72%]
+tests\unit\infrastructure\observability\test_metrics_server_adapter.py . [ 72%]
+............                                                             [ 72%]
+tests\unit\infrastructure\observability\test_prometheus_metrics.py ..... [ 73%]
+.......                                                                  [ 73%]
+tests\unit\infrastructure\observability\test_server.py ...........       [ 73%]
+tests\unit\infrastructure\observability\test_tracing.py ..........       [ 73%]
+tests\unit\infrastructure\observability\test_unified_logger.py ......... [ 73%]
+...............                                                          [ 74%]
+tests\unit\infrastructure\observability\test_zscore_detector.py ........ [ 74%]
+.............                                                            [ 74%]
+tests\unit\infrastructure\quarantine\test_unified_quarantine.py ........ [ 75%]
+.EEEEEEEEEEEEEEEEEEEEE...                                                [ 75%]
+tests\unit\infrastructure\schemas\test_base_schemas.py ................. [ 76%]
+..............................................                           [ 77%]
+tests\unit\infrastructure\schemas\test_gold.py ......................... [ 77%]
+...........................................                              [ 78%]
+tests\unit\infrastructure\schemas\test_silver_pipeline_contracts.py .... [ 78%]
+............................................................             [ 80%]
+tests\unit\infrastructure\storage\test_atomic.py EEEEEEEEEEEEEEEEEEEEE   [ 80%]
+tests\unit\infrastructure\storage\test_base_delta_writer.py ..........EE [ 81%]
+EEEEEEE.EEEE                                                             [ 81%]
+tests\unit\infrastructure\storage\test_bronze_writer.py EEEEEEEEEEEEEEEE [ 81%]
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE...EEEEEEEEEEEEEEEEE........EEE    [ 83%]
+tests\unit\infrastructure\storage\test_delta_reader.py EEEEEEEEEEEEEEEEE [ 83%]
+EEEEEEEEEE                                                               [ 84%]
+tests\unit\infrastructure\storage\test_gold_writer.py .................. [ 84%]
+...............................                                          [ 85%]
+tests\unit\infrastructure\storage\test_metadata_writer.py EEEEEEEEE..... [ 85%]
+.....                                                                    [ 85%]
+tests\unit\infrastructure\storage\test_silver_writer.py ................ [ 86%]
+........................................EEEEEE......FFF...........F      [ 87%]
+tests\unit\infrastructure\storage\test_silver_writer_validation.py ..... [ 87%]
+......                                                                   [ 88%]
+tests\unit\infrastructure\test_adapters.py ..................            [ 88%]
+tests\unit\infrastructure\test_checkpoint.py EEEEEEEEEEEEE               [ 88%]
+tests\unit\infrastructure\test_circuit_breaker.py .................      [ 89%]
+tests\unit\infrastructure\test_circuit_breaker_degradation.py .......... [ 89%]
+................                                                         [ 89%]
+tests\unit\infrastructure\test_config.py .......................         [ 90%]
+tests\unit\infrastructure\test_config_settings.py .................      [ 90%]
+tests\unit\infrastructure\test_observability.py .........                [ 91%]
+tests\unit\infrastructure\test_quarantine.py ...                         [ 91%]
+tests\unit\infrastructure\test_rate_limiter.py .................         [ 91%]
+tests\unit\infrastructure\test_storage.py EEEEEEEEEE.....                [ 91%]
+tests\unit\infrastructure\test_storage_factory.py ..EEEEEEEEEEEEEE..     [ 92%]
+tests\unit\infrastructure\validation\test_pandera_validator.py ......... [ 92%]
+................                                                         [ 93%]
+tests\unit\interfaces\cli\test_cli_main_module.py ....                   [ 93%]
+tests\unit\interfaces\factories\test_pipeline_factories.py ...           [ 93%]
+tests\unit\interfaces\orchestration\test_orchestration_init.py ......    [ 93%]
+tests\unit\interfaces\test_cli.py .........................              [ 93%]
+tests\unit\interfaces\test_cli_commands.py ............................. [ 94%]
+...............................................                          [ 95%]
+tests\unit\interfaces\test_cli_run_all_vacuum_formatters.py ............ [ 96%]
+.................................................................        [ 97%]
+tests\unit\interfaces\test_run_all_command.py ........................   [ 98%]
+tests\unit\interfaces\test_run_all_service_mock.py ..................    [ 98%]
+tests\unit\interfaces\test_vacuum_commands.py .........................  [ 99%]
+tests\unit\test_bootstrap.py .................                           [ 99%]
+tests\unit\test_ports.py ............                                    [100%]
+
+=================================== ERRORS ====================================
+_ ERROR at setup of TestRecordProcessorProcessBatch.test_dq_thresholds_follow_yaml_hard_fail _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestRecordProcessorProcessBatch.test_dq_thresholds_follow_yaml_soft_threshold_prevents_warning _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestFileAuditAdapter.test_log_write_creates_file ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestFileAuditAdapter.test_log_write_appends_entries ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestFileAuditAdapter.test_get_entries_returns_all _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestFileAuditAdapter.test_get_entries_filter_by_run_id ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestFileAuditAdapter.test_get_entries_filter_by_layer ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestFileAuditAdapter.test_get_entries_filter_by_table_name _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestFileAuditAdapter.test_get_entries_filter_by_time_range _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestFileAuditAdapter.test_get_entries_respects_limit ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestFileAuditAdapter.test_get_entries_empty_directory ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestFileAuditAdapter.test_aclose_prevents_further_writes __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestFileAuditAdapter.test_aclose_is_idempotent _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestFileAuditAdapterEdgeCases.test_handles_special_characters_in_metadata _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestFileAuditAdapterEdgeCases.test_handles_multiple_days __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+________ ERROR at setup of TestCsvExporterInit.test_init_with_defaults ________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestCsvExporterInit.test_init_with_custom_options _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestCsvExporterExport.test_export_creates_file _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestCsvExporterExport.test_export_creates_parent_directories _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestCsvExporterExport.test_export_with_custom_delimiter __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestCsvExporterExport.test_export_without_header ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestCsvExporterExport.test_export_complex_types ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestCsvExporterExport.test_export_appends_to_existing_file _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestCsvExporterExport.test_export_overwrites_when_append_false _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestCsvExporterClear.test_clear_specific_table _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestCsvExporterClear.test_clear_all_csv_files _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestCsvExporterClear.test_clear_nonexistent_directory ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestCsvExporterClear.test_clear_nonexistent_table _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+________ ERROR at setup of TestUnifiedQuarantineWrite.test_write_basic ________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineWrite.test_write_with_error_details __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineWrite.test_write_with_bronze_file_uri _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineWrite.test_write_truncates_large_payload _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineWrite.test_write_no_truncation_for_small_payload _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineWrite.test_write_creates_table_on_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineWrite.test_write_sets_dq_status_new __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineInspect.test_inspect_returns_empty_when_table_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestUnifiedQuarantineInspect.test_inspect_with_filters ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineReplay.test_replay_returns_empty_when_table_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineReplay.test_replay_with_error_code_filter _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantinePurge.test_purge_returns_zero_when_table_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantinePurge.test_purge_deletes_old_records _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantinePurge.test_purge_no_delete_when_no_old_records _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineUpdateStatus.test_update_status_returns_false_when_table_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineUpdateStatus.test_update_status_returns_false_when_record_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineUpdateStatus.test_update_status_updates_record _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineGetStats.test_get_stats_returns_empty_when_table_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineGetStats.test_get_stats_returns_empty_for_empty_table _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestUnifiedQuarantineGetStats.test_get_stats_calculates_statistics _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestUnifiedQuarantineAclose.test_aclose_does_nothing ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestAtomicWrite.test_atomic_write_creates_file _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_________ ERROR at setup of TestAtomicWrite.test_atomic_write_binary __________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWrite.test_atomic_write_creates_parent_directories _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestAtomicWrite.test_atomic_write_overwrites_existing ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWrite.test_atomic_write_no_temp_file_after_success _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestAtomicWrite.test_atomic_write_cleanup_on_error _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWrite.test_atomic_write_preserves_original_on_error _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestAtomicWriteHelpers.test_atomic_write_bytes _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestAtomicWriteHelpers.test_atomic_write_text _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestAtomicWriteHelpers.test_atomic_write_text_encoding ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestAtomicWriteGroup.test_group_writes_multiple_files ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestAtomicWriteGroup.test_group_atomic_commit _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWriteGroup.test_group_rollback_on_context_exit_with_exception _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestAtomicWriteGroup.test_group_explicit_rollback _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWriteGroup.test_group_preserves_original_on_partial_commit_failure _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWriteGroup.test_group_creates_parent_directories _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestAtomicWriteEdgeCases.test_write_empty_file _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestAtomicWriteEdgeCases.test_write_large_file _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWriteEdgeCases.test_concurrent_writes_to_different_files _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWriteEdgeCases.test_special_characters_in_path __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestAtomicWriteEdgeCases.test_temp_file_in_same_directory _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__________ ERROR at setup of TestBaseDeltaWriter.test_initialization __________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBaseDeltaWriter.test_base_path_strips_trailing_slash __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__________ ERROR at setup of TestBaseDeltaWriter.test_get_table_path __________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestBaseDeltaWriter.test_get_table_path_single_level ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+________ ERROR at setup of TestBaseDeltaWriter.test_prepare_arrow_data ________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBaseDeltaWriter.test_prepare_arrow_data_with_json_serialization _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestBaseDeltaWriter.test_sort_by_primary_keys _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBaseDeltaWriter.test_sort_by_primary_keys_empty_keys __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBaseDeltaWriter.test_sort_by_primary_keys_invalid_key _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestBaseDeltaWriter.test_clear_specific_table _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_________ ERROR at setup of TestBaseDeltaWriter.test_clear_all_tables _________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestBaseDeltaWriter.test_clear_nonexistent_table ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBaseDeltaWriterAsync.test_get_table_schema_nonexistent _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_validate_bronze_names_valid _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_validate_bronze_names_invalid_provider _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_validate_bronze_names_invalid_entity _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_write_bronze_invalid_provider_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_write_bronze_invalid_entity_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_validate_records_iterator_valid _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_validate_records_iterator_none_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_validate_records_iterator_not_iterator_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterNameValidation.test_write_bronze_invalid_records_type_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterUTCValidation.test_validate_utc_datetime_valid _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterUTCValidation.test_validate_utc_datetime_naive_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterUTCValidation.test_validate_utc_datetime_non_utc_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterUTCValidation.test_write_bronze_naive_date_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterUTCValidation.test_write_bronze_naive_ingestion_ts_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterUTCValidation.test_write_bronze_non_utc_date_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestBronzeWriterInit.test_init_local_storage ________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestBronzeWriterInit.test_init_with_save_json _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestBronzeWriterInit.test_init_with_custom_json_path ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestBronzeWriterInit.test_init_requires_logger _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestBronzeWriterWriteLocal.test_write_bronze_local _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterWriteLocal.test_write_bronze_local_async __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterWriteLocal.test_write_bronze_with_json_copy _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterWriteLocal.test_write_bronze_empty_records_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestBronzeWriterReadLocal.test_read_bronze_local ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestBronzeWriterListBatches.test_list_batches_local ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterListBatches.test_list_batches_with_date_filter _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestBronzeWriterListBatches.test_list_batches_empty ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterAtomicWrite.test_no_partial_files_on_write_failure _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterAtomicWrite.test_no_orphan_metadata_without_data _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterAtomicWrite.test_no_temp_files_after_successful_write _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterAtomicWrite.test_failure_during_stream_write_cleans_up _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterAtomicWrite.test_json_copy_uses_atomic_write _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterLoggerInjection.test_logger_called_on_write _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterLoggerInjection.test_logger_is_stored_as_attribute _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetadataDeterminism.test_metadata_bitwise_identical_on_repeated_calls _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetadataDeterminism.test_metadata_json_format_is_deterministic _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetadataDeterminism.test_metadata_has_no_whitespace_variations _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestBronzeWriterMetrics.test_init_with_metrics _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetrics.test_init_without_metrics_uses_noop _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetrics.test_write_bronze_records_duration_metric _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetrics.test_write_bronze_records_count_metric _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetrics.test_write_bronze_records_bytes_metric _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetrics.test_write_bronze_all_metrics_recorded _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetrics.test_logger_includes_metrics_info _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_init_with_validate_json_default _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_init_with_validate_json_disabled _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_validate_json_records_valid _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_validate_json_records_invalid_raises _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_validate_json_records_empty_string _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_validate_json_records_truncated_json _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_validate_json_records_is_lazy _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_write_bronze_validates_json_by_default _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_write_bronze_skips_validation_when_disabled _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterJsonValidation.test_write_bronze_valid_json_succeeds _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestBronzeWriterAudit.test_write_bronze_with_audit _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestBronzeWriterAudit.test_write_bronze_without_audit ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanup.test_find_old_date_dirs_empty_base _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanup.test_find_old_date_dirs_finds_old_directories _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanup.test_find_old_date_dirs_ignores_non_date_directories _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanup.test_cleanup_old_files_removes_old_data _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestBronzeWriterCleanup.test_cleanup_old_files_dry_run ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanup.test_cleanup_old_files_preserves_recent_data _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanup.test_cleanup_old_files_multiple_providers _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetadataSidecar.test_metadata_writer_called_when_save_metadata_enabled _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetadataSidecar.test_metadata_writer_not_called_when_save_metadata_disabled _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetadataSidecar.test_noop_metadata_writer_used_by_default _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetadataSidecar.test_build_full_bronze_metadata_structure _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterMetadataSidecar.test_metadata_run_type_mapping _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterQueryString.test_query_string_extracted_from_source_metadata _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterQueryString.test_query_string_none_when_source_metadata_has_no_query _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterQueryString.test_query_string_none_when_no_source_metadata _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanupFiltered.test_find_old_date_dirs_filtered_by_provider _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanupFiltered.test_find_old_date_dirs_filtered_by_entity _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriterCleanupFiltered.test_cleanup_old_files_filtered _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__________ ERROR at setup of TestDeltaReaderInit.test_initialization __________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestDeltaReaderInit.test_base_path_accepts_string _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestResolvePath.test_relative_path_resolved_to_base ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestResolvePath.test_absolute_path_returned_unchanged ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_________ ERROR at setup of TestResolvePath.test_nested_relative_path _________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___________ ERROR at setup of TestReadTable.test_read_table_success ___________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestReadTable.test_read_table_with_column_projection ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_________ ERROR at setup of TestReadTable.test_read_table_with_limit __________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestReadTable.test_read_table_limit_larger_than_rows ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestReadTable.test_read_table_with_columns_and_limit ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestReadTable.test_read_table_nonexistent_raises_file_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestReadTable.test_read_table_logs_debug_message ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___________ ERROR at setup of TestGetSchema.test_get_schema_success ___________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestGetSchema.test_get_schema_nonexistent_raises_file_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+________ ERROR at setup of TestGetRowCount.test_get_row_count_success _________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestGetRowCount.test_get_row_count_nonexistent_raises_file_not_found _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestTableExists.test_table_exists_returns_true_for_valid_table _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestTableExists.test_table_exists_returns_false_for_nonexistent_directory _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestTableExists.test_table_exists_returns_false_for_directory_without_delta_log _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestTableExists.test_table_exists_returns_false_for_invalid_delta_log _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______________ ERROR at setup of TestAclose.test_aclose_is_noop _______________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestAbsolutePath.test_read_table_with_absolute_path ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestAbsolutePath.test_table_exists_with_absolute_path ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___________ ERROR at setup of TestEmptyTable.test_read_empty_table ____________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestEmptyTable.test_get_row_count_empty_table _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestLimitEdgeCases.test_limit_zero_returns_empty ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestLimitEdgeCases.test_limit_none_returns_all _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_write_bronze_metadata_creates_file _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_write_bronze_metadata_valid_yaml __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_write_silver_metadata_creates_file _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_write_silver_metadata_includes_lineage _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_write_silver_metadata_includes_dq_summary _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_write_gold_metadata_creates_file __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_write_gold_metadata_includes_schema_contract _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_atomic_write_creates_no_temp_files _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestMetadataWriter.test_write_metadata_overwrites_existing _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestSilverWriterClear.test_clear_nonexistent_base_path_returns_zero _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestSilverWriterClear.test_clear_specific_table ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestSilverWriterClear.test_clear_specific_table_dry_run __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+________ ERROR at setup of TestSilverWriterClear.test_clear_all_tables ________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestSilverWriterClear.test_clear_ignores_non_delta_directories _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_________ ERROR at setup of TestSilverWriterClear.test_get_table_path _________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestLocalCheckpoint.test_local_checkpoint_initialization __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+________ ERROR at setup of TestLocalCheckpoint.test_save_creates_file _________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestLocalCheckpoint.test_load_returns_correct_data _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestLocalCheckpoint.test_load_nonexistent_returns_none ___
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestLocalCheckpoint.test_save_and_load_roundtrip ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestLocalCheckpoint.test_delete_removes_file ________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___ ERROR at setup of TestLocalCheckpoint.test_delete_nonexistent_no_error ____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestLocalCheckpoint.test_exists_returns_true ________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_______ ERROR at setup of TestLocalCheckpoint.test_exists_returns_false _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+________ ERROR at setup of TestLocalCheckpoint.test_list_all_pipelines ________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__________ ERROR at setup of TestLocalCheckpoint.test_list_all_empty __________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______________ ERROR at setup of TestLocalCheckpoint.test_aclose ______________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+___________ ERROR at setup of TestLocalCheckpoint.test_atomic_write ___________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestBronzeWriter.test_bronze_writer_initialization _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestBronzeWriter.test_write_bronze_creates_file ______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestBronzeWriter.test_write_bronze_generates_correct_key __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestBronzeWriter.test_write_bronze_compresses_with_zstd __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestBronzeWriter.test_write_bronze_with_no_records _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____ ERROR at setup of TestBronzeWriter.test_write_bronze_save_json_copy _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_____________ ERROR at setup of TestBronzeWriter.test_read_bronze _____________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____________ ERROR at setup of TestBronzeWriter.test_list_batches _____________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+______ ERROR at setup of TestBronzeWriter.test_list_batches_nonexistent _______
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+________ ERROR at setup of TestBronzeWriter.test_writes_metadata_file _________
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageFactoryLocal.test_local_run_uses_settings_paths _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageFactoryLocal.test_local_run_uses_yaml_paths_when_specified _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestStorageFactoryLocal.test_local_run_with_json_export __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+__ ERROR at setup of TestStorageFactoryLocal.test_local_run_with_csv_exports __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+____ ERROR at setup of TestStorageFactoryEdgeCases.test_empty_sink_config _____
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageFactoryEdgeCases.test_adapter_is_properly_composed _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageAdapterHealthCheck.test_health_check_healthy_all_layers_writable _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageAdapterHealthCheck.test_health_check_degraded_partial_access _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageAdapterHealthCheck.test_check_directory_writable_creates_probe_file _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageAdapterClearOperations.test_clear_silver_calls_writer _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageAdapterClearOperations.test_clear_gold_calls_writer _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageAdapterPreviewCleanup.test_preview_cleanup_returns_file_counts _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageAdapterPreviewCleanup.test_preview_cleanup_without_gold _
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+_ ERROR at setup of TestStorageAdapterVacuum.test_vacuum_calls_silver_vacuum __
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:458: in setup
+    return super().setup()
+           ^^^^^^^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytest_asyncio\plugin.py:730: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+E   PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Fedor\\AppData\\Local\\Temp\\pytest-of-Fedor'
+================================== FAILURES ===================================
+_ TestSilverWriterCsvExport.test_write_silver_csv_exporter_with_merge_passes_primary_keys _
+E:\google_drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\infrastructure\storage\test_silver_writer.py:1689: in test_write_silver_csv_exporter_with_merge_passes_primary_keys
+    ???
+src\bioetl\infrastructure\storage\silver_writer.py:597: in write_silver
+    await self._dispatch_write(
+src\bioetl\infrastructure\storage\silver_writer.py:421: in _dispatch_write
+    await self._write_merge(
+src\bioetl\infrastructure\storage\silver_writer.py:272: in _write_merge
+    await self._merge_records(dt, data, primary_keys)
+src\bioetl\infrastructure\storage\silver_writer.py:873: in _merge_records
+    await loop.run_in_executor(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\bioetl\infrastructure\storage\silver_writer.py:895: in <lambda>
+    .execute()
+     ^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\deltalake\table.py:1685: in execute
+    metrics = self._table.merge_execute(self._builder)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   _internal.DeltaError: Failed to parse parquet: External: Generic LocalFileSystem error: Unable to open file E:\tmp\silver\test\table\part-00000-29529af4-8b11-430c-9c05-32512c0e1d15-c000.snappy.parquet#1: Access is denied. (os error 5)
+________ TestSilverWriterLineage.test_write_silver_without_bronze_refs ________
+E:\google_drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\infrastructure\storage\test_silver_writer.py:1734: in test_write_silver_without_bronze_refs
+    ???
+src\bioetl\infrastructure\storage\silver_writer.py:597: in write_silver
+    await self._dispatch_write(
+src\bioetl\infrastructure\storage\silver_writer.py:421: in _dispatch_write
+    await self._write_merge(
+src\bioetl\infrastructure\storage\silver_writer.py:272: in _write_merge
+    await self._merge_records(dt, data, primary_keys)
+src\bioetl\infrastructure\storage\silver_writer.py:873: in _merge_records
+    await loop.run_in_executor(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\bioetl\infrastructure\storage\silver_writer.py:895: in <lambda>
+    .execute()
+     ^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\deltalake\table.py:1685: in execute
+    metrics = self._table.merge_execute(self._builder)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   _internal.DeltaError: Failed to parse parquet: External: Generic LocalFileSystem error: Unable to open file E:\tmp\silver\test\table\part-00000-a4eadb3b-8ea3-4af2-ae40-db81a3d5f2e6-c000.snappy.parquet#1: Access is denied. (os error 5)
+_________ TestSilverWriterLineage.test_write_silver_with_bronze_refs __________
+E:\google_drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\infrastructure\storage\test_silver_writer.py:1785: in test_write_silver_with_bronze_refs
+    ???
+src\bioetl\infrastructure\storage\silver_writer.py:597: in write_silver
+    await self._dispatch_write(
+src\bioetl\infrastructure\storage\silver_writer.py:421: in _dispatch_write
+    await self._write_merge(
+src\bioetl\infrastructure\storage\silver_writer.py:272: in _write_merge
+    await self._merge_records(dt, data, primary_keys)
+src\bioetl\infrastructure\storage\silver_writer.py:873: in _merge_records
+    await loop.run_in_executor(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\bioetl\infrastructure\storage\silver_writer.py:895: in <lambda>
+    .execute()
+     ^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\deltalake\table.py:1685: in execute
+    metrics = self._table.merge_execute(self._builder)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   _internal.DeltaError: Failed to parse parquet: External: Generic LocalFileSystem error: Unable to open file E:\tmp\silver\test\table\part-00000-b1afb379-cd46-4ac2-98de-d1a9eae1b6a0-c000.snappy.parquet#1: Access is denied. (os error 5)
+_ TestSilverWriterDQMetrics.test_write_silver_computes_and_passes_dq_metrics __
+E:\google_drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\infrastructure\storage\test_silver_writer.py:2317: in test_write_silver_computes_and_passes_dq_metrics
+    ???
+src\bioetl\infrastructure\storage\silver_writer.py:597: in write_silver
+    await self._dispatch_write(
+src\bioetl\infrastructure\storage\silver_writer.py:421: in _dispatch_write
+    await self._write_merge(
+src\bioetl\infrastructure\storage\silver_writer.py:272: in _write_merge
+    await self._merge_records(dt, data, primary_keys)
+src\bioetl\infrastructure\storage\silver_writer.py:873: in _merge_records
+    await loop.run_in_executor(
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py:59: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\bioetl\infrastructure\storage\silver_writer.py:895: in <lambda>
+    .execute()
+     ^^^^^^^^^
+c:\Users\Fedor\AppData\Local\Programs\Python\Python313\Lib\site-packages\deltalake\table.py:1685: in execute
+    metrics = self._table.merge_execute(self._builder)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   _internal.DeltaError: Failed to parse parquet: External: Generic LocalFileSystem error: Unable to open file E:\tmp\silver\test\table\part-00000-21a2722c-6a3b-4884-8069-f3249f5fcb49-c000.snappy.parquet#1: Access is denied. (os error 5)
+=========================== short test summary info ===========================
+SKIPPED [1] ..\..\..\..\google_drive\05_AI\github\BioactivityDataAcquisition2\tests\unit\application\pipelines\test_transformer_snapshots.py:21: syrupy package required for snapshot tests
+ERROR tests/unit/application/core/test_record_processor.py::TestRecordProcessorProcessBatch::test_dq_thresholds_follow_yaml_hard_fail
+ERROR tests/unit/application/core/test_record_processor.py::TestRecordProcessorProcessBatch::test_dq_thresholds_follow_yaml_soft_threshold_prevents_warning
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_log_write_creates_file
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_log_write_appends_entries
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_get_entries_returns_all
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_get_entries_filter_by_run_id
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_get_entries_filter_by_layer
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_get_entries_filter_by_table_name
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_get_entries_filter_by_time_range
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_get_entries_respects_limit
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_get_entries_empty_directory
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_aclose_prevents_further_writes
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapter::test_aclose_is_idempotent
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapterEdgeCases::test_handles_special_characters_in_metadata
+ERROR tests/unit/infrastructure/audit/test_file_audit.py::TestFileAuditAdapterEdgeCases::test_handles_multiple_days
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterInit::test_init_with_defaults
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterInit::test_init_with_custom_options
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterExport::test_export_creates_file
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterExport::test_export_creates_parent_directories
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterExport::test_export_with_custom_delimiter
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterExport::test_export_without_header
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterExport::test_export_complex_types
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterExport::test_export_appends_to_existing_file
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterExport::test_export_overwrites_when_append_false
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterClear::test_clear_specific_table
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterClear::test_clear_all_csv_files
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterClear::test_clear_nonexistent_directory
+ERROR tests/unit/infrastructure/export/test_csv_exporter.py::TestCsvExporterClear::test_clear_nonexistent_table
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineWrite::test_write_basic
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineWrite::test_write_with_error_details
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineWrite::test_write_with_bronze_file_uri
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineWrite::test_write_truncates_large_payload
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineWrite::test_write_no_truncation_for_small_payload
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineWrite::test_write_creates_table_on_not_found
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineWrite::test_write_sets_dq_status_new
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineInspect::test_inspect_returns_empty_when_table_not_found
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineInspect::test_inspect_with_filters
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineReplay::test_replay_returns_empty_when_table_not_found
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineReplay::test_replay_with_error_code_filter
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantinePurge::test_purge_returns_zero_when_table_not_found
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantinePurge::test_purge_deletes_old_records
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantinePurge::test_purge_no_delete_when_no_old_records
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_returns_false_when_table_not_found
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_returns_false_when_record_not_found
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_updates_record
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineGetStats::test_get_stats_returns_empty_when_table_not_found
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineGetStats::test_get_stats_returns_empty_for_empty_table
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineGetStats::test_get_stats_calculates_statistics
+ERROR tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineAclose::test_aclose_does_nothing
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWrite::test_atomic_write_creates_file
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWrite::test_atomic_write_binary
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWrite::test_atomic_write_creates_parent_directories
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWrite::test_atomic_write_overwrites_existing
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWrite::test_atomic_write_no_temp_file_after_success
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWrite::test_atomic_write_cleanup_on_error
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWrite::test_atomic_write_preserves_original_on_error
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteHelpers::test_atomic_write_bytes
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteHelpers::test_atomic_write_text
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteHelpers::test_atomic_write_text_encoding
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteGroup::test_group_writes_multiple_files
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteGroup::test_group_atomic_commit
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteGroup::test_group_rollback_on_context_exit_with_exception
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteGroup::test_group_explicit_rollback
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteGroup::test_group_preserves_original_on_partial_commit_failure
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteGroup::test_group_creates_parent_directories
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteEdgeCases::test_write_empty_file
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteEdgeCases::test_write_large_file
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteEdgeCases::test_concurrent_writes_to_different_files
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteEdgeCases::test_special_characters_in_path
+ERROR tests/unit/infrastructure/storage/test_atomic.py::TestAtomicWriteEdgeCases::test_temp_file_in_same_directory
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_initialization
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_base_path_strips_trailing_slash
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_get_table_path
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_get_table_path_single_level
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_prepare_arrow_data
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_prepare_arrow_data_with_json_serialization
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_sort_by_primary_keys
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_sort_by_primary_keys_empty_keys
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_sort_by_primary_keys_invalid_key
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_clear_specific_table
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_clear_all_tables
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriter::test_clear_nonexistent_table
+ERROR tests/unit/infrastructure/storage/test_base_delta_writer.py::TestBaseDeltaWriterAsync::test_get_table_schema_nonexistent
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_validate_bronze_names_valid
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_validate_bronze_names_invalid_provider
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_validate_bronze_names_invalid_entity
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_write_bronze_invalid_provider_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_write_bronze_invalid_entity_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_validate_records_iterator_valid
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_validate_records_iterator_none_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_validate_records_iterator_not_iterator_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterNameValidation::test_write_bronze_invalid_records_type_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterUTCValidation::test_validate_utc_datetime_valid
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterUTCValidation::test_validate_utc_datetime_naive_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterUTCValidation::test_validate_utc_datetime_non_utc_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterUTCValidation::test_write_bronze_naive_date_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterUTCValidation::test_write_bronze_naive_ingestion_ts_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterUTCValidation::test_write_bronze_non_utc_date_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterInit::test_init_local_storage
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterInit::test_init_with_save_json
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterInit::test_init_with_custom_json_path
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterInit::test_init_requires_logger
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterWriteLocal::test_write_bronze_local
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterWriteLocal::test_write_bronze_local_async
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterWriteLocal::test_write_bronze_with_json_copy
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterWriteLocal::test_write_bronze_empty_records_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterReadLocal::test_read_bronze_local
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterListBatches::test_list_batches_local
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterListBatches::test_list_batches_with_date_filter
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterListBatches::test_list_batches_empty
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterAtomicWrite::test_no_partial_files_on_write_failure
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterAtomicWrite::test_no_orphan_metadata_without_data
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterAtomicWrite::test_no_temp_files_after_successful_write
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterAtomicWrite::test_failure_during_stream_write_cleans_up
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterAtomicWrite::test_json_copy_uses_atomic_write
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterLoggerInjection::test_logger_called_on_write
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterLoggerInjection::test_logger_is_stored_as_attribute
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetadataDeterminism::test_metadata_bitwise_identical_on_repeated_calls
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetadataDeterminism::test_metadata_json_format_is_deterministic
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetadataDeterminism::test_metadata_has_no_whitespace_variations
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetrics::test_init_with_metrics
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetrics::test_init_without_metrics_uses_noop
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetrics::test_write_bronze_records_duration_metric
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetrics::test_write_bronze_records_count_metric
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetrics::test_write_bronze_records_bytes_metric
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetrics::test_write_bronze_all_metrics_recorded
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetrics::test_logger_includes_metrics_info
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_init_with_validate_json_default
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_init_with_validate_json_disabled
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_validate_json_records_valid
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_validate_json_records_invalid_raises
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_validate_json_records_empty_string
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_validate_json_records_truncated_json
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_validate_json_records_is_lazy
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_write_bronze_validates_json_by_default
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_write_bronze_skips_validation_when_disabled
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterJsonValidation::test_write_bronze_valid_json_succeeds
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterAudit::test_write_bronze_with_audit
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterAudit::test_write_bronze_without_audit
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanup::test_find_old_date_dirs_empty_base
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanup::test_find_old_date_dirs_finds_old_directories
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanup::test_find_old_date_dirs_ignores_non_date_directories
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanup::test_cleanup_old_files_removes_old_data
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanup::test_cleanup_old_files_dry_run
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanup::test_cleanup_old_files_preserves_recent_data
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanup::test_cleanup_old_files_multiple_providers
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetadataSidecar::test_metadata_writer_called_when_save_metadata_enabled
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetadataSidecar::test_metadata_writer_not_called_when_save_metadata_disabled
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetadataSidecar::test_noop_metadata_writer_used_by_default
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetadataSidecar::test_build_full_bronze_metadata_structure
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterMetadataSidecar::test_metadata_run_type_mapping
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterQueryString::test_query_string_extracted_from_source_metadata
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterQueryString::test_query_string_none_when_source_metadata_has_no_query
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterQueryString::test_query_string_none_when_no_source_metadata
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanupFiltered::test_find_old_date_dirs_filtered_by_provider
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanupFiltered::test_find_old_date_dirs_filtered_by_entity
+ERROR tests/unit/infrastructure/storage/test_bronze_writer.py::TestBronzeWriterCleanupFiltered::test_cleanup_old_files_filtered
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestDeltaReaderInit::test_initialization
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestDeltaReaderInit::test_base_path_accepts_string
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestResolvePath::test_relative_path_resolved_to_base
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestResolvePath::test_absolute_path_returned_unchanged
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestResolvePath::test_nested_relative_path
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestReadTable::test_read_table_success
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestReadTable::test_read_table_with_column_projection
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestReadTable::test_read_table_with_limit
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestReadTable::test_read_table_limit_larger_than_rows
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestReadTable::test_read_table_with_columns_and_limit
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestReadTable::test_read_table_nonexistent_raises_file_not_found
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestReadTable::test_read_table_logs_debug_message
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestGetSchema::test_get_schema_success
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestGetSchema::test_get_schema_nonexistent_raises_file_not_found
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestGetRowCount::test_get_row_count_success
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestGetRowCount::test_get_row_count_nonexistent_raises_file_not_found
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestTableExists::test_table_exists_returns_true_for_valid_table
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestTableExists::test_table_exists_returns_false_for_nonexistent_directory
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestTableExists::test_table_exists_returns_false_for_directory_without_delta_log
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestTableExists::test_table_exists_returns_false_for_invalid_delta_log
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestAclose::test_aclose_is_noop
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestAbsolutePath::test_read_table_with_absolute_path
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestAbsolutePath::test_table_exists_with_absolute_path
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestEmptyTable::test_read_empty_table
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestEmptyTable::test_get_row_count_empty_table
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestLimitEdgeCases::test_limit_zero_returns_empty
+ERROR tests/unit/infrastructure/storage/test_delta_reader.py::TestLimitEdgeCases::test_limit_none_returns_all
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_write_bronze_metadata_creates_file
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_write_bronze_metadata_valid_yaml
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_write_silver_metadata_creates_file
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_write_silver_metadata_includes_lineage
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_write_silver_metadata_includes_dq_summary
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_write_gold_metadata_creates_file
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_write_gold_metadata_includes_schema_contract
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_atomic_write_creates_no_temp_files
+ERROR tests/unit/infrastructure/storage/test_metadata_writer.py::TestMetadataWriter::test_write_metadata_overwrites_existing
+ERROR tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterClear::test_clear_nonexistent_base_path_returns_zero
+ERROR tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterClear::test_clear_specific_table
+ERROR tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterClear::test_clear_specific_table_dry_run
+ERROR tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterClear::test_clear_all_tables
+ERROR tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterClear::test_clear_ignores_non_delta_directories
+ERROR tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterClear::test_get_table_path
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_local_checkpoint_initialization
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_save_creates_file
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_load_returns_correct_data
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_load_nonexistent_returns_none
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_save_and_load_roundtrip
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_delete_removes_file
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_delete_nonexistent_no_error
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_exists_returns_true
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_exists_returns_false
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_list_all_pipelines
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_list_all_empty
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_aclose
+ERROR tests/unit/infrastructure/test_checkpoint.py::TestLocalCheckpoint::test_atomic_write
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_bronze_writer_initialization
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_write_bronze_creates_file
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_write_bronze_generates_correct_key
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_write_bronze_compresses_with_zstd
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_write_bronze_with_no_records
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_write_bronze_save_json_copy
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_read_bronze
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_list_batches
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_list_batches_nonexistent
+ERROR tests/unit/infrastructure/test_storage.py::TestBronzeWriter::test_writes_metadata_file
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageFactoryLocal::test_local_run_uses_settings_paths
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageFactoryLocal::test_local_run_uses_yaml_paths_when_specified
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageFactoryLocal::test_local_run_with_json_export
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageFactoryLocal::test_local_run_with_csv_exports
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageFactoryEdgeCases::test_empty_sink_config
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageFactoryEdgeCases::test_adapter_is_properly_composed
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageAdapterHealthCheck::test_health_check_healthy_all_layers_writable
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageAdapterHealthCheck::test_health_check_degraded_partial_access
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageAdapterHealthCheck::test_check_directory_writable_creates_probe_file
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageAdapterClearOperations::test_clear_silver_calls_writer
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageAdapterClearOperations::test_clear_gold_calls_writer
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageAdapterPreviewCleanup::test_preview_cleanup_returns_file_counts
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageAdapterPreviewCleanup::test_preview_cleanup_without_gold
+ERROR tests/unit/infrastructure/test_storage_factory.py::TestStorageAdapterVacuum::test_vacuum_calls_silver_vacuum
+FAILED tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterCsvExport::test_write_silver_csv_exporter_with_merge_passes_primary_keys
+FAILED tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterLineage::test_write_silver_without_bronze_refs
+FAILED tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterLineage::test_write_silver_with_bronze_refs
+FAILED tests/unit/infrastructure/storage/test_silver_writer.py::TestSilverWriterDQMetrics::test_write_silver_computes_and_passes_dq_metrics
+= 4 failed, 3870 passed, 1 skipped, 7596 deselected, 236 errors in 165.97s (0:02:45) =

@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## trigger: model_decision description: USE WHEN designing or editing pipelines; one source → one public pipeline; unified components; standard stages
+---
+trigger: model_decision
+description: USE WHEN designing or editing pipelines; one source → one public pipeline; unified components; standard stages
+---
 
 etl-architecture
 
