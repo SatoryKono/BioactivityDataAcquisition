@@ -1,2 +1,2 @@
   [features]
-  experimental_windows_sandbox = true
+  # experimental_windows_sandbox = true # Disabled for cloud/linux compatibility

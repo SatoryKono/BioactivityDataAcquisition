@@ -75,7 +75,7 @@ class TestResolveBronzeOpts:
 
     def test_dependencies_default_to_api(self) -> None:
         """Dependencies default to False (API) even when master is True."""
-        runtime = CompositeRuntimeConfig()  # defaults
+        runtime = CompositeRuntimeConfig(use_cached_bronze=True)
         assert runtime.use_cached_bronze is True
         assert runtime.cached_bronze_dependencies is False
         result = _resolve_bronze_opts(

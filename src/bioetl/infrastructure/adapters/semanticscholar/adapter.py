@@ -99,9 +99,6 @@ class SemanticScholarAdapter(BaseHttpAdapter):
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
-        from bioetl.infrastructure.adapters.semanticscholar.fallback import (
-            SemanticScholarTitleFallbackHandler,
-        )
 
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
