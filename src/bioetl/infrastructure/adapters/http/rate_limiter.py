@@ -188,3 +188,6 @@ def create_pubmed_bucket(
 
 
 _BUCKET_FACTORIES = (create_pubchem_bucket, create_pubmed_bucket)
+
+
+_BUCKET_FACTORIES = (create_pubchem_bucket, create_pubmed_bucket)

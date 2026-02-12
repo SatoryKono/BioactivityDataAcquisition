@@ -107,6 +107,7 @@ class FieldValidation:
     - pattern: Regex pattern matching
     - enum: Allowed values validation
     - max_length: Maximum string length validation
+    - not_empty_list: List field must be non-empty when present
     - custom: Custom validator function reference
 
     Attributes:
@@ -125,7 +126,14 @@ class FieldValidation:
 
     field: str
     validation_type: Literal[
-        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+        "required",
+        "not_null",
+        "range",
+        "pattern",
+        "enum",
+        "max_length",
+        "not_empty_list",
+        "custom",
     ]
     nullable: bool = True
     severity: Literal["error", "warn"] = "error"
