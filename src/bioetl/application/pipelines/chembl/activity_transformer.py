@@ -51,7 +51,7 @@ _IDENTIFIERS = FieldGroup(
     name="identifiers",
     fields=(
         *simple_fields(
-            "target_id", "assay_id", "publication_id", "target_chembl_id", "assay_chembl_id", "document_chembl_id"
+            "target_id", "assay_id", "publication_id"
         ),
         *int_fields("record_id", "src_id"),
     ),
@@ -68,11 +68,11 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
         ),
         FieldSpec(
             "parent_molecule_chembl_id",
-            target="parent_molecule_chembl_id",
+            target="parent_molecule_id",
         ),
         FieldSpec(
             "target_tax_id",
-            target="target_taxonomy_id",
+            target="taxonomy_id",
             converter=validate_taxonomy_id,
         ),
         *simple_fields(
@@ -121,10 +121,9 @@ _QUALITY_ANNOTATIONS = FieldGroup(
             "activity_comment",
             "data_validity_comment",
             "data_validity_description",
-            "document_journal",
+            "journal",
         ),
         *int_fields(
-            "document_year",
             "potential_duplicate",
             "toid",
             "manual_curation_flag",
@@ -203,11 +202,12 @@ class ActivityTransformer(BaseChemblTransformer):
             Dictionary of Activity business fields.
 
         """
-        return {
+        business_data = {
             # Primary and secondary identifiers (manual - need special handling)
             "activity_id": str(primary_id),
-            "molecule_chembl_id": str(
-                self._get_required_field(record, "molecule_chembl_id")
+            "molecule_id": str(
+                record.get("molecule_chembl_id")
+                or self._get_required_field(record, "molecule_id")
             ),
             # Declarative field groups
             **map_field_groups(record, _ACTIVITY_GROUPS),
@@ -223,3 +223,22 @@ class ActivityTransformer(BaseChemblTransformer):
                 record.get("activity_properties")
             ),
         }
+
+        # Backward-compatible aliases from legacy ChEMBL field names.
+        business_data["target_id"] = (
+            business_data.get("target_id") or record.get("target_chembl_id")
+        )
+        business_data["assay_id"] = (
+            business_data.get("assay_id") or record.get("assay_chembl_id")
+        )
+        business_data["publication_id"] = (
+            business_data.get("publication_id") or record.get("document_chembl_id")
+        )
+        business_data["publication_year"] = (
+            business_data.get("publication_year") or safe_int(record.get("document_year"))
+        )
+        business_data["journal"] = (
+            business_data.get("journal") or record.get("document_journal")
+        )
+
+        return business_data

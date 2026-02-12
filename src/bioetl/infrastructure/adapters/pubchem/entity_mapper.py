@@ -42,15 +42,22 @@ class PubChemEntityMapper:
             - Stereochemistry (atom/bond stereo counts)
             - 3D properties (volume, conformer count, feature counts)
         """
+        molecule_id = getattr(compound, "cid", None)
+        if molecule_id is None:
+            molecule_id = getattr(compound, "molecule_id", None)
+
         return {
             # === Primary Key ===
-            "cid": compound.cid,
+            "molecule_id": molecule_id,
+            # Backward-compatible alias consumed by legacy client paths
+            "cid": molecule_id,
             # === Structural Identifiers ===
             # Use connectivity_smiles (replaces deprecated canonical_smiles)
             "canonical_smiles": getattr(compound, "connectivity_smiles", None),
             # Use smiles (replaces deprecated isomeric_smiles)
             "isomeric_smiles": getattr(compound, "smiles", None),
             "inchi": getattr(compound, "inchi", None),
+            "inchi_key": getattr(compound, "inchikey", None),
             "inchikey": getattr(compound, "inchikey", None),
             # === Nomenclature ===
             "molecular_formula": getattr(compound, "molecular_formula", None),
