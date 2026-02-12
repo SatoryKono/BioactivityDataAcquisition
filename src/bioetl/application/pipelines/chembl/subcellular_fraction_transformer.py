@@ -177,12 +177,12 @@ class SubcellularFractionTransformer(BaseChemblTransformer):
         if not fraction:
             return None
 
-        assay_chembl_id = record.get("assay_chembl_id")
+        assay_id = record.get("assay_id") or record.get("assay_chembl_id")
 
         return {
             "subcellular_fraction": fraction,
-            "example_assay_id": str(assay_chembl_id)
-            if assay_chembl_id
+            "example_assay_id": str(assay_id)
+            if assay_id
             else None,
             "assay_count": 1,
         }
