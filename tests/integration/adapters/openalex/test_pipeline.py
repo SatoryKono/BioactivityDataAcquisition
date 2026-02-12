@@ -125,19 +125,19 @@ class TestOpenAlexPublicationTransformerIntegration:
         assert result["oa_status"] is None
 
     @pytest.mark.asyncio
-    async def test_transformer_author_orcids_extraction(self) -> None:
+    async def test_transformer_author_ormolecule_ids_extraction(self) -> None:
         """Test ORCID extraction from authorships."""
         from bioetl.application.pipelines.openalex.extractors import (
-            extract_author_orcids,
+            extract_author_ormolecule_ids,
         )
 
         authorships = [
-            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
-            {"author": {"orcid": None}},
-            {"author": {"orcid": "https://orcid.org/0000-0002-3456-789X"}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"}},
+            {"author": {"ormolecule_id": None}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0002-3456-789X"}},
         ]
 
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert len(result) == 3
         assert result == ["0000-0001-2345-6789", "", "0000-0002-3456-789X"]
 

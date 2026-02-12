@@ -19,7 +19,7 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 class PublicationTermSchema(ETLRecordSchema):
     """Publication Term validation schema for Silver layer.
 
-    Composite Key: (document_chembl_id, term_type, term)
+    Composite Key: (publication_id, term_type, term)
     Entity ID is generated as SHA256 hash of the composite key.
 
     Term types:
@@ -30,7 +30,7 @@ class PublicationTermSchema(ETLRecordSchema):
     """
 
     # === Composite Key Fields ===
-    document_chembl_id: Series[str] = pa.Field(
+    publication_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
         description="FK → Document ChEMBL ID.",

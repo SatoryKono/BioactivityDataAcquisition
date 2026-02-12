@@ -98,7 +98,7 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary key (source identifier)
-    target_chembl_id: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=False)
 
     # Mapped identifier (nullable - None if not found)
     uniprot_accession: Series[str] = pa.Field(nullable=True)

@@ -43,9 +43,9 @@ class TestBaseEntity:
             Bioactivity(
                 **base_entity_kwargs,
                 activity_id="ACT1",
-                molecule_chembl_id="CHEMBL123",
-                target_chembl_id="CHEMBL456",
-                assay_chembl_id="CHEMBL789",
+                molecule_id="CHEMBL123",
+                target_id="CHEMBL456",
+                assay_id="CHEMBL789",
             )
 
     def test_base_entity_requires_content_hash(self, base_entity_kwargs):
@@ -55,9 +55,9 @@ class TestBaseEntity:
             Bioactivity(
                 **base_entity_kwargs,
                 activity_id="ACT1",
-                molecule_chembl_id="CHEMBL123",
-                target_chembl_id="CHEMBL456",
-                assay_chembl_id="CHEMBL789",
+                molecule_id="CHEMBL123",
+                target_id="CHEMBL456",
+                assay_id="CHEMBL789",
             )
 
     def test_base_entity_requires_ingestion_ts(self, base_entity_kwargs):
@@ -70,9 +70,9 @@ class TestBaseEntity:
             Bioactivity(
                 **kwargs_without_ts,
                 activity_id="ACT1",
-                molecule_chembl_id="CHEMBL123",
-                target_chembl_id="CHEMBL456",
-                assay_chembl_id="CHEMBL789",
+                molecule_id="CHEMBL123",
+                target_id="CHEMBL456",
+                assay_id="CHEMBL789",
             )
 
     def test_base_entity_accepts_explicit_ingestion_ts(self, base_entity_kwargs):
@@ -80,9 +80,9 @@ class TestBaseEntity:
         bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
-            molecule_chembl_id="CHEMBL123",
-            target_chembl_id="CHEMBL456",
-            assay_chembl_id="CHEMBL789",
+            molecule_id="CHEMBL123",
+            target_id="CHEMBL456",
+            assay_id="CHEMBL789",
         )
         assert bioactivity.ingestion_ts is not None
         assert isinstance(bioactivity.ingestion_ts, datetime)
@@ -98,23 +98,23 @@ class TestBioactivity:
         bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT123",
-            molecule_chembl_id="CHEMBL1",
-            target_chembl_id="CHEMBL2",
-            assay_chembl_id="CHEMBL3",
+            molecule_id="CHEMBL1",
+            target_id="CHEMBL2",
+            assay_id="CHEMBL3",
         )
         assert bioactivity.activity_id == "ACT123"
-        assert bioactivity.molecule_chembl_id == "CHEMBL1"
-        assert bioactivity.target_chembl_id == "CHEMBL2"
-        assert bioactivity.assay_chembl_id == "CHEMBL3"
+        assert bioactivity.molecule_id == "CHEMBL1"
+        assert bioactivity.target_id == "CHEMBL2"
+        assert bioactivity.assay_id == "CHEMBL3"
 
     def test_bioactivity_with_optional_fields(self, base_entity_kwargs):
         """Test Bioactivity with all optional fields."""
         bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT456",
-            molecule_chembl_id="CHEMBL100",
-            target_chembl_id="CHEMBL200",
-            assay_chembl_id="CHEMBL300",
+            molecule_id="CHEMBL100",
+            target_id="CHEMBL200",
+            assay_id="CHEMBL300",
             standard_type="IC50",
             standard_value=10.5,
             standard_units="nM",
@@ -137,9 +137,9 @@ class TestBioactivity:
             Bioactivity(
                 **base_entity_kwargs,
                 activity_id="",
-                molecule_chembl_id="CHEMBL1",
-                target_chembl_id="CHEMBL2",
-                assay_chembl_id="CHEMBL3",
+                molecule_id="CHEMBL1",
+                target_id="CHEMBL2",
+                assay_id="CHEMBL3",
             )
 
     def test_bioactivity_pchembl_must_be_nonnegative(self, base_entity_kwargs):
@@ -148,9 +148,9 @@ class TestBioactivity:
             Bioactivity(
                 **base_entity_kwargs,
                 activity_id="ACT1",
-                molecule_chembl_id="CHEMBL1",
-                target_chembl_id="CHEMBL2",
-                assay_chembl_id="CHEMBL3",
+                molecule_id="CHEMBL1",
+                target_id="CHEMBL2",
+                assay_id="CHEMBL3",
                 pchembl_value=-1.0,
             )
 
@@ -159,9 +159,9 @@ class TestBioactivity:
         bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
-            molecule_chembl_id="CHEMBL1",
-            target_chembl_id="CHEMBL2",
-            assay_chembl_id="CHEMBL3",
+            molecule_id="CHEMBL1",
+            target_id="CHEMBL2",
+            assay_id="CHEMBL3",
             pchembl_value=0.0,
         )
         assert bioactivity.pchembl_value == 0.0
@@ -171,9 +171,9 @@ class TestBioactivity:
         bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
-            molecule_chembl_id="CHEMBL1",
-            target_chembl_id="CHEMBL2",
-            assay_chembl_id="CHEMBL3",
+            molecule_id="CHEMBL1",
+            target_id="CHEMBL2",
+            assay_id="CHEMBL3",
         )
         with pytest.raises(AttributeError):
             bioactivity.activity_id = "NEW_ID"
@@ -183,7 +183,7 @@ class TestBioactivity:
         bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
-            molecule_chembl_id="CHEMBL1",
+            molecule_id="CHEMBL1",
         )
         assert bioactivity.state == BioactivityState.VALIDATED
 
@@ -192,7 +192,7 @@ class TestBioactivity:
         bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
-            molecule_chembl_id="CHEMBL1",
+            molecule_id="CHEMBL1",
             _state=BioactivityState.RAW,
         )
         assert bioactivity.state == BioactivityState.RAW
@@ -202,7 +202,7 @@ class TestBioactivity:
         bioactivity = Bioactivity(
             **base_entity_kwargs,
             activity_id="ACT1",
-            molecule_chembl_id="CHEMBL1",
+            molecule_id="CHEMBL1",
             _state=BioactivityState.RAW,
         )
         normalized = bioactivity.with_state(BioactivityState.NORMALIZED)
@@ -213,8 +213,8 @@ class TestBioactivity:
         """Test from_raw factory method creates entity in RAW state."""
         raw_data = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL1",
-            "target_chembl_id": "CHEMBL2",
+            "molecule_id": "CHEMBL1",
+            "target_id": "CHEMBL2",
             "standard_value": "10.5",
             "pchembl_value": 7.5,
         }
@@ -225,7 +225,7 @@ class TestBioactivity:
         )
         assert bioactivity.state == BioactivityState.RAW
         assert bioactivity.activity_id == "12345"
-        assert bioactivity.molecule_chembl_id == "CHEMBL1"
+        assert bioactivity.molecule_id == "CHEMBL1"
         assert bioactivity.standard_value == 10.5
         assert bioactivity.pchembl_value == 7.5
 
@@ -233,14 +233,14 @@ class TestBioactivity:
         """Test from_raw raises ValueError if activity_id missing."""
         with pytest.raises(ValueError, match="activity_id"):
             Bioactivity.from_raw(
-                raw_data={"molecule_chembl_id": "CHEMBL1"},
+                raw_data={"molecule_id": "CHEMBL1"},
                 run_id=uuid4(),
                 ingestion_ts=datetime.now(UTC),
             )
 
     def test_bioactivity_from_raw_missing_molecule_id(self):
-        """Test from_raw raises ValueError if molecule_chembl_id missing."""
-        with pytest.raises(ValueError, match="molecule_chembl_id"):
+        """Test from_raw raises ValueError if molecule_id missing."""
+        with pytest.raises(ValueError, match="molecule_id"):
             Bioactivity.from_raw(
                 raw_data={"activity_id": 123},
                 run_id=uuid4(),
@@ -279,17 +279,17 @@ class TestPubchemMolecule:
         """Test PubchemMolecule creation with canonical SMILES."""
         compound = PubchemMolecule(
             **base_entity_kwargs,
-            cid="12345",
+            molecule_id="12345",
             canonical_smiles="CCO",
         )
-        assert compound.cid == "12345"
+        assert compound.molecule_id == "12345"
         assert compound.canonical_smiles == "CCO"
 
     def test_compound_creation_with_isomeric_smiles(self, base_entity_kwargs):
         """Test PubchemMolecule creation with isomeric SMILES."""
         compound = PubchemMolecule(
             **base_entity_kwargs,
-            cid="12345",
+            molecule_id="12345",
             isomeric_smiles="C[C@H](O)CC",
         )
         assert compound.isomeric_smiles == "C[C@H](O)CC"
@@ -298,7 +298,7 @@ class TestPubchemMolecule:
         """Test PubchemMolecule creation with InChI."""
         compound = PubchemMolecule(
             **base_entity_kwargs,
-            cid="12345",
+            molecule_id="12345",
             inchi="InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3",
         )
         assert compound.inchi == "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3"
@@ -307,26 +307,26 @@ class TestPubchemMolecule:
         """Test PubchemMolecule with all optional fields."""
         compound = PubchemMolecule(
             **base_entity_kwargs,
-            cid="2244",
+            molecule_id="2244",
             molecular_formula="C9H8O4",
             molecular_weight="180.16",
             canonical_smiles="CC(=O)OC1=CC=CC=C1C(=O)O",
             isomeric_smiles="CC(=O)OC1=CC=CC=C1C(=O)O",
             inchi="InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
-            inchikey="BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
-            iupac_name="2-acetyloxybenzoic acid",
+            inchi_key="BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            iupac_name="2-acetyloxybenzoic amolecule_id",
         )
         assert compound.molecular_formula == "C9H8O4"
         assert compound.molecular_weight == "180.16"
-        assert compound.inchikey == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
-        assert compound.iupac_name == "2-acetyloxybenzoic acid"
+        assert compound.inchi_key == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+        assert compound.iupac_name == "2-acetyloxybenzoic amolecule_id"
 
-    def test_compound_requires_cid(self, base_entity_kwargs):
-        """Test that empty cid raises ValueError."""
-        with pytest.raises(ValueError, match="PubchemMolecule cid is required"):
+    def test_compound_requires_molecule_id(self, base_entity_kwargs):
+        """Test that empty molecule_id raises ValueError."""
+        with pytest.raises(ValueError, match="PubchemMolecule molecule_id is required"):
             PubchemMolecule(
                 **base_entity_kwargs,
-                cid="",
+                molecule_id="",
                 canonical_smiles="CCO",
             )
 
@@ -338,11 +338,11 @@ class TestPubchemMolecule:
         ):
             PubchemMolecule(
                 **base_entity_kwargs,
-                cid="12345",
+                molecule_id="12345",
                 # No SMILES or InChI
             )
 
-    def test_compound_inchikey_alone_not_sufficient(self, base_entity_kwargs):
+    def test_compound_inchi_key_alone_not_sufficient(self, base_entity_kwargs):
         """Test that InChIKey alone is not sufficient."""
         with pytest.raises(
             ValueError,
@@ -350,8 +350,8 @@ class TestPubchemMolecule:
         ):
             PubchemMolecule(
                 **base_entity_kwargs,
-                cid="12345",
-                inchikey="BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+                molecule_id="12345",
+                inchi_key="BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
                 # InChIKey is not counted as structural identifier
             )
 
@@ -359,11 +359,11 @@ class TestPubchemMolecule:
         """Test that PubchemMolecule is immutable."""
         compound = PubchemMolecule(
             **base_entity_kwargs,
-            cid="12345",
+            molecule_id="12345",
             canonical_smiles="CCO",
         )
         with pytest.raises(AttributeError):
-            compound.cid = "99999"
+            compound.molecule_id = "99999"
 
 
 @pytest.mark.unit

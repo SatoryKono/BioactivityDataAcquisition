@@ -148,10 +148,10 @@ class TestChemblActivitySchema:
     def test_has_core_identifiers(self):
         """Verify core identifier fields exist."""
         expected = [
-            "molecule_chembl_id",
-            "target_chembl_id",
-            "assay_chembl_id",
-            "document_chembl_id",
+            "molecule_id",
+            "target_id",
+            "assay_id",
+            "publication_id",
         ]
         for field_name in expected:
             assert field_name in CHEMBL_ACTIVITY_SCHEMA.names
@@ -199,14 +199,14 @@ class TestChemblAssaySchema:
 
     def test_has_primary_key(self):
         """Verify primary key field exists."""
-        assert "assay_chembl_id" in CHEMBL_ASSAY_SCHEMA.names
+        assert "assay_id" in CHEMBL_ASSAY_SCHEMA.names
 
     def test_has_core_identifiers(self):
         """Verify core identifier fields exist."""
         expected = [
-            "target_chembl_id",
-            "document_chembl_id",
-            "cell_chembl_id",
+            "target_id",
+            "publication_id",
+            "cell_id",
         ]
         for field_name in expected:
             assert field_name in CHEMBL_ASSAY_SCHEMA.names
@@ -215,7 +215,7 @@ class TestChemblAssaySchema:
         """Verify biological context fields exist."""
         expected = [
             "assay_organism",
-            "assay_taxonomy_id",
+            "taxonomy_id",
             "assay_cell_type",
         ]
         for field_name in expected:
@@ -236,7 +236,7 @@ class TestChemblMoleculeSchema:
 
     def test_has_primary_key(self):
         """Verify primary key field exists."""
-        assert "molecule_chembl_id" in CHEMBL_MOLECULE_SCHEMA.names
+        assert "molecule_id" in CHEMBL_MOLECULE_SCHEMA.names
 
     def test_has_flags(self):
         """Verify boolean flag fields exist."""
@@ -269,7 +269,7 @@ class TestChemblTargetSchema:
 
     def test_has_primary_key(self):
         """Verify primary key field exists."""
-        assert "target_chembl_id" in CHEMBL_TARGET_SCHEMA.names
+        assert "target_id" in CHEMBL_TARGET_SCHEMA.names
 
     def test_has_list_fields(self):
         """Verify list fields have correct types."""
@@ -300,7 +300,7 @@ class TestChemblDocumentSchema:
 
     def test_has_primary_key(self):
         """Verify primary key field exists."""
-        assert "document_chembl_id" in CHEMBL_PUBLICATION_SCHEMA.names
+        assert "publication_id" in CHEMBL_PUBLICATION_SCHEMA.names
 
     def test_has_publication_identifiers(self):
         """Verify publication identifier fields exist."""
@@ -320,11 +320,11 @@ class TestPubchemCompoundSchema:
 
     def test_has_primary_key(self):
         """Verify primary key field exists."""
-        assert "cid" in PUBCHEM_COMPOUND_SCHEMA.names
+        assert "molecule_id" in PUBCHEM_COMPOUND_SCHEMA.names
 
-    def test_cid_is_string(self):
-        """Verify cid is string type (from source)."""
-        field = PUBCHEM_COMPOUND_SCHEMA.field("cid")
+    def test_molecule_id_is_string(self):
+        """Verify molecule_id is string type (from source)."""
+        field = PUBCHEM_COMPOUND_SCHEMA.field("molecule_id")
         assert field.type == pa.string()
 
     def test_has_structure_fields(self):
@@ -334,7 +334,7 @@ class TestPubchemCompoundSchema:
             "canonical_smiles",
             "isomeric_smiles",
             "inchi",
-            "inchikey",
+            "inchi_key",
         ]
         for field_name in expected:
             assert field_name in PUBCHEM_COMPOUND_SCHEMA.names
@@ -342,11 +342,11 @@ class TestPubchemCompoundSchema:
     def test_all_fields_are_strings_or_typed(self):
         """Verify non-system fields have correct types."""
         string_fields = [
-            "cid",
+            "molecule_id",
             "molecular_formula",
             "canonical_smiles",
             "inchi",
-            "inchikey",
+            "inchi_key",
             "iupac_name",
         ]
         for field_name in string_fields:
@@ -494,18 +494,18 @@ class TestSilverSchemaValidation:
             "entity_id": "ACT_12345",
             "content_hash": "abc123def456",
             "activity_id": "12345",
-            "molecule_chembl_id": "CHEMBL25",
-            "target_chembl_id": "CHEMBL1824",
-            "assay_chembl_id": "CHEMBL829232",
-            "document_chembl_id": "CHEMBL1122334",
+            "molecule_id": "CHEMBL25",
+            "target_id": "CHEMBL1824",
+            "assay_id": "CHEMBL829232",
+            "publication_id": "CHEMBL1122334",
             "record_id": 1001,
             "src_id": 1,
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "molecule_pref_name": "ASPIRIN",
-            "parent_molecule_chembl_id": "CHEMBL25",
+            "parent_molecule_id": "CHEMBL25",
             "target_pref_name": "Cyclooxygenase-2",
             "target_organism": "Homo sapiens",
-            "target_taxonomy_id": "9606",
+            "taxonomy_id": "9606",
             "assay_type": "B",
             "assay_description": "Binding assay",
             "assay_variant_accession": None,
@@ -533,8 +533,8 @@ class TestSilverSchemaValidation:
             "ligand_efficiency_sei": 8.5,
             "qudt_units": "nM",
             "uo_units": "UO:0000065",
-            "document_journal": "J Med Chem",
-            "document_year": 2020,
+            "journal": "J Med Chem",
+            "publication_year": 2020,
             "activity_comment": None,
             "data_validity_comment": None,
             "data_validity_description": None,
@@ -561,14 +561,14 @@ class TestSilverSchemaValidation:
         valid_record = {
             "entity_id": "CID_2244",
             "content_hash": "xyz789",
-            "cid": "2244",
+            "molecule_id": "2244",
             "molecular_formula": "C9H8O4",
             "molecular_weight": 180.16,  # float64, not string
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "isomeric_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
-            "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
-            "iupac_name": "2-acetoxybenzoic acid",
+            "inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "iupac_name": "2-acetoxybenzoic amolecule_id",
             "_run_id": "run_002",
             "_run_type": "incremental",
             "_source_batch_id": "batch_002",
@@ -610,10 +610,10 @@ class TestSilverSchemaValidation:
             "entity_id": "ACT_12345",
             "content_hash": "abc123",
             "activity_id": "12345",
-            "molecule_chembl_id": "CHEMBL25",
-            "target_chembl_id": "CHEMBL1824",
-            "assay_chembl_id": "CHEMBL829232",
-            "document_chembl_id": "CHEMBL1122334",
+            "molecule_id": "CHEMBL25",
+            "target_id": "CHEMBL1824",
+            "assay_id": "CHEMBL829232",
+            "publication_id": "CHEMBL1122334",
             "record_id": "not_an_integer",  # Should be int64
             "src_id": "not_an_integer",  # Should be int64
             "value": "not_a_float",  # Should be float64
@@ -655,18 +655,18 @@ class TestSilverSchemaValidation:
             "entity_id": "ACT_12345",
             "content_hash": "abc123",
             "activity_id": "12345",
-            "molecule_chembl_id": None,
-            "target_chembl_id": None,
-            "assay_chembl_id": None,
-            "document_chembl_id": None,
+            "molecule_id": None,
+            "target_id": None,
+            "assay_id": None,
+            "publication_id": None,
             "record_id": None,
             "src_id": None,
             "canonical_smiles": None,
             "molecule_pref_name": None,
-            "parent_molecule_chembl_id": None,
+            "parent_molecule_id": None,
             "target_pref_name": None,
             "target_organism": None,
-            "target_taxonomy_id": None,
+            "taxonomy_id": None,
             "assay_type": None,
             "assay_description": None,
             "assay_variant_accession": None,
@@ -694,8 +694,8 @@ class TestSilverSchemaValidation:
             "ligand_efficiency_sei": None,
             "qudt_units": None,
             "uo_units": None,
-            "document_journal": None,
-            "document_year": None,
+            "journal": None,
+            "publication_year": None,
             "activity_comment": None,
             "data_validity_comment": None,
             "data_validity_description": None,
@@ -719,8 +719,8 @@ class TestSilverSchemaValidation:
         "schema,primary_key,invalid_pk_value",
         [
             (CHEMBL_ACTIVITY_SCHEMA, "activity_id", 12345),  # Should be string
-            (CHEMBL_ASSAY_SCHEMA, "assay_chembl_id", 12345),  # Should be string
-            (PUBCHEM_COMPOUND_SCHEMA, "cid", 2244),  # Should be string
+            (CHEMBL_ASSAY_SCHEMA, "assay_id", 12345),  # Should be string
+            (PUBCHEM_COMPOUND_SCHEMA, "molecule_id", 2244),  # Should be string
         ],
     )
     def test_silver_schema_rejects_invalid_primary_key_type(
@@ -1004,7 +1004,7 @@ class TestAllPublicationSchemas:
     @pytest.mark.parametrize(
         "schema,name,primary_key",
         [
-            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication", "document_chembl_id"),
+            (CHEMBL_PUBLICATION_SCHEMA, "ChEMBL Publication", "publication_id"),
             (CROSSREF_PUBLICATION_SCHEMA, "CrossRef Publication", "doi"),
             (OPENALEX_PUBLICATION_SCHEMA, "OpenAlex Publication", "openalex_id"),
             (PUBMED_PUBLICATION_SCHEMA, "PubMed Publication", "pmid"),

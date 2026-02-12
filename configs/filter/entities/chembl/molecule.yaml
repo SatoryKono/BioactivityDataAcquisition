@@ -12,12 +12,12 @@ entity: molecule
 # -----------------------------------------------------------------------------
 # Input Filter
 # -----------------------------------------------------------------------------
-# Filter molecules by molecule_chembl_id from CSV
+# Filter molecules by molecule_id from CSV
 input_filter:
   enabled: true
   source_path: "data/input/molecule.csv"
-  column_name: "molecule_chembl_id"
-  filter_field: "molecule_chembl_id"
+  column_name: "molecule_id"
+  filter_field: "molecule_id"
   batch_size: 20
 
 # -----------------------------------------------------------------------------
@@ -36,4 +36,4 @@ gold_filters:
 
   # Required fields
   required_fields:
-    - molecule_chembl_id
+    - molecule_id

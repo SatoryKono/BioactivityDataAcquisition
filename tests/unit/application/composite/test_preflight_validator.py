@@ -53,7 +53,7 @@ def basic_composite_config() -> CompositeConfig:
         version="1.0.0",
         seed=SeedConfig(
             pipeline="chembl_publication",
-            output_keys=("document_chembl_id", "doi", "pmid"),
+            output_keys=("publication_id", "doi", "pmid"),
             silver_table="silver/chembl/publication",
         ),
         enrichers=(
@@ -259,7 +259,7 @@ class TestCompositePreflightValidatorValidation:
             version="1.0.0",
             seed=SeedConfig(
                 pipeline="chembl_publication",
-                output_keys=("document_chembl_id", "doi"),
+                output_keys=("publication_id", "doi"),
                 silver_table="silver/chembl/publication",
             ),
             enrichers=(
@@ -287,7 +287,7 @@ class TestCompositePreflightValidatorValidation:
             version="1.0.0",
             seed=SeedConfig(
                 pipeline="chembl_publication",
-                output_keys=("document_chembl_id", "doi"),
+                output_keys=("publication_id", "doi"),
                 silver_table="silver/chembl/publication",
             ),
             enrichers=(
@@ -320,7 +320,7 @@ class TestCompositePreflightValidatorValidation:
             version="1.0.0",
             seed=SeedConfig(
                 pipeline="chembl_publication",
-                output_keys=("document_chembl_id", "doi"),
+                output_keys=("publication_id", "doi"),
                 silver_table="silver/chembl/publication",
             ),
             enrichers=(
@@ -353,7 +353,7 @@ class TestCompositePreflightValidatorValidation:
             version="1.0.0",
             seed=SeedConfig(
                 pipeline="chembl_publication",
-                output_keys=("document_chembl_id", "doi"),
+                output_keys=("publication_id", "doi"),
                 silver_table="silver/chembl/publication",
             ),
             enrichers=(
@@ -389,7 +389,7 @@ class TestCompositePreflightValidatorWithSchemas:
             version="1.0.0",
             seed=SeedConfig(
                 pipeline="chembl_publication",
-                output_keys=("document_chembl_id", "doi", "pmid"),
+                output_keys=("publication_id", "doi", "pmid"),
                 silver_table="silver/chembl/publication",
             ),
             enrichers=(

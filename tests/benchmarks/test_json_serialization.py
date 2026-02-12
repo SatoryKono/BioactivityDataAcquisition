@@ -31,8 +31,8 @@ def nested_payload() -> list[dict[str, Any]]:
     return [
         {
             "id": f"RECORD_{i:06d}",
-            "molecule_chembl_id": f"CHEMBL{100000 + i}",
-            "assay_chembl_id": f"CHEMBL{200000 + i}",
+            "molecule_id": f"CHEMBL{100000 + i}",
+            "assay_id": f"CHEMBL{200000 + i}",
             "properties": {
                 "mw_freebase": 200.0 + i,
                 "alogp": 2.5 + (i * 0.01),

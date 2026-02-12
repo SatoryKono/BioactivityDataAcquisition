@@ -47,7 +47,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
     """
 
     entity_class = DocumentTerm
-    primary_id_field = "document_chembl_id"
+    primary_id_field = "publication_id"
 
     async def _transform_impl(
         self,
@@ -73,7 +73,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             SilverRecord if transformation successful, None if skipped.
 
         """
-        # 1. Validate primary ID (document_chembl_id)
+        # 1. Validate primary ID (publication_id)
         primary_id = self._get_required_field(record, self.primary_id_field)
 
         # 2. Extract business data (term details)
@@ -85,11 +85,9 @@ class PublicationTermTransformer(BaseChemblTransformer):
         if pre_computed_id:
             entity_id = str(pre_computed_id)
         else:
-            # Compute from composite key (document_chembl_id, term_type, term)
+            # Compute from composite key (publication_id, term_type, term)
             entity_id = self.compute_term_entity_id(
-                document_chembl_id=str(
-                    business_data.get("document_chembl_id", primary_id)
-                ),
+                publication_id=str(business_data.get("publication_id", primary_id)),
                 term_type=str(business_data.get("term_type", "")),
                 term=str(business_data.get("term", "")),
             )
@@ -127,7 +125,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         Args:
             record: Bronze record (either term record or document record).
-            primary_id: Validated document_chembl_id value.
+            primary_id: Validated publication_id value.
 
         Returns:
             Dictionary of term business fields with normalized values.
@@ -149,7 +147,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             qualifier = str(raw_qualifier).strip() if raw_qualifier else None
 
             return {
-                "document_chembl_id": str(record.get("document_chembl_id", primary_id)),
+                "publication_id": str(record.get("publication_id", primary_id)),
                 "term": term,
                 "term_type": term_type,
                 "mesh_id": mesh_id,
@@ -161,7 +159,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         if not terms:
             # Return empty data that will fail validation
             return {
-                "document_chembl_id": str(primary_id),
+                "publication_id": str(primary_id),
                 "term": "",
                 "term_type": "",
                 "mesh_id": None,
@@ -170,9 +168,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         return terms[0]
 
     def extract_terms_from_document(
-        self,
-        record: BronzeRecord,
-        document_chembl_id: str,
+        self, record: BronzeRecord, publication_id: str
     ) -> list[dict[str, Any]]:
         """Extract and flatten all terms from a Publication record.
 
@@ -181,7 +177,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         Args:
             record: Raw Bronze record from ChEMBL API.
-            document_chembl_id: Document ChEMBL ID.
+            publication_id: Document ChEMBL ID.
 
         Yields:
             Dictionary of term business fields for each term.
@@ -202,7 +198,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             if mesh_heading:
                 terms.append(
                     self._create_term_data(
-                        document_chembl_id=document_chembl_id,
+                        publication_id=publication_id,
                         term=mesh_heading,
                         term_type="MESH_HEADING",
                         mesh_id=mesh.get("mesh_id"),
@@ -215,7 +211,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
             if mesh_qualifier:
                 terms.append(
                     self._create_term_data(
-                        document_chembl_id=document_chembl_id,
+                        publication_id=publication_id,
                         term=mesh_qualifier,
                         term_type="MESH_QUALIFIER",
                         mesh_id=mesh.get("mesh_id"),
@@ -232,7 +228,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
                 if stripped:  # Skip empty strings after stripping
                     terms.append(
                         self._create_term_data(
-                            document_chembl_id=document_chembl_id,
+                            publication_id=publication_id,
                             term=stripped,
                             term_type="KEYWORD",
                             mesh_id=None,
@@ -244,7 +240,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
     def _create_term_data(
         self,
-        document_chembl_id: str,
+        publication_id: str,
         term: str,
         term_type: str,
         mesh_id: str | None,
@@ -253,7 +249,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         """Create a single term data dictionary.
 
         Args:
-            document_chembl_id: Parent document ChEMBL ID.
+            publication_id: Parent document ChEMBL ID.
             term: Term text.
             term_type: Term type (MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT).
             mesh_id: MeSH identifier if applicable.
@@ -264,7 +260,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         """
         return {
-            "document_chembl_id": document_chembl_id,
+            "publication_id": publication_id,
             "term": term.strip() if term else term,
             "term_type": term_type,
             "mesh_id": mesh_id,
@@ -272,10 +268,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         }
 
     def compute_term_entity_id(
-        self,
-        document_chembl_id: str,
-        term_type: str,
-        term: str,
+        self, publication_id: str, term_type: str, term: str
     ) -> str:
         """Compute entity ID for a term based on composite key.
 
@@ -290,4 +283,4 @@ class PublicationTermTransformer(BaseChemblTransformer):
             Entity ID string (first 16 chars of SHA256 hex digest).
 
         """
-        return compute_publication_term_entity_id(document_chembl_id, term_type, term)
+        return compute_publication_term_entity_id(publication_id, term_type, term)

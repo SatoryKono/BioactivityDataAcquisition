@@ -9,7 +9,7 @@ entity_type: target
 version: "1.2.0"
 description: "Extract biological targets from ChEMBL API"
 
-primary_keys: ["target_chembl_id"]
+primary_keys: ["target_id"]
 silver_table: "chembl_target"
 gold_table: "chembl_target"
 
@@ -61,7 +61,7 @@ dq_rules:
   # Unique cross-field validation (not in entity config)
   cross_field_validations:
     - name: "target_identifiable"
-      fields: ["target_chembl_id", "pref_name"]
+      fields: ["target_id", "pref_name"]
       condition: "all_present"
       error_message: "Target must have ID and preferred name"
 
@@ -71,17 +71,17 @@ sink:
     path: "data/output/bronze/chembl/target"
   silver:
     path: "data/output/silver/chembl/target"
-    primary_key: ["target_chembl_id"]
+    primary_key: ["target_id"]
     partition_by: ["target_type"]
     sort_by:
-      columns: ["target_chembl_id"]
+      columns: ["target_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/chembl/target"
   gold:
     path: "data/output/gold/chembl/target"
     sort_by:
-      columns: ["target_chembl_id", "pref_name"]
+      columns: ["target_id", "pref_name"]
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/target"

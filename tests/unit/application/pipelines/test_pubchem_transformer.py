@@ -39,23 +39,23 @@ class TestPubChemCompoundTransformer:
     async def test_transform_valid_record(self, transformer, mock_context):
         """Test transformation of valid compound record with all fields."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_formula": "C9H8O4",
             "molecular_weight": "180.16",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "isomeric_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
-            "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
-            "iupac_name": "2-acetoxybenzoic acid",
+            "inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "iupac_name": "2-acetoxybenzoic amolecule_id",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cid"] == "2244"
+        assert result["molecule_id"] == "2244"
         assert result["molecular_formula"] == "C9H8O4"
         assert result["canonical_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
-        assert result["inchikey"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+        assert result["inchi_key"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
         assert "entity_id" in result
         assert "content_hash" in result
         # Lineage fields should be present
@@ -64,8 +64,8 @@ class TestPubChemCompoundTransformer:
         assert "_ingestion_ts" in result
 
     @pytest.mark.asyncio
-    async def test_transform_missing_cid(self, transformer, mock_context):
-        """Test transformation returns None when cid is missing."""
+    async def test_transform_missing_molecule_id(self, transformer, mock_context):
+        """Test transformation returns None when molecule_id is missing."""
         record = {
             "molecular_formula": "C9H8O4",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
@@ -86,7 +86,7 @@ class TestPubChemCompoundTransformer:
         canonical_smiles, isomeric_smiles, or inchi.
         """
         record = {
-            "cid": 12345,
+            "molecule_id": 12345,
             "molecular_formula": "C10H12O2",
             "iupac_name": "Some compound",
             # Missing: canonical_smiles, isomeric_smiles, inchi
@@ -103,80 +103,80 @@ class TestPubChemCompoundTransformer:
     ):
         """Test transformation succeeds with only canonical_smiles."""
         record = {
-            "cid": 12345,
+            "molecule_id": 12345,
             "canonical_smiles": "CCO",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cid"] == "12345"
+        assert result["molecule_id"] == "12345"
         assert result["canonical_smiles"] == "CCO"
 
     @pytest.mark.asyncio
     async def test_transform_with_only_isomeric_smiles(self, transformer, mock_context):
         """Test transformation succeeds with only isomeric_smiles."""
         record = {
-            "cid": 12345,
+            "molecule_id": 12345,
             "isomeric_smiles": "C[C@H](O)CC",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cid"] == "12345"
+        assert result["molecule_id"] == "12345"
         assert result["isomeric_smiles"] == "C[C@H](O)CC"
 
     @pytest.mark.asyncio
     async def test_transform_with_only_inchi(self, transformer, mock_context):
         """Test transformation succeeds with only inchi."""
         record = {
-            "cid": 12345,
+            "molecule_id": 12345,
             "inchi": "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cid"] == "12345"
+        assert result["molecule_id"] == "12345"
         assert result["inchi"] == "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3"
 
     @pytest.mark.asyncio
     async def test_transform_with_minimal_valid_record(self, transformer, mock_context):
-        """Test transformation with minimal valid record (cid + one structural ID)."""
+        """Test transformation with minimal valid record (molecule_id + one structural ID)."""
         record = {
-            "cid": 1,
+            "molecule_id": 1,
             "canonical_smiles": "C",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cid"] == "1"
+        assert result["molecule_id"] == "1"
         assert result["canonical_smiles"] == "C"
         assert result.get("molecular_formula") is None
         assert result.get("molecular_weight") is None
-        assert result.get("inchikey") is None
+        assert result.get("inchi_key") is None
 
     @pytest.mark.asyncio
-    async def test_transform_cid_converted_to_string(self, transformer, mock_context):
-        """Test that numeric cid is converted to string."""
+    async def test_transform_molecule_id_converted_to_string(self, transformer, mock_context):
+        """Test that numeric molecule_id is converted to string."""
         record = {
-            "cid": 99999999,
+            "molecule_id": 99999999,
             "canonical_smiles": "C",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cid"] == "99999999"
-        assert isinstance(result["cid"], str)
+        assert result["molecule_id"] == "99999999"
+        assert isinstance(result["molecule_id"], str)
 
     @pytest.mark.asyncio
     async def test_transform_entity_id_format(self, transformer, mock_context):
         """Test that entity_id follows expected format."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
 
@@ -184,7 +184,7 @@ class TestPubChemCompoundTransformer:
 
         assert result is not None
         assert "entity_id" in result
-        # Entity ID should contain provider and cid
+        # Entity ID should contain provider and molecule_id
         assert "pubchem" in result["entity_id"]
         assert "2244" in result["entity_id"]
 
@@ -192,7 +192,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_content_hash_generated(self, transformer, mock_context):
         """Test that content_hash is generated and is consistent."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
 
@@ -210,7 +210,7 @@ class TestPubChemCompoundTransformer:
         """Test transformation with custom provider."""
         transformer = PubChemCompoundTransformer(provider="custom_pubchem")
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
         }
 
@@ -220,10 +220,10 @@ class TestPubChemCompoundTransformer:
         assert "custom_pubchem" in result["entity_id"]
 
     @pytest.mark.asyncio
-    async def test_transform_empty_cid_rejected(self, transformer, mock_context):
-        """Test that empty string cid is rejected."""
+    async def test_transform_empty_molecule_id_rejected(self, transformer, mock_context):
+        """Test that empty string molecule_id is rejected."""
         record = {
-            "cid": "",
+            "molecule_id": "",
             "canonical_smiles": "C",
         }
 
@@ -235,7 +235,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_lineage_fields_present(self, transformer, mock_context):
         """Test that lineage fields are properly added to the result."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
 
@@ -258,7 +258,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that molecular_weight is converted from string to float."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_formula": "C9H8O4",
             "molecular_weight": "180.156",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
@@ -276,7 +276,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that numeric molecular_weight is preserved as float."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_weight": 180.156,
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
@@ -291,7 +291,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_molecular_weight_none(self, transformer, mock_context):
         """Test that None molecular_weight is preserved as None."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             # molecular_weight not provided
         }
@@ -307,7 +307,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that empty string molecular_weight becomes None."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_weight": "",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
@@ -323,7 +323,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that invalid string molecular_weight becomes None."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_weight": "invalid",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
@@ -337,7 +337,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_molecular_weight_negative(self, transformer, mock_context):
         """Test that negative molecular_weight becomes None."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_weight": "-5.0",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
@@ -351,7 +351,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_molecular_weight_zero(self, transformer, mock_context):
         """Test that zero molecular_weight returns None (invalid: must be > 0)."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_weight": "0",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
@@ -368,7 +368,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that molecular_weight precision is preserved up to 10 decimal places."""
         record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_weight": "1234.5678901234",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
         }
@@ -395,15 +395,15 @@ class TestPubChemCompoundTransformer:
         """
         record = {
             # Primary key
-            "cid": 2244,
+            "molecule_id": 2244,
             # Structural identifiers
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "isomeric_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
-            "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
             # Nomenclature
             "molecular_formula": "C9H8O4",
-            "iupac_name": "2-acetoxybenzoic acid",
+            "iupac_name": "2-acetoxybenzoic amolecule_id",
             # Physical properties
             "molecular_weight": 180.16,
             "exact_mass": 180.042259,
@@ -449,15 +449,15 @@ class TestPubChemCompoundTransformer:
 
         assert result is not None
         # Primary key
-        assert result["cid"] == "2244"
+        assert result["molecule_id"] == "2244"
         # Structural identifiers
         assert result["canonical_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
         assert result["isomeric_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
         assert result["inchi"].startswith("InChI=")
-        assert result["inchikey"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+        assert result["inchi_key"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
         # Nomenclature
         assert result["molecular_formula"] == "C9H8O4"
-        assert result["iupac_name"] == "2-acetoxybenzoic acid"
+        assert result["iupac_name"] == "2-acetoxybenzoic amolecule_id"
         # Physical properties
         assert result["molecular_weight"] == 180.16
         assert result["exact_mass"] == 180.042259
@@ -502,7 +502,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_xlogp_negative_value(self, transformer, mock_context):
         """Test that negative XLogP values are preserved (valid range: -20 to 20)."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "xlogp": -5.2,
         }
@@ -516,7 +516,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_charge_negative_value(self, transformer, mock_context):
         """Test that negative formal charge values are preserved."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "charge": -2,
         }
@@ -532,7 +532,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that negative steric quadrupole values are preserved (can be negative)."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "x_steric_quadrupole_3d": -2.5,
             "y_steric_quadrupole_3d": -1.8,
@@ -550,7 +550,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_monoisotopic_mass(self, transformer, mock_context):
         """Test that monoisotopic mass is validated as non-negative float."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "monoisotopic_mass": "16.031",
         }
@@ -566,7 +566,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that negative monoisotopic mass becomes None."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "monoisotopic_mass": -100.0,
         }
@@ -580,7 +580,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_feature_count_3d(self, transformer, mock_context):
         """Test that feature_count_3d is validated as non-negative integer."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "feature_count_3d": 10,
         }
@@ -594,7 +594,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_tpsa_invalid_negative(self, transformer, mock_context):
         """Test that negative TPSA values become None (must be >= 0)."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "tpsa": -10.0,
         }
@@ -610,7 +610,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that negative complexity values become None (must be >= 0)."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "complexity": -50.0,
         }
@@ -626,7 +626,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that string atom counts are converted to integers."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "heavy_atom_count": "5",
             "h_bond_donor_count": "2",
@@ -646,7 +646,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_3d_properties_optional(self, transformer, mock_context):
         """Test that 3D properties are optional and can be None."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             # No 3D properties provided
         }
@@ -664,7 +664,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_stereo_counts_all_zero(self, transformer, mock_context):
         """Test transformation with zero stereochemistry counts (achiral molecule)."""
         record = {
-            "cid": 702,  # Ethanol
+            "molecule_id": 702,  # Ethanol
             "canonical_smiles": "CCO",
             "atom_stereo_count": 0,
             "defined_atom_stereo_count": 0,
@@ -690,7 +690,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test transformation with non-zero stereochemistry counts (chiral molecule)."""
         record = {
-            "cid": 1,
+            "molecule_id": 1,
             "canonical_smiles": "C[C@H](O)CC",
             "atom_stereo_count": 1,
             "defined_atom_stereo_count": 1,
@@ -708,7 +708,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_covalent_unit_count(self, transformer, mock_context):
         """Test transformation with covalent_unit_count (>1 for salts/mixtures)."""
         record = {
-            "cid": 1,
+            "molecule_id": 1,
             "canonical_smiles": "[Na+].[Cl-]",  # NaCl
             "covalent_unit_count": 2,
         }
@@ -722,7 +722,7 @@ class TestPubChemCompoundTransformer:
     async def test_transform_exact_mass_validation(self, transformer, mock_context):
         """Test that exact_mass is validated as non-negative float."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "exact_mass": "16.031",
         }
@@ -738,7 +738,7 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that negative exact_mass becomes None."""
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "exact_mass": -100.0,
         }
@@ -754,12 +754,12 @@ class TestPubChemCompoundTransformer:
     ):
         """Test that content_hash changes when physicochemical properties change."""
         base_record = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
         }
 
         record_with_xlogp = {
-            "cid": 123,
+            "molecule_id": 123,
             "canonical_smiles": "C",
             "xlogp": 1.5,
         }

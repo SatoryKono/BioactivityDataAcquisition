@@ -77,7 +77,7 @@
     "required": false,
     "unique": false
   },
-  "assay_chembl_id": {
+  "assay_id": {
     "checks": [
       {
         "name": "str_matches",

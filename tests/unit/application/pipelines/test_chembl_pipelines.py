@@ -85,7 +85,7 @@ class TestChEMBLAssayPipeline:
             pipeline_name="chembl_assay",
             entity_type="assay",
             silver_table="chembl.assay",
-            primary_keys=["assay_chembl_id"],
+            primary_keys=["assay_id"],
         )
         return ChEMBLAssayPipeline(
             config=config,
@@ -112,13 +112,13 @@ class TestChEMBLAssayPipeline:
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
         assert result is not None
-        assert result["assay_chembl_id"] == "CHEMBL123456"
+        assert result["assay_id"] == "CHEMBL123456"
         assert "_run_id" in result
 
     @pytest.mark.asyncio
     async def test_transform_bronze_to_silver_missing_id(self, pipeline):
         """Test transformation returns None for missing ID."""
-        record = {"target_chembl_id": "CHEMBL123"}
+        record = {"target_id": "CHEMBL123"}
 
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
@@ -136,7 +136,7 @@ class TestChEMBLPublicationPipeline:
             pipeline_name="chembl_publication",
             entity_type="publication",
             silver_table="chembl.publication",
-            primary_keys=["document_chembl_id"],
+            primary_keys=["publication_id"],
         )
         return ChEMBLPublicationPipeline(
             config=config,
@@ -163,7 +163,7 @@ class TestChEMBLPublicationPipeline:
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
         assert result is not None
-        assert result["document_chembl_id"] == "CHEMBL789012"
+        assert result["publication_id"] == "CHEMBL789012"
         assert "_run_id" in result
 
     @pytest.mark.asyncio
@@ -187,7 +187,7 @@ class TestChEMBLMoleculePipeline:
             pipeline_name="chembl_molecule",
             entity_type="molecule",
             silver_table="chembl.molecule",
-            primary_keys=["molecule_chembl_id"],
+            primary_keys=["molecule_id"],
         )
         return ChEMBLMoleculePipeline(
             config=config,
@@ -214,7 +214,7 @@ class TestChEMBLMoleculePipeline:
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
         assert result is not None
-        assert result["molecule_chembl_id"] == "CHEMBL25"
+        assert result["molecule_id"] == "CHEMBL25"
         assert "_run_id" in result
 
     @pytest.mark.asyncio
@@ -238,7 +238,7 @@ class TestChEMBLTargetPipeline:
             pipeline_name="chembl_target",
             entity_type="target",
             silver_table="chembl.target",
-            primary_keys=["target_chembl_id"],
+            primary_keys=["target_id"],
         )
         return ChEMBLTargetPipeline(
             config=config,
@@ -265,7 +265,7 @@ class TestChEMBLTargetPipeline:
         result = await pipeline.transform_bronze_to_silver(pipeline.context, record)
 
         assert result is not None
-        assert result["target_chembl_id"] == "CHEMBL1862"
+        assert result["target_id"] == "CHEMBL1862"
         assert "_run_id" in result
 
     @pytest.mark.asyncio

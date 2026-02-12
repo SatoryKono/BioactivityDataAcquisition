@@ -4,7 +4,7 @@ Aligned with RULES.md v5.0 and UniProt ID Mapping API.
 Source: https://www.uniprot.org/id-mapping/
 
 Schema validates ChEMBL → UniProt ID mapping results:
-- target_chembl_id: Source ChEMBL target ID
+- target_id: Source ChEMBL target ID
 - uniprot_accession: Mapped UniProt accession (nullable for not_found)
 - mapping_status: Status of mapping operation
 """
@@ -30,13 +30,13 @@ class IDMappingSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    target_chembl_id: Series[str] = pa.Field(
+    target_id: Series[str] = pa.Field(
         nullable=False,
         description="Source ChEMBL target identifier (e.g., CHEMBL204)",
     )
 
-    @pa.check("target_chembl_id", name="target_chembl_id_format")
-    def _check_target_chembl_id(cls, series: Series[str]) -> Series[bool]:
+    @pa.check("target_id", name="target_id_format")
+    def _check_target_id(cls, series: Series[str]) -> Series[bool]:
         """Validate ChEMBL target ID format."""
         return cast("Series[bool]", series.str.match(r"^CHEMBL\d+$"))
 

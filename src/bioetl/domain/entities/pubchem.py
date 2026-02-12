@@ -25,7 +25,7 @@ class PubchemMoleculeRecord(BaseModel):
     """Chemical molecule DTO from PubChem.
 
     Represents a molecule (compound) from PubChem API via pubchempy.
-    Required field: cid.
+    Required field: molecule_id.
     At least one structural identifier (SMILES/InChI) should be present.
 
     Contains all physicochemical properties defined in PubchemMoleculeSchema:
@@ -39,18 +39,18 @@ class PubchemMoleculeRecord(BaseModel):
 
     Example:
         >>> record = PubchemMoleculeRecord(
-        ...     cid="2244",
+        ...     molecule_id="2244",
         ...     molecular_formula="C9H8O4",
         ...     canonical_smiles="CC(=O)OC1=CC=CC=C1C(=O)O",
         ... )
         >>> record.model_dump()
-        {'cid': '2244', 'molecular_formula': 'C9H8O4', ...}
+        {'molecule_id': '2244', 'molecular_formula': 'C9H8O4', ...}
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # === Primary Identifier (REQUIRED) ===
-    cid: str = Field(description="PubChem Compound ID")
+    molecule_id: str = Field(description="PubChem Compound ID")
 
     # === Structural Identifiers ===
     canonical_smiles: str | None = Field(
@@ -60,7 +60,7 @@ class PubchemMoleculeRecord(BaseModel):
         default=None, description="Isomeric SMILES (with stereochemistry)"
     )
     inchi: str | None = Field(default=None, description="InChI string")
-    inchikey: str | None = Field(default=None, description="InChI Key")
+    inchi_key: str | None = Field(default=None, description="InChI Key")
 
     # === Nomenclature ===
     molecular_formula: str | None = Field(default=None, description="Molecular formula")
@@ -199,13 +199,13 @@ class PubchemMolecule(BaseEntity):
     """
 
     # === Primary Identifier (REQUIRED) ===
-    cid: str
+    molecule_id: str
 
     # === Structural Identifiers ===
     canonical_smiles: str | None = None
     isomeric_smiles: str | None = None
     inchi: str | None = None
-    inchikey: str | None = None
+    inchi_key: str | None = None
 
     # === Nomenclature ===
     molecular_formula: str | None = None
@@ -256,8 +256,8 @@ class PubchemMolecule(BaseEntity):
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        if not self.cid:
-            raise ValueError("PubchemMolecule cid is required")
+        if not self.molecule_id:
+            raise ValueError("PubchemMolecule molecule_id is required")
 
         # Invariant: At least one structural representation should be present
         if not any([self.canonical_smiles, self.isomeric_smiles, self.inchi]):

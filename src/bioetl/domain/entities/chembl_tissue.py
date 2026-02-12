@@ -16,14 +16,14 @@ class Tissue(BaseEntity):
     """Represents a tissue type (ChEMBL Tissue).
 
     Tissues are anatomical structures used in assay experiments.
-    They have 1:M relationship with Assay (via assay.tissue_chembl_id FK).
+    They have 1:M relationship with Assay (via assay.tissue_id FK).
 
     Contains all fields from ChEMBL tissue API endpoint.
     See: https://www.ebi.ac.uk/chembl/api/data/tissue
     """
 
     # Primary identifier (REQUIRED)
-    tissue_chembl_id: str
+    tissue_id: str
 
     # Core metadata (REQUIRED)
     pref_name: str
@@ -39,7 +39,7 @@ class Tissue(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.tissue_chembl_id:
+        if not self.tissue_id:
             raise ValueError("Tissue ChEMBL ID is required")
         if not self.pref_name:
             raise ValueError("Tissue pref_name is required")

@@ -177,7 +177,7 @@ class TestGoldPublicationSchemaCoreFields:
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             # SemanticScholar excluded: transformer pops raw authors,
-            # uses author_s2_ids/author_orcids instead
+            # uses author_s2_ids/author_ormolecule_ids instead
         ],
     )
     def test_schema_has_authors_field(self, schema_class, name):
@@ -214,7 +214,7 @@ class TestGoldPublicationSchemaPrimaryKeys:
     @pytest.mark.parametrize(
         "schema_class,name,primary_key",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document", "document_chembl_id"),
+            (ChEMBLDocumentGoldSchema, "ChEMBL Document", "publication_id"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication", "doi"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication", "openalex_id"),
             (PubMedPublicationGoldSchema, "PubMed Publication", "pmid"),
@@ -417,7 +417,7 @@ class TestGoldSchemaValidation:
         valid_record = {
             "entity_id": "chembl_CHEMBL12345",
             "content_hash": "xyz789",
-            "document_chembl_id": "CHEMBL12345",
+            "publication_id": "CHEMBL12345",
             "pmid": "12345678",
             # pmc_id excluded: not available from ChEMBL API
             "doi": "10.1234/test",
@@ -456,4 +456,4 @@ class TestGoldSchemaValidation:
         validated = ChEMBLDocumentGoldSchema.validate(df)
 
         assert len(validated) == 1
-        assert validated["document_chembl_id"].iloc[0] == "CHEMBL12345"
+        assert validated["publication_id"].iloc[0] == "CHEMBL12345"

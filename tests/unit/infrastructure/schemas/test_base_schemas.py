@@ -307,13 +307,13 @@ class TestBaseInputFilterConfig:
             enabled=True,
             source_path="/data/ids.csv",
             column_name="chembl_id",
-            filter_field="molecule_chembl_id",
+            filter_field="molecule_id",
             batch_size=50,
         )
         assert config.enabled is True
         assert config.source_path == "/data/ids.csv"
         assert config.column_name == "chembl_id"
-        assert config.filter_field == "molecule_chembl_id"
+        assert config.filter_field == "molecule_id"
         assert config.batch_size == 50
 
     def test_multi_column_mode(self) -> None:
@@ -365,12 +365,12 @@ class TestBaseInputFilterConfig:
             enabled=True,
             source_path="/data/ids.csv",
             column_name="chembl_id",
-            filter_field="molecule_chembl_id",
+            filter_field="molecule_id",
         )
         domain = config.to_domain()
         assert domain.enabled is True
         assert domain.column_name == "chembl_id"
-        assert domain.filter_field == "molecule_chembl_id"
+        assert domain.filter_field == "molecule_id"
 
 
 @pytest.mark.unit

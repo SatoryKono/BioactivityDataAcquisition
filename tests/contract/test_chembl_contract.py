@@ -121,7 +121,7 @@ class TestChemblContract:
 
         # Verify assay has key identifiers
         assay = assays[0]
-        assert "assay_chembl_id" in assay
+        assert "assay_id" in assay
         assert "assay_type" in assay
 
     @pytest.mark.asyncio
@@ -173,6 +173,6 @@ class TestChemblContract:
         assert response.status_code == 200
         data = response.json()
 
-        assert data["molecule_chembl_id"] == chembl_id
+        assert data["molecule_id"] == chembl_id
         # Aspirin should have canonical SMILES
         assert "molecule_structures" in data

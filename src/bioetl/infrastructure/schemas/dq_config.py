@@ -69,14 +69,14 @@ class ThresholdsConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_order(self) -> ThresholdsConfig:
-        """Ensure soft_fail <= hard_fail.
+        """Ensure soft_fail < hard_fail.
 
         Raises:
-            ValueError: If soft_fail is strictly greater than hard_fail.
+            ValueError: If soft_fail is not strictly less than hard_fail.
         """
-        if self.soft_fail > self.hard_fail:
+        if self.soft_fail >= self.hard_fail:
             raise ValueError(
-                f"soft_fail ({self.soft_fail}) must be <= hard_fail ({self.hard_fail})"
+                f"soft_fail ({self.soft_fail}) must be < hard_fail ({self.hard_fail})"
             )
         return self
 

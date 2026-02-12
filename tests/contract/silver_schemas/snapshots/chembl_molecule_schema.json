@@ -257,7 +257,7 @@
     "required": false,
     "unique": false
   },
-  "inchikey": {
+  "inchi_key": {
     "checks": [
       {
         "name": "str_matches",
@@ -299,7 +299,7 @@
     "required": false,
     "unique": false
   },
-  "molecule_chembl_id": {
+  "molecule_id": {
     "checks": [
       {
         "name": "str_matches",

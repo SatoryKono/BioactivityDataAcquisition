@@ -50,7 +50,7 @@ entity_notes:
         typical_volume: "~570K reviewed entries"
     idmapping:
         description: "Maps ChEMBL target IDs to UniProt accessions"
-        input_mode: "CSV file with target_chembl_id"
+        input_mode: "CSV file with target_id"
         dq_thresholds:
             soft_fail: 0.30  # Higher threshold - many targets lack UniProt mapping
             hard_fail: 0.80

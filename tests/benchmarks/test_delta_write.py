@@ -38,9 +38,9 @@ def _create_activity_schema() -> pa.Schema:
     return pa.schema(
         [
             pa.field("id", pa.string()),
-            pa.field("molecule_chembl_id", pa.string()),
-            pa.field("assay_chembl_id", pa.string()),
-            pa.field("target_chembl_id", pa.string()),
+            pa.field("molecule_id", pa.string()),
+            pa.field("assay_id", pa.string()),
+            pa.field("target_id", pa.string()),
             pa.field("standard_value", pa.float64()),
             pa.field("standard_units", pa.string()),
             pa.field("pchembl_value", pa.float64()),
@@ -60,9 +60,9 @@ def _prepare_records_for_delta(
     for record in records:
         rec = {
             "id": record.get("id", ""),
-            "molecule_chembl_id": record.get("molecule_chembl_id", ""),
-            "assay_chembl_id": record.get("assay_chembl_id", ""),
-            "target_chembl_id": record.get("target_chembl_id", ""),
+            "molecule_id": record.get("molecule_id", ""),
+            "assay_id": record.get("assay_id", ""),
+            "target_id": record.get("target_id", ""),
             "standard_value": record.get("standard_value"),
             "standard_units": record.get("standard_units", ""),
             "pchembl_value": record.get("pchembl_value"),

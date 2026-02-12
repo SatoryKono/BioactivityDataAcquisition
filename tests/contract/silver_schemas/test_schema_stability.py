@@ -1,6 +1,6 @@
 """Silver Schema Stability Tests.
 
-Contract tests that ensure Silver schemas don't change accidentally.
+Contract tests that ensure Silver schemas don't change acmolecule_identally.
 Uses snapshot testing to detect any field additions, deletions, or type changes.
 
 To update snapshots after intentional schema changes:
@@ -40,7 +40,7 @@ class TestSchemaStability:
     ) -> None:
         """Silver schema fields MUST NOT change without explicit snapshot update.
 
-        This test prevents accidental schema modifications that would break
+        This test prevents acmolecule_idental schema modifications that would break
         downstream consumers and Gold layer contracts.
 
         If schema change is intentional:
@@ -68,10 +68,10 @@ class TestSchemaStability:
         allowed_attr_diffs = {
             "_run_id": {"dtype"},
             "_source_batch_id": {"dtype"},
-            "cid": {"dtype"},
+            "molecule_id": {"dtype"},
             "publication_year": {"required"},
         }
-        allowed_check_diffs = {"document_year", "standard_relation", "usan_year"}
+        allowed_check_diffs = {"publication_year", "standard_relation", "usan_year"}
 
         # Check for added fields
         added_fields = current_fields - snapshot_fields

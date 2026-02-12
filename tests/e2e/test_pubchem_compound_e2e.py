@@ -65,7 +65,7 @@ async def test_pubchem_compound_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "pubchem_compound")
-    required_fields = ["cid"]
+    required_fields = ["molecule_id"]
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
@@ -91,7 +91,7 @@ async def test_pubchem_compound_structural_fields(e2e_data_dir: Path):
 
     for record in records:
         # CID must always be present
-        assert record.get("cid") is not None
+        assert record.get("molecule_id") is not None
 
         # Check structural data extraction - most compounds should have basic fields
         has_formula = record.get("molecular_formula") is not None
@@ -102,7 +102,7 @@ async def test_pubchem_compound_structural_fields(e2e_data_dir: Path):
         )
 
         assert has_formula or has_weight or has_smiles, (
-            f"Compound {record.get('cid')} missing all structural fields"
+            f"Compound {record.get('molecule_id')} missing all structural fields"
         )
 
 

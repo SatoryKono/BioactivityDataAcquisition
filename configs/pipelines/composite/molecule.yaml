@@ -31,12 +31,12 @@ composite:
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts primary entities from ChEMBL.
-  # Its output provides join keys (inchikey, canonical_smiles) for enrichment.
+  # Its output provides join keys (inchi_key, canonical_smiles) for enrichment.
   seed:
     pipeline: chembl_molecule
     output_keys:
-      - molecule_chembl_id  # Primary key
-      - inchikey            # Join key 1 (IUPAC standard, preferred)
+      - molecule_id         # Primary key
+      - inchi_key           # Join key 1 (IUPAC standard, preferred)
       - canonical_smiles    # Join key 2 (fallback)
       - pref_name           # For logging/debugging
     # Note: chembl_molecule uses flat_structure, so table is in path directly
@@ -58,10 +58,10 @@ composite:
     # OPTIONAL: Failure logged, composite continues (graceful degradation)
     - pipeline: pubchem_compound
       join_keys:
-        - inchikey           # Primary join key (IUPAC standard) - uses seed field name
+        - inchi_key          # Primary join key (IUPAC standard) - uses seed field name
         - canonical_smiles   # Fallback key (less reliable)
       required: false        # Graceful degradation - seed data preserved on failure
-      filter_condition: "inchikey IS NOT NULL"  # Only join records with structure
+      filter_condition: "inchi_key IS NOT NULL"  # Only join records with structure
       timeout_seconds: 3600
       silver_table: silver/pubchem/compound
 
@@ -93,7 +93,7 @@ composite:
       canonical_smiles:
         - chembl           # ChEMBL structures are manually curated
         - pubchem
-      inchikey:
+      inchi_key:
         - chembl           # ChEMBL InChIKey from standardized structures
         - pubchem
       inchi:
@@ -111,25 +111,28 @@ composite:
       molecular_formula:
         - pubchem
         - chembl
-      xlogp:
+      logp:
         - pubchem          # PubChem uses XLogP3
         - chembl           # ChEMBL uses ALogP
-      tpsa:
-        - pubchem          # PubChem TPSA (Topological Polar Surface Area)
-        - chembl           # ChEMBL PSA
-      hba:
-        - pubchem          # H-bond acceptors
+      logp_method:
+        - pubchem
         - chembl
-      hbd:
-        - pubchem          # H-bond donors
+      polar_surface_area:
+        - pubchem
         - chembl
-      rotatable_bonds:
+      hba_count:
+        - pubchem
+        - chembl
+      hbd_count:
+        - pubchem
+        - chembl
+      rotatable_bond_count:
         - pubchem
         - chembl
       heavy_atom_count:
         - pubchem
         - chembl
-      aromatic_rings:
+      aromatic_ring_count:
         - pubchem
         - chembl
 
@@ -182,9 +185,8 @@ composite:
       # === Business identifiers ===
       - name: identifiers
         fields:
-          - molecule_chembl_id   # ChEMBL primary key
-          - cid                  # PubChem CID
-          - inchikey             # Standard InChIKey (both ChEMBL and PubChem)
+          - molecule_id          # Canonical molecule id
+          - inchi_key            # Standard InChIKey (both ChEMBL and PubChem)
           - inchi
           - standard_inchi
         provider_order: [chembl, pubchem]
@@ -203,23 +205,16 @@ composite:
         fields:
           - molecular_weight
           - molecular_formula
-          - property_full_mwt
-          - property_mw_freebase
-          - property_alogp
-          - xlogp
-          - property_psa
-          - tpsa
-          - property_hba
-          - hba
-          - property_hbd
-          - hbd
-          - property_rtb
-          - rotatable_bonds
-          - property_heavy_atoms
+          - molecular_weight
+          - logp
+          - logp_method
+          - polar_surface_area
+          - hba_count
+          - hbd_count
+          - rotatable_bond_count
           - heavy_atom_count
-          - property_aromatic_rings
-          - aromatic_rings
-          - property_qed_weighted
+          - aromatic_ring_count
+          - qed_weighted
           - property_ro5_violations
           - property_ro3_pass
         provider_order: [chembl, pubchem]
@@ -305,13 +300,13 @@ composite:
 
     # Required fields in final Gold output
     required_fields:
-      - molecule_chembl_id
+      - molecule_id
       - entity_id
 
     # Field-level validation rules
     field_validations:
       # === Structural Identifiers ===
-      inchikey:
+      inchi_key:
         type: string
         nullable: true
         pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
@@ -330,19 +325,19 @@ composite:
         max_value: 50000.0
         description: "Molecular weight in Daltons"
 
-      xlogp:
+      logp:
         type: float
         nullable: true
         min_value: -20.0
         max_value: 30.0
-        description: "XLogP (lipophilicity estimate)"
+        description: "LogP (AlogP/XlogP coalesced)"
 
-      tpsa:
+      polar_surface_area:
         type: float
         nullable: true
         min_value: 0.0
         max_value: 2000.0
-        description: "Topological Polar Surface Area"
+        description: "Polar Surface Area"
 
       # === Clinical Data ===
       max_phase:
@@ -390,12 +385,12 @@ composite:
     # Field-level source tracking for overlapping fields
     track_source_for_fields:
       - canonical_smiles
-      - inchikey
+      - inchi_key
       - molecular_weight
-      - xlogp
-      - tpsa
-      - hba
-      - hbd
+      - logp
+      - polar_surface_area
+      - hba_count
+      - hbd_count
 
 # -----------------------------------------------------------------------------
 # Gold Filters (applied to merged output)
@@ -403,7 +398,7 @@ composite:
 gold_filters:
   # Only include molecules with primary key
   required_fields:
-    - molecule_chembl_id
+    - molecule_id
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)

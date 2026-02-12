@@ -418,7 +418,7 @@ class TestMixedErrorTypesDuringDegradation:
         """Mixed errors: All exceptions count in circuit breaker.
 
         Note: CircuitBreaker itself counts all exceptions. Error classification
-        (is_circuit_breaker_error) is used at HTTP client level to decide
+        (is_circuit_breaker_error) is used at HTTP client level to demolecule_ide
         whether to pass failure to circuit breaker.
         """
         cb = CircuitBreaker(provider="test", failure_threshold=2)

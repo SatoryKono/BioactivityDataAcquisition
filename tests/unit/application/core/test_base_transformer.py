@@ -201,7 +201,7 @@ class TestCreateEntity:
             content_hash="abc123",
             index=0,
             activity_id="123",
-            molecule_chembl_id="CHEMBL25",
+            molecule_id="CHEMBL25",
         )
 
         assert entity.entity_id == "test:activity:123"
@@ -210,7 +210,7 @@ class TestCreateEntity:
         assert entity.run_type == mock_context.run_type
         assert entity.source_batch_id is None
         assert entity.activity_id == "123"
-        assert entity.molecule_chembl_id == "CHEMBL25"
+        assert entity.molecule_id == "CHEMBL25"
         assert entity._index == 0
 
     def test_raises_on_invalid_entity_data(
@@ -225,7 +225,7 @@ class TestCreateEntity:
                 content_hash="abc123",
                 index=0,
                 activity_id="",  # Invalid: empty activity_id
-                molecule_chembl_id="CHEMBL25",
+                molecule_id="CHEMBL25",
             )
 
 
@@ -584,7 +584,7 @@ class TestValidateValueObject:
         # DOI normalizes to lowercase
         assert result == "10.1038/nature12373"
 
-    def test_validate_value_object_inchikey_valid(self) -> None:
+    def test_validate_value_object_inchi_key_valid(self) -> None:
         """Test validate_value_object with valid InChIKey."""
         from bioetl.domain.value_objects import InChIKey
 
@@ -593,11 +593,11 @@ class TestValidateValueObject:
         )
         assert result == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
 
-    def test_validate_value_object_inchikey_invalid(self) -> None:
+    def test_validate_value_object_inchi_key_invalid(self) -> None:
         """Test validate_value_object with invalid InChIKey."""
         from bioetl.domain.value_objects import InChIKey
 
-        result = BaseTransformer.validate_value_object(InChIKey, "not-an-inchikey")
+        result = BaseTransformer.validate_value_object(InChIKey, "not-an-inchi_key")
         assert result is None
 
     def test_validate_value_objects_returns_list(self) -> None:

@@ -17,8 +17,8 @@ entity: idmapping
 input_filter:
   enabled: false
   source_path: "data/input/target.csv"
-  column_name: "target_chembl_id"
-  filter_field: "target_chembl_id"
+  column_name: "target_id"
+  filter_field: "target_id"
   batch_size: 100
 
 # -----------------------------------------------------------------------------
@@ -28,5 +28,5 @@ input_filter:
 gold_filters:
   # Required fields
   required_fields:
-    - target_chembl_id
+    - target_id
     - mapping_status

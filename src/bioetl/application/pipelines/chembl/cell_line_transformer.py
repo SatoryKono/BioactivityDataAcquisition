@@ -60,7 +60,7 @@ class CellLineTransformer(BaseChemblTransformer):
 
         return {
             # Primary identifier
-            "cell_chembl_id": str(primary_id),
+            "cell_id": str(primary_id),
             # Core metadata
             "cell_name": cell_name,
             "cell_description": record.get("cell_description"),

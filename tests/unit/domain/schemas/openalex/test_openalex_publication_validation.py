@@ -684,21 +684,21 @@ class TestMagIdBaseValidation:
 
 
 @pytest.mark.unit
-class TestAuthorOrcidsBaseValidation:
-    """Base validation tests for author_orcids."""
+class TestAuthorOrmolecule_idsBaseValidation:
+    """Base validation tests for author_ormolecule_ids."""
 
-    def test_author_orcids_valid(
+    def test_author_ormolecule_ids_valid(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
-        """PASS: valid author_orcids value."""
+        """PASS: valid author_ormolecule_ids value."""
         OpenAlexPublicationSchema.validate(minimal_openalex_publication_df)
 
-    def test_author_orcids_null_allowed(
+    def test_author_ormolecule_ids_null_allowed(
         self, minimal_openalex_publication_df: pd.DataFrame
     ) -> None:
-        """SKIP: author_orcids is nullable."""
+        """SKIP: author_ormolecule_ids is nullable."""
         df = minimal_openalex_publication_df.copy()
-        df["author_orcids"] = None
+        df["author_ormolecule_ids"] = None
         OpenAlexPublicationSchema.validate(df)
 
 

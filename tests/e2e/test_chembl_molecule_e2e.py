@@ -68,7 +68,7 @@ async def test_chembl_molecule_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "chembl_molecule")
-    required_fields = ["molecule_chembl_id"]
+    required_fields = ["molecule_id"]
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
@@ -93,5 +93,5 @@ async def test_chembl_molecule_structural_fields(e2e_data_dir: Path):
     records = get_silver_records(e2e_data_dir, "chembl_molecule")
 
     for record in records:
-        # At least molecule_chembl_id should always be present
-        assert record.get("molecule_chembl_id") is not None
+        # At least molecule_id should always be present
+        assert record.get("molecule_id") is not None

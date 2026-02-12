@@ -12,7 +12,7 @@ entity: molecule
 # Molecule-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: molecule_chembl_id
+  - field: molecule_id
     type: required
     nullable: false
     error_message: "Molecule ChEMBL ID is required"

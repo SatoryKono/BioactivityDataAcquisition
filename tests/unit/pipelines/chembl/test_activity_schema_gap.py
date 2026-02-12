@@ -62,7 +62,7 @@ def context(chembl_pipeline) -> PipelineContext:
 
 @pytest.mark.asyncio
 async def test_transform_populates_extended_fields(chembl_pipeline, context):
-    """Verify that new fields (assay_type, document_year, etc.) are correctly propagated via Entity."""
+    """Verify that new fields (assay_type, publication_year, etc.) are correctly propagated via Entity."""
     record = {
         "activity_id": "100",
         "molecule_chembl_id": "M1",
@@ -71,7 +71,7 @@ async def test_transform_populates_extended_fields(chembl_pipeline, context):
         # New fields
         "assay_type": "B",
         "assay_description": "Test Assay",
-        "document_chembl_id": "DOC123",
+        "document_chembl_id": "CHEMBL123",
         "document_year": 2023,
     }
 
@@ -82,8 +82,8 @@ async def test_transform_populates_extended_fields(chembl_pipeline, context):
     # Verify extended fields are present in SilverRecord
     assert result["assay_type"] == "B"
     assert result["assay_description"] == "Test Assay"
-    assert result["document_chembl_id"] == "DOC123"
-    assert result["document_year"] == 2023
+    assert result["publication_id"] == "CHEMBL123"
+    assert result["publication_year"] == 2023
     assert "_run_id" in result
 
 
@@ -101,4 +101,4 @@ async def test_transform_handles_missing_extended_fields(chembl_pipeline, contex
 
     assert result is not None
     assert result["assay_type"] is None
-    assert result["document_year"] is None
+    assert result["publication_year"] is None

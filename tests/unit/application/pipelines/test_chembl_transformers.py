@@ -49,9 +49,9 @@ class TestAssayTransformer:
     async def test_transform_valid_record(self, transformer, mock_context):
         """Test transformation of valid assay record."""
         record = {
-            "assay_chembl_id": "CHEMBL1234567",
-            "target_chembl_id": "CHEMBL123",
-            "document_chembl_id": "CHEMBL456",
+            "assay_id": "CHEMBL1234567",
+            "target_id": "CHEMBL123",
+            "publication_id": "CHEMBL456",
             "assay_type": "B",
             "assay_type_description": "Binding",
             "description": "Test assay description",
@@ -61,8 +61,8 @@ class TestAssayTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["assay_chembl_id"] == "CHEMBL1234567"
-        assert result["target_chembl_id"] == "CHEMBL123"
+        assert result["assay_id"] == "CHEMBL1234567"
+        assert result["target_id"] == "CHEMBL123"
         assert result["assay_type"] == "B"
         assert result["confidence_score"] == 9
         assert "entity_id" in result
@@ -71,9 +71,9 @@ class TestAssayTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_missing_assay_id(self, transformer, mock_context):
-        """Test transformation returns None when assay_chembl_id is missing."""
+        """Test transformation returns None when assay_id is missing."""
         record = {
-            "target_chembl_id": "CHEMBL123",
+            "target_id": "CHEMBL123",
             "assay_type": "B",
         }
 
@@ -85,7 +85,7 @@ class TestAssayTransformer:
     async def test_transform_with_json_fields(self, transformer, mock_context):
         """Test transformation handles complex JSON fields."""
         record = {
-            "assay_chembl_id": "CHEMBL1234567",
+            "assay_id": "CHEMBL1234567",
             "assay_classifications": [{"class": "Pharmacology"}],
             "assay_parameters": [{"param": "IC50"}],
         }
@@ -101,7 +101,7 @@ class TestAssayTransformer:
     async def test_transform_with_variant_sequence(self, transformer, mock_context):
         """Test transformation with variant_sequence data (flattened structure)."""
         record = {
-            "assay_chembl_id": "CHEMBL1234567",
+            "assay_id": "CHEMBL1234567",
             "variant_sequence": {
                 "accession": "P12345",
                 "isoform": "1",
@@ -129,7 +129,7 @@ class TestAssayTransformer:
     async def test_transform_with_null_variant(self, transformer, mock_context):
         """Test transformation handles null variant_sequence."""
         record = {
-            "assay_chembl_id": "CHEMBL1234567",
+            "assay_id": "CHEMBL1234567",
             "variant_sequence": None,
         }
 
@@ -148,7 +148,7 @@ class TestAssayTransformer:
     async def test_transform_with_partial_variant(self, transformer, mock_context):
         """Test transformation with partial variant_sequence data."""
         record = {
-            "assay_chembl_id": "CHEMBL1234567",
+            "assay_id": "CHEMBL1234567",
             "variant_sequence": {
                 "accession": "P12345",
                 "mutation": "L858R",
@@ -170,7 +170,7 @@ class TestAssayTransformer:
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
         transformer = AssayTransformer(provider="custom_provider")
-        record = {"assay_chembl_id": "CUSTOM123"}
+        record = {"assay_id": "CUSTOM123"}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -191,7 +191,7 @@ class TestPublicationTransformer:
     async def test_transform_valid_record(self, transformer, mock_context):
         """Test transformation of valid document record."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "pubmed_id": "12345678",  # Source API field name
             "doi": "10.1000/test.doi",
             "title": "Test Document Title",
@@ -203,7 +203,7 @@ class TestPublicationTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["document_chembl_id"] == "CHEMBL1234567"
+        assert result["publication_id"] == "CHEMBL1234567"
         assert result["pmid"] == "12345678"  # Standardized output field name
         assert result["doi"] == "10.1000/test.doi"
         assert result["publication_year"] == 2024
@@ -213,7 +213,7 @@ class TestPublicationTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_missing_document_id(self, transformer, mock_context):
-        """Test transformation returns None when document_chembl_id is missing."""
+        """Test transformation returns None when publication_id is missing."""
         record = {
             "pubmed_id": "12345678",  # Source API field name
             "title": "Test Document",
@@ -227,7 +227,7 @@ class TestPublicationTransformer:
     async def test_transform_with_all_fields(self, transformer, mock_context):
         """Test transformation with all document fields."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "pubmed_id": "12345678",  # Source API field name
             "doi": "10.1000/test",
             # patent_id excluded from unified publication schema
@@ -265,7 +265,7 @@ class TestMoleculeTransformer:
     async def test_transform_valid_record(self, transformer, mock_context):
         """Test transformation of valid molecule record."""
         record = {
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "pref_name": "ASPIRIN",
             "molecule_type": "Small molecule",
             "max_phase": 4,
@@ -275,7 +275,7 @@ class TestMoleculeTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["molecule_chembl_id"] == "CHEMBL25"
+        assert result["molecule_id"] == "CHEMBL25"
         assert result["pref_name"] == "ASPIRIN"
         assert result["molecule_type"] == "Small molecule"
         assert result["max_phase"] == 4
@@ -285,7 +285,7 @@ class TestMoleculeTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_missing_molecule_id(self, transformer, mock_context):
-        """Test transformation returns None when molecule_chembl_id is missing."""
+        """Test transformation returns None when molecule_id is missing."""
         record = {
             "pref_name": "TEST MOLECULE",
             "molecule_type": "Small molecule",
@@ -299,7 +299,7 @@ class TestMoleculeTransformer:
     async def test_transform_with_flags(self, transformer, mock_context):
         """Test transformation with boolean flag fields."""
         record = {
-            "molecule_chembl_id": "CHEMBL123",
+            "molecule_id": "CHEMBL123",
             "oral": True,
             "parenteral": False,
             "topical": False,
@@ -321,7 +321,7 @@ class TestMoleculeTransformer:
     async def test_transform_with_complex_fields(self, transformer, mock_context):
         """Test transformation with complex JSON fields."""
         record = {
-            "molecule_chembl_id": "CHEMBL123",
+            "molecule_id": "CHEMBL123",
             "molecule_hierarchy": {"parent_chembl_id": "CHEMBL123"},
             "molecule_properties": {"mw_freebase": 180.16},
             "molecule_structures": {"canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O"},
@@ -341,7 +341,7 @@ class TestMoleculeTransformer:
     async def test_transform_with_new_core_fields(self, transformer, mock_context):
         """Test transformation with chirality, availability_type, and other new fields."""
         record = {
-            "molecule_chembl_id": "CHEMBL456",
+            "molecule_id": "CHEMBL456",
             "chirality": 1,  # racemic
             "dosed_ingredient": 1,
             "availability_type": 2,
@@ -366,7 +366,7 @@ class TestMoleculeTransformer:
         in the /molecule endpoint. Use /drug_warning endpoint for detailed info.
         """
         record = {
-            "molecule_chembl_id": "CHEMBL789",
+            "molecule_id": "CHEMBL789",
             "withdrawn_flag": True,
         }
 
@@ -379,7 +379,7 @@ class TestMoleculeTransformer:
     async def test_transform_with_usan_fields(self, transformer, mock_context):
         """Test transformation with USAN naming fields."""
         record = {
-            "molecule_chembl_id": "CHEMBL1234",
+            "molecule_id": "CHEMBL1234",
             "usan_stem": "-mab",
             "usan_stem_definition": "monoclonal antibody",
             "usan_substem": "-xi-",
@@ -402,7 +402,7 @@ class TestMoleculeTransformer:
         in the public ChEMBL API.
         """
         record = {
-            "molecule_chembl_id": "CHEMBL5678",
+            "molecule_id": "CHEMBL5678",
             "molecule_properties": {
                 "alogp": 2.5,
                 "mw_freebase": 300.5,
@@ -425,11 +425,11 @@ class TestMoleculeTransformer:
     async def test_transform_with_hierarchy_child(self, transformer, mock_context):
         """Test transformation extracts child_chembl_id from hierarchy."""
         record = {
-            "molecule_chembl_id": "CHEMBL9999",
+            "molecule_id": "CHEMBL9999",
             "molecule_hierarchy": {
                 "parent_chembl_id": "CHEMBL1000",
                 "active_chembl_id": "CHEMBL1001",
-                "molecule_chembl_id": "CHEMBL9999",
+                "molecule_id": "CHEMBL9999",
             },
         }
 
@@ -454,7 +454,7 @@ class TestTargetTransformer:
     async def test_transform_valid_record(self, transformer, mock_context):
         """Test transformation of valid target record."""
         record = {
-            "target_chembl_id": "CHEMBL1862",
+            "target_id": "CHEMBL1862",
             "pref_name": "Cyclooxygenase-2",
             "target_type": "SINGLE PROTEIN",
             "organism": "Homo sapiens",
@@ -464,7 +464,7 @@ class TestTargetTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["target_chembl_id"] == "CHEMBL1862"
+        assert result["target_id"] == "CHEMBL1862"
         assert result["pref_name"] == "Cyclooxygenase-2"
         assert result["target_type"] == "SINGLE PROTEIN"
         assert result["taxonomy_id"] == 9606  # Standardized output field name
@@ -474,7 +474,7 @@ class TestTargetTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_missing_target_id(self, transformer, mock_context):
-        """Test transformation returns None when target_chembl_id is missing."""
+        """Test transformation returns None when target_id is missing."""
         record = {
             "pref_name": "TEST TARGET",
             "organism": "Homo sapiens",
@@ -488,7 +488,7 @@ class TestTargetTransformer:
     async def test_transform_with_components(self, transformer, mock_context):
         """Test transformation with target components containing xrefs."""
         record = {
-            "target_chembl_id": "CHEMBL123",
+            "target_id": "CHEMBL123",
             "target_components": [
                 {
                     "component_type": "PROTEIN",
@@ -523,7 +523,7 @@ class TestTargetTransformer:
     ):
         """Test that cross_references are aggregated from all target_component_xrefs."""
         record = {
-            "target_chembl_id": "CHEMBL240",
+            "target_id": "CHEMBL240",
             "cross_references": [],  # API always returns empty
             "target_components": [
                 {
@@ -566,7 +566,7 @@ class TestTargetTransformer:
     ):
         """Test handling of targets with components but no cross-references."""
         record = {
-            "target_chembl_id": "CHEMBL456",
+            "target_id": "CHEMBL456",
             "target_components": [
                 {"accession": "P12345", "component_type": "PROTEIN"}  # No xrefs
             ],
@@ -581,7 +581,7 @@ class TestTargetTransformer:
     async def test_transform_handles_empty_components(self, transformer, mock_context):
         """Test handling of targets with no components."""
         record = {
-            "target_chembl_id": "CHEMBL789",
+            "target_id": "CHEMBL789",
             "target_components": [],
         }
 
@@ -594,7 +594,7 @@ class TestTargetTransformer:
     async def test_transform_custom_provider(self, mock_context):
         """Test transformation with custom provider."""
         transformer = TargetTransformer(provider="custom_target_provider")
-        record = {"target_chembl_id": "CUSTOM123"}
+        record = {"target_id": "CUSTOM123"}
 
         result = await transformer.transform(mock_context, record, index=0)
 
@@ -604,7 +604,7 @@ class TestTargetTransformer:
     async def test_transform_with_downgraded_field(self, transformer, mock_context):
         """Test transformation extracts downgraded field."""
         record = {
-            "target_chembl_id": "CHEMBL1862",
+            "target_id": "CHEMBL1862",
             "pref_name": "Cyclooxygenase-2",
             "target_type": "SINGLE PROTEIN",
             "downgraded": 0,
@@ -619,7 +619,7 @@ class TestTargetTransformer:
     async def test_transform_with_pipeline_stages(self, transformer, mock_context):
         """Test transformation handles pipeline_stages as JSON."""
         record = {
-            "target_chembl_id": "CHEMBL240",
+            "target_id": "CHEMBL240",
             "pipeline_stages": [{"stage": "Phase 1", "status": "Active"}],
         }
 
@@ -640,7 +640,7 @@ class TestTargetTransformer:
     ):
         """Test transformation handles missing fields (returns None/defaults)."""
         record = {
-            "target_chembl_id": "CHEMBL123",
+            "target_id": "CHEMBL123",
             "pref_name": "Test Target",
             # No downgraded, pipeline_stages
         }
@@ -779,7 +779,7 @@ class TestPublicationTermTransformer:
     def test_extract_mesh_terms(self, transformer):
         """Test extraction of MeSH terms from document record."""
         record = {
-            "document_chembl_id": "CHEMBL1135642",
+            "publication_id": "CHEMBL1135642",
             "mesh_terms": [
                 {
                     "mesh_id": "D001241",
@@ -804,7 +804,7 @@ class TestPublicationTermTransformer:
             for t in terms
             if t["term"] == "Aspirin" and t["term_type"] == "MESH_HEADING"
         )
-        assert aspirin_heading["document_chembl_id"] == "CHEMBL1135642"
+        assert aspirin_heading["publication_id"] == "CHEMBL1135642"
         assert aspirin_heading["mesh_id"] == "D001241"
         assert aspirin_heading["qualifier"] == "pharmacology"
 
@@ -814,7 +814,7 @@ class TestPublicationTermTransformer:
             for t in terms
             if t["term"] == "pharmacology" and t["term_type"] == "MESH_QUALIFIER"
         )
-        assert qualifier_term["document_chembl_id"] == "CHEMBL1135642"
+        assert qualifier_term["publication_id"] == "CHEMBL1135642"
 
         # Check second MeSH heading (no qualifier)
         humans_heading = next(
@@ -828,7 +828,7 @@ class TestPublicationTermTransformer:
     def test_extract_keywords(self, transformer):
         """Test extraction of keywords from document record."""
         record = {
-            "document_chembl_id": "CHEMBL1135642",
+            "publication_id": "CHEMBL1135642",
             "keywords": ["aspirin", "anti-inflammatory", "COX inhibitor"],
         }
 
@@ -838,7 +838,7 @@ class TestPublicationTermTransformer:
 
         for term in terms:
             assert term["term_type"] == "KEYWORD"
-            assert term["document_chembl_id"] == "CHEMBL1135642"
+            assert term["publication_id"] == "CHEMBL1135642"
             assert term["mesh_id"] is None
             assert term["qualifier"] is None
 
@@ -850,7 +850,7 @@ class TestPublicationTermTransformer:
     def test_extract_mixed_terms(self, transformer):
         """Test extraction of both MeSH and keywords from document."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "mesh_terms": [
                 {"mesh_id": "D001241", "mesh_heading": "Aspirin"},
             ],
@@ -870,7 +870,7 @@ class TestPublicationTermTransformer:
     def test_extract_empty_terms(self, transformer):
         """Test extraction from document with no terms."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "mesh_terms": [],
             "keywords": [],
         }
@@ -882,7 +882,7 @@ class TestPublicationTermTransformer:
     def test_extract_null_terms(self, transformer):
         """Test extraction from document with null term arrays."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "mesh_terms": None,
             "keywords": None,
         }
@@ -894,7 +894,7 @@ class TestPublicationTermTransformer:
     def test_extract_terms_with_whitespace(self, transformer):
         """Test that keyword terms are stripped of whitespace."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "keywords": ["  aspirin  ", " kinase inhibitor "],
         }
 
@@ -943,7 +943,7 @@ class TestPublicationTermTransformer:
     def test_skip_empty_keywords(self, transformer):
         """Test that empty string keywords are skipped."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "keywords": ["aspirin", "", "  ", "kinase"],
         }
 
@@ -958,7 +958,7 @@ class TestPublicationTermTransformer:
     def test_skip_non_dict_mesh_terms(self, transformer):
         """Test that non-dict entries in mesh_terms are skipped."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "mesh_terms": [
                 {"mesh_id": "D001241", "mesh_heading": "Aspirin"},
                 "invalid_string",  # Should be skipped
@@ -983,7 +983,7 @@ class TestPublicationTermTransformer:
         and term_type come directly from the record (PublicationTermDataSource).
         """
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "term": "  kinase  ",
             "term_type": "  KEYWORD  ",
         }
@@ -993,7 +993,7 @@ class TestPublicationTermTransformer:
         assert result is not None
         assert result["term"] == "kinase"
         assert result["term_type"] == "KEYWORD"
-        assert result["document_chembl_id"] == "CHEMBL1234567"
+        assert result["publication_id"] == "CHEMBL1234567"
 
     @pytest.mark.asyncio
     async def test_transform_pre_extracted_mesh_heading_with_qualifier(
@@ -1005,7 +1005,7 @@ class TestPublicationTermTransformer:
         mesh_id or qualifier fields while applying strip().
         """
         record = {
-            "document_chembl_id": "CHEMBL1135642",
+            "publication_id": "CHEMBL1135642",
             "term": "  Aspirin  ",
             "term_type": "  MESH_HEADING  ",
             "mesh_id": "  D001241  ",
@@ -1019,7 +1019,7 @@ class TestPublicationTermTransformer:
         assert result["term_type"] == "MESH_HEADING"
         assert result["mesh_id"] == "D001241"
         assert result["qualifier"] == "pharmacology"
-        assert result["document_chembl_id"] == "CHEMBL1135642"
+        assert result["publication_id"] == "CHEMBL1135642"
 
     @pytest.mark.asyncio
     async def test_transform_pre_extracted_empty_term_returns_none(
@@ -1031,7 +1031,7 @@ class TestPublicationTermTransformer:
         validation should reject the record (skip logic).
         """
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "term": "   ",  # Only whitespace
             "term_type": "KEYWORD",
         }
@@ -1051,7 +1051,7 @@ class TestPublicationTermTransformer:
         skipped as it lacks required classification.
         """
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "term": "kinase",
             "term_type": "   ",  # Only whitespace
         }
@@ -1071,7 +1071,7 @@ class TestPublicationTermTransformer:
         Verifies consistency with the pre-extracted term normalization.
         """
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "mesh_terms": [
                 {
                     "mesh_id": "D001241",
@@ -1101,7 +1101,7 @@ class TestPublicationTermTransformer:
     ):
         """Test that pre-extracted record with None mesh_id/qualifier works correctly."""
         record = {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "term": "  kinase inhibitor  ",
             "term_type": "KEYWORD",
             "mesh_id": None,

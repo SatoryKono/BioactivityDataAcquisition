@@ -20,11 +20,11 @@ class IDMappingResult(BaseEntity):
     Maps ChEMBL target IDs to UniProt accessions using UniProt ID Mapping REST API.
     Extracts comprehensive metadata from UniProt entries when mapping is found.
 
-    Required fields: target_chembl_id, mapping_status
+    Required fields: target_id, mapping_status
     Optional fields: All others (None if mapping not found or data unavailable)
 
     Attributes:
-        target_chembl_id: Source ChEMBL target identifier (e.g., CHEMBL204)
+        target_id: Source ChEMBL target identifier (e.g., CHEMBL204)
         uniprot_accession: Mapped UniProt accession (e.g., P00742) or None if not found
         mapping_status: Status of mapping: 'found', 'not_found', 'error', 'multiple'
         uniprot_entry_name: UniProt entry name (e.g., FA10_HUMAN)
@@ -41,7 +41,7 @@ class IDMappingResult(BaseEntity):
     """
 
     # Primary key (input)
-    target_chembl_id: str
+    target_id: str
 
     # Core mapping result
     uniprot_accession: str | None = None
@@ -69,8 +69,8 @@ class IDMappingResult(BaseEntity):
 
     def _validate_invariants(self) -> None:
         """Validate domain-specific invariants."""
-        if not self.target_chembl_id:
-            raise ValueError("target_chembl_id is required")
+        if not self.target_id:
+            raise ValueError("target_id is required")
         if self.mapping_status not in ("found", "not_found", "error", "multiple"):
             raise ValueError(
                 f"Invalid mapping_status: {self.mapping_status}. "

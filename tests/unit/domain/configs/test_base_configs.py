@@ -229,7 +229,7 @@ class TestConsolidationPattern:
             enabled=True,
             source_path="/path/to/file.csv",
             column_name="chembl_id",
-            filter_field="molecule_chembl_id",
+            filter_field="molecule_id",
             batch_size=50,
         )
         domain_config = pydantic_config.to_domain()
@@ -237,5 +237,5 @@ class TestConsolidationPattern:
         assert domain_config.enabled is True
         assert domain_config.source_path == "/path/to/file.csv"
         assert domain_config.column_name == "chembl_id"
-        assert domain_config.filter_field == "molecule_chembl_id"
+        assert domain_config.filter_field == "molecule_id"
         assert domain_config.batch_size == 50

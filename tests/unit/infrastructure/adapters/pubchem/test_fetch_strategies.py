@@ -47,7 +47,7 @@ def mock_entity_mapper():
     """Create a mock PubChemEntityMapper."""
     mapper = MagicMock()
     mapper.compound_to_dict = MagicMock(
-        side_effect=lambda c: {"cid": getattr(c, "cid", 1), "name": "test_compound"}
+        side_effect=lambda c: {"molecule_id": getattr(c, "molecule_id", 1), "name": "test_compound"}
     )
     mapper.substance_to_dict = MagicMock(
         side_effect=lambda s: {"sid": getattr(s, "sid", 1), "name": "test_substance"}
@@ -175,8 +175,8 @@ class TestFetchByQuery:
         self, fetch_strategies, mock_circuit_breaker, mock_entity_mapper
     ):
         """Test that fetch_by_query yields compound dictionaries."""
-        mock_compound1 = MagicMock(cid=2244)
-        mock_compound2 = MagicMock(cid=3672)
+        mock_compound1 = MagicMock(molecule_id=2244)
+        mock_compound2 = MagicMock(molecule_id=3672)
         mock_circuit_breaker.call.return_value = [mock_compound1, mock_compound2]
 
         results = await collect_async_iterator(
@@ -191,7 +191,7 @@ class TestFetchByQuery:
         self, fetch_strategies, mock_circuit_breaker
     ):
         """Test that fetch_by_query respects limit parameter."""
-        mock_compounds = [MagicMock(cid=i) for i in range(10)]
+        mock_compounds = [MagicMock(molecule_id=i) for i in range(10)]
         mock_circuit_breaker.call.return_value = mock_compounds
 
         results = await collect_async_iterator(
@@ -236,7 +236,7 @@ class TestFetchBySmiles:
         self, fetch_strategies, mock_circuit_breaker, mock_entity_mapper
     ):
         """Test that fetch_by_smiles yields compound dictionaries."""
-        mock_compound = MagicMock(cid=2244)
+        mock_compound = MagicMock(molecule_id=2244)
         mock_circuit_breaker.call.return_value = [mock_compound]
 
         smiles_list = ["CC(=O)OC1=CC=CC=C1C(=O)O"]
@@ -251,7 +251,7 @@ class TestFetchBySmiles:
         self, fetch_strategies, mock_circuit_breaker
     ):
         """Test that fetch_by_smiles skips empty SMILES strings."""
-        mock_compound = MagicMock(cid=2244)
+        mock_compound = MagicMock(molecule_id=2244)
         mock_circuit_breaker.call.return_value = [mock_compound]
 
         smiles_list = ["", "  ", "CC(=O)OC1=CC=CC=C1C(=O)O", None]
@@ -267,7 +267,7 @@ class TestFetchBySmiles:
         self, fetch_strategies, mock_circuit_breaker
     ):
         """Test that fetch_by_smiles respects limit parameter."""
-        mock_compound = MagicMock(cid=1)
+        mock_compound = MagicMock(molecule_id=1)
         mock_circuit_breaker.call.return_value = [mock_compound]
 
         smiles_list = ["CC", "CCC", "CCCC", "CCCCC"]
@@ -297,21 +297,21 @@ class TestFetchBySmiles:
 
 @pytest.mark.unit
 class TestParseValidCids:
-    """Tests for _parse_valid_cids method."""
+    """Tests for _parse_valid_molecule_ids method."""
 
-    def test_parse_valid_cids_converts_strings_to_ints(self, fetch_strategies):
-        """Test that _parse_valid_cids converts string CIDs to integers."""
-        cid_list = ["2244", "3672", "5988"]
+    def test_parse_valid_molecule_ids_converts_strings_to_ints(self, fetch_strategies):
+        """Test that _parse_valid_molecule_ids converts string CIDs to integers."""
+        molecule_id_list = ["2244", "3672", "5988"]
 
-        result = fetch_strategies._parse_valid_cids(cid_list)
+        result = fetch_strategies._parse_valid_molecule_ids(molecule_id_list)
 
         assert result == [2244, 3672, 5988]
 
-    def test_parse_valid_cids_skips_invalid_cids(self, fetch_strategies, mock_logger):
-        """Test that _parse_valid_cids skips invalid CIDs and logs warning."""
-        cid_list = ["2244", "invalid", "3672", ""]
+    def test_parse_valid_molecule_ids_skips_invalid_molecule_ids(self, fetch_strategies, mock_logger):
+        """Test that _parse_valid_molecule_ids skips invalid CIDs and logs warning."""
+        molecule_id_list = ["2244", "invalid", "3672", ""]
 
-        result = fetch_strategies._parse_valid_cids(cid_list)
+        result = fetch_strategies._parse_valid_molecule_ids(molecule_id_list)
 
         assert result == [2244, 3672]
         # Should log warnings for invalid CIDs
@@ -320,71 +320,71 @@ class TestParseValidCids:
 
 @pytest.mark.unit
 class TestFetchByCids:
-    """Tests for fetch_by_cids method."""
+    """Tests for fetch_by_molecule_ids method."""
 
     @pytest.mark.asyncio
-    async def test_fetch_by_cids_yields_compounds(
+    async def test_fetch_by_molecule_ids_yields_compounds(
         self, fetch_strategies, mock_circuit_breaker
     ):
-        """Test that fetch_by_cids yields compound dictionaries."""
-        mock_compound = MagicMock(cid=2244)
+        """Test that fetch_by_molecule_ids yields compound dictionaries."""
+        mock_compound = MagicMock(molecule_id=2244)
         mock_circuit_breaker.call.return_value = [mock_compound]
 
-        cid_list = ["2244"]
+        molecule_id_list = ["2244"]
         results = await collect_async_iterator(
-            fetch_strategies.fetch_by_cids(cid_list, limit=None)
+            fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=None)
         )
 
         assert len(results) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_by_cids_batches_requests(
+    async def test_fetch_by_molecule_ids_batches_requests(
         self, fetch_strategies, mock_circuit_breaker
     ):
-        """Test that fetch_by_cids batches requests."""
-        mock_compound = MagicMock(cid=1)
+        """Test that fetch_by_molecule_ids batches requests."""
+        mock_compound = MagicMock(molecule_id=1)
         mock_circuit_breaker.call.return_value = [mock_compound]
 
         # Create list with more CIDs than batch size
-        cid_list = [str(i) for i in range(120)]
+        molecule_id_list = [str(i) for i in range(120)]
         await collect_async_iterator(
-            fetch_strategies.fetch_by_cids(cid_list, limit=None, batch_size=50)
+            fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=None, batch_size=50)
         )
 
         # Should have made 3 batches (50 + 50 + 20)
         assert mock_circuit_breaker.call.call_count == 3
 
     @pytest.mark.asyncio
-    async def test_fetch_by_cids_respects_limit(
+    async def test_fetch_by_molecule_ids_respects_limit(
         self, fetch_strategies, mock_circuit_breaker
     ):
-        """Test that fetch_by_cids respects limit parameter."""
-        mock_compounds = [MagicMock(cid=i) for i in range(10)]
+        """Test that fetch_by_molecule_ids respects limit parameter."""
+        mock_compounds = [MagicMock(molecule_id=i) for i in range(10)]
         mock_circuit_breaker.call.return_value = mock_compounds
 
-        cid_list = [str(i) for i in range(100)]
+        molecule_id_list = [str(i) for i in range(100)]
         results = await collect_async_iterator(
-            fetch_strategies.fetch_by_cids(cid_list, limit=5, batch_size=50)
+            fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=5, batch_size=50)
         )
 
         assert len(results) == 5
 
     @pytest.mark.asyncio
-    async def test_fetch_by_cids_logs_warning_on_batch_error(
+    async def test_fetch_by_molecule_ids_logs_warning_on_batch_error(
         self, fetch_strategies, mock_circuit_breaker, mock_logger
     ):
-        """Test that fetch_by_cids logs warning when batch fetch fails."""
+        """Test that fetch_by_molecule_ids logs warning when batch fetch fails."""
         mock_circuit_breaker.call.side_effect = Exception("API error")
 
-        cid_list = ["2244", "3672"]
+        molecule_id_list = ["2244", "3672"]
         results = await collect_async_iterator(
-            fetch_strategies.fetch_by_cids(cid_list, limit=None)
+            fetch_strategies.fetch_by_molecule_ids(molecule_id_list, limit=None)
         )
 
         assert len(results) == 0
         mock_logger.warning.assert_called()
         call_args = mock_logger.warning.call_args
-        assert call_args[0][0] == "cid_batch_fetch_failed"
+        assert call_args[0][0] == "molecule_id_batch_fetch_failed"
 
 
 @pytest.mark.unit

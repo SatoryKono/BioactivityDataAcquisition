@@ -12,12 +12,12 @@ entity: target
 # -----------------------------------------------------------------------------
 # Input Filter
 # -----------------------------------------------------------------------------
-# Filter targets by target_chembl_id from CSV
+# Filter targets by target_id from CSV
 input_filter:
   enabled: true
   source_path: "data/input/target.csv"
-  column_name: "target_chembl_id"
-  filter_field: "target_chembl_id"
+  column_name: "target_id"
+  filter_field: "target_id"
   batch_size: 20
 
 # -----------------------------------------------------------------------------

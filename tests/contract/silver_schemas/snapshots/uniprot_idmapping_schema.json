@@ -213,10 +213,10 @@
     "required": false,
     "unique": false
   },
-  "target_chembl_id": {
+  "target_id": {
     "checks": [
       {
-        "name": "target_chembl_id_format"
+        "name": "target_id_format"
       }
     ],
     "coerce": false,

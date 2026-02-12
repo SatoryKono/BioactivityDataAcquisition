@@ -51,7 +51,7 @@ class TestRunOptions:
             limit=1000,
             input_csv="/path/to/ids.csv",
             filter_column="chembl_id",
-            filter_field="molecule_chembl_id",
+            filter_field="molecule_id",
             dry_run=True,
             vacuum_after_run=True,
             vacuum_retention_days=14,
@@ -62,7 +62,7 @@ class TestRunOptions:
         assert options.limit == 1000
         assert options.input_csv == "/path/to/ids.csv"
         assert options.filter_column == "chembl_id"
-        assert options.filter_field == "molecule_chembl_id"
+        assert options.filter_field == "molecule_id"
         assert options.dry_run is True
         assert options.vacuum_after_run is True
         assert options.vacuum_retention_days == 14
@@ -241,14 +241,14 @@ class TestBuildPipelineContext:
         options = RunOptions(
             input_csv="/path/to/ids.csv",
             filter_column="chembl_id",
-            filter_field="molecule_chembl_id",
+            filter_field="molecule_id",
         )
         ctx = build_pipeline_context("chembl_activity", options)
 
         assert ctx.input_filter.enabled is True
         assert ctx.input_filter.source_path == "/path/to/ids.csv"
         assert ctx.input_filter.column_name == "chembl_id"
-        assert ctx.input_filter.filter_field == "molecule_chembl_id"
+        assert ctx.input_filter.filter_field == "molecule_id"
 
     def test_context_without_input_filter(self):
         """Test building context without input filter."""

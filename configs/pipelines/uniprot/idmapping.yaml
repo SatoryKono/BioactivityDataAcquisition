@@ -2,7 +2,7 @@
 # Pipeline configuration for UniProt ID Mapping (ChEMBL → UniProt).
 #
 # Maps ChEMBL target IDs to UniProt accessions using UniProt ID Mapping REST API.
-# Input: CSV file with target_chembl_id column
+# Input: CSV file with target_id column
 # Output: Silver/Gold records with mapping results (null for not_found)
 #
 # Inherits defaults from ../_base.yaml
@@ -13,7 +13,7 @@ entity_type: idmapping
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
-primary_keys: ["target_chembl_id"]
+primary_keys: ["target_id"]
 silver_table: "uniprot_idmapping"
 gold_table: "uniprot_idmapping"
 
@@ -44,7 +44,7 @@ source:
 #
 # Entity-specific config contains:
 #   - Elevated thresholds: soft_fail=0.30, hard_fail=0.80 (ID mapping may have many not_found)
-#   - Field validations: target_chembl_id, mapping_status, uniprot_accession
+#   - Field validations: target_id, mapping_status, uniprot_accession
 #   - Conditional validations: found_has_accession
 dq_config_file: ../../dq/entities/uniprot/idmapping.yaml
 data_schema_file: ../../data_schema/uniprot/idmapping.yaml
@@ -66,17 +66,17 @@ sink:
     path: "data/output/bronze/uniprot/idmapping"
   silver:
     path: "data/output/silver/uniprot/idmapping"
-    primary_key: ["target_chembl_id"]
+    primary_key: ["target_id"]
     partition_by: []  # No partitioning - small dataset
     sort_by:
-      columns: ["target_chembl_id"]
+      columns: ["target_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/uniprot/idmapping"
   gold:
     path: "data/output/gold/uniprot/idmapping"
     sort_by:
-      columns: ["target_chembl_id"]
+      columns: ["target_id"]
       ascending: true
     csv_export:
       path: "data/output/gold/uniprot/idmapping"

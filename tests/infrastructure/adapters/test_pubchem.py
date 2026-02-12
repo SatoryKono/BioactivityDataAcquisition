@@ -58,7 +58,7 @@ def pubchem_adapter(mock_logger, rate_limiter, circuit_breaker, thread_pool):
 @pytest.fixture
 def mock_pcp_compound():
     compound = MagicMock()
-    compound.cid = 123
+    compound.molecule_id = 123
     compound.molecular_formula = "C9H8O4"
     compound.molecular_weight = 180.16
     compound.exact_mass = 180.042259
@@ -70,8 +70,8 @@ def mock_pcp_compound():
     compound.inchi = (
         "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)"
     )
-    compound.inchikey = "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
-    compound.iupac_name = "2-acetyloxybenzoic acid"
+    compound.inchi_key = "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+    compound.iupac_name = "2-acetyloxybenzoic amolecule_id"
     compound.charge = 0
     compound.complexity = 212
     compound.h_bond_acceptor_count = 4
@@ -92,7 +92,7 @@ def mock_pcp_substance():
     substance.sid = 456
     substance.source_name = "MockSource"
     substance.source_id = "Source123"
-    substance.standardized_cids = [123]
+    substance.standardized_molecule_ids = [123]
     substance.synonyms = ["Aspirin"]
     return substance
 
@@ -116,8 +116,8 @@ async def test_fetch_compound_by_query(pubchem_adapter, mock_pcp_compound):
             results.append(record)
 
         assert len(results) == 1
-        assert results[0]["cid"] == 123
-        assert results[0]["iupac_name"] == "2-acetyloxybenzoic acid"
+        assert results[0]["molecule_id"] == 123
+        assert results[0]["iupac_name"] == "2-acetyloxybenzoic amolecule_id"
         mock_get.assert_called_with("aspirin", "name")
 
 
@@ -129,7 +129,7 @@ async def test_fetch_compound_with_limit(pubchem_adapter, mock_pcp_compound):
             results.append(record)
 
         assert len(results) == 1
-        assert results[0]["cid"] == 123
+        assert results[0]["molecule_id"] == 123
         mock_get.assert_called_with("aspirin", "name")
 
 

@@ -31,7 +31,7 @@ class AssayParametersSchema(ETLRecordSchema):
     )
 
     # === Foreign Key (Required) ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         coerce=True,
         str_matches=r"^CHEMBL\d+$",

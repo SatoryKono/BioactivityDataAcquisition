@@ -20,8 +20,8 @@ class CompoundRecordSchema(ETLRecordSchema):
     compound name as it appears in the publication.
 
     Relationships:
-    - M:1 → Molecule (molecule_chembl_id)
-    - M:1 → Publication (document_chembl_id)
+    - M:1 → Molecule (molecule_id)
+    - M:1 → Publication (publication_id)
     - M:1 → Source (src_id)
     """
 
@@ -33,12 +33,12 @@ class CompoundRecordSchema(ETLRecordSchema):
     )
 
     # === Foreign Keys ===
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="FK → Molecule.",
     )
-    document_chembl_id: Series[str] = pa.Field(
+    publication_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="FK → Publication.",

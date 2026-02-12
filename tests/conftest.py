@@ -640,7 +640,7 @@ def minimal_chembl_publication_df() -> Any:
         [
             {
                 # Primary identifier
-                "document_chembl_id": "CHEMBL1234567",
+                "publication_id": "CHEMBL1234567",
                 # ETL metadata (required by ETLRecordSchema)
                 "entity_id": "CHEMBL1234567",
                 "_run_id": str(uuid4()),
@@ -649,9 +649,9 @@ def minimal_chembl_publication_df() -> Any:
                 "_source_batch_id": None,
                 "_index": 0,
                 # Cross-reference identifiers
-                "pmid": "12345678",
-                "doi": "10.1234/test.2024.001",
-                "pmc_id": "PMC1234567",
+                "publication_pmid": "12345678",
+                "publication_doi": "10.1234/test.2024.001",
+                "publication_pmc_id": "PMC1234567",
                 # Core content
                 "title": "Test Publication Title",
                 "abstract": "Test abstract text for validation.",
@@ -676,7 +676,7 @@ def minimal_chembl_publication_df() -> Any:
                 "citations_made": 5,
                 "is_oa": True,
                 # Author identifiers
-                "author_orcids": None,
+                "author_ormolecule_ids": None,
                 # Provider-specific
                 "src_id": 123,
                 "chembl_release": "CHEMBL_34",
@@ -769,7 +769,7 @@ def minimal_pubmed_publication_df() -> Any:
                 "publication_types": None,
                 "authors_with_affiliations": None,
                 # Author identifiers
-                "author_orcids": None,
+                "author_ormolecule_ids": None,
                 # System fields
                 "content_hash": "b" * 64,
                 "_source": "pubmed",
@@ -838,7 +838,7 @@ def minimal_crossref_publication_df() -> Any:
                 "journal_name_short": None,
                 "issn_print": None,
                 "issn_electronic": None,
-                "author_orcids": None,
+                "author_ormolecule_ids": None,
                 "author_details": None,
                 "references": None,
                 # System fields
@@ -909,7 +909,7 @@ def minimal_openalex_publication_df() -> Any:
                 "subject_mesh": None,
                 "subject_keywords": None,
                 "mag_id": None,
-                "author_orcids": None,
+                "author_ormolecule_ids": None,
                 "author_openalex_ids": None,
                 "institution_ids": None,
                 "institution_country_codes": None,
@@ -980,7 +980,7 @@ def minimal_semanticscholar_publication_df() -> Any:
                 "subject_fields": None,
                 "publication_types": None,
                 "author_s2_ids": None,
-                "author_orcids": None,
+                "author_ormolecule_ids": None,
                 "author_h_indices": None,
                 "citation_contexts": None,
                 # System fields

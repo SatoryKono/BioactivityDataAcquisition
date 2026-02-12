@@ -196,7 +196,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     issn_electronic: str | None = None
 
     # Author ORCID identifiers (JSON array of ORCID IDs)
-    author_orcids: str | None = None
+    author_ormolecule_ids: str | None = None
 
     # Full author details with ORCID, sequence, affiliations (JSON array)
     author_details: str | None = None

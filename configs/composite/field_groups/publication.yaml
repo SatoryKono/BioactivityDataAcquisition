@@ -42,17 +42,17 @@ groups:
           - chembl.publication.publication_type
           - pubmed.publication.publication_type
 
-      - base_name: document_chembl_id
+      - base_name: publication_id
         columns:
-          - chembl.publication.document_chembl_id
+          - chembl.publication.publication_id
 
-      - base_name: doi
+      - base_name: publication_doi
         columns:
-          - chembl.publication.doi
-          - crossref.publication.doi
-          - openalex.publication.doi
-          - pubmed.publication.doi
-          - semanticscholar.publication.doi
+          - chembl.publication.publication_doi
+          - crossref.publication.publication_doi
+          - openalex.publication.publication_doi
+          - pubmed.publication.publication_doi
+          - semanticscholar.publication.publication_doi
 
       - base_name: entity_id
         columns:

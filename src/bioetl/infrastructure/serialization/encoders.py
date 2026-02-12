@@ -23,6 +23,7 @@ Feature Flag:
 from __future__ import annotations
 
 import json
+import os
 import types
 from functools import lru_cache
 from typing import Any
@@ -215,7 +216,11 @@ def get_json_encoder(encoder_type: str | None = None) -> JsonEncoderPort:
         ImportError: If orjson is requested but not installed
         ValueError: If unknown encoder type is specified
     """
-    effective_type = (encoder_type or "").lower()
+    # Priority: explicit arg -> environment variable -> automatic default
+    raw_type = encoder_type
+    if raw_type is None:
+        raw_type = os.getenv("BIOETL_JSON_ENCODER")
+    effective_type = (raw_type or "").strip().lower()
 
     if effective_type == "orjson":
         if not ORJSON_AVAILABLE:

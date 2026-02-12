@@ -56,6 +56,14 @@ _PROPERTIES_FIELDS: dict[str, Any] = {
 
 # Rename mapping for properties fields (num_ro5_violations -> ro5_violations)
 _PROPERTIES_RENAMES: dict[str, str] = {
+    "property_alogp": "logp",
+    "property_psa": "polar_surface_area",
+    "property_rtb": "rotatable_bond_count",
+    "property_heavy_atoms": "heavy_atom_count",
+    "property_aromatic_rings": "aromatic_ring_count",
+    "property_full_mwt": "molecular_weight",
+    "property_hba": "hba_count",
+    "property_hbd": "hbd_count",
     "property_num_ro5_violations": "property_ro5_violations",
 }
 
@@ -67,7 +75,7 @@ _STRUCTURES_FIELDS: dict[str, Any] = {
 
 # Rename mapping for structures fields (standard_inchi_key -> inchikey for IUPAC/PubChem consistency)
 _STRUCTURES_RENAMES: dict[str, str] = {
-    "standard_inchi_key": "inchikey",
+    "standard_inchi_key": "inchi_key",
 }
 
 # JSON fields to serialize
@@ -168,8 +176,8 @@ class MoleculeTransformer(BaseChemblTransformer):
         )
 
         # Validate InChI Key using Value Object (returns None for invalid/empty)
-        structure_data["inchikey"] = self.validate_value_object(
-            InChIKey, structure_data.get("inchikey")
+        structure_data["inchi_key"] = self.validate_value_object(
+            InChIKey, structure_data.get("inchi_key")
         )
 
         # Validate SMILES using Value Object (returns None for invalid/empty)
@@ -180,9 +188,18 @@ class MoleculeTransformer(BaseChemblTransformer):
         )
         structure_data["canonical_smiles"] = str(smiles) if smiles else None
 
+        properties = flatten_nested_dict(
+            cast("dict[str, Any] | None", rec.get("molecule_properties")),
+            "property_",
+            _PROPERTIES_FIELDS,
+            renames=_PROPERTIES_RENAMES,
+        )
+        if properties.get("logp") is not None:
+            properties["logp_method"] = "alogp"
+
         return {
-            # Primary identifier
-            "molecule_chembl_id": str(primary_id),
+            # Primary identifier (canonical)
+            "molecule_id": str(primary_id),
             # Declarative field groups (uses BronzeRecord type)
             **map_field_groups(record, _MOLECULE_GROUPS),
             # JSON serialization using helper method
@@ -194,12 +211,7 @@ class MoleculeTransformer(BaseChemblTransformer):
                 _HIERARCHY_FIELDS,
                 renames=_HIERARCHY_RENAMES,
             ),
-            **flatten_nested_dict(
-                cast("dict[str, Any] | None", rec.get("molecule_properties")),
-                "property_",
-                _PROPERTIES_FIELDS,
-                renames=_PROPERTIES_RENAMES,
-            ),
+            **properties,
             # Structure data with validated InChI Key and SMILES
             **structure_data,
         }

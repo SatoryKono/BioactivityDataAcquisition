@@ -44,7 +44,7 @@ def seed_keys() -> pl.DataFrame:
     """Create seed keys DataFrame."""
     return pl.DataFrame(
         {
-            "target_chembl_id": ["CHEMBL1", "CHEMBL2", "CHEMBL3"],
+            "target_id": ["CHEMBL1", "CHEMBL2", "CHEMBL3"],
             "component_id": [100, 200, 300],
         }
     )

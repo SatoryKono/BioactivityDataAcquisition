@@ -42,7 +42,7 @@ All 18 Silver schemas are fully covered:
 - ✅ chembl_target_component
 
 ### PubChem (1 schema)
-- ✅ pubchem_compound *(cid type corrected: int64 → str)*
+- ✅ pubchem_compound *(molecule_id type corrected: int64 → str)*
 
 ### UniProt (2 schemas)
 - ✅ uniprot_protein *(date fields validated)*
@@ -96,7 +96,7 @@ tests/contract/silver_schemas/snapshots/
 **Problem:** Schemas intentionally changed but snapshots were outdated.
 
 **Changes Accepted:**
-1. `pubchem_compound.cid`: int64 → str (correct! IDs should be strings)
+1. `pubchem_compound.molecule_id`: int64 → str (correct! IDs should be strings)
 2. `semanticscholar_publication.influential_citation_count`: required → optional
 3. `openalex_publication.fwci`: required → optional
 4. `pubmed_publication.title`: validation check renamed (`_check_title` → `title_not_empty`)
@@ -252,14 +252,14 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 
 ### 2. Schema Quality Improvements
 - ✅ Enum validation added (`ASSAY_PARAMETER_STANDARD_TYPES`)
-- ✅ ID field types corrected (pubchem_compound.cid)
+- ✅ ID field types corrected (pubchem_compound.molecule_id)
 - ✅ Optional fields properly marked (fwci, corpus_id, influential_citation_count)
 - ✅ Validation check names improved (title_not_empty)
 
 ### 3. Test Suite Maturity
 - ✅ Comprehensive documentation of exclusions
 - ✅ Clear rationale for each exception
-- ✅ Snapshot system protecting against accidental changes
+- ✅ Snapshot system protecting against acmolecule_idental changes
 - ✅ Fast execution (~1.8 seconds)
 
 ### 4. Maintainability
@@ -422,7 +422,7 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 - ✅ Phase 1: Updated 5 snapshots for intentional schema changes
 - ✅ Phase 2: Added documented exclusions for numeric IDs and date fields
 - ✅ Phase 3: Added enum validation for `standard_type`
-- ✅ Schema improvements: cid type, optional fields, validation checks
+- ✅ Schema improvements: molecule_id type, optional fields, validation checks
 - ✅ New constant: `ASSAY_PARAMETER_STANDARD_TYPES`
 - ✅ Zero technical debt
 - **Pass Rate:** 100% (451/451 tests)
@@ -465,7 +465,7 @@ The Silver Schema Contract Test Suite has achieved **production-ready status** w
 - ✅ Validation coverage: 100%
 - ✅ Schema stability: Protected by snapshots
 
-The test suite will **prevent accidental schema breakage** while **documenting valid design decisions** through clear exclusions and comprehensive validation.
+The test suite will **prevent acmolecule_idental schema breakage** while **documenting valid design decisions** through clear exclusions and comprehensive validation.
 
 ---
 

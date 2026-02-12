@@ -45,7 +45,7 @@ class TestAssayParametersEntity:
         """Create valid AssayParameters constructor arguments."""
         return {
             "assay_param_id": 12345,
-            "assay_chembl_id": "CHEMBL1217643",
+            "assay_id": "CHEMBL1217643",
             "type": "CONC",
             "entity_id": "chembl:12345",
             "content_hash": "a" * 64,
@@ -60,7 +60,7 @@ class TestAssayParametersEntity:
         entity = AssayParameters(**valid_params)
 
         assert entity.assay_param_id == 12345
-        assert entity.assay_chembl_id == "CHEMBL1217643"
+        assert entity.assay_id == "CHEMBL1217643"
         assert entity.type == "CONC"
 
     def test_create_entity_with_values(self, valid_params: dict) -> None:
@@ -93,9 +93,9 @@ class TestAssayParametersEntity:
 
     def test_invalid_chembl_id_format(self, valid_params: dict) -> None:
         """Test that invalid ChEMBL ID format raises ValueError."""
-        valid_params["assay_chembl_id"] = "INVALID123"
+        valid_params["assay_id"] = "INVALID123"
 
-        with pytest.raises(ValueError, match="Invalid assay_chembl_id"):
+        with pytest.raises(ValueError, match="Invalid assay_id"):
             AssayParameters(**valid_params)
 
     def test_missing_type_allowed(self, valid_params: dict) -> None:
@@ -219,7 +219,7 @@ class TestAssayParametersTransformer:
         """Create sample Bronze record from ChEMBL API."""
         return {
             "assay_param_id": 12345,
-            "assay_chembl_id": "CHEMBL1217643",
+            "assay_id": "CHEMBL1217643",
             "type": "CONC",
             "relation": "=",
             "value": 10.0,
@@ -245,7 +245,7 @@ class TestAssayParametersTransformer:
 
         assert result is not None
         assert result["assay_param_id"] == 12345
-        assert result["assay_chembl_id"] == "CHEMBL1217643"
+        assert result["assay_id"] == "CHEMBL1217643"
         assert result["type"] == "CONC"
         assert result["value"] == 10.0
         assert result["standard_value"] == 10000.0
@@ -261,7 +261,7 @@ class TestAssayParametersTransformer:
     ) -> None:
         """Test transformation returns None when assay_param_id is missing."""
         record = {
-            "assay_chembl_id": "CHEMBL1217643",
+            "assay_id": "CHEMBL1217643",
             "type": "CONC",
         }
 
@@ -278,7 +278,7 @@ class TestAssayParametersTransformer:
         """Test transformation with text value instead of numeric."""
         record = {
             "assay_param_id": 12346,
-            "assay_chembl_id": "CHEMBL1217643",
+            "assay_id": "CHEMBL1217643",
             "type": "TEMP",
             "text_value": "Room temperature",
             "standard_text_value": "25 degrees Celsius",
@@ -300,7 +300,7 @@ class TestAssayParametersTransformer:
         """Test that parameter type is normalized to uppercase."""
         record = {
             "assay_param_id": 12347,
-            "assay_chembl_id": "CHEMBL1217643",
+            "assay_id": "CHEMBL1217643",
             "type": "conc",  # lowercase
         }
 
@@ -318,7 +318,7 @@ class TestAssayParametersTransformer:
         """Test that None type remains None (no sentinel value)."""
         record = {
             "assay_param_id": 12348,
-            "assay_chembl_id": "CHEMBL1217643",
+            "assay_id": "CHEMBL1217643",
             "type": None,
         }
 
@@ -336,7 +336,7 @@ class TestAssayParametersTransformer:
         """Test transformation with all optional fields as None."""
         record = {
             "assay_param_id": 12349,
-            "assay_chembl_id": "CHEMBL1217643",
+            "assay_id": "CHEMBL1217643",
             "type": "CONC",
             "relation": None,
             "value": None,
@@ -367,7 +367,7 @@ class TestAssayParametersTransformer:
         transformer = AssayParametersTransformer(provider="custom_provider")
         record = {
             "assay_param_id": 12350,
-            "assay_chembl_id": "CHEMBL1217643",
+            "assay_id": "CHEMBL1217643",
             "type": "PH",
         }
 

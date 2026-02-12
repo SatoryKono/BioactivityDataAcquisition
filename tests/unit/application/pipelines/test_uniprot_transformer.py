@@ -844,7 +844,7 @@ class TestUniProtProteinTransformerExtendedFields:
             "primaryAccession": "P31749",
             "uniProtkbId": "AKT1_HUMAN",
             "sequence": {
-                "value": "MSDV" * 120,  # 480 amino acids
+                "value": "MSDV" * 120,  # 480 amino amolecule_ids
                 "length": 480,
                 "molWeight": 55686,
                 "crc64": "C7E35E7E9B7C6B5A",

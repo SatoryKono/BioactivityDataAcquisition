@@ -252,7 +252,7 @@ class TestEntityIdPerformance:
     def record_with_id(self) -> dict[str, Any]:
         """Record with explicit ID field."""
         return {
-            "molecule_chembl_id": "CHEMBL123456",
+            "molecule_id": "CHEMBL123456",
             "pref_name": "Test Molecule",
             "data": {"key": "value"},
         }
@@ -276,7 +276,7 @@ class TestEntityIdPerformance:
             generate_entity_id,
             record_with_id,
             "chembl",
-            "molecule_chembl_id",
+            "molecule_id",
         )
         assert result == "chembl:CHEMBL123456"
 

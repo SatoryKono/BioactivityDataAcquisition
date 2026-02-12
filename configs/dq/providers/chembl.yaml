@@ -17,25 +17,25 @@ thresholds:
 # =============================================================================
 provider_field_validations:
   # ChEMBL ID format validation (applies to all ChEMBL entities)
-  - field: molecule_chembl_id
+  - field: molecule_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
     error_message: "Invalid ChEMBL molecule ID format"
 
-  - field: target_chembl_id
+  - field: target_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
     error_message: "Invalid ChEMBL target ID format"
 
-  - field: assay_chembl_id
+  - field: assay_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
     error_message: "Invalid ChEMBL assay ID format"
 
-  - field: document_chembl_id
+  - field: publication_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true

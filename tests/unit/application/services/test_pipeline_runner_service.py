@@ -433,7 +433,7 @@ class TestContextBuilding:
         options = RunOptions(
             input_csv="/path/to/ids.csv",
             filter_column="mol_id",
-            filter_field="molecule_chembl_id",
+            filter_field="molecule_id",
         )
 
         await service.run("test_pipeline", options=options)
@@ -443,7 +443,7 @@ class TestContextBuilding:
         assert context.input_filter.enabled is True
         assert context.input_filter.source_path == "/path/to/ids.csv"
         assert context.input_filter.column_name == "mol_id"
-        assert context.input_filter.filter_field == "molecule_chembl_id"
+        assert context.input_filter.filter_field == "molecule_id"
 
     @pytest.mark.asyncio
     async def test_context_without_input_filter(self, service, mock_runner_factory):

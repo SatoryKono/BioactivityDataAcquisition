@@ -92,10 +92,10 @@ class TestActivityTransformerSnapshot:
     def sample_record(self) -> dict[str, Any]:
         return {
             "activity_id": 12345678,
-            "molecule_chembl_id": "CHEMBL25",
-            "target_chembl_id": "CHEMBL1862",
-            "assay_chembl_id": "CHEMBL123456",
-            "document_chembl_id": "CHEMBL789012",
+            "molecule_id": "CHEMBL25",
+            "target_id": "CHEMBL1862",
+            "assay_id": "CHEMBL123456",
+            "publication_id": "CHEMBL789012",
             "record_id": 1234,
             "src_id": 1,
             "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
@@ -115,7 +115,7 @@ class TestActivityTransformerSnapshot:
                 "lle": "1.30",
                 "sei": "5.56",
             },
-            "document_year": 2024,
+            "publication_year": 2024,
             "activity_comment": "High activity",
         }
 
@@ -144,9 +144,9 @@ class TestAssayTransformerSnapshot:
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
         return {
-            "assay_chembl_id": "CHEMBL1234567",
-            "target_chembl_id": "CHEMBL123",
-            "document_chembl_id": "CHEMBL456",
+            "assay_id": "CHEMBL1234567",
+            "target_id": "CHEMBL123",
+            "publication_id": "CHEMBL456",
             "assay_type": "B",
             "assay_type_description": "Binding",
             "assay_organism": "Homo sapiens",
@@ -184,7 +184,7 @@ class TestPublicationTransformerSnapshot:
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
         return {
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "pubmed_id": "12345678",  # Source API field name
             "doi": "10.1000/test.doi",
             "title": "Test Document Title",
@@ -230,7 +230,7 @@ class TestMoleculeTransformerSnapshot:
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
         return {
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "pref_name": "ASPIRIN",
             "molecule_type": "Small molecule",
             "structure_type": "MOL",
@@ -242,7 +242,7 @@ class TestMoleculeTransformerSnapshot:
             "molecule_hierarchy": {
                 "parent_chembl_id": "CHEMBL25",
                 "active_chembl_id": "CHEMBL25",
-                "molecule_chembl_id": "CHEMBL25",
+                "molecule_id": "CHEMBL25",
             },
             "molecule_properties": {
                 "alogp": 1.19,
@@ -286,7 +286,7 @@ class TestTargetTransformerSnapshot:
         # Note: protein_classifications are NOT available in /target endpoint.
         # They are only available via /target_component endpoint.
         return {
-            "target_chembl_id": "CHEMBL1862",
+            "target_id": "CHEMBL1862",
             "pref_name": "Cyclooxygenase-2",
             "target_type": "SINGLE PROTEIN",
             "organism": "Homo sapiens",
@@ -371,14 +371,14 @@ class TestPubChemCompoundTransformerSnapshot:
     @pytest.fixture
     def sample_record(self) -> dict[str, Any]:
         return {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_formula": "C9H8O4",
             "molecular_weight": "180.16",
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "isomeric_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "inchi": "InChI=1S/C9H8O4/c...",
-            "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
-            "iupac_name": "2-acetyloxybenzoic acid",
+            "inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "iupac_name": "2-acetyloxybenzoic amolecule_id",
         }
 
     @pytest.mark.asyncio

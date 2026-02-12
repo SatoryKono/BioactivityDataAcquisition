@@ -221,14 +221,14 @@ class TestNullabilityRules:
 
         NOTE: Aspirational test - skipped because heuristics can't distinguish
         primary keys from foreign keys. Many fields ending in _id are FKs
-        (like target_chembl_id, document_chembl_id) that are legitimately nullable.
+        (like target_id, publication_id) that are legitimately nullable.
 
         Use test_schema_stability.py::test_primary_key_field_exists instead,
         which checks entity_id (the actual base PK from ETLRecordSchema).
         """
         pytest.skip(
             "Cannot reliably distinguish primary keys from foreign keys. "
-            "Fields like target_chembl_id, document_chembl_id are FKs, not PKs."
+            "Fields like target_id, publication_id are FKs, not PKs."
         )
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))

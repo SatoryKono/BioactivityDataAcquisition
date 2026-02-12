@@ -42,7 +42,7 @@ class TestIDMappingDataSourceInit:
         assert data_source._input_path == input_path
         assert data_source._from_db == "ChEMBL"
         assert data_source._to_db == "UniProtKB"
-        assert data_source._id_column == "target_chembl_id"
+        assert data_source._id_column == "target_id"
 
     def test_initialization_custom_params(
         self, mock_client: MagicMock, mock_logger: MagicMock, tmp_path: Path
@@ -167,7 +167,7 @@ class TestIDMappingDataSourceFetch:
         """Create sample CSV file."""
         csv_path = tmp_path / "targets.csv"
         csv_path.write_text(
-            "target_chembl_id,name\n"
+            "target_id,name\n"
             "CHEMBL204,Target 1\n"
             "CHEMBL205,Target 2\n"
             "CHEMBL206,Target 3\n"
@@ -193,11 +193,11 @@ class TestIDMappingDataSourceFetch:
             records.append(record)
 
         assert len(records) == 3
-        assert records[0]["target_chembl_id"] == "CHEMBL204"
+        assert records[0]["target_id"] == "CHEMBL204"
         assert records[0]["uniprot_accession"] == "P00742"
-        assert records[1]["target_chembl_id"] == "CHEMBL205"
+        assert records[1]["target_id"] == "CHEMBL205"
         assert records[1]["uniprot_accession"] == "P12345"
-        assert records[2]["target_chembl_id"] == "CHEMBL206"
+        assert records[2]["target_id"] == "CHEMBL206"
         assert records[2]["uniprot_accession"] is None  # Not in mapping results
 
     @pytest.mark.asyncio
@@ -229,7 +229,7 @@ class TestIDMappingDataSourceFetch:
     ) -> None:
         """Test fetch with empty CSV (only header)."""
         csv_path = tmp_path / "empty.csv"
-        csv_path.write_text("target_chembl_id,name\n")
+        csv_path.write_text("target_id,name\n")
 
         data_source = IDMappingDataSource(
             idmapping_client=mock_client,
@@ -293,7 +293,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
         """Test successful reading of ChEMBL IDs."""
         csv_path = tmp_path / "targets.csv"
         csv_path.write_text(
-            "target_chembl_id,name\nCHEMBL204,Target 1\nCHEMBL205,Target 2\n"
+            "target_id,name\nCHEMBL204,Target 1\nCHEMBL205,Target 2\n"
         )
 
         data_source = IDMappingDataSource(
@@ -351,7 +351,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
         """Test that empty IDs are skipped."""
         csv_path = tmp_path / "with_empty.csv"
         csv_path.write_text(
-            "target_chembl_id,name\n"
+            "target_id,name\n"
             "CHEMBL204,Target 1\n"
             ",Empty\n"
             "  ,Whitespace\n"
@@ -376,7 +376,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
         """Test that IDs are stripped of whitespace."""
         csv_path = tmp_path / "with_whitespace.csv"
         csv_path.write_text(
-            "target_chembl_id,name\n  CHEMBL204  ,Target 1\nCHEMBL205\t,Target 2\n"
+            "target_id,name\n  CHEMBL204  ,Target 1\nCHEMBL205\t,Target 2\n"
         )
 
         data_source = IDMappingDataSource(
@@ -413,7 +413,7 @@ class TestIDMappingDataSourceHealthCheck:
     ) -> None:
         """Test health_check returns HEALTHY when all checks pass."""
         csv_path = tmp_path / "input.csv"
-        csv_path.write_text("target_chembl_id\nCHEMBL1\n")
+        csv_path.write_text("target_id\nCHEMBL1\n")
 
         data_source = IDMappingDataSource(
             idmapping_client=mock_client,
@@ -455,7 +455,7 @@ class TestIDMappingDataSourceHealthCheck:
     ) -> None:
         """Test health_check returns API status when file exists but API is unhealthy."""
         csv_path = tmp_path / "input.csv"
-        csv_path.write_text("target_chembl_id\nCHEMBL1\n")
+        csv_path.write_text("target_id\nCHEMBL1\n")
         mock_client.health_check = AsyncMock(return_value=HealthStatus.UNHEALTHY)
 
         data_source = IDMappingDataSource(
@@ -477,7 +477,7 @@ class TestIDMappingDataSourceHealthCheck:
     ) -> None:
         """Test health_check returns DEGRADED when API is degraded."""
         csv_path = tmp_path / "input.csv"
-        csv_path.write_text("target_chembl_id\nCHEMBL1\n")
+        csv_path.write_text("target_id\nCHEMBL1\n")
         mock_client.health_check = AsyncMock(return_value=HealthStatus.DEGRADED)
 
         data_source = IDMappingDataSource(
@@ -531,7 +531,7 @@ class TestIDMappingDataSourceEdgeCases:
             records.append(record)
 
         assert len(records) == 1
-        assert records[0]["target_chembl_id"] == "CHEMBL1"
+        assert records[0]["target_id"] == "CHEMBL1"
 
     @pytest.mark.asyncio
     async def test_fetch_logs_statistics(
@@ -542,7 +542,7 @@ class TestIDMappingDataSourceEdgeCases:
     ) -> None:
         """Test that fetch logs mapping statistics."""
         csv_path = tmp_path / "targets.csv"
-        csv_path.write_text("target_chembl_id\nCHEMBL1\nCHEMBL2\n")
+        csv_path.write_text("target_id\nCHEMBL1\nCHEMBL2\n")
 
         mock_client.map_ids = AsyncMock(
             return_value={"CHEMBL1": {"uniprot_accession": "P00001", "reviewed": True}}
@@ -579,7 +579,7 @@ class TestIDMappingDataSourceEdgeCases:
     ) -> None:
         """Test that fetch ignores query, filter_ids, filter_field params."""
         csv_path = tmp_path / "targets.csv"
-        csv_path.write_text("target_chembl_id\nCHEMBL1\n")
+        csv_path.write_text("target_id\nCHEMBL1\n")
 
         mock_client.map_ids = AsyncMock(
             return_value={"CHEMBL1": {"uniprot_accession": "P00001", "reviewed": True}}

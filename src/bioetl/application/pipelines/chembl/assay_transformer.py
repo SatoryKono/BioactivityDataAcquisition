@@ -71,11 +71,11 @@ def _extract_variant(data: dict[str, Any] | None) -> dict[str, Any]:
 _IDENTIFIERS = FieldGroup(
     name="identifiers",
     fields=(
+        FieldSpec("target_chembl_id", target="target_id"),
+        FieldSpec("document_chembl_id", target="publication_id"),
+        FieldSpec("cell_chembl_id", target="cell_id"),
+        FieldSpec("tissue_chembl_id", target="tissue_id"),
         *simple_fields(
-            "target_chembl_id",
-            "document_chembl_id",
-            "cell_chembl_id",
-            "tissue_chembl_id",
             "src_assay_id",
             "aidx",
         ),
@@ -108,7 +108,7 @@ _BIOLOGICAL_CONTEXT = FieldGroup(
         ),
         # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
         FieldSpec(
-            "assay_tax_id", target="assay_taxonomy_id", converter=validate_taxonomy_id
+            "assay_tax_id", target="taxonomy_id", converter=validate_taxonomy_id
         ),
     ),
 )
@@ -160,7 +160,7 @@ class AssayTransformer(BaseChemblTransformer):
         """
         return {
             # Primary identifier
-            "assay_chembl_id": str(primary_id),
+            "assay_id": str(primary_id),
             # Declarative field groups
             **map_field_groups(record, _ASSAY_GROUPS),
             # Nested dict extraction (variant)

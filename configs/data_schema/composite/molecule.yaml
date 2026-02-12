@@ -18,33 +18,32 @@
 # Field Mapping Table
 # =============================================================================
 #
-# | ChEMBL Field            | PubChem Field      | Unified Field     | Priority |
-# |-------------------------|--------------------|--------------------|----------|
-# | molecule_chembl_id      | —                  | molecule_chembl_id | chembl   |
-# | —                       | cid                | cid                | pubchem  |
-# | inchi_key               | inchikey           | inchikey           | chembl   |
-# | standard_inchi          | inchi              | inchi              | chembl   |
-# | canonical_smiles        | canonical_smiles   | canonical_smiles   | chembl   |
-# | —                       | isomeric_smiles    | isomeric_smiles    | pubchem  |
-# | property_full_mwt       | molecular_weight   | molecular_weight   | pubchem  |
-# | property_full_molformula| molecular_formula  | molecular_formula  | pubchem  |
-# | property_alogp          | —                  | alogp              | chembl   |
-# | —                       | xlogp              | xlogp              | pubchem  |
-# | property_psa            | tpsa               | tpsa               | pubchem  |
-# | property_hba            | —                  | hba                | pubchem  |
-# | property_hbd            | —                  | hbd                | pubchem  |
-# | property_rtb            | —                  | rotatable_bonds    | pubchem  |
-# | property_heavy_atoms    | —                  | heavy_atom_count   | pubchem  |
-# | property_aromatic_rings | —                  | aromatic_rings     | pubchem  |
-# | property_qed_weighted   | —                  | qed_weighted       | chembl   |
-# | pref_name               | —                  | pref_name          | chembl   |
-# | —                       | iupac_name         | iupac_name         | pubchem  |
-# | molecule_synonyms       | —                  | synonyms           | merge    |
-# | max_phase               | —                  | max_phase          | chembl   |
-# | first_approval          | —                  | first_approval     | chembl   |
-# | therapeutic_flag        | —                  | therapeutic_flag   | chembl   |
-# | withdrawn_flag          | —                  | withdrawn_flag     | chembl   |
-# | black_box_warning       | —                  | black_box_warning  | chembl   |
+# | ChEMBL Field            | PubChem Field      | Unified Field         | Priority |
+# |-------------------------|--------------------|-----------------------|----------|
+# | molecule_id             | molecule_id        | molecule_id           | chembl   |
+# | inchi_key               | inchikey           | inchi_key             | chembl   |
+# | standard_inchi          | inchi              | inchi                 | chembl   |
+# | canonical_smiles        | canonical_smiles   | canonical_smiles      | chembl   |
+# | —                       | isomeric_smiles    | isomeric_smiles       | pubchem  |
+# | molecular_weight        | molecular_weight   | molecular_weight      | pubchem  |
+# | molecular_formula       | molecular_formula  | molecular_formula     | pubchem  |
+# | logp                    | logp               | logp                  | pubchem  |
+# | logp_method             | logp_method        | logp_method           | pubchem  |
+# | polar_surface_area      | polar_surface_area | polar_surface_area    | pubchem  |
+# | hba_count               | hba_count          | hba_count             | pubchem  |
+# | hbd_count               | hbd_count          | hbd_count             | pubchem  |
+# | rotatable_bond_count    | rotatable_bond_count | rotatable_bond_count| pubchem  |
+# | heavy_atom_count        | heavy_atom_count   | heavy_atom_count      | pubchem  |
+# | aromatic_ring_count     | aromatic_ring_count| aromatic_ring_count   | pubchem  |
+# | qed_weighted            | qed_weighted       | qed_weighted          | chembl   |
+# | pref_name               | pref_name          | pref_name             | chembl   |
+# | iupac_name              | iupac_name         | iupac_name            | pubchem  |
+# | molecule_synonyms       | —                  | synonyms              | merge    |
+# | max_phase               | —                  | max_phase             | chembl   |
+# | first_approval          | —                  | first_approval        | chembl   |
+# | therapeutic_flag        | —                  | therapeutic_flag      | chembl   |
+# | withdrawn_flag          | —                  | withdrawn_flag        | chembl   |
+# | black_box_warning       | —                  | black_box_warning     | chembl   |
 #
 # =============================================================================
 
@@ -67,21 +66,15 @@ column_groups:
     pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
 
   # 3. Primary identifiers
-  - name: identifiers_chembl
+  - name: identifiers
     fields:
-      - molecule_chembl_id
-    provider_order: [chembl]
-
-  - name: identifiers_pubchem
-    fields:
-      - cid
-    provider_order: [pubchem]
+      - molecule_id
+    provider_order: [chembl, pubchem]
 
   # 4. Structural identifiers (join keys)
   - name: structural_identifiers
     fields:
-      - inchi_key           # ChEMBL field name
-      - inchikey            # PubChem field name (alias)
+      - inchi_key           # Unified InChIKey
       - standard_inchi      # ChEMBL
       - inchi               # PubChem
     provider_order: [chembl, pubchem]
@@ -98,35 +91,31 @@ column_groups:
   # 6. Molecular weight and formula
   - name: weight_formula
     fields:
-      - molecular_weight     # Unified (PubChem priority)
-      - molecular_formula    # Unified (PubChem priority)
-      - property_full_mwt    # ChEMBL specific
-      - property_mw_freebase # ChEMBL specific
-      - property_full_molformula  # ChEMBL specific
+      - molecular_weight
+      - molecular_formula
     provider_order: [pubchem, chembl]
 
   # 7. Lipophilicity and polarity
   - name: lipophilicity
     fields:
-      - property_alogp       # ChEMBL ALogP
-      - xlogp                # PubChem XLogP3
-      - property_psa         # ChEMBL PSA
-      - tpsa                 # PubChem TPSA
+      - logp
+      - logp_method
+      - polar_surface_area
     provider_order: [pubchem, chembl]
 
   # 8. Hydrogen bonding
   - name: hbond
     fields:
-      - property_hba         # ChEMBL
-      - property_hbd         # ChEMBL
+      - hba_count
+      - hbd_count
     provider_order: [pubchem, chembl]
 
   # 9. Molecular complexity
   - name: complexity
     fields:
-      - property_rtb         # ChEMBL rotatable bonds
-      - property_heavy_atoms # ChEMBL
-      - property_aromatic_rings  # ChEMBL
+      - rotatable_bond_count
+      - heavy_atom_count
+      - aromatic_ring_count
     provider_order: [pubchem, chembl]
 
   # 10. Drug-likeness metrics
@@ -238,9 +227,9 @@ gold:
 # =============================================================================
 join_keys:
   primary:
-    field: inchikey
+    field: inchi_key
     chembl_name: inchi_key
-    pubchem_name: inchikey
+    pubchem_name: inchi_key
     description: "InChIKey - IUPAC standard structural identifier (27 chars)"
     validation: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
 
@@ -256,7 +245,7 @@ join_keys:
 # =============================================================================
 normalization:
   # InChIKey normalization (should already be uppercase)
-  inchikey:
+  inchi_key:
     uppercase: true
     strip: true
 

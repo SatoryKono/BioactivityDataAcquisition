@@ -77,7 +77,7 @@
     "required": false,
     "unique": false
   },
-  "cell_chembl_id": {
+  "cell_id": {
     "checks": [
       {
         "name": "str_matches",

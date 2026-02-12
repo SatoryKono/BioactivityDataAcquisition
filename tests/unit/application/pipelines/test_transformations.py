@@ -65,7 +65,7 @@ class TestPubChemCompoundPipeline:
         )
 
         record = {
-            "cid": 123,
+            "molecule_id": 123,
             "molecular_formula": "C6H6",
             "molecular_weight": "78.11",
             "canonical_smiles": "c1ccccc1",
@@ -76,7 +76,7 @@ class TestPubChemCompoundPipeline:
 
         # Assert
         assert result is not None
-        assert result["cid"] == "123"
+        assert result["molecule_id"] == "123"
         assert result["molecular_formula"] == "C6H6"
         assert "entity_id" in result
         assert "content_hash" in result
@@ -85,7 +85,7 @@ class TestPubChemCompoundPipeline:
         assert "_run_id" in result
 
     @pytest.mark.asyncio
-    async def test_transform_bronze_to_silver_no_cid(
+    async def test_transform_bronze_to_silver_no_molecule_id(
         self, mock_context, mock_pipeline_base, mock_run_id
     ):
         # Arrange

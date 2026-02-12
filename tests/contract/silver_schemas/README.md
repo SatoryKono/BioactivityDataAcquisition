@@ -10,7 +10,7 @@
 
 ## Overview
 
-These tests protect against accidental schema changes that would break:
+These tests protect against acmolecule_idental schema changes that would break:
 - Downstream consumers (Gold layer, analytics, reports)
 - Data contracts with external teams
 - Historical data compatibility
@@ -163,7 +163,7 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 **Example:**
 ```python
 def test_schema_fields_unchanged(schema_name: str):
-    """Prevents accidental schema modifications."""
+    """Prevents acmolecule_idental schema modifications."""
     current = extract_field_metadata(schema)
     snapshot = load_snapshot(schema_name)
     assert current == snapshot  # Fails if ANY difference
@@ -300,7 +300,7 @@ Process:
 
 ### Why snapshot tests?
 
-**Problem:** Pandera schemas can change accidentally during refactoring.
+**Problem:** Pandera schemas can change acmolecule_identally during refactoring.
 
 **Solution:** Snapshot tests detect ANY change and require explicit approval via `UPDATE_SNAPSHOTS=1`.
 
@@ -355,4 +355,4 @@ Adding fields is usually safe (non-breaking), but:
 **Type Safety Tests:** 50 (100% of schemas × type rules)
 
 **Maintenance:** Low (snapshots update automatically with `UPDATE_SNAPSHOTS=1`)
-**Value:** High (prevents accidental breaking changes)
+**Value:** High (prevents acmolecule_idental breaking changes)

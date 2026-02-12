@@ -24,7 +24,7 @@ class ChemblPublication(PublicationEntityBase):
     """
 
     # Primary identifier
-    document_chembl_id: str
+    publication_id: str
 
     volume: str | None = None
     issue: str | None = None
@@ -43,8 +43,8 @@ class ChemblPublication(PublicationEntityBase):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.document_chembl_id:
-            raise ValueError("ChemblPublication document_chembl_id is required")
+        if not self.publication_id:
+            raise ValueError("ChemblPublication publication_id is required")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -57,12 +57,12 @@ class DocumentTerm(BaseEntity):
 
     Source: Nested in ChEMBL API /document response (mesh_terms, keywords fields)
 
-    Composite Key: document_chembl_id + term_type + term (normalized)
+    Composite Key: publication_id + term_type + term (normalized)
     See: https://www.ebi.ac.uk/chembl/api/data/document
     """
 
     # === Composite Key Fields ===
-    document_chembl_id: str  # FK → Document
+    publication_id: str  # FK → Document
     term: str  # Term text (e.g., "Aspirin", "kinase inhibitor")
     term_type: str  # MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT
 
@@ -75,7 +75,7 @@ class DocumentTerm(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.document_chembl_id:
+        if not self.publication_id:
             raise ValueError("Document ChEMBL ID is required")
         if not self.term:
             raise ValueError("Term text is required")
@@ -97,7 +97,7 @@ class Target(BaseEntity):
     """
 
     # Primary identifier
-    target_chembl_id: str
+    target_id: str
 
     # Core metadata
     pref_name: str | None = None
@@ -116,7 +116,7 @@ class Target(BaseEntity):
 
     # Flattened component fields (aggregated lists)
     component_accessions: list[str] | None = None
-    component_id: int | None = None  # Primary component ID (component_ids[0])
+    primary_component_id: int | None = None  # Primary component ID
     component_ids: list[int] | None = None
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
@@ -130,7 +130,7 @@ class Target(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.target_chembl_id:
+        if not self.target_id:
             raise ValueError("Target ChEMBL ID is required")
 
 
@@ -178,14 +178,14 @@ class CellLine(BaseEntity):
     """Represents a cell line (ChEMBL Cell Line).
 
     Cell lines are biological objects used for in vitro experiments.
-    They have M:N relationship with Assay (via assay.cell_chembl_id FK).
+    They have M:N relationship with Assay (via assay.cell_id FK).
 
     Contains all fields from ChEMBL cell_line API endpoint.
     See: https://www.ebi.ac.uk/chembl/api/data/cell_line
     """
 
     # Primary identifier (REQUIRED)
-    cell_chembl_id: str
+    cell_id: str
 
     # Core metadata (cell_name is REQUIRED per task spec)
     cell_name: str
@@ -213,7 +213,7 @@ class CellLine(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.cell_chembl_id:
+        if not self.cell_id:
             raise ValueError("Cell ChEMBL ID is required")
         if not self.cell_name:
             raise ValueError("Cell name is required")
@@ -235,7 +235,7 @@ class Molecule(BaseEntity):
     """
 
     # Primary identifier
-    molecule_chembl_id: str
+    molecule_id: str
 
     # Core metadata
     pref_name: str | None = None
@@ -306,15 +306,25 @@ class Molecule(BaseEntity):
     # Flattened Structures (unified naming without structure_ prefix)
     canonical_smiles: str | None = None
     standard_inchi: str | None = None
-    # Standardized to 'inchikey' (no underscore) for IUPAC/PubChem consistency
-    inchikey: str | None = None
+    # Standardized to 'inchi_key' (no underscore) for IUPAC/PubChem consistency
+    inchi_key: str | None = None
+    # Canonical property aliases (unified naming)
+    logp: float | None = None
+    logp_method: str | None = None
+    molecular_weight: float | None = None
+    polar_surface_area: float | None = None
+    rotatable_bond_count: int | None = None
+    heavy_atom_count: int | None = None
+    aromatic_ring_count: int | None = None
+    hba_count: int | None = None
+    hbd_count: int | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.molecule_chembl_id:
+        if not self.molecule_id:
             raise ValueError("Molecule ChEMBL ID is required")
         if self.max_phase is not None and not (0 <= self.max_phase <= 4):
             raise ValueError(f"max_phase must be 0-4, got {self.max_phase}")

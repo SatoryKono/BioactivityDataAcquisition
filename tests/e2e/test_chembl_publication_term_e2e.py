@@ -74,7 +74,7 @@ async def test_chembl_publication_term_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "chembl_publication_term")
-    required_fields = ["document_chembl_id", "term", "term_type"]
+    required_fields = ["publication_id", "term", "term_type"]
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
@@ -107,8 +107,8 @@ async def test_chembl_publication_term_types(e2e_data_dir: Path):
         term_type = record.get("term_type")
         assert term_type in valid_term_types, f"Invalid term_type: {term_type}"
         assert record.get("term"), "Term text should not be empty"
-        assert record.get("document_chembl_id"), (
-            "document_chembl_id should not be empty"
+        assert record.get("publication_id"), (
+            "publication_id should not be empty"
         )
 
 

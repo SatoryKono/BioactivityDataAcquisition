@@ -39,7 +39,7 @@ class TestPipelineConfig:
             provider="chembl",
             entity_type="activity",
             table=TableConfig(
-                primary_keys=["activity_id", "assay_chembl_id"],
+                primary_keys=["activity_id", "assay_id"],
                 silver_table="chembl_activity",
                 gold_table="chembl_activity_gold",
             ),

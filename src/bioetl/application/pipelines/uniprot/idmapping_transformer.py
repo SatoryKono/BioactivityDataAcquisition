@@ -84,7 +84,7 @@ class IDMappingTransformer(BaseTransformer):
 
         Args:
             context: Pipeline context with run_id, run_type, logger.
-            record: Bronze-like record with target_chembl_id and entry metadata.
+            record: Bronze-like record with target_id and entry metadata.
             index: Sequential index of the record in the pipeline run.
 
         Returns:
@@ -95,7 +95,7 @@ class IDMappingTransformer(BaseTransformer):
             ValueError: If IDMappingResult entity validation fails.
         """
         # Step 1: Extract required field
-        target_chembl_id = self._get_required_field(record, "target_chembl_id")
+        target_id = self._get_required_field(record, "target_id")
         uniprot_accession = record.get("uniprot_accession")  # Can be None
         all_mappings = record.get("all_mappings")
 
@@ -109,7 +109,7 @@ class IDMappingTransformer(BaseTransformer):
 
         # Step 3: Build business data dictionary for content hash
         business_data: dict[str, Any] = {
-            "target_chembl_id": target_chembl_id,
+            "target_id": target_id,
             "uniprot_accession": uniprot_accession,
             "mapping_status": mapping_status,
             # UniProt entry metadata
@@ -127,10 +127,7 @@ class IDMappingTransformer(BaseTransformer):
         }
 
         # Step 4: Generate entity_id using IdentityService (RULES.md §2.8)
-        entity_id = self.compute_entity_id(
-            source_id=target_chembl_id,
-            record={"target_chembl_id": target_chembl_id},
-        )
+        entity_id = self.compute_entity_id(source_id=target_id, record={"target_id": target_id})
 
         # Step 5: Compute content_hash (RULES.md §2.8.1)
         content_hash = self.compute_content_hash(business_data, exclude_none=True)

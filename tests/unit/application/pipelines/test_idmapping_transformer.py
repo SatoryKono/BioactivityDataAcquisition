@@ -40,14 +40,14 @@ class TestIDMappingTransformer:
     async def test_transform_found_mapping(self, transformer, mock_context):
         """Test transformation of successful mapping."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["target_chembl_id"] == "CHEMBL204"
+        assert result["target_id"] == "CHEMBL204"
         assert result["uniprot_accession"] == "P00742"
         assert result["mapping_status"] == "found"
         assert result["_dq_warn"] is False
@@ -56,14 +56,14 @@ class TestIDMappingTransformer:
     async def test_transform_not_found_mapping(self, transformer, mock_context):
         """Test transformation when mapping not found."""
         record = {
-            "target_chembl_id": "CHEMBL9999999999",
+            "target_id": "CHEMBL9999999999",
             "uniprot_accession": None,
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["target_chembl_id"] == "CHEMBL9999999999"
+        assert result["target_id"] == "CHEMBL9999999999"
         assert result["uniprot_accession"] is None
         assert result["mapping_status"] == "not_found"
         assert result["_dq_warn"] is True
@@ -72,7 +72,7 @@ class TestIDMappingTransformer:
     async def test_transform_entity_id_format(self, transformer, mock_context):
         """Test entity_id follows convention."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
@@ -85,7 +85,7 @@ class TestIDMappingTransformer:
     async def test_transform_entity_id_for_not_found(self, transformer, mock_context):
         """Test entity_id is generated even for not_found mappings."""
         record = {
-            "target_chembl_id": "CHEMBL12345_INVALID",
+            "target_id": "CHEMBL12345_INVALID",
             "uniprot_accession": None,
         }
 
@@ -96,7 +96,7 @@ class TestIDMappingTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_missing_chembl_id(self, transformer, mock_context):
-        """Test transformation returns None when target_chembl_id is missing."""
+        """Test transformation returns None when target_id is missing."""
         record = {
             "uniprot_accession": "P00742",
         }
@@ -108,9 +108,9 @@ class TestIDMappingTransformer:
 
     @pytest.mark.asyncio
     async def test_transform_empty_chembl_id(self, transformer, mock_context):
-        """Test transformation returns None when target_chembl_id is empty."""
+        """Test transformation returns None when target_id is empty."""
         record = {
-            "target_chembl_id": "",
+            "target_id": "",
             "uniprot_accession": "P00742",
         }
 
@@ -123,7 +123,7 @@ class TestIDMappingTransformer:
     async def test_transform_content_hash_present(self, transformer, mock_context):
         """Test that content_hash is generated."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
@@ -137,7 +137,7 @@ class TestIDMappingTransformer:
     async def test_transform_content_hash_consistent(self, transformer, mock_context):
         """Test that content_hash is consistent for same record."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
@@ -154,11 +154,11 @@ class TestIDMappingTransformer:
     ):
         """Test that content_hash differs when accession differs."""
         record1 = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
         record2 = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00743",
         }
 
@@ -175,11 +175,11 @@ class TestIDMappingTransformer:
     ):
         """Test that content_hash differs for found vs not_found."""
         record_found = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
         record_not_found = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": None,
         }
 
@@ -194,7 +194,7 @@ class TestIDMappingTransformer:
     async def test_transform_lineage_fields_present(self, transformer, mock_context):
         """Test that lineage fields are present in result."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
@@ -211,7 +211,7 @@ class TestIDMappingTransformer:
     async def test_transform_index_preserved(self, transformer, mock_context):
         """Test that index is preserved in result."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
@@ -224,7 +224,7 @@ class TestIDMappingTransformer:
     async def test_transform_run_type_incremental(self, transformer, mock_context):
         """Test that run_type is correctly propagated."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
@@ -239,9 +239,9 @@ class TestIDMappingTransformer:
     ):
         """Test that different records get unique entity_ids."""
         records = [
-            {"target_chembl_id": "CHEMBL204", "uniprot_accession": "P00742"},
-            {"target_chembl_id": "CHEMBL205", "uniprot_accession": "P00915"},
-            {"target_chembl_id": "CHEMBL206", "uniprot_accession": None},
+            {"target_id": "CHEMBL204", "uniprot_accession": "P00742"},
+            {"target_id": "CHEMBL205", "uniprot_accession": "P00915"},
+            {"target_id": "CHEMBL206", "uniprot_accession": None},
         ]
 
         results = []
@@ -258,7 +258,7 @@ class TestIDMappingTransformer:
     async def test_transform_dq_warn_false_for_found(self, transformer, mock_context):
         """Test _dq_warn is False for found mappings."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
@@ -273,7 +273,7 @@ class TestIDMappingTransformer:
     ):
         """Test _dq_warn is True for not_found mappings."""
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": None,
         }
 
@@ -287,7 +287,7 @@ class TestIDMappingTransformer:
         """Test transformation with custom provider."""
         transformer = IDMappingTransformer(provider="custom_provider")
         record = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": "P00742",
         }
 
@@ -303,11 +303,11 @@ class TestIDMappingTransformer:
     ):
         """Test that explicit None and missing key are handled the same."""
         record_none = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             "uniprot_accession": None,
         }
         record_missing = {
-            "target_chembl_id": "CHEMBL204",
+            "target_id": "CHEMBL204",
             # uniprot_accession not present
         }
 

@@ -56,7 +56,7 @@ filter/
    gold_filters:
      required_fields:
        - activity_id
-       - target_chembl_id
+       - target_id
      columns:
        standard_type: [IC50, Ki]
    ```

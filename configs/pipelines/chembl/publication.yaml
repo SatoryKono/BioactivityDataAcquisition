@@ -20,7 +20,7 @@ source:
 # - watermark_based: Placeholder for future incremental loading (not implemented)
 loading_strategy: full_scan_only
 
-primary_keys: ["document_chembl_id"]
+primary_keys: ["publication_id"]
 silver_table: "chembl_publication"
 gold_table: "chembl_publication"
 
@@ -60,10 +60,10 @@ sink:
     flat_structure: true  # Files written directly under path/{date}/, without provider/entity subdirs
   silver:
     path: "data/output/silver/chembl/publication"
-    primary_key: ["document_chembl_id"]
+    primary_key: ["publication_id"]
     partition_by: ["doc_type"]
     sort_by:
-      columns: ["document_chembl_id"]
+      columns: ["publication_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/chembl/publication"
@@ -71,7 +71,7 @@ sink:
   gold:
     path: "data/output/gold/chembl/publication"
     sort_by:
-      columns: ["document_chembl_id"]
+      columns: ["publication_id"]
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/publication"

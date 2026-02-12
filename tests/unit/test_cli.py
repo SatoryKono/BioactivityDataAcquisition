@@ -330,7 +330,7 @@ class TestRunCommandAdvanced:
                 "--filter-column",
                 "id",
                 "--filter-field",
-                "molecule_chembl_id",
+                "molecule_id",
             ],
         )
 
@@ -344,7 +344,7 @@ class TestRunCommandAdvanced:
         assert isinstance(options, RunOptions)
         assert options.input_csv == str(csv_file)
         assert options.filter_column == "id"
-        assert options.filter_field == "molecule_chembl_id"
+        assert options.filter_field == "molecule_id"
 
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_missing_logger(self, mock_asyncio_run, runner):

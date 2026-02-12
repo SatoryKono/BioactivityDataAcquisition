@@ -86,7 +86,7 @@ def multi_column_overlapping_filter() -> InputFilterConfig:
         source_path="data/input/multi.csv",
         columns=(
             FilterColumn(column_name="type_col", filter_field="standard_type__in"),
-            FilterColumn(column_name="unit_col", filter_field="target_chembl_id"),
+            FilterColumn(column_name="unit_col", filter_field="target_id"),
         ),
         batch_size=20,
     )
@@ -166,7 +166,7 @@ class TestOverlapValidation:
             active_extraction_params, multi_column_overlapping_filter, logger
         )
 
-        # Only standard_type__in overlaps, target_chembl_id does not
+        # Only standard_type__in overlaps, target_id does not
         assert logger.warning.call_count == 1
         call_args = logger.warning.call_args
         assert call_args[1]["overlap_field"] == "standard_type__in"

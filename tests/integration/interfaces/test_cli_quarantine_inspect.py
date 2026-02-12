@@ -239,7 +239,7 @@ class TestCliQuarantineInspectWithFake:
         quarantine.add_record(
             pipeline="pubchem_compound",
             error_code="API_ERROR",
-            payload={"cid": "12345", "status": "failed"},
+            payload={"molecule_id": "12345", "status": "failed"},
         )
 
         return quarantine

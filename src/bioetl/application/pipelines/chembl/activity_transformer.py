@@ -21,8 +21,8 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Bioactivity
-from bioetl.domain.transformations import safe_float
-from bioetl.domain.value_objects import validate_taxonomy_id_str
+from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -50,7 +50,9 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
 _IDENTIFIERS = FieldGroup(
     name="identifiers",
     fields=(
-        *simple_fields("target_chembl_id", "assay_chembl_id", "document_chembl_id"),
+        FieldSpec("target_chembl_id", target="target_id"),
+        FieldSpec("assay_chembl_id", target="assay_id"),
+        FieldSpec("document_chembl_id", target="publication_id"),
         *int_fields("record_id", "src_id"),
     ),
 )
@@ -61,15 +63,17 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
         *simple_fields(
             "canonical_smiles",
             "molecule_pref_name",
-            "parent_molecule_chembl_id",
             "target_pref_name",
             "target_organism",
         ),
-        # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-        FieldSpec(  # N-01: Taxonomy ID unification
+        FieldSpec(
+            "parent_molecule_chembl_id",
+            target="parent_molecule_id",
+        ),
+        FieldSpec(
             "target_tax_id",
-            target="target_taxonomy_id",
-            converter=validate_taxonomy_id_str,
+            target="taxonomy_id",
+            converter=validate_taxonomy_id,
         ),
         *simple_fields(
             "assay_type",
@@ -114,13 +118,13 @@ _QUALITY_ANNOTATIONS = FieldGroup(
     name="quality_annotations",
     fields=(
         *simple_fields(
-            "document_journal",
             "activity_comment",
             "data_validity_comment",
             "data_validity_description",
         ),
+        FieldSpec("document_journal", target="journal"),
+        FieldSpec("document_year", target="publication_year", converter=safe_int),
         *int_fields(
-            "document_year",
             "potential_duplicate",
             "toid",
             "manual_curation_flag",
@@ -177,7 +181,12 @@ class ActivityTransformer(BaseChemblTransformer):
         Returns:
             Flat dictionary with prefixed keys.
         """
-        return flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
+        return flatten_nested_dict(
+            action_data,
+            "action_type_",
+            _ACTION_TYPE_FIELDS,
+            renames={"action_type_action_type": "action_type"},
+        )
 
     def _extract_business_data(
         self,
@@ -194,13 +203,10 @@ class ActivityTransformer(BaseChemblTransformer):
             Dictionary of Activity business fields.
 
         """
-        # Validate secondary required field
-        molecule_id = self._get_required_field(record, "molecule_chembl_id")
-
         return {
             # Primary and secondary identifiers (manual - need special handling)
             "activity_id": str(primary_id),
-            "molecule_chembl_id": str(molecule_id),
+            "molecule_id": str(self._get_required_field(record, "molecule_chembl_id")),
             # Declarative field groups
             **map_field_groups(record, _ACTIVITY_GROUPS),
             # Nested dict extraction (not declarative)

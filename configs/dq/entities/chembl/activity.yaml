@@ -86,7 +86,7 @@ entity_conditional_validations:
     condition_value: B
     condition_operator: eq
     then_validations:
-      - field: target_chembl_id
+      - field: target_id
         type: required
         nullable: false
         error_message: "Binding assays must have a target"

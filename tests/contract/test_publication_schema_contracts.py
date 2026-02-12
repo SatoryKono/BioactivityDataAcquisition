@@ -179,7 +179,7 @@ class TestPrimaryKeyFields:
     """Test each provider has a unique primary key field."""
 
     PRIMARY_KEYS = {
-        "chembl": "document_chembl_id",
+        "chembl": "publication_id",
         "pubmed": "pmid",
         "crossref": "doi",
         "openalex": "openalex_id",
@@ -439,7 +439,7 @@ class TestPrimaryKeyStability:
     @pytest.mark.parametrize(
         "provider,pk_field",
         [
-            ("chembl", "document_chembl_id"),
+            ("chembl", "publication_id"),
             ("pubmed", "pmid"),
             ("crossref", "doi"),
             ("openalex", "openalex_id"),
@@ -462,7 +462,7 @@ class TestPrimaryKeyStability:
     @pytest.mark.parametrize(
         "provider,pk_field",
         [
-            ("chembl", "document_chembl_id"),
+            ("chembl", "publication_id"),
             ("pubmed", "pmid"),
             ("crossref", "doi"),
             ("openalex", "openalex_id"),

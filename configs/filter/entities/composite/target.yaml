@@ -29,12 +29,12 @@ input_filter:
 gold_filters:
   # Required fields - records missing these are excluded from Gold
   required_fields:
-    - target_chembl_id  # Primary key
+    - target_id  # Primary key
     - pref_name         # Target name (critical for usability)
 
   # Field-specific validation (applied before Gold write)
   columns:
-    target_chembl_id:
+    target_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"

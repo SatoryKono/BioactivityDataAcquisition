@@ -85,7 +85,7 @@ class DQConfig:
             raise ValueError(
                 "hard_fail_threshold must be between 0.0 and 1.0 inclusive"
             )
-        if soft_fail_threshold > hard_fail_threshold:
+        if soft_fail_threshold >= hard_fail_threshold:
             raise ValueError(
-                "soft_fail_threshold must be less than or equal to hard_fail_threshold"
+                "soft_fail_threshold must be strictly less than hard_fail_threshold"
             )

@@ -131,7 +131,7 @@
     "required": false,
     "unique": false
   },
-  "assay_chembl_id": {
+  "assay_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -259,7 +259,7 @@
     "required": false,
     "unique": false
   },
-  "document_chembl_id": {
+  "publication_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -273,7 +273,7 @@
     "required": false,
     "unique": false
   },
-  "document_journal": {
+  "journal": {
     "checks": [],
     "coerce": false,
     "description": "Publication journal name.",
@@ -282,7 +282,7 @@
     "required": false,
     "unique": false
   },
-  "document_year": {
+  "publication_year": {
     "checks": [
       {
         "name": "greater_than_or_equal_to",
@@ -359,7 +359,7 @@
     "required": false,
     "unique": false
   },
-  "molecule_chembl_id": {
+  "molecule_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -391,7 +391,7 @@
     "required": false,
     "unique": false
   },
-  "parent_molecule_chembl_id": {
+  "parent_molecule_id": {
     "checks": [],
     "coerce": false,
     "description": "Parent molecule ChEMBL ID.",
@@ -551,7 +551,7 @@
     "required": false,
     "unique": false
   },
-  "target_chembl_id": {
+  "target_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -583,7 +583,7 @@
     "required": false,
     "unique": false
   },
-  "target_taxonomy_id": {
+  "taxonomy_id": {
     "checks": [],
     "coerce": false,
     "description": "Target taxonomy ID. Standardized name (was target_tax_id).",

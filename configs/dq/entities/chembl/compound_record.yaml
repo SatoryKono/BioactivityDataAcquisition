@@ -18,17 +18,17 @@ entity_field_validations:
     nullable: false
     error_message: "Record ID is required and must be positive"
 
-  - field: molecule_chembl_id
+  - field: molecule_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "molecule_chembl_id must match CHEMBL format"
+    error_message: "molecule_id must match CHEMBL format"
 
-  - field: document_chembl_id
+  - field: publication_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "document_chembl_id must match CHEMBL format"
+    error_message: "publication_id must match CHEMBL format"
 
   - field: src_id
     type: range
@@ -41,8 +41,8 @@ entity_field_validations:
 entity_cross_field_validations:
   - name: record_linkage
     fields:
-      - molecule_chembl_id
-      - document_chembl_id
+      - molecule_id
+      - publication_id
     condition: all_present
     error_message: "Both molecule and document IDs are required"
 

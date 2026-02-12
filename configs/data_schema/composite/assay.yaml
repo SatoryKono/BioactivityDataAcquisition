@@ -67,11 +67,11 @@ column_groups:
   # 3. Primary identifiers (assay)
   - name: identifiers
     fields:
-      - assay_chembl_id
-      - cell_chembl_id
-      - tissue_chembl_id
-      - target_chembl_id
-      - document_chembl_id
+      - assay_id
+      - cell_id
+      - tissue_id
+      - target_id
+      - publication_id
       - src_id
       - src_assay_id
       - aidx
@@ -95,7 +95,7 @@ column_groups:
   - name: biological_context
     fields:
       - assay_organism
-      - assay_taxonomy_id
+      - taxonomy_id
       - assay_strain
       - assay_tissue
       - assay_cell_type
@@ -126,7 +126,6 @@ column_groups:
       - cell_source_organism
       - cell_source_taxonomy_id
       - cellosaurus_id
-      - clo_id
       - cl_lincs_id
       - cell_efo_id
     provider_order: [chembl]
@@ -178,16 +177,16 @@ gold:
 # Join Key Configuration
 join_keys:
   cell_line:
-    seed_field: cell_chembl_id
-    enricher_field: cell_chembl_id
+    seed_field: cell_id
+    enricher_field: cell_id
     description: "ChEMBL cell line ID for cell line enrichment"
     validation: "^CHEMBL\\d+$"
     nullable: true
     # Cardinality: one_to_one (each assay FK points to at most one cell line)
 
   tissue:
-    seed_field: tissue_chembl_id
-    enricher_field: tissue_chembl_id
+    seed_field: tissue_id
+    enricher_field: tissue_id
     description: "ChEMBL tissue ID for tissue enrichment"
     validation: "^CHEMBL\\d+$"
     nullable: true
@@ -196,11 +195,11 @@ join_keys:
 # All business fields for Gold layer (excluding system/lineage)
 gold_columns:
   # Identifiers
-  - assay_chembl_id
-  - cell_chembl_id
-  - tissue_chembl_id
-  - target_chembl_id
-  - document_chembl_id
+  - assay_id
+  - cell_id
+  - tissue_id
+  - target_id
+  - publication_id
   - src_id
   - src_assay_id
   - aidx
@@ -216,7 +215,7 @@ gold_columns:
   - confidence_description
   # Biological context
   - assay_organism
-  - assay_taxonomy_id
+  - taxonomy_id
   - assay_strain
   - assay_tissue
   - assay_cell_type

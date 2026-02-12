@@ -77,7 +77,7 @@ def chembl_activity_strategy() -> st.SearchStrategy[dict[str, Any]]:
     """Generate records that look like ChEMBL activity data.
 
     Creates dictionaries with structure similar to ChEMBL API responses.
-    Required fields (activity_id, molecule_chembl_id) are always present,
+    Required fields (activity_id, molecule_id) are always present,
     while optional fields may contain valid or edge-case values.
 
     Returns:
@@ -103,10 +103,10 @@ def chembl_activity_strategy() -> st.SearchStrategy[dict[str, Any]]:
     return st.fixed_dictionaries(
         {
             "activity_id": st.one_of(st.integers(), st.text()),
-            "molecule_chembl_id": st.text(),
+            "molecule_id": st.text(),
         },
         optional={
-            "target_chembl_id": st.text(),
+            "target_id": st.text(),
             "standard_type": st.text(),
             "standard_value": st.one_of(st.floats(), st.text()),
             "standard_units": st.text(),

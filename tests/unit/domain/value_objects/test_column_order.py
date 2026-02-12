@@ -34,7 +34,7 @@ class TestColumnOrderConfig:
         config = ColumnOrderConfig()
         assert config.get_group("doi") == SemanticGroup.IDENTIFIERS
         assert config.get_group("pmid") == SemanticGroup.IDENTIFIERS
-        assert config.get_group("document_chembl_id") == SemanticGroup.IDENTIFIERS
+        assert config.get_group("publication_id") == SemanticGroup.IDENTIFIERS
 
     def test_get_group_qualified_column(self) -> None:
         """Qualified columns extract field correctly."""

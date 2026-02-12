@@ -48,9 +48,9 @@ class TestActivityTransformerTransform:
         """Test transformation of valid activity record."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "target_chembl_id": "CHEMBL1862",
-            "assay_chembl_id": "CHEMBL1234567",
+            "molecule_id": "CHEMBL25",
+            "target_id": "CHEMBL1862",
+            "assay_id": "CHEMBL1234567",
             "standard_type": "IC50",
             "standard_value": 10.5,
             "standard_units": "nM",
@@ -61,8 +61,8 @@ class TestActivityTransformerTransform:
 
         assert result is not None
         assert result["activity_id"] == "12345"
-        assert result["molecule_chembl_id"] == "CHEMBL25"
-        assert result["target_chembl_id"] == "CHEMBL1862"
+        assert result["molecule_id"] == "CHEMBL25"
+        assert result["target_id"] == "CHEMBL1862"
         assert result["standard_type"] == "IC50"
         assert result["standard_value"] == pytest.approx(10.5)
         assert result["pchembl_value"] == pytest.approx(8.0)
@@ -74,8 +74,8 @@ class TestActivityTransformerTransform:
     async def test_transform_missing_activity_id(self, transformer, mock_context):
         """Test transformation returns None when activity_id is missing."""
         record = {
-            "molecule_chembl_id": "CHEMBL25",
-            "target_chembl_id": "CHEMBL1862",
+            "molecule_id": "CHEMBL25",
+            "target_id": "CHEMBL1862",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -84,10 +84,10 @@ class TestActivityTransformerTransform:
 
     @pytest.mark.asyncio
     async def test_transform_missing_molecule_id(self, transformer, mock_context):
-        """Test transformation returns None when molecule_chembl_id is missing."""
+        """Test transformation returns None when molecule_id is missing."""
         record = {
             "activity_id": 12345,
-            "target_chembl_id": "CHEMBL1862",
+            "target_id": "CHEMBL1862",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -99,7 +99,7 @@ class TestActivityTransformerTransform:
         """Test transformation with ligand efficiency data."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "ligand_efficiency": {
                 "bei": "14.06",
                 "le": "0.26",
@@ -121,15 +121,15 @@ class TestActivityTransformerTransform:
         """Test transformation with all core activity fields."""
         record = {
             "activity_id": 99999,
-            "molecule_chembl_id": "CHEMBL25",
-            "target_chembl_id": "CHEMBL1862",
-            "assay_chembl_id": "CHEMBL123",
-            "document_chembl_id": "CHEMBL456",
+            "molecule_id": "CHEMBL25",
+            "target_id": "CHEMBL1862",
+            "assay_id": "CHEMBL123",
+            "publication_id": "CHEMBL456",
             "record_id": 100,
             "src_id": 1,
             "canonical_smiles": "CC(=O)Oc1ccccc1C(=O)O",
             "molecule_pref_name": "ASPIRIN",
-            "parent_molecule_chembl_id": "CHEMBL25",
+            "parent_molecule_id": "CHEMBL25",
             "target_pref_name": "Cyclooxygenase-2",
             "target_organism": "Homo sapiens",
             "target_tax_id": 9606,  # Source API field name
@@ -144,7 +144,7 @@ class TestActivityTransformerTransform:
         assert result["molecule_pref_name"] == "ASPIRIN"
         assert result["target_pref_name"] == "Cyclooxygenase-2"
         assert result["target_organism"] == "Homo sapiens"
-        assert result["target_taxonomy_id"] == "9606"  # Standardized output (string)
+        assert result["taxonomy_id"] == "9606"  # Standardized output (string)
         assert result["assay_type"] == "B"
 
     @pytest.mark.asyncio
@@ -152,7 +152,7 @@ class TestActivityTransformerTransform:
         """Test transformation with raw and standardized activity values."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "type": "IC50",
             "value": 10.5,
             "units": "nM",
@@ -181,7 +181,7 @@ class TestActivityTransformerTransform:
         """Test transformation with data quality annotations."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "activity_comment": "Potent inhibitor",
             "data_validity_comment": "Valid",
             "data_validity_description": "Data passed validation",
@@ -205,7 +205,7 @@ class TestActivityTransformerTransform:
         """Test transformation handles nullable curation fields."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             # Curation fields are missing/null
         }
 
@@ -221,7 +221,7 @@ class TestActivityTransformerTransform:
         """Test transformation with manual_curation_flag set to 0 (not curated)."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "manual_curation_flag": 0,
         }
 
@@ -235,7 +235,7 @@ class TestActivityTransformerTransform:
         """Test transformation unwraps single-element activity_properties."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "activity_properties": [{"type": "Ki", "value": 5.0}],
         }
 
@@ -250,7 +250,7 @@ class TestActivityTransformerTransform:
         """Test transformation keeps multi-element activity_properties as array."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "activity_properties": [{"type": "Ki"}, {"type": "IC50"}],
         }
 
@@ -267,7 +267,7 @@ class TestActivityTransformerTransform:
         """Test transformation returns None for empty activity_properties."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "activity_properties": [],  # Empty array from ChEMBL API
         }
 
@@ -282,7 +282,7 @@ class TestActivityTransformerTransform:
         """Test transformation with action type data (flattened structure)."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "action_type": {
                 "action_type": "INHIBITOR",
                 "description": "Compound that inhibits target activity",
@@ -305,7 +305,7 @@ class TestActivityTransformerTransform:
         """Test transformation with null action type."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
             "action_type": None,
         }
 
@@ -322,7 +322,7 @@ class TestActivityTransformerTransform:
         transformer = ActivityTransformer(provider="custom_provider")
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
+            "molecule_id": "CHEMBL25",
         }
 
         result = await transformer.transform(mock_context, record, index=0)

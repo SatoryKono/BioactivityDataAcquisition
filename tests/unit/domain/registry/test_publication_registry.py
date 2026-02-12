@@ -28,7 +28,7 @@ class TestPublicationMapping:
             canonical_name="publication",
             api_resource="document",
             plural_key="documents",
-            primary_key_field="document_chembl_id",
+            primary_key_field="publication_id",
         )
 
         with pytest.raises(AttributeError):
@@ -40,7 +40,7 @@ class TestPublicationMapping:
             canonical_name="publication",
             api_resource="document",
             plural_key="documents",
-            primary_key_field="document_chembl_id",
+            primary_key_field="publication_id",
         )
 
         assert mapping.is_legacy_alias is False
@@ -109,7 +109,7 @@ class TestGetPublicationMapping:
         assert mapping.canonical_name == "publication"
         assert mapping.api_resource == "document"
         assert mapping.plural_key == "documents"
-        assert mapping.primary_key_field == "document_chembl_id"
+        assert mapping.primary_key_field == "publication_id"
         assert mapping.is_legacy_alias is False
 
     def test_get_canonical_publication_similarity(self) -> None:
@@ -130,7 +130,7 @@ class TestGetPublicationMapping:
         assert mapping is not None
         assert mapping.canonical_name == "publication_term"
         assert mapping.api_resource == "document"
-        assert mapping.primary_key_field == "document_chembl_id"
+        assert mapping.primary_key_field == "publication_id"
         assert mapping.is_legacy_alias is False
 
     def test_get_legacy_document(self) -> None:

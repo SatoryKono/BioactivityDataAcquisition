@@ -68,7 +68,7 @@ async def test_chembl_assay_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "chembl_assay")
-    required_fields = ["assay_chembl_id", "assay_type"]
+    required_fields = ["assay_id", "assay_type"]
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
@@ -96,8 +96,8 @@ async def test_chembl_assay_metadata_fields(e2e_data_dir: Path):
     records = get_silver_records(e2e_data_dir, "chembl_assay")
 
     for record in records:
-        # assay_chembl_id must always be present
-        assert record.get("assay_chembl_id") is not None
+        # assay_id must always be present
+        assert record.get("assay_id") is not None
 
         # assay_type should always be present
         assert record.get("assay_type") is not None
@@ -125,5 +125,5 @@ async def test_chembl_assay_confidence_score(e2e_data_dir: Path):
         confidence = record.get("confidence_score")
         if confidence is not None:
             assert 0 <= confidence <= 9, (
-                f"Invalid confidence_score {confidence} for {record.get('assay_chembl_id')}"
+                f"Invalid confidence_score {confidence} for {record.get('assay_id')}"
             )

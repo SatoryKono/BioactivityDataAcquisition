@@ -70,7 +70,7 @@ class BioactivityState(StrEnum):
 
 @dataclass(frozen=True, kw_only=True)
 class Bioactivity(BaseEntity):
-    """Bioactivity measurement from ChEMBL. Required: activity_id, molecule_chembl_id."""
+    """Bioactivity measurement from ChEMBL. Required: activity_id, molecule_id."""
 
     # Processing state (informational, does not affect behavior)
     _state: BioactivityState = BioactivityState.VALIDATED
@@ -79,23 +79,23 @@ class Bioactivity(BaseEntity):
     activity_id: str
 
     # REQUIRED: Core identifiers (validated in __post_init__)
-    molecule_chembl_id: str
-    target_chembl_id: str | None = None
-    assay_chembl_id: str | None = None
-    document_chembl_id: str | None = None
+    molecule_id: str
+    target_id: str | None = None
+    assay_id: str | None = None
+    publication_id: str | None = None
     record_id: int | None = None
     src_id: int | None = None
 
     # Molecule data
     canonical_smiles: str | None = None
     molecule_pref_name: str | None = None
-    parent_molecule_chembl_id: str | None = None
+    parent_molecule_id: str | None = None
 
     # Target data
     target_pref_name: str | None = None
     target_organism: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-    target_taxonomy_id: str | None = None
+    taxonomy_id: str | None = None
 
     # Assay data
     assay_type: str | None = None
@@ -139,8 +139,8 @@ class Bioactivity(BaseEntity):
     uo_units: str | None = None
 
     # Document/Publication data
-    document_journal: str | None = None
-    document_year: int | None = None
+    journal: str | None = None
+    publication_year: int | None = None
 
     # Quality annotations
     activity_comment: str | None = None
@@ -153,9 +153,7 @@ class Bioactivity(BaseEntity):
     original_activity_id: int | None = None  # FK to original activity for traceability
 
     # Action type (flattened from ChEMBL API nested structure)
-    action_type_action_type: str | None = (
-        None  # Type of action (INHIBITOR, AGONIST, etc.)
-    )
+    action_type: str | None = None  # Type of action (INHIBITOR, AGONIST, etc.)
     action_type_description: str | None = None  # Description of the action type
     action_type_parent_type: str | None = None  # Higher-level grouping (nullable)
 
@@ -175,7 +173,7 @@ class Bioactivity(BaseEntity):
         """
         if not self.activity_id:
             raise ValueError("Activity ID is required")
-        if not self.molecule_chembl_id:
+        if not self.molecule_id:
             raise ValueError("Molecule ID is required")
         self._validate_pchembl_value()
 
@@ -212,7 +210,7 @@ class Bioactivity(BaseEntity):
         from bioetl.domain.serialization import serialize_to_json_canonical
 
         activity_id = _require_field(raw_data, "activity_id")
-        molecule_chembl_id = _require_field(raw_data, "molecule_chembl_id")
+        molecule_id = _require_field(raw_data, "molecule_id")
         entity_id = EntityID(str(activity_id))
         content_hash_str = hashlib.sha256(
             serialize_to_json_canonical(raw_data).encode()
@@ -228,25 +226,25 @@ class Bioactivity(BaseEntity):
             source_batch_id=BatchID(source_batch_id) if source_batch_id else None,
             _state=BioactivityState.RAW,
             activity_id=str(activity_id),
-            molecule_chembl_id=str(molecule_chembl_id),
+            molecule_id=str(molecule_id),
             # Optional identifiers
-            target_chembl_id=_safe_str(raw_data.get("target_chembl_id")),
-            assay_chembl_id=_safe_str(raw_data.get("assay_chembl_id")),
-            document_chembl_id=_safe_str(raw_data.get("document_chembl_id")),
+            target_id=_safe_str(raw_data.get("target_id")),
+            assay_id=_safe_str(raw_data.get("assay_id")),
+            publication_id=_safe_str(raw_data.get("publication_id")),
             record_id=_safe_int(raw_data.get("record_id")),
             src_id=_safe_int(raw_data.get("src_id")),
             # Molecule data
             canonical_smiles=_safe_str(raw_data.get("canonical_smiles")),
             molecule_pref_name=_safe_str(raw_data.get("molecule_pref_name")),
-            parent_molecule_chembl_id=_safe_str(
-                raw_data.get("parent_molecule_chembl_id")
+            parent_molecule_id=_safe_str(
+                raw_data.get("parent_molecule_id")
             ),
             # Target data
             target_pref_name=_safe_str(raw_data.get("target_pref_name")),
             target_organism=_safe_str(raw_data.get("target_organism")),
-            # Supports both old 'target_tax_id' and new 'target_taxonomy_id' keys
-            target_taxonomy_id=_safe_str(
-                raw_data.get("target_taxonomy_id") or raw_data.get("target_tax_id")
+            # Supports both old 'target_tax_id' and new 'taxonomy_id' keys
+            taxonomy_id=_safe_str(
+                raw_data.get("taxonomy_id") or raw_data.get("target_tax_id")
             ),
             # Assay data
             assay_type=_safe_str(raw_data.get("assay_type")),
@@ -275,8 +273,11 @@ class Bioactivity(BaseEntity):
             # Derived metrics
             pchembl_value=_safe_float(raw_data.get("pchembl_value")),
             # Document data
-            document_journal=_safe_str(raw_data.get("document_journal")),
-            document_year=_safe_int(raw_data.get("document_year")),
+            journal=_safe_str(raw_data.get("journal")),
+            publication_year=_safe_int(raw_data.get("publication_year")),
+            action_type=_safe_str(raw_data.get("action_type")),
+            action_type_description=_safe_str(raw_data.get("action_type_description")),
+            action_type_parent_type=_safe_str(raw_data.get("action_type_parent_type")),
             # Quality annotations
             activity_comment=_safe_str(raw_data.get("activity_comment")),
             data_validity_comment=_safe_str(raw_data.get("data_validity_comment")),

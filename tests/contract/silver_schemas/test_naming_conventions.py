@@ -77,7 +77,7 @@ class TestFieldNaming:
         - ec: enzyme commission
         - go: gene ontology
         - pdb: protein data bank
-        - cid: compound identifier (PubChem)
+        - molecule_id: compound identifier (PubChem)
         - bao: BioAssay Ontology
         - uo: Units of Measurement Ontology
         """
@@ -91,20 +91,20 @@ class TestFieldNaming:
             "uri",
             "doi",
             "pmid",
-            "pmcid",
+            "pmmolecule_id",
             "isbn",
             "issn",
             "ec",
             "go",
             "pdb",
-            "cid",
+            "molecule_id",
             "bao",
             "uo",
             "sdf",
             "smiles",
             "inchi",
-            "inchikey",
-            "orcid",
+            "inchi_key",
+            "ormolecule_id",
             "max",
             "min",
             "avg",
@@ -274,7 +274,7 @@ class TestForeignKeyNaming:
         fks_without_id_suffix = [
             (field, desc)
             for field, desc in fk_fields
-            if not field.endswith(("_id", "_chembl_id", "cid", "accession"))
+            if not field.endswith(("_id", "_chembl_id", "molecule_id", "accession"))
         ]
 
         if fks_without_id_suffix:
@@ -323,7 +323,7 @@ class TestForeignKeyNaming:
 
             # Check if it's a known entity or compound word
             if entity not in valid_entities and "_" in entity:
-                # Check compound: target_chembl_id, compound_record_chembl_id OK
+                # Check compound: target_id, compound_record_chembl_id OK
                 # But: invalid_name_chembl_id NOT OK
                 parts = entity.split("_")
                 if not any(part in valid_entities for part in parts):
@@ -359,7 +359,7 @@ class TestCrossProviderNaming:
             # Check for legacy field names (should be renamed)
             legacy_fields = {
                 "citation_count": "Use citations_received instead (5.14.0)",
-                "author_orcid_list": "Use author_orcids instead (5.14.0)",
+                "author_ormolecule_id_list": "Use author_ormolecule_ids instead (5.14.0)",
             }
 
             found_legacy = [
@@ -381,7 +381,7 @@ class TestCrossProviderNaming:
 
         Conventions:
         - ChEMBL: {entity}_chembl_id
-        - PubChem: cid
+        - PubChem: molecule_id
         - UniProt: accession (or entry)
         - PubMed: pmid
         - CrossRef: doi
@@ -390,7 +390,7 @@ class TestCrossProviderNaming:
         """
         provider_conventions = {
             "chembl": "_chembl_id",
-            "pubchem": "cid",
+            "pubchem": "molecule_id",
             "uniprot": "accession",
             "pubmed": "pmid",
             "crossref": "doi",

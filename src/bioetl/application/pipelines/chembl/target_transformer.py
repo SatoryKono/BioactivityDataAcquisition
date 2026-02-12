@@ -152,9 +152,9 @@ class TargetTransformer(BaseChemblTransformer):
 
         return {
             # Primary identifier
-            "target_chembl_id": str(primary_id),
+            "target_id": str(primary_id),
             # Primary component ID (for target_component enricher join)
-            "component_id": primary_component_id,
+            "primary_component_id": primary_component_id,
             # Core metadata
             "pref_name": record.get("pref_name"),
             "target_type": record.get("target_type"),

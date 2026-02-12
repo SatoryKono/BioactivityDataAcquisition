@@ -53,7 +53,7 @@
       }
     ],
     "coerce": false,
-    "description": "How record was resolved: direct, doi, pmid, title_fallback, title_only",
+    "description": "How record was resolved: direct, publication_doi, publication_pmid, title_fallback, title_only",
     "dtype": "str",
     "nullable": false,
     "required": true,
@@ -118,10 +118,10 @@
     "required": true,
     "unique": false
   },
-  "author_orcids": {
+  "author_ormolecule_ids": {
     "checks": [
       {
-        "name": "orcid_format"
+        "name": "ormolecule_id_format"
       }
     ],
     "coerce": false,
@@ -205,7 +205,7 @@
     "required": true,
     "unique": false
   },
-  "document_chembl_id": {
+  "publication_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -219,7 +219,7 @@
     "required": true,
     "unique": false
   },
-  "doi": {
+  "publication_doi": {
     "checks": [
       {
         "name": "str_matches",
@@ -301,7 +301,7 @@
     "required": true,
     "unique": false
   },
-  "pmc_id": {
+  "publication_pmc_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -315,7 +315,7 @@
     "required": true,
     "unique": false
   },
-  "pmid": {
+  "publication_pmid": {
     "checks": [
       {
         "name": "str_matches",

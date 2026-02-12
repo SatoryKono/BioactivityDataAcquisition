@@ -15,8 +15,8 @@ column_groups:
   - name: identifiers
     fields:
       - openalex_id
-      - doi
-      - pmid
+      - publication_doi
+      - publication_pmid
       - mag_id
 
   - name: title
@@ -119,6 +119,8 @@ field_aliases:
   keywords: subject_keywords
   mesh_terms: subject_mesh
   source_type: publication_type
+  doi: publication_doi
+  pmid: publication_pmid
 
 # Layer-specific column filtering
 silver:

@@ -95,7 +95,7 @@ class TestFieldTypes:
 
         numeric_id_fields = {
             "assay_param_id",
-            "assay_taxonomy_id",
+            "taxonomy_id",
             "cell_source_taxonomy_id",
             "component_id",
             "component_ids",
@@ -125,7 +125,7 @@ class TestFieldTypes:
             if (
                 "_id" in field.lower()
                 or field.lower().endswith("id")
-                or field in {"pmid", "doi", "accession", "cid"}
+                or field in {"pmid", "doi", "accession", "molecule_id"}
             )
             and field not in numeric_id_fields
         ]
