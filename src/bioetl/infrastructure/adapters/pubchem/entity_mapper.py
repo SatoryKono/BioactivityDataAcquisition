@@ -42,9 +42,13 @@ class PubChemEntityMapper:
             - Stereochemistry (atom/bond stereo counts)
             - 3D properties (volume, conformer count, feature counts)
         """
-        molecule_id = getattr(compound, "cid", None)
-        if molecule_id is None:
-            molecule_id = getattr(compound, "molecule_id", None)
+        molecule_id = getattr(compound, "molecule_id", None)
+        if molecule_id is None or not isinstance(molecule_id, (str, int, float)):
+            molecule_id = None
+
+        cid_value = getattr(compound, "cid", None)
+        if molecule_id is None and isinstance(cid_value, (str, int, float)):
+            molecule_id = cid_value
 
         return {
             # === Primary Key ===

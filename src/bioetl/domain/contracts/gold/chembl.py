@@ -319,9 +319,6 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # Cross-reference IDs for linking publications across providers
     pmid: Series[str] = pa.Field(nullable=True)
     doi: Series[str] = pa.Field(nullable=True)
-    # Unified names retained for migration compatibility
-    publication_pmid: Series[str] = pa.Field(nullable=True)
-    publication_doi: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
@@ -606,7 +603,9 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    primary_component_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64
+    primary_component_id: Series[float] = pa.Field(
+        nullable=False, coerce=True, alias="component_id"
+    )  # int64
     accession: Series[str] = pa.Field(nullable=True)
     component_type: Series[str] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
