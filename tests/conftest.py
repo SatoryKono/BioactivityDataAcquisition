@@ -94,7 +94,7 @@ def query_ignore_email(request_1: Any, request_2: Any) -> bool:
 
 
 @pytest.fixture(scope="module")
-def vcr(vcr_config: dict[str, object]):  # type: ignore[override]
+def vcr(vcr_config: dict[str, object]) -> Any:  # type: ignore[override]
     """Configure VCR instance with custom matchers."""
     vcr_instance = vcrpy.VCR(**vcr_config)
     vcr_instance.register_matcher("query_ignore_email", query_ignore_email)

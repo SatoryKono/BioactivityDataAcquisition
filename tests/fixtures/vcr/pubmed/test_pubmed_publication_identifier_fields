@@ -1,0 +1,1635 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=health&retmax=1&retmode=json&email=821311%40gmail.com
+  response:
+    body:
+      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"7830635","retmax":"1","retstart":"0","idlist":["41637538"],"translationset":[{"from":"health","to":"\"health\"[MeSH
+        Terms] OR \"health\"[All Fields] OR \"health''s\"[All Fields] OR \"healthful\"[All
+        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}],"querytranslation":"\"health\"[MeSH
+        Terms] OR \"health\"[All Fields] OR \"health s\"[All Fields] OR \"healthful\"[All
+        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}}
+
+        '
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Cache-Control:
+      - private
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 12 Feb 2026 17:09:35 GMT
+      Keep-Alive:
+      - timeout=4, max=40
+      NCBI-PHID:
+      - 1D3229B4080E22C50000606B09DA62E4.1.1.m_1
+      NCBI-SID:
+      - D34E6526AB04D72B_D9EASID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Set-Cookie:
+      - ncbi_sid=D34E6526AB04D72B_D9EASID; domain=.nih.gov; path=/; expires=Fri, 12
+        Feb 2027 17:09:36 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '2'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '529'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Cookie:
+      - ncbi_sid=D34E6526AB04D72B_D9EASID
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=pharmacogenomics%5BTitle%2FAbstract%5D&retmax=5&usehistory=y&retmode=json&email=821311%40gmail.com
+  response:
+    body:
+      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"8769","retmax":"5","retstart":"0","querykey":"1","webenv":"MCID_698e0951c0958aa61a0bcb97","idlist":["41675730","41664336","41664142","41663779","41663058"],"translationset":[],"querytranslation":"\"pharmacogenomics\"[Title/Abstract]"}}
+
+        '
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Cache-Control:
+      - private
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 12 Feb 2026 17:09:37 GMT
+      Keep-Alive:
+      - timeout=4, max=40
+      NCBI-PHID:
+      - 1D3229B4080E22C50000506B0C4F167E.1.1.m_1
+      NCBI-SID:
+      - D34E6526AB04D72B_D9EASID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Set-Cookie:
+      - ncbi_sid=D34E6526AB04D72B_D9EASID; domain=.nih.gov; path=/; expires=Fri, 12
+        Feb 2027 17:09:37 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '0'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '307'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Cookie:
+      - ncbi_sid=D34E6526AB04D72B_D9EASID
+      Host:
+      - eutils.ncbi.nlm.nih.gov
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=41675730%2C41664336%2C41664142%2C41663779%2C41663058&retmode=xml&rettype=abstract&email=821311%40gmail.com
+  response:
+    body:
+      string: '<?xml version="1.0" ?>
+
+        <!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle, 1st January
+        2025//EN" "https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_250101.dtd">
+
+        <PubmedArticleSet>
+
+        <PubmedArticle><MedlineCitation Status="Publisher" Owner="NLM"><PMID Version="1">41675730</PMID><DateRevised><Year>2026</Year><Month>02</Month><Day>12</Day></DateRevised><Article
+        PubModel="Electronic-eCollection"><Journal><ISSN IssnType="Print">2049-0801</ISSN><JournalIssue
+        CitedMedium="Print"><Volume>88</Volume><Issue>2</Issue><PubDate><Year>2026</Year><Month>Feb</Month></PubDate></JournalIssue><Title>Annals
+        of medicine and surgery (2012)</Title><ISOAbbreviation>Ann Med Surg (Lond)</ISOAbbreviation></Journal><ArticleTitle>Integration
+        of pharmacogenomics into precision medicine: transforming healthcare for the
+        next generation.</ArticleTitle><Pagination><StartPage>2192</StartPage><EndPage>2193</EndPage><MedlinePgn>2192-2193</MedlinePgn></Pagination><ELocationID
+        EIdType="doi" ValidYN="Y">10.1097/MS9.0000000000004691</ELocationID><Abstract><AbstractText>Pharmacogenomics
+        is now an essential part of precision medicine, as it describes how genetic
+        differences at the individual level influence drug responses. Its combination
+        enables a transition from trial-and-error prescriptions to predictive, genotype-directed
+        treatment, thereby enhancing the safety and accuracy of treatment. Rapid genomic
+        testing, AI-driven prediction of drug-gene interactions, and clinical decision-support
+        systems have advanced, increasing their uptake in psychiatry, cardiology,
+        and oncology. New methods, such as polygenic pharmacogenomic scoring and population-specific
+        genomic maps, are even more personalized. Together, these advances make pharmacogenomics
+        a central figure with the potential to shape the future of personalized, effective,
+        and innovative healthcare.</AbstractText><CopyrightInformation>Copyright &#xa9;
+        2026 The Author(s). Published by Wolters Kluwer Health, Inc.</CopyrightInformation></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Ali</LastName><ForeName>Umair</ForeName><Initials>U</Initials><AffiliationInfo><Affiliation>Department
+        of Pharmacy, University of Swabi, Pakistan.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Mahato</LastName><ForeName>Raghabendra Kumar</ForeName><Initials>RK</Initials><Identifier
+        Source="ORCID">0009-0006-5140-877X</Identifier><AffiliationInfo><Affiliation>Department
+        of Medicine,Gandaki Medical College Teaching Hospital and Research Center,
+        Pokhara, Nepal.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016422">Letter</PublicationType></PublicationTypeList><ArticleDate DateType="Electronic"><Year>2026</Year><Month>01</Month><Day>21</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>Ann
+        Med Surg (Lond)</MedlineTA><NlmUniqueID>101616869</NlmUniqueID><ISSNLinking>2049-0801</ISSNLinking></MedlineJournalInfo><KeywordList
+        Owner="NOTNLM"><Keyword MajorTopicYN="N">drug response prediction</Keyword><Keyword
+        MajorTopicYN="N">genetic variability</Keyword><Keyword MajorTopicYN="N">personalized
+        therapy</Keyword><Keyword MajorTopicYN="N">pharmacogenomics</Keyword><Keyword
+        MajorTopicYN="N">precision medicine</Keyword></KeywordList><CoiStatement>None
+        declared.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="medline"><Year>2026</Year><Month>2</Month><Day>12</Day><Hour>6</Hour><Minute>54</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2026</Year><Month>2</Month><Day>12</Day><Hour>6</Hour><Minute>54</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="received"><Year>2025</Year><Month>12</Month><Day>12</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>12</Month><Day>15</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2026</Year><Month>2</Month><Day>12</Day><Hour>5</Hour><Minute>45</Minute></PubMedPubDate></History><PublicationStatus>epublish</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41675730</ArticleId><ArticleId IdType="pmc">PMC12889299</ArticleId><ArticleId
+        IdType="doi">10.1097/MS9.0000000000004691</ArticleId><ArticleId IdType="pii">AMSU-D-25-04231</ArticleId></ArticleIdList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="Publisher" Owner="NLM"><PMID Version="1">41664336</PMID><DateRevised><Year>2026</Year><Month>02</Month><Day>10</Day></DateRevised><Article
+        PubModel="Print-Electronic"><Journal><ISSN IssnType="Electronic">1873-4286</ISSN><JournalIssue
+        CitedMedium="Internet"><PubDate><Year>2026</Year><Month>Feb</Month><Day>03</Day></PubDate></JournalIssue><Title>Current
+        pharmaceutical design</Title><ISOAbbreviation>Curr Pharm Des</ISOAbbreviation></Journal><ArticleTitle>Crosstalk
+        in Signaling Pathways and Mutations of Therapeutic Target Genes in Oral Cancer:
+        A Comprehensive Review.</ArticleTitle><ELocationID EIdType="doi" ValidYN="Y">10.2174/0113816128407170251013122858</ELocationID><Abstract><AbstractText
+        Label="INTRODUCTION" NlmCategory="BACKGROUND">Head and neck squamous cell
+        carcinoma (HNSCC), including oral squamous cell carcinoma (OSCC), is an aggressive
+        malignancy with poor survival rates due to late diagnosis and recurrence.
+        This study aims to identify novel biomarkers and therapeutic targets to improve
+        early detection and treatment, ultimately enhancing patient outcomes and reducing
+        mortality associated with HNSCC and OC.</AbstractText><AbstractText Label="METHOD"
+        NlmCategory="METHODS">This review explores the major cross-talking signals,
+        drugs, and target genes of HNSCC and OC, with a focus on Wnt as a key resource.
+        Keywords in OC studies were categorized, revealing highly specific pathways
+        and the role of pharmacogenomics, nutrigenomics, and gene mutations for future
+        drug development.</AbstractText><AbstractText Label="RESULTS" NlmCategory="RESULTS">The
+        roles of interlinked signaling pathways and gene networks in HNSCC and OC,
+        identifying major regulatory pathways as potential therapeutic targets, and
+        discussing target genes and therapies.</AbstractText><AbstractText Label="DISCUSSION"
+        NlmCategory="CONCLUSIONS">Understanding molecular pathways is crucial for
+        precision medicine in OC Integrating pharmacogenomic and nutrigenomic insights
+        can improve therapeutic outcomes and reduce toxicity, despite resistance and
+        heterogeneity challenges.</AbstractText><AbstractText Label="CONCLUSION" NlmCategory="CONCLUSIONS">This
+        review focuses on HNSCC and OC, both of which are complex diseases with multiple
+        molecular mechanisms. Understanding the cross-talk between signaling pathways
+        is crucial for identifying novel therapeutic targets. Despite advancements
+        in modern medicine and synthetic drugs, herbal remedies continue to be used
+        in healthcare and can effectively support therapy in various ways. Biological
+        therapies, such as monoclonal antibodies, can help reduce the side effects
+        of chemotherapy, whereas synthetic drugs have posed challenges in recent years.</AbstractText><CopyrightInformation>Copyright&#xa9;
+        Bentham Science Publishers; For any queries, please email at epub@benthamscience.net.</CopyrightInformation></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Jagannathan</LastName><ForeName>Sushma
+        Shruthi</ForeName><Initials>SS</Initials><Identifier Source="ORCID">0009-0005-9706-0919</Identifier><AffiliationInfo><Affiliation>Pharmacogenomics
+        and CADD Laboratory, Department of Bioinformatics, Science Block, Alagappa
+        University, Karaikudi, 630 003, Tamil Nadu, India.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Muthusamy</LastName><ForeName>Karthikeyan</ForeName><Initials>K</Initials><Identifier
+        Source="ORCID">0000-0001-7755-3381</Identifier><AffiliationInfo><Affiliation>Pharmacogenomics
+        and CADD Laboratory, Department of Bioinformatics, Science Block, Alagappa
+        University, Karaikudi, 630 003, Tamil Nadu, India.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2026</Year><Month>02</Month><Day>03</Day></ArticleDate></Article><MedlineJournalInfo><Country>United
+        Arab Emirates</Country><MedlineTA>Curr Pharm Des</MedlineTA><NlmUniqueID>9602487</NlmUniqueID><ISSNLinking>1381-6128</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><KeywordList
+        Owner="NOTNLM"><Keyword MajorTopicYN="N">Head and neck squamous cell carcinoma</Keyword><Keyword
+        MajorTopicYN="N">RAS</Keyword><Keyword MajorTopicYN="N">Wnt/&#x3b2;-catenin</Keyword><Keyword
+        MajorTopicYN="N">drug</Keyword><Keyword MajorTopicYN="N">immunotherapy</Keyword><Keyword
+        MajorTopicYN="N">nutrigenomics</Keyword><Keyword MajorTopicYN="N">oral cancer</Keyword><Keyword
+        MajorTopicYN="N">pharmacogenomics.</Keyword><Keyword MajorTopicYN="N">target
+        genes</Keyword></KeywordList></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="received"><Year>2025</Year><Month>5</Month><Day>5</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="revised"><Year>2025</Year><Month>6</Month><Day>7</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>6</Month><Day>17</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>6</Hour><Minute>31</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>6</Hour><Minute>31</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>0</Hour><Minute>33</Minute></PubMedPubDate></History><PublicationStatus>aheadofprint</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41664336</ArticleId><ArticleId IdType="doi">10.2174/0113816128407170251013122858</ArticleId><ArticleId
+        IdType="pii">CPD-EPUB-152980</ArticleId></ArticleIdList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="Publisher" Owner="NLM"><PMID Version="1">41664142</PMID><DateRevised><Year>2026</Year><Month>02</Month><Day>10</Day></DateRevised><Article
+        PubModel="Print-Electronic"><Journal><ISSN IssnType="Electronic">1755-8794</ISSN><JournalIssue
+        CitedMedium="Internet"><PubDate><Year>2026</Year><Month>Feb</Month><Day>09</Day></PubDate></JournalIssue><Title>BMC
+        medical genomics</Title><ISOAbbreviation>BMC Med Genomics</ISOAbbreviation></Journal><ArticleTitle>Clinically
+        actionable pharmacogenomic variants for anticancer therapy in Nigeria: first
+        comprehensive variant profiling in underrepresented Nigerian cohorts.</ArticleTitle><ELocationID
+        EIdType="doi" ValidYN="Y">10.1186/s12920-026-02324-7</ELocationID><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Ukpe</LastName><ForeName>Michael
+        Pius</ForeName><Initials>MP</Initials><AffiliationInfo><Affiliation>Department
+        of Chemical Pathology, Lead City University, Ibadan, Nigeria. scientistmichaelpius@gmail.com.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Ezeanuka</LastName><ForeName>Anastecia Chinasa</ForeName><Initials>AC</Initials><AffiliationInfo><Affiliation>Department
+        of Chemical Pathology, Lead City University, Ibadan, Nigeria.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2026</Year><Month>02</Month><Day>09</Day></ArticleDate></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>BMC
+        Med Genomics</MedlineTA><NlmUniqueID>101319628</NlmUniqueID><ISSNLinking>1755-8794</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><KeywordList
+        Owner="NOTNLM"><Keyword MajorTopicYN="N">Anticancer drug response</Keyword><Keyword
+        MajorTopicYN="N">Clinically actionable variants</Keyword><Keyword MajorTopicYN="N">Minor
+        allele frequency</Keyword><Keyword MajorTopicYN="N">Nigerian population genetics</Keyword><Keyword
+        MajorTopicYN="N">Pharmacogenomics</Keyword><Keyword MajorTopicYN="N">Precision
+        oncology</Keyword></KeywordList><CoiStatement>Declarations. Ethics approval
+        and consent to participate: This study used publicly accessible, de-identified
+        genomic data from the 1KGPand did not involve direct human participation;
+        therefore, ethics approval and consent to participate were not required. Consent
+        for publication: Not applicable. Competing interests: The authors declare
+        no competing interests.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="received"><Year>2025</Year><Month>11</Month><Day>17</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2026</Year><Month>2</Month><Day>3</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>6</Hour><Minute>30</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>6</Hour><Minute>30</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>0</Hour><Minute>10</Minute></PubMedPubDate></History><PublicationStatus>aheadofprint</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41664142</ArticleId><ArticleId IdType="doi">10.1186/s12920-026-02324-7</ArticleId><ArticleId
+        IdType="pii">10.1186/s12920-026-02324-7</ArticleId></ArticleIdList><ReferenceList><Reference><Citation>WHO.
+        Cancer. 2025. https://www.who.int/news-room/fact-sheets/detail/cancer. Accessed
+        26 Sep 2025.</Citation></Reference><Reference><Citation>Hamdi Y, Abdeljaoued-Tej
+        I, Zatchi AA, Abdelhak S, Boubaker S, Brown JS, et al. Cancer in africa: the
+        untold story. Front Oncol. 2021;11:650117. https://doi.org/10.3389/FONC.2021.650117/FULL.</Citation></Reference><Reference><Citation>Sung
+        H, Ferlay J, Siegel RL, Laversanne M, Soerjomataram I, Jemal A, et al. Global
+        cancer statistics 2020: GLOBOCAN estimates of incidence and mortality worldwide
+        for 36 cancers in 185 countries. CA Cancer J Clin. 2021;71:209&#x2013;49.
+        https://doi.org/10.3322/CAAC.21660.</Citation></Reference><Reference><Citation>Moen
+        L, Liu B, Bukirwa P, Chingonzoh T, Chokunonga E, Finesse A, et al. Trends
+        in the incidence of colorectal cancer in sub-Saharan africa: A population-based
+        registry study. Int J Cancer. 2024;155:675&#x2013;82. https://doi.org/10.1002/IJC.34942.</Citation></Reference><Reference><Citation>Parkin
+        DM, Bray F, Ferlay J, Jemal A. Cancer in Africa 2012. Cancer Epidemiol Biomarkers
+        Prev. 2014;23:953&#x2013;66. https://doi.org/10.1158/1055-9965.EPI-14-0281/68042/AM/CANCER-IN-AFRICA-2012CANCER-IN-AFRICA.</Citation></Reference><Reference><Citation>Ogunniyi
+        TJ, Fatokun BS, Isah KO, Abdulbaki A, Emiola AR, Batisani K. Current status
+        of cancer diagnosis and treatment in Nigeria. Health Sci Rep. 2025;8:e70877.
+        https://doi.org/10.1002/HSR2.70877.</Citation></Reference><Reference><Citation>Bray
+        F, Laversanne M, Sung H, Ferlay J, Siegel RL, Soerjomataram I, et al. Global
+        cancer statistics 2022: GLOBOCAN estimates of incidence and mortality worldwide
+        for 36 cancers in 185 countries. CA Cancer J Clin. 2024;74:229&#x2013;63.
+        https://doi.org/10.3322/CAAC.21834.</Citation></Reference><Reference><Citation>Liu
+        B, Zhou H, Tan L, Siu KTH, Guan XY. Exploring treatment options in cancer:
+        tumor treatment strategies. Signal Transduct Target Ther. 2024;9:1&#x2013;44.
+        https://doi.org/10.1038/S41392-024-01856-7;SUBJMETA.</Citation></Reference><Reference><Citation>Filipski
+        KK, Mechanic LE, Long R, Freedman AN. Pharmacogenomics in oncology care. Front
+        Genet. 2014;5. https://doi.org/10.3389/FGENE.2014.00073/BIBTEX. APR:89020.</Citation></Reference><Reference><Citation>Ranasinghe
+        P, Sirisena N, Vishnukanthan T, Ariadurai JN, Thilakarathne S, Priyadarshani
+        CDN, et al. Frequency of pharmacogenomic variants affecting efficacy and safety
+        of anti-cancer drugs in a south Asian population from Sri Lanka. BMC Med Genomics.
+        2024;17:143. https://doi.org/10.1186/S12920-024-01919-2.</Citation></Reference><Reference><Citation>Adejumo
+        OE, Kotila TR, Falusi AG, Silva BO, Nwogu JN, Fasinu PS, et al. Phenotyping
+        and genotyping of CYP2C19 using comparative metabolism of proguanil in sickle&#x2010;cell
+        disease patients and healthy controls in Nigeria. Pharmacol Res Perspect.
+        2016;4:e00252. https://doi.org/10.1002/PRP2.252.</Citation></Reference><Reference><Citation>Katabalo
+        DM, Kidenya SMBR, Schroeder K, Liwa AC. Pharmacogenomics of Chemotherapies
+        for Childhood Cancers in Africa: A Scoping Review. Pharmgenomics Pers Med.
+        2025;18:55&#x2013;69. https://doi.org/10.2147/PGPM.S502355.</Citation></Reference><Reference><Citation>Adehin
+        A, Bolaji OO, Kennedy MA, Adeagbo BA. Allele frequencies of thiopurine S-methyltransferase
+        (TPMT) variants in the Nigerian population. Polish Annals of Medicine. 2017;24:144&#x2013;7.
+        https://doi.org/10.1016/J.POAMED.2016.06.007.</Citation></Reference><Reference><Citation>ClinPGx.
+        https://www.clinpgx.org/. Accessed 13 Jan 2026.</Citation></Reference><Reference><Citation>PharmVar.
+        https://www.pharmvar.org/. Accessed 13 Jan 2026.</Citation></Reference><Reference><Citation>CPIC.
+        https://cpicpgx.org/. Accessed 13 Jan 2026.</Citation></Reference><Reference><Citation>Auton
+        A, Abecasis GR, Altshuler DM, Durbin RM, Bentley DR, Chakravarti A, et al.
+        A global reference for human genetic variation. Nature 2015 526:7571. 2015;526:68&#x2013;74.
+        https://doi.org/10.1038/nature15393.</Citation></Reference><Reference><Citation>Ensembl
+        Rest API-Ensembl REST API Endpoints. https://rest.ensembl.org/. Accessed 13
+        Jan 2026.</Citation></Reference><Reference><Citation>Ensembl genome browser
+        115. https://www.ensembl.org/Help/View?id=171. Accessed 13 Jan 2026.</Citation></Reference><Reference><Citation>Hemstrom
+        W, Grummer JA, Luikart G, Christie MR. Next-generation data filtering in the
+        genomics era. https://doi.org/10.1038/s41576-024-00738-6.</Citation></Reference><Reference><Citation>Backenroth
+        D, Carmi S. A test for deviations from expected genotype frequencies on the
+        X chromosome for sex-biased admixed populations. Heredity (Edinb). 2019;123:470.
+        https://doi.org/10.1038/S41437-019-0233-Z.</Citation></Reference><Reference><Citation>R
+        Core Team. R: The R Project for Statistical Computing. 2025. https://www.r-project.org/.
+        Accessed 13 Jan 2026.</Citation></Reference><Reference><Citation>Patel HK,
+        Bihani T. Selective estrogen receptor modulators (SERMs) and selective estrogen
+        receptor degraders (SERDs) in cancer treatment. Pharmacol Ther. 2018;186:1&#x2013;24.
+        https://doi.org/10.1016/J.PHARMTHERA.2017.12.012.</Citation></Reference><Reference><Citation>Daly
+        MB. Tamoxifen in ductal carcinoma in situ. Semin Oncol. 2006;33:647&#x2013;9.
+        https://doi.org/10.1053/J.SEMINONCOL.2006.08.019.</Citation></Reference><Reference><Citation>Del
+        Tredici AL, Malhotra A, Dedek M, Espin F, Roach D, Zhu G dan, et al. Frequency
+        of CYP2D6 alleles including structural variants in the United States. Front
+        Pharmacol. 2018;9 APR:350795. https://doi.org/10.3389/FPHAR.2018.00305/BIBTEX.</Citation></Reference><Reference><Citation>Kane
+        M. CYP2D6 Overview: Allele and Phenotype Frequencies-Medical Genetics Summaries-NCBI
+        Bookshelf. 2025. https://www.ncbi.nlm.nih.gov/books/NBK574601/. Accessed 13
+        Jan 2026.</Citation></Reference><Reference><Citation>Wanas H, Kamel MH, William
+        EA, Fayad T, Abdelfattah ME, Elbadawy HM, et al. The impact of CYP3A4 and
+        CYP3A5 genetic variations on tacrolimus treatment of living&#x2010;donor Egyptian
+        kidney transplanted patients. J Clin Lab Anal. 2023;37:e24969. https://doi.org/10.1002/JCLA.24969.</Citation></Reference><Reference><Citation>Li
+        Y, Wang Y, Li J, Ling Z, Chen W, Zhang L, et al. Tacrolimus inhibits oral
+        carcinogenesis through cell cycle control. Biomedicine &amp; Pharmacotherapy.
+        2021;139:111545. https://doi.org/10.1016/J.BIOPHA.2021.111545.</Citation></Reference><Reference><Citation>Birdwell
+        KA, Decker B, Barbarino JM, Peterson JF, Stein CM, Sadee W, et al. Clinical
+        Pharmacogenetics Implementation Consortium (CPIC) Guidelines for CYP3A5 Genotype
+        and Tacrolimus Dosing. https://doi.org/10.1002/cpt.113.</Citation></Reference><Reference><Citation>Ghafouri-Fard
+        S, Abak A, Tondro Anamag F, Shoorei H, Fattahi F, Javadinia SA, et al. 5-Fluorouracil:
+        A Narrative Review on the Role of Regulatory Mechanisms in Driving Resistance
+        to This Chemotherapeutic Agent. Front Oncol. 2021;11:658636. https://doi.org/10.3389/FONC.2021.658636.</Citation></Reference><Reference><Citation>Sethy
+        C, Kundu CN. 5-Fluorouracil (5-FU) resistance and the new strategy to enhance
+        the sensitivity against cancer: Implication of DNA repair inhibition. Biomedicine
+        &amp; Pharmacotherapy. 2021;137:111285. https://doi.org/10.1016/J.BIOPHA.2021.111285.</Citation></Reference><Reference><Citation>Dean
+        L, Kane M. Fluorouracil Therapy and DPYD Genotype-PubMed. 2012. https://pubmed.ncbi.nlm.nih.gov/28520376/.
+        Accessed 13 January 2026.</Citation></Reference><Reference><Citation>Amstutz
+        U, Henricks LM, Offer SM, Barbarino J, Schellens JHM, Swen JJ, et al. Clinical
+        Pharmacogenetics Implementation Consortium (CPIC) Guideline for Dihydropyrimidine
+        Dehydrogenase Genotype and Fluoropyrimidine Dosing: 2017 Update. https://doi.org/10.1002/cpt.911.</Citation></Reference><Reference><Citation>Ataseven
+        E, Kosova B, Aktan &#xc7;, Kurug&#xf6;l Z, Kantar M, Ataseven E, et al. Thiopurine-S-Methyltransferase
+        Gene Polymorphism and Drug-related Toxicity in Children Treated for Acute
+        Leukemia and Non-Hodgkin&#x2019;s Lymphoma. The Journal of Pediatric Research.
+        2022;9:60&#x2013;5. https://doi.org/10.4274/JPR.GALENOS.2021.35492.</Citation></Reference><Reference><Citation>Chen
+        ZY, Zhu YH, Zhou LY, Shi WQ, Qin Z, Wu B, et al. Association Between Genetic
+        Polymorphisms of Metabolic Enzymes and Azathioprine-Induced Myelosuppression
+        in 1,419 Chinese Patients: A Retrospective Study. Front Pharmacol. 2021;12:672769.
+        https://doi.org/10.3389/FPHAR.2021.672769/BIBTEX.</Citation></Reference><Reference><Citation>Lennard
+        L. Implementation of TPMT testing. Br J Clin Pharmacol. 2014;77:704&#x2013;14.https://doi.org/10.1111/BCP.12226.</Citation></Reference><Reference><Citation>Relling
+        M V, Schwab M, Whirl-Carrillo M, Suarez-Kurtz G, Pui C-H, Stein CM, et al.
+        Clinical Pharmacogenetics Implementation Consortium Guideline for Thiopurine
+        Dosing Based on TPMT and NUDT15 Genotypes: 2018 Update. CLINICAL PHARMACOLOGY&amp;
+        THERAPEUTICS | VOLUME. 2019;105. https://doi.org/10.1002/cpt.1304.</Citation></Reference></ReferenceList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="Publisher" Owner="NLM"><PMID Version="1">41663779</PMID><DateRevised><Year>2026</Year><Month>02</Month><Day>09</Day></DateRevised><Article
+        PubModel="Print-Electronic"><Journal><ISSN IssnType="Electronic">2240-2993</ISSN><JournalIssue
+        CitedMedium="Internet"><PubDate><Year>2026</Year><Month>Feb</Month><Day>10</Day></PubDate></JournalIssue><Title>Acta
+        neurologica Belgica</Title><ISOAbbreviation>Acta Neurol Belg</ISOAbbreviation></Journal><ArticleTitle>Tailoring
+        treatments: pharmacogenomics in the management of neurodegenerative diseases.</ArticleTitle><ELocationID
+        EIdType="doi" ValidYN="Y">10.1007/s13760-025-02919-4</ELocationID><Abstract><AbstractText>Neurodegenerative
+        diseases like Alzheimer''s, Parkinson''s, Huntington''s, and amyotrophic lateral
+        sclerosis are growing more common worldwide, yet treatment is still poor.
+        Conventional therapies can have unforeseen side effects, produce poor medication
+        reactions, and take longer to work. This persistent treatment gap highlights
+        the need for novel approaches to these disorders'' complex distinctions. Pharmacogenomics,
+        which examines how genetic differences affect drug response, is a promising
+        new subject and an urgent solution. Pharmacogenomics tailors medicine selection
+        and administration to each patient''s genetic profile, addressing the main
+        causes of poor treatment response and preventable side effects. This research
+        has enabled precision medicine that can improve neurodegenerative disease
+        therapy and reduce harm. In this in-depth research, we examine neurodegenerative
+        disease management issues, pharmacogenomics breakthroughs, and how incorporating
+        genetics to clinical practice can improve outcomes. We examine the latest
+        evidence that genetics affect drug breakdown, efficacy, and toxicity. We also
+        discuss the challenges and opportunities of applying this knowledge. Pharmacogenomic
+        approaches must be widely applied to make medicines for these awful disorders
+        safer, more effective, and really suited to patient needs, according to our
+        compilation.</AbstractText><CopyrightInformation>&#xa9; 2025. The Author(s)
+        under exclusive licence to Belgian Neurological Society.</CopyrightInformation></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y" EqualContrib="Y"><LastName>Roy</LastName><ForeName>Kishor
+        Kumar</ForeName><Initials>KK</Initials><AffiliationInfo><Affiliation>Department
+        of Pharmaceutical Sciences, Jharkhand Rai University, Ranchi, 834010, Jharkhand,
+        India.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y" EqualContrib="Y"><LastName>Kumari</LastName><ForeName>Rashmi</ForeName><Initials>R</Initials><AffiliationInfo><Affiliation>Department
+        of Pharmaceutical Sciences, Jharkhand Rai University, Ranchi, 834010, Jharkhand,
+        India.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y" EqualContrib="Y"><LastName>Upadhyay</LastName><ForeName>Abhay
+        Kumar</ForeName><Initials>AK</Initials><AffiliationInfo><Affiliation>Department
+        of Pharmaceutical Sciences, Jharkhand Rai University, Ranchi, 834010, Jharkhand,
+        India.</Affiliation></AffiliationInfo></Author><Author ValidYN="Y"><LastName>Mohanty</LastName><ForeName>Satyajit</ForeName><Initials>S</Initials><Identifier
+        Source="ORCID">0000-0001-6665-3432</Identifier><AffiliationInfo><Affiliation>Division
+        of Pharmacology, Department of Pharmaceutical Sciences and Technology, Birla
+        Institute of Technology, Mesra, Ranchi, 835215, Jharkhand, India. satyajitmohanty922@gmail.com.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType><PublicationType UI="D016454">Review</PublicationType></PublicationTypeList><ArticleDate
+        DateType="Electronic"><Year>2026</Year><Month>02</Month><Day>10</Day></ArticleDate></Article><MedlineJournalInfo><Country>Italy</Country><MedlineTA>Acta
+        Neurol Belg</MedlineTA><NlmUniqueID>0247035</NlmUniqueID><ISSNLinking>0300-9009</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><KeywordList
+        Owner="NOTNLM"><Keyword MajorTopicYN="N">Alzheimer''s disease</Keyword><Keyword
+        MajorTopicYN="N">Amyotrophic lateral sclerosis</Keyword><Keyword MajorTopicYN="N">Genetic
+        variability</Keyword><Keyword MajorTopicYN="N">Huntington''s disease</Keyword><Keyword
+        MajorTopicYN="N">Neurodegenerative disease</Keyword><Keyword MajorTopicYN="N">Parkinson''s
+        disease</Keyword><Keyword MajorTopicYN="N">Personalized medicine</Keyword><Keyword
+        MajorTopicYN="N">Pharmacogenomics</Keyword></KeywordList><CoiStatement>Declarations.
+        Competing interests: The authors declare no competing interests. Ethics approval:
+        Not applicable.</CoiStatement></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="received"><Year>2025</Year><Month>5</Month><Day>29</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>10</Month><Day>13</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>1</Hour><Minute>30</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>1</Hour><Minute>30</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2026</Year><Month>2</Month><Day>9</Day><Hour>23</Hour><Minute>40</Minute></PubMedPubDate></History><PublicationStatus>aheadofprint</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41663779</ArticleId><ArticleId IdType="doi">10.1007/s13760-025-02919-4</ArticleId><ArticleId
+        IdType="pii">10.1007/s13760-025-02919-4</ArticleId></ArticleIdList><ReferenceList><Reference><Citation>Ball
+        N, Teo WP, Chandra S, Chapman J (2019) Parkinson&#x2019;s disease and the
+        environment. Front Neurol 10:218. https://doi.org/10.3389/fneur.2019.00218</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fneur.2019.00218</ArticleId><ArticleId IdType="pubmed">30941085</ArticleId><ArticleId
+        IdType="pmc">6433887</ArticleId></ArticleIdList></Reference><Reference><Citation>Huang
+        Y, Li Y, Pan H, Han L (2023) Global, regional, and national burden of neurological
+        disorders in 204 countries and territories worldwide. J Glob Health 13:04160.
+        https://doi.org/10.7189/jogh.13.04160</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.7189/jogh.13.04160</ArticleId><ArticleId IdType="pubmed">38018250</ArticleId><ArticleId
+        IdType="pmc">10685084</ArticleId></ArticleIdList></Reference><Reference><Citation>Murray
+        CJL, Aravkin AY, Zheng P, Abbafati C, Abbas KM, Abbasi-Kangevari M, Abd-Allah
+        F, Abdelalim A, Abdollahi M, Abdollahpour I (2020) Global burden of 87 risk
+        factors in 204 countries and territories, 1990&#x2013;2019: a systematic analysis
+        for the global burden of disease study 2019. Lancet 396(10258):1223&#x2013;1249</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/S0140-6736(20)30752-2</ArticleId></ArticleIdList></Reference><Reference><Citation>Tong
+        T, Ledig C, Guerrero R, Schuh A, Koikkalainen J, Tolonen A, Rhodius H, Barkhof
+        F, Tijms B, Lemstra AW, Soininen H, Remes AM, Waldemar G, Hasselbalch S, Mecocci
+        P, Baroni M, L&#xf6;tj&#xf6;nen J, Flier W, van der Rueckert D (2017) Five-class
+        differential diagnostics of neurodegenerative diseases using random undersampling
+        boosting. NeuroImage: Clin 15:613&#x2013;624. https://doi.org/10.1016/J.NICL.2017.06.012</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/J.NICL.2017.06.012</ArticleId><ArticleId IdType="pubmed">28664032</ArticleId><ArticleId
+        IdType="pmc">5479966</ArticleId></ArticleIdList></Reference><Reference><Citation>Ding
+        C, Wu Y, Chen X, Chen Y, Wu Z, Lin Z, Kang D, Fang W, Chen F (2022) Global,
+        regional, and national burden and attributable risk factors of neurological
+        disorders: the global burden of disease study 1990&#x2013;2019. Front Public
+        Health 10:952161. https://doi.org/10.3389/fpubh.2022.952161</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fpubh.2022.952161</ArticleId><ArticleId IdType="pubmed">36523572</ArticleId><ArticleId
+        IdType="pmc">9745318</ArticleId></ArticleIdList></Reference><Reference><Citation>Santiago
+        JA, Bottero V, Potashkin JA (2017) Dissecting the molecular mechanisms of
+        neurodegenerative diseases through network biology. Front Aging Neurosci 9:166.
+        https://doi.org/10.3389/fnagi.2017.00166</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fnagi.2017.00166</ArticleId><ArticleId IdType="pubmed">28611656</ArticleId><ArticleId
+        IdType="pmc">5446999</ArticleId></ArticleIdList></Reference><Reference><Citation>Lin
+        MK, Farrer MJ (2014) Genetics and genomics of parkinson&#x2019;s disease.
+        Genome Med 6(6):48. https://doi.org/10.1186/gm566</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1186/gm566</ArticleId><ArticleId IdType="pubmed">25061481</ArticleId><ArticleId
+        IdType="pmc">4085542</ArticleId></ArticleIdList></Reference><Reference><Citation>Ehrlich
+        ME (2012) Huntington&#x2019;s disease and the striatal medium spiny neuron:
+        cell-autonomous and non-cell-autonomous mechanisms of disease. Neurotherapeutics
+        9(2):270&#x2013;284. https://doi.org/10.1007/s13311-012-0112-2</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s13311-012-0112-2</ArticleId><ArticleId IdType="pubmed">22441874</ArticleId><ArticleId
+        IdType="pmc">3337013</ArticleId></ArticleIdList></Reference><Reference><Citation>Orr
+        HT, Zoghbi HY (2007) Trinucleotide repeat disorders. Annu Rev Neurosci 30:575&#x2013;621.
+        https://doi.org/10.1146/annurev.neuro.29.051605.113042</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1146/annurev.neuro.29.051605.113042</ArticleId><ArticleId
+        IdType="pubmed">17417937</ArticleId></ArticleIdList></Reference><Reference><Citation>Wang
+        F, Li Y, Zhang YJ, Zhou Y, Li S, Li HB (2016) Natural products for the prevention
+        and treatment of hangover and alcohol use disorder. Molecules 21(1):64. https://doi.org/10.3390/molecules21010064</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/molecules21010064</ArticleId><ArticleId IdType="pubmed">26751438</ArticleId><ArticleId
+        IdType="pmc">6274469</ArticleId></ArticleIdList></Reference><Reference><Citation>Bodea
+        LG, Wang Y, Linnartz-Gerlach B, Kopatz J, Sinkkonen L, Musgrove R, Kaoma T,
+        Muller A, Vallar L, Di Monte DA, Balling R, Neumann H (2014) Neurodegeneration
+        by activation of the microglial complement-phagosome pathway. J Neuroscience:
+        Official J Soc Neurosci 34(25):8546&#x2013;8556. https://doi.org/10.1523/JNEUROSCI.5002-13.2014</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1523/JNEUROSCI.5002-13.2014</ArticleId></ArticleIdList></Reference><Reference><Citation>Mor&#xe9;n
+        C, deSouza RM, Giraldo DM, Uff C (2022) Antioxidant therapeutic strategies
+        in neurodegenerative diseases. Int J Mol Sci 23(16):9328. https://doi.org/10.3390/ijms23169328</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/ijms23169328</ArticleId><ArticleId IdType="pubmed">36012599</ArticleId><ArticleId
+        IdType="pmc">9409201</ArticleId></ArticleIdList></Reference><Reference><Citation>Fleming
+        SM (2017) Mechanisms of gene-environment interactions in parkinson&#x2019;s
+        disease. Curr Environ Health Rep 4(2):192&#x2013;199. https://doi.org/10.1007/s40572-017-0143-2</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s40572-017-0143-2</ArticleId><ArticleId IdType="pubmed">28417442</ArticleId></ArticleIdList></Reference><Reference><Citation>Rabiei
+        Z, Solati K, Amini-Khoei H (2019) Phytotherapy in treatment of parkinson&#x2019;s
+        disease: a review. Pharm Biol 57(1):355&#x2013;362. https://doi.org/10.1080/13880209.2019.1618344</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1080/13880209.2019.1618344</ArticleId><ArticleId IdType="pubmed">31141426</ArticleId><ArticleId
+        IdType="pmc">6542178</ArticleId></ArticleIdList></Reference><Reference><Citation>Ciccacci
+        C, Borgiani P (2019) Pharmacogenomics in Parkinson&#x2019;s disease: which
+        perspective for developing a personalized medicine? Neural Regen Res 14(Issue
+        1):75&#x2013;76. https://doi.org/10.4103/1673-5374.243706</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.4103/1673-5374.243706</ArticleId><ArticleId IdType="pubmed">30531077</ArticleId><ArticleId
+        IdType="pmc">6263000</ArticleId></ArticleIdList></Reference><Reference><Citation>Ventola
+        CL (2013) Role of Pharmacogenomic biomarkers in predicting and improving drug
+        response: part 1: the clinical significance of Pharmacogenetic variants. Pharmcy
+        and Therapeutics, 38(9):545&#x2013;560</Citation></Reference><Reference><Citation>Cecchin
+        E, Stocco G (2020) Pharmacogenomics and personalized medicine. Genes 11(6):1&#x2013;5.
+        https://doi.org/10.3390/genes11060679</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/genes11060679</ArticleId></ArticleIdList></Reference><Reference><Citation>Di
+        Battista AM, Heinsinger NM, Rebeck GW (2016) Alzheimer&#x2019;s disease genetic
+        risk factor APOE-&#x3b5;4 also affects normal brain function. Curr Alzheimer
+        Res 13(11):1200&#x2013;1207. https://doi.org/10.2174/1567205013666160401115127</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.2174/1567205013666160401115127</ArticleId><ArticleId IdType="pubmed">27033053</ArticleId><ArticleId
+        IdType="pmc">5839141</ArticleId></ArticleIdList></Reference><Reference><Citation>Klein
+        C, Westenberger A (2012) Genetics of Parkinson&#x2019;s disease. Cold Spring
+        Harb Perspect Med. https://doi.org/10.1101/cshperspect.a008888</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1101/cshperspect.a008888</ArticleId><ArticleId IdType="pubmed">22315721</ArticleId><ArticleId
+        IdType="pmc">3253033</ArticleId></ArticleIdList></Reference><Reference><Citation>Pihlstr&#xf8;m
+        L, Wiethoff S, Houlden H (2018) Genetics of neurodegenerative diseases: an
+        overview. Handb Clin Neurol 145:309&#x2013;323. https://doi.org/10.1016/B978-0-12-802395-2.00022-5</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/B978-0-12-802395-2.00022-5</ArticleId></ArticleIdList></Reference><Reference><Citation>M&#xf6;ncke-Buchner
+        E, Reich S, M&#xfc;cke M, Reuter M, Messer W, Wanker EE, Kr&#xfc;ger DH (2002)
+        Counting CAG repeats in the huntington&#x2019;s disease gene by restriction
+        endonuclease EcoP15I cleavage. Nucleic Acids Res 30(16):e83. https://doi.org/10.1093/nar/gnf082</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1093/nar/gnf082</ArticleId><ArticleId IdType="pubmed">12177311</ArticleId><ArticleId
+        IdType="pmc">134256</ArticleId></ArticleIdList></Reference><Reference><Citation>Seefelder
+        M, Alva V, Huang B, Engler T, Baumeister W, Guo Q, Fern&#xe1;ndez-Busnadiego
+        R, Lupas AN, Kochanek S (2020) The evolution of the Huntingtin-associated
+        protein 40 (HAP40) in conjunction with Huntingtin. BMC Evol Biol 20(1):162.
+        https://doi.org/10.1186/s12862-020-01705-5</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1186/s12862-020-01705-5</ArticleId><ArticleId IdType="pubmed">33297953</ArticleId><ArticleId
+        IdType="pmc">7725122</ArticleId></ArticleIdList></Reference><Reference><Citation>Jarosi&#x144;ska
+        OD, R&#xfc;diger SGD (2021) Molecular strategies to target protein aggregation
+        in Huntington&#x2019;s disease. Front Mol Biosci. https://doi.org/10.3389/fmolb.2021.769184</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fmolb.2021.769184</ArticleId><ArticleId IdType="pubmed">34869596</ArticleId><ArticleId
+        IdType="pmc">8636123</ArticleId></ArticleIdList></Reference><Reference><Citation>Matz
+        OC, Spocter M (2022) The effect of huntington&#x2019;s disease on the basal
+        nuclei: A review. https://doi.org/10.7759/cureus.24473 . Cureus</Citation></Reference><Reference><Citation>Arnold
+        C (2019) Tailored treatment for ALS poised to move ahead. Nature medicine,
+        10.1038/d41591-019-00013-w. Advance online publication. https://doi.org/10.1038/d41591-019-00013-w</Citation></Reference><Reference><Citation>Saeed
+        M (2020) Fractal genomics of SOD1 evolution. Immunogenetics 72(9&#x2013;10):439&#x2013;445.
+        https://doi.org/10.1007/s00251-020-01184-4</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s00251-020-01184-4</ArticleId><ArticleId IdType="pubmed">33237378</ArticleId></ArticleIdList></Reference><Reference><Citation>Kortazar-Zubizarreta
+        I, Manero-Azua A, Afonso-Ag&#xfc;era J, de Perez G (2023) C9ORF72 gene GGGGCC
+        hexanucleotide expansion: A high clinical variability from amyotrophic lateral
+        sclerosis to frontotemporal dementia. J Personalized Med 13(9). https://doi.org/10.3390/jpm13091396</Citation></Reference><Reference><Citation>Ederle
+        H, Funk C, Abou-Ajram C, Hutten S, Funk EBE, Kehlenbach RH, Bailer SM, Dormann
+        D (2018) Nuclear egress of TDP-43 and FUS occurs independently of Exportin-1/CRM1.
+        Sci Rep 8(1):7084. https://doi.org/10.1038/s41598-018-25007-5</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41598-018-25007-5</ArticleId><ArticleId IdType="pubmed">29728564</ArticleId><ArticleId
+        IdType="pmc">5935713</ArticleId></ArticleIdList></Reference><Reference><Citation>Nguyen
+        DKH, Thombre R, Wang J (2019) Autophagy as a common pathway in amyotrophic
+        lateral sclerosis. Neurosci Lett 697:34&#x2013;48. https://doi.org/10.1016/j.neulet.2018.04.006</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neulet.2018.04.006</ArticleId><ArticleId IdType="pubmed">29626651</ArticleId></ArticleIdList></Reference><Reference><Citation>Dai
+        MH, Zheng H, Zeng LD, Zhang Y (2017) The genes associated with early-onset
+        Alzheimer&#x2019;s disease. Oncotarget 9(19):15132&#x2013;15143. https://doi.org/10.18632/oncotarget.23738</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.18632/oncotarget.23738</ArticleId><ArticleId IdType="pubmed">29599933</ArticleId><ArticleId
+        IdType="pmc">5871104</ArticleId></ArticleIdList></Reference><Reference><Citation>Bekris
+        LM, Yu CE, Bird TD, Tsuang DW (2010) Review article: genetics of alzheimer
+        disease. J Geriatr Psychiatry Neurol 23(4):213&#x2013;227. https://doi.org/10.1177/0891988710383571</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1177/0891988710383571</ArticleId><ArticleId IdType="pubmed">21045163</ArticleId><ArticleId
+        IdType="pmc">3044597</ArticleId></ArticleIdList></Reference><Reference><Citation>Liu
+        CC, Kanekiyo T, Xu H, Bu G (2013) Apolipoprotein e and Alzheimer disease:
+        risk, mechanisms and therapy. Nat Rev Neurol 9(2):106&#x2013;118. https://doi.org/10.1038/nrneurol.2012.263</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/nrneurol.2012.263</ArticleId><ArticleId IdType="pubmed">23296339</ArticleId><ArticleId
+        IdType="pmc">3726719</ArticleId></ArticleIdList></Reference><Reference><Citation>Kim
+        J, Basak JM, Holtzman DM (2009) The role of Apolipoprotein E in Alzheimer&#x2019;s
+        disease. Neuron 63(3):287&#x2013;303. https://doi.org/10.1016/j.neuron.2009.06.026</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neuron.2009.06.026</ArticleId><ArticleId IdType="pubmed">19679070</ArticleId><ArticleId
+        IdType="pmc">3044446</ArticleId></ArticleIdList></Reference><Reference><Citation>Stefanis
+        L (2012) &#x3b1;-Synuclein in parkinson&#x2019;s disease. Cold Spring Harbor
+        Perspect Med 2(2). https://doi.org/10.1101/cshperspect.a009399</Citation></Reference><Reference><Citation>Waxman
+        EA, Giasson BI (2009) Molecular mechanisms of &#x3b1;-synuclein neurodegeneration.
+        Biochimica et biophysica acta (BBA) -. Mol Basis Disease 1792(7):616&#x2013;624.
+        https://doi.org/10.1016/J.BBADIS.2008.09.013</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/J.BBADIS.2008.09.013</ArticleId></ArticleIdList></Reference><Reference><Citation>Denison
+        SR, Callahan G, Becker NA, Phillips LA, Smith DI (2003) Characterization of
+        FRA6E and its potential role in autosomal recessive juvenile parkinsonism
+        and ovarian cancer. Genes Chromosomes Cancer 38(1):40&#x2013;52. https://doi.org/10.1002/GCC.10236</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/GCC.10236</ArticleId><ArticleId IdType="pubmed">12874785</ArticleId></ArticleIdList></Reference><Reference><Citation>Oczkowska
+        A, Kozubski W, Lianeri M, Dorszewska J (2013) Mutations in PRKN and SNCA genes
+        important for the progress of parkinson&#x2019;s disease. Curr Genom 14(8):502&#x2013;517.
+        https://doi.org/10.2174/1389202914666131210205839</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.2174/1389202914666131210205839</ArticleId></ArticleIdList></Reference><Reference><Citation>Chan
+        A, Pirmohamed M, Comabella M (2011) Pharmacogenomics in neurology: current
+        state and future steps. Ann Neurol 70(5):684&#x2013;697. https://doi.org/10.1002/ana.22502</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/ana.22502</ArticleId><ArticleId IdType="pubmed">22162054</ArticleId></ArticleIdList></Reference><Reference><Citation>Gilman
+        C, McSweeney C, Mao Y (2014) The applications of pharmacogenomics to neurological
+        disorders. Curr Mol Med 14(7):880&#x2013;890. https://doi.org/10.2174/1566524014666140811115900</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.2174/1566524014666140811115900</ArticleId><ArticleId IdType="pubmed">25109797</ArticleId></ArticleIdList></Reference><Reference><Citation>Kovacs
+        GG (2017) Concepts and classification of neurodegenerative diseases. Handb
+        Clin Neurol 145:301&#x2013;307. https://doi.org/10.1016/B978-0-12-802395-2.00021-3</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/B978-0-12-802395-2.00021-3</ArticleId><ArticleId IdType="pubmed">28987178</ArticleId></ArticleIdList></Reference><Reference><Citation>Cacabelos
+        R (2008) Pharmacogenomics in Alzheimer&#x2019;s disease. Pharmacogenomics
+        in Drug Discovery and Development: From Bench to Bedside, 213&#x2013;357</Citation></Reference><Reference><Citation>Cacabelos
+        R (2002) Pharmacogenomics in Alzheimer&#x2019;s disease. Mini Rev Med Chem
+        2(1):59&#x2013;84</Citation><ArticleIdList><ArticleId IdType="doi">10.2174/1389557023406458</ArticleId><ArticleId
+        IdType="pubmed">12369958</ArticleId></ArticleIdList></Reference><Reference><Citation>Cacabelos
+        R, Cacabelos P, Torrellas C, Tellado I, Carril JC (2014) Pharmacogenomics
+        of alzheimer&#x2019;s disease: novel therapeutic strategies for drug development.
+        Pharmacogenomics Drug Discovery Dev, 323&#x2013;556</Citation></Reference><Reference><Citation>Argueta
+        N, Notari E, Szigeti K (2022) Role of pharmacogenomics in individualizing
+        treatment for Alzheimer&#x2019;s disease. CNS Drugs 36(4):365&#x2013;376</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s40263-022-00915-3</ArticleId><ArticleId IdType="pubmed">35352296</ArticleId></ArticleIdList></Reference><Reference><Citation>Karch
+        CM, Goate AM (2015) Alzheimer&#x2019;s disease risk genes and mechanisms of
+        disease pathogenesis. Biol Psychiatry 77(1):43&#x2013;51. https://doi.org/10.1016/j.biopsych.2014.05.006</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.biopsych.2014.05.006</ArticleId><ArticleId IdType="pubmed">24951455</ArticleId></ArticleIdList></Reference><Reference><Citation>Xiao
+        X, Liu X, Jiao B (2020) Epigenetics: recent advances and its role in the treatment
+        of Alzheimer&#x2019;s disease. Front Neurol 11:538301. https://doi.org/10.3389/fneur.2020.538301</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fneur.2020.538301</ArticleId><ArticleId IdType="pubmed">33178099</ArticleId><ArticleId
+        IdType="pmc">7594522</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhang
+        X, Zhu Z, Huang Y, Shang X, O&#x2019;Brien TJ, Kwan P, Ha J, Wang W, Liu S,
+        Zhang X, Kiburg K, Bao Y, Wang J, Yu H, He M, Zhang L (2024) Shared genetic
+        aetiology of alzheimer&#x2019;s disease and age-related macular degeneration
+        by APOC1 and APOE genes. BMJ Neurol Open 6(1):e000570. https://doi.org/10.1136/bmjno-2023-000570</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1136/bmjno-2023-000570</ArticleId><ArticleId IdType="pubmed">38646507</ArticleId><ArticleId
+        IdType="pmc">11029327</ArticleId></ArticleIdList></Reference><Reference><Citation>Gao
+        P, Ye L, Cheng H, Li H (2021) The mechanistic role of bridging integrator
+        1 (BIN1) in alzheimer&#x2019;s disease. Cell Mol Neurobiol 41(7):1431&#x2013;1440.
+        https://doi.org/10.1007/s10571-020-00926-y</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s10571-020-00926-y</ArticleId><ArticleId IdType="pubmed">32719966</ArticleId></ArticleIdList></Reference><Reference><Citation>Guo
+        Y, Sun CK, Tang L, Tan MS (2023) Microglia PTK2B/Pyk2 in the pathogenesis
+        of Alzheimer&#x2019;s disease. Curr Alzheimer Res 20(10):692&#x2013;704. https://doi.org/10.2174/0115672050299004240129051655</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.2174/0115672050299004240129051655</ArticleId><ArticleId IdType="pubmed">38321895</ArticleId></ArticleIdList></Reference><Reference><Citation>Ando
+        K, Nagaraj S, K&#xfc;&#xe7;&#xfc;kali F, de Fisenne MA, Kosa AC, Doeraene
+        E, Lopez Gutierrez L, Brion JP, Leroy K (2022) PICALM and Alzheimer&#x2019;s
+        disease: an update and perspectives. Cells 11(24):3994. https://doi.org/10.3390/cells11243994</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/cells11243994</ArticleId><ArticleId IdType="pubmed">36552756</ArticleId><ArticleId
+        IdType="pmc">9776874</ArticleId></ArticleIdList></Reference><Reference><Citation>Gu
+        X, Dou M, Cao B, Jiang Z, Chen Y (2022) Peripheral level of CD33 and Alzheimer&#x2019;s
+        disease: a bidirectional two-sample Mendelian randomization study. Transl
+        Psychiatry 12(1):427. https://doi.org/10.1038/s41398-022-02205-4</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41398-022-02205-4</ArticleId><ArticleId IdType="pubmed">36192375</ArticleId><ArticleId
+        IdType="pmc">9529877</ArticleId></ArticleIdList></Reference><Reference><Citation>Qin
+        Q, Teng Z, Liu C, Li Q, Yin Y, Tang Y (2021) TREM2, microglia, and Alzheimer&#x2019;s
+        disease. Mech Ageing Dev 195:111438. https://doi.org/10.1016/j.mad.2021.111438</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.mad.2021.111438</ArticleId><ArticleId IdType="pubmed">33516818</ArticleId></ArticleIdList></Reference><Reference><Citation>Scherzer
+        CR, Offe K, Gearing M, Rees HD, Fang G, Heilman CJ, Schaller C, Bujo H, Levey
+        AI, Lah JJ (2004) Loss of apolipoprotein E receptor LR11 in Alzheimer disease.
+        Arch Neurol 61(8):1200&#x2013;1205. https://doi.org/10.1001/archneur.61.8.1200</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1001/archneur.61.8.1200</ArticleId><ArticleId IdType="pubmed">15313836</ArticleId></ArticleIdList></Reference><Reference><Citation>Jonsson
+        T, Atwal JK, Steinberg S, Snaedal J, Jonsson PV, Bjornsson S, Stefansson H,
+        Sulem P, Gudbjartsson D, Maloney J, Hoyte K, Gustafson A, Liu Y, Lu Y, Bhangale
+        T, Graham RR, Huttenlocher J, Bjornsdottir G, Andreassen OA, J&#xf6;nsson
+        EG, Stefansson K (2012) A mutation in APP protects against alzheimer&#x2019;s
+        disease and age-related cognitive decline. Nature 488(7409):96&#x2013;99.
+        https://doi.org/10.1038/nature11283</Citation><ArticleIdList><ArticleId IdType="doi">10.1038/nature11283</ArticleId><ArticleId
+        IdType="pubmed">22801501</ArticleId></ArticleIdList></Reference><Reference><Citation>Arber
+        C, Lovejoy C, Harris L, Willumsen N, Alatza A, Casey JM, Lines G, Kerins C,
+        Mueller AK, Zetterberg H, Hardy J, Ryan NS, Fox NC, Lashley T, Wray S (2021)
+        Familial Alzheimer&#x2019;s disease mutations in PSEN1 lead to premature human
+        stem cell neurogenesis. Cell Rep 34(2):108615. https://doi.org/10.1016/j.celrep.2020.108615</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.celrep.2020.108615</ArticleId><ArticleId IdType="pubmed">33440141</ArticleId><ArticleId
+        IdType="pmc">7809623</ArticleId></ArticleIdList></Reference><Reference><Citation>Selkoe
+        DJ, Hardy J (2016) The amyloid hypothesis of Alzheimer&#x2019;s disease at
+        25 years. EMBO Mol Med 8(6):595&#x2013;608. https://doi.org/10.15252/emmm.201606210</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.15252/emmm.201606210</ArticleId><ArticleId IdType="pubmed">27025652</ArticleId><ArticleId
+        IdType="pmc">4888851</ArticleId></ArticleIdList></Reference><Reference><Citation>Zheng
+        H, Cheng B, Li Y, Li X, Chen X, Zhang YW (2018) TREM2 in Alzheimer&#x2019;s
+        disease: microglial survival and energy metabolism. Front Aging Neurosci 10:395.
+        https://doi.org/10.3389/fnagi.2018.00395</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fnagi.2018.00395</ArticleId><ArticleId IdType="pubmed">30532704</ArticleId><ArticleId
+        IdType="pmc">6265312</ArticleId></ArticleIdList></Reference><Reference><Citation>Sill&#xe9;n
+        A, Lilius L, Forsell C, Kimura T, Winblad B, Graff C (2011) Linkage to the
+        8p21.1 region including the CLU gene in age at onset stratified Alzheimer&#x2019;s
+        disease families. J Alzheimer&#x2019;s Disease: JAD 23(1):13&#x2013;20. https://doi.org/10.3233/JAD-2010-101359</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3233/JAD-2010-101359</ArticleId><ArticleId IdType="pubmed">20930273</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhu
+        XC, Yu JT, Jiang T, Wang P, Cao L, Tan L (2015) CR1 in alzheimer&#x2019;s
+        disease. Mol Neurobiol 51(2):753&#x2013;765. https://doi.org/10.1007/s12035-014-8723-8</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s12035-014-8723-8</ArticleId><ArticleId IdType="pubmed">24794147</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhao
+        QF, Yu JT, Tan MS, Tan L (2015) ABCA7 in alzheimer&#x2019;s disease. Mol Neurobiol
+        51(3):1008&#x2013;1016. https://doi.org/10.1007/s12035-014-8759-9</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s12035-014-8759-9</ArticleId><ArticleId IdType="pubmed">24878767</ArticleId></ArticleIdList></Reference><Reference><Citation>Yin
+        RH, Yu JT, Tan L (2015) The role of SORL1 in Alzheimer&#x2019;s disease. Mol
+        Neurobiol 51(3):909&#x2013;918. https://doi.org/10.1007/s12035-014-8742-5</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s12035-014-8742-5</ArticleId><ArticleId IdType="pubmed">24833601</ArticleId></ArticleIdList></Reference><Reference><Citation>Lanfranco
+        MF, Ng CA, Rebeck GW (2020) ApoE lipidation as a therapeutic target in Alzheimer&#x2019;s
+        disease. Int J Mol Sci 21(17):6336. https://doi.org/10.3390/ijms21176336</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/ijms21176336</ArticleId><ArticleId IdType="pubmed">32882843</ArticleId><ArticleId
+        IdType="pmc">7503657</ArticleId></ArticleIdList></Reference><Reference><Citation>Van
+        Helmond ZK, Miners JS, Bednall E, Chalmers KA, Zhang Y, Wilcock GK, Kehoe
+        PG (2007) Caveolin-1 and&#x2010;2 and their relationship to cerebral amyloid
+        angiopathy in Alzheimer&#x2019;s disease. Neuropathol Appl Neurobiol 33(3):317&#x2013;327</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1111/j.1365-2990.2006.00815.x</ArticleId><ArticleId IdType="pubmed">17493012</ArticleId></ArticleIdList></Reference><Reference><Citation>Course
+        MM, Gudsnuk K, Smukowski SN, Winston K, Desai N, Ross JP, Sulovari A, Bourassa
+        CV, Spiegelman D, Couthouis J, Yu CE, Tsuang DW, Jayadev S, Kay MA, Gitler
+        AD, Dupre N, Eichler EE, Dion PA, Rouleau GA, Valdmanis PN (2020) Evolution
+        of a human-specific tandem repeat associated with ALS. Am J Hum Genet 107(3):445&#x2013;460.
+        https://doi.org/10.1016/j.ajhg.2020.07.004</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.ajhg.2020.07.004</ArticleId><ArticleId IdType="pubmed">32750315</ArticleId><ArticleId
+        IdType="pmc">7477013</ArticleId></ArticleIdList></Reference><Reference><Citation>Jiang
+        S, Tang L, Zhao N, Yang W, Qiu Y, Chen HZ (2016) A systems view of the differences
+        between APOE &#x3b5;4 carriers and non-carriers in Alzheimer&#x2019;s disease.
+        Front Aging Neurosci 8:171</Citation><ArticleIdList><ArticleId IdType="doi">10.3389/fnagi.2016.00171</ArticleId><ArticleId
+        IdType="pubmed">27462267</ArticleId><ArticleId IdType="pmc">4941795</ArticleId></ArticleIdList></Reference><Reference><Citation>Hares
+        K, Miners S, Scolding N, Love S, Wilkins A (2019) KIF5A and KLC1 expression
+        in Alzheimer&#x2019;s disease: relationship and genetic influences. AMRC Open
+        Res 1:1</Citation><ArticleIdList><ArticleId IdType="doi">10.12688/amrcopenres.12861.1</ArticleId></ArticleIdList></Reference><Reference><Citation>Nicoletti
+        NW (2019) An Ultrastructural Analysis of Microglial Morphological Changes
+        in Response to Manipulation of RNA Binding Protein TIA1 in the P301S Mouse
+        Model of Alzheimer&#x2019;s Disease (Master&#x2019;s thesis, Boston University)</Citation></Reference><Reference><Citation>Wi&#xdf;feld
+        J, Assale A, Cuevas-Rios T, Liao G, H., Neumann H (2024) Therapeutic potential
+        to target sialylation and SIGLECs in neurodegenerative and psychiatric diseases.
+        Front Neurol 15:1330874. https://doi.org/10.3389/fneur.2024.1330874</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fneur.2024.1330874</ArticleId><ArticleId IdType="pubmed">38529039</ArticleId><ArticleId
+        IdType="pmc">10961342</ArticleId></ArticleIdList></Reference><Reference><Citation>Kim
+        T, Vidal GS, Djurisic M, William CM, Birnbaum ME, Garcia KC, Hyman BT, Shatz
+        CJ (2013) Human LilrB2 is a &#x3b2;-amyloid receptor and its murine homolog
+        PirB regulates synaptic plasticity in an Alzheimer&#x2019;s model, vol 341.
+        Science (New York, pp 1399&#x2013;1404. 6152 https://doi.org/10.1126/science.1242077</Citation></Reference><Reference><Citation>Lefort
+        R (2015) Reversing synapse loss in Alzheimer&#x2019;s disease: Rho-guanosine
+        triphosphatases and insights from other brain disorders. Neurotherapeutics
+        12(1):19&#x2013;28</Citation><ArticleIdList><ArticleId IdType="doi">10.1007/s13311-014-0328-4</ArticleId><ArticleId
+        IdType="pubmed">25588580</ArticleId><ArticleId IdType="pmc">4322073</ArticleId></ArticleIdList></Reference><Reference><Citation>Zajkowicz
+        A, Gdowicz-K&#x142;osok A, Krze&#x15b;niak M, Janus P, &#x141;asut B, Rusin
+        M (2018) The Alzheimer&#x2019;s disease-associated TREM2 gene is regulated
+        by p53 tumor suppressor protein. Neurosci Lett 681:62&#x2013;67. https://doi.org/10.1016/j.neulet.2018.05.037</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neulet.2018.05.037</ArticleId><ArticleId IdType="pubmed">29842899</ArticleId></ArticleIdList></Reference><Reference><Citation>Ingannato
+        A, Bessi V, Chiari A, Salvatori D, Bagnoli S, Bedin R, Ferrari C, Sorbi S,
+        Nacmias B (2023) GRN missense variants and familial alzheimer&#x2019;s disease:
+        two case reports. J Alzheimer&#x2019;s Disease: JAD 96(2):767&#x2013;775.
+        https://doi.org/10.3233/JAD-230689</Citation><ArticleIdList><ArticleId IdType="doi">10.3233/JAD-230689</ArticleId><ArticleId
+        IdType="pubmed">37899057</ArticleId></ArticleIdList></Reference><Reference><Citation>Satoh
+        JI, Kino Y, Kawana N, Yamamoto Y, Ishida T, Saito Y, Arima K (2014) TMEM106B
+        expression is reduced in alzheimer&#x2019;s disease brains, vol 6. Alzheimer&#x2019;s
+        research &amp; therapy, pp 1&#x2013;14</Citation></Reference><Reference><Citation>Rajan
+        R, Divya KP, Kandadai RM, Yadav R, Satagopam VP, Madhusoodanan UK, Agarwal
+        P, Kumar N, Ferreira T, Kumar H, Sreeram Prasad AV, Shetty K, Mehta S, Desai
+        S, Kumar S, Prashanth LK, Bhatt M, Wadia P, Ramalingam S, Wali GM (2020) Genetic
+        architecture of Parkinson&#x2019;s disease in the Indian population: harnessing
+        genetic diversity to address critical gaps in Parkinson&#x2019;s disease research.
+        Front Neurol 11:524. https://doi.org/10.3389/fneur.2020.00524</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fneur.2020.00524</ArticleId><ArticleId IdType="pubmed">32655481</ArticleId><ArticleId
+        IdType="pmc">7323575</ArticleId></ArticleIdList></Reference><Reference><Citation>Cacabelos
+        R (2017) Parkinson&#x2019;s disease: from pathogenesis to pharmacogenomics.
+        Int J Mol Sci 18(3):551. https://doi.org/10.3390/ijms18030551</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/ijms18030551</ArticleId><ArticleId IdType="pubmed">28273839</ArticleId><ArticleId
+        IdType="pmc">5372567</ArticleId></ArticleIdList></Reference><Reference><Citation>Corvol
+        JC, Poewe W (2016) Pharmacogenetics of parkinson&#x2019;s disease in clinical
+        practice. Mov Disord Clin Pract 4(2):173&#x2013;180. https://doi.org/10.1002/mdc3.12444</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/mdc3.12444</ArticleId><ArticleId IdType="pubmed">30363349</ArticleId><ArticleId
+        IdType="pmc">6174439</ArticleId></ArticleIdList></Reference><Reference><Citation>Schumacher-Schuh
+        AF, Rieder CR, Hutz MH (2014) Parkinson&#x2019;s disease pharmacogenomics:
+        new findings and perspectives. Pharmacogenomics 15(9):1253&#x2013;1271</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.2217/pgs.14.93</ArticleId><ArticleId IdType="pubmed">25141900</ArticleId></ArticleIdList></Reference><Reference><Citation>Vuleti&#x107;
+        V, Ra&#x10d;ki V, Papi&#x107; E, Peterlin B (2021) A systematic review of
+        Parkinson&#x2019;s disease pharmacogenomics: is there time for translation
+        into the clinics? Int J Mol Sci 22(13):7213</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/ijms22137213</ArticleId><ArticleId IdType="pubmed">34281267</ArticleId><ArticleId
+        IdType="pmc">8268929</ArticleId></ArticleIdList></Reference><Reference><Citation>Alonso-Navarro
+        H, Jimenez-Jimenez J, Garcia-Martin F, E., Agundez AG, J (2014) Genomic and
+        Pharmacogenomic biomarkers of parkinson&#x2019;s disease. Curr Drug Metab
+        15(2):129&#x2013;181</Citation><ArticleIdList><ArticleId IdType="doi">10.2174/138920021502140327175404</ArticleId><ArticleId
+        IdType="pubmed">24694231</ArticleId></ArticleIdList></Reference><Reference><Citation>D&#x17e;olji&#x107;
+        E, Novakovi&#x107; I, Krajinovic M, Grbatini&#x107; I, Kosti&#x107; V (2015)
+        Pharmacogenetics of drug response in Parkinson&#x2019;s disease. Int J Neurosci
+        125(9):635&#x2013;644</Citation><ArticleIdList><ArticleId IdType="doi">10.3109/00207454.2014.963851</ArticleId><ArticleId
+        IdType="pubmed">25226559</ArticleId></ArticleIdList></Reference><Reference><Citation>Liu
+        JS, Chen Y, Shi DD, Zhang BR, Pu JL (2023) Pharmacogenomics&#x2014;a new frontier
+        for individualized treatment of Parkinson&#x2019;s disease. Curr Neuropharmacol
+        21(3):536</Citation><ArticleIdList><ArticleId IdType="doi">10.2174/1570159X21666221229154830</ArticleId><ArticleId
+        IdType="pubmed">36582064</ArticleId><ArticleId IdType="pmc">10207905</ArticleId></ArticleIdList></Reference><Reference><Citation>Shu
+        L, Zhang Y, Sun Q, Pan H, Guo J, Tang B (2018) SNCA REP1 and parkinson&#x2019;s
+        disease. Neurosci Lett 682:79&#x2013;84. https://doi.org/10.1016/j.neulet.2018.05.043</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neulet.2018.05.043</ArticleId><ArticleId IdType="pubmed">29859327</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhai
+        D, Li S, Zhao Y, Lin Z (2014) SLC6A3 is a risk factor for parkinson&#x2019;s
+        disease: a meta-analysis of sixteen years&#x2019; studies. Neurosci Lett 564:99&#x2013;104.
+        https://doi.org/10.1016/j.neulet.2013.10.060</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neulet.2013.10.060</ArticleId><ArticleId IdType="pubmed">24211691</ArticleId></ArticleIdList></Reference><Reference><Citation>Carlquist
+        JF, Menlove RL, Murray MB, O&#x2019;Connell JB, Anderson JL (1991) HLA class
+        II (DR and DQ) antigen associations in idiopathic dilated cardiomyopathy.
+        Validation study and meta-analysis of published HLA association studies. Circulation
+        83(2):515&#x2013;522. https://doi.org/10.1161/01.cir.83.2.515</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1161/01.cir.83.2.515</ArticleId><ArticleId IdType="pubmed">1825038</ArticleId></ArticleIdList></Reference><Reference><Citation>Yoshino
+        H, Li Y, Nishioka K, Daida K, Hayashida A, Ishiguro Y, Hattori N (2022) Genotype-phenotype
+        correlation of Parkinson&#x2019;s disease with PRKN variants. Neurobiol Aging
+        114:117&#x2013;128</Citation><ArticleIdList><ArticleId IdType="doi">10.1016/j.neurobiolaging.2021.12.014</ArticleId><ArticleId
+        IdType="pubmed">35123805</ArticleId></ArticleIdList></Reference><Reference><Citation>Gandhi,
+        S., Muqit, M. M. K., Stanyer, L., Healy, D. G., Abou-Sleiman, P. M., Hargreaves,I.,
+        &#x2026; Revesz, T. (2006). PINK1 protein in normal human brain and Parkinson&#x2019;s
+        disease.Brain, 129(7), 1720&#x2013;1731.</Citation></Reference><Reference><Citation>Ariga
+        H, Takahashi-Niki K, Kato I, Maita H, Niki T, Iguchi-Ariga SM (2013) Neuroprotective
+        Function of DJ-1 in Parkinson&#x2019;s Disease. Oxidative medicine and cellular
+        longevity, 2013(1), 683920</Citation></Reference><Reference><Citation>Gan-Or
+        Z, Liong C, Alcalay RN (2018) GBA-associated parkinson&#x2019;s disease and
+        other synucleinopathies. Curr Neurol Neurosci Rep 18:1&#x2013;10</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s11910-018-0860-4</ArticleId></ArticleIdList></Reference><Reference><Citation>Joseph
+        S, Schulz JB, Stegm&#xfc;ller J (2018) Mechanistic contributions of FBXO7
+        to Parkinson disease. J Neurochem 144(2):118&#x2013;127. https://doi.org/10.1111/jnc.14253</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1111/jnc.14253</ArticleId><ArticleId IdType="pubmed">29134665</ArticleId></ArticleIdList></Reference><Reference><Citation>Liu
+        Y, Fallon L, Lashuel HA, Liu Z, Lansbury PT (2002) The UCH-L1 gene encodes
+        two opposing enzymatic activities that affect &#x3b1;-synuclein degradation
+        and Parkinson&#x2019;s disease susceptibility. Cell 111(2):209&#x2013;218</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/S0092-8674(02)01012-7</ArticleId><ArticleId IdType="pubmed">12408865</ArticleId></ArticleIdList></Reference><Reference><Citation>Fujii
+        T, Nagamori S, Wiriyasermkul P, Zheng S, Yago A, Shimizu T, Tabuchi Y, Okumura
+        T, Fujii T, Takeshima H, Sakai H (2023) Parkinson&#x2019;s disease-associated
+        ATP13A2/PARK9 functions as a lysosomal H+,K+-ATPase. Nat Commun 14(1):2174.
+        https://doi.org/10.1038/s41467-023-37815-z</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41467-023-37815-z</ArticleId><ArticleId IdType="pubmed">37080960</ArticleId><ArticleId
+        IdType="pmc">10119128</ArticleId></ArticleIdList></Reference><Reference><Citation>Tomiyama
+        H, Yoshino H, Ogaki K, Li L, Yamashita C, Li Y, Funayama Manabu, Sasaki Ryogen,
+        Kokubo Yasumasa, Kuzuhara Shigeki, Hattori N (2011) PLA2G6 variant in Parkinson&#x2019;s
+        disease. J Hum Genet 56(5):401&#x2013;403</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/jhg.2011.22</ArticleId><ArticleId IdType="pubmed">21368765</ArticleId></ArticleIdList></Reference><Reference><Citation>Deng
+        H, Gao K, Jankovic J (2013) The VPS35 gene and Parkinson&#x2019;s disease.
+        Mov Disord 28(5):569&#x2013;575</Citation><ArticleIdList><ArticleId IdType="doi">10.1002/mds.25430</ArticleId><ArticleId
+        IdType="pubmed">23536430</ArticleId></ArticleIdList></Reference><Reference><Citation>Jansen
+        IE, Bras JM, Lesage S, Schulte C, Gibbs JR, Nalls MA, Brice Alexis, Wood Nicholas
+        W, Morris Huw, Hardy John A, Singleton Andrew B, Gasser Thomas, Heutink Peter,
+        Sharma M (2015) Chchd2 and Parkinson&#x2019;s disease. Lancet Neurol 14(7):678&#x2013;679</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/S1474-4422(15)00094-0</ArticleId><ArticleId IdType="pubmed">26067110</ArticleId></ArticleIdList></Reference><Reference><Citation>Kurian
+        MA, Abela L (2021) DNAJC6 Parkinson disease. In: Adam MP (ed) GeneReviews&#xae;.
+        University of Washington, Seattle</Citation></Reference><Reference><Citation>Xie,
+        F., Chen, S., Cen, Z. D., Chen, Y., Yang, D. H., Wang, H. T., &#x2026; Luo,
+        W. (2019).A novel homozygous SYNJ1 mutation in two siblings with typical Parkinson&#x2019;s
+        disease.Parkinsonism &amp; Related Disorders, 69, 134&#x2013;137.</Citation></Reference><Reference><Citation>Deng
+        HX, Shi Y, Yang Y, Ahmeti KB, Miller N, Huang C, Cheng Lijun, Zhai Hong, Deng
+        Sheng, Nuytemans Karen, Corbett Nicola J, Kim Myung Jong, Deng Hao, Tang Beisha,
+        Yang Ziquang, Xu Yanming, Chan Piu, Huang Bo, Gao Xiao-Ping, Song Zhi, Liu
+        Zhenhua, Fecto Faisal, Siddique Nailah, Foroud Tatiana, Jankovic Joseph, Ghetti
+        Bernardino, Nicholson Daniel A, Krainc Dimitri, Melen Onur, Vance Jeffery
+        M, Pericak-Vance Margaret A, Ma Yong-Chao, Rajput Ali H, Siddique T (2016)
+        Identification of TMEM230 mutations in familial Parkinson&#x2019;s disease.
+        Nat Genet 48(7):733&#x2013;739</Citation><ArticleIdList><ArticleId IdType="doi">10.1038/ng.3589</ArticleId><ArticleId
+        IdType="pubmed">27270108</ArticleId><ArticleId IdType="pmc">6047531</ArticleId></ArticleIdList></Reference><Reference><Citation>Tucci
+        A, Charlesworth G, Sheerin UM, Plagnol V, Wood NW, Hardy J (2012) Study of
+        the genetic variability in a parkinson&#x2019;s disease gene: EIF4G1. Neurosci
+        Lett 518(1):19&#x2013;22</Citation><ArticleIdList><ArticleId IdType="doi">10.1016/j.neulet.2012.04.033</ArticleId><ArticleId
+        IdType="pubmed">22561553</ArticleId><ArticleId IdType="pmc">3769807</ArticleId></ArticleIdList></Reference><Reference><Citation>Chen
+        CM, Wu CH, Hsieh CH, Lin CH, Chen IC, Chen YC, Lee LC, Lee CM, Tseng YC, Lee-Chen
+        GJ, Wu YR (2014) HTRA2 variations in Taiwanese parkinson&#x2019;s disease.
+        J Neural Transmission (Vienna Austria: 1996) 121(5):491&#x2013;498. https://doi.org/10.1007/s00702-013-1131-9</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s00702-013-1131-9</ArticleId></ArticleIdList></Reference><Reference><Citation>Ruiz-Martinez
+        J, Krebs CE, Makarov V, Gorostidi A, Mart&#xed;-Mass&#xf3; JF, Pais&#xe1;n-Ruiz
+        C (2015) GIGYF2 mutation in late-onset Parkinson&#x2019;s disease with cognitive
+        impairment. J Hum Genet 60(10):637&#x2013;640. https://doi.org/10.1038/jhg.2015.69</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/jhg.2015.69</ArticleId><ArticleId IdType="pubmed">26134514</ArticleId><ArticleId
+        IdType="pmc">4624020</ArticleId></ArticleIdList></Reference><Reference><Citation>Wider
+        C, Vilari&#xf1;o-G&#xfc;ell C, Jasinska&#x2010;Myga B, Heckman MG, Soto&#x2010;Ortolaza
+        AI, Cobb SA, Ross OA (2010) Association of the MAPT locus with Parkinson&#x2019;s
+        disease. Eur J Neurol 17(3):483&#x2013;486</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1111/j.1468-1331.2009.02847.x</ArticleId><ArticleId IdType="pubmed">19912324</ArticleId></ArticleIdList></Reference><Reference><Citation>Rudakou
+        U, Bencheikh BOA, Ruskey JA, Krohn L, Laurent SB, Spiegelman D, Gan-Or Z (2019)
+        Common and rare GCH1 variants are associated with parkinson&#x2019;s disease.
+        Neurobiol Aging 73:231&#x2013;e1</Citation><ArticleIdList><ArticleId IdType="doi">10.1016/j.neurobiolaging.2018.09.008</ArticleId></ArticleIdList></Reference><Reference><Citation>Lee
+        MS, Lyoo CH, Ulmanen I, Syv&#xe4;nen AC, Rinne JO (2001) Genotypes of catechol-O-methyltransferase
+        and response to levodopa treatment in patients with parkinson&#x2019;s disease.
+        Neurosci Lett 298(2):131&#x2013;134</Citation><ArticleIdList><ArticleId IdType="doi">10.1016/S0304-3940(00)01749-3</ArticleId><ArticleId
+        IdType="pubmed">11163295</ArticleId></ArticleIdList></Reference><Reference><Citation>Bialecka
+        M, Kurzawski M, Klodowska-Duda G, Opala G, Tan EK, Drozdzik M (2008) The association
+        of functional catechol-O-methyltransferase haplotypes with risk of parkinson&#x2019;s
+        disease, levodopa treatment response, and complications. Pharmacogenet Genomics
+        18(9):815&#x2013;821</Citation><ArticleIdList><ArticleId IdType="doi">10.1097/FPC.0b013e328306c2f2</ArticleId><ArticleId
+        IdType="pubmed">18698234</ArticleId></ArticleIdList></Reference><Reference><Citation>Magistrelli
+        L, Ferrari M, Furgiuele A, Milner AV, Contaldi E, Comi C, Cosentino Marco,
+        Marino F (2021) Polymorphisms of dopamine receptor genes and Parkinson&#x2019;s
+        disease: clinical relevance and future perspectives. Int J Mol Sci 22(7):3781</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/ijms22073781</ArticleId><ArticleId IdType="pubmed">33917417</ArticleId><ArticleId
+        IdType="pmc">8038729</ArticleId></ArticleIdList></Reference><Reference><Citation>Pelzer
+        EA, St&#xfc;rmer S, Feis DL, Melzer C, Schwartz F, Scharge M, Eggers C, Tittgemeyer
+        M, Timmermann L (2022) Clustering of Parkinson subtypes reveals strong influence
+        of DRD2 polymorphism and gender. Sci Rep 12(1):6038. https://doi.org/10.1038/s41598-022-09657-0</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41598-022-09657-0</ArticleId><ArticleId IdType="pubmed">35411010</ArticleId><ArticleId
+        IdType="pmc">9001640</ArticleId></ArticleIdList></Reference><Reference><Citation>Moreau
+        C, Meguig S, Corvol JC, Labreuche J, Vasseur F, Duhamel A, Delval A, Bardyn
+        T, Devedjian JC, Rouaix N, Petyt G, Brefel-Courbon C, Ory-Magne F, Guehl D,
+        Eusebio A, Fraix V, Saulnier PJ, Lagha-Boukbiza O, Durif F, Faighel M, Giordana
+        Caroline, Drapier Sophie, Malt&#xea;te David, Tranchant Christine, Houeto
+        Jean-Luc, Deb&#xfb; Bettina, Azulay Jean-Philippe, Tison Fran&#xe7;ois, Dest&#xe9;e
+        Alain, Vidailhet Marie, Rascol Olivier, Dujardin Kathy, Defebvre Luc, Bordet
+        R&#xe9;gis, Sablonni&#xe8;re Bernard, Devos David, Parkgait-II Study Group
+        (2015) Polymorphism of the dopamine transporter type 1 gene modifies the treatment
+        response in Parkinson&#x2019;s disease. Brain 138(Pt 5):1271&#x2013;1283.
+        https://doi.org/10.1093/brain/awv063</Citation><ArticleIdList><ArticleId IdType="doi">10.1093/brain/awv063</ArticleId><ArticleId
+        IdType="pubmed">25805645</ArticleId><ArticleId IdType="pmc">5963414</ArticleId></ArticleIdList></Reference><Reference><Citation>Wang
+        J, Ekambaram S, Huang X, Mailman RB, Proctor EA, Dokholyan NV (2024) Comprehensive
+        mapping of the Interaction of levodopa and iron metabolism in Parkinson&#x2019;s
+        disease. BioRxiv, 2024&#x2013;2009</Citation></Reference><Reference><Citation>Dunn
+        AR, Stout KA, Ozawa M, Lohr KM, Hoffman CA, Bernstein AI, Li Yingjie, Wang
+        Minzheng, Sgobio Carmelo, Sastry Namratha, Cai Huaibin, Caudle W. Michael,
+        Miller GW (2017) Synaptic vesicle glycoprotein 2 C (SV2C) modulates dopamine
+        release and is disrupted in Parkinson disease. Proc Natl Acad Sci U S A 114(11):E2253&#x2013;E2262</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1073/pnas.1616892114</ArticleId><ArticleId IdType="pubmed">28246328</ArticleId><ArticleId
+        IdType="pmc">5358362</ArticleId></ArticleIdList></Reference><Reference><Citation>Hantraye
+        P, Brouillet E, N&#xe9;ri C (2002) Pharmacogenomics of neurodegenerative diseases:
+        examples and perspectives. The Search for Individualized Therapies, Pharmacogenomics,
+        pp 347&#x2013;367</Citation></Reference><Reference><Citation>Cacabelos R (2020)
+        Pharmacogenomics of drugs used to treat brain disorders. Expert Rev Precis
+        Med Drug Dev 5(3):181&#x2013;234</Citation><ArticleIdList><ArticleId IdType="doi">10.1080/23808993.2020.1738217</ArticleId></ArticleIdList></Reference><Reference><Citation>Cacabelos
+        R, Martinez-Bouza R, Carlos Carril J, Fernandez-Novoa L, Lombardi V, Carrera
+        I, Corzo Lola, McKay A (2012) Genomics and pharmacogenomics of brain disorders.
+        Curr Pharm Biotechnol 13(5):674&#x2013;725</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.2174/138920112799857576</ArticleId><ArticleId IdType="pubmed">22122480</ArticleId></ArticleIdList></Reference><Reference><Citation>Soria-Chacartegui
+        P, Villapalos-Garc&#xed;a G, Zubiaur P, Abad-Santos F, Koller D (2021) Genetic
+        polymorphisms associated with the pharmacokinetics, pharmacodynamics and adverse
+        effects of Olanzapine, Aripiprazole and Risperidone. Front Pharmacol 12:711940.
+        https://doi.org/10.3389/fphar.2021.711940</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fphar.2021.711940</ArticleId><ArticleId IdType="pubmed">34335273</ArticleId><ArticleId
+        IdType="pmc">8316766</ArticleId></ArticleIdList></Reference><Reference><Citation>Mohamed
+        NA, Eraslan A, Kose S (2023) The impact of anxiety and depression on the quality
+        of life of Hemodialysis patients in a sample from Somalia. BMC Psychiatry
+        23(1):825. https://doi.org/10.1186/s12888-023-05312-8</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1186/s12888-023-05312-8</ArticleId><ArticleId IdType="pubmed">37950178</ArticleId><ArticleId
+        IdType="pmc">10636891</ArticleId></ArticleIdList></Reference><Reference><Citation>Ranen
+        NG, Lipsey JR, Treisman G, Ross CA (1996) Sertraline in the treatment of severe
+        aggressiveness in huntington&#x2019;s disease. J Neuropsychiatry Clin Neurosci
+        8(3):338&#x2013;340. https://doi.org/10.1176/jnp.8.3.338</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1176/jnp.8.3.338</ArticleId><ArticleId IdType="pubmed">8854307</ArticleId></ArticleIdList></Reference><Reference><Citation>Hicks
+        JK, Bishop JR, Sangkuhl K, M&#xfc;ller DJ, Ji Y, Leckband SG, Leeder JS, Graham
+        RL, Chiulli DL, LLerena A, Skaar TC, Scott SA, Stingl JC, Klein TE, Caudle
+        KE, Gaedigk A (2015) Clinical pharmacogenetics implementation consortium (CPIC)
+        guideline for CYP2D6 and CYP2C19 genotypes and dosing of selective serotonin
+        reuptake inhibitors. Clin Pharmacol Ther 98(2):127&#x2013;134. https://doi.org/10.1002/cpt.147</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/cpt.147</ArticleId><ArticleId IdType="pubmed">25974703</ArticleId><ArticleId
+        IdType="pmc">4512908</ArticleId></ArticleIdList></Reference><Reference><Citation>Tr&#xe4;ger
+        U, Andre R, Lahiri N, Magnusson-Lind A, Weiss A, Grueninger S, McKinnon Chris,
+        Sirinathsinghji Eva, Kahlon Shira, Pfister Edith L., Moser Roger, Hummerich
+        Holger, Antoniou Michael, Bates Gillian P., Luthi-Carter Ruth, Lowdell Mark
+        W., Bj&#xf6;rkqvist Maria, Ostroff Gary R., Aronin Neil, Tabrizi SJ (2014)
+        HTT-lowering reverses Huntington&#x2019;s disease immune dysfunction caused
+        by NF&#x3ba;B pathway dysregulation. Brain 137(3):819&#x2013;833</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1093/brain/awt355</ArticleId><ArticleId IdType="pubmed">24459107</ArticleId><ArticleId
+        IdType="pmc">3983408</ArticleId></ArticleIdList></Reference><Reference><Citation>Stevanin,
+        G., Fujigasaki, H., Lebre, A. S., Camuzat, A., Jeannequin, C., Dod&#xe9;,
+        C.,&#x2026; Durr, A. (2003). Huntington&#x2019;s disease-like phenotype due
+        to trinucleotide repeat expansions in the TBP and JPH3 genes. Brain, 126(7),
+        1599&#x2013;1603.</Citation></Reference><Reference><Citation>Keo, A., Aziz,
+        N. A., Dzyubachyk, O., Van der Grond, J., van Roon-Mom, W. M., Lelieveldt,B.
+        P., &#x2026; Mahfouz, A. (2017). Co-expression patterns between ATN1 and ATXN2
+        coincide with brain regions affected in Huntington&#x2019;s disease. Frontiers
+        in Molecular Neuroscience,10, 399.</Citation></Reference><Reference><Citation>Joachimiak
+        P, Ciesio&#x142;ka A, Koz&#x142;owska E, &#x15a;wito&#x144;ski PM, Figura
+        G, Cio&#x142;ak A, Adamek Gra&#x17c;yna, Surdyka Magdalena, Kalinowska-Po&#x15b;ka
+        &#x17b;aneta, Figiel Maciej, Caron Nicholas S., Hayden Michael R., Fiszer
+        A (2023) Allele-specific quantitation of ATXN3 and HTT transcripts in polyQ
+        disease models. BMC Biol 21(1):17</Citation><ArticleIdList><ArticleId IdType="doi">10.1186/s12915-023-01515-3</ArticleId><ArticleId
+        IdType="pubmed">36726088</ArticleId><ArticleId IdType="pmc">9893648</ArticleId></ArticleIdList></Reference><Reference><Citation>Ganguly
+        J, Tuesta Bernaola M, Jog M (2023) Four octapeptide repeat insertion (4-OPRI)
+        in PRNP causing huntington disease Phenocopy. The Canadian journal of neurological
+        sciences. Le journal canadien des sciences neurologiques, 1&#x2013;3. Advance
+        online publication https://doi.org/10.1017/cjn.2023.279</Citation></Reference><Reference><Citation>Ha
+        AD, Jankovic J (2011) Exploring the correlates of intermediate CAG repeats
+        in huntington disease. Postgrad Med 123(5):116&#x2013;121</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3810/pgm.2011.09.2466</ArticleId><ArticleId IdType="pubmed">21904093</ArticleId></ArticleIdList></Reference><Reference><Citation>Hensman
+        Moss DJ, Poulter M, Beck J, Hehir J, Polke JM, Campbell T, Adamson Garry,
+        Mudanohwo Ese, McColgan Peter, Haworth Andrea, Wild Edward J., Sweeney Mary
+        G., Houlden Henry, Mead Simon, Tabrizi SJ (2014) C9orf72 expansions are the
+        most common genetic cause of Huntington disease phenocopies. Neurology 82(4):292&#x2013;299</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1212/WNL.0000000000000061</ArticleId><ArticleId IdType="pubmed">24363131</ArticleId></ArticleIdList></Reference><Reference><Citation>van
+        Eijk RPA, Eijkemans MJC, Nikolakopoulos S, Jansen MD, Westeneng HJ, van Eijk
+        KR, van der Spek RAA, van Vugt JJFA, Piepers S, Groeneveld GJ, Veldink JH,
+        van den Berg LH, van Es MA (2020) Pharmacogenetic interactions in amyotrophic
+        lateral sclerosis: a step closer to a cure? Pharmacogenomics J 20(2):220&#x2013;226.
+        https://doi.org/10.1038/s41397-019-0111-3</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41397-019-0111-3</ArticleId><ArticleId IdType="pubmed">31624333</ArticleId></ArticleIdList></Reference><Reference><Citation>Costa
+        J, Gomes C, de Carvalho M (2010) Diagnosis, pathogenesis and therapeutic targets
+        in amyotrophic lateral sclerosis. CNS Neurol Disord Drug Targets 9(6):764&#x2013;778.
+        https://doi.org/10.2174/187152710793237502</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.2174/187152710793237502</ArticleId><ArticleId IdType="pubmed">20942786</ArticleId></ArticleIdList></Reference><Reference><Citation>Festoff
+        BW, Suo Z, Citron BA (2003) Prospects for the pharmacotherapy of amyotrophic
+        lateral sclerosis: old strategies and new paradigms for the third millennium.
+        CNS Drugs 17:699&#x2013;717</Citation><ArticleIdList><ArticleId IdType="doi">10.2165/00023210-200317100-00002</ArticleId><ArticleId
+        IdType="pubmed">12873154</ArticleId></ArticleIdList></Reference><Reference><Citation>Morahan
+        JM, Yu B, Trent RJ, Pamphlett R (2007) A gene-environment study of the paraoxonase
+        1 gene and pesticides in amyotrophic lateral sclerosis. Neurotoxicology 28(3):532&#x2013;540.
+        https://doi.org/10.1016/j.neuro.2006.11.007</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neuro.2006.11.007</ArticleId><ArticleId IdType="pubmed">17204329</ArticleId></ArticleIdList></Reference><Reference><Citation>Vidal-Taboada
+        JM, Pugliese M, Salvad&#xf3; M, G&#xe1;mez J, Mahy N, Rodr&#xed;guez MJ (2018)
+        Katp channel expression and genetic polymorphisms associated with progression
+        and survival in amyotrophic lateral sclerosis. Mol Neurobiol 55(10):7962&#x2013;7972.
+        https://doi.org/10.1007/s12035-018-0970-7</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s12035-018-0970-7</ArticleId><ArticleId IdType="pubmed">29492846</ArticleId></ArticleIdList></Reference><Reference><Citation>Maurel
+        C, Dangoumau A, Marouillat S, Brulard C, Chami A, Hergesheimer R, Corcia P,
+        Blasco H, Andres CR, &#x2018;h Vourc P (2018) Causative genes in amyotrophic
+        lateral sclerosis and protein degradation pathways: a link to neurodegeneration.
+        Mol Neurobiol 55(8):6480&#x2013;6499. https://doi.org/10.1007/s12035-017-0856-0</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s12035-017-0856-0</ArticleId><ArticleId IdType="pubmed">29322304</ArticleId></ArticleIdList></Reference><Reference><Citation>Marangi
+        G, Traynor BJ (2015) Genetic causes of amyotrophic lateral sclerosis: new
+        genetic analysis methodologies entailing new opportunities and challenges.
+        Brain Res 1607:75&#x2013;93. https://doi.org/10.1016/j.brainres.2014.10.009</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.brainres.2014.10.009</ArticleId><ArticleId IdType="pubmed">25316630</ArticleId></ArticleIdList></Reference><Reference><Citation>Wang
+        H, Guan L, Deng M (2023) Recent progress of the genetics of amyotrophic lateral
+        sclerosis and challenges of gene therapy. Front Neurosci 17:1170996. https://doi.org/10.3389/fnins.2023.1170996</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fnins.2023.1170996</ArticleId><ArticleId IdType="pubmed">37250416</ArticleId><ArticleId
+        IdType="pmc">10213321</ArticleId></ArticleIdList></Reference><Reference><Citation>Turner
+        MR, Hardiman O, Benatar M, Brooks BR, Chio A, de Carvalho M, Ince PG, Lin
+        C, Miller RG, Mitsumoto H, Nicholson G, Ravits J, Shaw PJ, Swash M, Talbot
+        K, Traynor BJ, Van den Berg LH, Veldink JH, Vucic S, Kiernan MC (2013) Controversies
+        and priorities in amyotrophic lateral sclerosis. Lancet Neurol 12(3):310&#x2013;322.
+        https://doi.org/10.1016/S1474-4422(13)70036-X</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/S1474-4422(13)70036-X</ArticleId><ArticleId IdType="pubmed">23415570</ArticleId><ArticleId
+        IdType="pmc">4565161</ArticleId></ArticleIdList></Reference><Reference><Citation>Shu
+        S, Lei X, Liu F, Cui B, Liu Q, Ding Q, Liu MS, Li XG, Cui L, Zhang X (2018)
+        Mutation screening of NEK1 in Chinese ALS patients. Neurobiol Aging 71:267e1&#x2013;267e4.
+        https://doi.org/10.1016/j.neurobiolaging.2018.06.022</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2018.06.022</ArticleId></ArticleIdList></Reference><Reference><Citation>Yuan
+        J, Amin P, Ofengeim D (2019) Necroptosis and RIPK1-mediated neuroinflammation
+        in CNS diseases. Nat Rev Neurosci 20(1):19&#x2013;33. https://doi.org/10.1038/s41583-018-0093-1</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41583-018-0093-1</ArticleId><ArticleId IdType="pubmed">30467385</ArticleId><ArticleId
+        IdType="pmc">6342007</ArticleId></ArticleIdList></Reference><Reference><Citation>Mann
+        JR, McKenna ED, Mawrie D, Papakis V, Alessandrini F, Anderson EN, Mayers R,
+        Ball HE, Kaspi E, Lubinski K, Baron DM, Tellez L, Landers JE, Pandey UB, Kiskinis
+        E (2023) Loss of function of the ALS-associated NEK1 kinase disrupts microtubule
+        homeostasis and nuclear import. Sci Adv 9(33):eadi5548. https://doi.org/10.1126/sciadv.adi5548</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1126/sciadv.adi5548</ArticleId><ArticleId IdType="pubmed">37585529</ArticleId><ArticleId
+        IdType="pmc">10431718</ArticleId></ArticleIdList></Reference><Reference><Citation>Williams,
+        K. L., Topp, S., Yang, S., Smith, B., Fifita, J. A., Warraich, S. T., Zhang,K.
+        Y., Farrawell, N., Vance, C., Hu, X., Chesi, A., Leblond, C. S., Lee, A.,
+        Rayner,S. L., Sundaramoorthy, V., Dobson-Stone, C., Molloy, M. P., van Blitterswijk,
+        M.,Dickson, D. W., Petersen, R. C., &#x2026; Blair, I. P. (2016). CCNF mutations
+        in amyotrophic lateral sclerosis and frontotemporal dementia. Nature communications,
+        7, 11253. https://doi.org/10.1038/ncomms11253.</Citation></Reference><Reference><Citation>Davidson
+        JM, Wu SSL, Rayner SL, Cheng F, Duncan K, Russo C, Newbery M, Ding K, Scherer
+        NM, Balez R, Garc&#xed;a-Redondo A, R&#xe1;bano A, Rosa-Fernandes L, Ooi L,
+        Williams KL, Morsch M, Blair IP, Di Ieva A, Yang S, Chung RS, Lee A (2023)
+        The E3 ubiquitin ligase SCF cyclin F promotes Sequestosome-1/p62 insolubility
+        and foci formation and is dysregulated in ALS and FTD pathogenesis. Mol Neurobiol
+        60(9):5034&#x2013;5054. https://doi.org/10.1007/s12035-023-03355-2</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s12035-023-03355-2</ArticleId><ArticleId IdType="pubmed">37243816</ArticleId><ArticleId
+        IdType="pmc">10415446</ArticleId></ArticleIdList></Reference><Reference><Citation>Pan
+        C, Jiao B, Xiao T, Hou L, Zhang W, Liu X, Xu J, Tang B, Shen L (2017) Mutations
+        of CCNF gene is rare in patients with amyotrophic lateral sclerosis and frontotemporal
+        dementia from mainland China. Amyotroph Lateral Scler Frontotemporal Degener
+        18(3&#x2013;4):265&#x2013;268. https://doi.org/10.1080/21678421.2017.1293111</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1080/21678421.2017.1293111</ArticleId><ArticleId IdType="pubmed">28281833</ArticleId></ArticleIdList></Reference><Reference><Citation>Lillebostad
+        PAG, Raasakka A, Hjellbrekke SJ, Patil S, R&#xf8;stb&#xf8; T, Holl&#xe5;s
+        H, Sakya SA, Szigetvari PD, Vedeler A, Kursula P (2020) Structure of the ALS
+        mutation target Annexin A11 reveals a stabilising N-terminal segment. Biomolecules
+        10(4):660. https://doi.org/10.3390/biom10040660</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/biom10040660</ArticleId><ArticleId IdType="pubmed">32344647</ArticleId><ArticleId
+        IdType="pmc">7226064</ArticleId></ArticleIdList></Reference><Reference><Citation>Wang
+        Y, Duan X, Zhou X, Wang R, Zhang X, Cao Z, Wang X, Zhou Z, Sun Y, Peng D (2022)
+        ANXA11 mutations are associated with amyotrophic lateral sclerosis-frontotemporal
+        dementia. Front Neurol 13:886887. https://doi.org/10.3389/fneur.2022.886887</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fneur.2022.886887</ArticleId><ArticleId IdType="pubmed">36226077</ArticleId><ArticleId
+        IdType="pmc">9549789</ArticleId></ArticleIdList></Reference><Reference><Citation>Mackenzie,
+        I. R., Nicholson, A. M., Sarkar, M., Messing, J., Purice, M. D., Pottier,C.,
+        Annu, K., Baker, M., Perkerson, R. B., Kurti, A., Matchett, B. J., Mittag,
+        T.,Temirov, J., Hsiung, G. R., Krieger, C., Murray, M. E., Kato, M., Fryer,
+        J. D., Petrucelli,L., Zinman, L., &#x2026; Rademakers, R. (2017). TIA1 Mutations
+        in Amyotrophic Lateral Sclerosis and Frontotemporal Dementia Promote Phase
+        Separation and Alter Stress Granule Dynamics.Neuron, 95(4), 808&#x2013;816.e9.
+        https://doi.org/10.1016/j.neuron.2017.07.025.</Citation></Reference><Reference><Citation>Baradaran-Heravi,
+        Y., Dillen, L., Nguyen, H. P., Van Mossevelde, S., Baets, J., De Jonghe, P.,
+        Engelborghs, S., De Deyn, P. P., Vandenbulcke, M., Vandenberghe, R., Van Damme,
+        P., Cras, P., Salmon, E., Synofzik, M., Heutink, P., Wilke, C., Simon-Sanchez,J.,
+        Rojas-Garcia, R., Turon-Sans, J., Lle&#xf3;, A., &#x2026; EU EOD Consortium
+        (2018). No supportive evidence for TIA1 gene mutations in a European cohort
+        of ALS-FTD spectrum patients.Neurobiology of aging, 69, 293.e9&#x2013;293.e11.
+        https://doi.org/10.1016/j.neurobiolaging.2018.05.005.</Citation></Reference><Reference><Citation>Hirsch-Reinshagen
+        V, Pottier C, Nicholson AM, Baker M, Hsiung GR, Krieger C, Sengdy P, Boylan
+        KB, Dickson DW, Mesulam M, Weintraub S, Bigio E, Zinman L, Keith J, Rogaeva
+        E, Zivkovic SA, Lacomis D, Taylor JP, Rademakers R, Mackenzie IRA (2017) Clinical
+        and neuropathological features of ALS/FTD with TIA1 mutations. Acta Neuropathol
+        Commun 5(1):96. https://doi.org/10.1186/s40478-017-0493-x</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1186/s40478-017-0493-x</ArticleId><ArticleId IdType="pubmed">29216908</ArticleId><ArticleId
+        IdType="pmc">5719900</ArticleId></ArticleIdList></Reference><Reference><Citation>Duis
+        J, Dean S, Applegate C, Harper A, Xiao R, He W, Dollar JD, Sun LR, Waberski
+        MB, Crawford TO, Hamosh A, Stafstrom CE (2016) KIF5A mutations cause an infantile
+        onset phenotype including severe myoclonus with evidence of mitochondrial
+        dysfunction. Ann Neurol 80(4):633&#x2013;637. https://doi.org/10.1002/ana.24744</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/ana.24744</ArticleId><ArticleId IdType="pubmed">27463701</ArticleId><ArticleId
+        IdType="pmc">5042851</ArticleId></ArticleIdList></Reference><Reference><Citation>Cuchanski
+        M, Baldwin KJ (2018) Mutation in KIF5A c.610C&#x2009;&gt;&#x2009;T causing
+        hereditary spastic paraplegia with axonal sensorimotor neuropathy. Case Rep
+        Neurol 10(2):165&#x2013;168. https://doi.org/10.1159/000490456</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1159/000490456</ArticleId><ArticleId IdType="pubmed">30057544</ArticleId><ArticleId
+        IdType="pmc">6062669</ArticleId></ArticleIdList></Reference><Reference><Citation>Filosto
+        M, Piccinelli SC, Palmieri I, Necchini N, Valente M, Zanella I, Biasiotto
+        G, Lorenzo DD, Cereda C, Padovani A (2018) A novel mutation in the stalk domain
+        of KIF5A causes a slowly progressive atypical motor syndrome. J Clin Med 8(1):17.
+        https://doi.org/10.3390/jcm8010017</Citation><ArticleIdList><ArticleId IdType="doi">10.3390/jcm8010017</ArticleId><ArticleId
+        IdType="pubmed">30583522</ArticleId><ArticleId IdType="pmc">6352268</ArticleId></ArticleIdList></Reference><Reference><Citation>Pottinger
+        TD, Motelow JE, Povysil G, Moreno CAM, Ren Z, Phatnani H, New York Genome
+        Center ALS Sequencing Consortium, Aitman TJ, Santoyo-Lopez J, Partnership
+        SG, Mitsumoto H, ALS COSMOS Study Group, PLS COSMOS Study Group, Investigators
+        GTAC, Goldstein DB, Harms MB (2023) Rare variant analyses validate known ALS
+        genes in a multi-ethnic population and identifies ANTXR2 as a candidate in
+        PLS. medRxiv: the preprint server for health sciences, 2023.09.30.23296353.
+        https://doi.org/10.1101/2023.09.30.23296353</Citation></Reference><Reference><Citation>Grad
+        LI, Rouleau GA, Ravits J, Cashman NR (2017) Clinical spectrum of amyotrophic
+        lateral sclerosis (ALS). Cold Spring Harb Perspect Med 7(8):a024117. https://doi.org/10.1101/cshperspect.a024117</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1101/cshperspect.a024117</ArticleId><ArticleId IdType="pubmed">28003278</ArticleId><ArticleId
+        IdType="pmc">5538408</ArticleId></ArticleIdList></Reference><Reference><Citation>Cooper-Knock,
+        J., Moll, T., Ramesh, T., Castelli, L., Beer, A., Robins, H., Fox, I.,Niedermoser,
+        I., Van Damme, P., Moisse, M., Robberecht, W., Hardiman, O., Panades,M. P.,
+        Assialioui, A., Mora, J. S., Basak, A. N., Morrison, K. E., Shaw, C. E., Al-Chalabi,A.,
+        Landers, J. E., &#x2026; Shaw, P. J. (2019). Mutations in the Glycosyltransferase
+        Domain of GLT8D1 Are Associated with Familial Amyotrophic Lateral Sclerosis.
+        Cell reports,26(9), 2298&#x2013;2306.e5. https://doi.org/10.1016/j.celrep.2019.02.006.</Citation></Reference><Reference><Citation>Tsai
+        PC, Jih KY, Shen TY, Liu YH, Lin KP, Liao YC, Lee YC (2021) Genetic and functional
+        analysis of glycosyltransferase 8 domain-containing protein 1 in Taiwanese
+        patients with amyotrophic lateral sclerosis. Neurol Genet 7(6):e627. https://doi.org/10.1212/NXG.0000000000000627</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1212/NXG.0000000000000627</ArticleId><ArticleId IdType="pubmed">34746377</ArticleId><ArticleId
+        IdType="pmc">8569617</ArticleId></ArticleIdList></Reference><Reference><Citation>Li
+        W, Liu Z, Sun W, Yuan Y, Hu Y, Ni J, Jiao B, Fang L, Li J, Shen L, Tang B,
+        Wang J (2020) Mutation analysis of GLT8D1 and ARPP21 genes in amyotrophic
+        lateral sclerosis patients from Mainland China. Neurobiol Aging 85:156e1-156e4.
+        https://doi.org/10.1016/j.neurobiolaging.2019.09.013</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2019.09.013</ArticleId></ArticleIdList></Reference><Reference><Citation>Dols-Icardo
+        O, Carbayo &#xc1;, Jeric&#xf3; I, Blasco-Mart&#xed;nez O, &#xc1;lvarez-S&#xe1;nchez
+        E, L&#xf3;pez P&#xe9;rez MA, Bernal S, Rodr&#xed;guez-Santiago B, Cusco I,
+        Turon-Sans J, Cabezas-Torres M, Caballero-&#xc1;vila M, Vesperinas A, Llans&#xf3;
+        L, Pagola-Lorz I, Torn&#xe9; L, Valle-Tamayo N, Mu&#xf1;oz L, Rubio-Guerra
+        S, Ill&#xe1;n-Gala I, Rojas-Garc&#xed;a R (2024) Identification of a pathogenic
+        mutation in ARPP21 in patients with amyotrophic lateral sclerosis. J Neurol
+        Neurosurg Psychiatry. https://doi.org/10.1136/jnnp-2024-333834</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1136/jnnp-2024-333834</ArticleId></ArticleIdList></Reference><Reference><Citation>Chan
+        M, Fat S, McCann EP, Williams KL, Henden L, Twine NA, Bauer DC, Pamphlett
+        R, Kiernan MC, Rowe DB, Nicholson GA, Fifita JA, Blair IP (2021) Genetic analysis
+        of GLT8D1 and ARPP21 in Australian Familial and sporadic amyotrophic lateral
+        sclerosis. Neurobiol Aging 101:297e9&#x2013;297e11. https://doi.org/10.1016/j.neurobiolaging.2021.01.005</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2021.01.005</ArticleId></ArticleIdList></Reference><Reference><Citation>Nagy
+        ZF, Sonkodi B, P&#xe1;l M, Kliv&#xe9;nyi P, Sz&#xe9;ll M (2023) Likely pathogenic
+        variants of Cav1.3 and Nav1.1 encoding genes in amyotrophic lateral sclerosis
+        could elucidate the dysregulated pain pathways. Biomedicines 11(3):933. https://doi.org/10.3390/biomedicines11030933</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/biomedicines11030933</ArticleId><ArticleId IdType="pubmed">36979911</ArticleId><ArticleId
+        IdType="pmc">10046311</ArticleId></ArticleIdList></Reference><Reference><Citation>Hannan
+        AJ (2018) Tandem repeats mediating genetic plasticity in health and disease.
+        Nat Rev Genet 19(5):286&#x2013;298. https://doi.org/10.1038/nrg.2017.115</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/nrg.2017.115</ArticleId><ArticleId IdType="pubmed">29398703</ArticleId></ArticleIdList></Reference><Reference><Citation>Lone
+        MA, Aaltonen MJ, Zidell A, Pedro HF, Morales Saute JA, Mathew S, Mohassel
+        P, B&#xf6;nnemann CG, Shoubridge EA, Hornemann T (2022) Sptlc1 variants associated
+        with ALS produce distinct sphingolipid signatures through impaired interaction
+        with ORMDL proteins. J Clin Invest 132(18):e161908. https://doi.org/10.1172/JCI161908</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1172/JCI161908</ArticleId><ArticleId IdType="pubmed">35900868</ArticleId><ArticleId
+        IdType="pmc">9479574</ArticleId></ArticleIdList></Reference><Reference><Citation>Johnson,
+        J. O., Chia, R., Miller, D. E., Li, R., Kumaran, R., Abramzon, Y., Alahmady,N.,
+        Renton, A. E., Topp, S. D., Gibbs, J. R., Cookson, M. R., Sabir, M. S., Dalgard,C.
+        L., Troakes, C., Jones, A. R., Shatunov, A., Iacoangeli, A., Al Khleifat,
+        A., Ticozzi,N., Silani, V., &#x2026; Zucchi, E. (2021). Association of Variants
+        in the SPTLC1 Gene With Juvenile Amyotrophic Lateral Sclerosis. JAMA Neurol
+        78(10):1236&#x2013;1248. https://doi.org/10.1001/jamaneurol.2021.2598</Citation></Reference><Reference><Citation>Lone
+        MA, Zeng S, Bourquin F, Wang M, Huang S, Lin Z, Tang B, Zhang R, Hornemann
+        T (2023) Sptlc1 p.Leu38Arg, a novel mutation associated with childhood ALS.
+        Biochimica et biophysica acta. Mol Cell Biology Lipids 1868(9):159359. https://doi.org/10.1016/j.bbalip.2023.159359</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.bbalip.2023.159359</ArticleId></ArticleIdList></Reference><Reference><Citation>Abati
+        E, Bresolin N, Comi G, Corti S (2020) Silence superoxide dismutase 1 (SOD1):
+        a promising therapeutic target for amyotrophic lateral sclerosis (ALS). Expert
+        Opin Ther Targets 24(4):295&#x2013;310. https://doi.org/10.1080/14728222.2020.1738390</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1080/14728222.2020.1738390</ArticleId><ArticleId IdType="pubmed">32125907</ArticleId></ArticleIdList></Reference><Reference><Citation>Brown
+        CA, Lally C, Kupelian V, Flanders WD (2021) Estimated prevalence and incidence
+        of amyotrophic lateral sclerosis and SOD1 and C9orf72 genetic variants. Neuroepidemiology
+        55(5):342&#x2013;353. https://doi.org/10.1159/000516752</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1159/000516752</ArticleId><ArticleId IdType="pubmed">34247168</ArticleId></ArticleIdList></Reference><Reference><Citation>Ma
+        L, Shi Y, Chen Z, Li S, Zhang J (2018) A novel SETX gene mutation associated
+        with juvenile amyotrophic lateral sclerosis. Brain Behav 8(9):e01066. https://doi.org/10.1002/brb3.1066</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/brb3.1066</ArticleId><ArticleId IdType="pubmed">30052327</ArticleId><ArticleId
+        IdType="pmc">6160657</ArticleId></ArticleIdList></Reference><Reference><Citation>Dilliott
+        AA, Andary CM, Stoltz M, Petropavlovskiy AA, Farhan SMK, Duennwald ML (2022)
+        DnaJC7 in amyotrophic lateral sclerosis. Int J Mol Sci 23(8):4076. https://doi.org/10.3390/ijms23084076</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/ijms23084076</ArticleId><ArticleId IdType="pubmed">35456894</ArticleId><ArticleId
+        IdType="pmc">9025444</ArticleId></ArticleIdList></Reference><Reference><Citation>Yilihamu
+        M, He J, Liu X, Tian J, Fan D (2021) GLT8D1 may not be significant in Chinese
+        sporadic amyotrophic lateral sclerosis patients. Neurobiol Aging 102:224e1-224e3.
+        https://doi.org/10.1016/j.neurobiolaging.2021.01.028</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2021.01.028</ArticleId></ArticleIdList></Reference><Reference><Citation>Suk
+        TR, Rousseaux MWC (2020) The role of TDP-43 mislocalization in amyotrophic
+        lateral sclerosis. Mol Neurodegener 15(1):45. https://doi.org/10.1186/s13024-020-00397-1</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1186/s13024-020-00397-1</ArticleId><ArticleId IdType="pubmed">32799899</ArticleId><ArticleId
+        IdType="pmc">7429473</ArticleId></ArticleIdList></Reference><Reference><Citation>Xiao
+        X, Li M, Ye Z, He X, Wei J, Zha Y (2024) FUS gene mutation in amyotrophic
+        lateral sclerosis: a new case report and systematic review. Amyotroph Lateral
+        Scler Frontotemporal Degener 25(1&#x2013;2):1&#x2013;15. https://doi.org/10.1080/21678421.2023.2272170</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1080/21678421.2023.2272170</ArticleId><ArticleId IdType="pubmed">37926865</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhang
+        Y, Li Y, Bin S, Cheng X, Niu Q (2024) A neglected gene: the role of the ANG
+        gene in the pathogenesis of amyotrophic lateral sclerosis. Aging Disease.
+        https://doi.org/10.14336/AD.2024.0107 . 10.14336/AD.2024.0107. Advance online
+        publication</Citation><ArticleIdList><ArticleId IdType="doi">10.14336/AD.2024.0107</ArticleId><ArticleId
+        IdType="pubmed">39812543</ArticleId><ArticleId IdType="pmc">12539497</ArticleId></ArticleIdList></Reference><Reference><Citation>Mou
+        Y, Li M, Liu M, Wang J, Zhu G, Zha Y (2022) OPTN variants in ALS cases: a
+        case report of a novel mutation and literature review. Neurol Sciences: Official
+        J Italian Neurol Soc Italian Soc Clin Neurophysiol 43(9):5391&#x2013;5396.
+        https://doi.org/10.1007/s10072-022-06125-5</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s10072-022-06125-5</ArticleId></ArticleIdList></Reference><Reference><Citation>Liu
+        X, He J, Chen L, Zhang N, Tang L, Liu X, Ma Y, Fan D (2021) TBK1 variants
+        in Chinese patients with amyotrophic lateral sclerosis. Neurobiol Aging 97:149e9-149e15.
+        https://doi.org/10.1016/j.neurobiolaging.2020.07.028</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2020.07.028</ArticleId></ArticleIdList></Reference><Reference><Citation>Scarian
+        E, Fiamingo G, Diamanti L, Palmieri I, Gagliardi S, Pansarasa O (2022) The
+        role of VCP mutations in the spectrum of amyotrophic lateral sclerosis-frontotemporal
+        dementia. Front Neurol 13:841394. https://doi.org/10.3389/fneur.2022.841394</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fneur.2022.841394</ArticleId><ArticleId IdType="pubmed">35273561</ArticleId><ArticleId
+        IdType="pmc">8902152</ArticleId></ArticleIdList></Reference><Reference><Citation>Renaud
+        L, Picher-Martel V, Codron P, Julien JP (2019) Key role of UBQLN2 in pathogenesis
+        of amyotrophic lateral sclerosis and frontotemporal dementia. Acta Neuropathol
+        Commun 7(1):103. https://doi.org/10.1186/s40478-019-0758-7</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1186/s40478-019-0758-7</ArticleId><ArticleId IdType="pubmed">31319884</ArticleId><ArticleId
+        IdType="pmc">6889556</ArticleId></ArticleIdList></Reference><Reference><Citation>Rubino
+        E, Rainero I, Chi&#xf2; A, Rogaeva E, Galimberti D, Fenoglio P, Grinberg Y,
+        Isaia G, Calvo A, Gentile S, Bruni AC, George-Hyslop S, Scarpini PH, Gallone
+        E, Pinessi S, TODEM Study Group (2012) SQSTM1 mutations in frontotemporal
+        Lobar degeneration and amyotrophic lateral sclerosis. Neurology 79(15):1556&#x2013;1562.
+        https://doi.org/10.1212/WNL.0b013e31826e25df</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1212/WNL.0b013e31826e25df</ArticleId><ArticleId IdType="pubmed">22972638</ArticleId><ArticleId
+        IdType="pmc">3655323</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhang
+        K, Liu Q, Shen D, Tai H, Liu S, Wang Z, Shi J, Fu H, Wu S, Ding Q, Hu Y, Wu
+        Y, Li X, Guan Y, Liu M, Cui L, Zhang X (2019) Mutation analysis of KIF5A in
+        Chinese amyotrophic lateral sclerosis patients. Neurobiol Aging 73:229e1-229e4.
+        https://doi.org/10.1016/j.neurobiolaging.2018.08.006</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2018.08.006</ArticleId></ArticleIdList></Reference><Reference><Citation>Wang
+        P, Wei Q, Li H, Wu ZY (2023) Clinical feature difference between juvenile
+        amyotrophic lateral sclerosis with SPTLC1 and FUS mutations. Chin Med J 136(2):176&#x2013;183.
+        https://doi.org/10.1097/CM9.0000000000002495</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1097/CM9.0000000000002495</ArticleId><ArticleId IdType="pubmed">36801857</ArticleId><ArticleId
+        IdType="pmc">10106144</ArticleId></ArticleIdList></Reference><Reference><Citation>Keith
+        JL, Swinkin E, Gao A, Alminawi S, Zhang M, McGoldrick P, McKeever P, Robertson
+        J, Rogaeva E, Zinman L (2020) Neuropathologic description of CHCHD10 mutated
+        amyotrophic lateral sclerosis. Neurol Genet 6(1):e394. https://doi.org/10.1212/NXG.0000000000000394</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1212/NXG.0000000000000394</ArticleId><ArticleId IdType="pubmed">32042922</ArticleId><ArticleId
+        IdType="pmc">6975173</ArticleId></ArticleIdList></Reference><Reference><Citation>Yao
+        L, He X, Cui B, Zhao F, Zhou C (2021) NEK1 mutations and the risk of amyotrophic
+        lateral sclerosis (ALS): a meta-analysis. Neurol Sciences: Official J Italian
+        Neurol Soc Italian Soc Clin Neurophysiol 42(4):1277&#x2013;1285. https://doi.org/10.1007/s10072-020-05037-6</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s10072-020-05037-6</ArticleId></ArticleIdList></Reference><Reference><Citation>Daneshmandpour
+        Y, Bahmanpour Z, Kazeminasab S, Aghaei Moghadam E, Alehabib E, Chapi M, Tafakhori
+        A, Aghaei N, Darvish H, Emamalizadeh B (2023) A novel mutation in the ALS2
+        gene in an Iranian Kurdish family with juvenile amyotrophic lateral sclerosis.
+        Amyotroph Lateral Scler Frontotemporal Degener 24(1&#x2013;2):148&#x2013;151.
+        https://doi.org/10.1080/21678421.2022.2100263</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1080/21678421.2022.2100263</ArticleId><ArticleId IdType="pubmed">35852402</ArticleId></ArticleIdList></Reference><Reference><Citation>Gu
+        X, Chen Y, Wei Q, Cao B, Ou R, Yuan X, Hou Y, Zhang L, Liu H, Chen X, Shang
+        HF (2018) Mutation screening of the TIA1 gene in Chinese patients with amyotrophic
+        lateral sclerosis/frontotemporal dementia. Neurobiol Aging 68:161e1-161e3.
+        https://doi.org/10.1016/j.neurobiolaging.2018.04.010</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2018.04.010</ArticleId></ArticleIdList></Reference><Reference><Citation>Kim
+        G, Gautier O, Tassoni-Tsuchida E, Ma XR, Gitler AD (2020) ALS genetics: gains,
+        losses, and implications for future therapies. Neuron 108(5):822&#x2013;842.
+        https://doi.org/10.1016/j.neuron.2020.08.022</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neuron.2020.08.022</ArticleId><ArticleId IdType="pubmed">32931756</ArticleId><ArticleId
+        IdType="pmc">7736125</ArticleId></ArticleIdList></Reference><Reference><Citation>Pino
+        MG, Rich KA, Hall NJ, Jones ML, Fox A, Musier-Forsyth K, Kolb SJ (2023) Heterogeneous
+        splicing patterns resulting from KIF5A variants associated with amyotrophic
+        lateral sclerosis. Hum Mol Genet 32(22):3166&#x2013;3180. https://doi.org/10.1093/hmg/ddad134</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1093/hmg/ddad134</ArticleId><ArticleId IdType="pubmed">37593923</ArticleId></ArticleIdList></Reference><Reference><Citation>Corcia
+        P, Lejeune P, Vourc&#x2019;h P, Beltran S, Piegay AS, Blasco H, Meininger
+        V (2023) Comparison between PFN1 and SOD1 mutations in amyotrophic lateral
+        sclerosis. Eur J Neurol 30(2):552&#x2013;554. https://doi.org/10.1111/ene.15583</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1111/ene.15583</ArticleId><ArticleId IdType="pubmed">36176198</ArticleId></ArticleIdList></Reference><Reference><Citation>Pensato
+        V, Tiloca C, Corrado L, Bertolin C, Sardone V, Del Bo R, Calini D, Mandrioli
+        J, Lauria G, Mazzini L, Querin G, Ceroni M, Cantello R, Corti S, Castellotti
+        B, Sold&#xe0; G, Duga S, Comi GP, Cereda C, Sorar&#xf9; G, D&#x2019;Alfonso
+        Sandra, Taroni Franco, Shaw Christopher E., Landers John E., Ticozzi Nicola,
+        Ratti Antonia, Gellera Cinzia, Silani Vincenzo, SLAGEN Consortium (2015) TUBA4A
+        gene analysis in sporadic amyotrophic lateral sclerosis: identification of
+        novel mutations. J Neurol 262(5):1376&#x2013;1378. https://doi.org/10.1007/s00415-015-7739-y</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s00415-015-7739-y</ArticleId><ArticleId IdType="pubmed">25893256</ArticleId><ArticleId
+        IdType="pmc">6614739</ArticleId></ArticleIdList></Reference><Reference><Citation>Leblond
+        CS, Gan-Or Z, Spiegelman D, Laurent SB, Szuto A, Hodgkinson A, Dionne-Laporte
+        A, Provencher P, de Carvalho M, Orr&#xf9; S, Brunet D, Bouchard JP, Awadalla
+        P, Dupr&#xe9; N, Dion PA, Rouleau GA (2016) Replication study of MATR3 in
+        familial and sporadic amyotrophic lateral sclerosis. Neurobiol Aging 37:209e17-209e21.
+        https://doi.org/10.1016/j.neurobiolaging.2015.09.013</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2015.09.013</ArticleId></ArticleIdList></Reference><Reference><Citation>Tsai
+        PC, Liao YC, Chen PL, Guo YC, Chen YH, Jih KY, Lin KP, Soong BW, Tsai CP,
+        Lee YC (2018) Investigating CCNF mutations in a Taiwanese cohort with amyotrophic
+        lateral sclerosis. Neurobiol Aging 62:243e1-243e6. https://doi.org/10.1016/j.neurobiolaging.2017.09.031</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2017.09.031</ArticleId></ArticleIdList></Reference><Reference><Citation>Glass
+        JD, Dewan R, Ding J, Gibbs JR, Dalgard C, Keagle PJ, Shankaracharya, Garc&#xed;a-Redondo
+        A, Traynor BJ, Chia R, Landers JE (2022) ATXN2 intermediate expansions in
+        amyotrophic lateral sclerosis. Brain 145(8):2671&#x2013;2676. https://doi.org/10.1093/brain/awac167</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1093/brain/awac167</ArticleId><ArticleId IdType="pubmed">35521889</ArticleId><ArticleId
+        IdType="pmc">9890463</ArticleId></ArticleIdList></Reference><Reference><Citation>Corrado
+        L, Carlomagno Y, Falasco L, Mellone S, Godi M, Cova E, Cereda C, Testa L,
+        Mazzini L, Alfonso D, S (2011) A novel peripherin gene (PRPH) mutation identified
+        in one sporadic amyotrophic lateral sclerosis patient. Neurobiol Aging 32(3):552e1&#x2013;552e5526.
+        https://doi.org/10.1016/j.neurobiolaging.2010.02.011</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.neurobiolaging.2010.02.011</ArticleId></ArticleIdList></Reference><Reference><Citation>Watanabe
+        Y, Nakagawa T, Akiyama T, Nakagawa M, Suzuki N, Warita H, Aoki M, Nakayama
+        K (2020) An amyotrophic lateral Sclerosis-Associated mutant of C21ORF2 is
+        stabilized by NEK1-Mediated hyperphosphorylation and the inability to bind
+        FBXO3. iScience 23(9):101491. https://doi.org/10.1016/j.isci.2020.101491</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.isci.2020.101491</ArticleId><ArticleId IdType="pubmed">32891887</ArticleId><ArticleId
+        IdType="pmc">7481237</ArticleId></ArticleIdList></Reference><Reference><Citation>Fukunaga
+        K, Shinoda Y, Tagashira H (2015) The role of SIGMAR1 gene mutation and mitochondrial
+        dysfunction in amyotrophic lateral sclerosis. J Pharmacol Sci 127(1):36&#x2013;41.
+        https://doi.org/10.1016/j.jphs.2014.12.012</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.jphs.2014.12.012</ArticleId><ArticleId IdType="pubmed">25704016</ArticleId></ArticleIdList></Reference><Reference><Citation>Zhang
+        N, Chen KL, Huang YY, Chen SF, Dong Q, Tan L, Yu JT (2023) A new ERBB4 variant
+        in amyotrophic lateral sclerosis type 19: case report and review of the literature.
+        Clin Neurol Neurosurg 227:107636. https://doi.org/10.1016/j.clineuro.2023.107636</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.clineuro.2023.107636</ArticleId><ArticleId IdType="pubmed">36857887</ArticleId></ArticleIdList></Reference><Reference><Citation>Farhan
+        SMK, Gendron TF, Petrucelli L, Hegele RA, Strong MJ (2017) ARHGEF28 p.Lys280Metfs40Ter
+        in an amyotrophic lateral sclerosis family with a C9orf72 expansion. Neurol
+        Genet 3(5):e190. https://doi.org/10.1212/NXG.0000000000000190</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1212/NXG.0000000000000190</ArticleId><ArticleId IdType="pubmed">28971145</ArticleId><ArticleId
+        IdType="pmc">5616022</ArticleId></ArticleIdList></Reference><Reference><Citation>Crews
+        KR, Hicks JK, Pui CH, Relling MV, Evans WE (2012) Pharmacogenomics and individualized
+        medicine: translating science into practice. Clin Pharmacol Ther 92(4):467&#x2013;475.
+        https://doi.org/10.1038/clpt.2012.120</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/clpt.2012.120</ArticleId><ArticleId IdType="pubmed">22948889</ArticleId><ArticleId
+        IdType="pmc">3589526</ArticleId></ArticleIdList></Reference><Reference><Citation>Ahmed
+        S, Zhou Z, Zhou J, Chen SQ (2016) Pharmacogenomics of drug metabolizing enzymes
+        and transporters: relevance to precision medicine. Genomics Proteomics Bioinf
+        14(5):298&#x2013;313. https://doi.org/10.1016/j.gpb.2016.03.008</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.gpb.2016.03.008</ArticleId></ArticleIdList></Reference><Reference><Citation>Yang
+        L (2020) A practical guide for structural variation detection in the human
+        genome. Curr Protoc Hum Genet 107(1):e103. https://doi.org/10.1002/cphg.103</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/cphg.103</ArticleId><ArticleId IdType="pubmed">32813322</ArticleId><ArticleId
+        IdType="pmc">7738216</ArticleId></ArticleIdList></Reference><Reference><Citation>Goh
+        LL, Lim CW, Sim WC, Toh LX, Leong KP (2017) Analysis of genetic variation
+        in CYP450 genes for clinical implementation. PLoS ONE 12(1):e0169233. https://doi.org/10.1371/journal.pone.0169233</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1371/journal.pone.0169233</ArticleId><ArticleId IdType="pubmed">28046094</ArticleId><ArticleId
+        IdType="pmc">5207784</ArticleId></ArticleIdList></Reference><Reference><Citation>Neyshaburinezhad
+        N, Ghasim H, Rouini M, Daali Y, Ardakani YH (2021) Frequency of important
+        CYP450 enzyme gene polymorphisms in the Iranian population in comparison with
+        other major populations: a comprehensive review of the human data. J Pers
+        Med 11(8):804. https://doi.org/10.3390/jpm11080804</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/jpm11080804</ArticleId><ArticleId IdType="pubmed">34442448</ArticleId><ArticleId
+        IdType="pmc">8401584</ArticleId></ArticleIdList></Reference><Reference><Citation>Howarth
+        I., Szott D., Witham L., Wilding S., Bethell J. (2023) Genetic polymorphisms
+        in the serotonin, dopamine and opioid pathways influence social attention
+        in rhesus macaques (Macaca mulatta). PLoS ONE 18(8):e0288108. https://doi.org/10.1371/journal.pone.0288108</Citation></Reference><Reference><Citation>Takekita
+        Y, Fabbri C, Kato M, Koshikawa Y, Tajika A, Kinoshita T, Serretti A (2016)
+        HTR1A polymorphisms and clinical efficacy of antipsychotic drug treatment
+        in schizophrenia: a meta-analysis. Int J Neuropsychopharmacol 19(5):pyv125.
+        https://doi.org/10.1093/ijnp/pyv125</Citation><ArticleIdList><ArticleId IdType="doi">10.1093/ijnp/pyv125</ArticleId><ArticleId
+        IdType="pubmed">26568455</ArticleId><ArticleId IdType="pmc">4886666</ArticleId></ArticleIdList></Reference><Reference><Citation>Waring
+        JF, Tang Q, Robieson WZ, King DP, Das U, Dubow J, Dutta S, Marek GJ, Gault
+        LM (2015) APOE-&#x25b;4 carrier status and donepezil response in patients
+        with Alzheimer&#x2019;s disease. J Alzheimers Dis 47(1):137&#x2013;148. https://doi.org/10.3233/JAD-142589</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3233/JAD-142589</ArticleId><ArticleId IdType="pubmed">26402762</ArticleId><ArticleId
+        IdType="pmc">4923746</ArticleId></ArticleIdList></Reference><Reference><Citation>Xiao
+        T, Jiao B, Zhang W, Tang B, Shen L (2016) Effect of the CYP2D6 and APOE polymorphisms
+        on the efficacy of donepezil in patients with Alzheimer&#x2019;s disease:
+        a systematic review and meta-analysis. CNS Drugs 30(10):899&#x2013;907. https://doi.org/10.1007/s40263-016-0356-1</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s40263-016-0356-1</ArticleId><ArticleId IdType="pubmed">27282366</ArticleId></ArticleIdList></Reference><Reference><Citation>Holail
+        J, Mobarak R, Al-Ghamdi B, Aljada A, Fakhoury H (2022) Association of VKORC1
+        and CYP2C9 single-nucleotide polymorphisms with warfarin dose adjustment in
+        Saudi patients. Drug Metab Pers Ther 37(4):353&#x2013;359. https://doi.org/10.1515/dmpt-2022-0108</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1515/dmpt-2022-0108</ArticleId><ArticleId IdType="pubmed">36476275</ArticleId></ArticleIdList></Reference><Reference><Citation>Yamamoto
+        J, Omura T, Kasamo S, Yamamoto S, Kawata M, Yonezawa A, Taruno Y, Endo H,
+        Aizawa H, Sawamoto N, Matsubara K, Takahashi R, Tasaki Y (2021) Impact of
+        the catechol-O-methyltransferase Val158Met polymorphism on the pharmacokinetics
+        of L-dopa and its metabolite 3-O-methyldopa in combination with entacapone.
+        Journal of neural transmission (Vienna, Austria: 1996) 128(1):27&#x2013;36.
+        https://doi.org/10.1007/s00702-020-02267-y</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1007/s00702-020-02267-y</ArticleId><ArticleId IdType="pubmed">33136226</ArticleId></ArticleIdList></Reference><Reference><Citation>Borrego-&#xc9;cija
+        S, Morgado J, Palencia-Madrid L, Grau-Rivera O, Re&#xf1;&#xe9; R, Hern&#xe1;ndez
+        I, Almenar C, Balasa M, Antonell A, Molinuevo JL, Llad&#xf3; A, de Mart&#xed;nez
+        M, Gelpi E, S&#xe1;nchez-Valle R (2017) Frontotemporal dementia caused by
+        the P301L mutation in the MAPT gene: clinicopathological features of 13 cases
+        from the same geographical origin in Barcelona, Spain. dementia and geriatric
+        cognitive disorders. 44(3&#x2013;4):213&#x2013;221. https://doi.org/10.1159/000480077</Citation></Reference><Reference><Citation>Molnar
+        J, Ocsovszki I, Pusztai R (2018) Amyloid-beta interactions with ABC transporters
+        and resistance modifiers. Anticancer Res 38(6):3407&#x2013;3410. https://doi.org/10.21873/anticanres.12608</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.21873/anticanres.12608</ArticleId><ArticleId IdType="pubmed">29848690</ArticleId></ArticleIdList></Reference><Reference><Citation>Mir
+        A, Qahtani M, Bashir S (2020) GRIN2A -related severe epileptic encephalopathy
+        treated with memantine: an example of precision medicine. J Pediatr Genet
+        9(4):252&#x2013;257. https://doi.org/10.1055/s-0039-3401028</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1055/s-0039-3401028</ArticleId><ArticleId IdType="pubmed">32765929</ArticleId></ArticleIdList></Reference><Reference><Citation>Guest
+        N, Corey P, Vescovi J, El-Sohemy A (2018) Caffeine, CYP1A2 genotype, and endurance
+        performance in athletes. Med Sci Sports Exerc 50(8):1570&#x2013;1578. https://doi.org/10.1249/MSS.0000000000001596</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1249/MSS.0000000000001596</ArticleId><ArticleId IdType="pubmed">29509641</ArticleId></ArticleIdList></Reference><Reference><Citation>Bousman
+        CA, Stevenson JM, Ramsey LB, Sangkuhl K, Hicks JK, Strawn JR, Singh AB, Rua&#xf1;o
+        G, Mueller DJ, Tsermpini EE, Brown JT, Bell GC, Leeder JS, Gaedigk A, Scott
+        SA, Klein TE, Caudle KE, Bishop JR (2023) Clinical pharmacogenetics implementation
+        consortium (CPIC) guideline for CYP2D6, CYP2C19, CYP2B6, SLC6A4, and HTR2A
+        genotypes and serotonin reuptake inhibitor antidepressants. Clin Pharmacol
+        Ther 114(1):51&#x2013;68. https://doi.org/10.1002/cpt.2903</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/cpt.2903</ArticleId><ArticleId IdType="pubmed">37032427</ArticleId><ArticleId
+        IdType="pmc">10564324</ArticleId></ArticleIdList></Reference><Reference><Citation>Medeiros
+        R, Figueiredo CP, Pandolfo P, Duarte FS, Prediger RD, Passos GF, Calixto JB
+        (2010) The role of TNF-alpha signaling pathway on COX-2 upregulation and cognitive
+        decline induced by beta-amyloid peptide. Behav Brain Res 209(1):165&#x2013;173.
+        https://doi.org/10.1016/j.bbr.2010.01.040</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.bbr.2010.01.040</ArticleId><ArticleId IdType="pubmed">20122965</ArticleId></ArticleIdList></Reference><Reference><Citation>Tang
+        Y, Zhou X, Cao J, Li Z, Yin W, Wan K, Huang C, Zhu W, Yin J, Zhang W, Zhu
+        X, Sun Z (2024) Synergistic effect of folate and MTHFR C677T on hippocampal
+        subfields and perfusion in Alzheimer&#x2019;s disease. Prog Neuro-Psychopharmacol
+        Biol Psychiatry 134:111071. https://doi.org/10.1016/j.pnpbp.2024.111071</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.pnpbp.2024.111071</ArticleId></ArticleIdList></Reference><Reference><Citation>Kular
+        L, Liu Y, Ruhrmann S, Zheleznyakova G, Marabita F, Gomez-Cabrero D, James
+        T, Ewing E, Lind&#xe9;n M, G&#xf3;rnikiewicz B, Aeinehband S, Stridh P, Link
+        J, Andlauer TFM, Gasperi C, Wiendl H, Zipp F, Gold R, Tackenberg B, Weber
+        F, Jagodic M (2018) DNA methylation as a mediator of HLA-DRB1*15:01 and a
+        protective variant in multiple sclerosis. Nat Commun 9(1):2397. https://doi.org/10.1038/s41467-018-04732-5</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41467-018-04732-5</ArticleId><ArticleId IdType="pubmed">29921915</ArticleId><ArticleId
+        IdType="pmc">6008330</ArticleId></ArticleIdList></Reference><Reference><Citation>Hu
+        B, Duan S, Wang Z, Li X, Zhou Y, Zhang X, Zhang YW, Xu H, Zheng H (2021) Insights
+        into the role of CSF1R in the central nervous system and neurological disorders.
+        Front Aging Neurosci 13:789834. https://doi.org/10.3389/fnagi.2021.789834</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fnagi.2021.789834</ArticleId><ArticleId IdType="pubmed">34867307</ArticleId><ArticleId
+        IdType="pmc">8634759</ArticleId></ArticleIdList></Reference><Reference><Citation>Drozda
+        K, M&#xfc;ller DJ, Bishop JR (2014) Pharmacogenomic testing for neuropsychiatric
+        drugs: current status of drug labeling, guidelines for using genetic information,
+        and test options. Pharmacotherapy 34(2):166&#x2013;184. https://doi.org/10.1002/phar.1398</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/phar.1398</ArticleId><ArticleId IdType="pubmed">24523097</ArticleId><ArticleId
+        IdType="pmc">3939793</ArticleId></ArticleIdList></Reference><Reference><Citation>Vuic
+        B, Milos T, Tudor L, Nikolac Perkovic M, Konjevod M, Nedic Erjavec G, Farkas
+        V, Uzun S, Mimica N, Strac S (2023) D. Pharmacogenomics of Dementia: Personalizing
+        the Treatment of Cognitive and Neuropsychiatric Symptoms. In Genes (Vol. 14,
+        Issue 11). Multidisciplinary Digital Publishing Institute (MDPI). https://doi.org/10.3390/genes14112048</Citation></Reference><Reference><Citation>Roden
+        DM, Altman RB, Benowitz NL, Flockhart DA, Giacomini KM, Johnson JA, Krauss
+        RM, McLeod HL, Ratain MJ, Relling MV, Ring HZ, Shuldiner AR, Weinshilboum
+        RM, Weiss ST (n.d.). Pharmacogenomics: Challenges and Opportunities HHS Public
+        Access. In National Institutes of Health);J. Ratain. Pfizer Inc. www.annals.org</Citation></Reference><Reference><Citation>Gershon
+        ES, Alliey-Rodriguez N, Grennan K (2014) Ethical and public policy challenges
+        for pharmacogenomics. www.dialogues-cns.org</Citation></Reference><Reference><Citation>Koutsilieri
+        S, Tzioufa F, Sismanoglou DC, Patrinos GP (2020) Unveiling the guidance heterogeneity
+        for genome-informed drug treatment interventions among regulatory bodies and
+        research consortia. Pharmacol Res 153:104590. https://doi.org/10.1016/j.phrs.2019.104590</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.phrs.2019.104590</ArticleId><ArticleId IdType="pubmed">31830522</ArticleId></ArticleIdList></Reference><Reference><Citation>Shekhani
+        R, Steinacher L, Swen JJ, Ingelman-Sundberg M (2020) Evaluation of current
+        regulation and guidelines of pharmacogenomic drug labels: opportunities for
+        improvements. Clin Pharmacol Ther 107(5):1240&#x2013;1255</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1002/cpt.1720</ArticleId><ArticleId IdType="pubmed">31715018</ArticleId></ArticleIdList></Reference><Reference><Citation>Lunenburg
+        CATC, Guchelaar HJ, van Schaik RHN, Neumaier M, Swen JJ (2019) Confirmation
+        practice in pharmacogenetic testing; how good is good enough? Int J Clin Chem
+        490:77&#x2013;80. https://doi.org/10.1016/j.cca.2018.12.023</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.cca.2018.12.023</ArticleId></ArticleIdList></Reference><Reference><Citation>Weissman
+        SM, Kirkpatrick B, Ramos E (2019) At-home genetic testing in pediatrics. Curr
+        Opin Pediatr 31(6):723&#x2013;731. https://doi.org/10.1097/MOP.0000000000000824</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1097/MOP.0000000000000824</ArticleId><ArticleId IdType="pubmed">31693579</ArticleId></ArticleIdList></Reference><Reference><Citation>Qian
+        J, Wolters FJ, Beiser A, Haan M, Ikram MA, Karlawish J, Langbaum JB, Neuhaus
+        JM, Reiman EM, Roberts JS (2017) APOE-related risk of mild cognitive impairment
+        and dementia for prevention trials: an analysis of four cohorts. PLoS Med
+        14(3):e1002254</Citation><ArticleIdList><ArticleId IdType="doi">10.1371/journal.pmed.1002254</ArticleId><ArticleId
+        IdType="pubmed">28323826</ArticleId><ArticleId IdType="pmc">5360223</ArticleId></ArticleIdList></Reference><Reference><Citation>Roberts
+        JS, Patterson AK, Uhlmann WR (2020) Genetic testing for neurodegenerative
+        diseases: ethical and health communication challenges. Neurobiol Dis. https://doi.org/10.1016/j.nbd.2020.104871</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.nbd.2020.104871</ArticleId><ArticleId IdType="pubmed">33387634</ArticleId><ArticleId
+        IdType="pmc">7908817</ArticleId></ArticleIdList></Reference><Reference><Citation>Behl
+        T, Kaur I, Sehgal A, Singh S, Bhatia S, Al-Harrasi A, Zengin G, Babes EE,
+        Brisc C, Stoicescu M, Toma MM, Sava C, Bungau SG (2021) Bioinformatics accelerates
+        the major tetrad: a real boost for the pharmaceutical industry. Int J Mol
+        Sci. https://doi.org/10.3390/ijms22126184</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/ijms22126184</ArticleId><ArticleId IdType="pubmed">34576325</ArticleId><ArticleId
+        IdType="pmc">8467926</ArticleId></ArticleIdList></Reference><Reference><Citation>Dweep
+        H, Gretz N (2015) MiRwalk2.0: a comprehensive atlas of microrna-target interactions.
+        Nat Methods 12(8):697. https://doi.org/10.1038/nmeth.3485</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/nmeth.3485</ArticleId><ArticleId IdType="pubmed">26226356</ArticleId></ArticleIdList></Reference><Reference><Citation>Poplin
+        R, Chang PC, Alexander D, Schwartz S, Colthurst T, Ku A, Newburger D, Dijamco
+        J, Nguyen N, Afshar PT, Gross SS, Dorfman L, McLean CY, DePristo MA (2018)
+        A universal SNP and small-indel variant caller using deep neural networks.
+        Nat Biotechnol 36(10):983&#x2013;987. https://doi.org/10.1038/nbt.4235</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/nbt.4235</ArticleId><ArticleId IdType="pubmed">30247488</ArticleId></ArticleIdList></Reference><Reference><Citation>Olson
+        ND, Wagner J, McDaniel J, Stephens SH, Westreich ST, Prasanna AG, Johanson
+        E, Boja E, Maier EJ, Serang O, J&#xe1;spez D, Lorenzo-Salazar JM, Mu&#xf1;oz-Barrera
+        A, Rubio-Rodr&#xed;guez LA, Flores C, Kyriakidis K, Malousi A, Shafin K, Pesout
+        T, Jain M, Paten Benedict, Chang Pi-Chuan, Kolesnikov Alexey, Nattestad Maria,
+        Baid Gunjan, Goel Sidharth, Yang Howard, Carroll Andrew, Eveleigh Robert,
+        Bourgey Mathieu, Bourque Guillaume, Li Gen, Ma ChouXian, Tang LinQi, Du YuanPing,
+        Zhang ShaoWei, Morata Jordi, Tonda Ra&#xfa;l, Parra Gen&#xed;s, Trotta Jean-R&#xe9;mi,
+        Brueffer Christian, Demirkaya-Budak Sinem, Kabakci-Zorlu Duygu, Turgut Deniz,
+        Kalay &#xd6;zem, Budak Gungor, Narc&#x131; K&#xfc;bra, Arslan Elif, Brown
+        Richard, Johnson Ivan J., Dolgoborodov Alexey, Semenyuk Vladimir, Jain Amit,
+        Tetikol H. Serhat, Jain Varun, Ruehle Mike, Lajoie Bryan, Roddey Cooper, Catreux
+        Severine, Mehio Rami, Ahsan Mian Umair, Liu Qian, Wang Kai, Ebrahim Sahraeian
+        Sayed Mohammad, Fang Li Tai, Mohiyuddin Marghoob, Hung Calvin, Jain Chirag,
+        Feng Hanying, Li Zhipan, Chen Luoqi, Sedlazeck Fritz J., Zook JM (2022) PrecisionFDA
+        truth challenge v2: calling variants from short and long reads in difficult-to-map
+        regions. Cell Genom 2(5):100129. https://doi.org/10.1016/j.xgen.2022.100129</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.xgen.2022.100129</ArticleId><ArticleId IdType="pubmed">35720974</ArticleId><ArticleId
+        IdType="pmc">9205427</ArticleId></ArticleIdList></Reference><Reference><Citation>Teil
+        M, Arotcarena ML, Faggiani E, Laferriere F, Bezard E, Dehay B (2020) Targeting
+        &#x3b1;-synuclein for PD therapeutics: a pursuit on all fronts. Biomolecules
+        10(3):391. https://doi.org/10.3390/biom10030391</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3390/biom10030391</ArticleId><ArticleId IdType="pubmed">32138193</ArticleId><ArticleId
+        IdType="pmc">7175302</ArticleId></ArticleIdList></Reference><Reference><Citation>Mouro
+        Pinto R, Arning L, Giordano JV, Razghandi P, Andrew MA, Gillis T, Correia
+        K, Mysore JS, Grote Urtubey DM, Parwez CR, von Hein SM, Clark HB, Nguyen HP,
+        F&#xf6;rster E, Beller A, Jayadaev S, Keene CD, Bird TD, Lucente D, Vonsattel
+        JP, Orr Harry, Saft Carsten, Petrasch-Parwez Elisabeth, Wheeler VC (2020)
+        Patterns of CAG repeat instability in the central nervous system and periphery
+        in Huntington&#x2019;s disease and in spinocerebellar ataxia type 1. Hum Mol
+        Genet 29(15):2551&#x2013;2567. https://doi.org/10.1093/hmg/ddaa139</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1093/hmg/ddaa139</ArticleId><ArticleId IdType="pubmed">32761094</ArticleId><ArticleId
+        IdType="pmc">7471505</ArticleId></ArticleIdList></Reference><Reference><Citation>Chen
+        X, Schulz-Trieglaff O, Shaw R, Barnes B, Schlesinger F, K&#xe4;llberg M, Cox
+        AJ, Kruglyak S, Saunders CT (2016) Manta: rapid detection of structural variants
+        and indels for germline and cancer sequencing applications. Bioinformatics
+        32(8):1220&#x2013;1222. https://doi.org/10.1093/bioinformatics/btv710</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1093/bioinformatics/btv710</ArticleId><ArticleId IdType="pubmed">26647377</ArticleId></ArticleIdList></Reference><Reference><Citation>Pugh
+        TJ, Amr SS, Bowser MJ, Gowrisankar S, Hynes E, Mahanta LM, Rehm HL, Funke
+        B, Lebo MS (2016) Genet medicine: official J Am Coll Med Genet 18(7):712&#x2013;719.
+        https://doi.org/10.1038/gim.2015.156 . VisCap: inference and visualization
+        of germ-line copy-number variants from targeted clinical sequencing data</Citation></Reference><Reference><Citation>Hu
+        B, Guo H, Zhou P, Shi ZL (2021) Characteristics of SARS-CoV-2 and COVID-19.
+        Nat Rev Microbiol 19(3):141&#x2013;154. https://doi.org/10.1038/s41579-020-00459-7</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41579-020-00459-7</ArticleId><ArticleId IdType="pubmed">33024307</ArticleId></ArticleIdList></Reference><Reference><Citation>Forni
+        G, Mantovani A (2021) COVID-19 vaccines: where we stand and challenges ahead.
+        Cell Death Differ 28(2):626&#x2013;639. https://doi.org/10.1038/s41418-020-00720-9</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1038/s41418-020-00720-9</ArticleId><ArticleId IdType="pubmed">33479399</ArticleId><ArticleId
+        IdType="pmc">7818063</ArticleId></ArticleIdList></Reference><Reference><Citation>Ray
+        M, Sable MN, Sarkar S, Hallur V (2021) Essential interpretations of bioinformatics
+        in COVID-19 pandemic. Meta Gene 27:100844. https://doi.org/10.1016/j.mgene.2020.100844</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/j.mgene.2020.100844</ArticleId><ArticleId IdType="pubmed">33349792</ArticleId></ArticleIdList></Reference><Reference><Citation>Seemann
+        T (2014) Prokka: rapid prokaryotic genome annotation. Bioinf (Oxford England)
+        30(14):2068&#x2013;2069. https://doi.org/10.1093/bioinformatics/btu153</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1093/bioinformatics/btu153</ArticleId></ArticleIdList></Reference><Reference><Citation>Lam
+        YWF (2022) Applying pharmacogenomics in drug therapy of neurologic and psychiatric
+        disorders. Compr Pharmacol 2:277&#x2013;301. https://doi.org/10.1016/B978-0-12-820472-6.00142-0</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1016/B978-0-12-820472-6.00142-0</ArticleId></ArticleIdList></Reference><Reference><Citation>Saykin,
+        A. J., Shen, L., Foroud, T. M., Potkin, S. G., Swaminathan, S., Kim, S., &#x2026;Alzheimer&#x2019;s
+        Disease Neuroimaging Initiative. (2010). Alzheimer&#x2019;s Disease Neuroimaging
+        Initiative biomarkers as quantitative phenotypes: Genetics core aims, progress,
+        and plans. Alzheimer&#x2019;s &amp; dementia, 6(3), 265&#x2013;273. https://doi.org/10.1016/j.jalz.2010.03.013.</Citation></Reference><Reference><Citation>Strafella
+        C, Caputo V, Galota MR, Zampatti S, Marella G, Mauriello S, Cascella R, Giardina
+        E (2018) Application of precision medicine in neurodegenerative diseases.
+        Front Neurol 9:701. https://doi.org/10.3389/fneur.2018.00701</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.3389/fneur.2018.00701</ArticleId><ArticleId IdType="pubmed">30190701</ArticleId><ArticleId
+        IdType="pmc">6115491</ArticleId></ArticleIdList></Reference><Reference><Citation>Sadee
+        W, Wang D, Hartmann K, Toland AE (2023) Pharmacogenomics: driving personalized
+        medicine. Pharmacol Rev 75(4):789&#x2013;814. https://doi.org/10.1124/pharmrev.122.000810</Citation><ArticleIdList><ArticleId
+        IdType="doi">10.1124/pharmrev.122.000810</ArticleId><ArticleId IdType="pubmed">36927888</ArticleId><ArticleId
+        IdType="pmc">10289244</ArticleId></ArticleIdList></Reference></ReferenceList></PubmedData></PubmedArticle><PubmedArticle><MedlineCitation
+        Status="MEDLINE" Owner="NLM" IndexingMethod="Automated"><PMID Version="1">41663058</PMID><DateCompleted><Year>2026</Year><Month>02</Month><Day>09</Day></DateCompleted><DateRevised><Year>2026</Year><Month>02</Month><Day>09</Day></DateRevised><Article
+        PubModel="Print"><Journal><ISSN IssnType="Electronic">2042-7158</ISSN><JournalIssue
+        CitedMedium="Internet"><Volume>78</Volume><Issue>2</Issue><PubDate><Year>2026</Year><Month>Feb</Month><Day>06</Day></PubDate></JournalIssue><Title>The
+        Journal of pharmacy and pharmacology</Title><ISOAbbreviation>J Pharm Pharmacol</ISOAbbreviation></Journal><ArticleTitle>Precision
+        pharmaceutics: bioinformatics and pharmacogenomics as catalysts for personalized
+        drug therapy.</ArticleTitle><ELocationID EIdType="pii" ValidYN="Y">rgag001</ELocationID><ELocationID
+        EIdType="doi" ValidYN="Y">10.1093/jpp/rgag001</ELocationID><Abstract><AbstractText
+        Label="OBJECTIVES" NlmCategory="OBJECTIVE">This review summarizes how advances
+        in bioinformatics are transforming pharmacogenomics by enabling prediction
+        of individual drug responses and integration of pharmacogenomic data into
+        clinical practice across multiple therapeutic areas. It aims to highlight
+        key databases, computational tools, and artificial intelligence (AI) approaches
+        that support personalized medicine.</AbstractText><AbstractText Label="METHODS"
+        NlmCategory="METHODS">Evidence from pharmacogenomic studies, centralized resources
+        (for example, PharmGKB), and in silico prediction tools (such as PolyPhen
+        and SIFT) is synthesized to illustrate how genetic variants affecting drug
+        metabolism, efficacy, and toxicity are systematically analysed and translated
+        into clinical applications.</AbstractText><AbstractText Label="KEY FINDINGS"
+        NlmCategory="RESULTS">Pharmacogenomic applications in psychiatry, cardiology,
+        oncology, and autoimmune disorders show that genetically guided therapies
+        can enhance efficacy and reduce adverse effects. AI and machine learning improve
+        interpretation of high-dimensional pharmacogenomic data, accelerating progress
+        in precision medicine and drug discovery, although challenges such as computational
+        complexity, data privacy, and underrepresentation of diverse populations persist.</AbstractText><AbstractText
+        Label="CONCLUSIONS" NlmCategory="CONCLUSIONS">Bioinformatics technologies
+        are central to operationalizing pharmacogenomics by enabling robust variant
+        interpretation and data integration for individualized therapy. Addressing
+        technical, ethical, and equity-related challenges will be critical to fully
+        realizing the potential of pharmacogenomics and advancing precision health
+        care.</AbstractText><CopyrightInformation>&#xa9; The Author(s) 2026. Published
+        by Oxford University Press on behalf of the Royal Pharmaceutical Society.
+        All rights reserved. For commercial re-use, please contact reprints@oup.com
+        for reprints and translation rights for reprints. All other permissions can
+        be obtained through our RightsLink service via the Permissions link on the
+        article page on our site&#x2014;for further information please contact journals.permissions@oup.com.</CopyrightInformation></Abstract><AuthorList
+        CompleteYN="Y"><Author ValidYN="Y"><LastName>Saini</LastName><ForeName>Jaskaran
+        Preet Singh</ForeName><Initials>JPS</Initials><AffiliationInfo><Affiliation>Chitkara
+        University School of Pharmacy, Chitkara University-Himachal Pradesh, HIMUDA
+        Education Hub-Atal Shiksha Kunj, Solan, Himachal Pradesh 174103, India.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Thakur</LastName><ForeName>Ankita</ForeName><Initials>A</Initials><AffiliationInfo><Affiliation>Chitkara
+        University School of Pharmacy, Chitkara University-Himachal Pradesh, HIMUDA
+        Education Hub-Atal Shiksha Kunj, Solan, Himachal Pradesh 174103, India.</Affiliation></AffiliationInfo></Author><Author
+        ValidYN="Y"><LastName>Yadav</LastName><ForeName>Deepak</ForeName><Initials>D</Initials><Identifier
+        Source="ORCID">0000-0003-4241-0158</Identifier><AffiliationInfo><Affiliation>Chitkara
+        University School of Pharmacy, Chitkara University-Himachal Pradesh, HIMUDA
+        Education Hub-Atal Shiksha Kunj, Solan, Himachal Pradesh 174103, India.</Affiliation></AffiliationInfo></Author></AuthorList><Language>eng</Language><PublicationTypeList><PublicationType
+        UI="D016428">Journal Article</PublicationType><PublicationType UI="D016454">Review</PublicationType></PublicationTypeList></Article><MedlineJournalInfo><Country>England</Country><MedlineTA>J
+        Pharm Pharmacol</MedlineTA><NlmUniqueID>0376363</NlmUniqueID><ISSNLinking>0022-3573</ISSNLinking></MedlineJournalInfo><CitationSubset>IM</CitationSubset><MeshHeadingList><MeshHeading><DescriptorName
+        UI="D057285" MajorTopicYN="Y">Precision Medicine</DescriptorName><QualifierName
+        UI="Q000379" MajorTopicYN="N">methods</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D006801" MajorTopicYN="N">Humans</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D010597" MajorTopicYN="Y">Pharmacogenetics</DescriptorName><QualifierName
+        UI="Q000379" MajorTopicYN="N">methods</QualifierName><QualifierName UI="Q000639"
+        MajorTopicYN="N">trends</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D019295" MajorTopicYN="Y">Computational Biology</DescriptorName><QualifierName
+        UI="Q000379" MajorTopicYN="N">methods</QualifierName></MeshHeading><MeshHeading><DescriptorName
+        UI="D001185" MajorTopicYN="N">Artificial Intelligence</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D000069550" MajorTopicYN="N">Machine Learning</DescriptorName></MeshHeading><MeshHeading><DescriptorName
+        UI="D055808" MajorTopicYN="N">Drug Discovery</DescriptorName><QualifierName
+        UI="Q000379" MajorTopicYN="N">methods</QualifierName></MeshHeading></MeshHeadingList><KeywordList
+        Owner="NOTNLM"><Keyword MajorTopicYN="N">PharmGKB</Keyword><Keyword MajorTopicYN="N">PolyPhen</Keyword><Keyword
+        MajorTopicYN="N">SIFT</Keyword><Keyword MajorTopicYN="N">bioinformatics</Keyword><Keyword
+        MajorTopicYN="N">personalized medicine</Keyword><Keyword MajorTopicYN="N">pharmacogenomics</Keyword></KeywordList></MedlineCitation><PubmedData><History><PubMedPubDate
+        PubStatus="received"><Year>2025</Year><Month>9</Month><Day>14</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="revised"><Year>2025</Year><Month>11</Month><Day>26</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="accepted"><Year>2025</Year><Month>12</Month><Day>22</Day></PubMedPubDate><PubMedPubDate
+        PubStatus="medline"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>1</Hour><Minute>30</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="pubmed"><Year>2026</Year><Month>2</Month><Day>10</Day><Hour>1</Hour><Minute>29</Minute></PubMedPubDate><PubMedPubDate
+        PubStatus="entrez"><Year>2026</Year><Month>2</Month><Day>9</Day><Hour>19</Hour><Minute>18</Minute></PubMedPubDate></History><PublicationStatus>ppublish</PublicationStatus><ArticleIdList><ArticleId
+        IdType="pubmed">41663058</ArticleId><ArticleId IdType="doi">10.1093/jpp/rgag001</ArticleId><ArticleId
+        IdType="pii">8469516</ArticleId></ArticleIdList></PubmedData></PubmedArticle></PubmedArticleSet>'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - X-RateLimit-Limit,X-RateLimit-Remaining
+      Cache-Control:
+      - private
+      Connection:
+      - Keep-Alive
+      Content-Security-Policy:
+      - upgrade-insecure-requests
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Date:
+      - Thu, 12 Feb 2026 17:09:37 GMT
+      Keep-Alive:
+      - timeout=4, max=40
+      NCBI-PHID:
+      - 1D3417763CCE9B7500005A67798F3951.1.1.m_6
+      NCBI-SID:
+      - D34E6526AB04D72B_D9EASID
+      Referrer-Policy:
+      - origin-when-cross-origin
+      Server:
+      - Finatra
+      Set-Cookie:
+      - ncbi_sid=D34E6526AB04D72B_D9EASID; domain=.nih.gov; path=/; expires=Fri, 12
+        Feb 2027 17:09:38 GMT
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-RateLimit-Limit:
+      - '3'
+      X-RateLimit-Remaining:
+      - '0'
+      X-UA-Compatible:
+      - IE=Edge
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '137496'
+    status:
+      code: 200
+      message: OK
+version: 1
