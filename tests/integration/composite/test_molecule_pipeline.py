@@ -325,7 +325,7 @@ class TestMoleculeFieldMapping:
         # Key mappings that should work
         mappings = {
             # ChEMBL -> PubChem (same field, different naming)
-            "inchi_key": "inchi_key",
+            "inchi_key": "inchikey",
             "canonical_smiles": "canonical_smiles",  # Same name
             "standard_inchi": "inchi",
             # ChEMBL -> PubChem (different concepts)
