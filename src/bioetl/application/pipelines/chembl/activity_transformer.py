@@ -22,7 +22,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.transformations import safe_float
-from bioetl.domain.value_objects import validate_taxonomy_id
+from bioetl.domain.value_objects import validate_taxonomy_id_str
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -41,11 +41,6 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
     "action_type": None,
     "description": None,
     "parent_type": None,
-}
-
-# Mapping for renaming fields to avoid tautology (Phase 2)
-_ACTION_TYPE_RENAMES: dict[str, str] = {
-    "action_type_action_type": "action_type",
 }
 
 # ============================================================================
@@ -74,7 +69,7 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
         FieldSpec(  # N-01: Taxonomy ID unification
             "target_tax_id",
             target="target_taxonomy_id",
-            converter=validate_taxonomy_id,
+            converter=validate_taxonomy_id_str,
         ),
         *simple_fields(
             "assay_type",
@@ -182,13 +177,7 @@ class ActivityTransformer(BaseChemblTransformer):
         Returns:
             Flat dictionary with prefixed keys.
         """
-        flat_data = flatten_nested_dict(
-            action_data, "action_type_", _ACTION_TYPE_FIELDS
-        )
-        for old_key, new_key in _ACTION_TYPE_RENAMES.items():
-            if old_key in flat_data:
-                flat_data[new_key] = flat_data.pop(old_key)
-        return flat_data
+        return flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
 
     def _extract_business_data(
         self,
