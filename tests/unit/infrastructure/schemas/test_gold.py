@@ -418,7 +418,7 @@ class TestGoldSchemaValidation:
             "entity_id": "chembl_CHEMBL12345",
             "content_hash": "xyz789",
             "publication_id": "CHEMBL12345",
-            "pmid": "12345678",
+            "pubmed_id": "12345678",
             # pmc_id excluded: not available from ChEMBL API
             "doi": "10.1234/test",
             # patent_id excluded from unified publication schema
