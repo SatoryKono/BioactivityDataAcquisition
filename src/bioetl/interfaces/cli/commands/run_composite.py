@@ -166,8 +166,9 @@ async def _run_composite_async(
 @click.option(
     "--cached-bronze-dependencies/--no-cached-bronze-dependencies",
     "cached_bronze_dependencies",
-    default=None,
-    help="Override cached Bronze for dependencies (default: follow --use-cached-bronze)",
+    default=False,
+    help="Override cached Bronze for dependencies (default: use API)",
+    show_default=True,
 )
 @click.option(
     "--debug",
@@ -200,7 +201,7 @@ def run_composite(
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
     cached_bronze_enrichers: bool | None,
-    cached_bronze_dependencies: bool | None,
+    cached_bronze_dependencies: bool,
     debug: bool,
     health_server: bool,
     health_port: int,

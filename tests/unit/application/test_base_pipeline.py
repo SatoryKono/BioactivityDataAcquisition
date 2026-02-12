@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.core.base import BasePipeline
 from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
+from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunID, RunType
 
@@ -39,8 +39,10 @@ def mock_pipeline():
         pipeline_name="test_pipeline",
         provider="test_provider",
         entity_type="test_entity",
-        primary_keys=["test_entity_id"],
-        silver_table="test_provider.test_entity",
+        table=TableConfig(
+            primary_keys=["test_entity_id"],
+            silver_table="test_provider.test_entity",
+        ),
     )
     runtime = RuntimeConfig(
         run_type=RunType.INCREMENTAL,
@@ -86,8 +88,10 @@ async def test_base_pipeline_accepts_five_params():
         pipeline_name="test",
         provider="test",
         entity_type="entity",
-        primary_keys=["id"],
-        silver_table="test.entity",
+        table=TableConfig(
+            primary_keys=["id"],
+            silver_table="test.entity",
+        ),
     )
     runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
     mock_logger = MagicMock()
@@ -149,8 +153,10 @@ async def test_run_id_propagation_is_consistent():
         pipeline_name="test_pipeline",
         provider="test_provider",
         entity_type="test_entity",
-        primary_keys=["id"],
-        silver_table="test_provider.test_entity",
+        table=TableConfig(
+            primary_keys=["id"],
+            silver_table="test_provider.test_entity",
+        ),
     )
     runtime = RuntimeConfig(run_type=RunType.INCREMENTAL)
     mock_logger = MagicMock()

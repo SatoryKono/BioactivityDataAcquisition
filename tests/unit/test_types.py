@@ -45,7 +45,6 @@ class TestDriftLevel:
     def test_drift_level_values(self) -> None:
         """DriftLevel should have correct string values."""
         assert DriftLevel.INFO.value == "INFO"
-        assert DriftLevel.WARN.value == "WARN"
         assert DriftLevel.CRITICAL.value == "CRITICAL"
 
 

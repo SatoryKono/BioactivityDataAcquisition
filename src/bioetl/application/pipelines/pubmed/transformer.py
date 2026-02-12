@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 import xml.etree.ElementTree as ET
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.pubmed.extractors import (
@@ -31,7 +31,7 @@ from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities import BaseEntity
-    from bioetl.domain.filtering import GoldFilterConfig
+    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         DataNormalizationPort,
         MetricsPort,
@@ -69,13 +69,28 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         re.compile(r"^\d{4}$"),
     )
 
+    _MONTH_MAP: ClassVar[dict[str, int]] = {
+        "jan": 1,
+        "feb": 2,
+        "mar": 3,
+        "apr": 4,
+        "may": 5,
+        "jun": 6,
+        "jul": 7,
+        "aug": 8,
+        "sep": 9,
+        "oct": 10,
+        "nov": 11,
+        "dec": 12,
+    }
+
     def __init__(
         self,
         provider: str = "pubmed",
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        silver_filters: GoldFilterConfig | None = None,
+        silver_filters: SilverFilterConfig | GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -619,21 +634,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             return None
 
         month_lower = month_text.strip().lower()[:3]
-        month_map = {
-            "jan": 1,
-            "feb": 2,
-            "mar": 3,
-            "apr": 4,
-            "may": 5,
-            "jun": 6,
-            "jul": 7,
-            "aug": 8,
-            "sep": 9,
-            "oct": 10,
-            "nov": 11,
-            "dec": 12,
-        }
-        result = month_map.get(month_lower)
+        result = self._MONTH_MAP.get(month_lower)
         if result is None and month_text.isdigit():
             result = int(month_text)
         return result

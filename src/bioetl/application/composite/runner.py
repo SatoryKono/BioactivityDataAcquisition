@@ -70,7 +70,10 @@ class CompositeRuntimeConfig:
         cached_bronze_enrichers: Override cached Bronze for enrichers.
             None=follow master, True=force cache, False=force API.
         cached_bronze_dependencies: Override cached Bronze for dependencies.
-            None=follow master, True=force cache, False=force API.
+            False by default — dependencies call APIs with seed-derived keys,
+            so their Bronze cache is often stale or absent (e.g. uniprot_idmapping
+            on first composite run). Set True to force cache if Bronze was
+            pre-populated by a standalone run with identical keys.
     """
 
     resume: bool = False
@@ -83,7 +86,7 @@ class CompositeRuntimeConfig:
     cached_bronze_path: str | None = None
     cached_bronze_date: str | None = None
     cached_bronze_enrichers: bool | None = None
-    cached_bronze_dependencies: bool | None = None
+    cached_bronze_dependencies: bool = False
 
     def __post_init__(self) -> None:
         """Convert types for immutability."""

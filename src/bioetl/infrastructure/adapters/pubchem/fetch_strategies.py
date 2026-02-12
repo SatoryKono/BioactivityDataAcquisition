@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
 
+from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
 
@@ -21,10 +23,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
-
-
-# PubChem REST API base URL for request metadata
-PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
 
 class PubChemFetchStrategies:

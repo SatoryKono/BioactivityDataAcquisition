@@ -84,15 +84,12 @@ class DriftLevel(StrEnum):
     """Schema drift severity levels (RULES.md §2.2).
 
     - INFO: New optional fields appear
-    - WARN: >3 new fields appear
     - CRITICAL: Required fields (ID) disappear
     """
 
     INFO = "INFO"
     """New optional fields detected (logged)."""
 
-    WARN = "WARN"
-    """Significant drift detected (>3 fields), requires review within 48h."""
 
     CRITICAL = "CRITICAL"
     """Critical drift (missing required fields), blocks pipeline."""

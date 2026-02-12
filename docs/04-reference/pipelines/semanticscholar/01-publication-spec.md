@@ -1,6 +1,6 @@
 # Semantic Scholar Publication Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
 ---
 
@@ -258,7 +258,7 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
 pipeline_name: semanticscholar_publication
 provider: semanticscholar
 entity_type: publication
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["paper_id"]
 silver_table: "semanticscholar_publication"

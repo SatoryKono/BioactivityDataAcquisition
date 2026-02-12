@@ -76,7 +76,9 @@ molecule = new_client.molecule
 results = molecule.filter(molecule_chembl_id__in=chembl_ids)
 ```
 
-### 3.2. Complete API Fields
+### 3.2. Complete API Fields (23 поля)
+
+> **Примечание:** После flattening (molecule_hierarchy, molecule_properties, molecule_structures) Silver schema содержит 46 полей.
 
 | #   | API Field             | JSON Type | Nullable | Nested | Description          | Example            |
 | --- | --------------------- | --------- | -------- | ------ | -------------------- | ------------------ |

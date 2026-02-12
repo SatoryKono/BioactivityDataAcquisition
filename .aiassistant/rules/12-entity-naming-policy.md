@@ -52,7 +52,7 @@ ______________________________________________________________________
 
 ## TESTS
 
-- Unit: `tests/bioetl/.../test_<module>.py`
+- Unit: `tests/unit/application/pipelines/<provider>/test_<entity>_transformer.py`
 - Pipeline: `tests/unit/application/pipelines/<provider>/test_<entity>_transformer.py`
 - Integration: `tests/integration/` or suffix `_integration.py`
 - Golden: `tests/golden/test_<area>_golden.py`
@@ -71,7 +71,7 @@ Valid:
 - Function: `fetch_one()`, `iter_pages()`, `default_chembl_data_client()`
 - Module: `data_client.py`, `factories.py`
 - Pipeline: `src/bioetl/pipelines/chembl/activity/extract.py`
-- Test: `tests/bioetl/pipelines/chembl/activity/test_extract.py`
+- Test: `tests/unit/application/pipelines/chembl/test_activity_transformer.py`
 
 Invalid:
 

@@ -1,6 +1,6 @@
 # ChEMBL Compound Record Pipeline Specification
 
-*Version 1.1.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.17*
 
 ---
 
@@ -114,7 +114,7 @@ class CompoundRecordSchema(ETLRecordSchema):
 pipeline_name: chembl_compound_record
 provider: chembl
 entity_type: compound_record
-version: "1.1.0"
+version: "1.2.0"
 
 primary_keys: ["record_id"]
 silver_table: "chembl_compound_record"

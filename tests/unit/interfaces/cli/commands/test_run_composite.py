@@ -593,10 +593,15 @@ class TestCompositeRuntimeConfigPostInit:
         config = CompositeRuntimeConfig()
         assert config.cached_bronze_enrichers is None
 
-    def test_cached_bronze_dependencies_default_none(self) -> None:
-        """Test cached_bronze_dependencies defaults to None (follow master)."""
+    def test_cached_bronze_dependencies_default_false(self) -> None:
+        """Test cached_bronze_dependencies defaults to False (always call APIs).
+
+        Dependencies receive seed-derived keys, so their Bronze cache is
+        typically stale or absent (e.g. uniprot_idmapping on first composite
+        run). Default False ensures APIs are always called.
+        """
         config = CompositeRuntimeConfig()
-        assert config.cached_bronze_dependencies is None
+        assert config.cached_bronze_dependencies is False
 
     def test_cached_bronze_enrichers_explicit_false(self) -> None:
         """Test cached_bronze_enrichers can be set to False."""
