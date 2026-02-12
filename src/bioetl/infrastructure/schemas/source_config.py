@@ -27,18 +27,8 @@ from bioetl.infrastructure.schemas.base_schemas import (
     BaseRateLimitConfig,
 )
 
-
-class RateLimitYamlConfig(BaseRateLimitConfig):
-    """Rate limit configuration from YAML.
-
-    Inherits from BaseRateLimitConfig for consistency with other schemas.
-
-    Attributes:
-        requests_per_second: Maximum requests per second.
-        burst: Maximum burst capacity (token bucket).
-    """
-
-    pass
+RateLimitYamlConfig = BaseRateLimitConfig
+RateLimitYamlConfig.__doc__ = """Rate limit configuration from YAML."""
 
 
 class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
@@ -60,17 +50,8 @@ class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
         return super().to_domain()
 
 
-class ClientYamlConfig(BaseClientConfig):
-    """HTTP client configuration from YAML.
-
-    Inherits from BaseClientConfig for consistency with other schemas.
-
-    Attributes:
-        timeout_sec: Request timeout in seconds.
-        max_retries: Maximum number of retry attempts.
-    """
-
-    pass
+ClientYamlConfig = BaseClientConfig
+ClientYamlConfig.__doc__ = """HTTP client configuration from YAML."""
 
 
 class ProviderConfigYaml(BaseModel):

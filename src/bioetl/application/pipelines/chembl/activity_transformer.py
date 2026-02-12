@@ -22,7 +22,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 )
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.transformations import safe_float
-from bioetl.domain.value_objects import validate_taxonomy_id_str
+from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord
@@ -66,10 +66,10 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
             "target_organism",
         ),
         # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-        FieldSpec(
+        FieldSpec(  # N-01: Taxonomy ID unification
             "target_tax_id",
             target="target_taxonomy_id",
-            converter=validate_taxonomy_id_str,
+            converter=validate_taxonomy_id,
         ),
         *simple_fields(
             "assay_type",

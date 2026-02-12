@@ -24,32 +24,13 @@ if TYPE_CHECKING:
 
 
 @contextmanager
-def traced_operation(
+def _span_context(
     tracer: TracingPort,
     name: str,
     attributes: dict[str, Any] | None = None,
     tracer_name: str = "bioetl",
 ) -> Generator[Any, None, None]:
-    """Context manager for synchronous tracing spans.
-
-    Creates a span that is properly closed even if an exception occurs.
-    Records exceptions on the span before re-raising.
-
-    Args:
-        tracer: TracingPort for creating spans
-        name: Name of the span (e.g., "write_bronze", "transform_batch")
-        attributes: Optional initial span attributes
-        tracer_name: Name of the tracer (default: "bioetl")
-
-    Yields:
-        The span context for setting additional attributes
-
-    Example:
-        >>> with traced_operation(tracer, "write_bronze", {"layer": "bronze"}) as span:
-        ...     # Write data
-        ...     span.set_attribute("record_count", 100)
-
-    """
+    """Internal helper to manage span lifecycle."""
     otel_tracer = tracer.get_tracer(tracer_name)
     span = otel_tracer.start_as_current_span(name, attributes=attributes or {})
     span.__enter__()
@@ -63,6 +44,9 @@ def traced_operation(
         raise
     finally:
         span.__exit__(None, None, None)
+
+
+traced_operation = _span_context
 
 
 @asynccontextmanager
@@ -72,36 +56,6 @@ async def traced_async_operation(
     attributes: dict[str, Any] | None = None,
     tracer_name: str = "bioetl",
 ) -> AsyncGenerator[Any, None]:
-    """Async context manager for tracing spans.
-
-    Creates a span that is properly closed even if an exception occurs.
-    Records exceptions on the span before re-raising.
-
-    Args:
-        tracer: TracingPort for creating spans
-        name: Name of the span (e.g., "write_bronze", "transform_batch")
-        attributes: Optional initial span attributes
-        tracer_name: Name of the tracer (default: "bioetl")
-
-    Yields:
-        The span context for setting additional attributes
-
-    Example:
-        >>> async with traced_async_operation(tracer, "fetch_data") as span:
-        ...     data = await fetch()
-        ...     span.set_attribute("record_count", len(data))
-
-    """
-    otel_tracer = tracer.get_tracer(tracer_name)
-    span = otel_tracer.start_as_current_span(name, attributes=attributes or {})
-    span.__enter__()
-
-    try:
+    """Async context manager for tracing spans."""
+    with _span_context(tracer, name, attributes, tracer_name) as span:
         yield span
-    except Exception as e:
-        span.set_attribute("error", True)
-        span.set_attribute("error.type", type(e).__name__)
-        span.record_exception(e)
-        raise
-    finally:
-        span.__exit__(None, None, None)

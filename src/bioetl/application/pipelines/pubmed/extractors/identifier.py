@@ -12,18 +12,16 @@ from xml.etree.ElementTree import Element
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 
 
-class RawIdentifiers(TypedDict):
-    """Raw identifier data before normalization."""
+class ArticleIdentifiers(TypedDict):
+    """Identifier data container (raw or normalized)."""
 
     doi: str | None
     pmc_id: str | None
 
 
-class NormalizedIdentifiers(TypedDict):
-    """Normalized identifier data."""
-
-    doi: str | None
-    pmc_id: str | None
+# Aliases for clarity in extractor API
+RawIdentifiers = ArticleIdentifiers
+NormalizedIdentifiers = ArticleIdentifiers
 
 
 class AllArticleIds(TypedDict, total=False):

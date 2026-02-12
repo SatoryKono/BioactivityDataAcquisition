@@ -13,6 +13,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
+from bioetl.domain.medallion import Layer as MedallionLayer
 from bioetl.domain.types import DriftLevel
 
 
@@ -38,14 +39,6 @@ class DQReportStatus(StrEnum):
     PASS = "pass"
     WARNING = "warning"
     FAIL = "fail"
-
-
-class MedallionLayer(StrEnum):
-    """Medallion architecture layer."""
-
-    BRONZE = "bronze"
-    SILVER = "silver"
-    GOLD = "gold"
 
 
 # =============================================================================

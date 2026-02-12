@@ -108,12 +108,6 @@ def strip_html_tags(text: str | None) -> str | None:
 
     return clean if clean else None
 
-
-def _to_none_if_empty(s: str) -> str | None:
-    """Return None if string is empty after strip."""
-    return s.strip() or None
-
-
 # Electronic page identifiers (e-123, E-456, e123) -- not page ranges.
 _ELECTRONIC_PAGE_PATTERN = re.compile(r"^[eE]-?\d+$")
 
