@@ -102,21 +102,12 @@ class DQConfigLoader:
         if inline_overrides:
             merged = self._deep_merge(merged, inline_overrides)
 
-        # 5. Test override: relax DQ for e2e/integration tests
-        # - Thresholds: soft_fail < hard_fail required by ThresholdsConfig validator
-        # - Clear validations so records pass through (ChEMBL API data may not match)
+        # 5. Test override: relax DQ thresholds for e2e/integration tests
+        # (soft_fail < hard_fail required by ThresholdsConfig validator)
         if os.environ.get("BIOETL_TEST_RELAXED_DQ") == "1":
             merged = self._deep_merge(
                 merged,
-                {
-                    "thresholds": {"soft_fail": 0.99, "hard_fail": 1.0},
-                    "entity_field_validations": [],
-                    "entity_cross_field_validations": [],
-                    "entity_conditional_validations": [],
-                    "common_field_validations": [],
-                    "provider_field_validations": [],
-                    "common_cross_field_validations": [],
-                },
+                {"thresholds": {"soft_fail": 0.99, "hard_fail": 1.0}},
             )
 
         # Normalize and validate via Pydantic

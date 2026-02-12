@@ -124,6 +124,38 @@ def validate_positive_int(value: Any) -> int | None:
     return int_value
 
 
+def validate_publication_year(
+    year: int | None,
+    config: ValidationConfig | None = None,
+) -> tuple[int | None, bool]:
+    """Validate publication year and return (year, is_warning).
+
+    Preserves the original value; flags as warning when outside valid range.
+    Uses ValidationConfig range (default 1500-2100).
+
+    Args:
+        year: Year to validate.
+        config: Optional ValidationConfig. Uses DEFAULT_VALIDATION_CONFIG if None.
+
+    Returns:
+        Tuple of (year, is_warning). Year is preserved; is_warning is True
+        when year is outside [min_publication_year, max_publication_year].
+
+    Example:
+        >>> validate_publication_year(2020)
+        (2020, False)
+        >>> validate_publication_year(1499)
+        (1499, True)
+        >>> validate_publication_year(None)
+        (None, False)
+    """
+    if year is None:
+        return (None, False)
+    cfg = config if config is not None else _get_default_config()
+    in_range = cfg.min_publication_year <= year <= cfg.max_publication_year
+    return (year, not in_range)
+
+
 def validate_year_range(
     year: int | None,
     min_year: int = MIN_PUBLICATION_YEAR,
@@ -375,3 +407,6 @@ def validate_inchi_key(key: str | None) -> bool:
     if not key or not isinstance(key, str):
         return False
     return bool(_INCHI_KEY_PATTERN.match(key.strip()))
+
+
+VALIDATION_API = (validate_publication_year, validate_inchi_key)

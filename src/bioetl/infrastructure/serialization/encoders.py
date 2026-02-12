@@ -249,6 +249,8 @@ def reset_encoder_cache() -> None:
     get_json_encoder.cache_clear()
 
 
+_ENCODER_API = (reset_encoder_cache,)
+
 __all__ = [
     "ORJSON_AVAILABLE",
     "OrjsonEncoder",
