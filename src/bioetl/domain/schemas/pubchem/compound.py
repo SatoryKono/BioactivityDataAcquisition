@@ -25,7 +25,6 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     # === Primary Key ===
     molecule_id: Series[str] = pa.Field(
         nullable=False,
-        alias="cid",
         description="PubChem Compound ID (PK)",
     )
 
@@ -66,7 +65,6 @@ class PubchemMoleculeSchema(ETLRecordSchema):
 
     inchi_key: Series[str] | None = pa.Field(
         nullable=True,
-        alias="inchikey",
         description="InChI hash key (27 chars)",
     )
 
