@@ -44,23 +44,23 @@ from bioetl.domain.config.validation import (
 )
 
 __all__ = [
+    "DEFAULT_VALIDATION_CONFIG",
     # Validation
     "ConditionalValidation",
     "CrossFieldValidation",
-    "DEFAULT_VALIDATION_CONFIG",
-    "FieldValidation",
-    "ValidationConfig",
     # Data Quality
     "DQConfig",
     "DQReportConfig",
-    # Table
-    "TableConfig",
+    "FieldValidation",
+    # Memory
+    "MemoryConfig",
     # Pipeline
     "PipelineConfig",
     # Runtime
     "RuntimeConfig",
-    # Memory
-    "MemoryConfig",
+    # Table
+    "TableConfig",
+    "ValidationConfig",
     # Converters (public utilities)
     "convert_write_mode",
     "freeze_sequences",

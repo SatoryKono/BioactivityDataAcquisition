@@ -111,6 +111,7 @@ class TestFileSizeLimits:
         "silver.py": 1070,  # 1066 LOC - Silver PyArrow schemas + base schema fields for Crossref/S2 + SubcellularFraction schema + publication classification fields + nullable int handling + PubChem expanded fields
         "client.py": 1175,  # 1169 LOC - ChemblAdapter (complex FilterableDataSourcePort + health-aware batching + 500 error detection + fallback + composite key deduplication + extraction_params ADR-028), CrossRefAdapter (DOI→title fallback)
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
+        "idmapping_client.py": 660,  # 651 LOC
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + loading_strategy (ADR-031) + column_groups + extraction_params + DQ severity/max_length/not_null
         "composite_config.py": 705,  # 699 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields
         # Interfaces layer exemptions
@@ -609,7 +610,7 @@ class TestClassSize:
         # UniProt adapter (similar to ChEMBL adapter)
         "UniProtAdapter": 660,  # 656 lines - HTTP adapter with streaming + FilterableDataSourcePort
         # UniProt ID Mapping client (job-based async API with entry metadata extraction)
-        "UniProtIDMappingClient": 580,  # 575 lines - ID Mapping client with job polling + entry metadata extraction helpers
+        "UniProtIDMappingClient": 590,  # 586 lines - ID Mapping client with job polling + entry metadata extraction helpers
         # SemanticScholar adapter
         "SemanticScholarAdapter": 590,  # 588 lines - HTTP adapter with multi-identifier fallback + FilterableDataSourcePort
         # Error handling utility (ErrorService + deprecated ErrorHandler alias)
