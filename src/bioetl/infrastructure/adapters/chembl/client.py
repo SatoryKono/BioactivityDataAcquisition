@@ -246,18 +246,10 @@ class ChemblAdapter(BaseHttpAdapter):
     def _build_filter_params(
         self, entity_type: str, filter_field: str, id_batch: list[str]
     ) -> dict[str, str]:
-        """Build filter params with canonical + API alias compatibility.
-
-        For publication entities, we keep canonical ``publication_id__in`` alongside
-        API-specific ``document_chembl_id__in`` to preserve compatibility with
-        existing tests and callers while still targeting the ChEMBL API field.
-        """
+        """Build filter params using API-specific field names."""
         joined_ids = ",".join(id_batch)
         api_filter_field = self._normalize_filter_field(entity_type, filter_field)
-        params = {f"{api_filter_field}__in": joined_ids}
-        if api_filter_field != filter_field:
-            params[f"{filter_field}__in"] = joined_ids
-        return params
+        return {f"{api_filter_field}__in": joined_ids}
 
     def _get_projected_url_length(self, url: str, params: dict[str, Any]) -> int:
         """Estimate the length of the final URL with parameters."""
