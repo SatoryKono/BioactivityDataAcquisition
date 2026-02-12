@@ -18,7 +18,7 @@ Enforce non-negotiable invariants across the whole repo so the agent does not gu
 - Deterministic I/O: identical inputs+config produce bit-identical outputs. Use stable row/column order, UTC timestamps, canonical JSON, atomic writes.
 - Validate-before-write: every table is validated against a Pandera schema with fixed column order. No writes on validation failure.
 - Structured logging only via UnifiedLogger; no print(); include run context and mandatory fields.
-ц- Tests: no network in unit tests; golden tests for critical outputs; property-based tests for transformations; coverage ≥ 85% in CI.
+- Tests: no network in unit tests; golden tests for critical outputs; property-based tests for transformations; coverage ≥ 85% in CI.
 - API access only through UnifiedAPIClient with retry/backoff, rate limiting, circuit breaker and strict timeouts.
 - One source → one public pipeline; use unified components (Logger, Writer, Client, Schema); follow extract→transform→validate→export.
 - Secrets in env/secret manager only; typed configs via Pydantic; profiles for shared defaults; CI secret scanning enabled.

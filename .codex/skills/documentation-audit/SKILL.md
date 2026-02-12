@@ -5,46 +5,72 @@ description: Full audit and update of BioETL project documentation for v5.14+. U
 
 # Documentation Audit
 
-## Overview
+## Objective
 Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.14+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
 
-## Workflow (default)
-1. Intake and scope
+## Required inputs (before starting)
+- Load `references/audit-checklist.md` — checklist for each audit area.
+- Load `references/report-template.md` — template for the audit report.
+
+## Workflow
+
+### 1. Intake and scope
 - Confirm repo root and target version (v5.14+).
-- Identify doc entry points (for example: README.md, mkdocs.yml).
-- Load `references/audit-checklist.md` and `references/report-template.md`.
+- Identify doc entry points: README.md, mkdocs.yml.
+- List files under `docs/`: `rg --files docs`.
 
-2. Audit
+### 2. Audit (follow audit-checklist.md)
 - Compare documentation to current code and configs.
-- Focus on RULES.md, REQUIREMENTS.md, architecture docs, provider docs, and contract docs.
-- Check alignment with ADR-010 Local-Only, ADR-014 Determinism, ADR-017 Observability.
-- Record findings with severity (Critical, High, Medium, Low).
+- Focus: RULES.md, REQUIREMENTS.md, architecture, provider, contract docs.
+- Check ADR alignment: ADR-010 (Local-Only), ADR-014 (Determinism), ADR-017 (Observability).
+- Record findings with severity: Critical, High, Medium, Low.
 
-3. Plan
+### 3. Plan
 - Turn findings into a concrete change list.
 - Prioritize by impact (Critical > High > Medium > Low).
 - Call out unknowns that need user confirmation.
 
-4. Update
+### 4. Update (if user requests)
 - Edit docs to match current code and ADRs.
 - Keep versions and dates explicit in text.
-- For obsolete or unreferenced docs, propose delete/archive unless the user explicitly asks to remove.
+- For obsolete docs: propose delete/archive, do not remove unless user asks.
 
-5. Verify
-- Check links between docs and nav entries.
-- Ensure RULES.md and REQUIREMENTS.md are synchronized.
-- Confirm ADRs are reflected in top-level docs and architecture sections.
+### 5. Verify
+- Check links and nav entries (mkdocs.yml).
+- Confirm RULES.md and REQUIREMENTS.md are synchronized.
+- Ensure ADRs are reflected in top-level docs.
 
-## Practical checks and commands
-- Find ADR references: `rg -n "ADR-010|ADR-014|ADR-017" docs README.md mkdocs.yml`
-- Find version mentions: `rg -n "v5\.14|5\.14" docs README.md`
-- Find doc references in nav: `rg -n "docs/|\.md" mkdocs.yml README.md`
-- Scan for orphan docs: list files in `docs/` then search for each filename in `mkdocs.yml` and other docs.
+## Practical commands
+```bash
+# ADR references
+rg -n "ADR-010|ADR-014|ADR-017" docs README.md mkdocs.yml
 
-## Outputs
-- Use `references/report-template.md` for the audit report.
-- Provide a short prioritized change list and note any required user decisions.
+# Version mentions
+rg -n "v5\.14|5\.14" docs README.md
 
-## Notes
-- Prefer documenting reality over desired behavior; if code and docs diverge, flag it and propose options.
-- Avoid code changes unless the user explicitly asks; this skill focuses on documentation.
+# Doc refs in nav
+rg -n "docs/|\.md" mkdocs.yml README.md
+
+# Orphan scan: list docs/ then search each filename in mkdocs.yml and other docs
+rg --files docs
+```
+
+## Output format
+- Use `references/report-template.md` structure for the audit report.
+- Provide a short prioritized change list and required user decisions.
+- Do not change code unless explicitly requested; focus on documentation.
+
+## Constraints
+
+### MUST
+- Use report-template.md for the audit report.
+- Verify findings against actual code and configs.
+- Record severity for each finding.
+
+### MUST NOT
+- Change code unless user explicitly asks.
+- Remove docs without explicit user approval.
+- Document desired behavior instead of reality when code and docs diverge — flag and propose options.
+
+### SHOULD
+- Prefer documenting reality; when code and docs diverge, flag and propose options.
