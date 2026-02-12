@@ -107,9 +107,7 @@ async def test_chembl_publication_term_types(e2e_data_dir: Path):
         term_type = record.get("term_type")
         assert term_type in valid_term_types, f"Invalid term_type: {term_type}"
         assert record.get("term"), "Term text should not be empty"
-        assert record.get("publication_id"), (
-            "publication_id should not be empty"
-        )
+        assert record.get("publication_id"), "publication_id should not be empty"
 
 
 @pytest.mark.e2e

@@ -202,8 +202,16 @@ class TestExtractAuthorOrmolecule_ids:
     def test_extract_ormolecule_ids_from_urls(self) -> None:
         """Should extract ORCID IDs from full URLs."""
         authorships = [
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"}},
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0002-3456-789X"}},
+            {
+                "author": {
+                    "ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"
+                }
+            },
+            {
+                "author": {
+                    "ormolecule_id": "https://ormolecule_id.org/0000-0002-3456-789X"
+                }
+            },
         ]
         result = extract_author_ormolecule_ids(authorships)
         assert result == ["0000-0001-2345-6789", "0000-0002-3456-789X"]
@@ -211,9 +219,17 @@ class TestExtractAuthorOrmolecule_ids:
     def test_extract_ormolecule_ids_preserves_order(self) -> None:
         """Should preserve order and return same length as input."""
         authorships = [
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"}},
+            {
+                "author": {
+                    "ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"
+                }
+            },
             {"author": {"ormolecule_id": None}},
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0003-4567-8901"}},
+            {
+                "author": {
+                    "ormolecule_id": "https://ormolecule_id.org/0000-0003-4567-8901"
+                }
+            },
         ]
         result = extract_author_ormolecule_ids(authorships)
         assert len(result) == 3
@@ -238,8 +254,14 @@ class TestExtractAuthorOrmolecule_ids:
     def test_extract_ormolecule_ids_invalid_format(self) -> None:
         """Should return empty string for invalid ORCID format."""
         authorships = [
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/invalid-ormolecule_id"}},
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001"}},  # Too short
+            {
+                "author": {
+                    "ormolecule_id": "https://ormolecule_id.org/invalid-ormolecule_id"
+                }
+            },
+            {
+                "author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001"}
+            },  # Too short
             {"author": {"ormolecule_id": "not-a-url"}},
         ]
         result = extract_author_ormolecule_ids(authorships)
@@ -248,7 +270,11 @@ class TestExtractAuthorOrmolecule_ids:
     def test_extract_ormolecule_ids_http_url(self) -> None:
         """Should handle http:// URLs (not just https://)."""
         authorships = [
-            {"author": {"ormolecule_id": "http://ormolecule_id.org/0000-0001-2345-6789"}},
+            {
+                "author": {
+                    "ormolecule_id": "http://ormolecule_id.org/0000-0001-2345-6789"
+                }
+            },
         ]
         result = extract_author_ormolecule_ids(authorships)
         assert result == ["0000-0001-2345-6789"]
@@ -279,7 +305,11 @@ class TestExtractAuthorOrmolecule_ids:
     def test_extract_ormolecule_ids_with_checksum_x(self) -> None:
         """Should accept ORCID with X checksum digit."""
         authorships = [
-            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0002-1825-009X"}},
+            {
+                "author": {
+                    "ormolecule_id": "https://ormolecule_id.org/0000-0002-1825-009X"
+                }
+            },
         ]
         result = extract_author_ormolecule_ids(authorships)
         assert result == ["0000-0002-1825-009X"]

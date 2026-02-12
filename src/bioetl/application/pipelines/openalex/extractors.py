@@ -34,6 +34,7 @@ __all__ = [
     "reconstruct_abstract",
 ]
 
+
 # Backward-compatible alias (legacy name preserved for tests/older callers)
 def extract_author_ormolecule_ids(authorships: list[dict[str, Any]]) -> list[str]:
     return extract_author_orcids(authorships)

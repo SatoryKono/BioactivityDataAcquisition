@@ -292,9 +292,7 @@ class TestIDMappingDataSourceReadChEMBLIds:
     ) -> None:
         """Test successful reading of ChEMBL IDs."""
         csv_path = tmp_path / "targets.csv"
-        csv_path.write_text(
-            "target_id,name\nCHEMBL204,Target 1\nCHEMBL205,Target 2\n"
-        )
+        csv_path.write_text("target_id,name\nCHEMBL204,Target 1\nCHEMBL205,Target 2\n")
 
         data_source = IDMappingDataSource(
             idmapping_client=mock_client,

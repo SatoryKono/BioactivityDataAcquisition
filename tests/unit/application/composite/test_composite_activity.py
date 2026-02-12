@@ -129,10 +129,7 @@ class TestActivityKeyExtraction:
         extraction should return only 2 unique IDs.
         """
         unique_ids = (
-            activity_seed_keys.select("molecule_id")
-            .unique()
-            .to_series()
-            .to_list()
+            activity_seed_keys.select("molecule_id").unique().to_series().to_list()
         )
 
         assert len(unique_ids) == 2

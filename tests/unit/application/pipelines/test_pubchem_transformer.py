@@ -159,7 +159,9 @@ class TestPubChemCompoundTransformer:
         assert result.get("inchi_key") is None
 
     @pytest.mark.asyncio
-    async def test_transform_molecule_id_converted_to_string(self, transformer, mock_context):
+    async def test_transform_molecule_id_converted_to_string(
+        self, transformer, mock_context
+    ):
         """Test that numeric molecule_id is converted to string."""
         record = {
             "molecule_id": 99999999,
@@ -220,7 +222,9 @@ class TestPubChemCompoundTransformer:
         assert "custom_pubchem" in result["entity_id"]
 
     @pytest.mark.asyncio
-    async def test_transform_empty_molecule_id_rejected(self, transformer, mock_context):
+    async def test_transform_empty_molecule_id_rejected(
+        self, transformer, mock_context
+    ):
         """Test that empty string molecule_id is rejected."""
         record = {
             "molecule_id": "",

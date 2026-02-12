@@ -30,6 +30,7 @@ from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
 
 if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         DataNormalizationPort,
@@ -37,7 +38,6 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -116,7 +116,10 @@ class PublicationTransformer(BaseChemblTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Support both unified and legacy publication identifier field names."""
-        if "publication_id" not in record and record.get("document_chembl_id") is not None:
+        if (
+            "publication_id" not in record
+            and record.get("document_chembl_id") is not None
+        ):
             record = dict(record)
             record["publication_id"] = record.get("document_chembl_id")
         return await super()._transform_impl(context, record, index)

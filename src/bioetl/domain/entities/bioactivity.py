@@ -236,9 +236,7 @@ class Bioactivity(BaseEntity):
             # Molecule data
             canonical_smiles=_safe_str(raw_data.get("canonical_smiles")),
             molecule_pref_name=_safe_str(raw_data.get("molecule_pref_name")),
-            parent_molecule_id=_safe_str(
-                raw_data.get("parent_molecule_id")
-            ),
+            parent_molecule_id=_safe_str(raw_data.get("parent_molecule_id")),
             # Target data
             target_pref_name=_safe_str(raw_data.get("target_pref_name")),
             target_organism=_safe_str(raw_data.get("target_organism")),

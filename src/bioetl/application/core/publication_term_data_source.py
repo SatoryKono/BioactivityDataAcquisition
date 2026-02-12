@@ -189,9 +189,7 @@ class PublicationTermDataSource:
                 continue
 
             # Extract terms from publication
-            terms = self._extract_terms_from_publication(
-                publication, publication_id
-            )
+            terms = self._extract_terms_from_publication(publication, publication_id)
 
             for term in terms:
                 yield term
@@ -297,7 +295,9 @@ class PublicationTermDataSource:
         """
         # Compute entity_id from composite key
         normalized_term = term.strip() if term else term
-        entity_id = self._compute_entity_id(publication_id, term_type, normalized_term or "")
+        entity_id = self._compute_entity_id(
+            publication_id, term_type, normalized_term or ""
+        )
 
         return {
             "entity_id": entity_id,
@@ -437,9 +437,7 @@ class PublicationTermDataSource:
             if not publication_id:
                 continue
 
-            terms = self._extract_terms_from_publication(
-                publication, publication_id
-            )
+            terms = self._extract_terms_from_publication(publication, publication_id)
 
             for term in terms:
                 yield term

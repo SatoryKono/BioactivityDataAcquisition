@@ -203,7 +203,10 @@ class TestORCIDExternalVerification:
     async def test_ormolecule_id_valid(self) -> None:
         """PASS: ORCID resolved successfully."""
         verify_service = mock.AsyncMock()
-        verify_service.verify_ormolecule_id.return_value = {"status": "PASS", "found": True}
+        verify_service.verify_ormolecule_id.return_value = {
+            "status": "PASS",
+            "found": True,
+        }
 
         result = await verify_service.verify_ormolecule_id("0000-0002-1825-0097")
         assert result["status"] == "PASS"
@@ -212,7 +215,10 @@ class TestORCIDExternalVerification:
     async def test_ormolecule_id_not_found_warns(self) -> None:
         """WARN: ORCID not found."""
         verify_service = mock.AsyncMock()
-        verify_service.verify_ormolecule_id.return_value = {"status": "WARN", "found": False}
+        verify_service.verify_ormolecule_id.return_value = {
+            "status": "WARN",
+            "found": False,
+        }
 
         result = await verify_service.verify_ormolecule_id("0000-0000-0000-0000")
         assert result["status"] == "WARN"

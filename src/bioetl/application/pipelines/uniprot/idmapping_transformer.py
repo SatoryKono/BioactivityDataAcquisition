@@ -127,7 +127,9 @@ class IDMappingTransformer(BaseTransformer):
         }
 
         # Step 4: Generate entity_id using IdentityService (RULES.md §2.8)
-        entity_id = self.compute_entity_id(source_id=target_id, record={"target_id": target_id})
+        entity_id = self.compute_entity_id(
+            source_id=target_id, record={"target_id": target_id}
+        )
 
         # Step 5: Compute content_hash (RULES.md §2.8.1)
         content_hash = self.compute_content_hash(business_data, exclude_none=True)

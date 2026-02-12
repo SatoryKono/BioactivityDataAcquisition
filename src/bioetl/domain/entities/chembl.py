@@ -39,12 +39,8 @@ class ActivityRecord(BaseModel):
 
     # Core identifiers (REQUIRED: molecule_id)
     molecule_id: str = Field(description="ChEMBL ID of tested molecule")
-    assay_id: str | None = Field(
-        default=None, description="ChEMBL ID of the assay"
-    )
-    target_id: str | None = Field(
-        default=None, description="ChEMBL ID of the target"
-    )
+    assay_id: str | None = Field(default=None, description="ChEMBL ID of the assay")
+    target_id: str | None = Field(default=None, description="ChEMBL ID of the target")
     publication_id: str | None = Field(
         default=None, description="ChEMBL ID of the source document"
     )
@@ -134,9 +130,7 @@ class ActivityRecord(BaseModel):
     toid: int | None = Field(default=None, description="Test Occasion ID")
 
     # Document data (denormalized)
-    journal: str | None = Field(
-        default=None, description="Source journal name"
-    )
+    journal: str | None = Field(default=None, description="Source journal name")
     publication_year: int | None = Field(default=None, description="Publication year")
 
     # Data quality annotations

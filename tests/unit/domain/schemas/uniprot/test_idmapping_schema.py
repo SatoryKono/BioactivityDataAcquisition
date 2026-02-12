@@ -189,9 +189,7 @@ class TestDataFramePatterns:
 
     def test_target_id_pattern_with_dataframe(self) -> None:
         """Test ChEMBL ID pattern with pandas DataFrame."""
-        df = pd.DataFrame(
-            {"target_id": ["CHEMBL204", "CHEMBL1234567", "invalid"]}
-        )
+        df = pd.DataFrame({"target_id": ["CHEMBL204", "CHEMBL1234567", "invalid"]})
         matches = df["target_id"].str.match(r"^CHEMBL\d+$")
         assert bool(matches.iloc[0]) is True
         assert bool(matches.iloc[1]) is True

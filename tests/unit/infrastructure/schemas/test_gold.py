@@ -53,7 +53,7 @@ class TestGoldPublicationSchemaDQFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_dq_fields(self, schema_class, name):
+    def test_schema_has_dq_fields(self, schema_class, name) -> None:
         """All Gold publication schemas must have DQ fields."""
         fields = get_schema_fields(schema_class)
         # Check for alias versions (_dq_warn, _dq_error) or regular versions
@@ -77,7 +77,7 @@ class TestGoldPublicationSchemaUnifiedFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_publication_date(self, schema_class, name):
+    def test_schema_has_publication_date(self, schema_class, name) -> None:
         """All Gold publication schemas must have publication_date field."""
         fields = get_schema_fields(schema_class)
         assert "publication_date" in fields, f"{name} missing publication_date field"
@@ -92,7 +92,7 @@ class TestGoldPublicationSchemaUnifiedFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_page_fields(self, schema_class, name):
+    def test_schema_has_page_fields(self, schema_class, name) -> None:
         """Gold publication schemas with page data must have page_first and page_last fields."""
         fields = get_schema_fields(schema_class)
         assert "page_first" in fields, f"{name} missing page_first field"
@@ -113,7 +113,7 @@ class TestGoldPublicationSchemaCrossRefFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_doi_field(self, schema_class, name):
+    def test_schema_has_doi_field(self, schema_class, name) -> None:
         """All Gold publication schemas must have doi field."""
         fields = get_schema_fields(schema_class)
         assert "doi" in fields, f"{name} missing doi field"
@@ -128,7 +128,7 @@ class TestGoldPublicationSchemaCrossRefFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_pmid_field(self, schema_class, name):
+    def test_schema_has_pmid_field(self, schema_class, name) -> None:
         """All Gold publication schemas should have pmid field."""
         fields = get_schema_fields(schema_class)
         assert "pmid" in fields, f"{name} missing pmid field"
@@ -143,7 +143,7 @@ class TestGoldPublicationSchemaCrossRefFields:
             (PubMedPublicationGoldSchema, "PubMed Publication"),
         ],
     )
-    def test_schema_has_pmc_id_field(self, schema_class, name):
+    def test_schema_has_pmc_id_field(self, schema_class, name) -> None:
         """All Gold publication schemas should have pmc_id field."""
         fields = get_schema_fields(schema_class)
         assert "pmc_id" in fields, f"{name} missing pmc_id field"
@@ -163,7 +163,7 @@ class TestGoldPublicationSchemaCoreFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_title_and_abstract(self, schema_class, name):
+    def test_schema_has_title_and_abstract(self, schema_class, name) -> None:
         """All Gold publication schemas must have title and abstract fields."""
         fields = get_schema_fields(schema_class)
         assert "title" in fields, f"{name} missing title field"
@@ -180,7 +180,7 @@ class TestGoldPublicationSchemaCoreFields:
             # uses author_s2_ids/author_ormolecule_ids instead
         ],
     )
-    def test_schema_has_authors_field(self, schema_class, name):
+    def test_schema_has_authors_field(self, schema_class, name) -> None:
         """Gold publication schemas with raw authors must have authors field."""
         fields = get_schema_fields(schema_class)
         assert "authors" in fields, f"{name} missing authors field"
@@ -194,12 +194,12 @@ class TestGoldPublicationSchemaCoreFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_publication_year_field(self, schema_class, name):
+    def test_schema_has_publication_year_field(self, schema_class, name) -> None:
         """All Gold publication schemas must have publication_year field."""
         fields = get_schema_fields(schema_class)
         assert "publication_year" in fields, f"{name} missing publication_year field"
 
-    def test_chembl_schema_has_publication_year_field(self):
+    def test_chembl_schema_has_publication_year_field(self) -> None:
         """ChEMBL Gold schema uses publication_year (unified naming)."""
         fields = get_schema_fields(ChEMBLDocumentGoldSchema)
         assert "publication_year" in fields, (
@@ -225,7 +225,7 @@ class TestGoldPublicationSchemaPrimaryKeys:
             ),
         ],
     )
-    def test_schema_has_primary_key(self, schema_class, name, primary_key):
+    def test_schema_has_primary_key(self, schema_class, name, primary_key) -> None:
         """Each Gold publication schema must have its provider-specific primary key."""
         fields = get_schema_fields(schema_class)
         assert primary_key in fields, f"{name} missing primary key: {primary_key}"
@@ -250,7 +250,7 @@ class TestGoldPublicationSchemaLookupTrackingFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_lookup_method_field(self, schema_class, name):
+    def test_schema_has_lookup_method_field(self, schema_class, name) -> None:
         """All Gold publication schemas must have _lookup_method field."""
         fields = get_schema_fields(schema_class)
         has_lookup_method = "_lookup_method" in fields or "lookup_method" in fields
@@ -266,7 +266,7 @@ class TestGoldPublicationSchemaLookupTrackingFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_original_id_field(self, schema_class, name):
+    def test_schema_has_original_id_field(self, schema_class, name) -> None:
         """All Gold publication schemas must have _original_id field."""
         fields = get_schema_fields(schema_class)
         has_original_id = "_original_id" in fields or "original_id" in fields
@@ -287,7 +287,7 @@ class TestGoldPublicationSchemaMetadataFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_entity_id(self, schema_class, name):
+    def test_schema_has_entity_id(self, schema_class, name) -> None:
         """All Gold schemas must have entity_id field."""
         fields = get_schema_fields(schema_class)
         assert "entity_id" in fields, f"{name} missing entity_id field"
@@ -302,7 +302,7 @@ class TestGoldPublicationSchemaMetadataFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_content_hash(self, schema_class, name):
+    def test_schema_has_content_hash(self, schema_class, name) -> None:
         """All Gold schemas must have content_hash field."""
         fields = get_schema_fields(schema_class)
         assert "content_hash" in fields, f"{name} missing content_hash field"
@@ -317,7 +317,7 @@ class TestGoldPublicationSchemaMetadataFields:
             (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
-    def test_schema_has_lineage_fields(self, schema_class, name):
+    def test_schema_has_lineage_fields(self, schema_class, name) -> None:
         """All Gold schemas must have lineage metadata fields."""
         fields = get_schema_fields(schema_class)
         # Check for alias or regular field names
@@ -336,7 +336,7 @@ class TestGoldPublicationSchemaMetadataFields:
 class TestGoldSchemaValidation:
     """Test Gold schema validation with sample data."""
 
-    def test_pubmed_publication_validates_correct_data(self):
+    def test_pubmed_publication_validates_correct_data(self) -> None:
         """PubMedPublicationGoldSchema should validate correct data."""
         valid_record = {
             "entity_id": "pubmed_12345678",
@@ -412,7 +412,7 @@ class TestGoldSchemaValidation:
         assert len(validated) == 1
         assert validated["pmid"].iloc[0] == "12345678"
 
-    def test_chembl_document_validates_correct_data(self):
+    def test_chembl_document_validates_correct_data(self) -> None:
         """ChEMBLDocumentGoldSchema should validate correct data."""
         valid_record = {
             "entity_id": "chembl_CHEMBL12345",
@@ -421,6 +421,8 @@ class TestGoldSchemaValidation:
             "pmid": "12345678",
             # pmc_id excluded: not available from ChEMBL API
             "doi": "10.1234/test",
+            "publication_pmid": "12345678",
+            "publication_doi": "10.1234/test",
             # patent_id excluded from unified publication schema
             "title": "Test Publication",
             "authors": '["Author One"]',

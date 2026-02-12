@@ -67,8 +67,6 @@ class PublicationBaseSchema(ETLRecordSchema):
         description="PubMed Central ID",
     )
 
-
-
     # === Core content (common to all providers) ===
     title: Series[str] = pa.Field(nullable=True, description="Publication title")
     abstract: Series[str] = pa.Field(nullable=True, description="Publication abstract")

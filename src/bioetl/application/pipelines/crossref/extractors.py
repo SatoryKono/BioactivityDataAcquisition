@@ -44,6 +44,7 @@ __all__ = [
     "extract_references",
 ]
 
+
 # Backward-compatible alias (legacy name preserved for tests/older callers)
 def extract_author_ormolecule_ids(publication: dict[str, Any]) -> list[str]:
     return extract_author_orcids(publication)
