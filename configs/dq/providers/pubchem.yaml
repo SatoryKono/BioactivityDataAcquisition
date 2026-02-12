@@ -16,8 +16,8 @@ thresholds:
 # PubChem Common Field Validations
 # =============================================================================
 provider_field_validations:
-  # CID must be positive integer
-  - field: cid
+  # molecule_id (CID) must be positive integer
+  - field: molecule_id
     type: range
     min: 1
     nullable: true

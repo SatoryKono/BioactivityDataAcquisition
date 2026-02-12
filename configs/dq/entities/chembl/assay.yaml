@@ -12,10 +12,10 @@ entity: assay
 # Assay-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: assay_chembl_id
+  - field: assay_id
     type: required
     nullable: false
-    error_message: "Assay ChEMBL ID is required"
+    error_message: "Assay ID is required"
 
   - field: assay_type
     type: enum

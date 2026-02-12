@@ -52,7 +52,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("affiliation_list", pa.string()),  # JSON array (None for ChEMBL)
-        pa.field("author_ormolecule_ids", pa.string()),
+        pa.field("author_orcids", pa.string()),
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
         pa.field(
             "publication_type_unified", pa.string()
@@ -97,7 +97,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("action_type_action_type", pa.string()),
+        pa.field("action_type", pa.string()),
         pa.field("action_type_description", pa.string()),
         pa.field("action_type_parent_type", pa.string()),
         pa.field("activity_comment", pa.string()),
@@ -765,7 +765,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (for author-level analytics)
         pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
-        pa.field("author_ormolecule_ids", pa.string()),
+        pa.field("author_orcids", pa.string()),
         pa.field("author_s2_ids", pa.string()),  # JSON array of S2 author IDs
         pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
         pa.field("citations_made", pa.int64()),  # Unified: from referenceCount
@@ -834,7 +834,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         ),  # Not available from CrossRef (None values)
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("author_details", pa.string()),  # JSON array of author objects
-        pa.field("author_ormolecule_ids", pa.string()),
+        pa.field("author_orcids", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citations_made", pa.int64()),  # Unified: from references-count
         pa.field(
@@ -908,7 +908,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (JSON arrays preserving author order)
         pa.field("author_openalex_ids", pa.string()),  # OpenAlex author IDs
-        pa.field("author_ormolecule_ids", pa.string()),
+        pa.field("author_orcids", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         # Unified: from referenced_works_count
         pa.field("citations_made", pa.int64()),
