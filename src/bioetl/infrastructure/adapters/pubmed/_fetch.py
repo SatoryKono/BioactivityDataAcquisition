@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.common.api_request_collector import APIRequestCollector
 
-ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+from .constants import ENTREZ_API_BASE
 
 
 class PubMedFetchMixin:
