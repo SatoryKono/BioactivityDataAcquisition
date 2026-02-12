@@ -14,7 +14,7 @@ entity_type: assay
 version: "1.2.0"
 description: "Extract bioassay definitions from ChEMBL API"
 
-primary_keys: ["assay_chembl_id"]
+primary_keys: ["assay_id"]
 silver_table: "chembl_assay"
 gold_table: "chembl_assay"
 
@@ -43,7 +43,7 @@ dq_rules:
 
   cross_field_validations:
     - name: "assay_identifiable"
-      fields: ["assay_chembl_id", "description"]
+      fields: ["assay_id", "description"]
       condition: "all_present"
       error_message: "Assay must have ID and description"
 
@@ -53,10 +53,10 @@ dq_rules:
 # Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
-    primary_key: ["assay_chembl_id"]
+    primary_key: ["assay_id"]
     sort_by:
-      columns: ["assay_chembl_id"]
+      columns: ["assay_id"]
     partition_by: ["assay_type"]
   gold:
     sort_by:
-      columns: ["assay_chembl_id"]
+      columns: ["assay_id"]

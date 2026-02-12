@@ -186,21 +186,6 @@ class ActivityTransformer(BaseChemblTransformer):
             renames={"action_type_action_type": "action_type"},
         )
 
-    async def _transform_impl(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
-        """Transform and emit legacy action-type alias for compatibility."""
-        transformed = await super()._transform_impl(context, record, index)
-        if transformed is None:
-            return None
-        # Keep legacy Silver field name expected by existing contracts/tests.
-        transformed["action_type_action_type"] = transformed.get("action_type")
-        transformed.pop("action_type", None)
-        return transformed
-
     def _extract_business_data(
         self,
         record: BronzeRecord,

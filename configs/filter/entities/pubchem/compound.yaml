@@ -28,7 +28,7 @@ input_filter:
 gold_filters:
   # Required fields
   required_fields:
-    - cid
+    - molecule_id
     - molecular_formula
 
   # Empty columns filter (use defaults)

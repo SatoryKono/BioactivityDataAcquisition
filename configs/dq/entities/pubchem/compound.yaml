@@ -12,7 +12,7 @@ entity: compound
 # Compound-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: cid
+  - field: molecule_id
     type: required
     nullable: false
     error_message: "CID is required"
