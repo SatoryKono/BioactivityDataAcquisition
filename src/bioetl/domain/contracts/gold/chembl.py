@@ -100,9 +100,9 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     # Document/Publication data
     journal: Series[str] = pa.Field(nullable=True)
     publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    publication_doi: Series[str] | None = pa.Field(nullable=True)
-    publication_pmid: Series[str] | None = pa.Field(nullable=True)
-    publication_pmc_id: Series[str] | None = pa.Field(nullable=True)
+    publication_doi: Series[str] = pa.Field(nullable=True)
+    publication_pmid: Series[str] = pa.Field(nullable=True)
+    publication_pmc_id: Series[str] = pa.Field(nullable=True)
 
     # Quality annotations
     activity_comment: Series[str] = pa.Field(nullable=True)
@@ -321,9 +321,9 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # Cross-reference IDs for linking publications across providers
     pmid: Series[str] = pa.Field(nullable=True)
     doi: Series[str] = pa.Field(nullable=True)
-    publication_doi: Series[str] | None = pa.Field(nullable=True)
-    publication_pmid: Series[str] | None = pa.Field(nullable=True)
-    publication_pmc_id: Series[str] | None = pa.Field(nullable=True)
+    publication_doi: Series[str] = pa.Field(nullable=True)
+    publication_pmid: Series[str] = pa.Field(nullable=True)
+    publication_pmc_id: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)

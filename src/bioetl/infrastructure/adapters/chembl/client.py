@@ -209,6 +209,10 @@ class ChemblAdapter(BaseHttpAdapter):
         data = response.json()
         plural_key = self._mapper.get_plural_key(entity_type)
         records = data.get(plural_key, [])
+        if entity_type in {"publication", "publication_term"}:
+            for record in records:
+                if "publication_id" not in record and record.get("document_chembl_id"):
+                    record["publication_id"] = record["document_chembl_id"]
         page_meta = data.get("page_meta", {})
         has_next = page_meta.get("next") is not None
         return records, has_next
