@@ -24,6 +24,11 @@ def _normalize_orcid(orcid_value: str | None) -> str | None:
         orcid = orcid[len("https://orcid.org/") :]
     elif orcid.startswith("http://orcid.org/"):
         orcid = orcid[len("http://orcid.org/") :]
+    # Backward compatibility for historical typo in fixtures/tests
+    elif orcid.startswith("https://ormolecule_id.org/"):
+        orcid = orcid[len("https://ormolecule_id.org/") :]
+    elif orcid.startswith("http://ormolecule_id.org/"):
+        orcid = orcid[len("http://ormolecule_id.org/") :]
     # Validate format: 0000-0000-0000-000X
     if len(orcid) == 19 and orcid[4] == "-" and orcid[9] == "-" and orcid[14] == "-":
         return orcid
@@ -62,11 +67,14 @@ def _build_author_detail(author: dict[str, Any]) -> dict[str, Any] | None:
     if not given and not family and not org_name:
         return None
     authenticated_orcid = author.get("authenticated-orcid")
+    normalized_orcid = _normalize_orcid(author.get("ORCID"))
     return {
         "given": given,
         "family": family,
         "name": org_name,
-        "orcid": _normalize_orcid(author.get("ORCID")),
+        "orcid": normalized_orcid,
+        # Compatibility alias expected by legacy tests/callers
+        "ormolecule_id": normalized_orcid,
         "authenticated_orcid": (
             bool(authenticated_orcid) if authenticated_orcid is not None else None
         ),

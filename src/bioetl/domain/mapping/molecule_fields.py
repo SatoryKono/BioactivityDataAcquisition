@@ -5,11 +5,13 @@ MOLECULE_FIELD_MAPPING = {
         "logp": "logp",
         "hba_count": "hba_count",
         "molecular_weight": "molecular_weight",
+        "inchi_key": "inchi_key",
     },
     "pubchem": {
         "xlogp": "logp",
         "hba": "hba_count",
         "molecular_weight": "molecular_weight",
+        "inchi_key": "inchi_key",
     },
     # Add other providers here as needed (e.g., ZINC, etc.)
     # "zinc": {
