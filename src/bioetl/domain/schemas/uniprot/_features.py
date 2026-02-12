@@ -12,7 +12,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 
-class UniprotFeatureSchema(pa.SchemaModel):
+class UniprotFeatureSchema(pa.DataFrameModel):
     """Sequence features, keywords, PTMs, isoforms and counts."""
 
     # === Features & Keywords ===
