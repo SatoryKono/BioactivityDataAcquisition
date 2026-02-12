@@ -172,6 +172,7 @@ def find_evidence(
     inverted: dict[str, set[int]],
     lines: list[tuple[Path, int, str]],
     freq: Counter,
+    first_line_idx_by_path: dict[str, int],
 ) -> Evidence | None:
     backticks = [x.strip() for x in BACKTICK_RE.findall(sentence) if x.strip()]
     sentence_tokens = tokenize(sentence)
@@ -182,13 +183,17 @@ def find_evidence(
     for token in probe_tokens:
         candidate_ids |= inverted.get(token, set())
 
-    # Prefer exact backtick references if they exist as path fragments.
-    for idx, (path, line_no, line) in enumerate(lines):
-        for bt in backticks:
-            if bt and bt in str(path).replace("\\", "/"):
-                return Evidence(path=path, line_no=line_no, line=line.strip(), score=10)
-            if bt and bt in line:
-                return Evidence(path=path, line_no=line_no, line=line.strip(), score=9)
+    # Fast path lookup for explicit backtick file references.
+    for bt in backticks:
+        bt_norm = bt.strip().replace("\\", "/")
+        if "/" in bt_norm or bt_norm.endswith((".py", ".md", ".yml", ".yaml", ".toml", ".json")):
+            abs_path = (ROOT / bt_norm).resolve()
+            if abs_path.exists():
+                key = str(abs_path).replace("\\", "/").lower()
+                if key in first_line_idx_by_path:
+                    idx = first_line_idx_by_path[key]
+                    path, line_no, line = lines[idx]
+                    return Evidence(path=path, line_no=line_no, line=line.strip(), score=10)
 
     if not candidate_ids:
         return None
@@ -234,19 +239,33 @@ def rel(path: Path) -> str:
     return str(path.relative_to(ROOT)).replace("\\", "/")
 
 
+def read_text_robust(path: Path) -> str:
+    for enc in ("utf-8", "utf-8-sig", "utf-16", "utf-16-le", "utf-16-be"):
+        try:
+            return path.read_text(encoding=enc)
+        except UnicodeDecodeError:
+            continue
+    return path.read_text(encoding="utf-8", errors="ignore")
+
+
 def generate() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     doc_files = iter_doc_files()
     inverted, lines, freq = build_index()
+    first_line_idx_by_path: dict[str, int] = {}
+    for idx, (path, _, _) in enumerate(lines):
+        key = str(path).replace("\\", "/").lower()
+        if key not in first_line_idx_by_path:
+            first_line_idx_by_path[key] = idx
 
     rows: list[dict[str, str]] = []
     prompt_map: dict[str, list[dict[str, str]]] = defaultdict(list)
 
     for doc in doc_files:
-        text = doc.read_text(encoding="utf-8")
+        text = read_text_robust(doc)
         sentences = extract_sentences(text)
         for i, sentence in enumerate(sentences, start=1):
-            evidence = find_evidence(sentence, inverted, lines, freq)
+            evidence = find_evidence(sentence, inverted, lines, freq, first_line_idx_by_path)
             status = status_for(sentence, evidence)
             code_link = ""
             code_fragment = ""
