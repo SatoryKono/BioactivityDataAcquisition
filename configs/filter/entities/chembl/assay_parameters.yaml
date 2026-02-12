@@ -28,5 +28,5 @@ input_filter:
 gold_filters:
   # Required fields
   required_fields:
-    - assay_chembl_id
+    - assay_id
     - type

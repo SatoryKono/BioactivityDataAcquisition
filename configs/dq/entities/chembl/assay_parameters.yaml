@@ -18,11 +18,11 @@ entity_field_validations:
     nullable: false
     error_message: "Assay parameter ID is required and must be positive"
 
-  - field: assay_chembl_id
+  - field: assay_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "assay_chembl_id must match CHEMBL format"
+    error_message: "assay_id must match CHEMBL format"
 
   - field: type
     type: pattern
@@ -37,7 +37,7 @@ entity_cross_field_validations:
   - name: param_linkage
     fields:
       - assay_param_id
-      - assay_chembl_id
+      - assay_id
     condition: all_present
     error_message: "Both param ID and assay ID are required"
 

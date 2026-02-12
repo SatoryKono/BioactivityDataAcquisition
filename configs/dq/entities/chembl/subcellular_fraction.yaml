@@ -30,11 +30,11 @@ entity_field_validations:
     nullable: true
     error_message: "assay_count must be non-negative"
 
-  - field: example_assay_chembl_id
+  - field: example_assay_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
-    error_message: "example_assay_chembl_id must match CHEMBL format if present"
+    error_message: "example_assay_id must match CHEMBL format if present"
 
 # =============================================================================
 # Cross-Field Validations
