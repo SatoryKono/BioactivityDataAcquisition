@@ -307,11 +307,12 @@ class ColumnOrderer:
         # Match by explicit field names, preserving field order
         for field_name in group.fields:
             field_matches: list[str] = []
+            aliases = self._field_aliases(field_name)
             for col in available:
                 if col in used:
                     continue
                 extracted = self._extract_field_from_qualified(col)
-                if extracted == field_name or col == field_name:
+                if extracted in aliases or col in aliases:
                     field_matches.append(col)
                     used.add(col)
             ordered.extend(self._sort_by_provider(field_matches, group.provider_order))
@@ -374,6 +375,23 @@ class ColumnOrderer:
         if len(parts) == 2:
             return parts[1]  # field.A -> A (conflict suffix) - keep original
         return column
+
+    def _field_aliases(self, field_name: str) -> set[str]:
+        """Return compatibility aliases for evolving field names."""
+        aliases = {field_name}
+        legacy_to_unified = {
+            "pmid": "publication_pmid",
+            "pmc_id": "publication_pmc_id",
+            "doi": "publication_doi",
+            "author_orcids": "author_ormolecule_ids",
+        }
+        if field_name in legacy_to_unified:
+            aliases.add(legacy_to_unified[field_name])
+        # Allow reverse matching when config already uses unified names
+        for legacy, unified in legacy_to_unified.items():
+            if field_name == unified:
+                aliases.add(legacy)
+        return aliases
 
     def filter_by_layer_config(
         self,
