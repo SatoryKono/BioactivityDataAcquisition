@@ -450,6 +450,9 @@ class TestGoldSchemaValidation:
             "_source_batch_id": "batch-001",
             "_ingestion_ts": "2024-01-01T00:00:00Z",
             "_index": 0,
+            "publication_pmid": "12345678",
+            "publication_doi": "10.1234/test",
+            "publication_pmc_id": None,
         }
 
         df = pd.DataFrame([valid_record])
