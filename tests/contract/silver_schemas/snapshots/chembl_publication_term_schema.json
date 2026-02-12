@@ -91,20 +91,6 @@
     "required": true,
     "unique": false
   },
-  "publication_id": {
-    "checks": [
-      {
-        "name": "str_matches",
-        "regex": "^CHEMBL\\d+$"
-      }
-    ],
-    "coerce": false,
-    "description": "FK \u2192 Document ChEMBL ID.",
-    "dtype": "str",
-    "nullable": false,
-    "required": true,
-    "unique": false
-  },
   "entity_id": {
     "checks": [],
     "coerce": false,
@@ -121,6 +107,20 @@
     "dtype": "str",
     "nullable": true,
     "required": false,
+    "unique": false
+  },
+  "publication_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "FK \u2192 Document ChEMBL ID.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "qualifier": {

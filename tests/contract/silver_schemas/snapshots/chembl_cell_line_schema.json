@@ -77,6 +77,15 @@
     "required": false,
     "unique": false
   },
+  "cell_description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Cell line description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "cell_id": {
     "checks": [
       {
@@ -90,15 +99,6 @@
     "nullable": false,
     "required": true,
     "unique": true
-  },
-  "cell_description": {
-    "checks": [],
-    "coerce": false,
-    "description": "Cell line description.",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
   },
   "cell_name": {
     "checks": [],
@@ -119,15 +119,10 @@
     "unique": false
   },
   "cell_source_taxonomy_id": {
-    "checks": [
-      {
-        "name": "greater_than_or_equal_to",
-        "type": "ge"
-      }
-    ],
+    "checks": [],
     "coerce": false,
-    "description": "NCBI Taxonomy ID for source organism. Standardized name (was cell_source_tax_id).",
-    "dtype": "int64",
+    "description": "NCBI Taxonomy ID for source organism (nullable int).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false

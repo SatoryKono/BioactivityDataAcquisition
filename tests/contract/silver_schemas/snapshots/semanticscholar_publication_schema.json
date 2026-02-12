@@ -53,7 +53,7 @@
       }
     ],
     "coerce": false,
-    "description": "How record was resolved: direct, publication_doi, publication_pmid, title_fallback, title_only",
+    "description": "How record was resolved: direct, doi, pmid, title_fallback, title_only",
     "dtype": "str",
     "nullable": false,
     "required": true,
@@ -127,17 +127,26 @@
     "required": true,
     "unique": false
   },
-  "author_ormolecule_ids": {
+  "author_orcids": {
     "checks": [
       {
-        "name": "_check_author_ormolecule_ids"
+        "name": "_check_author_orcids"
       }
     ],
     "coerce": false,
     "description": "JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     "dtype": "str",
     "nullable": true,
-    "required": true,
+    "required": false,
+    "unique": false
+  },
+  "author_ormolecule_ids": {
+    "checks": [],
+    "coerce": false,
+    "description": "Backward-compatible author identifier field (legacy alias for cross-provider pipelines).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
   "author_s2_ids": {
@@ -232,7 +241,7 @@
     "required": true,
     "unique": false
   },
-  "publication_doi": {
+  "doi": {
     "checks": [
       {
         "name": "str_matches",
@@ -365,7 +374,7 @@
     "required": true,
     "unique": false
   },
-  "publication_pmc_id": {
+  "pmc_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -379,7 +388,7 @@
     "required": true,
     "unique": false
   },
-  "publication_pmid": {
+  "pmid": {
     "checks": [
       {
         "name": "str_matches",

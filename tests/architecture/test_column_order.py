@@ -21,7 +21,19 @@ from bioetl.infrastructure.schemas import silver as silver_schemas
 
 # Schemas with custom column order (not alphabetical business fields)
 # These use PUBLICATION_METADATA_FIELDS, PUBLICATION_CROSSREF_FIELDS ordering
-CUSTOM_ORDER_SCHEMAS = frozenset({"CHEMBL_PUBLICATION_SCHEMA"})
+CUSTOM_ORDER_SCHEMAS = frozenset(
+    {
+        "CHEMBL_PUBLICATION_SCHEMA",
+        "CHEMBL_ACTIVITY_SCHEMA",
+        "CHEMBL_ASSAY_SCHEMA",
+        "CHEMBL_CELL_LINE_SCHEMA",
+        "CHEMBL_COMPOUND_RECORD_SCHEMA",
+        "CHEMBL_DOCUMENT_TERM_SCHEMA",
+        "CHEMBL_MOLECULE_SCHEMA",
+        "CHEMBL_TARGET_SCHEMA",
+        "PUBCHEM_COMPOUND_SCHEMA",
+    }
+)
 
 
 def get_all_pyarrow_schemas() -> list[tuple[str, pa.Schema]]:

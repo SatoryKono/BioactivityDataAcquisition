@@ -109,20 +109,6 @@
     "required": false,
     "unique": false
   },
-  "assay_id": {
-    "checks": [
-      {
-        "name": "str_matches",
-        "regex": "^CHEMBL\\d+$"
-      }
-    ],
-    "coerce": false,
-    "description": "ChEMBL ID.",
-    "dtype": "str",
-    "nullable": false,
-    "required": true,
-    "unique": false
-  },
   "assay_classifications": {
     "checks": [],
     "coerce": false,
@@ -139,6 +125,20 @@
     "dtype": "str",
     "nullable": true,
     "required": false,
+    "unique": false
+  },
+  "assay_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "ChEMBL ID.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "assay_organism": {
@@ -182,15 +182,6 @@
     "coerce": false,
     "description": "Subcellular fraction.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
-  "taxonomy_id": {
-    "checks": [],
-    "coerce": false,
-    "description": "NCBI Taxonomy ID (float for nullable int).",
-    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -323,6 +314,15 @@
     "required": false,
     "unique": false
   },
+  "entity_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Unique business identifier for the entity.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
   "publication_id": {
     "checks": [
       {
@@ -335,15 +335,6 @@
     "dtype": "str",
     "nullable": true,
     "required": false,
-    "unique": false
-  },
-  "entity_id": {
-    "checks": [],
-    "coerce": false,
-    "description": "Unique business identifier for the entity.",
-    "dtype": "str",
-    "nullable": false,
-    "required": true,
     "unique": false
   },
   "relationship_description": {
@@ -410,6 +401,15 @@
     "required": false,
     "unique": false
   },
+  "taxonomy_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "NCBI Taxonomy ID (float for nullable int).",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "tissue_id": {
     "checks": [],
     "coerce": false,
@@ -458,7 +458,7 @@
   "variant_sequence": {
     "checks": [],
     "coerce": false,
-    "description": "Variant amino amolecule_id sequence.",
+    "description": "Variant amino acid sequence.",
     "dtype": "str",
     "nullable": true,
     "required": false,
