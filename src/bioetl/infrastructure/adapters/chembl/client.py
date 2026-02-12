@@ -492,7 +492,9 @@ class ChemblAdapter(BaseHttpAdapter):
             if limit and offset >= limit:
                 break
             params = self._build_params(offset, entity_type)
-            params.update(self._build_filter_params(entity_type, filter_field, id_batch))
+            params.update(
+                self._build_filter_params(entity_type, filter_field, id_batch)
+            )
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:

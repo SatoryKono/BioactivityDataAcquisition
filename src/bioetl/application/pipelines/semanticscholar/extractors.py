@@ -305,11 +305,21 @@ def extract_fields_of_study(
     return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 
+def extract_author_ormolecule_ids(authors: list[dict[str, Any]] | None) -> list[str]:
+    """Backward-compatible alias for ORCID extraction.
+
+    Legacy tests and some pipelines still reference ``author_ormolecule_ids``.
+    Keep this alias until all callers migrate to ``extract_author_orcids``.
+    """
+    return extract_author_orcids(authors)
+
+
 __all__ = [
     "OA_STATUS_SET",
     "extract_affiliations",
     "extract_author_h_indices",
     "extract_author_ids",
+    "extract_author_ormolecule_ids",
     "extract_author_orcids",
     "extract_author_s2_ids",
     "extract_authors",
