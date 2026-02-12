@@ -281,6 +281,8 @@ def minimal_pubmed_publication_df():
         PUBMED_SPECIFIC, "pubmed", "pubmed_12345678", "pmid", "12345678"
     )
     df["abstract_structured"] = False
+    # Fix for TestPublicationTypeValid::test_pub_type_present
+    df["publication_type"] = "Journal Article"
     return df
 
 
