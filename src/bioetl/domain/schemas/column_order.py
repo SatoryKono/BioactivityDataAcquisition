@@ -52,10 +52,10 @@ PUBLICATION_METADATA_FIELDS: Final[tuple[str, ...]] = (
 )
 
 PUBLICATION_CROSSREF_FIELDS: Final[tuple[str, ...]] = (
-    "document_chembl_id",
-    "doi",
-    "pmid",
-    "pmc_id",
+    "publication_id",
+    "publication_doi",
+    "publication_pmid",
+    "publication_pmc_id",
 )
 
 

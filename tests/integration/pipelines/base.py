@@ -122,7 +122,7 @@ class IntegrationPipelineTestCase:
     def settings(self):
         """Return generic settings for testing."""
         # Use defaults, usually sufficient as we mock storage
-        # Ensure ENV is not prod to avoid accidental S3 usage if mock fails (safety net)
+        # Ensure ENV is not prod to avoid acmolecule_idental S3 usage if mock fails (safety net)
         os.environ["BIOETL_ENV"] = "dev"
         return Settings()
 

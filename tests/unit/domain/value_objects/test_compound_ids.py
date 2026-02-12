@@ -33,88 +33,88 @@ class TestCompoundId:
 
     def test_from_chembl_valid(self) -> None:
         """Test creation from valid ChEMBL ID."""
-        cid = CompoundId.from_chembl("CHEMBL25")
-        assert cid.value == "CHEMBL25"
-        assert cid.source == CompoundSource.CHEMBL
-        assert cid.is_chembl is True
-        assert cid.is_pubchem is False
+        molecule_id = CompoundId.from_chembl("CHEMBL25")
+        assert molecule_id.value == "CHEMBL25"
+        assert molecule_id.source == CompoundSource.CHEMBL
+        assert molecule_id.is_chembl is True
+        assert molecule_id.is_pubchem is False
 
     def test_from_chembl_normalizes_case(self) -> None:
         """Test ChEMBL ID case normalization."""
-        cid = CompoundId.from_chembl("chembl123")
-        assert cid.value == "CHEMBL123"
+        molecule_id = CompoundId.from_chembl("chembl123")
+        assert molecule_id.value == "CHEMBL123"
 
     def test_from_chembl_removes_leading_zeros(self) -> None:
         """Test ChEMBL ID leading zero removal."""
-        cid = CompoundId.from_chembl("CHEMBL0025")
-        assert cid.value == "CHEMBL25"
+        molecule_id = CompoundId.from_chembl("CHEMBL0025")
+        assert molecule_id.value == "CHEMBL25"
 
     def test_from_pubchem_int_valid(self) -> None:
         """Test creation from PubChem CID integer."""
-        cid = CompoundId.from_pubchem(2244)
-        assert cid.value == "2244"
-        assert cid.source == CompoundSource.PUBCHEM
-        assert cid.is_pubchem is True
-        assert cid.is_chembl is False
+        molecule_id = CompoundId.from_pubchem(2244)
+        assert molecule_id.value == "2244"
+        assert molecule_id.source == CompoundSource.PUBCHEM
+        assert molecule_id.is_pubchem is True
+        assert molecule_id.is_chembl is False
 
     def test_from_pubchem_string_valid(self) -> None:
         """Test creation from PubChem CID string."""
-        cid = CompoundId.from_pubchem("2244")
-        assert cid.value == "2244"
-        assert cid.source == CompoundSource.PUBCHEM
+        molecule_id = CompoundId.from_pubchem("2244")
+        assert molecule_id.value == "2244"
+        assert molecule_id.source == CompoundSource.PUBCHEM
 
     def test_from_raw_chembl(self) -> None:
         """Test from_raw with ChEMBL source."""
-        cid = CompoundId.from_raw("CHEMBL100", "chembl")
-        assert cid.value == "CHEMBL100"
-        assert cid.source == CompoundSource.CHEMBL
+        molecule_id = CompoundId.from_raw("CHEMBL100", "chembl")
+        assert molecule_id.value == "CHEMBL100"
+        assert molecule_id.source == CompoundSource.CHEMBL
 
     def test_from_raw_pubchem(self) -> None:
         """Test from_raw with PubChem source."""
-        cid = CompoundId.from_raw(5988, "pubchem")
-        assert cid.value == "5988"
-        assert cid.source == CompoundSource.PUBCHEM
+        molecule_id = CompoundId.from_raw(5988, "pubchem")
+        assert molecule_id.value == "5988"
+        assert molecule_id.source == CompoundSource.PUBCHEM
 
     def test_from_raw_with_enum_source(self) -> None:
         """Test from_raw with enum source."""
-        cid = CompoundId.from_raw("CHEMBL50", CompoundSource.CHEMBL)
-        assert cid.source == CompoundSource.CHEMBL
+        molecule_id = CompoundId.from_raw("CHEMBL50", CompoundSource.CHEMBL)
+        assert molecule_id.source == CompoundSource.CHEMBL
 
     def test_numeric_id_chembl(self) -> None:
         """Test numeric_id property for ChEMBL."""
-        cid = CompoundId.from_chembl("CHEMBL25")
-        assert cid.numeric_id == 25
+        molecule_id = CompoundId.from_chembl("CHEMBL25")
+        assert molecule_id.numeric_id == 25
 
     def test_numeric_id_pubchem(self) -> None:
         """Test numeric_id property for PubChem."""
-        cid = CompoundId.from_pubchem(2244)
-        assert cid.numeric_id == 2244
+        molecule_id = CompoundId.from_pubchem(2244)
+        assert molecule_id.numeric_id == 2244
 
     def test_as_chembl_id_when_chembl(self) -> None:
         """Test as_chembl_id when source is ChEMBL."""
-        cid = CompoundId.from_chembl("CHEMBL25")
-        chembl = cid.as_chembl_id
+        molecule_id = CompoundId.from_chembl("CHEMBL25")
+        chembl = molecule_id.as_chembl_id
         assert chembl is not None
         assert isinstance(chembl, ChemblId)
         assert chembl.value == "CHEMBL25"
 
     def test_as_chembl_id_when_pubchem(self) -> None:
         """Test as_chembl_id when source is PubChem returns None."""
-        cid = CompoundId.from_pubchem(2244)
-        assert cid.as_chembl_id is None
+        molecule_id = CompoundId.from_pubchem(2244)
+        assert molecule_id.as_chembl_id is None
 
-    def test_as_pubchem_cid_when_pubchem(self) -> None:
-        """Test as_pubchem_cid when source is PubChem."""
-        cid = CompoundId.from_pubchem(2244)
-        pubchem = cid.as_pubchem_cid
+    def test_as_pubchem_molecule_id_when_pubchem(self) -> None:
+        """Test as_pubchem_molecule_id when source is PubChem."""
+        molecule_id = CompoundId.from_pubchem(2244)
+        pubchem = molecule_id.as_pubchem_molecule_id
         assert pubchem is not None
         assert isinstance(pubchem, PubChemCid)
         assert pubchem.value == 2244
 
-    def test_as_pubchem_cid_when_chembl(self) -> None:
-        """Test as_pubchem_cid when source is ChEMBL returns None."""
-        cid = CompoundId.from_chembl("CHEMBL25")
-        assert cid.as_pubchem_cid is None
+    def test_as_pubchem_molecule_id_when_chembl(self) -> None:
+        """Test as_pubchem_molecule_id when source is ChEMBL returns None."""
+        molecule_id = CompoundId.from_chembl("CHEMBL25")
+        assert molecule_id.as_pubchem_molecule_id is None
 
     def test_invalid_chembl_format_raises(self) -> None:
         """Test invalid ChEMBL format raises ValueError."""
@@ -138,41 +138,41 @@ class TestCompoundId:
 
     def test_immutability(self) -> None:
         """Test CompoundId is immutable (frozen dataclass)."""
-        cid = CompoundId.from_chembl("CHEMBL25")
+        molecule_id = CompoundId.from_chembl("CHEMBL25")
         with pytest.raises(Exception):  # FrozenInstanceError
-            cid.value = "CHEMBL100"  # type: ignore[misc]
+            molecule_id.value = "CHEMBL100"  # type: ignore[misc]
 
     def test_equality_same_source(self) -> None:
         """Test equality for same source."""
-        cid1 = CompoundId.from_chembl("CHEMBL25")
-        cid2 = CompoundId.from_chembl("chembl25")
-        assert cid1 == cid2
+        molecule_id1 = CompoundId.from_chembl("CHEMBL25")
+        molecule_id2 = CompoundId.from_chembl("chembl25")
+        assert molecule_id1 == molecule_id2
 
     def test_inequality_different_sources(self) -> None:
         """Test inequality for different sources."""
-        cid1 = CompoundId.from_chembl("CHEMBL25")
-        cid2 = CompoundId.from_pubchem(25)
-        assert cid1 != cid2
+        molecule_id1 = CompoundId.from_chembl("CHEMBL25")
+        molecule_id2 = CompoundId.from_pubchem(25)
+        assert molecule_id1 != molecule_id2
 
     def test_inequality_different_values(self) -> None:
         """Test inequality for different values."""
-        cid1 = CompoundId.from_chembl("CHEMBL25")
-        cid2 = CompoundId.from_chembl("CHEMBL100")
-        assert cid1 != cid2
+        molecule_id1 = CompoundId.from_chembl("CHEMBL25")
+        molecule_id2 = CompoundId.from_chembl("CHEMBL100")
+        assert molecule_id1 != molecule_id2
 
     def test_hash_consistency(self) -> None:
         """Test hash is consistent with equality."""
-        cid1 = CompoundId.from_chembl("CHEMBL25")
-        cid2 = CompoundId.from_chembl("chembl25")
-        assert hash(cid1) == hash(cid2)
+        molecule_id1 = CompoundId.from_chembl("CHEMBL25")
+        molecule_id2 = CompoundId.from_chembl("chembl25")
+        assert hash(molecule_id1) == hash(molecule_id2)
 
     def test_str(self) -> None:
         """Test string representation includes source."""
-        cid = CompoundId.from_chembl("CHEMBL25")
-        assert str(cid) == "chembl:CHEMBL25"
+        molecule_id = CompoundId.from_chembl("CHEMBL25")
+        assert str(molecule_id) == "chembl:CHEMBL25"
 
-        cid2 = CompoundId.from_pubchem(2244)
-        assert str(cid2) == "pubchem:2244"
+        molecule_id2 = CompoundId.from_pubchem(2244)
+        assert str(molecule_id2) == "pubchem:2244"
 
     def test_can_be_used_in_set(self) -> None:
         """Test CompoundId can be used in set."""

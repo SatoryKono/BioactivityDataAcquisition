@@ -17,19 +17,19 @@ class ActivityRecord(BaseModel):
     """Bioactivity measurement DTO from ChEMBL.
 
     Represents a single activity measurement from ChEMBL API.
-    Required fields: activity_id, molecule_chembl_id.
+    Required fields: activity_id, molecule_id.
 
     Example:
         >>> record = ActivityRecord(
         ...     activity_id="12345",
-        ...     molecule_chembl_id="CHEMBL25",
-        ...     assay_chembl_id="CHEMBL1000",
+        ...     molecule_id="CHEMBL25",
+        ...     assay_id="CHEMBL1000",
         ...     standard_type="IC50",
         ...     standard_value=5.0,
         ...     standard_units="nM",
         ... )
         >>> record.model_dump()
-        {'activity_id': '12345', 'molecule_chembl_id': 'CHEMBL25', ...}
+        {'activity_id': '12345', 'molecule_id': 'CHEMBL25', ...}
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -37,15 +37,15 @@ class ActivityRecord(BaseModel):
     # Primary identifier (REQUIRED)
     activity_id: str = Field(description="Unique activity identifier")
 
-    # Core identifiers (REQUIRED: molecule_chembl_id)
-    molecule_chembl_id: str = Field(description="ChEMBL ID of tested molecule")
-    assay_chembl_id: str | None = Field(
+    # Core identifiers (REQUIRED: molecule_id)
+    molecule_id: str = Field(description="ChEMBL ID of tested molecule")
+    assay_id: str | None = Field(
         default=None, description="ChEMBL ID of the assay"
     )
-    target_chembl_id: str | None = Field(
+    target_id: str | None = Field(
         default=None, description="ChEMBL ID of the target"
     )
-    document_chembl_id: str | None = Field(
+    publication_id: str | None = Field(
         default=None, description="ChEMBL ID of the source document"
     )
 
@@ -92,7 +92,7 @@ class ActivityRecord(BaseModel):
     molecule_pref_name: str | None = Field(
         default=None, description="Molecule preferred name"
     )
-    parent_molecule_chembl_id: str | None = Field(
+    parent_molecule_id: str | None = Field(
         default=None, description="Parent molecule ChEMBL ID"
     )
 
@@ -134,10 +134,10 @@ class ActivityRecord(BaseModel):
     toid: int | None = Field(default=None, description="Test Occasion ID")
 
     # Document data (denormalized)
-    document_journal: str | None = Field(
+    journal: str | None = Field(
         default=None, description="Source journal name"
     )
-    document_year: int | None = Field(default=None, description="Publication year")
+    publication_year: int | None = Field(default=None, description="Publication year")
 
     # Data quality annotations
     activity_comment: str | None = Field(
@@ -188,21 +188,21 @@ class AssayRecord(BaseModel):
     """Bioassay definition DTO from ChEMBL.
 
     Represents a bioassay protocol from ChEMBL API.
-    Required field: assay_chembl_id.
+    Required field: assay_id.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    assay_chembl_id: str = Field(description="Unique assay ChEMBL ID")
+    assay_id: str = Field(description="Unique assay ChEMBL ID")
 
     # Core identifiers
-    target_chembl_id: str | None = Field(default=None, description="Target ChEMBL ID")
-    document_chembl_id: str | None = Field(
+    target_id: str | None = Field(default=None, description="Target ChEMBL ID")
+    publication_id: str | None = Field(
         default=None, description="Source document ChEMBL ID"
     )
-    cell_chembl_id: str | None = Field(default=None, description="Cell line ChEMBL ID")
-    tissue_chembl_id: str | None = Field(default=None, description="Tissue ChEMBL ID")
+    cell_id: str | None = Field(default=None, description="Cell line ChEMBL ID")
+    tissue_id: str | None = Field(default=None, description="Tissue ChEMBL ID")
     src_id: int | None = Field(default=None, description="Data source ID")
     src_assay_id: str | None = Field(
         default=None, description="Original source assay ID"
@@ -273,7 +273,7 @@ class AssayRecord(BaseModel):
     )
     variant_organism: str | None = Field(default=None, description="Variant organism")
     variant_sequence: str | None = Field(
-        default=None, description="Variant amino acid sequence"
+        default=None, description="Variant amino amolecule_id sequence"
     )
     variant_tax_id: int | None = Field(
         default=None, description="Variant NCBI Taxonomy ID"
@@ -295,13 +295,13 @@ class MoleculeRecord(BaseModel):
     """Chemical compound DTO from ChEMBL.
 
     Represents a molecule/compound from ChEMBL API.
-    Required field: molecule_chembl_id.
+    Required field: molecule_id.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    molecule_chembl_id: str = Field(description="Unique molecule ChEMBL ID")
+    molecule_id: str = Field(description="Unique molecule ChEMBL ID")
 
     # Core metadata
     pref_name: str | None = Field(default=None, description="Preferred molecule name")
@@ -445,13 +445,13 @@ class TargetRecord(BaseModel):
     """Biological target DTO from ChEMBL.
 
     Represents a drug target from ChEMBL API.
-    Required field: target_chembl_id.
+    Required field: target_id.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    target_chembl_id: str = Field(description="Unique target ChEMBL ID")
+    target_id: str = Field(description="Unique target ChEMBL ID")
 
     # Core metadata
     pref_name: str | None = Field(default=None, description="Preferred target name")
@@ -512,7 +512,7 @@ class ChemblPublicationRecord(BaseModel):
     """Scientific publication DTO from ChEMBL.
 
     Represents a publication from ChEMBL API (/document endpoint).
-    Required field: document_chembl_id.
+    Required field: publication_id.
 
     Note: Previously named DocumentRecord. The ChEMBL API uses 'document'
     as the endpoint name, but we use 'Publication' for Ubiquitous Language
@@ -522,7 +522,7 @@ class ChemblPublicationRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    document_chembl_id: str = Field(description="Unique document ChEMBL ID")
+    publication_id: str = Field(description="Unique document ChEMBL ID")
 
     # Publication identifiers
     pubmed_id: str | None = Field(
@@ -566,7 +566,7 @@ class ChemblPublicationTermRecord(BaseModel):
     a ChEMBL publication. This is a derived entity extracted from Publication
     records by flattening the 1:M relationship.
 
-    Required fields: document_chembl_id, term, term_type.
+    Required fields: publication_id, term, term_type.
 
     Note: Previously named DocumentTermRecord per ADR-024.
     """
@@ -574,7 +574,7 @@ class ChemblPublicationTermRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # === Composite Key Fields (REQUIRED) ===
-    document_chembl_id: str = Field(description="FK → Document ChEMBL ID")
+    publication_id: str = Field(description="FK → Document ChEMBL ID")
     term: str = Field(min_length=1, description="Term text (e.g., 'Aspirin')")
     term_type: str = Field(
         description="Term type: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT"
@@ -593,13 +593,13 @@ class CellLineRecord(BaseModel):
     """Cell line DTO from ChEMBL.
 
     Represents a cell line from ChEMBL API.
-    Required fields: cell_chembl_id, cell_name.
+    Required fields: cell_id, cell_name.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    cell_chembl_id: str = Field(description="Unique cell line ChEMBL ID")
+    cell_id: str = Field(description="Unique cell line ChEMBL ID")
 
     # Core metadata (REQUIRED)
     cell_name: str = Field(description="Cell line name")

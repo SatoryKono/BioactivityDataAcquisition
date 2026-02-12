@@ -68,7 +68,7 @@ def seed_molecule_df() -> pl.DataFrame:
             "_dq_warn": [False, False, False],
             "_dq_error": [False, False, False],
             # Business fields
-            "molecule_chembl_id": ["CHEMBL25", "CHEMBL192", "CHEMBL941"],
+            "molecule_id": ["CHEMBL25", "CHEMBL192", "CHEMBL941"],
             "pref_name": ["ASPIRIN", "IBUPROFEN", "IMATINIB"],
             "inchi_key": [
                 "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",  # Aspirin
@@ -104,9 +104,9 @@ def enricher_pubchem_df() -> pl.DataFrame:
             "_index": [0, 1],
             "_dq_warn": [False, False],
             "_dq_error": [False, False],
-            # Business fields - matches aspirin and ibuprofen by inchikey
-            "cid": ["2244", "3672"],
-            "inchikey": [
+            # Business fields - matches aspirin and ibuprofen by inchi_key
+            "molecule_id": ["2244", "3672"],
+            "inchi_key": [
                 "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",  # Aspirin
                 "HEFNNWSXXWATRW-UHFFFAOYSA-N",  # Ibuprofen
             ],
@@ -115,8 +115,8 @@ def enricher_pubchem_df() -> pl.DataFrame:
                 "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",  # Ibuprofen
             ],
             "iupac_name": [
-                "2-acetoxybenzoic acid",
-                "2-(4-isobutylphenyl)propionic acid",
+                "2-acetoxybenzoic amolecule_id",
+                "2-(4-isobutylphenyl)propionic amolecule_id",
             ],
             "molecular_weight": [180.157, 206.285],
             "molecular_formula": ["C9H8O4", "C13H18O2"],
@@ -136,7 +136,7 @@ def composite_molecule_config() -> CompositeConfig:
         version="1.0.0",
         seed=SeedConfig(
             pipeline="chembl_molecule",
-            output_keys=("molecule_chembl_id", "inchi_key", "canonical_smiles"),
+            output_keys=("molecule_id", "inchi_key", "canonical_smiles"),
             silver_table="silver/chembl/molecule",
         ),
         enrichers=(
@@ -173,7 +173,7 @@ def composite_molecule_config() -> CompositeConfig:
                 ),
                 ColumnGroupConfig(
                     name="identifiers",
-                    fields=("molecule_chembl_id", "cid", "inchi_key", "inchikey"),
+                    fields=("molecule_id", "molecule_id", "inchi_key", "inchi_key"),
                     pattern=None,
                     provider_order=("chembl", "pubchem"),
                 ),
@@ -208,9 +208,9 @@ class TestCompositeMoleculePipeline:
 
         # All seed records should be preserved
         assert len(seed_renamed) == 3
-        assert "chembl.molecule.molecule_chembl_id" in seed_renamed.columns
+        assert "chembl.molecule.molecule_id" in seed_renamed.columns
 
-    def test_enricher_join_by_inchikey(
+    def test_enricher_join_by_inchi_key(
         self,
         mock_logger: LoggerPort,
         seed_molecule_df: pl.DataFrame,
@@ -229,14 +229,14 @@ class TestCompositeMoleculePipeline:
 
         # Verify renamed columns exist
         assert "chembl.molecule.inchi_key" in seed_renamed.columns
-        assert "pubchem.compound.inchikey" in enricher_renamed.columns
+        assert "pubchem.compound.inchi_key" in enricher_renamed.columns
 
-        # Perform join on inchikey
+        # Perform join on inchi_key
         # Note: In real merge, join keys are normalized
         joined = seed_renamed.join(
             enricher_renamed,
             left_on="chembl.molecule.inchi_key",
-            right_on="pubchem.compound.inchikey",
+            right_on="pubchem.compound.inchi_key",
             how="left",
         )
 
@@ -245,9 +245,9 @@ class TestCompositeMoleculePipeline:
         assert len(joined) == 3
 
         # Check that PubChem CID is populated for matched records
-        cid_col = "pubchem.compound.cid"
-        if cid_col in joined.columns:
-            non_null_count = joined.filter(pl.col(cid_col).is_not_null()).height
+        molecule_id_col = "pubchem.compound.molecule_id"
+        if molecule_id_col in joined.columns:
+            non_null_count = joined.filter(pl.col(molecule_id_col).is_not_null()).height
             assert non_null_count == 2, "Expected 2 records with PubChem CID"
 
     def test_conflict_resolution_field_priorities(
@@ -284,18 +284,18 @@ class TestCompositeMoleculePipeline:
         # All 3 seed records should be preserved
         assert len(seed_renamed) == 3
 
-    def test_inchikey_format_validation(
+    def test_inchi_key_format_validation(
         self,
         seed_molecule_df: pl.DataFrame,
     ) -> None:
         """Verify InChIKey format is valid (27 chars, XXXXX-YYYYY-Z)."""
         import re
 
-        inchikey_pattern = r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+        inchi_key_pattern = r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
 
-        for inchikey in seed_molecule_df["inchi_key"].to_list():
-            assert re.match(inchikey_pattern, inchikey), (
-                f"Invalid InChIKey format: {inchikey}"
+        for inchi_key in seed_molecule_df["inchi_key"].to_list():
+            assert re.match(inchi_key_pattern, inchi_key), (
+                f"Invalid InChIKey format: {inchi_key}"
             )
 
     def test_column_groups_ordering(
@@ -313,7 +313,7 @@ class TestCompositeMoleculePipeline:
         # Identifiers group should contain primary keys
         identifiers = next((g for g in groups if g.name == "identifiers"), None)
         assert identifiers is not None
-        assert "molecule_chembl_id" in identifiers.fields
+        assert "molecule_id" in identifiers.fields
 
 
 @pytest.mark.integration
@@ -325,7 +325,7 @@ class TestMoleculeFieldMapping:
         # Key mappings that should work
         mappings = {
             # ChEMBL -> PubChem (same field, different naming)
-            "inchi_key": "inchikey",
+            "inchi_key": "inchi_key",
             "canonical_smiles": "canonical_smiles",  # Same name
             "standard_inchi": "inchi",
             # ChEMBL -> PubChem (different concepts)
@@ -341,7 +341,7 @@ class TestMoleculeFieldMapping:
     def test_chembl_only_fields(self) -> None:
         """Verify ChEMBL-only fields are preserved."""
         chembl_only_fields = [
-            "molecule_chembl_id",
+            "molecule_id",
             "max_phase",
             "first_approval",
             "therapeutic_flag",
@@ -359,7 +359,7 @@ class TestMoleculeFieldMapping:
     def test_pubchem_only_fields(self) -> None:
         """Verify PubChem-only fields are preserved."""
         pubchem_only_fields = [
-            "cid",
+            "molecule_id",
             "iupac_name",
             "isomeric_smiles",
         ]

@@ -59,9 +59,9 @@ async def test_chembl_transform_bronze_to_silver_happy_path(chembl_pipeline):
     """Test the transform_bronze_to_silver method with a valid record."""
     record = {
         "activity_id": 123,
-        "molecule_chembl_id": "CHEMBL1",
-        "target_chembl_id": "CHEMBL2",
-        "assay_chembl_id": "CHEMBL3",
+        "molecule_id": "CHEMBL1",
+        "target_id": "CHEMBL2",
+        "assay_id": "CHEMBL3",
         "standard_type": "IC50",
         "standard_value": "10.5",
         "standard_units": "nM",
@@ -81,7 +81,7 @@ async def test_chembl_transform_bronze_to_silver_happy_path(chembl_pipeline):
 @pytest.mark.asyncio
 async def test_chembl_transform_bronze_to_silver_no_activity_id(chembl_pipeline):
     """Test that records with no activity_id are skipped."""
-    record = {"molecule_chembl_id": "CHEMBL1"}
+    record = {"molecule_id": "CHEMBL1"}
     context = PipelineContext(
         run_id=chembl_pipeline.context.run_id,
         run_type=chembl_pipeline.context.run_type,
@@ -96,7 +96,7 @@ def test_chembl_should_write_gold_true(chembl_pipeline):
     record = {
         "standard_value": 10.5,
         "standard_units": "nM",
-        "target_chembl_id": "CHEMBL2",
+        "target_id": "CHEMBL2",
         "standard_type": "IC50",
         "standard_relation": "=",
         "assay_type": "B",
@@ -121,7 +121,7 @@ def test_chembl_should_write_gold_false(chembl_pipeline):
     # No standard value
     record1 = {
         "standard_units": "nM",
-        "target_chembl_id": "CHEMBL2",
+        "target_id": "CHEMBL2",
         "standard_type": "IC50",
     }
     assert chembl_pipeline.transformer.should_write_gold(context, record1) is False
@@ -129,7 +129,7 @@ def test_chembl_should_write_gold_false(chembl_pipeline):
     # No standard units
     record2 = {
         "standard_value": 10.5,
-        "target_chembl_id": "CHEMBL2",
+        "target_id": "CHEMBL2",
         "standard_type": "IC50",
     }
     assert chembl_pipeline.transformer.should_write_gold(context, record2) is False
@@ -142,7 +142,7 @@ def test_chembl_should_write_gold_false(chembl_pipeline):
     record4 = {
         "standard_value": 10.5,
         "standard_units": "nM",
-        "target_chembl_id": "CHEMBL2",
+        "target_id": "CHEMBL2",
         "standard_type": "Other",
     }
     assert chembl_pipeline.transformer.should_write_gold(context, record4) is False

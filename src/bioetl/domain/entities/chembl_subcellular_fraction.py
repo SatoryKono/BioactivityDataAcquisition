@@ -43,7 +43,7 @@ class SubcellularFraction(BaseEntity):
     assay_count: int | None = None  # Number of assays using this fraction
 
     # === Example Source Reference ===
-    example_assay_chembl_id: str | None = None  # One assay using this fraction
+    example_assay_id: str | None = None  # One assay using this fraction
 
     def __post_init__(self) -> None:
         super().__post_init__()

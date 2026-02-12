@@ -36,7 +36,7 @@ class MockDataSource:
 
 # Sample document records for testing
 SAMPLE_DOCUMENT_WITH_TERMS = {
-    "document_chembl_id": "CHEMBL1123456",
+    "publication_id": "CHEMBL1123456",
     "title": "Test Document",
     "mesh_terms": [
         {
@@ -54,20 +54,20 @@ SAMPLE_DOCUMENT_WITH_TERMS = {
 }
 
 SAMPLE_DOCUMENT_EMPTY_TERMS = {
-    "document_chembl_id": "CHEMBL9999999",
+    "publication_id": "CHEMBL9999999",
     "title": "Document without terms",
     "mesh_terms": [],
     "keywords": [],
 }
 
 SAMPLE_DOCUMENT_NO_TERMS = {
-    "document_chembl_id": "CHEMBL8888888",
+    "publication_id": "CHEMBL8888888",
     "title": "Document with no term fields",
     # No mesh_terms or keywords fields at all
 }
 
 SAMPLE_DOCUMENT_INVALID_MESH = {
-    "document_chembl_id": "CHEMBL7777777",
+    "publication_id": "CHEMBL7777777",
     "title": "Document with invalid mesh",
     "mesh_terms": ["invalid", None, 123],  # Not dicts
     "keywords": ["valid_keyword"],
@@ -208,7 +208,7 @@ class TestPublicationTermDataSourceFetch:
 
         # Should get the original documents, not terms
         assert len(records) == 2
-        assert all("document_chembl_id" in r for r in records)
+        assert all("publication_id" in r for r in records)
 
     @pytest.mark.asyncio
     async def test_fetch_publication_term_empty_result(
@@ -329,7 +329,7 @@ class TestPublicationTermDataSourceRecordFormat:
 
         for term in terms:
             assert "entity_id" in term
-            assert "document_chembl_id" in term
+            assert "publication_id" in term
             assert "term" in term
             assert "term_type" in term
             assert "mesh_id" in term
@@ -430,7 +430,7 @@ class TestPublicationTermDataSourceEdgeCases:
 
     @pytest.mark.asyncio
     async def test_document_without_chembl_id_skipped(self):
-        """Test documents without document_chembl_id are skipped."""
+        """Test documents without publication_id are skipped."""
         source = MockDataSource(
             documents=[
                 {"title": "No ID document", "mesh_terms": [], "keywords": ["test"]}
@@ -450,7 +450,7 @@ class TestPublicationTermDataSourceEdgeCases:
         source = MockDataSource(
             documents=[
                 {
-                    "document_chembl_id": "CHEMBL1",
+                    "publication_id": "CHEMBL1",
                     "keywords": ["  spaced  ", "\ttabbed\t", "  ", ""],
                     "mesh_terms": [],
                 }
@@ -473,12 +473,12 @@ class TestPublicationTermDataSourceEdgeCases:
         source = MockDataSource(
             documents=[
                 {
-                    "document_chembl_id": "CHEMBL1",
+                    "publication_id": "CHEMBL1",
                     "keywords": ["term1"],
                     "mesh_terms": [],
                 },
                 {
-                    "document_chembl_id": "CHEMBL2",
+                    "publication_id": "CHEMBL2",
                     "keywords": ["term2"],
                     "mesh_terms": [],
                 },
@@ -491,7 +491,7 @@ class TestPublicationTermDataSourceEdgeCases:
             terms.append(term)
 
         assert len(terms) == 2
-        doc_ids = {t["document_chembl_id"] for t in terms}
+        doc_ids = {t["publication_id"] for t in terms}
         assert doc_ids == {"CHEMBL1", "CHEMBL2"}
 
     @pytest.mark.asyncio
@@ -509,7 +509,7 @@ class TestPublicationTermDataSourceEdgeCases:
         source = TrackingMockDataSource(
             documents=[
                 {
-                    "document_chembl_id": "CHEMBL1",
+                    "publication_id": "CHEMBL1",
                     "keywords": ["test"],
                     "mesh_terms": [],
                 }
@@ -521,14 +521,14 @@ class TestPublicationTermDataSourceEdgeCases:
         async for term in wrapper.fetch(
             "publication_term",
             filter_ids=["CHEMBL1", "CHEMBL2"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
         ):
             terms.append(term)
 
         # Verify fetch was called with publication entity type (ADR-024 naming)
         assert call_args["entity_type"] == "publication"
         assert call_args["filter_ids"] == ["CHEMBL1", "CHEMBL2"]
-        assert call_args["filter_field"] == "document_chembl_id"
+        assert call_args["filter_field"] == "publication_id"
 
 
 class MockFilterableDataSource:
@@ -597,7 +597,7 @@ class TestPublicationTermFilterable:
         async for term in wrapper.fetch_filtered(
             entity_type="publication_term",
             filter_ids=["CHEMBL1123456"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
         ):
             terms.append(term)
 
@@ -613,12 +613,12 @@ class TestPublicationTermFilterable:
         async for record in wrapper.fetch_filtered(
             entity_type="document",
             filter_ids=["CHEMBL1123456"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
         ):
             records.append(record)
 
         assert len(records) == 1
-        assert "document_chembl_id" in records[0]
+        assert "publication_id" in records[0]
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_limit(self):
@@ -630,7 +630,7 @@ class TestPublicationTermFilterable:
         async for term in wrapper.fetch_filtered(
             entity_type="publication_term",
             filter_ids=["CHEMBL1123456"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
             limit=2,
         ):
             terms.append(term)
@@ -649,7 +649,7 @@ class TestPublicationTermFilterable:
             async for _ in wrapper.fetch_filtered(
                 entity_type="publication_term",
                 filter_ids=["CHEMBL1123456"],
-                filter_field="document_chembl_id",
+                filter_field="publication_id",
             ):
                 pass
 
@@ -662,7 +662,7 @@ class TestPublicationTermFilterable:
         terms = []
         async for term in wrapper.fetch_multi_filtered(
             entity_type="publication_term",
-            filters={"document_chembl_id": ["CHEMBL1123456"]},
+            filters={"publication_id": ["CHEMBL1123456"]},
         ):
             terms.append(term)
 
@@ -677,7 +677,7 @@ class TestPublicationTermFilterable:
         records = []
         async for record in wrapper.fetch_multi_filtered(
             entity_type="document",
-            filters={"document_chembl_id": ["CHEMBL1123456"]},
+            filters={"publication_id": ["CHEMBL1123456"]},
         ):
             records.append(record)
 
@@ -692,7 +692,7 @@ class TestPublicationTermFilterable:
         terms = []
         async for term in wrapper.fetch_multi_filtered(
             entity_type="publication_term",
-            filters={"document_chembl_id": ["CHEMBL1123456"]},
+            filters={"publication_id": ["CHEMBL1123456"]},
             limit=3,
         ):
             terms.append(term)
@@ -701,20 +701,20 @@ class TestPublicationTermFilterable:
 
     @pytest.mark.asyncio
     async def test_fetch_multi_filtered_skips_no_chembl_id(self):
-        """Test fetch_multi_filtered skips docs without document_chembl_id."""
+        """Test fetch_multi_filtered skips docs without publication_id."""
         source = MockFilterableDataSource(
-            documents=[SAMPLE_DOCUMENT_NO_TERMS]  # Has no document_chembl_id field
+            documents=[SAMPLE_DOCUMENT_NO_TERMS]  # Has no publication_id field
         )
-        # Add document_chembl_id to make it valid
+        # Add publication_id to make it valid
         doc = {**SAMPLE_DOCUMENT_NO_TERMS}
-        doc.pop("document_chembl_id", None)
+        doc.pop("publication_id", None)
         source._documents = [{"title": "No ID", "keywords": ["test"], "mesh_terms": []}]
         wrapper = PublicationTermDataSource(data_source=source)
 
         terms = []
         async for term in wrapper.fetch_multi_filtered(
             entity_type="publication_term",
-            filters={"document_chembl_id": ["CHEMBL1"]},
+            filters={"publication_id": ["CHEMBL1"]},
         ):
             terms.append(term)
 
@@ -731,7 +731,7 @@ class TestPublicationTermFilterable:
         ):
             async for _ in wrapper.fetch_multi_filtered(
                 entity_type="publication_term",
-                filters={"document_chembl_id": ["CHEMBL1"]},
+                filters={"publication_id": ["CHEMBL1"]},
             ):
                 pass
 
@@ -745,7 +745,7 @@ class TestPublicationTermFilterable:
         async for term in wrapper.fetch_filtered_with_fallback(
             entity_type="publication_term",
             filter_ids=["CHEMBL1123456"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
             fallback_mapping={"CHEMBL1123456": "Test Document"},
         ):
             terms.append(term)
@@ -762,7 +762,7 @@ class TestPublicationTermFilterable:
         async for record in wrapper.fetch_filtered_with_fallback(
             entity_type="document",
             filter_ids=["CHEMBL1123456"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
             fallback_mapping={"CHEMBL1123456": "Test"},
         ):
             records.append(record)
@@ -779,7 +779,7 @@ class TestPublicationTermFilterable:
         async for term in wrapper.fetch_filtered_with_fallback(
             entity_type="publication_term",
             filter_ids=["CHEMBL1123456"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
             fallback_mapping={"CHEMBL1123456": "Test"},
             limit=2,
         ):
@@ -799,7 +799,7 @@ class TestPublicationTermFilterable:
             async for _ in wrapper.fetch_filtered_with_fallback(
                 entity_type="publication_term",
                 filter_ids=["CHEMBL1"],
-                filter_field="document_chembl_id",
+                filter_field="publication_id",
                 fallback_mapping={},
             ):
                 pass

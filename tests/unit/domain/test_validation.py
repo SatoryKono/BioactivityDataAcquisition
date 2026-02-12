@@ -32,7 +32,7 @@ class TestValidateSmiles:
         [
             ("CCO", True),  # Ethanol
             ("C1=CC=CC=C1", True),  # Benzene
-            ("CC(=O)O", True),  # Acetic acid
+            ("CC(=O)O", True),  # Acetic amolecule_id
             ("CN1C=NC2=C1C(=O)N(C(=O)N2C)C", True),  # Caffeine
             ("c1ccccc1", True),  # Benzene (aromatic)
             ("[Na+].[Cl-]", True),  # NaCl

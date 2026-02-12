@@ -208,7 +208,7 @@
     "required": false,
     "unique": false
   },
-  "target_chembl_id": {
+  "target_id": {
     "checks": [
       {
         "name": "str_matches",

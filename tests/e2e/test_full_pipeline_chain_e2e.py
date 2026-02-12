@@ -183,16 +183,16 @@ async def test_pipeline_isolation(e2e_data_dir: Path):
     target_records = get_silver_records(e2e_data_dir, "chembl_target")
     molecule_records = get_silver_records(e2e_data_dir, "chembl_molecule")
 
-    # Verify data isolation - targets should have target_chembl_id
+    # Verify data isolation - targets should have target_id
     for record in target_records:
-        assert "target_chembl_id" in record
-        # Should NOT have molecule_chembl_id as primary identifier
+        assert "target_id" in record
+        # Should NOT have molecule_id as primary identifier
         # (though it might have it as a reference field)
 
-    # Verify molecules have molecule_chembl_id
+    # Verify molecules have molecule_id
     for record in molecule_records:
-        assert "molecule_chembl_id" in record
-        # Should NOT have target_chembl_id as primary identifier
+        assert "molecule_id" in record
+        # Should NOT have target_id as primary identifier
 
 
 @pytest.mark.e2e

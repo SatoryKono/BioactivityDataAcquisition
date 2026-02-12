@@ -52,7 +52,7 @@ class TestSubcellularFractionTransformer:
             "entity_id": "a1b2c3d4e5f67890",
             "subcellular_fraction": "Microsomes",
             "assay_count": 42,
-            "example_assay_chembl_id": "CHEMBL123456",
+            "example_assay_id": "CHEMBL123456",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -60,7 +60,7 @@ class TestSubcellularFractionTransformer:
         assert result is not None
         assert result["subcellular_fraction"] == "Microsomes"
         assert result["assay_count"] == 42
-        assert result["example_assay_chembl_id"] == "CHEMBL123456"
+        assert result["example_assay_id"] == "CHEMBL123456"
         assert result["entity_id"] == "a1b2c3d4e5f67890"
         assert "content_hash" in result
         assert "_run_id" in result
@@ -210,7 +210,7 @@ class TestSubcellularFractionTransformer:
         record = {
             "subcellular_fraction": "S9 fraction",
             "assay_count": None,
-            "example_assay_chembl_id": None,
+            "example_assay_id": None,
         }
 
         result = await transformer.transform(mock_context, record, index=0)
@@ -218,7 +218,7 @@ class TestSubcellularFractionTransformer:
         assert result is not None
         assert result["subcellular_fraction"] == "S9 fraction"
         assert result["assay_count"] is None
-        assert result["example_assay_chembl_id"] is None
+        assert result["example_assay_id"] is None
 
 
 @pytest.mark.unit
@@ -302,7 +302,7 @@ class TestExtractFractionFromAssay:
     ) -> None:
         """Test extraction from valid assay record."""
         assay = {
-            "assay_chembl_id": "CHEMBL123456",
+            "assay_id": "CHEMBL123456",
             "assay_subcellular_fraction": "Microsomes",
         }
 
@@ -310,7 +310,7 @@ class TestExtractFractionFromAssay:
 
         assert result is not None
         assert result["subcellular_fraction"] == "Microsomes"
-        assert result["example_assay_chembl_id"] == "CHEMBL123456"
+        assert result["example_assay_id"] == "CHEMBL123456"
         assert result["assay_count"] == 1
 
     def test_extract_missing_fraction(
@@ -319,7 +319,7 @@ class TestExtractFractionFromAssay:
     ) -> None:
         """Test extraction returns None when fraction is missing."""
         assay = {
-            "assay_chembl_id": "CHEMBL123456",
+            "assay_id": "CHEMBL123456",
             # No assay_subcellular_fraction field
         }
 
@@ -333,7 +333,7 @@ class TestExtractFractionFromAssay:
     ) -> None:
         """Test extraction returns None when fraction is empty."""
         assay = {
-            "assay_chembl_id": "CHEMBL123456",
+            "assay_id": "CHEMBL123456",
             "assay_subcellular_fraction": "",
         }
 
@@ -347,7 +347,7 @@ class TestExtractFractionFromAssay:
     ) -> None:
         """Test extraction returns None when fraction is None."""
         assay = {
-            "assay_chembl_id": "CHEMBL123456",
+            "assay_id": "CHEMBL123456",
             "assay_subcellular_fraction": None,
         }
 
@@ -361,7 +361,7 @@ class TestExtractFractionFromAssay:
     ) -> None:
         """Test extraction returns None for whitespace-only fraction."""
         assay = {
-            "assay_chembl_id": "CHEMBL123456",
+            "assay_id": "CHEMBL123456",
             "assay_subcellular_fraction": "   ",
         }
 
@@ -373,7 +373,7 @@ class TestExtractFractionFromAssay:
         self,
         transformer: SubcellularFractionTransformer,
     ) -> None:
-        """Test extraction works without assay_chembl_id."""
+        """Test extraction works without assay_id."""
         assay = {
             "assay_subcellular_fraction": "Cytosol",
         }
@@ -382,4 +382,4 @@ class TestExtractFractionFromAssay:
 
         assert result is not None
         assert result["subcellular_fraction"] == "Cytosol"
-        assert result["example_assay_chembl_id"] is None
+        assert result["example_assay_id"] is None

@@ -8,7 +8,7 @@ from __future__ import annotations
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
     extract_author_ids,
-    extract_author_orcids,
+    extract_author_ormolecule_ids,
     extract_authors,
     extract_biblio_info,
     extract_doi,
@@ -196,100 +196,100 @@ class TestExtractAuthorIds:
         assert result == [""]
 
 
-class TestExtractAuthorOrcids:
-    """Tests for extract_author_orcids function."""
+class TestExtractAuthorOrmolecule_ids:
+    """Tests for extract_author_ormolecule_ids function."""
 
-    def test_extract_orcids_from_urls(self) -> None:
+    def test_extract_ormolecule_ids_from_urls(self) -> None:
         """Should extract ORCID IDs from full URLs."""
         authorships = [
-            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
-            {"author": {"orcid": "https://orcid.org/0000-0002-3456-789X"}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0002-3456-789X"}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == ["0000-0001-2345-6789", "0000-0002-3456-789X"]
 
-    def test_extract_orcids_preserves_order(self) -> None:
+    def test_extract_ormolecule_ids_preserves_order(self) -> None:
         """Should preserve order and return same length as input."""
         authorships = [
-            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
-            {"author": {"orcid": None}},
-            {"author": {"orcid": "https://orcid.org/0000-0003-4567-8901"}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001-2345-6789"}},
+            {"author": {"ormolecule_id": None}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0003-4567-8901"}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert len(result) == 3
         assert result == ["0000-0001-2345-6789", "", "0000-0003-4567-8901"]
 
-    def test_extract_orcids_none_value(self) -> None:
+    def test_extract_ormolecule_ids_none_value(self) -> None:
         """Should return empty string for None ORCID."""
         authorships = [
-            {"author": {"display_name": "John Doe", "orcid": None}},
+            {"author": {"display_name": "John Doe", "ormolecule_id": None}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == [""]
 
-    def test_extract_orcids_missing_orcid_field(self) -> None:
-        """Should return empty string when orcid field is missing."""
+    def test_extract_ormolecule_ids_missing_ormolecule_id_field(self) -> None:
+        """Should return empty string when ormolecule_id field is missing."""
         authorships = [
-            {"author": {"display_name": "John Doe"}},  # No orcid field
+            {"author": {"display_name": "John Doe"}},  # No ormolecule_id field
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == [""]
 
-    def test_extract_orcids_invalid_format(self) -> None:
+    def test_extract_ormolecule_ids_invalid_format(self) -> None:
         """Should return empty string for invalid ORCID format."""
         authorships = [
-            {"author": {"orcid": "https://orcid.org/invalid-orcid"}},
-            {"author": {"orcid": "https://orcid.org/0000-0001"}},  # Too short
-            {"author": {"orcid": "not-a-url"}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/invalid-ormolecule_id"}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0001"}},  # Too short
+            {"author": {"ormolecule_id": "not-a-url"}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == ["", "", ""]
 
-    def test_extract_orcids_http_url(self) -> None:
+    def test_extract_ormolecule_ids_http_url(self) -> None:
         """Should handle http:// URLs (not just https://)."""
         authorships = [
-            {"author": {"orcid": "http://orcid.org/0000-0001-2345-6789"}},
+            {"author": {"ormolecule_id": "http://ormolecule_id.org/0000-0001-2345-6789"}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == ["0000-0001-2345-6789"]
 
-    def test_extract_orcids_bare_orcid(self) -> None:
+    def test_extract_ormolecule_ids_bare_ormolecule_id(self) -> None:
         """Should handle bare ORCID without URL prefix."""
         authorships = [
-            {"author": {"orcid": "0000-0001-2345-6789"}},
+            {"author": {"ormolecule_id": "0000-0001-2345-6789"}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == ["0000-0001-2345-6789"]
 
-    def test_extract_orcids_empty_list(self) -> None:
+    def test_extract_ormolecule_ids_empty_list(self) -> None:
         """Should return empty list for empty authorships."""
-        result = extract_author_orcids([])
+        result = extract_author_ormolecule_ids([])
         assert result == []
 
-    def test_extract_orcids_invalid_author_structure(self) -> None:
+    def test_extract_ormolecule_ids_invalid_author_structure(self) -> None:
         """Should return empty string for invalid author structure."""
         authorships = [
             {"author": None},
             {"author": "string"},
             {"not_author": {}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == ["", "", ""]
 
-    def test_extract_orcids_with_checksum_x(self) -> None:
+    def test_extract_ormolecule_ids_with_checksum_x(self) -> None:
         """Should accept ORCID with X checksum digit."""
         authorships = [
-            {"author": {"orcid": "https://orcid.org/0000-0002-1825-009X"}},
+            {"author": {"ormolecule_id": "https://ormolecule_id.org/0000-0002-1825-009X"}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == ["0000-0002-1825-009X"]
 
-    def test_extract_orcids_empty_string_url(self) -> None:
+    def test_extract_ormolecule_ids_empty_string_url(self) -> None:
         """Should return empty string for empty URL."""
         authorships = [
-            {"author": {"orcid": ""}},
+            {"author": {"ormolecule_id": ""}},
         ]
-        result = extract_author_orcids(authorships)
+        result = extract_author_ormolecule_ids(authorships)
         assert result == [""]
 
 
@@ -642,13 +642,13 @@ class TestExtractExternalIds:
         """Should extract all external IDs from URLs."""
         ids = {
             "pmid": "https://pubmed.ncbi.nlm.nih.gov/32015508",
-            "pmcid": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418",
+            "pmmolecule_id": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418",
             "mag": "3006090887",
         }
         result = extract_external_ids(ids)
         assert result == {
             "pmid": "32015508",
-            "pmcid": "PMC7095418",
+            "pmmolecule_id": "PMC7095418",
             "mag_id": "3006090887",
         }
 
@@ -657,7 +657,7 @@ class TestExtractExternalIds:
         ids = {"pmid": "https://pubmed.ncbi.nlm.nih.gov/12345678"}
         result = extract_external_ids(ids)
         assert result["pmid"] == "12345678"
-        assert result["pmcid"] is None
+        assert result["pmmolecule_id"] is None
         assert result["mag_id"] is None
 
     def test_extract_external_ids_bare_pmid(self) -> None:
@@ -666,11 +666,11 @@ class TestExtractExternalIds:
         result = extract_external_ids(ids)
         assert result["pmid"] == "12345678"
 
-    def test_extract_external_ids_pmcid_trailing_slash(self) -> None:
+    def test_extract_external_ids_pmmolecule_id_trailing_slash(self) -> None:
         """Should handle trailing slash in PMCID URL."""
-        ids = {"pmcid": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418/"}
+        ids = {"pmmolecule_id": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7095418/"}
         result = extract_external_ids(ids)
-        assert result["pmcid"] == "PMC7095418"
+        assert result["pmmolecule_id"] == "PMC7095418"
 
     def test_extract_external_ids_mag_as_int(self) -> None:
         """Should convert MAG ID to string."""
@@ -681,12 +681,12 @@ class TestExtractExternalIds:
     def test_extract_external_ids_none(self) -> None:
         """Should return None values for None input."""
         result = extract_external_ids(None)
-        assert result == {"pmid": None, "pmcid": None, "mag_id": None}
+        assert result == {"pmid": None, "pmmolecule_id": None, "mag_id": None}
 
     def test_extract_external_ids_empty(self) -> None:
         """Should return None values for empty dict."""
         result = extract_external_ids({})
-        assert result == {"pmid": None, "pmcid": None, "mag_id": None}
+        assert result == {"pmid": None, "pmmolecule_id": None, "mag_id": None}
 
 
 class TestExtractMeshTerms:

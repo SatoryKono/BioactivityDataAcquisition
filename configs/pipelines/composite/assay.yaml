@@ -33,13 +33,13 @@ composite:
   seed:
     pipeline: chembl_assay
     output_keys:
-      - assay_chembl_id      # Primary key
-      - cell_chembl_id       # FK for cell_line enrichment (nullable)
-      - tissue_chembl_id     # FK for tissue enrichment (nullable)
-      - target_chembl_id     # FK to target (for context)
-      - document_chembl_id   # FK to document (for context)
-      - assay_type           # Classification
-      - description          # For logging/debugging
+      - assay_id            # Primary key
+      - cell_id             # FK for cell_line enrichment (nullable)
+      - tissue_id           # FK for tissue enrichment (nullable)
+      - target_id           # FK to target (for context)
+      - publication_id      # FK to publication (for context)
+      - assay_type          # Classification
+      - description         # For logging/debugging
     silver_table: silver/chembl/assay
 
   # ---------------------------------------------------------------------------
@@ -56,9 +56,9 @@ composite:
     # Cardinality: one_to_one (each assay FK points to at most one cell line)
     - pipeline: chembl_cell_line
       join_keys:
-        - cell_chembl_id       # Direct FK match
+        - cell_id              # Direct FK match
       required: false          # Many assays lack cell line (~70%)
-      filter_condition: "cell_chembl_id IS NOT NULL"
+      filter_condition: "cell_id IS NOT NULL"
       timeout_seconds: 300
       silver_table: silver/chembl/cell_line
 
@@ -67,9 +67,9 @@ composite:
     # Cardinality: one_to_one (each assay FK points to at most one tissue)
     - pipeline: chembl_tissue
       join_keys:
-        - tissue_chembl_id     # Direct FK match
+        - tissue_id            # Direct FK match
       required: false          # Many assays lack tissue (~70%)
-      filter_condition: "tissue_chembl_id IS NOT NULL"
+      filter_condition: "tissue_id IS NOT NULL"
       timeout_seconds: 300
       silver_table: silver/chembl/tissue
 
@@ -89,9 +89,9 @@ composite:
     # Field-level priority overrides
     field_priorities:
       # FKs from seed are authoritative (prevent enricher overwrite)
-      cell_chembl_id:
+      cell_id:
         - chembl.assay
-      tissue_chembl_id:
+      tissue_id:
         - chembl.assay
 
     # Field renaming for conflicts
@@ -126,11 +126,11 @@ composite:
       # === Business identifiers ===
       - name: identifiers
         fields:
-          - assay_chembl_id
-          - cell_chembl_id
-          - tissue_chembl_id
-          - target_chembl_id
-          - document_chembl_id
+          - assay_id
+          - cell_id
+          - tissue_id
+          - target_id
+          - publication_id
           - src_id
           - src_assay_id
           - aidx
@@ -222,9 +222,9 @@ composite:
     # Fields to exclude from merged output
     exclude_fields:
       # Exclude cell_line PK (already have FK in seed)
-      - chembl.cell_line.cell_chembl_id
+      - chembl.cell_line.cell_id
       # Exclude tissue PK (already have FK in seed)
-      - chembl.tissue.tissue_chembl_id
+      - chembl.tissue.tissue_id
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
@@ -249,25 +249,25 @@ composite:
 
     # Field-level validation rules
     field_validations:
-      assay_chembl_id:
+      assay_id:
         type: string
         nullable: false
         pattern: "^CHEMBL\\d+$"
         description: "ChEMBL assay ID (primary key)"
 
-      cell_chembl_id:
+      cell_id:
         type: string
         nullable: true
         pattern: "^CHEMBL\\d+$"
         description: "FK to cell_line (nullable)"
 
-      tissue_chembl_id:
+      tissue_id:
         type: string
         nullable: true
         pattern: "^CHEMBL\\d+$"
         description: "FK to tissue (nullable)"
 
-      target_chembl_id:
+      target_id:
         type: string
         nullable: true
         pattern: "^CHEMBL\\d+$"

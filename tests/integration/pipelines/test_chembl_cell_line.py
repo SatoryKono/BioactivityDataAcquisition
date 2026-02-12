@@ -79,7 +79,7 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
         assert "_ingestion_ts" in silver_df.column_names
 
         # Verify cell_line specific fields
-        assert "cell_chembl_id" in silver_df.column_names
+        assert "cell_id" in silver_df.column_names
         assert "cell_name" in silver_df.column_names
 
         # Verify Gold Delta Table

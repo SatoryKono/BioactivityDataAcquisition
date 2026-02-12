@@ -41,10 +41,10 @@ class TestCompoundRecordTransformer:
         """Test transformation of valid compound record."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "compound_key": "Aspirin",
-            "compound_name": "Acetylsalicylic acid",
+            "compound_name": "Acetylsalicylic amolecule_id",
             "src_id": 1,
             "src_compound_id": "ASPIRIN-001",
         }
@@ -53,10 +53,10 @@ class TestCompoundRecordTransformer:
 
         assert result is not None
         assert result["record_id"] == 12345
-        assert result["molecule_chembl_id"] == "CHEMBL25"
-        assert result["document_chembl_id"] == "CHEMBL1123456"
+        assert result["molecule_id"] == "CHEMBL25"
+        assert result["publication_id"] == "CHEMBL1123456"
         assert result["compound_key"] == "Aspirin"
-        assert result["compound_name"] == "Acetylsalicylic acid"
+        assert result["compound_name"] == "Acetylsalicylic amolecule_id"
         assert result["src_id"] == 1
         assert result["src_compound_id"] == "ASPIRIN-001"
         assert "entity_id" in result
@@ -67,8 +67,8 @@ class TestCompoundRecordTransformer:
     async def test_transform_missing_record_id(self, transformer, mock_context):
         """Test transformation returns None when record_id is missing."""
         record = {
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
         }
 
@@ -81,8 +81,8 @@ class TestCompoundRecordTransformer:
         """Test transformation with only required fields."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
         }
 
@@ -90,8 +90,8 @@ class TestCompoundRecordTransformer:
 
         assert result is not None
         assert result["record_id"] == 12345
-        assert result["molecule_chembl_id"] == "CHEMBL25"
-        assert result["document_chembl_id"] == "CHEMBL1123456"
+        assert result["molecule_id"] == "CHEMBL25"
+        assert result["publication_id"] == "CHEMBL1123456"
         assert result["src_id"] == 1
         assert result["compound_key"] is None
         assert result["compound_name"] is None
@@ -104,8 +104,8 @@ class TestCompoundRecordTransformer:
         """Test that compound_key is stripped of leading/trailing whitespace."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
             "compound_key": "  Aspirin  ",
         }
@@ -122,24 +122,24 @@ class TestCompoundRecordTransformer:
         """Test that compound_name is stripped of leading/trailing whitespace."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
-            "compound_name": "\tAcetylsalicylic acid\n",
+            "compound_name": "\tAcetylsalicylic amolecule_id\n",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["compound_name"] == "Acetylsalicylic acid"
+        assert result["compound_name"] == "Acetylsalicylic amolecule_id"
 
     @pytest.mark.asyncio
     async def test_transform_with_empty_strings(self, transformer, mock_context):
         """Test that empty string fields become None."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
             "compound_key": "",
             "compound_name": "   ",
@@ -158,8 +158,8 @@ class TestCompoundRecordTransformer:
         """Test transformation handles None values correctly."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
             "compound_key": None,
             "compound_name": None,
@@ -178,8 +178,8 @@ class TestCompoundRecordTransformer:
         """Test that record_id as string is converted to int."""
         record = {
             "record_id": "12345",
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": "1",
         }
 
@@ -195,8 +195,8 @@ class TestCompoundRecordTransformer:
         transformer = CompoundRecordTransformer(provider="custom_provider")
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CUSTOM25",
-            "document_chembl_id": "CUSTOM1123456",
+            "molecule_id": "CUSTOM25",
+            "publication_id": "CUSTOM1123456",
             "src_id": 1,
         }
 
@@ -210,8 +210,8 @@ class TestCompoundRecordTransformer:
         """Test that content_hash is generated and is 64 hex characters."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
         }
 
@@ -228,8 +228,8 @@ class TestCompoundRecordTransformer:
         """Test that all lineage fields are present."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
         }
 
@@ -248,8 +248,8 @@ class TestCompoundRecordTransformer:
         """Test that src_compound_id is stripped of whitespace."""
         record = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
             "src_compound_id": "  ASPIRIN-001  ",
         }
@@ -266,15 +266,15 @@ class TestCompoundRecordTransformer:
         """Test that identical records produce the same content hash."""
         record1 = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
             "compound_key": "Aspirin",
         }
         record2 = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
             "compound_key": "Aspirin",
         }
@@ -293,15 +293,15 @@ class TestCompoundRecordTransformer:
         """Test that different records produce different content hashes."""
         record1 = {
             "record_id": 12345,
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
             "compound_key": "Aspirin",
         }
         record2 = {
             "record_id": 12346,  # Different record_id
-            "molecule_chembl_id": "CHEMBL25",
-            "document_chembl_id": "CHEMBL1123456",
+            "molecule_id": "CHEMBL25",
+            "publication_id": "CHEMBL1123456",
             "src_id": 1,
             "compound_key": "Aspirin",
         }

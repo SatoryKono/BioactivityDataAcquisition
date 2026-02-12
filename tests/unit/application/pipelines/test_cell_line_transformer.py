@@ -40,7 +40,7 @@ class TestCellLineTransformer:
     async def test_transform_valid_record(self, transformer, mock_context):
         """Test transformation of valid cell line record."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cell_description": "Human cervical cancer cell line",
             "cell_source_tissue": "Cervix",
@@ -56,7 +56,7 @@ class TestCellLineTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cell_chembl_id"] == "CHEMBL3308376"
+        assert result["cell_id"] == "CHEMBL3308376"
         assert result["cell_name"] == "HeLa"
         assert result["cell_description"] == "Human cervical cancer cell line"
         assert result["cell_source_tissue"] == "Cervix"
@@ -72,8 +72,8 @@ class TestCellLineTransformer:
         assert "_run_id" in result
 
     @pytest.mark.asyncio
-    async def test_transform_missing_cell_chembl_id(self, transformer, mock_context):
-        """Test transformation returns None when cell_chembl_id is missing."""
+    async def test_transform_missing_cell_id(self, transformer, mock_context):
+        """Test transformation returns None when cell_id is missing."""
         record = {
             "cell_name": "HeLa",
             "cell_source_organism": "Homo sapiens",
@@ -87,14 +87,14 @@ class TestCellLineTransformer:
     async def test_transform_minimal_record(self, transformer, mock_context):
         """Test transformation with only required fields."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
         }
 
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["cell_chembl_id"] == "CHEMBL3308376"
+        assert result["cell_id"] == "CHEMBL3308376"
         assert result["cell_name"] == "HeLa"
         assert result["cell_description"] is None
         assert result["cell_source_tissue"] is None
@@ -112,7 +112,7 @@ class TestCellLineTransformer:
     ):
         """Test that cell_name is stripped of leading/trailing whitespace."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "  HeLa  ",
         }
 
@@ -125,7 +125,7 @@ class TestCellLineTransformer:
     async def test_transform_with_empty_external_ids(self, transformer, mock_context):
         """Test that empty string external IDs become None."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cellosaurus_id": "",
             "clo_id": "   ",
@@ -147,7 +147,7 @@ class TestCellLineTransformer:
     ):
         """Test that external IDs are stripped of whitespace."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cellosaurus_id": "  CVCL_0030  ",
             "clo_id": "\tCLO_0003684\n",
@@ -165,7 +165,7 @@ class TestCellLineTransformer:
     async def test_transform_with_invalid_tax_id_zero(self, transformer, mock_context):
         """Test that taxonomy_id of 0 becomes None (must be >= 1)."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cell_source_tax_id": 0,  # Source API field name
         }
@@ -179,7 +179,7 @@ class TestCellLineTransformer:
     async def test_transform_with_negative_tax_id(self, transformer, mock_context):
         """Test that negative taxonomy_id becomes None (must be >= 1)."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cell_source_tax_id": -1,
         }
@@ -193,7 +193,7 @@ class TestCellLineTransformer:
     async def test_transform_with_valid_tax_id(self, transformer, mock_context):
         """Test that valid taxonomy_id is preserved."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cell_source_tax_id": 9606,  # Source API field name
         }
@@ -207,7 +207,7 @@ class TestCellLineTransformer:
     async def test_transform_with_tax_id_as_string(self, transformer, mock_context):
         """Test that taxonomy_id as string is converted to int."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cell_source_tax_id": "9606",
         }
@@ -222,7 +222,7 @@ class TestCellLineTransformer:
         """Test transformation with custom provider."""
         transformer = CellLineTransformer(provider="custom_provider")
         record = {
-            "cell_chembl_id": "CUSTOM123",
+            "cell_id": "CUSTOM123",
             "cell_name": "CustomCell",
         }
 
@@ -235,7 +235,7 @@ class TestCellLineTransformer:
     async def test_transform_generates_content_hash(self, transformer, mock_context):
         """Test that content_hash is generated and is 64 hex characters."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
         }
 
@@ -251,7 +251,7 @@ class TestCellLineTransformer:
     async def test_transform_includes_lineage_fields(self, transformer, mock_context):
         """Test that all lineage fields are present."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
         }
 
@@ -269,7 +269,7 @@ class TestCellLineTransformer:
     async def test_transform_with_null_values(self, transformer, mock_context):
         """Test transformation handles None values correctly."""
         record = {
-            "cell_chembl_id": "CHEMBL3308376",
+            "cell_id": "CHEMBL3308376",
             "cell_name": "HeLa",
             "cell_description": None,
             "cell_source_tissue": None,

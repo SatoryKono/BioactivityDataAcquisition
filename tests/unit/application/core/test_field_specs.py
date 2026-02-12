@@ -278,16 +278,16 @@ class TestIntegrationWithChemblPatterns:
         """Test pattern similar to ActivityTransformer._map_core_identifiers."""
         record = {
             "activity_id": 12345,
-            "molecule_chembl_id": "CHEMBL123",
-            "target_chembl_id": "CHEMBL456",
+            "molecule_id": "CHEMBL123",
+            "target_id": "CHEMBL456",
             "record_id": "789",
             "src_id": "1",
         }
 
         specs = (
             FieldSpec("activity_id", converter=STR, required=True),
-            FieldSpec("molecule_chembl_id", converter=STR, required=True),
-            FieldSpec("target_chembl_id"),
+            FieldSpec("molecule_id", converter=STR, required=True),
+            FieldSpec("target_id"),
             FieldSpec("record_id", converter=INT),
             FieldSpec("src_id", converter=INT),
         )
@@ -295,8 +295,8 @@ class TestIntegrationWithChemblPatterns:
         result = map_fields(record, specs)
 
         assert result["activity_id"] == "12345"
-        assert result["molecule_chembl_id"] == "CHEMBL123"
-        assert result["target_chembl_id"] == "CHEMBL456"
+        assert result["molecule_id"] == "CHEMBL123"
+        assert result["target_id"] == "CHEMBL456"
         assert result["record_id"] == 789
         assert result["src_id"] == 1
 

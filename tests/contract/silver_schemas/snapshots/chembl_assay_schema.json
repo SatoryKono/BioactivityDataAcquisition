@@ -109,7 +109,7 @@
     "required": false,
     "unique": false
   },
-  "assay_chembl_id": {
+  "assay_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -186,7 +186,7 @@
     "required": false,
     "unique": false
   },
-  "assay_taxonomy_id": {
+  "taxonomy_id": {
     "checks": [],
     "coerce": false,
     "description": "NCBI Taxonomy ID (float for nullable int).",
@@ -264,7 +264,7 @@
     "required": false,
     "unique": false
   },
-  "cell_chembl_id": {
+  "cell_id": {
     "checks": [],
     "coerce": false,
     "description": "FK to cell_line.",
@@ -323,7 +323,7 @@
     "required": false,
     "unique": false
   },
-  "document_chembl_id": {
+  "publication_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -396,7 +396,7 @@
     "required": false,
     "unique": false
   },
-  "target_chembl_id": {
+  "target_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -410,7 +410,7 @@
     "required": false,
     "unique": false
   },
-  "tissue_chembl_id": {
+  "tissue_id": {
     "checks": [],
     "coerce": false,
     "description": "FK to tissue.",
@@ -458,7 +458,7 @@
   "variant_sequence": {
     "checks": [],
     "coerce": false,
-    "description": "Variant amino acid sequence.",
+    "description": "Variant amino amolecule_id sequence.",
     "dtype": "str",
     "nullable": true,
     "required": false,

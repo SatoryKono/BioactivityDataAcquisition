@@ -98,7 +98,7 @@ class TestCrossRefYearValidation:
             # Author affiliations
             "affiliation_list": None,
             # Author and reference fields
-            "author_orcids": None,
+            "author_ormolecule_ids": None,
             "author_details": None,
             "references": None,
         }
@@ -188,7 +188,7 @@ class TestSemanticScholarYearValidation:
             "affiliation_list": None,
             # Author identifiers
             "author_s2_ids": None,
-            "author_orcids": None,
+            "author_ormolecule_ids": None,
             "author_h_indices": None,
             # Citation context
             "citation_contexts": None,
@@ -265,14 +265,14 @@ class TestChemblYearValidation:
             # System field (per SYSTEM_FIELDS_PREFIX)
             "_source": "chembl",
             # ChEMBL-specific fields
-            "document_chembl_id": "CHEMBL1234567",
+            "publication_id": "CHEMBL1234567",
             "src_id": 1,
             "volume": "1",
             "issue": "1",
             "page_first": "1",
             "page_last": "10",
             # Author identifiers
-            "author_orcids": None,
+            "author_ormolecule_ids": None,
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-15",
@@ -389,7 +389,7 @@ class TestPubMedYearValidation:
             "publication_types": None,
             # Note: affiliation_list inherited from base (unified field name)
             # Author identifiers
-            "author_orcids": None,
+            "author_ormolecule_ids": None,
             # Author-affiliation mapping
             "authors_with_affiliations": None,
         }

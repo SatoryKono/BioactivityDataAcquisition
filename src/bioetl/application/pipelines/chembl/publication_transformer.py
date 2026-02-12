@@ -45,8 +45,8 @@ _PUBLICATION_IDS = FieldGroup(
     name="publication_ids",
     fields=(
         # Rename pubmed_id -> pmid for cross-provider consistency (PMID standardization)
-        FieldSpec("pubmed_id", target="pmid", converter=PMID),
-        *simple_fields("doi"),
+        FieldSpec("pubmed_id", target="publication_pmid", converter=PMID),
+        FieldSpec("doi", target="publication_doi"),
         # Note: patent_id excluded - not needed for unified publication schema
     ),
 )
@@ -164,7 +164,7 @@ class PublicationTransformer(BaseChemblTransformer):
         """
         # Extract base fields using declarative DSL
         data = {
-            "document_chembl_id": str(primary_id),
+            "publication_id": str(primary_id),
             **map_field_groups(record, _PUBLICATION_GROUPS),
         }
 
@@ -173,8 +173,8 @@ class PublicationTransformer(BaseChemblTransformer):
         data["abstract"] = normalizer.strip_html_tags(data.get("abstract"))
 
         # Validate DOI using Value Object (returns None for invalid/empty)
-        doi = DOI.from_raw(data.get("doi"))
-        data["doi"] = str(doi) if doi else None
+        doi = DOI.from_raw(data.get("publication_doi"))
+        data["publication_doi"] = str(doi) if doi else None
 
         # Validate year using PublicationYear Value Object
         # Note: field_specs already maps year → publication_year

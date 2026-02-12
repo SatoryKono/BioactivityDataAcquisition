@@ -82,37 +82,37 @@ assert isinstance(MockFilterableDataSource(), FilterableDataSourcePort)
 
 # Sample assay records
 ASSAY_WITH_FRACTION = {
-    "assay_chembl_id": "CHEMBL1000",
+    "assay_id": "CHEMBL1000",
     "assay_subcellular_fraction": "Microsomes",
     "assay_type": "B",
 }
 
 ASSAY_WITH_FRACTION_2 = {
-    "assay_chembl_id": "CHEMBL1001",
+    "assay_id": "CHEMBL1001",
     "assay_subcellular_fraction": "Cytosol",
     "assay_type": "F",
 }
 
 ASSAY_DUPLICATE_FRACTION = {
-    "assay_chembl_id": "CHEMBL1002",
+    "assay_id": "CHEMBL1002",
     "assay_subcellular_fraction": "Microsomes",  # Same as ASSAY_WITH_FRACTION
     "assay_type": "B",
 }
 
 ASSAY_WITHOUT_FRACTION = {
-    "assay_chembl_id": "CHEMBL2000",
+    "assay_id": "CHEMBL2000",
     "assay_subcellular_fraction": None,
     "assay_type": "B",
 }
 
 ASSAY_EMPTY_FRACTION = {
-    "assay_chembl_id": "CHEMBL3000",
+    "assay_id": "CHEMBL3000",
     "assay_subcellular_fraction": "",
     "assay_type": "B",
 }
 
 ASSAY_WHITESPACE_FRACTION = {
-    "assay_chembl_id": "CHEMBL3001",
+    "assay_id": "CHEMBL3001",
     "assay_subcellular_fraction": "  ",
     "assay_type": "B",
 }
@@ -239,7 +239,7 @@ class TestSubcellularFractionDataSourceFetch:
             records.append(record)
 
         assert len(records) == 1
-        assert records[0]["assay_chembl_id"] == "CHEMBL1000"
+        assert records[0]["assay_id"] == "CHEMBL1000"
 
     @pytest.mark.asyncio
     async def test_fetch_skips_none_fractions(self) -> None:
@@ -321,7 +321,7 @@ class TestSubcellularFractionRecordFormat:
         r = records[0]
         assert "entity_id" in r
         assert "subcellular_fraction" in r
-        assert "example_assay_chembl_id" in r
+        assert "example_assay_id" in r
         assert "assay_count" in r
 
     @pytest.mark.asyncio
@@ -365,7 +365,7 @@ class TestSubcellularFractionRecordFormat:
         assert len(ids) == len(set(ids))
 
     @pytest.mark.asyncio
-    async def test_example_assay_chembl_id_preserved(self) -> None:
+    async def test_example_assay_id_preserved(self) -> None:
         source = MockDataSource(assays=[ASSAY_WITH_FRACTION])
         wrapper = SubcellularFractionDataSource(data_source=source)
 
@@ -373,7 +373,7 @@ class TestSubcellularFractionRecordFormat:
         async for record in wrapper.fetch("subcellular_fraction"):
             records.append(record)
 
-        assert records[0]["example_assay_chembl_id"] == "CHEMBL1000"
+        assert records[0]["example_assay_id"] == "CHEMBL1000"
 
     @pytest.mark.asyncio
     async def test_assay_without_chembl_id(self) -> None:
@@ -385,7 +385,7 @@ class TestSubcellularFractionRecordFormat:
             records.append(record)
 
         assert len(records) == 1
-        assert records[0]["example_assay_chembl_id"] is None
+        assert records[0]["example_assay_id"] is None
 
 
 @pytest.mark.unit
@@ -445,7 +445,7 @@ class TestSubcellularFractionFilterable:
         async for record in wrapper.fetch_filtered(
             entity_type="subcellular_fraction",
             filter_ids=["CHEMBL1000"],
-            filter_field="assay_chembl_id",
+            filter_field="assay_id",
         ):
             records.append(record)
 
@@ -460,12 +460,12 @@ class TestSubcellularFractionFilterable:
         async for record in wrapper.fetch_filtered(
             entity_type="assay",
             filter_ids=["CHEMBL1000"],
-            filter_field="assay_chembl_id",
+            filter_field="assay_id",
         ):
             records.append(record)
 
         assert len(records) == 1
-        assert records[0]["assay_chembl_id"] == "CHEMBL1000"
+        assert records[0]["assay_id"] == "CHEMBL1000"
 
     @pytest.mark.asyncio
     async def test_fetch_filtered_with_limit(self) -> None:
@@ -478,7 +478,7 @@ class TestSubcellularFractionFilterable:
         async for record in wrapper.fetch_filtered(
             entity_type="subcellular_fraction",
             filter_ids=["CHEMBL1000"],
-            filter_field="assay_chembl_id",
+            filter_field="assay_id",
             limit=1,
         ):
             records.append(record)
@@ -496,7 +496,7 @@ class TestSubcellularFractionFilterable:
         async for record in wrapper.fetch_filtered(
             entity_type="subcellular_fraction",
             filter_ids=["CHEMBL1000"],
-            filter_field="assay_chembl_id",
+            filter_field="assay_id",
         ):
             records.append(record)
 
@@ -513,7 +513,7 @@ class TestSubcellularFractionFilterable:
             async for _ in wrapper.fetch_filtered(
                 entity_type="subcellular_fraction",
                 filter_ids=["CHEMBL1000"],
-                filter_field="assay_chembl_id",
+                filter_field="assay_id",
             ):
                 pass
 
@@ -527,7 +527,7 @@ class TestSubcellularFractionFilterable:
         records = []
         async for record in wrapper.fetch_multi_filtered(
             entity_type="subcellular_fraction",
-            filters={"assay_chembl_id": ["CHEMBL1000"]},
+            filters={"assay_id": ["CHEMBL1000"]},
         ):
             records.append(record)
 
@@ -541,7 +541,7 @@ class TestSubcellularFractionFilterable:
         records = []
         async for record in wrapper.fetch_multi_filtered(
             entity_type="assay",
-            filters={"assay_chembl_id": ["CHEMBL1000"]},
+            filters={"assay_id": ["CHEMBL1000"]},
         ):
             records.append(record)
 
@@ -557,7 +557,7 @@ class TestSubcellularFractionFilterable:
         records = []
         async for record in wrapper.fetch_multi_filtered(
             entity_type="subcellular_fraction",
-            filters={"assay_chembl_id": ["CHEMBL1000"]},
+            filters={"assay_id": ["CHEMBL1000"]},
             limit=1,
         ):
             records.append(record)
@@ -574,7 +574,7 @@ class TestSubcellularFractionFilterable:
         ):
             async for _ in wrapper.fetch_multi_filtered(
                 entity_type="subcellular_fraction",
-                filters={"assay_chembl_id": ["CHEMBL1000"]},
+                filters={"assay_id": ["CHEMBL1000"]},
             ):
                 pass
 
@@ -589,7 +589,7 @@ class TestSubcellularFractionFilterable:
         async for record in wrapper.fetch_filtered_with_fallback(
             entity_type="subcellular_fraction",
             filter_ids=["CHEMBL1000"],
-            filter_field="assay_chembl_id",
+            filter_field="assay_id",
             fallback_mapping={"CHEMBL1000": "Test Assay"},
         ):
             records.append(record)
@@ -605,7 +605,7 @@ class TestSubcellularFractionFilterable:
         async for record in wrapper.fetch_filtered_with_fallback(
             entity_type="assay",
             filter_ids=["CHEMBL1000"],
-            filter_field="assay_chembl_id",
+            filter_field="assay_id",
             fallback_mapping={"CHEMBL1000": "Test"},
         ):
             records.append(record)
@@ -623,7 +623,7 @@ class TestSubcellularFractionFilterable:
         async for record in wrapper.fetch_filtered_with_fallback(
             entity_type="subcellular_fraction",
             filter_ids=["CHEMBL1000"],
-            filter_field="assay_chembl_id",
+            filter_field="assay_id",
             fallback_mapping={"CHEMBL1000": "Test"},
             limit=1,
         ):
@@ -642,7 +642,7 @@ class TestSubcellularFractionFilterable:
             async for _ in wrapper.fetch_filtered_with_fallback(
                 entity_type="subcellular_fraction",
                 filter_ids=["CHEMBL1000"],
-                filter_field="assay_chembl_id",
+                filter_field="assay_id",
                 fallback_mapping={},
             ):
                 pass

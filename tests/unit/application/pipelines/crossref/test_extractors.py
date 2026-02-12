@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.pipelines.crossref.extractors import (
     extract_affiliations,
     extract_author_details,
-    extract_author_orcids,
+    extract_author_ormolecule_ids,
     extract_authors,
     extract_content_domain,
     extract_dates,
@@ -514,8 +514,8 @@ class TestExtractAuthorDetails:
                 {
                     "given": "John",
                     "family": "Doe",
-                    "ORCID": "https://orcid.org/0000-0001-2345-6789",
-                    "authenticated-orcid": True,
+                    "ORCID": "https://ormolecule_id.org/0000-0001-2345-6789",
+                    "authenticated-ormolecule_id": True,
                     "sequence": "first",
                     "affiliation": [{"name": "Harvard University"}],
                 }
@@ -526,12 +526,12 @@ class TestExtractAuthorDetails:
         assert result[0]["given"] == "John"
         assert result[0]["family"] == "Doe"
         assert result[0]["name"] is None
-        assert result[0]["orcid"] == "0000-0001-2345-6789"
-        assert result[0]["authenticated_orcid"] is True
+        assert result[0]["ormolecule_id"] == "0000-0001-2345-6789"
+        assert result[0]["authenticated_ormolecule_id"] is True
         assert result[0]["sequence"] == "first"
         assert result[0]["affiliations"] == ["Harvard University"]
 
-    def test_extract_author_with_orcid_id_only(self) -> None:
+    def test_extract_author_with_ormolecule_id_id_only(self) -> None:
         """Should handle ORCID without URL prefix."""
         publication = {
             "author": [
@@ -543,14 +543,14 @@ class TestExtractAuthorDetails:
             ]
         }
         result = extract_author_details(publication)
-        assert result[0]["orcid"] == "0000-0002-3456-7890"
+        assert result[0]["ormolecule_id"] == "0000-0002-3456-7890"
 
-    def test_extract_author_without_orcid(self) -> None:
+    def test_extract_author_without_ormolecule_id(self) -> None:
         """Should handle author without ORCID."""
         publication = {"author": [{"given": "John", "family": "Doe"}]}
         result = extract_author_details(publication)
-        assert result[0]["orcid"] is None
-        assert result[0]["authenticated_orcid"] is None
+        assert result[0]["ormolecule_id"] is None
+        assert result[0]["authenticated_ormolecule_id"] is None
 
     def test_extract_organization_author(self) -> None:
         """Should extract organization author with name field."""
@@ -616,41 +616,41 @@ class TestExtractAuthorDetails:
         assert len(result) == 1
         assert result[0]["given"] == "Valid"
 
-    def test_authenticated_orcid_false(self) -> None:
-        """Should handle authenticated-orcid=False."""
+    def test_authenticated_ormolecule_id_false(self) -> None:
+        """Should handle authenticated-ormolecule_id=False."""
         publication = {
             "author": [
                 {
                     "given": "John",
                     "family": "Doe",
                     "ORCID": "0000-0001-2345-6789",
-                    "authenticated-orcid": False,
+                    "authenticated-ormolecule_id": False,
                 }
             ]
         }
         result = extract_author_details(publication)
-        assert result[0]["authenticated_orcid"] is False
+        assert result[0]["authenticated_ormolecule_id"] is False
 
-    def test_invalid_orcid_format_ignored(self) -> None:
+    def test_invalid_ormolecule_id_format_ignored(self) -> None:
         """Should return None for invalid ORCID format."""
         publication = {
-            "author": [{"given": "John", "family": "Doe", "ORCID": "invalid-orcid"}]
+            "author": [{"given": "John", "family": "Doe", "ORCID": "invalid-ormolecule_id"}]
         }
         result = extract_author_details(publication)
-        assert result[0]["orcid"] is None
+        assert result[0]["ormolecule_id"] is None
 
 
-class TestExtractAuthorOrcids:
-    """Tests for extract_author_orcids function."""
+class TestExtractAuthorOrmolecule_ids:
+    """Tests for extract_author_ormolecule_ids function."""
 
-    def test_extract_multiple_orcids(self) -> None:
+    def test_extract_multiple_ormolecule_ids(self) -> None:
         """Should extract ORCIDs from multiple authors."""
         publication = {
             "author": [
                 {
                     "given": "John",
                     "family": "Doe",
-                    "ORCID": "https://orcid.org/0000-0001-2345-6789",
+                    "ORCID": "https://ormolecule_id.org/0000-0001-2345-6789",
                 },
                 {"given": "Jane", "family": "Smith"},
                 {
@@ -660,20 +660,20 @@ class TestExtractAuthorOrcids:
                 },
             ]
         }
-        result = extract_author_orcids(publication)
+        result = extract_author_ormolecule_ids(publication)
         assert result == ["0000-0001-2345-6789", "0000-0002-3456-7890"]
 
-    def test_extract_single_orcid(self) -> None:
+    def test_extract_single_ormolecule_id(self) -> None:
         """Should extract single ORCID."""
         publication = {
             "author": [
                 {"given": "John", "family": "Doe", "ORCID": "0000-0001-2345-6789"}
             ]
         }
-        result = extract_author_orcids(publication)
+        result = extract_author_ormolecule_ids(publication)
         assert result == ["0000-0001-2345-6789"]
 
-    def test_no_orcids(self) -> None:
+    def test_no_ormolecule_ids(self) -> None:
         """Should return empty list when no ORCIDs present."""
         publication = {
             "author": [
@@ -681,12 +681,12 @@ class TestExtractAuthorOrcids:
                 {"given": "Jane", "family": "Smith"},
             ]
         }
-        result = extract_author_orcids(publication)
+        result = extract_author_ormolecule_ids(publication)
         assert result == []
 
     def test_empty_publication(self) -> None:
         """Should return empty list for empty publication."""
-        result = extract_author_orcids({})
+        result = extract_author_ormolecule_ids({})
         assert result == []
 
     def test_normalizes_url_prefix(self) -> None:
@@ -696,11 +696,11 @@ class TestExtractAuthorOrcids:
                 {
                     "given": "John",
                     "family": "Doe",
-                    "ORCID": "https://orcid.org/0000-0001-2345-6789",
+                    "ORCID": "https://ormolecule_id.org/0000-0001-2345-6789",
                 }
             ]
         }
-        result = extract_author_orcids(publication)
+        result = extract_author_ormolecule_ids(publication)
         assert result == ["0000-0001-2345-6789"]
 
     def test_http_url_prefix(self) -> None:
@@ -710,14 +710,14 @@ class TestExtractAuthorOrcids:
                 {
                     "given": "John",
                     "family": "Doe",
-                    "ORCID": "http://orcid.org/0000-0001-2345-6789",
+                    "ORCID": "http://ormolecule_id.org/0000-0001-2345-6789",
                 }
             ]
         }
-        result = extract_author_orcids(publication)
+        result = extract_author_ormolecule_ids(publication)
         assert result == ["0000-0001-2345-6789"]
 
-    def test_invalid_orcid_excluded(self) -> None:
+    def test_invalid_ormolecule_id_excluded(self) -> None:
         """Should exclude invalid ORCIDs."""
         publication = {
             "author": [
@@ -725,7 +725,7 @@ class TestExtractAuthorOrcids:
                 {"given": "Jane", "family": "Smith", "ORCID": "0000-0001-2345-6789"},
             ]
         }
-        result = extract_author_orcids(publication)
+        result = extract_author_ormolecule_ids(publication)
         assert result == ["0000-0001-2345-6789"]
 
 

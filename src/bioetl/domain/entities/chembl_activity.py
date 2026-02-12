@@ -34,13 +34,13 @@ class Assay(BaseEntity):
     """
 
     # Primary identifier
-    assay_chembl_id: str
+    assay_id: str
 
     # Core identifiers
-    target_chembl_id: str | None = None
-    document_chembl_id: str | None = None
-    cell_chembl_id: str | None = None
-    tissue_chembl_id: str | None = None
+    target_id: str | None = None
+    publication_id: str | None = None
+    cell_id: str | None = None
+    tissue_id: str | None = None
     src_id: int | None = None
     src_assay_id: str | None = None
     aidx: str | None = None
@@ -55,7 +55,7 @@ class Assay(BaseEntity):
     # Biological context
     assay_organism: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-    assay_taxonomy_id: int | None = None
+    taxonomy_id: int | None = None
     assay_cell_type: str | None = None
     assay_tissue: str | None = None
     assay_strain: str | None = None
@@ -81,7 +81,7 @@ class Assay(BaseEntity):
     variant_isoform: str | None = None  # Isoform identifier
     variant_mutation: str | None = None  # Mutation description (e.g., V600E)
     variant_organism: str | None = None  # Organism name
-    variant_sequence: str | None = None  # Amino acid sequence
+    variant_sequence: str | None = None  # Amino amolecule_id sequence
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     variant_taxonomy_id: int | None = None  # NCBI Taxonomy ID
     # Forensic: original JSON
@@ -96,7 +96,7 @@ class Assay(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.assay_chembl_id:
+        if not self.assay_id:
             raise ValueError("Assay ChEMBL ID is required")
         if self.confidence_score is not None and not (0 <= self.confidence_score <= 9):
             raise ValueError(

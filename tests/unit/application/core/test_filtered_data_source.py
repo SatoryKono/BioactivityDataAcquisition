@@ -117,8 +117,8 @@ def enabled_filter_config():
     return InputFilterConfig(
         enabled=True,
         source_path="data/molecules.csv",
-        column_name="molecule_chembl_id",
-        filter_field="molecule_chembl_id",
+        column_name="molecule_id",
+        filter_field="molecule_id",
     )
 
 
@@ -224,7 +224,7 @@ class TestFilteredDataSourceContextManager:
 
         mock_filter_reader.load_filter_ids.assert_called_once_with(
             source_path="data/molecules.csv",
-            column_name="molecule_chembl_id",
+            column_name="molecule_id",
         )
         # FilterLoadResult.ids is a tuple, converted to list by FilteredDataSource
         assert filtered._filter_ids == ["CHEMBL1", "CHEMBL2", "CHEMBL3"]
@@ -480,8 +480,8 @@ class TestFilteredDataSourceMultiColumn:
             enabled=True,
             source_path="data/multi.csv",
             columns=(
-                FilterColumn("molecule_chembl_id", "molecule_chembl_id"),
-                FilterColumn("assay_chembl_id", "assay_chembl_id"),
+                FilterColumn("molecule_id", "molecule_id"),
+                FilterColumn("assay_id", "assay_id"),
             ),
         )
 
@@ -496,11 +496,11 @@ class TestFilteredDataSourceMultiColumn:
             duplicate_count=0,
             duplicates=frozenset(),
             column_ids={
-                "molecule_chembl_id": frozenset({"CHEMBL1", "CHEMBL2"}),
-                "assay_chembl_id": frozenset({"CHEMBL_ASSAY_1"}),
+                "molecule_id": frozenset({"CHEMBL1", "CHEMBL2"}),
+                "assay_id": frozenset({"CHEMBL_ASSAY_1"}),
             },
             valid_combinations=frozenset({("CHEMBL1", "CHEMBL_ASSAY_1")}),
-            filter_fields=("molecule_chembl_id", "assay_chembl_id"),
+            filter_fields=("molecule_id", "assay_id"),
         )
         reader.load_multi_column_filter = AsyncMock(return_value=multi_result)
         return reader
@@ -723,8 +723,8 @@ class TestFilteredDataSourceLoggerWarning:
         config = InputFilterConfig(
             enabled=True,
             source_path="data/test.csv",
-            column_name="molecule_chembl_id",
-            filter_field="molecule_chembl_id",
+            column_name="molecule_id",
+            filter_field="molecule_id",
         )
 
         filtered = FilteredDataSource(
@@ -866,8 +866,8 @@ class TestFilteredDataSourceValidCombinations:
         config = InputFilterConfig(
             enabled=True,
             source_path="data/test.csv",
-            column_name="molecule_chembl_id",
-            filter_field="molecule_chembl_id",
+            column_name="molecule_id",
+            filter_field="molecule_id",
         )
         reader = AsyncMock()
         reader.load_filter_ids = AsyncMock(

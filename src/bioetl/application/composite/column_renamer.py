@@ -37,7 +37,9 @@ class ColumnRenamer:
     SYSTEM_PREFIXES: Final[frozenset[str]] = frozenset({"_"})
 
     # Join key columns (not renamed, case-insensitive)
-    JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset({"doi", "pmid", "pmc_id"})
+    JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset(
+        {"publication_id", "publication_doi", "publication_pmid", "publication_pmc_id"}
+    )
 
     def __init__(self, logger: LoggerPort) -> None:
         """Initialize renamer.

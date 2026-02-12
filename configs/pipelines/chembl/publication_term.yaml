@@ -16,7 +16,7 @@ description: "Extract publication terms (MeSH, keywords) from ChEMBL Publication
 # Deduplication is handled on Silver layer via content_hash.
 loading_strategy: full_scan_only
 
-# Composite primary key (document_chembl_id + term_type + term)
+# Composite primary key (publication_id + term_type + term)
 # entity_id is generated as SHA256 hash of composite key
 primary_keys: ["entity_id"]
 silver_table: "chembl_publication_term"

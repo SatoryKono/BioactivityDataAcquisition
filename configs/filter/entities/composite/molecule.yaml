@@ -33,11 +33,11 @@ input_filter:
 gold_filters:
   # Required fields - records missing these are excluded from Gold
   required_fields:
-    - molecule_chembl_id  # Primary key from seed (ChEMBL)
+    - molecule_id  # Primary key from seed (ChEMBL)
 
   # Field-specific validation (applied before Gold write)
   columns:
-    molecule_chembl_id:
+    molecule_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"
@@ -47,13 +47,7 @@ gold_filters:
       type: string
       nullable: true
       pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
-      description: "InChIKey - IUPAC standard structural identifier (27 chars)"
-
-    inchikey:
-      type: string
-      nullable: true
-      pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
-      description: "InChIKey - PubChem field name (alias)"
+      description: "InChIKey - canonical identifier (27 chars)"
 
     canonical_smiles:
       type: string
@@ -134,6 +128,6 @@ gold_filters:
 #   - _source_batch_id (nullable)
 #
 # Business fields use qualified names:
-#   - chembl.molecule.molecule_chembl_id (seed primary key)
+#   - chembl.molecule.molecule_id (seed primary key)
 #   - chembl.molecule.canonical_smiles, pubchem.compound.canonical_smiles, etc.
 #   - Additional columns depend on enricher success

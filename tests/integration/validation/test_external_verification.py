@@ -173,7 +173,7 @@ class TestChEMBLExternalVerification:
     """External verification against ChEMBL API."""
 
     @pytest.mark.vcr("chembl_document_id_valid.yaml")
-    async def test_document_chembl_id_exists(self) -> None:
+    async def test_publication_id_exists(self) -> None:
         """PASS: ChEMBL Document ID resolved successfully."""
         verify_service = mock.AsyncMock()
         verify_service.verify_chembl_id.return_value = {"status": "PASS", "found": True}
@@ -182,7 +182,7 @@ class TestChEMBLExternalVerification:
         assert result["status"] == "PASS"
 
     @pytest.mark.vcr("chembl_document_id_not_found.yaml")
-    async def test_document_chembl_id_not_found_fails(self) -> None:
+    async def test_publication_id_not_found_fails(self) -> None:
         """FAIL: ChEMBL ID not found (PK for ChEMBL provider)."""
         verify_service = mock.AsyncMock()
         verify_service.verify_chembl_id.return_value = {
@@ -195,26 +195,26 @@ class TestChEMBLExternalVerification:
 
 
 @pytest.mark.integration
-@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/orcid")
+@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/ormolecule_id")
 class TestORCIDExternalVerification:
     """External verification against ORCID API."""
 
-    @pytest.mark.vcr("orcid_valid.yaml")
-    async def test_orcid_valid(self) -> None:
+    @pytest.mark.vcr("ormolecule_id_valid.yaml")
+    async def test_ormolecule_id_valid(self) -> None:
         """PASS: ORCID resolved successfully."""
         verify_service = mock.AsyncMock()
-        verify_service.verify_orcid.return_value = {"status": "PASS", "found": True}
+        verify_service.verify_ormolecule_id.return_value = {"status": "PASS", "found": True}
 
-        result = await verify_service.verify_orcid("0000-0002-1825-0097")
+        result = await verify_service.verify_ormolecule_id("0000-0002-1825-0097")
         assert result["status"] == "PASS"
 
-    @pytest.mark.vcr("orcid_not_found.yaml")
-    async def test_orcid_not_found_warns(self) -> None:
+    @pytest.mark.vcr("ormolecule_id_not_found.yaml")
+    async def test_ormolecule_id_not_found_warns(self) -> None:
         """WARN: ORCID not found."""
         verify_service = mock.AsyncMock()
-        verify_service.verify_orcid.return_value = {"status": "WARN", "found": False}
+        verify_service.verify_ormolecule_id.return_value = {"status": "WARN", "found": False}
 
-        result = await verify_service.verify_orcid("0000-0000-0000-0000")
+        result = await verify_service.verify_ormolecule_id("0000-0000-0000-0000")
         assert result["status"] == "WARN"
 
 

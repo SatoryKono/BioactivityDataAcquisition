@@ -71,21 +71,21 @@ def uniprot_api_key() -> str | None:
 CHEMBL_ACTIVITY_REQUIRED_FIELDS = frozenset(
     {
         "activity_id",
-        "assay_chembl_id",
-        "molecule_chembl_id",
+        "assay_id",
+        "molecule_id",
     }
 )
 
 CHEMBL_MOLECULE_REQUIRED_FIELDS = frozenset(
     {
-        "molecule_chembl_id",
+        "molecule_id",
         "molecule_type",
     }
 )
 
 CHEMBL_TARGET_REQUIRED_FIELDS = frozenset(
     {
-        "target_chembl_id",
+        "target_id",
         "target_type",
     }
 )
@@ -100,6 +100,6 @@ UNIPROT_PROTEIN_REQUIRED_FIELDS = frozenset(
 
 PUBCHEM_COMPOUND_REQUIRED_FIELDS = frozenset(
     {
-        "cid",
+        "molecule_id",
     }
 )

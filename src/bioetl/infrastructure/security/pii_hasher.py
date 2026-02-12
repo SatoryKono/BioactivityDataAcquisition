@@ -12,6 +12,7 @@ Environment variables:
 from __future__ import annotations
 
 import hashlib
+import os
 import unicodedata
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -66,6 +67,30 @@ class SaltConfig:
         )
         rotation_active = settings.pii_salt_rotation_active
 
+        return cls(
+            current_salt=current,
+            next_salt=next_salt,
+            rotation_active=rotation_active,
+        )
+
+    @classmethod
+    def from_env(cls) -> SaltConfig:
+        """Create SaltConfig directly from environment variables.
+
+        Expected variables:
+        - BIOETL_PII_SALT_CURRENT (required)
+        - BIOETL_PII_SALT_NEXT (optional)
+        - BIOETL_SALT_ROTATION_ACTIVE (optional: true/1/yes/on)
+        """
+        current = os.getenv("BIOETL_PII_SALT_CURRENT", "")
+        raw_next = os.getenv("BIOETL_PII_SALT_NEXT")
+        next_salt = raw_next or None
+        rotation_active = os.getenv("BIOETL_SALT_ROTATION_ACTIVE", "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
         return cls(
             current_salt=current,
             next_salt=next_salt,
@@ -201,3 +226,8 @@ class Sha256PiiHasher:
             Configured Sha256PiiHasher instance.
         """
         return cls(salt_config=SaltConfig.from_settings(settings))
+
+    @classmethod
+    def from_env(cls) -> Sha256PiiHasher:
+        """Create hasher directly from environment variables."""
+        return cls(salt_config=SaltConfig.from_env())

@@ -96,16 +96,16 @@ silver_filters:
     pchembl_value:
       min: 3
       max: 10
-    document_year:
+    publication_year:
       min: 1950
       max: 2050
 
   # Required fields — must be non-null for silver
   required_fields:
     - activity_id
-    - molecule_chembl_id
-    - target_chembl_id
-    - document_chembl_id
+    - molecule_id
+    - target_id
+    - publication_id
     - standard_value
     - pchembl_value
 
@@ -142,4 +142,4 @@ gold_filters:
     - standard_type
     - standard_value
     - standard_units
-    - target_chembl_id
+    - target_id

@@ -78,6 +78,6 @@ gold_filters:
 #   - _source_batch_id (nullable)
 #
 # Business fields use qualified names:
-#   - chembl.publication.document_chembl_id (seed primary key)
+#   - chembl.publication.publication_id (seed primary key)
 #   - chembl.publication.title, crossref.publication.title, etc.
 #   - Additional columns depend on enricher success

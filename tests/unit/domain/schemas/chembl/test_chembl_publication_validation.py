@@ -406,30 +406,30 @@ class TestSourceBaseValidation:
 
 @pytest.mark.unit
 class TestDocumentChemblIdBaseValidation:
-    """Base validation tests for document_chembl_id."""
+    """Base validation tests for publication_id."""
 
-    def test_document_chembl_id_valid(
+    def test_publication_id_valid(
         self, minimal_chembl_publication_df: pd.DataFrame
     ) -> None:
-        """PASS: valid document_chembl_id value."""
+        """PASS: valid publication_id value."""
         ChemblPublicationSchema.validate(minimal_chembl_publication_df)
 
-    def test_document_chembl_id_null_fails(
+    def test_publication_id_null_fails(
         self, minimal_chembl_publication_df: pd.DataFrame
     ) -> None:
-        """FAIL: document_chembl_id is non-nullable(PK)."""
+        """FAIL: publication_id is non-nullable(PK)."""
         df = minimal_chembl_publication_df.copy()
-        df["document_chembl_id"] = None
-        with pytest.raises(pa.errors.SchemaError, match="document_chembl_id"):
+        df["publication_id"] = None
+        with pytest.raises(pa.errors.SchemaError, match="publication_id"):
             ChemblPublicationSchema.validate(df)
 
     @pytest.mark.parametrize("invalid_value", ["chembl25", "CHEMBL", ""])
-    def test_document_chembl_id_invalid_format(
+    def test_publication_id_invalid_format(
         self, minimal_chembl_publication_df: pd.DataFrame, invalid_value: Any
     ) -> None:
-        """FAIL: document_chembl_id invalid format."""
+        """FAIL: publication_id invalid format."""
         df = minimal_chembl_publication_df.copy()
-        df["document_chembl_id"] = invalid_value
+        df["publication_id"] = invalid_value
         with pytest.raises(pa.errors.SchemaError):
             ChemblPublicationSchema.validate(df)
 

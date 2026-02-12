@@ -31,14 +31,14 @@ class TestInputFilterConfigCreation:
             enabled=True,
             source_path="/path/to/file.csv",
             column_name="molecule_id",
-            filter_field="molecule_chembl_id",
+            filter_field="molecule_id",
             batch_size=50,
         )
 
         assert config.enabled is True
         assert config.source_path == "/path/to/file.csv"
         assert config.column_name == "molecule_id"
-        assert config.filter_field == "molecule_chembl_id"
+        assert config.filter_field == "molecule_id"
         assert config.batch_size == 50
 
     def test_config_is_frozen(self):

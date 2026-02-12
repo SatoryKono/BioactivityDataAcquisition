@@ -18,7 +18,7 @@ class AssayParameters(BaseEntity):
     Contains parameters such as concentrations, pH, temperature, incubation time, etc.
     Includes both raw values from original source and standardized values for comparison.
 
-    M:1 relationship with Assay (many parameters -> one assay via assay_chembl_id FK).
+    M:1 relationship with Assay (many parameters -> one assay via assay_id FK).
 
     API Endpoint: https://www.ebi.ac.uk/chembl/api/data/assay_parameters
 
@@ -43,7 +43,7 @@ class AssayParameters(BaseEntity):
     assay_param_id: int
 
     # === Foreign Key (REQUIRED) ===
-    assay_chembl_id: str
+    assay_id: str
 
     # === Parameter Type (Optional, may be None if not provided by API) ===
     type: str | None = None
@@ -73,8 +73,8 @@ class AssayParameters(BaseEntity):
             raise ValueError(
                 f"assay_param_id must be positive integer, got {self.assay_param_id}"
             )
-        if not self.assay_chembl_id or not self.assay_chembl_id.startswith("CHEMBL"):
-            raise ValueError(f"Invalid assay_chembl_id: {self.assay_chembl_id}")
+        if not self.assay_id or not self.assay_id.startswith("CHEMBL"):
+            raise ValueError(f"Invalid assay_id: {self.assay_id}")
 
     def has_numeric_value(self) -> bool:
         """Check if parameter has numeric value (raw or standardized)."""

@@ -70,7 +70,7 @@ async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "chembl_activity")
-    required_fields = ["activity_id", "molecule_chembl_id", "target_chembl_id"]
+    required_fields = ["activity_id", "molecule_id", "target_id"]
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"

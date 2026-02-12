@@ -36,8 +36,8 @@ gold_filters:
   # Required fields - records missing these are excluded from Gold
   required_fields:
     - activity_id          # Primary key from seed
-    - molecule_chembl_id   # FK to molecule (join key)
-    - assay_chembl_id      # FK to assay
+    - molecule_id          # FK to molecule (join key)
+    - assay_id             # FK to assay
 
   # Field-specific validation (applied before Gold write)
   columns:
@@ -46,29 +46,29 @@ gold_filters:
       nullable: false
       description: "ChEMBL activity ID (primary key)"
 
-    molecule_chembl_id:
+    molecule_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL molecule identifier (FK)"
 
-    assay_chembl_id:
+    assay_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL assay identifier (FK)"
 
-    target_chembl_id:
+    target_id:
       type: string
       nullable: true
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL target identifier (FK, optional)"
 
-    document_chembl_id:
+    publication_id:
       type: string
       nullable: true
       pattern: "^CHEMBL\\d+$"
-      description: "ChEMBL document identifier (FK, optional)"
+      description: "ChEMBL publication identifier (FK, optional)"
 
     standard_type:
       type: string
@@ -131,7 +131,7 @@ gold_filters:
 # Notes on Join Semantics
 # -----------------------------------------------------------------------------
 # Activity → CompoundRecord join is M:N:
-# - One activity has one molecule_chembl_id
+# - One activity has one molecule_id
 # - One molecule can have many compound records (from different documents)
 # - Merge uses left_outer to preserve all activities
 # - Missing compound_record fields will be null

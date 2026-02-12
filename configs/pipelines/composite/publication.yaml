@@ -40,14 +40,15 @@ composite:
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts primary entities from ChEMBL.
-  # Its output provides join keys (doi, pmid) for enrichment.
+  # Its output provides join keys (publication_id, publication_doi, publication_pmid) for enrichment.
   seed:
     pipeline: chembl_publication
     output_keys:
-      - document_chembl_id  # ChEMBL document ID (primary key)
-      - doi                 # Digital Object Identifier
-      - pmid                # PubMed ID
-      - title               # Publication title (for fallback joins)
+      - publication_id         # ChEMBL document ID (primary key)
+      - publication_doi        # Digital Object Identifier
+      - publication_pmid       # PubMed ID
+      - publication_pmc_id     # PubMed Central ID
+      - title                  # Publication title (for fallback joins)
     # Note: chembl_publication uses flat_structure, so table is in path directly
     silver_table: silver/chembl/publication
 
@@ -74,7 +75,7 @@ composite:
     # REQUIRED: Primary source for citation data (needs doi)
     - pipeline: crossref_publication
       join_keys:
-        - doi            # Primary join key
+        - publication_doi   # Primary join key
         - title
       required: false    # Optional - seed may not have DOIs
       filter_condition: "doi IS NOT NULL"
@@ -85,8 +86,8 @@ composite:
     # OPTIONAL: Failure logged, composite continues
     - pipeline: openalex_publication
       join_keys:
-        - doi            # Primary key
-        - title          # Fallback key if doi not found
+        - publication_doi   # Primary key
+        - title             # Fallback key if doi not found
       required: false    # Optional - needs doi or pmid
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 3600
@@ -96,8 +97,8 @@ composite:
     # OPTIONAL: Only processes records with pmid
     - pipeline: pubmed_publication
       join_keys:
-        - pmid           # PubMed-specific identifier
-        - doi
+        - publication_pmid    # PubMed-specific identifier
+        - publication_doi
       required: false    # Optional - only for records with pmid
       filter_condition: "pmid IS NOT NULL"
       timeout_seconds: 3600
@@ -107,7 +108,7 @@ composite:
     # OPTIONAL: Higher rate limits, ok to skip
     - pipeline: semanticscholar_publication
       join_keys:
-        - doi
+        - publication_doi
         - title
       required: false    # Optional - high rate limits, ok to skip
       filter_condition: "doi IS NOT NULL OR title IS NOT NULL"
@@ -278,13 +279,13 @@ composite:
           - chembl_release
           - corpus_id
           - dblp_id
-          - document_chembl_id
+          - publication_id
           - mag_id
           - nlm_unique_id
           - openalex_id
           - paper_id
-          - pmc_id
-          - pmid
+          - publication_pmc_id
+          - publication_pmid
           - src_id
         provider_order: [semanticscholar, openalex, pubmed, chembl, crossref]
 
@@ -433,7 +434,7 @@ composite:
 
     # Required fields in final Gold output
     required_fields:
-      - document_chembl_id
+      - publication_id
       - title
 
     # Field-level validation rules for new fields

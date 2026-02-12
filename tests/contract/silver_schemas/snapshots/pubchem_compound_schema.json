@@ -129,10 +129,10 @@
     "required": false,
     "unique": false
   },
-  "cid": {
+  "molecule_id": {
     "checks": [
       {
-        "name": "cid_positive"
+        "name": "molecule_id_positive"
       }
     ],
     "coerce": false,
@@ -412,10 +412,10 @@
     "required": false,
     "unique": false
   },
-  "inchikey": {
+  "inchi_key": {
     "checks": [
       {
-        "name": "inchikey_format"
+        "name": "inchi_key_format"
       }
     ],
     "coerce": false,

@@ -175,10 +175,10 @@ class TestEnricherConfig:
         """MANY_TO_ONE cardinality with aggregation should work."""
         config = EnricherConfig(
             pipeline="chembl_publication_term",
-            join_keys=("document_chembl_id",),
+            join_keys=("publication_id",),
             cardinality=EnricherCardinality.MANY_TO_ONE,
             aggregation=AggregationConfig(
-                group_by="document_chembl_id",
+                group_by="publication_id",
                 fields=(
                     AggregationFieldSpec(
                         source_field="term",
@@ -328,7 +328,7 @@ class TestAggregationConfig:
     def test_valid_config(self):
         """Valid aggregation config should be created successfully."""
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -343,7 +343,7 @@ class TestAggregationConfig:
                 ),
             ),
         )
-        assert config.group_by == "document_chembl_id"
+        assert config.group_by == "publication_id"
         assert len(config.fields) == 2
 
     def test_empty_fields_raises(self):

@@ -19,10 +19,10 @@ class TargetSchema(ETLRecordSchema):
     # tid: Series[int] = pa.Field(
     #     nullable=False, description="Primary key."
     # )
-    # Removed tid as it is not in Silver schema. target_chembl_id is the PK.
+    # Removed tid as it is not in Silver schema. target_id is the PK.
 
     # === Identifiers ===
-    target_chembl_id: Series[str] = pa.Field(
+    target_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
@@ -79,7 +79,7 @@ class TargetSchema(ETLRecordSchema):
     component_descriptions: Series[object] | None = pa.Field(
         nullable=True, description="List of component descriptions."
     )
-    component_id: Series[float] | None = pa.Field(
+    primary_component_id: Series[float] | None = pa.Field(
         nullable=True,
         coerce=True,
         description="Primary component ID (first from list).",

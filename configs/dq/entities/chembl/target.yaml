@@ -12,7 +12,7 @@ entity: target
 # Target-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: target_chembl_id
+  - field: target_id
     type: required
     nullable: false
     error_message: "Target ChEMBL ID is required"

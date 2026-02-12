@@ -31,7 +31,7 @@ UPDATE_SNAPSHOTS=1 python -m pytest tests/contract/silver_schemas/test_schema_st
 
 ### Детали изменений
 
-#### 1.1 pubchem_compound.cid: int64 → str ✅ ПРАВИЛЬНОЕ ИЗМЕНЕНИЕ
+#### 1.1 pubchem_compound.molecule_id: int64 → str ✅ ПРАВИЛЬНОЕ ИЗМЕНЕНИЕ
 
 **Текущее состояние:**
 ```
@@ -354,7 +354,7 @@ UPDATE_SNAPSHOTS=1 python -m pytest tests/contract/silver_schemas/test_schema_st
 # tests/contract/silver_schemas/test_field_types.py
 numeric_id_fields = {
     "assay_param_id",
-    "assay_taxonomy_id",
+    "taxonomy_id",
     # ... existing ...
     "toid",          # ADD: Target organism ID
     "parent_id",     # ADD: Protein class parent ID
@@ -453,7 +453,7 @@ pytest tests/contract/silver_schemas/ -v
 3. ✅ Add date_only_fields exclusion (Phase 2.2) — 2 minutes
 
 ### Short-term (P1)
-4. ⚠️ Decide on standard_type validation strategy (Phase 3) — requires data analysis
+4. ⚠️ Demolecule_ide on standard_type validation strategy (Phase 3) — requires data analysis
 
 ### Long-term (P2)
 5. 📝 Document ID field type convention в RULES.md

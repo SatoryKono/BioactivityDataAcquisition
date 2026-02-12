@@ -14,9 +14,10 @@ column_groups:
 
   - name: identifiers
     fields:
-      - document_chembl_id
-      - doi
-      - pmid
+      - publication_id
+      - publication_doi
+      - publication_pmid
+      - publication_pmc_id
 
   - name: title
     fields:
@@ -64,6 +65,10 @@ field_aliases:
   first_page: page_first
   last_page: page_last
   doc_type: publication_type
+  document_chembl_id: publication_id
+  doi: publication_doi
+  pmid: publication_pmid
+  pmc_id: publication_pmc_id
 
 # Layer-specific column filtering
 silver:

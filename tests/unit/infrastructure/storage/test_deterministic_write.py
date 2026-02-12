@@ -242,11 +242,11 @@ class TestSortByConfig:
         from bioetl.infrastructure.schemas.pipeline_config import SortByConfig
 
         config = SortByConfig(
-            columns=["target_chembl_id", "pref_name"],
+            columns=["target_id", "pref_name"],
             ascending=False,
         )
 
-        assert config.columns == ["target_chembl_id", "pref_name"]
+        assert config.columns == ["target_id", "pref_name"]
         assert config.ascending is False
 
     def test_sink_layer_config_with_sort_by(self):

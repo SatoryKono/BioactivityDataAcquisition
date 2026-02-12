@@ -17,9 +17,9 @@ def small_payload() -> list[dict[str, Any]]:
     return [
         {
             "id": f"RECORD_{i:05d}",
-            "molecule_chembl_id": f"CHEMBL{100000 + i}",
-            "assay_chembl_id": f"CHEMBL{200000 + i}",
-            "target_chembl_id": f"CHEMBL{300000 + i}",
+            "molecule_id": f"CHEMBL{100000 + i}",
+            "assay_id": f"CHEMBL{200000 + i}",
+            "target_id": f"CHEMBL{300000 + i}",
             "standard_value": 10.5 + (i * 0.1),
             "standard_units": "nM",
             "pchembl_value": 7.5 + (i * 0.01),
@@ -36,10 +36,10 @@ def medium_payload() -> list[dict[str, Any]]:
     return [
         {
             "id": f"RECORD_{i:06d}",
-            "molecule_chembl_id": f"CHEMBL{100000 + i}",
-            "assay_chembl_id": f"CHEMBL{200000 + i}",
-            "target_chembl_id": f"CHEMBL{300000 + i}",
-            "document_chembl_id": f"CHEMBL{400000 + i}",
+            "molecule_id": f"CHEMBL{100000 + i}",
+            "assay_id": f"CHEMBL{200000 + i}",
+            "target_id": f"CHEMBL{300000 + i}",
+            "publication_id": f"CHEMBL{400000 + i}",
             "standard_value": 10.5 + (i * 0.1),
             "standard_units": "nM",
             "pchembl_value": 7.5 + (i * 0.01),
@@ -66,10 +66,10 @@ def large_payload() -> list[dict[str, Any]]:
     return [
         {
             "id": f"RECORD_{i:07d}",
-            "molecule_chembl_id": f"CHEMBL{100000 + i}",
-            "assay_chembl_id": f"CHEMBL{200000 + i}",
-            "target_chembl_id": f"CHEMBL{300000 + i}",
-            "document_chembl_id": f"CHEMBL{400000 + i}",
+            "molecule_id": f"CHEMBL{100000 + i}",
+            "assay_id": f"CHEMBL{200000 + i}",
+            "target_id": f"CHEMBL{300000 + i}",
+            "publication_id": f"CHEMBL{400000 + i}",
             "standard_value": 10.5 + (i * 0.1),
             "standard_units": "nM",
             "pchembl_value": 7.5 + (i * 0.01),

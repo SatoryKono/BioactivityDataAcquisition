@@ -22,28 +22,28 @@ column_groups:
     pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
 
   # 3. Primary identifiers
-  - name: identifiers_document_chembl_id
+  - name: identifiers_publication
     fields:
-      - document_chembl_id
+      - publication_id
     provider_order: [chembl]
 
   # 3.2 doi identifiers
   - name: identifiers_doi
     fields:
-      - doi
+      - publication_doi
     provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 3.3 pmid identifiers
   - name: identifiers_pmid
     fields:
-      - pmid
+      - publication_pmid
     provider_order: [chembl, openalex, pubmed, semanticscholar]
 
   # 4. PMC IDs (separate group - not in seed)
   # Note: Only PubMed provides pmc_id (removed from OpenAlex, SemanticScholar)
   - name: pmc_identifiers
     fields:
-      - pmc_id
+      - publication_pmc_id
     provider_order: [pubmed]
 
   # 5. Title group
@@ -285,6 +285,10 @@ field_aliases:
   journal_abbrev: journal_name_short
   pages: page_range
   fields_of_study: subject_fields
+  doi: publication_doi
+  pmid: publication_pmid
+  pmc_id: publication_pmc_id
+  document_chembl_id: publication_id
 
 # Layer-specific column filtering (Variant 2 approach)
 # Silver: Include most fields for intermediate processing
@@ -294,7 +298,7 @@ silver:
   include_groups:
     - system
     - lineage
-    - identifiers_document_chembl_id
+    - identifiers_publication
     - identifiers_doi
     - identifiers_pmid
     - pmc_identifiers

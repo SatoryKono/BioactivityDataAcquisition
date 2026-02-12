@@ -482,8 +482,8 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
         from bioetl.domain.filtering import FilterColumn
 
         columns = [
-            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
-            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+            FilterColumn(column_name="target_id", filter_field="target_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_id"),
         ]
 
         result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
@@ -497,16 +497,16 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
         from bioetl.domain.filtering import FilterColumn
 
         columns = [
-            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
-            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+            FilterColumn(column_name="target_id", filter_field="target_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_id"),
         ]
 
         result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
 
-        assert "target_chembl_id" in result.column_ids
-        assert "assay_chembl_id" in result.column_ids
-        assert set(result.column_ids["target_chembl_id"]) == {"T001", "T002"}
-        assert set(result.column_ids["assay_chembl_id"]) == {"A001", "A002", "A003"}
+        assert "target_id" in result.column_ids
+        assert "assay_id" in result.column_ids
+        assert set(result.column_ids["target_id"]) == {"T001", "T002"}
+        assert set(result.column_ids["assay_id"]) == {"A001", "A002", "A003"}
 
     async def test_load_multi_column_filter_builds_valid_combinations(
         self, csv_reader, multi_column_csv
@@ -515,8 +515,8 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
         from bioetl.domain.filtering import FilterColumn
 
         columns = [
-            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
-            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+            FilterColumn(column_name="target_id", filter_field="target_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_id"),
         ]
 
         result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
@@ -537,13 +537,13 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
         from bioetl.domain.filtering import FilterColumn
 
         columns = [
-            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
-            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+            FilterColumn(column_name="target_id", filter_field="target_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_id"),
         ]
 
         result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
 
-        assert result.filter_fields == ("target_chembl_id", "assay_chembl_id")
+        assert result.filter_fields == ("target_id", "assay_id")
 
     async def test_load_multi_column_filter_sets_total_count(
         self, csv_reader, multi_column_csv
@@ -552,7 +552,7 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
         from bioetl.domain.filtering import FilterColumn
 
         columns = [
-            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+            FilterColumn(column_name="target_id", filter_field="target_id"),
         ]
 
         result = await csv_reader.load_multi_column_filter(multi_column_csv, columns)
@@ -593,8 +593,8 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
         from bioetl.domain.filtering import FilterColumn
 
         columns = [
-            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
-            FilterColumn(column_name="assay_id", filter_field="assay_chembl_id"),
+            FilterColumn(column_name="target_id", filter_field="target_id"),
+            FilterColumn(column_name="assay_id", filter_field="assay_id"),
         ]
 
         await csv_reader_with_logger.load_multi_column_filter(multi_column_csv, columns)
@@ -612,7 +612,7 @@ class TestCsvFilterReaderLoadMultiColumnFilter:
         from bioetl.domain.filtering import FilterColumn
 
         columns = [
-            FilterColumn(column_name="target_id", filter_field="target_chembl_id"),
+            FilterColumn(column_name="target_id", filter_field="target_id"),
         ]
 
         # Should not raise any exception

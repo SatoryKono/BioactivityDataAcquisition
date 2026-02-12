@@ -27,36 +27,36 @@ class TestChemblId:
 
     def test_valid_chembl_id(self) -> None:
         """Test creation with valid ChEMBL ID."""
-        cid = ChemblId("CHEMBL25")
-        assert cid.value == "CHEMBL25"
-        assert cid.numeric_id == 25
+        molecule_id = ChemblId("CHEMBL25")
+        assert molecule_id.value == "CHEMBL25"
+        assert molecule_id.numeric_id == 25
 
     def test_large_chembl_id(self) -> None:
         """Test creation with large numeric ID."""
-        cid = ChemblId("CHEMBL1234567")
-        assert cid.value == "CHEMBL1234567"
-        assert cid.numeric_id == 1234567
+        molecule_id = ChemblId("CHEMBL1234567")
+        assert molecule_id.value == "CHEMBL1234567"
+        assert molecule_id.numeric_id == 1234567
 
     def test_normalizes_case(self) -> None:
         """Test case normalization to uppercase."""
-        cid = ChemblId("chembl123")
-        assert cid.value == "CHEMBL123"
+        molecule_id = ChemblId("chembl123")
+        assert molecule_id.value == "CHEMBL123"
 
     def test_normalizes_mixed_case(self) -> None:
         """Test mixed case normalization."""
-        cid = ChemblId("ChEmBl999")
-        assert cid.value == "CHEMBL999"
+        molecule_id = ChemblId("ChEmBl999")
+        assert molecule_id.value == "CHEMBL999"
 
     def test_strips_whitespace(self) -> None:
         """Test whitespace stripping."""
-        cid = ChemblId("  CHEMBL100  ")
-        assert cid.value == "CHEMBL100"
+        molecule_id = ChemblId("  CHEMBL100  ")
+        assert molecule_id.value == "CHEMBL100"
 
     def test_removes_leading_zeros(self) -> None:
         """Test leading zeros are normalized."""
-        cid = ChemblId("CHEMBL0025")
-        assert cid.value == "CHEMBL25"
-        assert cid.numeric_id == 25
+        molecule_id = ChemblId("CHEMBL0025")
+        assert molecule_id.value == "CHEMBL25"
+        assert molecule_id.numeric_id == 25
 
     def test_invalid_format_raises(self) -> None:
         """Test invalid format raises ValueError."""
@@ -90,22 +90,22 @@ class TestChemblId:
 
     def test_immutability(self) -> None:
         """Test Value Object is immutable."""
-        cid = ChemblId("CHEMBL25")
+        molecule_id = ChemblId("CHEMBL25")
         with pytest.raises(AttributeError, match="immutable"):
-            cid._value = "CHEMBL999"  # type: ignore[misc]
+            molecule_id._value = "CHEMBL999"  # type: ignore[misc]
 
     def test_equality_by_value(self) -> None:
         """Test equality is based on value, not identity."""
-        cid1 = ChemblId("CHEMBL25")
-        cid2 = ChemblId("chembl25")
-        assert cid1 == cid2
-        assert cid1 is not cid2
+        molecule_id1 = ChemblId("CHEMBL25")
+        molecule_id2 = ChemblId("chembl25")
+        assert molecule_id1 == molecule_id2
+        assert molecule_id1 is not molecule_id2
 
     def test_hash_consistency(self) -> None:
         """Test hash is consistent with equality."""
-        cid1 = ChemblId("CHEMBL25")
-        cid2 = ChemblId("chembl25")
-        assert hash(cid1) == hash(cid2)
+        molecule_id1 = ChemblId("CHEMBL25")
+        molecule_id2 = ChemblId("chembl25")
+        assert hash(molecule_id1) == hash(molecule_id2)
 
     def test_can_be_used_in_set(self) -> None:
         """Test Value Object can be used in set."""
@@ -119,25 +119,25 @@ class TestChemblId:
 
     def test_repr(self) -> None:
         """Test string representation."""
-        cid = ChemblId("CHEMBL25")
-        assert repr(cid) == "ChemblId('CHEMBL25')"
+        molecule_id = ChemblId("CHEMBL25")
+        assert repr(molecule_id) == "ChemblId('CHEMBL25')"
 
     def test_str(self) -> None:
         """Test string conversion."""
-        cid = ChemblId("CHEMBL25")
-        assert str(cid) == "CHEMBL25"
+        molecule_id = ChemblId("CHEMBL25")
+        assert str(molecule_id) == "CHEMBL25"
 
     def test_inequality_with_different_ids(self) -> None:
         """Test inequality for different IDs."""
-        cid1 = ChemblId("CHEMBL25")
-        cid2 = ChemblId("CHEMBL100")
-        assert cid1 != cid2
+        molecule_id1 = ChemblId("CHEMBL25")
+        molecule_id2 = ChemblId("CHEMBL100")
+        assert molecule_id1 != molecule_id2
 
     def test_inequality_with_different_types(self) -> None:
         """Test inequality with different types."""
-        cid = ChemblId("CHEMBL25")
-        assert cid != "CHEMBL25"
-        assert cid != 25
+        molecule_id = ChemblId("CHEMBL25")
+        assert molecule_id != "CHEMBL25"
+        assert molecule_id != 25
 
 
 class TestUniProtId:
@@ -452,20 +452,20 @@ class TestPubMedId:
 class TestPubChemCid:
     """Tests for PubChemCid Value Object."""
 
-    def test_valid_cid(self) -> None:
+    def test_valid_molecule_id(self) -> None:
         """Test creation with valid CID."""
-        cid = PubChemCid(2244)  # Aspirin
-        assert cid.value == 2244
+        molecule_id = PubChemCid(2244)  # Aspirin
+        assert molecule_id.value == 2244
 
-    def test_large_cid(self) -> None:
+    def test_large_molecule_id(self) -> None:
         """Test creation with large CID."""
-        cid = PubChemCid(50_000_000_000)
-        assert cid.value == 50_000_000_000
+        molecule_id = PubChemCid(50_000_000_000)
+        assert molecule_id.value == 50_000_000_000
 
     def test_string_conversion(self) -> None:
         """Test string input is converted to int."""
-        cid = PubChemCid("2244")  # type: ignore[arg-type]
-        assert cid.value == 2244
+        molecule_id = PubChemCid("2244")  # type: ignore[arg-type]
+        assert molecule_id.value == 2244
 
     def test_zero_raises(self) -> None:
         """Test zero CID raises ValueError."""
@@ -489,38 +489,38 @@ class TestPubChemCid:
 
     def test_immutability(self) -> None:
         """Test Value Object is immutable."""
-        cid = PubChemCid(2244)
+        molecule_id = PubChemCid(2244)
         with pytest.raises(AttributeError, match="immutable"):
-            cid._value = 9999  # type: ignore[misc]
+            molecule_id._value = 9999  # type: ignore[misc]
 
     def test_equality_by_value(self) -> None:
         """Test equality is based on value."""
-        cid1 = PubChemCid(2244)
-        cid2 = PubChemCid(2244)
-        assert cid1 == cid2
+        molecule_id1 = PubChemCid(2244)
+        molecule_id2 = PubChemCid(2244)
+        assert molecule_id1 == molecule_id2
 
     def test_hash_consistency(self) -> None:
         """Test hash is consistent with equality."""
-        cid1 = PubChemCid(2244)
-        cid2 = PubChemCid(2244)
-        assert hash(cid1) == hash(cid2)
+        molecule_id1 = PubChemCid(2244)
+        molecule_id2 = PubChemCid(2244)
+        assert hash(molecule_id1) == hash(molecule_id2)
 
     def test_str(self) -> None:
         """Test string conversion."""
-        cid = PubChemCid(2244)
-        assert str(cid) == "2244"
+        molecule_id = PubChemCid(2244)
+        assert str(molecule_id) == "2244"
 
     def test_from_raw_valid_int(self) -> None:
         """Test from_raw with valid integer."""
-        cid = PubChemCid.from_raw(2244)
-        assert cid is not None
-        assert cid.value == 2244
+        molecule_id = PubChemCid.from_raw(2244)
+        assert molecule_id is not None
+        assert molecule_id.value == 2244
 
     def test_from_raw_valid_string(self) -> None:
         """Test from_raw with valid string."""
-        cid = PubChemCid.from_raw("2244")
-        assert cid is not None
-        assert cid.value == 2244
+        molecule_id = PubChemCid.from_raw("2244")
+        assert molecule_id is not None
+        assert molecule_id.value == 2244
 
     def test_from_raw_none(self) -> None:
         """Test from_raw with None."""
@@ -542,15 +542,15 @@ class TestChemblIdFromRaw:
 
     def test_from_raw_valid(self) -> None:
         """Test from_raw with valid ChEMBL ID."""
-        cid = ChemblId.from_raw("CHEMBL25")
-        assert cid is not None
-        assert cid.value == "CHEMBL25"
+        molecule_id = ChemblId.from_raw("CHEMBL25")
+        assert molecule_id is not None
+        assert molecule_id.value == "CHEMBL25"
 
     def test_from_raw_normalizes_case(self) -> None:
         """Test from_raw normalizes case."""
-        cid = ChemblId.from_raw("chembl25")
-        assert cid is not None
-        assert cid.value == "CHEMBL25"
+        molecule_id = ChemblId.from_raw("chembl25")
+        assert molecule_id is not None
+        assert molecule_id.value == "CHEMBL25"
 
     def test_from_raw_none(self) -> None:
         """Test from_raw with None."""

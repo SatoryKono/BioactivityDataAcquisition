@@ -41,13 +41,13 @@ async def test_fetch_as_models_valid(adapter, mock_http_client):
         "activities": [
             {
                 "activity_id": "1",
-                "assay_chembl_id": "CHEMBL123",
-                "molecule_chembl_id": "CHEMBL456",
+                "assay_id": "CHEMBL123",
+                "molecule_id": "CHEMBL456",
                 "pchembl_value": "7.5",
                 "standard_type": "IC50",
                 "standard_value": "30.0",
                 "standard_units": "nM",
-                "target_chembl_id": "CHEMBL789",
+                "target_id": "CHEMBL789",
             }
         ],
         "page_meta": {"next": None},
@@ -103,13 +103,13 @@ async def test_get_source_metadata(adapter):
 async def test_fetch_single_record_direct_success(adapter, mock_http_client):
     """Test successful fallback to direct endpoint."""
     mock_response = MagicMock()
-    mock_response.json.return_value = {"target_chembl_id": "CHEMBL123"}
+    mock_response.json.return_value = {"target_id": "CHEMBL123"}
     mock_http_client.get.return_value = mock_response
 
     result = await adapter._fetch_single_record_direct("target", "CHEMBL123")
 
     assert result is not None
-    assert result["target_chembl_id"] == "CHEMBL123"
+    assert result["target_id"] == "CHEMBL123"
     mock_http_client.get.assert_called_with(
         "https://www.ebi.ac.uk/chembl/api/data/target/CHEMBL123",
         params={"format": "json"},

@@ -84,7 +84,7 @@ if getattr(schema_class.Config, "coerce", False):
 - uniprot_protein
 
 **Обоснование:**
-Тест проверяет паттерн `{entity}_chembl_id` для foreign keys, который применим только к ChEMBL схемам. Другие провайдеры используют свои conventions (например, `openalex_id`, `cid`, `accession`).
+Тест проверяет паттерн `{entity}_chembl_id` для foreign keys, который применим только к ChEMBL схемам. Другие провайдеры используют свои conventions (например, `openalex_id`, `molecule_id`, `accession`).
 
 **Код теста:**
 ```python
@@ -231,16 +231,16 @@ if "pchembl_value" not in fields:
 **Skip message:**
 ```
 Cannot reliably distinguish primary keys from foreign keys.
-Fields like target_chembl_id, document_chembl_id are FKs, not PKs.
+Fields like target_id, publication_id are FKs, not PKs.
 ```
 
 **Пропущенные схемы:** Все 19 схем
 
 **Обоснование:**
 Многие поля заканчиваются на `_id` или `_chembl_id`, но являются foreign keys, не primary keys:
-- `target_chembl_id` (FK) vs `activity_id` (PK candidate)
-- `document_chembl_id` (FK) vs `molecule_chembl_id` (PK candidate)
-- `assay_chembl_id` (FK) vs `entity_id` (actual PK)
+- `target_id` (FK) vs `activity_id` (PK candidate)
+- `publication_id` (FK) vs `molecule_id` (PK candidate)
+- `assay_id` (FK) vs `entity_id` (actual PK)
 
 Реальный primary key - это `entity_id` (из ETLRecordSchema), который уже проверяется в `test_primary_key_field_exists`.
 
@@ -248,7 +248,7 @@ Fields like target_chembl_id, document_chembl_id are FKs, not PKs.
 ```python
 pytest.skip(
     "Cannot reliably distinguish primary keys from foreign keys. "
-    "Fields like target_chembl_id, document_chembl_id are FKs, not PKs."
+    "Fields like target_id, publication_id are FKs, not PKs."
 )
 ```
 

@@ -162,7 +162,7 @@ async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
         "chembl_publication",
         limit=100,
         filter_ids=PUBLICATION_TEST_IDS,
-        filter_field="document_chembl_id",
+        filter_field="publication_id",
     )
 
     # Act
@@ -181,7 +181,7 @@ async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "chembl_publication")
-    required_fields = ["document_chembl_id"]
+    required_fields = ["publication_id"]
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"
@@ -201,7 +201,7 @@ async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
         "chembl_publication",
         limit=100,
         filter_ids=PUBLICATION_TEST_IDS,
-        filter_field="document_chembl_id",
+        filter_field="publication_id",
     )
 
     # Act

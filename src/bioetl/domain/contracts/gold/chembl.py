@@ -138,8 +138,8 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     assay_id: Series[str] = pa.Field(nullable=False)
     target_id: Series[str] = pa.Field(nullable=True)
     publication_id: Series[str] = pa.Field(nullable=True)
-    cell_chembl_id: Series[str] = pa.Field(nullable=True)
-    tissue_chembl_id: Series[str] = pa.Field(nullable=True)
+    cell_id: Series[str] = pa.Field(nullable=True)
+    tissue_id: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
     src_assay_id: Series[str] = pa.Field(nullable=True)
     aidx: Series[str] = pa.Field(nullable=True)
@@ -204,7 +204,7 @@ class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
     )  # int64 in Silver
 
     # Foreign key
-    assay_chembl_id: Series[str] = pa.Field(nullable=False)
+    assay_id: Series[str] = pa.Field(nullable=False)
 
     # Parameter type
     type: Series[str] = pa.Field(nullable=False)
@@ -244,7 +244,7 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
     content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifier
-    cell_chembl_id: Series[str] = pa.Field(nullable=False)
+    cell_id: Series[str] = pa.Field(nullable=False)
 
     # Core metadata
     cell_name: Series[str] = pa.Field(nullable=False)
@@ -286,8 +286,8 @@ class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
     record_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
 
     # Foreign keys
-    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
-    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    molecule_id: Series[str] = pa.Field(nullable=False)
+    publication_id: Series[str] = pa.Field(nullable=False)
 
     # Original compound names from document
     compound_key: Series[str] = pa.Field(nullable=True)
@@ -315,12 +315,13 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    publication_id: Series[str] = pa.Field(nullable=False)
     # Cross-reference IDs for linking publications across providers
-    # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
-    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
+    # Unified names retained for migration compatibility
+    publication_pmid: Series[str] = pa.Field(nullable=True)
+    publication_doi: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
@@ -347,7 +348,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup (document_chembl_id for direct)
+    # _original_id: Original identifier used for lookup (publication_id for direct)
     lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
@@ -422,7 +423,7 @@ class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
     content_hash: Series[str] = pa.Field(nullable=False)
 
     # Composite key fields
-    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    publication_id: Series[str] = pa.Field(nullable=False)
     term: Series[str] = pa.Field(nullable=False)
     term_type: Series[str] = pa.Field(nullable=False)
 
@@ -448,7 +449,7 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
+    molecule_id: Series[str] = pa.Field(nullable=False)
     pref_name: Series[str] = pa.Field(nullable=True)
     molecule_type: Series[str] = pa.Field(nullable=True)
     structure_type: Series[str] = pa.Field(nullable=True)
@@ -483,27 +484,28 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     hierarchy_parent_chembl_id: Series[str] = pa.Field(nullable=True)
     hierarchy_active_chembl_id: Series[str] = pa.Field(nullable=True)
     hierarchy_child_chembl_id: Series[str] = pa.Field(nullable=True)
-    property_alogp: Series[float] = pa.Field(nullable=True, coerce=True)
+    logp: Series[float] = pa.Field(nullable=True, coerce=True)
+    logp_method: Series[str] = pa.Field(nullable=True)
+    molecular_weight: Series[float] = pa.Field(nullable=True, coerce=True)
     property_mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_full_mwt: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_hba: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    property_hbd: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    property_psa: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_rtb: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    polar_surface_area: Series[float] = pa.Field(nullable=True, coerce=True)
+    rotatable_bond_count: Series[float] = pa.Field(nullable=True, coerce=True)
     property_ro5_violations: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int64
-    property_heavy_atoms: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    property_aromatic_rings: Series[float] = pa.Field(
+    heavy_atom_count: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    aromatic_ring_count: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int64
+    hba_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    hbd_count: Series[float] = pa.Field(nullable=True, coerce=True)
     property_qed_weighted: Series[float] = pa.Field(nullable=True, coerce=True)
     property_full_molformula: Series[str] = pa.Field(nullable=True)
     property_ro3_pass: Series[str] = pa.Field(nullable=True)
     # Flattened Structures (unified naming without structure_ prefix)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     standard_inchi: Series[str] = pa.Field(nullable=True)
-    inchikey: Series[str] = pa.Field(nullable=True)
+    inchi_key: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -565,7 +567,7 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    target_chembl_id: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=False)
     pref_name: Series[str] = pa.Field(nullable=True)
     target_type: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
@@ -579,7 +581,7 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     cross_references: Series[str] = pa.Field(nullable=True)
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
     component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_id: Series[float] = pa.Field(
+    primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
     component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
@@ -604,7 +606,7 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    component_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64
+    primary_component_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64
     accession: Series[str] = pa.Field(nullable=True)
     component_type: Series[str] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)

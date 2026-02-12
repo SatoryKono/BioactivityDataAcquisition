@@ -26,10 +26,10 @@ class AssaySchema(ETLRecordSchema):
     # assay_id: Series[int] = pa.Field(
     #     nullable=False, description="Primary key."
     # )
-    # Removed assay_id as it is not in Silver schema. assay_chembl_id is the PK.
+    # Removed assay_id as it is not in Silver schema. assay_id is the PK.
 
     # === Identifiers ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
@@ -65,7 +65,7 @@ class AssaySchema(ETLRecordSchema):
     assay_organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    assay_taxonomy_id: Series[float] | None = pa.Field(
+    taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
         description="NCBI Taxonomy ID (float for nullable int).",
     )
@@ -79,7 +79,7 @@ class AssaySchema(ETLRecordSchema):
     )
 
     # === Target & Relationship ===
-    target_chembl_id: Series[str] | None = pa.Field(
+    target_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Target ChEMBL ID.",
@@ -115,7 +115,7 @@ class AssaySchema(ETLRecordSchema):
     src_assay_id: Series[str] | None = pa.Field(
         nullable=True, description="Source Assay ID."
     )
-    document_chembl_id: Series[str] | None = pa.Field(
+    publication_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Document ChEMBL ID.",
@@ -126,10 +126,10 @@ class AssaySchema(ETLRecordSchema):
     score: Series[float] | None = pa.Field(nullable=True, description="Score.")
 
     # === Foreign Keys ===
-    cell_chembl_id: Series[str] | None = pa.Field(
+    cell_id: Series[str] | None = pa.Field(
         nullable=True, description="FK to cell_line."
     )
-    tissue_chembl_id: Series[str] | None = pa.Field(
+    tissue_id: Series[str] | None = pa.Field(
         nullable=True, description="FK to tissue."
     )
     # variant_id: Optional[Series[int]] = pa.Field(

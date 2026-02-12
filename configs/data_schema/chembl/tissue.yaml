@@ -8,7 +8,7 @@ entity: tissue
 column_groups:
   - name: identifiers
     fields:
-      - tissue_chembl_id
+      - tissue_id
   - name: core_metadata
     fields:
       - pref_name
@@ -21,7 +21,7 @@ column_groups:
 
 # All business fields for Gold layer
 gold_columns:
-  - tissue_chembl_id
+  - tissue_id
   - pref_name
   - bto_id
   - caloha_id

@@ -25,8 +25,8 @@ class CompoundRecord(BaseEntity):
     record_id: int
 
     # Foreign keys (REQUIRED)
-    molecule_chembl_id: str
-    document_chembl_id: str
+    molecule_id: str
+    publication_id: str
 
     # Original names from the document (API-OPTIONAL)
     compound_key: str | None = None
@@ -48,8 +48,8 @@ class CompoundRecord(BaseEntity):
         """
         self._validate_positive_id(self.record_id, "record_id")
         self._validate_positive_id(self.src_id, "src_id")
-        self._validate_required_str(self.molecule_chembl_id, "molecule_chembl_id")
-        self._validate_required_str(self.document_chembl_id, "document_chembl_id")
+        self._validate_required_str(self.molecule_id, "molecule_id")
+        self._validate_required_str(self.publication_id, "publication_id")
 
     def _validate_positive_id(self, value: int, field_name: str) -> None:
         """Validate that an ID is positive (> 0)."""

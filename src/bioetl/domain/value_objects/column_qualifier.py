@@ -12,7 +12,14 @@ from typing import Final
 __all__ = ["JOIN_KEY_COLUMNS", "ColumnQualifier"]
 
 # Join keys excluded from renaming (case-insensitive)
-JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset({"doi", "pmid", "pmc_id"})
+JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset(
+    {
+        "publication_id",
+        "publication_doi",
+        "publication_pmid",
+        "publication_pmc_id",
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,7 +71,7 @@ class ColumnQualifier:
 
     @property
     def is_join_key(self) -> bool:
-        """Check if field is a join key (doi, pmid, pmc_id)."""
+        """Check if field is a join key (publication identifiers)."""
         return self.field.lower() in JOIN_KEY_COLUMNS
 
     @classmethod

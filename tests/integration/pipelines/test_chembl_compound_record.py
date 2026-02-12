@@ -89,8 +89,8 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
 
         # Verify business fields in Silver
         assert "record_id" in silver_df.column_names
-        assert "molecule_chembl_id" in silver_df.column_names
-        assert "document_chembl_id" in silver_df.column_names
+        assert "molecule_id" in silver_df.column_names
+        assert "publication_id" in silver_df.column_names
         assert "src_id" in silver_df.column_names
 
         # Verify Gold Delta Table

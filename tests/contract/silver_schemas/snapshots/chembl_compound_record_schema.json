@@ -109,7 +109,7 @@
     "required": true,
     "unique": false
   },
-  "document_chembl_id": {
+  "publication_id": {
     "checks": [
       {
         "name": "str_matches",
@@ -132,7 +132,7 @@
     "required": true,
     "unique": false
   },
-  "molecule_chembl_id": {
+  "molecule_id": {
     "checks": [
       {
         "name": "str_matches",

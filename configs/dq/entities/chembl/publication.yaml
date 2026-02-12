@@ -12,11 +12,11 @@ entity: publication
 # Publication-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: document_chembl_id
+  - field: publication_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "document_chembl_id must match CHEMBL format"
+    error_message: "publication_id must match CHEMBL format"
 
   - field: publication_type
     type: enum
@@ -34,14 +34,14 @@ entity_field_validations:
     nullable: true
     error_message: "Publication year must be between 1500 and 2100"
 
-  - field: pmid
+  - field: publication_pmid
     type: range
     min: 1
     max: 10000000000
     nullable: true
     error_message: "PubMed ID must be a positive integer"
 
-  - field: doi
+  - field: publication_doi
     type: pattern
     pattern: '^10\.\d{4,}/\S+$'
     nullable: true
@@ -92,15 +92,15 @@ entity_field_validations:
 entity_cross_field_validations:
   - name: publication_identifiable
     fields:
-      - document_chembl_id
+      - publication_id
       - title
     condition: all_present
-    error_message: "Publication must have document_chembl_id and title"
+    error_message: "Publication must have publication_id and title"
 
   - name: has_cross_reference
     fields:
-      - pmid
-      - doi
+      - publication_pmid
+      - publication_doi
     condition: any_present
     severity: warn
     error_message: "Publication should have at least one external identifier (PMID or DOI)"

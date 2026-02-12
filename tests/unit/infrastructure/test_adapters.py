@@ -158,7 +158,7 @@ class TestPubChemAdapter:
         # Mock compound object
         # Uses connectivity_smiles/smiles (pubchempy 1.0.5 replacements)
         class MockCompound:
-            cid = 2244
+            molecule_id = 2244
             molecular_formula = "C9H8O4"
             molecular_weight = 180.16
             # connectivity_smiles replaces deprecated canonical_smiles
@@ -168,8 +168,8 @@ class TestPubChemAdapter:
             inchi = (
                 "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)"
             )
-            inchikey = "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
-            iupac_name = "2-acetyloxybenzoic acid"
+            inchi_key = "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+            iupac_name = "2-acetyloxybenzoic amolecule_id"
             charge = 0
             complexity = 212.0
             h_bond_acceptor_count = 4
@@ -179,7 +179,7 @@ class TestPubChemAdapter:
 
         result = adapter._mapper.compound_to_dict(MockCompound())
 
-        assert result["cid"] == 2244
+        assert result["molecule_id"] == 2244
         assert result["molecular_formula"] == "C9H8O4"
         assert result["canonical_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
 

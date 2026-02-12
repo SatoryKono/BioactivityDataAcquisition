@@ -23,7 +23,7 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     """
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    cid: Series[str] = pa.Field(nullable=False)  # Domain entity uses str for cid
+    molecule_id: Series[str] = pa.Field(nullable=False)  # Canonical molecule id (was cid)
     molecular_formula: Series[str] = pa.Field(nullable=True)
     molecular_weight: Series[float] = pa.Field(
         nullable=True, coerce=True
@@ -31,7 +31,10 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     isomeric_smiles: Series[str] = pa.Field(nullable=True)
     inchi: Series[str] = pa.Field(nullable=True)
-    inchikey: Series[str] = pa.Field(nullable=True)
+    inchi_key: Series[str] = pa.Field(nullable=True)
+    logp: Series[float] = pa.Field(nullable=True, coerce=True)
+    logp_method: Series[str] = pa.Field(nullable=True)
+    polar_surface_area: Series[float] = pa.Field(nullable=True, coerce=True)
     iupac_name: Series[str] = pa.Field(nullable=True)
     content_hash: Series[str] = pa.Field(nullable=False)
 

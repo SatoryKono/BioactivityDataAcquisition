@@ -11,16 +11,16 @@ import hashlib
 
 
 def compute_publication_term_entity_id(
-    document_chembl_id: str,
+    publication_id: str,
     term_type: str,
     term: str,
 ) -> str:
     """Compute entity ID for a publication term based on composite key.
 
-    Entity ID is SHA256 hash of: document_chembl_id:term_type:normalized_term
+    Entity ID is SHA256 hash of: publication_id:term_type:normalized_term
 
     Args:
-        document_chembl_id: Document ChEMBL ID.
+        publication_id: Document ChEMBL ID.
         term_type: Term type classification.
         term: Term text (will be normalized).
 
@@ -29,7 +29,7 @@ def compute_publication_term_entity_id(
 
     """
     normalized_term = term.lower().strip() if term else ""
-    composite = f"{document_chembl_id}:{term_type}:{normalized_term}"
+    composite = f"{publication_id}:{term_type}:{normalized_term}"
     return hashlib.sha256(composite.encode()).hexdigest()[:16]
 
 

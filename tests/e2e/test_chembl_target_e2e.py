@@ -68,7 +68,7 @@ async def test_chembl_target_full_cycle(e2e_data_dir: Path):
 
     # Assert - Schema validation
     records = get_silver_records(e2e_data_dir, "chembl_target")
-    required_fields = ["target_chembl_id", "pref_name", "target_type"]
+    required_fields = ["target_id", "pref_name", "target_type"]
     for record in records:
         for field in required_fields:
             assert field in record, f"Missing required field: {field}"

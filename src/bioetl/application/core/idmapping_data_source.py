@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class IDMappingDataSource:
     """Data source for ChEMBL → UniProt ID mapping.
 
-    Reads target_chembl_id values from seed filter IDs (composite mode)
+    Reads target_id values from seed filter IDs (composite mode)
     or input CSV file (standalone mode), then maps them to UniProt
     accessions using the UniProt ID Mapping REST API.
 
@@ -36,7 +36,7 @@ class IDMappingDataSource:
         ... )
         >>> async for record in data_source.fetch("idmapping"):
         ...     logger.info("record_fetched", record=record)
-        # Output: {"target_chembl_id": "CHEMBL204", "uniprot_accession": "P00742"}
+        # Output: {"target_id": "CHEMBL204", "uniprot_accession": "P00742"}
     """
 
     provider_name: str = "uniprot_idmapping"
@@ -48,7 +48,7 @@ class IDMappingDataSource:
         logger: LoggerPort,
         from_db: str = "ChEMBL",
         to_db: str = "UniProtKB",
-        id_column: str = "target_chembl_id",
+        id_column: str = "target_id",
         seed_ids: list[str] | None = None,
     ) -> None:
         """Initialize ID Mapping data source.
@@ -121,7 +121,7 @@ class IDMappingDataSource:
             filter_field: Unused (for interface compatibility).
 
         Yields:
-            Dicts with target_chembl_id and uniprot_accession fields.
+            Dicts with target_id and uniprot_accession fields.
 
         Raises:
             FileNotFoundError: If input CSV file doesn't exist (standalone mode).
@@ -181,12 +181,12 @@ class IDMappingDataSource:
             entry_data = mapping_results.get(chembl_id)
             if entry_data is not None and isinstance(entry_data, dict):
                 found_count += 1
-                result: dict[str, Any] = {"target_chembl_id": chembl_id}
+                result: dict[str, Any] = {"target_id": chembl_id}
                 result.update(entry_data)
                 yield result
             else:
                 yield {
-                    "target_chembl_id": chembl_id,
+                    "target_id": chembl_id,
                     "uniprot_accession": None,
                 }
 

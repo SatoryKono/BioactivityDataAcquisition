@@ -15,8 +15,8 @@ column_groups:
   - name: identifiers
     fields:
       - paper_id
-      - doi
-      - pmid
+      - publication_doi
+      - publication_pmid
       - corpus_id
       - dblp_id
 
@@ -97,6 +97,8 @@ field_aliases:
   citation_count: citations_received
   reference_count: citations_made
   fields_of_study: subject_fields
+  doi: publication_doi
+  pmid: publication_pmid
 
 # Layer-specific column filtering
 silver:

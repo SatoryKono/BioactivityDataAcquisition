@@ -74,6 +74,10 @@ class PublicationEntityBase(BaseEntity):
     doi: str | None = None
     pmid: str | None = None
     pmc_id: str | None = None  # PubMed Central ID (with PMC prefix)
+    # Canonical aliases (used in unified schemas)
+    publication_doi: str | None = None
+    publication_pmid: str | None = None
+    publication_pmc_id: str | None = None
 
     # Core metadata
     title: str | None = None

@@ -54,10 +54,10 @@ def yaml_filter_multi_column():
     # Mock columns
     col1 = MagicMock()
     col1.column_name = "target_id"
-    col1.filter_field = "target_chembl_id"
+    col1.filter_field = "target_id"
     col2 = MagicMock()
     col2.column_name = "assay_id"
-    col2.filter_field = "assay_chembl_id"
+    col2.filter_field = "assay_id"
     yaml_filter.columns = [col1, col2]
 
     yaml_filter.fallback_column = None
@@ -143,11 +143,11 @@ class TestFilterConfigBuilderBuildMultiColumn:
 
         # Check first column
         assert result.columns[0].column_name == "target_id"
-        assert result.columns[0].filter_field == "target_chembl_id"
+        assert result.columns[0].filter_field == "target_id"
 
         # Check second column
         assert result.columns[1].column_name == "assay_id"
-        assert result.columns[1].filter_field == "assay_chembl_id"
+        assert result.columns[1].filter_field == "assay_id"
 
     def test_build_multi_column_config_preserves_batch_size(
         self, yaml_filter_multi_column

@@ -42,6 +42,8 @@ ALLOWED_INFRASTRUCTURE_FILES: set[str] = {
     # Salt is security configuration that should not be passed through Settings
     # to minimize exposure in logs and error messages.
     "pii_hasher.py",
+    # dq_config_loader.py uses os.environ for relaxed DQ thresholds in tests
+    "dq_config_loader.py",
 }
 
 

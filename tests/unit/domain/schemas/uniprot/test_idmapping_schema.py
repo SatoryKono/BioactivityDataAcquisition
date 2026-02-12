@@ -19,7 +19,7 @@ from bioetl.domain.schemas.uniprot.idmapping import (
 
 
 class TestTargetChemblIdValidation:
-    """Tests for target_chembl_id field validation."""
+    """Tests for target_id field validation."""
 
     def test_valid_chembl_id(self) -> None:
         """Test valid ChEMBL target ID format."""
@@ -130,7 +130,7 @@ class TestSchemaFieldDefinitions:
         """Test schema defines all required ID mapping fields."""
         schema = IDMappingSchema.to_schema()
         required_fields = [
-            "target_chembl_id",
+            "target_id",
             "uniprot_accession",
             "mapping_status",
         ]
@@ -138,10 +138,10 @@ class TestSchemaFieldDefinitions:
         for field in required_fields:
             assert field in schema.columns, f"Missing field: {field}"
 
-    def test_target_chembl_id_not_nullable(self) -> None:
-        """Test target_chembl_id is not nullable (PK)."""
+    def test_target_id_not_nullable(self) -> None:
+        """Test target_id is not nullable (PK)."""
         schema = IDMappingSchema.to_schema()
-        col = schema.columns.get("target_chembl_id")
+        col = schema.columns.get("target_id")
         assert col is not None
         assert col.nullable is False
 
@@ -187,12 +187,12 @@ class TestSchemaConfiguration:
 class TestDataFramePatterns:
     """Tests using pandas DataFrame for field validation patterns."""
 
-    def test_target_chembl_id_pattern_with_dataframe(self) -> None:
+    def test_target_id_pattern_with_dataframe(self) -> None:
         """Test ChEMBL ID pattern with pandas DataFrame."""
         df = pd.DataFrame(
-            {"target_chembl_id": ["CHEMBL204", "CHEMBL1234567", "invalid"]}
+            {"target_id": ["CHEMBL204", "CHEMBL1234567", "invalid"]}
         )
-        matches = df["target_chembl_id"].str.match(r"^CHEMBL\d+$")
+        matches = df["target_id"].str.match(r"^CHEMBL\d+$")
         assert bool(matches.iloc[0]) is True
         assert bool(matches.iloc[1]) is True
         assert bool(matches.iloc[2]) is False

@@ -65,7 +65,7 @@ async def test_transform_valid_record(chembl_pipeline, context):
     """Verify that a valid record is correctly transformed."""
     record = {
         "activity_id": "100",
-        "molecule_chembl_id": "M1",
+        "molecule_id": "M1",
         "pchembl_value": 5.5,
         "standard_value": 100,
     }
@@ -81,7 +81,7 @@ async def test_transform_invalid_pchembl(chembl_pipeline, context):
     """Verify that a negative pChemBL value causes the record to be skipped (Domain Invariant)."""
     record = {
         "activity_id": "101",
-        "molecule_chembl_id": "M1",
+        "molecule_id": "M1",
         "pchembl_value": -1.0,  # INVALID
         "standard_value": 100,
     }

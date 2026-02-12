@@ -26,7 +26,7 @@ class TestBootstrapLayerBoundaries:
         """Runtime bootstrap MUST NOT import from CLI bootstrap.
 
         REQ-ARCH-BOOT-001: Runtime modules should be independent of CLI-specific
-        services to prevent accidental use of NoOp implementations in production
+        services to prevent acmolecule_idental use of NoOp implementations in production
         pipeline execution.
         """
         runtime_path = src_dir / "bioetl" / "composition" / "bootstrap" / "runtime"

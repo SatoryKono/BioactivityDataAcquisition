@@ -157,7 +157,7 @@ class TestCompositePublicationColumns:
         columns = [
             "entity_id",
             "content_hash",
-            "chembl.publication.document_chembl_id",
+            "chembl.publication.publication_id",
             "pubmed.publication.pmid",
             "doi",
             "chembl.publication.title",
@@ -173,7 +173,7 @@ class TestCompositePublicationColumns:
         ordered = orderer.order_column_names(columns)
 
         # Verify specific names exist in the output
-        assert "chembl.publication.document_chembl_id" in ordered
+        assert "chembl.publication.publication_id" in ordered
         assert "pubmed.publication.pmid" in ordered
         assert "pubmed.publication.authors_with_affiliations" in ordered
         assert "semanticscholar.publication.influential_citation_count" in ordered
@@ -182,7 +182,7 @@ class TestCompositePublicationColumns:
         # Verify ordering of these keys
         # system -> provider_ids -> journal -> authors -> biomedical -> citations -> doc_type -> DQ
         # 1. entity_id, content_hash (system)
-        # 2. chembl.publication.document_chembl_id, pubmed.publication.pmid, doi (provider_ids / journal - wait, doi is in journal)
+        # 2. chembl.publication.publication_id, pubmed.publication.pmid, doi (provider_ids / journal - wait, doi is in journal)
         # 3. chembl.publication.title, pubmed.publication.abstract (journal)
         # 4. pubmed.publication.authors_with_affiliations (authors)
         # 5. pubmed.publication.chemicals (biomedical)
@@ -192,7 +192,7 @@ class TestCompositePublicationColumns:
 
         system_indices = [ordered.index("entity_id"), ordered.index("content_hash")]
         id_indices = [
-            ordered.index("chembl.publication.document_chembl_id"),
+            ordered.index("chembl.publication.publication_id"),
             ordered.index("pubmed.publication.pmid"),
         ]
         journal_indices = [

@@ -171,7 +171,7 @@
         "standard_type",
         "standard_value",
         "standard_units",
-        "target_chembl_id"
+        "target_id"
       ]
     },
     "loading_strategy": null,
@@ -229,7 +229,7 @@
     "partition_cols": [],
     "pipeline_name": "chembl_document",
     "primary_keys": [
-      "document_chembl_id"
+      "publication_id"
     ],
     "provider": "chembl",
     "silver_table": "chembl_document",
@@ -264,7 +264,7 @@
     "partition_cols": [],
     "pipeline_name": "chembl_molecule",
     "primary_keys": [
-      "molecule_chembl_id"
+      "molecule_id"
     ],
     "provider": "chembl",
     "silver_table": "chembl_molecule",
@@ -300,7 +300,7 @@
     "partition_cols": [],
     "pipeline_name": "chembl_target",
     "primary_keys": [
-      "target_chembl_id"
+      "target_id"
     ],
     "provider": "chembl",
     "silver_table": "chembl_target",
@@ -319,7 +319,7 @@
           "fields": [
             "canonical_smiles",
             "inchi",
-            "inchikey"
+            "inchi_key"
           ],
           "name": "structure_present",
           "required_field": null,
@@ -454,7 +454,7 @@
       "list_length_filters": [],
       "range_filters": [],
       "required_fields": [
-        "cid",
+        "molecule_id",
         "molecular_formula"
       ]
     },
@@ -475,7 +475,7 @@
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
-        "cid"
+        "molecule_id"
       ],
       "silver_table": "pubchem_compound",
       "silver_write_mode": "merge"

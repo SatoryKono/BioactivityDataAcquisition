@@ -163,7 +163,7 @@ class PublicationTermDataSource:
         Args:
             limit: Maximum number of term records to yield.
             filter_ids: Optional publication IDs to filter by.
-            filter_field: Optional field for filtering (typically document_chembl_id).
+            filter_field: Optional field for filtering (typically publication_id).
 
         Yields:
             Term records extracted from publications.
@@ -184,13 +184,13 @@ class PublicationTermDataSource:
             filter_ids=filter_ids,
             filter_field=filter_field,
         ):
-            document_chembl_id = publication.get("document_chembl_id")
-            if not document_chembl_id:
+            publication_id = publication.get("publication_id")
+            if not publication_id:
                 continue
 
             # Extract terms from publication
             terms = self._extract_terms_from_publication(
-                publication, document_chembl_id
+                publication, publication_id
             )
 
             for term in terms:
@@ -203,7 +203,7 @@ class PublicationTermDataSource:
     def _extract_terms_from_publication(
         self,
         record: dict[str, Any],
-        document_chembl_id: str,
+        publication_id: str,
     ) -> list[dict[str, Any]]:
         """Extract and flatten all terms from a Publication record.
 
@@ -211,7 +211,7 @@ class PublicationTermDataSource:
 
         Args:
             record: Raw publication record from ChEMBL API.
-            document_chembl_id: Publication ChEMBL ID.
+            publication_id: Publication ID.
 
         Returns:
             List of term dictionaries.
@@ -232,7 +232,7 @@ class PublicationTermDataSource:
             if mesh_heading:
                 terms.append(
                     self._create_term_record(
-                        document_chembl_id=document_chembl_id,
+                        publication_id=publication_id,
                         term=mesh_heading,
                         term_type="MESH_HEADING",
                         mesh_id=mesh.get("mesh_id"),
@@ -245,7 +245,7 @@ class PublicationTermDataSource:
             if mesh_qualifier:
                 terms.append(
                     self._create_term_record(
-                        document_chembl_id=document_chembl_id,
+                        publication_id=publication_id,
                         term=mesh_qualifier,
                         term_type="MESH_QUALIFIER",
                         mesh_id=mesh.get("mesh_id"),
@@ -262,7 +262,7 @@ class PublicationTermDataSource:
                 if stripped:  # Skip empty strings
                     terms.append(
                         self._create_term_record(
-                            document_chembl_id=document_chembl_id,
+                            publication_id=publication_id,
                             term=stripped,
                             term_type="KEYWORD",
                             mesh_id=None,
@@ -274,7 +274,7 @@ class PublicationTermDataSource:
 
     def _create_term_record(
         self,
-        document_chembl_id: str,
+        publication_id: str,
         term: str,
         term_type: str,
         mesh_id: str | None,
@@ -285,7 +285,7 @@ class PublicationTermDataSource:
         Computes entity_id as SHA256 hash of composite key for deduplication.
 
         Args:
-            document_chembl_id: Parent document ChEMBL ID.
+            publication_id: Parent publication ID.
             term: Term text.
             term_type: Term type (MESH_HEADING, MESH_QUALIFIER, KEYWORD).
             mesh_id: MeSH identifier if applicable.
@@ -296,12 +296,13 @@ class PublicationTermDataSource:
 
         """
         # Compute entity_id from composite key
-        entity_id = self._compute_entity_id(document_chembl_id, term_type, term)
+        normalized_term = term.strip() if term else term
+        entity_id = self._compute_entity_id(publication_id, term_type, normalized_term or "")
 
         return {
             "entity_id": entity_id,
-            "document_chembl_id": document_chembl_id,
-            "term": term.strip() if term else term,
+            "publication_id": publication_id,
+            "term": normalized_term,
             "term_type": term_type,
             "mesh_id": mesh_id,
             "qualifier": qualifier,
@@ -309,7 +310,7 @@ class PublicationTermDataSource:
 
     def _compute_entity_id(
         self,
-        document_chembl_id: str,
+        publication_id: str,
         term_type: str,
         term: str,
     ) -> str:
@@ -318,7 +319,7 @@ class PublicationTermDataSource:
         Delegates to shared ``compute_publication_term_entity_id``.
 
         Args:
-            document_chembl_id: Document ChEMBL ID.
+            publication_id: Publication ID.
             term_type: Term type classification.
             term: Term text (will be normalized).
 
@@ -326,7 +327,7 @@ class PublicationTermDataSource:
             Entity ID string (first 16 chars of SHA256 hex digest).
 
         """
-        return compute_publication_term_entity_id(document_chembl_id, term_type, term)
+        return compute_publication_term_entity_id(publication_id, term_type, term)
 
     async def health_check(self) -> HealthStatus:
         """Delegate health check to wrapped adapter."""
@@ -378,7 +379,7 @@ class PublicationTermDataSource:
 
         Args:
             entity_type: Type of entity to fetch.
-            filter_ids: List of IDs to filter by (document_chembl_id for publication_term).
+            filter_ids: List of IDs to filter by (publication_id for publication_term).
             filter_field: Field name to filter on.
             limit: Maximum number of records to fetch.
 
@@ -415,8 +416,8 @@ class PublicationTermDataSource:
 
         Args:
             filterable: Wrapped adapter that implements FilterableDataSourcePort.
-            filter_ids: Document ChEMBL IDs to filter by.
-            filter_field: Field name (typically document_chembl_id).
+            filter_ids: Publication IDs to filter by.
+            filter_field: Field name (typically publication_id).
             limit: Maximum number of term records to yield.
 
         Yields:
@@ -432,12 +433,12 @@ class PublicationTermDataSource:
             filter_field=filter_field,
             limit=publication_limit,
         ):
-            document_chembl_id = publication.get("document_chembl_id")
-            if not document_chembl_id:
+            publication_id = publication.get("publication_id")
+            if not publication_id:
                 continue
 
             terms = self._extract_terms_from_publication(
-                publication, document_chembl_id
+                publication, publication_id
             )
 
             for term in terms:
@@ -479,12 +480,12 @@ class PublicationTermDataSource:
                 filters=filters,
                 limit=publication_limit,
             ):
-                document_chembl_id = publication.get("document_chembl_id")
-                if not document_chembl_id:
+                publication_id = publication.get("publication_id")
+                if not publication_id:
                     continue
 
                 terms = self._extract_terms_from_publication(
-                    publication, document_chembl_id
+                    publication, publication_id
                 )
 
                 for term in terms:
@@ -540,12 +541,12 @@ class PublicationTermDataSource:
                 fallback_mapping=fallback_mapping,
                 limit=publication_limit,
             ):
-                document_chembl_id = publication.get("document_chembl_id")
-                if not document_chembl_id:
+                publication_id = publication.get("publication_id")
+                if not publication_id:
                     continue
 
                 terms = self._extract_terms_from_publication(
-                    publication, document_chembl_id
+                    publication, publication_id
                 )
 
                 for term in terms:

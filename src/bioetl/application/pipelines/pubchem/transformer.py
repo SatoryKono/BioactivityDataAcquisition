@@ -81,9 +81,11 @@ class PubChemCompoundTransformer(BaseTransformer):
         self, record: BronzeRecord
     ) -> dict[str, float | int | None]:
         """Extract and validate computed molecular descriptors."""
+        logp_val = safe_float(record.get("xlogp"))  # Can be negative
         return {
-            "xlogp": safe_float(record.get("xlogp")),  # Can be negative
-            "tpsa": validate_non_negative(record.get("tpsa")),
+            "logp": logp_val,
+            "logp_method": "xlogp" if logp_val is not None else None,
+            "polar_surface_area": validate_non_negative(record.get("tpsa")),
             "complexity": validate_non_negative(record.get("complexity")),
             "charge": safe_int(record.get("charge")),  # Can be negative
         }
@@ -167,11 +169,11 @@ class PubChemCompoundTransformer(BaseTransformer):
 
         # Build business data with all physicochemical properties
         business_data: dict[str, Any] = {
-            "cid": str(cid),
+            "molecule_id": str(cid),
             "canonical_smiles": record.get("canonical_smiles"),
             "isomeric_smiles": record.get("isomeric_smiles"),
             "inchi": record.get("inchi"),
-            "inchikey": self.validate_value_object(InChIKey, record.get("inchikey")),
+            "inchi_key": self.validate_value_object(InChIKey, record.get("inchikey")),
             "molecular_formula": record.get("molecular_formula"),
             "iupac_name": record.get("iupac_name"),
             "molecular_weight": validate_molecular_weight(
@@ -185,7 +187,9 @@ class PubChemCompoundTransformer(BaseTransformer):
             **self._extract_3d_properties(record),
         }
 
-        entity_id = self.compute_entity_id(source_id=str(cid), record={"cid": cid})
+        entity_id = self.compute_entity_id(
+            source_id=str(cid), record={"molecule_id": cid}
+        )
         content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
         entity = self._create_entity(

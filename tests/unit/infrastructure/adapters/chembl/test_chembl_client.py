@@ -120,13 +120,13 @@ async def test_fetch_deduplicates_across_pages(adapter, mock_http_client):
 
 @pytest.mark.asyncio
 async def test_fetch_deduplicates_assay_by_chembl_id(adapter, mock_http_client):
-    """Test deduplication for assay entity type using assay_chembl_id."""
+    """Test deduplication for assay entity type using assay_id."""
     # First page
     resp1 = MagicMock()
     resp1.json.return_value = {
         "assays": [
-            {"assay_chembl_id": "CHEMBL1234567"},
-            {"assay_chembl_id": "CHEMBL1234568"},
+            {"assay_id": "CHEMBL1234567"},
+            {"assay_id": "CHEMBL1234568"},
         ],
         "page_meta": {"next": "page2"},
     }
@@ -134,8 +134,8 @@ async def test_fetch_deduplicates_assay_by_chembl_id(adapter, mock_http_client):
     resp2 = MagicMock()
     resp2.json.return_value = {
         "assays": [
-            {"assay_chembl_id": "CHEMBL1234567"},  # Duplicate!
-            {"assay_chembl_id": "CHEMBL1234569"},
+            {"assay_id": "CHEMBL1234567"},  # Duplicate!
+            {"assay_id": "CHEMBL1234569"},
         ],
         "page_meta": {"next": None},
     }
@@ -148,7 +148,7 @@ async def test_fetch_deduplicates_assay_by_chembl_id(adapter, mock_http_client):
 
     # Should have 3 unique assays
     assert len(records) == 3
-    chembl_ids = [r["assay_chembl_id"] for r in records]
+    chembl_ids = [r["assay_id"] for r in records]
     assert "CHEMBL1234567" in chembl_ids
     assert "CHEMBL1234568" in chembl_ids
     assert "CHEMBL1234569" in chembl_ids
@@ -161,8 +161,8 @@ async def test_fetch_with_filter_deduplicates_across_pages(adapter, mock_http_cl
     resp1 = MagicMock()
     resp1.json.return_value = {
         "assays": [
-            {"assay_chembl_id": "CHEMBL1000"},
-            {"assay_chembl_id": "CHEMBL1001"},
+            {"assay_id": "CHEMBL1000"},
+            {"assay_id": "CHEMBL1001"},
         ],
         "page_meta": {"next": "page2"},
     }
@@ -170,8 +170,8 @@ async def test_fetch_with_filter_deduplicates_across_pages(adapter, mock_http_cl
     resp2 = MagicMock()
     resp2.json.return_value = {
         "assays": [
-            {"assay_chembl_id": "CHEMBL1000"},  # Duplicate from page 1
-            {"assay_chembl_id": "CHEMBL1002"},
+            {"assay_id": "CHEMBL1000"},  # Duplicate from page 1
+            {"assay_id": "CHEMBL1002"},
         ],
         "page_meta": {"next": None},
     }
@@ -182,13 +182,13 @@ async def test_fetch_with_filter_deduplicates_across_pages(adapter, mock_http_cl
     async for record in adapter.fetch_filtered(
         entity_type="assay",
         filter_ids=["CHEMBL1000", "CHEMBL1001", "CHEMBL1002"],
-        filter_field="assay_chembl_id",
+        filter_field="assay_id",
     ):
         records.append(record)
 
     # Should have 3 unique assays (duplicate CHEMBL1000 filtered out)
     assert len(records) == 3
-    chembl_ids = [r["assay_chembl_id"] for r in records]
+    chembl_ids = [r["assay_id"] for r in records]
     assert chembl_ids.count("CHEMBL1000") == 1
     assert "CHEMBL1001" in chembl_ids
     assert "CHEMBL1002" in chembl_ids
@@ -579,7 +579,7 @@ class TestChemblAdapterBatchReduction:
         async def mock_get(url, params=None):
             nonlocal call_count
             call_count += 1
-            ids_param = params.get("document_chembl_id__in", "")
+            ids_param = params.get("publication_id__in", "")
             ids = ids_param.split(",") if ids_param else []
 
             # Fail on 4-ID batch, succeed on smaller batches
@@ -591,7 +591,7 @@ class TestChemblAdapterBatchReduction:
             # Return records for smaller batches
             mock_response = MagicMock()
             mock_response.json.return_value = {
-                "documents": [{"document_chembl_id": id_} for id_ in ids],
+                "documents": [{"publication_id": id_} for id_ in ids],
                 "page_meta": {"next": None},
             }
             return mock_response
@@ -602,13 +602,13 @@ class TestChemblAdapterBatchReduction:
         async for record in adapter.fetch_filtered(
             entity_type="publication",
             filter_ids=["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
         ):
             records.append(record)
 
         # Should get all 4 records despite initial failure
         assert len(records) == 4
-        chembl_ids = {r["document_chembl_id"] for r in records}
+        chembl_ids = {r["publication_id"] for r in records}
         assert chembl_ids == {"CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"}
 
         # Verify warning was logged about batch reduction
@@ -634,7 +634,7 @@ class TestChemblAdapterBatchReduction:
         )
 
         async def mock_get(url, params=None):
-            ids_param = params.get("document_chembl_id__in", "")
+            ids_param = params.get("publication_id__in", "")
             ids = ids_param.split(",") if ids_param else []
 
             # Always fail for CHEMBL_BAD
@@ -646,7 +646,7 @@ class TestChemblAdapterBatchReduction:
             # Return records for good IDs
             mock_response = MagicMock()
             mock_response.json.return_value = {
-                "documents": [{"document_chembl_id": id_} for id_ in ids],
+                "documents": [{"publication_id": id_} for id_ in ids],
                 "page_meta": {"next": None},
             }
             return mock_response
@@ -657,13 +657,13 @@ class TestChemblAdapterBatchReduction:
         async for record in adapter.fetch_filtered(
             entity_type="publication",
             filter_ids=["CHEMBL_GOOD", "CHEMBL_BAD"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
         ):
             records.append(record)
 
         # Should get only the good record
         assert len(records) == 1
-        assert records[0]["document_chembl_id"] == "CHEMBL_GOOD"
+        assert records[0]["publication_id"] == "CHEMBL_GOOD"
 
         # Verify error was logged for the failed single ID
         mock_logger.error.assert_called()
@@ -687,8 +687,8 @@ class TestChemblAdapterBatchReduction:
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "documents": [
-                {"document_chembl_id": "CHEMBL1"},
-                {"document_chembl_id": "CHEMBL2"},
+                {"publication_id": "CHEMBL1"},
+                {"publication_id": "CHEMBL2"},
             ],
             "page_meta": {"next": None},
         }
@@ -698,7 +698,7 @@ class TestChemblAdapterBatchReduction:
         async for record in adapter.fetch_filtered(
             entity_type="publication",
             filter_ids=["CHEMBL1", "CHEMBL2"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
         ):
             records.append(record)
 
@@ -724,7 +724,7 @@ class TestChemblAdapterBatchReduction:
         )
 
         async def mock_get(url, params=None):
-            ids_param = params.get("document_chembl_id__in", "")
+            ids_param = params.get("publication_id__in", "")
             ids = ids_param.split(",") if ids_param else []
 
             # Fail on batches of size 2 or more
@@ -736,7 +736,7 @@ class TestChemblAdapterBatchReduction:
             # Succeed only on single-ID requests
             mock_response = MagicMock()
             mock_response.json.return_value = {
-                "documents": [{"document_chembl_id": id_} for id_ in ids],
+                "documents": [{"publication_id": id_} for id_ in ids],
                 "page_meta": {"next": None},
             }
             return mock_response
@@ -747,7 +747,7 @@ class TestChemblAdapterBatchReduction:
         async for record in adapter.fetch_filtered(
             entity_type="publication",
             filter_ids=["CHEMBL1", "CHEMBL2", "CHEMBL3", "CHEMBL4"],
-            filter_field="document_chembl_id",
+            filter_field="publication_id",
         ):
             records.append(record)
 
@@ -775,7 +775,7 @@ class TestChemblAdapterDirectEndpointFallback:
         """Test fallback to direct endpoint when filter endpoint returns 500.
 
         ChEMBL API has two code paths:
-        1. Filter: /target?target_chembl_id__in=CHEMBL123 (may fail with 500)
+        1. Filter: /target?target_id__in=CHEMBL123 (may fail with 500)
         2. Direct: /target/CHEMBL123 (often works when filter fails)
         """
         adapter = ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
@@ -786,7 +786,7 @@ class TestChemblAdapterDirectEndpointFallback:
             call_count += 1
 
             # Filter endpoint (has __in param) - always fails with 500
-            if params and "target_chembl_id__in" in params:
+            if params and "target_id__in" in params:
                 raise RetryExhaustedError(
                     url, attempts=3, last_error=Exception("500 Internal Server Error")
                 )
@@ -795,7 +795,7 @@ class TestChemblAdapterDirectEndpointFallback:
             if "/target/CHEMBL123" in url:
                 mock_response = MagicMock()
                 mock_response.json.return_value = {
-                    "target_chembl_id": "CHEMBL123",
+                    "target_id": "CHEMBL123",
                     "target_type": "SINGLE PROTEIN",
                     "pref_name": "Test Target",
                 }
@@ -810,13 +810,13 @@ class TestChemblAdapterDirectEndpointFallback:
         async for record in adapter.fetch_filtered(
             entity_type="target",
             filter_ids=["CHEMBL123"],
-            filter_field="target_chembl_id",
+            filter_field="target_id",
         ):
             records.append(record)
 
         # Should get 1 record via direct endpoint fallback
         assert len(records) == 1
-        assert records[0]["target_chembl_id"] == "CHEMBL123"
+        assert records[0]["target_id"] == "CHEMBL123"
 
         # Verify direct_endpoint_fallback_success was logged
         info_calls = [
@@ -845,7 +845,7 @@ class TestChemblAdapterDirectEndpointFallback:
         async for record in adapter.fetch_filtered(
             entity_type="target",
             filter_ids=["CHEMBL123"],
-            filter_field="target_chembl_id",
+            filter_field="target_id",
         ):
             records.append(record)
 

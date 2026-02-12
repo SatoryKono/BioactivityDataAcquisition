@@ -13,7 +13,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
     """Verify domain/__init__.py __all__ contains all public symbols.
 
     REQ-ARCH-027: All public symbols from domain submodules must be in __all__.
-    This ensures stable public API and prevents accidental exports.
+    This ensures stable public API and prevents acmolecule_idental exports.
     """
     import bioetl.domain as domain
 

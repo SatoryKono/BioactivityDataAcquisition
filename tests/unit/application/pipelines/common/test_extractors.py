@@ -191,7 +191,7 @@ class TestExtractAuthorNamesProviderFormats:
                 "author": {
                     "id": "https://openalex.org/A1234567890",
                     "display_name": "Albert Einstein",
-                    "orcid": "https://orcid.org/0000-0000-0000-0001",
+                    "ormolecule_id": "https://ormolecule_id.org/0000-0000-0000-0001",
                 },
                 "author_position": "first",
                 "institutions": [],
@@ -200,7 +200,7 @@ class TestExtractAuthorNamesProviderFormats:
                 "author": {
                     "id": "https://openalex.org/A0987654321",
                     "display_name": "Niels Bohr",
-                    "orcid": None,
+                    "ormolecule_id": None,
                 },
                 "author_position": "last",
                 "institutions": [],

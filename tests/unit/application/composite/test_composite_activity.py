@@ -1,7 +1,7 @@
 """Unit tests for composite_activity pipeline.
 
 Tests the composite pipeline that combines ChEMBL activity data
-with compound record metadata via molecule_chembl_id join key.
+with compound record metadata via molecule_id join key.
 
 See ADR-026 for architectural context.
 """
@@ -58,9 +58,9 @@ def activity_seed_keys() -> pl.DataFrame:
     return pl.DataFrame(
         {
             "activity_id": ["ACT_001", "ACT_002", "ACT_003"],
-            "molecule_chembl_id": ["CHEMBL25", "CHEMBL25", "CHEMBL1201585"],
-            "assay_chembl_id": ["CHEMBL123", "CHEMBL456", "CHEMBL789"],
-            "target_chembl_id": ["CHEMBL1824", "CHEMBL1824", None],
+            "molecule_id": ["CHEMBL25", "CHEMBL25", "CHEMBL1201585"],
+            "assay_id": ["CHEMBL123", "CHEMBL456", "CHEMBL789"],
+            "target_id": ["CHEMBL1824", "CHEMBL1824", None],
         }
     )
 
@@ -74,8 +74,8 @@ def compound_record_silver_data() -> pa.Table:
     return pa.table(
         {
             "record_id": [1001, 1002, 1003],
-            "molecule_chembl_id": ["CHEMBL25", "CHEMBL25", "CHEMBL1201585"],
-            "document_chembl_id": ["CHEMBL_DOC_1", "CHEMBL_DOC_2", "CHEMBL_DOC_3"],
+            "molecule_id": ["CHEMBL25", "CHEMBL25", "CHEMBL1201585"],
+            "publication_id": ["CHEMBL_DOC_1", "CHEMBL_DOC_2", "CHEMBL_DOC_3"],
             "compound_name": ["Aspirin", "ASA", "Compound X"],
             "compound_key": ["CMP001", "CMP002", "CMP003"],
             "src_id": [1, 1, 2],
@@ -90,9 +90,9 @@ def seed_config() -> SeedConfig:
         pipeline="chembl_activity",
         output_keys=(
             "activity_id",
-            "molecule_chembl_id",
-            "assay_chembl_id",
-            "target_chembl_id",
+            "molecule_id",
+            "assay_id",
+            "target_id",
         ),
         silver_table="silver/chembl/activity",
     )
@@ -103,8 +103,8 @@ def compound_record_dep_config() -> DependencyConfig:
     """Dependency configuration for compound_record."""
     return DependencyConfig(
         pipeline="chembl_compound_record",
-        join_keys=("molecule_chembl_id",),
-        filter_field="molecule_chembl_id",
+        join_keys=("molecule_id",),
+        filter_field="molecule_id",
         required=False,
         timeout_seconds=600,
         silver_table="silver/chembl/compound_record",
@@ -129,7 +129,7 @@ class TestActivityKeyExtraction:
         extraction should return only 2 unique IDs.
         """
         unique_ids = (
-            activity_seed_keys.select("molecule_chembl_id")
+            activity_seed_keys.select("molecule_id")
             .unique()
             .to_series()
             .to_list()
@@ -145,9 +145,9 @@ class TestActivityKeyExtraction:
     ) -> None:
         """Activity seed config extracts multiple output keys."""
         assert "activity_id" in seed_config.output_keys
-        assert "molecule_chembl_id" in seed_config.output_keys
-        assert "assay_chembl_id" in seed_config.output_keys
-        assert "target_chembl_id" in seed_config.output_keys
+        assert "molecule_id" in seed_config.output_keys
+        assert "assay_id" in seed_config.output_keys
+        assert "target_id" in seed_config.output_keys
 
 
 class TestKeyExtractorServiceWithActivity:
@@ -158,13 +158,13 @@ class TestKeyExtractorServiceWithActivity:
         mock_logger: LoggerPort,
         mock_delta_reader: DeltaReaderPort,
     ) -> None:
-        """KeyExtractorService should extract molecule_chembl_id from activity Silver."""
+        """KeyExtractorService should extract molecule_id from activity Silver."""
         # Setup mock to return activity data
         activity_data = pa.table(
             {
                 "activity_id": ["ACT_001", "ACT_002", "ACT_003"],
-                "molecule_chembl_id": ["CHEMBL25", "CHEMBL25", "CHEMBL1201585"],
-                "assay_chembl_id": ["CHEMBL123", "CHEMBL456", "CHEMBL789"],
+                "molecule_id": ["CHEMBL25", "CHEMBL25", "CHEMBL1201585"],
+                "assay_id": ["CHEMBL123", "CHEMBL456", "CHEMBL789"],
             }
         )
         mock_delta_reader.read_table.return_value = activity_data
@@ -176,13 +176,13 @@ class TestKeyExtractorServiceWithActivity:
 
         result = await extractor.extract(
             silver_table="silver/chembl/activity",
-            keys=["molecule_chembl_id"],
+            keys=["molecule_id"],
         )
 
         # Should deduplicate
         assert isinstance(result, pl.DataFrame)
         assert len(result) == 2
-        assert "molecule_chembl_id" in result.columns
+        assert "molecule_id" in result.columns
 
 
 # =============================================================================
@@ -191,7 +191,7 @@ class TestKeyExtractorServiceWithActivity:
 
 
 class TestDependencyWithMoleculeFilter:
-    """Tests for dependency execution with molecule_chembl_id filter."""
+    """Tests for dependency execution with molecule_id filter."""
 
     async def test_dependency_receives_molecule_filter_ids(
         self,
@@ -223,8 +223,8 @@ class TestDependencyWithMoleculeFilter:
         compound_record_dep_config: DependencyConfig,
     ) -> None:
         """Dependency config should specify filter_field for API calls."""
-        assert compound_record_dep_config.filter_field == "molecule_chembl_id"
-        assert compound_record_dep_config.join_keys == ("molecule_chembl_id",)
+        assert compound_record_dep_config.filter_field == "molecule_id"
+        assert compound_record_dep_config.join_keys == ("molecule_id",)
 
 
 # =============================================================================
@@ -249,7 +249,7 @@ class TestEmptySeedScenarios:
         mock_delta_reader.read_table.return_value = pa.table(
             {
                 "activity_id": pa.array([], type=pa.string()),
-                "molecule_chembl_id": pa.array([], type=pa.string()),
+                "molecule_id": pa.array([], type=pa.string()),
             }
         )
 
@@ -261,7 +261,7 @@ class TestEmptySeedScenarios:
         with pytest.raises(ValueError, match="Seed Silver table is empty"):
             await extractor.extract(
                 silver_table="silver/chembl/activity",
-                keys=["molecule_chembl_id"],
+                keys=["molecule_id"],
             )
 
     async def test_null_molecule_ids_excluded(
@@ -269,12 +269,12 @@ class TestEmptySeedScenarios:
         mock_logger: LoggerPort,
         mock_delta_reader: DeltaReaderPort,
     ) -> None:
-        """NULL molecule_chembl_id values should be excluded from keys."""
+        """NULL molecule_id values should be excluded from keys."""
         # Activity with some null molecule IDs
         mock_delta_reader.read_table.return_value = pa.table(
             {
                 "activity_id": ["ACT_001", "ACT_002", "ACT_003"],
-                "molecule_chembl_id": ["CHEMBL25", None, "CHEMBL1201585"],
+                "molecule_id": ["CHEMBL25", None, "CHEMBL1201585"],
             }
         )
 
@@ -285,12 +285,12 @@ class TestEmptySeedScenarios:
 
         result = await extractor.extract(
             silver_table="silver/chembl/activity",
-            keys=["molecule_chembl_id"],
+            keys=["molecule_id"],
         )
 
         # KeyExtractorService filters rows where ALL keys are null
         # Single null in one-key extraction should be filtered
-        molecule_ids = result["molecule_chembl_id"].to_list()
+        molecule_ids = result["molecule_id"].to_list()
         assert None not in molecule_ids
         assert len(result) == 2
 
@@ -335,7 +335,7 @@ class TestCompositeActivityConfig:
         assert seed_config.pipeline == "chembl_activity"
         assert seed_config.silver_table == "silver/chembl/activity"
         assert "activity_id" in seed_config.output_keys
-        assert "molecule_chembl_id" in seed_config.output_keys
+        assert "molecule_id" in seed_config.output_keys
 
     def test_dependency_config_structure(
         self,
@@ -346,8 +346,8 @@ class TestCompositeActivityConfig:
         assert (
             compound_record_dep_config.silver_table == "silver/chembl/compound_record"
         )
-        assert compound_record_dep_config.join_keys == ("molecule_chembl_id",)
-        assert compound_record_dep_config.filter_field == "molecule_chembl_id"
+        assert compound_record_dep_config.join_keys == ("molecule_id",)
+        assert compound_record_dep_config.filter_field == "molecule_id"
         assert compound_record_dep_config.timeout_seconds == 600
 
 
@@ -362,21 +362,21 @@ class TestActivityCompoundRecordJoin:
     def test_many_activities_to_many_records(self) -> None:
         """Activity → CompoundRecord is M:N relationship.
 
-        - One activity has one molecule_chembl_id
+        - One activity has one molecule_id
         - One molecule can have multiple compound records
         - Join should preserve all activities (left outer)
         """
         activities = pl.DataFrame(
             {
                 "activity_id": ["ACT_001", "ACT_002"],
-                "molecule_chembl_id": ["CHEMBL25", "CHEMBL25"],
+                "molecule_id": ["CHEMBL25", "CHEMBL25"],
             }
         )
 
         compound_records = pl.DataFrame(
             {
                 "record_id": [1001, 1002],
-                "molecule_chembl_id": ["CHEMBL25", "CHEMBL25"],
+                "molecule_id": ["CHEMBL25", "CHEMBL25"],
                 "compound_name": ["Aspirin", "ASA"],
             }
         )
@@ -384,7 +384,7 @@ class TestActivityCompoundRecordJoin:
         # Left outer join - activities × records where molecule matches
         result = activities.join(
             compound_records,
-            on="molecule_chembl_id",
+            on="molecule_id",
             how="left",
         )
 
@@ -396,26 +396,26 @@ class TestActivityCompoundRecordJoin:
         activities = pl.DataFrame(
             {
                 "activity_id": ["ACT_001", "ACT_002"],
-                "molecule_chembl_id": ["CHEMBL25", "CHEMBL_UNKNOWN"],
+                "molecule_id": ["CHEMBL25", "CHEMBL_UNKNOWN"],
             }
         )
 
         compound_records = pl.DataFrame(
             {
                 "record_id": [1001],
-                "molecule_chembl_id": ["CHEMBL25"],
+                "molecule_id": ["CHEMBL25"],
                 "compound_name": ["Aspirin"],
             }
         )
 
         result = activities.join(
             compound_records,
-            on="molecule_chembl_id",
+            on="molecule_id",
             how="left",
         )
 
         # All activities preserved
         assert len(result) == 2
         # Unknown molecule has null compound_record fields
-        unknown_row = result.filter(pl.col("molecule_chembl_id") == "CHEMBL_UNKNOWN")
+        unknown_row = result.filter(pl.col("molecule_id") == "CHEMBL_UNKNOWN")
         assert unknown_row["compound_name"][0] is None

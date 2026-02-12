@@ -26,20 +26,20 @@ def pubchem_config() -> PipelineConfig:
         provider="pubchem",
         entity_type="compound",
         table=TableConfig(
-            primary_keys=["cid"],
+            primary_keys=["molecule_id"],
             silver_table="pubchem.compound",
             gold_table="pubchem.compound_gold",
         ),
         batch_size=100,
         checkpoint_interval=1000,
         fields=[
-            "cid",
+            "molecule_id",
             "molecular_formula",
             "molecular_weight",
             "canonical_smiles",
             "isomeric_smiles",
             "inchi",
-            "inchikey",
+            "inchi_key",
             "iupac_name",
         ],
     )
@@ -132,14 +132,14 @@ class TestPubChemCompoundPipelineTransform:
         )
 
         bronze_record = {
-            "cid": 2244,
+            "molecule_id": 2244,
             "molecular_formula": "C9H8O4",
             "molecular_weight": 180.16,
             "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "isomeric_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
             "inchi": "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)",
-            "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
-            "iupac_name": "2-acetyloxybenzoic acid",
+            "inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "iupac_name": "2-acetyloxybenzoic amolecule_id",
         }
 
         silver_record = await pipeline.transform_bronze_to_silver(
@@ -147,12 +147,12 @@ class TestPubChemCompoundPipelineTransform:
         )
 
         assert silver_record is not None
-        assert silver_record["cid"] == "2244"  # Now string
+        assert silver_record["molecule_id"] == "2244"  # Now string
         assert silver_record["molecular_formula"] == "C9H8O4"
         assert silver_record["molecular_weight"] == 180.16  # Now stored as float
         assert silver_record["canonical_smiles"] == "CC(=O)OC1=CC=CC=C1C(=O)O"
-        assert silver_record["inchikey"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
-        assert silver_record["iupac_name"] == "2-acetyloxybenzoic acid"
+        assert silver_record["inchi_key"] == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+        assert silver_record["iupac_name"] == "2-acetyloxybenzoic amolecule_id"
         assert "entity_id" in silver_record
         assert "content_hash" in silver_record
         assert "_run_id" in silver_record
@@ -186,7 +186,7 @@ class TestPubChemCompoundPipelineTransform:
 
         # Partial record - CID, molecular_weight and one structural identifier
         bronze_record = {
-            "cid": 123456,
+            "molecule_id": 123456,
             "molecular_weight": 250.5,
             "canonical_smiles": "CCCC",  # Required: at least one structural ID
         }
@@ -196,7 +196,7 @@ class TestPubChemCompoundPipelineTransform:
         )
 
         assert silver_record is not None
-        assert silver_record["cid"] == "123456"  # Now string
+        assert silver_record["molecule_id"] == "123456"  # Now string
         assert silver_record["molecular_weight"] == 250.5  # Now stored as float
         assert silver_record["molecular_formula"] is None
         assert silver_record["canonical_smiles"] == "CCCC"
@@ -232,7 +232,7 @@ class TestPubChemCompoundPipelineTransform:
 
         # Record without any structural identifiers
         bronze_record = {
-            "cid": 123456,
+            "molecule_id": 123456,
             "molecular_weight": 250.5,
         }
 
@@ -242,7 +242,7 @@ class TestPubChemCompoundPipelineTransform:
 
         assert silver_record is None
 
-    async def test_transform_bronze_to_silver_missing_cid_returns_none(
+    async def test_transform_bronze_to_silver_missing_molecule_id_returns_none(
         self,
         pubchem_config,
         pubchem_runtime,

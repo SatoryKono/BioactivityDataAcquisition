@@ -17,19 +17,19 @@ class TestTissue:
             run_type="incremental",
             ingestion_ts="2023-01-01T00:00:00",
             _index=0,
-            tissue_chembl_id="CHEMBL3638177",
+            tissue_id="CHEMBL3638177",
             pref_name="Amniotic fluid",
             bto_id="BTO:0000068",
             caloha_id="TS-0034",
             efo_id=None,
             uberon_id="UBERON:0000173",
         )
-        assert tissue.tissue_chembl_id == "CHEMBL3638177"
+        assert tissue.tissue_id == "CHEMBL3638177"
         assert tissue.pref_name == "Amniotic fluid"
         assert tissue.bto_id == "BTO:0000068"
 
     def test_tissue_requires_chembl_id(self):
-        """Test that tissue_chembl_id is required."""
+        """Test that tissue_id is required."""
         with pytest.raises(ValueError, match="Tissue ChEMBL ID is required"):
             Tissue(
                 entity_id="test",
@@ -38,7 +38,7 @@ class TestTissue:
                 run_type="incremental",
                 ingestion_ts="2023-01-01T00:00:00",
                 _index=0,
-                tissue_chembl_id="",  # Empty
+                tissue_id="",  # Empty
                 pref_name="Test",
             )
 
@@ -52,7 +52,7 @@ class TestTissue:
                 run_type="incremental",
                 ingestion_ts="2023-01-01T00:00:00",
                 _index=0,
-                tissue_chembl_id="CHEMBL123",
+                tissue_id="CHEMBL123",
                 pref_name="",  # Empty
             )
 
@@ -65,7 +65,7 @@ class TestTissue:
             run_type="incremental",
             ingestion_ts="2023-01-01T00:00:00",
             _index=0,
-            tissue_chembl_id="CHEMBL123",
+            tissue_id="CHEMBL123",
             pref_name="Test Tissue",
             bto_id=None,
             caloha_id=None,
@@ -84,7 +84,7 @@ class TestTissue:
             run_type="incremental",
             ingestion_ts="2023-01-01T00:00:00",
             _index=0,
-            tissue_chembl_id="CHEMBL123",
+            tissue_id="CHEMBL123",
             pref_name="Test",
         )
         with pytest.raises(AttributeError):

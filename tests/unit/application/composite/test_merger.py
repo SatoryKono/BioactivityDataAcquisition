@@ -1613,14 +1613,14 @@ class TestManyToOneAggregation:
 
         df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1", "CHEMBL2"],
+                "publication_id": ["CHEMBL1", "CHEMBL1", "CHEMBL2"],
                 "term": ["Aspirin", "Pain", "Kinase"],
                 "term_type": ["MESH_HEADING", "MESH_HEADING", "KEYWORD"],
             }
         )
 
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -1633,9 +1633,9 @@ class TestManyToOneAggregation:
         result = aggregator.aggregate(df, config, "test_enricher")
 
         assert len(result) == 2
-        assert set(result["document_chembl_id"].to_list()) == {"CHEMBL1", "CHEMBL2"}
+        assert set(result["publication_id"].to_list()) == {"CHEMBL1", "CHEMBL2"}
 
-        chembl1_terms = result.filter(pl.col("document_chembl_id") == "CHEMBL1")[
+        chembl1_terms = result.filter(pl.col("publication_id") == "CHEMBL1")[
             "all_terms"
         ][0]
         assert set(chembl1_terms) == {"Aspirin", "Pain"}
@@ -1651,13 +1651,13 @@ class TestManyToOneAggregation:
 
         df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1"],
+                "publication_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1"],
                 "term": ["Aspirin", "Aspirin", "Pain"],  # Duplicate Aspirin
             }
         )
 
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -1686,13 +1686,13 @@ class TestManyToOneAggregation:
 
         df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1", "CHEMBL2"],
+                "publication_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1", "CHEMBL2"],
                 "term": ["A", "B", "C", "D"],
             }
         )
 
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -1705,12 +1705,12 @@ class TestManyToOneAggregation:
         result = aggregator.aggregate(df, config, "test_enricher")
 
         assert len(result) == 2
-        chembl1_count = result.filter(pl.col("document_chembl_id") == "CHEMBL1")[
+        chembl1_count = result.filter(pl.col("publication_id") == "CHEMBL1")[
             "term_count"
         ][0]
         assert chembl1_count == 3
 
-        chembl2_count = result.filter(pl.col("document_chembl_id") == "CHEMBL2")[
+        chembl2_count = result.filter(pl.col("publication_id") == "CHEMBL2")[
             "term_count"
         ][0]
         assert chembl2_count == 1
@@ -1726,13 +1726,13 @@ class TestManyToOneAggregation:
 
         df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1"],
+                "publication_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1"],
                 "term": ["First", "Second", "Third"],
             }
         )
 
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -1758,13 +1758,13 @@ class TestManyToOneAggregation:
 
         df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1"],
+                "publication_id": ["CHEMBL1", "CHEMBL1"],
                 "term": ["Aspirin", "Pain"],
             }
         )
 
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -1790,14 +1790,14 @@ class TestManyToOneAggregation:
 
         df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1"],
+                "publication_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1"],
                 "term": ["Aspirin", "Pain", "Kinase"],
                 "term_type": ["MESH_HEADING", "MESH_HEADING", "KEYWORD"],
             }
         )
 
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -1825,14 +1825,14 @@ class TestManyToOneAggregation:
 
         df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1"],
+                "publication_id": ["CHEMBL1", "CHEMBL1"],
                 "term": ["Aspirin", "Pain"],
                 "mesh_id": ["D001", "D002"],
             }
         )
 
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -1870,13 +1870,13 @@ class TestManyToOneAggregation:
 
         df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1"],
+                "publication_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1"],
                 "term": ["Aspirin", None, "Pain"],
             }
         )
 
         config = AggregationConfig(
-            group_by="document_chembl_id",
+            group_by="publication_id",
             fields=(
                 AggregationFieldSpec(
                     source_field="term",
@@ -1957,7 +1957,7 @@ class TestManyToOneAggregation:
 
         seed_df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL2"],
+                "publication_id": ["CHEMBL1", "CHEMBL2"],
                 "title": ["Study A", "Study B"],
             }
         )
@@ -1965,7 +1965,7 @@ class TestManyToOneAggregation:
         # Enricher has multiple rows per document
         enricher_df = pl.DataFrame(
             {
-                "document_chembl_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1", "CHEMBL2"],
+                "publication_id": ["CHEMBL1", "CHEMBL1", "CHEMBL1", "CHEMBL2"],
                 "term": ["Aspirin", "Pain", "Drug", "Kinase"],
                 "term_type": ["MESH_HEADING", "MESH_HEADING", "KEYWORD", "KEYWORD"],
             }
@@ -1973,11 +1973,11 @@ class TestManyToOneAggregation:
 
         enricher_config = EnricherConfig(
             pipeline="chembl_publication_term",
-            join_keys=("document_chembl_id",),
+            join_keys=("publication_id",),
             required=False,
             cardinality=EnricherCardinality.MANY_TO_ONE,
             aggregation=AggregationConfig(
-                group_by="document_chembl_id",
+                group_by="publication_id",
                 fields=(
                     AggregationFieldSpec(
                         source_field="term",
@@ -2005,7 +2005,7 @@ class TestManyToOneAggregation:
         assert len(result) == 2
 
         # Check aggregated values
-        chembl1 = result.filter(pl.col("document_chembl_id") == "CHEMBL1")
+        chembl1 = result.filter(pl.col("publication_id") == "CHEMBL1")
         # mesh_headings column should exist with qualified name
         mesh_col = next(c for c in result.columns if "mesh_headings" in c)
         mesh_terms = chembl1[mesh_col][0]

@@ -86,7 +86,7 @@ def valid_record() -> dict:
         # Author affiliations
         "affiliation_list": '["MIT", "Stanford"]',
         # Author identifiers
-        "author_orcids": '["0000-0001-2345-6789", ""]',
+        "author_ormolecule_ids": '["0000-0001-2345-6789", ""]',
         "author_openalex_ids": '["A1234567890", "A9876543210"]',
         # Institution identifiers
         "institution_ids": '["I1234567890", "I9876543210"]',
@@ -408,20 +408,20 @@ class TestOpenAlexPublicationSchema:
         validated = OpenAlexPublicationSchema.validate(df)
         assert validated["grants"].iloc[0] == grants_json
 
-    def test_author_orcids_nullable(self, valid_record: dict) -> None:
-        """Should allow null author_orcids."""
-        valid_record["author_orcids"] = None
+    def test_author_ormolecule_ids_nullable(self, valid_record: dict) -> None:
+        """Should allow null author_ormolecule_ids."""
+        valid_record["author_ormolecule_ids"] = None
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert pd.isna(validated["author_orcids"].iloc[0])
+        assert pd.isna(validated["author_ormolecule_ids"].iloc[0])
 
-    def test_author_orcids_json_string(self, valid_record: dict) -> None:
-        """Should accept author_orcids as JSON-serialized string."""
-        orcids_json = '["0000-0001-2345-6789", "0000-0002-3456-7890"]'
-        valid_record["author_orcids"] = orcids_json
+    def test_author_ormolecule_ids_json_string(self, valid_record: dict) -> None:
+        """Should accept author_ormolecule_ids as JSON-serialized string."""
+        ormolecule_ids_json = '["0000-0001-2345-6789", "0000-0002-3456-7890"]'
+        valid_record["author_ormolecule_ids"] = ormolecule_ids_json
         df = pd.DataFrame([valid_record])
         validated = OpenAlexPublicationSchema.validate(df)
-        assert validated["author_orcids"].iloc[0] == orcids_json
+        assert validated["author_ormolecule_ids"].iloc[0] == ormolecule_ids_json
 
     def test_author_ids_nullable(self, valid_record: dict) -> None:
         """Should allow null author_openalex_ids."""
