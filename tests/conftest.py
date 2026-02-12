@@ -276,6 +276,7 @@ def _create_minimal_df(columns, provider, entity_id, pk_field, pk_value):
     data["_source"] = provider
     data["_lookup_method"] = "direct"
     data["title"] = f"Minimal {provider} Publication"
+    data["publication_type"] = "journal-article"
 
     # Set PK
     data[pk_field] = pk_value
