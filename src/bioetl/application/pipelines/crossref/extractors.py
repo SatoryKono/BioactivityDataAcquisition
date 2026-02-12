@@ -32,6 +32,7 @@ from bioetl.domain.normalization import (
 __all__ = [
     "extract_author_details",
     "extract_author_orcids",
+    "extract_author_ormolecule_ids",
     "extract_authors",
     "extract_content_domain",
     "extract_dates",
@@ -42,6 +43,10 @@ __all__ = [
     "extract_published_date",
     "extract_references",
 ]
+
+# Backward-compatible alias (legacy name preserved for tests/older callers)
+def extract_author_ormolecule_ids(publication: dict[str, Any]) -> list[str]:
+    return extract_author_orcids(publication)
 
 
 def extract_authors(publication: dict[str, Any]) -> list[str]:

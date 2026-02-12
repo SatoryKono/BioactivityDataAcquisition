@@ -15,6 +15,7 @@ __all__ = [
     "extract_affiliations",
     "extract_author_ids",
     "extract_author_orcids",
+    "extract_author_ormolecule_ids",
     "extract_authors",
     "extract_biblio_info",
     "extract_doi",
@@ -32,6 +33,10 @@ __all__ = [
     "extract_topics",
     "reconstruct_abstract",
 ]
+
+# Backward-compatible alias (legacy name preserved for tests/older callers)
+def extract_author_ormolecule_ids(authorships: list[dict[str, Any]]) -> list[str]:
+    return extract_author_orcids(authorships)
 
 
 def _extract_id_from_url(url: str | None) -> str | None:
