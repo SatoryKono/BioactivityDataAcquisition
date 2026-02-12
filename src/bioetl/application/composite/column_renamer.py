@@ -38,7 +38,16 @@ class ColumnRenamer:
 
     # Join key columns (not renamed, case-insensitive)
     JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset(
-        {"publication_id", "publication_doi", "publication_pmid", "publication_pmc_id"}
+        {
+            "publication_id",
+            "publication_doi",
+            "publication_pmid",
+            "publication_pmc_id",
+            # Backward-compatible publication keys used in tests/pipelines
+            "doi",
+            "pmid",
+            "pmc_id",
+        }
     )
 
     def __init__(self, logger: LoggerPort) -> None:
