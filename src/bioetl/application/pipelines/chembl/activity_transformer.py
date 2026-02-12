@@ -50,9 +50,9 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
 _IDENTIFIERS = FieldGroup(
     name="identifiers",
     fields=(
-        FieldSpec("target_chembl_id", target="target_id"),
-        FieldSpec("assay_chembl_id", target="assay_id"),
-        FieldSpec("document_chembl_id", target="publication_id"),
+        *simple_fields(
+            "target_id", "assay_id", "publication_id", "target_chembl_id", "assay_chembl_id", "document_chembl_id"
+        ),
         *int_fields("record_id", "src_id"),
     ),
 )
@@ -68,11 +68,11 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
         ),
         FieldSpec(
             "parent_molecule_chembl_id",
-            target="parent_molecule_id",
+            target="parent_molecule_chembl_id",
         ),
         FieldSpec(
             "target_tax_id",
-            target="taxonomy_id",
+            target="target_taxonomy_id",
             converter=validate_taxonomy_id,
         ),
         *simple_fields(
@@ -121,10 +121,10 @@ _QUALITY_ANNOTATIONS = FieldGroup(
             "activity_comment",
             "data_validity_comment",
             "data_validity_description",
+            "document_journal",
         ),
-        FieldSpec("document_journal", target="journal"),
-        FieldSpec("document_year", target="publication_year", converter=safe_int),
         *int_fields(
+            "document_year",
             "potential_duplicate",
             "toid",
             "manual_curation_flag",
@@ -206,7 +206,9 @@ class ActivityTransformer(BaseChemblTransformer):
         return {
             # Primary and secondary identifiers (manual - need special handling)
             "activity_id": str(primary_id),
-            "molecule_id": str(self._get_required_field(record, "molecule_chembl_id")),
+            "molecule_chembl_id": str(
+                self._get_required_field(record, "molecule_chembl_id")
+            ),
             # Declarative field groups
             **map_field_groups(record, _ACTIVITY_GROUPS),
             # Nested dict extraction (not declarative)
