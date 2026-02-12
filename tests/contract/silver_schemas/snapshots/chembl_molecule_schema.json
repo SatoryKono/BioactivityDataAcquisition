@@ -543,6 +543,29 @@
     "required": false,
     "unique": false
   },
+  "property_alogp": {
+    "checks": [],
+    "coerce": false,
+    "description": "Canonical ALogP value from molecule_properties.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "property_aromatic_rings": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical aromatic ring count.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "property_full_molformula": {
     "checks": [],
     "coerce": false,
@@ -552,10 +575,80 @@
     "required": false,
     "unique": false
   },
+  "property_full_mwt": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical full molecular weight from molecule_properties.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "property_hba": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical H-bond acceptor count.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "property_hbd": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical H-bond donor count.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "property_heavy_atoms": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical heavy atom count.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "property_mw_freebase": {
     "checks": [],
     "coerce": false,
     "description": "Molecular weight of parent compound.",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "property_psa": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical polar surface area.",
     "dtype": "float64",
     "nullable": true,
     "required": false,
@@ -606,6 +699,20 @@
     ],
     "coerce": false,
     "description": "Number of Lipinski rule-of-5 violations.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "property_rtb": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical rotatable bond count.",
     "dtype": "int64",
     "nullable": true,
     "required": false,
