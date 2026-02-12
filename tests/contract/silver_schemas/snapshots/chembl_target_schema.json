@@ -95,15 +95,6 @@
     "required": false,
     "unique": false
   },
-  "component_id": {
-    "checks": [],
-    "coerce": true,
-    "description": "Primary component ID (first from list).",
-    "dtype": "float64",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
   "component_ids": {
     "checks": [],
     "coerce": false,
@@ -199,6 +190,15 @@
     "required": false,
     "unique": false
   },
+  "primary_component_id": {
+    "checks": [],
+    "coerce": true,
+    "description": "Primary component ID (first from list).",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "species_group_flag": {
     "checks": [],
     "coerce": false,
@@ -206,20 +206,6 @@
     "dtype": "bool",
     "nullable": true,
     "required": false,
-    "unique": false
-  },
-  "target_id": {
-    "checks": [
-      {
-        "name": "str_matches",
-        "regex": "^CHEMBL\\d+$"
-      }
-    ],
-    "coerce": false,
-    "description": "ChEMBL ID.",
-    "dtype": "str",
-    "nullable": false,
-    "required": true,
     "unique": false
   },
   "target_component_synonyms": {
@@ -238,6 +224,20 @@
     "dtype": "str",
     "nullable": true,
     "required": false,
+    "unique": false
+  },
+  "target_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "ChEMBL ID.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "target_type": {

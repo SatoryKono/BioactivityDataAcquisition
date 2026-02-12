@@ -758,7 +758,7 @@
       }
     ],
     "coerce": false,
-    "description": "Amino amolecule_id sequence",
+    "description": "Amino acid sequence",
     "dtype": "str",
     "nullable": false,
     "required": true,

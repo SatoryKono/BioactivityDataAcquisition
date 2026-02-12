@@ -77,7 +77,7 @@
     "required": false,
     "unique": false
   },
-  "action_type_action_type": {
+  "action_type": {
     "checks": [],
     "coerce": false,
     "description": "Action type classification.",
@@ -131,6 +131,15 @@
     "required": false,
     "unique": false
   },
+  "assay_description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Assay description text.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "assay_id": {
     "checks": [
       {
@@ -143,15 +152,6 @@
     "dtype": "str",
     "nullable": false,
     "required": true,
-    "unique": false
-  },
-  "assay_description": {
-    "checks": [],
-    "coerce": false,
-    "description": "Assay description text.",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
     "unique": false
   },
   "assay_type": {
@@ -259,18 +259,13 @@
     "required": false,
     "unique": false
   },
-  "publication_id": {
-    "checks": [
-      {
-        "name": "str_matches",
-        "regex": "^CHEMBL\\d+$"
-      }
-    ],
+  "entity_id": {
+    "checks": [],
     "coerce": false,
-    "description": "Foreign key to document.",
+    "description": "Unique business identifier for the entity.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "journal": {
@@ -280,33 +275,6 @@
     "dtype": "str",
     "nullable": true,
     "required": false,
-    "unique": false
-  },
-  "publication_year": {
-    "checks": [
-      {
-        "name": "greater_than_or_equal_to",
-        "type": "ge"
-      },
-      {
-        "name": "less_than_or_equal_to",
-        "type": "le"
-      }
-    ],
-    "coerce": false,
-    "description": "Publication year.",
-    "dtype": "int64",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
-  "entity_id": {
-    "checks": [],
-    "coerce": false,
-    "description": "Unique business identifier for the entity.",
-    "dtype": "str",
-    "nullable": false,
-    "required": true,
     "unique": false
   },
   "ligand_efficiency_bei": {
@@ -427,6 +395,65 @@
     ],
     "coerce": false,
     "description": "Duplicate flag.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "publication_doi": {
+    "checks": [],
+    "coerce": false,
+    "description": "Publication DOI.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "publication_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Foreign key to document.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "publication_pmc_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Publication PubMed Central ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "publication_pmid": {
+    "checks": [],
+    "coerce": false,
+    "description": "Publication PubMed ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "publication_year": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
+    "coerce": false,
+    "description": "Publication year.",
     "dtype": "int64",
     "nullable": true,
     "required": false,
@@ -586,8 +613,8 @@
   "taxonomy_id": {
     "checks": [],
     "coerce": false,
-    "description": "Target taxonomy ID. Standardized name (was target_tax_id).",
-    "dtype": "str",
+    "description": "Target taxonomy ID (nullable int pattern).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
