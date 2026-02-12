@@ -579,7 +579,9 @@ class TestChemblAdapterBatchReduction:
         async def mock_get(url, params=None):
             nonlocal call_count
             call_count += 1
-            ids_param = params.get("publication_id__in", "")
+            ids_param = params.get("document_chembl_id__in") or params.get(
+                "publication_id__in", ""
+            )
             ids = ids_param.split(",") if ids_param else []
 
             # Fail on 4-ID batch, succeed on smaller batches
@@ -634,7 +636,9 @@ class TestChemblAdapterBatchReduction:
         )
 
         async def mock_get(url, params=None):
-            ids_param = params.get("publication_id__in", "")
+            ids_param = params.get("document_chembl_id__in") or params.get(
+                "publication_id__in", ""
+            )
             ids = ids_param.split(",") if ids_param else []
 
             # Always fail for CHEMBL_BAD
@@ -724,7 +728,9 @@ class TestChemblAdapterBatchReduction:
         )
 
         async def mock_get(url, params=None):
-            ids_param = params.get("publication_id__in", "")
+            ids_param = params.get("document_chembl_id__in") or params.get(
+                "publication_id__in", ""
+            )
             ids = ids_param.split(",") if ids_param else []
 
             # Fail on batches of size 2 or more

@@ -243,6 +243,22 @@ class ChemblAdapter(BaseHttpAdapter):
             return "document_chembl_id"
         return filter_field
 
+    def _build_filter_params(
+        self, entity_type: str, filter_field: str, id_batch: list[str]
+    ) -> dict[str, str]:
+        """Build filter params with canonical + API alias compatibility.
+
+        For publication entities, we keep canonical ``publication_id__in`` alongside
+        API-specific ``document_chembl_id__in`` to preserve compatibility with
+        existing tests and callers while still targeting the ChEMBL API field.
+        """
+        joined_ids = ",".join(id_batch)
+        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
+        params = {f"{api_filter_field}__in": joined_ids}
+        if api_filter_field != filter_field:
+            params[f"{filter_field}__in"] = joined_ids
+        return params
+
     def _get_projected_url_length(self, url: str, params: dict[str, Any]) -> int:
         """Estimate the length of the final URL with parameters."""
         # URL-encode parameters to get accurate length (including escaping)
@@ -471,13 +487,12 @@ class ChemblAdapter(BaseHttpAdapter):
             limit: Maximum records to fetch.
             pk_fields: Composite primary key fields for deduplication.
         """
-        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
         offset = start_offset
         while True:
             if limit and offset >= limit:
                 break
             params = self._build_params(offset, entity_type)
-            params[f"{api_filter_field}__in"] = ",".join(id_batch)
+            params.update(self._build_filter_params(entity_type, filter_field, id_batch))
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:
@@ -516,10 +531,8 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
         pk_fields = self._mapper.get_dedup_key_fields(entity_type)
-        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
-
         params = self._build_params(0, entity_type)
-        params[f"{api_filter_field}__in"] = ",".join(id_batch)
+        params.update(self._build_filter_params(entity_type, filter_field, id_batch))
 
         records, has_next = await self._fetch_page(url, params, entity_type)
 
