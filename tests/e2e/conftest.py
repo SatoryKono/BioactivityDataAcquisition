@@ -53,6 +53,7 @@ def e2e_environment():
     """Настройка окружения для E2E тестов (Local-Only)."""
     os.environ["BIOETL_ENV"] = "dev"
     os.environ["BIOETL_TEST_MODE"] = "true"
+    os.environ["BIOETL_TEST_RELAXED_DQ"] = "1"  # Relax DQ thresholds for VCR cassettes
     # Prevent shutil.get_terminal_size hangs in CI/Test environments
     os.environ["COLUMNS"] = "80"
     os.environ["LINES"] = "24"

@@ -200,21 +200,8 @@ def is_logging_configured() -> bool:
         return _configured
 
 
-def reset_logging_config() -> None:
-    """Reset logging configuration state (for testing only).
-
-    Warning:
-        This is intended for test fixtures only. Do not use in production code.
-    """
-    global _configured, _current_format
-    with _config_lock:
-        _configured = False
-        _current_format = None
-
-
 __all__ = [
     "configure_logging",
     "is_logging_configured",
-    "reset_logging_config",
     "secret_filter_processor",
 ]

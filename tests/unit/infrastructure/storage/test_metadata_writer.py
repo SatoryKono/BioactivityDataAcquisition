@@ -9,6 +9,7 @@ from uuid import uuid4
 import pytest
 import yaml
 
+from bioetl.domain.medallion import Layer
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     BronzeMetadata,
@@ -19,7 +20,6 @@ from bioetl.domain.models.metadata import (
     FileOutputMetadata,
     GoldMetadata,
     GoldOutputExt,
-    LayerType,
     LineageMetadata,
     PipelineMetadata,
     RuntimeMetadata,
@@ -93,7 +93,7 @@ def bronze_metadata(
     """Create sample Bronze metadata."""
     return BronzeMetadata(
         version="1.1",
-        layer=LayerType.BRONZE,
+        layer=Layer.BRONZE,
         runtime=runtime_metadata,
         pipeline=pipeline_metadata,
         source=SourceMetadata(
@@ -130,7 +130,7 @@ def silver_metadata(
     """Create sample Silver metadata."""
     return SilverMetadata(
         version="1.1",
-        layer=LayerType.SILVER,
+        layer=Layer.SILVER,
         runtime=runtime_metadata,
         pipeline=pipeline_metadata,
         lineage=LineageMetadata(
@@ -175,7 +175,7 @@ def gold_metadata(
     """Create sample Gold metadata."""
     return GoldMetadata(
         version="1.1",
-        layer=LayerType.GOLD,
+        layer=Layer.GOLD,
         runtime=runtime_metadata,
         pipeline=pipeline_metadata,
         lineage=LineageMetadata(
@@ -379,7 +379,7 @@ class TestMetadataWriter:
         # Modify and write again
         updated_metadata = BronzeMetadata(
             version="1.0",
-            layer=LayerType.BRONZE,
+            layer=Layer.BRONZE,
             runtime=RuntimeMetadata(
                 run_id=str(uuid4()),
                 run_type=RunTypeEnum.REBUILD,

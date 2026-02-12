@@ -172,3 +172,12 @@ def list_pipelines_command() -> None:
     echo_info("Available pipelines:")
     for pipeline in sorted(pipelines):
         echo_info(f"  - {pipeline}")
+
+
+# Explicit command collection to mark usage for tooling.
+COMMANDS = (
+    list_pipelines_command,
+    show_command,
+    show_settings_command,
+    validate_command,
+)

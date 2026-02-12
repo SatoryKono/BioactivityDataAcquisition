@@ -241,10 +241,10 @@ def get_json_encoder() -> JsonEncoderPort:
 
 
 def reset_encoder_cache() -> None:
-    """Clear the encoder cache (for testing).
+    """Clear the get_json_encoder cache.
 
-    Call this after changing BIOETL_JSON_ENCODER environment variable
-    to get a fresh encoder instance.
+    Used by tests to ensure env var changes (BIOETL_JSON_ENCODER) take effect
+    when calling get_json_encoder() again.
     """
     get_json_encoder.cache_clear()
 

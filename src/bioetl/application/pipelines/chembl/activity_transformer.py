@@ -43,6 +43,11 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
     "parent_type": None,
 }
 
+# Mapping for renaming fields to avoid tautology (Phase 2)
+_ACTION_TYPE_RENAMES: dict[str, str] = {
+    "action_type_action_type": "action_type",
+}
+
 # ============================================================================
 # Declarative field groups for Activity entity
 # ============================================================================
@@ -177,7 +182,13 @@ class ActivityTransformer(BaseChemblTransformer):
         Returns:
             Flat dictionary with prefixed keys.
         """
-        return flatten_nested_dict(action_data, "action_type_", _ACTION_TYPE_FIELDS)
+        flat_data = flatten_nested_dict(
+            action_data, "action_type_", _ACTION_TYPE_FIELDS
+        )
+        for old_key, new_key in _ACTION_TYPE_RENAMES.items():
+            if old_key in flat_data:
+                flat_data[new_key] = flat_data.pop(old_key)
+        return flat_data
 
     def _extract_business_data(
         self,

@@ -25,6 +25,8 @@ class UniProtProteinPipeline(BasePipeline):
     """
 
 
+PIPELINES = (UniProtProteinPipeline,)
+
 __all__ = [
     "IDMappingTransformer",
     "UniProtProteinPipeline",

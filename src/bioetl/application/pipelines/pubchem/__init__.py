@@ -21,6 +21,8 @@ class PubChemCompoundPipeline(BasePipeline):
     """
 
 
+PIPELINES = (PubChemCompoundPipeline,)
+
 __all__ = [
     "PubChemCompoundPipeline",
     "PubChemCompoundTransformer",

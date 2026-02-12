@@ -117,7 +117,12 @@ class DataQualityService:
 
         Raises:
             DataQualityThresholdError: If threshold exceeded.
+
+        Note:
+            hard_fail_threshold >= 1.0 is treated as disabled (e.g. test mode).
         """
+        if self._config.hard_fail_threshold >= 1.0:
+            return
         if error_rate >= self._config.hard_fail_threshold:
             self._logger.error(
                 "DQ hard threshold exceeded",

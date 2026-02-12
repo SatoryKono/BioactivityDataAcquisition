@@ -390,7 +390,7 @@
   - Текущее доказательство: src/bioetl/domain/registry/publication.py:163
   - Причина статуса: числа в предложении не найдены в коде
 - [16] (risk=high) Уровни Требований (Governance)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:607
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:611
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] (risk=high) В документе используются ключевые слова согласно RFC 2119:
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:126
@@ -510,7 +510,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) BioETL: Утилиты Проекта
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) *Версия: 2.0 Синхронизировано с RULES.md v5.17 (2026-01-07)*
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:269
@@ -546,16 +546,16 @@
   - Текущее доказательство: src/bioetl/application/core/shutdown.py:24
   - Причина статуса: score<2 (недостаточно совпадений)
 - [16] (risk=medium) Эти инструменты **импортируют** модули `bioetl` и требуют установленного пакета.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] (risk=high) create_pipeline.py
   - Текущее доказательство: src/tools/create_pipeline.py:13
   - Причина статуса: score<2 (недостаточно совпадений)
 - [18] (risk=medium) **Назначение:** Генерация boilerplate-кода для новых BioETL пайплайнов.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [19] (risk=medium) **Зависимости bioetl:**
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [24] (risk=medium) **Создаёт:**
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:247
@@ -576,7 +576,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [33] (risk=medium) **Зависимости bioetl:**
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] (risk=medium) **Использование:**
   - Текущее доказательство: нет
@@ -603,7 +603,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:143
   - Причина статуса: score<2 (недостаточно совпадений)
 - [51] (risk=medium) `--output` Путь к выходному файлу
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:454
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:806
   - Причина статуса: score<2 (недостаточно совпадений)
 - [52] (risk=medium) scripts/ — Standalone скрипты
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:16
@@ -759,7 +759,7 @@
   - Текущее доказательство: tests/architecture/test_code_metrics.py:779
   - Причина статуса: числа в предложении не найдены в коде
 - [33] (risk=high) 5 Копирует `.env.example` → `.env`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: числа в предложении не найдены в коде
 - [34] (risk=high) 6 Проверяет импорт модуля и CLI
   - Текущее доказательство: src/bioetl/domain/filtering/load_result.py:61
@@ -1076,7 +1076,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) AI Agents Context
-  - Текущее доказательство: src/bioetl/domain/entities/base.py:47
+  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:225
   - Причина статуса: score<2 (недостаточно совпадений)
 ```
 
@@ -1096,7 +1096,7 @@
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
   - Причина статуса: числа в предложении не найдены в коде
 - [3] (risk=high) Для выполнения задач в проекте BioETL используется команда из **7 субагентов**.
-  - Текущее доказательство: src/bioetl/application/observability/__init__.py:20
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
   - Причина статуса: числа в предложении не найдены в коде
 - [4] (risk=medium) Основной агент (Codex/Jules) оркестрирует их работу, делегируя задачи в строго определённом порядке.
   - Текущее доказательство: configs/naming_exceptions.yaml:17
@@ -1147,7 +1147,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:729
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) Инструментарий верификации (BioETL Stack)
-  - Текущее доказательство: src/bioetl/application/observability/__init__.py:21
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:28
   - Причина статуса: score<2 (недостаточно совпадений)
 - [23] (risk=medium) Субагенты ОБЯЗАНЫ использовать следующие инструменты:
   - Текущее доказательство: tests/architecture/test_forbidden_imports.py:336
@@ -1177,7 +1177,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [38] (risk=medium) Гарантии BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] (risk=medium) **Traceability**: Каждое изменение привязано к ID.
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:118
@@ -1209,19 +1209,19 @@
 
 Проблемные предложения:
 - [1] (risk=medium) pyAuditBot — спецификация для BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) Архитектурный надзор и верификация соответствия правилам проекта (RULES.md, ADR).
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/models.py:9
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=medium) Сфера ответственности (BioETL)
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [7] (risk=medium) **Конфиги**: Проверка внешней валидации (DQ, Filter) через `scripts/config_gap_analysis.py`.
   - Текущее доказательство: src/bioetl/domain/exceptions/validation.py:7
   - Причина статуса: score<2 (недостаточно совпадений)
 - [8] (risk=medium) Чек-листы (BioETL)
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=medium) Архитектура (Hexagonal)
   - Текущее доказательство: src/tools/scripts/check_architecture.py:5
@@ -1253,7 +1253,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Реестр субагентов BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=medium) pyPlanBot
   - Текущее доказательство: нет
@@ -1357,7 +1357,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/system/memory_monitor.py:87
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) Entity Terminology
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:50
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:278
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=high) **Molecule** A chemical entity that can be characterized by a molecular structure (small molecule, peptide, antibody, etc.) ChEMBL: `Molecule` (API endpoint `/molecule`), **PubChem: `PubchemMolecule`** `Molecule`, `PubchemMolecule` `drug`, `substance`, `ligand` (in general context)
   - Текущее доказательство: src/bioetl/domain/schemas/constants.py:136
@@ -1459,7 +1459,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:244
   - Причина статуса: score<2 (недостаточно совпадений)
 - [161] (risk=medium) CrossRef
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [167] (risk=medium) **Health Check** Periodic verification of system component availability `ping`, `status check`
   - Текущее доказательство: src/bioetl/infrastructure/system/memory_monitor.py:87
@@ -1519,7 +1519,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:244
   - Причина статуса: score<2 (недостаточно совпадений)
 - [7] (risk=high) Согласно ADR-024, для обеспечения согласованности между провайдерами используются следующие канонические термины:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:842
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:846
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=medium) Научная публикация **Publication** `ChemblPublication`, `PubMedPublication`
   - Текущее доказательство: src/bioetl/application/composite/merger.py:740
@@ -1528,7 +1528,7 @@
   - Текущее доказательство: src/tools/verify_schema_parity.py:99
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) Биологическая мишень **Target** `ChemblTarget`, `UniprotTarget`
-  - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:327
+  - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:381
   - Причина статуса: score<2 (недостаточно совпадений)
 - [12] (risk=medium) Результат анализа **Activity** `ChemblActivity`
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:70
@@ -1728,7 +1728,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/vacuum.py:51
   - Причина статуса: score<2 (недостаточно совпадений)
 - [61] (risk=high) Bronze 90 дней Автоматическая архивация
-  - Текущее доказательство: src/bioetl/domain/ports/storage.py:33
+  - Текущее доказательство: src/bioetl/domain/ports/storage.py:52
   - Причина статуса: числа в предложении не найдены в коде
 - [62] (risk=high) Silver Постоянно Delta Lake VACUUM (7 дней)
   - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:474
@@ -1904,7 +1904,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Welcome to BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=medium) Project Mission
   - Текущее доказательство: src/tools/scripts/generate_contracts.py:11
@@ -2152,7 +2152,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) BioETL: Требования к Проекту
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) *Версия: 1.5 (2026-02-04)*
   - Текущее доказательство: configs/pipelines/composite/assay.yaml:22
@@ -2326,7 +2326,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:967
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] (risk=medium) Layer Documentation
-  - Текущее доказательство: src/bioetl/composition/factories/services_factory.py:184
+  - Текущее доказательство: src/bioetl/composition/factories/services_factory.py:276
   - Причина статуса: score<2 (недостаточно совпадений)
 - [7] (risk=high) **Domain** 01-domain-layer.md Ports, Models, Schemas, Pure logic
   - Текущее доказательство: src/bioetl/domain/services/dq_metrics_calculator.py:9
@@ -2374,7 +2374,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:6
   - Причина статуса: числа в предложении не найдены в коде
 - [28] (risk=high) ADR-001 Delta Lake vs Parquet §2.1, §3
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [30] (risk=high) ADR-003 In-Memory Locking §6
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/lock.py:4
@@ -2419,7 +2419,7 @@
   - Текущее доказательство: tests/unit/infrastructure/observability/test_tracing.py:155
   - Причина статуса: числа в предложении не найдены в коде
 - [50] (risk=high) ADR-023 Entity Type Patterns
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:57
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:97
   - Причина статуса: числа в предложении не найдены в коде
 - [57] (risk=high) ADR-030 Publication Pagination Strategy
   - Текущее доказательство: src/bioetl/application/pipelines/crossref/extractors.py:197
@@ -2434,7 +2434,7 @@
   - Текущее доказательство: src/tools/scripts/check_architecture.py:98
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] (risk=medium) **domain** ✅ ❌ ❌ ❌ ❌
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [65] (risk=medium) **application** ✅ ✅ ❌ ❌ ❌
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:13
@@ -2482,7 +2482,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Слой Domain (Домен)
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=medium) Назначение
   - Текущее доказательство: нет
@@ -2659,7 +2659,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:90
   - Причина статуса: score<2 (недостаточно совпадений)
 - [7] (risk=medium) Здесь реализуются **Use Cases** или, в нашей терминологии, **пайплайны**.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [8] (risk=medium) **Ключевые характеристики:**
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:126
@@ -2776,7 +2776,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/decorators.py:53
   - Причина статуса: числа в предложении не найдены в коде
 - [69] (risk=medium) Provider Трансформер Расположение
-  - Текущее доказательство: src/bioetl/composition/_services.py:247
+  - Текущее доказательство: src/bioetl/composition/bootstrap/assembly/storage.py:77
   - Причина статуса: score<2 (недостаточно совпадений)
 - [93] (risk=medium) `core/` — Ядро Исполнения Пайплайнов
   - Текущее доказательство: src/tools/scripts/cleanup_cache.py:7
@@ -3318,7 +3318,7 @@
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:284
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Фундаментальная архитектура проекта BioETL с пятью чёткими слоями:
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] (risk=high) 3 DDD Aggregates (PipelineRun, Batch, QuarantineEntry)
   - Текущее доказательство: tests/architecture/test_aggregate_boundaries.py:101
@@ -3366,7 +3366,7 @@
   - Текущее доказательство: src/tools/scripts/check_architecture.py:5
   - Причина статуса: числа в предложении не найдены в коде
 - [43] (risk=high) **Приоритет:** 9.50 **Тип:** C4 Context Diagram
-  - Текущее доказательство: src/bioetl/domain/entities/base.py:46
+  - Текущее доказательство: src/bioetl/domain/entities/base.py:63
   - Причина статуса: числа в предложении не найдены в коде
 - [44] (risk=medium) **Описание:**
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:284
@@ -3450,7 +3450,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [2] (risk=medium) Эта диаграмма детализирует "Систему BioETL", представленную на диаграмме контекста.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=medium) Она показывает основные контейнеры (приложения и хранилища данных), которые составляют систему BioETL, и их взаимодействие.
   - Текущее доказательство: src/bioetl/domain/filtering/load_result.py:26
@@ -3724,7 +3724,7 @@
 
 Проблемные предложения:
 - [1] (risk=high) ADR-001: Why Delta Lake over Raw Parquet?
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [2] (risk=medium) **Status:** Accepted
   - Текущее доказательство: src/bioetl/domain/ports/health_check.py:70
@@ -3885,7 +3885,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/_atomic.py:132
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] (risk=high) ADR-001: Delta Lake vs Parquet — storage format choice for Silver/Gold layers (Updated: 2025-05-20)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [41] (risk=high) ADR-010: Local-Only Deployment — simplifies deployment while preserving Medallion architecture (Updated: 2025-12-23)
   - Текущее доказательство: pyproject.toml:400
@@ -4294,13 +4294,13 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [65] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [68] (risk=medium) Self-documenting architecture
   - Текущее доказательство: src/tools/scripts/check_architecture.py:98
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [72] (risk=high) One additional top-level directory (5 instead of 4)
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:49
@@ -4431,13 +4431,13 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [61] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [63] (risk=medium) Improved testability
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:314
   - Причина статуса: score<2 (недостаточно совпадений)
 - [66] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [67] (risk=high) Minor: Existing code using `BoundLogger` still works but should migrate to `LoggerPort`
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:246
@@ -4526,7 +4526,7 @@
   - Текущее доказательство: tests/unit/application/core/test_health_aggregator.py:73
   - Причина статуса: score<2 (недостаточно совпадений)
 - [33] (risk=high) 5xx Server Error Yes Server-side issue, retrying won't help
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:806
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:810
   - Причина статуса: числа в предложении не найдены в коде
 - [34] (risk=high) 429 Rate Limit Yes Need to back off significantly
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:122
@@ -4589,13 +4589,13 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [68] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] (risk=medium) Observable via metrics
   - Текущее доказательство: src/bioetl/domain/entities/uniprot.py:117
   - Причина статуса: score<2 (недостаточно совпадений)
 - [73] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [74] (risk=high) **Single circuit per provider**: All endpoints share one circuit.
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:22
@@ -4604,7 +4604,7 @@
   - Текущее доказательство: src/tools/create_pipeline.py:267
   - Причина статуса: score<2 (недостаточно совпадений)
 - [78] (risk=high) Acceptable for batch pipelines.
-  - Текущее доказательство: src/bioetl/infrastructure/storage/bronze_writer.py:714
+  - Текущее доказательство: src/bioetl/infrastructure/storage/gold_writer.py:67
   - Причина статуса: score<2 (недостаточно совпадений)
 - [80] (risk=high) Related ADRs
   - Текущее доказательство: src/bioetl/infrastructure/storage/_atomic.py:132
@@ -4666,10 +4666,10 @@
   - Текущее доказательство: src/bioetl/domain/types.py:7
   - Причина статуса: score<2 (недостаточно совпадений)
 - [24] (risk=medium) Layer Responsibility
-  - Текущее доказательство: src/bioetl/composition/factories/services_factory.py:584
+  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:9
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) interfaces Captures OS signals, framework events
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:491
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:495
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=medium) This follows the hexagonal architecture: interfaces translate external events, application orchestrates, infrastructure cleans up.
   - Текущее доказательство: src/bioetl/infrastructure/adapters/common/title_matching.py:33
@@ -4714,13 +4714,13 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [63] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [68] (risk=medium) Testable via signal injection
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/health_server_integration.py:8
   - Причина статуса: score<2 (недостаточно совпадений)
 - [69] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [70] (risk=high) **Main thread requirement**: Signal handlers can only be set in main thread.
   - Текущее доказательство: src/tools/verify_schema_parity.py:27
@@ -4732,13 +4732,13 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/health_server_integration.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
 - [73] (risk=medium) Mitigated by using async throughout.
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/client.py:1047
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/fallback.py:41
   - Причина статуса: score<2 (недостаточно совпадений)
 - [74] (risk=medium) Kubernetes Integration
   - Текущее доказательство: src/bioetl/interfaces/orchestration/__init__.py:7
   - Причина статуса: score<2 (недостаточно совпадений)
 - [75] (risk=high) The 5-minute grace period allows:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:519
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:523
   - Причина статуса: числа в предложении не найдены в коде
 - [76] (risk=high) Current batch to complete (~30s max)
   - Текущее доказательство: src/bioetl/application/services/shutdown_service.py:6
@@ -4863,7 +4863,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [55] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [57] (risk=medium) Consistent limit enforcement
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:127
@@ -4872,7 +4872,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/http/pagination.py:46
   - Причина статуса: score<2 (недостаточно совпадений)
 - [61] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [62] (risk=medium) **Mixin complexity**: Mixins can make class hierarchies harder to understand.
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:426
@@ -4890,7 +4890,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/_atomic.py:132
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] (risk=high) ADR-031: Composite Pipeline Pattern (orchestrates paginated fetches across providers)
-  - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:3
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/source_config.py:168
   - Причина статуса: числа в предложении не найдены в коде
 ```
 
@@ -5018,7 +5018,7 @@
   - Текущее доказательство: pyproject.toml:162
   - Причина статуса: score<2 (недостаточно совпадений)
 - [47] (risk=medium) Достаточность для use cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [48] (risk=medium) Локальный запуск полностью покрывает:
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:247
@@ -5165,7 +5165,7 @@
   - Текущее доказательство: tests/e2e/conftest.py:340
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] (risk=medium) Соответствие реальным use cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] (risk=medium) Анализ показал:
   - Текущее доказательство: нет
@@ -5201,7 +5201,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [53] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [55] (risk=medium) **Поддерживаемость**: Проще добавлять новые пайплайны
   - Текущее доказательство: нет
@@ -5213,7 +5213,7 @@
   - Текущее доказательство: tests/e2e/conftest.py:340
   - Причина статуса: score<2 (недостаточно совпадений)
 - [58] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [59] (risk=medium) **Нет инкрементальной загрузки**: Все запуски — полный reload
   - Текущее доказательство: src/bioetl/domain/medallion.py:234
@@ -5318,7 +5318,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [34] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [35] (risk=medium) **Трассируемость**: Один `run_id` во всех слоях и компонентах
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:303
@@ -5330,7 +5330,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:95
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] (risk=high) **Breaking Change**: Сигнатура `BasePipeline.__init__()` изменилась (4 параметра вместо 3)
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:9
@@ -5401,10 +5401,10 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [10] (risk=high) `_clear_exports()` объявляется как `async def`:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/common/base_title_fallback.py:131
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/fallback.py:61
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) Вызов из `run()` использует `await`:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py:296
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:130
   - Причина статуса: score<2 (недостаточно совпадений)
 - [12] (risk=medium) Политика очистки по RunType
   - Текущее доказательство: src/bioetl/infrastructure/storage/bronze_writer.py:417
@@ -5434,7 +5434,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [23] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [24] (risk=high) **Корректная работа** с асинхронным `StoragePort`
   - Текущее доказательство: src/bioetl/domain/ports/storage.py:32
@@ -5449,7 +5449,7 @@
   - Текущее доказательство: src/bioetl/domain/medallion.py:234
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=high) **Breaking change** для тестов, вызывающих `_clear_exports()` напрямую
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:312
@@ -5616,7 +5616,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/activity_values.py:385
   - Причина статуса: score<2 (недостаточно совпадений)
 - [80] (risk=medium) **Отвергнуто**: Слишком магически, сложно отлаживать, не работает с async.
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/common/base_title_fallback.py:131
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/fallback.py:61
   - Причина статуса: score<2 (недостаточно совпадений)
 - [81] (risk=medium) Injection через DI container
   - Текущее доказательство: src/bioetl/infrastructure/adapters/uniprot/models.py:54
@@ -5700,7 +5700,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [35] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] (risk=medium) **Parallel cleanup:** Async I/O resources closed concurrently for speed
   - Текущее доказательство: src/bioetl/application/services/medallion_lifecycle.py:147
@@ -5712,7 +5712,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:314
   - Причина статуса: score<2 (недостаточно совпадений)
 - [41] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [46] (risk=high) Related ADRs
   - Текущее доказательство: src/bioetl/infrastructure/storage/_atomic.py:132
@@ -5792,7 +5792,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/quarantine/unified.py:47
   - Причина статуса: score<2 (недостаточно совпадений)
 - [36] (risk=medium) Prevents storage bloat from large malformed records
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] (risk=high) Maintains linkage to Bronze via `bronze_batch_id` for full payload access
   - Текущее доказательство: src/bioetl/domain/mapping/publication_fields.py:10
@@ -5813,7 +5813,7 @@
   - Текущее доказательство: src/bioetl/domain/types.py:7
   - Причина статуса: score<2 (недостаточно совпадений)
 - [47] (risk=medium) Differentiated Handling Prevents Over-Engineering
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [56] (risk=high) Configurable via `RetryConfig(deterministic=True)`
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:11
@@ -5840,7 +5840,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:308
   - Причина статуса: score<2 (недостаточно совпадений)
 - [78] (risk=medium) Poor user experience for minor issues
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:716
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:720
   - Причина статуса: score<2 (недостаточно совпадений)
 - [79] (risk=high) Per-Pipeline Quarantine Tables
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:215
@@ -5879,19 +5879,19 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/bronze_writer.py:689
   - Причина статуса: score<2 (недостаточно совпадений)
 - [94] (risk=high) Violates ADR-014 principles
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:869
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:873
   - Причина статуса: числа в предложении не найдены в коде
 - [95] (risk=medium) Consequences
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [96] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [101] (risk=medium) **Cost control** via payload truncation
   - Текущее доказательство: src/bioetl/infrastructure/observability/unified_logger.py:23
   - Причина статуса: score<2 (недостаточно совпадений)
 - [102] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [103] (risk=medium) **Complexity**: Three error types require understanding
   - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:88
@@ -5999,7 +5999,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [106] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [108] (risk=medium) **Easy testing**: NoOp implementations require zero setup
   - Текущее доказательство: src/tools/create_pipeline.py:177
@@ -6008,7 +6008,7 @@
   - Текущее доказательство: src/bioetl/domain/ports/observability.py:39
   - Причина статуса: score<2 (недостаточно совпадений)
 - [112] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [113] (risk=high) **Boilerplate**: Port + Adapter + NoOp for each concern
   - Текущее доказательство: src/tools/create_pipeline.py:199
@@ -6256,13 +6256,13 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [39] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] (risk=high) **Clean architecture**: All layers respect port abstractions
   - Текущее доказательство: src/bioetl/domain/ports/validation.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
 - [44] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [46] (risk=high) **Migration effort**: Required updates to tests
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/quarantine.py:229
@@ -6477,16 +6477,16 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [7] (risk=medium) В рамках развития архитектуры BioETL возникла необходимость усилить защиту бизнес-инвариантов
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [8] (risk=medium) и улучшить модульность domain слоя.
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=medium) Ранее бизнес-логика была распределена между application
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:13
   - Причина статуса: score<2 (недостаточно совпадений)
 - [10] (risk=medium) и domain слоями без чёткой модели владения данными.
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) Проблемы до рефакторинга
   - Текущее доказательство: src/bioetl/domain/exceptions/network.py:10
@@ -6531,7 +6531,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/internal.py:31
   - Причина статуса: score<2 (недостаточно совпадений)
 - [43] (risk=medium) Структура domain слоя после рефакторинга
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:14
+  - Текущее доказательство: src/bioetl/application/services/config_service.py:154
   - Причина статуса: score<2 (недостаточно совпадений)
 - [44] (risk=medium) Последствия
   - Текущее доказательство: нет
@@ -6570,7 +6570,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [58] (risk=medium) Over-engineering Только критичные агрегаты (Batch, Run) Закрыт
-  - Текущее доказательство: src/bioetl/infrastructure/system/memory_monitor.py:58
+  - Текущее доказательство: src/bioetl/infrastructure/system/memory_monitor.py:71
   - Причина статуса: score<2 (недостаточно совпадений)
 - [59] (risk=medium) Регрессии Полное тестовое покрытие агрегатов Закрыт
   - Текущее доказательство: tests/unit/domain/services/test_dq_serializer.py:13
@@ -6690,7 +6690,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [55] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [57] (risk=high) **(+) No dependencies**: OpenTelemetry packages not required for default usage
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:96
@@ -6702,7 +6702,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/run_context.py:22
   - Причина статуса: числа в предложении не найдены в коде
 - [61] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [63] (risk=medium) **(-) No visual timeline**: No Jaeger/Zipkin UI for span visualization
   - Текущее доказательство: src/bioetl/domain/mapping/publication_type_classification.py:1207
@@ -6752,13 +6752,13 @@
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
 - [6] (risk=high) При анализе интерфейсов трансформеров выявлено 3 паттерна передачи `entity_type`:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/retry.py:224
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:322
   - Причина статуса: числа в предложении не найдены в коде
 - [7] (risk=medium) Исходная Проблема
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [9] (risk=medium) Параметр `entity_type` используется для:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py:161
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:130
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Выявленные Паттерны
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:3
@@ -6785,13 +6785,13 @@
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:289
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) Паттерн C: PubMed
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:103
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:133
   - Причина статуса: score<2 (недостаточно совпадений)
 - [23] (risk=medium) The Decision
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
 - [24] (risk=medium) Auto-derive entity_type в BaseChemblTransformer
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:244
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/client.py:269
   - Причина статуса: score<2 (недостаточно совпадений)
 - [26] (risk=medium) Явная передача для non-ChEMBL трансформеров
   - Текущее доказательство: tests/unit/domain/registry/test_publication_registry.py:263
@@ -6803,13 +6803,13 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [33] (risk=medium) Дублирование `entity_type` нарушало бы DRY:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/retry.py:224
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:322
   - Причина статуса: score<2 (недостаточно совпадений)
 - [34] (risk=high) Observability (O1 Requirements)
   - Текущее доказательство: src/bioetl/infrastructure/adapters/base_metrics.py:4
   - Причина статуса: числа в предложении не найдены в коде
 - [35] (risk=medium) Осмысленные метки `entity_type` критичны для observability:
-  - Текущее доказательство: src/bioetl/domain/registry/publication.py:224
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/base.py:45
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] (risk=medium) Span атрибуты становятся информативными:
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:573
@@ -6824,7 +6824,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [43] (risk=medium) Результирующие entity_type
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/retry.py:224
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:322
   - Причина статуса: score<2 (недостаточно совпадений)
 - [58] (risk=medium) Alternatives Considered
   - Текущее доказательство: src/bioetl/domain/value_objects/activity_values.py:385
@@ -6860,7 +6860,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [74] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [75] (risk=medium) **(+) Meaningful metrics labels**: All transformers now have informative `entity_type`
   - Текущее доказательство: src/bioetl/infrastructure/config/pipeline_config_loader.py:137
@@ -6872,7 +6872,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:8
   - Причина статуса: score<2 (недостаточно совпадений)
 - [80] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [81] (risk=high) **(-) Lowercase names**: `"bioactivity"` instead of `"activity"` (differs from pipeline naming)
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:6
@@ -6920,7 +6920,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [8] (risk=high) Provider API-имя Доменное значение
-  - Текущее доказательство: src/bioetl/application/services/health_service.py:233
+  - Текущее доказательство: src/bioetl/application/services/medallion_lifecycle.py:150
   - Причина статуса: score<2 (недостаточно совпадений)
 - [12] (risk=medium) Проблемы:
   - Текущее доказательство: src/bioetl/domain/exceptions/network.py:10
@@ -6938,7 +6938,7 @@
   - Текущее доказательство: src/tools/verify_schema_parity.py:99
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) **Target** — биологическая мишень для измерения активности
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:123
+  - Текущее доказательство: src/tools/verify_schema_parity.py:9
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Decision
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:3
@@ -6965,7 +6965,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:18
   - Причина статуса: score<2 (недостаточно совпадений)
 - [36] (risk=medium) Cleaner codebase without deprecated symbols
-  - Текущее доказательство: src/bioetl/domain/transformations.py:96
+  - Текущее доказательство: src/bioetl/domain/transformations.py:107
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] (risk=medium) Старое имя Новое (каноническое)
   - Текущее доказательство: нет
@@ -6995,7 +6995,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [51] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [52] (risk=medium) **Ubiquitous Language alignment**: Код соответствует глоссарию терминов
   - Текущее доказательство: src/bioetl/domain/entities/chembl.py:519
@@ -7010,7 +7010,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:5
   - Причина статуса: score<2 (недостаточно совпадений)
 - [56] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [57] (risk=medium) **Migration overhead**: Существующий код использовал старые имена (все обновлено атомарно в одном коммите, aliases не потребовались)
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:188
@@ -7145,13 +7145,13 @@
   - Текущее доказательство: src/bioetl/infrastructure/config/filter_config_loader.py:1
   - Причина статуса: числа в предложении не найдены в коде
 - [49] (risk=medium) DQ-правила загружаются иерархически через `DQConfigLoader`:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:728
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:732
   - Причина статуса: score<2 (недостаточно совпадений)
 - [54] (risk=medium) Consequences
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [55] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [56] (risk=high) **Единый источник defaults**: `_base.yaml` v2.0.0 — нет дублирования
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:104
@@ -7169,7 +7169,7 @@
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:41
   - Причина статуса: числа в предложении не найдены в коде
 - [63] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] (risk=medium) **Увеличенная сложность DQ**: Иерархическая загрузка требует понимания приоритетов
   - Текущее доказательство: configs/pipelines/_base.yaml:327
@@ -7196,7 +7196,7 @@
   - Текущее доказательство: tests/unit/infrastructure/storage/test_atomic.py:254
   - Причина статуса: score<2 (недостаточно совпадений)
 - [72] (risk=medium) Current file-based inheritance через `_base.yaml` проще и поддерживается стандартными инструментами.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:730
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:734
   - Причина статуса: score<2 (недостаточно совпадений)
 - [73] (risk=medium) Плоские пути без иерархии
   - Текущее доказательство: нет
@@ -7265,7 +7265,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/network.py:113
   - Причина статуса: score<2 (недостаточно совпадений)
 - [19] (risk=medium) Constraints
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:869
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:873
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Constraint Source Impact
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:939
@@ -7295,7 +7295,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/config/field_group_loader.py:6
   - Причина статуса: score<2 (недостаточно совпадений)
 - [33] (risk=high) Data Passing Mechanism: File-Based (Silver Tables)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:730
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:734
   - Причина статуса: score<2 (недостаточно совпадений)
 - [34] (risk=medium) Option Pros Cons Decision
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/vacuum.py:79
@@ -7322,19 +7322,19 @@
   - Текущее доказательство: src/tools/verify_schema_parity.py:53
   - Причина статуса: числа в предложении не найдены в коде
 - [59] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [60] (risk=medium) Use Case Example
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/filterable_mixin.py:95
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/http/circuit_breaker.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [61] (risk=high) Reference tables `protein_class` hierarchy (~1.5K records)
   - Текущее доказательство: src/bioetl/domain/entities/chembl_structures.py:379
   - Причина статуса: числа в предложении не найдены в коде
 - [73] (risk=medium) `key_source` string?
-  - Текущее доказательство: src/bioetl/domain/schemas/chembl/target.py:68
+  - Текущее доказательство: src/bioetl/domain/schemas/common/publication_base.py:104
   - Причина статуса: score<2 (недостаточно совпадений)
 - [79] (risk=high) `silver_table` string?
-  - Текущее доказательство: src/bioetl/domain/config/validation.py:121
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/publications.py:274
   - Причина статуса: score<2 (недостаточно совпадений)
 - [81] (risk=medium) Implementation
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:249
@@ -7358,13 +7358,13 @@
   - Текущее доказательство: src/tools/scripts/check_architecture.py:98
   - Причина статуса: score<2 (недостаточно совпадений)
 - [94] (risk=medium) Layer Distribution
-  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:41
+  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:69
   - Причина статуса: score<2 (недостаточно совпадений)
 - [96] (risk=medium) From To Allowed
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [104] (risk=medium) State Diagram
-  - Текущее доказательство: src/bioetl/infrastructure/observability/server.py:141
+  - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:387
   - Причина статуса: score<2 (недостаточно совпадений)
 - [108] (risk=medium) `can_transition()`, `validate_transition()` **domain** Pure functions for transition logic
   - Текущее доказательство: src/bioetl/domain/composite/state.py:180
@@ -7418,7 +7418,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/arrow_converter.py:4
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) Example of duplication:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:441
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py:73
   - Причина статуса: score<2 (недостаточно совпадений)
 - [12] (risk=medium) Decision
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:3
@@ -7433,10 +7433,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [33] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
-  - Причина статуса: score<2 (недостаточно совпадений)
-- [36] (risk=high) **Reusability**: Provider-level validations shared across entities
-  - Текущее доказательство: src/bioetl/infrastructure/storage/arrow_converter.py:4
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] (risk=medium) **Flexibility**: Entity-specific rules without affecting others
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:228
@@ -7445,7 +7442,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:8
   - Причина статуса: числа в предложении не найдены в коде
 - [41] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [43] (risk=high) **Indirection**: Must look at multiple files to understand full config
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:426
@@ -7561,7 +7558,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:224
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) Example of duplication:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:441
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py:73
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Decision
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:3
@@ -7579,14 +7576,11 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [39] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] (risk=high) **DRY**: Provider-level defaults (e.g., ChEMBL batch_size=20) defined once
   - Текущее доказательство: configs/filter/providers/uniprot.yaml:5
   - Причина статуса: числа в предложении не найдены в коде
-- [42] (risk=medium) **Reusability**: Provider-level filters shared across entities
-  - Текущее доказательство: src/bioetl/infrastructure/storage/arrow_converter.py:4
-  - Причина статуса: score<2 (недостаточно совпадений)
 - [43] (risk=medium) **Flexibility**: Entity-specific rules without affecting others
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:228
   - Причина статуса: score<2 (недостаточно совпадений)
@@ -7594,7 +7588,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/metrics_server_integration.py:7
   - Причина статуса: числа в предложении не найдены в коде
 - [48] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [49] (risk=high) **More files**: Additional 20+ config files (mitigated by clear structure)
   - Текущее доказательство: src/tools/scripts/check_constructor_args.py:5
@@ -7648,7 +7642,7 @@
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:88
   - Причина статуса: score<2 (недостаточно совпадений)
 - [101] (risk=high) `extraction_params`: pre-extract (API-side)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:804
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:808
   - Причина статуса: score<2 (недостаточно совпадений)
 - [103] (risk=medium) Не конфликтуют — разные точки применения
   - Текущее доказательство: нет
@@ -7663,7 +7657,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_all.py:4
   - Причина статуса: score<2 (недостаточно совпадений)
 - [110] (risk=medium) Filter Type Comparison
-  - Текущее доказательство: src/bioetl/application/pipelines/chembl/base_chembl_transformer.py:82
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:61
   - Причина статуса: score<2 (недостаточно совпадений)
 - [111] (risk=high) Aspect `input_filter` (§1) `gold_filters` (§2) `extraction_params` (§3)
   - Текущее доказательство: src/bioetl/infrastructure/schemas/filter_config.py:19
@@ -7686,7 +7680,10 @@
 - [133] (risk=medium) Cleaner separation of responsibilities
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_helpers.py:4
   - Причина статуса: score<2 (недостаточно совпадений)
-- ... и еще 14 предложений (см. полный CSV-отчет)
+- [134] (risk=medium) Code-based Filters
+  - Текущее доказательство: src/tools/file_merger.py:4
+  - Причина статуса: score<2 (недостаточно совпадений)
+- ... и еще 13 предложений (см. полный CSV-отчет)
 ```
 
 ## docs/02-architecture/decisions/ADR-029-output-metadata-unification.md
@@ -7750,7 +7747,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [27] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=medium) **Unified analytics**: Все слои экспортируют одинаковые базовые метрики
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:782
@@ -7765,7 +7762,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:260
   - Причина статуса: score<2 (недостаточно совпадений)
 - [33] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [35] (risk=high) **Schema migration**: Существующие sidecar-файлы v1.0 не совместимы с v1.1
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:7
@@ -7857,7 +7854,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [40] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [42] (risk=medium) **No data loss**: Full scan guarantees all current records are captured
   - Текущее доказательство: src/tools/file_merger.py:161
@@ -7866,7 +7863,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:273
   - Причина статуса: score<2 (недостаточно совпадений)
 - [46] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [48] (risk=high) **Higher API load**: May increase rate limiting on some providers
   - Текущее доказательство: src/bioetl/infrastructure/storage/delta_reader.py:26
@@ -7911,7 +7908,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:261
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] (risk=medium) **Domain:**
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [73] (risk=medium) **Application:**
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:13
@@ -8003,7 +8000,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [36] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] (risk=medium) **Explicit semantics**: Config clearly states loading strategy
   - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/retry.py:57
@@ -8015,7 +8012,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:265
   - Причина статуса: score<2 (недостаточно совпадений)
 - [42] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [44] (risk=medium) **Two fields**: Both `force_full_scan` and `loading_strategy` exist (temporary)
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:86
@@ -8045,7 +8042,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:261
   - Причина статуса: score<2 (недостаточно совпадений)
 - [58] (risk=medium) **Domain:**
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [61] (risk=high) `src/bioetl/domain/ports/watermark.py` — Add `WatermarkStrategyPort` (placeholder)
   - Текущее доказательство: src/bioetl/domain/ports/noop.py:267
@@ -8185,10 +8182,10 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [46] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [52] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [54] (risk=high) **Learning curve**: Developers must understand client API
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:426
@@ -8238,7 +8235,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [5] (risk=medium) **Автор** BioETL Team
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [6] (risk=medium) **Ревьюер** —
   - Текущее доказательство: нет
@@ -8304,7 +8301,7 @@
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:64
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=high) Нет верификации по внешним источникам (DOI существует в CrossRef API?)
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [32] (risk=medium) Нет семантических проверок (язык аннотации совпадает с полем language?)
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:2
@@ -8349,7 +8346,7 @@
   - Текущее доказательство: src/bioetl/domain/filtering/load_result.py:23
   - Причина статуса: числа в предложении не найдены в коде
 - [47] (risk=high) **REQ-VAL-008 (MUST):** Конфигурируемость: DQ-правила в YAML, не хардкод.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:838
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:842
   - Причина статуса: числа в предложении не найдены в коде
 - [48] (risk=medium) Связь с архитектурой
   - Текущее доказательство: нет
@@ -8394,7 +8391,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:224
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] (risk=high) ADR-001 Delta Lake vs Parquet Accepted Storage 2025-05-20
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [6] (risk=high) ADR-002 Medallion Architecture Accepted Architecture 2025-05-20
   - Текущее доказательство: src/bioetl/infrastructure/storage/base_delta_writer.py:6
@@ -8469,7 +8466,7 @@
   - Текущее доказательство: src/bioetl/application/core/pipeline_services.py:3
   - Причина статуса: числа в предложении не найдены в коде
 - [45] (risk=high) ADR-001: Delta Lake vs Parquet
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [46] (risk=high) ADR-012: Storage Clear Contract and Run ID
   - Текущее доказательство: tests/unit/application/core/test_runner.py:78
@@ -8493,7 +8490,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:4
   - Причина статуса: числа в предложении не найдены в коде
 - [57] (risk=high) ADR-023: Entity Type Patterns (transformer entity_type)
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:223
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:288
   - Причина статуса: числа в предложении не найдены в коде
 - [60] (risk=high) ADR-015: Pipeline Services Lifecycle
   - Текущее доказательство: src/bioetl/composition/bootstrap/cli/__init__.py:21
@@ -8562,10 +8559,10 @@
   - Текущее доказательство: src/tools/scripts/check_architecture.py:98
   - Причина статуса: score<2 (недостаточно совпадений)
 - [4] (risk=medium) Class Diagram
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:635
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:687
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] (risk=medium) Layer Interaction
-  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:69
+  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:79
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=high) See ADR-021: DDD Aggregates Adoption for details.
   - Текущее доказательство: src/bioetl/infrastructure/adapters/common/api_request_collector.py:175
@@ -8645,7 +8642,7 @@
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:6
   - Причина статуса: числа в предложении не найдены в коде
 - [21] (risk=medium) Format: `NN- .mermaid`
-  - Текущее доказательство: src/bioetl/domain/value_objects/compound_ids.py:246
+  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:102
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) Examples:
   - Текущее доказательство: src/tools/file_merger.py:39
@@ -8663,7 +8660,7 @@
   - Текущее доказательство: src/tools/scripts/config_matrix_generator.py:43
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=medium) Format Standards
-  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:25
+  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:122
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=high) 3.1 Mermaid (Preferred)
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:571
@@ -8678,10 +8675,10 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:132
   - Причина статуса: score<2 (недостаточно совпадений)
 - [33] (risk=medium) Class diagrams
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:629
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:635
   - Причина статуса: score<2 (недостаточно совпадений)
 - [34] (risk=medium) State diagrams
-  - Текущее доказательство: src/bioetl/infrastructure/observability/metrics_server_adapter.py:81
+  - Текущее доказательство: src/bioetl/infrastructure/observability/server.py:141
   - Причина статуса: score<2 (недостаточно совпадений)
 - [35] (risk=high) 3.2 PlantUML
   - Текущее доказательство: нет
@@ -8759,7 +8756,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Каталог Диаграмм BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) *Версия: 1.0 Дата: 2026-01-20*
   - Текущее доказательство: src/bioetl/domain/exceptions/infrastructure.py:310
@@ -8903,10 +8900,10 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/validation.py:7
   - Причина статуса: числа в предложении не найдены в коде
 - [213] (risk=high) 4.1 Domain Components (20)
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:26
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:29
   - Причина статуса: числа в предложении не найдены в коде
 - [219] (risk=medium) **Activity VO** - Class - Activity measurement
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:629
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:635
   - Причина статуса: score<2 (недостаточно совпадений)
 - ... и еще 55 предложений (см. полный CSV-отчет)
 ```
@@ -9089,7 +9086,7 @@
 
 Проблемные предложения:
 - [1] (risk=high) TOP-50 Архитектурных Диаграмм BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: числа в предложении не найдены в коде
 - [2] (risk=high) *Версия: 1.0 Дата: 2026-01-20*
   - Текущее доказательство: src/bioetl/domain/exceptions/infrastructure.py:310
@@ -9254,13 +9251,13 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Требования к плану консолидации модулей BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) *Статус: Draft (обязательные критерии для RFC/ADR и implementation plan).*
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:29
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=medium) *Область: `src/bioetl/**`.*
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [4] (risk=high) 1) Обязательная карта перемещения модулей по каждому варианту
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:128
@@ -9269,7 +9266,7 @@
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:282
   - Причина статуса: числа в предложении не найдены в коде
 - [6] (risk=medium) исходный путь `src/bioetl/...`
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [7] (risk=medium) целевой путь
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:95
@@ -9425,7 +9422,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/observability/prometheus_metrics.py:86
   - Причина статуса: score<2 (недостаточно совпадений)
 - [7] (risk=medium) *Role*: Captures Start/Success/Failure events.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:491
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:495
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=high) **Structlog**: Implements `LoggerPort` (implicitly via duck typing).
   - Текущее доказательство: src/bioetl/infrastructure/observability/logging.py:34
@@ -9469,7 +9466,7 @@
   - Текущее доказательство: src/tools/verify_schema_parity.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=high) Inside BioETL (§1.1)
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: числа в предложении не найдены в коде
 - [16] (risk=low) System Role Protocol Status
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:45
@@ -9493,7 +9490,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [32] (risk=medium) Независимость Domain от I/O
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [33] (risk=medium) Тестируемость через mock-адаптеры
   - Текущее доказательство: tests/integration/test_uniprot_pipeline.py:526
@@ -9615,7 +9612,7 @@
   - Текущее доказательство: src/bioetl/domain/types.py:208
   - Причина статуса: score<2 (недостаточно совпадений)
 - [59] (risk=medium) FK к Target.
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:123
+  - Текущее доказательство: src/tools/verify_schema_parity.py:9
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] (risk=high) Silver: PK.
   - Текущее доказательство: src/bioetl/application/services/config_service.py:47
@@ -9651,7 +9648,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:17
   - Причина статуса: score<2 (недостаточно совпадений)
 - [83] (risk=medium) Extraction filter: `B,F`.
-  - Текущее доказательство: src/bioetl/application/core/subcellular_fraction_data_source.py:160
+  - Текущее доказательство: src/bioetl/application/pipelines/chembl/activity_transformer.py:217
   - Причина статуса: score<2 (недостаточно совпадений)
 - [85] (risk=medium) DQ: enum.
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:17
@@ -9735,7 +9732,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/validation.py:7
   - Причина статуса: score<2 (недостаточно совпадений)
 - [30] (risk=high) N-01 CRITICAL Type mismatch: `taxonomy_id` Activity: `str`, все остальные: `float`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:484
+  - Текущее доказательство: src/bioetl/infrastructure/observability/logging_config.py:151
   - Причина статуса: числа в предложении не найдены в коде
 - [31] (risk=high) N-02 CRITICAL Type mismatch: `cell_source_taxonomy_id` Silver: `int`, Gold: `float`
   - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:255
@@ -10120,7 +10117,7 @@
   - Текущее доказательство: src/tools/scripts/cleanup_cache.py:29
   - Причина статуса: score<2 (недостаточно совпадений)
 - [38] (risk=medium) `.vercel/cache/` (keep `.vercel/project.json`)
-  - Текущее доказательство: src/tools/scripts/generate_contracts.py:11
+  - Текущее доказательство: src/tools/scripts/cleanup_cache.py:29
   - Причина статуса: score<2 (недостаточно совпадений)
 - [47] (risk=medium) `.gitignore` Git config
   - Текущее доказательство: src/bioetl/composition/bootstrap/runtime/composite.py:324
@@ -10189,7 +10186,7 @@
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:6
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=medium) **end of the period**:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:519
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:523
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) **Why end-of-period?**
   - Текущее доказательство: src/bioetl/domain/services/data_normalization_service.py:272
@@ -10201,7 +10198,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:608
   - Причина статуса: числа в предложении не найдены в коде
 - [20] (risk=medium) `format_date_parts()` (CrossRef)
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/exceptions.py:83
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=high) Location: `src/bioetl/domain/normalization.py:56-73`
   - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/client.py:25
@@ -10222,7 +10219,7 @@
   - Текущее доказательство: src/tools/scripts/check_application_deps.py:5
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] (risk=medium) CrossRef
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [44] (risk=medium) OpenAlex
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:132
@@ -10275,7 +10272,7 @@
 
 Проблемные предложения:
 - [2] (risk=high) Руководство по работе со схемами конфигураций в BioETL.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=high) *Версия: 1.0.0 Дата: 2026-01-26*
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
@@ -10311,7 +10308,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:81
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=high) `BaseGoldRangeFilterConfig` Range filter (min/max)
-  - Текущее доказательство: src/bioetl/application/pipelines/chembl/publication_transformer.py:132
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:107
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=medium) Other Configurations
   - Текущее доказательство: src/tools/create_pipeline.py:142
@@ -10472,7 +10469,7 @@
   - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:138
   - Причина статуса: числа в предложении не найдены в коде
 - [50] (risk=high) Step 3: Reference in pipeline config
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:764
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:768
   - Причина статуса: числа в предложении не найдены в коде
 - [59] (risk=medium) **Examples:**
   - Текущее доказательство: src/tools/file_merger.py:39
@@ -10481,13 +10478,13 @@
   - Текущее доказательство: src/tools/file_merger.py:39
   - Причина статуса: score<2 (недостаточно совпадений)
 - [75] (risk=medium) **Example:**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: score<2 (недостаточно совпадений)
 - [77] (risk=high) Inline Overrides (Level 4)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:775
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:779
   - Причина статуса: числа в предложении не найдены в коде
 - [78] (risk=high) For exceptional cases, override DQ rules directly in pipeline config:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [80] (risk=medium) Prefer updating entity config for permanent changes.
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:7
@@ -10499,7 +10496,7 @@
   - Текущее доказательство: mkdocs.yml:89
   - Причина статуса: score<2 (недостаточно совпадений)
 - [90] (risk=medium) **Check**:
-  - Текущее доказательство: src/bioetl/domain/services/value_validator.py:171
+  - Текущее доказательство: src/bioetl/domain/services/value_validator.py:255
   - Причина статуса: score<2 (недостаточно совпадений)
 - [94] (risk=medium) References
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:10
@@ -11020,7 +11017,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:278
   - Причина статуса: числа в предложении не найдены в коде
 - [2] (risk=high) **Target versions:** 5.9.0 → 5.14.0
-  - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:484
+  - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:536
   - Причина статуса: числа в предложении не найдены в коде
 - [3] (risk=high) **Release dates:** 2026-01-06 → 2026-02-09
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:223
@@ -11182,7 +11179,7 @@
 
 Проблемные предложения:
 - [2] (risk=medium) Руководство по настройке конфигурации ETL-пайплайнов в BioETL.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=high) **Версия:** 6.0.0
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
@@ -11239,22 +11236,22 @@
   - Текущее доказательство: tests/e2e/conftest.py:202
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=medium) `entity_type` Тип сущности Да
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/retry.py:224
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:322
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=medium) `primary_keys` Первичные ключи Да
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:15
   - Причина статуса: score<2 (недостаточно совпадений)
 - [36] (risk=medium) `source` Конфиг источника Нет (auto-resolved)
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [41] (risk=medium) `loading_strategy` Стратегия загрузки Нет (default: full)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:811
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:815
   - Причина статуса: score<2 (недостаточно совпадений)
 - [43] (risk=medium) Пример с переопределениями
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:21
   - Причина статуса: score<2 (недостаточно совпадений)
 - [46] (risk=medium) Структура Composite конфига
-  - Текущее доказательство: src/bioetl/composition/builders.py:154
+  - Текущее доказательство: src/bioetl/composition/builders.py:171
   - Причина статуса: score<2 (недостаточно совпадений)
 - [49] (risk=medium) `composite_activity` `chembl_activity` enrichers Обогащённые данные активности
   - Текущее доказательство: src/bioetl/application/pipelines/pubmed/extractors/classification.py:61
@@ -11323,10 +11320,10 @@
   - Текущее доказательство: src/tools/scripts/config_matrix_generator.py:154
   - Причина статуса: score<2 (недостаточно совпадений)
 - [96] (risk=medium) Filter конфигурация
-  - Текущее доказательство: src/bioetl/application/pipelines/chembl/publication_transformer.py:132
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:107
   - Причина статуса: score<2 (недостаточно совпадений)
 - [97] (risk=high) Иерархическая загрузка (ADR-028)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:806
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:810
   - Причина статуса: score<2 (недостаточно совпадений)
 - [98] (risk=medium) Аналогично DQ, фильтры загружаются иерархически:
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:47
@@ -11622,7 +11619,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:182
   - Причина статуса: score<2 (недостаточно совпадений)
 - [12] (risk=medium) Run on fixtures `make run-local`
-  - Текущее доказательство: src/bioetl/infrastructure/observability/logging_config.py:207
+  - Текущее доказательство: src/bioetl/composition/bootstrap_logger.py:79
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] (risk=medium) Next Steps
   - Текущее доказательство: src/bioetl/infrastructure/security/pii_hasher.py:27
@@ -11651,7 +11648,7 @@
   - Текущее доказательство: src/bioetl/composition/types.py:47
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) ProviderRegistry (Primary)
-  - Текущее доказательство: src/bioetl/infrastructure/export/csv_exporter.py:176
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/base_schemas.py:313
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=medium) Deprecated Methods
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:108
@@ -11674,7 +11671,7 @@
 
 Проблемные предложения:
 - [2] (risk=medium) Руководство по запуску и управлению ETL-пайплайнами в BioETL.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=high) **Версия:** 5.14.0
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
@@ -11872,7 +11869,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/system/memory_monitor.py:117
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=medium) Example Snapshot
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:38
+  - Текущее доказательство: src/bioetl/infrastructure/observability/logging.py:39
   - Причина статуса: score<2 (недостаточно совпадений)
 - [32] (risk=high) Workflow: Adding New Schema
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:59
@@ -11956,7 +11953,7 @@
   - Текущее доказательство: src/tools/scripts/config_matrix_generator.py:261
   - Причина статуса: score<2 (недостаточно совпадений)
 - [81] (risk=medium) ✅ `test_etl_metadata_fields_present` — ETL metadata
-  - Текущее доказательство: src/bioetl/domain/ports/noop.py:390
+  - Текущее доказательство: src/bioetl/domain/ports/noop.py:410
   - Причина статуса: score<2 (недостаточно совпадений)
 - [82] (risk=high) ✅ `test_schema_has_docstring` — Documentation
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:25
@@ -13687,7 +13684,7 @@
 - [81] (risk=medium) show_root_heading: true
   - Текущее доказательство: configs/pipelines/uniprot/idmapping.yaml:80
   - Причина статуса: score<2 (недостаточно совпадений)
-- ... и еще 74 предложений (см. полный CSV-отчет)
+- ... и еще 73 предложений (см. полный CSV-отчет)
 ```
 
 ## docs/04-reference/api/domain/ports.md
@@ -14039,7 +14036,7 @@
   - Текущее доказательство: src/tools/scripts/check_architecture.py:98
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] (risk=medium) Layer Documentation
-  - Текущее доказательство: src/bioetl/composition/factories/services_factory.py:184
+  - Текущее доказательство: src/bioetl/composition/factories/services_factory.py:276
   - Причина статуса: score<2 (недостаточно совпадений)
 - [8] (risk=medium) Contains:
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/__init__.py:3
@@ -14172,7 +14169,7 @@
   - Текущее доказательство: src/tools/scripts/check_architecture.py:98
   - Причина статуса: score<2 (недостаточно совпадений)
 - [58] (risk=medium) Layer Placement
-  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:90
+  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:117
   - Причина статуса: score<2 (недостаточно совпадений)
 - [60] (risk=high) **MUST:**
   - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:206
@@ -14462,7 +14459,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:573
   - Причина статуса: score<2 (недостаточно совпадений)
 - [49] (risk=medium) create_logger
-  - Текущее доказательство: src/bioetl/infrastructure/observability/logging.py:116
+  - Текущее доказательство: tests/unit/infrastructure/observability/test_logging.py:133
   - Причина статуса: score<2 (недостаточно совпадений)
 - [52] (risk=medium) options:
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:13
@@ -14486,7 +14483,7 @@
   - Текущее доказательство: src/bioetl/domain/aggregates/batch.py:100
   - Причина статуса: score<2 (недостаточно совпадений)
 - [61] (risk=medium) Log Context
-  - Текущее доказательство: src/bioetl/domain/entities/base.py:47
+  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:225
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] (risk=medium) LineageTracker
   - Текущее доказательство: нет
@@ -14743,11 +14740,14 @@
 - [21] (risk=medium) Simple GET Request
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:132
   - Причина статуса: score<2 (недостаточно совпадений)
+- [28] (risk=high) **PubChem** 5 req/sec `TokenBucketLimiter(rate=5.0)`
+  - Текущее доказательство: src/bioetl/domain/exceptions/network.py:322
+  - Причина статуса: числа в предложении не найдены в коде
 - [29] (risk=high) **UniProt** 100 req/sec `TokenBucketLimiter(rate=100.0)`
   - Текущее доказательство: src/bioetl/composition/providers/registration.py:539
   - Причина статуса: числа в предложении не найдены в коде
 - [30] (risk=high) **PubMed** 3 req/sec (no key) `TokenBucketLimiter(rate=3.0)`
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/http/rate_limiter.py:168
+  - Текущее доказательство: tests/unit/composition/providers/test_provider_registry.py:548
   - Причина статуса: числа в предложении не найдены в коде
 - [40] (risk=medium) Configuration
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:158
@@ -14768,7 +14768,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:4
   - Причина статуса: числа в предложении не найдены в коде
 - [64] (risk=medium) Recommended Pattern
-  - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_writer.py:56
+  - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_writer.py:151
   - Причина статуса: score<2 (недостаточно совпадений)
 - [69] (risk=high) **Note:** See ADR-032 Configuration for full schema.
   - Текущее доказательство: src/bioetl/domain/schemas/semanticscholar/publication.py:48
@@ -14777,7 +14777,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:10
   - Причина статуса: score<2 (недостаточно совпадений)
 - [72] (risk=medium) **After (unified):**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:587
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:602
   - Причина статуса: score<2 (недостаточно совпадений)
 - [73] (risk=medium) **Benefits:**
   - Текущее доказательство: src/bioetl/application/pipelines/generic.py:46
@@ -14971,7 +14971,7 @@
 
 Проблемные предложения:
 - [2] (risk=high) Контракты данных для Gold-слоя BioETL.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=high) > **Версия**: 1.1.0
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
@@ -15043,7 +15043,7 @@
   - Текущее доказательство: src/bioetl/application/composite/merger.py:493
   - Причина статуса: числа в предложении не найдены в коде
 - [36] (risk=high) **ranges** Числовой диапазон `standard_value: {min: 0}`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:663
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:667
   - Причина статуса: числа в предложении не найдены в коде
 - [37] (risk=high) **list_lengths** Длина списка `component_accessions: {min: 1, max: 1}`
   - Текущее доказательство: src/bioetl/domain/filtering/list_filters.py:42
@@ -15310,7 +15310,7 @@
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:145
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=medium) Pattern Example Notes
-  - Текущее доказательство: src/tools/scripts/lint_terminology.py:155
+  - Текущее доказательство: src/tools/scripts/lint_terminology.py:164
   - Причина статуса: score<2 (недостаточно совпадений)
 - [30] (risk=high) `{provider}_{entity}_{variant}` `chembl_publication_term` Variant/auxiliary pipeline
   - Текущее доказательство: src/bioetl/domain/composite/config.py:131
@@ -15417,7 +15417,7 @@
   - Текущее доказательство: src/bioetl/application/core/field_specs.py:180
   - Причина статуса: числа в предложении не найдены в коде
 - [35] (risk=medium) Provider Summary
-  - Текущее доказательство: src/bioetl/application/services/health_service.py:119
+  - Текущее доказательство: src/bioetl/application/services/health_service.py:121
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] (risk=high) **ChEMBL** 14 3 req/sec Public
   - Текущее доказательство: src/bioetl/domain/entities/chembl_structures.py:302
@@ -15429,7 +15429,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_all.py:290
   - Причина статуса: числа в предложении не найдены в коде
 - [40] (risk=high) **PubMed** 1 3 req/sec (10 with key) API Key
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:103
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:133
   - Причина статуса: числа в предложении не найдены в коде
 - [42] (risk=high) **OpenAlex** 1 ~10 req/sec email-based
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:132
@@ -15573,10 +15573,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Protein Classification represents a **hierarchical taxonomy** of protein families used to categorize biological targets in ChEMBL.
   - Текущее доказательство: src/tools/scripts/config_matrix_generator.py:101
@@ -15594,7 +15594,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/compound_ids.py:183
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) **Target Class Distribution**: Analyze which protein families have the most bioactivity data
   - Текущее доказательство: src/bioetl/infrastructure/observability/metrics.py:30
@@ -15606,7 +15606,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:608
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [30] (risk=medium) **Full Load Frequency** On demand or weekly
   - Текущее доказательство: tests/unit/infrastructure/storage/test_bronze_writer.py:1648
@@ -15651,10 +15651,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [51] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [54] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [58] (risk=high) `protein_class_id` Cast to int `"1"` `1`
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:117
@@ -15693,22 +15693,22 @@
   - Текущее доказательство: src/bioetl/infrastructure/observability/noop_logger.py:41
   - Причина статуса: числа в предложении не найдены в коде
 - [76] (risk=medium) `pref_name` str Yes INFO Log
-  - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_all.py:313
+  - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:245
   - Причина статуса: score<2 (недостаточно совпадений)
 - [77] (risk=medium) `short_name` str Yes INFO Log
-  - Текущее доказательство: src/tools/verify_schema_parity.py:25
+  - Текущее доказательство: src/tools/verify_schema_parity.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [78] (risk=medium) `protein_class_desc` str Yes INFO Log
-  - Текущее доказательство: src/tools/verify_schema_parity.py:25
+  - Текущее доказательство: src/tools/verify_schema_parity.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [79] (risk=medium) `definition` str Yes INFO Log
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:117
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:131
   - Причина статуса: score<2 (недостаточно совпадений)
 - [80] (risk=high) `class_level` int Yes >= 1 WARNING Log
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:122
   - Причина статуса: числа в предложении не найдены в коде
 - [81] (risk=medium) `sort_order` int Yes INFO Log
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:273
+  - Текущее доказательство: src/tools/verify_schema_parity.py:48
   - Причина статуса: score<2 (недостаточно совпадений)
 - [87] (risk=medium) DQ Thresholds
   - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:169
@@ -15738,16 +15738,16 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Cell Lines represent **biological cell cultures** used in experimental assays.
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:133
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) **Assay Context Analysis**: Determine which cell lines are most commonly used for specific target types
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:65
@@ -15762,7 +15762,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/serialization/encoders.py:205
   - Причина статуса: score<2 (недостаточно совпадений)
 - [26] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=medium) **Full Load Frequency** On demand
   - Текущее доказательство: tests/unit/infrastructure/storage/test_bronze_writer.py:1648
@@ -15810,10 +15810,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [53] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [56] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [60] (risk=high) `cell_chembl_id` Validate regex `"CHEMBL3307641"` `"CHEMBL3307641"`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:538
@@ -15831,7 +15831,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:172
   - Причина статуса: score<2 (недостаточно совпадений)
 - [68] (risk=high) `clo_id` Validate regex `"CLO_0002063"` `"CLO_0002063"`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:668
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:672
   - Причина статуса: числа в предложении не найдены в коде
 - [69] (risk=medium) `cl_lincs_id` strip()
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:172
@@ -15849,25 +15849,25 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:67
   - Причина статуса: score<2 (недостаточно совпадений)
 - [78] (risk=medium) `cell_description` str Yes INFO Log
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:257
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:265
   - Причина статуса: score<2 (недостаточно совпадений)
 - [79] (risk=medium) `cell_source_tissue` str Yes INFO Log
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:261
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:268
   - Причина статуса: score<2 (недостаточно совпадений)
 - [80] (risk=medium) `cell_source_organism` str Yes INFO Log
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:257
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:265
   - Причина статуса: score<2 (недостаточно совпадений)
 - [81] (risk=high) `cell_source_taxonomy_id` int Yes >= 1 WARNING Log
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:122
   - Причина статуса: числа в предложении не найдены в коде
 - [82] (risk=medium) `cell_type` str Yes INFO Log
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:273
+  - Текущее доказательство: src/tools/verify_schema_parity.py:48
   - Причина статуса: score<2 (недостаточно совпадений)
 - [84] (risk=medium) `clo_id` str Yes regex `^CLO_\d+$` WARNING Log
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:598
   - Причина статуса: score<2 (недостаточно совпадений)
 - [85] (risk=medium) `cl_lincs_id` str Yes INFO Log
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:265
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:273
   - Причина статуса: score<2 (недостаточно совпадений)
 - [86] (risk=medium) `efo_id` str Yes regex `^EFO_\d+$` WARNING Log
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:570
@@ -15903,10 +15903,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Molecules represent **chemical compounds** in ChEMBL with their structural and pharmacological properties:
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:133
@@ -15918,7 +15918,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:936
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [23] (risk=medium) **SAR Studies**: Correlate structural features with activity profiles
   - Текущее доказательство: src/bioetl/application/pipelines/crossref/reference_extractors.py:44
@@ -15927,7 +15927,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/observability/anomaly/detectors/zscore.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
 - [26] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=medium) **Full Load Frequency** On demand
   - Текущее доказательство: tests/unit/infrastructure/storage/test_bronze_writer.py:1648
@@ -15990,7 +15990,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/chembl.py:340
   - Причина статуса: числа в предложении не найдены в коде
 - [56] (risk=high) 18 `molecule_hierarchy` object Yes Yes Hierarchy JSON
-  - Текущее доказательство: src/bioetl/domain/transformations.py:93
+  - Текущее доказательство: src/bioetl/domain/transformations.py:104
   - Причина статуса: числа в предложении не найдены в коде
 - [57] (risk=high) 19 `molecule_properties` object Yes Yes Properties JSON
   - Текущее доказательство: src/bioetl/application/pipelines/uniprot/extractors/comments.py:433
@@ -16014,10 +16014,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [86] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [89] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [95] (risk=high) `max_phase` Cast to float `"4"` `4.0`
   - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:454
@@ -16038,7 +16038,7 @@
   - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:19
   - Причина статуса: score<2 (недостаточно совпадений)
 - [115] (risk=medium) `pref_name` str Yes INFO Log
-  - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_all.py:313
+  - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:245
   - Причина статуса: score<2 (недостаточно совпадений)
 - [119] (risk=medium) DQ Thresholds
   - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:169
@@ -16068,16 +16068,16 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Targets represent **biological entities** that drugs interact with:
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:133
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) **Target Identification**: Find druggable targets for diseases
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
@@ -16089,7 +16089,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/compound_ids.py:183
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [30] (risk=high) **Estimated Volume** ~15,000 records total
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/quarantine.py:99
@@ -16128,10 +16128,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [52] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [55] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [57] (risk=medium) Flattening Strategy
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:265
@@ -16143,7 +16143,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:122
   - Причина статуса: числа в предложении не найдены в коде
 - [71] (risk=medium) `organism` str Yes INFO
-  - Текущее доказательство: src/bioetl/infrastructure/observability/unified_logger.py:88
+  - Текущее доказательство: src/bioetl/infrastructure/observability/unified_logger.py:150
   - Причина статуса: score<2 (недостаточно совпадений)
 - [72] (risk=medium) Dependencies
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:38
@@ -16166,10 +16166,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] (risk=medium) **Structure-Activity Relationships (SAR)**: Connect molecules to targets via measured values
   - Текущее доказательство: нет
@@ -16178,7 +16178,7 @@
   - Текущее доказательство: src/tools/create_pipeline.py:104
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) **SAR Analysis**: Analyze activity profiles for lead compounds
   - Текущее доказательство: src/bioetl/domain/exceptions/internal.py:169
@@ -16193,7 +16193,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:211
   - Причина статуса: score<2 (недостаточно совпадений)
 - [26] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [30] (risk=medium) **Watermark Field** N/A (filtered by assay/molecule/target IDs)
   - Текущее доказательство: src/bioetl/infrastructure/storage/base_delta_writer.py:213
@@ -16259,7 +16259,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:128
   - Причина статуса: числа в предложении не найдены в коде
 - [59] (risk=high) 23 `src_id` integer Yes Source ID `1`
-  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:206
+  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:551
   - Причина статуса: числа в предложении не найдены в коде
 - [60] (risk=high) 24 `record_id` integer Yes FK compound_record `12345`
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:83
@@ -16271,7 +16271,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/common/api_request_collector.py:68
   - Причина статуса: числа в предложении не найдены в коде
 - [63] (risk=high) 27 `uo_units` string Yes UO units ID `"UO:0000065"`
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [64] (risk=high) 28 `qudt_units` string Yes QUDT units `"nM"`
   - Текущее доказательство: src/bioetl/domain/schemas/chembl/activity.py:110
@@ -16292,10 +16292,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [89] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [92] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [97] (risk=high) `standard_value` round(10) `50.123456789012` `50.1234567890`
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:185
@@ -16304,7 +16304,7 @@
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:185
   - Причина статуса: score<2 (недостаточно совпадений)
 - [99] (risk=medium) `standard_relation` Validate isin `"="` `"="`
-  - Текущее доказательство: src/bioetl/domain/value_objects/academic_ids.py:40
+  - Текущее доказательство: src/bioetl/domain/value_objects/academic_ids.py:213
   - Причина статуса: score<2 (недостаточно совпадений)
 - [100] (risk=medium) `standard_units` strip() `" nM "` `"nM"`
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:172
@@ -16331,16 +16331,16 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=low) Assays represent **experimental protocols** used to measure bioactivity:
   - Текущее доказательство: src/bioetl/infrastructure/validation/pandera_validator.py:195
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) **Assay Selection**: Choose appropriate assays for screening
   - Текущее доказательство: src/bioetl/infrastructure/serialization/encoders.py:205
@@ -16352,7 +16352,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/compound_ids.py:183
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=high) **Estimated Volume** ~1.5M records total
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/quarantine.py:99
@@ -16406,7 +16406,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/activity.py:188
   - Причина статуса: числа в предложении не найдены в коде
 - [50] (risk=high) 17 `src_id` integer Yes Source ID
-  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:206
+  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:551
   - Причина статуса: числа в предложении не найдены в коде
 - [51] (risk=high) 18 `src_assay_id` string Yes Source assay ID
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:435
@@ -16439,10 +16439,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [61] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [66] (risk=medium) Flattening Strategy
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:265
@@ -16495,10 +16495,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Documents represent **scientific publications** that are sources of ChEMBL data:
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:525
@@ -16507,7 +16507,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:936
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) **Citation Analysis**: Track publications with most bioactivity data
   - Текущее доказательство: src/tools/verify_schema_parity.py:102
@@ -16516,7 +16516,7 @@
   - Текущее доказательство: src/bioetl/domain/services/data_normalization_config.py:64
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=high) 1 `document_chembl_id` string No Primary key
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:48
@@ -16525,13 +16525,13 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:163
   - Причина статуса: числа в предложении не найдены в коде
 - [31] (risk=high) 3 `src_id` integer Yes Source ID
-  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:206
+  - Текущее доказательство: src/bioetl/domain/entities/chembl.py:551
   - Причина статуса: числа в предложении не найдены в коде
 - [32] (risk=high) 4 `pubmed_id` integer Yes PubMed ID
   - Текущее доказательство: configs/dq/entities/semanticscholar/publication.yaml:26
   - Причина статуса: числа в предложении не найдены в коде
 - [33] (risk=high) 5 `doi` string Yes DOI
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [34] (risk=high) 6 `patent_id` string Yes Patent ID
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:505
@@ -16590,10 +16590,10 @@
   - Текущее доказательство: src/bioetl/application/core/base_transformer.py:299
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [18] (risk=medium) **Conditions**: pH, temperature, media
   - Текущее доказательство: src/bioetl/infrastructure/adapters/uniprot/client.py:312
@@ -16602,7 +16602,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:327
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=low) **Protocol Reproducibility**: Understand exact experimental conditions
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:426
@@ -16611,7 +16611,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:98
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [27] (risk=high) API Fields
   - Текущее доказательство: src/bioetl/application/core/field_specs.py:119
@@ -16673,28 +16673,28 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [19] (risk=medium) **Literature references**: Enable citation-based analysis
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:255
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) **Compound Name Resolution**: Find molecules by literature names
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:404
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [27] (risk=high) API Fields
   - Текущее доказательство: src/bioetl/application/core/field_specs.py:119
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=high) 1 `record_id` int No Primary key
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:801
+  - Текущее доказательство: src/bioetl/infrastructure/storage/arrow_converter.py:25
   - Причина статуса: числа в предложении не найдены в коде
 - [30] (risk=high) 2 `molecule_chembl_id` string No FK to molecule
   - Текущее доказательство: src/bioetl/domain/value_objects/chemical.py:190
@@ -16753,10 +16753,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Target Components represent **subunits of biological targets**:
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:133
@@ -16765,10 +16765,10 @@
   - Текущее доказательство: src/bioetl/domain/schemas/chembl/target_component.py:36
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [27] (risk=high) API Fields
   - Текущее доказательство: src/bioetl/application/core/field_specs.py:119
@@ -16777,7 +16777,7 @@
   - Текущее доказательство: src/bioetl/domain/schemas/chembl/target_component.py:19
   - Причина статуса: числа в предложении не найдены в коде
 - [30] (risk=high) 2 `tid` int No FK to target
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:123
+  - Текущее доказательство: src/tools/verify_schema_parity.py:9
   - Причина статуса: числа в предложении не найдены в коде
 - [31] (risk=high) 3 `component_id` int No FK to component_sequences
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:507
@@ -16876,16 +16876,13 @@
   - Текущее доказательство: src/bioetl/application/core/base_transformer.py:299
   - Причина статуса: score<2 (недостаточно совпадений)
 - [10] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
-  - Причина статуса: score<2 (недостаточно совпадений)
-- [12] (risk=low) Subcellular Fractions represent specific **cellular compartments** (like mitochondria, nucleus, or microsomes) used in assays:
-  - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:133
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [16] (risk=low) **Compartmental Analysis**: Study drug effects specifically on mitochondrial or microsomal enzymes.
   - Текущее доказательство: tests/architecture/test_performance.py:44
@@ -16923,10 +16920,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [10] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) It allows for broad biological categorization of drug targets.
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:967
@@ -16952,10 +16949,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [10] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) Target Components are the individual proteins, DNA, or RNA sequences that make up a ChEMBL Target (especially for complexes).
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py:29
@@ -16981,10 +16978,10 @@
   - Текущее доказательство: src/bioetl/application/core/base_transformer.py:297
   - Причина статуса: score<2 (недостаточно совпадений)
 - [8] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 ```
 
@@ -17004,10 +17001,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [8] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 ```
 
@@ -17132,13 +17129,13 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [24] (risk=medium) **Funder Analysis**: Identify funding sources
   - Текущее доказательство: src/bioetl/infrastructure/observability/anomaly/detectors/zscore.py:3
@@ -17210,13 +17207,13 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [51] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [54] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [55] (risk=high) **Format** DOI (10.xxx/yyy)
-  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:48
+  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:138
   - Причина статуса: числа в предложении не найдены в коде
 - [58] (risk=high) `doi` lowercase, strip `"10.1234/ABC "` `"10.1234/abc"`
   - Текущее доказательство: src/bioetl/infrastructure/security/pii_hasher.py:127
@@ -17290,7 +17287,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:235
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) **Use Cases:**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] (risk=medium) Open Access landscape monitoring
   - Текущее доказательство: src/bioetl/interfaces/http/__init__.py:3
@@ -17305,7 +17302,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/base_metrics.py:95
   - Причина статуса: числа в предложении не найдены в коде
 - [33] (risk=high) Source API
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [34] (risk=medium) Endpoint
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:161
@@ -17374,7 +17371,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:613
   - Причина статуса: score<2 (недостаточно совпадений)
 - [137] (risk=medium) **Example:**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: score<2 (недостаточно совпадений)
 - [138] (risk=medium) This approach preserves word order while handling repeated words correctly.
   - Текущее доказательство: src/bioetl/infrastructure/system/memory_monitor.py:111
@@ -17386,10 +17383,10 @@
   - Текущее доказательство: src/bioetl/interfaces/orchestration/__init__.py:6
   - Причина статуса: score<2 (недостаточно совпадений)
 - [159] (risk=medium) `doi` string Yes
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: score<2 (недостаточно совпадений)
 - [165] (risk=medium) `concepts` list[str] Yes
-  - Текущее доказательство: src/bioetl/application/pipelines/openalex/extractors.py:402
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:160
   - Причина статуса: score<2 (недостаточно совпадений)
 - [179] (risk=high) `citation_count` float Yes ge=0, coerce=True
   - Текущее доказательство: src/bioetl/domain/contracts/gold/uniprot.py:117
@@ -17398,7 +17395,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:1042
   - Причина статуса: score<2 (недостаточно совпадений)
 - [198] (risk=medium) Year Constraints
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:869
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:873
   - Причина статуса: score<2 (недостаточно совпадений)
 - [203] (risk=high) **Minimum:** 0 (non-negative)
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/vacuum.py:72
@@ -17452,10 +17449,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/openalex/client.py:683
   - Причина статуса: числа в предложении не найдены в коде
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [16] (risk=high) **Works catalog**: 250M+ academic works
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:955
@@ -17464,7 +17461,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:988
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [23] (risk=medium) **Concept Classification**: Categorize publications by topics
   - Текущее доказательство: src/tools/scripts/config_matrix_generator.py:101
@@ -17476,7 +17473,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:926
   - Причина статуса: числа в предложении не найдены в коде
 - [31] (risk=high) 2 `doi` string Yes DOI
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [33] (risk=high) 4 `display_name` string Yes Display name
   - Текущее доказательство: tests/unit/application/pipelines/common/test_extractors.py:305
@@ -17527,16 +17524,16 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:315
   - Причина статуса: числа в предложении не найдены в коде
 - [66] (risk=medium) `pdf_url` string PDF URL
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: score<2 (недостаточно совпадений)
 - [68] (risk=medium) Transformation
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [69] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [72] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [73] (risk=high) **Format** OpenAlex ID (W[0-9]+)
   - Текущее доказательство: src/bioetl/domain/value_objects/academic_ids.py:56
@@ -17580,16 +17577,16 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/client.py:298
   - Причина статуса: числа в предложении не найдены в коде
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) **Cross-database linking**: InChI Key enables ChEMBL mapping
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:936
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [23] (risk=medium) **Property Calculation**: Access pre-computed descriptors
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/entity_mapper.py:62
@@ -17598,7 +17595,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/validation.py:6
   - Причина статуса: числа в предложении не найдены в коде
 - [26] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=high) API Request
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:144
@@ -17688,10 +17685,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [60] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [63] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [68] (risk=high) `molecular_weight` round(10) `180.157123456789` `180.1571234568`
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:185
@@ -17741,16 +17738,16 @@
   - Текущее доказательство: configs/pipelines/chembl/molecule.yaml:45
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [18] (risk=medium) **Author affiliations**: Institution data (available in source, `structured_affiliations` field only)
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:943
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=high) **Funding Analysis**: Track grant-supported research
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:941
@@ -17816,13 +17813,13 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [50] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [53] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [55] (risk=medium) XML Parsing Notes
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:724
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:728
   - Причина статуса: score<2 (недостаточно совпадений)
 - [57] (risk=medium) Key transformations:
   - Текущее доказательство: src/bioetl/infrastructure/storage/base_delta_writer.py:202
@@ -17846,7 +17843,7 @@
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:158
   - Причина статуса: score<2 (недостаточно совпадений)
 - [75] (risk=medium) XML Parsing
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:724
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:728
   - Причина статуса: score<2 (недостаточно совпадений)
 - [76] (risk=medium) Use robust XML parser (lxml)
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:234
@@ -17887,7 +17884,7 @@
   - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/extractors.py:138
   - Причина статуса: числа в предложении не найдены в коде
 - [15] (risk=medium) **Use Cases:**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [18] (risk=high) Author disambiguation (via S2 IDs and ORCIDs)
   - Текущее доказательство: src/bioetl/domain/schemas/semanticscholar/publication.py:137
@@ -17902,7 +17899,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/base_metrics.py:95
   - Причина статуса: числа в предложении не найдены в коде
 - [37] (risk=high) Source API
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [38] (risk=medium) Endpoint
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:161
@@ -18040,16 +18037,16 @@
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:174
   - Причина статуса: score<2 (недостаточно совпадений)
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) **Fields of Study**: AI-assigned research areas
   - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:263
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [23] (risk=medium) **TLDR Summaries**: Quick paper understanding
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:967
@@ -18115,10 +18112,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:39
   - Причина статуса: числа в предложении не найдены в коде
 - [50] (risk=medium) `DOI` string DOI
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: score<2 (недостаточно совпадений)
 - [52] (risk=medium) `PMCID` string PMC ID
-  - Текущее доказательство: src/bioetl/domain/services/data_normalization_service.py:100
+  - Текущее доказательство: src/bioetl/domain/services/data_normalization_service.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [55] (risk=high) `CorpusId` int S2 Corpus ID
   - Текущее доказательство: src/bioetl/domain/value_objects/academic_ids.py:86
@@ -18127,16 +18124,16 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [66] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [69] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] (risk=medium) Flattening Strategy
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:265
   - Причина статуса: score<2 (недостаточно совпадений)
 - [74] (risk=medium) `externalIds.DOI` `doi` Extract
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/error_handling.py:371
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/xml_processor.py:33
   - Причина статуса: score<2 (недостаточно совпадений)
 - [83] (risk=medium) `fieldsOfStudy` `fields_of_study` JSON array
   - Текущее доказательство: src/bioetl/infrastructure/adapters/semanticscholar/fallback.py:36
@@ -18148,7 +18145,7 @@
   - Текущее доказательство: src/tools/file_merger.py:746
   - Причина статуса: score<2 (недостаточно совпадений)
 - [98] (risk=high) **Public**: 100 requests per 5 minutes
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:533
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:537
   - Причина статуса: числа в предложении не найдены в коде
 ```
 
@@ -18168,19 +18165,19 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=medium) **Library** `unipressed` (async)
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/client.py:1033
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/client.py:402
   - Причина статуса: score<2 (недостаточно совпадений)
 - [10] (risk=high) **Rate Limit** 100 req/sec (with API key)
   - Текущее доказательство: src/bioetl/infrastructure/schemas/source_config.py:151
   - Причина статуса: числа в предложении не найдены в коде
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) **Target Identification**: Find drug targets with ChEMBL links
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_builder.py:453
@@ -18192,7 +18189,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/compound_ids.py:183
   - Причина статуса: score<2 (недостаточно совпадений)
 - [27] (risk=medium) Entity Relationships
-  - Текущее доказательство: src/bioetl/application/pipelines/pubchem/transformer.py:200
+  - Текущее доказательство: src/bioetl/application/pipelines/semanticscholar/transformer.py:270
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=high) API Request
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:144
@@ -18237,10 +18234,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [62] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [65] (risk=high) **ID Source** `from_api`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [67] (risk=medium) Flattening Strategy
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:265
@@ -18293,16 +18290,16 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/source_config.py:151
   - Причина статуса: числа в предложении не найдены в коде
 - [13] (risk=medium) Business Context
-  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:10
+  - Текущее доказательство: src/bioetl/composition/bootstrap_contexts.py:53
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Entity Purpose
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [18] (risk=medium) **External DBs**: Map to/from EMBL, RefSeq, PDB, etc.
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [20] (risk=medium) Use Cases
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:485
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:489
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) **ID Harmonization**: Standardize identifiers across databases
   - Текущее доказательство: src/bioetl/infrastructure/adapters/http/pagination.py:3
@@ -18332,10 +18329,10 @@
   - Текущее доказательство: src/tools/create_pipeline.py:303
   - Причина статуса: score<2 (недостаточно совпадений)
 - [48] (risk=medium) Entity ID Strategy
-  - Текущее доказательство: src/bioetl/application/pipelines/common/base_publication_transformer.py:183
+  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:57
   - Причина статуса: score<2 (недостаточно совпадений)
 - [51] (risk=medium) **ID Source** `from_input`
-  - Текущее доказательство: src/bioetl/domain/models/metadata.py:273
+  - Текущее доказательство: src/bioetl/domain/models/metadata.py:469
   - Причина статуса: score<2 (недостаточно совпадений)
 - [60] (risk=high) `uniprot_tax_id` int API Taxonomy ID
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:303
@@ -18380,7 +18377,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/http/client.py:342
   - Причина статуса: числа в предложении не найдены в коде
 - [90] (risk=medium) Mapping Failures
-  - Текущее доказательство: src/bioetl/infrastructure/storage/gold_writer.py:171
+  - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:311
   - Причина статуса: score<2 (недостаточно совпадений)
 - [91] (risk=medium) Scenario `mapping_status` Notes
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:6
@@ -18726,7 +18723,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [49] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [50] (risk=medium) Нормализация типа
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:10
@@ -18993,7 +18990,7 @@
   - Текущее доказательство: tests/integration/test_uniprot_pipeline.py:526
   - Причина статуса: числа в предложении не найдены в коде
 - [37] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [38] (risk=medium) Валидация
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:12
@@ -19133,10 +19130,10 @@
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=high) **Primary ID:** `record_id` (int, обязательный)
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:801
+  - Текущее доказательство: src/bioetl/infrastructure/storage/arrow_converter.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [34] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [35] (risk=medium) Валидация
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:12
@@ -19327,7 +19324,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:642
   - Причина статуса: score<2 (недостаточно совпадений)
 - [45] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [46] (risk=medium) Валидация
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:12
@@ -19455,7 +19452,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [31] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [32] (risk=medium) Иерархическая структура
   - Текущее доказательство: нет
@@ -19568,7 +19565,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [26] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [27] (risk=medium) Вычисляемые метрики
   - Текущее доказательство: нет
@@ -19672,10 +19669,10 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [25] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [26] (risk=high) Entity ID вычисляется как SHA256-хэш композитного ключа:
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: числа в предложении не найдены в коде
 - [28] (risk=medium) Извлечение терминов
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:8
@@ -19812,7 +19809,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [32] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [33] (risk=medium) Валидация
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:12
@@ -19913,7 +19910,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [28] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=medium) Использование CLI
   - Текущее доказательство: нет
@@ -19948,7 +19945,7 @@
   - Текущее доказательство: configs/pipelines/chembl/publication.yaml:69
   - Причина статуса: score<2 (недостаточно совпадений)
 - [4] (risk=medium) **Сущность:** `target`
-  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:123
+  - Текущее доказательство: src/tools/verify_schema_parity.py:9
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] (risk=high) **Версия схемы:** 1.2.0
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
@@ -19996,7 +19993,7 @@
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:199
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=medium) `target_synonyms` `list[str]` Синонимы названия
-  - Текущее доказательство: src/bioetl/application/pipelines/openalex/extractors.py:453
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/extractors/abstract.py:30
   - Причина статуса: score<2 (недостаточно совпадений)
 - [30] (risk=medium) Трансформация
   - Текущее доказательство: нет
@@ -20014,7 +20011,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/chembl.py:495
   - Причина статуса: score<2 (недостаточно совпадений)
 - [36] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] (risk=medium) Валидация
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:12
@@ -20064,7 +20061,7 @@
   - Текущее доказательство: src/bioetl/domain/composite/config.py:818
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=medium) **Провайдер:** `crossref`
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/exceptions.py:98
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:21
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] (risk=high) **Версия схемы:** 1.2.0
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:302
@@ -20133,7 +20130,7 @@
   - Текущее доказательство: src/bioetl/application/composite/merger.py:740
   - Причина статуса: score<2 (недостаточно совпадений)
 - [54] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [56] (risk=medium) Вычисляется по бизнес-полям публикации для дедупликации:
   - Текущее доказательство: src/bioetl/domain/filtering/load_result.py:23
@@ -20325,7 +20322,7 @@
   - Текущее доказательство: src/bioetl/application/composite/merger.py:704
   - Причина статуса: score<2 (недостаточно совпадений)
 - [69] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] (risk=medium) Вычисляется по бизнес-полям публикации для дедупликации:
   - Текущее доказательство: src/bioetl/domain/filtering/load_result.py:23
@@ -20462,7 +20459,7 @@
   - Текущее доказательство: src/tools/scripts/generate_contracts.py:32
   - Причина статуса: score<2 (недостаточно совпадений)
 - [3] (risk=medium) **Провайдер:** `pubmed`
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:3
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:32
   - Причина статуса: score<2 (недостаточно совпадений)
 - [4] (risk=medium) **Сущность:** `publication`
   - Текущее доказательство: src/bioetl/application/composite/merger.py:1304
@@ -20531,13 +20528,13 @@
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:250
   - Причина статуса: score<2 (недостаточно совпадений)
 - [35] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [36] (risk=medium) Особенности
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [38] (risk=high) PubMed API имеет строгие лимиты:
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:90
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:124
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] (risk=high) Без API key: 3 запроса/сек
   - Текущее доказательство: нет
@@ -20552,7 +20549,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:142
   - Причина статуса: score<2 (недостаточно совпадений)
 - [43] (risk=medium) Устанавливайте `limit` при тестировании
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/client.py:214
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:368
   - Причина статуса: score<2 (недостаточно совпадений)
 - [44] (risk=medium) Используйте `--dry-run` для проверки конфигурации
   - Текущее доказательство: src/bioetl/domain/exceptions/infrastructure.py:8
@@ -20686,10 +20683,10 @@
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:89
   - Причина статуса: score<2 (недостаточно совпадений)
 - [69] (risk=high) `validate_year()` Валидация года (1500-2100)
-  - Текущее доказательство: src/bioetl/domain/entities/pubmed.py:90
+  - Текущее доказательство: src/bioetl/domain/validation.py:138
   - Причина статуса: score<2 (недостаточно совпадений)
 - [70] (risk=medium) Entity ID
-  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:108
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/idmapping_transformer.py:56
   - Причина статуса: score<2 (недостаточно совпадений)
 - [72] (risk=medium) Вычисляется по бизнес-полям для дедупликации:
   - Текущее доказательство: src/bioetl/domain/filtering/load_result.py:23
@@ -20978,7 +20975,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [9] (risk=medium) CrossRef
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [10] (risk=medium) OpenAlex
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:132
@@ -21017,7 +21014,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:484
   - Причина статуса: числа в предложении не найдены в коде
 - [29] (risk=high) **CrossRef** 37 `doi` 1 36
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: числа в предложении не найдены в коде
 - [30] (risk=high) **OpenAlex** 39 `openalex_id` 1 38
   - Текущее доказательство: src/bioetl/domain/entities/publication_base.py:13
@@ -21077,7 +21074,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:181
   - Причина статуса: числа в предложении не найдены в коде
 - [60] (risk=high) `doi` string ✅ — `^10\.\d{4,9}/.+$`
-  - Текущее доказательство: src/bioetl/domain/services/dq_serializer.py:167
+  - Текущее доказательство: src/bioetl/domain/services/unit_converter.py:183
   - Причина статуса: числа в предложении не найдены в коде
 - [66] (risk=medium) Библиографическая информация
   - Текущее доказательство: нет
@@ -21347,7 +21344,7 @@
   - Текущее доказательство: src/bioetl/application/pipelines/chembl/assay_transformer.py:51
   - Причина статуса: числа в предложении не найдены в коде
 - [139] (risk=high) `action_type` `action_type_*` `flatten_nested_dict()` → 3 str fields
-  - Текущее доказательство: src/bioetl/application/pipelines/chembl/activity_transformer.py:180
+  - Текущее доказательство: tests/unit/application/pipelines/test_activity_transformer.py:584
   - Причина статуса: числа в предложении не найдены в коде
 - [141] (risk=high) Normalization Rules (RULES.md §2.8.1)
   - Текущее доказательство: src/bioetl/domain/value_objects/publications.py:7
@@ -21365,7 +21362,7 @@
   - Текущее доказательство: src/tools/scripts/check_application_deps.py:5
   - Причина статуса: score<2 (недостаточно совпадений)
 - [168] (risk=high) Bronze (Raw API Response)
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:63
+  - Текущее доказательство: src/bioetl/domain/ports/dq_config.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [173] (risk=medium) `standard_units` = `"nM"`
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:1055
@@ -21478,7 +21475,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/models.py:203
   - Причина статуса: числа в предложении не найдены в коде
 - [131] (risk=high) Bronze (Raw API Response)
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:63
+  - Текущее доказательство: src/bioetl/domain/ports/dq_config.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [133] (risk=medium) Related Artifacts
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_writer.py:53
@@ -21624,7 +21621,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:159
   - Причина статуса: score<2 (недостаточно совпадений)
 - [131] (risk=high) Bronze (Raw API Response)
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:63
+  - Текущее доказательство: src/bioetl/domain/ports/dq_config.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [133] (risk=medium) Related Artifacts
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_writer.py:53
@@ -21719,7 +21716,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:159
   - Причина статуса: score<2 (недостаточно совпадений)
 - [96] (risk=high) Bronze (Raw API Response)
-  - Текущее доказательство: src/bioetl/domain/ports/audit.py:63
+  - Текущее доказательство: src/bioetl/domain/ports/dq_config.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [98] (risk=medium) Related Artifacts
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_writer.py:53
@@ -21856,7 +21853,7 @@
   - Текущее доказательство: tests/e2e/test_pipeline_graceful_shutdown_e2e.py:8
   - Причина статуса: числа в предложении не найдены в коде
 - [112] (risk=high) [ ] Golden tests for output validation
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:454
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:806
   - Причина статуса: score<2 (недостаточно совпадений)
 - [113] (risk=high) [ ] Coverage ≥80%
   - Текущее доказательство: src/bioetl/domain/value_objects/publication_field_groups.py:412
@@ -21965,7 +21962,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:162
   - Причина статуса: score<2 (недостаточно совпадений)
 - [6] (risk=high) This checklist documents the pre-release verification completed for BioETL v5.9.0.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:673
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:677
   - Причина статуса: score<2 (недостаточно совпадений)
 - [7] (risk=medium) Final Verification Results
   - Текущее доказательство: src/bioetl/infrastructure/storage/bronze_writer.py:630
@@ -22508,7 +22505,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/validation/pandera_validator.py:163
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) Investigation Steps
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:704
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:708
   - Причина статуса: score<2 (недостаточно совпадений)
 - [16] (risk=high) Step 1: Identify Failure Scope
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:218
@@ -22823,7 +22820,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/network.py:184
   - Причина статуса: числа в предложении не найдены в коде
 - [20] (risk=medium) **Example:**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=high) *Reference: RULES.md §3.2.2*
   - Текущее доказательство: src/bioetl/infrastructure/config/pipeline_config_loader.py:82
@@ -22876,10 +22873,10 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/error_handling.py:505
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=medium) Diagnosis Steps
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:704
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:708
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) **Check Logs**:
-  - Текущее доказательство: src/bioetl/domain/services/normalization_service.py:358
+  - Текущее доказательство: src/bioetl/domain/services/normalization_service.py:372
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Recovery Actions
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/quarantine.py:33
@@ -22932,7 +22929,7 @@
   - Текущее доказательство: configs/pipelines/_base.yaml:141
   - Причина статуса: числа в предложении не найдены в коде
 - [12] (risk=medium) Diagnosis Steps
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:704
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:708
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] (risk=medium) `INVALID_FORMAT`: Date/Number format is incorrect.
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/fetch_strategies.py:268
@@ -22970,7 +22967,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [8] (risk=medium) Diagnostic Steps
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:704
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:708
   - Причина статуса: score<2 (недостаточно совпадений)
 - [9] (risk=high) Step 1: Check Exit Code
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:203
@@ -23033,7 +23030,7 @@
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:152
   - Причина статуса: числа в предложении не найдены в коде
 - [55] (risk=high) Check API key validity
-  - Текущее доказательство: src/bioetl/domain/services/normalization_service.py:372
+  - Текущее доказательство: src/bioetl/domain/services/value_validator.py:95
   - Причина статуса: score<2 (недостаточно совпадений)
 - [57] (risk=high) Rotate API key if expired
   - Текущее доказательство: src/bioetl/infrastructure/locking/memory_lock.py:243
@@ -23066,7 +23063,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:273
   - Причина статуса: score<2 (недостаточно совпадений)
 - [80] (risk=medium) Escalate to development team
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:510
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:514
   - Причина статуса: score<2 (недостаточно совпадений)
 ```
 
@@ -23110,7 +23107,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [12] (risk=high) Данный runbook описывает процедуры диагностики и устранения сбоев в **5-уровневой валидационной системе** для публикационных данных BioETL.
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: числа в предложении не найдены в коде
 - [13] (risk=high) **Validation Levels:**
   - Текущее доказательство: src/bioetl/domain/schemas/crossref/work.py:18
@@ -23227,7 +23224,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/network.py:10
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] (risk=high) **Проблема 1: Regex mismatch**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:668
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:672
   - Причина статуса: числа в предложении не найдены в коде
 - [65] (risk=medium) **Решение:**
   - Текущее доказательство: нет
@@ -23284,7 +23281,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/vacuum.py:51
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=high) Quarantine data is retained for **30 days** by default.
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:519
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:523
   - Причина статуса: числа в предложении не найдены в коде
 ```
 
@@ -23470,7 +23467,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/internal.py:168
   - Причина статуса: score<2 (недостаточно совпадений)
 - [12] (risk=medium) Diagnosis Steps
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:704
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:708
   - Причина статуса: score<2 (недостаточно совпадений)
 - [15] (risk=medium) If yes, is it stuck?
   - Текущее доказательство: pyproject.toml:510
@@ -23583,7 +23580,7 @@
   - Текущее доказательство: src/tools/scripts/check_architecture.py:37
   - Причина статуса: score<2 (недостаточно совпадений)
 - [57] (risk=medium) Log example:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: score<2 (недостаточно совпадений)
 - [59] (risk=medium) **Schedule during low-usage periods**
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:261
@@ -23744,7 +23741,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [63] (risk=high) ADR-001: Delta Lake vs Parquet
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:861
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:865
   - Причина статуса: числа в предложении не найдены в коде
 - [64] (risk=high) ADR-002: Medallion Architecture
   - Текущее доказательство: src/bioetl/infrastructure/storage/base_delta_writer.py:6
@@ -23809,7 +23806,7 @@
   - Текущее доказательство: tests/unit/domain/schemas/test_year_validation.py:441
   - Причина статуса: числа в предложении не найдены в коде
 - [21] (risk=high) ADR-024).
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:842
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:846
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=high) Finding 1: TYPE_MISMATCH - `authors` Field Type Inconsistency
   - Текущее доказательство: src/bioetl/application/composite/preflight_validator.py:543
@@ -24298,10 +24295,10 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:257
   - Причина статуса: score<2 (недостаточно совпадений)
 - [18] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=high) Longer runtimes and higher API load
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:907
@@ -24366,10 +24363,10 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:257
   - Причина статуса: score<2 (недостаточно совпадений)
 - [16] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [19] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=high) Higher API usage and longer execution time
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:907
@@ -24491,13 +24488,13 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [56] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [59] (risk=high) Lower data redundancy and smaller Silver/Gold storage footprint.
   - Текущее доказательство: src/tools/create_pipeline.py:213
   - Причина статуса: score<2 (недостаточно совпадений)
 - [60] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [63] (risk=medium) Implementation
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:249
@@ -24550,7 +24547,7 @@
   - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:257
   - Причина статуса: score<2 (недостаточно совпадений)
 - [19] (risk=medium) Positive
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [20] (risk=medium) Explicit, self-documenting loading semantics in configs
   - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/retry.py:57
@@ -24559,7 +24556,7 @@
   - Текущее доказательство: src/bioetl/interfaces/orchestration/__init__.py:12
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) Negative
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:883
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:887
   - Причина статуса: score<2 (недостаточно совпадений)
 - [24] (risk=medium) Temporary dual-field configuration (`force_full_scan` + `loading_strategy`)
   - Текущее доказательство: src/bioetl/interfaces/cli/exit_codes.py:86
@@ -24568,7 +24565,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/quarantine.py:208
   - Причина статуса: score<2 (недостаточно совпадений)
 - [26] (risk=high) Use ADR-031
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:815
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:819
   - Причина статуса: score<2 (недостаточно совпадений)
 ```
 
@@ -24756,7 +24753,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubchem/models.py:9
   - Причина статуса: числа в предложении не найдены в коде
 - [4] (risk=medium) **Проект**: BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] (risk=medium) Категория Статус Комментарий
   - Текущее доказательство: src/bioetl/domain/exceptions/validation.py:7
@@ -24960,7 +24957,7 @@
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:214
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=medium) Переименованы поля в `column_groups`
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:800
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:804
   - Причина статуса: score<2 (недостаточно совпадений)
 - [33] (risk=high) ✅ Фаза 2: Domain Entities (ЗАВЕРШЕНО)
   - Текущее доказательство: src/tools/verify_schema_parity.py:9
@@ -25020,7 +25017,7 @@
   - Текущее доказательство: tests/unit/application/composite/test_runner_required_flag.py:526
   - Причина статуса: числа в предложении не найдены в коде
 - [80] (risk=high) OpenAlex 147 passed ✅
-  - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:63
+  - Текущее доказательство: src/bioetl/domain/schemas/openalex/publication.py:162
   - Причина статуса: числа в предложении не найдены в коде
 - [81] (risk=high) PubMed 77 passed ✅
   - Текущее доказательство: tests/unit/application/composite/test_runner_required_flag.py:526
@@ -25080,13 +25077,13 @@
 
 Проблемные предложения:
 - [1] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [4] (risk=high) Implements RULES.md §4 - Application Layer.
   - Текущее доказательство: src/bioetl/application/services/quarantine_service.py:6
   - Причина статуса: числа в предложении не найдены в коде
 - [6] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [21] (risk=medium) CompositeCheckpointManager,
   - Текущее доказательство: src/bioetl/composition/bootstrap/runtime/composite.py:500
@@ -25149,7 +25146,7 @@
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:137
   - Причина статуса: score<2 (недостаточно совпадений)
 - [56] (risk=medium) if TYPE_CHECKING:
-  - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:33
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:31
   - Причина статуса: score<2 (недостаточно совпадений)
 - [59] (risk=medium) AggregationConfig,
   - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:89
@@ -25170,7 +25167,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/validation/pandera_validator.py:169
   - Причина статуса: score<2 (недостаточно совпадений)
 - [77] (risk=medium) Returns:
-  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/extractors/features.py:333
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/extractors/genes.py:96
   - Причина статуса: score<2 (недостаточно совпадений)
 - [82] (risk=medium) rows_before=len(df),
   - Текущее доказательство: src/bioetl/application/composite/aggregator.py:69
@@ -25206,13 +25203,13 @@
   - Текущее доказательство: src/bioetl/domain/composite/result.py:331
   - Причина статуса: score<2 (недостаточно совпадений)
 - [166] (risk=medium) if TYPE_CHECKING:
-  - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:33
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:31
   - Причина статуса: score<2 (недостаточно совпадений)
 - [177] (risk=medium) Attributes:
   - Текущее доказательство: src/bioetl/infrastructure/validation/pandera_validator.py:27
   - Причина статуса: score<2 (недостаточно совпадений)
 - [189] (risk=medium) Example:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: score<2 (недостаточно совпадений)
 - [198] (risk=medium) composite_name: str
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/run_composite.py:101
@@ -25229,7 +25226,7 @@
 - [245] (risk=medium) def with_enricher_completed(
   - Текущее доказательство: src/bioetl/application/composite/runner.py:557
   - Причина статуса: score<2 (недостаточно совпадений)
-- ... и еще 4199 предложений (см. полный CSV-отчет)
+- ... и еще 4200 предложений (см. полный CSV-отчет)
 ```
 
 ## docs/99-archive/reports/audit-2026-02-08/00-audit-baseline.md
@@ -25308,7 +25305,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/uniprot/client.py:43
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=high) AUD-004 [SHOULD] Legacy Config Sections
-  - Текущее доказательство: src/bioetl/domain/validation.py:295
+  - Текущее доказательство: src/bioetl/domain/validation.py:280
   - Причина статуса: числа в предложении не найдены в коде
 - [33] (risk=high) **Rule Violated**: ADR-025.
   - Текущее доказательство: src/bioetl/domain/exceptions/internal.py:68
@@ -25409,7 +25406,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [28] (risk=high) **Implementation (Config)**: Выполнить RF-CFG-001.
-  - Текущее доказательство: src/bioetl/composition/bootstrap/cli/__init__.py:68
+  - Текущее доказательство: src/bioetl/composition/bootstrap/cli/config.py:13
   - Причина статуса: числа в предложении не найдены в коде
 - [29] (risk=high) **Implementation (Structure)**: Выполнить RF-STR-001.
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:159
@@ -25515,7 +25512,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Аудит структуры пакетов src/bioetl
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) **Дата:** 2026-02-07
   - Текущее доказательство: нет
@@ -25551,7 +25548,7 @@
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:168
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=high) domain 149 36 156 31.8%
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: числа в предложении не найдены в коде
 - [15] (risk=high) application 121 32 625 28.7%
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:13
@@ -25680,7 +25677,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [7] (risk=medium) Components:
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:98
@@ -25689,7 +25686,7 @@
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:23
   - Причина статуса: score<2 (недостаточно совпадений)
 - [18] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [40] (risk=medium) bootstrap_checkpoint,
   - Текущее доказательство: src/bioetl/composition/bootstrap/assembly/checkpoint.py:83
@@ -25851,7 +25848,7 @@
   - Текущее доказательство: src/tools/_gen.py:11
   - Причина статуса: числа в предложении не найдены в коде
 - [4] (risk=medium) Config Counts
-  - Текущее доказательство: src/bioetl/composition/bootstrap/runtime/assembly.py:63
+  - Текущее доказательство: src/bioetl/composition/bootstrap/runtime/assembly.py:143
   - Причина статуса: score<2 (недостаточно совпадений)
 - [5] (risk=medium) Category Count
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:132
@@ -25899,8 +25896,8 @@
   - Текущее доказательство: src/bioetl/domain/models/metadata.py:543
   - Причина статуса: score<2 (недостаточно совпадений)
 - [23] (risk=high) **ADR-025** (Config Unification) COMPLIANT `_base.yaml` v2.0.0 inheritance working
-  - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:261
-  - Причина статуса: числа в предложении не найдены в коде
+  - Текущее доказательство: src/bioetl/composition/bootstrap/assembly/storage.py:67
+  - Причина статуса: score<2 (недостаточно совпадений)
 - [24] (risk=high) **ADR-027** (DQ Externalization) COMPLIANT Hierarchical DQ merge working
   - Текущее доказательство: tests/e2e/test_full_pipeline.py:306
   - Причина статуса: числа в предложении не найдены в коде
@@ -26010,7 +26007,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Аудит Параметров Доступа к Источникам Данных BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) **Дата аудита:** 2026-02-03
   - Текущее доказательство: configs/pipelines/composite/target.yaml:26
@@ -26049,7 +26046,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [14] (risk=high) ENV-001 `.env.example:43` `BIOETL_SEMANTIC_SCHOLAR_API_KEY` → `BIOETL_SEMANTICSCHOLAR_API_KEY`
-  - Текущее доказательство: src/bioetl/infrastructure/observability/unified_logger.py:25
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:189
   - Причина статуса: числа в предложении не найдены в коде
 - [15] (risk=high) CONFIG-001 `configs/sources/pubmed.yaml:16-17` `BIOETL_NCBI_*` → `BIOETL_PUBMED_*`
   - Текущее доказательство: src/bioetl/composition/providers/registration.py:490
@@ -26124,7 +26121,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/registration.py:493
   - Причина статуса: числа в предложении не найдены в коде
 - [47] (risk=high) `.env.example:42` `BIOETL_SEMANTIC_SCHOLAR_API_KEY` **MISMATCH**
-  - Текущее доказательство: src/bioetl/infrastructure/locking/memory_lock.py:169
+  - Текущее доказательство: src/bioetl/infrastructure/observability/metrics_server_adapter.py:30
   - Причина статуса: числа в предложении не найдены в коде
 - [48] (risk=high) `src/bioetl/composition/providers/registration.py:438` `BIOETL_SEMANTICSCHOLAR_API_KEY` Code
   - Текущее доказательство: src/bioetl/composition/providers/loader.py:10
@@ -26193,7 +26190,7 @@
   - Текущее доказательство: src/bioetl/domain/exceptions/infrastructure.py:8
   - Причина статуса: score<2 (недостаточно совпадений)
 - [8] (risk=high) ✅ **ADR-025** (Config Unification): Иерархия `_base.yaml` → provider → entity соблюдена
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:842
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:846
   - Причина статуса: числа в предложении не найдены в коде
 - [12] (risk=medium) Key Finding: Convention System Verified
   - Текущее доказательство: src/bioetl/infrastructure/validation/pandera_validator.py:157
@@ -26313,7 +26310,7 @@
   - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:342
   - Причина статуса: score<2 (недостаточно совпадений)
 - [74] (risk=high) Minimal config support ✅ 3 configs use convention-only
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:625
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:629
   - Причина статуса: числа в предложении не найдены в коде
 - [75] (risk=medium) Анализ Стилей Конфигурации
   - Текущее доказательство: src/bioetl/domain/exceptions/infrastructure.py:8
@@ -26373,7 +26370,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:923
   - Причина статуса: score<2 (недостаточно совпадений)
 - [50] (risk=medium) crossref
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [51] (risk=medium) citation_count:
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:106
@@ -26382,7 +26379,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/schemas/silver.py:979
   - Причина статуса: score<2 (недостаточно совпадений)
 - [54] (risk=medium) crossref
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [56] (risk=medium) column_order:
   - Текущее доказательство: src/bioetl/infrastructure/storage/silver_writer.py:1024
@@ -26391,7 +26388,7 @@
   - Текущее доказательство: src/bioetl/domain/value_objects/publication_field_groups.py:421
   - Причина статуса: score<2 (недостаточно совпадений)
 - [58] (risk=medium) crossref
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [59] (risk=medium) openalex
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:132
@@ -26654,7 +26651,7 @@
 - [85] (risk=medium) Operations
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/vacuum.py:3
   - Причина статуса: score<2 (недостаточно совпадений)
-- ... и еще 20594 предложений (см. полный CSV-отчет)
+- ... и еще 20592 предложений (см. полный CSV-отчет)
 ```
 
 ## docs/99-archive/reports/domain_merged.md
@@ -26670,7 +26667,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [25] (risk=medium) LEGACY_PUBLICATION_ALIASES,
   - Текущее доказательство: src/bioetl/domain/registry/publication.py:235
@@ -26691,16 +26688,16 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/entity_mapper.py:300
   - Причина статуса: score<2 (недостаточно совпадений)
 - [31] (risk=medium) validate_publication_entity_type,
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:849
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:853
   - Причина статуса: score<2 (недостаточно совпадений)
 - [34] (risk=high) DEFAULT_VALIDATION_CONFIG,
   - Текущее доказательство: src/bioetl/domain/value_objects/chemical.py:500
   - Причина статуса: score<2 (недостаточно совпадений)
 - [35] (risk=medium) DQConfig,
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:757
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:761
   - Причина статуса: score<2 (недостаточно совпадений)
 - [36] (risk=high) PipelineConfig,
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:903
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:907
   - Причина статуса: score<2 (недостаточно совпадений)
 - [37] (risk=medium) RuntimeConfig,
   - Текущее доказательство: src/bioetl/infrastructure/config/_base.py:8
@@ -26766,7 +26763,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/chembl_compound_record.py:44
   - Причина статуса: score<2 (недостаточно совпадений)
 - [64] (risk=medium) CrossRef
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: score<2 (недостаточно совпадений)
 - [65] (risk=medium) CrossRefPublicationEntity,
   - Текущее доказательство: src/bioetl/domain/entities/publication_base.py:12
@@ -26819,7 +26816,7 @@
 - [82] (risk=medium) TargetComponentRecord,
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/client.py:71
   - Причина статуса: score<2 (недостаточно совпадений)
-- ... и еще 4761 предложений (см. полный CSV-отчет)
+- ... и еще 4764 предложений (см. полный CSV-отчет)
 ```
 
 ## docs/99-archive/reports/dry_run_report.md
@@ -26878,10 +26875,10 @@
 
 Проблемные предложения:
 - [1] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [16] (risk=high) CircuitBreakerDataSourceDecorator,
   - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py:70
@@ -26935,7 +26932,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/decorators/__init__.py:101
   - Причина статуса: score<2 (недостаточно совпадений)
 - [56] (risk=medium) if TYPE_CHECKING:
-  - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:33
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:31
   - Причина статуса: score<2 (недостаточно совпадений)
 - [71] (risk=medium) Attributes:
   - Текущее доказательство: src/bioetl/infrastructure/validation/pandera_validator.py:27
@@ -26953,7 +26950,7 @@
   - Текущее доказательство: src/bioetl/interfaces/http/types.py:31
   - Причина статуса: score<2 (недостаточно совпадений)
 - [99] (risk=medium) Returns:
-  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/extractors/features.py:333
+  - Текущее доказательство: src/bioetl/application/pipelines/uniprot/extractors/genes.py:96
   - Причина статуса: score<2 (недостаточно совпадений)
 - [111] (risk=medium) ) -> None:
   - Текущее доказательство: src/bioetl/application/core/cleanup_service.py:205
@@ -26962,22 +26959,22 @@
   - Текущее доказательство: src/tools/file_merger.py:224
   - Причина статуса: score<2 (недостаточно совпадений)
 - [133] (risk=medium) if TYPE_CHECKING:
-  - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:33
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:31
   - Причина статуса: score<2 (недостаточно совпадений)
 - [135] (risk=medium) @dataclass
   - Текущее доказательство: src/bioetl/infrastructure/observability/anomaly/types.py:34
   - Причина статуса: score<2 (недостаточно совпадений)
 - [142] (risk=medium) Example:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: score<2 (недостаточно совпадений)
 - [148] (risk=medium) provider: str
-  - Текущее доказательство: src/bioetl/composition/_services.py:247
+  - Текущее доказательство: src/bioetl/composition/bootstrap/assembly/storage.py:77
   - Причина статуса: score<2 (недостаточно совпадений)
 - [149] (risk=medium) @contextmanager
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/metrics_server_integration.py:24
   - Причина статуса: score<2 (недостаточно совпадений)
 - [156] (risk=medium) Records:
-  - Текущее доказательство: src/bioetl/application/services/medallion_types.py:31
+  - Текущее доказательство: src/bioetl/application/services/quarantine_service.py:171
   - Причина статуса: score<2 (недостаточно совпадений)
 - [163] (risk=medium) finally:
   - Текущее доказательство: src/bioetl/interfaces/http/health_server.py:301
@@ -26992,19 +26989,19 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/base_metrics.py:82
   - Причина статуса: score<2 (недостаточно совпадений)
 - [178] (risk=medium) Records:
-  - Текущее доказательство: src/bioetl/application/services/medallion_types.py:31
+  - Текущее доказательство: src/bioetl/application/services/quarantine_service.py:171
   - Причина статуса: score<2 (недостаточно совпадений)
 - [181] (risk=high) "adapter_batch_size",
   - Текущее доказательство: src/bioetl/infrastructure/adapters/base_metrics.py:102
   - Причина статуса: score<2 (недостаточно совпадений)
 - [191] (risk=medium) Records:
-  - Текущее доказательство: src/bioetl/application/services/medallion_types.py:31
+  - Текущее доказательство: src/bioetl/application/services/quarantine_service.py:171
   - Причина статуса: score<2 (недостаточно совпадений)
 - [194] (risk=high) "adapter_dropped_duplicates_total",
   - Текущее доказательство: src/bioetl/infrastructure/adapters/base_metrics.py:123
   - Причина статуса: score<2 (недостаточно совпадений)
 - [196] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [204] (risk=medium) CHEMBL_RECORD_MODELS,
   - Текущее доказательство: src/bioetl/infrastructure/adapters/validation.py:206
@@ -27027,7 +27024,7 @@
 - [210] (risk=medium) ChemblMoleculeRecord,
   - Текущее доказательство: src/bioetl/infrastructure/adapters/chembl/models.py:635
   - Причина статуса: score<2 (недостаточно совпадений)
-- ... и еще 3611 предложений (см. полный CSV-отчет)
+- ... и еще 3630 предложений (см. полный CSV-отчет)
 ```
 
 ## docs/99-archive/reports/interfaces_merged.md
@@ -27043,19 +27040,19 @@
 
 Проблемные предложения:
 - [1] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [6] (risk=medium) Components:
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:98
   - Причина статуса: score<2 (недостаточно совпадений)
 - [11] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [17] (risk=medium) Structure:
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:159
   - Причина статуса: score<2 (недостаточно совпадений)
 - [22] (risk=medium) ├── run.py # bioetl run
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [32] (risk=medium) __all__ = [
   - Текущее доказательство: src/bioetl/interfaces/orchestration/__init__.py:20
@@ -27076,7 +27073,7 @@
   - Текущее доказательство: src/bioetl/domain/context.py:46
   - Причина статуса: score<2 (недостаточно совпадений)
 - [42] (risk=medium) File: __init__.py
-  - Текущее доказательство: src/bioetl/infrastructure/audit/file_audit.py:132
+  - Текущее доказательство: src/bioetl/infrastructure/checkpoint/local_checkpoint.py:58
   - Причина статуса: score<2 (недостаточно совпадений)
 - [48] (risk=medium) File: archive.py
   - Текущее доказательство: src/bioetl/infrastructure/storage/metadata_writer.py:183
@@ -27127,7 +27124,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:136
   - Причина статуса: score<2 (недостаточно совпадений)
 - [169] (risk=medium) "--format",
-  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:48
+  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:138
   - Причина статуса: score<2 (недостаточно совпадений)
 - [170] (risk=medium) "output_format",
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/export.py:149
@@ -27139,7 +27136,7 @@
   - Текущее доказательство: src/tools/file_merger.py:39
   - Причина статуса: score<2 (недостаточно совпадений)
 - [211] (risk=medium) "--format",
-  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:48
+  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:138
   - Причина статуса: score<2 (недостаточно совпадений)
 - [212] (risk=medium) "output_format",
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/export.py:149
@@ -27172,7 +27169,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/formatters.py:163
   - Причина статуса: score<2 (недостаточно совпадений)
 - [279] (risk=medium) "--list",
-  - Текущее доказательство: src/bioetl/application/pipelines/openalex/extractors.py:453
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/extractors/abstract.py:30
   - Причина статуса: score<2 (недостаточно совпадений)
 - [280] (risk=medium) "list_tables",
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/export.py:116
@@ -27181,7 +27178,7 @@
   - Текущее доказательство: src/bioetl/interfaces/cli/formatters.py:218
   - Причина статуса: score<2 (недостаточно совпадений)
 - [288] (risk=medium) "--format",
-  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:48
+  - Текущее доказательство: src/bioetl/domain/value_objects/identifiers.py:138
   - Причина статуса: score<2 (недостаточно совпадений)
 - [289] (risk=medium) "output_format",
   - Текущее доказательство: src/bioetl/interfaces/cli/commands/export.py:149
@@ -27190,7 +27187,7 @@
   - Текущее доказательство: src/bioetl/domain/entities/chembl.py:547
   - Причина статуса: score<2 (недостаточно совпадений)
 - [294] (risk=medium) "--layer",
-  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:90
+  - Текущее доказательство: src/bioetl/composition/factories/storage_adapter.py:117
   - Причина статуса: score<2 (недостаточно совпадений)
 - ... и еще 373 предложений (см. полный CSV-отчет)
 ```
@@ -27445,10 +27442,10 @@
   - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:174
   - Причина статуса: score<2 (недостаточно совпадений)
 - [46] (risk=high) 3.1 Add `transform.steps` Documentation
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:680
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:684
   - Причина статуса: числа в предложении не найдены в коде
 - [52] (risk=medium) **Example**:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: score<2 (недостаточно совпадений)
 - [53] (risk=high) 3.2 Document Empty `partition_by`
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:24
@@ -27457,7 +27454,7 @@
   - Текущее доказательство: src/bioetl/domain/contracts/gold/uniprot.py:10
   - Причина статуса: score<2 (недостаточно совпадений)
 - [58] (risk=medium) **Example**:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/composite_config.py:180
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/dq_config.py:110
   - Причина статуса: score<2 (недостаточно совпадений)
 - [59] (risk=high) Phase 4: Future Considerations (Priority: P3)
   - Текущее доказательство: src/bioetl/interfaces/orchestration/__init__.py:12
@@ -27585,7 +27582,7 @@
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:30
   - Причина статуса: числа в предложении не найдены в коде
 - [15] (risk=high) 1.1 CrossRef
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:1
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/crossref/models.py:161
   - Причина статуса: числа в предложении не найдены в коде
 - [16] (risk=medium) **Поле:** `type` (строка)
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:117
@@ -27639,7 +27636,7 @@
   - Текущее доказательство: src/bioetl/domain/mapping/publication_type_classification.py:1551
   - Причина статуса: числа в предложении не найдены в коде
 - [34] (risk=high) 1.3 PubMed
-  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:103
+  - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/models.py:133
   - Причина статуса: числа в предложении не найдены в коде
 - [35] (risk=medium) **Поля:**
   - Текущее доказательство: src/bioetl/domain/filtering/gold_config.py:30
@@ -27669,7 +27666,7 @@
   - Текущее доказательство: src/bioetl/domain/mapping/publication_type_classification.py:1551
   - Причина статуса: числа в предложении не найдены в коде
 - [45] (risk=medium) **Особенность:** Multi-value provider — классификатор выбирает **наиболее специфичный тип**
-  - Текущее доказательство: src/bioetl/composition/_services.py:247
+  - Текущее доказательство: src/bioetl/composition/bootstrap/assembly/storage.py:77
   - Причина статуса: score<2 (недостаточно совпадений)
 - [46] (risk=high) 1.5 ChEMBL
   - Текущее доказательство: configs/pipelines/chembl/publication.yaml:69
@@ -27870,7 +27867,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [84] (risk=medium) Параметр Standalone Composite
-  - Текущее доказательство: src/bioetl/composition/bootstrap/runtime/composite.py:555
+  - Текущее доказательство: src/bioetl/composition/bootstrap/runtime/composite.py:567
   - Причина статуса: score<2 (недостаточно совпадений)
 - [86] (risk=medium) column filter `doc_type: [PUBLICATION]` —
   - Текущее доказательство: нет
@@ -28038,7 +28035,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [98] (risk=medium) Параметр Standalone Composite
-  - Текущее доказательство: src/bioetl/composition/bootstrap/runtime/composite.py:555
+  - Текущее доказательство: src/bioetl/composition/bootstrap/runtime/composite.py:567
   - Причина статуса: score<2 (недостаточно совпадений)
 - [102] (risk=medium) Ключевые различия
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:126
@@ -28554,7 +28551,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Архитектурный аудит BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) Дата: 2026-02-07
   - Текущее доказательство: нет
@@ -28587,7 +28584,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:87
   - Причина статуса: score<2 (недостаточно совпадений)
 - [14] (risk=high) Количество классов `rg '^class ' src/ -g '*.py' \ wc -l` **945**
-  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:687
+  - Текущее доказательство: src/bioetl/domain/contracts/gold/chembl.py:693
   - Причина статуса: числа в предложении не найдены в коде
 - [15] (risk=high) Количество файлов `.py` `find src/ -name '*.py' \ wc -l` **533**
   - Текущее доказательство: src/tools/scripts/duplicate_function_analyzer.py:143
@@ -28833,7 +28830,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:477
   - Причина статуса: score<2 (недостаточно совпадений)
 - [41] (risk=high) Все TYPE_CHECKING guards используются правильно (EXC-001)
-  - Текущее доказательство: src/tools/scripts/migrations/migrate_pmid_to_string.py:33
+  - Текущее доказательство: src/tools/scripts/migrations/rename_structure_fields.py:31
   - Причина статуса: числа в предложении не найдены в коде
 - [42] (risk=high) **Обоснование:** 0 нарушений границ слоёв → 9-10 по критериям → **10**
   - Текущее доказательство: нет
@@ -28908,7 +28905,7 @@
   - Текущее доказательство: src/bioetl/domain/ports/dq_report.py:42
   - Причина статуса: числа в предложении не найдены в коде
 - [9] (risk=medium) **Вердикт: FALSE POSITIVE — не является нарушением.**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [10] (risk=high) Все три отчёта флагируют 55–146 импортов из `bioetl.domain.*` в `infrastructure/`
   - Текущее доказательство: src/bioetl/domain/exceptions/__init__.py:55
@@ -28953,7 +28950,7 @@
   - Текущее доказательство: src/bioetl/infrastructure/config/_base.py:129
   - Причина статуса: числа в предложении не найдены в коде
 - [28] (risk=medium) **Вердикт: FALSE POSITIVE — намеренный архитектурный паттерн.**
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:882
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:886
   - Причина статуса: score<2 (недостаточно совпадений)
 - [29] (risk=medium) Файл Класс Назначение
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:81
@@ -28977,7 +28974,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [37] (risk=high) конвертации — следствие одинакового целевого domain API, а не copy-paste.
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: score<2 (недостаточно совпадений)
 - [39] (risk=medium) При необходимости — документировать design
   - Текущее доказательство: src/bioetl/infrastructure/observability/tracing.py:3
@@ -29031,7 +29028,7 @@
   - Текущее доказательство: src/bioetl/composition/providers/provider_registry.py:180
   - Причина статуса: score<2 (недостаточно совпадений)
 - [65] (risk=high) FIX-2: Централизовать хеширование publication-term entity ID [HIGH]
-  - Текущее доказательство: src/bioetl/application/pipelines/openalex/transformer.py:310
+  - Текущее доказательство: src/bioetl/application/pipelines/pubmed/transformer.py:727
   - Причина статуса: числа в предложении не найдены в коде
 - ... и еще 84 предложений (см. полный CSV-отчет)
 ```
@@ -29049,7 +29046,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Исчерпывающий Аудит Документации BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) **Дата:** 2026-02-11
   - Текущее доказательство: нет
@@ -29214,7 +29211,7 @@
 
 Проблемные предложения:
 - [1] (risk=medium) Исчерпывающий аудит документации BioETL
-  - Текущее доказательство: src/bioetl/application/observability/observer.py:23
+  - Текущее доказательство: src/bioetl/application/observability/observer.py:76
   - Причина статуса: score<2 (недостаточно совпадений)
 - [2] (risk=high) *Дата: 2026-02-11 Версия проекта: 5.14.0 RULES.md: v5.17*
   - Текущее доказательство: tests/architecture/test_docs_version_sync.py:269
@@ -29289,7 +29286,7 @@
   - Текущее доказательство: src/bioetl/application/core/dict_transformers.py:264
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=high) 1 «Расположение: `src/bioetl/domain/`» `src/bioetl/domain/` Директория существует Да —
-  - Текущее доказательство: src/bioetl/application/services/config_service.py:17
+  - Текущее доказательство: src/bioetl/application/services/data_quality_service.py:22
   - Причина статуса: числа в предложении не найдены в коде
 - [29] (risk=high) 2 «Не импортирует модули из application, infrastructure или interfaces» `src/bioetl/domain/**/*.py` grep подтверждает отсутствие запрещённых импортов Да —
   - Текущее доказательство: src/tools/file_merger.py:317
@@ -29397,13 +29394,13 @@
   - Текущее доказательство: src/bioetl/composition/factories/pipeline_factory.py:158
   - Причина статуса: score<2 (недостаточно совпадений)
 - [27] (risk=medium) `extraction_params` key:
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:804
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:808
   - Причина статуса: score<2 (недостаточно совпадений)
 - [28] (risk=medium) How It Works
   - Текущее доказательство: src/tools/scripts/migrate_openalex_citation_count.py:25
   - Причина статуса: score<2 (недостаточно совпадений)
 - [38] (risk=medium) Constraints
-  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:869
+  - Текущее доказательство: src/bioetl/infrastructure/schemas/pipeline_config.py:873
   - Причина статуса: score<2 (недостаточно совпадений)
 - [42] (risk=high) Only affects Bronze extraction — Gold filters are applied separately at Silver→Gold
   - Текущее доказательство: src/bioetl/domain/filtering/silver_config.py:4
@@ -29465,7 +29462,7 @@
   - Текущее доказательство: нет
   - Причина статуса: нет кандидата
 - [33] (risk=medium) Coverage by Layer
-  - Текущее доказательство: src/bioetl/composition/factories/services_factory.py:358
+  - Текущее доказательство: src/bioetl/composition/factories/services_factory.py:445
   - Причина статуса: score<2 (недостаточно совпадений)
 - [35] (risk=high) **Total Lines** 28,836
   - Текущее доказательство: src/tools/scripts/validate_unified_configs.py:152
@@ -29495,7 +29492,7 @@
   - Текущее доказательство: src/tools/scripts/lint_terminology.py:80
   - Причина статуса: score<2 (недостаточно совпадений)
 - [50] (risk=medium) Directory Test Count
-  - Текущее доказательство: src/tools/scripts/check_constructor_args.py:39
+  - Текущее доказательство: src/tools/scripts/check_constructor_args.py:67
   - Причина статуса: score<2 (недостаточно совпадений)
 - [51] (risk=high) `tests/architecture/` 1150
   - Текущее доказательство: pyproject.toml:437

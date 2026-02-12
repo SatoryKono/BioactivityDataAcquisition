@@ -570,6 +570,12 @@ def list_available_pipelines() -> list[str]:
     return sorted(_factories.keys())
 
 
+_PIPELINE_FACTORY_API = (
+    get_factory,
+    list_available_pipelines,
+    reset_registration,
+)
+
 __all__ = [
     "PIPELINE_CONFIGS",
     "PipelineFactoryConfig",

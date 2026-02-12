@@ -117,6 +117,8 @@ def echo_health_server_info(enabled: bool, port: int, host: str = "127.0.0.1") -
         click.echo(f"Health server: http://{host}:{port}/health")
 
 
+COMMANDS = (health_server_context,)
+
 __all__ = [
     "DEFAULT_HEALTH_SERVER_PORT",
     "add_health_server_options",

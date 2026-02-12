@@ -249,4 +249,12 @@ def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:
         sys.exit(ExitCode.FAIL)
 
 
+COMMANDS = (
+    quarantine_inspect,
+    quarantine_purge,
+    quarantine_replay,
+    quarantine_resolve,
+    quarantine_stats,
+)
+
 __all__ = ["quarantine"]

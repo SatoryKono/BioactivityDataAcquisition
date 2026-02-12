@@ -8,6 +8,7 @@ configuration and assembly in the composition layer.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from bioetl.application.core.lock_manager import LockManager
@@ -36,6 +37,7 @@ from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -554,7 +556,9 @@ def create_pipeline_with_services(
         silver_validator=silver_validator,
     )
 
-    domain_config = yaml_config_to_domain(yaml_config)
+    config_loader = ConfigLoader(Path("configs"))
+    resolved_dq = config_loader.resolve_dq_config(yaml_config)
+    domain_config = yaml_config_to_domain(yaml_config, resolved_dq_config=resolved_dq)
 
     # Create transformer via DI if configured (with observability)
     transformer = None

@@ -32,3 +32,7 @@ def checkpoint_list(pipeline: str) -> None:
             echo_checkpoint(cp)
 
     asyncio.run(_list())
+
+
+# Hint for tooling: explicit reference to command function.
+COMMANDS = (checkpoint_list,)

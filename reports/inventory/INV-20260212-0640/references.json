@@ -1268,7 +1268,7 @@
       "layer": "domain",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\config\\validation.py",
-      "prod_refs": 14,
+      "prod_refs": 13,
       "test_refs": 0,
       "self_refs": 1,
       "classification": "PRODUCTION_ONLY",
@@ -3407,6 +3407,19 @@
       "exempt_reason": null
     },
     {
+      "qualname": "bioetl.domain.mapping.molecule_fields.MOLECULE_FIELD_MAPPING",
+      "name": "MOLECULE_FIELD_MAPPING",
+      "module": "bioetl.domain.mapping.molecule_fields",
+      "layer": "domain",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\mapping\\molecule_fields.py",
+      "prod_refs": 1,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
       "qualname": "bioetl.domain.mapping.publication_fields.PUBLICATION_FIELD_MAPPING",
       "name": "PUBLICATION_FIELD_MAPPING",
       "module": "bioetl.domain.mapping.publication_fields",
@@ -4265,19 +4278,6 @@
       "exempt_reason": null
     },
     {
-      "qualname": "bioetl.domain.normalization._to_none_if_empty",
-      "name": "_to_none_if_empty",
-      "module": "bioetl.domain.normalization",
-      "layer": "domain",
-      "type": "function",
-      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\normalization.py",
-      "prod_refs": 0,
-      "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
-      "exempt_reason": null
-    },
-    {
       "qualname": "bioetl.domain.normalization._try_parse_json_array",
       "name": "_try_parse_json_array",
       "module": "bioetl.domain.normalization",
@@ -4544,7 +4544,7 @@
       "layer": "domain",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\ports\\data_source.py",
-      "prod_refs": 14,
+      "prod_refs": 13,
       "test_refs": 0,
       "self_refs": 0,
       "classification": "PRODUCTION_ONLY",
@@ -5025,7 +5025,7 @@
       "layer": "domain",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\ports\\observability.py",
-      "prod_refs": 258,
+      "prod_refs": 256,
       "test_refs": 0,
       "self_refs": 0,
       "classification": "PRODUCTION_ONLY",
@@ -7235,10 +7235,10 @@
       "layer": "domain",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\transformations.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -7248,10 +7248,10 @@
       "layer": "domain",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\transformations.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -7261,10 +7261,10 @@
       "layer": "domain",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\transformations.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -7274,10 +7274,10 @@
       "layer": "domain",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\transformations.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -7287,9 +7287,9 @@
       "layer": "domain",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\transformations.py",
-      "prod_refs": 8,
+      "prod_refs": 9,
       "test_refs": 0,
-      "self_refs": 0,
+      "self_refs": 1,
       "classification": "PRODUCTION_ONLY",
       "exempt_reason": null
     },
@@ -7300,10 +7300,10 @@
       "layer": "domain",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\transformations.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -7560,7 +7560,7 @@
       "layer": "domain",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\types.py",
-      "prod_refs": 103,
+      "prod_refs": 100,
       "test_refs": 0,
       "self_refs": 12,
       "classification": "PRODUCTION_ONLY",
@@ -9133,7 +9133,7 @@
       "layer": "domain",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\value_objects\\taxonomy_id.py",
-      "prod_refs": 6,
+      "prod_refs": 8,
       "test_refs": 0,
       "self_refs": 0,
       "classification": "PRODUCTION_ONLY",
@@ -9146,7 +9146,7 @@
       "layer": "domain",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\value_objects\\taxonomy_id.py",
-      "prod_refs": 3,
+      "prod_refs": 1,
       "test_refs": 0,
       "self_refs": 0,
       "classification": "PRODUCTION_ONLY",
@@ -10583,6 +10583,19 @@
       "exempt_reason": null
     },
     {
+      "qualname": "bioetl.application.core.subcellular_fraction_data_source._compute_fraction_entity_id",
+      "name": "_compute_fraction_entity_id",
+      "module": "bioetl.application.core.subcellular_fraction_data_source",
+      "layer": "application",
+      "type": "function",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\subcellular_fraction_data_source.py",
+      "prod_refs": 1,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
       "qualname": "bioetl.application.observability.__init__.__all__",
       "name": "__all__",
       "module": "bioetl.application.observability.__init__",
@@ -11811,10 +11824,23 @@
       "layer": "application",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\pipelines\\pubchem\\__init__.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.application.pipelines.pubchem.__init__.PIPELINES",
+      "name": "PIPELINES",
+      "module": "bioetl.application.pipelines.pubchem.__init__",
+      "layer": "application",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\pipelines\\pubchem\\__init__.py",
+      "prod_refs": 3,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
       "exempt_reason": null
     },
     {
@@ -11850,10 +11876,23 @@
       "layer": "application",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\pipelines\\pubmed\\__init__.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.application.pipelines.pubmed.__init__.PIPELINES",
+      "name": "PIPELINES",
+      "module": "bioetl.application.pipelines.pubmed.__init__",
+      "layer": "application",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\pipelines\\pubmed\\__init__.py",
+      "prod_refs": 3,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
       "exempt_reason": null
     },
     {
@@ -12396,10 +12435,23 @@
       "layer": "application",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\pipelines\\uniprot\\__init__.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.application.pipelines.uniprot.__init__.PIPELINES",
+      "name": "PIPELINES",
+      "module": "bioetl.application.pipelines.uniprot.__init__",
+      "layer": "application",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\pipelines\\uniprot\\__init__.py",
+      "prod_refs": 3,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
       "exempt_reason": null
     },
     {
@@ -14437,49 +14489,10 @@
       "layer": "infrastructure",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\adapters\\crossref\\exceptions.py",
-      "prod_refs": 10,
+      "prod_refs": 7,
       "test_refs": 0,
-      "self_refs": 3,
+      "self_refs": 0,
       "classification": "PRODUCTION_ONLY",
-      "exempt_reason": null
-    },
-    {
-      "qualname": "bioetl.infrastructure.adapters.crossref.exceptions.CrossRefNotFoundError",
-      "name": "CrossRefNotFoundError",
-      "module": "bioetl.infrastructure.adapters.crossref.exceptions",
-      "layer": "infrastructure",
-      "type": "class",
-      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\adapters\\crossref\\exceptions.py",
-      "prod_refs": 0,
-      "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
-      "exempt_reason": null
-    },
-    {
-      "qualname": "bioetl.infrastructure.adapters.crossref.exceptions.CrossRefRateLimitError",
-      "name": "CrossRefRateLimitError",
-      "module": "bioetl.infrastructure.adapters.crossref.exceptions",
-      "layer": "infrastructure",
-      "type": "class",
-      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\adapters\\crossref\\exceptions.py",
-      "prod_refs": 0,
-      "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
-      "exempt_reason": null
-    },
-    {
-      "qualname": "bioetl.infrastructure.adapters.crossref.exceptions.CrossRefServiceUnavailableError",
-      "name": "CrossRefServiceUnavailableError",
-      "module": "bioetl.infrastructure.adapters.crossref.exceptions",
-      "layer": "infrastructure",
-      "type": "class",
-      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\adapters\\crossref\\exceptions.py",
-      "prod_refs": 0,
-      "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
       "exempt_reason": null
     },
     {
@@ -16634,7 +16647,7 @@
       "layer": "infrastructure",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\config\\pipeline_config_loader.py",
-      "prod_refs": 3,
+      "prod_refs": 5,
       "test_refs": 0,
       "self_refs": 0,
       "classification": "PRODUCTION_ONLY",
@@ -16686,7 +16699,7 @@
       "layer": "infrastructure",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\config_loader.py",
-      "prod_refs": 11,
+      "prod_refs": 12,
       "test_refs": 0,
       "self_refs": 4,
       "classification": "PRODUCTION_ONLY",
@@ -17024,9 +17037,9 @@
       "layer": "infrastructure",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\observability\\logging.py",
-      "prod_refs": 2,
+      "prod_refs": 3,
       "test_refs": 0,
-      "self_refs": 1,
+      "self_refs": 2,
       "classification": "PRODUCTION_ONLY",
       "exempt_reason": null
     },
@@ -17076,7 +17089,7 @@
       "layer": "infrastructure",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\observability\\logging_config.py",
-      "prod_refs": 4,
+      "prod_refs": 6,
       "test_refs": 0,
       "self_refs": 0,
       "classification": "PRODUCTION_ONLY",
@@ -17093,19 +17106,6 @@
       "test_refs": 0,
       "self_refs": 0,
       "classification": "PRODUCTION_ONLY",
-      "exempt_reason": null
-    },
-    {
-      "qualname": "bioetl.infrastructure.observability.logging_config.reset_logging_config",
-      "name": "reset_logging_config",
-      "module": "bioetl.infrastructure.observability.logging_config",
-      "layer": "infrastructure",
-      "type": "function",
-      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\observability\\logging_config.py",
-      "prod_refs": 0,
-      "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
       "exempt_reason": null
     },
     {
@@ -17128,10 +17128,10 @@
       "layer": "infrastructure",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\observability\\metrics.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -17371,6 +17371,19 @@
     {
       "qualname": "bioetl.infrastructure.observability.metrics.INFRASTRUCTURE_VALIDATED",
       "name": "INFRASTRUCTURE_VALIDATED",
+      "module": "bioetl.infrastructure.observability.metrics",
+      "layer": "infrastructure",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\infrastructure\\observability\\metrics.py",
+      "prod_refs": 1,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.infrastructure.observability.metrics.METRICS_COLLECTOR",
+      "name": "METRICS_COLLECTOR",
       "module": "bioetl.infrastructure.observability.metrics",
       "layer": "infrastructure",
       "type": "constant",
@@ -21184,10 +21197,23 @@
       "layer": "composition",
       "type": "class",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\bootstrap_logger.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.composition.bootstrap_logger.BOOTSTRAP_LOGGER_EXPORTS",
+      "name": "BOOTSTRAP_LOGGER_EXPORTS",
+      "module": "bioetl.composition.bootstrap_logger",
+      "layer": "composition",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\bootstrap_logger.py",
+      "prod_refs": 1,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -21210,10 +21236,10 @@
       "layer": "composition",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\bootstrap_logger.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -21405,10 +21431,10 @@
       "layer": "composition",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\factories\\pipeline_factories.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -21431,10 +21457,10 @@
       "layer": "composition",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\factories\\pipeline_factories.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -21457,10 +21483,10 @@
       "layer": "composition",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\factories\\pipeline_factories.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22107,10 +22133,10 @@
       "layer": "composition",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\providers\\loader.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22133,10 +22159,10 @@
       "layer": "composition",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\providers\\loader.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22543,6 +22569,19 @@
       "exempt_reason": null
     },
     {
+      "qualname": "bioetl.interfaces.cli.commands.checkpoint.COMMANDS",
+      "name": "COMMANDS",
+      "module": "bioetl.interfaces.cli.commands.checkpoint",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\checkpoint.py",
+      "prod_refs": 7,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
+      "exempt_reason": null
+    },
+    {
       "qualname": "bioetl.interfaces.cli.commands.checkpoint.checkpoint",
       "name": "checkpoint",
       "module": "bioetl.interfaces.cli.commands.checkpoint",
@@ -22562,10 +22601,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\checkpoint.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22578,6 +22617,19 @@
       "prod_refs": 2,
       "test_refs": 0,
       "self_refs": 0,
+      "classification": "PRODUCTION_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.interfaces.cli.commands.config.COMMANDS",
+      "name": "COMMANDS",
+      "module": "bioetl.interfaces.cli.commands.config",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\config.py",
+      "prod_refs": 7,
+      "test_refs": 0,
+      "self_refs": 1,
       "classification": "PRODUCTION_ONLY",
       "exempt_reason": null
     },
@@ -22601,7 +22653,7 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\config.py",
-      "prod_refs": 297,
+      "prod_refs": 296,
       "test_refs": 0,
       "self_refs": 9,
       "classification": "PRODUCTION_ONLY",
@@ -22614,10 +22666,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\config.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22627,10 +22679,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\config.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22640,10 +22692,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\config.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22653,10 +22705,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\config.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22680,6 +22732,19 @@
       "type": "__all__",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\health.py",
       "prod_refs": 219,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.interfaces.cli.commands.health.COMMANDS",
+      "name": "COMMANDS",
+      "module": "bioetl.interfaces.cli.commands.health",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\health.py",
+      "prod_refs": 7,
       "test_refs": 0,
       "self_refs": 1,
       "classification": "PRODUCTION_ONLY",
@@ -22718,10 +22783,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\health.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22732,6 +22797,19 @@
       "type": "__all__",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\health_server_integration.py",
       "prod_refs": 219,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.interfaces.cli.commands.health_server_integration.COMMANDS",
+      "name": "COMMANDS",
+      "module": "bioetl.interfaces.cli.commands.health_server_integration",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\health_server_integration.py",
+      "prod_refs": 7,
       "test_refs": 0,
       "self_refs": 1,
       "classification": "PRODUCTION_ONLY",
@@ -22783,9 +22861,22 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\health_server_integration.py",
-      "prod_refs": 6,
+      "prod_refs": 7,
       "test_refs": 0,
-      "self_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.interfaces.cli.commands.lock.COMMANDS",
+      "name": "COMMANDS",
+      "module": "bioetl.interfaces.cli.commands.lock",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\lock.py",
+      "prod_refs": 7,
+      "test_refs": 0,
+      "self_refs": 1,
       "classification": "PRODUCTION_ONLY",
       "exempt_reason": null
     },
@@ -22796,10 +22887,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\lock.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22822,10 +22913,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\lock.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22855,16 +22946,29 @@
       "exempt_reason": null
     },
     {
+      "qualname": "bioetl.interfaces.cli.commands.metrics_server_integration.COMMANDS",
+      "name": "COMMANDS",
+      "module": "bioetl.interfaces.cli.commands.metrics_server_integration",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\metrics_server_integration.py",
+      "prod_refs": 7,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
+      "exempt_reason": null
+    },
+    {
       "qualname": "bioetl.interfaces.cli.commands.metrics_server_integration.metrics_server_context",
       "name": "metrics_server_context",
       "module": "bioetl.interfaces.cli.commands.metrics_server_integration",
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\metrics_server_integration.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22875,6 +22979,19 @@
       "type": "__all__",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\quarantine.py",
       "prod_refs": 219,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "PRODUCTION_ONLY",
+      "exempt_reason": null
+    },
+    {
+      "qualname": "bioetl.interfaces.cli.commands.quarantine.COMMANDS",
+      "name": "COMMANDS",
+      "module": "bioetl.interfaces.cli.commands.quarantine",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\quarantine.py",
+      "prod_refs": 7,
       "test_refs": 0,
       "self_refs": 1,
       "classification": "PRODUCTION_ONLY",
@@ -22900,10 +23017,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\quarantine.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22913,10 +23030,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\quarantine.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22926,10 +23043,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\quarantine.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22939,10 +23056,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\quarantine.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -22952,10 +23069,10 @@
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\commands\\quarantine.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -23388,16 +23505,29 @@
       "exempt_reason": null
     },
     {
+      "qualname": "bioetl.interfaces.cli.exit_codes.EXIT_CODE_HELPERS",
+      "name": "EXIT_CODE_HELPERS",
+      "module": "bioetl.interfaces.cli.exit_codes",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\exit_codes.py",
+      "prod_refs": 1,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
       "qualname": "bioetl.interfaces.cli.exit_codes.get_exit_code_for_exception",
       "name": "get_exit_code_for_exception",
       "module": "bioetl.interfaces.cli.exit_codes",
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\cli\\exit_codes.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -23635,16 +23765,29 @@
       "exempt_reason": null
     },
     {
+      "qualname": "bioetl.interfaces.http.health_server.RUN_HEALTH_SERVER",
+      "name": "RUN_HEALTH_SERVER",
+      "module": "bioetl.interfaces.http.health_server",
+      "layer": "interfaces",
+      "type": "constant",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\http\\health_server.py",
+      "prod_refs": 1,
+      "test_refs": 0,
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
+      "exempt_reason": null
+    },
+    {
       "qualname": "bioetl.interfaces.http.health_server.run_health_server",
       "name": "run_health_server",
       "module": "bioetl.interfaces.http.health_server",
       "layer": "interfaces",
       "type": "function",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\interfaces\\http\\health_server.py",
-      "prod_refs": 0,
+      "prod_refs": 1,
       "test_refs": 0,
-      "self_refs": 0,
-      "classification": "DEAD",
+      "self_refs": 1,
+      "classification": "SELF_ONLY",
       "exempt_reason": null
     },
     {
@@ -23689,23 +23832,34 @@
   ],
   "orphans": [
     {
+      "module": "bioetl.domain.mapping.molecule_fields",
+      "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\domain\\mapping\\molecule_fields.py",
+      "layer": "domain",
+      "loc": 18,
+      "objects": [
+        "MOLECULE_FIELD_MAPPING"
+      ]
+    },
+    {
       "module": "bioetl.application.core.subcellular_fraction_data_source",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\application\\core\\subcellular_fraction_data_source.py",
       "layer": "application",
-      "loc": 518,
+      "loc": 299,
       "objects": [
         "__all__",
-        "SubcellularFractionDataSource"
+        "SubcellularFractionDataSource",
+        "_compute_fraction_entity_id"
       ]
     },
     {
       "module": "bioetl.composition.bootstrap_logger",
       "file": "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\src\\bioetl\\composition\\bootstrap_logger.py",
       "layer": "composition",
-      "loc": 144,
+      "loc": 146,
       "objects": [
         "__all__",
         "BootstrapLogger",
+        "BOOTSTRAP_LOGGER_EXPORTS",
         "get_bootstrap_logger",
         "reset_bootstrap_logger"
       ]
