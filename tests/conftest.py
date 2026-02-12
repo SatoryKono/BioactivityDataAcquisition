@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
 
+from hypothesis import settings
 import pytest
 import vcr as vcrpy
-from hypothesis import settings
 
 # --- Hypothesis Configuration ---
 # Profiles defined in docs/03-guides/testing.md
