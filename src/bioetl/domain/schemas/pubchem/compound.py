@@ -23,11 +23,15 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    cid: Series[str] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
+    molecule_id: Series[str] = pa.Field(
+        nullable=False,
+        alias="cid",
+        description="PubChem Compound ID (PK)",
+    )
 
-    @pa.check("cid", name="cid_positive")
-    def _check_cid(cls, series: Series[str]) -> Series[bool]:
-        """Validate CID is a positive integer string."""
+    @pa.check("molecule_id", name="molecule_id_positive")
+    def _check_molecule_id(cls, series: Series[str]) -> Series[bool]:
+        """Validate molecule_id/CID is a positive integer string."""
         return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === Structural Identifiers ===
@@ -60,12 +64,13 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate InChI format."""
         return cast("Series[bool]", series.isna() | series.str.startswith("InChI="))
 
-    inchikey: Series[str] | None = pa.Field(
+    inchi_key: Series[str] | None = pa.Field(
         nullable=True,
+        alias="inchikey",
         description="InChI hash key (27 chars)",
     )
 
-    @pa.check("inchikey", name="inchikey_format")
+    @pa.check("inchi_key", name="inchi_key_format")
     def _check_inchikey(cls, series: Series[str]) -> Series[bool]:
         """Validate InChI key format."""
         return cast(
