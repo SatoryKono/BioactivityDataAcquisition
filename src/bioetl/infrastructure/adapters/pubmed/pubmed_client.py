@@ -25,6 +25,7 @@ from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFil
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
 from bioetl.infrastructure.adapters.pubmed._health import PubMedHealthMixin
 from bioetl.infrastructure.adapters.pubmed._search import PubMedSearchMixin
+from bioetl.infrastructure.adapters.pubmed.constants import ENTREZ_API_BASE
 from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
 
 if TYPE_CHECKING:
