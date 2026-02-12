@@ -16,23 +16,25 @@ from typing import Any
 
 def _normalize_orcid(orcid_value: str | None) -> str | None:
     """Normalize ORCID to ID-only format (without URL prefix)."""
-    if not orcid_value or not isinstance(orcid_value, str):
+    if not isinstance(orcid_value, str):
         return None
     orcid = orcid_value.strip()
-    # Remove URL prefix if present
-    if orcid.startswith("https://orcid.org/"):
-        orcid = orcid[len("https://orcid.org/") :]
-    elif orcid.startswith("http://orcid.org/"):
-        orcid = orcid[len("http://orcid.org/") :]
-    # Backward compatibility for historical typo in fixtures/tests
-    elif orcid.startswith("https://ormolecule_id.org/"):
-        orcid = orcid[len("https://ormolecule_id.org/") :]
-    elif orcid.startswith("http://ormolecule_id.org/"):
-        orcid = orcid[len("http://ormolecule_id.org/") :]
+    if not orcid:
+        return None
+    prefixes = (
+        "https://orcid.org/",
+        "http://orcid.org/",
+        "https://ormolecule_id.org/",
+        "http://ormolecule_id.org/",
+    )
+    for prefix in prefixes:
+        if orcid.startswith(prefix):
+            orcid = orcid[len(prefix) :]
+            break
     # Validate format: 0000-0000-0000-000X
-    if len(orcid) == 19 and orcid[4] == "-" and orcid[9] == "-" and orcid[14] == "-":
-        return orcid
-    return None
+    if len(orcid) != 19 or orcid[4] != "-" or orcid[9] != "-" or orcid[14] != "-":
+        return None
+    return orcid
 
 
 def _extract_author_sequence(author: dict[str, Any]) -> str | None:
