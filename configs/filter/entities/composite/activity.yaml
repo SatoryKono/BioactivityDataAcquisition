@@ -36,8 +36,8 @@ gold_filters:
   # Required fields - records missing these are excluded from Gold
   required_fields:
     - activity_id          # Primary key from seed
-    - molecule_id          # FK to molecule (join key)
-    - assay_id             # FK to assay
+    - molecule_chembl_id   # FK to molecule (join key)
+    - assay_chembl_id      # FK to assay
 
   # Field-specific validation (applied before Gold write)
   columns:
