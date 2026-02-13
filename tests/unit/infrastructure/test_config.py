@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.config import PipelineConfig
+from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.config import yaml_config_to_domain
 from bioetl.infrastructure.schemas.pipeline_config import DQConfig as YamlDQConfig
 from bioetl.infrastructure.schemas.pipeline_config import (
@@ -30,9 +31,9 @@ def test_yaml_config_to_domain_mapping():
 
     assert isinstance(domain_config, PipelineConfig)
     assert domain_config.pipeline_name == "test_pipeline"
-    assert domain_config.write_mode == "append"
+    assert domain_config.write_mode is SilverWriteMode.APPEND
     # Table config verification
-    assert domain_config.table.silver_write_mode == "append"
+    assert domain_config.table.silver_write_mode is SilverWriteMode.APPEND
     assert domain_config.table.silver_table == "silver.test"
 
 
@@ -49,7 +50,58 @@ def test_yaml_config_to_domain_default_mode():
 
     domain_config = yaml_config_to_domain(yaml_config)
 
-    assert domain_config.write_mode == "merge"
+    assert domain_config.write_mode is SilverWriteMode.MERGE
+
+
+def test_pipeline_yaml_config_accepts_dq_overrides_alias_equivalently() -> None:
+    """dq_overrides and dq_rules must parse to identical inline DQ config."""
+    base = {
+        "pipeline_name": "test_pipeline",
+        "provider": "test",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "silver.test",
+    }
+
+    cfg_from_rules = PipelineYamlConfig.model_validate(
+        {
+            **base,
+            "dq_rules": {"soft_fail_threshold": 0.06, "hard_fail_threshold": 0.19},
+        }
+    )
+    cfg_from_overrides = PipelineYamlConfig.model_validate(
+        {
+            **base,
+            "dq_overrides": {
+                "soft_fail_threshold": 0.06,
+                "hard_fail_threshold": 0.19,
+            },
+        }
+    )
+
+    assert cfg_from_rules.dq_overrides.soft_fail_threshold == 0.06
+    assert cfg_from_overrides.dq_overrides.soft_fail_threshold == 0.06
+    assert cfg_from_rules.dq_overrides.hard_fail_threshold == 0.19
+    assert cfg_from_overrides.dq_overrides.hard_fail_threshold == 0.19
+
+
+def test_pipeline_yaml_config_serializes_dq_to_canonical_overrides_key() -> None:
+    """Serialized YAML schema uses canonical dq_overrides key."""
+    cfg = PipelineYamlConfig.model_validate(
+        {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "dq": {"soft_fail_threshold": 0.07, "hard_fail_threshold": 0.18},
+        }
+    )
+
+    dumped = cfg.model_dump(by_alias=True)
+
+    assert "dq_overrides" in dumped
+    assert "dq_rules" not in dumped
 
 
 @pytest.mark.unit
