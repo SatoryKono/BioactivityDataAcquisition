@@ -376,7 +376,7 @@ class MoleculeRecord(BaseModel):
 
     # Flattened properties
     property_alogp: float | None = Field(default=None, description="ALogP value")
-    property_mw_freebase: float | None = Field(
+    mw_freebase: float | None = Field(
         default=None, description="Molecular weight (freebase)"
     )
     property_full_mwt: float | None = Field(
@@ -386,7 +386,7 @@ class MoleculeRecord(BaseModel):
     property_hbd: int | None = Field(default=None, description="H-bond donor count")
     property_psa: float | None = Field(default=None, description="Polar surface area")
     property_rtb: int | None = Field(default=None, description="Rotatable bond count")
-    property_ro5_violations: int | None = Field(
+    ro5_violation_count: int | None = Field(
         default=None, description="Rule of 5 violations"
     )
     property_heavy_atoms: int | None = Field(
@@ -395,13 +395,13 @@ class MoleculeRecord(BaseModel):
     property_aromatic_rings: int | None = Field(
         default=None, description="Aromatic ring count"
     )
-    property_qed_weighted: float | None = Field(
+    qed_score: float | None = Field(
         default=None, description="QED weighted score"
     )
-    property_full_molformula: str | None = Field(
+    molecular_formula: str | None = Field(
         default=None, description="Full molecular formula"
     )
-    property_ro3_pass: str | None = Field(
+    ro3_pass: str | None = Field(
         default=None, description="Rule of 3 pass (Y/N)"
     )
 

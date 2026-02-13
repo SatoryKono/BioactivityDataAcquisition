@@ -116,8 +116,10 @@ class TestFieldTypes:
             "src_id",
             "targcomp_id",
             "tid",
+            "target_taxonomy_id",
             "toid",  # Target organism ID - ChEMBL numeric taxonomy ID
             "variant_taxonomy_id",
+            "assay_taxonomy_id",
         }
         id_fields = [
             (field, meta["dtype"])

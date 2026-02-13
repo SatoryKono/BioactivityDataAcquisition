@@ -57,9 +57,13 @@ _PROPERTIES_FIELDS: dict[str, Any] = {
     "ro3_pass": None,
 }
 
-# Rename mapping for properties fields (num_ro5_violations -> ro5_violations)
+# Rename mapping for properties fields (unified naming without property_ prefix)
 _PROPERTIES_RENAMES: dict[str, str] = {
-    "property_num_ro5_violations": "property_ro5_violations",
+    "property_mw_freebase": "mw_freebase",
+    "property_num_ro5_violations": "ro5_violation_count",
+    "property_qed_weighted": "qed_score",
+    "property_full_molformula": "molecular_formula",
+    "property_ro3_pass": "ro3_pass",
 }
 
 _STRUCTURES_FIELDS: dict[str, Any] = {

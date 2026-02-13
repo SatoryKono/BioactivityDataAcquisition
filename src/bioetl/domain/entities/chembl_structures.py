@@ -105,8 +105,8 @@ class Target(BaseEntity):
     organism: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: int | None = None
-    description: str | None = None
     species_group_flag: bool | None = None
+    description: str | None = None
     downgraded: bool | None = None  # Flag for deprecated/downgraded records
     pipeline_stages: str | None = None  # JSON string (for complexes/families)
 
@@ -289,20 +289,20 @@ class Molecule(BaseEntity):
 
     # Flattened Properties
     property_alogp: float | None = None
-    property_mw_freebase: float | None = None
+    mw_freebase: float | None = None
     property_full_mwt: float | None = None
     property_hba: int | None = None
     property_hbd: int | None = None
     property_psa: float | None = None
     property_rtb: int | None = None
-    property_ro5_violations: int | None = None
+    ro5_violation_count: int | None = None
     property_heavy_atoms: int | None = None
     property_aromatic_rings: int | None = None
-    property_qed_weighted: float | None = None
+    qed_score: float | None = None
     # Note: property_acd_logd, property_acd_logp, property_acd_most_apka,
     # property_acd_most_bpka are not available in the public ChEMBL API
-    property_full_molformula: str | None = None
-    property_ro3_pass: str | None = None  # "Y" or "N"
+    molecular_formula: str | None = None
+    ro3_pass: str | None = None  # "Y" or "N"
 
     # Flattened Structures (unified naming without structure_ prefix)
     canonical_smiles: str | None = None
