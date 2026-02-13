@@ -153,13 +153,19 @@ class BaseServicesFactory:
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation across Bronze, Silver, Gold.
             silver_validator: Optional SilverValidatorPort for Pandera validation
-                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
+                in SilverWriter. If None, validation is skipped by storage layer.
 
         Returns:
             PipelineServices with all dependencies configured
         """
         # Create metrics first so it can be passed to storage factory
         metrics = cls._create_metrics(settings)
+
+        if settings.env == "prod" and not settings.test_mode and silver_validator is None:
+            raise ValueError(
+                "Silver validator is required for production pipelines "
+                f"(pipeline={pipeline_config.pipeline_name})"
+            )
 
         storage_ctx = StorageFactory.create(
             settings,
@@ -429,7 +435,7 @@ class ServicesBuilder:
         gold_filter_callback: Any,
         gold_transform_callback: Any,
         *,
-        strict_gold_validation: bool = False,
+        strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
         column_groups: tuple[ColumnGroupConfig, ...] = (),
     ) -> RecordProcessor:
@@ -454,7 +460,7 @@ class ServicesBuilder:
             gold_filter_callback: Gold filtering callback
             gold_transform_callback: Silver to Gold transformation callback
             strict_gold_validation: If True, validation fails when gold_schema is None.
-                Default False for backward compatibility.
+                Default True to enforce strict Gold validation.
             lock_validator: Async callable that validates lock ownership.
                 Returns True if lock is still held, False otherwise.
                 Typically LockManager.validate(). If None, lock validation
@@ -508,7 +514,7 @@ class ServicesBuilder:
         silver_schema: pa.Schema | None,
         gold_schema: Any,
         *,
-        strict_gold_validation: bool = False,
+        strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
         """Create RecordProcessor from pipeline instance.
@@ -520,7 +526,7 @@ class ServicesBuilder:
             silver_schema: PyArrow schema for Silver layer
             gold_schema: Pandera schema for Gold layer
             strict_gold_validation: If True, validation fails when gold_schema is None.
-                Default False for backward compatibility.
+                Default True to enforce strict Gold validation.
             lock_validator: Async callable that validates lock ownership.
                 Returns True if lock is still held, False otherwise.
                 Typically LockManager.validate(). If None, lock validation
@@ -562,7 +568,7 @@ class ServicesBuilder:
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         *,
-        strict_gold_validation: bool = False,
+        strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
         tracer: TracingPort | None = None,
         memory_monitor: MemoryMonitorPort | None = None,

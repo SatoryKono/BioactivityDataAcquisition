@@ -15,6 +15,34 @@ import pytest
 
 
 @pytest.mark.smoke
+class TestRuntimeDependencies:
+    """Verify critical runtime dependencies are installed and importable."""
+
+    @pytest.mark.parametrize("module_name", [
+        "pandas",
+        "pandera",
+        "polars",
+        "deltalake",
+        "pyarrow",
+        "httpx",
+        "pydantic",
+        "pydantic_settings",
+        "yaml",
+        "structlog",
+        "click",
+        "orjson",
+        "prometheus_client",
+        "zstandard",
+        "pubchempy",
+    ])
+    def test_dependency_importable(self, module_name: str) -> None:
+        """Each critical dependency must be importable."""
+        import importlib
+
+        importlib.import_module(module_name)
+
+
+@pytest.mark.smoke
 class TestCoreImports:
     """Verify core modules import without errors."""
 

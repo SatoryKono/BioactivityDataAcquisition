@@ -139,12 +139,18 @@ class PanderaGoldValidator(BasePanderaValidator):
     Args:
         schema: Pandera DataFrameSchema for validation. If None and strict=False,
             validation is skipped. If None and strict=True, validation fails.
-        strict: If True, requires schema to be provided. Default False for
-            backward compatibility.
+        strict: If True, requires schema to be provided. Default True to enforce
+            strict Gold validation.
 
     """
 
     layer_name: ClassVar[str] = "Gold"
+
+    def __init__(
+        self, schema: pa.DataFrameSchema | None = None, *, strict: bool = True
+    ) -> None:
+        """Initialize Gold validator with strict validation by default."""
+        super().__init__(schema=schema, strict=strict)
 
     def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
         """Validate DataFrame with Gold-specific handling for extra columns.

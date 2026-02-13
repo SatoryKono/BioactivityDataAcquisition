@@ -351,8 +351,9 @@ class _MedallionConfigValidator:
 
         # Validate Silver write mode
         silver_mode = self._config.write_mode
+        silver_mode_value = str(silver_mode)
         try:
-            write_mode_policy.validate(Layer.SILVER, WriteMode(silver_mode))
+            write_mode_policy.validate(Layer.SILVER, WriteMode(silver_mode_value))
         except (PolicyViolationError, ValueError):
             allowed = WriteModePolicy.ALLOWED_MODES[Layer.SILVER]
             allowed_names = ", ".join(
@@ -362,14 +363,15 @@ class _MedallionConfigValidator:
                 ConfigValidationError(
                     field="write_mode",
                     expected=f"one of: {allowed_names}",
-                    actual=silver_mode,
+                    actual=silver_mode_value,
                     rule="RULES §2.1: Silver layer allowed modes",
                 )
             )
 
         # Validate Gold write mode
         gold_mode = self._config.gold_write_mode
-        effective_gold_mode = "merge" if gold_mode == "scd2" else gold_mode
+        gold_mode_value = str(gold_mode)
+        effective_gold_mode = "merge" if gold_mode_value == "scd2" else gold_mode_value
         try:
             write_mode_policy.validate(Layer.GOLD, WriteMode(effective_gold_mode))
         except (PolicyViolationError, ValueError):
@@ -381,7 +383,7 @@ class _MedallionConfigValidator:
                 ConfigValidationError(
                     field="gold_write_mode",
                     expected=f"one of: {allowed_names}, scd2",
-                    actual=gold_mode,
+                    actual=gold_mode_value,
                     rule="RULES §2.1: Gold layer allowed modes",
                 )
             )
@@ -399,8 +401,8 @@ class _MedallionConfigValidator:
             self._logger.debug(
                 "Write mode validation passed",
                 extra={
-                    "silver_mode": silver_mode,
-                    "gold_mode": gold_mode,
+                    "silver_mode": silver_mode_value,
+                    "gold_mode": gold_mode_value,
                 },
             )
 
