@@ -13,6 +13,7 @@ import inspect
 
 import pytest
 
+from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import LockPort
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 

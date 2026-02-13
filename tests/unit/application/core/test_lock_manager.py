@@ -128,7 +128,7 @@ class TestLockManager:
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
         """Test usage as async context manager."""
-        mock_lock_port.acquire.return_value = True
+        mock_lock_port.acquire.return_value = _TEST_TOKEN
         mock_lock_port.release.return_value = True
         mock_lock_port.heartbeat.return_value = True
 
@@ -160,7 +160,7 @@ class TestLockManager:
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
         """Test context manager raises if lock not acquired."""
-        mock_lock_port.acquire.return_value = False
+        mock_lock_port.acquire.return_value = None
 
         with pytest.raises(PipelineShutdownError):
             async with lock_manager:
