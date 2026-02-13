@@ -332,7 +332,6 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("_index", pa.int64()),
         ("component_accessions", pa.list_(pa.string())),
         ("component_descriptions", pa.list_(pa.string())),
-        ("component_id", pa.float64()),  # Float for nullable int
         ("component_ids", pa.list_(pa.int64())),
         ("component_relationships", pa.list_(pa.string())),
         ("component_types", pa.list_(pa.string())),
@@ -341,10 +340,11 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("organism", pa.string()),
         ("pipeline_stages", pa.string()),
         ("pref_name", pa.string()),
+        ("primary_component_id", pa.float64()),
         ("species_group_flag", pa.bool_()),
-        ("target_id", pa.string()),
         ("target_component_synonyms", pa.string()),
         ("target_components", pa.string()),
+        ("target_id", pa.string()),
         ("target_type", pa.string()),
         ("taxonomy_id", pa.float64()),  # Float for nullable int
         ("_dq_error", pa.bool_()),
