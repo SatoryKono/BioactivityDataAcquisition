@@ -551,11 +551,12 @@ class ServicesBuilder:
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
             primary_keys=pipeline.config.primary_keys,
-            silver_table=pipeline.config.silver_table,
+            silver_table=pipeline.config.silver_table
+            or f"{pipeline.config.provider}.{pipeline.config.entity_type}",
             gold_table=pipeline.config.gold_table,
             silver_write_mode=pipeline.config.write_mode,
             gold_write_mode=pipeline.config.gold_write_mode,
-            on_schema_mismatch=pipeline.config.on_schema_mismatch,
+            on_schema_mismatch=pipeline.config.on_schema_mismatch,  # type: ignore[arg-type]
             transform_callback=callbacks.transform,
             gold_filter_callback=callbacks.gold_filter,
             gold_transform_callback=callbacks.gold_transform,

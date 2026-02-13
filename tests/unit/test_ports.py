@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 
+from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import (
     CheckpointPort,
     DataSourcePort,
@@ -294,8 +295,13 @@ class TestLockPortProtocol:
                 wait: bool = False,
                 wait_timeout: int = 300,
                 exclusive: bool = False,
-            ) -> bool:
-                return True
+            ) -> FencingToken | None:
+                return FencingToken(
+                    sequence=1,
+                    key=key,
+                    owner_id=owner_id,
+                    issued_at=0.0,
+                )
 
             async def release(
                 self,
@@ -319,6 +325,13 @@ class TestLockPortProtocol:
                 owner_id: RunID,
             ) -> bool:
                 return True
+
+            async def validate_fencing_token(
+                self,
+                key: str,
+                token: FencingToken,
+            ) -> bool:
+                return token.key == key
 
             async def aclose(self) -> None:
                 pass

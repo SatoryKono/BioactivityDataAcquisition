@@ -731,7 +731,7 @@ class BaseTransformer(ABC):
             Extracted value or default.
 
         """
-        current = record
+        current: Any = record
         for key in keys:
             if not isinstance(current, dict):
                 return default
