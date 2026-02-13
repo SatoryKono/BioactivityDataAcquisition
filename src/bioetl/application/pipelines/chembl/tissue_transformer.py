@@ -37,7 +37,7 @@ class TissueTransformer(BaseChemblTransformer):
         if "tissue_id" not in record and record.get("tissue_chembl_id") is not None:
             record_with_alias = dict(record)
             record_with_alias["tissue_id"] = record_with_alias.get("tissue_chembl_id")
-            record = cast("BronzeRecord", record_with_alias)
+            record = record_with_alias
         return await super()._transform_impl(context, record, index)
 
     def _extract_business_data(

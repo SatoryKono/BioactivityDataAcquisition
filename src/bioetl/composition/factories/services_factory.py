@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.checkpoint_manager import CheckpointManager
@@ -27,7 +27,7 @@ from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -422,9 +422,9 @@ class ServicesBuilder:
         primary_keys: Sequence[str],
         silver_table: str,
         gold_table: str | None,
-        silver_write_mode: str,
-        gold_write_mode: str,
-        on_schema_mismatch: str,
+        silver_write_mode: SilverWriteMode | str,
+        gold_write_mode: GoldWriteMode | str,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
         transform_callback: Any,
         gold_filter_callback: Any,
         gold_transform_callback: Any,
@@ -470,7 +470,7 @@ class ServicesBuilder:
             gold_table=gold_table,
             silver_write_mode=silver_write_mode,
             gold_write_mode=gold_write_mode,
-            on_schema_mismatch=on_schema_mismatch,  # type: ignore[arg-type]
+            on_schema_mismatch=on_schema_mismatch,
         )
 
         processor_config = RecordProcessorConfig(
