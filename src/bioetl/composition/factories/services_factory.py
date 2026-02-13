@@ -161,7 +161,11 @@ class BaseServicesFactory:
         # Create metrics first so it can be passed to storage factory
         metrics = cls._create_metrics(settings)
 
-        if settings.env == "prod" and not settings.test_mode and silver_validator is None:
+        if (
+            settings.env == "prod"
+            and not settings.test_mode
+            and silver_validator is None
+        ):
             raise ValueError(
                 "Silver validator is required for production pipelines "
                 f"(pipeline={pipeline_config.pipeline_name})"

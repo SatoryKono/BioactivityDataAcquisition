@@ -172,7 +172,7 @@ from bioetl.domain.filtering import (
 )
 
 # Locking (value objects for lock context)
-from bioetl.domain.locking import LockContext, LockNotHeldError
+from bioetl.domain.locking import FencingToken, LockContext, LockNotHeldError
 
 # Medallion policies
 from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
@@ -460,6 +460,7 @@ __all__ = [
     "GoldRangeFilter",
     "InputFilterConfig",
     # Locking
+    "FencingToken",
     "LockContext",
     "LockNotHeldError",
     # Medallion policies
