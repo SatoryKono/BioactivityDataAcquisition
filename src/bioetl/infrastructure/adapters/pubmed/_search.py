@@ -13,10 +13,13 @@ from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcess
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-    from bioetl.infrastructure.adapters.common.api_request_collector import APIRequestCollector
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 from .constants import ENTREZ_API_BASE
 
@@ -61,6 +64,7 @@ class PubMedSearchMixin:
             return idlist
         except Exception as e:
             from bioetl.infrastructure.adapters.error_handling import ErrorService
+
             error_handler = ErrorService(self.logger)
             wrapped = error_handler.handle_error(
                 error=e,
