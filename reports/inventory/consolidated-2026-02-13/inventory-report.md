@@ -51,121 +51,64 @@ An object is classified as:
 - **PRODUCTION_ONLY**: Referenced in production code but not in tests. May need test coverage.
 - **ACTIVE**: Referenced in both production and test code.
 
-### 2.2 Confirmed DEAD Objects (high confidence)
+### 2.2 Confirmed DEAD Objects (grep-verified, zero callers anywhere)
 
-These objects have zero references outside their definition file AND zero internal references within the file:
+> **CRITICAL CORRECTION v2 (post-verification):** The original list in this report
+> contained **107 items**, of which **only 5 are truly DEAD**. The remaining 102
+> were **SELF_ONLY** (called within the same file) or **ACTIVE** (imported by other
+> modules). All 4 original codex branches AND the initial version of this
+> consolidated report made the same error: using cross-file grep patterns that
+> miss intra-module calls. The corrected list below is verified via
+> `grep -rn <name> src/bioetl/ tests/`.
 
-| # | Object | Type | Layer | File:Line |
-|---|--------|------|-------|-----------|
-| 1 | `VALIDATION_API` | constant | domain | domain/validation.py:412 |
-| 2 | `compute_subcellular_fraction_entity_id` | function | application | application/core/entity_id.py:36 |
-| 3 | `PARSER_HELPERS` | constant | application | application/pipelines/pubmed/xml_parser.py:79 |
-| 4 | `CIRCUIT_BREAKER_HELPERS` | constant | infrastructure | infrastructure/adapters/http/circuit_breaker.py:235 |
-| 5 | `METRICS_COLLECTOR` | constant | infrastructure | infrastructure/observability/metrics.py:221 |
-| 6 | `_validate_threshold_order` | function | domain | domain/composite/config.py:1021 |
-| 7 | `_validate_non_negative` | function | domain | domain/resilience.py:191 |
-| 8 | `PubchemMoleculeRecord` | class | domain | domain/entities/pubchem.py:24 |
-| 9 | `AssayRecord` | class | domain | domain/entities/chembl.py:181 |
-| 10 | `AuthFailureError` | class | domain | domain/exceptions/internal.py:227 |
-| 11 | `CachedBronzeEmptyError` | class | domain | domain/exceptions/infrastructure.py:291 |
-| 12 | `_safe_json` | function | domain | domain/entities/bioactivity.py:48 |
-| 13 | `_get_default_config` | function | domain | domain/validation.py:80 |
-| 14 | `_match_error_type` | function | domain | domain/error_classifier.py:60 |
-| 15 | `_get_orjson_options` | function | domain | domain/serialization.py:142 |
-| 16 | `_serialize_with_orjson` | function | domain | domain/serialization.py:150 |
-| 17 | `_serialize_with_stdlib` | function | domain | domain/serialization.py:165 |
-| 18 | `_deserialize_with_orjson` | function | domain | domain/serialization.py:182 |
-| 19 | `_deserialize_with_stdlib` | function | domain | domain/serialization.py:192 |
-| 20 | `_normalize_float` | function | domain | domain/transformations.py:37 |
-| 21 | `_normalize_datetime` | function | domain | domain/transformations.py:45 |
-| 22 | `_normalize_date` | function | domain | domain/transformations.py:51 |
-| 23 | `_normalize_str` | function | domain | domain/transformations.py:57 |
-| 24 | `_normalize_dict` | function | domain | domain/transformations.py:63 |
-| 25 | `_should_include_field` | function | domain | domain/transformations.py:85 |
-| 26 | `_is_electronic_page` | function | domain | domain/normalization.py:116 |
-| 27 | `_extract_non_digits` | function | domain | domain/normalization.py:126 |
-| 28 | `_is_abbreviated` | function | domain | domain/normalization.py:131 |
-| 29 | `_compute_expanded_page` | function | domain | domain/normalization.py:140 |
-| 30 | `_expand_abbreviated_page` | function | domain | domain/normalization.py:149 |
-| 31 | `_normalize_and_split_pages` | function | domain | domain/normalization.py:161 |
-| 32 | `_prepare_page_input` | function | domain | domain/normalization.py:174 |
-| 33 | `_is_valid_string` | function | domain | domain/normalization.py:223 |
-| 34 | `_filter_valid_strings` | function | domain | domain/normalization.py:235 |
-| 35 | `_try_parse_json_array` | function | domain | domain/normalization.py:245 |
-| 36 | `_parse_authors_from_delimited` | function | domain | domain/normalization.py:262 |
-| 37 | `_extract_variant` | function | application | application/pipelines/chembl/assay_transformer.py:51 |
-| 38 | `_parse_year` | function | application | application/pipelines/crossref/reference_extractors.py:27 |
-| 39 | `_extract_author_sequence` | function | application | application/pipelines/crossref/author_extractors.py:40 |
-| 40 | `_extract_author_affiliations_list` | function | application | application/pipelines/crossref/author_extractors.py:49 |
-| 41 | `_build_author_detail` | function | application | application/pipelines/crossref/author_extractors.py:64 |
-| 42 | `_extract_id_from_url` | function | application | application/pipelines/openalex/extractors.py:43 |
-| 43 | `_extract_orcid_from_url` | function | application | application/pipelines/openalex/extractors.py:132 |
-| 44 | `_parse_grant_dict` | function | application | application/pipelines/openalex/extractors.py:347 |
-| 45 | `extract_institution_ror_ids` | function | application | application/pipelines/openalex/extractors.py:272 |
-| 46 | `_extract_reaction_data` | function | application | application/pipelines/uniprot/extractors/comments.py:23 |
-| 47 | `_extract_location_value` | function | application | application/pipelines/uniprot/extractors/comments.py:40 |
-| 48 | `_build_isoform_data` | function | application | application/pipelines/uniprot/extractors/comments.py:57 |
-| 49 | `_extract_cofactor_entry` | function | application | application/pipelines/uniprot/extractors/comments.py:95 |
-| 50 | `_extract_km_entry` | function | application | application/pipelines/uniprot/extractors/comments.py:124 |
-| 51 | `_extract_vmax_entry` | function | application | application/pipelines/uniprot/extractors/comments.py:136 |
-| 52 | `_extract_kinetic_parameters` | function | application | application/pipelines/uniprot/extractors/comments.py:159 |
-| 53 | `_extract_absorption_data` | function | application | application/pipelines/uniprot/extractors/comments.py:182 |
-| 54 | `_extract_biophys_from_comment` | function | application | application/pipelines/uniprot/extractors/comments.py:193 |
-| 55 | `_extract_feature_location` | function | application | application/pipelines/uniprot/extractors/features.py:10 |
-| 56 | `_build_keyword_dict` | function | application | application/pipelines/uniprot/extractors/features.py:51 |
-| 57 | `_extract_nested_values` | function | application | application/core/dict_transformers.py:139 |
-| 58 | `_span_context` | function | application | application/observability/span_helpers.py:27 |
-| 59 | `_scan_provider_for_tables` | function | application | application/services/export_service.py:136 |
-| 60 | `_write_xlsx_file` | function | application | application/services/export_service.py:181 |
-| 61 | `PipelineSettingsProtocol` | class | application | application/services/config_service.py:22 |
-| 62 | `SettingsProtocol` | class | application | application/services/config_service.py:30 |
-| 63 | `PipelineRegistryProtocol` | class | application | application/services/config_service.py:86 |
-| 64 | `SettingsLoaderProtocol` | class | application | application/services/config_service.py:94 |
-| 65 | `PipelineConfigLoaderProtocol` | class | application | application/services/config_service.py:102 |
-| 66 | `DomainConfigMapperProtocol` | class | application | application/services/config_service.py:110 |
-| 67 | `RegistryAccessorProtocol` | class | application | application/services/config_service.py:118 |
-| 68 | `ChEMBLAssayParametersPipeline` | class | application | application/pipelines/chembl/_pipelines.py:23 |
-| 69 | `ChEMBLCellLinePipeline` | class | application | application/pipelines/chembl/_pipelines.py:27 |
-| 70 | `ChEMBLCompoundRecordPipeline` | class | application | application/pipelines/chembl/_pipelines.py:31 |
-| 71 | `ChEMBLProteinClassPipeline` | class | application | application/pipelines/chembl/_pipelines.py:39 |
-| 72 | `ChEMBLPublicationSimilarityPipeline` | class | application | application/pipelines/chembl/_pipelines.py:47 |
-| 73 | `ChEMBLPublicationTermPipeline` | class | application | application/pipelines/chembl/_pipelines.py:55 |
-| 74 | `ChEMBLSubcellularFractionPipeline` | class | application | application/pipelines/chembl/_pipelines.py:63 |
-| 75 | `ChEMBLTargetComponentPipeline` | class | application | application/pipelines/chembl/_pipelines.py:75 |
-| 76 | `ChEMBLTissuePipeline` | class | application | application/pipelines/chembl/_pipelines.py:79 |
-| 77 | `calculate_had_warnings` | function | application | application/composite/runner_helpers.py:88 |
-| 78 | `add_not_run_results` | function | application | application/composite/runner_helpers.py:128 |
-| 79 | `get_mergeable_enrichers` | function | application | application/composite/runner_helpers.py:193 |
-| 80 | `get_mergeable_dependencies` | function | application | application/composite/runner_helpers.py:241 |
-| 81 | `_load_base_config` | function | infrastructure | infrastructure/config_loader.py:54 |
-| 82 | `_apply_file_reference_defaults` | function | infrastructure | infrastructure/config_loader.py:70 |
-| 83 | `_load_column_groups_config` | function | infrastructure | infrastructure/config_loader.py:90 |
-| 84 | `_load_data_schema_config` | function | infrastructure | infrastructure/config_loader.py:112 |
-| 85 | `_apply_layer_defaults` | function | infrastructure | infrastructure/config_loader.py:151 |
-| 86 | `_apply_convention_defaults` | function | infrastructure | infrastructure/config_loader.py:179 |
-| 87 | `_load_filter_config` | function | infrastructure | infrastructure/config_loader.py:230 |
-| 88 | `_merge_filter_config` | function | infrastructure | infrastructure/config_loader.py:250 |
-| 89 | `_load_column_groups_section` | function | infrastructure | infrastructure/config_loader.py:309 |
-| 90 | `_load_source_section` | function | infrastructure | infrastructure/config_loader.py:338 |
-| 91 | `_check_psutil_available` | function | infrastructure | infrastructure/system/memory_monitor.py:39 |
-| 92 | `_get_metadata_filename` | function | infrastructure | infrastructure/storage/metadata_writer.py:34 |
-| 93 | `BaseConfigLoader` | class | infrastructure | infrastructure/config/base_config_loader.py:25 |
-| 94 | `YamlSettingsSource` | class | infrastructure | infrastructure/config/_base.py:45 |
-| 95 | `_extract_source_fields` | function | infrastructure | infrastructure/config/_base.py:87 |
-| 96 | `_extract_write_modes` | function | infrastructure | infrastructure/config/_base.py:95 |
-| 97 | `_build_silver_filters` | function | infrastructure | infrastructure/config/_base.py:117 |
-| 98 | `_build_gold_filters` | function | infrastructure | infrastructure/config/_base.py:126 |
-| 99 | `_parse_config` | function | infrastructure | infrastructure/config/field_group_loader.py:65 |
-| 100 | `_parse_group` | function | infrastructure | infrastructure/config/field_group_loader.py:104 |
-| 101 | `_parse_field` | function | infrastructure | infrastructure/config/field_group_loader.py:146 |
-| 102 | `inspect_records` | function | infrastructure | infrastructure/quarantine/operations.py:23 |
-| 103 | `replay_records` | function | infrastructure | infrastructure/quarantine/operations.py:59 |
-| 104 | `get_statistics` | function | infrastructure | infrastructure/quarantine/operations.py:106 |
-| 105 | `purge_records` | function | infrastructure | infrastructure/quarantine/operations.py:154 |
-| 106 | `FilterColumnSchema` | class | infrastructure | infrastructure/schemas/pipeline_config.py:312 |
-| 107 | `GoldColumnFilterConfig` | class | infrastructure | infrastructure/schemas/pipeline_config.py:636 |
+| # | Object | Type | Layer | File:Line | Verified |
+|---|--------|------|-------|-----------|----------|
+| 1 | `VALIDATION_API` | constant | domain | domain/validation.py:412 | 0 refs outside definition |
+| 2 | `compute_subcellular_fraction_entity_id` | function | application | application/core/entity_id.py:36 | 0 callers anywhere |
+| 3 | `PARSER_HELPERS` | constant | application | application/pipelines/pubmed/xml_parser.py:79 | 0 refs outside definition |
+| 4 | `CIRCUIT_BREAKER_HELPERS` | constant | infrastructure | infrastructure/adapters/http/circuit_breaker.py:235 | 0 refs outside definition |
+| 5 | `METRICS_COLLECTOR` | constant | infrastructure | infrastructure/observability/metrics.py:221 | 0 refs outside definition |
 
-**IMPORTANT CORRECTION**: Items #81-90 (config_loader.py helpers) are classified as DEAD by B1, but verified as **SELF_ONLY** — they are called within `load_pipeline_config()` in the same file. They should NOT be deleted. The DEAD classification applies only if we're considering the entire `config_loader.py` module as potentially dead. The public entry points `load_source_config` and `load_pipeline_config` are ACTIVE.
+### 2.2.1 False Positives Corrected (were listed as DEAD, actually SELF_ONLY or ACTIVE)
+
+The following items were classified as DEAD by one or more branches but are **verified active**:
+
+| Object | Actual Status | Evidence |
+|--------|--------------|----------|
+| `_get_default_config` (validation.py) | SELF_ONLY | Called at validation.py:154 by `validate_publication_year` |
+| `_match_error_type` (error_classifier.py) | SELF_ONLY | Called at error_classifier.py:154 by `ErrorClassifier.classify` |
+| `_safe_json` (bioactivity.py) | SELF_ONLY | Called at bioactivity.py:290 by `Bioactivity` |
+| `_validate_threshold_order` (composite/config.py) | SELF_ONLY | Called at config.py:672 |
+| `_validate_non_negative` (resilience.py) | SELF_ONLY | Called at resilience.py:182 |
+| All serialization helpers (serialization.py:142-200) | SELF_ONLY | Called by `serialize_to_json`/`deserialize_from_json` |
+| All normalization page helpers (normalization.py:116-179) | SELF_ONLY | Called by `parse_page_range` at normalization.py:188-199 |
+| All normalization author helpers (normalization.py:223-273) | SELF_ONLY | Called by `parse_authors_to_list` chain |
+| All transformation normalizers (transformations.py:37-85) | SELF_ONLY | Used in `_NORMALIZERS` tuple at transformations.py:76-81 |
+| `_extract_variant` (assay_transformer.py) | SELF_ONLY | Called at assay_transformer.py:178 |
+| All crossref author_extractors helpers | SELF_ONLY | Called within `extract_author_details`/`extract_author_orcids` |
+| All crossref reference_extractors helpers | SELF_ONLY | Called within `extract_references` |
+| All openalex extractors helpers | SELF_ONLY | Called by extractors in same file |
+| All uniprot comments.py helpers | SELF_ONLY | Called by `CommentExtractor` methods |
+| All uniprot features.py helpers | SELF_ONLY | Called by `FeatureExtractor` methods |
+| `_extract_nested_values` (dict_transformers.py) | SELF_ONLY | Called at dict_transformers.py:181 |
+| `_span_context` (span_helpers.py) | SELF_ONLY | Called at span_helpers.py:49 and :60 |
+| `_scan_provider_for_tables` (export_service.py) | SELF_ONLY | Called at export_service.py:131 |
+| `_write_xlsx_file` (export_service.py) | SELF_ONLY | Called at export_service.py:381 |
+| All config_service.py Protocols | SELF_ONLY | Used as type annotations in `ConfigService` (lines 202-205) |
+| All runner_helpers.py functions | ACTIVE | Imported by `composite/runner.py:19-22`, called at :570, :623, :750, :755 |
+| All quarantine/operations.py functions | ACTIVE | Imported by `quarantine/unified.py:24-27`, called at :140, :161, :183, :208 |
+| All config_loader.py helpers | SELF_ONLY | Called within `load_pipeline_config()` flow |
+| `_check_psutil_available` (memory_monitor.py) | SELF_ONLY | Called at memory_monitor.py:90 |
+| `_get_metadata_filename` (metadata_writer.py) | SELF_ONLY | Called at metadata_writer.py:198 |
+| `BaseConfigLoader` | ACTIVE | Imported by filter_config_loader.py:19, __init__.py:33 |
+| `YamlSettingsSource` (_base.py) | SELF_ONLY | Used at _base.py:431 in `settings_customise_sources` |
+| All _base.py config helpers | SELF_ONLY | Called within `yaml_config_to_domain` at lines 157-160 |
+| All field_group_loader helpers | SELF_ONLY | Called within `load_field_groups` chain |
+| `PubchemMoleculeRecord` | ACTIVE | Imported by pubchem/client.py:31, used at :53 |
+| `AssayRecord` | ACTIVE | Imported by chembl/client.py:21, used at :67 |
+| `CachedBronzeEmptyError` | ACTIVE | Imported by cached_bronze_data_source.py:23, raised at :227 |
+| `AuthFailureError` | ACTIVE (API) | Re-exported in domain/__init__.py:117, domain/exceptions/__init__.py:75 |
+| ChEMBL pipeline aliases (_pipelines.py) | TEST_ONLY | Re-exported in __init__.py, used in test_pipeline_registrations.py |
 
 ### 2.3 Orphan Modules (consensus from B1, B3, B4)
 
@@ -287,19 +230,15 @@ Note: Exact counts vary between branches due to different counting methods (dire
 
 **Not analyzed by any branch.** All deferred to external tooling (pydeps, import-linter, grimp, networkx).
 
-## 6. Recommendations
+## 6. Recommendations (corrected)
 
 ### 6.1 Immediate Actions (Quick Wins)
 
 | # | Action | Scope | Impact | Effort |
 |---|--------|-------|--------|--------|
-| 1 | Delete confirmed DEAD constants (#1-5 in §2.2) | 5 objects | Reduces noise | S |
-| 2 | Delete confirmed DEAD private functions (#6-36 in §2.2) | 31 functions | ~200 LOC removal | S |
-| 3 | Delete dead pipeline aliases (#68-76 in §2.2) | 9 classes | Cleaner _pipelines.py | S |
-| 4 | Delete dead Protocols in config_service.py (#61-67 in §2.2) | 7 classes | Cleaner service | S |
-| 5 | Verify and delete dead runner_helpers (#77-80 in §2.2) | 4 functions | ~200 LOC | M |
-| 6 | Fix `__all__` export gaps (§2.4) | 11 modules | API clarity | S |
-| 7 | Run `pyflakes` / `ruff check --select F401` for unused imports | project-wide | Lint cleanliness | S |
+| 1 | Delete 5 confirmed DEAD constants/functions (§2.2) | 5 objects | Reduces noise | S |
+| 2 | Fix `__all__` export gaps (§2.4) | 11 modules | API clarity | S |
+| 3 | Run `ruff check --select F401` for unused imports | project-wide | Lint cleanliness | S |
 
 ### 6.2 Refactoring Tasks (require planning)
 
@@ -310,26 +249,408 @@ Note: Exact counts vary between branches due to different counting methods (dire
 | 3 | RF-DUP-003 | Extract shared `get_source_metadata` into base data source | Remove ~30 LOC duplication | LOW |
 | 4 | RF-NAME-001 | Resolve `LineageMetadata` name collision within domain layer | Naming clarity | MEDIUM |
 | 5 | RF-NAME-002 | Resolve `CleanupResult` name collision within application layer | Naming clarity | MEDIUM |
-| 6 | RF-CROSS-001 | Verify `normalize_string`/`parse_date_field`/`validate_smiles` domain↔application overlap | Potential ~50 LOC | MEDIUM |
+| 6 | RF-CROSS-001 | Document `normalize_string`/`parse_date_field`/`validate_smiles` delegation pattern (verified as intentional REFACTOR-004 wrappers) | Documentation | LOW |
 | 7 | RF-CROSS-002 | Consolidate `_get_bioetl_version` to single location | Remove ~10 LOC | LOW |
-| 8 | RF-INFRA-001 | Investigate legacy `config_loader.py` — many SELF_ONLY helpers may be superseded by `config/pipeline_config_loader.py` | ~400 LOC cleanup | HIGH |
-| 9 | RF-DEPS-001 | Run cyclic dependency analysis with import-linter or grimp | Architecture health | MEDIUM |
+| 8 | RF-DEPS-001 | Run cyclic dependency analysis with import-linter or grimp | Architecture health | MEDIUM |
 
-### 6.3 Per-Layer Health Summary
+### 6.3 Per-Layer Health Summary (corrected)
 
 | Layer | Dead Objects | Confirmed Dupes | Name Collisions | Health |
 |-------|-------------|----------------|-----------------|--------|
-| domain | ~36 | 0 | 2 (LineageMetadata, tiny validators) | ⚠️ |
-| application | ~44 | 1 | 2 (CleanupResult, cross-domain funcs) | ⚠️ |
-| infrastructure | ~26 | 2 | 0 (intentional DTO separation) | ⚠️ |
-| composition | ~1 | 0 | 0 | ✅ |
-| interfaces | ~0 | 0 | 1 (_run_pipeline_async) | ✅ |
+| domain | 1 | 0 | 2 (LineageMetadata, tiny validators) | ✅ |
+| application | 2 | 1 | 2 (CleanupResult, delegation wrappers) | ✅ |
+| infrastructure | 2 | 2 | 0 (intentional DTO separation) | ⚠️ |
+| composition | 0 | 0 | 0 | ✅ |
+| interfaces | 0 | 0 | 1 (_run_pipeline_async) | ✅ |
 
 ## 7. Methodology Notes for Future Audits
 
 1. **Define DEAD vs SELF_ONLY explicitly** before counting. SELF_ONLY private helpers are NOT dead code.
-2. **Do not count protocol conformance as duplication.** Methods like `aclose()`, `health_check()`, `fetch()` that implement a shared Protocol/Port are polymorphism, not copy-paste.
-3. **Constants counting must specify**: UPPER_SNAKE_CASE only? Include `__all__`? Include TypeVars?
-4. **Use AST hashing** for confirmed duplicates, not just name matching.
-5. **Always include cyclic dependency analysis** — this is the most consistently missing section.
-6. **Verify classifications with grep** before reporting. At minimum spot-check 10% of DEAD claims.
+2. **Always verify with intra-file grep.** The pattern `grep -rn <name> src/` catches cross-file references, but MUST also check usage within the same file (e.g. `grep -n <name> <file>`). ALL four original branches AND this report's v1 missed this.
+3. **Do not count protocol conformance as duplication.** Methods like `aclose()`, `health_check()`, `fetch()` that implement a shared Protocol/Port are polymorphism, not copy-paste.
+4. **Constants counting must specify**: UPPER_SNAKE_CASE only? Include `__all__`? Include TypeVars?
+5. **Use AST hashing** for confirmed duplicates, not just name matching.
+6. **Always include cyclic dependency analysis** — this is the most consistently missing section.
+7. **Spot-check at least 20%** of DEAD claims with `grep -n <name> <file>` to catch SELF_ONLY.
+8. **Delegation wrappers are not duplication.** Functions like `dict_transformers.normalize_string` that delegate to `domain.normalization.normalize_string` with `return _domain_func(args)` are intentional backward-compatibility layers (REFACTOR-004).
+
+---
+
+## 8. Code Modification Prompts
+
+Below are ready-to-use prompts for each recommended action. Each prompt is self-contained
+and can be given to a code agent to execute.
+
+### PROMPT-001: Delete DEAD Constants and Functions
+
+```
+Task: Remove 5 verified dead objects from the BioETL codebase.
+
+Objects to delete (zero references anywhere in the codebase):
+
+1. `VALIDATION_API` tuple in src/bioetl/domain/validation.py at line 412.
+   It's a one-line assignment: `VALIDATION_API = (validate_publication_year, validate_inchi_key)`
+   Delete just that line. The functions it references (validate_publication_year, validate_inchi_key)
+   are actively used and MUST NOT be deleted.
+
+2. `compute_subcellular_fraction_entity_id` function in
+   src/bioetl/application/core/entity_id.py starting at line 36.
+   Delete the entire function definition (def + body + docstring).
+   Also remove it from `__all__` if present, and from
+   application/core/__init__.py re-exports if present.
+
+3. `PARSER_HELPERS` tuple in
+   src/bioetl/application/pipelines/pubmed/xml_parser.py at line 79.
+   It's a one-line assignment: `PARSER_HELPERS = (get_text, get_int)`
+   Delete just that line. The functions it references are actively used.
+
+4. `CIRCUIT_BREAKER_HELPERS` tuple in
+   src/bioetl/infrastructure/adapters/http/circuit_breaker.py at line 235.
+   Delete just that line.
+
+5. `METRICS_COLLECTOR` assignment in
+   src/bioetl/infrastructure/observability/metrics.py at line 221.
+   Delete just that line.
+
+After deletion:
+- Run `ruff check --select F401` to ensure no new unused imports appeared.
+- Run `pytest tests/` to confirm nothing breaks.
+- Do NOT delete any SELF_ONLY helpers or functions that are called within the same file.
+```
+
+### PROMPT-002: Fix `__all__` Export Gaps
+
+```
+Task: Add missing constants to `__all__` in 11 modules.
+
+For each module below, add the listed constants to the existing `__all__` list.
+If the module has no `__all__`, create one containing all public names.
+
+1. src/bioetl/infrastructure/serialization/encoders.py
+   Add: "ORJSON_AVAILABLE"
+
+2. src/bioetl/composition/factories/pipeline_factories.py
+   Add: "PIPELINE_CONFIGS"
+
+3. src/bioetl/interfaces/cli/exit_codes.py
+   Add: "EXCEPTION_EXIT_CODES"
+
+4. src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py
+   Add: "KNOWN_PARAM_TYPES"
+
+5. src/bioetl/application/core/field_specs.py
+   Add: "FLOAT", "INT", "PMID", "STR"
+
+6. src/bioetl/domain/composite/field_groups.py
+   Add: "DEFAULT_PROVIDER_ORDER"
+
+7. src/bioetl/domain/schemas/column_order.py
+   Add: "ALL_SYSTEM_FIELDS", "DQ_FIELDS_SUFFIX", "SYSTEM_FIELDS_PREFIX"
+
+8. src/bioetl/domain/schemas/constants.py
+   Add all public UPPER_SNAKE_CASE constants that are currently missing from __all__.
+
+9. src/bioetl/domain/value_objects/column_order.py
+   Add: "DEFAULT_COLUMN_ORDER", "PUBLICATION_FIELD_GROUPS"
+
+10. src/bioetl/domain/value_objects/publication_field_groups.py
+    Add: "DEFAULT_FIELD_GROUP_CONFIG", "FIELD_TO_GROUP_MAPPING"
+
+11. src/bioetl/domain/value_objects/column_qualifier.py
+    Add: "JOIN_KEY_COLUMNS"
+
+Rules:
+- Do NOT modify any logic. Only add names to `__all__` lists.
+- Verify each constant actually exists in the module before adding it.
+- Maintain alphabetical order in `__all__` if the existing list is alphabetical.
+- Run `ruff check` after changes.
+```
+
+### PROMPT-003: Run Unused Import Scan
+
+```
+Task: Find and remove unused imports across the BioETL codebase.
+
+Steps:
+1. Run `ruff check --select F401 src/bioetl/` to get the list of unused imports.
+2. For each finding, verify it's truly unused (not a re-export for public API):
+   - If the import is in an `__init__.py` and is part of `__all__`, it's a re-export — KEEP it.
+   - If the import is in a `TYPE_CHECKING` block, it's a type annotation — KEEP it.
+   - Otherwise, delete the unused import line.
+3. Run `ruff check` again to confirm clean.
+4. Run `pytest tests/` to confirm nothing breaks.
+
+Known unused imports from prior analysis:
+- src/bioetl/infrastructure/adapters/pubmed/_search.py:12 — `PubMedXmlProcessor`
+- src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:10 — `time`
+```
+
+### PROMPT-004: Extract Shared MetadataBuilder Base (RF-DUP-001)
+
+```
+Task: Deduplicate identical __init__ methods in SilverMetadataBuilder and GoldMetadataBuilder.
+
+File: src/bioetl/infrastructure/storage/metadata_builder.py
+
+Current state:
+- SilverMetadataBuilder.__init__ (line ~185) and GoldMetadataBuilder.__init__ (line ~321)
+  have IDENTICAL implementations:
+    def __init__(self, transform_version: str | None = None,
+                 transform_steps: tuple[str, ...] | None = None) -> None:
+        self._transform_version = transform_version
+        self._transform_steps = transform_steps or ()
+
+Action:
+1. Create a private base class `_MetadataBuilderBase` in the same file that contains
+   the shared __init__.
+2. Make both SilverMetadataBuilder and GoldMetadataBuilder inherit from it (in addition
+   to any existing base classes).
+3. Remove the __init__ from both subclasses since they now inherit it.
+4. Add a brief docstring to _MetadataBuilderBase explaining it holds shared init logic.
+5. Do NOT change any other methods or behavior.
+6. Run `pytest tests/ -k metadata_builder` to verify.
+
+Architecture rules:
+- _MetadataBuilderBase stays in infrastructure layer (same file).
+- Use single underscore prefix since it's internal.
+- Follow NAME-004: private attributes use single underscore.
+```
+
+### PROMPT-005: Consolidate _load_yaml (RF-DUP-002)
+
+```
+Task: Deduplicate identical _load_yaml methods between BaseConfigLoader and DQConfigLoader.
+
+Files:
+- src/bioetl/infrastructure/config/base_config_loader.py (line ~70)
+- src/bioetl/infrastructure/config/dq_config_loader.py (line ~131)
+
+Both have identical _load_yaml implementations.
+
+Action:
+1. Read both files to confirm the methods are still identical.
+2. Since DQConfigLoader likely doesn't inherit from BaseConfigLoader, create a small
+   shared utility function `_load_yaml_file(path: Path) -> dict[str, Any]` as a
+   module-level function in base_config_loader.py (or a new shared _yaml_utils.py
+   if it fits better).
+3. Have both _load_yaml methods delegate to this shared function.
+4. Run `pytest tests/ -k config_loader` to verify.
+
+Architecture rules:
+- Both files are in infrastructure layer — no cross-layer concern.
+- Keep the public interface (_load_yaml method signature) unchanged.
+```
+
+### PROMPT-006: Extract Shared get_source_metadata (RF-DUP-003)
+
+```
+Task: Deduplicate identical get_source_metadata between FilteredDataSource and
+PublicationTermDataSource.
+
+Files:
+- src/bioetl/application/core/filtered_data_source.py (line ~353)
+- src/bioetl/application/core/publication_term_data_source.py (line ~574)
+
+Action:
+1. Read both methods to confirm they're still identical.
+2. Check if both classes share a common base class. If yes, move get_source_metadata
+   to that base class.
+3. If no common base, create a mixin class `SourceMetadataMixin` in the application
+   layer with the shared method, and have both classes inherit from it.
+4. Remove the method from both subclasses.
+5. Run `pytest tests/ -k "filtered_data_source or publication_term"` to verify.
+
+Architecture rules:
+- Stay in application layer.
+- Follow NAME-001: use *Mixin suffix if creating a mixin.
+```
+
+### PROMPT-007: Resolve LineageMetadata Name Collision (RF-NAME-001)
+
+```
+Task: Investigate and resolve the `LineageMetadata` name collision within the domain layer.
+
+Files:
+- src/bioetl/domain/composite/lineage.py — defines LineageMetadata
+- src/bioetl/domain/models/metadata.py — defines LineageMetadata
+
+Action:
+1. Read both class definitions to understand the differences.
+2. Determine if they serve different purposes or if one is a legacy duplicate.
+3. Options:
+   a) If one is a superset of the other, keep the richer one and make the other
+      an alias (with deprecation comment).
+   b) If they serve different purposes, rename the less-used one to be more specific
+      (e.g., CompositeLineageMetadata for the composite module version).
+   c) If one is unused, delete it.
+4. Update all imports and __all__ exports accordingly.
+5. Run `pytest tests/` to verify.
+
+Architecture rules:
+- Both are in domain layer — no cross-layer concern.
+- Follow NAME-001: class names must be descriptive.
+- Check domain/__init__.py and domain/composite/__init__.py for re-exports.
+```
+
+### PROMPT-008: Resolve CleanupResult Name Collision (RF-NAME-002)
+
+```
+Task: Investigate and resolve the `CleanupResult` name collision within the application layer.
+
+Files:
+- src/bioetl/application/core/cleanup_service.py — defines CleanupResult
+- src/bioetl/application/services/bronze_cleanup_service.py — defines CleanupResult
+
+Action:
+1. Read both class definitions to understand the differences.
+2. Determine if they serve different purposes (generic vs bronze-specific).
+3. Options:
+   a) If the bronze version is a specialization, rename it to BronzeCleanupResult.
+   b) If they're identical, consolidate into one and have both modules import it.
+   c) If one is unused, delete it.
+4. Update all imports, __all__ exports, and callers.
+5. Run `pytest tests/ -k cleanup` to verify.
+```
+
+### PROMPT-009: Consolidate _get_bioetl_version (RF-CROSS-002)
+
+```
+Task: Consolidate _get_bioetl_version to a single location.
+
+Files:
+- src/bioetl/infrastructure/storage/metadata_builder.py — defines _get_bioetl_version
+- src/bioetl/composition/services/metadata_coordinator.py — defines _get_bioetl_version
+
+Action:
+1. Read both implementations to confirm they're identical or nearly identical.
+2. Move the canonical version to domain layer as a utility:
+   - Add `get_version() -> str` to src/bioetl/domain/version.py (create if needed),
+     or to an existing domain utility module.
+3. Replace both local _get_bioetl_version calls with imports from the canonical location.
+4. Run `pytest tests/` to verify.
+
+Architecture rules:
+- Version info is domain-level knowledge.
+- Both infrastructure and composition may import from domain (ARCH-001 allows this).
+- Follow NAME-002: use `get_` prefix for local data retrieval.
+```
+
+### PROMPT-010: Investigate _run_pipeline_async Duplication
+
+```
+Task: Investigate whether _run_pipeline_async is truly duplicated between CLI commands.
+
+Files:
+- src/bioetl/interfaces/cli/commands/run.py — defines _run_pipeline_async
+- src/bioetl/interfaces/cli/commands/run_all.py — defines _run_pipeline_async
+
+Action:
+1. Read both implementations carefully, comparing:
+   - Function signatures
+   - Core logic flow
+   - Error handling
+   - Click integration
+2. If logic is >80% identical:
+   a) Extract shared logic to a helper in interfaces/cli/commands/_pipeline_runner.py
+   b) Have both commands call the shared helper with different parameters.
+3. If logic is substantially different (different orchestration for single vs multi-pipeline):
+   a) Rename one to `_run_single_pipeline_async` / `_run_all_pipelines_async` for clarity.
+   b) Document why they're separate.
+4. Run `pytest tests/ -k cli` to verify.
+
+Architecture rules:
+- Both are in interfaces layer — no cross-layer concern.
+- CLI commands may have unique orchestration logic — duplication may be acceptable.
+```
+
+### PROMPT-011: Run Cyclic Dependency Analysis (RF-DEPS-001)
+
+```
+Task: Perform cyclic dependency analysis on the BioETL codebase.
+
+Steps:
+1. Install import-linter if not present:
+   pip install import-linter
+
+2. Create .importlinter config (or use existing if present) with these contracts:
+   - domain MUST NOT import from application, infrastructure, composition, interfaces
+   - application MUST NOT import from infrastructure, composition, interfaces
+   - infrastructure MUST NOT import from application, composition, interfaces
+
+3. Run: lint-imports
+
+4. Alternatively, use grimp for graph analysis:
+   pip install grimp
+   Then write a small script to detect cycles:
+
+   import grimp
+   graph = grimp.build_graph("bioetl")
+   # Check for intra-layer cycles
+   for layer in ["domain", "application", "infrastructure", "composition", "interfaces"]:
+       modules = [m for m in graph.modules if f".{layer}." in m]
+       for mod in modules:
+           chains = graph.find_illegal_dependencies_for_module(mod)
+           if chains:
+               print(f"CYCLE: {mod} -> {chains}")
+
+5. Report findings as a list of:
+   - Module A -> Module B -> ... -> Module A (cycle path)
+   - Layer and severity
+
+6. Do NOT fix cycles — only report them. Fixing requires architectural decisions.
+```
+
+### PROMPT-012: Document Cross-Layer DTO Separation Pattern
+
+```
+Task: Document the intentional cross-layer name duplication pattern for DTO/Domain separation.
+
+The following classes share names across domain and infrastructure layers BY DESIGN:
+- DQConfig, DQReportConfig
+- CircuitBreakerConfig
+- BaseClientConfig
+- InputFilterConfig
+- ValidationResult
+- RateLimitConfig
+
+Action:
+1. Check if docs/02-architecture/decisions/ contains an ADR covering this pattern.
+2. If NOT:
+   a) Create ADR-NNN-cross-layer-config-naming.md following existing ADR format.
+   b) Document:
+      - Context: domain defines pure data models, infrastructure defines Pydantic schemas
+        for YAML parsing.
+      - Decision: same names are acceptable because they live in different namespaces
+        (fully qualified imports disambiguate).
+      - Consequences: grep for class names may return multiple hits; developers must check
+        the import path.
+      - Alternative considered: adding Yaml prefix to infrastructure variants.
+3. If ADR already exists, verify it covers all 7 name pairs listed above.
+
+Do NOT rename any classes. This is documentation-only.
+```
+
+### PROMPT-013: Verify and Document Delegation Wrappers (RF-CROSS-001)
+
+```
+Task: Document the application→domain delegation pattern for backward compatibility.
+
+File: src/bioetl/application/core/dict_transformers.py
+
+Current state (verified):
+- normalize_string (line 198) → delegates to _domain_normalize_string (domain.normalization)
+- parse_date_field (line 223) → delegates to _domain_parse_date_field (domain.normalization)
+- validate_smiles (line 252) → delegates to _domain_validate_smiles (domain.validation)
+
+Each wrapper has a "Note: Delegated to domain... per REFACTOR-004" comment.
+
+Action:
+1. Verify all callers of these wrapper functions still import from dict_transformers
+   (not directly from domain). Run:
+   grep -rn "from bioetl.application.core.dict_transformers import.*normalize_string\|parse_date_field\|validate_smiles" src/bioetl/ tests/
+2. If callers exist → wrappers are needed, keep them. Add them to __all__ if missing.
+3. If no callers besides tests → consider deprecation warning with:
+   import warnings
+   warnings.warn("Use bioetl.domain.normalization.normalize_string directly", DeprecationWarning)
+4. Do NOT delete these wrappers — they may be part of the public API.
+```

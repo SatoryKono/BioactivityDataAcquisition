@@ -162,16 +162,20 @@ None of the reports performed:
 ## 5. Summary of Errors by Severity
 
 ### CRITICAL Errors
-1. **DEAD count unreliable across all branches** — ranges from 7 to 359 for the same codebase. None applied consistent methodology for SELF_ONLY vs DEAD distinction.
+1. **DEAD count unreliable across ALL branches AND the v1 of this consolidated report** — ranges from 7 to 359 for the same codebase. After exhaustive grep verification of every item, **only 5 objects are truly DEAD** (zero references anywhere). All analyses missed intra-module calls because they used cross-file grep patterns only.
 2. **B3 structural duplicates (264 groups) are false positives** — conflates protocol conformance with code duplication.
-3. **B1 RetentionManager classified as DEAD** — it's actively used in core storage layer.
+3. **B1 items #6-107 were nearly all SELF_ONLY** — every private helper function (prefixed with `_`) flagged as DEAD is actually called within its own module. This includes ALL serialization, normalization, transformation, extractor, and config helpers.
 
 ### HIGH Errors
-4. **B1 and B4 classify SELF_ONLY functions as DEAD** — all private helpers in `config_loader.py` (10 functions), `_collect_pattern_columns`, `_now_utc`.
-5. **B2 DEAD count of 7 is catastrophically low** — missed ~95% of genuinely dead code.
+4. **B1 and B4 classify SELF_ONLY functions as DEAD** — ~100 functions across all layers.
+5. **B2 DEAD count of 7 is catastrophically low** — but ironically closest to the true count (5).
 6. **Constants count inconsistent** — neither 132 nor 192 is verified; actual ~184.
+7. **B1 classified PubchemMoleculeRecord, AssayRecord, CachedBronzeEmptyError as DEAD** — all are ACTIVE (imported by infrastructure adapters).
 
 ### MEDIUM Errors
-7. **B1 `CachedBronzeContext` classified as PRODUCTION_ONLY** — it's ACTIVE (used in production code from multiple modules + tests).
-8. **B2 lists zero suspected duplicates** — either no analysis was done or results were lost.
-9. **No branch performed cyclic dependency analysis.**
+8. **B1 `CachedBronzeContext` classified as PRODUCTION_ONLY** — it's ACTIVE.
+9. **B2 lists zero suspected duplicates** — either no analysis was done or results were lost.
+10. **No branch performed cyclic dependency analysis.**
+
+### Meta-Error (affects all analyses including this one)
+11. **The fundamental methodology error**: using `grep -rn <name> src/bioetl/ --include="*.py"` across files but NOT checking `grep -n <name> <same-file>` for intra-module calls. Private helper functions are by definition called only within their module — a cross-file-only search will always miss them. The correct approach is per-file verification: `grep -c <name> <file>` should return >1 (definition + at least one call) for SELF_ONLY functions.
