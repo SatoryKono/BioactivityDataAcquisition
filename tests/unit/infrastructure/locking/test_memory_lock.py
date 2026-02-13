@@ -44,6 +44,37 @@ class TestMemoryLock:
         assert result.key == "test_key"
 
     @pytest.mark.asyncio
+    async def test_validate_fencing_token_success(self, memory_lock):
+        """Test fencing token validation succeeds for current holder."""
+        token = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert token is not None
+
+        result = await memory_lock.validate_fencing_token("test_key", token)
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_validate_fencing_token_rejects_stale(self, memory_lock):
+        """Test fencing token validation fails for stale tokens."""
+        token = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert token is not None
+        await memory_lock.release(key="test_key", owner_id="owner_1")
+
+        new_token = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+        )
+        assert new_token is not None
+
+        result = await memory_lock.validate_fencing_token("test_key", token)
+        assert result is False
+
+    @pytest.mark.asyncio
     async def test_acquire_no_wait_when_unlocked(self, memory_lock):
         """Test acquire with wait=False when lock is not held."""
         result = await memory_lock.acquire(

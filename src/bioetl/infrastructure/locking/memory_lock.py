@@ -29,8 +29,10 @@ class MemoryLock(LockPort):
         Args:
             ttl_check_interval: Interval in seconds between TTL checks.
         """
-        # Lock data: key -> (owner_id, asyncio.Lock, expires_at, original_ttl)
-        self._locks: dict[str, tuple[str, asyncio.Lock, float | None, int | None]] = {}
+        # Lock data: key -> (owner_id, asyncio.Lock, expires_at, original_ttl, sequence)
+        self._locks: dict[
+            str, tuple[str, asyncio.Lock, float | None, int | None, int | None]
+        ] = {}
         self._global_lock = asyncio.Lock()
         self._ttl_check_interval = ttl_check_interval
         self._ttl_checker_task: asyncio.Task[None] | None = None
@@ -54,13 +56,13 @@ class MemoryLock(LockPort):
         async with self._global_lock:
             expired_keys = [
                 key
-                for key, (_, lock, expires_at, _) in self._locks.items()
+                for key, (_, lock, expires_at, _, _) in self._locks.items()
                 if expires_at is not None
                 and current_time > expires_at
                 and lock.locked()
             ]
             for key in expired_keys:
-                _, lock, _, _ = self._locks[key]
+                _, lock, _, _, _ = self._locks[key]
                 if lock.locked():
                     lock.release()
                 del self._locks[key]
@@ -84,7 +86,7 @@ class MemoryLock(LockPort):
         """
         async with self._global_lock:
             if key in self._locks:
-                _existing_owner, lock, _, _ = self._locks[key]
+                _existing_owner, lock, _, _, _ = self._locks[key]
                 if lock.locked():
                     # Strictly non-reentrant: cannot acquire if already locked
                     return None
@@ -97,18 +99,18 @@ class MemoryLock(LockPort):
             # Create new lock or reuse existing unlocked one
             if key not in self._locks:
                 lock = asyncio.Lock()
-                self._locks[key] = (str(owner_id), lock, expires_at, ttl)
             else:
-                # Lock exists but is not locked - update owner and reuse
-                _, lock, _, _ = self._locks[key]
-                self._locks[key] = (str(owner_id), lock, expires_at, ttl)
+                # Lock exists but is not locked - reuse the existing lock
+                _, lock, _, _, _ = self._locks[key]
 
             # Acquire the asyncio.Lock
             if not lock.locked():
                 await lock.acquire()
                 self._sequence += 1
+                sequence = self._sequence
+                self._locks[key] = (str(owner_id), lock, expires_at, ttl, sequence)
                 return FencingToken(
-                    sequence=self._sequence,
+                    sequence=sequence,
                     key=key,
                     owner_id=owner_id,
                     issued_at=time.monotonic(),
@@ -183,7 +185,7 @@ class MemoryLock(LockPort):
             if key not in self._locks:
                 return False
 
-            existing_owner, lock, _, _ = self._locks[key]
+            existing_owner, lock, _, _, _ = self._locks[key]
             if existing_owner != str(owner_id):
                 return False
 
@@ -212,14 +214,20 @@ class MemoryLock(LockPort):
         async with self._global_lock:
             if key not in self._locks:
                 return False
-            existing_owner, lock, _, original_ttl = self._locks[key]
+            existing_owner, lock, _, original_ttl, sequence = self._locks[key]
             if existing_owner != str(owner_id):
                 return False
 
             # Extend TTL using the original TTL value
             if original_ttl is not None:
                 new_expires_at = time.monotonic() + original_ttl
-                self._locks[key] = (existing_owner, lock, new_expires_at, original_ttl)
+                self._locks[key] = (
+                    existing_owner,
+                    lock,
+                    new_expires_at,
+                    original_ttl,
+                    sequence,
+                )
 
             return True
 
@@ -244,7 +252,7 @@ class MemoryLock(LockPort):
             if key not in self._locks:
                 return False
 
-            existing_owner, lock, expires_at, _ = self._locks[key]
+            existing_owner, lock, expires_at, _, _ = self._locks[key]
 
             # Check if lock is still held
             if not lock.locked():
@@ -256,6 +264,20 @@ class MemoryLock(LockPort):
 
             # Check owner matches
             return existing_owner == str(owner_id)
+
+    async def validate_fencing_token(self, key: str, token: FencingToken) -> bool:
+        """Validate that the given fencing token is still valid for the lock."""
+        async with self._global_lock:
+            if key not in self._locks:
+                return False
+            existing_owner, lock, expires_at, _, sequence = self._locks[key]
+            if token.key != key or not lock.locked():
+                return False
+            if expires_at is not None and time.monotonic() > expires_at:
+                return False
+            if existing_owner != str(token.owner_id):
+                return False
+            return sequence is not None and token.sequence == sequence
 
     async def aclose(self) -> None:
         """Close all locks and stop background tasks."""
@@ -269,7 +291,7 @@ class MemoryLock(LockPort):
             self._ttl_checker_task = None
 
         async with self._global_lock:
-            for _, (_, lock, _, _) in self._locks.items():
+            for _, (_, lock, _, _, _) in self._locks.items():
                 if lock.locked():
                     lock.release()
             self._locks.clear()

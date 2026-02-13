@@ -1,6 +1,6 @@
 """Architecture test: Lock Safety Guard.
 
-Verifies that LockPort includes validate_owner method for Safety Guard.
+Verifies that LockPort includes fencing token validation for Safety Guard.
 This prevents split-brain scenarios where lock expires but writer continues.
 
 REQ-ARCH-041: Lock validation before storage writes.
@@ -39,6 +39,18 @@ class TestLockSafetyGuard:
             "This prevents split-brain scenarios where lock expires but writer continues."
         )
 
+    def test_lockport_has_validate_fencing_token_method(self):
+        """LockPort Protocol MUST define validate_fencing_token method."""
+        methods = [
+            name
+            for name, _ in inspect.getmembers(LockPort, predicate=inspect.isfunction)
+            if not name.startswith("_")
+        ]
+
+        assert "validate_fencing_token" in methods, (
+            "LockPort MUST define validate_fencing_token() for fencing validation."
+        )
+
     def test_memory_lock_implements_validate_owner(self):
         """MemoryLock MUST implement validate_owner method."""
         lock = MemoryLock()
@@ -47,6 +59,15 @@ class TestLockSafetyGuard:
             "MemoryLock MUST implement validate_owner() method from LockPort"
         )
         assert callable(lock.validate_owner)
+
+    def test_memory_lock_implements_validate_fencing_token(self):
+        """MemoryLock MUST implement validate_fencing_token method."""
+        lock = MemoryLock()
+
+        assert hasattr(lock, "validate_fencing_token"), (
+            "MemoryLock MUST implement validate_fencing_token() method from LockPort"
+        )
+        assert callable(lock.validate_fencing_token)
 
     @pytest.mark.asyncio
     async def test_validate_owner_returns_true_when_holding_lock(self):
@@ -122,6 +143,47 @@ class TestLockSafetyGuard:
 
         await lock.aclose()
 
+    @pytest.mark.asyncio
+    async def test_validate_fencing_token_returns_true_when_holding_lock(self):
+        """validate_fencing_token returns True when token matches holder."""
+        from uuid import uuid4
+
+        lock = MemoryLock()
+        run_id = uuid4()
+        key = "test:lock"
+
+        token = await lock.acquire(key, run_id, ttl=60)
+        assert token is not None
+
+        is_valid = await lock.validate_fencing_token(key, token)
+        assert is_valid is True
+
+        await lock.release(key, run_id)
+        await lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_validate_fencing_token_rejects_stale_token(self):
+        """validate_fencing_token returns False for stale tokens."""
+        from uuid import uuid4
+
+        lock = MemoryLock()
+        key = "test:lock"
+
+        run_id = uuid4()
+        stale_token = await lock.acquire(key, run_id, ttl=60)
+        assert stale_token is not None
+        await lock.release(key, run_id)
+
+        new_run = uuid4()
+        new_token = await lock.acquire(key, new_run, ttl=60)
+        assert new_token is not None
+
+        is_valid = await lock.validate_fencing_token(key, stale_token)
+        assert is_valid is False
+
+        await lock.release(key, new_run)
+        await lock.aclose()
+
 
 class TestFencingTokenContract:
     """Tests for FencingToken fencing contract."""
@@ -190,5 +252,5 @@ class TestLockManagerSafetyGuard:
 
         assert hasattr(LockManager, "validate"), (
             "LockManager MUST have validate() method for Safety Guard. "
-            "This method wraps LockPort.validate_owner() for use in pipelines."
+            "This method wraps fencing token validation for use in pipelines."
         )

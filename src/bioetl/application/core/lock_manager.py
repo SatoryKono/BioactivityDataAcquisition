@@ -250,8 +250,9 @@ class LockManager:
         """Validate that this LockManager still holds the lock.
 
         This is the Safety Guard: before critical operations (e.g., writes),
-        call this method to verify lock ownership. This prevents split-brain
-        scenarios where the lock expired but the writer continued.
+        call this method to verify lock ownership via fencing token validation.
+        This prevents split-brain scenarios where the lock expired but the
+        writer continued.
 
         Returns:
             True if this run_id still holds the lock, False otherwise.
@@ -263,7 +264,12 @@ class LockManager:
                     raise LockLostError(lock_key, run_id)
                 await storage.write_silver(...)
         """
-        return await self._lock.validate_owner(self._config.lock_key, self._run_id)
+        if self._fencing_token is None:
+            return await self._lock.validate_owner(self._config.lock_key, self._run_id)
+
+        return await self._lock.validate_fencing_token(
+            self._config.lock_key, self._fencing_token
+        )
 
     async def __aexit__(
         self,
