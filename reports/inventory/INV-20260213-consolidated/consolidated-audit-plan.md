@@ -125,32 +125,40 @@ Source: B4 report.
 
 | # | File | LOC | Verdict |
 |---|------|-----|---------|
-| 1 | `src/bioetl/__main__.py` | 8 | **OK** — Python entry point, called via `python -m bioetl` |
+| 1 | `src/bioetl/__main__.py` | 8 | **OK** — Python entry point (`python -m bioetl`) |
 | 2 | `src/bioetl/interfaces/cli/__main__.py` | 9 | **OK** — CLI entry point |
-| 3 | `src/bioetl/interfaces/observability.py` | 19 | **REVIEW** — may be unused |
-| 4 | `src/bioetl/infrastructure/storage/delta_writer.py` | 8 | **REVIEW** — may be a facade/re-export |
-| 5 | `src/bioetl/composition/types.py` | 52 | **REVIEW** — check if types are imported elsewhere |
-| 6 | `src/bioetl/composition/factories/storage_factory.py` | 341 | **REVIEW** — check if used in assembly |
-| 7 | `src/bioetl/composition/factories/storage_adapter.py` | 652 | **REVIEW** — check if used in assembly |
-| 8 | `src/bioetl/application/core/subcellular_fraction_data_source.py` | 297 | **REVIEW** — check if registered dynamically |
+| 3 | `src/bioetl/interfaces/observability.py` | 19 | **OK** — Re-export facade, tested in test_observability.py |
+| 4 | `src/bioetl/infrastructure/storage/delta_writer.py` | 8 | **OK** — Compat wrapper, used in benchmark tests |
+| 5 | `src/bioetl/composition/types.py` | 52 | **OK** — Type re-export facade, tested in test_types.py |
+| 6 | `src/bioetl/composition/factories/storage_factory.py` | 341 | **OK** — Active factory, re-exported via storage.py facade |
+| 7 | `src/bioetl/composition/factories/storage_adapter.py` | 652 | **OK** — StoragePort impl, re-exported via storage.py facade |
+| 8 | `src/bioetl/application/core/subcellular_fraction_data_source.py` | 297 | **VERIFY** — Has tests but no direct import in src/ |
+
+**CORRECTION:** Verification shows 7/8 modules are NOT orphaned (re-export facades,
+compat wrappers, factored-out implementations). Only #8 needs further investigation
+for possible dynamic registration.
 
 ### 2.6 `__all__` Export Gaps
 
 Source: B3 report (unique contribution).
 
-| # | Module | Missing from `__all__` |
-|---|--------|----------------------|
-| 1 | `infrastructure.serialization.encoders` | `ORJSON_AVAILABLE` |
-| 2 | `composition.factories.pipeline_factories` | `PIPELINE_CONFIGS` |
-| 3 | `interfaces.cli.exit_codes` | `EXCEPTION_EXIT_CODES` |
-| 4 | `application.pipelines.chembl.assay_parameters_transformer` | `KNOWN_PARAM_TYPES` |
-| 5 | `application.core.field_specs` | `FLOAT`, `INT`, `PMID`, `STR` |
-| 6 | `domain.composite.field_groups` | `DEFAULT_PROVIDER_ORDER` |
-| 7 | `domain.schemas.column_order` | `ALL_SYSTEM_FIELDS`, `DQ_FIELDS_SUFFIX`, `SYSTEM_FIELDS_PREFIX` |
-| 8 | `domain.schemas.constants` | 14 enum constants |
-| 9 | `domain.value_objects.column_order` | `DEFAULT_COLUMN_ORDER`, `PUBLICATION_FIELD_GROUPS` |
-| 10 | `domain.value_objects.publication_field_groups` | `DEFAULT_FIELD_GROUP_CONFIG`, `FIELD_TO_GROUP_MAPPING` |
-| 11 | `domain.value_objects.column_qualifier` | `JOIN_KEY_COLUMNS` |
+**CORRECTION:** Cross-verification showed that most B3 `__all__` gap claims are
+**FALSE POSITIVES**. The constants ARE already correctly exported. Verified:
+
+| # | Module | Claimed Missing | Actual Status |
+|---|--------|----------------|---------------|
+| 1 | `infrastructure.serialization.encoders` | `ORJSON_AVAILABLE` | **IN `__all__`** — false positive |
+| 2 | `composition.factories.pipeline_factories` | `PIPELINE_CONFIGS` | **IN `__all__`** (line 580) — false positive |
+| 3 | `interfaces.cli.exit_codes` | `EXCEPTION_EXIT_CODES` | **IN `__all__`** (line 123) — false positive |
+| 4 | `application.core.field_specs` | `FLOAT`, `INT`, `STR` | **IN `__all__`** (lines 306-310) — false positive |
+| 5 | `domain.composite.field_groups` | `DEFAULT_PROVIDER_ORDER` | **IN `__all__`** (line 29) — false positive |
+| 6 | `domain.schemas.column_order` | `ALL_SYSTEM_FIELDS`, etc. | **IN `__all__`** (lines 17-19) — false positive |
+| 7 | `domain.value_objects.column_order` | `DEFAULT_COLUMN_ORDER`, etc. | **IN `__all__`** (lines 14-15) — false positive |
+| 8 | `domain.value_objects.publication_field_groups` | `DEFAULT_FIELD_GROUP_CONFIG`, etc. | **IN `__all__`** (lines 24-25) — false positive |
+| 9 | `domain.value_objects.column_qualifier` | `JOIN_KEY_COLUMNS` | **IN `__all__`** (line 12) — false positive |
+
+**Conclusion:** No verified `__all__` export gaps found. B3 likely used AST parsing
+that failed to match multi-line `__all__` definitions or compared against a stale snapshot.
 
 ---
 
@@ -268,7 +276,6 @@ Not computed by any branch. All branches note this requires dedicated tooling
 | 1.2 | Rename `CleanupResult` → `BronzeCleanupResult` | 1 class + refs | S | Resolve name collision |
 | 1.3 | Rename `RateLimitConfig` → `RateLimitContext` in composition | 1 class + refs | S | Resolve name collision |
 | 1.4 | Run `pyflakes` / `ruff` unused import check | All modules | S | Clean imports |
-| 1.5 | Add missing `__all__` entries | §2.6 table | S | Complete exports |
 
 ### Phase 2: Verification Tasks (Medium Risk)
 
@@ -345,5 +352,446 @@ Best source for each section:
 - Object registry → **B2** (format), **B3** (accuracy)
 - Duplications → **B4** (with corrections from this document)
 - Dependencies → **B3** = **B4** (consistent)
-- `__all__` gaps → **B3** (unique)
-- Orphan modules → **B4** (unique)
+- `__all__` gaps → **None** (B3 claims are false positives)
+- Orphan modules → **B4** (but 7/8 verified as non-orphaned)
+
+---
+
+## Appendix B: Modification Prompts
+
+Ready-to-use prompts for each action item. Each prompt is self-contained and
+can be executed independently. Order matches the Phase 1/2/3 plan in §5.
+
+---
+
+### PROMPT 1.1: Delete 9 Verified DEAD Objects
+
+```
+Remove the following 9 verified dead objects from the BioETL codebase.
+Each is a module-level constant or function with zero references anywhere
+in production code or tests. Delete ONLY the object definition line(s);
+do NOT remove surrounding code, imports, or other objects.
+
+1. src/bioetl/infrastructure/adapters/http/circuit_breaker.py
+   - Delete: `CIRCUIT_BREAKER_HELPERS = (is_circuit_breaker_error,)`
+   - Location: last line of file (line ~235)
+   - This is a 1-line tuple constant at EOF
+
+2. src/bioetl/infrastructure/observability/metrics.py
+   - Delete: the comment + constant (2 lines):
+     ```
+     # Expose for tooling to avoid false dead-code flags.
+     METRICS_COLLECTOR = MetricsCollector
+     ```
+   - Location: last 2 lines of file (lines ~220-221)
+
+3. src/bioetl/infrastructure/observability/logging.py
+   - Delete: `LOGGING_API = (create_logger,)`
+   - Location: line ~52 (between create_logger function and StructlogLogger class)
+   - Leave a blank line between the function and the class after removal
+
+4. src/bioetl/composition/bootstrap_logger.py
+   - Delete: `BOOTSTRAP_LOGGER_EXPORTS = (BootstrapLogger, reset_bootstrap_logger)`
+   - Location: line ~140 (between BootstrapLogger class and __all__ list)
+   - Leave blank line between class and __all__ after removal
+
+5. src/bioetl/interfaces/cli/exit_codes.py
+   - Delete: `EXIT_CODE_HELPERS = (get_exit_code_for_exception,)`
+   - Location: line ~120 (between get_exit_code_for_exception function and __all__ list)
+   - Leave blank line between function and __all__ after removal
+
+6. src/bioetl/interfaces/http/health_server.py
+   - Delete: `RUN_HEALTH_SERVER = run_health_server`
+   - Location: line ~305 (between run_health_server function and __all__ list)
+   - Leave blank line between function and __all__ after removal
+
+7. src/bioetl/application/pipelines/pubmed/xml_parser.py
+   - Delete: `PARSER_HELPERS = (get_text, get_int)`
+   - Location: last line of file (line ~79)
+
+8. src/bioetl/application/core/entity_id.py
+   - Delete: the entire function `compute_subcellular_fraction_entity_id`
+     (lines ~36-51, including docstring)
+   - This is the last function in the file; leave trailing newline
+
+9. src/bioetl/domain/validation.py
+   - Delete: `VALIDATION_API = (validate_publication_year, validate_inchi_key)`
+   - Location: last line of file (line ~412)
+
+Verification after changes:
+  - Run `ruff check src/bioetl/` to ensure no broken imports
+  - Run `pytest tests/architecture/ -v` to ensure no architecture violations
+  - Run `pytest tests/ -x --timeout=60` to ensure no test regressions
+  - Grep for each deleted name to confirm zero remaining references
+
+Commit message:
+  refactor: remove 9 verified dead objects (INV-20260213 §2.1)
+```
+
+---
+
+### PROMPT 1.2: Rename CleanupResult → BronzeCleanupResult
+
+```
+Rename the `CleanupResult` class in the Bronze cleanup service to
+`BronzeCleanupResult` to resolve a name collision with the core
+`CleanupResult` class (which handles Silver/Gold cleanup).
+
+Files to modify (3 files, ~5 changes):
+
+1. src/bioetl/application/services/bronze_cleanup_service.py
+   - Rename: `class CleanupResult:` → `class BronzeCleanupResult:`
+   - Update all references within the file:
+     - Method return type annotations: `-> CleanupResult` → `-> BronzeCleanupResult`
+     - Constructor calls: `CleanupResult(` → `BronzeCleanupResult(`
+     - Type hints in method parameters
+
+2. src/bioetl/application/services/__init__.py
+   - Update import: `from .bronze_cleanup_service import CleanupResult`
+     → `from .bronze_cleanup_service import BronzeCleanupResult`
+   - Update __all__: replace `"CleanupResult"` with `"BronzeCleanupResult"`
+     in the __all__ list IF it appears there. If CleanupResult is NOT in
+     __all__ of this module, then only update the import line.
+   - IMPORTANT: Do NOT touch any import of CleanupResult from
+     `application.core.cleanup_service` — that is the CORRECT class to keep.
+
+3. src/bioetl/composition/_services.py (if references exist)
+   - Update any TYPE_CHECKING import that imports CleanupResult from
+     `application.services.bronze_cleanup_service`
+   - Update return type annotations that reference the Bronze version
+
+4. tests/unit/application/services/test_bronze_cleanup_service.py
+   - Update import and all usages of CleanupResult → BronzeCleanupResult
+
+DO NOT modify:
+- src/bioetl/application/core/cleanup_service.py — the CORE CleanupResult stays
+- src/bioetl/application/core/__init__.py — the core export stays
+- Any file that imports CleanupResult from `application.core`
+
+Verification:
+  - `grep -rn "class CleanupResult" src/bioetl/` should show exactly 1 result
+    (in core/cleanup_service.py)
+  - `grep -rn "class BronzeCleanupResult" src/bioetl/` should show exactly 1 result
+    (in services/bronze_cleanup_service.py)
+  - `pytest tests/unit/application/services/test_bronze_cleanup_service.py -v`
+  - `pytest tests/unit/application/core/test_cleanup_service.py -v`
+
+Commit message:
+  refactor: rename bronze CleanupResult → BronzeCleanupResult (INV-20260213 §3.2)
+```
+
+---
+
+### PROMPT 1.3: Rename RateLimitConfig → RateLimitContext in Composition
+
+```
+Rename the `RateLimitConfig` class in composition/bootstrap_contexts.py
+to `RateLimitContext` to resolve a name collision with the domain
+`RateLimitConfig` class (which has validation logic and different fields).
+
+Files to modify (3 production files + tests):
+
+1. src/bioetl/composition/bootstrap_contexts.py
+   - Rename: `class RateLimitConfig:` → `class RateLimitContext:`
+   - Update the docstring if it references the old name
+   - Update __all__ entry: `"RateLimitConfig"` → `"RateLimitContext"`
+
+2. src/bioetl/composition/types.py
+   - Update import: `from .bootstrap_contexts import RateLimitConfig`
+     → `from .bootstrap_contexts import RateLimitContext`
+   - Update __all__ entry: `"RateLimitConfig"` → `"RateLimitContext"`
+
+3. src/bioetl/composition/providers/_config_helpers.py
+   - Update import: `from ..bootstrap_contexts import RateLimitConfig`
+     → `from ..bootstrap_contexts import RateLimitContext`
+   - Update return type annotation of `_get_rate_limit_from_config()`:
+     `-> RateLimitConfig` → `-> RateLimitContext`
+   - Update constructor call: `RateLimitConfig(rate=..., capacity=...)`
+     → `RateLimitContext(rate=..., capacity=...)`
+
+4. tests/unit/composition/test_types.py
+   - Update import and all usages of RateLimitConfig → RateLimitContext
+
+DO NOT modify:
+- src/bioetl/domain/configs/base.py — domain RateLimitConfig stays as is
+- src/bioetl/domain/configs/__init__.py — domain export stays
+- src/bioetl/domain/__init__.py — domain re-export stays
+- Any file that imports RateLimitConfig from `bioetl.domain`
+
+Verification:
+  - `grep -rn "class RateLimitConfig" src/bioetl/` should show exactly 1 result
+    (in domain/configs/base.py)
+  - `grep -rn "class RateLimitContext" src/bioetl/` should show exactly 1 result
+    (in composition/bootstrap_contexts.py)
+  - `pytest tests/unit/composition/ -v`
+
+Commit message:
+  refactor: rename composition RateLimitConfig → RateLimitContext (INV-20260213 §3.2)
+```
+
+---
+
+### PROMPT 1.4: Run Ruff Unused Import Check
+
+```
+Run ruff with unused import rules on the entire BioETL source tree
+and fix any violations found.
+
+Steps:
+
+1. Run the linter:
+   ruff check src/bioetl/ --select F401 --output-format=full
+
+2. For each unused import found:
+   - If the import is in an __init__.py and is a re-export:
+     KEEP IT (add to __all__ if not already there, or add `# noqa: F401`)
+   - If the import is genuinely unused: REMOVE the import line
+   - If the import is used only under TYPE_CHECKING: move it there
+
+3. Run again to confirm zero violations:
+   ruff check src/bioetl/ --select F401
+
+Verification:
+  - `ruff check src/bioetl/ --select F401` returns 0 violations
+  - `pytest tests/ -x --timeout=60` passes
+
+Commit message:
+  chore: remove unused imports (INV-20260213 §5, Phase 1.4)
+```
+
+---
+
+### PROMPT 2.1: Verify Orphan Module — SubcellularFractionDataSource
+
+```
+Investigate whether `src/bioetl/application/core/subcellular_fraction_data_source.py`
+is used in production code. It defines `SubcellularFractionDataSource` which
+has a test file but no direct import found in src/.
+
+Steps:
+
+1. Search for any dynamic registration or factory creation:
+   grep -rn "subcellular_fraction_data_source\|SubcellularFractionDataSource" src/bioetl/
+
+2. Search for any string-based references (dynamic import / registry):
+   grep -rn "subcellular.*data.*source\|SubcellularFraction" src/bioetl/composition/
+
+3. Check if the chembl_subcellular_fraction pipeline creates this adapter:
+   - Read src/bioetl/composition/factories/pipeline_factories.py
+   - Search for "subcellular" in factory definitions
+
+4. If NO production references are found:
+   - This is TEST_ONLY code — consider if it should be:
+     a) Moved to tests/fixtures/ (if only used in tests)
+     b) Integrated into a pipeline factory (if it was intended to be used)
+     c) Removed (if it's truly abandoned)
+   - DO NOT remove without confirming with the team
+
+5. If production references ARE found:
+   - Document the reference chain
+   - Mark as ACTIVE in the inventory
+
+Report findings but do NOT delete the file without confirmation.
+```
+
+---
+
+### PROMPT 2.2: Verify TEST_ONLY Objects
+
+```
+Verify whether the following objects are truly TEST_ONLY or are actually
+used in production through indirect patterns (delegation, dynamic dispatch,
+reflection). For each object, determine its correct classification.
+
+Objects to verify:
+
+1. `TransformerPort` in src/bioetl/application/core/protocols.py:49
+   - Is this Protocol used as a type hint in any production code?
+   - grep -rn "TransformerPort" src/bioetl/ (exclude tests/)
+
+2. `PIPELINE_HEALTH_CHECK_PASSED` in infrastructure
+   - Is this a Prometheus metric name used at runtime?
+   - grep -rn "PIPELINE_HEALTH_CHECK_PASSED" src/bioetl/
+
+3. `DataClassification` in src/bioetl/domain/types.py
+   - Is this enum's .value used in string comparisons?
+   - grep -rn "DataClassification\|data_classification" src/bioetl/
+
+4. Domain validation functions (validate_smiles, validate_positive_int,
+   validate_publication_year, etc.) in src/bioetl/domain/validation.py
+   - Are these called via delegation in dict_transformers.py or other wrappers?
+   - grep -rn "validate_smiles\|validate_positive_int\|validate_publication_year" src/bioetl/
+
+For each object, report:
+  - ACTIVE (used in production AND tests)
+  - PRODUCTION_ONLY (used in production, not tested)
+  - TEST_ONLY (confirmed: only referenced in tests/)
+  - DEAD (zero references anywhere)
+
+Do NOT modify any files. Report findings only.
+```
+
+---
+
+### PROMPT 2.4: Set Up import-linter in CI
+
+```
+Set up import-linter to enforce ARCH-001 layer boundaries in CI.
+
+Steps:
+
+1. Add import-linter to dev dependencies:
+   - Add `import-linter>=2.0` to pyproject.toml [project.optional-dependencies.dev]
+
+2. Create .importlinter configuration in pyproject.toml:
+
+   [tool.importlinter]
+   root_packages = ["bioetl"]
+
+   [[tool.importlinter.contracts]]
+   name = "Domain layer must not import infrastructure"
+   type = "forbidden"
+   source_modules = ["bioetl.domain"]
+   forbidden_modules = ["bioetl.infrastructure", "bioetl.composition", "bioetl.interfaces"]
+
+   [[tool.importlinter.contracts]]
+   name = "Application layer must not import infrastructure"
+   type = "forbidden"
+   source_modules = ["bioetl.application"]
+   forbidden_modules = ["bioetl.infrastructure", "bioetl.composition", "bioetl.interfaces"]
+   ignore_imports = ["bioetl.application.* -> bioetl.infrastructure.* (TYPE_CHECKING)"]
+
+   [[tool.importlinter.contracts]]
+   name = "Infrastructure must not import application or composition"
+   type = "forbidden"
+   source_modules = ["bioetl.infrastructure"]
+   forbidden_modules = ["bioetl.application", "bioetl.composition", "bioetl.interfaces"]
+   ignore_imports = ["bioetl.infrastructure.* -> bioetl.application.* (TYPE_CHECKING)"]
+
+3. Run initial check:
+   lint-imports
+
+4. If violations are found, review each one:
+   - If it's a TYPE_CHECKING import: add to ignore_imports
+   - If it's a real violation: file a separate issue
+
+5. Add to CI pipeline (Makefile or CI config):
+   lint-imports
+
+Commit message:
+  ci: add import-linter for ARCH-001 enforcement (INV-20260213 §5, Phase 2.4)
+```
+
+---
+
+### PROMPT 3.1: Review Cross-Provider Extractor Patterns (RF-INV-001)
+
+```
+Analyze the cross-provider extractor modules for potential consolidation
+opportunities. Several publication providers (SemanticScholar, OpenAlex,
+CrossRef, PubMed, ChEMBL) have extractors with similar function names.
+
+The following function name pairs exist across providers:
+  - extract_authors (semanticscholar ↔ openalex)
+  - extract_author_orcids (semanticscholar ↔ openalex)
+  - extract_affiliations (semanticscholar ↔ openalex)
+  - extract_journal_info (semanticscholar ↔ openalex)
+  - extract_external_ids (semanticscholar ↔ openalex)
+  - extract_open_access_info (semanticscholar ↔ openalex)
+
+For each pair:
+
+1. Read both implementations side by side
+2. Determine if the logic is:
+   a) IDENTICAL — true copy-paste → candidate for shared base function
+   b) SIMILAR STRUCTURE — same pattern, different API fields → candidate for
+      parameterized base function with provider-specific field mappings
+   c) DIFFERENT — same name but different logic → no action (correct as-is)
+
+3. For cases (a) or (b), estimate:
+   - LOC savings from consolidation
+   - Risk of breaking provider-specific edge cases
+   - Whether a shared `_extract_*` in `application/core/` is appropriate
+
+Report findings with recommendations. Do NOT modify code without a plan
+review. Each consolidated function must be tested against all providers.
+
+Expected outcome: A decision document (not code changes) with one of:
+  - "Consolidate X functions into application/core/publication_extractors.py"
+  - "Keep separate — differences are provider-specific by design"
+  - "Partial consolidation: merge A+B, keep C+D separate"
+```
+
+---
+
+### PROMPT 3.2: Document Schema↔Domain Pair Convention (RF-INV-002)
+
+```
+Create an ADR (Architecture Decision Record) documenting the intentional
+schema↔domain pair pattern used in BioETL.
+
+File: docs/02-architecture/decisions/ADR-NNN-schema-domain-pairs.md
+
+Content should cover:
+
+1. Context:
+   - BioETL uses frozen dataclasses in domain/ for configuration value objects
+   - Infrastructure uses Pydantic models for YAML deserialization
+   - Both layers define classes with the same name (e.g., DQConfig, BaseClientConfig)
+
+2. Decision:
+   - Domain classes are immutable value objects with business validation
+   - Infrastructure Pydantic models are DTOs for deserialization only
+   - Infrastructure models have `to_domain()` methods for conversion
+   - This is NOT duplication — it's the Hexagonal Architecture boundary
+
+3. Consequences:
+   - Same-name classes exist across layers (intentional)
+   - Changes to domain config require corresponding infrastructure schema update
+   - New config objects must follow the pattern: Pydantic schema → to_domain() → frozen dataclass
+
+4. Known pairs:
+   - BaseClientConfig (domain/configs/base.py ↔ infrastructure/schemas/base_schemas.py)
+   - CircuitBreakerConfig (domain/resilience.py ↔ infrastructure/schemas/pipeline_config.py)
+   - DQConfig (domain/config/dq.py ↔ infrastructure/schemas/pipeline_config.py)
+   - DQReportConfig (domain/config/dq.py ↔ infrastructure/schemas/pipeline_config.py)
+   - InputFilterConfig (domain/filtering/ ↔ infrastructure/schemas/pipeline_config.py)
+
+Determine the next ADR number by checking existing ADRs in docs/02-architecture/decisions/.
+
+Commit message:
+  docs: ADR for schema-domain pair convention (INV-20260213 §3.3, RF-INV-002)
+```
+
+---
+
+### PROMPT 3.3: Review Facade Re-export Strategy (RF-INV-003)
+
+```
+Audit all __init__.py facade re-exports in BioETL and assess whether
+the re-export strategy is consistent and minimal.
+
+Steps:
+
+1. List all __init__.py files with __all__ exports:
+   grep -rn "__all__" src/bioetl/**/__init__.py
+
+2. For each __init__.py with __all__:
+   - Count total exports
+   - Check if all exported names are actually importable
+   - Check if any exported name is DEAD (not imported by anyone)
+   - Check if important public objects are MISSING from __all__
+
+3. Identify the largest facades (>20 exports) and evaluate:
+   - Should they be split into sub-facades?
+   - Are all exports truly part of the public API?
+   - Is there a pattern (e.g., all Ports re-exported from domain.ports)?
+
+4. Report inconsistencies:
+   - Modules that export things NOT in __all__
+   - Modules that have __all__ but it's incomplete
+   - Modules that DON'T have __all__ but should
+
+Expected outcome: A summary table of all facades with export counts
+and recommendations. No code changes without review.
+```
