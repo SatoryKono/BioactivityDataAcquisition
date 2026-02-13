@@ -329,6 +329,15 @@ step_verify_installation() {
         exit 1
     fi
 
+    # Проверяем критические runtime-зависимости (B2/B3 reproducibility)
+    print_step "Проверка критических зависимостей (pandas, pandera)..."
+    if "$venv_python" -c "import pandas; import pandera; print(f'Pandas {pandas.__version__}, Pandera {pandera.__version__}')" 2>/dev/null; then
+        print_success "Критические зависимости (pandas, pandera) доступны"
+    else
+        print_error "Критические зависимости не найдены! Проверьте установку."
+        exit 1
+    fi
+
     # Проверяем CLI
     print_step "Проверка CLI..."
     if "$venv_python" -m bioetl --help &>/dev/null; then

@@ -61,7 +61,7 @@ install-pip: ## Install dependencies using pip (fallback)
 	$(VENV_PIP) install -e ".[dev,tracing]"
 	@echo "$(GREEN)Installation complete! Activate venv with: source $(VENV_BIN)/activate$(NC)"
 
-test: ## Run all tests in parallel with coverage (excludes benchmarks)
+test: test-deps ## Run all tests in parallel with coverage (excludes benchmarks)
 	@echo "$(BLUE)Running tests in parallel (excluding benchmarks)...$(NC)"
 	$(RUN) pytest tests/ -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
