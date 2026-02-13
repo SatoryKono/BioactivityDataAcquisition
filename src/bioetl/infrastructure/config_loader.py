@@ -8,8 +8,8 @@ Convention-based path resolution (ADR-029):
 
     File References:
         - source_file: ../../sources/{provider}.yaml
-        - dq_config_file: ../../dq/entities/{provider}/{entity_type}.yaml
-        - filter_config_file: ../../filter/entities/{provider}/{entity_type}.yaml
+        - dq_config_file: ../../quality/entities/{provider}/{entity_type}.yaml
+        - filter_config_file: ../../filters/entities/{provider}/{entity_type}.yaml
 
     Sink Paths:
         - sink.bronze.path: data/output/bronze/{provider}/{entity_type}
@@ -36,6 +36,12 @@ import yaml
 
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+_PATH_ALIAS_GROUPS: tuple[tuple[str, str], ...] = (
+    ("filters", "filter"),
+    ("quality", "dq"),
+    ("schemas", "data_schema"),
+)
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -76,10 +82,15 @@ def _apply_file_reference_defaults(
     """
     config.setdefault("source_file", f"../../sources/{provider}.yaml")
     config.setdefault(
-        "dq_config_file", f"../../dq/entities/{provider}/{entity_type}.yaml"
+        "dq_config_file", f"../../quality/entities/{provider}/{entity_type}.yaml"
     )
     config.setdefault(
-        "filter_config_file", f"../../filter/entities/{provider}/{entity_type}.yaml"
+        "filter_config_file",
+        f"../../filters/entities/{provider}/{entity_type}.yaml",
+    )
+    config.setdefault(
+        "data_schema_file",
+        f"../schemas/{provider}/{entity_type}.yaml",
     )
     config.setdefault(
         "column_groups_file",
@@ -87,12 +98,40 @@ def _apply_file_reference_defaults(
     )
 
 
+def _resolve_with_path_aliases(base_dir: Path, relative_path: str) -> Path | None:
+    """Resolve file path using new-first aliases with legacy fallback."""
+    direct_path = base_dir / relative_path
+    if direct_path.exists():
+        return direct_path
+
+    parts = Path(relative_path).parts
+    for new_dir, legacy_dir in _PATH_ALIAS_GROUPS:
+        if new_dir in parts:
+            fallback = Path(
+                *[legacy_dir if part == new_dir else part for part in parts]
+            )
+            candidate = base_dir / fallback
+            if candidate.exists():
+                return candidate
+        if legacy_dir in parts:
+            promoted = Path(
+                *[new_dir if part == legacy_dir else part for part in parts]
+            )
+            candidate = base_dir / promoted
+            if candidate.exists():
+                return candidate
+
+    return None
+
+
 def _load_column_groups_config(
     config_path: Path, column_groups_file: str
 ) -> list[dict[str, Any]] | None:
     """Load column group configuration from column_groups_file."""
-    column_groups_path = config_path.parent / column_groups_file
-    if not column_groups_path.exists():
+    column_groups_path = _resolve_with_path_aliases(
+        config_path.parent, column_groups_file
+    )
+    if column_groups_path is None:
         return None
 
     with open(column_groups_path, encoding="utf-8") as f:
@@ -125,8 +164,8 @@ def _load_data_schema_config(
     Returns:
         Dictionary with column_groups, silver, and gold keys, or None if file not found.
     """
-    schema_path = config_path.parent / data_schema_file
-    if not schema_path.exists():
+    schema_path = _resolve_with_path_aliases(config_path.parent, data_schema_file)
+    if schema_path is None:
         return None
 
     with open(schema_path, encoding="utf-8") as f:
@@ -209,6 +248,136 @@ def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
     return config
 
 
+def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
+    """Normalize source config across legacy/new schemas before validation.
+
+    Supported input schemas:
+    - Legacy: ``source.provider_config.*`` and ``rate_limit.with_api_key``
+    - New: ``source.api`` + ``source.client`` + ``source.batch``
+      and ``rate_limit.authenticated``
+
+    The current ``SourceYamlConfig`` validates provider-config shape, so this
+    function performs dual-format reconciliation and emits provider-config
+    compatible output while preserving backward compatibility.
+    """
+    config = raw.copy()
+    source = config.get("source")
+    if not isinstance(source, dict):
+        return config
+
+    source_norm = source.copy()
+
+    # --- Normalize rate_limit old/new aliases ---
+    rate_limit = source_norm.get("rate_limit")
+    if isinstance(rate_limit, dict):
+        rate_limit_norm = rate_limit.copy()
+        with_api_key = rate_limit_norm.get("with_api_key")
+        authenticated = rate_limit_norm.get("authenticated")
+
+        if isinstance(with_api_key, dict) and "authenticated" not in rate_limit_norm:
+            rate_limit_norm["authenticated"] = with_api_key
+        if isinstance(authenticated, dict) and "with_api_key" not in rate_limit_norm:
+            rate_limit_norm["with_api_key"] = authenticated
+
+        source_norm["rate_limit"] = rate_limit_norm
+
+    # --- Normalize health_check timeout aliases ---
+    health_check = source_norm.get("health_check")
+    if isinstance(health_check, dict):
+        health_check_norm = health_check.copy()
+        if "timeout" in health_check_norm and "timeout_sec" not in health_check_norm:
+            health_check_norm["timeout_sec"] = health_check_norm["timeout"]
+        if "timeout_sec" in health_check_norm and "timeout" not in health_check_norm:
+            health_check_norm["timeout"] = health_check_norm["timeout_sec"]
+        source_norm["health_check"] = health_check_norm
+
+    provider_config = source_norm.get("provider_config")
+    if not isinstance(provider_config, dict):
+        provider_config = {}
+
+    # If legacy provider_config is provided, project to canonical new-style keys.
+    if provider_config:
+        api_norm = source_norm.get("api")
+        if not isinstance(api_norm, dict):
+            api_norm = {}
+        for key in ("base_url", "auth_type", "api_key", "api_version"):
+            if key in provider_config:
+                api_norm.setdefault(key, provider_config[key])
+        if api_norm:
+            source_norm["api"] = api_norm
+
+        if isinstance(provider_config.get("client"), dict):
+            client_norm = source_norm.get("client")
+            if not isinstance(client_norm, dict):
+                client_norm = {}
+
+            legacy_client = provider_config["client"].copy()
+            if "timeout" in legacy_client and "timeout_sec" not in legacy_client:
+                legacy_client["timeout_sec"] = legacy_client["timeout"]
+            if "timeout_sec" in legacy_client and "timeout" not in legacy_client:
+                legacy_client["timeout"] = legacy_client["timeout_sec"]
+            source_norm["client"] = _deep_merge(legacy_client, client_norm)
+
+        batch_norm = source_norm.get("batch")
+        if not isinstance(batch_norm, dict):
+            batch_norm = {}
+        if "batch_size" in provider_config:
+            batch_norm.setdefault("batch_size", provider_config["batch_size"])
+            batch_norm.setdefault("size", provider_config["batch_size"])
+        if "page_size" in provider_config:
+            batch_norm.setdefault("page_size", provider_config["page_size"])
+        if "max_url_length" in provider_config:
+            batch_norm.setdefault("max_url_length", provider_config["max_url_length"])
+        if batch_norm:
+            source_norm["batch"] = batch_norm
+
+    # Consume new-style keys into legacy provider_config for current validation schema.
+    api = source_norm.pop("api", None)
+    if isinstance(api, dict):
+        for key in ("base_url", "auth_type", "api_key", "api_version"):
+            if key in api:
+                provider_config.setdefault(key, api[key])
+
+    client = source_norm.pop("client", None)
+    if isinstance(client, dict):
+        existing_client = provider_config.get("client")
+        if not isinstance(existing_client, dict):
+            existing_client = {}
+
+        client_norm = client.copy()
+        if "timeout" in client_norm and "timeout_sec" not in client_norm:
+            client_norm["timeout_sec"] = client_norm["timeout"]
+        if "timeout_sec" in client_norm and "timeout" not in client_norm:
+            client_norm["timeout"] = client_norm["timeout_sec"]
+
+        existing_client_norm = existing_client.copy()
+        if "timeout" in existing_client_norm and "timeout_sec" not in existing_client_norm:
+            existing_client_norm["timeout_sec"] = existing_client_norm["timeout"]
+        if "timeout_sec" in existing_client_norm and "timeout" not in existing_client_norm:
+            existing_client_norm["timeout"] = existing_client_norm["timeout_sec"]
+
+        provider_config["client"] = _deep_merge(existing_client_norm, client_norm)
+
+    batch = source_norm.pop("batch", None)
+    if isinstance(batch, dict):
+        if "batch_size" in batch:
+            provider_config.setdefault("batch_size", batch["batch_size"])
+        elif "size" in batch:
+            provider_config.setdefault("batch_size", batch["size"])
+        if "page_size" in batch:
+            provider_config.setdefault("page_size", batch["page_size"])
+        if "max_url_length" in batch:
+            provider_config.setdefault("max_url_length", batch["max_url_length"])
+    elif isinstance(batch, int):
+        provider_config.setdefault("batch_size", batch)
+
+    if provider_config:
+        source_norm["provider_config"] = provider_config
+
+    config["source"] = source_norm
+    return config
+
+
 @lru_cache(maxsize=10)
 def load_source_config(provider: str) -> SourceYamlConfig:
     """Load source configuration from YAML file."""
@@ -223,7 +392,9 @@ def load_source_config(provider: str) -> SourceYamlConfig:
     with open(config_path, encoding="utf-8") as f:
         raw_config = yaml.safe_load(f) or {}
 
-    config: SourceYamlConfig = SourceYamlConfig.model_validate(raw_config)
+    normalized_config = _normalize_source_config(raw_config)
+
+    config: SourceYamlConfig = SourceYamlConfig.model_validate(normalized_config)
     return config
 
 
@@ -239,8 +410,8 @@ def _load_filter_config(
     Returns:
         Loaded filter config dict or None if file doesn't exist.
     """
-    filter_path = config_path.parent / filter_config_file
-    if not filter_path.exists():
+    filter_path = _resolve_with_path_aliases(config_path.parent, filter_config_file)
+    if filter_path is None:
         return None
 
     with open(filter_path, encoding="utf-8") as f:
@@ -327,7 +498,7 @@ def _load_column_groups_section(
                 config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
             if "gold" in data_schema:
                 config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
-        return
+            return
 
     if column_groups_file := config.get("column_groups_file"):
         column_groups = _load_column_groups_config(config_path, column_groups_file)
