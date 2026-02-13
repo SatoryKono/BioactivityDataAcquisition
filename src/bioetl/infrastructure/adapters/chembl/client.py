@@ -12,7 +12,7 @@ import itertools
 import time
 import urllib.parse
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, ClassVar, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn
 
 from pydantic import BaseModel
 
@@ -83,6 +83,19 @@ _NO_PAGINATION_ENTITIES: frozenset[str] = frozenset(
         "protein_class",
     }
 )
+
+
+# Silver canonical name → ChEMBL API field name.
+# ChEMBL API silently ignores unknown filter params and returns ALL records,
+# so correct mapping is critical for filtering to work.
+_SILVER_TO_CHEMBL_API_FIELD: dict[str, str] = {
+    "molecule_id": "molecule_chembl_id",
+    "publication_id": "document_chembl_id",
+    "assay_id": "assay_chembl_id",
+    "target_id": "target_chembl_id",
+    "cell_id": "cell_chembl_id",
+    "tissue_id": "tissue_chembl_id",
+}
 
 
 @dataclass
@@ -230,16 +243,6 @@ class ChemblAdapter(BaseHttpAdapter):
             if ids
         }
 
-    # Silver canonical name → ChEMBL API field name.
-    # ChEMBL API silently ignores unknown filter params and returns ALL records,
-    # so correct mapping is critical for filtering to work.
-    _SILVER_TO_API_FIELD: ClassVar[dict[str, str]] = {
-        "molecule_id": "molecule_chembl_id",
-        "publication_id": "document_chembl_id",
-        "assay_id": "assay_chembl_id",
-        "target_id": "target_chembl_id",
-    }
-
     def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
         """Map canonical Silver field names to ChEMBL API field names.
 
@@ -248,7 +251,21 @@ class ChemblAdapter(BaseHttpAdapter):
         The API silently ignores unknown filter parameters, returning unfiltered
         results — so this mapping is essential for correct filtering.
         """
-        return self._SILVER_TO_API_FIELD.get(filter_field, filter_field)
+        return _SILVER_TO_CHEMBL_API_FIELD.get(filter_field, filter_field)
+
+    def _get_api_pk_field(self, entity_type: str) -> str:
+        """Get primary key field name as it appears in raw API responses.
+
+        Entity mapper returns Silver names (assay_id, molecule_id) but
+        raw API records use ChEMBL names (assay_chembl_id, molecule_chembl_id).
+        """
+        pk = self._mapper.get_primary_key_field(entity_type)
+        return _SILVER_TO_CHEMBL_API_FIELD.get(pk, pk)
+
+    def _get_api_dedup_fields(self, entity_type: str) -> tuple[str, ...]:
+        """Get dedup key fields as they appear in raw API responses."""
+        fields = self._mapper.get_dedup_key_fields(entity_type)
+        return tuple(_SILVER_TO_CHEMBL_API_FIELD.get(f, f) for f in fields)
 
     def _build_filter_params(
         self, entity_type: str, filter_field: str, id_batch: list[str]
@@ -530,8 +547,8 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         url = self._mapper.get_resource_url(entity_type)
         seen_ids: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
-        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)
+        pk_fields = self._get_api_dedup_fields(entity_type)
         params = self._build_params(0, entity_type)
         params.update(self._build_filter_params(entity_type, filter_field, id_batch))
 
@@ -789,8 +806,8 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         total_fetched = 0
         seen_ids: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
-        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)
+        pk_fields = self._get_api_dedup_fields(entity_type)
 
         for id_batch in self._batch_ids(filter_ids, batch_size=self._filter_batch_size):
             async for record in self._fetch_batch_with_reduction(
@@ -821,8 +838,8 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         total_fetched = 0
         seen_keys: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
-        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)
+        pk_fields = self._get_api_dedup_fields(entity_type)
         use_composite = len(pk_fields) > 1
 
         async for records in self._page_iterator(entity_type, limit):
@@ -945,7 +962,7 @@ class ChemblAdapter(BaseHttpAdapter):
             return
 
         url = self._mapper.get_resource_url(entity_type)
-        pk_field = self._mapper.get_primary_key_field(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)
 
         # Determine optimal batch size based on 1000 character limit
         # Start with configured batch size and halve proactively if URL is too long
