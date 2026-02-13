@@ -203,11 +203,16 @@ class MoleculeTransformer(BaseChemblTransformer):
         )
         # Legacy convenience aliases derived from canonical property_* fields.
         properties["logp"] = properties.get("property_alogp")
+        properties["mw_freebase"] = properties.get("property_mw_freebase")
         properties["polar_surface_area"] = properties.get("property_psa")
         properties["rotatable_bond_count"] = properties.get("property_rtb")
         properties["heavy_atom_count"] = properties.get("property_heavy_atoms")
         properties["aromatic_ring_count"] = properties.get("property_aromatic_rings")
         properties["molecular_weight"] = properties.get("property_full_mwt")
+        properties["qed_score"] = properties.get("property_qed_weighted")
+        properties["molecular_formula"] = properties.get("property_full_molformula")
+        properties["ro3_pass"] = properties.get("property_ro3_pass")
+        properties["ro5_violation_count"] = properties.get("property_ro5_violations")
         properties["hba_count"] = properties.get("property_hba")
         properties["hbd_count"] = properties.get("property_hbd")
         if properties.get("property_alogp") is not None:

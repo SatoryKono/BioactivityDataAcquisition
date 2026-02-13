@@ -68,10 +68,10 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
             "target_organism",
         ),
         FieldSpec("parent_molecule_chembl_id", target="parent_molecule_id"),
-        # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
+        # Standardized to 'target_taxonomy_id' for NCBI consistency (was 'tax_id')
         FieldSpec(
             "target_tax_id",
-            target="taxonomy_id",
+            target="target_taxonomy_id",
             converter=validate_taxonomy_id_str,
         ),
         *simple_fields(
