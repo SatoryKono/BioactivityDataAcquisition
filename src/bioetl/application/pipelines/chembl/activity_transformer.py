@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
     FieldGroup,
@@ -20,7 +21,6 @@ from bioetl.application.core.field_specs import (
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
-from bioetl.application.core.base_transformer import TransformationError
 from bioetl.domain.entities import Bioactivity
 from bioetl.domain.transformations import safe_float
 from bioetl.domain.value_objects import validate_taxonomy_id_str

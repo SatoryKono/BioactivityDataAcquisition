@@ -72,8 +72,14 @@ class TestAdapterHealthCheck:
             # BaseHttpAdapter and BaseSyncAdapter provide health_check()
             # via HealthCheckProviderMixin (Template Method pattern).
             # We use regex to handle multi-line inheritance lists.
-            has_method = "def health_check" in content or "async def health_check" in content
-            inherits_base = re.search(r"class\s+\w+\s*\([^)]*Base(Http|Sync)Adapter", content, re.MULTILINE | re.DOTALL)
+            has_method = (
+                "def health_check" in content or "async def health_check" in content
+            )
+            inherits_base = re.search(
+                r"class\s+\w+\s*\([^)]*Base(Http|Sync)Adapter",
+                content,
+                re.MULTILINE | re.DOTALL,
+            )
             has_mixin = "HealthCheckProviderMixin" in content
 
             has_health_check = has_method or inherits_base or has_mixin

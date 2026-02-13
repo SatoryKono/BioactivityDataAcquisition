@@ -12,11 +12,13 @@ from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import HealthStatus
 
 if TYPE_CHECKING:
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-    from bioetl.infrastructure.adapters.common.api_request_collector import APIRequestCollector
+    from bioetl.infrastructure.adapters.common.api_request_collector import (
+        APIRequestCollector,
+    )
     from bioetl.infrastructure.adapters.error_handling import ErrorService
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 from .constants import ENTREZ_API_BASE
 

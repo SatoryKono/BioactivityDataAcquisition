@@ -100,17 +100,31 @@ async def test_fetch_filtered_with_fallback(pubmed_adapter: PubMedAdapter):
         # Primary fetch (pmid 12345 and missing_id)
         # fetch_filtered will be called with ["12345", "missing_id"]
         # which results in id=12345,missing_id
-        respx_mock.get("efetch.fcgi", params={"id": "12345,missing_id", "db": "pubmed", "retmode": "xml", "rettype": "abstract", "email": "test@example.com"}).mock(
-            return_value=Response(200, text=mock_xml)
-        )
+        respx_mock.get(
+            "efetch.fcgi",
+            params={
+                "id": "12345,missing_id",
+                "db": "pubmed",
+                "retmode": "xml",
+                "rettype": "abstract",
+                "email": "test@example.com",
+            },
+        ).mock(return_value=Response(200, text=mock_xml))
         # Fallback search by title
         respx_mock.get("esearch.fcgi").mock(
             return_value=Response(200, json=mock_search_json)
         )
         # Fallback fetch (pmid 67890)
-        respx_mock.get("efetch.fcgi", params={"id": "67890", "db": "pubmed", "retmode": "xml", "rettype": "abstract", "email": "test@example.com"}).mock(
-            return_value=Response(200, text=mock_fallback_xml)
-        )
+        respx_mock.get(
+            "efetch.fcgi",
+            params={
+                "id": "67890",
+                "db": "pubmed",
+                "retmode": "xml",
+                "rettype": "abstract",
+                "email": "test@example.com",
+            },
+        ).mock(return_value=Response(200, text=mock_fallback_xml))
 
         async with pubmed_adapter.http_client:
             records = []
@@ -195,6 +209,7 @@ async def test_adapter_factory_missing_args():
 @pytest.mark.integration
 async def test_adapter_aclose(pubmed_adapter: PubMedAdapter):
     from unittest.mock import AsyncMock
+
     pubmed_adapter.http_client = MagicMock(spec=UnifiedHTTPClient)
     # Mock __aexit__ which is called by await http_client.__aexit__
     pubmed_adapter.http_client.__aexit__ = AsyncMock()
@@ -207,7 +222,9 @@ async def test_adapter_aclose(pubmed_adapter: PubMedAdapter):
 async def test_fetch_batch_xml_parse_error(pubmed_adapter: PubMedAdapter, mock_logger):
     # Mocking efetch with invalid XML
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
-        respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text="invalid xml"))
+        respx_mock.get("efetch.fcgi").mock(
+            return_value=Response(200, text="invalid xml")
+        )
 
         async with pubmed_adapter.http_client:
             # We need to access the private method to test this specific branch
@@ -253,7 +270,9 @@ async def test_search_by_title_error(pubmed_adapter: PubMedAdapter, mock_logger)
 async def test_probe_health_explicit(pubmed_adapter: PubMedAdapter):
     mock_health_json = {"esearchresult": {"idlist": ["1"]}}
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
-        respx_mock.get("esearch.fcgi").mock(return_value=Response(200, json=mock_health_json))
+        respx_mock.get("esearch.fcgi").mock(
+            return_value=Response(200, json=mock_health_json)
+        )
 
         async with pubmed_adapter.http_client:
             status = await pubmed_adapter._probe_health()
@@ -263,18 +282,21 @@ async def test_probe_health_explicit(pubmed_adapter: PubMedAdapter):
 @pytest.mark.integration
 async def test_probe_health_degraded(pubmed_adapter: PubMedAdapter):
     import time
+
     mock_health_json = {"esearchresult": {"idlist": ["1"]}}
 
     # We want to test the timing branch.
     # BaseHttpAdapter or the mixin might use time.monotonic()
-    
+
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+
         async def slow_response(request):
             await anyio.sleep(5.1)
             return Response(200, json=mock_health_json)
-        
+
         # respx can take a callback
         import anyio
+
         respx_mock.get("esearch.fcgi").mock(side_effect=slow_response)
 
         async with pubmed_adapter.http_client:

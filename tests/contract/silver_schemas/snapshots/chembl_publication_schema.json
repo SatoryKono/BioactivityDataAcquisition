@@ -119,11 +119,7 @@
     "unique": false
   },
   "author_orcids": {
-    "checks": [
-      {
-        "name": "orcid_format"
-      }
-    ],
+    "checks": [],
     "coerce": false,
     "description": "JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     "dtype": "str",
@@ -426,11 +422,7 @@
     "unique": false
   },
   "title": {
-    "checks": [
-      {
-        "name": "title_not_empty"
-      }
-    ],
+    "checks": [],
     "coerce": false,
     "description": "Publication title",
     "dtype": "str",
