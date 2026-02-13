@@ -86,16 +86,10 @@ class TestFencingToken:
     def test_value_equality(self, run_id: RunID) -> None:
         """Test that FencingTokens are compared by value."""
         t1 = FencingToken(
-            sequence=1,
-            key="lock:test",
-            owner_id=run_id,
-            issued_at=100.0,
+            sequence=1, key="lock:test", owner_id=run_id, issued_at=100.0
         )
         t2 = FencingToken(
-            sequence=1,
-            key="lock:test",
-            owner_id=run_id,
-            issued_at=100.0,
+            sequence=1, key="lock:test", owner_id=run_id, issued_at=100.0
         )
 
         assert t1 == t2
@@ -103,16 +97,10 @@ class TestFencingToken:
     def test_different_sequences_not_equal(self, run_id: RunID) -> None:
         """Test that tokens with different sequences are not equal."""
         t1 = FencingToken(
-            sequence=1,
-            key="lock:test",
-            owner_id=run_id,
-            issued_at=100.0,
+            sequence=1, key="lock:test", owner_id=run_id, issued_at=100.0
         )
         t2 = FencingToken(
-            sequence=2,
-            key="lock:test",
-            owner_id=run_id,
-            issued_at=100.0,
+            sequence=2, key="lock:test", owner_id=run_id, issued_at=100.0
         )
 
         assert t1 != t2
@@ -120,10 +108,7 @@ class TestFencingToken:
     def test_truthy(self, run_id: RunID) -> None:
         """Test that FencingToken is truthy (for backward-compatible checks)."""
         token = FencingToken(
-            sequence=1,
-            key="lock:test",
-            owner_id=run_id,
-            issued_at=100.0,
+            sequence=1, key="lock:test", owner_id=run_id, issued_at=100.0
         )
         assert token  # truthy
 
@@ -162,15 +147,11 @@ class TestLockContext:
         assert valid_lock_context.is_valid() is True
         assert valid_lock_context.is_valid(ttl_seconds=3600) is True
 
-    def test_matches_table_correct(
-        self, valid_lock_context: LockContext
-    ) -> None:
+    def test_matches_table_correct(self, valid_lock_context: LockContext) -> None:
         """Test matching correct table name."""
         assert valid_lock_context.matches_table("chembl_activity") is True
 
-    def test_matches_table_exclusive(
-        self, exclusive_lock_context: LockContext
-    ) -> None:
+    def test_matches_table_exclusive(self, exclusive_lock_context: LockContext) -> None:
         """Test exclusive lock matches table."""
         assert exclusive_lock_context.matches_table("chembl_activity") is True
 
@@ -179,25 +160,16 @@ class TestLockContext:
         assert valid_lock_context.matches_table("pubchem_compound") is False
         assert valid_lock_context.matches_table("chembl_molecule") is False
 
-    def test_fencing_token_field_default(
-        self, valid_lock_context: LockContext
-    ) -> None:
+    def test_fencing_token_field_default(self, valid_lock_context: LockContext) -> None:
         """Test that fencing_token defaults to None."""
         assert valid_lock_context.fencing_token is None
 
     def test_fencing_token_field_set(self, run_id: RunID) -> None:
         """Test LockContext with fencing token."""
         token = FencingToken(
-            sequence=5,
-            key="lock:test",
-            owner_id=run_id,
-            issued_at=100.0,
+            sequence=5, key="lock:test", owner_id=run_id, issued_at=100.0
         )
-        ctx = LockContext(
-            key="lock:test",
-            owner_id=run_id,
-            fencing_token=token,
-        )
+        ctx = LockContext(key="lock:test", owner_id=run_id, fencing_token=token)
 
         assert ctx.fencing_token is not None
         assert ctx.fencing_token.sequence == 5
