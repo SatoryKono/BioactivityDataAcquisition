@@ -76,10 +76,10 @@ class TargetSchema(ETLRecordSchema):
 
     # === Flattened Component Fields (Lists) ===
     # Note: Pandera Series[object] is used for lists, validation is limited
-    component_accessions: Series[object] | None = pa.Field(  # type: ignore[type-var]
+    component_accessions: Series[object] | None = pa.Field(
         nullable=True, description="List of component accessions."
     )
-    component_descriptions: Series[object] | None = pa.Field(  # type: ignore[type-var]
+    component_descriptions: Series[object] | None = pa.Field(
         nullable=True, description="List of component descriptions."
     )
     primary_component_id: Series[float] | None = pa.Field(
@@ -87,13 +87,13 @@ class TargetSchema(ETLRecordSchema):
         coerce=True,
         description="Primary component ID (first from list).",
     )
-    component_ids: Series[object] | None = pa.Field(  # type: ignore[type-var]
+    component_ids: Series[object] | None = pa.Field(
         nullable=True, description="List of component IDs."
     )
-    component_types: Series[object] | None = pa.Field(  # type: ignore[type-var]
+    component_types: Series[object] | None = pa.Field(
         nullable=True, description="List of component types."
     )
-    component_relationships: Series[object] | None = pa.Field(  # type: ignore[type-var]
+    component_relationships: Series[object] | None = pa.Field(
         nullable=True, description="List of component relationships."
     )
 
