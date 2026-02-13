@@ -17,7 +17,7 @@ entity: compound_record
 input_filter:
   enabled: true
   source_path: "data/input/molecule.csv"
-  column_name: "molecule_id"
+  column_name: "molecule_chembl_id"
   filter_field: "molecule_id"
   batch_size: 10
 
