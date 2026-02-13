@@ -8,13 +8,13 @@ from uuid import uuid4
 import pytest
 
 from bioetl.application.pipelines.chembl.assay_transformer import AssayTransformer
+from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.publication_term_transformer import (
     PublicationTermTransformer,
 )
 from bioetl.application.pipelines.chembl.publication_transformer import (
     PublicationTransformer,
 )
-from bioetl.application.pipelines.chembl.molecule_transformer import MoleculeTransformer
 from bioetl.application.pipelines.chembl.target_component_transformer import (
     TargetComponentTransformer,
 )
@@ -420,6 +420,10 @@ class TestMoleculeTransformer:
         assert result["property_ro5_violations"] == 1
         assert result["property_full_molformula"] == "C15H12O3"
         assert result["property_ro3_pass"] == "Y"
+        assert result["mw_freebase"] == 300.5
+        assert result["ro5_violation_count"] == 1
+        assert result["molecular_formula"] == "C15H12O3"
+        assert result["ro3_pass"] == "Y"
 
     @pytest.mark.asyncio
     async def test_transform_with_hierarchy_child(self, transformer, mock_context):
@@ -467,6 +471,7 @@ class TestTargetTransformer:
         assert result["target_id"] == "CHEMBL1862"
         assert result["pref_name"] == "Cyclooxygenase-2"
         assert result["target_type"] == "SINGLE PROTEIN"
+        assert result["description"] is None
         assert result["taxonomy_id"] == 9606  # Standardized output field name
         assert "entity_id" in result
         assert "content_hash" in result

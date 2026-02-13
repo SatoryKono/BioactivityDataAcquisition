@@ -210,6 +210,11 @@ class MoleculeTransformer(BaseChemblTransformer):
         properties["molecular_weight"] = properties.get("property_full_mwt")
         properties["hba_count"] = properties.get("property_hba")
         properties["hbd_count"] = properties.get("property_hbd")
+        properties["mw_freebase"] = properties.get("property_mw_freebase")
+        properties["ro5_violation_count"] = properties.get("property_ro5_violations")
+        properties["qed_score"] = properties.get("property_qed_weighted")
+        properties["molecular_formula"] = properties.get("property_full_molformula")
+        properties["ro3_pass"] = properties.get("property_ro3_pass")
         if properties.get("property_alogp") is not None:
             properties["logp_method"] = "alogp"
 
