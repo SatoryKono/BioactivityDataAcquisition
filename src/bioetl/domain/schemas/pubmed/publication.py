@@ -169,10 +169,10 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     )
 
     # === Dates ===
-    date_completed: Series[datetime] = pa.Field(  # type: ignore[type-var]
+    date_completed: Series[datetime] = pa.Field(
         nullable=True, description="MEDLINE processing completion date"
     )
-    date_revised: Series[datetime] = pa.Field(  # type: ignore[type-var]
+    date_revised: Series[datetime] = pa.Field(
         nullable=True, description="Record revision date"
     )
 

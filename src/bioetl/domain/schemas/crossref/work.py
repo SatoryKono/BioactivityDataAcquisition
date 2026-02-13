@@ -103,13 +103,13 @@ class PublicationSchema(ETLRecordSchema):
     )
 
     # === Dates ===
-    published_date: Series[date] | None = pa.Field(  # type: ignore[type-var]
+    published_date: Series[date] | None = pa.Field(
         nullable=True, description="Publication date (from issued or published-print)"
     )
-    created_date: Series[date] | None = pa.Field(  # type: ignore[type-var]
+    created_date: Series[date] | None = pa.Field(
         nullable=True, description="Record creation date in CrossRef"
     )
-    deposited_date: Series[date] | None = pa.Field(  # type: ignore[type-var]
+    deposited_date: Series[date] | None = pa.Field(
         nullable=True, description="Last update date in CrossRef"
     )
 

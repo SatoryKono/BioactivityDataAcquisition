@@ -151,7 +151,6 @@ from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.domain.value_objects.taxonomy_id import (
     TaxonomyId,
     validate_taxonomy_id,
-    validate_taxonomy_id_str,
 )
 
 __all__ = [
@@ -237,5 +236,4 @@ __all__ = [
     "ValueDistributionResult",
     "ValueObject",
     "validate_taxonomy_id",
-    "validate_taxonomy_id_str",
 ]

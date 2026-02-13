@@ -103,7 +103,7 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Content Domain ===
-    content_domain_domains: Series[object] = pa.Field(  # type: ignore[type-var]
+    content_domain_domains: Series[object] = pa.Field(
         nullable=True,
         description="Content domain domains (list of strings)",
     )
@@ -114,7 +114,7 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Alternative Identifiers ===
-    alternative_id: Series[object] = pa.Field(  # type: ignore[type-var]
+    alternative_id: Series[object] = pa.Field(
         nullable=True,
         description="Alternative IDs (publisher-specific, e.g., PII)",
     )
