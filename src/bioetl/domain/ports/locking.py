@@ -102,6 +102,25 @@ class LockPort(Protocol):
         """
         ...
 
+    async def validate_fencing_token(
+        self,
+        key: str,
+        token: FencingToken,
+    ) -> bool:
+        """Validate that the given fencing token is still valid for the lock.
+
+        This is the Safety Guard for fencing tokens. Writers SHOULD validate
+        the token before writes to prevent stale lock holders from writing.
+
+        Args:
+            key: The unique key for the lock.
+            token: Fencing token issued by acquire().
+
+        Returns:
+            True if the fencing token is valid for the current lock holder.
+        """
+        ...
+
     async def aclose(self) -> None:
         """Gracefully close the lock connection and release resources."""
         ...

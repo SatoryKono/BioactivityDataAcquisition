@@ -158,7 +158,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     sequence_checksum: Series[str] | None = pa.Field(
         nullable=True, description="CRC64 checksum"
     )
-    sequence_modified: Series[datetime] | None = pa.Field(
+    sequence_modified: Series[datetime] | None = pa.Field(  # type: ignore[type-var]
         nullable=True, description="Sequence last modified date"
     )
 
@@ -172,10 +172,10 @@ class UniprotCoreSchema(ETLRecordSchema):
         """Validate entry version is positive."""
         return cast("Series[bool]", series.isna() | (series >= 1))
 
-    entry_created: Series[datetime] | None = pa.Field(
+    entry_created: Series[datetime] | None = pa.Field(  # type: ignore[type-var]
         nullable=True, description="Entry creation date"
     )
-    entry_modified: Series[datetime] | None = pa.Field(
+    entry_modified: Series[datetime] | None = pa.Field(  # type: ignore[type-var]
         nullable=True, description="Entry last modified date"
     )
 
