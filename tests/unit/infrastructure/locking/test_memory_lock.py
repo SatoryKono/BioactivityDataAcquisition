@@ -10,6 +10,7 @@ from bioetl.domain.locking import FencingToken
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
 
+
 @pytest.fixture
 def memory_lock():
     """Create a MemoryLock instance."""

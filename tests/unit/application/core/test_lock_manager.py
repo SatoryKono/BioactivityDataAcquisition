@@ -17,7 +17,10 @@ TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
 
 # Reusable test token
 _TEST_TOKEN = FencingToken(
-    sequence=1, key="lock:test_pipeline", owner_id=TEST_RUN_ID, issued_at=100.0,
+    sequence=1,
+    key="lock:test_pipeline",
+    owner_id=TEST_RUN_ID,
+    issued_at=100.0,
 )
 
 
@@ -111,7 +114,8 @@ class TestLockManager:
     ) -> None:
         """Test heartbeat failure triggers shutdown."""
         # Start heartbeat to initialize the HeartbeatTask
-        mock_lock_port.heartbeat.side_effect = [True, False]  # First success, then fail
+        # First success, then fail.
+        mock_lock_port.heartbeat.side_effect = [True, False]
 
         # Start heartbeat successfully
         await lock_manager.start_heartbeat()

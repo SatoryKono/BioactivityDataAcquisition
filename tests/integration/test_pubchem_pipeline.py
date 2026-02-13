@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -15,7 +15,15 @@ from bioetl.application.pipelines.pubchem import PubChemCompoundPipeline
 from bioetl.application.pipelines.pubchem.transformer import PubChemCompoundTransformer
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunType
+
+_MOCK_TOKEN = FencingToken(
+    sequence=1,
+    key="lock:mock",
+    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
+    issued_at=0.0,
+)
 
 
 @pytest.fixture
@@ -69,7 +77,7 @@ def mock_pubchem_services(mock_logger) -> PipelineServices:
     mock_storage.aclose = AsyncMock()
 
     mock_lock = AsyncMock()
-    mock_lock.acquire = AsyncMock(return_value=True)
+    mock_lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
     mock_lock.release = AsyncMock()
 
     mock_checkpoint = AsyncMock()

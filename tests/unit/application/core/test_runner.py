@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -21,7 +21,15 @@ from bioetl.application.services.medallion_lifecycle import (
 )
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
+from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunType
+
+_MOCK_TOKEN = FencingToken(
+    sequence=1,
+    key="lock:mock",
+    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
+    issued_at=0.0,
+)
 
 
 @pytest.fixture
@@ -68,7 +76,7 @@ def create_mock_services():
 
     services = MagicMock(spec=PipelineServices)
     services.lock = AsyncMock()
-    services.lock.acquire = AsyncMock(return_value=True)
+    services.lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
     services.lock.release = AsyncMock()
     services.lock.heartbeat = AsyncMock(return_value=True)
     services.metrics = MagicMock()

@@ -123,6 +123,64 @@ class TestLockSafetyGuard:
         await lock.aclose()
 
 
+class TestFencingTokenContract:
+    """Tests for FencingToken fencing contract."""
+
+    def test_lockport_acquire_returns_fencing_token(self):
+        """LockPort.acquire() MUST return FencingToken | None, not bool."""
+        import typing
+
+        hints = typing.get_type_hints(LockPort.acquire)
+        return_type = hints.get("return")
+        # The return type should include FencingToken (via Union with None)
+        assert return_type is not None, "acquire() must have a return type annotation"
+        # Check it's not bool
+        assert return_type is not bool, (
+            "LockPort.acquire() must return FencingToken | None, not bool"
+        )
+
+    @pytest.mark.asyncio
+    async def test_memory_lock_acquire_returns_fencing_token(self):
+        """MemoryLock.acquire() MUST return FencingToken on success."""
+        from uuid import uuid4
+
+        lock = MemoryLock()
+        run_id = uuid4()
+
+        token = await lock.acquire("test:key", run_id, ttl=60)
+        assert isinstance(token, FencingToken), (
+            f"acquire() must return FencingToken, got {type(token)}"
+        )
+        assert token.sequence > 0
+        assert token.key == "test:key"
+        assert token.owner_id == run_id
+
+        await lock.release("test:key", run_id)
+        await lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_fencing_token_sequence_is_monotonic(self):
+        """FencingToken sequence MUST increase across successive acquires."""
+        from uuid import uuid4
+
+        lock = MemoryLock()
+
+        tokens = []
+        for _ in range(3):
+            run_id = uuid4()
+            token = await lock.acquire("test:key", run_id, ttl=60)
+            assert token is not None
+            tokens.append(token)
+            await lock.release("test:key", run_id)
+
+        for i in range(1, len(tokens)):
+            assert tokens[i].sequence > tokens[i - 1].sequence, (
+                "FencingToken sequence must be monotonically increasing"
+            )
+
+        await lock.aclose()
+
+
 class TestLockManagerSafetyGuard:
     """Tests for LockManager.validate() method."""
 
