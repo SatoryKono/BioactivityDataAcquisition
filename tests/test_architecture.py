@@ -314,11 +314,8 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
         "molecule_synonyms": "molecule_synonyms_json",
         "logp_method": "logp_method",
         # PubchemMolecule aliases
-        "molecule_id": "molecule_id",
         "xlogp": "logp",
-        "inchi_key": "inchi_key",
         "tpsa": "tpsa",
-        "molecule_id": "molecule_id",
         "polar_surface_area": "tpsa",
         # UniprotTarget aliases
         "organism_id": "taxonomy_id",

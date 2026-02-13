@@ -132,7 +132,6 @@ class TestExtractionParamsToDomain:
         assert extraction_params.is_empty
         assert extraction_params.params == {}
 
-
     def test_to_domain_returns_silver_filter_config_type(self) -> None:
         """to_domain() should return SilverFilterConfig for silver filters."""
         config = FilterConfigFile()
