@@ -52,8 +52,12 @@ class EnrichmentResult:
 
     @property
     def is_success(self) -> bool:
-        """Check if enrichment was successful or partially successful."""
-        return self.status in (EnrichmentStatus.SUCCESS, EnrichmentStatus.PARTIAL)
+        """Check if enrichment succeeded, partially succeeded, or was skipped."""
+        return self.status in (
+            EnrichmentStatus.SUCCESS,
+            EnrichmentStatus.PARTIAL,
+            EnrichmentStatus.SKIPPED,
+        )
 
     @property
     def enrichment_rate(self) -> float:
@@ -142,18 +146,7 @@ class EnrichmentResult:
         enricher_name: str,
         reason: str = "Pipeline not executed (required_only mode)",
     ) -> EnrichmentResult:
-        """Factory for not-run enrichment result.
-
-        Used when an enricher is intentionally not executed,
-        for example due to required_only mode or explicit exclusion.
-
-        Args:
-            enricher_name: Name of the enricher pipeline.
-            reason: Human-readable reason why pipeline was not run.
-
-        Returns:
-            EnrichmentResult with NOT_RUN status.
-        """
+        """Factory for not-run enrichment result."""
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.NOT_RUN,
@@ -209,8 +202,8 @@ class DependencyResult:
 
     @property
     def is_success(self) -> bool:
-        """Check if dependency was successful."""
-        return self.status == DependencyStatus.SUCCESS
+        """Check if dependency succeeded or was skipped (resume mode)."""
+        return self.status in (DependencyStatus.SUCCESS, DependencyStatus.SKIPPED)
 
     @classmethod
     def success(
@@ -306,25 +299,7 @@ class MergeResult:
 
 @dataclass(frozen=True, slots=True)
 class CompositeResult:
-    """Complete result of composite pipeline execution.
-
-    Attributes:
-        composite_name: Name of the composite pipeline.
-        composite_run_id: Unique run identifier.
-        seed_result: Result of seed pipeline execution.
-        dependency_results: Results per dependency (keyed by pipeline name).
-        enrichment_results: Results per enricher (keyed by pipeline name).
-        merge_result: Result of merge operation (None if not completed).
-        total_duration_seconds: Total execution time.
-        started_at: Execution start timestamp.
-        completed_at: Execution end timestamp.
-        lineage: Optional lineage metadata.
-        had_warnings: True if any optional enrichers/dependencies failed but pipeline completed.
-            This indicates "completed with warnings" status - the pipeline succeeded
-            but some non-required enrichments did not complete successfully.
-        _required_enrichers: Internal set of required enricher names.
-        _required_dependencies: Internal set of required dependency names.
-    """
+    """Complete result of composite pipeline execution."""
 
     composite_name: str
     composite_run_id: str

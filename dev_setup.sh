@@ -260,6 +260,13 @@ step_create_venv() {
 step_install_dependencies() {
     print_header "Шаг 3: Установка зависимостей"
 
+    if command -v uv &> /dev/null; then
+        print_step "Установка зависимостей с помощью uv (рекомендуется)..."
+        uv sync --extra dev --extra tracing --extra performance
+        print_success "Зависимости установлены через uv"
+        return 0
+    fi
+
     local venv_python
     venv_python=$(get_venv_python_path)
 
@@ -267,9 +274,9 @@ step_install_dependencies() {
     "$venv_python" -m pip install --upgrade pip setuptools wheel --quiet
 
     print_step "Установка зависимостей разработки..."
-    "$venv_python" -m pip install -e ".[dev]" --quiet
+    "$venv_python" -m pip install -e ".[dev,tracing,performance]" --quiet
 
-    print_success "Зависимости установлены"
+    print_success "Зависимости установлены через pip"
 }
 
 step_setup_precommit() {
@@ -336,6 +343,17 @@ step_verify_installation() {
     else
         print_error "Критические зависимости не найдены! Проверьте установку."
         exit 1
+    fi
+
+    # Полная проверка через Makefile если доступен
+    if command -v make &> /dev/null; then
+        print_step "Запуск расширенной проверки через make test-deps-dev..."
+        if make test-deps-dev; then
+            print_success "Все зависимости и инструменты разработки подтверждены"
+        else
+            print_error "Ошибка проверки зависимостей. Проверьте логи установки."
+            exit 1
+        fi
     fi
 
     # Проверяем CLI

@@ -61,7 +61,10 @@ install-pip: ## Install dependencies using pip (fallback)
 	$(VENV_PIP) install -e ".[dev,tracing]"
 	@echo "$(GREEN)Installation complete! Activate venv with: source $(VENV_BIN)/activate$(NC)"
 
-test: test-deps ## Run all tests in parallel with coverage (excludes benchmarks)
+setup-dev: install test-deps-dev ## Full development environment setup and verification
+	@echo "$(GREEN)Development environment setup and verified!$(NC)"
+
+test: test-deps-dev ## Run all tests in parallel with coverage (excludes benchmarks)
 	@echo "$(BLUE)Running tests in parallel (excluding benchmarks)...$(NC)"
 	$(RUN) pytest tests/ -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
@@ -82,6 +85,14 @@ test-deps: ## Verify all runtime dependencies are importable
 	@echo "$(BLUE)Checking runtime dependencies...$(NC)"
 	$(RUN) pytest tests/smoke/test_smoke.py::TestRuntimeDependencies -v --tb=short
 	@echo "$(GREEN)All dependencies OK!$(NC)"
+
+test-deps-dev: test-deps ## Verify all development dependencies are importable
+	@echo "$(BLUE)Checking development dependencies...$(NC)"
+	$(RUN) pytest tests/smoke/test_smoke.py::TestDevDependencies -v --tb=short
+	@echo "$(BLUE)Checking dev tools availability...$(NC)"
+	$(RUN) ruff --version > /dev/null
+	$(RUN) mypy --version > /dev/null
+	@echo "$(GREEN)All development tools OK!$(NC)"
 
 test-unit: ## Run only unit tests (parallel)
 	@echo "$(BLUE)Running unit tests...$(NC)"

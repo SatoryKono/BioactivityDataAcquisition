@@ -5,6 +5,7 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -18,10 +19,10 @@ class ProteinClassificationSchema(ETLRecordSchema):
     protein_class_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
 
     # === Foreign Keys ===
-    parent_id: Series[int] | None = pa.Field(
+    parent_id: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="FK to parent classification."
     )
-    replaced_by: Series[int] | None = pa.Field(
+    replaced_by: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="FK to replacement classification."
     )
 
@@ -34,15 +35,17 @@ class ProteinClassificationSchema(ETLRecordSchema):
         nullable=True, description="Description."
     )
     definition: Series[str] | None = pa.Field(nullable=True, description="Definition.")
-    class_level: Series[int] | None = pa.Field(
+    class_level: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=1,
         description="Class level.",
     )
-    sort_order: Series[int] | None = pa.Field(nullable=True, description="Sort order.")
+    sort_order: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Sort order."
+    )
 
     # === Flags ===
-    downgraded: Series[int] | None = pa.Field(
+    downgraded: Series[float] | None = pa.Field(
         nullable=True,
         isin=[0, 1],
         description="Downgraded flag.",
@@ -52,5 +55,5 @@ class ProteinClassificationSchema(ETLRecordSchema):
         """Pandera configuration."""
 
         strict = True
-        ordered = True
+        ordered = False
         coerce = True
