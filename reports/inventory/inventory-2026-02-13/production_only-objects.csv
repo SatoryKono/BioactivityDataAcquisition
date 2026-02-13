@@ -1,0 +1,260 @@
+obj_type,name,module,file,line,layer,signature,loc,base_classes,suffix,public_methods,private_methods,prod_refs,test_refs,usage_class
+class,RetentionManager,bioetl.infrastructure.storage.retention_manager,src/bioetl/infrastructure/storage/retention_manager.py,31,infrastructure,,185,,,vacuum|optimize|get_table_info|time_travel,__init__|_get_table_path,9,0,PRODUCTION_ONLY
+function,_get_bioetl_version,bioetl.infrastructure.storage.metadata_builder,src/bioetl/infrastructure/storage/metadata_builder.py,27,infrastructure,() -> str,10,,,,,8,0,PRODUCTION_ONLY
+function,coerce_null_types_for_delta,bioetl.infrastructure.storage.base_delta_writer,src/bioetl/infrastructure/storage/base_delta_writer.py,91,infrastructure,(table: pa.Table) -> pa.Table,42,,,,,5,0,PRODUCTION_ONLY
+class,NotSupportedMultiFilterMixin,bioetl.infrastructure.adapters.filterable_mixin,src/bioetl/infrastructure/adapters/filterable_mixin.py,37,infrastructure,,47,,,fetch_multi_filtered,,4,0,PRODUCTION_ONLY
+class,FilterableStubMixin,bioetl.infrastructure.adapters.filterable_mixin,src/bioetl/infrastructure/adapters/filterable_mixin.py,136,infrastructure,,21,NotSupportedMultiFilterMixin|DelegatingFallbackMixin,,,,5,0,PRODUCTION_ONLY
+class,CachedBronzeDataSource,bioetl.infrastructure.adapters.cached_bronze_data_source,src/bioetl/infrastructure/adapters/cached_bronze_data_source.py,33,infrastructure,,225,,,provider_name|health_check|aclose|fetch,__init__|__aenter__|__aexit__|_parse_date|_list_batches_sorted,10,0,PRODUCTION_ONLY
+class,UniProtProteinRecord,bioetl.infrastructure.adapters.uniprot.models,src/bioetl/infrastructure/adapters/uniprot/models.py,296,infrastructure,,82,BaseModel,,,,4,0,PRODUCTION_ONLY
+class,UniProtSearchResponse,bioetl.infrastructure.adapters.uniprot.models,src/bioetl/infrastructure/adapters/uniprot/models.py,380,infrastructure,,8,BaseModel,,,,2,0,PRODUCTION_ONLY
+class,UniProtFeatureRecord,bioetl.infrastructure.adapters.uniprot.models,src/bioetl/infrastructure/adapters/uniprot/models.py,394,infrastructure,,11,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,UniProtSequenceRecord,bioetl.infrastructure.adapters.uniprot.models,src/bioetl/infrastructure/adapters/uniprot/models.py,410,infrastructure,,12,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,FastaParser,bioetl.infrastructure.adapters.uniprot.fasta_parser,src/bioetl/infrastructure/adapters/uniprot/fasta_parser.py,12,infrastructure,,82,,,parse|parse_header,,3,0,PRODUCTION_ONLY
+class,PubMedHealthMixin,bioetl.infrastructure.adapters.pubmed._health,src/bioetl/infrastructure/adapters/pubmed/_health.py,24,infrastructure,,81,,,get_source_metadata|clear_request_collector|request_count,_probe_health|_fallback_health_status|_get_health_endpoint,3,0,PRODUCTION_ONLY
+class,PubMedArticleRecord,bioetl.infrastructure.adapters.pubmed.models,src/bioetl/infrastructure/adapters/pubmed/models.py,23,infrastructure,,18,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,PubMedExtendedRecord,bioetl.infrastructure.adapters.pubmed.models,src/bioetl/infrastructure/adapters/pubmed/models.py,141,infrastructure,,97,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,PubMedSearchResponse,bioetl.infrastructure.adapters.pubmed.models,src/bioetl/infrastructure/adapters/pubmed/models.py,268,infrastructure,,8,BaseModel,,,,2,0,PRODUCTION_ONLY
+class,PubMedXmlProcessor,bioetl.infrastructure.adapters.pubmed.xml_processor,src/bioetl/infrastructure/adapters/pubmed/xml_processor.py,13,infrastructure,,64,,,parse_response|extract_record|find_articles|extract_all_records,,8,0,PRODUCTION_ONLY
+class,PubMedSearchMixin,bioetl.infrastructure.adapters.pubmed._search,src/bioetl/infrastructure/adapters/pubmed/_search.py,24,infrastructure,,79,,,,_get_pmids|_search_by_title,3,0,PRODUCTION_ONLY
+class,PubMedFetchMixin,bioetl.infrastructure.adapters.pubmed._fetch,src/bioetl/infrastructure/adapters/pubmed/_fetch.py,25,infrastructure,,74,,,,_build_fetch_params|_fetch_batch|_yield_articles_from_pmids,4,0,PRODUCTION_ONLY
+class,CrossRefPublicationRecord,bioetl.infrastructure.adapters.crossref.models,src/bioetl/infrastructure/adapters/crossref/models.py,160,infrastructure,,166,BaseModel,,,,6,0,PRODUCTION_ONLY
+class,CrossRefPublicationsResponse,bioetl.infrastructure.adapters.crossref.models,src/bioetl/infrastructure/adapters/crossref/models.py,359,infrastructure,,11,BaseModel,,,,2,0,PRODUCTION_ONLY
+class,CrossRefPublicationResponse,bioetl.infrastructure.adapters.crossref.models,src/bioetl/infrastructure/adapters/crossref/models.py,372,infrastructure,,11,BaseModel,,,,2,0,PRODUCTION_ONLY
+function,_create_crossref_adapter,bioetl.infrastructure.adapters.crossref.client,src/bioetl/infrastructure/adapters/crossref/client.py,413,infrastructure,"(http_client: UnifiedHTTPClient | None, logger: LoggerPort | None, settings: Settings | None, **kwargs: Any) -> CrossRefAdapter",45,,,,,5,0,PRODUCTION_ONLY
+class,PubchemMoleculeApiRecord,bioetl.infrastructure.adapters.pubchem.models,src/bioetl/infrastructure/adapters/pubchem/models.py,19,infrastructure,,58,BaseModel,,,,6,0,PRODUCTION_ONLY
+class,PubChemSubstanceRecord,bioetl.infrastructure.adapters.pubchem.models,src/bioetl/infrastructure/adapters/pubchem/models.py,79,infrastructure,,29,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,PubChemAssayRecord,bioetl.infrastructure.adapters.pubchem.models,src/bioetl/infrastructure/adapters/pubchem/models.py,110,infrastructure,,18,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,PubchemMoleculeDetailRecord,bioetl.infrastructure.adapters.pubchem.models,src/bioetl/infrastructure/adapters/pubchem/models.py,133,infrastructure,,64,BaseModel,,,,2,0,PRODUCTION_ONLY
+class,PubChemBioactivityRecord,bioetl.infrastructure.adapters.pubchem.models,src/bioetl/infrastructure/adapters/pubchem/models.py,202,infrastructure,,27,BaseModel,,,,2,0,PRODUCTION_ONLY
+constant,SEMANTICSCHOLAR_BASE_URL,bioetl.infrastructure.adapters.semanticscholar.constants,src/bioetl/infrastructure/adapters/semanticscholar/constants.py,5,infrastructure,,1,,,,,9,0,PRODUCTION_ONLY
+class,ChemblPageMeta,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,47,infrastructure,,10,BaseModel,,,,9,0,PRODUCTION_ONLY
+class,ChemblActivityRecord,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,62,infrastructure,,136,BaseModel,,,,9,0,PRODUCTION_ONLY
+class,ChemblActivityResponse,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,200,infrastructure,,14,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,ChemblAssayRecord,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,219,infrastructure,,55,BaseModel,,,,4,0,PRODUCTION_ONLY
+class,ChemblAssayResponse,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,276,infrastructure,,11,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,ChemblMoleculeRecord,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,343,infrastructure,,54,BaseModel,,,,5,0,PRODUCTION_ONLY
+class,ChemblMoleculeResponse,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,399,infrastructure,,11,BaseModel,,,,4,0,PRODUCTION_ONLY
+class,ChemblTargetRecord,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,415,infrastructure,,18,BaseModel,,,,4,0,PRODUCTION_ONLY
+class,ChemblTargetResponse,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,435,infrastructure,,11,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,ChemblPublicationApiRecord,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,467,infrastructure,,47,BaseModel,,,,5,0,PRODUCTION_ONLY
+class,ChemblPublicationResponse,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,516,infrastructure,,15,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,ChemblTargetComponentRecord,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,536,infrastructure,,26,BaseModel,,,,4,0,PRODUCTION_ONLY
+class,ChemblTargetComponentResponse,bioetl.infrastructure.adapters.chembl.models,src/bioetl/infrastructure/adapters/chembl/models.py,564,infrastructure,,11,BaseModel,,,,3,0,PRODUCTION_ONLY
+constant,CHEMBL_STATUS_URL,bioetl.infrastructure.adapters.chembl.entity_mapper,src/bioetl/infrastructure/adapters/chembl/entity_mapper.py,36,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,UNIPROT_ID_MAPPING_SCHEMA,bioetl.infrastructure.schemas.silver,src/bioetl/infrastructure/schemas/silver.py,277,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,CHEMBL_TISSUE_SCHEMA,bioetl.infrastructure.schemas.silver,src/bioetl/infrastructure/schemas/silver.py,551,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,bioetl.infrastructure.schemas.silver,src/bioetl/infrastructure/schemas/silver.py,575,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,bioetl.infrastructure.schemas.silver,src/bioetl/infrastructure/schemas/silver.py,717,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,CHEMBL_PROTEIN_CLASS_SCHEMA,bioetl.infrastructure.schemas.silver,src/bioetl/infrastructure/schemas/silver.py,985,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,CHEMBL_ASSAY_PARAMETERS_SCHEMA,bioetl.infrastructure.schemas.silver,src/bioetl/infrastructure/schemas/silver.py,1017,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+class,BronzeSinkConfig,bioetl.infrastructure.schemas.dq_report_config,src/bioetl/infrastructure/schemas/dq_report_config.py,172,infrastructure,,10,BaseModel,Config,,,3,0,PRODUCTION_ONLY
+class,SilverSinkConfig,bioetl.infrastructure.schemas.dq_report_config,src/bioetl/infrastructure/schemas/dq_report_config.py,184,infrastructure,,24,BaseModel,Config,,,3,0,PRODUCTION_ONLY
+class,GoldSinkConfig,bioetl.infrastructure.schemas.dq_report_config,src/bioetl/infrastructure/schemas/dq_report_config.py,210,infrastructure,,10,BaseModel,Config,,,3,0,PRODUCTION_ONLY
+class,SeedSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,97,infrastructure,,33,BaseModel,Schema,validate_output_keys_not_empty|to_domain,,4,0,PRODUCTION_ONLY
+class,EnricherSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,229,infrastructure,,71,BaseModel,Schema,validate_join_keys_not_empty|validate_aggregation_required|to_domain,,4,0,PRODUCTION_ONLY
+class,MergeOutputSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,302,infrastructure,,5,BaseModel,Schema,,,4,0,PRODUCTION_ONLY
+class,ColumnGroupSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,309,infrastructure,,32,BaseModel,Schema,validate_fields_or_pattern,,5,0,PRODUCTION_ONLY
+class,MergeSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,343,infrastructure,,76,BaseModel,Schema,validate_explicit_rules_requires_priorities|to_domain,,5,0,PRODUCTION_ONLY
+class,DQOverrideSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,421,infrastructure,,29,BaseModel,Schema,validate_threshold_order|to_domain,,5,0,PRODUCTION_ONLY
+class,CompositeDQSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,452,infrastructure,,38,BaseModel,Schema,validate_threshold_order|to_domain,,6,0,PRODUCTION_ONLY
+class,RetrySchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,492,infrastructure,,9,BaseModel,Schema,,,5,0,PRODUCTION_ONLY
+class,ExecutionSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,503,infrastructure,,21,BaseModel,Schema,to_domain,,5,0,PRODUCTION_ONLY
+class,LineageSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,526,infrastructure,,20,BaseModel,Schema,to_domain,,5,0,PRODUCTION_ONLY
+class,CompositeConfigSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,548,infrastructure,,108,BaseModel,Schema,validate_has_enrichers_or_dependencies|validate_enricher_join_keys|validate_dependency_join_keys|validate_unique_enricher_names|validate_unique_dependency_names|to_domain,,9,0,PRODUCTION_ONLY
+class,CompositeConfigFileSchema,bioetl.infrastructure.schemas.composite_config,src/bioetl/infrastructure/schemas/composite_config.py,658,infrastructure,,23,BaseModel,Schema,to_domain,,7,0,PRODUCTION_ONLY
+class,FilterColumnSchema,bioetl.infrastructure.schemas.pipeline_config,src/bioetl/infrastructure/schemas/pipeline_config.py,312,infrastructure,,2,BaseFilterColumnSchema,Schema,,,3,0,PRODUCTION_ONLY
+class,ObservabilitySettings,bioetl.infrastructure.config._base,src/bioetl/infrastructure/config/_base.py,242,infrastructure,,44,BaseSettings,,,,5,0,PRODUCTION_ONLY
+class,BaseConfigLoader,bioetl.infrastructure.config.base_config_loader,src/bioetl/infrastructure/config/base_config_loader.py,25,infrastructure,,129,ABC|Generic[T],,clear_cache|load,__init__|_load_yaml|_deep_merge_base|_merge_lists,5,0,PRODUCTION_ONLY
+constant,RECORDS_PROCESSED_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,16,infrastructure,,1,,,,,3,0,PRODUCTION_ONLY
+constant,ERRORS_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,22,infrastructure,,1,,,,,3,0,PRODUCTION_ONLY
+constant,BATCH_SIZE_RECORDS,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,28,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,FILTER_IDS_LOADED_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,36,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,FILTER_IDS_DUPLICATES_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,42,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,DQ_RECORDS_QUARANTINED_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,49,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,CIRCUIT_BREAKER_TRIPS_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,62,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,CIRCUIT_BREAKER_SUCCESS_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,68,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,CIRCUIT_BREAKER_FAILURE_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,74,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,VACUUM_FILES_REMOVED_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,81,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,VACUUM_DURATION_SECONDS,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,87,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,ARCHIVE_FILES_TOTAL,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,94,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,ARCHIVE_DURATION_SECONDS,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,100,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,DQ_VALIDATION_SCORE,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,107,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,DATA_FRESHNESS_SECONDS,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,113,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,DQ_CHECK_DURATION_MS,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,125,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,DQ_BASELINE_UPDATED,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,132,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+constant,DQ_BASELINE_SAMPLES,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,138,infrastructure,,1,,,,,2,0,PRODUCTION_ONLY
+class,DetectorStrategy,bioetl.infrastructure.observability.anomaly.detectors.base,src/bioetl/infrastructure/observability/anomaly/detectors/base.py,21,infrastructure,,44,ABC,,detect|get_severity,,8,0,PRODUCTION_ONLY
+function,inspect_records,bioetl.infrastructure.quarantine.operations,src/bioetl/infrastructure/quarantine/operations.py,23,infrastructure,"(base_path: str, storage_options: dict[str, str] | None, pipeline: str, limit: int=100, error_code: str | None=None, dq_status: QuarantineRecordStatus | None=None) -> list[dict[str, Any]]",34,,,,,2,0,PRODUCTION_ONLY
+function,replay_records,bioetl.infrastructure.quarantine.operations,src/bioetl/infrastructure/quarantine/operations.py,59,infrastructure,"(base_path: str, storage_options: dict[str, str] | None, pipeline: str, error_code: str | None=None, max_age_days: int=7, *, now: datetime) -> Iterator[dict[str, Any]]",45,,,,,2,0,PRODUCTION_ONLY
+function,get_statistics,bioetl.infrastructure.quarantine.operations,src/bioetl/infrastructure/quarantine/operations.py,106,infrastructure,"(base_path: str, storage_options: dict[str, str] | None, pipeline: str) -> dict[str, Any]",46,,,,,2,0,PRODUCTION_ONLY
+function,purge_records,bioetl.infrastructure.quarantine.operations,src/bioetl/infrastructure/quarantine/operations.py,154,infrastructure,"(base_path: str, storage_options: dict[str, str] | None, pipeline: str, older_than_days: int=30, *, now: datetime) -> int",43,,,,,2,0,PRODUCTION_ONLY
+class,DQReportWriter,bioetl.infrastructure.export.dq_report_writer,src/bioetl/infrastructure/export/dq_report_writer.py,26,infrastructure,,289,,,write_bronze_report|write_silver_report|write_gold_report,__init__|_build_layer_filename|_resolve_layer_output_path|_write_report|_get_extension,7,0,PRODUCTION_ONLY
+function,archive_table,bioetl.composition._resource_management,src/bioetl/composition/_resource_management.py,111,composition,"(table: str, options: ArchiveOptions) -> int",21,,,,,3,0,PRODUCTION_ONLY
+function,inspect_quarantine,bioetl.composition._resource_management,src/bioetl/composition/_resource_management.py,159,composition,"(pipeline: str, limit: int=100) -> list[dict[str, Any]]",20,,,,,3,0,PRODUCTION_ONLY
+function,get_metrics_service,bioetl.composition._services,src/bioetl/composition/_services.py,263,composition,() -> MetricsService,19,,,,,3,0,PRODUCTION_ONLY
+function,get_quarantine_store,bioetl.composition._services,src/bioetl/composition/_services.py,284,composition,(pipeline: str) -> QuarantinePort,19,,,,,3,0,PRODUCTION_ONLY
+function,create_noop_logger,bioetl.composition.bootstrap.cli.noop,src/bioetl/composition/bootstrap/cli/noop.py,38,composition,() -> NoOpLogger,14,,,,,25,0,PRODUCTION_ONLY
+function,create_noop_metrics,bioetl.composition.bootstrap.cli.noop,src/bioetl/composition/bootstrap/cli/noop.py,54,composition,() -> MetricsPort,14,,,,,5,0,PRODUCTION_ONLY
+function,create_noop_tracing,bioetl.composition.bootstrap.cli.noop,src/bioetl/composition/bootstrap/cli/noop.py,70,composition,() -> TracingPort,16,,,,,5,0,PRODUCTION_ONLY
+function,create_noop_observability_bundle,bioetl.composition.bootstrap.cli.noop,src/bioetl/composition/bootstrap/cli/noop.py,88,composition,"() -> tuple[NoOpLogger, MetricsPort, TracingPort]",20,,,,,4,0,PRODUCTION_ONLY
+function,bootstrap_tracer_port,bioetl.composition.bootstrap.runtime.observability,src/bioetl/composition/bootstrap/runtime/observability.py,163,composition,"(settings: Settings, service_name: str='bioetl') -> TracingPort",24,,,,,8,0,PRODUCTION_ONLY
+function,bootstrap_dq_monitor_port,bioetl.composition.bootstrap.runtime.observability,src/bioetl/composition/bootstrap/runtime/observability.py,289,composition,"(settings: Settings, logger: LoggerPort | None=None) -> DQMonitorPort | None",46,,,,,8,0,PRODUCTION_ONLY
+function,assemble_cached_bronze_context,bioetl.composition.bootstrap.runtime.assembly,src/bioetl/composition/bootstrap/runtime/assembly.py,222,composition,(ctx: PipelineRunContext) -> CachedBronzeContext,40,,,,,5,0,PRODUCTION_ONLY
+function,build_pipeline_services,bioetl.composition.factories.pipeline_factory,src/bioetl/composition/factories/pipeline_factory.py,400,composition,"(pipeline_name: str, create_data_source_fn: DataSourceCreator, settings: Settings, logger: LoggerPort, config: PipelineYamlConfig | None=None, filter_config: InputFilterConfig | None=None, tracer: TracingPort | None=None, dq_monitor: DQMonitorPort | None=None, metadata_coordinator: MetadataCoordinator | None=None, cached_bronze: CachedBronzeContext | None=None, silver_validator: Any=None) -> PipelineServices",71,,,,,6,0,PRODUCTION_ONLY
+function,assemble_runner,bioetl.composition.factories.pipeline_factory,src/bioetl/composition/factories/pipeline_factory.py,587,composition,"(pipeline: BasePipeline, observability: ObservabilityBundle, silver_schema: pa.Schema | None, gold_schema: Any, strict_gold_validation: bool, yaml_config: PipelineYamlConfig | None=None) -> PipelineRunner",147,,,,,5,0,PRODUCTION_ONLY
+function,_extract_dq_configs,bioetl.composition.factories.pipeline_factory,src/bioetl/composition/factories/pipeline_factory.py,768,composition,(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext,34,,,,,2,0,PRODUCTION_ONLY
+function,_extract_dq_output_paths,bioetl.composition.factories.pipeline_factory,src/bioetl/composition/factories/pipeline_factory.py,814,composition,(yaml_config: PipelineYamlConfig | None) -> DQOutputPathsContext,37,,,,,2,0,PRODUCTION_ONLY
+function,get_factory,bioetl.composition.factories.pipeline_factories,src/bioetl/composition/factories/pipeline_factories.py,544,composition,(pipeline_name: str) -> GenericPipelineFactory[GenericPipeline],18,,,,,4,0,PRODUCTION_ONLY
+function,extract_pipeline_callbacks,bioetl.composition.factories.services_factory,src/bioetl/composition/factories/services_factory.py,78,composition,(pipeline: BasePipeline) -> PipelineCallbacksContext,44,,,,,4,0,PRODUCTION_ONLY
+class,ServicesBuilder,bioetl.composition.factories.services_factory,src/bioetl/composition/factories/services_factory.py,376,composition,,266,,,create_checkpoint_manager|create_record_processor|create_record_processor_from_pipeline|create_batch_executor_from_pipeline,,11,0,PRODUCTION_ONLY
+function,create_data_normalization_service,bioetl.composition.factories.services_factory,src/bioetl/composition/factories/services_factory.py,649,composition,(config: DataNormalizationConfig | None=None) -> DataNormalizationPort,32,,,,,6,0,PRODUCTION_ONLY
+function,_get_batch_size_from_config,bioetl.composition.providers._config_helpers,src/bioetl/composition/providers/_config_helpers.py,54,composition,"(provider: str, default: int=100) -> int",4,,,,,4,0,PRODUCTION_ONLY
+function,get_git_commit,bioetl.composition.services.versioning,src/bioetl/composition/services/versioning.py,31,composition,() -> str | None,32,,,,,6,0,PRODUCTION_ONLY
+function,get_pipeline_version,bioetl.composition.services.versioning,src/bioetl/composition/services/versioning.py,128,composition,"(config: PipelineYamlConfig | dict[str, Any] | None=None) -> str",34,,,,,6,0,PRODUCTION_ONLY
+function,_get_bioetl_version,bioetl.composition.services.metadata_coordinator,src/bioetl/composition/services/metadata_coordinator.py,59,composition,() -> str,12,,,,,8,0,PRODUCTION_ONLY
+function,echo_table_list,bioetl.interfaces.cli.formatters,src/bioetl/interfaces/cli/formatters.py,163,interfaces,(tables: list[TableInfo]) -> None,17,,,,,2,0,PRODUCTION_ONLY
+function,echo_export_preview,bioetl.interfaces.cli.formatters,src/bioetl/interfaces/cli/formatters.py,182,interfaces,(preview: TablePreview) -> None,41,,,,,2,0,PRODUCTION_ONLY
+function,echo_export_result,bioetl.interfaces.cli.formatters,src/bioetl/interfaces/cli/formatters.py,225,interfaces,(result: ExportResult) -> None,11,,,,,2,0,PRODUCTION_ONLY
+constant,COMMANDS,bioetl.interfaces.cli.commands.lock,src/bioetl/interfaces/cli/commands/lock.py,96,interfaces,,1,,,,,6,0,PRODUCTION_ONLY
+constant,COMMANDS,bioetl.interfaces.cli.commands.health_server_integration,src/bioetl/interfaces/cli/commands/health_server_integration.py,120,interfaces,,1,,,,,6,0,PRODUCTION_ONLY
+constant,COMMANDS,bioetl.interfaces.cli.commands.checkpoint,src/bioetl/interfaces/cli/commands/checkpoint.py,38,interfaces,,1,,,,,6,0,PRODUCTION_ONLY
+constant,COMMANDS,bioetl.interfaces.cli.commands.quarantine,src/bioetl/interfaces/cli/commands/quarantine.py,252,interfaces,,1,,,,,6,0,PRODUCTION_ONLY
+function,get_runner_logger,bioetl.interfaces.cli.commands.run_helpers,src/bioetl/interfaces/cli/commands/run_helpers.py,61,interfaces,(runner: PipelineRunner) -> LoggerPort | None,13,,,,,3,0,PRODUCTION_ONLY
+function,handle_destructive_run_confirmation,bioetl.interfaces.cli.commands.run_helpers,src/bioetl/interfaces/cli/commands/run_helpers.py,98,interfaces,"(pipeline: str, run_type: str, dry_run: bool, yes: bool) -> bool",30,,,,,4,0,PRODUCTION_ONLY
+constant,COMMANDS,bioetl.interfaces.cli.commands.metrics_server_integration,src/bioetl/interfaces/cli/commands/metrics_server_integration.py,45,interfaces,,1,,,,,6,0,PRODUCTION_ONLY
+constant,COMMANDS,bioetl.interfaces.cli.commands.config,src/bioetl/interfaces/cli/commands/config.py,178,interfaces,,1,,,,,6,0,PRODUCTION_ONLY
+function,vacuum_command,bioetl.interfaces.cli.commands.vacuum,src/bioetl/interfaces/cli/commands/vacuum.py,34,interfaces,"(table: str, retention_days: int, dry_run: bool) -> None",31,,,,,2,0,PRODUCTION_ONLY
+constant,COMMANDS,bioetl.interfaces.cli.commands.health,src/bioetl/interfaces/cli/commands/health.py,176,interfaces,,1,,,,,6,0,PRODUCTION_ONLY
+function,calculate_had_warnings,bioetl.application.composite.runner_helpers,src/bioetl/application/composite/runner_helpers.py,88,application,"(enrichment_results: dict[str, EnrichmentResult], required_enrichers: frozenset[str], composite_name: str, logger: LoggerPort) -> bool",38,,,,,2,0,PRODUCTION_ONLY
+function,get_mergeable_enrichers,bioetl.application.composite.runner_helpers,src/bioetl/application/composite/runner_helpers.py,193,application,"(enrichment_results: dict[str, EnrichmentResult], all_enrichers: Iterable[EnricherConfig], logger: LoggerPort) -> list[EnricherConfig]",46,,,,,2,0,PRODUCTION_ONLY
+function,get_mergeable_dependencies,bioetl.application.composite.runner_helpers,src/bioetl/application/composite/runner_helpers.py,241,application,"(dependency_results: dict[str, DependencyResult], all_dependencies: Iterable[DependencyConfig], logger: LoggerPort) -> list[DependencyConfig]",54,,,,,2,0,PRODUCTION_ONLY
+class,GenericPipeline,bioetl.application.pipelines.generic,src/bioetl/application/pipelines/generic.py,33,application,,33,BasePipeline,,,,17,0,PRODUCTION_ONLY
+class,GeneExtractor,bioetl.application.pipelines.uniprot.extractors.genes,src/bioetl/application/pipelines/uniprot/extractors/genes.py,10,application,,104,,,extract_gene_names|extract_primary_gene|extract_gene_synonyms|extract_gene_orf_names,,8,0,PRODUCTION_ONLY
+class,AllArticleIds,bioetl.application.pipelines.pubmed.extractors.identifier,src/bioetl/application/pipelines/pubmed/extractors/identifier.py,27,application,,23,TypedDict,,,,5,0,PRODUCTION_ONLY
+class,ELocationIds,bioetl.application.pipelines.pubmed.extractors.identifier,src/bioetl/application/pipelines/pubmed/extractors/identifier.py,52,application,,10,TypedDict,,,,5,0,PRODUCTION_ONLY
+class,StructuredAffiliation,bioetl.application.pipelines.pubmed.extractors.author,src/bioetl/application/pipelines/pubmed/extractors/author.py,28,application,,21,TypedDict,,,,12,0,PRODUCTION_ONLY
+class,RawAuthor,bioetl.application.pipelines.pubmed.extractors.author,src/bioetl/application/pipelines/pubmed/extractors/author.py,51,application,,9,TypedDict,,,,9,0,PRODUCTION_ONLY
+function,extract_author_orcids,bioetl.application.pipelines.crossref.author_extractors,src/bioetl/application/pipelines/crossref/author_extractors.py,114,application,"(publication: dict[str, Any]) -> list[str]",22,,,,,21,0,PRODUCTION_ONLY
+function,extract_author_orcids,bioetl.application.pipelines.openalex.extractors,src/bioetl/application/pipelines/openalex/extractors.py,177,application,"(authorships: list[dict[str, Any]]) -> list[str]",27,,,,,21,0,PRODUCTION_ONLY
+function,extract_institution_ror_ids,bioetl.application.pipelines.openalex.extractors,src/bioetl/application/pipelines/openalex/extractors.py,272,application,"(authorships: list[dict[str, Any]]) -> list[str]",45,,,,,4,0,PRODUCTION_ONLY
+function,extract_author_orcids,bioetl.application.pipelines.semanticscholar._author_extractors,src/bioetl/application/pipelines/semanticscholar/_author_extractors.py,102,application,"(authors: list[dict[str, Any]] | None) -> list[str]",37,,,,,21,0,PRODUCTION_ONLY
+function,build_summary,bioetl.application.services.dq.dq_report_builders,src/bioetl/application/services/dq/dq_report_builders.py,72,application,"(passed: int, failed: int, warnings: int, threshold_status: DQCheckStatus | None=None) -> DQReportSummary",32,,,,,7,0,PRODUCTION_ONLY
+function,create_shutdown_service,bioetl.application.core.shutdown,src/bioetl/application/core/shutdown.py,123,application,"(logger: LoggerPort, metrics: MetricsPort | None=None) -> ShutdownService",17,,,,,3,0,PRODUCTION_ONLY
+class,BatchTracingManager,bioetl.application.core.batch_tracing,src/bioetl/application/core/batch_tracing.py,27,application,,225,,,start_execution_span|start_batch_span|start_layer_span|set_execution_stats|set_batch_result|set_transform_result|end_span|end_span_with_shutdown,__init__,3,0,PRODUCTION_ONLY
+function,extract_list_field,bioetl.application.core.dict_transformers,src/bioetl/application/core/dict_transformers.py,91,application,"(items: list[dict[str, Any]] | None, field: str, converter: Callable[[Any], T] | None=None) -> list[T] | None",46,,,,,14,0,PRODUCTION_ONLY
+function,aggregate_nested_lists,bioetl.application.core.dict_transformers,src/bioetl/application/core/dict_transformers.py,150,application,"(items: list[dict[str, Any]] | None, field: str, deduplicate: bool=True) -> list[Any] | None",46,,,,,10,0,PRODUCTION_ONLY
+function,safe_extract,bioetl.application.core.dict_transformers,src/bioetl/application/core/dict_transformers.py,282,application,"(record: dict[str, Any], key: str, default: T | None=None) -> T | Any | None",27,,,,,5,0,PRODUCTION_ONLY
+function,compute_publication_term_entity_id,bioetl.application.core.entity_id,src/bioetl/application/core/entity_id.py,13,application,"(publication_id: str, term_type: str, term: str) -> str",21,,,,,6,0,PRODUCTION_ONLY
+function,_extract_date_parts,bioetl.domain.normalization,src/bioetl/domain/normalization.py,48,domain,(date_parts: list[list[int]] | None) -> list[int] | None,6,,,,,3,0,PRODUCTION_ONLY
+function,_format_parts_to_date,bioetl.domain.normalization,src/bioetl/domain/normalization.py,67,domain,(parts: list[int]) -> str,10,,,,,3,0,PRODUCTION_ONLY
+function,_parse_authors_from_list,bioetl.domain.normalization,src/bioetl/domain/normalization.py,240,domain,(authors: list[Any]) -> list[str],3,,,,,3,0,PRODUCTION_ONLY
+function,_parse_authors_from_json,bioetl.domain.normalization,src/bioetl/domain/normalization.py,254,domain,(text: str) -> list[str] | None,6,,,,,3,0,PRODUCTION_ONLY
+function,_parse_authors_string,bioetl.domain.normalization,src/bioetl/domain/normalization.py,269,domain,(text: str) -> list[str],6,,,,,3,0,PRODUCTION_ONLY
+function,_validate_positive,bioetl.domain.resilience,src/bioetl/domain/resilience.py,185,domain,"(name: str, value: int | float) -> None",4,,,,,6,0,PRODUCTION_ONLY
+function,_normalize_list,bioetl.domain.transformations,src/bioetl/domain/transformations.py,69,domain,(value: list[Any]) -> list[Any],3,,,,,10,0,PRODUCTION_ONLY
+function,safe_int,bioetl.domain.transformations,src/bioetl/domain/transformations.py,218,domain,"(value: Any, default: int | None=None) -> int | None",16,,,,,58,0,PRODUCTION_ONLY
+function,safe_str,bioetl.domain.transformations,src/bioetl/domain/transformations.py,236,domain,"(value: Any, default: str | None=None) -> str | None",19,,,,,8,0,PRODUCTION_ONLY
+class,CachedBronzeContext,bioetl.domain.context,src/bioetl/domain/context.py,27,domain,,75,,,disabled|from_options,__post_init__|_validate_date_format,35,0,PRODUCTION_ONLY
+function,_require_non_empty,bioetl.domain.composite.aggregation,src/bioetl/domain/composite/aggregation.py,93,domain,"(value: str | tuple[object, ...], name: str) -> None",4,,,,,11,0,PRODUCTION_ONLY
+class,ExecutionConfig,bioetl.domain.composite.config,src/bioetl/domain/composite/config.py,732,domain,,30,,Config,,__post_init__,7,0,PRODUCTION_ONLY
+class,LineageConfig,bioetl.domain.composite.config,src/bioetl/domain/composite/config.py,765,domain,,12,,Config,,,7,0,PRODUCTION_ONLY
+function,_require_non_empty,bioetl.domain.composite.config,src/bioetl/domain/composite/config.py,997,domain,"(value: object, field_name: str) -> None",4,,,,,11,0,PRODUCTION_ONLY
+function,_validate_positive,bioetl.domain.composite.config,src/bioetl/domain/composite/config.py,1003,domain,"(value: int | float, field_name: str) -> None",4,,,,,6,0,PRODUCTION_ONLY
+class,DependencyStatus,bioetl.domain.composite.result,src/bioetl/domain/composite/result.py,183,domain,,7,StrEnum,,,,14,0,PRODUCTION_ONLY
+class,DomainEvent,bioetl.domain.aggregates.events,src/bioetl/domain/aggregates/events.py,29,domain,,11,,,,,19,0,PRODUCTION_ONLY
+class,BatchFailed,bioetl.domain.aggregates.events,src/bioetl/domain/aggregates/events.py,136,domain,,12,DomainEvent,,,,2,0,PRODUCTION_ONLY
+class,PublicationTypeEntry,bioetl.domain.mapping.publication_type_classification,src/bioetl/domain/mapping/publication_type_classification.py,28,domain,,15,,,,,18,0,PRODUCTION_ONLY
+constant,MOLECULE_FIELD_MAPPING,bioetl.domain.mapping.molecule_fields,src/bioetl/domain/mapping/molecule_fields.py,3,domain,,1,,,,,2,0,PRODUCTION_ONLY
+class,OpenAlexPublicationEntity,bioetl.domain.entities.openalex,src/bioetl/domain/entities/openalex.py,19,domain,,62,PublicationEntityBase,,,__post_init__,13,0,PRODUCTION_ONLY
+class,PublicationEntityBase,bioetl.domain.entities.publication_base,src/bioetl/domain/entities/publication_base.py,31,domain,,106,BaseEntity,,,__post_init__,33,0,PRODUCTION_ONLY
+class,ChemblPublication,bioetl.domain.entities.chembl_structures,src/bioetl/domain/entities/chembl_structures.py,16,domain,,32,PublicationEntityBase,,,__post_init__|_validate_invariants,17,0,PRODUCTION_ONLY
+class,DocumentTerm,bioetl.domain.entities.chembl_structures,src/bioetl/domain/entities/chembl_structures.py,51,domain,,38,BaseEntity,,,__post_init__|_validate_invariants,9,0,PRODUCTION_ONLY
+class,TargetComponent,bioetl.domain.entities.chembl_structures,src/bioetl/domain/entities/chembl_structures.py,138,domain,,36,BaseEntity,,,__post_init__|_validate_invariants,12,0,PRODUCTION_ONLY
+class,CellLine,bioetl.domain.entities.chembl_structures,src/bioetl/domain/entities/chembl_structures.py,177,domain,,50,BaseEntity,,,__post_init__|_validate_invariants,12,0,PRODUCTION_ONLY
+class,PubchemMoleculeRecord,bioetl.domain.entities.pubchem,src/bioetl/domain/entities/pubchem.py,24,domain,,155,BaseModel,,,,14,0,PRODUCTION_ONLY
+class,IDMappingResult,bioetl.domain.entities.uniprot,src/bioetl/domain/entities/uniprot.py,17,domain,,87,BaseEntity,,,__post_init__|_validate_invariants|_validate_annotation_score|_validate_sequence_fields,6,0,PRODUCTION_ONLY
+class,SemanticScholarPublicationEntity,bioetl.domain.entities.semanticscholar,src/bioetl/domain/entities/semanticscholar.py,24,domain,,89,PublicationEntityBase,,,__post_init__,12,0,PRODUCTION_ONLY
+class,AssayRecord,bioetl.domain.entities.chembl,src/bioetl/domain/entities/chembl.py,181,domain,,105,BaseModel,,,,8,0,PRODUCTION_ONLY
+class,MoleculeRecord,bioetl.domain.entities.chembl,src/bioetl/domain/entities/chembl.py,288,domain,,148,BaseModel,,,,8,0,PRODUCTION_ONLY
+class,TargetRecord,bioetl.domain.entities.chembl,src/bioetl/domain/entities/chembl.py,438,domain,,65,BaseModel,,,,7,0,PRODUCTION_ONLY
+class,ChemblPublicationRecord,bioetl.domain.entities.chembl,src/bioetl/domain/entities/chembl.py,505,domain,,49,BaseModel,,,,9,0,PRODUCTION_ONLY
+class,ChemblPublicationTermRecord,bioetl.domain.entities.chembl,src/bioetl/domain/entities/chembl.py,556,domain,,28,BaseModel,,,,5,0,PRODUCTION_ONLY
+class,CellLineRecord,bioetl.domain.entities.chembl,src/bioetl/domain/entities/chembl.py,586,domain,,33,BaseModel,,,,7,0,PRODUCTION_ONLY
+class,TargetComponentRecord,bioetl.domain.entities.chembl,src/bioetl/domain/entities/chembl.py,621,domain,,34,BaseModel,,,,7,0,PRODUCTION_ONLY
+class,ProteinClassRecord,bioetl.domain.entities.chembl,src/bioetl/domain/entities/chembl.py,657,domain,,32,BaseModel,,,,3,0,PRODUCTION_ONLY
+class,PubMedPublicationEntity,bioetl.domain.entities.pubmed,src/bioetl/domain/entities/pubmed.py,134,domain,,115,PublicationEntityBase,,,__post_init__,11,0,PRODUCTION_ONLY
+function,get_dedup_key_fields,bioetl.domain.registry.publication,src/bioetl/domain/registry/publication.py,238,domain,"(entity_type: str) -> tuple[str, ...] | None",26,,,,,14,0,PRODUCTION_ONLY
+function,has_composite_key,bioetl.domain.registry.publication,src/bioetl/domain/registry/publication.py,266,domain,(entity_type: str) -> bool,19,,,,,7,0,PRODUCTION_ONLY
+class,CompositePublicationGoldSchema,bioetl.domain.contracts.gold.composite,src/bioetl/domain/contracts/gold/composite.py,27,domain,,95,pa.DataFrameModel,Schema,,,6,0,PRODUCTION_ONLY
+class,ChEMBLTissueGoldSchema,bioetl.domain.contracts.gold.chembl,src/bioetl/domain/contracts/gold/chembl.py,640,domain,,56,pa.DataFrameModel,Schema,,,7,0,PRODUCTION_ONLY
+class,ChEMBLSubcellularFractionGoldSchema,bioetl.domain.contracts.gold.chembl,src/bioetl/domain/contracts/gold/chembl.py,698,domain,,48,pa.DataFrameModel,Schema,,,7,0,PRODUCTION_ONLY
+class,SchemaColumnMetadata,bioetl.domain.models.metadata,src/bioetl/domain/models/metadata.py,599,domain,,12,BaseModel,,,,9,0,PRODUCTION_ONLY
+class,SCDMetadata,bioetl.domain.models.metadata,src/bioetl/domain/models/metadata.py,635,domain,,22,BaseModel,,,,7,0,PRODUCTION_ONLY
+class,CachedBronzeEmptyError,bioetl.domain.exceptions.infrastructure,src/bioetl/domain/exceptions/infrastructure.py,291,domain,,51,StorageError,Error,,__init__,9,0,PRODUCTION_ONLY
+constant,BAO_ID_PATTERN,bioetl.domain.schemas.constants,src/bioetl/domain/schemas/constants.py,21,domain,,1,,,,,7,0,PRODUCTION_ONLY
+constant,UO_ID_PATTERN,bioetl.domain.schemas.constants,src/bioetl/domain/schemas/constants.py,22,domain,,1,,,,,5,0,PRODUCTION_ONLY
+constant,CLO_ID_PATTERN,bioetl.domain.schemas.constants,src/bioetl/domain/schemas/constants.py,23,domain,,1,,,,,5,0,PRODUCTION_ONLY
+constant,EFO_ID_PATTERN,bioetl.domain.schemas.constants,src/bioetl/domain/schemas/constants.py,24,domain,,1,,,,,5,0,PRODUCTION_ONLY
+constant,CELLOSAURUS_ID_PATTERN,bioetl.domain.schemas.constants,src/bioetl/domain/schemas/constants.py,27,domain,,1,,,,,5,0,PRODUCTION_ONLY
+constant,ISO_DATE_PATTERN,bioetl.domain.schemas.constants,src/bioetl/domain/schemas/constants.py,30,domain,,1,,,,,5,0,PRODUCTION_ONLY
+constant,ISSN_PATTERN,bioetl.domain.schemas.constants,src/bioetl/domain/schemas/constants.py,33,domain,,1,,,,,9,0,PRODUCTION_ONLY
+constant,ORCID_PATTERN,bioetl.domain.schemas.constants,src/bioetl/domain/schemas/constants.py,34,domain,,1,,,,,3,0,PRODUCTION_ONLY
+function,is_non_negative,bioetl.domain.schemas.validators,src/bioetl/domain/schemas/validators.py,128,domain,"(pandas_obj: pd.Series, *, min_value: float | bool=0) -> pd.Series",13,,,,,7,0,PRODUCTION_ONLY
+function,is_positive,bioetl.domain.schemas.validators,src/bioetl/domain/schemas/validators.py,147,domain,"(pandas_obj: pd.Series, *, min_value: int | bool=1) -> pd.Series",13,,,,,6,0,PRODUCTION_ONLY
+function,in_closed_range,bioetl.domain.schemas.validators,src/bioetl/domain/schemas/validators.py,166,domain,"(pandas_obj: pd.Series, *, min_val: int | float, max_val: int | float) -> pd.Series",14,,,,,4,0,PRODUCTION_ONLY
+function,max_str_length,bioetl.domain.schemas.validators,src/bioetl/domain/schemas/validators.py,186,domain,"(pandas_obj: pd.Series, *, max_len: int) -> pd.Series",7,,,,,5,0,PRODUCTION_ONLY
+function,str_starts_with,bioetl.domain.schemas.validators,src/bioetl/domain/schemas/validators.py,199,domain,"(pandas_obj: pd.Series, *, prefix: str) -> pd.Series",7,,,,,4,0,PRODUCTION_ONLY
+function,str_matches_pattern,bioetl.domain.schemas.validators,src/bioetl/domain/schemas/validators.py,212,domain,"(pandas_obj: pd.Series, *, pattern: str) -> pd.Series",7,,,,,4,0,PRODUCTION_ONLY
+class,UniprotAnnotationSchema,bioetl.domain.schemas.uniprot._annotations,src/bioetl/domain/schemas/uniprot/_annotations.py,12,domain,,54,pa.DataFrameModel,Schema,,,2,0,PRODUCTION_ONLY
+class,UniprotFeatureSchema,bioetl.domain.schemas.uniprot._features,src/bioetl/domain/schemas/uniprot/_features.py,15,domain,,143,pa.DataFrameModel,Schema,,_check_cross_reference_count|_check_feature_count|_check_keyword_count|_check_publication_count|_check_isoform_count,2,0,PRODUCTION_ONLY
+class,UniprotXrefSchema,bioetl.domain.schemas.uniprot._xrefs,src/bioetl/domain/schemas/uniprot/_xrefs.py,12,domain,,56,pa.DataFrameModel,Schema,,,2,0,PRODUCTION_ONLY
+constant,PROTEIN_EXISTENCE_LEVELS,bioetl.domain.schemas.uniprot._core,src/bioetl/domain/schemas/uniprot/_core.py,18,domain,,1,,,,,3,0,PRODUCTION_ONLY
+constant,ENTRY_TYPES,bioetl.domain.schemas.uniprot._core,src/bioetl/domain/schemas/uniprot/_core.py,26,domain,,1,,,,,3,0,PRODUCTION_ONLY
+constant,PROTEIN_FLAGS,bioetl.domain.schemas.uniprot._core,src/bioetl/domain/schemas/uniprot/_core.py,31,domain,,1,,,,,3,0,PRODUCTION_ONLY
+class,UniprotCoreSchema,bioetl.domain.schemas.uniprot._core,src/bioetl/domain/schemas/uniprot/_core.py,34,domain,,172,ETLRecordSchema,Schema,,_check_accession|_check_entry_name|_check_entry_type|_check_flag|_check_taxonomy_id|_check_sequence|_check_sequence_length|_check_sequence_mass|_check_entry_version|_check_protein_existence|_check_annotation_score,2,0,PRODUCTION_ONLY
+class,RunnerFactoryPort,bioetl.domain.ports.runner,src/bioetl/domain/ports/runner.py,32,domain,,45,Protocol,Port,create|list_pipelines|contains,,8,0,PRODUCTION_ONLY
+class,MetricsExtractorPort,bioetl.domain.ports.runner,src/bioetl/domain/ports/runner.py,80,domain,,22,Protocol,Port,extract_metrics,,8,0,PRODUCTION_ONLY
+class,HealthStatePort,bioetl.domain.ports.health_check,src/bioetl/domain/ports/health_check.py,150,domain,,15,Protocol,Port,status|consecutive_errors,,6,0,PRODUCTION_ONLY
+class,IDMappingPort,bioetl.domain.ports.idmapping,src/bioetl/domain/ports/idmapping.py,16,domain,,58,Protocol,Port,provider_name|map_ids|health_check,__aenter__|__aexit__,7,0,PRODUCTION_ONLY
+class,MetadataCoordinatorPort,bioetl.domain.ports.metadata_coordinator,src/bioetl/domain/ports/metadata_coordinator.py,153,domain,,39,Protocol,Port,create_bronze_metadata|create_silver_metadata|create_gold_metadata,,14,0,PRODUCTION_ONLY
+class,SilverDQConfigPort,bioetl.domain.ports.dq_config,src/bioetl/domain/ports/dq_config.py,59,domain,,32,Protocol,Port,enabled|output_path|get_checks_enums|get_format_enum,,19,0,PRODUCTION_ONLY
+class,GoldDQConfigPort,bioetl.domain.ports.dq_config,src/bioetl/domain/ports/dq_config.py,94,domain,,32,Protocol,Port,enabled|output_path|get_checks_enums|get_format_enum,,19,0,PRODUCTION_ONLY
+class,SilverFilterConfig,bioetl.domain.filtering.silver_config,src/bioetl/domain/filtering/silver_config.py,17,domain,,34,GoldFilterConfig,Config,from_gold_filter_config,,37,0,PRODUCTION_ONLY
+function,convert_write_mode,bioetl.domain.config._converters,src/bioetl/domain/config/_converters.py,16,domain,"(mode: _WM | str, enum_cls: type[_WM]) -> _WM",16,,,,,6,0,PRODUCTION_ONLY
+function,resolve_loading_strategy,bioetl.domain.config._converters,src/bioetl/domain/config/_converters.py,34,domain,(loading_strategy: LoadingStrategy | str | None) -> LoadingStrategy | None,18,,,,,5,0,PRODUCTION_ONLY
+function,freeze_sequences,bioetl.domain.config._converters,src/bioetl/domain/config/_converters.py,54,domain,"(instance: object, fields: tuple[str, ...]) -> None",14,,,,,13,0,PRODUCTION_ONLY
+class,FieldValidation,bioetl.domain.config.validation,src/bioetl/domain/config/validation.py,100,domain,,57,,,,__post_init__,8,0,PRODUCTION_ONLY
+class,CrossFieldValidation,bioetl.domain.config.validation,src/bioetl/domain/config/validation.py,160,domain,,31,,,,__post_init__,7,0,PRODUCTION_ONLY
+class,ConditionalValidation,bioetl.domain.config.validation,src/bioetl/domain/config/validation.py,194,domain,,22,,,,__post_init__,7,0,PRODUCTION_ONLY
+function,validate_taxonomy_id,bioetl.domain.value_objects.taxonomy_id,src/bioetl/domain/value_objects/taxonomy_id.py,137,domain,(value: str | int | None) -> int | None,24,,,,,11,0,PRODUCTION_ONLY
+function,validate_taxonomy_id_str,bioetl.domain.value_objects.taxonomy_id,src/bioetl/domain/value_objects/taxonomy_id.py,163,domain,(value: str | int | None) -> str | None,24,,,,,8,0,PRODUCTION_ONLY
+class,SilverDQCheckType,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,64,domain,,11,StrEnum,,,,26,0,PRODUCTION_ONLY
+class,RecordCountResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,100,domain,,10,,,,,12,0,PRODUCTION_ONLY
+class,FileIntegrityResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,113,domain,,7,,,,,6,0,PRODUCTION_ONLY
+class,SchemaSnapshotResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,123,domain,,21,,,,__post_init__,6,0,PRODUCTION_ONLY
+class,EncodingValidationResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,147,domain,,13,,,,__post_init__,6,0,PRODUCTION_ONLY
+class,NullRateResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,163,domain,,7,,,,,6,0,PRODUCTION_ONLY
+class,UniquenessResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,173,domain,,9,,,,,8,0,PRODUCTION_ONLY
+class,TypeConformanceResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,185,domain,,13,,,,__post_init__,6,0,PRODUCTION_ONLY
+class,NumericDistribution,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,201,domain,,12,,,,,7,0,PRODUCTION_ONLY
+class,CategoricalDistribution,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,216,domain,,10,,,,__post_init__,7,0,PRODUCTION_ONLY
+class,ValueDistributionResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,229,domain,,8,,,,,7,0,PRODUCTION_ONLY
+class,SchemaDriftResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,240,domain,,17,,,,__post_init__,7,0,PRODUCTION_ONLY
+class,DeduplicationStatsResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,260,domain,,8,,,,,6,0,PRODUCTION_ONLY
+class,ContentHashIntegrityResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,271,domain,,7,,,,,7,0,PRODUCTION_ONLY
+class,CompletenessResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,281,domain,,7,,,,,7,0,PRODUCTION_ONLY
+class,BusinessRuleResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,291,domain,,8,,,,,6,0,PRODUCTION_ONLY
+class,BusinessRulesResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,302,domain,,13,,,,__post_init__,7,0,PRODUCTION_ONLY
+class,ForeignKeyResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,318,domain,,9,,,,,7,0,PRODUCTION_ONLY
+class,ReferentialIntegrityResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,330,domain,,5,,,,,7,0,PRODUCTION_ONLY
+class,StatisticalMetric,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,338,domain,,9,,,,,8,0,PRODUCTION_ONLY
+class,StatisticalProfileResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,350,domain,,6,,,,,7,0,PRODUCTION_ONLY
+class,AnomalyMetric,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,359,domain,,10,,,,,8,0,PRODUCTION_ONLY
+class,AnomalyDetectionResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,372,domain,,18,,,,__post_init__,7,0,PRODUCTION_ONLY
+class,SCDIntegrityResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,393,domain,,11,,,,,8,0,PRODUCTION_ONLY
+class,DataFreshnessResult,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,407,domain,,7,,,,,8,0,PRODUCTION_ONLY
+class,DQReportSummary,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,422,domain,,8,,,,,10,0,PRODUCTION_ONLY
+class,DQThresholds,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,433,domain,,7,,,,,8,0,PRODUCTION_ONLY
+class,BronzeDQReport,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,448,domain,,27,,,,__post_init__,22,0,PRODUCTION_ONLY
+class,SilverDQReport,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,478,domain,,34,,,,__post_init__,22,0,PRODUCTION_ONLY
+class,GoldDQReport,bioetl.domain.value_objects.dq_report,src/bioetl/domain/value_objects/dq_report.py,515,domain,,27,,,,__post_init__,22,0,PRODUCTION_ONLY

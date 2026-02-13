@@ -1,0 +1,5 @@
+obj_type,name,module,file,line,layer,signature,loc,base_classes,suffix,public_methods,private_methods,prod_refs,test_refs,usage_class
+constant,PIPELINE_HEALTH_CHECK_PASSED,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,148,infrastructure,,1,,,,,0,5,TEST_ONLY
+constant,INFRASTRUCTURE_VALIDATED,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,154,infrastructure,,1,,,,,0,5,TEST_ONLY
+constant,HEALTH_CHECK_DURATION_SECONDS,bioetl.infrastructure.observability.metrics,src/bioetl/infrastructure/observability/metrics.py,160,infrastructure,,1,,,,,0,2,TEST_ONLY
+class,TransformerPort,bioetl.application.core.protocols,src/bioetl/application/core/protocols.py,49,application,,39,Protocol,Port,transform,,0,14,TEST_ONLY
