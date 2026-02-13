@@ -23,9 +23,12 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
-from bioetl.domain.filtering import GoldFilterConfig
 from bioetl.domain.filtering import (
-    InputFilterConfig as DomainInputFilterConfig,
+    GoldFilterConfig,
+)
+from bioetl.domain.filtering import InputFilterConfig as DomainInputFilterConfig
+from bioetl.domain.filtering import (
+    SilverFilterConfig,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
@@ -102,10 +105,25 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
     def to_domain(self) -> GoldFilterConfig:
         """Convert to domain GoldFilterConfig dataclass.
 
+        Kept for compatibility with BaseGoldFiltersConfig contract.
+        """
+        return super().to_domain()
+
+    def to_silver_domain(self) -> SilverFilterConfig:
+        """Convert to domain SilverFilterConfig dataclass.
+
         Returns:
             GoldFilterConfig: Immutable domain filter configuration.
         """
-        return super().to_domain()
+        gold_filters = self.to_domain()
+        return SilverFilterConfig(
+            column_filters=gold_filters.column_filters,
+            range_filters=gold_filters.range_filters,
+            list_length_filters=gold_filters.list_length_filters,
+            list_contains_filters=gold_filters.list_contains_filters,
+            required_fields=gold_filters.required_fields,
+            exclude_if_present=gold_filters.exclude_if_present,
+        )
 
 
 class GoldFiltersFileConfig(BaseGoldFiltersConfig):
@@ -202,7 +220,10 @@ class FilterConfigFile(BaseModel):
     def to_domain(
         self,
     ) -> tuple[
-        DomainInputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams
+        DomainInputFilterConfig,
+        SilverFilterConfig,
+        GoldFilterConfig,
+        ExtractionParams,
     ]:
         """Convert to domain objects.
 
@@ -213,7 +234,7 @@ class FilterConfigFile(BaseModel):
         """
         return (
             self.input_filter.to_domain(),
-            self.silver_filters.to_domain(),
+            self.silver_filters.to_silver_domain(),
             self.gold_filters.to_domain(),
             ExtractionParams(params=self.extraction_params),
         )

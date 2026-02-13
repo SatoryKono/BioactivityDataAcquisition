@@ -14,7 +14,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
+from bioetl.domain.filtering import (
+    GoldFilterConfig,
+    InputFilterConfig,
+    SilverFilterConfig,
+)
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.config.base_config_loader import BaseConfigLoader
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
@@ -25,7 +29,7 @@ _FILTER_CONCAT_KEYS = frozenset({"required_fields", "exclude_if_present"})
 
 class FilterConfigLoader(
     BaseConfigLoader[
-        tuple[InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams]
+        tuple[InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams]
     ],
 ):
     """Loads and merges filter configurations from hierarchical files.
@@ -50,7 +54,9 @@ class FilterConfigLoader(
         provider: str,
         entity: str,
         inline_overrides: dict[str, Any] | None = None,
-    ) -> tuple[InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams]:
+    ) -> tuple[
+        InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
+    ]:
         """Load merged filter config for provider/entity.
 
         Merge order (later wins for scalars, special handling for collections):
@@ -66,8 +72,7 @@ class FilterConfigLoader(
 
         Returns:
             Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
-            ExtractionParams) domain objects.  Silver and Gold filters both use
-            GoldFilterConfig as the domain type.
+            ExtractionParams) domain objects.  Silver and Gold filters are represented by distinct domain types.
 
         Raises:
             FileNotFoundError: If _defaults.yaml doesn't exist.
@@ -106,7 +111,7 @@ class FilterConfigLoader(
         # Validate via Pydantic
         validated = FilterConfigFile.model_validate(merged)
         domain_configs: tuple[
-            InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams
+            InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
         ] = validated.to_domain()
 
         # Cache result if no inline overrides
