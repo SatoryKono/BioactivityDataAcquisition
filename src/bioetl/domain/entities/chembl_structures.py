@@ -103,6 +103,7 @@ class Target(BaseEntity):
     pref_name: str | None = None
     target_type: str | None = None  # SINGLE PROTEIN, PROTEIN COMPLEX, ORGANISM, etc.
     organism: str | None = None
+    description: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: int | None = None
     species_group_flag: bool | None = None
