@@ -142,7 +142,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("target_id", pa.string()),
         pa.field("target_organism", pa.string()),
         pa.field("target_pref_name", pa.string()),
-        pa.field("target_taxonomy_id", pa.float64()),
+        pa.field("target_taxonomy_id", pa.string()),
         pa.field("text_value", pa.string()),
         pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),

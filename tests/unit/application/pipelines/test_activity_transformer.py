@@ -144,7 +144,7 @@ class TestActivityTransformerTransform:
         assert result["molecule_pref_name"] == "ASPIRIN"
         assert result["target_pref_name"] == "Cyclooxygenase-2"
         assert result["target_organism"] == "Homo sapiens"
-        assert result["target_taxonomy_id"] == 9606  # Standardized output (string)
+        assert result["target_taxonomy_id"] == "9606"  # Standardized output (string)
         assert result["assay_type"] == "B"
 
     @pytest.mark.asyncio
