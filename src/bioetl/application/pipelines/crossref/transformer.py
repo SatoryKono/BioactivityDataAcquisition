@@ -115,8 +115,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             Dictionary of Publication business fields.
 
         """
-        # Cast to dict for type-safe access (BronzeRecord is an empty TypedDict marker)
-        rec = cast("dict[str, Any]", record)
+        # BronzeRecord is already a dict[str, Any]
+        rec = record
 
         # Normalize DOI using Value Object for consistent lowercase format.
         # DOI validity is guaranteed by _pre_extract_validation, so we assert non-None.

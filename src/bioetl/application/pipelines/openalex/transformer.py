@@ -133,8 +133,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             Dictionary of Publication business fields.
 
         """
-        # Cast to dict for type-safe access (BronzeRecord is a TypedDict marker)
-        rec = cast("dict[str, Any]", record)
+        # BronzeRecord is already a dict[str, Any]
+        rec = record
 
         # Extract OpenAlex ID from URL
         openalex_id = extract_openalex_id(rec.get("id"))

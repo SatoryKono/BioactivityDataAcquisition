@@ -171,7 +171,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             Dictionary of extracted and normalized fields.
 
         """
-        rec = cast("dict[str, Any]", record)
+        rec = record
 
         ids = self._extract_validated_ids(rec)
         author_meta = self._extract_author_metadata(rec.get("authors"))

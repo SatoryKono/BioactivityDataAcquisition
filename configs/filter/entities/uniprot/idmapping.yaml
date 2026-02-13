@@ -17,7 +17,7 @@ entity: idmapping
 input_filter:
   enabled: false
   source_path: "data/input/target.csv"
-  column_name: "target_id"
+  column_name: "target_chembl_id"
   filter_field: "target_id"
   batch_size: 100
 
