@@ -36,10 +36,15 @@ class CellLineTransformer(BaseChemblTransformer):
         record: BronzeRecord,
         index: int,
     ) -> SilverRecord | None:
-        """Support both unified and legacy cell-line identifier field names."""
-        if "cell_id" not in record and record.get("cell_chembl_id") is not None:
+        """Map cell_chembl_id → cell_id for Silver layer.
+
+        ChEMBL API returns both cell_id (numeric internal ID like 449)
+        and cell_chembl_id (CHEMBL ID like CHEMBL3308072). Silver uses
+        cell_chembl_id as the canonical cell_id.
+        """
+        if record.get("cell_chembl_id") is not None:
             record = dict(record)
-            record["cell_id"] = record.get("cell_chembl_id")
+            record["cell_id"] = record["cell_chembl_id"]
         return await super()._transform_impl(context, record, index)
 
     def _extract_business_data(
