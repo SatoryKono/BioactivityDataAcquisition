@@ -201,7 +201,7 @@ class StorageFactory:
                                 metadata creation. If provided, ensures consistent
                                 run_id and timestamps across Bronze, Silver, Gold.
             silver_validator: Optional SilverValidatorPort for Pandera validation
-                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
+                in SilverWriter. If None, validation is skipped by storage layer.
 
         Returns:
             StorageContext with adapter and paths

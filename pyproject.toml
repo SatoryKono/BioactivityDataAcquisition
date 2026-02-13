@@ -81,6 +81,7 @@ tests = [
     "pytest-vcr>=1.0",
     # Code formatting (required by architecture tests) - ruff replaces black+isort
     "ruff>=0.4",
+    "detect-secrets>=1.4",
 ]
 dev = [
     "pytest>=8.0",
@@ -124,6 +125,7 @@ dev = [
     "radon>=6.0",
     # Code duplication detection
     "pylint>=3.0",
+    "detect-secrets>=1.4",
     # Dead code detection
     "vulture>=2.11",
     # Mutation testing

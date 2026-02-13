@@ -78,6 +78,11 @@ test-smoke: ## Run smoke tests (quick sanity check for local development)
 	$(RUN) pytest tests/smoke/ -v --tb=short
 	@echo "$(GREEN)Smoke tests passed!$(NC)"
 
+test-deps: ## Verify all runtime dependencies are importable
+	@echo "$(BLUE)Checking runtime dependencies...$(NC)"
+	$(RUN) pytest tests/smoke/test_smoke.py::TestRuntimeDependencies -v --tb=short
+	@echo "$(GREEN)All dependencies OK!$(NC)"
+
 test-unit: ## Run only unit tests (parallel)
 	@echo "$(BLUE)Running unit tests...$(NC)"
 	$(RUN) pytest tests/unit/ -n auto --dist loadscope --ignore=tests/benchmarks

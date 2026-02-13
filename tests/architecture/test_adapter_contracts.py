@@ -46,6 +46,7 @@ class TestAdapterHealthCheck:
             "pagination.py",  # Pagination mixin, not a DataSourcePort adapter
             "rate_limiter.py",  # Rate limiting utility
             "circuit_breaker.py",  # Circuit breaker utility
+            "health.py",  # Health check mixin, not a DataSourcePort adapter
             "health_monitor.py",  # Health state utility, not a DataSourcePort adapter
             "error_handling.py",  # Error handling utility, not a DataSourcePort adapter
             "fallback.py",  # Title fallback handler utility, not a DataSourcePort adapter

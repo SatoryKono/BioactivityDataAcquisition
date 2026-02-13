@@ -12,7 +12,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 
-class UniprotFeatureSchema(pa.DataFrameModel):
+class UniprotFeatureSchema(pa.DataFrameModel):  # type: ignore[type-arg]  # Pandera typing limitation
     """Sequence features, keywords, PTMs, isoforms and counts."""
 
     # === Features & Keywords ===

@@ -29,11 +29,10 @@ from bioetl.domain.registry.publication import (
     has_composite_key,
     is_publication_entity,
 )
-
-# ChEMBL API base URL
-# Note: ChEMBL API no longer supports .json extension - use format=json parameter instead
-CHEMBL_API_BASE = "https://www.ebi.ac.uk/chembl/api/data"
-CHEMBL_STATUS_URL = f"{CHEMBL_API_BASE}/status"
+from bioetl.infrastructure.adapters.chembl.constants import (
+    CHEMBL_API_BASE,
+    CHEMBL_STATUS_URL,
+)
 
 # =============================================================================
 # Non-Publication Entity Mappings

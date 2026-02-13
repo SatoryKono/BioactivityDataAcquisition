@@ -48,9 +48,8 @@ class RuntimeConfig:
 
     # Gold layer schema validation (strict mode)
     # When True, pipelines fail if Gold schema is not provided
-    # When False (default), missing Gold schema skips validation
-    # Use False during migration, True for production readiness
-    strict_gold_validation: bool = False
+    # Default True to enforce strict Gold validation (override only in non-prod)
+    strict_gold_validation: bool = True
 
     # Skip Gold layer writing (composite sub-pipelines)
     # When True, Gold filter returns False for all records,
