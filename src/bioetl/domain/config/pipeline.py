@@ -125,12 +125,12 @@ class PipelineConfig:
         return self.table.gold_table
 
     @property
-    def write_mode(self) -> SilverWriteMode | str:
+    def write_mode(self) -> SilverWriteMode:
         """Shortcut for ``self.table.silver_write_mode``."""
         return self.table.silver_write_mode
 
     @property
-    def gold_write_mode(self) -> GoldWriteMode | str:
+    def gold_write_mode(self) -> GoldWriteMode:
         """Shortcut for ``self.table.gold_write_mode``."""
         return self.table.gold_write_mode
 

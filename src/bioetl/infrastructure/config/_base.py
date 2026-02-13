@@ -34,6 +34,7 @@ from pydantic_settings import (
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, PipelineConfig, TableConfig
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.infrastructure.config_loader import (
     load_pipeline_config,
     load_source_config,
@@ -94,24 +95,20 @@ def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
 
 def _extract_write_modes(
     yaml_config: PipelineYamlConfig,
-) -> tuple[
-    Literal["merge", "append", "overwrite"], Literal["append", "overwrite", "scd2"]
-]:
-    """Extract write modes from sink config."""
+) -> tuple[SilverWriteMode, GoldWriteMode]:
+    """Extract and convert write modes from sink config to domain enums."""
     silver_config = yaml_config.sink.get("silver")
     gold_config = yaml_config.sink.get("gold")
 
-    write_mode: Literal["merge", "append", "overwrite"] = "merge"
+    silver_mode = SilverWriteMode.MERGE
     if silver_config and silver_config.mode:
-        # Cast the mode string to the literal type
-        write_mode = silver_config.mode  # type: ignore[assignment]
+        silver_mode = SilverWriteMode.from_string(silver_config.mode)
 
-    gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
+    gold_mode = GoldWriteMode.APPEND
     if gold_config and gold_config.mode:
-        # Cast the mode string to the literal type
-        gold_write_mode = gold_config.mode  # type: ignore[assignment]
+        gold_mode = GoldWriteMode.from_string(gold_config.mode)
 
-    return write_mode, gold_write_mode
+    return silver_mode, gold_mode
 
 
 def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig:
