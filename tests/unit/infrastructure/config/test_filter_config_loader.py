@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.domain.filtering import SilverFilterConfig
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 
 
@@ -405,6 +406,13 @@ class TestFilterConfigFile:
         assert input_filter.column_name == "test_id"
         assert input_filter.filter_field == "id"
         assert input_filter.batch_size == 20
+
+
+    def test_to_domain_silver_filters_type(self, loader: FilterConfigLoader) -> None:
+        """Silver filters should be converted to SilverFilterConfig."""
+        _, silver_filters, _, _ = loader.load("test_provider", "test_entity")
+
+        assert isinstance(silver_filters, SilverFilterConfig)
 
     def test_to_domain_gold_filters(self, loader: FilterConfigLoader) -> None:
         """Gold filters should be converted correctly."""

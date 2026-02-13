@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
-from bioetl.domain.filtering import GoldFilterConfig
+from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.filtering import (
     InputFilterConfig as DomainInputFilterConfig,
 )
@@ -99,13 +99,13 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
         exclude_if_present: Exclude if field has value.
     """
 
-    def to_domain(self) -> GoldFilterConfig:
-        """Convert to domain GoldFilterConfig dataclass.
+    def to_domain(self) -> SilverFilterConfig:
+        """Convert to domain SilverFilterConfig dataclass.
 
         Returns:
-            GoldFilterConfig: Immutable domain filter configuration.
+            SilverFilterConfig: Immutable domain filter configuration.
         """
-        return super().to_domain()
+        return SilverFilterConfig.from_base(super().to_domain())
 
 
 class GoldFiltersFileConfig(BaseGoldFiltersConfig):
@@ -202,14 +202,13 @@ class FilterConfigFile(BaseModel):
     def to_domain(
         self,
     ) -> tuple[
-        DomainInputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams
+        DomainInputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
     ]:
         """Convert to domain objects.
 
         Returns:
             Tuple of (InputFilterConfig, SilverFilterConfig, GoldFilterConfig,
-            ExtractionParams).  Silver and Gold filters both use GoldFilterConfig
-            as the domain type — only their YAML section differs.
+            ExtractionParams).
         """
         return (
             self.input_filter.to_domain(),
