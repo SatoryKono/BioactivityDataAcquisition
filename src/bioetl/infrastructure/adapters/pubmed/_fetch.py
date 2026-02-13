@@ -14,8 +14,6 @@ from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcess
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from pydantic import BaseModel
-
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
     from bioetl.infrastructure.adapters.common.api_request_collector import (

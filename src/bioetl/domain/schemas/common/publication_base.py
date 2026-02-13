@@ -6,16 +6,11 @@ Provides unified field set for cross-provider publication analysis.
 
 from __future__ import annotations
 
-import json
-import re
-from typing import Any, cast
-
 import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.schemas.constants import ORCID_PATTERN
 from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
     MAX_PUBLICATION_YEAR,

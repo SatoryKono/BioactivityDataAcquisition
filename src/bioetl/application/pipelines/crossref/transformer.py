@@ -16,7 +16,7 @@ Uses DataNormalizationService for text normalization (DI pattern).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.crossref.extractors import (
