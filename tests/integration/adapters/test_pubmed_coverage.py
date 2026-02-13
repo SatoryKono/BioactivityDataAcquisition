@@ -10,6 +10,7 @@ from httpx import Response
 from pydantic import SecretStr
 
 from bioetl.domain.entities.pubmed import ArticleRecord
+from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
@@ -96,9 +97,10 @@ async def test_fetch_filtered_with_fallback(pubmed_adapter: PubMedAdapter):
     """
 
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
-        # Primary fetch (pmid 12345)
-        # Use simple params matching
-        respx_mock.get("efetch.fcgi", params={"id": "12345", "db": "pubmed", "retmode": "xml", "rettype": "abstract", "email": "test@example.com"}).mock(
+        # Primary fetch (pmid 12345 and missing_id)
+        # fetch_filtered will be called with ["12345", "missing_id"]
+        # which results in id=12345,missing_id
+        respx_mock.get("efetch.fcgi", params={"id": "12345,missing_id", "db": "pubmed", "retmode": "xml", "rettype": "abstract", "email": "test@example.com"}).mock(
             return_value=Response(200, text=mock_xml)
         )
         # Fallback search by title
@@ -199,3 +201,93 @@ async def test_adapter_aclose(pubmed_adapter: PubMedAdapter):
 
     await pubmed_adapter.aclose()
     assert pubmed_adapter.http_client.__aexit__.called
+
+
+@pytest.mark.integration
+async def test_fetch_batch_xml_parse_error(pubmed_adapter: PubMedAdapter, mock_logger):
+    # Mocking efetch with invalid XML
+    with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        respx_mock.get("efetch.fcgi").mock(return_value=Response(200, text="invalid xml"))
+
+        async with pubmed_adapter.http_client:
+            # We need to access the private method to test this specific branch
+            records = await pubmed_adapter._fetch_batch(["12345"])
+            assert records == []
+            assert mock_logger.error.called
+
+
+@pytest.mark.integration
+async def test_fetch_batch_network_error(pubmed_adapter: PubMedAdapter):
+    with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        respx_mock.get("efetch.fcgi").mock(return_value=Response(500))
+
+        async with pubmed_adapter.http_client:
+            with pytest.raises(Exception):
+                await pubmed_adapter._fetch_batch(["12345"])
+
+
+@pytest.mark.integration
+async def test_get_pmids_error(pubmed_adapter: PubMedAdapter):
+    with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        respx_mock.get("esearch.fcgi").mock(return_value=Response(500))
+
+        async with pubmed_adapter.http_client:
+            with pytest.raises(Exception):
+                await pubmed_adapter._get_pmids("query", 10)
+
+
+@pytest.mark.integration
+async def test_search_by_title_error(pubmed_adapter: PubMedAdapter, mock_logger):
+    # This should trigger the exception block in _search_by_title
+    # which returns [] and logs debug
+    with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        respx_mock.get("esearch.fcgi").mock(side_effect=Exception("search error"))
+
+        async with pubmed_adapter.http_client:
+            results = await pubmed_adapter._search_by_title("some title")
+            assert results == []
+            assert mock_logger.debug.called
+
+
+@pytest.mark.integration
+async def test_probe_health_explicit(pubmed_adapter: PubMedAdapter):
+    mock_health_json = {"esearchresult": {"idlist": ["1"]}}
+    with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        respx_mock.get("esearch.fcgi").mock(return_value=Response(200, json=mock_health_json))
+
+        async with pubmed_adapter.http_client:
+            status = await pubmed_adapter._probe_health()
+            assert status == HealthStatus.HEALTHY
+
+
+@pytest.mark.integration
+async def test_probe_health_degraded(pubmed_adapter: PubMedAdapter):
+    import time
+    mock_health_json = {"esearchresult": {"idlist": ["1"]}}
+
+    # We want to test the timing branch.
+    # BaseHttpAdapter or the mixin might use time.monotonic()
+    
+    with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        async def slow_response(request):
+            await anyio.sleep(5.1)
+            return Response(200, json=mock_health_json)
+        
+        # respx can take a callback
+        import anyio
+        respx_mock.get("esearch.fcgi").mock(side_effect=slow_response)
+
+        async with pubmed_adapter.http_client:
+            status = await pubmed_adapter._probe_health()
+            assert status == HealthStatus.DEGRADED
+
+
+@pytest.mark.integration
+async def test_probe_health_unhealthy(pubmed_adapter: PubMedAdapter):
+    with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        respx_mock.get("esearch.fcgi").mock(return_value=Response(500))
+
+        async with pubmed_adapter.http_client:
+            # health_check calls _probe_health and catches exceptions
+            status = await pubmed_adapter.health_check()
+            assert status == HealthStatus.UNHEALTHY
