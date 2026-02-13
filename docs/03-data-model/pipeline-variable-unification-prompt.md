@@ -2,7 +2,7 @@
 
 ## Область: пайплайны Activity, Assay, Target, Molecule (ChEMBL)
 
-**Версия**: 1.0.0
+**Версия**: 2.0.0
 **Дата**: 2026-02-13
 **Задача**: Стандартизировать наименования полей (переменных) и правила валидации
 данных для 4-х основных ChEMBL source-пайплайнов.
@@ -20,6 +20,22 @@
 3. [Кросс-таблица унификации](#3-кросс-таблица-унификации)
 4. [Выявленные расхождения](#4-выявленные-расхождения)
 5. [Рекомендации по унификации](#5-рекомендации-по-унификации)
+6. [Промты для изменения кода](#6-промты-для-изменения-кода)
+   - [PROMPT-1: action_type_parent → action_type_parent_type](#prompt-1-синхронизация-dto-action_type_parent--action_type_parent_type)
+   - [PROMPT-2: _json Activity](#prompt-2-убрать-суффикс-_json-в-dto-activity)
+   - [PROMPT-3: _json Assay](#prompt-3-убрать-суффикс-_json-в-dto-assay)
+   - [PROMPT-4: _json Target](#prompt-4-убрать-суффикс-_json-в-dto-target)
+   - [PROMPT-5: _json Molecule](#prompt-5-убрать-суффикс-_json-в-dto-molecule)
+   - [PROMPT-6: DQ molecule field names](#prompt-6-синхронизация-dq-конфига-molecule-с-silver-именами)
+   - [PROMPT-7: assay filter column_name](#prompt-7-синхронизация-input_filtercolumn_name-для-assay)
+   - [PROMPT-8: taxonomy Activity](#prompt-8-унификация-taxonomy_id-с-контекстным-префиксом-activity)
+   - [PROMPT-9: taxonomy Assay](#prompt-9-унификация-taxonomy_id-с-контекстным-префиксом-assay)
+   - [PROMPT-10: component_id Target](#prompt-10-silver-schema-component_id--primary_component_id-target)
+   - [PROMPT-11: molecule property alias](#prompt-11-унификация-molecule-property-alias--добавить-недостающие-molecule-gold)
+   - [PROMPT-12: DTO-only Target fields](#prompt-12-удаление-dto-only-полей-из-target-или-добавление-в-entity)
+   - [PROMPT-13: docs update](#prompt-13-обновление-field-catalog-source-pipelinesmd)
+   - [PROMPT-14: taxonomy type fix](#prompt-14-обновление-silver-schema-taxonomy_id-тип-данных-activity)
+   - [PROMPT-15: финальная валидация](#prompt-15-финальная-валидация--architecture-tests-и-cross-layer-consistency)
 
 ---
 
@@ -605,3 +621,640 @@ Assay input_filter.column_name использует `assay_chembl_id` (API-им�
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` | Имена колонок |
 | Тесты | `tests/unit/application/pipelines/chembl/` | Обновить маппинги |
 | Тесты архитектуры | `tests/architecture/` | Проверить границы |
+
+---
+
+## 6. Промты для изменения кода
+
+Ниже — пошаговые промты (задания) для AI-агентов или ручного выполнения.
+Каждый промт — независимый рефакторинг с минимальным blast radius.
+Порядок выполнения соответствует зависимостям между изменениями.
+
+**Правила для всех промтов:**
+- Каждое изменение должно сопровождаться обновлением тестов.
+- После каждого промта: `make lint && pytest tests/architecture/ -v`.
+- Не менять API/Bronze имена — они определяются внешним API.
+- DTO → Entity маппинг происходит в Transformer. DTO может хранить API-имена.
+- Коммитить каждый промт отдельно с описательным сообщением.
+
+---
+
+### PROMPT-1: Синхронизация DTO `action_type_parent` → `action_type_parent_type`
+
+**Severity**: HIGH (рассинхрон DTO ↔ Entity/Gold)
+**Blast radius**: LOW (1 поле, 1 пайплайн)
+
+**Задание:**
+
+В файле `src/bioetl/domain/entities/chembl.py` в классе `ActivityRecord`
+переименовать поле `action_type_parent` → `action_type_parent_type` для
+синхронизации с Entity `Bioactivity` и Gold Schema `ChEMBLActivityGoldSchema`.
+
+**Файлы для изменения:**
+
+1. `src/bioetl/domain/entities/chembl.py`:
+   - В классе `ActivityRecord`: переименовать атрибут `action_type_parent` → `action_type_parent_type`
+
+2. `src/bioetl/application/pipelines/chembl/activity_transformer.py`:
+   - Обновить маппинг, если трансформер обращается к `record.action_type_parent`
+   - Должно стать `record.action_type_parent_type`
+
+3. Тесты:
+   - `tests/unit/application/pipelines/test_activity_transformer.py`
+   - `tests/unit/application/pipelines/test_chembl_activity_unit.py`
+   - `tests/unit/domain/value_objects/test_activity.py`
+   - Обновить fixtures и assertions с `action_type_parent` → `action_type_parent_type`
+
+**Верификация:**
+```bash
+grep -rn "action_type_parent[^_]" src/ tests/ --include="*.py"
+# Ожидание: 0 совпадений (все заменены на action_type_parent_type)
+make lint && pytest tests/unit/application/pipelines/test_activity_transformer.py -v
+```
+
+---
+
+### PROMPT-2: Убрать суффикс `_json` в DTO (Activity)
+
+**Severity**: MEDIUM (рассинхрон именования DTO ↔ Entity/Silver/Gold)
+**Blast radius**: LOW (1 поле, 1 пайплайн)
+
+**Задание:**
+
+В `ActivityRecord` (файл `src/bioetl/domain/entities/chembl.py`):
+- Переименовать `activity_properties_json` → `activity_properties`
+
+Это приведёт DTO в соответствие с Entity (`Bioactivity.activity_properties`),
+Silver Schema (`CHEMBL_ACTIVITY_SCHEMA` — `activity_properties`),
+и Gold Schema (`ChEMBLActivityGoldSchema.activity_properties`).
+
+**Файлы для изменения:**
+
+1. `src/bioetl/domain/entities/chembl.py`:
+   - `ActivityRecord.activity_properties_json` → `activity_properties`
+
+2. `src/bioetl/application/pipelines/chembl/activity_transformer.py`:
+   - Все обращения `record.activity_properties_json` → `record.activity_properties`
+   - Убрать маппинг-переименование если оно есть в transform-логике
+
+3. Тесты: fixtures с `activity_properties_json` → `activity_properties`
+
+**Верификация:**
+```bash
+grep -rn "activity_properties_json" src/ tests/ --include="*.py"
+# Ожидание: 0 совпадений
+```
+
+---
+
+### PROMPT-3: Убрать суффикс `_json` в DTO (Assay)
+
+**Severity**: MEDIUM
+**Blast radius**: LOW (2 поля, 1 пайплайн)
+
+**Задание:**
+
+В `AssayRecord` (файл `src/bioetl/domain/entities/chembl.py`):
+- `assay_classifications_json` → `assay_classifications`
+- `assay_parameters_json` → `assay_parameters`
+
+**Файлы для изменения:**
+
+1. `src/bioetl/domain/entities/chembl.py`:
+   - `AssayRecord.assay_classifications_json` → `assay_classifications`
+   - `AssayRecord.assay_parameters_json` → `assay_parameters`
+
+2. `src/bioetl/application/pipelines/chembl/assay_transformer.py`:
+   - Обновить обращения к этим полям
+
+3. Тесты:
+   - `tests/unit/application/pipelines/test_chembl_assay_parameters.py`
+   - `tests/e2e/test_chembl_assay_e2e.py`
+
+**Верификация:**
+```bash
+grep -rn "assay_classifications_json\|assay_parameters_json" src/ tests/ --include="*.py"
+# Ожидание: 0 совпадений
+```
+
+---
+
+### PROMPT-4: Убрать суффикс `_json` в DTO (Target)
+
+**Severity**: MEDIUM
+**Blast radius**: LOW (2 поля, 1 пайплайн)
+
+**Задание:**
+
+В `TargetRecord` (файл `src/bioetl/domain/entities/chembl.py`):
+- `target_components_json` → `target_components`
+- `cross_references_json` → `cross_references`
+
+Примечание: `target_component_synonyms_json` — проверить, есть ли.
+Если есть → `target_component_synonyms`.
+
+**Файлы для изменения:**
+
+1. `src/bioetl/domain/entities/chembl.py`:
+   - В классе `TargetRecord`
+
+2. `src/bioetl/application/pipelines/chembl/target_transformer.py`:
+   - Обновить обращения
+
+3. Тесты:
+   - `tests/e2e/test_chembl_target_e2e.py`
+
+**Верификация:**
+```bash
+grep -rn "target_components_json\|cross_references_json" src/ tests/ --include="*.py" | grep -v "# "
+# Ожидание: 0 совпадений (кроме комментариев)
+```
+
+---
+
+### PROMPT-5: Убрать суффикс `_json` в DTO (Molecule)
+
+**Severity**: MEDIUM
+**Blast radius**: MEDIUM (6 полей, 1 пайплайн)
+
+**Задание:**
+
+В `MoleculeRecord` (файл `src/bioetl/domain/entities/chembl.py`):
+- `molecule_hierarchy_json` → `molecule_hierarchy`
+- `molecule_properties_json` → `molecule_properties`
+- `molecule_structures_json` → `molecule_structures`
+- `molecule_synonyms_json` → `molecule_synonyms`
+- `cross_references_json` → `cross_references`
+- `atc_classifications_json` → `atc_classifications`
+
+**Файлы для изменения:**
+
+1. `src/bioetl/domain/entities/chembl.py`:
+   - В классе `MoleculeRecord`
+
+2. `src/bioetl/application/pipelines/chembl/molecule_transformer.py`:
+   - Обновить все обращения к `record.*_json`
+
+3. Тесты:
+   - `tests/e2e/test_chembl_molecule_e2e.py`
+
+**Верификация:**
+```bash
+grep -rn "_json" src/bioetl/domain/entities/chembl.py --include="*.py"
+# Ожидание: только variant_sequence_json (assay) — это forensic-поле, оно остаётся
+```
+
+---
+
+### PROMPT-6: Синхронизация DQ-конфига Molecule с Silver-именами
+
+**Severity**: HIGH (DQ проверяет несуществующие поля)
+**Blast radius**: LOW (1 файл)
+
+**Задание:**
+
+В `configs/dq/entities/chembl/molecule.yaml` поля DQ-валидации используют
+API-имена (`full_mwt`, `alogp`), но Silver/Entity используют `property_full_mwt`,
+`property_alogp`. DQ-движок работает по Silver-данным, значит DQ-правила должны
+ссылаться на Silver-имена.
+
+**Изменения:**
+
+```yaml
+# БЫЛО:
+- field: full_mwt
+  type: range
+  ...
+- field: alogp
+  type: range
+  ...
+
+# СТАЛО:
+- field: property_full_mwt
+  type: range
+  ...
+- field: property_alogp
+  type: range
+  ...
+```
+
+**Файлы для изменения:**
+
+1. `configs/dq/entities/chembl/molecule.yaml`:
+   - `full_mwt` → `property_full_mwt`
+   - `alogp` → `property_alogp`
+
+**Верификация:**
+```bash
+# Проверить, что DQ-поля совпадают с Silver-схемой
+python -c "
+import yaml
+with open('configs/dq/entities/chembl/molecule.yaml') as f:
+    dq = yaml.safe_load(f)
+fields = [v['field'] for v in dq.get('entity_field_validations', [])]
+print('DQ fields:', fields)
+"
+# Ожидание: ['molecule_id', 'property_full_mwt', 'property_alogp']
+```
+
+---
+
+### PROMPT-7: Синхронизация input_filter.column_name для Assay
+
+**Severity**: LOW
+**Blast radius**: LOW (1 файл, 1 поле)
+
+**Задание:**
+
+В `configs/filter/entities/chembl/assay.yaml` поле `input_filter.column_name`
+использует `assay_chembl_id` (API-имя), тогда как остальные пайплайны
+(activity, target, molecule) используют unified-имена (`activity_id`, `target_id`,
+`molecule_id`). Для консистентности:
+
+```yaml
+# БЫЛО:
+input_filter:
+  column_name: "assay_chembl_id"
+  filter_field: "assay_id"
+
+# СТАЛО:
+input_filter:
+  column_name: "assay_id"
+  filter_field: "assay_id"
+```
+
+**ВАЖНО**: Проверить, что CSV-файл `data/input/assay.csv` тоже использует
+`assay_id` как заголовок. Если CSV использует `assay_chembl_id`, то нужно
+обновить и CSV, или оставить `column_name` как есть (оно ссылается на CSV).
+
+**Файлы для изменения:**
+
+1. `configs/filter/entities/chembl/assay.yaml` (если CSV совместим)
+2. `data/input/assay.csv` (если нужно обновить заголовок)
+
+---
+
+### PROMPT-8: Унификация `taxonomy_id` с контекстным префиксом (Activity)
+
+**Severity**: HIGH (семантическое перекрытие при join/merge)
+**Blast radius**: HIGH (затрагивает все слои Activity)
+
+**Задание:**
+
+В Activity пайплайне `taxonomy_id` хранит NCBI Taxonomy ID **мишени** (target).
+Для устранения семантической неоднозначности при объединении с Assay (где
+`taxonomy_id` — это taxonomy ID **организма анализа**):
+
+Переименовать `taxonomy_id` → `target_taxonomy_id` в Activity-пайплайне.
+
+**Файлы для изменения (в порядке зависимостей):**
+
+1. `src/bioetl/domain/entities/bioactivity.py`:
+   - Entity `Bioactivity`: `taxonomy_id` → `target_taxonomy_id`
+
+2. `src/bioetl/domain/contracts/gold/chembl.py`:
+   - `ChEMBLActivityGoldSchema`: `taxonomy_id` → `target_taxonomy_id`
+
+3. `src/bioetl/infrastructure/schemas/silver.py`:
+   - `CHEMBL_ACTIVITY_SCHEMA`: `pa.field("taxonomy_id", pa.string())` → `pa.field("target_taxonomy_id", pa.string())`
+
+4. `src/bioetl/application/pipelines/chembl/activity_transformer.py`:
+   - Маппинг `target_tax_id` → `target_taxonomy_id` (вместо `taxonomy_id`)
+
+5. `configs/filter/entities/chembl/activity.yaml`:
+   - Проверить ссылки на `taxonomy_id` → `target_taxonomy_id`
+
+6. `configs/dq/entities/chembl/activity.yaml`:
+   - Если есть ссылки на `taxonomy_id` → `target_taxonomy_id`
+
+7. `docs/03-data-model/field-catalog-source-pipelines.md`:
+   - Обновить `taxonomy_id` → `target_taxonomy_id` в секции `chembl_activity`
+
+8. Тесты:
+   - `tests/unit/application/pipelines/test_activity_transformer.py`
+   - `tests/unit/application/pipelines/test_chembl_activity_unit.py`
+   - `tests/unit/pipelines/chembl/test_activity_schema_gap.py`
+   - `tests/e2e/test_chembl_activity_e2e.py`
+   - `tests/unit/infrastructure/schemas/test_silver.py`
+   - `tests/unit/infrastructure/schemas/test_silver_pipeline_contracts.py`
+
+**Верификация:**
+```bash
+# 1. Проверить, что taxonomy_id НЕ используется в Activity
+grep -rn "taxonomy_id" src/bioetl/domain/entities/bioactivity.py
+# Ожидание: target_taxonomy_id
+
+# 2. Полный набор тестов
+pytest tests/unit/application/pipelines/test_activity_transformer.py \
+       tests/unit/infrastructure/schemas/test_silver.py \
+       tests/architecture/ -v
+```
+
+---
+
+### PROMPT-9: Унификация `taxonomy_id` с контекстным префиксом (Assay)
+
+**Severity**: HIGH
+**Blast radius**: HIGH (затрагивает все слои Assay)
+
+**Задание:**
+
+В Assay пайплайне `taxonomy_id` хранит NCBI Taxonomy ID **организма анализа**.
+Переименовать `taxonomy_id` → `assay_taxonomy_id`.
+
+**Файлы для изменения:**
+
+1. `src/bioetl/domain/entities/chembl_activity.py`:
+   - Entity `Assay`: `taxonomy_id: int | None` → `assay_taxonomy_id: int | None`
+   - Обновить комментарий `# Standardized to 'taxonomy_id'` → `# Standardized to 'assay_taxonomy_id'`
+
+2. `src/bioetl/domain/contracts/gold/chembl.py`:
+   - `ChEMBLAssayGoldSchema`: `taxonomy_id` → `assay_taxonomy_id`
+
+3. `src/bioetl/infrastructure/schemas/silver.py`:
+   - `CHEMBL_ASSAY_SCHEMA`: `pa.field("taxonomy_id", pa.float64())` → `pa.field("assay_taxonomy_id", pa.float64())`
+
+4. `src/bioetl/application/pipelines/chembl/assay_transformer.py`:
+   - Маппинг `assay_tax_id` → `assay_taxonomy_id` (вместо `taxonomy_id`)
+
+5. `docs/03-data-model/field-catalog-source-pipelines.md`:
+   - Обновить `taxonomy_id` → `assay_taxonomy_id` в секции `chembl_assay`
+
+6. Тесты:
+   - `tests/unit/application/pipelines/test_chembl_assay_parameters.py`
+   - `tests/e2e/test_chembl_assay_e2e.py`
+   - `tests/unit/infrastructure/schemas/test_silver.py`
+
+**Примечание**: `variant_taxonomy_id` уже имеет контекстный префикс — не менять.
+
+**Верификация:**
+```bash
+# В Assay entity не должно быть bare taxonomy_id
+grep -n "taxonomy_id" src/bioetl/domain/entities/chembl_activity.py
+# Ожидание: assay_taxonomy_id, variant_taxonomy_id (но НЕ bare taxonomy_id)
+```
+
+---
+
+### PROMPT-10: Silver schema `component_id` → `primary_component_id` (Target)
+
+**Severity**: MEDIUM (рассинхрон Silver Schema ↔ Entity)
+**Blast radius**: LOW (1 поле, 1 пайплайн)
+
+**Задание:**
+
+В Silver Schema `CHEMBL_TARGET_SCHEMA` есть поле `component_id` (float64),
+но Entity `Target` использует `primary_component_id` (int | None).
+Silver Schema должна совпадать с Entity.
+
+**Файлы для изменения:**
+
+1. `src/bioetl/infrastructure/schemas/silver.py`:
+   - `pa.field("component_id", pa.float64())` → `pa.field("primary_component_id", pa.float64())`
+
+2. `src/bioetl/application/pipelines/chembl/target_transformer.py`:
+   - Проверить, что трансформер записывает в `primary_component_id`
+
+3. Тесты Silver:
+   - `tests/unit/infrastructure/schemas/test_silver.py`
+   - `tests/unit/infrastructure/schemas/test_silver_pipeline_contracts.py`
+
+**Верификация:**
+```bash
+grep -n "component_id" src/bioetl/infrastructure/schemas/silver.py | grep -i target
+# Ожидание: primary_component_id
+```
+
+---
+
+### PROMPT-11: Унификация molecule property alias — добавить недостающие (Molecule Gold)
+
+**Severity**: MEDIUM (непоследовательность в Gold)
+**Blast radius**: MEDIUM
+
+**Задание:**
+
+В Molecule Gold Schema часть `property_*` полей имеет каноническое alias-имя
+(например `property_alogp` → `logp`), а часть — нет. Привести к единому стилю.
+
+Добавить alias-поля для оставшихся `property_*` без alias:
+
+| property_* (Silver) | Каноническое (Gold) | Описание |
+|---|---|---|
+| `property_ro5_violations` | `ro5_violation_count` | Число нарушений Rule of 5 |
+| `property_qed_weighted` | `qed_score` | QED взвешенный |
+| `property_full_molformula` | `molecular_formula` | Молекулярная формула |
+| `property_ro3_pass` | `ro3_pass` | Соответствие Rule of 3 |
+| `property_mw_freebase` | `mw_freebase` | MW свободного основания |
+
+**Файлы для изменения:**
+
+1. `src/bioetl/domain/entities/chembl_structures.py` (`Molecule` entity):
+   - Добавить alias-атрибуты: `ro5_violation_count`, `qed_score`, `molecular_formula`, `ro3_pass`, `mw_freebase`
+
+2. `src/bioetl/application/pipelines/chembl/molecule_transformer.py`:
+   - Добавить вычисление alias-полей (как сделано для `logp`, `molecular_weight` и т.д.)
+
+3. `src/bioetl/domain/contracts/gold/chembl.py`:
+   - `ChEMBLMoleculeGoldSchema`: заменить `property_ro5_violations` → `ro5_violation_count` и т.д.
+   - **Или** добавить alias-поля рядом с `property_*` (если property нужно сохранить для обратной совместимости)
+
+4. `src/bioetl/infrastructure/schemas/silver.py` (`CHEMBL_MOLECULE_SCHEMA`):
+   - Оставить `property_*` как есть (Silver хранит оба стиля)
+
+5. Тесты:
+   - `tests/unit/infrastructure/schemas/test_gold.py`
+   - `tests/e2e/test_chembl_molecule_e2e.py`
+
+**Верификация:**
+```bash
+# Все property_* должны иметь alias в Gold
+grep -c "property_" src/bioetl/domain/contracts/gold/chembl.py
+# Ожидание: 0 (все заменены на канонические имена)
+# ИЛИ: все имеют парное alias-имя
+```
+
+---
+
+### PROMPT-12: Удаление DTO-only полей из Target или добавление в Entity
+
+**Severity**: LOW (DTO-only поля не проходят в Silver/Gold)
+**Blast radius**: LOW
+
+**Задание:**
+
+В `TargetRecord` (DTO) есть поля, отсутствующие в Entity `Target` и Gold Schema:
+- `description` — описание мишени
+- `dap_id` — Drug-Affinity Panel ID
+- `target_constraints` — ограничения мишени
+- `component_tax_ids` — taxonomy IDs компонентов
+
+**Варианты решения:**
+
+**Вариант A (рекомендуется)**: Если данные нужны — добавить в Entity `Target`
+и в Silver Schema `CHEMBL_TARGET_SCHEMA`. Если не нужны — удалить из DTO.
+
+**Вариант B**: Оставить в DTO как транзитные поля, явно задокументировав,
+что они не проходят в Silver/Gold.
+
+**Для каждого поля принять решение:**
+
+| DTO Field | Решение | Обоснование |
+|---|---|---|
+| `description` | Добавить в Entity/Silver/Gold? | Target описание полезно для поиска |
+| `dap_id` | Удалить из DTO? | Не используется ни в одном downstream |
+| `target_constraints` | Удалить из DTO? | Не используется ни в одном downstream |
+| `component_tax_ids` | Удалить из DTO? | Taxonomy IDs уже есть через component flattening |
+
+**Файлы для изменения:**
+
+1. `src/bioetl/domain/entities/chembl.py` (`TargetRecord`)
+2. `src/bioetl/domain/entities/chembl_structures.py` (`Target` entity, если добавляем)
+3. `src/bioetl/infrastructure/schemas/silver.py` (`CHEMBL_TARGET_SCHEMA`, если добавляем)
+
+---
+
+### PROMPT-13: Обновление field-catalog-source-pipelines.md
+
+**Severity**: LOW (документация)
+**Blast radius**: LOW
+
+**Задание:**
+
+После выполнения PROMPT-8 и PROMPT-9 обновить каталог бизнес-полей для
+отражения переименований taxonomy.
+
+**Файлы для изменения:**
+
+1. `docs/03-data-model/field-catalog-source-pipelines.md`:
+   - Секция `chembl_activity`:
+     `taxonomy_id` → `target_taxonomy_id` (строка 88)
+   - Секция `chembl_assay`:
+     `taxonomy_id` → `assay_taxonomy_id` (строка 111)
+
+2. `docs/03-data-model/field-naming-unification-matrix.md`:
+   - Обновить секцию "Организм / таксономия" с новыми каноническими именами
+
+---
+
+### PROMPT-14: Обновление Silver Schema taxonomy_id тип данных (Activity)
+
+**Severity**: MEDIUM (некорректный тип в Silver)
+**Blast radius**: LOW
+
+**Задание:**
+
+В `CHEMBL_ACTIVITY_SCHEMA` поле `taxonomy_id` (которое станет `target_taxonomy_id`
+после PROMPT-8) имеет тип `pa.string()`, но это NCBI Taxonomy ID (числовое).
+В `CHEMBL_ASSAY_SCHEMA` аналогичное поле имеет тип `pa.float64()` (nullable int pattern).
+В `CHEMBL_TARGET_SCHEMA` — тоже `pa.float64()`.
+
+Привести к единому типу `pa.float64()` (nullable int via float pattern, Pandas convention).
+
+**Файлы для изменения:**
+
+1. `src/bioetl/infrastructure/schemas/silver.py`:
+   - Activity schema: `pa.field("taxonomy_id", pa.string())` →
+     `pa.field("target_taxonomy_id", pa.float64())`
+     (этот промт совмещается с PROMPT-8)
+
+2. `src/bioetl/application/pipelines/chembl/activity_transformer.py`:
+   - Убедиться, что `target_tax_id` конвертируется в float (а не строку)
+
+---
+
+### PROMPT-15: Финальная валидация — architecture tests и cross-layer consistency
+
+**Severity**: CRITICAL (финальная проверка)
+**Blast radius**: —
+
+**Задание:**
+
+После выполнения всех предыдущих промтов запустить полную верификацию:
+
+```bash
+# 1. Linting
+make lint
+
+# 2. Type checking
+mypy --strict src/bioetl/
+
+# 3. Architecture tests (import boundaries)
+pytest tests/architecture/ -v
+
+# 4. Silver schema consistency
+pytest tests/unit/infrastructure/schemas/test_silver.py \
+       tests/unit/infrastructure/schemas/test_silver_pipeline_contracts.py -v
+
+# 5. Gold schema consistency
+pytest tests/unit/infrastructure/schemas/test_gold.py \
+       tests/architecture/test_gold_schema_contracts.py -v
+
+# 6. Transformer tests
+pytest tests/unit/application/pipelines/ -v
+
+# 7. E2E tests (если VCR cassettes не сломаны)
+pytest tests/e2e/ -v --timeout=120
+
+# 8. Полный набор тестов с coverage
+pytest --cov=src/bioetl --cov-fail-under=85
+```
+
+**Cross-layer consistency check:**
+```bash
+# Проверить, что все field-имена согласованы между Silver и Gold
+python -c "
+from bioetl.infrastructure.schemas.silver import (
+    CHEMBL_ACTIVITY_SCHEMA, CHEMBL_ASSAY_SCHEMA,
+    CHEMBL_TARGET_SCHEMA, CHEMBL_MOLECULE_SCHEMA,
+)
+for name, schema in [
+    ('activity', CHEMBL_ACTIVITY_SCHEMA),
+    ('assay', CHEMBL_ASSAY_SCHEMA),
+    ('target', CHEMBL_TARGET_SCHEMA),
+    ('molecule', CHEMBL_MOLECULE_SCHEMA),
+]:
+    fields = [f.name for f in schema if not f.name.startswith('_') and f.name not in ('entity_id', 'content_hash')]
+    print(f'{name}: {len(fields)} business fields')
+"
+```
+
+**Grep для остаточных расхождений:**
+```bash
+# Не должно быть bare taxonomy_id в Activity/Assay
+grep -rn '"taxonomy_id"' src/bioetl/infrastructure/schemas/silver.py | grep -i "activity\|assay"
+
+# Не должно быть _json в DTO (кроме variant_sequence_json)
+grep -rn "_json" src/bioetl/domain/entities/chembl.py | grep -v variant_sequence_json | grep -v "#"
+
+# Не должно быть action_type_parent без _type
+grep -rn "action_type_parent[^_]" src/ --include="*.py"
+```
+
+---
+
+## Порядок выполнения и зависимости
+
+```
+PROMPT-1  (action_type_parent)        — независимый
+PROMPT-2  (_json Activity)            — независимый
+PROMPT-3  (_json Assay)               — независимый
+PROMPT-4  (_json Target)              — независимый
+PROMPT-5  (_json Molecule)            — независимый
+PROMPT-6  (DQ molecule field names)   — независимый
+PROMPT-7  (assay filter column_name)  — независимый
+                                        ↓
+PROMPT-8  (taxonomy Activity)         — зависит от PROMPT-14
+PROMPT-9  (taxonomy Assay)            — независимый от PROMPT-8
+PROMPT-10 (component_id Target)       — независимый
+PROMPT-11 (molecule property alias)   — независимый
+PROMPT-12 (DTO-only Target fields)    — независимый
+                                        ↓
+PROMPT-13 (docs update)              — после PROMPT-8, PROMPT-9
+PROMPT-14 (taxonomy type fix)        — совместить с PROMPT-8
+                                        ↓
+PROMPT-15 (финальная валидация)       — после всех
+```
+
+**Параллельно безопасно выполнять**: PROMPT-1..7 (все независимы).
+**Последовательно**: PROMPT-8+14 → PROMPT-9 → PROMPT-13 → PROMPT-15.
