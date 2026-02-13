@@ -12,7 +12,7 @@ import itertools
 import time
 import urllib.parse
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, Any, ClassVar, NoReturn
 
 from pydantic import BaseModel
 
@@ -230,18 +230,25 @@ class ChemblAdapter(BaseHttpAdapter):
             if ids
         }
 
-    def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
-        """Map canonical filter field names to ChEMBL API field names.
+    # Silver canonical name → ChEMBL API field name.
+    # ChEMBL API silently ignores unknown filter params and returns ALL records,
+    # so correct mapping is critical for filtering to work.
+    _SILVER_TO_API_FIELD: ClassVar[dict[str, str]] = {
+        "molecule_id": "molecule_chembl_id",
+        "publication_id": "document_chembl_id",
+        "assay_id": "assay_chembl_id",
+        "target_id": "target_chembl_id",
+    }
 
-        Publication pipelines use canonical `publication_id` in configs/tests,
-        while ChEMBL /document endpoint expects `document_chembl_id`.
+    def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
+        """Map canonical Silver field names to ChEMBL API field names.
+
+        Silver schemas use short canonical names (molecule_id, publication_id),
+        while ChEMBL API expects full names (molecule_chembl_id, document_chembl_id).
+        The API silently ignores unknown filter parameters, returning unfiltered
+        results — so this mapping is essential for correct filtering.
         """
-        if filter_field == "publication_id" and entity_type in {
-            "publication",
-            "publication_term",
-        }:
-            return "document_chembl_id"
-        return filter_field
+        return self._SILVER_TO_API_FIELD.get(filter_field, filter_field)
 
     def _build_filter_params(
         self, entity_type: str, filter_field: str, id_batch: list[str]
