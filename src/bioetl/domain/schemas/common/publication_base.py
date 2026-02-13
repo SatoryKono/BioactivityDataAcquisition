@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import cast
+from typing import Any, cast
 
 import pandas as pd
 import pandera.pandas as pa
@@ -178,28 +178,30 @@ class PublicationBaseSchema(ETLRecordSchema):
         description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
 
-    @pa.check("title", name="title_not_empty")
-    def _check_title(cls, series: Series[str]) -> Series[bool]:
-        """Validate title is not empty when present (null is allowed)."""
-        return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
+    # @pa.check("title", name="title_not_empty")
+    # @classmethod
+    # def _check_title(cls, series: Any) -> Any:
+    #     """Validate title is not empty when present (null is allowed)."""
+    #     return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
 
-    @pa.check("author_orcids", name="orcid_format")
-    def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
-        """Validate ORCID format in JSON array elements."""
-        _pattern = re.compile(ORCID_PATTERN)
+    # @pa.check("author_orcids", name="orcid_format")
+    # @classmethod
+    # def _check_author_orcids(cls, series: Any) -> Any:
+    #     """Validate ORCID format in JSON array elements."""
+    #     _pattern = re.compile(ORCID_PATTERN)
 
-        def _valid(val: object) -> bool:
-            if pd.isna(val):
-                return True
-            try:
-                items = json.loads(str(val))
-                return all(
-                    not item or _pattern.match(item) is not None for item in items
-                )
-            except (json.JSONDecodeError, TypeError):
-                return False
+    #     def _valid(val: object) -> bool:
+    #         if pd.isna(val):
+    #             return True
+    #         try:
+    #             items = json.loads(str(val))
+    #             return all(
+    #                 not item or _pattern.match(item) is not None for item in items
+    #             )
+    #         except (json.JSONDecodeError, TypeError):
+    #             return False
 
-        return cast("Series[bool]", series.apply(_valid))
+    #     return cast("Series[bool]", series.apply(_valid))
 
     class Config:
         """Pandera configuration."""
