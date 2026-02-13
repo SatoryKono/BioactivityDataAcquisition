@@ -209,6 +209,58 @@ def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
     return config
 
 
+def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
+    """Normalize source config to legacy provider_config-compatible shape.
+
+    Supports dual source formats:
+    - Legacy: ``source.provider_config.*``
+    - New: ``source.api`` + ``source.client`` + ``source.batch`` (+ rate/health)
+
+    Returns a normalized dict suitable for ``SourceYamlConfig`` validation.
+    """
+    config = raw.copy()
+    source = config.get("source")
+    if not isinstance(source, dict):
+        return config
+
+    source_norm = source.copy()
+    provider_config = source_norm.get("provider_config")
+    if not isinstance(provider_config, dict):
+        provider_config = {}
+
+    api = source_norm.pop("api", None)
+    if isinstance(api, dict):
+        for key in ("base_url", "auth_type", "api_key", "api_version"):
+            if key in api:
+                provider_config.setdefault(key, api[key])
+
+    client = source_norm.pop("client", None)
+    if isinstance(client, dict):
+        existing_client = provider_config.get("client")
+        if not isinstance(existing_client, dict):
+            existing_client = {}
+        provider_config["client"] = _deep_merge(existing_client, client)
+
+    batch = source_norm.pop("batch", None)
+    if isinstance(batch, dict):
+        if "batch_size" in batch:
+            provider_config.setdefault("batch_size", batch["batch_size"])
+        elif "size" in batch:
+            provider_config.setdefault("batch_size", batch["size"])
+        if "page_size" in batch:
+            provider_config.setdefault("page_size", batch["page_size"])
+        if "max_url_length" in batch:
+            provider_config.setdefault("max_url_length", batch["max_url_length"])
+    elif isinstance(batch, int):
+        provider_config.setdefault("batch_size", batch)
+
+    if provider_config:
+        source_norm["provider_config"] = provider_config
+
+    config["source"] = source_norm
+    return config
+
+
 @lru_cache(maxsize=10)
 def load_source_config(provider: str) -> SourceYamlConfig:
     """Load source configuration from YAML file."""
@@ -223,7 +275,9 @@ def load_source_config(provider: str) -> SourceYamlConfig:
     with open(config_path, encoding="utf-8") as f:
         raw_config = yaml.safe_load(f) or {}
 
-    config: SourceYamlConfig = SourceYamlConfig.model_validate(raw_config)
+    normalized_config = _normalize_source_config(raw_config)
+
+    config: SourceYamlConfig = SourceYamlConfig.model_validate(normalized_config)
     return config
 
 

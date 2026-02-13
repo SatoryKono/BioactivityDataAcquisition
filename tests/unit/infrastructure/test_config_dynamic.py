@@ -123,6 +123,122 @@ def test_load_fallback_no_underscore(setup_configs):
     assert config.pipeline_name == "simple"
 
 
+def test_load_source_config_legacy_and_new_format_equivalent_chembl(
+    tmp_path, monkeypatch
+):
+    """New source format should normalize to same result as legacy format (chembl)."""
+    load_source_config.cache_clear()
+
+    sources_dir = tmp_path / "configs" / "sources"
+    sources_dir.mkdir(parents=True)
+
+    legacy = {
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "provider_config": {
+                "provider": "chembl",
+                "base_url": "https://example.chembl/api",
+                "auth_type": "public",
+                "api_version": "v1",
+                "client": {"timeout_sec": 60.0, "max_retries": 3},
+                "batch_size": 25,
+            },
+            "rate_limit": {"requests_per_second": 3.0, "burst": 10},
+            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+        }
+    }
+    new = {
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "api": {
+                "base_url": "https://example.chembl/api",
+                "auth_type": "public",
+                "api_version": "v1",
+            },
+            "client": {"timeout_sec": 60.0, "max_retries": 3},
+            "batch": {"batch_size": 25},
+            "provider_config": {"provider": "chembl"},
+            "rate_limit": {"requests_per_second": 3.0, "burst": 10},
+            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+        }
+    }
+
+    monkeypatch.chdir(tmp_path)
+    (sources_dir / "chembl_legacy.yaml").write_text(yaml.dump(legacy))
+    (sources_dir / "chembl_new.yaml").write_text(yaml.dump(new))
+
+    cfg_legacy = load_source_config("chembl_legacy")
+    load_source_config.cache_clear()
+    cfg_new = load_source_config("chembl_new")
+
+    assert cfg_legacy.base_url == cfg_new.base_url
+    assert cfg_legacy.timeout_sec == cfg_new.timeout_sec
+    assert cfg_legacy.max_retries == cfg_new.max_retries
+    assert cfg_legacy.batch_size == cfg_new.batch_size
+    assert cfg_legacy.rate_limit.requests_per_second == cfg_new.rate_limit.requests_per_second
+
+
+def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
+    tmp_path, monkeypatch
+):
+    """New source format should normalize to same result as legacy format (pubmed)."""
+    load_source_config.cache_clear()
+
+    sources_dir = tmp_path / "configs" / "sources"
+    sources_dir.mkdir(parents=True)
+
+    legacy = {
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "provider_config": {
+                "provider": "pubmed",
+                "base_url": "https://example.pubmed/api",
+                "auth_type": "api_key",
+                "api_key": "${BIOETL_PUBMED_API_KEY}",
+                "client": {"timeout_sec": 45.0, "max_retries": 4},
+                "batch_size": 100,
+            },
+            "rate_limit": {"requests_per_second": 5.0, "burst": 15},
+            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+            "health_check": {"endpoint": "/health", "timeout": 5},
+        }
+    }
+    new = {
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "api": {
+                "base_url": "https://example.pubmed/api",
+                "auth_type": "api_key",
+                "api_key": "${BIOETL_PUBMED_API_KEY}",
+            },
+            "client": {"timeout_sec": 45.0, "max_retries": 4},
+            "batch": {"size": 100},
+            "provider_config": {"provider": "pubmed"},
+            "rate_limit": {"requests_per_second": 5.0, "burst": 15},
+            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+            "health_check": {"endpoint": "/health", "timeout": 5},
+        }
+    }
+
+    monkeypatch.chdir(tmp_path)
+    (sources_dir / "pubmed_legacy.yaml").write_text(yaml.dump(legacy))
+    (sources_dir / "pubmed_new.yaml").write_text(yaml.dump(new))
+
+    cfg_legacy = load_source_config("pubmed_legacy")
+    load_source_config.cache_clear()
+    cfg_new = load_source_config("pubmed_new")
+
+    assert cfg_legacy.base_url == cfg_new.base_url
+    assert cfg_legacy.timeout_sec == cfg_new.timeout_sec
+    assert cfg_legacy.max_retries == cfg_new.max_retries
+    assert cfg_legacy.batch_size == cfg_new.batch_size
+    assert cfg_legacy.rate_limit.requests_per_second == cfg_new.rate_limit.requests_per_second
+
+
 def test_dq_thresholds_are_validated_once(setup_configs):
     """DQ thresholds must satisfy domain invariants even in YAML schema."""
     pipelines_dir = setup_configs
