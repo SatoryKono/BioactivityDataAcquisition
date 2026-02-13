@@ -46,9 +46,21 @@ groups:
           - chembl.publication.publication_type
           - pubmed.publication.publication_type
 
+      - base_name: publication_id
+        columns:
+          - chembl.publication.publication_id
+
       - base_name: document_chembl_id
         columns:
           - chembl.publication.document_chembl_id
+
+      - base_name: publication_doi
+        columns:
+          - chembl.publication.publication_doi
+          - crossref.publication.publication_doi
+          - openalex.publication.publication_doi
+          - pubmed.publication.publication_doi
+          - semanticscholar.publication.publication_doi
 
       - base_name: doi
         columns:
@@ -278,6 +290,12 @@ groups:
           - crossref.publication.author_orcids
           - openalex.publication.author_orcids
           - semanticscholar.publication.author_orcids
+
+      - base_name: author_ormolecule_ids
+        columns:
+          - crossref.publication.author_ormolecule_ids
+          - openalex.publication.author_ormolecule_ids
+          - semanticscholar.publication.author_ormolecule_ids
 
       - base_name: author_s2_ids
         columns:
@@ -617,9 +635,10 @@ column_groups:
 
   - name: identifiers
     fields:
-      - document_chembl_id
-      - doi
-      - pmid
+      - publication_id
+      - publication_doi
+      - publication_pmid
+      - publication_pmc_id
 
   - name: title
     fields:
@@ -667,6 +686,10 @@ field_aliases:
   first_page: page_first
   last_page: page_last
   doc_type: publication_type
+  document_chembl_id: publication_id
+  doi: publication_doi
+  pmid: publication_pmid
+  pmc_id: publication_pmc_id
 
 # Layer-specific column filtering
 silver:
@@ -739,7 +762,7 @@ entity: tissue
 column_groups:
   - name: identifiers
     fields:
-      - tissue_chembl_id
+      - tissue_id
   - name: core_metadata
     fields:
       - pref_name
@@ -752,7 +775,7 @@ column_groups:
 
 # All business fields for Gold layer
 gold_columns:
-  - tissue_chembl_id
+  - tissue_id
   - pref_name
   - bto_id
   - caloha_id
@@ -832,11 +855,11 @@ column_groups:
   # 3. Primary identifiers (assay)
   - name: identifiers
     fields:
-      - assay_chembl_id
-      - cell_chembl_id
-      - tissue_chembl_id
-      - target_chembl_id
-      - document_chembl_id
+      - assay_id
+      - cell_id
+      - tissue_id
+      - target_id
+      - publication_id
       - src_id
       - src_assay_id
       - aidx
@@ -860,7 +883,7 @@ column_groups:
   - name: biological_context
     fields:
       - assay_organism
-      - assay_taxonomy_id
+      - taxonomy_id
       - assay_strain
       - assay_tissue
       - assay_cell_type
@@ -891,7 +914,6 @@ column_groups:
       - cell_source_organism
       - cell_source_taxonomy_id
       - cellosaurus_id
-      - clo_id
       - cl_lincs_id
       - cell_efo_id
     provider_order: [chembl]
@@ -943,16 +965,16 @@ gold:
 # Join Key Configuration
 join_keys:
   cell_line:
-    seed_field: cell_chembl_id
-    enricher_field: cell_chembl_id
+    seed_field: cell_id
+    enricher_field: cell_id
     description: "ChEMBL cell line ID for cell line enrichment"
     validation: "^CHEMBL\\d+$"
     nullable: true
     # Cardinality: one_to_one (each assay FK points to at most one cell line)
 
   tissue:
-    seed_field: tissue_chembl_id
-    enricher_field: tissue_chembl_id
+    seed_field: tissue_id
+    enricher_field: tissue_id
     description: "ChEMBL tissue ID for tissue enrichment"
     validation: "^CHEMBL\\d+$"
     nullable: true
@@ -961,11 +983,11 @@ join_keys:
 # All business fields for Gold layer (excluding system/lineage)
 gold_columns:
   # Identifiers
-  - assay_chembl_id
-  - cell_chembl_id
-  - tissue_chembl_id
-  - target_chembl_id
-  - document_chembl_id
+  - assay_id
+  - cell_id
+  - tissue_id
+  - target_id
+  - publication_id
   - src_id
   - src_assay_id
   - aidx
@@ -981,7 +1003,7 @@ gold_columns:
   - confidence_description
   # Biological context
   - assay_organism
-  - assay_taxonomy_id
+  - taxonomy_id
   - assay_strain
   - assay_tissue
   - assay_cell_type
@@ -1040,33 +1062,32 @@ Path: data_schema\composite\molecule.yaml
 # Field Mapping Table
 # =============================================================================
 #
-# | ChEMBL Field            | PubChem Field      | Unified Field     | Priority |
-# |-------------------------|--------------------|--------------------|----------|
-# | molecule_chembl_id      | —                  | molecule_chembl_id | chembl   |
-# | —                       | cid                | cid                | pubchem  |
-# | inchi_key               | inchikey           | inchikey           | chembl   |
-# | standard_inchi          | inchi              | inchi              | chembl   |
-# | canonical_smiles        | canonical_smiles   | canonical_smiles   | chembl   |
-# | —                       | isomeric_smiles    | isomeric_smiles    | pubchem  |
-# | property_full_mwt       | molecular_weight   | molecular_weight   | pubchem  |
-# | property_full_molformula| molecular_formula  | molecular_formula  | pubchem  |
-# | property_alogp          | —                  | alogp              | chembl   |
-# | —                       | xlogp              | xlogp              | pubchem  |
-# | property_psa            | tpsa               | tpsa               | pubchem  |
-# | property_hba            | —                  | hba                | pubchem  |
-# | property_hbd            | —                  | hbd                | pubchem  |
-# | property_rtb            | —                  | rotatable_bonds    | pubchem  |
-# | property_heavy_atoms    | —                  | heavy_atom_count   | pubchem  |
-# | property_aromatic_rings | —                  | aromatic_rings     | pubchem  |
-# | property_qed_weighted   | —                  | qed_weighted       | chembl   |
-# | pref_name               | —                  | pref_name          | chembl   |
-# | —                       | iupac_name         | iupac_name         | pubchem  |
-# | molecule_synonyms       | —                  | synonyms           | merge    |
-# | max_phase               | —                  | max_phase          | chembl   |
-# | first_approval          | —                  | first_approval     | chembl   |
-# | therapeutic_flag        | —                  | therapeutic_flag   | chembl   |
-# | withdrawn_flag          | —                  | withdrawn_flag     | chembl   |
-# | black_box_warning       | —                  | black_box_warning  | chembl   |
+# | ChEMBL Field            | PubChem Field      | Unified Field         | Priority |
+# |-------------------------|--------------------|-----------------------|----------|
+# | molecule_id             | molecule_id        | molecule_id           | chembl   |
+# | inchi_key               | inchikey           | inchi_key             | chembl   |
+# | standard_inchi          | inchi              | inchi                 | chembl   |
+# | canonical_smiles        | canonical_smiles   | canonical_smiles      | chembl   |
+# | —                       | isomeric_smiles    | isomeric_smiles       | pubchem  |
+# | molecular_weight        | molecular_weight   | molecular_weight      | pubchem  |
+# | molecular_formula       | molecular_formula  | molecular_formula     | pubchem  |
+# | logp                    | logp               | logp                  | pubchem  |
+# | logp_method             | logp_method        | logp_method           | pubchem  |
+# | polar_surface_area      | polar_surface_area | polar_surface_area    | pubchem  |
+# | hba_count               | hba_count          | hba_count             | pubchem  |
+# | hbd_count               | hbd_count          | hbd_count             | pubchem  |
+# | rotatable_bond_count    | rotatable_bond_count | rotatable_bond_count| pubchem  |
+# | heavy_atom_count        | heavy_atom_count   | heavy_atom_count      | pubchem  |
+# | aromatic_ring_count     | aromatic_ring_count| aromatic_ring_count   | pubchem  |
+# | qed_weighted            | qed_weighted       | qed_weighted          | chembl   |
+# | pref_name               | pref_name          | pref_name             | chembl   |
+# | iupac_name              | iupac_name         | iupac_name            | pubchem  |
+# | molecule_synonyms       | —                  | synonyms              | merge    |
+# | max_phase               | —                  | max_phase             | chembl   |
+# | first_approval          | —                  | first_approval        | chembl   |
+# | therapeutic_flag        | —                  | therapeutic_flag      | chembl   |
+# | withdrawn_flag          | —                  | withdrawn_flag        | chembl   |
+# | black_box_warning       | —                  | black_box_warning     | chembl   |
 #
 # =============================================================================
 
@@ -1089,21 +1110,15 @@ column_groups:
     pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
 
   # 3. Primary identifiers
-  - name: identifiers_chembl
+  - name: identifiers
     fields:
-      - molecule_chembl_id
-    provider_order: [chembl]
-
-  - name: identifiers_pubchem
-    fields:
-      - cid
-    provider_order: [pubchem]
+      - molecule_id
+    provider_order: [chembl, pubchem]
 
   # 4. Structural identifiers (join keys)
   - name: structural_identifiers
     fields:
-      - inchi_key           # ChEMBL field name
-      - inchikey            # PubChem field name (alias)
+      - inchi_key           # Unified InChIKey
       - standard_inchi      # ChEMBL
       - inchi               # PubChem
     provider_order: [chembl, pubchem]
@@ -1120,35 +1135,31 @@ column_groups:
   # 6. Molecular weight and formula
   - name: weight_formula
     fields:
-      - molecular_weight     # Unified (PubChem priority)
-      - molecular_formula    # Unified (PubChem priority)
-      - property_full_mwt    # ChEMBL specific
-      - property_mw_freebase # ChEMBL specific
-      - property_full_molformula  # ChEMBL specific
+      - molecular_weight
+      - molecular_formula
     provider_order: [pubchem, chembl]
 
   # 7. Lipophilicity and polarity
   - name: lipophilicity
     fields:
-      - property_alogp       # ChEMBL ALogP
-      - xlogp                # PubChem XLogP3
-      - property_psa         # ChEMBL PSA
-      - tpsa                 # PubChem TPSA
+      - logp
+      - logp_method
+      - polar_surface_area
     provider_order: [pubchem, chembl]
 
   # 8. Hydrogen bonding
   - name: hbond
     fields:
-      - property_hba         # ChEMBL
-      - property_hbd         # ChEMBL
+      - hba_count
+      - hbd_count
     provider_order: [pubchem, chembl]
 
   # 9. Molecular complexity
   - name: complexity
     fields:
-      - property_rtb         # ChEMBL rotatable bonds
-      - property_heavy_atoms # ChEMBL
-      - property_aromatic_rings  # ChEMBL
+      - rotatable_bond_count
+      - heavy_atom_count
+      - aromatic_ring_count
     provider_order: [pubchem, chembl]
 
   # 10. Drug-likeness metrics
@@ -1260,9 +1271,9 @@ gold:
 # =============================================================================
 join_keys:
   primary:
-    field: inchikey
+    field: inchi_key
     chembl_name: inchi_key
-    pubchem_name: inchikey
+    pubchem_name: inchi_key
     description: "InChIKey - IUPAC standard structural identifier (27 chars)"
     validation: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
 
@@ -1278,7 +1289,7 @@ join_keys:
 # =============================================================================
 normalization:
   # InChIKey normalization (should already be uppercase)
-  inchikey:
+  inchi_key:
     uppercase: true
     strip: true
 
@@ -1319,28 +1330,28 @@ column_groups:
     pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_"
 
   # 3. Primary identifiers
-  - name: identifiers_document_chembl_id
+  - name: identifiers_publication
     fields:
-      - document_chembl_id
+      - publication_id
     provider_order: [chembl]
 
   # 3.2 doi identifiers
   - name: identifiers_doi
     fields:
-      - doi
+      - publication_doi
     provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
 
   # 3.3 pmid identifiers
   - name: identifiers_pmid
     fields:
-      - pmid
+      - publication_pmid
     provider_order: [chembl, openalex, pubmed, semanticscholar]
 
   # 4. PMC IDs (separate group - not in seed)
   # Note: Only PubMed provides pmc_id (removed from OpenAlex, SemanticScholar)
   - name: pmc_identifiers
     fields:
-      - pmc_id
+      - publication_pmc_id
     provider_order: [pubmed]
 
   # 5. Title group
@@ -1582,6 +1593,10 @@ field_aliases:
   journal_abbrev: journal_name_short
   pages: page_range
   fields_of_study: subject_fields
+  doi: publication_doi
+  pmid: publication_pmid
+  pmc_id: publication_pmc_id
+  document_chembl_id: publication_id
 
 # Layer-specific column filtering (Variant 2 approach)
 # Silver: Include most fields for intermediate processing
@@ -1591,7 +1606,7 @@ silver:
   include_groups:
     - system
     - lineage
-    - identifiers_document_chembl_id
+    - identifiers_publication
     - identifiers_doi
     - identifiers_pmid
     - pmc_identifiers
@@ -1666,7 +1681,7 @@ column_groups:
 
   - name: identifiers
     fields:
-      - doi
+      - publication_doi
       - alternative_id
 
   - name: title
@@ -1753,6 +1768,7 @@ field_aliases:
   reference_count: citations_made
   subjects: subject_keywords
   source_type: publication_type
+  doi: publication_doi
   # author_orcids: now native field name (was: author_orcid_list)
 
 # Layer-specific column filtering
@@ -1907,8 +1923,8 @@ column_groups:
   - name: identifiers
     fields:
       - openalex_id
-      - doi
-      - pmid
+      - publication_doi
+      - publication_pmid
       - mag_id
 
   - name: title
@@ -2011,6 +2027,8 @@ field_aliases:
   keywords: subject_keywords
   mesh_terms: subject_mesh
   source_type: publication_type
+  doi: publication_doi
+  pmid: publication_pmid
 
 # Layer-specific column filtering
 silver:
@@ -2254,8 +2272,8 @@ column_groups:
   - name: identifiers
     fields:
       - paper_id
-      - doi
-      - pmid
+      - publication_doi
+      - publication_pmid
       - corpus_id
       - dblp_id
 
@@ -2336,6 +2354,8 @@ field_aliases:
   citation_count: citations_received
   reference_count: citations_made
   fields_of_study: subject_fields
+  doi: publication_doi
+  pmid: publication_pmid
 
 # Layer-specific column filtering
 silver:
@@ -2544,7 +2564,7 @@ entity_conditional_validations:
     condition_value: B
     condition_operator: eq
     then_validations:
-      - field: target_chembl_id
+      - field: target_id
         type: required
         nullable: false
         error_message: "Binding assays must have a target"
@@ -2567,10 +2587,10 @@ entity: assay
 # Assay-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: assay_chembl_id
+  - field: assay_id
     type: required
     nullable: false
-    error_message: "Assay ChEMBL ID is required"
+    error_message: "Assay ID is required"
 
   - field: assay_type
     type: enum
@@ -2618,11 +2638,11 @@ entity_field_validations:
     nullable: false
     error_message: "Assay parameter ID is required and must be positive"
 
-  - field: assay_chembl_id
+  - field: assay_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "assay_chembl_id must match CHEMBL format"
+    error_message: "assay_id must match CHEMBL format"
 
   - field: type
     type: pattern
@@ -2637,7 +2657,7 @@ entity_cross_field_validations:
   - name: param_linkage
     fields:
       - assay_param_id
-      - assay_chembl_id
+      - assay_id
     condition: all_present
     error_message: "Both param ID and assay ID are required"
 
@@ -2722,17 +2742,17 @@ entity_field_validations:
     nullable: false
     error_message: "Record ID is required and must be positive"
 
-  - field: molecule_chembl_id
+  - field: molecule_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "molecule_chembl_id must match CHEMBL format"
+    error_message: "molecule_id must match CHEMBL format"
 
-  - field: document_chembl_id
+  - field: publication_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "document_chembl_id must match CHEMBL format"
+    error_message: "publication_id must match CHEMBL format"
 
   - field: src_id
     type: range
@@ -2745,8 +2765,8 @@ entity_field_validations:
 entity_cross_field_validations:
   - name: record_linkage
     fields:
-      - molecule_chembl_id
-      - document_chembl_id
+      - molecule_id
+      - publication_id
     condition: all_present
     error_message: "Both molecule and document IDs are required"
 
@@ -2773,7 +2793,7 @@ entity: molecule
 # Molecule-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: molecule_chembl_id
+  - field: molecule_id
     type: required
     nullable: false
     error_message: "Molecule ChEMBL ID is required"
@@ -2881,13 +2901,13 @@ entity: publication
 # Publication-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: document_chembl_id
+  - field: publication_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "document_chembl_id must match CHEMBL format"
+    error_message: "publication_id must match CHEMBL format"
 
-  - field: doc_type
+  - field: publication_type
     type: enum
     allowed:
       - PUBLICATION
@@ -2903,14 +2923,14 @@ entity_field_validations:
     nullable: true
     error_message: "Publication year must be between 1500 and 2100"
 
-  - field: pmid
+  - field: publication_pmid
     type: range
     min: 1
     max: 10000000000
     nullable: true
     error_message: "PubMed ID must be a positive integer"
 
-  - field: doi
+  - field: publication_doi
     type: pattern
     pattern: '^10\.\d{4,}/\S+$'
     nullable: true
@@ -2961,15 +2981,15 @@ entity_field_validations:
 entity_cross_field_validations:
   - name: publication_identifiable
     fields:
-      - document_chembl_id
+      - publication_id
       - title
     condition: all_present
-    error_message: "Publication must have document_chembl_id and title"
+    error_message: "Publication must have publication_id and title"
 
   - name: has_cross_reference
     fields:
-      - pmid
-      - doi
+      - publication_pmid
+      - publication_doi
     condition: any_present
     severity: warn
     error_message: "Publication should have at least one external identifier (PMID or DOI)"
@@ -2979,7 +2999,7 @@ entity_cross_field_validations:
 # =============================================================================
 entity_conditional_validations:
   - name: publication_requires_title
-    condition_field: doc_type
+    condition_field: publication_type
     condition_value: PUBLICATION
     condition_operator: eq
     then_validations:
@@ -3078,11 +3098,11 @@ entity_field_validations:
     nullable: false
     error_message: "entity_id must be a 64-char SHA256 hash"
 
-  - field: document_chembl_id
+  - field: publication_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "document_chembl_id must match CHEMBL format"
+    error_message: "publication_id must match CHEMBL format"
 
   - field: term_type
     type: enum
@@ -3106,7 +3126,7 @@ entity_field_validations:
 entity_cross_field_validations:
   - name: term_completeness
     fields:
-      - document_chembl_id
+      - publication_id
       - term
       - term_type
     condition: all_present
@@ -3153,11 +3173,11 @@ entity_field_validations:
     nullable: true
     error_message: "assay_count must be non-negative"
 
-  - field: example_assay_chembl_id
+  - field: example_assay_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
-    error_message: "example_assay_chembl_id must match CHEMBL format if present"
+    error_message: "example_assay_id must match CHEMBL format if present"
 
 # =============================================================================
 # Cross-Field Validations
@@ -3187,7 +3207,7 @@ entity: target
 # Target-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: target_chembl_id
+  - field: target_id
     type: required
     nullable: false
     error_message: "Target ChEMBL ID is required"
@@ -3603,7 +3623,7 @@ entity: compound
 # Compound-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: cid
+  - field: molecule_id
     type: required
     nullable: false
     error_message: "CID is required"
@@ -3884,11 +3904,11 @@ thresholds:
 # ID Mapping-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: target_chembl_id
+  - field: target_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "target_chembl_id must match CHEMBL format"
+    error_message: "target_id must match CHEMBL format"
 
   - field: mapping_status
     type: enum
@@ -4132,25 +4152,25 @@ thresholds:
 # =============================================================================
 provider_field_validations:
   # ChEMBL ID format validation (applies to all ChEMBL entities)
-  - field: molecule_chembl_id
+  - field: molecule_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
     error_message: "Invalid ChEMBL molecule ID format"
 
-  - field: target_chembl_id
+  - field: target_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
     error_message: "Invalid ChEMBL target ID format"
 
-  - field: assay_chembl_id
+  - field: assay_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
     error_message: "Invalid ChEMBL assay ID format"
 
-  - field: document_chembl_id
+  - field: publication_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: true
@@ -4259,8 +4279,8 @@ thresholds:
 # PubChem Common Field Validations
 # =============================================================================
 provider_field_validations:
-  # CID must be positive integer
-  - field: cid
+  # molecule_id (CID) must be positive integer
+  - field: molecule_id
     type: range
     min: 1
     nullable: true
@@ -4582,16 +4602,16 @@ silver_filters:
     pchembl_value:
       min: 3
       max: 10
-    document_year:
+    publication_year:
       min: 1950
       max: 2050
 
   # Required fields — must be non-null for silver
   required_fields:
     - activity_id
-    - molecule_chembl_id
-    - target_chembl_id
-    - document_chembl_id
+    - molecule_id
+    - target_id
+    - publication_id
     - standard_value
     - pchembl_value
 
@@ -4628,7 +4648,7 @@ gold_filters:
     - standard_type
     - standard_value
     - standard_units
-    - target_chembl_id
+    - target_id
 
 ================================================================================
 File: assay.yaml
@@ -4653,7 +4673,7 @@ input_filter:
   enabled: true
   source_path: "data/input/assay.csv"
   column_name: "assay_chembl_id"
-  filter_field: "assay_chembl_id"
+  filter_field: "assay_id"
   batch_size: 20
 
 # -----------------------------------------------------------------------------
@@ -4709,7 +4729,7 @@ input_filter:
 gold_filters:
   # Required fields
   required_fields:
-    - assay_chembl_id
+    - assay_id
     - type
 
 ================================================================================
@@ -4765,13 +4785,13 @@ entity: compound_record
 # -----------------------------------------------------------------------------
 # Input Filter
 # -----------------------------------------------------------------------------
-# Filter by molecule_chembl_id from molecule CSV
+# Filter by molecule_id from molecule CSV
 # NOTE: ChEMBL API doesn't support filtering by record_id directly
 input_filter:
   enabled: true
   source_path: "data/input/molecule.csv"
-  column_name: "molecule_chembl_id"
-  filter_field: "molecule_chembl_id"
+  column_name: "molecule_id"
+  filter_field: "molecule_id"
   batch_size: 10
 
 # -----------------------------------------------------------------------------
@@ -4781,8 +4801,8 @@ input_filter:
 gold_filters:
   # Required fields - must have both molecule and document references
   required_fields:
-    - molecule_chembl_id
-    - document_chembl_id
+    - molecule_id
+    - publication_id
 
 ================================================================================
 File: molecule.yaml
@@ -4802,12 +4822,12 @@ entity: molecule
 # -----------------------------------------------------------------------------
 # Input Filter
 # -----------------------------------------------------------------------------
-# Filter molecules by molecule_chembl_id from CSV
+# Filter molecules by molecule_id from CSV
 input_filter:
   enabled: true
   source_path: "data/input/molecule.csv"
-  column_name: "molecule_chembl_id"
-  filter_field: "molecule_chembl_id"
+  column_name: "molecule_id"
+  filter_field: "molecule_id"
   batch_size: 20
 
 # -----------------------------------------------------------------------------
@@ -4826,7 +4846,7 @@ gold_filters:
 
   # Required fields
   required_fields:
-    - molecule_chembl_id
+    - molecule_id
 
 ================================================================================
 File: protein_class.yaml
@@ -4882,12 +4902,12 @@ entity: publication
 # -----------------------------------------------------------------------------
 # Input Filter
 # -----------------------------------------------------------------------------
-# Filter publications by document_chembl_id from CSV
+# Filter publications by publication_id from CSV
 input_filter:
   enabled: true
   source_path: "data/input/publication.csv"
-  column_name: "document_chembl_id"
-  filter_field: "document_chembl_id"
+  column_name: "publication_id"
+  filter_field: "publication_id"
   batch_size: 16
 
 # -----------------------------------------------------------------------------
@@ -4909,7 +4929,7 @@ gold_filters:
 
   # Required fields (pubmed_id and doi are optional - not all publications have them)
   required_fields:
-    - document_chembl_id
+    - publication_id
     - doc_type
     - title
 
@@ -4971,12 +4991,12 @@ entity: publication_term
 # -----------------------------------------------------------------------------
 # Input Filter
 # -----------------------------------------------------------------------------
-# Filter by document_chembl_id from publication CSV
+# Filter by publication_id from publication CSV
 input_filter:
   enabled: true
   source_path: "data/input/publication.csv"
-  column_name: "document_chembl_id"
-  filter_field: "document_chembl_id"
+  column_name: "publication_id"
+  filter_field: "publication_id"
   batch_size: 20
 
 # -----------------------------------------------------------------------------
@@ -4991,7 +5011,7 @@ gold_filters:
 
   # Required fields
   required_fields:
-    - document_chembl_id
+    - publication_id
     - term
     - term_type
 
@@ -5047,12 +5067,12 @@ entity: target
 # -----------------------------------------------------------------------------
 # Input Filter
 # -----------------------------------------------------------------------------
-# Filter targets by target_chembl_id from CSV
+# Filter targets by target_id from CSV
 input_filter:
   enabled: true
   source_path: "data/input/target.csv"
-  column_name: "target_chembl_id"
-  filter_field: "target_chembl_id"
+  column_name: "target_id"
+  filter_field: "target_id"
   batch_size: 20
 
 # -----------------------------------------------------------------------------
@@ -5179,29 +5199,29 @@ gold_filters:
       nullable: false
       description: "ChEMBL activity ID (primary key)"
 
-    molecule_chembl_id:
+    molecule_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL molecule identifier (FK)"
 
-    assay_chembl_id:
+    assay_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL assay identifier (FK)"
 
-    target_chembl_id:
+    target_id:
       type: string
       nullable: true
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL target identifier (FK, optional)"
 
-    document_chembl_id:
+    publication_id:
       type: string
       nullable: true
       pattern: "^CHEMBL\\d+$"
-      description: "ChEMBL document identifier (FK, optional)"
+      description: "ChEMBL publication identifier (FK, optional)"
 
     standard_type:
       type: string
@@ -5264,7 +5284,7 @@ gold_filters:
 # Notes on Join Semantics
 # -----------------------------------------------------------------------------
 # Activity → CompoundRecord join is M:N:
-# - One activity has one molecule_chembl_id
+# - One activity has one molecule_id
 # - One molecule can have many compound records (from different documents)
 # - Merge uses left_outer to preserve all activities
 # - Missing compound_record fields will be null
@@ -5311,38 +5331,38 @@ input_filter:
 gold_filters:
   # Required fields - records missing these are excluded from Gold
   required_fields:
-    - assay_chembl_id      # Primary key from seed
+    - assay_id      # Primary key from seed
     - assay_type           # Classification (required for analysis)
 
   # Field-specific validation (applied before Gold write)
   columns:
     # === Primary Key ===
-    assay_chembl_id:
+    assay_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL assay ID (primary key)"
 
     # === Foreign Keys (nullable) ===
-    cell_chembl_id:
+    cell_id:
       type: string
       nullable: true
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL cell line ID (FK, ~70% null)"
 
-    tissue_chembl_id:
+    tissue_id:
       type: string
       nullable: true
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL tissue ID (FK, ~70% null)"
 
-    target_chembl_id:
+    target_id:
       type: string
       nullable: true
       pattern: "^CHEMBL\\d+$"
       description: "ChEMBL target ID (FK)"
 
-    document_chembl_id:
+    publication_id:
       type: string
       nullable: true
       pattern: "^CHEMBL\\d+$"
@@ -5524,11 +5544,11 @@ input_filter:
 gold_filters:
   # Required fields - records missing these are excluded from Gold
   required_fields:
-    - molecule_chembl_id  # Primary key from seed (ChEMBL)
+    - molecule_id  # Primary key from seed (ChEMBL)
 
   # Field-specific validation (applied before Gold write)
   columns:
-    molecule_chembl_id:
+    molecule_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"
@@ -5538,13 +5558,7 @@ gold_filters:
       type: string
       nullable: true
       pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
-      description: "InChIKey - IUPAC standard structural identifier (27 chars)"
-
-    inchikey:
-      type: string
-      nullable: true
-      pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
-      description: "InChIKey - PubChem field name (alias)"
+      description: "InChIKey - canonical identifier (27 chars)"
 
     canonical_smiles:
       type: string
@@ -5625,7 +5639,7 @@ gold_filters:
 #   - _source_batch_id (nullable)
 #
 # Business fields use qualified names:
-#   - chembl.molecule.molecule_chembl_id (seed primary key)
+#   - chembl.molecule.molecule_id (seed primary key)
 #   - chembl.molecule.canonical_smiles, pubchem.compound.canonical_smiles, etc.
 #   - Additional columns depend on enricher success
 
@@ -5713,7 +5727,7 @@ gold_filters:
 #   - _source_batch_id (nullable)
 #
 # Business fields use qualified names:
-#   - chembl.publication.document_chembl_id (seed primary key)
+#   - chembl.publication.publication_id (seed primary key)
 #   - chembl.publication.title, crossref.publication.title, etc.
 #   - Additional columns depend on enricher success
 
@@ -5752,12 +5766,12 @@ input_filter:
 gold_filters:
   # Required fields - records missing these are excluded from Gold
   required_fields:
-    - target_chembl_id  # Primary key
+    - target_id  # Primary key
     - pref_name         # Target name (critical for usability)
 
   # Field-specific validation (applied before Gold write)
   columns:
-    target_chembl_id:
+    target_id:
       type: string
       nullable: false
       pattern: "^CHEMBL\\d+$"
@@ -5905,7 +5919,7 @@ input_filter:
 gold_filters:
   # Required fields
   required_fields:
-    - cid
+    - molecule_id
     - molecular_formula
 
   # Empty columns filter (use defaults)
@@ -6027,8 +6041,8 @@ entity: idmapping
 input_filter:
   enabled: false
   source_path: "data/input/target.csv"
-  column_name: "target_chembl_id"
-  filter_field: "target_chembl_id"
+  column_name: "target_id"
+  filter_field: "target_id"
   batch_size: 100
 
 # -----------------------------------------------------------------------------
@@ -6038,7 +6052,7 @@ input_filter:
 gold_filters:
   # Required fields
   required_fields:
-    - target_chembl_id
+    - target_id
     - mapping_status
 
 ================================================================================
@@ -7088,7 +7102,7 @@ entity_type: assay
 version: "1.2.0"
 description: "Extract bioassay definitions from ChEMBL API"
 
-primary_keys: ["assay_chembl_id"]
+primary_keys: ["assay_id"]
 silver_table: "chembl_assay"
 gold_table: "chembl_assay"
 
@@ -7117,7 +7131,7 @@ dq_rules:
 
   cross_field_validations:
     - name: "assay_identifiable"
-      fields: ["assay_chembl_id", "description"]
+      fields: ["assay_id", "description"]
       condition: "all_present"
       error_message: "Assay must have ID and description"
 
@@ -7127,13 +7141,13 @@ dq_rules:
 # Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
-    primary_key: ["assay_chembl_id"]
+    primary_key: ["assay_id"]
     sort_by:
-      columns: ["assay_chembl_id"]
+      columns: ["assay_id"]
     partition_by: ["assay_type"]
   gold:
     sort_by:
-      columns: ["assay_chembl_id"]
+      columns: ["assay_id"]
 
 ================================================================================
 File: assay_parameters.yaml
@@ -7213,7 +7227,7 @@ entity_type: cell_line
 version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
-primary_keys: ["cell_chembl_id"]
+primary_keys: ["cell_id"]
 silver_table: "chembl_cell_line"
 gold_table: "chembl_cell_line"
 
@@ -7244,16 +7258,16 @@ sink:
     path: "data/output/bronze/chembl/cell_line"
   silver:
     path: "data/output/silver/chembl/cell_line"
-    primary_key: ["cell_chembl_id"]
+    primary_key: ["cell_id"]
     sort_by:
-      columns: ["cell_chembl_id"]
+      columns: ["cell_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/chembl/cell_line"
   gold:
     path: "data/output/gold/chembl/cell_line"
     sort_by:
-      columns: ["cell_chembl_id", "cell_name"]
+      columns: ["cell_id", "cell_name"]
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/cell_line"
@@ -7317,7 +7331,7 @@ sink:
   gold:
     path: "data/output/gold/chembl/compound_record"
     sort_by:
-      columns: ["molecule_chembl_id", "document_chembl_id", "record_id"]
+      columns: ["molecule_id", "publication_id", "record_id"]
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/compound_record"
@@ -7338,7 +7352,7 @@ entity_type: molecule
 version: "1.2.0"
 description: "Extract molecules/compounds from ChEMBL API"
 
-primary_keys: ["molecule_chembl_id"]
+primary_keys: ["molecule_id"]
 silver_table: "chembl_molecule"
 gold_table: "chembl_molecule"
 
@@ -7429,17 +7443,17 @@ sink:
     path: "data/output/bronze/chembl/molecule"
   silver:
     path: "data/output/silver/chembl/molecule"
-    primary_key: ["molecule_chembl_id"]
+    primary_key: ["molecule_id"]
     partition_by: ["molecule_type"]
     sort_by:
-      columns: ["molecule_chembl_id"]
+      columns: ["molecule_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/chembl/molecule"
   gold:
     path: "data/output/gold/chembl/molecule"
     sort_by:
-      columns: ["molecule_chembl_id"]
+      columns: ["molecule_id"]
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/molecule"
@@ -7536,10 +7550,9 @@ source:
 # Deduplication is handled on Silver layer via content_hash.
 # - full_scan_only: Explicit strategy disabling checkpoint resume
 # - watermark_based: Placeholder for future incremental loading (not implemented)
-force_full_scan: true
 loading_strategy: full_scan_only
 
-primary_keys: ["document_chembl_id"]
+primary_keys: ["publication_id"]
 silver_table: "chembl_publication"
 gold_table: "chembl_publication"
 
@@ -7579,10 +7592,10 @@ sink:
     flat_structure: true  # Files written directly under path/{date}/, without provider/entity subdirs
   silver:
     path: "data/output/silver/chembl/publication"
-    primary_key: ["document_chembl_id"]
+    primary_key: ["publication_id"]
     partition_by: ["doc_type"]
     sort_by:
-      columns: ["document_chembl_id"]
+      columns: ["publication_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/chembl/publication"
@@ -7590,7 +7603,7 @@ sink:
   gold:
     path: "data/output/gold/chembl/publication"
     sort_by:
-      columns: ["document_chembl_id"]
+      columns: ["publication_id"]
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/publication"
@@ -7616,7 +7629,6 @@ description: "Extract publication similarity data (Tanimoto coefficients) from C
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
 # Deduplication is handled on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
 primary_keys: ["sim_id"]
@@ -7687,10 +7699,9 @@ description: "Extract publication terms (MeSH, keywords) from ChEMBL Publication
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
 # Deduplication is handled on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
-# Composite primary key (document_chembl_id + term_type + term)
+# Composite primary key (publication_id + term_type + term)
 # entity_id is generated as SHA256 hash of composite key
 primary_keys: ["entity_id"]
 silver_table: "chembl_publication_term"
@@ -7761,7 +7772,6 @@ description: "Extract unique subcellular fractions from ChEMBL Assay records"
 # Loading strategy (ADR-030, ADR-031)
 # Derived entity requires full scan to ensure comprehensive deduplication.
 # Deduplication is handled both at DataSource level and on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
 # Primary key is the normalized subcellular_fraction name
@@ -7826,7 +7836,7 @@ entity_type: target
 version: "1.2.0"
 description: "Extract biological targets from ChEMBL API"
 
-primary_keys: ["target_chembl_id"]
+primary_keys: ["target_id"]
 silver_table: "chembl_target"
 gold_table: "chembl_target"
 
@@ -7878,7 +7888,7 @@ dq_rules:
   # Unique cross-field validation (not in entity config)
   cross_field_validations:
     - name: "target_identifiable"
-      fields: ["target_chembl_id", "pref_name"]
+      fields: ["target_id", "pref_name"]
       condition: "all_present"
       error_message: "Target must have ID and preferred name"
 
@@ -7888,17 +7898,17 @@ sink:
     path: "data/output/bronze/chembl/target"
   silver:
     path: "data/output/silver/chembl/target"
-    primary_key: ["target_chembl_id"]
+    primary_key: ["target_id"]
     partition_by: ["target_type"]
     sort_by:
-      columns: ["target_chembl_id"]
+      columns: ["target_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/chembl/target"
   gold:
     path: "data/output/gold/chembl/target"
     sort_by:
-      columns: ["target_chembl_id", "pref_name"]
+      columns: ["target_id", "pref_name"]
       ascending: true
     csv_export:
       path: "data/output/gold/chembl/target"
@@ -8023,16 +8033,16 @@ Path: pipelines\composite\activity.yaml
 # =============================================================================
 #
 # Combines bioactivity data from ChEMBL with compound record metadata:
-# - Seed: ChEMBL activities (activity_id, molecule_chembl_id, ...)
+# - Seed: ChEMBL activities (activity_id, molecule_id, ...)
 # - Dependencies:
 #   1. chembl_compound_record: compound records filtered by
-#      molecule_chembl_id AND document_chembl_id (dual-key enrichment)
+#      molecule_id AND publication_id (dual-key enrichment)
 #
 # This pipeline enables correlation of activity measurements with their
 # original compound names and document references from compound records.
 #
 # Join Strategy:
-# - Composite key: (molecule_chembl_id, document_chembl_id)
+# - Composite key: (molecule_id, publication_id)
 # - Activity → CompoundRecord is ~1:1 with composite key
 #   (one compound record per molecule-document pair)
 # - Merge uses left_outer to preserve all activities
@@ -8054,16 +8064,16 @@ composite:
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts bioactivity data from ChEMBL.
-  # Its output provides join keys (molecule_chembl_id, document_chembl_id)
+  # Its output provides join keys (molecule_id, publication_id)
   # for dependency dual-key filtering and composite join.
   seed:
     pipeline: chembl_activity
     output_keys:
       - activity_id           # Primary key
-      - molecule_chembl_id    # FK for compound_record join (key 1)
-      - assay_chembl_id       # FK for future assay enrichment
-      - target_chembl_id      # FK for future target enrichment
-      - document_chembl_id    # FK for compound_record join (key 2)
+      - molecule_id           # FK for compound_record join (key 1)
+      - assay_id              # FK for future assay enrichment
+      - target_id             # FK for future target enrichment
+      - publication_id        # FK for compound_record join (key 2)
     silver_table: silver/chembl/activity
 
   # ---------------------------------------------------------------------------
@@ -8071,21 +8081,21 @@ composite:
   # ---------------------------------------------------------------------------
   # compound_record is a dependency (not enricher) because:
   # 1. It requires API calls (not just Silver table lookup)
-  # 2. It should be filtered by molecule_chembl_id AND document_chembl_id
+  # 2. It should be filtered by molecule_id AND publication_id
   # 3. It must complete before any merge can occur
   dependencies:
     # ChEMBL Compound Record: original compound names from publications
-    # Fetches compound records filtered by BOTH molecule_chembl_id AND
-    # document_chembl_id from seed (dual-key enrichment).
-    # API call: /compound_record?molecule_chembl_id__in=...&document_chembl_id__in=...
+    # Fetches compound records filtered by BOTH molecule_id AND
+    # publication_id from seed (dual-key enrichment).
+    # API call: /compound_record?molecule_id__in=...&publication_id__in=...
     # This produces ~1:1 mapping (one record per molecule-document pair).
     - pipeline: chembl_compound_record
       join_keys:
-        - molecule_chembl_id   # Composite join key 1
-        - document_chembl_id   # Composite join key 2
+        - molecule_id          # Composite join key 1
+        - publication_id       # Composite join key 2
       filter_fields:           # Multi-field API filtering (AND logic)
-        - molecule_chembl_id
-        - document_chembl_id
+        - molecule_id
+        - publication_id
       required: false          # Optional - missing records don't block composite
       timeout_seconds: 600
       silver_table: silver/chembl/compound_record
@@ -8094,8 +8104,8 @@ composite:
   # Enricher Pipelines
   # ---------------------------------------------------------------------------
   # Currently empty. Future expansion could include:
-  # - PubChem compound properties (via molecule_chembl_id → inchikey → PubChem)
-  # - UniProt target data (via target_chembl_id → UniProt accession)
+# - PubChem compound properties (via molecule_id → inchi_key → PubChem)
+# - UniProt target data (via target_id → UniProt accession)
   enrichers: []
 
   # ---------------------------------------------------------------------------
@@ -8110,7 +8120,7 @@ composite:
     conflict_resolution: seed_priority
 
     # Preserve provider-qualified columns for overlapping fields
-    # molecule_chembl_id appears in both sources, keep both for lineage
+    # molecule_id appears in both sources, keep both for lineage
     preserve_all_sources: false
 
     # Output paths for merged data
@@ -8120,9 +8130,9 @@ composite:
 
     # Field-level priority for overlapping fields
     field_priorities:
-      molecule_chembl_id:
+      molecule_id:
         - chembl.activity     # Activity FK is authoritative
-      document_chembl_id:
+      publication_id:
         - chembl.activity     # Activity document reference is primary
 
     # -------------------------------------------------------------------------
@@ -8149,10 +8159,10 @@ composite:
       - name: identifiers
         fields:
           - activity_id
-          - molecule_chembl_id
-          - assay_chembl_id
-          - target_chembl_id
-          - document_chembl_id
+          - molecule_id
+          - assay_id
+          - target_id
+          - publication_id
           - record_id
         provider_order: [chembl]
 
@@ -8203,7 +8213,7 @@ composite:
         fields:
           - canonical_smiles
           - molecule_pref_name
-          - parent_molecule_chembl_id
+          - parent_molecule_id
         provider_order: [chembl]
 
       # === Target context (denormalized from activity) ===
@@ -8211,7 +8221,7 @@ composite:
         fields:
           - target_pref_name
           - target_organism
-          - target_taxonomy_id
+          - taxonomy_id
         provider_order: [chembl]
 
       # === Assay context (denormalized from activity) ===
@@ -8289,8 +8299,8 @@ composite:
     # Required fields in final Gold output
     required_fields:
       - activity_id
-      - molecule_chembl_id
-      - assay_chembl_id
+      - molecule_id
+      - assay_id
 
     # Field-level validation rules
     field_validations:
@@ -8299,23 +8309,29 @@ composite:
         nullable: false
         description: "ChEMBL activity ID (primary key)"
 
-      molecule_chembl_id:
+      molecule_id:
         type: string
         nullable: false
         pattern: "^CHEMBL\\d+$"
         description: "ChEMBL molecule ID (FK)"
 
-      assay_chembl_id:
+      assay_id:
         type: string
         nullable: false
         pattern: "^CHEMBL\\d+$"
         description: "ChEMBL assay ID (FK)"
 
-      target_chembl_id:
+      target_id:
         type: string
         nullable: true
         pattern: "^CHEMBL\\d+$"
         description: "ChEMBL target ID (FK, optional)"
+
+      publication_id:
+        type: string
+        nullable: true
+        pattern: "^CHEMBL\\d+$"
+        description: "ChEMBL publication ID (FK, optional)"
 
       standard_value:
         type: float
@@ -8372,8 +8388,8 @@ composite:
 
     # Field-level source tracking for overlapping fields
     track_source_for_fields:
-      - molecule_chembl_id
-      - document_chembl_id
+      - molecule_id
+      - publication_id
       - src_id
 
 # -----------------------------------------------------------------------------
@@ -8383,8 +8399,8 @@ gold_filters:
   # Only include activities with required keys
   required_fields:
     - activity_id
-    - molecule_chembl_id
-    - assay_chembl_id
+    - molecule_id
+    - assay_id
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -8434,13 +8450,13 @@ composite:
   seed:
     pipeline: chembl_assay
     output_keys:
-      - assay_chembl_id      # Primary key
-      - cell_chembl_id       # FK for cell_line enrichment (nullable)
-      - tissue_chembl_id     # FK for tissue enrichment (nullable)
-      - target_chembl_id     # FK to target (for context)
-      - document_chembl_id   # FK to document (for context)
-      - assay_type           # Classification
-      - description          # For logging/debugging
+      - assay_id            # Primary key
+      - cell_id             # FK for cell_line enrichment (nullable)
+      - tissue_id           # FK for tissue enrichment (nullable)
+      - target_id           # FK to target (for context)
+      - publication_id      # FK to publication (for context)
+      - assay_type          # Classification
+      - description         # For logging/debugging
     silver_table: silver/chembl/assay
 
   # ---------------------------------------------------------------------------
@@ -8457,9 +8473,9 @@ composite:
     # Cardinality: one_to_one (each assay FK points to at most one cell line)
     - pipeline: chembl_cell_line
       join_keys:
-        - cell_chembl_id       # Direct FK match
+        - cell_id              # Direct FK match
       required: false          # Many assays lack cell line (~70%)
-      filter_condition: "cell_chembl_id IS NOT NULL"
+      filter_condition: "cell_id IS NOT NULL"
       timeout_seconds: 300
       silver_table: silver/chembl/cell_line
 
@@ -8468,9 +8484,9 @@ composite:
     # Cardinality: one_to_one (each assay FK points to at most one tissue)
     - pipeline: chembl_tissue
       join_keys:
-        - tissue_chembl_id     # Direct FK match
+        - tissue_id            # Direct FK match
       required: false          # Many assays lack tissue (~70%)
-      filter_condition: "tissue_chembl_id IS NOT NULL"
+      filter_condition: "tissue_id IS NOT NULL"
       timeout_seconds: 300
       silver_table: silver/chembl/tissue
 
@@ -8490,9 +8506,9 @@ composite:
     # Field-level priority overrides
     field_priorities:
       # FKs from seed are authoritative (prevent enricher overwrite)
-      cell_chembl_id:
+      cell_id:
         - chembl.assay
-      tissue_chembl_id:
+      tissue_id:
         - chembl.assay
 
     # Field renaming for conflicts
@@ -8527,11 +8543,11 @@ composite:
       # === Business identifiers ===
       - name: identifiers
         fields:
-          - assay_chembl_id
-          - cell_chembl_id
-          - tissue_chembl_id
-          - target_chembl_id
-          - document_chembl_id
+          - assay_id
+          - cell_id
+          - tissue_id
+          - target_id
+          - publication_id
           - src_id
           - src_assay_id
           - aidx
@@ -8623,9 +8639,9 @@ composite:
     # Fields to exclude from merged output
     exclude_fields:
       # Exclude cell_line PK (already have FK in seed)
-      - chembl.cell_line.cell_chembl_id
+      - chembl.cell_line.cell_id
       # Exclude tissue PK (already have FK in seed)
-      - chembl.tissue.tissue_chembl_id
+      - chembl.tissue.tissue_id
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
@@ -8645,30 +8661,30 @@ composite:
 
     # Required fields in final Gold output
     required_fields:
-      - assay_chembl_id
+      - assay_id
       - assay_type
 
     # Field-level validation rules
     field_validations:
-      assay_chembl_id:
+      assay_id:
         type: string
         nullable: false
         pattern: "^CHEMBL\\d+$"
         description: "ChEMBL assay ID (primary key)"
 
-      cell_chembl_id:
+      cell_id:
         type: string
         nullable: true
         pattern: "^CHEMBL\\d+$"
         description: "FK to cell_line (nullable)"
 
-      tissue_chembl_id:
+      tissue_id:
         type: string
         nullable: true
         pattern: "^CHEMBL\\d+$"
         description: "FK to tissue (nullable)"
 
-      target_chembl_id:
+      target_id:
         type: string
         nullable: true
         pattern: "^CHEMBL\\d+$"
@@ -8739,7 +8755,7 @@ composite:
 # -----------------------------------------------------------------------------
 gold_filters:
   required_fields:
-    - assay_chembl_id
+    - assay_id
     - assay_type
 
 # -----------------------------------------------------------------------------
@@ -8784,12 +8800,12 @@ composite:
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts primary entities from ChEMBL.
-  # Its output provides join keys (inchikey, canonical_smiles) for enrichment.
+  # Its output provides join keys (inchi_key, canonical_smiles) for enrichment.
   seed:
     pipeline: chembl_molecule
     output_keys:
-      - molecule_chembl_id  # Primary key
-      - inchikey            # Join key 1 (IUPAC standard, preferred)
+      - molecule_id         # Primary key
+      - inchi_key           # Join key 1 (IUPAC standard, preferred)
       - canonical_smiles    # Join key 2 (fallback)
       - pref_name           # For logging/debugging
     # Note: chembl_molecule uses flat_structure, so table is in path directly
@@ -8811,10 +8827,10 @@ composite:
     # OPTIONAL: Failure logged, composite continues (graceful degradation)
     - pipeline: pubchem_compound
       join_keys:
-        - inchikey           # Primary join key (IUPAC standard) - uses seed field name
+        - inchi_key          # Primary join key (IUPAC standard) - uses seed field name
         - canonical_smiles   # Fallback key (less reliable)
       required: false        # Graceful degradation - seed data preserved on failure
-      filter_condition: "inchikey IS NOT NULL"  # Only join records with structure
+      filter_condition: "inchi_key IS NOT NULL"  # Only join records with structure
       timeout_seconds: 3600
       silver_table: silver/pubchem/compound
 
@@ -8846,7 +8862,7 @@ composite:
       canonical_smiles:
         - chembl           # ChEMBL structures are manually curated
         - pubchem
-      inchikey:
+      inchi_key:
         - chembl           # ChEMBL InChIKey from standardized structures
         - pubchem
       inchi:
@@ -8864,25 +8880,28 @@ composite:
       molecular_formula:
         - pubchem
         - chembl
-      xlogp:
+      logp:
         - pubchem          # PubChem uses XLogP3
         - chembl           # ChEMBL uses ALogP
-      tpsa:
-        - pubchem          # PubChem TPSA (Topological Polar Surface Area)
-        - chembl           # ChEMBL PSA
-      hba:
-        - pubchem          # H-bond acceptors
+      logp_method:
+        - pubchem
         - chembl
-      hbd:
-        - pubchem          # H-bond donors
+      polar_surface_area:
+        - pubchem
         - chembl
-      rotatable_bonds:
+      hba_count:
+        - pubchem
+        - chembl
+      hbd_count:
+        - pubchem
+        - chembl
+      rotatable_bond_count:
         - pubchem
         - chembl
       heavy_atom_count:
         - pubchem
         - chembl
-      aromatic_rings:
+      aromatic_ring_count:
         - pubchem
         - chembl
 
@@ -8935,9 +8954,8 @@ composite:
       # === Business identifiers ===
       - name: identifiers
         fields:
-          - molecule_chembl_id   # ChEMBL primary key
-          - cid                  # PubChem CID
-          - inchikey             # Standard InChIKey (both ChEMBL and PubChem)
+          - molecule_id          # Canonical molecule id
+          - inchi_key            # Standard InChIKey (both ChEMBL and PubChem)
           - inchi
           - standard_inchi
         provider_order: [chembl, pubchem]
@@ -8956,23 +8974,16 @@ composite:
         fields:
           - molecular_weight
           - molecular_formula
-          - property_full_mwt
-          - property_mw_freebase
-          - property_alogp
-          - xlogp
-          - property_psa
-          - tpsa
-          - property_hba
-          - hba
-          - property_hbd
-          - hbd
-          - property_rtb
-          - rotatable_bonds
-          - property_heavy_atoms
+          - molecular_weight
+          - logp
+          - logp_method
+          - polar_surface_area
+          - hba_count
+          - hbd_count
+          - rotatable_bond_count
           - heavy_atom_count
-          - property_aromatic_rings
-          - aromatic_rings
-          - property_qed_weighted
+          - aromatic_ring_count
+          - qed_weighted
           - property_ro5_violations
           - property_ro3_pass
         provider_order: [chembl, pubchem]
@@ -9058,13 +9069,13 @@ composite:
 
     # Required fields in final Gold output
     required_fields:
-      - molecule_chembl_id
+      - molecule_id
       - entity_id
 
     # Field-level validation rules
     field_validations:
       # === Structural Identifiers ===
-      inchikey:
+      inchi_key:
         type: string
         nullable: true
         pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
@@ -9083,19 +9094,19 @@ composite:
         max_value: 50000.0
         description: "Molecular weight in Daltons"
 
-      xlogp:
+      logp:
         type: float
         nullable: true
         min_value: -20.0
         max_value: 30.0
-        description: "XLogP (lipophilicity estimate)"
+        description: "LogP (AlogP/XlogP coalesced)"
 
-      tpsa:
+      polar_surface_area:
         type: float
         nullable: true
         min_value: 0.0
         max_value: 2000.0
-        description: "Topological Polar Surface Area"
+        description: "Polar Surface Area"
 
       # === Clinical Data ===
       max_phase:
@@ -9143,12 +9154,12 @@ composite:
     # Field-level source tracking for overlapping fields
     track_source_for_fields:
       - canonical_smiles
-      - inchikey
+      - inchi_key
       - molecular_weight
-      - xlogp
-      - tpsa
-      - hba
-      - hbd
+      - logp
+      - polar_surface_area
+      - hba_count
+      - hbd_count
 
 # -----------------------------------------------------------------------------
 # Gold Filters (applied to merged output)
@@ -9156,7 +9167,7 @@ composite:
 gold_filters:
   # Only include molecules with primary key
   required_fields:
-    - molecule_chembl_id
+    - molecule_id
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -9214,14 +9225,15 @@ composite:
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts primary entities from ChEMBL.
-  # Its output provides join keys (doi, pmid) for enrichment.
+  # Its output provides join keys (publication_id, doi, pmid) for enrichment.
   seed:
     pipeline: chembl_publication
     output_keys:
-      - document_chembl_id  # ChEMBL document ID (primary key)
-      - doi                 # Digital Object Identifier
-      - pmid                # PubMed ID
-      - title               # Publication title (for fallback joins)
+      - publication_id         # ChEMBL document ID (primary key)
+      - doi                    # Digital Object Identifier
+      - pmid                   # PubMed ID
+      - pmc_id                 # PubMed Central ID
+      - title                  # Publication title (for fallback joins)
     # Note: chembl_publication uses flat_structure, so table is in path directly
     silver_table: silver/chembl/publication
 
@@ -9234,7 +9246,7 @@ composite:
   #
   # Use dependencies for:
   # - Derived entities (e.g., publication_term extracted from publication data)
-  # - Pipelines with force_full_scan that don't work with enricher filtering
+  # - Pipelines with full_scan_only strategy that don't work with enricher filtering
   # - Data that must be pre-populated before enrichment phase
   dependencies: []  # No dependencies currently
 
@@ -9248,7 +9260,7 @@ composite:
     # REQUIRED: Primary source for citation data (needs doi)
     - pipeline: crossref_publication
       join_keys:
-        - doi            # Primary join key
+        - doi               # Primary join key
         - title
       required: false    # Optional - seed may not have DOIs
       filter_condition: "doi IS NOT NULL"
@@ -9259,8 +9271,8 @@ composite:
     # OPTIONAL: Failure logged, composite continues
     - pipeline: openalex_publication
       join_keys:
-        - doi            # Primary key
-        - title          # Fallback key if doi not found
+        - doi               # Primary key
+        - title             # Fallback key if doi not found
       required: false    # Optional - needs doi or pmid
       filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
       timeout_seconds: 3600
@@ -9270,7 +9282,7 @@ composite:
     # OPTIONAL: Only processes records with pmid
     - pipeline: pubmed_publication
       join_keys:
-        - pmid           # PubMed-specific identifier
+        - pmid                 # PubMed-specific identifier
         - doi
       required: false    # Optional - only for records with pmid
       filter_condition: "pmid IS NOT NULL"
@@ -9452,13 +9464,13 @@ composite:
           - chembl_release
           - corpus_id
           - dblp_id
-          - document_chembl_id
+          - publication_id
           - mag_id
           - nlm_unique_id
           - openalex_id
           - paper_id
-          - pmc_id
-          - pmid
+          - publication_pmc_id
+          - publication_pmid
           - src_id
         provider_order: [semanticscholar, openalex, pubmed, chembl, crossref]
 
@@ -9607,7 +9619,7 @@ composite:
 
     # Required fields in final Gold output
     required_fields:
-      - document_chembl_id
+      - publication_id
       - title
 
     # Field-level validation rules for new fields
@@ -9830,9 +9842,9 @@ Path: pipelines\composite\target.yaml
 # =============================================================================
 #
 # Combines biological target data from multiple sources:
-# - Seed: ChEMBL targets (target_chembl_id, target_type, pref_name, ...)
+# - Seed: ChEMBL targets (target_id, target_type, pref_name, ...)
 # - Dependencies (ordered, chained):
-#   1. chembl_target_component: fetches component data using component_id from seed
+#   1. chembl_target_component: fetches component data using primary_component_id from seed
 #   2. chembl_protein_class: fetches protein classifications using
 #      protein_classification_id from target_component Silver table (chained dep)
 #   3. uniprot_idmapping: maps ChEMBL target IDs to UniProt accessions
@@ -9840,10 +9852,10 @@ Path: pipelines\composite\target.yaml
 #      from idmapping Silver table (chained dep)
 #
 # Dependency chaining (key_source):
-# - chembl_target_component uses component_id from seed (standard)
+# - chembl_target_component uses primary_component_id from seed (standard)
 # - chembl_protein_class uses protein_classification_id from target_component
 #   Silver table via key_source field (chained dependency)
-# - uniprot_idmapping uses target_chembl_id from seed (standard)
+# - uniprot_idmapping uses target_id from seed (standard)
 # - uniprot_protein uses uniprot_accession from idmapping Silver table
 #   via key_source field (chained dependency)
 #
@@ -9864,12 +9876,12 @@ composite:
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   # The seed pipeline extracts primary entities from ChEMBL.
-  # Its output provides join keys (target_chembl_id) for enrichment.
+  # Its output provides join keys (target_id) for enrichment.
   seed:
     pipeline: chembl_target
     output_keys:
-      - target_chembl_id  # ChEMBL target ID (primary key, join key for idmapping)
-      - component_id      # Primary component ID (join key for target_component)
+      - target_id         # ChEMBL target ID (primary key, join key for idmapping)
+      - primary_component_id      # Primary component ID (join key for target_component)
       - pref_name         # Target name (for logging/debugging)
       - target_type       # Classification (for filtering)
     silver_table: silver/chembl/target
@@ -9881,19 +9893,19 @@ composite:
   # They execute as full standalone pipelines (API -> Bronze -> Silver).
   #
   # Order matters for chained dependencies:
-  # 1. chembl_target_component runs first (uses component_id from seed)
+  # 1. chembl_target_component runs first (uses primary_component_id from seed)
   # 2. chembl_protein_class runs second (uses protein_classification_id from
   #    target_component Silver table via key_source)
-  # 3. uniprot_idmapping runs third (uses target_chembl_id from seed)
+  # 3. uniprot_idmapping runs third (uses target_id from seed)
   # 4. uniprot_protein runs fourth (uses uniprot_accession from idmapping
   #    Silver table via key_source - CHAINED)
   dependencies:
     # ChEMBL Target Component: detailed per-component data
     # Fetches protein_classifications, xrefs for each component.
-    # Uses component_id from seed to filter API requests.
+    # Uses primary_component_id from seed to filter API requests.
     - pipeline: chembl_target_component
       join_keys:
-        - component_id      # Scalar join key from seed (int)
+        - primary_component_id      # Scalar join key from seed (int)
       required: false       # Optional - some targets have no components
       timeout_seconds: 600
       silver_table: silver/chembl/target_component
@@ -9915,11 +9927,24 @@ composite:
     # UniProt ID Mapping: maps ChEMBL target IDs to UniProt accessions
     # This MUST run before uniprot_protein to provide uniprot_accession keys.
     # OPTIONAL: Many non-protein targets lack UniProt mappings.
+    #
+    # ID source: target_id values extracted from seed DataFrame
+    #   (NOT from data/input/target.csv — CSV is fallback for standalone mode only).
+    #   Flow: seed DataFrame → dependencies_runner_factory extracts join_keys
+    #         → filter_ids → IDMappingDataSource.seed_ids → UniProt API.
+    #
+    # API parameters (from configs/pipelines/uniprot/idmapping.yaml):
+    #   from_db: ChEMBL          — source database for UniProt ID Mapping API
+    #   to_db: UniProtKB         — target database
+    #   base_url: https://rest.uniprot.org
+    #   batch_size: 500 IDs/job  — MAX_IDS_PER_BATCH in idmapping_client.py
+    #   polling_interval: 3s     — job status polling period
+    #   max_poll_attempts: 100   — ~5 min max wait per batch
     - pipeline: uniprot_idmapping
       join_keys:
-        - target_chembl_id  # Direct join key from seed
+        - target_id  # Direct join key from seed
       required: false       # Optional - many targets lack UniProt accessions
-      filter_condition: "target_chembl_id IS NOT NULL"
+      filter_condition: "target_id IS NOT NULL"
       timeout_seconds: 600
       silver_table: silver/uniprot/idmapping
 
@@ -9969,10 +9994,10 @@ composite:
     # Field-level priority for overlapping fields
     # seed_priority applies globally; these are explicit overrides per field.
     field_priorities:
-      target_chembl_id:
+      target_id:
         - chembl  # Seed is authoritative for PK
-      component_id:
-        - chembl  # Seed component_id (from component_ids[0]) is authoritative
+      primary_component_id:
+        - chembl  # Seed primary_component_id is authoritative
       taxonomy_id:
         - chembl  # ChEMBL taxonomy_id takes priority over UniProt
       organism:
@@ -10004,8 +10029,8 @@ composite:
       # === Business identifiers ===
       - name: identifiers
         fields:
-          - target_chembl_id
-          - component_id
+          - target_id
+          - primary_component_id
           - dap_id
           - uniprot_accession
           - mapping_status
@@ -10106,7 +10131,7 @@ composite:
       - chembl.target.cross_references
       # --- ChEMBL target_component exclusions ---
       - chembl.target_component.accession
-      - chembl.target_component.component_id
+      - chembl.target_component.primary_component_id
       - chembl.target_component.component_type
       - chembl.target_component.description
       - chembl.target_component.organism
@@ -10126,7 +10151,7 @@ composite:
       - uniprot.idmapping.reviewed
       - uniprot.idmapping.sequence_length
       - uniprot.idmapping.sequence_mass
-      - uniprot.idmapping.target_chembl_id
+      - uniprot.idmapping.target_id
       - uniprot.idmapping.taxonomy_id
       - uniprot.idmapping.uniprot_entry_name
       # --- UniProt protein exclusions (redundant or too large) ---
@@ -10188,12 +10213,12 @@ composite:
 
     # Required fields in final Gold output
     required_fields:
-      - target_chembl_id
+      - target_id
       - pref_name
 
     # Field-level validation rules
     field_validations:
-      target_chembl_id:
+      target_id:
         type: string
         nullable: false
         pattern: "^CHEMBL\\d+$"
@@ -10288,8 +10313,8 @@ composite:
 
     # Field-level source tracking (for fields from multiple providers)
     track_source_for_fields:
-      - target_chembl_id  # Overlapping field between seed and idmapping
-      - component_id      # Overlapping field between seed and target_component
+      - target_id  # Overlapping field between seed and idmapping
+      - primary_component_id      # Overlapping field between seed and target_component
       - taxonomy_id       # Overlapping between ChEMBL and UniProt
       - organism          # Overlapping between ChEMBL and UniProt
 
@@ -10299,7 +10324,7 @@ composite:
 gold_filters:
   # Only include targets with primary key and name
   required_fields:
-    - target_chembl_id
+    - target_id
     - pref_name
 
 # -----------------------------------------------------------------------------
@@ -10330,7 +10355,6 @@ description: "Enrich publication records with CrossRef metadata via DOI resoluti
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
 # Deduplication is handled on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
 primary_keys: ["doi"]
@@ -10412,7 +10436,6 @@ description: "Batch DOI resolution via OpenAlex with title fallback"
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
 # Deduplication is handled on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
 primary_keys: ["openalex_id"]
@@ -10492,7 +10515,7 @@ entity_type: compound
 version: "1.2.0"
 description: "Pipeline for ingesting PubChem compounds"
 
-primary_keys: ["cid"]
+primary_keys: ["molecule_id"]
 silver_table: "pubchem_compound"
 gold_table: "pubchem_compound"
 
@@ -10573,7 +10596,7 @@ dq_rules:
   # Unique cross-field validation (not in entity config)
   cross_field_validations:
     - name: "structure_present"
-      fields: ["canonical_smiles", "inchi", "inchikey"]
+      fields: ["canonical_smiles", "inchi", "inchi_key"]
       condition: "any_present"
       error_message: "At least one structure identifier required"
 
@@ -10583,17 +10606,17 @@ sink:
     path: "data/output/bronze/pubchem/compound"
   silver:
     path: "data/output/silver/pubchem/compound"
-    primary_key: ["cid"]
+    primary_key: ["molecule_id"]
     partition_by: ["batch_date"]
     sort_by:
-      columns: ["cid"]
+      columns: ["molecule_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/pubchem/compound"
   gold:
     path: "data/output/gold/pubchem/compound"
     sort_by:
-      columns: ["cid"]
+      columns: ["molecule_id"]
       ascending: true
     csv_export:
       path: "data/output/gold/pubchem/compound"
@@ -10619,7 +10642,6 @@ description: "Extract publication metadata from PubMed via Entrez API"
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
 # Deduplication is handled on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
 primary_keys: ["pmid"]
@@ -10692,7 +10714,6 @@ description: "Batch DOI resolution via Semantic Scholar with title fallback"
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
 # Deduplication is handled on Silver layer via content_hash.
-force_full_scan: true
 loading_strategy: full_scan_only
 
 primary_keys: ["paper_id"]
@@ -10760,7 +10781,7 @@ Path: pipelines\uniprot\idmapping.yaml
 # Pipeline configuration for UniProt ID Mapping (ChEMBL → UniProt).
 #
 # Maps ChEMBL target IDs to UniProt accessions using UniProt ID Mapping REST API.
-# Input: CSV file with target_chembl_id column
+# Input: CSV file with target_id column
 # Output: Silver/Gold records with mapping results (null for not_found)
 #
 # Inherits defaults from ../_base.yaml
@@ -10771,7 +10792,7 @@ entity_type: idmapping
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
-primary_keys: ["target_chembl_id"]
+primary_keys: ["target_id"]
 silver_table: "uniprot_idmapping"
 gold_table: "uniprot_idmapping"
 
@@ -10802,7 +10823,7 @@ source:
 #
 # Entity-specific config contains:
 #   - Elevated thresholds: soft_fail=0.30, hard_fail=0.80 (ID mapping may have many not_found)
-#   - Field validations: target_chembl_id, mapping_status, uniprot_accession
+#   - Field validations: target_id, mapping_status, uniprot_accession
 #   - Conditional validations: found_has_accession
 dq_config_file: ../../dq/entities/uniprot/idmapping.yaml
 data_schema_file: ../../data_schema/uniprot/idmapping.yaml
@@ -10824,17 +10845,17 @@ sink:
     path: "data/output/bronze/uniprot/idmapping"
   silver:
     path: "data/output/silver/uniprot/idmapping"
-    primary_key: ["target_chembl_id"]
+    primary_key: ["target_id"]
     partition_by: []  # No partitioning - small dataset
     sort_by:
-      columns: ["target_chembl_id"]
+      columns: ["target_id"]
       ascending: true
     csv_export:
       path: "data/output/silver/uniprot/idmapping"
   gold:
     path: "data/output/gold/uniprot/idmapping"
     sort_by:
-      columns: ["target_chembl_id"]
+      columns: ["target_id"]
       ascending: true
     csv_export:
       path: "data/output/gold/uniprot/idmapping"
@@ -11321,7 +11342,7 @@ entity_notes:
         typical_volume: "~570K reviewed entries"
     idmapping:
         description: "Maps ChEMBL target IDs to UniProt accessions"
-        input_mode: "CSV file with target_chembl_id"
+        input_mode: "CSV file with target_id"
         dq_thresholds:
             soft_fail: 0.30  # Higher threshold - many targets lack UniProt mapping
             hard_fail: 0.80

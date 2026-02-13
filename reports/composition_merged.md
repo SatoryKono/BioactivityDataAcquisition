@@ -41,7 +41,7 @@ from typing import TYPE_CHECKING, cast
 from uuid import uuid4
 
 from bioetl.application.core.shutdown import PipelineShutdownError
-from bioetl.application.services import RunOptions, RunResult, RunStatus
+from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition.bootstrap import (
     bootstrap_pipeline,
     maybe_start_metrics_server,
@@ -243,9 +243,9 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     Example:
         >>> options = RunOptions(run_type="incremental", limit=100)
         >>> result = await run_pipeline("chembl_activity", options)
-        >>> if result.status == RunStatus.SUCCESS:
+        >>> if result.status == PipelineRunResult.SUCCESS:
         ...     logger.info("pipeline_success", records_silver=result.records_silver)
-        >>> elif result.status == RunStatus.SHUTDOWN:
+        >>> elif result.status == PipelineRunResult.SHUTDOWN:
         ...     logger.info("pipeline_shutdown", pipeline="chembl_activity")
         >>> else:
         ...     logger.error("pipeline_failed", error_message=result.error_message)
@@ -261,16 +261,16 @@ async def run_pipeline(name: str, options: RunOptions) -> RunResult:
     run_id = str(runner._context.run_id)
     run_type = options.run_type
 
-    status = RunStatus.SUCCESS
+    status = PipelineRunResult.SUCCESS
     error_message: str | None = None
     error_type: str | None = None
 
     try:
         await runner.run()
     except PipelineShutdownError:
-        status = RunStatus.SHUTDOWN
+        status = PipelineRunResult.SHUTDOWN
     except Exception as e:
-        status = RunStatus.FAILED
+        status = PipelineRunResult.FAILED
         error_message = str(e)
         error_type = type(e).__name__
 
@@ -1142,13 +1142,12 @@ from uuid import uuid4
 
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
+from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 from bioetl.domain.types import RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
@@ -1737,10 +1736,8 @@ Note:
 
 from __future__ import annotations
 
-from bioetl.domain.ports import MetricsPort, TracingPort
+from bioetl.domain.ports import MetricsPort, NoOpMetrics, NoOpTracing, TracingPort
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 
 __all__ = [
     "create_noop_logger",
@@ -2389,7 +2386,7 @@ def assemble_cached_bronze_context(
         ...     run_id=uuid4(),
         ...     run_type=RunType.INCREMENTAL,
         ...     cached_bronze=CachedBronzeContext.from_options(
-        ...         path="/data/bronze/chembl/activity",
+        ...         path="/data/output/bronze/chembl/activity",
         ...         date="2026-01-20"
         ...     ),
         ... )
@@ -3063,10 +3060,15 @@ from uuid import UUID, uuid4
 
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.exceptions import MetricsServerError
-from bioetl.domain.ports import DQMonitorPort, LoggerPort, MetricsPort, TracingPort
-from bioetl.infrastructure.observability import (
+from bioetl.domain.ports import (
+    DQMonitorPort,
+    LoggerPort,
+    MetricsPort,
     NoOpMetrics,
     NoOpTracing,
+    TracingPort,
+)
+from bioetl.infrastructure.observability import (
     OpenTelemetryTracer,
     PrometheusMetrics,
     UnifiedLogger,
@@ -3758,6 +3760,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from bioetl.domain.resilience import CircuitBreakerConfig
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
@@ -3854,19 +3858,8 @@ class RateLimitConfig:
     capacity: int
 
 
-@dataclass(frozen=True)
-class CircuitBreakerConfig:
-    """Typed context for circuit breaker configuration.
-
-    Replaces untyped tuple[int, int] from _get_circuit_breaker_from_config().
-
-    Attributes:
-        failure_threshold: Number of failures before opening circuit.
-        recovery_timeout: Seconds to wait before attempting recovery.
-    """
-
-    failure_threshold: int
-    recovery_timeout: int
+# CircuitBreakerConfig is imported from bioetl.domain.resilience (canonical definition)
+# and re-exported via __all__ for backward compatibility.
 
 ================================================================================
 File: bootstrap_logger.py
@@ -4010,6 +4003,8 @@ class BootstrapLogger:
         """
         self._logger.error(event, **kwargs)
 
+
+BOOTSTRAP_LOGGER_EXPORTS = (BootstrapLogger, reset_bootstrap_logger)
 
 __all__ = [
     "BootstrapLogger",
@@ -4241,7 +4236,7 @@ from __future__ import annotations
 
 # Re-export canonical DTO classes from application.services (H1 refactoring)
 # These are the single source of truth for pipeline execution interfaces.
-from bioetl.application.services import RunOptions, RunResult, RunStatus
+from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition._pipeline_execution import (
     ArchiveOptions,
     VacuumOptions,
@@ -4289,7 +4284,7 @@ __all__ = [
     "ArchiveOptions",
     # Result classes (re-exported from application.services)
     "RunResult",
-    "RunStatus",
+    "PipelineRunResult",
     # Pipeline operations
     "build_pipeline_context",
     "create_pipeline_runner",
@@ -5539,6 +5534,12 @@ def list_available_pipelines() -> list[str]:
     return sorted(_factories.keys())
 
 
+_PIPELINE_FACTORY_API = (
+    get_factory,
+    list_available_pipelines,
+    reset_registration,
+)
+
 __all__ = [
     "PIPELINE_CONFIGS",
     "PipelineFactoryConfig",
@@ -5584,6 +5585,7 @@ configuration and assembly in the composition layer.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from bioetl.application.core.lock_manager import LockManager
@@ -5612,6 +5614,7 @@ from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -5620,10 +5623,13 @@ if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.composition.observability import ObservabilityBundle
-    from bioetl.composition.services.metadata_coordinator import MetadataCoordinator
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import CachedBronzeContext
-    from bioetl.domain.filtering import GoldFilterConfig, InputFilterConfig
+    from bioetl.domain.filtering import (
+        GoldFilterConfig,
+        InputFilterConfig,
+        SilverFilterConfig,
+    )
     from bioetl.domain.ports import (
         DataSourcePort,
         DQMonitorPort,
@@ -5717,7 +5723,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        silver_filters: GoldFilterConfig | None = None,
+        silver_filters: SilverFilterConfig | GoldFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -6127,7 +6133,11 @@ def create_pipeline_with_services(
         silver_validator=silver_validator,
     )
 
-    domain_config = yaml_config_to_domain(yaml_config)
+    config_loader = ConfigLoader(
+        Path("configs"), relaxed_dq=settings.pipeline.relaxed_dq
+    )
+    resolved_dq = config_loader.resolve_dq_config(yaml_config)
+    domain_config = yaml_config_to_domain(yaml_config, resolved_dq_config=resolved_dq)
 
     # Create transformer via DI if configured (with observability)
     transformer = None
@@ -6188,7 +6198,6 @@ def assemble_runner(
         pipeline_name=pipeline.config.pipeline_name,
         run_id=pipeline.run_id,
         resume=pipeline.runtime.resume,
-        force_full_scan=pipeline.config.force_full_scan,
         loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
     )
 
@@ -6616,9 +6625,9 @@ from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.quarantine import UnifiedQuarantine
 from bioetl.infrastructure.validation import PanderaGoldValidator
@@ -6765,7 +6774,7 @@ class BaseServicesFactory:
         # Use provided tracer or fallback to NoOpTracing
         # Tracer should be created via bootstrap_tracer() for consistent configuration
         if tracer is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            from bioetl.domain.ports import NoOpTracing
 
             tracer = NoOpTracing()
 
@@ -6972,7 +6981,6 @@ class ServicesBuilder:
         run_id: RunID,
         resume: bool,
         *,
-        force_full_scan: bool = False,
         loading_strategy: LoadingStrategy | None = None,
     ) -> CheckpointManager:
         """Create configured CheckpointManager.
@@ -6983,10 +6991,8 @@ class ServicesBuilder:
             pipeline_name: Name of the pipeline
             run_id: Unique run identifier
             resume: Whether to resume from previous checkpoint
-            force_full_scan: If True, checkpoint resume is disabled (ADR-030).
-                Used for entities with unreliable offset pagination like publications.
-            loading_strategy: Explicit loading strategy (ADR-031). Takes precedence
-                over force_full_scan if provided. FULL_SCAN_ONLY disables resume.
+            loading_strategy: Loading strategy (ADR-031).
+                FULL_SCAN_ONLY disables checkpoint resume.
 
         Returns:
             Configured CheckpointManager instance
@@ -6997,7 +7003,6 @@ class ServicesBuilder:
             pipeline_name=pipeline_name,
             run_id=run_id,
             resume=resume,
-            force_full_scan=force_full_scan,
             loading_strategy=loading_strategy,
         )
 
@@ -7191,14 +7196,6 @@ class ServicesBuilder:
 
         # Build configuration
         error_classifier = ErrorClassifier()
-        table_config = TableConfig(
-            primary_keys=tuple(pipeline.config.primary_keys),
-            silver_table=pipeline.config.silver_table,
-            gold_table=pipeline.config.gold_table,
-            silver_write_mode=pipeline.config.write_mode,
-            gold_write_mode=pipeline.config.gold_write_mode,
-            on_schema_mismatch=pipeline.config.on_schema_mismatch,
-        )
 
         processor_config = RecordProcessorConfig(
             pipeline_name=pipeline.config.pipeline_name,
@@ -7207,7 +7204,7 @@ class ServicesBuilder:
             silver_schema=silver_schema,
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
-            table_config=table_config,
+            table_config=pipeline.config.table,
             # DQ report output paths for flat_structure support
             bronze_output_path=bronze_output_path,
             silver_output_path=silver_output_path,
@@ -7351,7 +7348,6 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from datetime import datetime
 
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
@@ -7996,9 +7992,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import NoOpMetadataWriter
+from bioetl.domain.ports import NoOpMetadataWriter, NoOpTracing
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
@@ -8345,7 +8340,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.domain.filtering import GoldFilterConfig
+    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         DataNormalizationPort,
         MetricsPort,
@@ -8379,7 +8374,7 @@ def create_transformer(
     entity_type: str,
     tracer: TracingPort | None = None,
     metrics: MetricsPort | None = None,
-    silver_filters: GoldFilterConfig | None = None,
+    silver_filters: SilverFilterConfig | GoldFilterConfig | None = None,
     gold_filters: GoldFilterConfig | None = None,
     identity_service: IdentityService | None = None,
     pii_hasher: PiiHasherPort | None = None,
@@ -9085,6 +9080,9 @@ def reset_loader() -> None:
     global _loaded
     _loaded = False
     ProviderRegistry.clear()
+
+
+_LOADER_API = (get_loaded_status, reset_loader)
 
 ================================================================================
 File: provider_registry.py
@@ -10746,8 +10744,7 @@ class MetadataCoordinator:
                     idx = file_path.find("src/bioetl")
                     contract_path = file_path[idx:]
         except Exception:
-            # Catch all: module may not have __file__, or path extraction may fail
-            # for dynamically generated modules. Use default contract_path = None.
+            # Module may not have __file__ or path extraction may fail
             pass
 
         # Extract schema version from Config if defined
@@ -11061,52 +11058,6 @@ def get_pipeline_version(
         return pkg_version("bioetl")
     except Exception:
         return "unknown"
-
-
-def get_full_git_commit() -> str | None:
-    """Get the full git commit hash (40 characters).
-
-    Similar to get_git_commit() but returns the full hash instead of
-    the short version. Useful for exact reproducibility tracking.
-
-    Returns:
-        Full git commit hash (e.g., 'abc1234...') or None.
-    """
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-        if result.returncode == 0:
-            return result.stdout.strip()
-        return None
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return None
-
-
-def is_git_dirty() -> bool:
-    """Check if the git working directory has uncommitted changes.
-
-    Returns:
-        True if there are uncommitted changes, False otherwise.
-        Returns False if not in a git repository or git is unavailable.
-    """
-    try:
-        result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-        if result.returncode == 0:
-            return bool(result.stdout.strip())
-        return False
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return False
 
 ================================================================================
 File: types.py
