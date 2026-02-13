@@ -277,7 +277,7 @@
       }
     ],
     "coerce": false,
-    "description": "Electronic ISSN (format: XXXX-XXXX)",
+    "description": "Electronic ISSN (format: NNNN-NNNN)",
     "dtype": "str",
     "nullable": true,
     "required": true,
@@ -300,7 +300,7 @@
       }
     ],
     "coerce": false,
-    "description": "Print ISSN (format: XXXX-XXXX)",
+    "description": "Print ISSN (format: NNNN-NNNN)",
     "dtype": "str",
     "nullable": true,
     "required": true,

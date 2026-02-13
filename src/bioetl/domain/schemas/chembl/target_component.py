@@ -5,6 +5,7 @@ Aligned with TargetComponent entity and TargetComponentTransformer output.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -32,8 +33,8 @@ class TargetComponentSchema(ETLRecordSchema):
     organism: Series[str] | None = pa.Field(
         nullable=True, description="Source organism."
     )
-    taxonomy_id: Series[float] | None = pa.Field(
-        nullable=True, description="NCBI Taxonomy ID (float for nullable int)."
+    taxonomy_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="NCBI Taxonomy ID."
     )
 
     # === Complex Fields (JSON Strings) ===
@@ -53,7 +54,7 @@ class TargetComponentSchema(ETLRecordSchema):
         coerce=True,
         description="Primary protein classification ID (first from list).",
     )
-    protein_classification_ids: Series[object] | None = pa.Field(  # type: ignore[type-var]
+    protein_classification_ids: Series[object] | None = pa.Field(
         nullable=True, description="List of protein classification IDs."
     )
 
