@@ -8,8 +8,8 @@ Convention-based path resolution (ADR-029):
 
     File References:
         - source_file: ../../sources/{provider}.yaml
-        - dq_config_file: ../../dq/entities/{provider}/{entity_type}.yaml
-        - filter_config_file: ../../filter/entities/{provider}/{entity_type}.yaml
+        - dq_config_file: ../../quality/entities/{provider}/{entity_type}.yaml
+        - filter_config_file: ../../filters/entities/{provider}/{entity_type}.yaml
 
     Sink Paths:
         - sink.bronze.path: data/output/bronze/{provider}/{entity_type}
@@ -36,6 +36,12 @@ import yaml
 
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
+
+_PATH_ALIAS_GROUPS: tuple[tuple[str, str], ...] = (
+    ("filters", "filter"),
+    ("quality", "dq"),
+    ("schemas", "data_schema"),
+)
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -76,10 +82,15 @@ def _apply_file_reference_defaults(
     """
     config.setdefault("source_file", f"../../sources/{provider}.yaml")
     config.setdefault(
-        "dq_config_file", f"../../dq/entities/{provider}/{entity_type}.yaml"
+        "dq_config_file", f"../../quality/entities/{provider}/{entity_type}.yaml"
     )
     config.setdefault(
-        "filter_config_file", f"../../filter/entities/{provider}/{entity_type}.yaml"
+        "filter_config_file",
+        f"../../filters/entities/{provider}/{entity_type}.yaml",
+    )
+    config.setdefault(
+        "data_schema_file",
+        f"../schemas/{provider}/{entity_type}.yaml",
     )
     config.setdefault(
         "column_groups_file",
@@ -87,12 +98,40 @@ def _apply_file_reference_defaults(
     )
 
 
+def _resolve_with_path_aliases(base_dir: Path, relative_path: str) -> Path | None:
+    """Resolve file path using new-first aliases with legacy fallback."""
+    direct_path = base_dir / relative_path
+    if direct_path.exists():
+        return direct_path
+
+    parts = Path(relative_path).parts
+    for new_dir, legacy_dir in _PATH_ALIAS_GROUPS:
+        if new_dir in parts:
+            fallback = Path(
+                *[legacy_dir if part == new_dir else part for part in parts]
+            )
+            candidate = base_dir / fallback
+            if candidate.exists():
+                return candidate
+        if legacy_dir in parts:
+            promoted = Path(
+                *[new_dir if part == legacy_dir else part for part in parts]
+            )
+            candidate = base_dir / promoted
+            if candidate.exists():
+                return candidate
+
+    return None
+
+
 def _load_column_groups_config(
     config_path: Path, column_groups_file: str
 ) -> list[dict[str, Any]] | None:
     """Load column group configuration from column_groups_file."""
-    column_groups_path = config_path.parent / column_groups_file
-    if not column_groups_path.exists():
+    column_groups_path = _resolve_with_path_aliases(
+        config_path.parent, column_groups_file
+    )
+    if column_groups_path is None:
         return None
 
     with open(column_groups_path, encoding="utf-8") as f:
@@ -125,8 +164,8 @@ def _load_data_schema_config(
     Returns:
         Dictionary with column_groups, silver, and gold keys, or None if file not found.
     """
-    schema_path = config_path.parent / data_schema_file
-    if not schema_path.exists():
+    schema_path = _resolve_with_path_aliases(config_path.parent, data_schema_file)
+    if schema_path is None:
         return None
 
     with open(schema_path, encoding="utf-8") as f:
@@ -293,8 +332,8 @@ def _load_filter_config(
     Returns:
         Loaded filter config dict or None if file doesn't exist.
     """
-    filter_path = config_path.parent / filter_config_file
-    if not filter_path.exists():
+    filter_path = _resolve_with_path_aliases(config_path.parent, filter_config_file)
+    if filter_path is None:
         return None
 
     with open(filter_path, encoding="utf-8") as f:
@@ -381,7 +420,7 @@ def _load_column_groups_section(
                 config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
             if "gold" in data_schema:
                 config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
-        return
+            return
 
     if column_groups_file := config.get("column_groups_file"):
         column_groups = _load_column_groups_config(config_path, column_groups_file)

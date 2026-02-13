@@ -177,7 +177,10 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
     assert cfg_legacy.timeout_sec == cfg_new.timeout_sec
     assert cfg_legacy.max_retries == cfg_new.max_retries
     assert cfg_legacy.batch_size == cfg_new.batch_size
-    assert cfg_legacy.rate_limit.requests_per_second == cfg_new.rate_limit.requests_per_second
+    assert (
+        cfg_legacy.rate_limit.requests_per_second
+        == cfg_new.rate_limit.requests_per_second
+    )
 
 
 def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
@@ -236,7 +239,10 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
     assert cfg_legacy.timeout_sec == cfg_new.timeout_sec
     assert cfg_legacy.max_retries == cfg_new.max_retries
     assert cfg_legacy.batch_size == cfg_new.batch_size
-    assert cfg_legacy.rate_limit.requests_per_second == cfg_new.rate_limit.requests_per_second
+    assert (
+        cfg_legacy.rate_limit.requests_per_second
+        == cfg_new.rate_limit.requests_per_second
+    )
 
 
 def test_dq_thresholds_are_validated_once(setup_configs):
@@ -310,8 +316,11 @@ def test_convention_based_source_file(setup_configs, tmp_path):
     config = load_pipeline_config("testprovider_entity")
 
     # source_file should be auto-computed
-    assert config.dq_config_file == "../../dq/entities/testprovider/entity.yaml"
-    assert config.filter_config_file == "../../filter/entities/testprovider/entity.yaml"
+    assert config.dq_config_file == "../../quality/entities/testprovider/entity.yaml"
+    assert (
+        config.filter_config_file == "../../filters/entities/testprovider/entity.yaml"
+    )
+    assert config.data_schema_file == "../schemas/testprovider/entity.yaml"
 
 
 def test_convention_based_sink_paths(setup_configs, tmp_path):
@@ -399,7 +408,7 @@ def test_filter_config_merging(setup_configs, tmp_path):
     pipelines_dir = setup_configs
 
     # Create filter config directory structure
-    filter_dir = tmp_path / "configs" / "filter" / "entities" / "filtertest"
+    filter_dir = tmp_path / "configs" / "filters" / "entities" / "filtertest"
     filter_dir.mkdir(parents=True)
 
     # Create filter entity config with complete input_filter
@@ -425,7 +434,7 @@ def test_filter_config_merging(setup_configs, tmp_path):
         "entity_type": "entity",
         "primary_keys": ["id"],
         "silver_table": "filter.entity",
-        # filter_config_file will be auto-computed to ../../filter/entities/filtertest/entity.yaml
+        # filter_config_file will be auto-computed to ../../filters/entities/filtertest/entity.yaml
     }
 
     filter_pipeline_dir = pipelines_dir / "filtertest"
@@ -447,7 +456,7 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
     pipelines_dir = setup_configs
 
     # Create filter config directory structure
-    filter_dir = tmp_path / "configs" / "filter" / "entities" / "override"
+    filter_dir = tmp_path / "configs" / "filters" / "entities" / "override"
     filter_dir.mkdir(parents=True)
 
     # Create filter entity config
@@ -500,3 +509,64 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
         "name",
         "extra",
     ]  # Explicit override
+
+
+def test_filter_config_legacy_path_fallback(setup_configs, tmp_path):
+    """Auto-computed ../../filters path should fallback to legacy ../../filter."""
+    pipelines_dir = setup_configs
+
+    legacy_filter_dir = tmp_path / "configs" / "filter" / "entities" / "legacyf"
+    legacy_filter_dir.mkdir(parents=True)
+    (legacy_filter_dir / "entity.yaml").write_text(
+        yaml.dump(
+            {
+                "input_filter": {
+                    "enabled": True,
+                    "source_path": "data/input/legacy.csv",
+                    "column_name": "id",
+                    "filter_field": "id",
+                    "batch_size": 77,
+                }
+            }
+        )
+    )
+
+    cfg = {
+        "pipeline_name": "legacyf_entity",
+        "provider": "legacyf",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "legacyf.entity",
+    }
+    provider_dir = pipelines_dir / "legacyf"
+    provider_dir.mkdir()
+    (provider_dir / "entity.yaml").write_text(yaml.dump(cfg))
+
+    config = load_pipeline_config("legacyf_entity")
+    assert config.input_filter.enabled is True
+    assert config.input_filter.batch_size == 77
+
+
+def test_data_schema_legacy_path_fallback(setup_configs, tmp_path):
+    """Auto-computed ../schemas path should fallback to legacy ../data_schema."""
+    pipelines_dir = setup_configs
+
+    legacy_schema_dir = tmp_path / "configs" / "pipelines" / "data_schema" / "legacys"
+    legacy_schema_dir.mkdir(parents=True)
+    (legacy_schema_dir / "entity.yaml").write_text(
+        yaml.dump({"column_groups": [{"name": "core", "columns": ["id"]}]})
+    )
+
+    cfg = {
+        "pipeline_name": "legacys_entity",
+        "provider": "legacys",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "legacys.entity",
+    }
+    provider_dir = pipelines_dir / "legacys"
+    provider_dir.mkdir()
+    (provider_dir / "entity.yaml").write_text(yaml.dump(cfg))
+
+    config = load_pipeline_config("legacys_entity")
+    assert config.column_groups[0].name == "core"
