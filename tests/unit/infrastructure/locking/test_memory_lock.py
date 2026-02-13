@@ -10,7 +10,6 @@ from bioetl.domain.locking import FencingToken
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
 
-
 @pytest.fixture
 def memory_lock():
     """Create a MemoryLock instance."""
@@ -319,7 +318,8 @@ class TestMemoryLockTTL:
         sequences = []
         for i in range(3):
             token = await memory_lock.acquire(
-                key="test_key", owner_id=f"owner_{i}",
+                key="test_key",
+                owner_id=f"owner_{i}",
             )
             assert token is not None
             sequences.append(token.sequence)

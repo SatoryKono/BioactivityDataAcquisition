@@ -86,10 +86,16 @@ class TestFencingToken:
     def test_value_equality(self, run_id: RunID) -> None:
         """Test that FencingTokens are compared by value."""
         t1 = FencingToken(
-            sequence=1, key="lock:test", owner_id=run_id, issued_at=100.0
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
         )
         t2 = FencingToken(
-            sequence=1, key="lock:test", owner_id=run_id, issued_at=100.0
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
         )
 
         assert t1 == t2
@@ -97,10 +103,16 @@ class TestFencingToken:
     def test_different_sequences_not_equal(self, run_id: RunID) -> None:
         """Test that tokens with different sequences are not equal."""
         t1 = FencingToken(
-            sequence=1, key="lock:test", owner_id=run_id, issued_at=100.0
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
         )
         t2 = FencingToken(
-            sequence=2, key="lock:test", owner_id=run_id, issued_at=100.0
+            sequence=2,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
         )
 
         assert t1 != t2
@@ -108,7 +120,10 @@ class TestFencingToken:
     def test_truthy(self, run_id: RunID) -> None:
         """Test that FencingToken is truthy (for backward-compatible checks)."""
         token = FencingToken(
-            sequence=1, key="lock:test", owner_id=run_id, issued_at=100.0
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
         )
         assert token  # truthy
 
@@ -167,7 +182,10 @@ class TestLockContext:
     def test_fencing_token_field_set(self, run_id: RunID) -> None:
         """Test LockContext with fencing token."""
         token = FencingToken(
-            sequence=5, key="lock:test", owner_id=run_id, issued_at=100.0
+            sequence=5,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
         )
         ctx = LockContext(key="lock:test", owner_id=run_id, fencing_token=token)
 
@@ -178,7 +196,6 @@ class TestLockContext:
         """Test that LockContext is immutable (frozen dataclass)."""
         with pytest.raises(AttributeError):
             valid_lock_context.key = "modified"  # type: ignore[misc]
-
 
 
 class TestLockNotHeldError:
@@ -192,7 +209,6 @@ class TestLockNotHeldError:
         assert "lock:chembl_activity" in str(error)
         assert error.operation == "write_silver"
         assert error.expected_key == "lock:chembl_activity"
-
 
 
 class TestLockManagerGetContext:
