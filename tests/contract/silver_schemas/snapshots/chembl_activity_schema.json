@@ -610,7 +610,7 @@
     "required": false,
     "unique": false
   },
-  "taxonomy_id": {
+  "target_taxonomy_id": {
     "checks": [],
     "coerce": false,
     "description": "Target taxonomy ID (nullable int pattern).",

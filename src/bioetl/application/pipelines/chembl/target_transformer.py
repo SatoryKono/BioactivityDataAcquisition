@@ -174,6 +174,7 @@ class TargetTransformer(BaseChemblTransformer):
             "organism": record.get("organism"),
             # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
             "taxonomy_id": taxonomy_id,
+            "description": record.get("description"),
             "species_group_flag": record.get("species_group_flag"),
             "downgraded": downgraded,
             "pipeline_stages": self.serialize_json(record.get("pipeline_stages")),

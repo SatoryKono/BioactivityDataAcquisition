@@ -62,7 +62,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_id", pa.string()),
         ("target_organism", pa.string()),
         ("target_pref_name", pa.string()),
-        ("taxonomy_id", pa.string()),
+        ("target_taxonomy_id", pa.float64()),
         ("text_value", pa.string()),
         ("toid", pa.float64()),  # Float for nullable int
         ("type", pa.string()),
@@ -92,7 +92,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("assay_pref_name", pa.string()),
         ("assay_strain", pa.string()),
         ("assay_subcellular_fraction", pa.string()),
-        ("taxonomy_id", pa.float64()),  # Float for nullable int
+        ("assay_taxonomy_id", pa.float64()),  # Float for nullable int
         ("assay_test_type", pa.string()),
         ("assay_tissue", pa.string()),
         ("assay_type", pa.string()),

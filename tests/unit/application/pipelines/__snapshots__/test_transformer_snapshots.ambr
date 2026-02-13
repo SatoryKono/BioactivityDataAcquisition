@@ -59,7 +59,7 @@
     'target_id': 'CHEMBL1862',
     'target_organism': 'Homo sapiens',
     'target_pref_name': 'Cyclooxygenase-2',
-    'taxonomy_id': None,
+    'target_taxonomy_id': None,
     'text_value': None,
     'toid': None,
     'type': None,

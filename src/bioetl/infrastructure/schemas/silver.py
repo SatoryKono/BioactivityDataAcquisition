@@ -142,7 +142,7 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("target_id", pa.string()),
         pa.field("target_organism", pa.string()),
         pa.field("target_pref_name", pa.string()),
-        pa.field("taxonomy_id", pa.string()),
+        pa.field("target_taxonomy_id", pa.float64()),
         pa.field("text_value", pa.string()),
         pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),
@@ -415,7 +415,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_pref_name", pa.string()),
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
-        pa.field("taxonomy_id", pa.float64()),
+        pa.field("assay_taxonomy_id", pa.float64()),
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string()),
@@ -478,6 +478,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("target_components", pa.string()),
         pa.field("target_type", pa.string()),
         pa.field("taxonomy_id", pa.float64()),
+        pa.field("description", pa.string()),
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===

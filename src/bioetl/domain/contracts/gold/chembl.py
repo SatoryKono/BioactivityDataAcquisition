@@ -52,7 +52,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     # Target data
     target_pref_name: Series[str] = pa.Field(nullable=True)
     target_organism: Series[str] = pa.Field(nullable=True)
-    taxonomy_id: Series[float] = pa.Field(
+    target_taxonomy_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Standardized name
 
@@ -151,7 +151,7 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     assay_test_type: Series[str] = pa.Field(nullable=True)
     assay_group: Series[str] = pa.Field(nullable=True)
     assay_organism: Series[str] = pa.Field(nullable=True)
-    taxonomy_id: Series[float] = pa.Field(
+    assay_taxonomy_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Standardized name
     assay_cell_type: Series[str] = pa.Field(nullable=True)
@@ -489,19 +489,17 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     logp: Series[float] = pa.Field(nullable=True, coerce=True)
     logp_method: Series[str] = pa.Field(nullable=True)
     molecular_weight: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
+    mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
     polar_surface_area: Series[float] = pa.Field(nullable=True, coerce=True)
     rotatable_bond_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_ro5_violations: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64
+    ro5_violation_count: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     heavy_atom_count: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     aromatic_ring_count: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
     hba_count: Series[float] = pa.Field(nullable=True, coerce=True)
     hbd_count: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_qed_weighted: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_full_molformula: Series[str] = pa.Field(nullable=True)
-    property_ro3_pass: Series[str] = pa.Field(nullable=True)
+    qed_score: Series[float] = pa.Field(nullable=True, coerce=True)
+    molecular_formula: Series[str] = pa.Field(nullable=True)
+    ro3_pass: Series[str] = pa.Field(nullable=True)
     # Flattened Structures (unified naming without structure_ prefix)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     standard_inchi: Series[str] = pa.Field(nullable=True)
@@ -574,19 +572,20 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     taxonomy_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Standardized name
+    description: Series[str] = pa.Field(nullable=True)
     species_group_flag: Series[bool] = pa.Field(nullable=True)
     downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)
     pipeline_stages: Series[str] = pa.Field(nullable=True)
     target_components: Series[str] = pa.Field(nullable=True)
     cross_references: Series[str] = pa.Field(nullable=True)
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
-    component_accessions: Series[object] = pa.Field(nullable=True)  # type: ignore[type-var]  # list[str]
+    component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
     primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
-    component_ids: Series[object] = pa.Field(nullable=True)  # type: ignore[type-var]  # list[int]
-    component_types: Series[object] = pa.Field(nullable=True)  # type: ignore[type-var]  # list[str]
-    component_relationships: Series[object] = pa.Field(nullable=True)  # type: ignore[type-var]  # list[str]
+    component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
+    component_types: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_relationships: Series[object] = pa.Field(nullable=True)  # list[str]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -622,7 +621,7 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     protein_classification_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
-    protein_classification_ids: Series[object] = pa.Field(nullable=True)  # type: ignore[type-var]  # list[int]
+    protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")

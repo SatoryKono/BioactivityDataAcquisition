@@ -401,7 +401,7 @@
     "required": false,
     "unique": false
   },
-  "taxonomy_id": {
+  "assay_taxonomy_id": {
     "checks": [],
     "coerce": false,
     "description": "NCBI Taxonomy ID (float for nullable int).",

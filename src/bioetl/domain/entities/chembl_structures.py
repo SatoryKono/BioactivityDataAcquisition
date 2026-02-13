@@ -105,6 +105,7 @@ class Target(BaseEntity):
     organism: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: int | None = None
+    description: str | None = None
     species_group_flag: bool | None = None
     downgraded: bool | None = None  # Flag for deprecated/downgraded records
     pipeline_stages: str | None = None  # JSON string (for complexes/families)
