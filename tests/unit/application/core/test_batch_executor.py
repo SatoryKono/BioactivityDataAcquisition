@@ -20,6 +20,7 @@ from bioetl.domain.config import TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
 from bioetl.domain.exceptions import DataQualityError
+from bioetl.domain.ports import MetricsPort
 from bioetl.domain.types import RunType, ValidationResult
 
 
@@ -36,8 +37,7 @@ def mock_storage():
 @pytest.fixture
 def mock_metrics():
     """Create mock metrics."""
-    metrics = AsyncMock()
-    return metrics
+    return MagicMock(spec=MetricsPort)
 
 
 @pytest.fixture
@@ -56,6 +56,7 @@ def mock_services(mock_storage, mock_metrics, mock_quarantine_port):
     services.metrics = mock_metrics
     services.quarantine = mock_quarantine_port
     services.data_source = AsyncMock()
+    services.data_source.get_source_metadata = MagicMock(return_value=None)
     services.logger = MagicMock()
     return services
 
