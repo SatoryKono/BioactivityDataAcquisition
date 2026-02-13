@@ -8,11 +8,17 @@ import pytest
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType
 
 # Test UUID constant for consistent assertions
 TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+
+# Reusable test token
+_TEST_TOKEN = FencingToken(
+    sequence=1, key="lock:test_pipeline", owner_id=TEST_RUN_ID, issued_at=100.0,
+)
 
 
 @pytest.fixture
@@ -58,11 +64,14 @@ class TestLockManager:
     async def test_acquire_lock_success(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
-        """Test successful lock acquisition."""
-        mock_lock_port.acquire.return_value = True
+        """Test successful lock acquisition returns FencingToken."""
+        mock_lock_port.acquire.return_value = _TEST_TOKEN
 
-        await lock_manager.acquire()
+        result = await lock_manager.acquire()
 
+        assert result is not None
+        assert isinstance(result, FencingToken)
+        assert result.sequence == 1
         mock_lock_port.acquire.assert_called_once_with(
             key="lock:test_pipeline",
             owner_id=TEST_RUN_ID,
@@ -75,12 +84,12 @@ class TestLockManager:
     async def test_acquire_lock_failure(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
-        """Test failure to acquire lock returns False."""
-        mock_lock_port.acquire.return_value = False
+        """Test failure to acquire lock returns None."""
+        mock_lock_port.acquire.return_value = None
 
         result = await lock_manager.acquire()
 
-        assert result is False
+        assert result is None
 
     async def test_release_lock_success(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock

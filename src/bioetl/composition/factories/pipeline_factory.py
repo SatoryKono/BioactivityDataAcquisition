@@ -287,9 +287,9 @@ class GenericPipelineFactory(Generic[TPipeline]):
             silver_schema=self.silver_schema,
             gold_schema=self.gold_schema,
             strict_gold_validation=(
-                True
-                if settings.env == "prod" and not settings.test_mode
-                else runtime.strict_gold_validation
+                runtime.strict_gold_validation
+                if settings.env != "prod" or settings.test_mode
+                else True
             ),
             yaml_config=yaml_config,
         )
@@ -523,12 +523,6 @@ def create_pipeline_with_services(
     """
     yaml_config = config or load_pipeline_config(pipeline_name)
     entity = _extract_entity_type(pipeline_name) or pipeline_name
-
-    if settings.env == "prod" and not settings.test_mode and pandera_silver_schema is None:
-        raise ValueError(
-            "Pandera Silver schema is required for production pipelines "
-            f"(pipeline={pipeline_name})"
-        )
 
     # Create Silver validator from Pandera schema if provided (DI pattern)
     silver_validator = None

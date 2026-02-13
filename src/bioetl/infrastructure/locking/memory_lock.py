@@ -9,6 +9,7 @@ import asyncio
 import contextlib
 import time
 
+from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID
 
@@ -34,6 +35,7 @@ class MemoryLock(LockPort):
         self._ttl_check_interval = ttl_check_interval
         self._ttl_checker_task: asyncio.Task[None] | None = None
         self._closed = False
+        self._sequence: int = 0
 
     async def _start_ttl_checker(self) -> None:
         """Start the TTL checker background task if not already running."""
@@ -68,7 +70,7 @@ class MemoryLock(LockPort):
         key: str,
         owner_id: RunID,
         ttl: int | None = None,
-    ) -> bool:
+    ) -> FencingToken | None:
         """Attempt to acquire the lock once without waiting.
 
         Args:
@@ -77,7 +79,7 @@ class MemoryLock(LockPort):
             ttl: Time-to-live in seconds. If None, lock does not expire.
 
         Returns:
-            True if lock was acquired, False otherwise.
+            FencingToken if lock was acquired, None otherwise.
 
         """
         async with self._global_lock:
@@ -85,7 +87,7 @@ class MemoryLock(LockPort):
                 _existing_owner, lock, _, _ = self._locks[key]
                 if lock.locked():
                     # Strictly non-reentrant: cannot acquire if already locked
-                    return False
+                    return None
 
             # Calculate expiration time
             expires_at: float | None = None
@@ -104,9 +106,15 @@ class MemoryLock(LockPort):
             # Acquire the asyncio.Lock
             if not lock.locked():
                 await lock.acquire()
-                return True
+                self._sequence += 1
+                return FencingToken(
+                    sequence=self._sequence,
+                    key=key,
+                    owner_id=owner_id,
+                    issued_at=time.monotonic(),
+                )
 
-            return str(owner_id) == self._locks[key][0]
+            return None
 
     async def acquire(
         self,
@@ -116,7 +124,7 @@ class MemoryLock(LockPort):
         wait: bool = False,
         wait_timeout: int = 300,
         exclusive: bool = False,
-    ) -> bool:
+    ) -> FencingToken | None:
         """Acquire a lock.
 
         Args:
@@ -128,7 +136,7 @@ class MemoryLock(LockPort):
             exclusive: Exclusive lock flag (unused in memory lock).
 
         Returns:
-            True if lock was acquired, False otherwise.
+            FencingToken if lock was acquired, None otherwise.
 
         """
         # Start TTL checker if acquiring with TTL
@@ -136,21 +144,23 @@ class MemoryLock(LockPort):
             await self._start_ttl_checker()
 
         # Try to acquire immediately
-        if await self._try_acquire(key, owner_id, ttl):
-            return True
+        token = await self._try_acquire(key, owner_id, ttl)
+        if token is not None:
+            return token
 
         # If not waiting, return immediately
         if not wait:
-            return False
+            return None
 
         # Wait for lock with timeout
         start = time.monotonic()
         while time.monotonic() - start < wait_timeout:
-            if await self._try_acquire(key, owner_id, ttl):
-                return True
+            token = await self._try_acquire(key, owner_id, ttl)
+            if token is not None:
+                return token
             await asyncio.sleep(0.1)
 
-        return False
+        return None
 
     async def release(
         self,

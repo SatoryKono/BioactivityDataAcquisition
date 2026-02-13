@@ -18,23 +18,26 @@ import pytest
 class TestRuntimeDependencies:
     """Verify critical runtime dependencies are installed and importable."""
 
-    @pytest.mark.parametrize("module_name", [
-        "pandas",
-        "pandera",
-        "polars",
-        "deltalake",
-        "pyarrow",
-        "httpx",
-        "pydantic",
-        "pydantic_settings",
-        "yaml",
-        "structlog",
-        "click",
-        "orjson",
-        "prometheus_client",
-        "zstandard",
-        "pubchempy",
-    ])
+    @pytest.mark.parametrize(
+        "module_name",
+        [
+            "pandas",
+            "pandera",
+            "polars",
+            "deltalake",
+            "pyarrow",
+            "httpx",
+            "pydantic",
+            "pydantic_settings",
+            "yaml",
+            "structlog",
+            "click",
+            "orjson",
+            "prometheus_client",
+            "zstandard",
+            "pubchempy",
+        ],
+    )
     def test_dependency_importable(self, module_name: str) -> None:
         """Each critical dependency must be importable."""
         import importlib
