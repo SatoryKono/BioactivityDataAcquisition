@@ -215,7 +215,7 @@ class TestChemblAssaySchema:
         """Verify biological context fields exist."""
         expected = [
             "assay_organism",
-            "taxonomy_id",
+            "assay_taxonomy_id",
             "assay_cell_type",
         ]
         for field_name in expected:
@@ -505,7 +505,7 @@ class TestSilverSchemaValidation:
             "parent_molecule_id": "CHEMBL25",
             "target_pref_name": "Cyclooxygenase-2",
             "target_organism": "Homo sapiens",
-            "taxonomy_id": "9606",
+            "target_taxonomy_id": "9606",
             "assay_type": "B",
             "assay_description": "Binding assay",
             "assay_variant_accession": None,
@@ -666,7 +666,7 @@ class TestSilverSchemaValidation:
             "parent_molecule_id": None,
             "target_pref_name": None,
             "target_organism": None,
-            "taxonomy_id": None,
+            "target_taxonomy_id": None,
             "assay_type": None,
             "assay_description": None,
             "assay_variant_accession": None,
