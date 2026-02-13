@@ -31,7 +31,6 @@ from bioetl.domain.registry.publication import (
 )
 from bioetl.infrastructure.adapters.chembl.constants import (
     CHEMBL_API_BASE,
-    CHEMBL_STATUS_URL,
 )
 
 # =============================================================================

@@ -5,10 +5,12 @@ import yaml
 
 from bioetl.infrastructure.config import load_pipeline_config
 from bioetl.infrastructure.config_loader import (
+    _normalize_source_config,
+)
+from bioetl.infrastructure.config_loader import (
     load_pipeline_config as load_pipeline_config_cached,
 )
 from bioetl.infrastructure.config_loader import (
-    _normalize_source_config,
     load_source_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -599,7 +601,7 @@ def test_data_schema_legacy_path_fallback(setup_configs, tmp_path):
     legacy_schema_dir = tmp_path / "configs" / "pipelines" / "data_schema" / "legacys"
     legacy_schema_dir.mkdir(parents=True)
     (legacy_schema_dir / "entity.yaml").write_text(
-        yaml.dump({"column_groups": [{"name": "core", "columns": ["id"]}]})
+        yaml.dump({"column_groups": [{"name": "core", "fields": ["id"]}]})
     )
 
     cfg = {

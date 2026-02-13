@@ -16,7 +16,7 @@ try:
     import pandera.backends.pandas
 
     # Create a dummy check to access the dispatch registry
-    _check = pa.Check(lambda s: True)
+    _check = pa.Check(lambda _: True)
     from pandera.backends.pandas.checks import PandasCheckBackend
 
     _backend = PandasCheckBackend(_check)

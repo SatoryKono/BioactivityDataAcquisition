@@ -85,38 +85,20 @@ class DQConfigLoader:
         if inline_overrides is None and cache_key in self._cache:
             return self._cache[cache_key]
 
-        # 1. Load defaults (MUST exist)
-        defaults_path = self._resolve_dq_path("_defaults.yaml")
-        if defaults_path is None:
-            raise FileNotFoundError(
-                "Required DQ defaults file not found in configs/quality or configs/dq. "
-                "Create _defaults.yaml with global DQ settings."
-            )
-        merged = self._load_yaml(defaults_path)
+        merged = self._load_required_defaults()
+        merged = self._merge_optional_config(
+            merged,
+            self._resolve_dq_path("providers", f"{provider}.yaml"),
+        )
+        merged = self._merge_optional_config(
+            merged,
+            self._resolve_dq_path("entities", provider, f"{entity}.yaml"),
+        )
 
-        # 2. Load provider config (optional)
-        provider_path = self._resolve_dq_path("providers", f"{provider}.yaml")
-        provider_config = self._load_yaml(provider_path) if provider_path else {}
-        if provider_config:
-            merged = self._deep_merge(merged, provider_config)
-
-        # 3. Load entity config (optional)
-        entity_path = self._resolve_dq_path("entities", provider, f"{entity}.yaml")
-        entity_config = self._load_yaml(entity_path) if entity_path else {}
-        if entity_config:
-            merged = self._deep_merge(merged, entity_config)
-
-        # 4. Apply inline overrides (optional)
         if inline_overrides:
             merged = self._deep_merge(merged, inline_overrides)
 
-        # 5. Test override: relax DQ thresholds for e2e/integration tests
-        # (soft_fail < hard_fail required by ThresholdsConfig validator)
-        if self._relaxed_dq:
-            merged = self._deep_merge(
-                merged,
-                {"thresholds": {"soft_fail": 0.99, "hard_fail": 1.0}},
-            )
+        merged = self._apply_relaxed_thresholds(merged)
 
         # Normalize and validate via Pydantic
         normalized = self._normalize_to_file_format(merged)
@@ -128,6 +110,41 @@ class DQConfigLoader:
             self._cache[cache_key] = domain_config
 
         return domain_config
+
+    def _load_required_defaults(self) -> dict[str, Any]:
+        """Load required defaults from quality/dq roots."""
+        defaults_path = self._resolve_dq_path("_defaults.yaml")
+        if defaults_path is None:
+            raise FileNotFoundError(
+                "Required DQ defaults file not found in configs/quality or configs/dq. "
+                "Create _defaults.yaml with global DQ settings."
+            )
+        return self._load_yaml(defaults_path)
+
+    def _merge_optional_config(
+        self,
+        merged: dict[str, Any],
+        config_path: Path | None,
+    ) -> dict[str, Any]:
+        """Merge optional provider/entity config when path exists."""
+        if config_path is None:
+            return merged
+
+        config = self._load_yaml(config_path)
+        if not config:
+            return merged
+
+        return self._deep_merge(merged, config)
+
+    def _apply_relaxed_thresholds(self, merged: dict[str, Any]) -> dict[str, Any]:
+        """Apply relaxed thresholds for test environments when enabled."""
+        if not self._relaxed_dq:
+            return merged
+
+        return self._deep_merge(
+            merged,
+            {"thresholds": {"soft_fail": 0.99, "hard_fail": 1.0}},
+        )
 
     def clear_cache(self) -> None:
         """Clear the configuration cache.

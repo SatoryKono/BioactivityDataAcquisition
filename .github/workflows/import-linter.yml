@@ -62,7 +62,7 @@ jobs:
           python -m pip install .[dev]
 
       - name: Architecture tests (all)
-        run: pytest tests/architecture/ -v --tb=short
+        run: pytest tests/architecture/ -v --tb=short -o addopts=''
 
       - name: Import Linter contract
         run: lint-imports --config .importlinter
@@ -202,4 +202,3 @@ jobs:
             exit 1
           fi
           echo "All checks completed successfully."
-

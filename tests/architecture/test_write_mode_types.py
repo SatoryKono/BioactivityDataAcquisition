@@ -134,15 +134,14 @@ def test_write_mode_from_string_invalid_raises() -> None:
         GoldWriteMode.from_string("invalid")
 
 
-def test_table_config_converts_strings_to_enums() -> None:
-    """TableConfig MUST convert string write modes to enums."""
+def test_table_config_uses_enum_write_modes() -> None:
+    """TableConfig should be constructed with enum write modes in domain layer."""
     from bioetl.domain.config import TableConfig
     from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
-    # Test with string inputs (backward compatibility)
     config = TableConfig(
-        silver_write_mode="merge",
-        gold_write_mode="append",
+        silver_write_mode=SilverWriteMode.MERGE,
+        gold_write_mode=GoldWriteMode.APPEND,
     )
 
     assert isinstance(config.silver_write_mode, SilverWriteMode)
@@ -166,8 +165,8 @@ def test_table_config_accepts_enums_directly() -> None:
     assert config.gold_write_mode == GoldWriteMode.SCD2
 
 
-def test_pipeline_config_converts_strings_to_enums() -> None:
-    """PipelineConfig MUST convert string write modes to enums."""
+def test_pipeline_config_exposes_enum_write_modes() -> None:
+    """PipelineConfig convenience properties should expose enum write modes."""
     from bioetl.domain.config import PipelineConfig, TableConfig
     from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
@@ -178,8 +177,8 @@ def test_pipeline_config_converts_strings_to_enums() -> None:
         table=TableConfig(
             primary_keys=("id",),
             silver_table="test_silver",
-            silver_write_mode="merge",
-            gold_write_mode="scd2",
+            silver_write_mode=SilverWriteMode.MERGE,
+            gold_write_mode=GoldWriteMode.SCD2,
         ),
     )
 
@@ -196,10 +195,10 @@ def test_overwrite_for_silver_raises_error() -> None:
     The deprecated 'overwrite' alias for Silver layer has been removed.
     Use SilverWriteMode.DELETE explicitly for rebuild operations.
     """
-    from bioetl.domain.config import TableConfig
+    from bioetl.domain.medallion import SilverWriteMode
 
     with pytest.raises(ValueError, match=r"Invalid Silver write mode.*overwrite"):
-        TableConfig(silver_write_mode="overwrite")
+        SilverWriteMode.from_string("overwrite")
 
 
 def test_no_silent_degradation_in_batch_writer() -> None:

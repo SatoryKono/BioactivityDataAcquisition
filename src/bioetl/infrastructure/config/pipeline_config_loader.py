@@ -195,7 +195,8 @@ class ConfigLoader:
         # Validation lists → entity-level (inline = highest priority)
         if dq_overrides.field_validations:
             result["entity_field_validations"] = [
-                self._field_validation_to_dict(fv) for fv in dq_overrides.field_validations
+                self._field_validation_to_dict(fv)
+                for fv in dq_overrides.field_validations
             ]
 
         if dq_overrides.cross_field_validations:

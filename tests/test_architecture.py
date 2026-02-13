@@ -314,11 +314,8 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
         "molecule_synonyms": "molecule_synonyms_json",
         "logp_method": "logp_method",
         # PubchemMolecule aliases
-        "molecule_id": "molecule_id",
         "xlogp": "logp",
-        "inchi_key": "inchi_key",
         "tpsa": "tpsa",
-        "molecule_id": "molecule_id",
         "polar_surface_area": "tpsa",
         # UniprotTarget aliases
         "organism_id": "taxonomy_id",
@@ -705,12 +702,12 @@ def test_adapters_implement_protocols(src_dir: Path):
     # Import Adapters (Lazy import to avoid import errors if deps are missing)
     try:
         from bioetl.composition.factories.storage import StorageAdapter
+        from bioetl.domain.ports import NoOpMetrics
         from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
         from bioetl.infrastructure.adapters.pubchem.client import PubChemAdapter
         from bioetl.infrastructure.adapters.uniprot.client import UniProtAdapter
         from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
         from bioetl.infrastructure.locking.memory_lock import MemoryLock
-        from bioetl.domain.ports import NoOpMetrics
         from bioetl.infrastructure.observability.prometheus_metrics import (
             PrometheusMetrics,
         )

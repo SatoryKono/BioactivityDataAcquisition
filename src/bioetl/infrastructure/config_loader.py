@@ -106,22 +106,174 @@ def _resolve_with_path_aliases(base_dir: Path, relative_path: str) -> Path | Non
 
     parts = Path(relative_path).parts
     for new_dir, legacy_dir in _PATH_ALIAS_GROUPS:
-        if new_dir in parts:
-            fallback = Path(
-                *[legacy_dir if part == new_dir else part for part in parts]
-            )
-            candidate = base_dir / fallback
-            if candidate.exists():
-                return candidate
-        if legacy_dir in parts:
-            promoted = Path(
-                *[new_dir if part == legacy_dir else part for part in parts]
-            )
-            candidate = base_dir / promoted
+        for source, target in ((new_dir, legacy_dir), (legacy_dir, new_dir)):
+            if source not in parts:
+                continue
+            rewritten = Path(*[target if part == source else part for part in parts])
+            candidate = base_dir / rewritten
             if candidate.exists():
                 return candidate
 
     return None
+
+
+def _normalize_timeout_keys(config: dict[str, Any]) -> dict[str, Any]:
+    """Normalize timeout and timeout_sec aliases bidirectionally."""
+    result = config.copy()
+    if "timeout" in result and "timeout_sec" not in result:
+        result["timeout_sec"] = result["timeout"]
+    if "timeout_sec" in result and "timeout" not in result:
+        result["timeout"] = result["timeout_sec"]
+    return result
+
+
+def _normalize_rate_limit_aliases(source_norm: dict[str, Any]) -> None:
+    """Normalize rate_limit.with_api_key ↔ rate_limit.authenticated aliases."""
+    rate_limit = source_norm.get("rate_limit")
+    if not isinstance(rate_limit, dict):
+        return
+
+    rate_limit_norm = rate_limit.copy()
+    with_api_key = rate_limit_norm.get("with_api_key")
+    authenticated = rate_limit_norm.get("authenticated")
+
+    if isinstance(with_api_key, dict) and "authenticated" not in rate_limit_norm:
+        rate_limit_norm["authenticated"] = with_api_key
+    if isinstance(authenticated, dict) and "with_api_key" not in rate_limit_norm:
+        rate_limit_norm["with_api_key"] = authenticated
+
+    source_norm["rate_limit"] = rate_limit_norm
+
+
+def _normalize_health_check_aliases(source_norm: dict[str, Any]) -> None:
+    """Normalize health_check timeout aliases."""
+    health_check = source_norm.get("health_check")
+    if isinstance(health_check, dict):
+        source_norm["health_check"] = _normalize_timeout_keys(health_check)
+
+
+def _project_provider_config_to_new_shape(
+    source_norm: dict[str, Any],
+) -> dict[str, Any]:
+    """Project legacy provider_config fields to canonical new-style sections."""
+    provider_config = source_norm.get("provider_config")
+    if not isinstance(provider_config, dict):
+        return {}
+
+    _project_api_from_provider_config(source_norm, provider_config)
+    _project_client_from_provider_config(source_norm, provider_config)
+    _project_batch_from_provider_config(source_norm, provider_config)
+
+    return provider_config
+
+
+def _project_api_from_provider_config(
+    source_norm: dict[str, Any],
+    provider_config: dict[str, Any],
+) -> None:
+    """Project provider_config API fields into source.api."""
+
+    api_norm = source_norm.get("api")
+    if not isinstance(api_norm, dict):
+        api_norm = {}
+    for key in ("base_url", "auth_type", "api_key", "api_version"):
+        if key in provider_config:
+            api_norm.setdefault(key, provider_config[key])
+    if api_norm:
+        source_norm["api"] = api_norm
+
+
+def _project_client_from_provider_config(
+    source_norm: dict[str, Any],
+    provider_config: dict[str, Any],
+) -> None:
+    """Project provider_config client fields into source.client."""
+    client = provider_config.get("client")
+    if not isinstance(client, dict):
+        return
+
+    client_norm = source_norm.get("client")
+    if not isinstance(client_norm, dict):
+        client_norm = {}
+
+    source_norm["client"] = _deep_merge(_normalize_timeout_keys(client), client_norm)
+
+
+def _project_batch_from_provider_config(
+    source_norm: dict[str, Any],
+    provider_config: dict[str, Any],
+) -> None:
+    """Project provider_config batch fields into source.batch."""
+    batch_norm = source_norm.get("batch")
+    if not isinstance(batch_norm, dict):
+        batch_norm = {}
+
+    _set_default_if_present(batch_norm, "batch_size", provider_config)
+    if "batch_size" in provider_config:
+        batch_norm.setdefault("size", provider_config["batch_size"])
+    _set_default_if_present(batch_norm, "page_size", provider_config)
+    _set_default_if_present(batch_norm, "max_url_length", provider_config)
+
+    if batch_norm:
+        source_norm["batch"] = batch_norm
+
+
+def _set_default_if_present(
+    target: dict[str, Any],
+    key: str,
+    source: dict[str, Any],
+) -> None:
+    """Set target[key] from source when key exists and target lacks it."""
+    if key in source:
+        target.setdefault(key, source[key])
+
+
+def _apply_api_to_provider_config(
+    provider_config: dict[str, Any],
+    api: dict[str, Any],
+) -> None:
+    """Map API section into provider_config."""
+    for key in ("base_url", "auth_type", "api_key", "api_version"):
+        if key in api:
+            provider_config.setdefault(key, api[key])
+
+
+def _apply_client_to_provider_config(
+    provider_config: dict[str, Any],
+    client: dict[str, Any],
+) -> None:
+    """Map client section into provider_config with timeout normalization."""
+    existing_client = provider_config.get("client")
+    if not isinstance(existing_client, dict):
+        existing_client = {}
+
+    provider_config["client"] = _deep_merge(
+        _normalize_timeout_keys(existing_client),
+        _normalize_timeout_keys(client),
+    )
+
+
+def _apply_batch_to_provider_config(
+    provider_config: dict[str, Any],
+    batch: dict[str, Any] | int,
+) -> None:
+    """Map batch section into provider_config."""
+    if isinstance(batch, int):
+        provider_config.setdefault("batch_size", batch)
+        return
+
+    if not isinstance(batch, dict):
+        return
+
+    if "batch_size" in batch:
+        provider_config.setdefault("batch_size", batch["batch_size"])
+    elif "size" in batch:
+        provider_config.setdefault("batch_size", batch["size"])
+
+    if "page_size" in batch:
+        provider_config.setdefault("page_size", batch["page_size"])
+    if "max_url_length" in batch:
+        provider_config.setdefault("max_url_length", batch["max_url_length"])
 
 
 def _load_column_groups_config(
@@ -267,109 +419,23 @@ def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
 
     source_norm = source.copy()
 
-    # --- Normalize rate_limit old/new aliases ---
-    rate_limit = source_norm.get("rate_limit")
-    if isinstance(rate_limit, dict):
-        rate_limit_norm = rate_limit.copy()
-        with_api_key = rate_limit_norm.get("with_api_key")
-        authenticated = rate_limit_norm.get("authenticated")
+    _normalize_rate_limit_aliases(source_norm)
+    _normalize_health_check_aliases(source_norm)
 
-        if isinstance(with_api_key, dict) and "authenticated" not in rate_limit_norm:
-            rate_limit_norm["authenticated"] = with_api_key
-        if isinstance(authenticated, dict) and "with_api_key" not in rate_limit_norm:
-            rate_limit_norm["with_api_key"] = authenticated
-
-        source_norm["rate_limit"] = rate_limit_norm
-
-    # --- Normalize health_check timeout aliases ---
-    health_check = source_norm.get("health_check")
-    if isinstance(health_check, dict):
-        health_check_norm = health_check.copy()
-        if "timeout" in health_check_norm and "timeout_sec" not in health_check_norm:
-            health_check_norm["timeout_sec"] = health_check_norm["timeout"]
-        if "timeout_sec" in health_check_norm and "timeout" not in health_check_norm:
-            health_check_norm["timeout"] = health_check_norm["timeout_sec"]
-        source_norm["health_check"] = health_check_norm
-
-    provider_config = source_norm.get("provider_config")
-    if not isinstance(provider_config, dict):
-        provider_config = {}
-
-    # If legacy provider_config is provided, project to canonical new-style keys.
-    if provider_config:
-        api_norm = source_norm.get("api")
-        if not isinstance(api_norm, dict):
-            api_norm = {}
-        for key in ("base_url", "auth_type", "api_key", "api_version"):
-            if key in provider_config:
-                api_norm.setdefault(key, provider_config[key])
-        if api_norm:
-            source_norm["api"] = api_norm
-
-        if isinstance(provider_config.get("client"), dict):
-            client_norm = source_norm.get("client")
-            if not isinstance(client_norm, dict):
-                client_norm = {}
-
-            legacy_client = provider_config["client"].copy()
-            if "timeout" in legacy_client and "timeout_sec" not in legacy_client:
-                legacy_client["timeout_sec"] = legacy_client["timeout"]
-            if "timeout_sec" in legacy_client and "timeout" not in legacy_client:
-                legacy_client["timeout"] = legacy_client["timeout_sec"]
-            source_norm["client"] = _deep_merge(legacy_client, client_norm)
-
-        batch_norm = source_norm.get("batch")
-        if not isinstance(batch_norm, dict):
-            batch_norm = {}
-        if "batch_size" in provider_config:
-            batch_norm.setdefault("batch_size", provider_config["batch_size"])
-            batch_norm.setdefault("size", provider_config["batch_size"])
-        if "page_size" in provider_config:
-            batch_norm.setdefault("page_size", provider_config["page_size"])
-        if "max_url_length" in provider_config:
-            batch_norm.setdefault("max_url_length", provider_config["max_url_length"])
-        if batch_norm:
-            source_norm["batch"] = batch_norm
+    provider_config = _project_provider_config_to_new_shape(source_norm)
 
     # Consume new-style keys into legacy provider_config for current validation schema.
     api = source_norm.pop("api", None)
     if isinstance(api, dict):
-        for key in ("base_url", "auth_type", "api_key", "api_version"):
-            if key in api:
-                provider_config.setdefault(key, api[key])
+        _apply_api_to_provider_config(provider_config, api)
 
     client = source_norm.pop("client", None)
     if isinstance(client, dict):
-        existing_client = provider_config.get("client")
-        if not isinstance(existing_client, dict):
-            existing_client = {}
-
-        client_norm = client.copy()
-        if "timeout" in client_norm and "timeout_sec" not in client_norm:
-            client_norm["timeout_sec"] = client_norm["timeout"]
-        if "timeout_sec" in client_norm and "timeout" not in client_norm:
-            client_norm["timeout"] = client_norm["timeout_sec"]
-
-        existing_client_norm = existing_client.copy()
-        if "timeout" in existing_client_norm and "timeout_sec" not in existing_client_norm:
-            existing_client_norm["timeout_sec"] = existing_client_norm["timeout"]
-        if "timeout_sec" in existing_client_norm and "timeout" not in existing_client_norm:
-            existing_client_norm["timeout"] = existing_client_norm["timeout_sec"]
-
-        provider_config["client"] = _deep_merge(existing_client_norm, client_norm)
+        _apply_client_to_provider_config(provider_config, client)
 
     batch = source_norm.pop("batch", None)
-    if isinstance(batch, dict):
-        if "batch_size" in batch:
-            provider_config.setdefault("batch_size", batch["batch_size"])
-        elif "size" in batch:
-            provider_config.setdefault("batch_size", batch["size"])
-        if "page_size" in batch:
-            provider_config.setdefault("page_size", batch["page_size"])
-        if "max_url_length" in batch:
-            provider_config.setdefault("max_url_length", batch["max_url_length"])
-    elif isinstance(batch, int):
-        provider_config.setdefault("batch_size", batch)
+    if batch is not None:
+        _apply_batch_to_provider_config(provider_config, batch)
 
     if provider_config:
         source_norm["provider_config"] = provider_config

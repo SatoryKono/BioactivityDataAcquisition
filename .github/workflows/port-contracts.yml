@@ -71,7 +71,7 @@ jobs:
             tests/architecture/test_port_contracts.py \
             tests/architecture/test_adapter_contracts.py \
             tests/architecture/test_registry_contracts.py \
-            -v --tb=short \
+            -v --tb=short -o addopts='' \
             --junit-xml=port-contracts-results.xml
 
       - name: Upload Test Results
@@ -119,7 +119,7 @@ jobs:
         run: |
           uv run pytest \
             tests/architecture/test_port_contracts_hypothesis.py \
-            -v --tb=short \
+            -v --tb=short -o addopts='' \
             --junit-xml=hypothesis-contracts-results.xml
         env:
           HYPOTHESIS_PROFILE: ci
