@@ -46,7 +46,7 @@ class PipelineConfig:
     table: TableConfig
 
     # Processing
-    silver_filters: SilverFilterConfig | GoldFilterConfig | None = None
+    silver_filters: SilverFilterConfig | None = None
     gold_filters: GoldFilterConfig | None = None
     batch_size: int = 100
     checkpoint_interval: int = 1000
