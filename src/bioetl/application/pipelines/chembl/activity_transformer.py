@@ -20,8 +20,9 @@ from bioetl.application.core.field_specs import (
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
+from bioetl.application.core.base_transformer import TransformationError
 from bioetl.domain.entities import Bioactivity
-from bioetl.domain.transformations import safe_float, safe_int
+from bioetl.domain.transformations import safe_float
 from bioetl.domain.value_objects import validate_taxonomy_id_str
 
 if TYPE_CHECKING:
@@ -50,7 +51,9 @@ _ACTION_TYPE_FIELDS: dict[str, Any] = {
 _IDENTIFIERS = FieldGroup(
     name="identifiers",
     fields=(
-        *simple_fields("target_id", "assay_id", "publication_id"),
+        FieldSpec("target_chembl_id", target="target_id"),
+        FieldSpec("assay_chembl_id", target="assay_id"),
+        FieldSpec("document_chembl_id", target="publication_id"),
         *int_fields("record_id", "src_id"),
     ),
 )
@@ -64,10 +67,8 @@ _MOLECULE_TARGET_ASSAY = FieldGroup(
             "target_pref_name",
             "target_organism",
         ),
-        FieldSpec(
-            "parent_molecule_chembl_id",
-            target="parent_molecule_id",
-        ),
+        FieldSpec("parent_molecule_chembl_id", target="parent_molecule_id"),
+        # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
         FieldSpec(
             "target_tax_id",
             target="taxonomy_id",
@@ -115,12 +116,13 @@ _UNIT_FIELDS = FieldGroup(
 _QUALITY_ANNOTATIONS = FieldGroup(
     name="quality_annotations",
     fields=(
+        FieldSpec("document_journal", target="journal"),
         *simple_fields(
             "activity_comment",
             "data_validity_comment",
             "data_validity_description",
-            "journal",
         ),
+        FieldSpec("document_year", target="publication_year"),
         *int_fields(
             "potential_duplicate",
             "toid",
@@ -150,9 +152,8 @@ class ActivityTransformer(BaseChemblTransformer):
     entity_class = Bioactivity
     primary_id_field = "activity_id"
 
-    def _extract_ligand_efficiency(
-        self, le_data: dict[str, Any] | None
-    ) -> dict[str, Any]:
+    @staticmethod
+    def _extract_ligand_efficiency(le_data: dict[str, Any] | None) -> dict[str, Any]:
         """Extract ligand efficiency metrics from nested dictionary.
 
         Args:
@@ -166,9 +167,8 @@ class ActivityTransformer(BaseChemblTransformer):
             le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS
         )
 
-    def _extract_action_type(
-        self, action_data: dict[str, Any] | None
-    ) -> dict[str, Any]:
+    @staticmethod
+    def _extract_action_type(action_data: dict[str, Any] | None) -> dict[str, Any]:
         """Extract action type fields from nested dictionary.
 
         Args:
@@ -200,13 +200,18 @@ class ActivityTransformer(BaseChemblTransformer):
             Dictionary of Activity business fields.
 
         """
+        # Support both unified and legacy identifier names
+        molecule_id = record.get("molecule_chembl_id") or record.get("molecule_id")
+        if not molecule_id:
+            raise TransformationError(
+                "Missing required field: molecule_chembl_id or molecule_id",
+                field="molecule_id",
+            )
+
         business_data = {
             # Primary and secondary identifiers (manual - need special handling)
             "activity_id": str(primary_id),
-            "molecule_id": str(
-                record.get("molecule_chembl_id")
-                or self._get_required_field(record, "molecule_id")
-            ),
+            "molecule_id": str(molecule_id),
             # Declarative field groups
             **map_field_groups(record, _ACTIVITY_GROUPS),
             # Nested dict extraction (not declarative)
@@ -222,36 +227,15 @@ class ActivityTransformer(BaseChemblTransformer):
             ),
         }
 
-        # Backward-compatible aliases from legacy ChEMBL field names.
+        # Support both unified and legacy FK source fields from input record
         business_data["target_id"] = business_data.get("target_id") or record.get(
-            "target_chembl_id"
+            "target_id"
         )
         business_data["assay_id"] = business_data.get("assay_id") or record.get(
-            "assay_chembl_id"
+            "assay_id"
         )
         business_data["publication_id"] = business_data.get(
             "publication_id"
-        ) or record.get("document_chembl_id")
-        business_data["publication_year"] = business_data.get(
-            "publication_year"
-        ) or safe_int(record.get("document_year"))
-        business_data["journal"] = business_data.get("journal") or record.get(
-            "document_journal"
-        )
-        business_data["publication_doi"] = (
-            record.get("publication_doi")
-            or record.get("doi")
-            or record.get("document_doi")
-        )
-        business_data["publication_pmid"] = (
-            record.get("publication_pmid")
-            or record.get("pmid")
-            or record.get("document_pubmed_id")
-        )
-        business_data["publication_pmc_id"] = (
-            record.get("publication_pmc_id")
-            or record.get("pmc_id")
-            or record.get("document_pubmed_central_id")
-        )
+        ) or record.get("publication_id")
 
         return business_data

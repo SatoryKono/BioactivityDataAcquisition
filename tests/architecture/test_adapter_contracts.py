@@ -70,16 +70,13 @@ class TestAdapterHealthCheck:
 
             # Check for health_check method definition OR inheritance from base adapters
             # BaseHttpAdapter and BaseSyncAdapter provide health_check()
-            # via HealthCheckProviderMixin (Template Method pattern)
-            has_health_check = (
-                "def health_check" in content
-                or "async def health_check" in content
-                or "(BaseHttpAdapter)" in content  # Inherits health_check from base
-                or "(BaseSyncAdapter)"
-                in content  # Inherits health_check from sync base
-                or "HealthCheckProviderMixin"
-                in content  # Uses health check mixin directly
-            )
+            # via HealthCheckProviderMixin (Template Method pattern).
+            # We use regex to handle multi-line inheritance lists.
+            has_method = "def health_check" in content or "async def health_check" in content
+            inherits_base = re.search(r"class\s+\w+\s*\([^)]*Base(Http|Sync)Adapter", content, re.MULTILINE | re.DOTALL)
+            has_mixin = "HealthCheckProviderMixin" in content
+
+            has_health_check = has_method or inherits_base or has_mixin
 
             if not has_health_check:
                 # Only flag if it looks like an adapter class

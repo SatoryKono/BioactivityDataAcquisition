@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, NewType, TypeAlias, TypedDict
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -39,12 +39,8 @@ in the domain layer. At runtime, this is a pyarrow.Schema object.
 """
 
 
-class BronzeRecord(TypedDict):
-    """Untyped dictionary representing a raw record from the source."""
-
-    # We use NotRequired for dynamic fields, but TypedDict doesn't allow mixing optional/required well in old python
-    # For now, we assume keys are strings and values Any
-    # This is a marker type for clarity in signatures
+BronzeRecord: TypeAlias = dict[str, Any]
+"""Untyped dictionary representing a raw record from the source."""
 
 
 class SilverRecord(TypedDict, total=False):
