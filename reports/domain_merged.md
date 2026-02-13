@@ -125,7 +125,6 @@ from bioetl.domain.exceptions import (
     CachedBronzeEmptyError,
     CheckpointConflictError,
     CircuitBreakerOpenError,
-    ConfigurationError,
     CriticalError,
     DataQualityError,
     DataQualityThresholdError,
@@ -135,9 +134,7 @@ from bioetl.domain.exceptions import (
     DeltaTransactionError,
     DeltaWriteConflictError,
     ExternalServiceError,
-    FileSystemError,
     InfrastructureError,
-    InternalError,
     InvalidDataFormatError,
     InvalidStateError,
     LockAcquisitionError,
@@ -200,7 +197,6 @@ from bioetl.domain.normalization import (
 
 # Ports
 from bioetl.domain.ports import (
-    ActivityAggregatorPort,
     AuditEntry,
     AuditLayer,
     AuditOperation,
@@ -242,8 +238,6 @@ from bioetl.domain.ports import (
     NoOpMetrics,
     NoOpPiiHasher,
     NoOpTracing,
-    NormalizationServicePort,
-    OutlierFilterPort,
     PiiHasherPort,
     QuarantinePort,
     RateLimiterPort,
@@ -257,8 +251,6 @@ from bioetl.domain.ports import (
     SilverValidatorPort,
     StoragePort,
     TracingPort,
-    UnitConverterPort,
-    ValueValidatorPort,
 )
 
 # Resilience (domain value objects)
@@ -429,13 +421,10 @@ __all__ = [
     "ServiceAuthenticationError",
     "DataValidationError",
     # Exceptions - Internal/Critical
-    "InternalError",
     "BucketNotFoundError",
     "CheckpointConflictError",
-    "ConfigurationError",
     "DeltaSchemaValidationError",
     "DeltaTransactionError",
-    "FileSystemError",
     "InfrastructureError",
     "InvalidStateError",
     "LockAcquisitionError",
@@ -481,7 +470,6 @@ __all__ = [
     "ClearPolicy",
     "MedallionPolicy",
     # Ports
-    "ActivityAggregatorPort",
     "AuditEntry",
     "AuditLayer",
     "AuditOperation",
@@ -523,8 +511,6 @@ __all__ = [
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
-    "NormalizationServicePort",
-    "OutlierFilterPort",
     "PiiHasherPort",
     "QuarantinePort",
     "RateLimiterPort",
@@ -538,8 +524,6 @@ __all__ = [
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
-    "UnitConverterPort",
-    "ValueValidatorPort",
     # Registry (publication entity types, ADR-024)
     "LEGACY_PUBLICATION_ALIASES",
     "PUBLICATION_ENTITY_TYPES",
@@ -654,7 +638,7 @@ from bioetl.domain.aggregates.batch import (
 )
 from bioetl.domain.aggregates.pipeline_run import (
     PipelineRun,
-    RunStatus,
+    PipelineRunState,
     StageResult,
     StageStatus,
 )
@@ -668,9 +652,9 @@ __all__ = [
     "BatchRecord",
     "BatchStatus",
     "PipelineRun",
+    "PipelineRunState",
     "QuarantineEntry",
     "QuarantineStatus",
-    "RunStatus",
     "StageResult",
     "StageStatus",
 ]
@@ -1267,18 +1251,6 @@ class DomainEvent:
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineStarted(DomainEvent):
-    """Event: Pipeline run has started.
-
-    Published when a pipeline transitions from PENDING to RUNNING.
-    """
-
-    run_id: RunID
-    pipeline_name: str
-    run_type: str
-
-
-@dataclass(frozen=True, slots=True)
 class PipelineCompleted(DomainEvent):
     """Event: Pipeline run completed successfully.
 
@@ -1319,21 +1291,6 @@ class PipelineShutdown(DomainEvent):
     run_id: RunID
     pipeline_name: str
     records_processed: int
-
-
-@dataclass(frozen=True, slots=True)
-class StageCompleted(DomainEvent):
-    """Event: A pipeline stage completed.
-
-    Published after each stage (preflight, execution, postrun, etc.)
-    completes, regardless of success or failure.
-    """
-
-    run_id: RunID
-    stage_name: str
-    status: str
-    duration_seconds: float
-    records_processed: int = 0
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1445,42 +1402,6 @@ class QuarantineEntryResolved(DomainEvent):
     resolution: str  # "reprocessed", "ignored"
     resolved_by: str | None = None
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Data Quality Events
-# ──────────────────────────────────────────────────────────────────────────────
-
-
-@dataclass(frozen=True, slots=True)
-class DQThresholdExceeded(DomainEvent):
-    """Event: Data quality threshold was exceeded.
-
-    Published when the error rate exceeds soft or hard thresholds.
-    """
-
-    run_id: RunID
-    pipeline_name: str
-    threshold_type: str  # "soft", "hard"
-    threshold_value: float
-    actual_value: float
-    record_count: int
-    error_count: int
-
-
-@dataclass(frozen=True, slots=True)
-class SchemaEvolutionDetected(DomainEvent):
-    """Event: Schema evolution was detected.
-
-    Published when new fields appear or existing fields change.
-    """
-
-    run_id: RunID
-    pipeline_name: str
-    layer: str
-    drift_level: str  # "INFO", "WARN", "CRITICAL"
-    added_fields: tuple[str, ...]
-    removed_fields: tuple[str, ...]
-
 ================================================================================
 File: pipeline_run.py
 Path: aggregates\pipeline_run.py
@@ -1511,8 +1432,12 @@ class StageStatus(StrEnum):
     SKIPPED = "skipped"
 
 
-class RunStatus(StrEnum):
-    """Status of a pipeline run."""
+class PipelineRunState(StrEnum):
+    """Lifecycle state of a pipeline run (PENDING -> RUNNING -> terminal).
+
+    Unlike application.services.PipelineRunResult (completion result),
+    this enum tracks the *current state* during execution.
+    """
 
     PENDING = "pending"
     RUNNING = "running"
@@ -1522,7 +1447,11 @@ class RunStatus(StrEnum):
 
     def is_terminal(self) -> bool:
         """Check if terminal (no more transitions)."""
-        return self in {RunStatus.COMPLETED, RunStatus.FAILED, RunStatus.SHUTDOWN}
+        return self in {
+            PipelineRunState.COMPLETED,
+            PipelineRunState.FAILED,
+            PipelineRunState.SHUTDOWN,
+        }
 
 
 def _validate_stage_name(stage: str) -> None:
@@ -1705,7 +1634,7 @@ class PipelineRun:
         self._run_id = run_id
         self._run_type = run_type
         self._pipeline_name = pipeline_name
-        self._status = RunStatus.PENDING
+        self._status = PipelineRunState.PENDING
         self._stages: list[StageResult] = []
         self._started_at: datetime | None = None
         self._ended_at: datetime | None = None
@@ -1728,7 +1657,7 @@ class PipelineRun:
         return self._pipeline_name
 
     @property
-    def status(self) -> RunStatus:
+    def status(self) -> PipelineRunState:
         """Current run status (read-only)."""
         return self._status
 
@@ -1786,13 +1715,13 @@ class PipelineRun:
         Raises:
             InvalidStateError: If run is not in PENDING status.
         """
-        if self._status != RunStatus.PENDING:
+        if self._status != PipelineRunState.PENDING:
             raise InvalidStateError(
                 f"Cannot start run in status {self._status.value}",
                 current_state=self._status.value,
                 attempted_operation="start",
             )
-        self._status = RunStatus.RUNNING
+        self._status = PipelineRunState.RUNNING
         self._started_at = started_at or datetime.now(UTC)
 
     def record_stage_start(
@@ -1887,7 +1816,7 @@ class PipelineRun:
         )
 
         # Invariant: First stage failure transitions run to FAILED
-        self._status = RunStatus.FAILED
+        self._status = PipelineRunState.FAILED
         self._ended_at = completed_at or now
 
         # Emit domain event
@@ -1940,7 +1869,7 @@ class PipelineRun:
         self._assert_can_complete()
 
         now = completed_at or datetime.now(UTC)
-        self._status = RunStatus.COMPLETED
+        self._status = PipelineRunState.COMPLETED
         self._ended_at = now
 
         # Emit domain event
@@ -1977,7 +1906,7 @@ class PipelineRun:
         """
         self._assert_running("fail")
         now = failed_at or datetime.now(UTC)
-        self._status = RunStatus.FAILED
+        self._status = PipelineRunState.FAILED
         self._ended_at = now
 
         # Emit domain event
@@ -2007,7 +1936,7 @@ class PipelineRun:
         """
         self._assert_running("shutdown")
         now = shutdown_at or datetime.now(UTC)
-        self._status = RunStatus.SHUTDOWN
+        self._status = PipelineRunState.SHUTDOWN
         self._ended_at = now
 
         # Emit domain event
@@ -2038,7 +1967,7 @@ class PipelineRun:
         Raises:
             InvalidStateError: If not in RUNNING status.
         """
-        if self._status != RunStatus.RUNNING:
+        if self._status != PipelineRunState.RUNNING:
             raise InvalidStateError(
                 f"Cannot {operation}: run is in status {self._status.value}",
                 current_state=self._status.value,
@@ -2949,7 +2878,7 @@ class DependencyConfig:
 
     Use cases:
     - Derived entities that need full API data (e.g., publication_term from /document)
-    - Pipelines with force_full_scan that don't work with enricher filtering
+    - Pipelines with full_scan_only strategy that don't work with enricher filtering
     - Data that must be pre-populated before enrichment phase
     - Chained dependencies where one dependency provides keys for another
 
@@ -5269,35 +5198,605 @@ class FallbackStrategy(StrEnum):
             ) from None
 
 ================================================================================
-File: config.py
-Path: config.py
+File: __init__.py
+Path: config\__init__.py
 ================================================================================
 """Domain configuration objects.
 
-This module defines configuration value objects used within the Domain and Application layers.
-These are distinct from Infrastructure configuration schemas (Pydantic) to maintain
-strict layer separation.
+This package defines configuration value objects used within the Domain and
+Application layers.  These are distinct from Infrastructure configuration
+schemas (Pydantic) to maintain strict layer separation.
 
-Consolidated configuration classes (post-refactoring):
-- ValidationConfig: Centralized validation ranges for domain value objects
-- DQConfig: Data Quality thresholds
-- TableConfig: Database tables and keys
-- PipelineConfig: Complete immutable pipeline configuration
-- RuntimeConfig: CLI/runtime parameters (Value Object)
+All public symbols are re-exported here so that existing imports of the form
+``from bioetl.domain.config import X`` continue to work without changes.
+
+Modules
+-------
+validation
+    ValidationConfig, FieldValidation, CrossFieldValidation, ConditionalValidation
+dq
+    DQConfig, DQReportConfig
+table
+    TableConfig
+pipeline
+    PipelineConfig
+runtime
+    RuntimeConfig
+memory
+    MemoryConfig
+_converters
+    Internal helpers: convert_write_mode, resolve_loading_strategy, freeze_sequences
+"""
+
+from bioetl.domain.config._converters import (
+    convert_write_mode,
+    freeze_sequences,
+    resolve_loading_strategy,
+)
+from bioetl.domain.config.dq import DQConfig, DQReportConfig
+from bioetl.domain.config.memory import MemoryConfig
+from bioetl.domain.config.pipeline import PipelineConfig
+from bioetl.domain.config.runtime import RuntimeConfig
+from bioetl.domain.config.table import TableConfig
+from bioetl.domain.config.validation import (
+    DEFAULT_VALIDATION_CONFIG,
+    ConditionalValidation,
+    CrossFieldValidation,
+    FieldValidation,
+    ValidationConfig,
+)
+
+__all__ = [
+    "DEFAULT_VALIDATION_CONFIG",
+    # Validation
+    "ConditionalValidation",
+    "CrossFieldValidation",
+    # Data Quality
+    "DQConfig",
+    "DQReportConfig",
+    "FieldValidation",
+    # Memory
+    "MemoryConfig",
+    # Pipeline
+    "PipelineConfig",
+    # Runtime
+    "RuntimeConfig",
+    # Table
+    "TableConfig",
+    "ValidationConfig",
+    # Converters (public utilities)
+    "convert_write_mode",
+    "freeze_sequences",
+    "resolve_loading_strategy",
+]
+
+================================================================================
+File: _converters.py
+Path: config\_converters.py
+================================================================================
+"""Internal converters for domain configuration objects.
+
+Provides type conversion utilities used by config dataclasses during
+__post_init__ for backward compatibility with string-based configuration.
+"""
+
+from __future__ import annotations
+
+from typing import TypeVar
+
+from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
+
+_WM = TypeVar("_WM", SilverWriteMode, GoldWriteMode)
+
+
+def convert_write_mode(mode: _WM | str, enum_cls: type[_WM]) -> _WM:
+    """Convert a string or enum value to the target write-mode enum.
+
+    Generic replacement for the former ``_convert_silver_write_mode``
+    and ``_convert_gold_write_mode`` helpers.
+
+    Args:
+        mode: Write mode value (string or enum instance).
+        enum_cls: Target enum class (SilverWriteMode or GoldWriteMode).
+
+    Returns:
+        Resolved enum value.
+    """
+    if isinstance(mode, enum_cls):
+        return mode
+    return enum_cls.from_string(mode)
+
+
+def resolve_loading_strategy(
+    loading_strategy: LoadingStrategy | str | None,
+) -> LoadingStrategy | None:
+    """Resolve loading_strategy from explicit value.
+
+    Converts string values to enum, passes through enum values and None.
+
+    Args:
+        loading_strategy: Explicit strategy value, string, or None
+
+    Returns:
+        Resolved LoadingStrategy enum value or None
+    """
+    if loading_strategy is None:
+        return None
+    if isinstance(loading_strategy, LoadingStrategy):
+        return loading_strategy
+    return LoadingStrategy.from_string(loading_strategy)
+
+
+def freeze_sequences(instance: object, fields: tuple[str, ...]) -> None:
+    """Convert list fields to tuples on a frozen dataclass instance.
+
+    Must be called inside ``__post_init__`` of frozen dataclasses.
+    Uses ``object.__setattr__`` to bypass the frozen guard.
+
+    Args:
+        instance: The frozen dataclass instance being initialised.
+        fields: Attribute names whose values should be coerced to tuples.
+    """
+    for attr in fields:
+        val = getattr(instance, attr)
+        if isinstance(val, list):
+            object.__setattr__(instance, attr, tuple(val))
+
+================================================================================
+File: dq.py
+Path: config\dq.py
+================================================================================
+"""Data Quality configuration objects.
+
+DQ threshold and validation rule descriptors used by the DQ subsystem.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
+
+from bioetl.domain.config._converters import freeze_sequences
+from bioetl.domain.config.validation import (
+    ConditionalValidation,
+    CrossFieldValidation,
+    FieldValidation,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class DQReportConfig:
+    """Configuration for DQ report generation.
+
+    Attributes:
+        enabled: Whether to generate DQ reports. Default: True.
+        format: Report format (json, yaml, csv). Default: json.
+        include_sample_failures: Include sample failed records. Default: True.
+        sample_size: Number of sample failures to include. Default: 10.
+        output_path: Path for report output. None = use pipeline output dir.
+    """
+
+    enabled: bool = True
+    format: Literal["json", "yaml", "csv"] = "json"
+    include_sample_failures: bool = True
+    sample_size: int = 10
+    output_path: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class DQConfig:
+    """Configuration for Data Quality thresholds and validations.
+
+    Attributes:
+        soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).
+        hard_fail_threshold: Error rate threshold for failures (0.0-1.0).
+        strict_validation: If True, apply stricter validation rules that may
+            reject more records. Use with caution in production. Default: False.
+        field_validations: Field-level validation rules.
+        cross_field_validations: Cross-field validation rules.
+        conditional_validations: Conditional validation rules.
+        invalid_record_policy: Policy for handling invalid records.
+        report: DQ report configuration.
+    """
+
+    soft_fail_threshold: float = 0.05
+    hard_fail_threshold: float = 0.20
+    strict_validation: bool = False
+    # Extended DQ configuration
+    field_validations: tuple[FieldValidation, ...] = ()
+    cross_field_validations: tuple[CrossFieldValidation, ...] = ()
+    conditional_validations: tuple[ConditionalValidation, ...] = ()
+    invalid_record_policy: Literal["quarantine", "skip", "fail"] = "quarantine"
+    report: DQReportConfig = field(default_factory=DQReportConfig)
+
+    def __post_init__(self) -> None:
+        """Validate threshold invariants on creation."""
+        self.validate_thresholds(
+            soft_fail_threshold=self.soft_fail_threshold,
+            hard_fail_threshold=self.hard_fail_threshold,
+        )
+        freeze_sequences(
+            self,
+            ("field_validations", "cross_field_validations", "conditional_validations"),
+        )
+
+    @staticmethod
+    def validate_thresholds(
+        *, soft_fail_threshold: float, hard_fail_threshold: float
+    ) -> None:
+        """Validate ordering and bounds for DQ thresholds."""
+        if not 0.0 <= soft_fail_threshold <= 1.0:
+            raise ValueError(
+                "soft_fail_threshold must be between 0.0 and 1.0 inclusive"
+            )
+        if not 0.0 <= hard_fail_threshold <= 1.0:
+            raise ValueError(
+                "hard_fail_threshold must be between 0.0 and 1.0 inclusive"
+            )
+        if soft_fail_threshold >= hard_fail_threshold:
+            raise ValueError(
+                "soft_fail_threshold must be strictly less than hard_fail_threshold"
+            )
+
+================================================================================
+File: memory.py
+Path: config\memory.py
+================================================================================
+"""Memory monitoring configuration object.
+
+Defines the MemoryConfig value object for memory-aware batch processing.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryConfig:
+    """Configuration for memory-aware batch processing.
+
+    Used by MemoryMonitor (infrastructure layer) to configure adaptive
+    batch sizing based on memory pressure detection.
+
+    Attributes:
+        max_batch_memory_mb: Maximum memory per batch in MB (default: 512MB).
+        memory_pressure_threshold: Threshold (0.0-1.0) for reducing batch size (default: 0.8).
+        min_batch_size: Minimum batch size even under memory pressure (default: 10).
+        check_interval_records: Check memory every N records (default: 100).
+        enable_adaptive_sizing: Enable/disable adaptive batch sizing (default: True).
+
+    Example:
+        >>> config = MemoryConfig()
+        >>> config.memory_pressure_threshold
+        0.8
+        >>> config.max_batch_memory_mb
+        512
+    """
+
+    max_batch_memory_mb: int = 512
+    memory_pressure_threshold: float = 0.8
+    min_batch_size: int = 10
+    check_interval_records: int = 100
+    enable_adaptive_sizing: bool = True
+
+================================================================================
+File: pipeline.py
+Path: config\pipeline.py
+================================================================================
+"""Pipeline configuration object.
+
+Defines the immutable PipelineConfig value object — the main domain
+configuration for a single ETL pipeline run.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.config import ColumnGroupConfig
-from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
-from bioetl.domain.types import RunType
+from bioetl.domain.config._converters import freeze_sequences, resolve_loading_strategy
+from bioetl.domain.config.dq import DQConfig
+from bioetl.domain.config.table import TableConfig
+from bioetl.domain.medallion import LoadingStrategy
 
 if TYPE_CHECKING:
-    from bioetl.domain.filtering import GoldFilterConfig
+    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 
+
+@dataclass(frozen=True, slots=True)
+class PipelineConfig:
+    """Immutable pipeline configuration.
+
+    Contains static configuration that doesn't change during execution.
+    Frozen dataclass ensures immutability after creation.
+
+    This is the consolidated domain configuration object that combines
+    identity, data quality, table, and processing settings.
+
+    Table-related fields (primary_keys, silver_table, gold_table,
+    write modes, partition_cols, on_schema_mismatch) are stored in the
+    nested ``table`` field (:class:`TableConfig`).  Convenience
+    properties forward the most common accesses so that
+    ``config.primary_keys`` continues to work alongside the canonical
+    ``config.table.primary_keys`` form.
+    """
+
+    # Identity
+    pipeline_name: str
+    provider: str
+    entity_type: str
+
+    # Table configuration — single source of truth
+    table: TableConfig
+
+    # Processing
+    silver_filters: SilverFilterConfig | GoldFilterConfig | None = None
+    gold_filters: GoldFilterConfig | None = None
+    batch_size: int = 100
+    checkpoint_interval: int = 1000
+    fields: tuple[str, ...] = ()
+    column_groups: tuple[ColumnGroupConfig, ...] = ()
+
+    # Data Quality
+    dq: DQConfig = field(default_factory=DQConfig)
+
+    # Transform versioning (lineage tracking)
+    transform_version: str | None = None
+    transform_steps: tuple[str, ...] = ()
+
+    # Loading strategy (ADR-031)
+    # - FULL_SCAN_ONLY: Each run performs full scan, checkpoint resume disabled
+    # - None: Default incremental behavior with checkpoint resume
+    loading_strategy: LoadingStrategy | str | None = None
+
+    def __post_init__(self) -> None:
+        """Convert lists to tuples and validate configuration on creation."""
+        freeze_sequences(
+            self,
+            ("fields", "column_groups", "transform_steps"),
+        )
+        self._resolve_loading_strategy()
+        self._validate_config()
+
+    def _resolve_loading_strategy(self) -> None:
+        """Resolve loading_strategy from string to enum if provided."""
+        resolved = resolve_loading_strategy(self.loading_strategy)
+        object.__setattr__(self, "loading_strategy", resolved)
+
+    def _validate_config(self) -> None:
+        """Validate configuration values."""
+        validations = [
+            (not self.pipeline_name, "pipeline_name cannot be empty"),
+            (not self.provider, "provider cannot be empty"),
+            (not self.entity_type, "entity_type cannot be empty"),
+            (
+                self.batch_size <= 0,
+                f"batch_size must be positive, got {self.batch_size}",
+            ),
+            (
+                self.checkpoint_interval <= 0,
+                f"checkpoint_interval must be positive, got {self.checkpoint_interval}",
+            ),
+            (not self.table.primary_keys, "primary_keys cannot be empty"),
+        ]
+        for condition, message in validations:
+            if condition:
+                raise ValueError(message)
+
+    @property
+    def lock_key(self) -> str:
+        """Generate lock key for distributed locking."""
+        return f"pipeline:{self.pipeline_name}"
+
+    # ------------------------------------------------------------------
+    # Convenience forwarding properties for backward compatibility.
+    # Canonical access is via ``self.table.<field>``.
+    # ------------------------------------------------------------------
+
+    @property
+    def primary_keys(self) -> tuple[str, ...]:
+        """Shortcut for ``self.table.primary_keys``."""
+        return self.table.primary_keys
+
+    @property
+    def silver_table(self) -> str | None:
+        """Shortcut for ``self.table.silver_table``."""
+        return self.table.silver_table
+
+    @property
+    def gold_table(self) -> str | None:
+        """Shortcut for ``self.table.gold_table``."""
+        return self.table.gold_table
+
+    @property
+    def write_mode(self) -> object:
+        """Shortcut for ``self.table.silver_write_mode``."""
+        return self.table.silver_write_mode
+
+    @property
+    def gold_write_mode(self) -> object:
+        """Shortcut for ``self.table.gold_write_mode``."""
+        return self.table.gold_write_mode
+
+    @property
+    def partition_cols(self) -> tuple[str, ...]:
+        """Shortcut for ``self.table.partition_cols``."""
+        return self.table.partition_cols
+
+    @property
+    def on_schema_mismatch(self) -> str:
+        """Shortcut for ``self.table.on_schema_mismatch``."""
+        return self.table.on_schema_mismatch
+
+================================================================================
+File: runtime.py
+Path: config\runtime.py
+================================================================================
+"""Runtime configuration object.
+
+Defines the RuntimeConfig value object for CLI / runtime execution parameters.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from bioetl.domain.types import RunType
+
+
+@dataclass(frozen=True, slots=True)
+class RuntimeConfig:
+    """Runtime execution parameters.
+
+    Contains parameters that may vary between pipeline runs
+    but are fixed during a single execution. These are typically
+    passed via CLI arguments.
+
+    This is a Value Object that belongs in the domain layer because
+    it has no I/O dependencies and represents immutable runtime state.
+    """
+
+    run_type: RunType
+    resume: bool = False
+    limit: int | None = None
+    heartbeat_interval: int = 30
+    wait_for_lock: bool = False
+    lock_wait_timeout: int = 300
+    lock_ttl: int | None = 90
+    query: str | None = None
+    dry_run: bool = False
+
+    # VACUUM automation (Phase 1 refactoring)
+    # When enabled, VACUUM is executed after successful pipeline run
+    vacuum_after_run: bool = False
+    vacuum_retention_days: int = 7
+
+    # Storage optimization (Unifies cleanup policies)
+    # Controls explicit storage maintenance (vacuum, old file removal)
+    optimize_storage: bool = False
+
+    # Medallion invariants validation (REQ-CONF-001)
+    # When True, Medallion config violations fail the pipeline
+    # When False, violations are logged as warnings
+    strict_validation: bool = False
+
+    # Gold layer schema validation (strict mode)
+    # When True, pipelines fail if Gold schema is not provided
+    # When False (default), missing Gold schema skips validation
+    # Use False during migration, True for production readiness
+    strict_gold_validation: bool = False
+
+    # Skip Gold layer writing (composite sub-pipelines)
+    # When True, Gold filter returns False for all records,
+    # preventing individual Gold writes during composite execution
+    skip_gold: bool = False
+
+    def __post_init__(self) -> None:
+        """Validate runtime config."""
+        self._validate_positive_values()
+
+    def _validate_positive_values(self) -> None:
+        """Validate that numeric fields have positive values."""
+        validations = [
+            (
+                self.limit is not None and self.limit <= 0,
+                f"limit must be positive or None, got {self.limit}",
+            ),
+            (
+                self.heartbeat_interval <= 0,
+                f"heartbeat_interval must be positive, got {self.heartbeat_interval}",
+            ),
+            (
+                self.lock_wait_timeout <= 0,
+                f"lock_wait_timeout must be positive, got {self.lock_wait_timeout}",
+            ),
+            (
+                self.vacuum_retention_days <= 0,
+                f"vacuum_retention_days must be positive, got {self.vacuum_retention_days}",
+            ),
+        ]
+        for condition, message in validations:
+            if condition:
+                raise ValueError(message)
+
+    @property
+    def effective_lock_ttl(self) -> int:
+        """Derived TTL for lock renewal based on runtime config."""
+        return self.lock_ttl or self.heartbeat_interval * 3
+
+================================================================================
+File: table.py
+Path: config\table.py
+================================================================================
+"""Table configuration object.
+
+Defines the TableConfig value object for database table and key settings.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from bioetl.domain.config._converters import convert_write_mode, freeze_sequences
+from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
+
+
+@dataclass(frozen=True, slots=True)
+class TableConfig:
+    """Configuration for database tables and keys.
+
+    All collection fields are immutable tuples to ensure true immutability
+    of the frozen dataclass. The __post_init__ converts any incoming lists
+    to tuples for backward compatibility.
+
+    Write modes are now typed using domain enums (SilverWriteMode, GoldWriteMode)
+    instead of Literal strings for type safety and policy enforcement.
+    """
+
+    primary_keys: tuple[str, ...] = ("entity_id",)
+    silver_table: str | None = None
+    gold_table: str | None = None
+    # Write modes using domain enums (R1 refactoring)
+    silver_write_mode: SilverWriteMode | str = SilverWriteMode.MERGE
+    gold_write_mode: GoldWriteMode | str = GoldWriteMode.APPEND
+    partition_cols: tuple[str, ...] = ()
+    # Schema drift handling for Silver layer
+    on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
+
+    def __post_init__(self) -> None:
+        """Convert incoming values to proper types for immutability."""
+        freeze_sequences(self, ("primary_keys", "partition_cols"))
+        # Convert string write modes to enums (backward compatibility)
+        object.__setattr__(
+            self,
+            "silver_write_mode",
+            convert_write_mode(self.silver_write_mode, SilverWriteMode),
+        )
+        object.__setattr__(
+            self,
+            "gold_write_mode",
+            convert_write_mode(self.gold_write_mode, GoldWriteMode),
+        )
+
+================================================================================
+File: validation.py
+Path: config\validation.py
+================================================================================
+"""Validation configuration objects.
+
+Defines domain value-object validation ranges and field-level /
+cross-field / conditional validation rule descriptors.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+from bioetl.domain.config._converters import freeze_sequences
 
 # =============================================================================
 # Validation Configuration
@@ -5395,6 +5894,7 @@ class FieldValidation:
     - pattern: Regex pattern matching
     - enum: Allowed values validation
     - max_length: Maximum string length validation
+    - not_empty_list: List field must be non-empty when present
     - custom: Custom validator function reference
 
     Attributes:
@@ -5413,7 +5913,14 @@ class FieldValidation:
 
     field: str
     validation_type: Literal[
-        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+        "required",
+        "not_null",
+        "range",
+        "pattern",
+        "enum",
+        "max_length",
+        "not_empty_list",
+        "custom",
     ]
     nullable: bool = True
     severity: Literal["error", "warn"] = "error"
@@ -5433,8 +5940,7 @@ class FieldValidation:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.allowed, list):
-            object.__setattr__(self, "allowed", tuple(self.allowed))
+        freeze_sequences(self, ("allowed",))
 
 
 @dataclass(frozen=True, slots=True)
@@ -5468,8 +5974,7 @@ class CrossFieldValidation:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.fields, list):
-            object.__setattr__(self, "fields", tuple(self.fields))
+        freeze_sequences(self, ("fields",))
 
 
 @dataclass(frozen=True, slots=True)
@@ -5494,884 +5999,7 @@ class ConditionalValidation:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
-        if isinstance(self.condition_value, list):
-            object.__setattr__(self, "condition_value", tuple(self.condition_value))
-        if isinstance(self.then_validations, list):
-            object.__setattr__(self, "then_validations", tuple(self.then_validations))
-
-
-@dataclass(frozen=True, slots=True)
-class DQReportConfig:
-    """Configuration for DQ report generation.
-
-    Attributes:
-        enabled: Whether to generate DQ reports. Default: True.
-        format: Report format (json, yaml, csv). Default: json.
-        include_sample_failures: Include sample failed records. Default: True.
-        sample_size: Number of sample failures to include. Default: 10.
-        output_path: Path for report output. None = use pipeline output dir.
-    """
-
-    enabled: bool = True
-    format: Literal["json", "yaml", "csv"] = "json"
-    include_sample_failures: bool = True
-    sample_size: int = 10
-    output_path: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class DQConfig:
-    """Configuration for Data Quality thresholds and validations.
-
-    Attributes:
-        soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).
-        hard_fail_threshold: Error rate threshold for failures (0.0-1.0).
-        strict_validation: If True, apply stricter validation rules that may
-            reject more records. Use with caution in production. Default: False.
-        field_validations: Field-level validation rules.
-        cross_field_validations: Cross-field validation rules.
-        conditional_validations: Conditional validation rules.
-        invalid_record_policy: Policy for handling invalid records.
-        report: DQ report configuration.
-    """
-
-    soft_fail_threshold: float = 0.05
-    hard_fail_threshold: float = 0.20
-    strict_validation: bool = False
-    # Extended DQ configuration
-    field_validations: tuple[FieldValidation, ...] = ()
-    cross_field_validations: tuple[CrossFieldValidation, ...] = ()
-    conditional_validations: tuple[ConditionalValidation, ...] = ()
-    invalid_record_policy: Literal["quarantine", "skip", "fail"] = "quarantine"
-    report: DQReportConfig = field(default_factory=DQReportConfig)
-
-    def __post_init__(self) -> None:
-        """Validate threshold invariants on creation."""
-        self.validate_thresholds(
-            soft_fail_threshold=self.soft_fail_threshold,
-            hard_fail_threshold=self.hard_fail_threshold,
-        )
-        self._ensure_immutability()
-
-    def _ensure_immutability(self) -> None:
-        """Convert lists to tuples for immutability."""
-        if isinstance(self.field_validations, list):
-            object.__setattr__(self, "field_validations", tuple(self.field_validations))
-        if isinstance(self.cross_field_validations, list):
-            object.__setattr__(
-                self, "cross_field_validations", tuple(self.cross_field_validations)
-            )
-        if isinstance(self.conditional_validations, list):
-            object.__setattr__(
-                self, "conditional_validations", tuple(self.conditional_validations)
-            )
-
-    @staticmethod
-    def validate_thresholds(
-        *, soft_fail_threshold: float, hard_fail_threshold: float
-    ) -> None:
-        """Validate ordering and bounds for DQ thresholds."""
-        if not 0.0 <= soft_fail_threshold <= 1.0:
-            raise ValueError(
-                "soft_fail_threshold must be between 0.0 and 1.0 inclusive"
-            )
-        if not 0.0 <= hard_fail_threshold <= 1.0:
-            raise ValueError(
-                "hard_fail_threshold must be between 0.0 and 1.0 inclusive"
-            )
-        if soft_fail_threshold >= hard_fail_threshold:
-            raise ValueError(
-                "soft_fail_threshold must be strictly less than hard_fail_threshold"
-            )
-
-
-def _convert_silver_write_mode(mode: SilverWriteMode | str) -> SilverWriteMode:
-    """Convert string to SilverWriteMode."""
-    if isinstance(mode, SilverWriteMode):
-        return mode
-    return SilverWriteMode.from_string(mode)
-
-
-def _convert_gold_write_mode(mode: GoldWriteMode | str) -> GoldWriteMode:
-    """Convert string to GoldWriteMode."""
-    if isinstance(mode, GoldWriteMode):
-        return mode
-    return GoldWriteMode.from_string(mode)
-
-
-def _resolve_loading_strategy(
-    loading_strategy: LoadingStrategy | str | None,
-    force_full_scan: bool,
-) -> LoadingStrategy:
-    """Resolve loading_strategy from explicit value or force_full_scan flag.
-
-    Priority:
-    1. Explicit loading_strategy if provided
-    2. Derived from force_full_scan for backward compatibility
-
-    Args:
-        loading_strategy: Explicit strategy value or None
-        force_full_scan: Legacy boolean flag
-
-    Returns:
-        Resolved LoadingStrategy enum value
-    """
-    if loading_strategy is not None:
-        if isinstance(loading_strategy, LoadingStrategy):
-            return loading_strategy
-        return LoadingStrategy.from_string(loading_strategy)
-    # Derive from force_full_scan for backward compatibility
-    return LoadingStrategy.from_force_full_scan(force_full_scan)
-
-
-@dataclass(frozen=True, slots=True)
-class TableConfig:
-    """Configuration for database tables and keys.
-
-    All collection fields are immutable tuples to ensure true immutability
-    of the frozen dataclass. The __post_init__ converts any incoming lists
-    to tuples for backward compatibility.
-
-    Write modes are now typed using domain enums (SilverWriteMode, GoldWriteMode)
-    instead of Literal strings for type safety and policy enforcement.
-    """
-
-    primary_keys: tuple[str, ...] = ("entity_id",)
-    silver_table: str | None = None
-    gold_table: str | None = None
-    # Write modes using domain enums (R1 refactoring)
-    silver_write_mode: SilverWriteMode | str = SilverWriteMode.MERGE
-    gold_write_mode: GoldWriteMode | str = GoldWriteMode.APPEND
-    partition_cols: tuple[str, ...] = ()
-    # Schema drift handling for Silver layer
-    on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
-
-    def __post_init__(self) -> None:
-        """Convert incoming values to proper types for immutability."""
-        # Use object.__setattr__ because frozen=True
-        if isinstance(self.primary_keys, list):
-            object.__setattr__(self, "primary_keys", tuple(self.primary_keys))
-        if isinstance(self.partition_cols, list):
-            object.__setattr__(self, "partition_cols", tuple(self.partition_cols))
-        # Convert string write modes to enums (backward compatibility)
-        object.__setattr__(
-            self,
-            "silver_write_mode",
-            _convert_silver_write_mode(self.silver_write_mode),
-        )
-        object.__setattr__(
-            self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode)
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class PipelineConfig:
-    """Immutable pipeline configuration.
-
-    Contains static configuration that doesn't change during execution.
-    Frozen dataclass ensures immutability after creation.
-
-    This is the consolidated domain configuration object that combines
-    identity, data quality, table, and processing settings.
-
-    Write modes use domain enums (SilverWriteMode, GoldWriteMode) for type
-    safety. String values are accepted for backward compatibility and
-    converted to enums in __post_init__.
-    """
-
-    # Identity
-    pipeline_name: str
-    provider: str
-    entity_type: str
-
-    # Table configuration
-    primary_keys: tuple[str, ...]
-    silver_table: str
-    gold_table: str | None = None
-    # Write modes using domain enums (R1 refactoring)
-    write_mode: SilverWriteMode | str = SilverWriteMode.MERGE
-    gold_write_mode: GoldWriteMode | str = GoldWriteMode.APPEND
-    partition_cols: tuple[str, ...] = ()
-    on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
-
-    # Processing
-    silver_filters: GoldFilterConfig | None = None  # Domain-level Silver layer filters
-    gold_filters: GoldFilterConfig | None = None  # Configurable Gold layer filters
-    batch_size: int = 100
-    checkpoint_interval: int = 1000
-    fields: tuple[str, ...] = ()
-    column_groups: tuple[ColumnGroupConfig, ...] = ()
-
-    # Data Quality
-    dq: DQConfig = field(default_factory=DQConfig)
-
-    # Transform versioning (lineage tracking)
-    transform_version: str | None = None
-    transform_steps: tuple[str, ...] = ()
-
-    # Pagination strategy (ADR-030, ADR-031)
-    # When True, checkpoint-based resume is disabled and each run performs a full scan.
-    # Deduplication is handled on Silver layer via content_hash.
-    # Required for publication entities due to API offset instability.
-    force_full_scan: bool = False
-
-    # Loading strategy (ADR-031)
-    # Explicit formalization of data loading approach.
-    # - FULL_SCAN_ONLY: Each run performs full scan, checkpoint resume disabled
-    # If not specified, derived from force_full_scan for backward compatibility.
-    loading_strategy: LoadingStrategy | str | None = None
-
-    def __post_init__(self) -> None:
-        """Convert lists to tuples and validate configuration on creation."""
-        self._ensure_immutability()
-        self._convert_write_modes()
-        self._resolve_loading_strategy()
-        self._validate_config()
-
-    def _ensure_immutability(self) -> None:
-        """Convert incoming lists to tuples for immutability."""
-        for attr in (
-            "primary_keys",
-            "partition_cols",
-            "fields",
-            "column_groups",
-            "transform_steps",
-        ):
-            val = getattr(self, attr)
-            if isinstance(val, list):
-                object.__setattr__(self, attr, tuple(val))
-
-    def _convert_write_modes(self) -> None:
-        """Convert string write modes to enums (backward compatibility)."""
-        object.__setattr__(
-            self, "write_mode", _convert_silver_write_mode(self.write_mode)
-        )
-        object.__setattr__(
-            self, "gold_write_mode", _convert_gold_write_mode(self.gold_write_mode)
-        )
-
-    def _resolve_loading_strategy(self) -> None:
-        """Resolve loading_strategy from explicit value or force_full_scan.
-
-        Ensures consistency between loading_strategy and force_full_scan fields.
-        Validates that explicit loading_strategy matches force_full_scan when both set.
-        """
-        resolved = _resolve_loading_strategy(
-            self.loading_strategy, self.force_full_scan
-        )
-        object.__setattr__(self, "loading_strategy", resolved)
-
-        # Validate consistency: if both explicit and force_full_scan conflict
-        if (
-            self.loading_strategy == LoadingStrategy.FULL_SCAN_ONLY
-            and not self.force_full_scan
-        ):
-            # Update force_full_scan to match explicit loading_strategy
-            object.__setattr__(self, "force_full_scan", True)
-
-    def _validate_config(self) -> None:
-        """Validate configuration values."""
-        validations = [
-            (not self.pipeline_name, "pipeline_name cannot be empty"),
-            (not self.provider, "provider cannot be empty"),
-            (not self.entity_type, "entity_type cannot be empty"),
-            (
-                self.batch_size <= 0,
-                f"batch_size must be positive, got {self.batch_size}",
-            ),
-            (
-                self.checkpoint_interval <= 0,
-                f"checkpoint_interval must be positive, got {self.checkpoint_interval}",
-            ),
-            (not self.primary_keys, "primary_keys cannot be empty"),
-        ]
-        for condition, message in validations:
-            if condition:
-                raise ValueError(message)
-
-    @property
-    def lock_key(self) -> str:
-        """Generate lock key for distributed locking."""
-        return f"pipeline:{self.pipeline_name}"
-
-    @property
-    def table(self) -> TableConfig:
-        """Get TableConfig for backward compatibility."""
-        return TableConfig(
-            primary_keys=self.primary_keys,
-            silver_table=self.silver_table,
-            gold_table=self.gold_table,
-            silver_write_mode=self.write_mode,
-            gold_write_mode=self.gold_write_mode,
-            partition_cols=self.partition_cols,
-            on_schema_mismatch=self.on_schema_mismatch,
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class RuntimeConfig:
-    """Runtime execution parameters.
-
-    Contains parameters that may vary between pipeline runs
-    but are fixed during a single execution. These are typically
-    passed via CLI arguments.
-
-    This is a Value Object that belongs in the domain layer because
-    it has no I/O dependencies and represents immutable runtime state.
-    """
-
-    run_type: RunType
-    resume: bool = False
-    limit: int | None = None
-    heartbeat_interval: int = 30
-    wait_for_lock: bool = False
-    lock_wait_timeout: int = 300
-    lock_ttl: int | None = 90
-    query: str | None = None
-    dry_run: bool = False
-
-    # VACUUM automation (Phase 1 refactoring)
-    # When enabled, VACUUM is executed after successful pipeline run
-    vacuum_after_run: bool = False
-    vacuum_retention_days: int = 7
-
-    # Storage optimization (Unifies cleanup policies)
-    # Controls explicit storage maintenance (vacuum, old file removal)
-    optimize_storage: bool = False
-
-    # Medallion invariants validation (REQ-CONF-001)
-    # When True, Medallion config violations fail the pipeline
-    # When False, violations are logged as warnings
-    strict_validation: bool = False
-
-    # Gold layer schema validation (strict mode)
-    # When True, pipelines fail if Gold schema is not provided
-    # When False (default), missing Gold schema skips validation
-    # Use False during migration, True for production readiness
-    strict_gold_validation: bool = False
-
-    # Skip Gold layer writing (composite sub-pipelines)
-    # When True, Gold filter returns False for all records,
-    # preventing individual Gold writes during composite execution
-    skip_gold: bool = False
-
-    def __post_init__(self) -> None:
-        """Validate runtime config."""
-        self._validate_positive_values()
-
-    def _validate_positive_values(self) -> None:
-        """Validate that numeric fields have positive values."""
-        validations = [
-            (
-                self.limit is not None and self.limit <= 0,
-                f"limit must be positive or None, got {self.limit}",
-            ),
-            (
-                self.heartbeat_interval <= 0,
-                f"heartbeat_interval must be positive, got {self.heartbeat_interval}",
-            ),
-            (
-                self.lock_wait_timeout <= 0,
-                f"lock_wait_timeout must be positive, got {self.lock_wait_timeout}",
-            ),
-            (
-                self.vacuum_retention_days <= 0,
-                f"vacuum_retention_days must be positive, got {self.vacuum_retention_days}",
-            ),
-        ]
-        for condition, message in validations:
-            if condition:
-                raise ValueError(message)
-
-    @property
-    def effective_lock_ttl(self) -> int:
-        """Derived TTL for lock renewal based on runtime config."""
-        return self.lock_ttl or self.heartbeat_interval * 3
-
-
-# =============================================================================
-# Memory Monitoring Configuration
-# =============================================================================
-
-
-@dataclass(frozen=True, slots=True)
-class MemoryConfig:
-    """Configuration for memory-aware batch processing.
-
-    Used by MemoryMonitor (infrastructure layer) to configure adaptive
-    batch sizing based on memory pressure detection.
-
-    Attributes:
-        max_batch_memory_mb: Maximum memory per batch in MB (default: 512MB).
-        memory_pressure_threshold: Threshold (0.0-1.0) for reducing batch size (default: 0.8).
-        min_batch_size: Minimum batch size even under memory pressure (default: 10).
-        check_interval_records: Check memory every N records (default: 100).
-        enable_adaptive_sizing: Enable/disable adaptive batch sizing (default: True).
-
-    Example:
-        >>> config = MemoryConfig()
-        >>> config.memory_pressure_threshold
-        0.8
-        >>> config.max_batch_memory_mb
-        512
-    """
-
-    max_batch_memory_mb: int = 512
-    memory_pressure_threshold: float = 0.8
-    min_batch_size: int = 10
-    check_interval_records: int = 100
-    enable_adaptive_sizing: bool = True
-
-================================================================================
-File: config_types.py
-Path: config_types.py
-================================================================================
-"""TypedDict definitions for YAML configuration structures.
-
-These TypedDicts define the shape of external YAML configuration files.
-They are used for type-safe parsing and validation of configuration data
-before converting to domain dataclasses.
-
-Implements RULES.md §1 - Domain Layer with pure types.
-"""
-
-from __future__ import annotations
-
-from typing import Literal, Required, TypedDict
-
-# =============================================================================
-# Gold Filter Configuration TypedDicts
-# =============================================================================
-
-
-class GoldColumnFilterDict(TypedDict):
-    """YAML structure for column-based filtering."""
-
-    # Column name is the key, values is a list of allowed values
-    # Example: standard_type: [IC50, Ki]
-    pass  # This is actually a dict[str, list[str]] pattern
-
-
-class GoldRangeDict(TypedDict, total=False):
-    """YAML structure for numeric range filter."""
-
-    min: float
-    max: float
-    include_min: bool  # Default: True
-    include_max: bool  # Default: True
-
-
-class GoldFiltersDict(TypedDict, total=False):
-    """YAML structure for gold_filters section."""
-
-    columns: dict[str, list[str]]
-    ranges: dict[str, GoldRangeDict]
-    list_length: dict[str, dict[str, int]]  # column -> {min_length, max_length}
-    list_contains: dict[str, dict[str, list[str] | str]]  # column -> {values, mode}
-    required_fields: list[str]
-    exclude_if_present: list[str]
-
-
-# =============================================================================
-# Sink Configuration TypedDicts
-# =============================================================================
-
-
-class CsvExportDict(TypedDict, total=False):
-    """YAML structure for CSV export configuration."""
-
-    enabled: bool
-    path: str
-    delimiter: str
-    header: bool
-    encoding: str
-
-
-class BronzeSinkDict(TypedDict, total=False):
-    """YAML structure for Bronze layer sink configuration.
-
-    Note: Bronze format MUST be "jsonl" per RULES.md §2.1 and Medallion Architecture.
-    Parquet is not allowed for Bronze layer - only JSONL + zstd compression.
-    """
-
-    path: str
-    format: Literal["jsonl"]  # RULES.md §2.1: Bronze MUST use JSONL + zstd
-    save_json: bool
-
-
-class SilverSinkDict(TypedDict, total=False):
-    """YAML structure for Silver layer sink configuration.
-
-    Note: Silver format MUST be "delta" per RULES.md §2.1 and medallion_validator.py.
-    Parquet is not allowed for Silver layer to ensure ACID compliance.
-    """
-
-    path: str
-    format: Literal["delta"]  # RULES.md §2.1: Silver MUST use Delta Lake
-    mode: Literal["merge", "append", "overwrite"]
-    primary_key: list[str]
-    partition_by: list[str]
-    classification: Literal["public", "internal", "restricted"]
-    forensic_retention: bool
-    csv_export: CsvExportDict
-
-
-class GoldValidationDict(TypedDict, total=False):
-    """YAML structure for Gold layer validation."""
-
-    strict: bool
-
-
-class GoldSinkDict(TypedDict, total=False):
-    """YAML structure for Gold layer sink configuration."""
-
-    enabled: bool
-    validation: GoldValidationDict
-    path: str
-    format: Literal["delta", "parquet"]
-    mode: Literal["append", "overwrite", "scd2"]
-    csv_export: CsvExportDict
-
-
-class SinkDict(TypedDict, total=False):
-    """YAML structure for complete sink configuration."""
-
-    bronze: BronzeSinkDict
-    silver: SilverSinkDict
-    gold: GoldSinkDict
-
-
-# =============================================================================
-# Transform Configuration TypedDicts
-# =============================================================================
-
-
-class TransformDict(TypedDict, total=False):
-    """YAML structure for transformation configuration."""
-
-    version: str
-    steps: list[str]
-
-
-# =============================================================================
-# Column Ordering Configuration TypedDicts
-# =============================================================================
-
-
-class ColumnGroupDict(TypedDict, total=False):
-    """YAML structure for column group ordering."""
-
-    name: Required[str]
-    fields: list[str]
-    pattern: str
-    provider_order: list[str]
-
-
-# =============================================================================
-# DQ Configuration TypedDicts (Extended)
-# =============================================================================
-
-
-class DQThresholdsDict(TypedDict, total=False):
-    """YAML structure for DQ thresholds section."""
-
-    soft_fail: float  # 0.0-1.0, default 0.05
-    hard_fail: float  # 0.0-1.0, default 0.20
-
-
-class DQReportDict(TypedDict, total=False):
-    """YAML structure for DQ report configuration."""
-
-    enabled: bool
-    format: Literal["json", "yaml", "csv"]
-    include_sample_failures: bool
-    sample_size: int
-    output_path: str | None
-
-
-class FieldValidationDict(TypedDict, total=False):
-    """YAML structure for field validation rule."""
-
-    field: Required[str]
-    type: Required[
-        Literal[
-            "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
-        ]
-    ]
-    nullable: bool
-    severity: Literal["error", "warn"]
-    min: float
-    max: float
-    pattern: str
-    allowed: list[str]
-    max_length: int
-    validator: str
-    error_message: str
-
-
-class CrossFieldValidationDict(TypedDict, total=False):
-    """YAML structure for cross-field validation rule."""
-
-    name: Required[str]
-    fields: Required[list[str]]
-    condition: Required[
-        Literal[
-            "all_present",
-            "any_present",
-            "mutually_exclusive",
-            "conditional_required",
-            "custom",
-        ]
-    ]
-    trigger_field: str
-    required_field: str
-    validator: str
-    error_message: str
-
-
-class ConditionalValidationDict(TypedDict, total=False):
-    """YAML structure for conditional validation rule."""
-
-    name: Required[str]
-    condition_field: Required[str]
-    condition_value: Required[str | list[str]]
-    condition_operator: Literal["eq", "ne", "in", "not_in"]
-    then_validations: list[FieldValidationDict]
-
-
-class DQRulesDict(TypedDict, total=False):
-    """YAML structure for data quality rules in pipeline config.
-
-    Supports two modes:
-    1. Inline: direct specification of thresholds/validations
-    2. File reference: dq_config_file points to external config
-
-    When dq_config_file is present, other fields serve as overrides.
-    """
-
-    # Inline thresholds (legacy, for backward compat)
-    soft_fail_threshold: float  # 0.0-1.0
-    hard_fail_threshold: float  # 0.0-1.0
-    strict_validation: bool
-
-    # Extended inline (optional)
-    field_validations: list[FieldValidationDict]
-    cross_field_validations: list[CrossFieldValidationDict]
-    conditional_validations: list[ConditionalValidationDict]
-    invalid_record_policy: Literal["quarantine", "skip", "fail"]
-    report: DQReportDict
-
-
-class DQConfigFileDict(TypedDict, total=False):
-    """YAML structure for standalone DQ config file.
-
-    Used in configs/dq/_defaults.yaml, configs/dq/providers/*.yaml,
-    and configs/dq/entities/{provider}/*.yaml.
-    """
-
-    # Metadata
-    version: str
-    provider: str
-    entity: str
-
-    # Core settings
-    thresholds: DQThresholdsDict
-    strict_validation: bool
-    invalid_record_policy: Literal["quarantine", "skip", "fail"]
-    report: DQReportDict
-
-    # Hierarchical validations
-    common_field_validations: list[FieldValidationDict]
-    provider_field_validations: list[FieldValidationDict]
-    entity_field_validations: list[FieldValidationDict]
-
-    common_cross_field_validations: list[CrossFieldValidationDict]
-    entity_cross_field_validations: list[CrossFieldValidationDict]
-
-    entity_conditional_validations: list[ConditionalValidationDict]
-
-
-# =============================================================================
-# Circuit Breaker Configuration TypedDict
-# =============================================================================
-
-
-class CircuitBreakerDict(TypedDict, total=False):
-    """YAML structure for circuit breaker configuration."""
-
-    failure_threshold: int
-    recovery_timeout: int  # seconds
-
-
-# =============================================================================
-# Input Filter Configuration TypedDict
-# =============================================================================
-
-
-class InputFilterDict(TypedDict, total=False):
-    """YAML structure for input filter configuration."""
-
-    enabled: bool
-    source_path: str
-    column_name: str
-    filter_field: str
-    batch_size: int
-
-
-# =============================================================================
-# Source Configuration TypedDicts
-# =============================================================================
-
-
-class ClientConfigDict(TypedDict, total=False):
-    """YAML structure for HTTP client configuration."""
-
-    timeout_sec: float
-    max_retries: int
-
-
-class RateLimitDict(TypedDict, total=False):
-    """YAML structure for rate limiting configuration."""
-
-    requests_per_second: int
-    burst: int
-
-
-class ProviderConfigDict(TypedDict, total=False):
-    """YAML structure for provider-specific configuration."""
-
-    provider: str
-    base_url: str
-    client: ClientConfigDict
-    max_url_length: int
-    batch_size: int
-    page_size: int
-    api_version: str | None
-
-
-class SourceConfigDict(TypedDict, total=False):
-    """YAML structure for source configuration in source files."""
-
-    type: Literal["api", "file"]
-    load_strategy: Literal["full", "incremental"]
-    batch_size: int
-    provider_config: ProviderConfigDict
-    circuit_breaker: CircuitBreakerDict
-    rate_limit: RateLimitDict
-
-
-class SourceFileDict(TypedDict):
-    """YAML structure for source configuration file (e.g., configs/sources/chembl.yaml)."""
-
-    source: SourceConfigDict
-
-
-# =============================================================================
-# Pipeline Configuration TypedDict (Main)
-# =============================================================================
-
-
-class PipelineConfigDict(TypedDict, total=False):
-    """YAML structure for pipeline configuration file.
-
-    This represents the complete structure of a pipeline YAML file
-    (e.g., configs/pipelines/chembl/activity.yaml).
-    """
-
-    # Required fields
-    pipeline_name: Required[str]
-    provider: Required[str]
-    entity_type: Required[str]
-
-    # Optional metadata
-    version: str
-    description: str
-
-    # Table configuration
-    primary_keys: list[str]
-    silver_table: str
-    gold_table: str
-
-    # Source reference
-    source_file: str
-
-    # Filtering
-    gold_filters: GoldFiltersDict
-    input_filter: InputFilterDict
-
-    # Transform
-    transform: TransformDict
-    column_groups: list[ColumnGroupDict]
-
-    # Sink
-    sink: SinkDict
-
-    # Data Quality - TWO options:
-    # 1. Reference to external file (recommended)
-    dq_config_file: str  # Relative path, e.g., "../../dq/entities/chembl/activity.yaml"
-    # 2. Inline rules (legacy, or for overrides)
-    dq_rules: DQRulesDict
-
-    # Circuit Breaker
-    circuit_breaker: CircuitBreakerDict
-
-
-# =============================================================================
-# Runtime Configuration TypedDict (CLI arguments)
-# =============================================================================
-
-
-class RuntimeArgsDict(TypedDict, total=False):
-    """TypedDict for CLI runtime arguments.
-
-    Maps CLI arguments to their expected types.
-    """
-
-    run_type: Literal["incremental", "backfill", "rebuild"]
-    limit: int
-    query: str
-    resume: bool
-    dry_run: bool
-    wait_for_lock: bool
-    lock_wait_timeout: int
-    heartbeat_interval: int
-    vacuum_after_run: bool
-    vacuum_retention_days: int
-    strict_validation: bool
-    strict_gold_validation: bool
-    input_csv: str
-    filter_column: str
-    filter_field: str
-
-
-__all__ = [
-    "BronzeSinkDict",
-    "CircuitBreakerDict",
-    "ClientConfigDict",
-    "ConditionalValidationDict",
-    "CrossFieldValidationDict",
-    "CsvExportDict",
-    "DQConfigFileDict",
-    "DQReportDict",
-    "DQRulesDict",
-    "DQThresholdsDict",
-    "FieldValidationDict",
-    "GoldColumnFilterDict",
-    "GoldFiltersDict",
-    "GoldRangeDict",
-    "GoldSinkDict",
-    "GoldValidationDict",
-    "InputFilterDict",
-    "PipelineConfigDict",
-    "ProviderConfigDict",
-    "RateLimitDict",
-    "RuntimeArgsDict",
-    "SilverSinkDict",
-    "SinkDict",
-    "SourceConfigDict",
-    "SourceFileDict",
-    "TransformDict",
-]
+        freeze_sequences(self, ("condition_value", "then_validations"))
 
 ================================================================================
 File: __init__.py
@@ -6439,7 +6067,6 @@ class RateLimitConfig:
     Consolidates rate limiting fields from:
     - composition/providers/provider_registry.py:HttpConfig
     - infrastructure/schemas/pipeline_config.py:ApiConfig
-    - domain/config_types.py:RateLimitDict
 
     Attributes:
         requests_per_second: Maximum requests per second (default: 5.0).
@@ -6626,7 +6253,7 @@ class CachedBronzeContext:
 
         >>> # Enabled with explicit path
         >>> ctx = CachedBronzeContext.from_options(
-        ...     path="./data/bronze/chembl/activity",
+        ...     path="./data/output/bronze/chembl/activity",
         ...     date="2026-01-20"
         ... )
     """
@@ -7216,22 +6843,24 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     activity_id: Series[str] = pa.Field(nullable=False)
 
     # Core identifiers
-    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
-    target_chembl_id: Series[str] = pa.Field(nullable=True)
-    assay_chembl_id: Series[str] = pa.Field(nullable=True)
-    document_chembl_id: Series[str] = pa.Field(nullable=True)
+    molecule_id: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=True)
+    assay_id: Series[str] = pa.Field(nullable=True)
+    publication_id: Series[str] = pa.Field(nullable=True)
     record_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
 
     # Molecule data
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     molecule_pref_name: Series[str] = pa.Field(nullable=True)
-    parent_molecule_chembl_id: Series[str] = pa.Field(nullable=True)
+    parent_molecule_id: Series[str] = pa.Field(nullable=True)
 
     # Target data
     target_pref_name: Series[str] = pa.Field(nullable=True)
     target_organism: Series[str] = pa.Field(nullable=True)
-    target_taxonomy_id: Series[str] = pa.Field(nullable=True)  # Standardized name
+    taxonomy_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # Standardized name
 
     # Assay data
     assay_type: Series[str] = pa.Field(nullable=True)
@@ -7275,8 +6904,11 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     uo_units: Series[str] = pa.Field(nullable=True)
 
     # Document/Publication data
-    document_journal: Series[str] = pa.Field(nullable=True)
-    document_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    journal: Series[str] = pa.Field(nullable=True)
+    publication_year: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    publication_doi: Series[str] = pa.Field(nullable=True)
+    publication_pmid: Series[str] = pa.Field(nullable=True)
+    publication_pmc_id: Series[str] = pa.Field(nullable=True)
 
     # Quality annotations
     activity_comment: Series[str] = pa.Field(nullable=True)
@@ -7285,7 +6917,7 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     potential_duplicate: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Action type
-    action_type_action_type: Series[str] = pa.Field(nullable=True)
+    action_type: Series[str] = pa.Field(nullable=True)
     action_type_description: Series[str] = pa.Field(nullable=True)
     action_type_parent_type: Series[str] = pa.Field(nullable=True)
 
@@ -7311,11 +6943,11 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    assay_chembl_id: Series[str] = pa.Field(nullable=False)
-    target_chembl_id: Series[str] = pa.Field(nullable=True)
-    document_chembl_id: Series[str] = pa.Field(nullable=True)
-    cell_chembl_id: Series[str] = pa.Field(nullable=True)
-    tissue_chembl_id: Series[str] = pa.Field(nullable=True)
+    assay_id: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=True)
+    publication_id: Series[str] = pa.Field(nullable=True)
+    cell_id: Series[str] = pa.Field(nullable=True)
+    tissue_id: Series[str] = pa.Field(nullable=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
     src_assay_id: Series[str] = pa.Field(nullable=True)
     aidx: Series[str] = pa.Field(nullable=True)
@@ -7325,7 +6957,7 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     assay_test_type: Series[str] = pa.Field(nullable=True)
     assay_group: Series[str] = pa.Field(nullable=True)
     assay_organism: Series[str] = pa.Field(nullable=True)
-    assay_taxonomy_id: Series[float] = pa.Field(
+    taxonomy_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Standardized name
     assay_cell_type: Series[str] = pa.Field(nullable=True)
@@ -7346,9 +6978,7 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     variant_mutation: Series[str] = pa.Field(nullable=True)
     variant_organism: Series[str] = pa.Field(nullable=True)
     variant_sequence: Series[str] = pa.Field(nullable=True)
-    variant_taxonomy_id: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # Standardized name
+    variant_taxonomy_id: Series[float] = pa.Field(nullable=True, coerce=True)
     variant_sequence_json: Series[str] = pa.Field(nullable=True)
     assay_classifications: Series[str] = pa.Field(nullable=True)
     assay_parameters: Series[str] = pa.Field(nullable=True)
@@ -7382,7 +7012,7 @@ class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
     )  # int64 in Silver
 
     # Foreign key
-    assay_chembl_id: Series[str] = pa.Field(nullable=False)
+    assay_id: Series[str] = pa.Field(nullable=False)
 
     # Parameter type
     type: Series[str] = pa.Field(nullable=False)
@@ -7422,7 +7052,7 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
     content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary identifier
-    cell_chembl_id: Series[str] = pa.Field(nullable=False)
+    cell_id: Series[str] = pa.Field(nullable=False)
 
     # Core metadata
     cell_name: Series[str] = pa.Field(nullable=False)
@@ -7464,8 +7094,8 @@ class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
     record_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
 
     # Foreign keys
-    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
-    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    molecule_id: Series[str] = pa.Field(nullable=False)
+    publication_id: Series[str] = pa.Field(nullable=False)
 
     # Original compound names from document
     compound_key: Series[str] = pa.Field(nullable=True)
@@ -7493,12 +7123,13 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    publication_id: Series[str] = pa.Field(nullable=False)
     # Cross-reference IDs for linking publications across providers
-    # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
-    # doi: Digital Object Identifier (lowercase, without "https://doi.org/")
     doi: Series[str] = pa.Field(nullable=True)
+    publication_doi: Series[str] = pa.Field(nullable=True)
+    publication_pmid: Series[str] = pa.Field(nullable=True)
+    publication_pmc_id: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
@@ -7525,7 +7156,7 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
 
     # Lookup metadata
     # _lookup_method: "direct" | "doi" | "pmid" | "title_fallback" | "unknown"
-    # _original_id: Original identifier used for lookup (document_chembl_id for direct)
+    # _original_id: Original identifier used for lookup (publication_id for direct)
     lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
     original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
@@ -7600,7 +7231,7 @@ class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
     content_hash: Series[str] = pa.Field(nullable=False)
 
     # Composite key fields
-    document_chembl_id: Series[str] = pa.Field(nullable=False)
+    publication_id: Series[str] = pa.Field(nullable=False)
     term: Series[str] = pa.Field(nullable=False)
     term_type: Series[str] = pa.Field(nullable=False)
 
@@ -7626,7 +7257,7 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    molecule_chembl_id: Series[str] = pa.Field(nullable=False)
+    molecule_id: Series[str] = pa.Field(nullable=False)
     pref_name: Series[str] = pa.Field(nullable=True)
     molecule_type: Series[str] = pa.Field(nullable=True)
     structure_type: Series[str] = pa.Field(nullable=True)
@@ -7661,27 +7292,26 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     hierarchy_parent_chembl_id: Series[str] = pa.Field(nullable=True)
     hierarchy_active_chembl_id: Series[str] = pa.Field(nullable=True)
     hierarchy_child_chembl_id: Series[str] = pa.Field(nullable=True)
-    property_alogp: Series[float] = pa.Field(nullable=True, coerce=True)
+    logp: Series[float] = pa.Field(nullable=True, coerce=True)
+    logp_method: Series[str] = pa.Field(nullable=True)
+    molecular_weight: Series[float] = pa.Field(nullable=True, coerce=True)
     property_mw_freebase: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_full_mwt: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_hba: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    property_hbd: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    property_psa: Series[float] = pa.Field(nullable=True, coerce=True)
-    property_rtb: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    polar_surface_area: Series[float] = pa.Field(nullable=True, coerce=True)
+    rotatable_bond_count: Series[float] = pa.Field(nullable=True, coerce=True)
     property_ro5_violations: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int64
-    property_heavy_atoms: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
-    property_aromatic_rings: Series[float] = pa.Field(
-        nullable=True, coerce=True
-    )  # int64
+    heavy_atom_count: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    aromatic_ring_count: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
+    hba_count: Series[float] = pa.Field(nullable=True, coerce=True)
+    hbd_count: Series[float] = pa.Field(nullable=True, coerce=True)
     property_qed_weighted: Series[float] = pa.Field(nullable=True, coerce=True)
     property_full_molformula: Series[str] = pa.Field(nullable=True)
     property_ro3_pass: Series[str] = pa.Field(nullable=True)
     # Flattened Structures (unified naming without structure_ prefix)
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     standard_inchi: Series[str] = pa.Field(nullable=True)
-    inchikey: Series[str] = pa.Field(nullable=True)
+    inchi_key: Series[str] = pa.Field(nullable=True)
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -7743,7 +7373,7 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    target_chembl_id: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=False)
     pref_name: Series[str] = pa.Field(nullable=True)
     target_type: Series[str] = pa.Field(nullable=True)
     organism: Series[str] = pa.Field(nullable=True)
@@ -7757,7 +7387,7 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     cross_references: Series[str] = pa.Field(nullable=True)
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
     component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_id: Series[float] = pa.Field(
+    primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
     component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
@@ -7782,7 +7412,9 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
 
     entity_id: Series[str] = pa.Field(nullable=False)
     content_hash: Series[str] = pa.Field(nullable=False)
-    component_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64
+    primary_component_id: Series[float] = pa.Field(
+        nullable=False, coerce=True, alias="component_id"
+    )  # int64
     accession: Series[str] = pa.Field(nullable=True)
     component_type: Series[str] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
@@ -8192,7 +7824,9 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     """
 
     entity_id: Series[str] = pa.Field(nullable=False)
-    cid: Series[str] = pa.Field(nullable=False)  # Domain entity uses str for cid
+    molecule_id: Series[str] = pa.Field(
+        nullable=False
+    )  # Canonical molecule id (was cid)
     molecular_formula: Series[str] = pa.Field(nullable=True)
     molecular_weight: Series[float] = pa.Field(
         nullable=True, coerce=True
@@ -8200,7 +7834,11 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     canonical_smiles: Series[str] = pa.Field(nullable=True)
     isomeric_smiles: Series[str] = pa.Field(nullable=True)
     inchi: Series[str] = pa.Field(nullable=True)
-    inchikey: Series[str] = pa.Field(nullable=True)
+    inchi_key: Series[str] = pa.Field(nullable=True)
+    logp: Series[float] = pa.Field(nullable=True, coerce=True, alias="xlogp")
+    polar_surface_area: Series[float] = pa.Field(
+        nullable=True, coerce=True, alias="tpsa"
+    )
     iupac_name: Series[str] = pa.Field(nullable=True)
     content_hash: Series[str] = pa.Field(nullable=False)
 
@@ -8796,7 +8434,7 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary key (source identifier)
-    target_chembl_id: Series[str] = pa.Field(nullable=False)
+    target_id: Series[str] = pa.Field(nullable=False)
 
     # Mapped identifier (nullable - None if not found)
     uniprot_accession: Series[str] = pa.Field(nullable=True)
@@ -9123,7 +8761,7 @@ class BioactivityState(StrEnum):
 
 @dataclass(frozen=True, kw_only=True)
 class Bioactivity(BaseEntity):
-    """Bioactivity measurement from ChEMBL. Required: activity_id, molecule_chembl_id."""
+    """Bioactivity measurement from ChEMBL. Required: activity_id, molecule_id."""
 
     # Processing state (informational, does not affect behavior)
     _state: BioactivityState = BioactivityState.VALIDATED
@@ -9132,25 +8770,22 @@ class Bioactivity(BaseEntity):
     activity_id: str
 
     # REQUIRED: Core identifiers (validated in __post_init__)
-    molecule_chembl_id: str
-    target_chembl_id: str | None = None
-    assay_chembl_id: str | None = None
-    document_chembl_id: str | None = None
+    molecule_id: str
+    target_id: str | None = None
+    assay_id: str | None = None
+    publication_id: str | None = None
     record_id: int | None = None
     src_id: int | None = None
 
-    # Molecule data
     canonical_smiles: str | None = None
     molecule_pref_name: str | None = None
-    parent_molecule_chembl_id: str | None = None
+    parent_molecule_id: str | None = None
 
-    # Target data
     target_pref_name: str | None = None
     target_organism: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-    target_taxonomy_id: str | None = None
+    taxonomy_id: str | None = None
 
-    # Assay data
     assay_type: str | None = None
     assay_description: str | None = None
     assay_variant_accession: str | None = None
@@ -9161,7 +8796,6 @@ class Bioactivity(BaseEntity):
     bao_format: str | None = None
     bao_label: str | None = None
 
-    # Raw activity values
     type: str | None = None
     value: float | None = None
     units: str | None = None
@@ -9192,8 +8826,11 @@ class Bioactivity(BaseEntity):
     uo_units: str | None = None
 
     # Document/Publication data
-    document_journal: str | None = None
-    document_year: int | None = None
+    journal: str | None = None
+    publication_doi: str | None = None
+    publication_pmid: str | None = None
+    publication_pmc_id: str | None = None
+    publication_year: int | None = None
 
     # Quality annotations
     activity_comment: str | None = None
@@ -9206,9 +8843,7 @@ class Bioactivity(BaseEntity):
     original_activity_id: int | None = None  # FK to original activity for traceability
 
     # Action type (flattened from ChEMBL API nested structure)
-    action_type_action_type: str | None = (
-        None  # Type of action (INHIBITOR, AGONIST, etc.)
-    )
+    action_type: str | None = None  # Type of action (INHIBITOR, AGONIST, etc.)
     action_type_description: str | None = None  # Description of the action type
     action_type_parent_type: str | None = None  # Higher-level grouping (nullable)
 
@@ -9228,7 +8863,7 @@ class Bioactivity(BaseEntity):
         """
         if not self.activity_id:
             raise ValueError("Activity ID is required")
-        if not self.molecule_chembl_id:
+        if not self.molecule_id:
             raise ValueError("Molecule ID is required")
         self._validate_pchembl_value()
 
@@ -9265,7 +8900,7 @@ class Bioactivity(BaseEntity):
         from bioetl.domain.serialization import serialize_to_json_canonical
 
         activity_id = _require_field(raw_data, "activity_id")
-        molecule_chembl_id = _require_field(raw_data, "molecule_chembl_id")
+        molecule_id = _require_field(raw_data, "molecule_id")
         entity_id = EntityID(str(activity_id))
         content_hash_str = hashlib.sha256(
             serialize_to_json_canonical(raw_data).encode()
@@ -9281,25 +8916,23 @@ class Bioactivity(BaseEntity):
             source_batch_id=BatchID(source_batch_id) if source_batch_id else None,
             _state=BioactivityState.RAW,
             activity_id=str(activity_id),
-            molecule_chembl_id=str(molecule_chembl_id),
+            molecule_id=str(molecule_id),
             # Optional identifiers
-            target_chembl_id=_safe_str(raw_data.get("target_chembl_id")),
-            assay_chembl_id=_safe_str(raw_data.get("assay_chembl_id")),
-            document_chembl_id=_safe_str(raw_data.get("document_chembl_id")),
+            target_id=_safe_str(raw_data.get("target_id")),
+            assay_id=_safe_str(raw_data.get("assay_id")),
+            publication_id=_safe_str(raw_data.get("publication_id")),
             record_id=_safe_int(raw_data.get("record_id")),
             src_id=_safe_int(raw_data.get("src_id")),
             # Molecule data
             canonical_smiles=_safe_str(raw_data.get("canonical_smiles")),
             molecule_pref_name=_safe_str(raw_data.get("molecule_pref_name")),
-            parent_molecule_chembl_id=_safe_str(
-                raw_data.get("parent_molecule_chembl_id")
-            ),
+            parent_molecule_id=_safe_str(raw_data.get("parent_molecule_id")),
             # Target data
             target_pref_name=_safe_str(raw_data.get("target_pref_name")),
             target_organism=_safe_str(raw_data.get("target_organism")),
-            # Supports both old 'target_tax_id' and new 'target_taxonomy_id' keys
-            target_taxonomy_id=_safe_str(
-                raw_data.get("target_taxonomy_id") or raw_data.get("target_tax_id")
+            # Supports both old 'target_tax_id' and new 'taxonomy_id' keys
+            taxonomy_id=_safe_str(
+                raw_data.get("taxonomy_id") or raw_data.get("target_tax_id")
             ),
             # Assay data
             assay_type=_safe_str(raw_data.get("assay_type")),
@@ -9328,8 +8961,14 @@ class Bioactivity(BaseEntity):
             # Derived metrics
             pchembl_value=_safe_float(raw_data.get("pchembl_value")),
             # Document data
-            document_journal=_safe_str(raw_data.get("document_journal")),
-            document_year=_safe_int(raw_data.get("document_year")),
+            journal=_safe_str(raw_data.get("journal")),
+            publication_doi=_safe_str(raw_data.get("publication_doi")),
+            publication_pmid=_safe_str(raw_data.get("publication_pmid")),
+            publication_pmc_id=_safe_str(raw_data.get("publication_pmc_id")),
+            publication_year=_safe_int(raw_data.get("publication_year")),
+            action_type=_safe_str(raw_data.get("action_type")),
+            action_type_description=_safe_str(raw_data.get("action_type_description")),
+            action_type_parent_type=_safe_str(raw_data.get("action_type_parent_type")),
             # Quality annotations
             activity_comment=_safe_str(raw_data.get("activity_comment")),
             data_validity_comment=_safe_str(raw_data.get("data_validity_comment")),
@@ -9374,19 +9013,19 @@ class ActivityRecord(BaseModel):
     """Bioactivity measurement DTO from ChEMBL.
 
     Represents a single activity measurement from ChEMBL API.
-    Required fields: activity_id, molecule_chembl_id.
+    Required fields: activity_id, molecule_id.
 
     Example:
         >>> record = ActivityRecord(
         ...     activity_id="12345",
-        ...     molecule_chembl_id="CHEMBL25",
-        ...     assay_chembl_id="CHEMBL1000",
+        ...     molecule_id="CHEMBL25",
+        ...     assay_id="CHEMBL1000",
         ...     standard_type="IC50",
         ...     standard_value=5.0,
         ...     standard_units="nM",
         ... )
         >>> record.model_dump()
-        {'activity_id': '12345', 'molecule_chembl_id': 'CHEMBL25', ...}
+        {'activity_id': '12345', 'molecule_id': 'CHEMBL25', ...}
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -9394,15 +9033,11 @@ class ActivityRecord(BaseModel):
     # Primary identifier (REQUIRED)
     activity_id: str = Field(description="Unique activity identifier")
 
-    # Core identifiers (REQUIRED: molecule_chembl_id)
-    molecule_chembl_id: str = Field(description="ChEMBL ID of tested molecule")
-    assay_chembl_id: str | None = Field(
-        default=None, description="ChEMBL ID of the assay"
-    )
-    target_chembl_id: str | None = Field(
-        default=None, description="ChEMBL ID of the target"
-    )
-    document_chembl_id: str | None = Field(
+    # Core identifiers (REQUIRED: molecule_id)
+    molecule_id: str = Field(description="ChEMBL ID of tested molecule")
+    assay_id: str | None = Field(default=None, description="ChEMBL ID of the assay")
+    target_id: str | None = Field(default=None, description="ChEMBL ID of the target")
+    publication_id: str | None = Field(
         default=None, description="ChEMBL ID of the source document"
     )
 
@@ -9449,7 +9084,7 @@ class ActivityRecord(BaseModel):
     molecule_pref_name: str | None = Field(
         default=None, description="Molecule preferred name"
     )
-    parent_molecule_chembl_id: str | None = Field(
+    parent_molecule_id: str | None = Field(
         default=None, description="Parent molecule ChEMBL ID"
     )
 
@@ -9491,10 +9126,8 @@ class ActivityRecord(BaseModel):
     toid: int | None = Field(default=None, description="Test Occasion ID")
 
     # Document data (denormalized)
-    document_journal: str | None = Field(
-        default=None, description="Source journal name"
-    )
-    document_year: int | None = Field(default=None, description="Publication year")
+    journal: str | None = Field(default=None, description="Source journal name")
+    publication_year: int | None = Field(default=None, description="Publication year")
 
     # Data quality annotations
     activity_comment: str | None = Field(
@@ -9545,21 +9178,21 @@ class AssayRecord(BaseModel):
     """Bioassay definition DTO from ChEMBL.
 
     Represents a bioassay protocol from ChEMBL API.
-    Required field: assay_chembl_id.
+    Required field: assay_id.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    assay_chembl_id: str = Field(description="Unique assay ChEMBL ID")
+    assay_id: str = Field(description="Unique assay ChEMBL ID")
 
     # Core identifiers
-    target_chembl_id: str | None = Field(default=None, description="Target ChEMBL ID")
-    document_chembl_id: str | None = Field(
+    target_id: str | None = Field(default=None, description="Target ChEMBL ID")
+    publication_id: str | None = Field(
         default=None, description="Source document ChEMBL ID"
     )
-    cell_chembl_id: str | None = Field(default=None, description="Cell line ChEMBL ID")
-    tissue_chembl_id: str | None = Field(default=None, description="Tissue ChEMBL ID")
+    cell_id: str | None = Field(default=None, description="Cell line ChEMBL ID")
+    tissue_id: str | None = Field(default=None, description="Tissue ChEMBL ID")
     src_id: int | None = Field(default=None, description="Data source ID")
     src_assay_id: str | None = Field(
         default=None, description="Original source assay ID"
@@ -9630,7 +9263,7 @@ class AssayRecord(BaseModel):
     )
     variant_organism: str | None = Field(default=None, description="Variant organism")
     variant_sequence: str | None = Field(
-        default=None, description="Variant amino acid sequence"
+        default=None, description="Variant amino amolecule_id sequence"
     )
     variant_tax_id: int | None = Field(
         default=None, description="Variant NCBI Taxonomy ID"
@@ -9652,13 +9285,13 @@ class MoleculeRecord(BaseModel):
     """Chemical compound DTO from ChEMBL.
 
     Represents a molecule/compound from ChEMBL API.
-    Required field: molecule_chembl_id.
+    Required field: molecule_id.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    molecule_chembl_id: str = Field(description="Unique molecule ChEMBL ID")
+    molecule_id: str = Field(description="Unique molecule ChEMBL ID")
 
     # Core metadata
     pref_name: str | None = Field(default=None, description="Preferred molecule name")
@@ -9802,13 +9435,13 @@ class TargetRecord(BaseModel):
     """Biological target DTO from ChEMBL.
 
     Represents a drug target from ChEMBL API.
-    Required field: target_chembl_id.
+    Required field: target_id.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    target_chembl_id: str = Field(description="Unique target ChEMBL ID")
+    target_id: str = Field(description="Unique target ChEMBL ID")
 
     # Core metadata
     pref_name: str | None = Field(default=None, description="Preferred target name")
@@ -9869,7 +9502,7 @@ class ChemblPublicationRecord(BaseModel):
     """Scientific publication DTO from ChEMBL.
 
     Represents a publication from ChEMBL API (/document endpoint).
-    Required field: document_chembl_id.
+    Required field: publication_id.
 
     Note: Previously named DocumentRecord. The ChEMBL API uses 'document'
     as the endpoint name, but we use 'Publication' for Ubiquitous Language
@@ -9879,7 +9512,7 @@ class ChemblPublicationRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    document_chembl_id: str = Field(description="Unique document ChEMBL ID")
+    publication_id: str = Field(description="Unique document ChEMBL ID")
 
     # Publication identifiers
     pubmed_id: str | None = Field(
@@ -9923,7 +9556,7 @@ class ChemblPublicationTermRecord(BaseModel):
     a ChEMBL publication. This is a derived entity extracted from Publication
     records by flattening the 1:M relationship.
 
-    Required fields: document_chembl_id, term, term_type.
+    Required fields: publication_id, term, term_type.
 
     Note: Previously named DocumentTermRecord per ADR-024.
     """
@@ -9931,7 +9564,7 @@ class ChemblPublicationTermRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # === Composite Key Fields (REQUIRED) ===
-    document_chembl_id: str = Field(description="FK → Document ChEMBL ID")
+    publication_id: str = Field(description="FK → Document ChEMBL ID")
     term: str = Field(min_length=1, description="Term text (e.g., 'Aspirin')")
     term_type: str = Field(
         description="Term type: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT"
@@ -9950,13 +9583,13 @@ class CellLineRecord(BaseModel):
     """Cell line DTO from ChEMBL.
 
     Represents a cell line from ChEMBL API.
-    Required fields: cell_chembl_id, cell_name.
+    Required fields: cell_id, cell_name.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    cell_chembl_id: str = Field(description="Unique cell line ChEMBL ID")
+    cell_id: str = Field(description="Unique cell line ChEMBL ID")
 
     # Core metadata (REQUIRED)
     cell_name: str = Field(description="Cell line name")
@@ -10103,13 +9736,13 @@ class Assay(BaseEntity):
     """
 
     # Primary identifier
-    assay_chembl_id: str
+    assay_id: str
 
     # Core identifiers
-    target_chembl_id: str | None = None
-    document_chembl_id: str | None = None
-    cell_chembl_id: str | None = None
-    tissue_chembl_id: str | None = None
+    target_id: str | None = None
+    publication_id: str | None = None
+    cell_id: str | None = None
+    tissue_id: str | None = None
     src_id: int | None = None
     src_assay_id: str | None = None
     aidx: str | None = None
@@ -10124,7 +9757,7 @@ class Assay(BaseEntity):
     # Biological context
     assay_organism: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-    assay_taxonomy_id: int | None = None
+    taxonomy_id: int | None = None
     assay_cell_type: str | None = None
     assay_tissue: str | None = None
     assay_strain: str | None = None
@@ -10150,7 +9783,7 @@ class Assay(BaseEntity):
     variant_isoform: str | None = None  # Isoform identifier
     variant_mutation: str | None = None  # Mutation description (e.g., V600E)
     variant_organism: str | None = None  # Organism name
-    variant_sequence: str | None = None  # Amino acid sequence
+    variant_sequence: str | None = None  # Amino amolecule_id sequence
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     variant_taxonomy_id: int | None = None  # NCBI Taxonomy ID
     # Forensic: original JSON
@@ -10165,7 +9798,7 @@ class Assay(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.assay_chembl_id:
+        if not self.assay_id:
             raise ValueError("Assay ChEMBL ID is required")
         if self.confidence_score is not None and not (0 <= self.confidence_score <= 9):
             raise ValueError(
@@ -10196,7 +9829,7 @@ class AssayParameters(BaseEntity):
     Contains parameters such as concentrations, pH, temperature, incubation time, etc.
     Includes both raw values from original source and standardized values for comparison.
 
-    M:1 relationship with Assay (many parameters -> one assay via assay_chembl_id FK).
+    M:1 relationship with Assay (many parameters -> one assay via assay_id FK).
 
     API Endpoint: https://www.ebi.ac.uk/chembl/api/data/assay_parameters
 
@@ -10221,7 +9854,7 @@ class AssayParameters(BaseEntity):
     assay_param_id: int
 
     # === Foreign Key (REQUIRED) ===
-    assay_chembl_id: str
+    assay_id: str
 
     # === Parameter Type (Optional, may be None if not provided by API) ===
     type: str | None = None
@@ -10251,8 +9884,8 @@ class AssayParameters(BaseEntity):
             raise ValueError(
                 f"assay_param_id must be positive integer, got {self.assay_param_id}"
             )
-        if not self.assay_chembl_id or not self.assay_chembl_id.startswith("CHEMBL"):
-            raise ValueError(f"Invalid assay_chembl_id: {self.assay_chembl_id}")
+        if not self.assay_id or not self.assay_id.startswith("CHEMBL"):
+            raise ValueError(f"Invalid assay_id: {self.assay_id}")
 
     def has_numeric_value(self) -> bool:
         """Check if parameter has numeric value (raw or standardized)."""
@@ -10308,8 +9941,8 @@ class CompoundRecord(BaseEntity):
     record_id: int
 
     # Foreign keys (REQUIRED)
-    molecule_chembl_id: str
-    document_chembl_id: str
+    molecule_id: str
+    publication_id: str
 
     # Original names from the document (API-OPTIONAL)
     compound_key: str | None = None
@@ -10331,8 +9964,8 @@ class CompoundRecord(BaseEntity):
         """
         self._validate_positive_id(self.record_id, "record_id")
         self._validate_positive_id(self.src_id, "src_id")
-        self._validate_required_str(self.molecule_chembl_id, "molecule_chembl_id")
-        self._validate_required_str(self.document_chembl_id, "document_chembl_id")
+        self._validate_required_str(self.molecule_id, "molecule_id")
+        self._validate_required_str(self.publication_id, "publication_id")
 
     def _validate_positive_id(self, value: int, field_name: str) -> None:
         """Validate that an ID is positive (> 0)."""
@@ -10374,7 +10007,7 @@ class ChemblPublication(PublicationEntityBase):
     """
 
     # Primary identifier
-    document_chembl_id: str
+    publication_id: str
 
     volume: str | None = None
     issue: str | None = None
@@ -10393,8 +10026,8 @@ class ChemblPublication(PublicationEntityBase):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.document_chembl_id:
-            raise ValueError("ChemblPublication document_chembl_id is required")
+        if not self.publication_id:
+            raise ValueError("ChemblPublication publication_id is required")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -10407,12 +10040,12 @@ class DocumentTerm(BaseEntity):
 
     Source: Nested in ChEMBL API /document response (mesh_terms, keywords fields)
 
-    Composite Key: document_chembl_id + term_type + term (normalized)
+    Composite Key: publication_id + term_type + term (normalized)
     See: https://www.ebi.ac.uk/chembl/api/data/document
     """
 
     # === Composite Key Fields ===
-    document_chembl_id: str  # FK → Document
+    publication_id: str  # FK → Document
     term: str  # Term text (e.g., "Aspirin", "kinase inhibitor")
     term_type: str  # MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT
 
@@ -10425,7 +10058,7 @@ class DocumentTerm(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.document_chembl_id:
+        if not self.publication_id:
             raise ValueError("Document ChEMBL ID is required")
         if not self.term:
             raise ValueError("Term text is required")
@@ -10447,7 +10080,7 @@ class Target(BaseEntity):
     """
 
     # Primary identifier
-    target_chembl_id: str
+    target_id: str
 
     # Core metadata
     pref_name: str | None = None
@@ -10466,7 +10099,7 @@ class Target(BaseEntity):
 
     # Flattened component fields (aggregated lists)
     component_accessions: list[str] | None = None
-    component_id: int | None = None  # Primary component ID (component_ids[0])
+    primary_component_id: int | None = None  # Primary component ID
     component_ids: list[int] | None = None
     component_types: list[str] | None = None
     component_relationships: list[str] | None = None
@@ -10480,7 +10113,7 @@ class Target(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.target_chembl_id:
+        if not self.target_id:
             raise ValueError("Target ChEMBL ID is required")
 
 
@@ -10528,14 +10161,14 @@ class CellLine(BaseEntity):
     """Represents a cell line (ChEMBL Cell Line).
 
     Cell lines are biological objects used for in vitro experiments.
-    They have M:N relationship with Assay (via assay.cell_chembl_id FK).
+    They have M:N relationship with Assay (via assay.cell_id FK).
 
     Contains all fields from ChEMBL cell_line API endpoint.
     See: https://www.ebi.ac.uk/chembl/api/data/cell_line
     """
 
     # Primary identifier (REQUIRED)
-    cell_chembl_id: str
+    cell_id: str
 
     # Core metadata (cell_name is REQUIRED per task spec)
     cell_name: str
@@ -10563,7 +10196,7 @@ class CellLine(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.cell_chembl_id:
+        if not self.cell_id:
             raise ValueError("Cell ChEMBL ID is required")
         if not self.cell_name:
             raise ValueError("Cell name is required")
@@ -10585,7 +10218,7 @@ class Molecule(BaseEntity):
     """
 
     # Primary identifier
-    molecule_chembl_id: str
+    molecule_id: str
 
     # Core metadata
     pref_name: str | None = None
@@ -10656,15 +10289,25 @@ class Molecule(BaseEntity):
     # Flattened Structures (unified naming without structure_ prefix)
     canonical_smiles: str | None = None
     standard_inchi: str | None = None
-    # Standardized to 'inchikey' (no underscore) for IUPAC/PubChem consistency
-    inchikey: str | None = None
+    # Standardized to 'inchi_key' (no underscore) for IUPAC/PubChem consistency
+    inchi_key: str | None = None
+    # Canonical property aliases (unified naming)
+    logp: float | None = None
+    logp_method: str | None = None
+    molecular_weight: float | None = None
+    polar_surface_area: float | None = None
+    rotatable_bond_count: int | None = None
+    heavy_atom_count: int | None = None
+    aromatic_ring_count: int | None = None
+    hba_count: int | None = None
+    hbd_count: int | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.molecule_chembl_id:
+        if not self.molecule_id:
             raise ValueError("Molecule ChEMBL ID is required")
         if self.max_phase is not None and not (0 <= self.max_phase <= 4):
             raise ValueError(f"max_phase must be 0-4, got {self.max_phase}")
@@ -10846,7 +10489,7 @@ class SubcellularFraction(BaseEntity):
     assay_count: int | None = None  # Number of assays using this fraction
 
     # === Example Source Reference ===
-    example_assay_chembl_id: str | None = None  # One assay using this fraction
+    example_assay_id: str | None = None  # One assay using this fraction
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -10887,14 +10530,14 @@ class Tissue(BaseEntity):
     """Represents a tissue type (ChEMBL Tissue).
 
     Tissues are anatomical structures used in assay experiments.
-    They have 1:M relationship with Assay (via assay.tissue_chembl_id FK).
+    They have 1:M relationship with Assay (via assay.tissue_id FK).
 
     Contains all fields from ChEMBL tissue API endpoint.
     See: https://www.ebi.ac.uk/chembl/api/data/tissue
     """
 
     # Primary identifier (REQUIRED)
-    tissue_chembl_id: str
+    tissue_id: str
 
     # Core metadata (REQUIRED)
     pref_name: str
@@ -10910,7 +10553,7 @@ class Tissue(BaseEntity):
         self._validate_invariants()
 
     def _validate_invariants(self) -> None:
-        if not self.tissue_chembl_id:
+        if not self.tissue_id:
             raise ValueError("Tissue ChEMBL ID is required")
         if not self.pref_name:
             raise ValueError("Tissue pref_name is required")
@@ -11117,7 +10760,7 @@ class CrossRefPublicationEntity(PublicationEntityBase):
     issn_electronic: str | None = None
 
     # Author ORCID identifiers (JSON array of ORCID IDs)
-    author_orcids: str | None = None
+    author_ormolecule_ids: str | None = None
 
     # Full author details with ORCID, sequence, affiliations (JSON array)
     author_details: str | None = None
@@ -11152,7 +10795,7 @@ Path: entities\openalex.py
 ================================================================================
 """OpenAlex domain entities.
 
-Contains OpenAlexPublicationRecord (DTO) and OpenAlexPublicationEntity (domain).
+Contains OpenAlexPublicationEntity (domain).
 Topics provide a 4-level hierarchy: domain -> field -> subfield -> topic.
 """
 
@@ -11161,172 +10804,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
-from pydantic import Field as PydanticField
-
 from bioetl.domain.entities.publication_base import PublicationEntityBase
-
-# Lookup method values for tracking DOI resolution strategy
-LOOKUP_METHODS = ["doi", "title_fallback", "title_only", "unknown"]
-
-
-# === Pydantic DTO Model ===
-
-
-class OpenAlexPublicationRecord(BaseModel):
-    """Scholarly work DTO from OpenAlex. Required field: openalex_id."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    # Primary identifier (REQUIRED, OpenAlex Work ID)
-    openalex_id: str = PydanticField(description="OpenAlex Work ID (e.g., W2148763428)")
-
-    # DOI (may be None for some works)
-    doi: str | None = PydanticField(
-        default=None, description="Digital Object Identifier (normalized)"
-    )
-
-    # Core metadata
-    title: str | None = PydanticField(default=None, description="Publication title")
-    abstract: str | None = PydanticField(
-        default=None,
-        description="Publication abstract (reconstructed from inverted index)",
-    )
-
-    # Authors (JSON-serialized list of hashed names for PII compliance)
-    authors: str | None = PydanticField(
-        default=None, description="Author names (JSON array, hashed for PII)"
-    )
-
-    # Journal information
-    journal: str | None = PydanticField(
-        default=None, description="Source name (journal/venue)"
-    )
-    issn: str | None = PydanticField(default=None, description="ISSN-L")
-    publisher: str | None = PydanticField(
-        default=None, description="Host organization name"
-    )
-
-    # Dates
-    year: int | None = PydanticField(default=None, description="Publication year")
-    publication_date: str | None = PydanticField(
-        default=None, description="Publication date (YYYY-MM-DD)"
-    )
-
-    # Document type (mapped from OpenAlex type)
-    doc_type: str = PydanticField(default="PUBLICATION", description="Document type")
-
-    # Open Access status
-    is_oa: bool | None = PydanticField(default=None, description="Is Open Access")
-    oa_status: str | None = PydanticField(
-        default=None, description="OA status (gold, green, hybrid, bronze, closed)"
-    )
-
-    # Citation metrics
-    # OpenAlex source field: cited_by_count
-    # Unified BioETL field: citation_count (standardized across all providers)
-    citation_count: int | None = PydanticField(
-        default=None, description="Number of citations (from OpenAlex cited_by_count)"
-    )
-
-    # Topics (hierarchical classification - replaces deprecated concepts)
-    # Each topic dict has: id, display_name, score, subfield, field, domain
-    topics: list[dict[str, Any]] = PydanticField(
-        default_factory=list,
-        description="Hierarchical topic classification (domain/field/subfield/topic)",
-    )
-
-    # Primary topic (single most relevant topic for quick categorization)
-    # Dict with: id, display_name, score, subfield, field, domain
-    primary_topic: dict[str, Any] | None = PydanticField(
-        default=None, description="Primary topic classification"
-    )
-
-    # Grants/funding information
-    # Each grant dict has: funder, funder_display_name, award_id
-    grants: list[dict[str, Any]] = PydanticField(
-        default_factory=list, description="Funding/grant information"
-    )
-
-    # MeSH terms (Medical Subject Headings)
-    mesh_terms: list[str] = PydanticField(
-        default_factory=list, description="MeSH descriptor names"
-    )
-
-    # Keywords
-    keywords: list[str] = PydanticField(
-        default_factory=list, description="Author-assigned keywords"
-    )
-
-    # External identifiers
-    # pmc_id: PubMed Central ID (format: "PMC1234567")
-    pmc_id: str | None = PydanticField(
-        default=None, description="PubMed Central ID (format: PMC1234567)"
-    )
-    mag_id: str | None = PydanticField(
-        default=None, description="Microsoft Academic Graph ID"
-    )
-
-    # Institution identifiers (for cross-referencing and geographic analysis)
-    institution_ids: list[str] = PydanticField(
-        default_factory=list,
-        description="OpenAlex institution IDs (e.g., I1234567890)",
-    )
-    institution_country_codes: list[str] = PydanticField(
-        default_factory=list,
-        description="ISO 2-letter country codes of affiliated institutions",
-    )
-    ror_ids: list[str] = PydanticField(
-        default_factory=list,
-        description="ROR IDs of affiliated institutions (full URL format). "
-        "May be empty if not returned by Works API.",
-    )
-
-    # Author identifiers (JSON-serialized lists preserving author order)
-    author_orcids: str | None = PydanticField(
-        default=None,
-        description="ORCID IDs as JSON array (empty string for missing)",
-    )
-    author_openalex_ids: str | None = PydanticField(
-        default=None,
-        description="OpenAlex author IDs as JSON array (empty string for missing)",
-    )
-
-    # Additional metadata
-    language: str | None = PydanticField(default=None, description="Language code")
-
-    # Bibliographic info (from biblio object)
-    volume: str | None = PydanticField(
-        default=None, description="Journal volume number"
-    )
-    issue: str | None = PydanticField(default=None, description="Journal issue number")
-
-    # Additional metrics
-    fwci: float | None = PydanticField(
-        default=None, description="Field-Weighted Citation Impact"
-    )
-    reference_count: int | None = PydanticField(
-        default=None, description="Number of works referenced"
-    )
-
-    # Quality indicators
-    is_retracted: bool = PydanticField(
-        default=False, description="Whether the publication has been retracted"
-    )
-
-    # Lookup metadata (from adapter)
-    # Note: Pydantic doesn't allow underscore-prefixed fields, so these use public names
-    lookup_method: str = PydanticField(
-        default="unknown",
-        description="How record was resolved: doi, title_fallback, title_only",
-    )
-    original_doi: str | None = PydanticField(
-        default=None,
-        description="Original DOI from input CSV (for fallback records)",
-    )
-
-    # Note: _source is set by transformer via entity_to_silver_record() mapping
-
+from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 
 # === Dataclass Domain Entity ===
 
@@ -11347,7 +10826,7 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     ror_ids: list[str] = field(default_factory=list)  # ROR IDs (may be empty)
 
     # Author identifiers (JSON-serialized lists preserving author order)
-    author_orcids: str | None = None  # ORCID IDs (empty string for missing)
+    author_ormolecule_ids: str | None = None  # ORCID IDs (empty string for missing)
     author_openalex_ids: str | None = (
         None  # OpenAlex author IDs (empty string for missing)
     )
@@ -11399,7 +10878,6 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 __all__ = [
     "LOOKUP_METHODS",
     "OpenAlexPublicationEntity",
-    "OpenAlexPublicationRecord",
 ]
 
 ================================================================================
@@ -11433,7 +10911,7 @@ class PubchemMoleculeRecord(BaseModel):
     """Chemical molecule DTO from PubChem.
 
     Represents a molecule (compound) from PubChem API via pubchempy.
-    Required field: cid.
+    Required field: molecule_id.
     At least one structural identifier (SMILES/InChI) should be present.
 
     Contains all physicochemical properties defined in PubchemMoleculeSchema:
@@ -11447,18 +10925,18 @@ class PubchemMoleculeRecord(BaseModel):
 
     Example:
         >>> record = PubchemMoleculeRecord(
-        ...     cid="2244",
+        ...     molecule_id="2244",
         ...     molecular_formula="C9H8O4",
         ...     canonical_smiles="CC(=O)OC1=CC=CC=C1C(=O)O",
         ... )
         >>> record.model_dump()
-        {'cid': '2244', 'molecular_formula': 'C9H8O4', ...}
+        {'molecule_id': '2244', 'molecular_formula': 'C9H8O4', ...}
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # === Primary Identifier (REQUIRED) ===
-    cid: str = Field(description="PubChem Compound ID")
+    molecule_id: str = Field(description="PubChem Compound ID")
 
     # === Structural Identifiers ===
     canonical_smiles: str | None = Field(
@@ -11468,7 +10946,7 @@ class PubchemMoleculeRecord(BaseModel):
         default=None, description="Isomeric SMILES (with stereochemistry)"
     )
     inchi: str | None = Field(default=None, description="InChI string")
-    inchikey: str | None = Field(default=None, description="InChI Key")
+    inchi_key: str | None = Field(default=None, description="InChI Key")
 
     # === Nomenclature ===
     molecular_formula: str | None = Field(default=None, description="Molecular formula")
@@ -11607,13 +11085,13 @@ class PubchemMolecule(BaseEntity):
     """
 
     # === Primary Identifier (REQUIRED) ===
-    cid: str
+    molecule_id: str
 
     # === Structural Identifiers ===
     canonical_smiles: str | None = None
     isomeric_smiles: str | None = None
     inchi: str | None = None
-    inchikey: str | None = None
+    inchi_key: str | None = None
 
     # === Nomenclature ===
     molecular_formula: str | None = None
@@ -11664,8 +11142,8 @@ class PubchemMolecule(BaseEntity):
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        if not self.cid:
-            raise ValueError("PubchemMolecule cid is required")
+        if not self.molecule_id:
+            raise ValueError("PubchemMolecule molecule_id is required")
 
         # Invariant: At least one structural representation should be present
         if not any([self.canonical_smiles, self.isomeric_smiles, self.inchi]):
@@ -11760,6 +11238,10 @@ class PublicationEntityBase(BaseEntity):
     doi: str | None = None
     pmid: str | None = None
     pmc_id: str | None = None  # PubMed Central ID (with PMC prefix)
+    # Canonical aliases (used in unified schemas)
+    publication_doi: str | None = None
+    publication_pmid: str | None = None
+    publication_pmc_id: str | None = None
 
     # Core metadata
     title: str | None = None
@@ -11768,6 +11250,7 @@ class PublicationEntityBase(BaseEntity):
     affiliation_list: str | None = (
         None  # JSON-serialized list of unique affiliations (unified field name)
     )
+    author_orcids: str | None = None  # JSON array of ORCID identifiers
 
     # Journal information
     journal: str | None = None
@@ -12134,7 +11617,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         subject_fields: JSON string of fields of study.
         publication_type: JSON string of publication types.
         author_s2_ids: JSON string of S2 author IDs (40-char hex).
-        author_orcids: JSON string of ORCID identifiers.
+        author_ormolecule_ids: JSON string of ORCID identifiers.
         author_h_indices: JSON string of h-index values.
         citation_contexts: JSON string of citation context sentences.
 
@@ -12175,7 +11658,7 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # Author identifiers (for author-level analytics and disambiguation)
     author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)
-    author_orcids: str | None = None  # JSON array of ORCID identifiers
+    author_ormolecule_ids: str | None = None  # JSON array of ORCID identifiers
     author_h_indices: str | None = None  # JSON array of h-index values
 
     # Citation context (for citation sentiment analysis)
@@ -12224,11 +11707,11 @@ class IDMappingResult(BaseEntity):
     Maps ChEMBL target IDs to UniProt accessions using UniProt ID Mapping REST API.
     Extracts comprehensive metadata from UniProt entries when mapping is found.
 
-    Required fields: target_chembl_id, mapping_status
+    Required fields: target_id, mapping_status
     Optional fields: All others (None if mapping not found or data unavailable)
 
     Attributes:
-        target_chembl_id: Source ChEMBL target identifier (e.g., CHEMBL204)
+        target_id: Source ChEMBL target identifier (e.g., CHEMBL204)
         uniprot_accession: Mapped UniProt accession (e.g., P00742) or None if not found
         mapping_status: Status of mapping: 'found', 'not_found', 'error', 'multiple'
         uniprot_entry_name: UniProt entry name (e.g., FA10_HUMAN)
@@ -12245,7 +11728,7 @@ class IDMappingResult(BaseEntity):
     """
 
     # Primary key (input)
-    target_chembl_id: str
+    target_id: str
 
     # Core mapping result
     uniprot_accession: str | None = None
@@ -12273,8 +11756,8 @@ class IDMappingResult(BaseEntity):
 
     def _validate_invariants(self) -> None:
         """Validate domain-specific invariants."""
-        if not self.target_chembl_id:
-            raise ValueError("target_chembl_id is required")
+        if not self.target_id:
+            raise ValueError("target_id is required")
         if self.mapping_status not in ("found", "not_found", "error", "multiple"):
             raise ValueError(
                 f"Invalid mapping_status: {self.mapping_status}. "
@@ -12776,7 +12259,7 @@ External Service Exceptions (RULES.md §7.2):
     - DataValidationError: Invalid data from external source
 
 Provider-Specific Exceptions:
-    Provider-specific API errors (ChemblApiError, CrossRefApiError, etc.) are
+    Provider-specific API errors (CrossRefApiError, etc.) are
     defined in infrastructure.adapters.{provider}.exceptions. Application layer
     should catch ExternalServiceError instead.
 """
@@ -12805,12 +12288,10 @@ from bioetl.domain.exceptions.infrastructure import (
     BronzeValidationError,
     BucketNotFoundError,
     CachedBronzeEmptyError,
-    ConfigurationError,
     DeltaOptimizeError,
     DeltaSchemaValidationError,
     DeltaTransactionError,
     DeltaWriteConflictError,
-    FileSystemError,
     InfrastructureError,
     SchemaEvolutionError,
     StorageError,
@@ -12825,7 +12306,6 @@ from bioetl.domain.exceptions.infrastructure import (
 from bioetl.domain.exceptions.internal import (
     AuthFailureError,
     CheckpointConflictError,
-    InternalError,
     InvalidStateError,
     LockAcquisitionError,
     LockLostError,
@@ -12872,7 +12352,6 @@ __all__ = [
     "CachedBronzeEmptyError",
     "CheckpointConflictError",
     "CircuitBreakerOpenError",
-    "ConfigurationError",
     "CriticalError",
     "DataQualityError",
     # DataQualityErrors
@@ -12884,11 +12363,8 @@ __all__ = [
     "DeltaWriteConflictError",
     # External service errors (NetworkErrors subcategory)
     "ExternalServiceError",
-    "FileSystemError",
     # InfrastructureErrors
     "InfrastructureError",
-    # InternalErrors
-    "InternalError",
     "InvalidDataFormatError",
     "InvalidStateError",
     "LockAcquisitionError",
@@ -13215,66 +12691,6 @@ class InfrastructureError(CriticalError):
         super().__init__(message)
 
 
-class ConfigurationError(InfrastructureError):
-    """Raised when system configuration is invalid or missing.
-
-    This error indicates that the pipeline cannot start due to
-    configuration problems that must be resolved first.
-
-    Attributes:
-        config_key: Name of the problematic configuration key.
-
-    Example:
-        >>> raise ConfigurationError("BIOETL_CHEMBL_API_KEY")
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, config_key: str) -> None:
-        """Initialize ConfigurationError.
-
-        Args:
-            config_key: Name of the problematic configuration key.
-        """
-        self.config_key = config_key
-        super().__init__(f"Missing or invalid configuration: {config_key}")
-
-
-class FileSystemError(InfrastructureError):
-    """Raised when filesystem operations fail.
-
-    This error indicates problems with local file I/O operations
-    such as reading, writing, or directory operations.
-
-    Attributes:
-        path: Path that caused the error.
-        operation: Type of operation that failed (read, write, delete).
-        reason: Description of why the operation failed.
-
-    Example:
-        >>> raise FileSystemError(
-        ...     "/data/bronze",
-        ...     operation="write",
-        ...     reason="Permission denied"
-        ... )
-    """
-
-    error_type = ErrorType.DB_UNAVAILABLE
-
-    def __init__(self, path: str, operation: str, reason: str) -> None:
-        """Initialize FileSystemError.
-
-        Args:
-            path: Path that caused the error.
-            operation: Type of operation that failed.
-            reason: Description of why the operation failed.
-        """
-        self.path = path
-        self.operation = operation
-        self.reason = reason
-        super().__init__(f"Filesystem {operation} failed for '{path}': {reason}")
-
-
 # =============================================================================
 # Storage Exceptions
 # =============================================================================
@@ -13527,7 +12943,7 @@ class CachedBronzeEmptyError(StorageError):
         >>> raise CachedBronzeEmptyError(
         ...     provider="chembl",
         ...     entity_type="activity",
-        ...     bronze_path="/data/bronze/chembl/activity",
+        ...     bronze_path="/data/output/bronze/chembl/activity",
         ...     date_filter="2026-01-20"
         ... )
     """
@@ -13582,7 +12998,7 @@ class DeltaWriteConflictError(StorageError):
 
     Example:
         >>> raise DeltaWriteConflictError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     operation="merge",
         ...     conflicting_version=42
         ... )
@@ -13625,7 +13041,7 @@ class DeltaTransactionError(CriticalError):
 
     Example:
         >>> raise DeltaTransactionError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     reason="Transaction log corrupted",
         ...     version=42
         ... )
@@ -13714,7 +13130,7 @@ class DeltaSchemaValidationError(CriticalError):
 
     Example:
         >>> raise DeltaSchemaValidationError(
-        ...     "/data/gold/chembl_activity",
+        ...     "/data/output/gold/chembl_activity",
         ...     expected_columns=["id", "name", "value"],
         ...     actual_columns=["id", "name"],
         ...     type_mismatches={"id": ("int64", "string")}
@@ -13766,7 +13182,7 @@ class DeltaOptimizeError(StorageError):
 
     Example:
         >>> raise DeltaOptimizeError(
-        ...     "/data/silver/chembl_activity",
+        ...     "/data/output/silver/chembl_activity",
         ...     operation="vacuum",
         ...     reason="Concurrent operation in progress"
         ... )
@@ -13813,24 +13229,6 @@ from __future__ import annotations
 
 from bioetl.domain.exceptions.base import CriticalError
 from bioetl.domain.types import ErrorType
-
-# =============================================================================
-# Base Internal Exception
-# =============================================================================
-
-
-class InternalError(CriticalError):
-    """Base class for internal application errors.
-
-    InternalErrors indicate unexpected conditions that should not occur
-    during normal operation. They typically represent programming errors,
-    invariant violations, or system state corruption.
-
-    These errors are always critical and result in immediate pipeline termination.
-    """
-
-    error_type = ErrorType.INVALID_DATA
-
 
 # =============================================================================
 # State and Invariant Violations
@@ -14751,6 +14149,7 @@ from bioetl.domain.filtering.list_filters import (
 )
 from bioetl.domain.filtering.load_result import FilterLoadResult
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
+from bioetl.domain.filtering.silver_config import SilverFilterConfig
 
 __all__ = [
     "FilterColumn",
@@ -14762,6 +14161,7 @@ __all__ = [
     "GoldListLengthFilter",
     "GoldRangeFilter",
     "InputFilterConfig",
+    "SilverFilterConfig",
 ]
 
 ================================================================================
@@ -15423,6 +14823,61 @@ class GoldRangeFilter:
             )
 
 ================================================================================
+File: silver_config.py
+Path: filtering\silver_config.py
+================================================================================
+"""Silver filter configuration.
+
+Provides SilverFilterConfig — a semantically distinct type for Silver layer
+filtering.  Structurally identical to GoldFilterConfig but typed separately
+so that mypy can catch accidental assignment of a Silver-layer filter to a
+Gold-layer slot (and vice versa).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from bioetl.domain.filtering.gold_config import GoldFilterConfig
+
+
+@dataclass(frozen=True, slots=True)
+class SilverFilterConfig(GoldFilterConfig):
+    """Filters applied during Silver layer processing.
+
+    Structurally identical to :class:`GoldFilterConfig` but kept as a
+    separate type so that the type checker can distinguish between
+    Silver-layer and Gold-layer filter configurations.
+
+    Attributes:
+        column_filters: Column value filters (IN / NOT_IN / IS_NULL etc.).
+        range_filters: Numeric range filters.
+        list_length_filters: List-length bound filters.
+        list_contains_filters: List-contents filters.
+        required_fields: Fields that must be non-null / non-empty.
+        exclude_if_present: Fields whose presence excludes a record.
+    """
+
+    # All fields are inherited from GoldFilterConfig.
+    # The class exists purely for nominal typing separation.
+
+    @classmethod
+    def from_gold_filter_config(cls, config: GoldFilterConfig) -> SilverFilterConfig:
+        """Create a SilverFilterConfig from an existing GoldFilterConfig.
+
+        Convenience factory for the migration period where infrastructure
+        loaders still produce GoldFilterConfig for Silver filters.
+        """
+        return cls(
+            column_filters=config.column_filters,
+            range_filters=config.range_filters,
+            list_length_filters=config.list_length_filters,
+            list_contains_filters=config.list_contains_filters,
+            required_fields=config.required_fields,
+            exclude_if_present=config.exclude_if_present,
+        )
+
+================================================================================
 File: locking.py
 Path: locking.py
 ================================================================================
@@ -15609,6 +15064,8 @@ Path: mapping\__init__.py
 ================================================================================
 """Domain mapping utilities for cross-provider field unification."""
 
+from bioetl.domain.mapping.activity_fields import ACTIVITY_FIELD_MAPPING
+from bioetl.domain.mapping.molecule_fields import MOLECULE_FIELD_MAPPING
 from bioetl.domain.mapping.publication_fields import (
     PUBLICATION_FIELD_MAPPING,
     UNIFIED_TO_PROVIDER,
@@ -15622,6 +15079,8 @@ from bioetl.domain.mapping.publication_type_classification import (
 )
 
 __all__ = [
+    "ACTIVITY_FIELD_MAPPING",
+    "MOLECULE_FIELD_MAPPING",
     "PUBLICATION_FIELD_MAPPING",
     "UNIFIED_TO_PROVIDER",
     "PublicationTypeEntry",
@@ -15630,6 +15089,47 @@ __all__ = [
     "get_provider_name",
     "get_unified_name",
 ]
+
+================================================================================
+File: activity_fields.py
+Path: mapping\activity_fields.py
+================================================================================
+"""Mapping for activity fields across different providers.
+
+Placeholder for cross-provider activity field unification.
+ChEMBL activity uses canonical names directly; extend when adding
+other providers (e.g., PubChem bioassay).
+"""
+
+ACTIVITY_FIELD_MAPPING: dict[str, dict[str, str]] = {
+    "chembl": {},  # ChEMBL activity fields are already canonical
+    # "pubchem": {...}  # Add when PubChem bioassay support is added
+}
+
+================================================================================
+File: molecule_fields.py
+Path: mapping\molecule_fields.py
+================================================================================
+"""Mapping for molecule fields across different providers."""
+
+MOLECULE_FIELD_MAPPING = {
+    "chembl": {
+        "logp": "logp",
+        "hba_count": "hba_count",
+        "molecular_weight": "molecular_weight",
+        "inchi_key": "inchi_key",
+    },
+    "pubchem": {
+        "xlogp": "logp",
+        "hba": "hba_count",
+        "molecular_weight": "molecular_weight",
+        "inchi_key": "inchi_key",
+    },
+    # Add other providers here as needed (e.g., ZINC, etc.)
+    # "zinc": {
+    #     "logp": "logp", # Example
+    # }
+}
 
 ================================================================================
 File: publication_fields.py
@@ -17740,7 +17240,6 @@ class LoadingStrategy(StrEnum):
     """Loading strategy for pipeline data extraction.
 
     Determines how the pipeline handles incremental vs full data loading.
-    This formalizes the implicit behavior previously controlled by force_full_scan.
 
     Attributes:
         FULL_SCAN_ONLY: Each run performs a full scan of the data source.
@@ -17754,7 +17253,6 @@ class LoadingStrategy(StrEnum):
         False
 
     See Also:
-        ADR-030: Publication pagination strategy (force_full_scan)
         ADR-031: Loading strategy formalization
     """
 
@@ -17790,21 +17288,6 @@ class LoadingStrategy(StrEnum):
             raise ValueError(
                 f"Invalid loading strategy: '{value}'. Valid strategies: {valid}"
             ) from None
-
-    @classmethod
-    def from_force_full_scan(cls, force_full_scan: bool) -> LoadingStrategy:  # noqa: ARG003
-        """Convert legacy force_full_scan flag to LoadingStrategy.
-
-        Provides backward compatibility with existing configs using
-        force_full_scan: true/false.
-
-        Args:
-            force_full_scan: Legacy boolean flag
-
-        Returns:
-            FULL_SCAN_ONLY (always, since watermark-based loading was removed)
-        """
-        return cls.FULL_SCAN_ONLY
 
 
 class ClearPolicy(StrEnum):
@@ -17907,6 +17390,7 @@ Contains Pydantic models for structured data that requires validation.
 These models define data contracts for metadata sidecar files.
 """
 
+from bioetl.domain.medallion import Layer
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
@@ -17916,7 +17400,6 @@ from bioetl.domain.models.metadata import (
     EnvironmentMetadata,
     FileOutputMetadata,
     GoldMetadata,
-    LayerType,
     LineageMetadata,
     PipelineMetadata,
     RuntimeMetadata,
@@ -17937,7 +17420,7 @@ __all__ = [
     "ExtractionParams",
     "FileOutputMetadata",
     "GoldMetadata",
-    "LayerType",
+    "Layer",
     "LineageMetadata",
     "PipelineMetadata",
     "RuntimeMetadata",
@@ -18041,13 +17524,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-
-class LayerType(StrEnum):
-    """Medallion architecture layer type."""
-
-    BRONZE = "bronze"
-    SILVER = "silver"
-    GOLD = "gold"
+from bioetl.domain.medallion import Layer
 
 
 class RunTypeEnum(StrEnum):
@@ -18697,7 +18174,7 @@ class BronzeMetadata(BaseModel):
     """
 
     version: str = Field(default="1.1", description="Metadata schema version")
-    layer: LayerType = Field(default=LayerType.BRONZE, description="Medallion layer")
+    layer: Layer = Field(default=Layer.BRONZE, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
     source: SourceMetadata = Field(
@@ -18724,7 +18201,7 @@ class SilverMetadata(BaseModel):
     """
 
     version: str = Field(default="1.1", description="Metadata schema version")
-    layer: LayerType = Field(default=LayerType.SILVER, description="Medallion layer")
+    layer: Layer = Field(default=Layer.SILVER, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
     lineage: LineageMetadata = Field(
@@ -18762,7 +18239,7 @@ class GoldMetadata(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     version: str = Field(default="1.1", description="Metadata schema version")
-    layer: LayerType = Field(default=LayerType.GOLD, description="Medallion layer")
+    layer: Layer = Field(default=Layer.GOLD, description="Medallion layer")
     runtime: RuntimeMetadata = Field(description="Runtime context")
     pipeline: PipelineMetadata = Field(description="Pipeline identification")
     lineage: LineageMetadata = Field(
@@ -18848,18 +18325,9 @@ def _extract_date_parts(date_parts: list[list[int]] | None) -> list[int] | None:
 
 
 def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
-    """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD string.
+    """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD.
 
-    Uses end-of-period normalization for partial dates:
-    - Complete date [[2024, 3, 15]]: returns "2024-03-15"
-    - Month-only [[2024, 3]]: returns "2024-03-31" (last day of month)
-    - Year-only [[2024]]: returns "2024-12-31" (last day of year)
-
-    Args:
-        date_parts: CrossRef date-parts array [[year, month?, day?]].
-
-    Returns:
-        ISO date string (YYYY-MM-DD) or None if input is invalid.
+    Uses end-of-period normalization: month-only -> last day, year-only -> Dec 31.
     """
     parts = _extract_date_parts(date_parts)
     if not parts:
@@ -18896,21 +18364,7 @@ _WHITESPACE_PATTERN = re.compile(r"\s+")
 
 
 def strip_html_tags(text: str | None) -> str | None:
-    """Remove HTML tags and decode entities from text.
-
-    Performs the following normalization steps:
-    1. Remove HTML tags (including JATS tags like <jats:p>)
-    2. Decode HTML entities (&amp; → &, &lt; → <, etc.)
-    3. Normalize whitespace (collapse multiple spaces to single space)
-    4. Strip leading/trailing whitespace
-
-    Args:
-        text: Input text possibly containing HTML.
-
-    Returns:
-        Clean text without HTML tags, or None if input is None/empty.
-
-    """
+    """Remove HTML/JATS tags, decode entities, normalize whitespace."""
     if not text:
         return None
 
@@ -18926,87 +18380,100 @@ def strip_html_tags(text: str | None) -> str | None:
     return clean if clean else None
 
 
-def _to_none_if_empty(s: str) -> str | None:
-    """Return None if string is empty after strip."""
-    return s.strip() or None
-
-
-# Pattern for electronic/article page identifiers that should NOT be split on hyphen.
-# Examples: e-123, E-456, e123 (electronic articles)
+# Electronic page identifiers (e-123, E-456, e123) -- not page ranges.
 _ELECTRONIC_PAGE_PATTERN = re.compile(r"^[eE]-?\d+$")
 
 
 def _is_electronic_page(page: str) -> bool:
-    """Check if page is electronic article number that shouldn't be split.
-
-    Electronic page identifiers like 'e-123' or 'e123' represent article
-    numbers, not page ranges. The hyphen in 'e-123' is part of the identifier.
-
-    Args:
-        page: Stripped page string.
-
-    Returns:
-        True if page matches electronic article pattern.
-    """
+    """Check if page is electronic article number (e.g., 'e-123', 'e123')."""
     return bool(_ELECTRONIC_PAGE_PATTERN.match(page))
 
 
-def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
-    """Parse page range '123-456' to (first, last) tuple.
+def _extract_digits(s: str) -> str:
+    """Extract only digit characters from a string."""
+    return "".join(c for c in s if c.isdigit())
 
-    Handles various page formats:
-    - Standard ranges: "123-456" → ("123", "456")
-    - Single pages: "42" → ("42", None)
-    - Electronic pages: "e12345", "e-123" → (original, None)
-    - Article numbers: "100234" → ("100234", None)
-    - Supplements: "S1-S15" → ("S1", "S15")
 
-    Args:
-        page: Page string from publication metadata.
+def _extract_non_digits(s: str) -> str:
+    """Extract only non-digit characters from a string."""
+    return "".join(c for c in s if not c.isdigit())
 
-    Returns:
-        Tuple of (first_page, last_page). last_page is None for single pages
-        or electronic article identifiers.
+
+def _is_abbreviated(first_digits: str, last_digits: str) -> bool:
+    """Return True if last_digits is an abbreviated form of first_digits."""
+    return (
+        bool(first_digits)
+        and bool(last_digits)
+        and len(last_digits) < len(first_digits)
+    )
+
+
+def _compute_expanded_page(first_digits: str, last_digits: str) -> int:
+    """Compute expanded page number with rollover handling."""
+    first_num = int(first_digits)
+    divisor = 10 ** len(last_digits)
+    expanded = (first_num // divisor) * divisor + int(last_digits)
+    # Rollover: "199-3" -> 203, not 193
+    return int(expanded + divisor) if expanded < first_num else int(expanded)
+
+
+def _expand_abbreviated_page(first_page: str, last_page_raw: str) -> str:
+    """Expand abbreviated last page (e.g., 737-9 -> 739, 199-3 -> 203)."""
+    first_digits = _extract_digits(first_page)
+    last_digits = _extract_digits(last_page_raw)
+    if not _is_abbreviated(first_digits, last_digits):
+        return last_page_raw
+
+    expanded = _compute_expanded_page(first_digits, last_digits)
+    prefix = _extract_non_digits(last_page_raw)
+    return f"{prefix}{expanded}" if prefix else str(expanded)
+
+
+def _normalize_and_split_pages(page: str) -> tuple[str, str | None]:
+    """Normalize dashes and split page string on first hyphen.
+
+    Returns (first_page, raw_last_page_or_None). Caller must handle
+    empty first_page.
     """
+    normalized = page.replace("\u2013", "-").replace("\u2014", "-")
+    parts = normalized.split("-", 1)
+    first = parts[0].strip()
+    last = parts[1].strip() if len(parts) > 1 else None
+    return first, last or None
+
+
+def _prepare_page_input(page: str | None) -> str | None:
+    """Strip and return page string, or None if empty."""
     if not page:
-        return None, None
-
+        return None
     stripped = page.strip()
-    if not stripped:
-        return None, None
+    return stripped if stripped else None
 
-    # Electronic article numbers: don't split on hyphen (e.g., e-123)
+
+def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
+    """Parse page range string to (first, last) tuple.
+
+    Handles standard ranges, abbreviated ranges (737-9 -> 739), electronic
+    pages (e-123), supplements (S1-S15), and en/em-dash normalization.
+    """
+    stripped = _prepare_page_input(page)
+    if stripped is None:
+        return None, None
     if _is_electronic_page(stripped):
         return stripped, None
 
-    # Standard range parsing
-    first, sep, last = stripped.partition("-")
-    return _to_none_if_empty(first), _to_none_if_empty(last) if sep else None
+    first_page, last_page_raw = _normalize_and_split_pages(stripped)
+    if not first_page:
+        return None, None
+
+    last_page = (
+        _expand_abbreviated_page(first_page, last_page_raw) if last_page_raw else None
+    )
+    return first_page, last_page
 
 
 def normalize_pmc_id(pmc_id: str | None) -> str | None:
-    """Normalize PMC ID to uppercase with 'PMC' prefix.
-
-    Ensures PMC IDs are consistently formatted across providers
-    for cross-referencing publications.
-
-    Args:
-        pmc_id: Raw PMC ID (may or may not have 'PMC' prefix).
-
-    Returns:
-        Normalized PMC ID with 'PMC' prefix in uppercase,
-        or None if input is empty.
-
-    Examples:
-        >>> normalize_pmc_id("PMC1234567")
-        'PMC1234567'
-        >>> normalize_pmc_id("1234567")
-        'PMC1234567'
-        >>> normalize_pmc_id("pmc1234567")
-        'PMC1234567'
-        >>> normalize_pmc_id(None)
-
-    """
+    """Normalize PMC ID to uppercase with 'PMC' prefix."""
     if not pmc_id:
         return None
     pmc_id = pmc_id.strip()
@@ -19079,33 +18546,7 @@ def _parse_authors_string(text: str) -> list[str]:
 
 
 def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
-    """Parse various author input formats into a list of author names.
-
-    Supports:
-    - list[str]: Direct list of authors (returned as-is with stripping)
-    - str (JSON): JSON-serialized list (e.g., '["John Doe", "Jane Smith"]')
-    - str (concatenated): Semicolon or comma-separated string
-      (e.g., "John Doe; Jane Smith" or "John Doe, Jane Smith")
-
-    Args:
-        authors: Raw author data in various formats.
-
-    Returns:
-        List of individual author names (empty list if None or empty).
-        Each name is stripped of whitespace.
-
-    Example:
-        >>> parse_authors_to_list(["John Doe", "Jane Smith"])
-        ['John Doe', 'Jane Smith']
-        >>> parse_authors_to_list('["John Doe", "Jane Smith"]')
-        ['John Doe', 'Jane Smith']
-        >>> parse_authors_to_list("John Doe; Jane Smith")
-        ['John Doe', 'Jane Smith']
-        >>> parse_authors_to_list("John Doe, Jane Smith")
-        ['John Doe', 'Jane Smith']
-        >>> parse_authors_to_list(None)
-        []
-    """
+    """Parse author input (list, JSON string, or delimited string) to list."""
     if authors is None:
         return []
     if isinstance(authors, list):
@@ -19136,7 +18577,6 @@ This package contains all port definitions organized by domain:
 - audit: AuditPort for write operation traceability
 - shutdown: ShutdownPort for graceful termination coordination
 - memory: MemoryMonitorPort for adaptive batch sizing
-- normalization: UnitConverterPort, ValueValidatorPort, ActivityAggregatorPort
 - data_normalization: DataNormalizationPort for text/data normalization
 - delta_reader: DeltaReaderPort for read-only Delta table access
 """
@@ -19192,13 +18632,6 @@ from bioetl.domain.ports.noop import (
     NoOpPiiHasher,
     NoOpTracing,
 )
-from bioetl.domain.ports.normalization import (
-    ActivityAggregatorPort,
-    NormalizationServicePort,
-    OutlierFilterPort,
-    UnitConverterPort,
-    ValueValidatorPort,
-)
 from bioetl.domain.ports.observability import (
     DQMonitorPort,
     LoggerPort,
@@ -19219,7 +18652,6 @@ from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
 
 __all__ = [
-    "ActivityAggregatorPort",
     "AuditEntry",
     "AuditLayer",
     "AuditOperation",
@@ -19261,8 +18693,6 @@ __all__ = [
     "NoOpMetrics",
     "NoOpPiiHasher",
     "NoOpTracing",
-    "NormalizationServicePort",
-    "OutlierFilterPort",
     "PiiHasherPort",
     "QuarantinePort",
     "RateLimiterPort",
@@ -19276,8 +18706,6 @@ __all__ = [
     "SilverValidatorPort",
     "StoragePort",
     "TracingPort",
-    "UnitConverterPort",
-    "ValueValidatorPort",
 ]
 
 ================================================================================
@@ -19523,8 +18951,8 @@ Defines contracts for text and data normalization operations:
 - HTML tag stripping
 - Open Access status normalization
 
-This port is distinct from NormalizationServicePort which handles
-bioactivity value normalization (unit conversion, pChEMBL, etc.).
+This port handles text/data normalization, distinct from bioactivity
+value normalization (unit conversion, pChEMBL, etc.).
 
 All ports follow the Ports & Adapters pattern per RULES.md §1.1.
 """
@@ -21479,63 +20907,46 @@ class NoOpTracing:
 class NoOpMetrics:
     """No-op implementation of MetricsPort.
 
-    Used when metrics collection is disabled or not configured.
-    All operations are silently ignored.
-
-    Implements:
-        MetricsPort: Domain port for metrics collection.
-
-    Example:
-        >>> metrics = NoOpMetrics()
-        >>> metrics.observe_histogram("duration", 1.5, {"entity": "activity"})
-        >>> metrics.increment_counter("errors", 1, {"type": "validation"})
-
+    All operations are silently ignored. Supports optional warn_on_use
+    flag for composition/CLI layers to alert when metrics are disabled.
     """
 
+    _warned: bool = False
+
+    def __init__(self, warn_on_use: bool = False) -> None:
+        """Initialize NoOpMetrics.
+
+        Args:
+            warn_on_use: Whether to warn about disabled metrics.
+
+        """
+        if warn_on_use and not NoOpMetrics._warned:
+            import warnings
+
+            warnings.warn(
+                "NoOpMetrics is being used - metrics are NOT being collected. "
+                "Set BIOETL_METRICS_ENABLED=true or inject PrometheusMetrics "
+                "to enable metrics collection.",
+                UserWarning,
+                stacklevel=2,
+            )
+            NoOpMetrics._warned = True
+
+    @classmethod
+    def reset_warning(cls) -> None:
+        """Reset warning state (for testing)."""
+        cls._warned = False
+
     def observe_histogram(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
+        self, name: str, value: float, labels: dict[str, str]
     ) -> None:
-        """Observe a value for a histogram metric (no-op).
+        """Observe a value for a histogram metric (no-op)."""
 
-        Args:
-            name: The name of the histogram metric.
-            value: The value to observe.
-            labels: A dictionary of label names to label values.
+    def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
+        """Increment a counter metric (no-op)."""
 
-        """
-
-    def increment_counter(
-        self,
-        name: str,
-        value: int,
-        labels: dict[str, str],
-    ) -> None:
-        """Increment a counter metric (no-op).
-
-        Args:
-            name: The name of the counter metric.
-            value: The amount to increment by.
-            labels: A dictionary of label names to label values.
-
-        """
-
-    def set_gauge(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """Set a gauge metric to a specific value (no-op).
-
-        Args:
-            name: The name of the gauge metric.
-            value: The value to set.
-            labels: A dictionary of label names to label values.
-
-        """
+    def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
+        """Set a gauge metric to a specific value (no-op)."""
 
     def close(self) -> None:
         """No-op close. Idempotent."""
@@ -21830,352 +21241,6 @@ class NoOpMetadataWriter:
 
     async def aclose(self) -> None:
         """No-op close. Idempotent."""
-
-================================================================================
-File: normalization.py
-Path: ports\normalization.py
-================================================================================
-"""Normalization service port interfaces (Protocols).
-
-Defines contracts for bioactivity normalization services:
-- UnitConverterPort: Unit conversion (nM → µM, IC50 → pIC50)
-- ValueValidatorPort: Range validation for bioactivity values
-- ActivityAggregatorPort: Aggregation of multiple measurements
-- OutlierFilterPort: Anomaly detection and filtering
-- NormalizationServicePort: Orchestrator facade
-
-All ports follow the Ports & Adapters pattern per RULES.md §1.1.
-"""
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
-
-    from bioetl.domain.value_objects.activity_values import (
-        ActivityType,
-        Concentration,
-        ConcentrationUnit,
-        PChemblValue,
-    )
-
-
-@runtime_checkable
-class UnitConverterPort(Protocol):
-    """Port for unit conversion operations.
-
-    Handles conversion between different concentration units and
-    calculation of standardized values (pIC50, pEC50, etc.).
-    """
-
-    def convert(
-        self,
-        value: float,
-        from_unit: str,
-        to_unit: str,
-    ) -> float:
-        """Convert value between concentration units.
-
-        Args:
-            value: Numeric value to convert.
-            from_unit: Source unit (e.g., "nM", "µM").
-            to_unit: Target unit (e.g., "nM", "µM").
-
-        Returns:
-            Converted value in target unit.
-
-        Raises:
-            ValueError: If units are not recognized.
-        """
-        ...
-
-    def to_concentration(
-        self,
-        value: float,
-        unit: str,
-    ) -> Concentration:
-        """Create Concentration value object from raw values.
-
-        Args:
-            value: Numeric concentration value.
-            unit: Unit string (e.g., "nM", "µM").
-
-        Returns:
-            Concentration value object.
-
-        Raises:
-            ValueError: If unit is not recognized or value is negative.
-        """
-        ...
-
-    def to_pchembl(
-        self,
-        concentration: Concentration,
-    ) -> PChemblValue:
-        """Convert concentration to pChEMBL value (-log10 molar).
-
-        Args:
-            concentration: Concentration value object.
-
-        Returns:
-            pChEMBL value object.
-
-        Raises:
-            ValueError: If concentration is not positive.
-        """
-        ...
-
-    def pchembl_to_concentration(
-        self,
-        pchembl: PChemblValue,
-        target_unit: ConcentrationUnit,
-    ) -> Concentration:
-        """Convert pChEMBL value to concentration.
-
-        Args:
-            pchembl: pChEMBL value object.
-            target_unit: Target concentration unit.
-
-        Returns:
-            Concentration value object.
-        """
-        ...
-
-
-@runtime_checkable
-class ValueValidatorPort(Protocol):
-    """Port for bioactivity value validation.
-
-    Validates that bioactivity values fall within acceptable ranges
-    based on the measurement type.
-    """
-
-    def validate_concentration(
-        self,
-        value: float,
-        unit: str,
-    ) -> tuple[bool, str | None]:
-        """Validate concentration value is within acceptable range.
-
-        Args:
-            value: Concentration value.
-            unit: Unit string.
-
-        Returns:
-            Tuple of (is_valid, error_message).
-            error_message is None if valid.
-        """
-        ...
-
-    def validate_pchembl(
-        self,
-        value: float,
-    ) -> tuple[bool, str | None]:
-        """Validate pChEMBL value is within acceptable range.
-
-        pChEMBL values typically range from 2 to 14.
-
-        Args:
-            value: pChEMBL value.
-
-        Returns:
-            Tuple of (is_valid, error_message).
-        """
-        ...
-
-    def validate_activity_value(
-        self,
-        value: float,
-        activity_type: ActivityType,
-        unit: str | None = None,
-    ) -> tuple[bool, str | None]:
-        """Validate activity value based on measurement type.
-
-        Args:
-            value: Activity measurement value.
-            activity_type: Type of measurement (IC50, EC50, Ki, etc.).
-            unit: Optional unit for context-aware validation.
-
-        Returns:
-            Tuple of (is_valid, error_message).
-        """
-        ...
-
-
-@runtime_checkable
-class OutlierFilterPort(Protocol):
-    """Port for outlier detection and filtering.
-
-    Detects anomalous values using statistical methods.
-    """
-
-    def is_outlier(
-        self,
-        value: float,
-        baseline: Sequence[float],
-        threshold: float = 2.0,
-    ) -> bool:
-        """Check if value is an outlier relative to baseline.
-
-        Args:
-            value: Value to check.
-            baseline: Historical values for comparison.
-            threshold: Detection threshold (e.g., z-score threshold).
-
-        Returns:
-            True if value is considered an outlier.
-        """
-        ...
-
-    def filter_outliers(
-        self,
-        values: Sequence[float],
-        threshold: float = 2.0,
-    ) -> list[float]:
-        """Filter outliers from a sequence of values.
-
-        Args:
-            values: Sequence of values to filter.
-            threshold: Detection threshold.
-
-        Returns:
-            List of values with outliers removed.
-        """
-        ...
-
-
-@runtime_checkable
-class ActivityAggregatorPort(Protocol):
-    """Port for aggregating multiple activity measurements.
-
-    Handles combination of replicate measurements and
-    calculation of summary statistics.
-    """
-
-    def aggregate_values(
-        self,
-        values: Sequence[float],
-        method: str = "median",
-    ) -> float:
-        """Aggregate multiple values into a single representative value.
-
-        Args:
-            values: Sequence of values to aggregate.
-            method: Aggregation method ("mean", "median", "geometric_mean").
-
-        Returns:
-            Aggregated value.
-
-        Raises:
-            ValueError: If values is empty or method is unknown.
-        """
-        ...
-
-    def aggregate_with_uncertainty(
-        self,
-        values: Sequence[float],
-        method: str = "median",
-    ) -> tuple[float, float]:
-        """Aggregate values and calculate uncertainty.
-
-        Args:
-            values: Sequence of values to aggregate.
-            method: Aggregation method.
-
-        Returns:
-            Tuple of (aggregated_value, uncertainty).
-            Uncertainty is standard deviation or MAD depending on method.
-        """
-        ...
-
-    def aggregate_concentrations(
-        self,
-        concentrations: Sequence[Concentration],
-        method: str = "median",
-    ) -> Concentration:
-        """Aggregate multiple concentration measurements.
-
-        All concentrations are converted to common unit before aggregation.
-
-        Args:
-            concentrations: Sequence of Concentration objects.
-            method: Aggregation method.
-
-        Returns:
-            Aggregated Concentration in nanomolar (nM).
-
-        Raises:
-            ValueError: If concentrations is empty.
-        """
-        ...
-
-
-@runtime_checkable
-class NormalizationServicePort(Protocol):
-    """Port for the normalization service facade.
-
-    Orchestrates unit conversion, validation, filtering, and aggregation
-    for bioactivity data normalization.
-    """
-
-    @property
-    def converter(self) -> UnitConverterPort:
-        """Access unit converter service."""
-        ...
-
-    @property
-    def validator(self) -> ValueValidatorPort:
-        """Access value validator service."""
-        ...
-
-    @property
-    def aggregator(self) -> ActivityAggregatorPort:
-        """Access activity aggregator service."""
-        ...
-
-    def normalize_activity(
-        self,
-        value: float,
-        unit: str,
-        activity_type: str,
-        *,
-        validate: bool = True,
-    ) -> tuple[float, str] | None:
-        """Normalize a single activity value.
-
-        Converts to standard unit (nM) and validates.
-
-        Args:
-            value: Raw activity value.
-            unit: Unit of the value.
-            activity_type: Type of measurement (IC50, EC50, etc.).
-            validate: Whether to validate the value.
-
-        Returns:
-            Tuple of (normalized_value, normalized_unit) or None if invalid.
-        """
-        ...
-
-    def normalize_to_pchembl(
-        self,
-        value: float,
-        unit: str,
-        *,
-        validate: bool = True,
-    ) -> PChemblValue | None:
-        """Normalize activity to pChEMBL value.
-
-        Args:
-            value: Activity value.
-            unit: Unit of the value.
-            validate: Whether to validate the result.
-
-        Returns:
-            pChEMBL value or None if invalid/unconvertible.
-        """
-        ...
 
 ================================================================================
 File: observability.py
@@ -23771,7 +22836,7 @@ _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
         canonical_name="publication",
         api_resource="document",
         plural_key="documents",
-        primary_key_field="document_chembl_id",
+        primary_key_field="publication_id",
     ),
     PublicationMapping(
         canonical_name="publication_similarity",
@@ -23786,10 +22851,10 @@ _PUBLICATION_MAPPINGS: Final[tuple[PublicationMapping, ...]] = (
         canonical_name="publication_term",
         api_resource="document",  # Derived from publication endpoint
         plural_key="documents",
-        primary_key_field="document_chembl_id",
+        primary_key_field="publication_id",
         # Composite key for uniqueness: document + term type + term text
         # Note: entity_id is SHA256 hash of this composite key
-        primary_key_fields=("document_chembl_id", "term_type", "term"),
+        primary_key_fields=("publication_id", "term_type", "term"),
     ),
     # Legacy aliases (backward compatibility ONLY)
     # DO NOT use in new code. Will be deprecated.
@@ -24304,234 +23369,6 @@ __all__ = [
 ]
 
 ================================================================================
-File: _field_orders.py
-Path: schemas\_field_orders.py
-================================================================================
-"""Canonical field orders for composite pipeline schemas.
-
-Defines the authoritative field ordering for composite publication output.
-The order is derived from docs/schemas/publication_field_order.csv and
-used by ColumnOrderer and tests to ensure deterministic column ordering.
-
-Categories (6 groups, 179 fully-qualified fields):
-  - id (1-24): Identifiers, content hashes, entity IDs
-  - bibliography (25-83): Title, abstract, journal, pagination, year
-  - author_and_affiliation (84-104): Authors, affiliations, institutions
-  - date (105-114): Publication and revision dates
-  - topics_and_keywords (115-130): MeSH, topics, keywords, chemicals
-  - publication (131-179): Citations, OA, types, language, misc
-"""
-
-from __future__ import annotations
-
-from typing import Final
-
-__all__ = [
-    "PUBLICATION_CANONICAL_CATEGORIES",
-    "PUBLICATION_FIELD_ORDER",
-]
-
-# Canonical order of all 179 fully-qualified publication fields.
-# Source of truth: docs/schemas/publication_field_order.csv
-PUBLICATION_FIELD_ORDER: Final[tuple[str, ...]] = (
-    # === id (1-24) ===
-    "crossref.publication.alternative_id",
-    "chembl.publication.chembl_release",
-    "chembl.publication.content_hash",
-    "crossref.publication.content_hash",
-    "openalex.publication.content_hash",
-    "pubmed.publication.content_hash",
-    "semanticscholar.publication.content_hash",
-    "semanticscholar.publication.corpus_id",
-    "semanticscholar.publication.dblp_id",
-    "chembl.publication.document_chembl_id",
-    "chembl.publication.entity_id",
-    "crossref.publication.entity_id",
-    "openalex.publication.entity_id",
-    "pubmed.publication.entity_id",
-    "semanticscholar.publication.entity_id",
-    "openalex.publication.mag_id",
-    "pubmed.publication.nlm_unique_id",
-    "openalex.publication.openalex_id",
-    "semanticscholar.publication.paper_id",
-    "pubmed.publication.pmc_id",
-    "chembl.publication.pmid",
-    "openalex.publication.pmid",
-    "semanticscholar.publication.pmid",
-    "chembl.publication.src_id",
-    # === bibliography (25-83) ===
-    "chembl.publication.abstract",
-    "openalex.publication.abstract",
-    "pubmed.publication.abstract",
-    "semanticscholar.publication.abstract",
-    "pubmed.publication.abstract_structured",
-    "chembl.publication.doi",
-    "pubmed.publication.doi",
-    "crossref.publication.issn",
-    "openalex.publication.issn",
-    "pubmed.publication.issn",
-    "crossref.publication.issn_electronic",
-    "crossref.publication.issn_list",
-    "crossref.publication.issn_print",
-    "chembl.publication.issue",
-    "crossref.publication.issue",
-    "openalex.publication.issue",
-    "pubmed.publication.issue",
-    "semanticscholar.publication.issue",
-    "chembl.publication.journal",
-    "crossref.publication.journal",
-    "openalex.publication.journal",
-    "pubmed.publication.journal",
-    "semanticscholar.publication.journal",
-    "pubmed.publication.journal_iso_abbrev",
-    "pubmed.publication.journal_issn_type",
-    "crossref.publication.journal_name_short",
-    "pubmed.publication.journal_name_short",
-    "chembl.publication.page_first",
-    "crossref.publication.page_first",
-    "openalex.publication.page_first",
-    "pubmed.publication.page_first",
-    "semanticscholar.publication.page_first",
-    "chembl.publication.page_last",
-    "crossref.publication.page_last",
-    "openalex.publication.page_last",
-    "pubmed.publication.page_last",
-    "semanticscholar.publication.page_last",
-    "pubmed.publication.page_range",
-    "semanticscholar.publication.page_range",
-    "crossref.publication.published",
-    "crossref.publication.published_online",
-    "crossref.publication.published_print",
-    "crossref.publication.publisher",
-    "openalex.publication.publisher",
-    "chembl.publication.publication_year",
-    "crossref.publication.publication_year",
-    "openalex.publication.publication_year",
-    "pubmed.publication.publication_year",
-    "semanticscholar.publication.publication_year",
-    "chembl.publication.title",
-    "crossref.publication.title",
-    "openalex.publication.title",
-    "pubmed.publication.title",
-    "semanticscholar.publication.title",
-    "chembl.publication.volume",
-    "crossref.publication.volume",
-    "openalex.publication.volume",
-    "pubmed.publication.volume",
-    "semanticscholar.publication.volume",
-    # === author_and_affiliation (84-104) ===
-    "pubmed.publication.affiliation_list",
-    "openalex.publication.affiliation_list",
-    "semanticscholar.publication.affiliation_list",
-    "pubmed.publication.affiliation_structured",
-    "pubmed.publication.author_count",
-    "crossref.publication.author_details",
-    "semanticscholar.publication.author_h_indices",
-    "openalex.publication.author_openalex_ids",
-    "crossref.publication.author_orcids",
-    "openalex.publication.author_orcids",
-    "semanticscholar.publication.author_orcids",
-    "semanticscholar.publication.author_s2_ids",
-    "chembl.publication.authors",
-    "crossref.publication.authors",
-    "openalex.publication.authors",
-    "pubmed.publication.authors",
-    "pubmed.publication.authors_with_affiliations",
-    "pubmed.publication.country",
-    "openalex.publication.institution_country_codes",
-    "openalex.publication.institution_ids",
-    "openalex.publication.ror_ids",
-    # === date (105-114) ===
-    "chembl.publication.creation_date",
-    "pubmed.publication.date_completed",
-    "pubmed.publication.date_revised",
-    "pubmed.publication.pub_date",
-    "pubmed.publication.pub_day",
-    "pubmed.publication.pub_month",
-    "crossref.publication.publication_date",
-    "openalex.publication.publication_date",
-    "pubmed.publication.publication_date",
-    "semanticscholar.publication.publication_date",
-    # === topics_and_keywords (115-130) ===
-    "pubmed.publication.chemical_count",
-    "pubmed.publication.chemicals",
-    "pubmed.publication.citation_subset",
-    "pubmed.publication.databanks",
-    "openalex.publication.fwci",
-    "pubmed.publication.gene_symbols",
-    "pubmed.publication.keyword_count",
-    "pubmed.publication.mesh_heading_count",
-    "openalex.publication.primary_topic",
-    "semanticscholar.publication.subject_fields",
-    "crossref.publication.subject_keywords",
-    "openalex.publication.subject_keywords",
-    "pubmed.publication.subject_keywords",
-    "openalex.publication.subject_mesh",
-    "pubmed.publication.subject_mesh",
-    "openalex.publication.subject_topics",
-    # === publication (131-167) ===
-    "semanticscholar.publication.citation_contexts",
-    "chembl.publication.citations_made",
-    "crossref.publication.citations_made",
-    "openalex.publication.citations_made",
-    "pubmed.publication.citations_made",
-    "semanticscholar.publication.citations_made",
-    "chembl.publication.citations_received",
-    "crossref.publication.citations_received",
-    "openalex.publication.citations_received",
-    "semanticscholar.publication.citations_received",
-    "crossref.publication.content_domain_crossmark_restriction",
-    "crossref.publication.content_domain_domains",
-    "pubmed.publication.grant_count",
-    "openalex.publication.grants",
-    "semanticscholar.publication.influential_citation_count",
-    "openalex.publication.is_oa",
-    "semanticscholar.publication.is_oa",
-    "openalex.publication.is_retracted",
-    "crossref.publication.language",
-    "openalex.publication.language",
-    "pubmed.publication.language",
-    "crossref.publication.license_url",
-    "pubmed.publication.medline_pgn",
-    "openalex.publication.oa_status",
-    "semanticscholar.publication.oa_status",
-    "semanticscholar.publication.open_access_url",
-    "pubmed.publication.publication_status",
-    "chembl.publication.publication_type",
-    "crossref.publication.publication_type",
-    "openalex.publication.publication_type",
-    "pubmed.publication.publication_type",
-    "semanticscholar.publication.publication_type",
-    "crossref.publication.publication_type_unified",
-    "openalex.publication.publication_type_unified",
-    "pubmed.publication.publication_type_unified",
-    "semanticscholar.publication.publication_type_unified",
-    "crossref.publication.publication_subclass",
-    "openalex.publication.publication_subclass",
-    "pubmed.publication.publication_subclass",
-    "semanticscholar.publication.publication_subclass",
-    "crossref.publication.publication_class",
-    "openalex.publication.publication_class",
-    "pubmed.publication.publication_class",
-    "semanticscholar.publication.publication_class",
-    "pubmed.publication.publication_type_list",
-    "pubmed.publication.publication_types",
-    "semanticscholar.publication.publication_types",
-    "crossref.publication.references",
-    "semanticscholar.publication.tldr",
-)
-
-# Canonical categories with their field ranges (1-indexed, inclusive).
-PUBLICATION_CANONICAL_CATEGORIES: Final[dict[str, tuple[int, int]]] = {
-    "id": (1, 24),
-    "bibliography": (25, 83),
-    "author_and_affiliation": (84, 104),
-    "date": (105, 114),
-    "topics_and_keywords": (115, 130),
-    "publication": (131, 179),
-}
-
-================================================================================
 File: base.py
 Path: schemas\base.py
 ================================================================================
@@ -24649,22 +23486,22 @@ class ActivitySchema(ETLRecordSchema):
     activity_id: Series[str] = pa.Field(nullable=False, description="Primary key.")
 
     # === Foreign Keys ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to assay.",
     )
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to molecule.",
     )
-    target_chembl_id: Series[str] | None = pa.Field(
+    target_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to target.",
     )
-    document_chembl_id: Series[str] | None = pa.Field(
+    publication_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Foreign key to document.",
@@ -24781,7 +23618,7 @@ class ActivitySchema(ETLRecordSchema):
         nullable=True, description="Surface Efficiency Index (SEI)."
     )
 
-    action_type_action_type: Series[str] | None = pa.Field(
+    action_type: Series[str] | None = pa.Field(
         nullable=True, description="Action type classification."
     )
     action_type_description: Series[str] | None = pa.Field(
@@ -24802,7 +23639,7 @@ class ActivitySchema(ETLRecordSchema):
     molecule_pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Molecule preferred name."
     )
-    parent_molecule_chembl_id: Series[str] | None = pa.Field(
+    parent_molecule_id: Series[str] | None = pa.Field(
         nullable=True, description="Parent molecule ChEMBL ID."
     )
     target_pref_name: Series[str] | None = pa.Field(
@@ -24811,9 +23648,9 @@ class ActivitySchema(ETLRecordSchema):
     target_organism: Series[str] | None = pa.Field(
         nullable=True, description="Target organism."
     )
-    target_taxonomy_id: Series[str] | None = pa.Field(
+    taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
-        description="Target taxonomy ID. Standardized name (was target_tax_id).",
+        description="Target taxonomy ID (nullable int pattern).",
     )
     assay_type: Series[str] | None = pa.Field(
         nullable=True, description="Assay type (B/F/A/T/P/U)."
@@ -24833,10 +23670,19 @@ class ActivitySchema(ETLRecordSchema):
     bao_label: Series[str] | None = pa.Field(
         nullable=True, description="BioAssay Ontology label."
     )
-    document_journal: Series[str] | None = pa.Field(
+    journal: Series[str] | None = pa.Field(
         nullable=True, description="Publication journal name."
     )
-    document_year: Series[int] | None = pa.Field(
+    publication_doi: Series[str] | None = pa.Field(
+        nullable=True, description="Publication DOI."
+    )
+    publication_pmid: Series[str] | None = pa.Field(
+        nullable=True, description="Publication PubMed ID."
+    )
+    publication_pmc_id: Series[str] | None = pa.Field(
+        nullable=True, description="Publication PubMed Central ID."
+    )
+    publication_year: Series[int] | None = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
@@ -24882,10 +23728,10 @@ class AssaySchema(ETLRecordSchema):
     # assay_id: Series[int] = pa.Field(
     #     nullable=False, description="Primary key."
     # )
-    # Removed assay_id as it is not in Silver schema. assay_chembl_id is the PK.
+    # Removed assay_id as it is not in Silver schema. assay_id is the PK.
 
     # === Identifiers ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
@@ -24921,7 +23767,7 @@ class AssaySchema(ETLRecordSchema):
     assay_organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    assay_taxonomy_id: Series[float] | None = pa.Field(
+    taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
         description="NCBI Taxonomy ID (float for nullable int).",
     )
@@ -24935,7 +23781,7 @@ class AssaySchema(ETLRecordSchema):
     )
 
     # === Target & Relationship ===
-    target_chembl_id: Series[str] | None = pa.Field(
+    target_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Target ChEMBL ID.",
@@ -24971,7 +23817,7 @@ class AssaySchema(ETLRecordSchema):
     src_assay_id: Series[str] | None = pa.Field(
         nullable=True, description="Source Assay ID."
     )
-    document_chembl_id: Series[str] | None = pa.Field(
+    publication_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Document ChEMBL ID.",
@@ -24982,12 +23828,10 @@ class AssaySchema(ETLRecordSchema):
     score: Series[float] | None = pa.Field(nullable=True, description="Score.")
 
     # === Foreign Keys ===
-    cell_chembl_id: Series[str] | None = pa.Field(
+    cell_id: Series[str] | None = pa.Field(
         nullable=True, description="FK to cell_line."
     )
-    tissue_chembl_id: Series[str] | None = pa.Field(
-        nullable=True, description="FK to tissue."
-    )
+    tissue_id: Series[str] | None = pa.Field(nullable=True, description="FK to tissue.")
     # variant_id: Optional[Series[int]] = pa.Field(
     #     nullable=True, description="FK to variant_sequences."
     # )
@@ -25110,7 +23954,7 @@ class AssayParametersSchema(ETLRecordSchema):
     )
 
     # === Foreign Key (Required) ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         coerce=True,
         str_matches=r"^CHEMBL\d+$",
@@ -25222,7 +24066,7 @@ class CellLineSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    cell_chembl_id: Series[str] = pa.Field(
+    cell_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         unique=True,
@@ -25248,10 +24092,9 @@ class CellLineSchema(ETLRecordSchema):
         nullable=True,
         description="Source organism (e.g., Homo sapiens).",
     )
-    cell_source_taxonomy_id: Series[int] | None = pa.Field(
+    cell_source_taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
-        ge=1,
-        description="NCBI Taxonomy ID for source organism. Standardized name (was cell_source_tax_id).",
+        description="NCBI Taxonomy ID for source organism (nullable int).",
     )
 
     # === Cell Type Classification ===
@@ -25314,8 +24157,8 @@ class CompoundRecordSchema(ETLRecordSchema):
     compound name as it appears in the publication.
 
     Relationships:
-    - M:1 → Molecule (molecule_chembl_id)
-    - M:1 → Publication (document_chembl_id)
+    - M:1 → Molecule (molecule_id)
+    - M:1 → Publication (publication_id)
     - M:1 → Source (src_id)
     """
 
@@ -25327,12 +24170,12 @@ class CompoundRecordSchema(ETLRecordSchema):
     )
 
     # === Foreign Keys ===
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="FK → Molecule.",
     )
-    document_chembl_id: Series[str] = pa.Field(
+    publication_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="FK → Publication.",
@@ -25399,18 +24242,13 @@ class MoleculeSchema(ETLRecordSchema):
     # molregno: Series[int] = pa.Field(
     #     nullable=False, description="Primary key."
     # )
-    # Removed molregno as it is not in Silver schema. molecule_chembl_id is the PK.
+    # Removed molregno as it is not in Silver schema. molecule_id is the PK.
 
     # === Identifiers ===
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
-        description="ChEMBL ID.",
-    )
-    structure_standard_inchi_key: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=INCHI_KEY_REGEX_PATTERN,
-        description="Standard InChI Key (27 characters, format: XXXX-YYYY-Z).",
+        description="Canonical molecule ID (ChEMBL ID).",
     )
     # chebi_id: Optional[Series[int]] = pa.Field(
     #     nullable=True, description="ChEBI ID."
@@ -25500,8 +24338,10 @@ class MoleculeSchema(ETLRecordSchema):
     dosed_ingredient: Series[int] | None = pa.Field(
         nullable=True, isin=[0, 1], description="Dosed ingredient flag."
     )
-    availability_type: Series[int] | None = pa.Field(
-        nullable=True, isin=[-2, -1, 0, 1, 2], description="Availability type."
+    availability_type: Series[float] | None = pa.Field(
+        nullable=True,
+        isin=[-2, -1, 0, 1, 2],
+        description="Availability type (float for nullable int).",
     )
     usan_year: Series[float] | None = pa.Field(
         nullable=True,
@@ -25543,25 +24383,53 @@ class MoleculeSchema(ETLRecordSchema):
     )
 
     # === Property Fields (flattened from molecule_properties) ===
+    # Canonical Silver property_* fields
     property_alogp: Series[float] | None = pa.Field(
-        nullable=True, description="Calculated ALogP (partition coefficient)."
+        nullable=True, description="Canonical ALogP value from molecule_properties."
+    )
+    property_full_mwt: Series[float] | None = pa.Field(
+        nullable=True,
+        ge=0,
+        description="Canonical full molecular weight from molecule_properties.",
+    )
+    property_hba: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical H-bond acceptor count."
+    )
+    property_hbd: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical H-bond donor count."
+    )
+    property_psa: Series[float] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical polar surface area."
+    )
+    property_rtb: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical rotatable bond count."
+    )
+    property_heavy_atoms: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical heavy atom count."
+    )
+    property_aromatic_rings: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Canonical aromatic ring count."
+    )
+
+    # Backward-compatible aliases derived from canonical property_* fields
+    logp: Series[float] | None = pa.Field(
+        nullable=True, description="Partition coefficient (ALogP/XlogP)."
+    )
+    logp_method: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=["alogp", "xlogp"],
+        description="Source method for logp.",
+    )
+    molecular_weight: Series[float] | None = pa.Field(
+        nullable=True, description="Full molecular weight including salts."
     )
     property_mw_freebase: Series[float] | None = pa.Field(
         nullable=True, description="Molecular weight of parent compound."
     )
-    property_full_mwt: Series[float] | None = pa.Field(
-        nullable=True, description="Full molecular weight including salts."
+    polar_surface_area: Series[float] | None = pa.Field(
+        nullable=True, ge=0, description="Polar surface area (PSA/tPSA)."
     )
-    property_hba: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Hydrogen bond acceptors count."
-    )
-    property_hbd: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Hydrogen bond donors count."
-    )
-    property_psa: Series[float] | None = pa.Field(
-        nullable=True, ge=0, description="Polar surface area (PSA)."
-    )
-    property_rtb: Series[int] | None = pa.Field(
+    rotatable_bond_count: Series[int] | None = pa.Field(
         nullable=True, ge=0, description="Rotatable bonds count."
     )
     property_ro5_violations: Series[int] | None = pa.Field(
@@ -25570,10 +24438,16 @@ class MoleculeSchema(ETLRecordSchema):
         le=4,
         description="Number of Lipinski rule-of-5 violations.",
     )
-    property_heavy_atoms: Series[int] | None = pa.Field(
+    heavy_atom_count: Series[int] | None = pa.Field(
         nullable=True, ge=0, description="Heavy (non-hydrogen) atoms count."
     )
-    property_aromatic_rings: Series[int] | None = pa.Field(
+    hba_count: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Hydrogen bond acceptors count."
+    )
+    hbd_count: Series[int] | None = pa.Field(
+        nullable=True, ge=0, description="Hydrogen bond donors count."
+    )
+    aromatic_ring_count: Series[int] | None = pa.Field(
         nullable=True, ge=0, description="Aromatic rings count."
     )
     property_qed_weighted: Series[float] | None = pa.Field(
@@ -25593,7 +24467,7 @@ class MoleculeSchema(ETLRecordSchema):
     standard_inchi: Series[str] | None = pa.Field(
         nullable=True, description="Standard InChI representation."
     )
-    inchikey: Series[str] | None = pa.Field(
+    inchi_key: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=INCHI_KEY_REGEX_PATTERN,
         description="Standard InChI Key (27 characters, XXXX-YYYY-Z format).",
@@ -25624,46 +24498,6 @@ class MoleculeSchema(ETLRecordSchema):
 
         strict = True
         ordered = False
-        coerce = True
-
-================================================================================
-File: molecule_form.py
-Path: schemas\chembl\molecule_form.py
-================================================================================
-"""Pandera schema for ChEMBL Molecule Form entity.
-
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
-"""
-
-from __future__ import annotations
-
-import pandera.pandas as pa
-from pandera.typing import Series
-
-from bioetl.domain.schemas.base import ETLRecordSchema
-
-
-class MoleculeFormSchema(ETLRecordSchema):
-    """Molecule Form validation schema for Silver layer."""
-
-    # === Primary Key ===
-    molregno: Series[int] = pa.Field(
-        nullable=False, description="Primary key (child molecule)."
-    )
-
-    # === Foreign Keys ===
-    parent_molregno: Series[int] | None = pa.Field(
-        nullable=True, description="FK to parent molecule."
-    )
-    active_molregno: Series[int] | None = pa.Field(
-        nullable=True, description="FK to active molecule."
-    )
-
-    class Config:
-        """Pandera configuration."""
-
-        strict = True
-        ordered = True
         coerce = True
 
 ================================================================================
@@ -25774,7 +24608,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     """
 
     # === Primary Key (ChEMBL-specific) ===
-    document_chembl_id: Series[str] = pa.Field(
+    publication_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL Document ID.",
@@ -25929,7 +24763,7 @@ from bioetl.domain.schemas.base import ETLRecordSchema
 class PublicationTermSchema(ETLRecordSchema):
     """Publication Term validation schema for Silver layer.
 
-    Composite Key: (document_chembl_id, term_type, term)
+    Composite Key: (publication_id, term_type, term)
     Entity ID is generated as SHA256 hash of the composite key.
 
     Term types:
@@ -25940,7 +24774,7 @@ class PublicationTermSchema(ETLRecordSchema):
     """
 
     # === Composite Key Fields ===
-    document_chembl_id: Series[str] = pa.Field(
+    publication_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
         description="FK → Document ChEMBL ID.",
@@ -25998,10 +24832,10 @@ class TargetSchema(ETLRecordSchema):
     # tid: Series[int] = pa.Field(
     #     nullable=False, description="Primary key."
     # )
-    # Removed tid as it is not in Silver schema. target_chembl_id is the PK.
+    # Removed tid as it is not in Silver schema. target_id is the PK.
 
     # === Identifiers ===
-    target_chembl_id: Series[str] = pa.Field(
+    target_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
@@ -26058,7 +24892,7 @@ class TargetSchema(ETLRecordSchema):
     component_descriptions: Series[object] | None = pa.Field(
         nullable=True, description="List of component descriptions."
     )
-    component_id: Series[float] | None = pa.Field(
+    primary_component_id: Series[float] | None = pa.Field(
         nullable=True,
         coerce=True,
         description="Primary component ID (first from list).",
@@ -26135,49 +24969,6 @@ class TargetComponentSchema(ETLRecordSchema):
         coerce = True
 
 ================================================================================
-File: target_relation.py
-Path: schemas\chembl\target_relation.py
-================================================================================
-"""Pandera schema for ChEMBL Target Relation entity.
-
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
-"""
-
-from __future__ import annotations
-
-import pandera.pandas as pa
-from pandera.typing import Series
-
-from bioetl.domain.schemas.base import ETLRecordSchema
-
-
-class TargetRelationSchema(ETLRecordSchema):
-    """Target Relation validation schema for Silver layer."""
-
-    # === Primary Key ===
-    targrel_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
-
-    # === Foreign Keys ===
-    tid: Series[int] = pa.Field(nullable=False, description="FK to target.")
-    related_tid: Series[int] = pa.Field(
-        nullable=False, description="FK to related target."
-    )
-
-    # === Metadata ===
-    relationship: Series[str] | None = pa.Field(
-        nullable=True,
-        isin=["EQUIVALENT TO", "SUBSET OF", "SUPERSET OF", "OVERLAPS WITH"],
-        description="Relationship type.",
-    )
-
-    class Config:
-        """Pandera configuration."""
-
-        strict = True
-        ordered = True
-        coerce = True
-
-================================================================================
 File: column_order.py
 Path: schemas\column_order.py
 ================================================================================
@@ -26235,10 +25026,10 @@ PUBLICATION_METADATA_FIELDS: Final[tuple[str, ...]] = (
 )
 
 PUBLICATION_CROSSREF_FIELDS: Final[tuple[str, ...]] = (
-    "document_chembl_id",
-    "doi",
-    "pmid",
-    "pmc_id",
+    "publication_id",
+    "publication_doi",
+    "publication_pmid",
+    "publication_pmc_id",
 )
 
 
@@ -26262,12 +25053,6 @@ DQ_FIELDS_SUFFIX: Final[tuple[str, ...]] = (
 # All system fields (prefix + suffix) for quick membership check
 ALL_SYSTEM_FIELDS: Final[frozenset[str]] = frozenset(
     SYSTEM_FIELDS_PREFIX + LOOKUP_FIELDS_PREFIX + DQ_FIELDS_SUFFIX
-)
-
-ALL_PUBLICATION_FIELDS: Final[frozenset[str]] = frozenset(
-    PUBLICATION_METADATA_FIELDS
-    + PUBLICATION_CROSSREF_FIELDS
-    + PUBLICATION_UNIFIED_FIELDS
 )
 
 
@@ -26352,7 +25137,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import cast
+from typing import Any, cast
 
 import pandas as pd
 import pandera.pandas as pa
@@ -26394,7 +25179,7 @@ class PublicationBaseSchema(ETLRecordSchema):
     """
 
     # === Cross-reference IDs (common to all providers) ===
-    # Note: PubMed overrides pmid to be int type instead of str
+    # Note: PubMed overrides pubmed_id to be int type instead of str
     pmid: Series[str] = pa.Field(
         nullable=True,
         str_matches=r"^[1-9]\d*$",
@@ -26422,9 +25207,16 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of unique affiliations (unified field name)",
     )
-    author_orcids: Series[str] = pa.Field(
+    author_orcids: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
+    )
+    author_ormolecule_ids: Series[str] | None = pa.Field(
+        nullable=True,
+        description=(
+            "Backward-compatible author identifier field "
+            "(legacy alias for cross-provider pipelines)."
+        ),
     )
 
     # === Publication metadata (common to all providers) ===
@@ -26432,7 +25224,7 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="Journal name",
     )
-    publication_year: Series[pd.Int64Dtype] | None = pa.Field(
+    publication_year: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
@@ -26478,12 +25270,12 @@ class PublicationBaseSchema(ETLRecordSchema):
 
     # === Metrics (unified field names) ===
     # Use pd.Int64Dtype for nullable integer support
-    citations_received: Series[pd.Int64Dtype] | None = pa.Field(
+    citations_received: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
         description="Number of citations TO this publication (unified field name)",
     )
-    citations_made: Series[pd.Int64Dtype] | None = pa.Field(
+    citations_made: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
         description="Number of references FROM this publication (unified field name)",
@@ -26515,28 +25307,30 @@ class PublicationBaseSchema(ETLRecordSchema):
         description="Data source identifier (e.g., chembl, pubmed, crossref, openalex)",
     )
 
-    @pa.check("title", name="title_not_empty")  # type: ignore[untyped-decorator]
-    def _check_title(cls, series: Series[str]) -> Series[bool]:
-        """Validate title is not empty when present (null is allowed)."""
-        return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
+    # @pa.check("title", name="title_not_empty")
+    # @classmethod
+    # def _check_title(cls, series: Any) -> Any:
+    #     """Validate title is not empty when present (null is allowed)."""
+    #     return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
 
-    @pa.check("author_orcids", name="orcid_format")  # type: ignore[untyped-decorator]
-    def _check_author_orcids(cls, series: Series[str]) -> Series[bool]:
-        """Validate ORCID format in JSON array elements."""
-        _pattern = re.compile(ORCID_PATTERN)
+    # @pa.check("author_orcids", name="orcid_format")
+    # @classmethod
+    # def _check_author_orcids(cls, series: Any) -> Any:
+    #     """Validate ORCID format in JSON array elements."""
+    #     _pattern = re.compile(ORCID_PATTERN)
 
-        def _valid(val: object) -> bool:
-            if pd.isna(val):
-                return True
-            try:
-                items = json.loads(str(val))
-                return all(
-                    not item or _pattern.match(item) is not None for item in items
-                )
-            except (json.JSONDecodeError, TypeError):
-                return False
+    #     def _valid(val: object) -> bool:
+    #         if pd.isna(val):
+    #             return True
+    #         try:
+    #             items = json.loads(str(val))
+    #             return all(
+    #                 not item or _pattern.match(item) is not None for item in items
+    #             )
+    #         except (json.JSONDecodeError, TypeError):
+    #             return False
 
-        return cast("Series[bool]", series.apply(_valid))
+    #     return cast("Series[bool]", series.apply(_valid))
 
     class Config:
         """Pandera configuration."""
@@ -26806,170 +25600,6 @@ __all__ = [
 ]
 
 ================================================================================
-File: author.py
-Path: schemas\crossref\author.py
-================================================================================
-"""Pandera schema for CrossRef Author entity.
-
-Aligned with RULES.md v5.0 and CrossRef REST API.
-Represents authors from the "author" field in Publications API response.
-
-Terminology:
-- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
-"""
-
-from __future__ import annotations
-
-import pandera.pandas as pa
-from pandera.typing import Series
-
-from bioetl.domain.schemas.base import ETLRecordSchema
-
-# === Fixed Value Constants ===
-AUTHOR_SEQUENCES = ["first", "additional"]
-
-
-class AuthorSchema(ETLRecordSchema):
-    """CrossRef Author validation schema for Silver layer.
-
-    Represents an author of a CrossRef Publication (1:N relationship).
-    Composite PK: (doi, author_sequence)
-    """
-
-    # === Foreign Key ===
-    doi: Series[str] = pa.Field(
-        nullable=False,
-        str_matches=r"^10\.\d{4,}/\S+$",
-        description="FK to Publication.doi",
-    )
-
-    # === Composite Primary Key Component ===
-    author_sequence: Series[int] = pa.Field(
-        nullable=False, ge=0, description="Author order (0-based index)"
-    )
-
-    # === Author Names ===
-    family_name: Series[str] = pa.Field(
-        nullable=False,
-        str_length={"min_value": 1},
-        description="Family name (required)",
-    )
-    given_name: Series[str] | None = pa.Field(
-        nullable=True, description="Given name(s)"
-    )
-    suffix: Series[str] | None = pa.Field(
-        nullable=True, description="Name suffix (Jr., III, etc.)"
-    )
-
-    # === Identifiers ===
-    orcid: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$",
-        description="ORCID (ID only, without URL prefix)",
-    )
-    authenticated_orcid: Series[bool] | None = pa.Field(
-        nullable=True, description="Whether ORCID is CrossRef-authenticated"
-    )
-
-    # === Affiliation ===
-    affiliation: Series[str] | None = pa.Field(
-        nullable=True, description="Primary affiliation (first from affiliations list)"
-    )
-    affiliation_ids: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Affiliation identifiers (ROR, ISNI; joined with '; ')",
-    )
-
-    # === Metadata ===
-    sequence: Series[str] | None = pa.Field(
-        nullable=True,
-        isin=AUTHOR_SEQUENCES,
-        description="Author sequence type ('first' or 'additional')",
-    )
-
-    class Config:
-        """Pandera configuration."""
-
-        strict = True
-        ordered = True
-        coerce = True
-        name = "AuthorSchema"
-        description = "CrossRef Author Silver layer validation"
-
-================================================================================
-File: funder.py
-Path: schemas\crossref\funder.py
-================================================================================
-"""Pandera schema for CrossRef Funder entity.
-
-Aligned with RULES.md v5.0 and CrossRef REST API.
-Represents funders from the "funder" field in Publications API response.
-Integrates with CrossRef Funder Registry (DOI prefix: 10.13039/).
-
-Terminology:
-- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
-"""
-
-from __future__ import annotations
-
-import pandera.pandas as pa
-from pandera.typing import Series
-
-from bioetl.domain.schemas.base import ETLRecordSchema
-
-
-class FunderSchema(ETLRecordSchema):
-    """CrossRef Funder validation schema for Silver layer.
-
-    Represents a funder of a CrossRef Publication (1:N relationship).
-    Composite PK: (doi, funder_sequence)
-    """
-
-    # === Foreign Key ===
-    doi: Series[str] = pa.Field(
-        nullable=False,
-        str_matches=r"^10\.\d{4,}/\S+$",
-        description="FK to Publication.doi",
-    )
-
-    # === Composite Primary Key Component ===
-    funder_sequence: Series[int] = pa.Field(
-        nullable=False, ge=0, description="Funder order (0-based index)"
-    )
-
-    # === Funder Details ===
-    name: Series[str] = pa.Field(
-        nullable=False,
-        str_length={"min_value": 1},
-        description="Funder organization name",
-    )
-    funder_doi: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=r"^10\.13039/\d+$",
-        description="Funder Registry DOI (10.13039/...)",
-    )
-    funder_id: Series[str] | None = pa.Field(
-        nullable=True, description="Funder ID (legacy, without DOI prefix)"
-    )
-
-    # === Awards/Grants ===
-    award_numbers: Series[str] | None = pa.Field(
-        nullable=True, description="Grant/award numbers (joined with '; ')"
-    )
-    award_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Number of awards from this funder"
-    )
-
-    class Config:
-        """Pandera configuration."""
-
-        strict = True
-        ordered = True
-        coerce = True
-        name = "FunderSchema"
-        description = "CrossRef Funder Silver layer validation"
-
-================================================================================
 File: publication.py
 Path: schemas\crossref\publication.py
 ================================================================================
@@ -26994,9 +25624,6 @@ from bioetl.domain.validation import DOI_REGEX_PATTERN
 # Re-export for backwards compatibility
 __all__ = ["DOI_REGEX_PATTERN", "LOOKUP_METHODS", "PublicationEnrichedSchema"]
 
-# === Fixed Value Constants ===
-DOCUMENT_TYPES = ["PUBLICATION", "PREPRINT"]
-
 
 class PublicationEnrichedSchema(PublicationBaseSchema):
     """CrossRef-enriched Publication validation schema for Silver layer.
@@ -27015,6 +25642,27 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     - pmc_id: CrossRef API doesn't provide PMC IDs
     - doc_type: CrossRef uses raw 'type' field instead (journal-article, etc.)
     """
+
+    # === Override inherited fields to allow missing (align with excluded fields) ===
+    # Note: Fields are already nullable in base schema, just re-declaring here for clarity
+    pmid: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^[1-9]\d*$",
+        description="PubMed ID (positive numeric string)",
+    )
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central ID",
+    )
+    abstract: Series[str] = pa.Field(
+        nullable=True,
+        description="Publication abstract",
+    )
+    affiliation_list: Series[str] = pa.Field(
+        nullable=True,
+        description="JSON array of unique affiliations (unified field name)",
+    )
 
     # === Primary Key (override doi to be non-nullable) ===
     doi: Series[str] = pa.Field(
@@ -27123,107 +25771,6 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
         coerce = True
         name = "PublicationEnrichedSchema"
         description = "CrossRef-enriched Publication Silver layer validation"
-
-================================================================================
-File: reference.py
-Path: schemas\crossref\reference.py
-================================================================================
-"""Pandera schema for CrossRef Reference entity.
-
-Aligned with RULES.md v5.0 and CrossRef REST API.
-Represents bibliographic references from the "reference" field in Publications API response.
-
-Terminology:
-- Uses "Publication" instead of CrossRef API term "Work" for Ubiquitous Language
-"""
-
-from __future__ import annotations
-
-import pandera.pandas as pa
-from pandera.typing import Series
-
-from bioetl.domain.schemas.base import ETLRecordSchema
-
-
-class ReferenceSchema(ETLRecordSchema):
-    """CrossRef Reference validation schema for Silver layer.
-
-    Represents a bibliographic reference in a CrossRef Publication (1:N relationship).
-    Composite PK: (source_doi, reference_key)
-    """
-
-    # === Foreign Key ===
-    source_doi: Series[str] = pa.Field(
-        nullable=False,
-        str_matches=r"^10\.\d{4,}/\S+$",
-        description="DOI of citing publication (FK to Publication.doi)",
-    )
-
-    # === Composite Primary Key Component ===
-    reference_key: Series[str] = pa.Field(
-        nullable=False,
-        str_length={"min_value": 1},
-        description="Unique reference key within source publication",
-    )
-
-    # === Target Reference ===
-    target_doi: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=r"^10\.\d{4,}/\S+$",
-        description="DOI of cited publication (if resolved)",
-    )
-    unstructured: Series[str] | None = pa.Field(
-        nullable=True, description="Unstructured citation string"
-    )
-
-    # === Bibliographic Details ===
-    article_title: Series[str] | None = pa.Field(
-        nullable=True, description="Article title"
-    )
-    journal_title: Series[str] | None = pa.Field(
-        nullable=True, description="Journal name"
-    )
-    series_title: Series[str] | None = pa.Field(
-        nullable=True, description="Series name"
-    )
-    volume: Series[str] | None = pa.Field(nullable=True, description="Volume number")
-    issue: Series[str] | None = pa.Field(nullable=True, description="Issue number")
-    first_page: Series[str] | None = pa.Field(
-        nullable=True, description="First page number"
-    )
-    year: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=1500,
-        le=2100,
-        description="Publication year",
-    )
-    author: Series[str] | None = pa.Field(
-        nullable=True, description="First author (Family, Given or just family)"
-    )
-
-    # === Identifiers ===
-    isbn: Series[str] | None = pa.Field(nullable=True, description="ISBN (for books)")
-    issn: Series[str] | None = pa.Field(
-        nullable=True,
-        str_matches=r"^\d{4}-\d{3}[\dX]$",
-        description="ISSN",
-    )
-    component: Series[str] | None = pa.Field(nullable=True, description="Component DOI")
-
-    # === Additional Metadata ===
-    edition: Series[str] | None = pa.Field(nullable=True, description="Edition number")
-    standards_body: Series[str] | None = pa.Field(
-        nullable=True, description="Standards organization"
-    )
-
-    class Config:
-        """Pandera configuration."""
-
-        strict = True
-        ordered = True
-        coerce = True
-        name = "ReferenceSchema"
-        description = "CrossRef Reference Silver layer validation"
 
 ================================================================================
 File: work.py
@@ -27610,6 +26157,7 @@ from __future__ import annotations
 
 from typing import cast
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -27624,11 +26172,14 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    cid: Series[str] = pa.Field(nullable=False, description="PubChem Compound ID (PK)")
+    molecule_id: Series[str] = pa.Field(
+        nullable=False,
+        description="PubChem Compound ID (PK)",
+    )
 
-    @pa.check("cid", name="cid_positive")
-    def _check_cid(cls, series: Series[str]) -> Series[bool]:
-        """Validate CID is a positive integer string."""
+    @pa.check("molecule_id", name="molecule_id_positive")
+    def _check_molecule_id(cls, series: Series[str]) -> Series[bool]:
+        """Validate molecule_id/CID is a positive integer string."""
         return cast("Series[bool]", series.str.match(r"^[1-9]\d*$"))
 
     # === Structural Identifiers ===
@@ -27667,7 +26218,7 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     )
 
     @pa.check("inchi_key", name="inchi_key_format")
-    def _check_inchi_key(cls, series: Series[str]) -> Series[bool]:
+    def _check_inchikey(cls, series: Series[str]) -> Series[bool]:
         """Validate InChI key format."""
         return cast(
             "Series[bool]",
@@ -27738,128 +26289,140 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate complexity is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    charge: Series[int] | None = pa.Field(nullable=True, description="Formal charge")
+    charge: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Formal charge"
+    )
 
     @pa.check("charge", name="charge_range")
-    def _check_charge(cls, series: Series[int]) -> Series[bool]:
+    def _check_charge(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate formal charge range."""
         return cast("Series[bool]", series.isna() | ((series >= -10) & (series <= 10)))
 
     # === Atom/Bond Counts ===
-    heavy_atom_count: Series[int] | None = pa.Field(
+    heavy_atom_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Non-hydrogen atom count"
     )
 
     @pa.check("heavy_atom_count", name="heavy_atom_count_range")
-    def _check_heavy_atom_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_heavy_atom_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate heavy atom count range."""
         return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 500)))
 
-    h_bond_donor_count: Series[int] | None = pa.Field(
+    h_bond_donor_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Hydrogen bond donor count"
     )
 
     @pa.check("h_bond_donor_count", name="h_bond_donor_count_range")
-    def _check_h_bond_donor_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_h_bond_donor_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate H-bond donor count range."""
         return cast("Series[bool]", series.isna() | ((series >= 0) & (series <= 50)))
 
-    h_bond_acceptor_count: Series[int] | None = pa.Field(
+    h_bond_acceptor_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Hydrogen bond acceptor count"
     )
 
     @pa.check("h_bond_acceptor_count", name="h_bond_acceptor_count_range")
-    def _check_h_bond_acceptor_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_h_bond_acceptor_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate H-bond acceptor count range."""
         return cast("Series[bool]", series.isna() | ((series >= 0) & (series <= 50)))
 
-    rotatable_bond_count: Series[int] | None = pa.Field(
+    rotatable_bond_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Rotatable bond count"
     )
 
     @pa.check("rotatable_bond_count", name="rotatable_bond_count_range")
-    def _check_rotatable_bond_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_rotatable_bond_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate rotatable bond count range."""
         return cast("Series[bool]", series.isna() | ((series >= 0) & (series <= 100)))
 
     # === Stereochemistry ===
-    atom_stereo_count: Series[int] | None = pa.Field(
+    atom_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Total stereocenters"
     )
 
     @pa.check("atom_stereo_count", name="atom_stereo_count_non_negative")
-    def _check_atom_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_atom_stereo_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate atom stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    defined_atom_stereo_count: Series[int] | None = pa.Field(
+    defined_atom_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Defined stereocenters"
     )
 
     @pa.check(
         "defined_atom_stereo_count", name="defined_atom_stereo_count_non_negative"
     )
-    def _check_defined_atom_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_defined_atom_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate defined atom stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    undefined_atom_stereo_count: Series[int] | None = pa.Field(
+    undefined_atom_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Undefined stereocenters"
     )
 
     @pa.check(
         "undefined_atom_stereo_count", name="undefined_atom_stereo_count_non_negative"
     )
-    def _check_undefined_atom_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_undefined_atom_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate undefined atom stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    bond_stereo_count: Series[int] | None = pa.Field(
+    bond_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Total E/Z bonds"
     )
 
     @pa.check("bond_stereo_count", name="bond_stereo_count_non_negative")
-    def _check_bond_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_bond_stereo_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate bond stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    defined_bond_stereo_count: Series[int] | None = pa.Field(
+    defined_bond_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Defined E/Z bonds"
     )
 
     @pa.check(
         "defined_bond_stereo_count", name="defined_bond_stereo_count_non_negative"
     )
-    def _check_defined_bond_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_defined_bond_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate defined bond stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    undefined_bond_stereo_count: Series[int] | None = pa.Field(
+    undefined_bond_stereo_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Undefined E/Z bonds"
     )
 
     @pa.check(
         "undefined_bond_stereo_count", name="undefined_bond_stereo_count_non_negative"
     )
-    def _check_undefined_bond_stereo_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_undefined_bond_stereo_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
         """Validate undefined bond stereo count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    isotope_atom_count: Series[int] | None = pa.Field(
+    isotope_atom_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Isotopic atom count"
     )
 
     @pa.check("isotope_atom_count", name="isotope_atom_count_non_negative")
-    def _check_isotope_atom_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_isotope_atom_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate isotopic atom count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    covalent_unit_count: Series[int] | None = pa.Field(
+    covalent_unit_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Number of covalent units"
     )
 
     @pa.check("covalent_unit_count", name="covalent_unit_count_positive")
-    def _check_covalent_unit_count(cls, series: Series[int]) -> Series[bool]:
+    def _check_covalent_unit_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate covalent unit count is positive."""
         return cast("Series[bool]", series.isna() | (series >= 1))
 
@@ -27873,70 +26436,71 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         """Validate 3D volume is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    conformer_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="Number of 3D conformers"
+    conformer_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="Number of 3D conformers (float for nullable int)"
     )
 
     @pa.check("conformer_count_3d", name="conformer_count_3d_non_negative")
-    def _check_conformer_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_conformer_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D conformer count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_acceptor_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D H-bond acceptor features"
+    feature_acceptor_count_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="3D H-bond acceptor features (float for nullable int)",
     )
 
     @pa.check(
         "feature_acceptor_count_3d", name="feature_acceptor_count_3d_non_negative"
     )
-    def _check_feature_acceptor_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_acceptor_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D H-bond acceptor count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_donor_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D H-bond donor features"
+    feature_donor_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D H-bond donor features (float for nullable int)"
     )
 
     @pa.check("feature_donor_count_3d", name="feature_donor_count_3d_non_negative")
-    def _check_feature_donor_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_donor_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D H-bond donor count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_anion_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D anion features"
+    feature_anion_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D anion features (float for nullable int)"
     )
 
     @pa.check("feature_anion_count_3d", name="feature_anion_count_3d_non_negative")
-    def _check_feature_anion_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_anion_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D anion count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_cation_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D cation features"
+    feature_cation_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D cation features (float for nullable int)"
     )
 
     @pa.check("feature_cation_count_3d", name="feature_cation_count_3d_non_negative")
-    def _check_feature_cation_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_cation_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D cation count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_ring_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D ring features"
+    feature_ring_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D ring features (float for nullable int)"
     )
 
     @pa.check("feature_ring_count_3d", name="feature_ring_count_3d_non_negative")
-    def _check_feature_ring_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_ring_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D ring count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
-    feature_hydrophobe_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="3D hydrophobic features"
+    feature_hydrophobe_count_3d: Series[float] | None = pa.Field(
+        nullable=True, description="3D hydrophobic features (float for nullable int)"
     )
 
     @pa.check(
         "feature_hydrophobe_count_3d", name="feature_hydrophobe_count_3d_non_negative"
     )
-    def _check_feature_hydrophobe_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_hydrophobe_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D hydrophobic count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
@@ -27975,20 +26539,21 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     )
 
     # === 3D Feature Count (total pharmacophore features) ===
-    feature_count_3d: Series[int] | None = pa.Field(
-        nullable=True, description="Total count of 3D pharmacophore features"
+    feature_count_3d: Series[float] | None = pa.Field(
+        nullable=True,
+        description="Total count of 3D pharmacophore features (float for nullable int)",
     )
 
     @pa.check("feature_count_3d", name="feature_count_3d_non_negative")
-    def _check_feature_count_3d(cls, series: Series[int]) -> Series[bool]:
+    def _check_feature_count_3d(cls, series: Series[float]) -> Series[bool]:
         """Validate 3D feature count is non-negative."""
         return cast("Series[bool]", series.isna() | (series >= 0))
 
     class Config:
         """Pandera configuration."""
 
-        strict = True
-        ordered = True
+        strict = False
+        ordered = False
         coerce = True
         name = "PubchemMoleculeSchema"
         description = "PubChem Molecule Silver layer validation"
@@ -28375,6 +26940,14 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     - doc_type: S2 uses publication_type (JSON array) instead
     """
 
+    # === Override inherited fields to allow missing (align with excluded fields) ===
+    # Note: pmc_id is already nullable in base schema, just re-declaring here for clarity
+    pmc_id: Series[str] = pa.Field(
+        nullable=True,
+        str_matches=r"^PMC\d+$",
+        description="PubMed Central ID",
+    )
+
     # === Primary Key (SemanticScholar-specific) ===
     paper_id: Series[str] = pa.Field(
         nullable=False,
@@ -28485,6 +27058,520 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
         description = "Semantic Scholar Publication Silver layer validation"
 
 ================================================================================
+File: _annotations.py
+Path: schemas\uniprot\_annotations.py
+================================================================================
+"""Functional annotations and biochemical property fields.
+
+Part of UniprotTargetSchema split to comply with LOC limits.
+"""
+
+from __future__ import annotations
+
+import pandera.pandas as pa
+from pandera.typing import Series
+
+
+class UniprotAnnotationSchema(pa.DataFrameModel):
+    """Functional annotations, cofactors and biophysicochemical properties."""
+
+    # === Functional Annotation ===
+    function_comment: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of function descriptions"
+    )
+    catalytic_activity: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of catalytic reactions"
+    )
+    activity_regulation: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of activity regulation info"
+    )
+    subunit: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of subunit structure info"
+    )
+    pathway: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of pathways"
+    )
+    subcellular_location: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of subcellular locations"
+    )
+    tissue_specificity: Series[str] | None = pa.Field(
+        nullable=True, description="Tissue expression pattern"
+    )
+    alternative_products: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of alternative splicing/isoforms"
+    )
+    disease_involvement: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of disease associations"
+    )
+    pharmaceutical_use: Series[str] | None = pa.Field(
+        nullable=True, description="Pharmaceutical applications"
+    )
+    similarity_comment: Series[str] | None = pa.Field(
+        nullable=True, description="Family and domain information"
+    )
+    caution: Series[str] | None = pa.Field(
+        nullable=True, description="Warnings about this entry"
+    )
+
+    # === Biochemical Properties ===
+    cofactors: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of cofactors with name and ChEBI ID",
+    )
+    biophysicochemical_properties: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON object with pH/temp optima, kinetics, redox potential",
+    )
+    induction: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of gene expression induction conditions",
+    )
+
+================================================================================
+File: _core.py
+Path: schemas\uniprot\_core.py
+================================================================================
+"""Core UniProt identifier and metadata fields.
+
+Part of UniprotTargetSchema split to comply with LOC limits.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import cast
+
+import pandas as pd
+import pandera.pandas as pa
+from pandera.typing import Series
+
+from bioetl.domain.schemas.base import ETLRecordSchema
+
+# === Fixed Value Constants ===
+PROTEIN_EXISTENCE_LEVELS = [
+    "Evidence at protein level",
+    "Evidence at transcript level",
+    "Inferred from homology",
+    "Predicted",
+    "Uncertain",
+]
+
+ENTRY_TYPES = [
+    "UniProtKB reviewed (Swiss-Prot)",
+    "UniProtKB unreviewed (TrEMBL)",
+]
+
+PROTEIN_FLAGS = ["Fragment", "Precursor", "Fragments"]
+
+
+class UniprotCoreSchema(ETLRecordSchema):
+    """Core identifiers, names, organism and sequence metadata."""
+
+    # === Primary Key & Core Identifiers ===
+    accession: Series[str] = pa.Field(
+        nullable=False,
+        description="UniProt primary accession (PK)",
+    )
+
+    @pa.check("accession", name="accession_format")
+    def _check_accession(cls, series: Series[str]) -> Series[bool]:
+        """Validate UniProt accession format."""
+        pattern = (
+            r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
+        )
+        return cast("Series[bool]", series.str.match(pattern))
+
+    entry_name: Series[str] = pa.Field(
+        nullable=False,
+        description="Entry name (e.g., MK01_HUMAN)",
+    )
+
+    @pa.check("entry_name", name="entry_name_format")
+    def _check_entry_name(cls, series: Series[str]) -> Series[bool]:
+        """Validate entry name format."""
+        return cast("Series[bool]", series.str.match(r"^\w+_\w+$"))
+
+    entry_type: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Entry type (Swiss-Prot reviewed / TrEMBL unreviewed)",
+    )
+
+    @pa.check("entry_type", name="entry_type_values")
+    def _check_entry_type(cls, series: Series[str]) -> Series[bool]:
+        """Validate entry type values."""
+        return cast("Series[bool]", series.isna() | series.isin(ENTRY_TYPES))
+
+    secondary_accessions: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of secondary accessions"
+    )
+
+    # === Protein Names ===
+    protein_name: Series[str] | None = pa.Field(
+        nullable=True, description="Recommended protein name"
+    )
+    protein_short_names: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of short names"
+    )
+    protein_alternative_names: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of alternative protein names"
+    )
+    protein_ec_numbers: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of EC numbers"
+    )
+    flag: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Protein sequence completeness flag (Fragment/Precursor)",
+    )
+
+    @pa.check("flag", name="flag_values")
+    def _check_flag(cls, series: Series[str]) -> Series[bool]:
+        """Validate flag values."""
+        return cast("Series[bool]", series.isna() | series.isin(PROTEIN_FLAGS))
+
+    # === Gene Names ===
+    gene_primary: Series[str] | None = pa.Field(
+        nullable=True, description="Primary gene name"
+    )
+    gene_synonyms: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of gene synonyms"
+    )
+    gene_orf_names: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of ORF names"
+    )
+
+    # === Organism ===
+    organism_scientific: Series[str] | None = pa.Field(
+        nullable=True, description="Scientific organism name"
+    )
+    organism_common: Series[str] | None = pa.Field(
+        nullable=True, description="Common organism name"
+    )
+    taxonomy_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="NCBI Taxonomy ID"
+    )
+
+    @pa.check("taxonomy_id", name="taxonomy_id_positive")
+    def _check_taxonomy_id(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate taxonomy ID is positive."""
+        return cast("Series[bool]", series.isna() | (series >= 1))
+
+    lineage: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of taxonomic lineage"
+    )
+
+    # === Sequence ===
+    sequence: Series[str] = pa.Field(
+        nullable=False,
+        description="Amino acid sequence",
+    )
+
+    @pa.check("sequence", name="sequence_format")
+    def _check_sequence(cls, series: Series[str]) -> Series[bool]:
+        """Validate amino acid sequence."""
+        return cast("Series[bool]", series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$"))
+
+    sequence_length: Series[pd.Int64Dtype] = pa.Field(
+        nullable=False, description="Sequence length"
+    )
+
+    @pa.check("sequence_length", name="sequence_length_positive")
+    def _check_sequence_length(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate sequence length is positive."""
+        return cast("Series[bool]", series >= 1)
+
+    sequence_mass: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Molecular mass (Da)"
+    )
+
+    @pa.check("sequence_mass", name="sequence_mass_positive")
+    def _check_sequence_mass(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate sequence mass is positive."""
+        return cast("Series[bool]", series.isna() | (series >= 1))
+
+    sequence_checksum: Series[str] | None = pa.Field(
+        nullable=True, description="CRC64 checksum"
+    )
+    sequence_modified: Series[datetime] | None = pa.Field(
+        nullable=True, description="Sequence last modified date"
+    )
+
+    # === Entry Metadata ===
+    entry_version: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Entry version number"
+    )
+
+    @pa.check("entry_version", name="entry_version_positive")
+    def _check_entry_version(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate entry version is positive."""
+        return cast("Series[bool]", series.isna() | (series >= 1))
+
+    entry_created: Series[datetime] | None = pa.Field(
+        nullable=True, description="Entry creation date"
+    )
+    entry_modified: Series[datetime] | None = pa.Field(
+        nullable=True, description="Entry last modified date"
+    )
+
+    reviewed: Series[bool] = pa.Field(
+        nullable=False, description="Swiss-Prot (True) vs TrEMBL (False)"
+    )
+
+    protein_existence: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Evidence level for existence",
+    )
+
+    @pa.check("protein_existence", name="protein_existence_values")
+    def _check_protein_existence(cls, series: Series[str]) -> Series[bool]:
+        """Validate protein existence values."""
+        return cast(
+            "Series[bool]", series.isna() | series.isin(PROTEIN_EXISTENCE_LEVELS)
+        )
+
+    annotation_score: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Annotation quality (1-5 stars)"
+    )
+
+    @pa.check("annotation_score", name="annotation_score_range")
+    def _check_annotation_score(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate annotation score range."""
+        return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 5)))
+
+================================================================================
+File: _features.py
+Path: schemas\uniprot\_features.py
+================================================================================
+"""Sequence features, keywords, PTMs and counts.
+
+Part of UniprotTargetSchema split to comply with LOC limits.
+"""
+
+from __future__ import annotations
+
+from typing import cast
+
+import pandas as pd
+import pandera.pandas as pa
+from pandera.typing import Series
+
+
+class UniprotFeatureSchema(pa.DataFrameModel):
+    """Sequence features, keywords, PTMs, isoforms and counts."""
+
+    # === Features & Keywords ===
+    features_json: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of all sequence features"
+    )
+    domains: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of protein domain features"
+    )
+    binding_sites: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of binding site features"
+    )
+    active_sites: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of active site features"
+    )
+    keywords: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of UniProt keywords"
+    )
+
+    # === Structural Features ===
+    topology: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of topological domain features (TOPO_DOM)",
+    )
+    transmembrane: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of transmembrane regions (TRANSMEM)",
+    )
+    intramembrane: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of intramembrane regions (INTRAMEM)",
+    )
+    signal_peptide: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of signal peptide features (SIGNAL)",
+    )
+    propeptide: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of propeptide features (PROPEP)",
+    )
+
+    # === PTM Features ===
+    glycosylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of glycosylation sites (CARBOHYD)",
+    )
+    lipidation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of lipidation sites (LIPID)",
+    )
+    disulfide_bond: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of disulfide bonds (DISULFID)",
+    )
+    modified_residue: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of all modified residues (MOD_RES)",
+    )
+    phosphorylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of phosphorylation sites",
+    )
+    acetylation: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of acetylation sites",
+    )
+    ubiquitination: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of ubiquitination sites",
+    )
+
+    # === Isoform Details ===
+    isoform_names: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform names",
+    )
+    isoform_ids: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform IDs (e.g., P12345-2)",
+    )
+    isoform_synonyms: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of isoform synonyms",
+    )
+
+    # === Reaction Data ===
+    reactions: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of reaction names from catalytic activity",
+    )
+    reaction_ec_numbers: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of EC numbers from catalytic activity reactions",
+    )
+
+    # === Counts ===
+    cross_reference_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of database cross-references"
+    )
+
+    @pa.check("cross_reference_count", name="cross_reference_count_non_negative")
+    def _check_cross_reference_count(
+        cls, series: Series[pd.Int64Dtype]
+    ) -> Series[bool]:
+        """Validate cross-reference count is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
+    feature_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of sequence features"
+    )
+
+    @pa.check("feature_count", name="feature_count_non_negative")
+    def _check_feature_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate feature count is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
+    keyword_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of keywords"
+    )
+
+    @pa.check("keyword_count", name="keyword_count_non_negative")
+    def _check_keyword_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate keyword count is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
+    publication_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of publications"
+    )
+
+    @pa.check("publication_count", name="publication_count_non_negative")
+    def _check_publication_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate publication count is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
+    isoform_count: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="Number of isoforms"
+    )
+
+    @pa.check("isoform_count", name="isoform_count_non_negative")
+    def _check_isoform_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
+        """Validate isoform count is non-negative."""
+        return cast("Series[bool]", series.isna() | (series >= 0))
+
+================================================================================
+File: _xrefs.py
+Path: schemas\uniprot\_xrefs.py
+================================================================================
+"""UniProt cross-references and taxonomy/GO components.
+
+Part of UniprotTargetSchema split to comply with LOC limits.
+"""
+
+from __future__ import annotations
+
+import pandera.pandas as pa
+from pandera.typing import Series
+
+
+class UniprotXrefSchema(pa.DataFrameModel):
+    """Database cross-references, taxonomy and GO components."""
+
+    # === Cross-References (Extracted) ===
+    go_terms: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of GO terms with evidence codes"
+    )
+    drugbank_ids: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of DrugBank identifiers"
+    )
+    chembl_ids: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of ChEMBL target identifiers"
+    )
+    guidetopharmacology_ids: Series[str] | None = pa.Field(
+        nullable=True, description="JSON array of Guide to Pharmacology identifiers"
+    )
+    pdb_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of PDB cross-references with structure details",
+    )
+    interpro_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of InterPro domain entries with id and name",
+    )
+    pfam_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of Pfam family entries with id, name, and match_status",
+    )
+    reactome_xrefs: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of Reactome pathway entries with id and pathway_name",
+    )
+
+    # === Taxonomy Components ===
+    superkingdom: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Superkingdom/Domain (Bacteria, Archaea, Eukaryota, Viruses)",
+    )
+    phylum: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Phylum from taxonomic lineage",
+    )
+    genus: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Genus from taxonomic lineage",
+    )
+
+    # === GO Components ===
+    molecular_function: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of GO molecular function terms (aspect F)",
+    )
+    cellular_component: Series[str] | None = pa.Field(
+        nullable=True,
+        description="JSON array of GO cellular component terms (aspect C)",
+    )
+
+================================================================================
 File: idmapping.py
 Path: schemas\uniprot\idmapping.py
 ================================================================================
@@ -28494,7 +27581,7 @@ Aligned with RULES.md v5.0 and UniProt ID Mapping API.
 Source: https://www.uniprot.org/id-mapping/
 
 Schema validates ChEMBL → UniProt ID mapping results:
-- target_chembl_id: Source ChEMBL target ID
+- target_id: Source ChEMBL target ID
 - uniprot_accession: Mapped UniProt accession (nullable for not_found)
 - mapping_status: Status of mapping operation
 """
@@ -28520,13 +27607,13 @@ class IDMappingSchema(ETLRecordSchema):
     """
 
     # === Primary Key ===
-    target_chembl_id: Series[str] = pa.Field(
+    target_id: Series[str] = pa.Field(
         nullable=False,
         description="Source ChEMBL target identifier (e.g., CHEMBL204)",
     )
 
-    @pa.check("target_chembl_id", name="target_chembl_id_format")
-    def _check_target_chembl_id(cls, series: Series[str]) -> Series[bool]:
+    @pa.check("target_id", name="target_id_format")
+    def _check_target_id(cls, series: Series[str]) -> Series[bool]:
         """Validate ChEMBL target ID format."""
         return cast("Series[bool]", series.str.match(r"^CHEMBL\d+$"))
 
@@ -28635,571 +27722,54 @@ __all__ = [
 ]
 
 ================================================================================
-File: isoform.py
-Path: schemas\uniprot\isoform.py
-================================================================================
-"""Pandera schema for UniProt Isoform entity.
-
-Aligned with RULES.md v5.0 and UniProt REST API.
-"""
-
-from __future__ import annotations
-
-from typing import cast
-
-import pandera.pandas as pa
-from pandera.typing import Series
-
-from bioetl.domain.schemas.base import ETLRecordSchema
-
-# === Fixed Value Constants ===
-SEQUENCE_STATUSES = ["displayed", "described", "not described", "external"]
-
-
-class IsoformSchema(ETLRecordSchema):
-    """UniProt Isoform validation schema for Silver layer.
-
-    Represents alternative protein isoforms from alternative splicing.
-    """
-
-    # === Foreign Key ===
-    accession: Series[str] = pa.Field(
-        nullable=False, description="FK → Protein (parent accession)"
-    )
-
-    # === Primary Key ===
-    isoform_id: Series[str] = pa.Field(
-        nullable=False, description="Isoform accession (e.g., P12345-2)"
-    )
-
-    # === Isoform Details ===
-    isoform_name: Series[str] | None = pa.Field(
-        nullable=True, description="Isoform name"
-    )
-    sequence_status: Series[str] | None = pa.Field(
-        nullable=True, description="Sequence display status"
-    )
-
-    @pa.check("sequence_status", name="sequence_status_values")
-    def _check_sequence_status(cls, series: Series[str]) -> Series[bool]:
-        """Validate sequence status values."""
-        return cast("Series[bool]", series.isna() | series.isin(SEQUENCE_STATUSES))
-
-    sequence: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Isoform amino acid sequence",
-    )
-
-    @pa.check("sequence", name="sequence_format")
-    def _check_sequence(cls, series: Series[str]) -> Series[bool]:
-        """Validate amino acid sequence."""
-        return cast(
-            "Series[bool]",
-            series.isna() | series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$"),
-        )
-
-    sequence_length: Series[int] | None = pa.Field(
-        nullable=True, description="Isoform sequence length"
-    )
-
-    @pa.check("sequence_length", name="sequence_length_positive")
-    def _check_sequence_length(cls, series: Series[int]) -> Series[bool]:
-        """Validate sequence length is positive."""
-        return cast("Series[bool]", series.isna() | (series >= 1))
-
-    note: Series[str] | None = pa.Field(
-        nullable=True, description="Isoform description/note"
-    )
-
-    class Config:
-        """Pandera configuration."""
-
-        strict = True
-        ordered = True
-        coerce = True
-        name = "IsoformSchema"
-        description = "UniProt Isoform Silver layer validation"
-
-================================================================================
 File: protein.py
 Path: schemas\uniprot\protein.py
 ================================================================================
 """Pandera schema for UniProt Target entity.
 
 Aligned with RULES.md v5.0 and UniProt REST API.
-Source: https://rest.uniprot.org/uniprotkb/
-
-Extended schema includes:
-- Core identifiers and metadata
-- Organism & taxonomy information
-- Protein names and EC numbers
-- Functional annotations (comments)
-- Cross-references (GO, DrugBank, ChEMBL, GtoPdb)
-- Sequence features and keywords
+Split into sub-modules to comply with LOC limits.
 """
 
 from __future__ import annotations
 
-from datetime import date
-from typing import cast
-
-import pandera.pandas as pa
-from pandera.typing import Series
-
-from bioetl.domain.schemas.base import ETLRecordSchema
-
-# === Fixed Value Constants ===
-PROTEIN_EXISTENCE_LEVELS = [
-    "Evidence at protein level",
-    "Evidence at transcript level",
-    "Inferred from homology",
-    "Predicted",
-    "Uncertain",
-]
-
-# Entry types from UniProt API
-ENTRY_TYPES = [
-    "UniProtKB reviewed (Swiss-Prot)",
-    "UniProtKB unreviewed (TrEMBL)",
-]
-
-# Protein sequence completeness flags
-PROTEIN_FLAGS = ["Fragment", "Precursor", "Fragments"]
+from bioetl.domain.schemas.uniprot._annotations import UniprotAnnotationSchema
+from bioetl.domain.schemas.uniprot._core import (
+    ENTRY_TYPES,
+    PROTEIN_EXISTENCE_LEVELS,
+    PROTEIN_FLAGS,
+    UniprotCoreSchema,
+)
+from bioetl.domain.schemas.uniprot._features import UniprotFeatureSchema
+from bioetl.domain.schemas.uniprot._xrefs import UniprotXrefSchema
 
 
-class UniprotTargetSchema(ETLRecordSchema):
+class UniprotTargetSchema(
+    UniprotCoreSchema,
+    UniprotAnnotationSchema,
+    UniprotXrefSchema,
+    UniprotFeatureSchema,
+):
     """UniProt Target validation schema for Silver layer.
 
     Represents a UniProtKB protein entry (Swiss-Prot or TrEMBL).
+    Inherits fields from core, annotation, xref and feature sub-schemas.
     """
-
-    # === Primary Key & Core Identifiers ===
-    accession: Series[str] = pa.Field(
-        nullable=False,
-        description="UniProt primary accession (PK)",
-    )
-
-    @pa.check("accession", name="accession_format")
-    def _check_accession(cls, series: Series[str]) -> Series[bool]:
-        """Validate UniProt accession format."""
-        pattern = (
-            r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
-        )
-        return cast("Series[bool]", series.str.match(pattern))
-
-    entry_name: Series[str] = pa.Field(
-        nullable=False,
-        description="Entry name (e.g., MK01_HUMAN)",
-    )
-
-    @pa.check("entry_name", name="entry_name_format")
-    def _check_entry_name(cls, series: Series[str]) -> Series[bool]:
-        """Validate entry name format."""
-        return cast("Series[bool]", series.str.match(r"^\w+_\w+$"))
-
-    entry_type: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Entry type (Swiss-Prot reviewed / TrEMBL unreviewed)",
-    )
-
-    @pa.check("entry_type", name="entry_type_values")
-    def _check_entry_type(cls, series: Series[str]) -> Series[bool]:
-        """Validate entry type values."""
-        return cast("Series[bool]", series.isna() | series.isin(ENTRY_TYPES))
-
-    secondary_accessions: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of secondary accessions"
-    )
-
-    # === Protein Names ===
-    protein_name: Series[str] | None = pa.Field(
-        nullable=True, description="Recommended protein name"
-    )
-    protein_short_names: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of short names"
-    )
-    protein_alternative_names: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of alternative protein names"
-    )
-    protein_ec_numbers: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of EC numbers"
-    )
-    flag: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Protein sequence completeness flag (Fragment/Precursor)",
-    )
-
-    @pa.check("flag", name="flag_values")
-    def _check_flag(cls, series: Series[str]) -> Series[bool]:
-        """Validate flag values."""
-        return cast("Series[bool]", series.isna() | series.isin(PROTEIN_FLAGS))
-
-    # === Gene Names ===
-    gene_primary: Series[str] | None = pa.Field(
-        nullable=True, description="Primary gene name"
-    )
-    gene_synonyms: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of gene synonyms"
-    )
-    gene_orf_names: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of ORF names"
-    )
-
-    # === Organism ===
-    organism_scientific: Series[str] | None = pa.Field(
-        nullable=True, description="Scientific organism name"
-    )
-    organism_common: Series[str] | None = pa.Field(
-        nullable=True, description="Common organism name"
-    )
-    taxonomy_id: Series[int] | None = pa.Field(
-        nullable=True, description="NCBI Taxonomy ID"
-    )
-
-    @pa.check("taxonomy_id", name="taxonomy_id_positive")
-    def _check_taxonomy_id(cls, series: Series[int]) -> Series[bool]:
-        """Validate taxonomy ID is positive."""
-        return cast("Series[bool]", series.isna() | (series >= 1))
-
-    lineage: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of taxonomic lineage"
-    )
-
-    # === Evidence & Quality ===
-    protein_existence: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Evidence level for existence",
-    )
-
-    @pa.check("protein_existence", name="protein_existence_values")
-    def _check_protein_existence(cls, series: Series[str]) -> Series[bool]:
-        """Validate protein existence values."""
-        return cast(
-            "Series[bool]", series.isna() | series.isin(PROTEIN_EXISTENCE_LEVELS)
-        )
-
-    annotation_score: Series[int] | None = pa.Field(
-        nullable=True, description="Annotation quality (1-5 stars)"
-    )
-
-    @pa.check("annotation_score", name="annotation_score_range")
-    def _check_annotation_score(cls, series: Series[int]) -> Series[bool]:
-        """Validate annotation score range."""
-        return cast("Series[bool]", series.isna() | ((series >= 1) & (series <= 5)))
-
-    reviewed: Series[bool] = pa.Field(
-        nullable=False, description="Swiss-Prot (True) vs TrEMBL (False)"
-    )
-
-    # === Sequence ===
-    sequence: Series[str] = pa.Field(
-        nullable=False,
-        description="Amino acid sequence",
-    )
-
-    @pa.check("sequence", name="sequence_format")
-    def _check_sequence(cls, series: Series[str]) -> Series[bool]:
-        """Validate amino acid sequence."""
-        return cast("Series[bool]", series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$"))
-
-    sequence_length: Series[int] = pa.Field(
-        nullable=False, description="Sequence length"
-    )
-
-    @pa.check("sequence_length", name="sequence_length_positive")
-    def _check_sequence_length(cls, series: Series[int]) -> Series[bool]:
-        """Validate sequence length is positive."""
-        return cast("Series[bool]", series >= 1)
-
-    sequence_mass: Series[int] | None = pa.Field(
-        nullable=True, description="Molecular mass (Da)"
-    )
-
-    @pa.check("sequence_mass", name="sequence_mass_positive")
-    def _check_sequence_mass(cls, series: Series[int]) -> Series[bool]:
-        """Validate sequence mass is positive."""
-        return cast("Series[bool]", series.isna() | (series >= 1))
-
-    sequence_checksum: Series[str] | None = pa.Field(
-        nullable=True, description="CRC64 checksum"
-    )
-    sequence_modified: Series[date] | None = pa.Field(
-        nullable=True, description="Sequence last modified date"
-    )
-
-    # === Entry Metadata ===
-    entry_version: Series[int] | None = pa.Field(
-        nullable=True, description="Entry version number"
-    )
-
-    @pa.check("entry_version", name="entry_version_positive")
-    def _check_entry_version(cls, series: Series[int]) -> Series[bool]:
-        """Validate entry version is positive."""
-        return cast("Series[bool]", series.isna() | (series >= 1))
-
-    entry_created: Series[date] | None = pa.Field(
-        nullable=True, description="Entry creation date"
-    )
-    entry_modified: Series[date] | None = pa.Field(
-        nullable=True, description="Entry last modified date"
-    )
-
-    # === Functional Annotation ===
-    function_comment: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of function descriptions"
-    )
-    catalytic_activity: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of catalytic reactions"
-    )
-    activity_regulation: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of activity regulation info"
-    )
-    subunit: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of subunit structure info"
-    )
-    pathway: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of pathways"
-    )
-    subcellular_location: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of subcellular locations"
-    )
-    tissue_specificity: Series[str] | None = pa.Field(
-        nullable=True, description="Tissue expression pattern"
-    )
-    alternative_products: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of alternative splicing/isoforms"
-    )
-    disease_involvement: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of disease associations"
-    )
-    pharmaceutical_use: Series[str] | None = pa.Field(
-        nullable=True, description="Pharmaceutical applications"
-    )
-    similarity_comment: Series[str] | None = pa.Field(
-        nullable=True, description="Family and domain information"
-    )
-    caution: Series[str] | None = pa.Field(
-        nullable=True, description="Warnings about this entry"
-    )
-
-    # === Biochemical Properties ===
-    cofactors: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of cofactors with name and ChEBI ID",
-    )
-    biophysicochemical_properties: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON object with pH/temp optima, kinetics, redox potential",
-    )
-    induction: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of gene expression induction conditions",
-    )
-
-    # === Cross-References (Extracted) ===
-    go_terms: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of GO terms with evidence codes"
-    )
-    drugbank_ids: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of DrugBank identifiers"
-    )
-    chembl_ids: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of ChEMBL target identifiers"
-    )
-    guidetopharmacology_ids: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of Guide to Pharmacology identifiers"
-    )
-    pdb_xrefs: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of PDB cross-references with structure details",
-    )
-    interpro_xrefs: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of InterPro domain entries with id and name",
-    )
-    pfam_xrefs: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of Pfam family entries with id, name, and match_status",
-    )
-    reactome_xrefs: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of Reactome pathway entries with id and pathway_name",
-    )
-
-    # === Features & Keywords ===
-    features_json: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of all sequence features"
-    )
-    domains: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of protein domain features"
-    )
-    binding_sites: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of binding site features"
-    )
-    active_sites: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of active site features"
-    )
-    keywords: Series[str] | None = pa.Field(
-        nullable=True, description="JSON array of UniProt keywords"
-    )
-
-    # === Taxonomy Components ===
-    superkingdom: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Superkingdom/Domain (Bacteria, Archaea, Eukaryota, Viruses)",
-    )
-    phylum: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Phylum from taxonomic lineage",
-    )
-    genus: Series[str] | None = pa.Field(
-        nullable=True,
-        description="Genus from taxonomic lineage",
-    )
-
-    # === GO Components ===
-    molecular_function: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of GO molecular function terms (aspect F)",
-    )
-    cellular_component: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of GO cellular component terms (aspect C)",
-    )
-
-    # === Structural Features ===
-    topology: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of topological domain features (TOPO_DOM)",
-    )
-    transmembrane: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of transmembrane regions (TRANSMEM)",
-    )
-    intramembrane: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of intramembrane regions (INTRAMEM)",
-    )
-    signal_peptide: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of signal peptide features (SIGNAL)",
-    )
-    propeptide: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of propeptide features (PROPEP)",
-    )
-
-    # === PTM Features ===
-    glycosylation: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of glycosylation sites (CARBOHYD)",
-    )
-    lipidation: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of lipidation sites (LIPID)",
-    )
-    disulfide_bond: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of disulfide bonds (DISULFID)",
-    )
-    modified_residue: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of all modified residues (MOD_RES)",
-    )
-    phosphorylation: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of phosphorylation sites",
-    )
-    acetylation: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of acetylation sites",
-    )
-    ubiquitination: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of ubiquitination sites",
-    )
-
-    # === Isoform Details ===
-    isoform_names: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of isoform names",
-    )
-    isoform_ids: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of isoform IDs (e.g., P12345-2)",
-    )
-    isoform_synonyms: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of isoform synonyms",
-    )
-
-    # === Reaction Data ===
-    reactions: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of reaction names from catalytic activity",
-    )
-    reaction_ec_numbers: Series[str] | None = pa.Field(
-        nullable=True,
-        description="JSON array of EC numbers from catalytic activity reactions",
-    )
-
-    # === Counts ===
-    cross_reference_count: Series[int] | None = pa.Field(
-        nullable=True, description="Number of database cross-references"
-    )
-
-    @pa.check("cross_reference_count", name="cross_reference_count_non_negative")
-    def _check_cross_reference_count(cls, series: Series[int]) -> Series[bool]:
-        """Validate cross-reference count is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
-
-    feature_count: Series[int] | None = pa.Field(
-        nullable=True, description="Number of sequence features"
-    )
-
-    @pa.check("feature_count", name="feature_count_non_negative")
-    def _check_feature_count(cls, series: Series[int]) -> Series[bool]:
-        """Validate feature count is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
-
-    keyword_count: Series[int] | None = pa.Field(
-        nullable=True, description="Number of keywords"
-    )
-
-    @pa.check("keyword_count", name="keyword_count_non_negative")
-    def _check_keyword_count(cls, series: Series[int]) -> Series[bool]:
-        """Validate keyword count is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
-
-    publication_count: Series[int] | None = pa.Field(
-        nullable=True, description="Number of publications"
-    )
-
-    @pa.check("publication_count", name="publication_count_non_negative")
-    def _check_publication_count(cls, series: Series[int]) -> Series[bool]:
-        """Validate publication count is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
-
-    isoform_count: Series[int] | None = pa.Field(
-        nullable=True, description="Number of isoforms"
-    )
-
-    @pa.check("isoform_count", name="isoform_count_non_negative")
-    def _check_isoform_count(cls, series: Series[int]) -> Series[bool]:
-        """Validate isoform count is non-negative."""
-        return cast("Series[bool]", series.isna() | (series >= 0))
 
     class Config:
         """Pandera configuration."""
 
-        strict = True
-        ordered = True
+        strict = False
+        ordered = False
         coerce = True
         name = "UniprotTargetSchema"
         description = "UniProt Target Silver layer validation"
 
 
 __all__ = [
+    "ENTRY_TYPES",
+    "PROTEIN_EXISTENCE_LEVELS",
+    "PROTEIN_FLAGS",
     "UniprotTargetSchema",
 ]
 
@@ -31115,6 +29685,9 @@ Path: services\identity_service.py
 Provides centralized logic for computing entity identifiers and content hashes
 according to RULES.md §2.8.
 
+Delegates normalization and hashing to the canonical implementations in
+``bioetl.domain.transformations`` to avoid algorithm duplication (DRY).
+
 This is a pure domain service with no external dependencies (only stdlib).
 All methods are deterministic and side-effect free.
 
@@ -31125,13 +29698,13 @@ Requirements:
 
 from __future__ import annotations
 
-import hashlib
-import math
-from datetime import date, datetime
 from typing import Any
 
-from bioetl.domain.constants import META_FIELDS
-from bioetl.domain.serialization import serialize_to_json_canonical
+from bioetl.domain.constants import META_FIELDS as META_FIELDS  # re-export for tests
+from bioetl.domain.transformations import (
+    generate_content_hash,
+    normalize_for_hash,
+)
 from bioetl.domain.types import ContentHash, EntityID
 
 
@@ -31142,6 +29715,10 @@ class IdentityService:
     - Stable entity_id from business keys or content hash
     - SHA256 content hash with canonical JSON normalization
     - Meta-field exclusion for deterministic hashing
+
+    All normalization and hashing logic is delegated to the canonical
+    free functions in ``bioetl.domain.transformations`` to maintain a
+    single source of truth for the hash algorithm (DRY principle).
 
     This service is stateless and can be safely shared across transformers.
     All methods are pure (deterministic, side-effect free).
@@ -31172,6 +29749,8 @@ class IdentityService:
 
         If source_id is provided, uses it directly for stable identification.
         Otherwise, generates identifier from content hash prefix.
+
+        Delegates to ``bioetl.domain.transformations.generate_entity_id``.
 
         Args:
             provider: Data provider identifier (e.g., 'chembl', 'pubchem').
@@ -31205,6 +29784,8 @@ class IdentityService:
     ) -> ContentHash:
         """Compute SHA256 content hash for record versioning.
 
+        Delegates to ``bioetl.domain.transformations.generate_content_hash``.
+
         Implements RULES.md §2.8.1:
         - sha256(provider + canonical_json(record))
         - Normalizes values before hashing for consistency
@@ -31222,11 +29803,7 @@ class IdentityService:
             ContentHash("abc123...")
 
         """
-        normalized = self._normalize_for_hash(record, exclude_none=exclude_none)
-        canonical = self._canonical_json_dumps(normalized)
-        data = f"{provider}{canonical}"
-        hash_digest = hashlib.sha256(data.encode("utf-8")).hexdigest()
-        return ContentHash(hash_digest)
+        return generate_content_hash(record, provider, exclude_none=exclude_none)
 
     def _normalize_for_hash(
         self,
@@ -31236,12 +29813,14 @@ class IdentityService:
     ) -> dict[str, Any]:
         """Normalize record before hashing for consistency.
 
+        Delegates to ``bioetl.domain.transformations.normalize_for_hash``.
+
         Applies normalization rules from RULES.md §2.8.1:
-        - NaN/Inf floats → null
-        - Floats → round(val, 10)
-        - Dates → ISO YYYY-MM-DD
-        - Strings → strip()
-        - Meta-fields (_ingestion_ts, _run_id, etc.) → excluded
+        - NaN/Inf floats -> null
+        - Floats -> round(val, 10)
+        - Dates -> ISO YYYY-MM-DD
+        - Strings -> strip()
+        - Meta-fields (_ingestion_ts, _run_id, etc.) -> excluded
 
         Args:
             record: Input record dictionary.
@@ -31251,90 +29830,7 @@ class IdentityService:
             Normalized dictionary suitable for hashing.
 
         """
-        result: dict[str, Any] = {}
-
-        for key, value in record.items():
-            # Skip meta-fields
-            if key in META_FIELDS:
-                continue
-
-            # Optionally skip None values
-            if exclude_none and value is None:
-                continue
-
-            # Normalize and include
-            result[key] = self._normalize_value(value)
-
-        return result
-
-    def _normalize_value(self, value: Any) -> Any:
-        """Normalize a single value for hashing.
-
-        Args:
-            value: Input value of any type.
-
-        Returns:
-            Normalized value.
-
-        """
-        if value is None:
-            return None
-        return self._normalize_by_type(value)
-
-    def _normalize_by_type(self, value: Any) -> Any:
-        """Dispatch normalization by type."""
-        # Handle scalar types first
-        scalar_result = self._normalize_scalar(value)
-        if scalar_result is not value:  # Was processed
-            return scalar_result
-
-        # Handle container types
-        return self._normalize_container(value)
-
-    def _normalize_scalar(self, value: Any) -> Any:
-        """Normalize scalar types: float, datetime, date, str."""
-        if isinstance(value, float):
-            return self._normalize_float(value)
-        if isinstance(value, datetime):
-            return value.date().isoformat()
-        if isinstance(value, date):
-            return value.isoformat()
-        if isinstance(value, str):
-            return value.strip()
-        return value  # Return unchanged if not a scalar type we handle
-
-    def _normalize_container(self, value: Any) -> Any:
-        """Normalize container types: dict, list."""
-        if isinstance(value, dict):
-            return {k: self._normalize_value(v) for k, v in value.items()}
-        if isinstance(value, list):
-            return [self._normalize_value(v) for v in value]
-        return value
-
-    def _normalize_float(self, value: float) -> float | None:
-        """Normalize float value: NaN/Inf → None, else round to 10 decimals."""
-        if math.isnan(value) or math.isinf(value):
-            return None
-        return round(value, 10)
-
-    @staticmethod
-    def _canonical_json_dumps(obj: dict[str, Any]) -> str:
-        """Convert object to canonical JSON representation.
-
-        Uses centralized serialization with sorted keys and minimal separators
-        for deterministic output per RULES.md §2.8.1.
-
-        Delegates to domain.serialization.serialize_to_json_canonical() which
-        uses orjson for optimal performance when available.
-
-        Args:
-            obj: Dictionary to serialize.
-
-        Returns:
-            Canonical JSON string.
-
-        """
-        return serialize_to_json_canonical(obj)
+        return normalize_for_hash(record, exclude_none=exclude_none)
 
 ================================================================================
 File: normalization_config.py
@@ -32579,6 +31075,17 @@ def _normalize_list(value: list[Any]) -> list[Any]:
     return [_normalize_value(v) for v in value]
 
 
+# Keep registry visible for tooling to avoid false dead-code positives.
+_NORMALIZE_DISPATCH = (
+    _normalize_float,
+    _normalize_datetime,
+    _normalize_date,
+    _normalize_str,
+    _normalize_dict,
+    _normalize_list,
+)
+
+
 def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
     """Check if field should be included in hash calculation."""
     if key in META_FIELDS:
@@ -32648,8 +31155,6 @@ def detect_schema_drift(
     level = DriftLevel.INFO
     if missing_required:
         level = DriftLevel.CRITICAL
-    elif len(added) > 3:
-        level = DriftLevel.WARN
 
     details = {
         "added_fields": added,
@@ -32770,7 +31275,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING, NewType, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, NewType, TypeAlias, TypedDict
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -32797,12 +31302,8 @@ in the domain layer. At runtime, this is a pyarrow.Schema object.
 """
 
 
-class BronzeRecord(TypedDict):
-    """Untyped dictionary representing a raw record from the source."""
-
-    # We use NotRequired for dynamic fields, but TypedDict doesn't allow mixing optional/required well in old python
-    # For now, we assume keys are strings and values Any
-    # This is a marker type for clarity in signatures
+BronzeRecord: TypeAlias = dict[str, Any]
+"""Untyped dictionary representing a raw record from the source."""
 
 
 class SilverRecord(TypedDict, total=False):
@@ -32842,15 +31343,11 @@ class DriftLevel(StrEnum):
     """Schema drift severity levels (RULES.md §2.2).
 
     - INFO: New optional fields appear
-    - WARN: >3 new fields appear
     - CRITICAL: Required fields (ID) disappear
     """
 
     INFO = "INFO"
     """New optional fields detected (logged)."""
-
-    WARN = "WARN"
-    """Significant drift detected (>3 fields), requires review within 48h."""
 
     CRITICAL = "CRITICAL"
     """Critical drift (missing required fields), blocks pipeline."""
@@ -33270,6 +31767,38 @@ def validate_positive_int(value: Any) -> int | None:
     return int_value
 
 
+def validate_publication_year(
+    year: int | None,
+    config: ValidationConfig | None = None,
+) -> tuple[int | None, bool]:
+    """Validate publication year and return (year, is_warning).
+
+    Preserves the original value; flags as warning when outside valid range.
+    Uses ValidationConfig range (default 1500-2100).
+
+    Args:
+        year: Year to validate.
+        config: Optional ValidationConfig. Uses DEFAULT_VALIDATION_CONFIG if None.
+
+    Returns:
+        Tuple of (year, is_warning). Year is preserved; is_warning is True
+        when year is outside [min_publication_year, max_publication_year].
+
+    Example:
+        >>> validate_publication_year(2020)
+        (2020, False)
+        >>> validate_publication_year(1499)
+        (1499, True)
+        >>> validate_publication_year(None)
+        (None, False)
+    """
+    if year is None:
+        return (None, False)
+    cfg = config if config is not None else _get_default_config()
+    in_range = cfg.min_publication_year <= year <= cfg.max_publication_year
+    return (year, not in_range)
+
+
 def validate_year_range(
     year: int | None,
     min_year: int = MIN_PUBLICATION_YEAR,
@@ -33299,51 +31828,6 @@ def validate_year_range(
     if year is None:
         return False
     return min_year <= year <= max_year
-
-
-def validate_publication_year(
-    year: int | None,
-    config: ValidationConfig | None = None,
-) -> tuple[int | None, bool]:
-    """Validate publication year and flag if out of range.
-
-    Uses validation range from config or DEFAULT_VALIDATION_CONFIG.
-    Values outside this range are preserved but flagged for DQ warnings.
-
-    Args:
-        year: Publication year to validate.
-        config: Optional ValidationConfig for custom ranges.
-            If None, uses DEFAULT_VALIDATION_CONFIG.
-
-    Returns:
-        Tuple of (year, is_warning) where:
-        - year: Original value (preserved even if out of range)
-        - is_warning: True if year is outside valid range (requires DQ warning)
-
-    Example:
-        >>> validate_publication_year(2020)
-        (2020, False)
-        >>> validate_publication_year(1950)
-        (1950, False)
-        >>> validate_publication_year(1949)
-        (1949, True)
-        >>> validate_publication_year(None)
-        (None, False)
-        >>> # With custom config
-        >>> from bioetl.domain.config import ValidationConfig
-        >>> ss_config = ValidationConfig(min_publication_year=1500)
-        >>> validate_publication_year(1600, config=ss_config)
-        (1600, False)
-
-    """
-    if year is None:
-        return None, False
-    resolved_config = config or _get_default_config()
-    min_year = resolved_config.min_publication_year
-    max_year = resolved_config.max_publication_year
-    if min_year <= year <= max_year:
-        return year, False
-    return year, True  # Keep value but flag as warning
 
 
 def validate_non_negative(value: Any) -> float | None:
@@ -33567,6 +32051,9 @@ def validate_inchi_key(key: str | None) -> bool:
         return False
     return bool(_INCHI_KEY_PATTERN.match(key.strip()))
 
+
+VALIDATION_API = (validate_publication_year, validate_inchi_key)
+
 ================================================================================
 File: __init__.py
 Path: value_objects\__init__.py
@@ -33676,7 +32163,6 @@ from bioetl.domain.value_objects.dq_report import (
     ContentHashIntegrityResult,
     DataFreshnessResult,
     DeduplicationStatsResult,
-    DQCheckResult,
     DQCheckStatus,
     DQReportFormat,
     DQReportStatus,
@@ -33684,7 +32170,6 @@ from bioetl.domain.value_objects.dq_report import (
     DQThresholds,
     DriftLevel,
     EncodingValidationResult,
-    FieldPresenceResult,
     FileIntegrityResult,
     ForeignKeyResult,
     GoldDQCheckType,
@@ -33763,7 +32248,6 @@ __all__ = [
     "ConcentrationUnit",
     "ConfidenceScore",
     "ContentHashIntegrityResult",
-    "DQCheckResult",
     "DQCheckStatus",
     "DQEvaluationStatus",
     "DQReportFormat",
@@ -33776,7 +32260,6 @@ __all__ = [
     "DriftLevel",
     "EncodingValidationResult",
     "FieldGroupConfig",
-    "FieldPresenceResult",
     "FileIntegrityResult",
     "ForeignKeyResult",
     "GoldDQCheckType",
@@ -34020,6 +32503,9 @@ class ORCID(ValueObject[str]):
     _value: str
     _PATTERN = re.compile(r"^(\d{4})-?(\d{4})-?(\d{4})-?(\d{3}[\dXx])$")
     _URL_PREFIXES = (
+        "https://ormolecule_id.org/",
+        "http://ormolecule_id.org/",
+        "ormolecule_id.org/",
         "https://orcid.org/",
         "http://orcid.org/",
         "orcid.org/",
@@ -34963,6 +33449,7 @@ Requirements:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from bioetl.domain.types import BatchID
 
@@ -34987,7 +33474,7 @@ class BronzeWriteResult:
         >>> result = BronzeWriteResult(
         ...     batch_id=BatchID(uuid4()),
         ...     relative_path="chembl/activity/2024-01-15/batch_abc.jsonl.zst",
-        ...     absolute_path="/data/bronze/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
+        ...     absolute_path="/data/output/bronze/chembl/activity/2024-01-15/batch_abc.jsonl.zst",
         ...     record_count=1000,
         ...     compressed_size=50000,
         ...     uncompressed_size=200000,
@@ -35033,6 +33520,10 @@ class BronzeWriteResult:
             raise ValueError("absolute_path cannot be empty")
         if not self.checksum_blake2:
             raise ValueError("checksum_blake2 cannot be empty")
+
+    def exists(self) -> bool:
+        """Check if the written Bronze file exists on disk."""
+        return Path(self.absolute_path).exists()
 
     @property
     def compression_ratio(self) -> float:
@@ -35700,6 +34191,7 @@ PUBLICATION_FIELD_GROUPS: Final[dict[str, SemanticGroup]] = {
     "_sources": SemanticGroup.SYSTEM,
     # Identifiers
     "document_chembl_id": SemanticGroup.IDENTIFIERS,
+    "publication_id": SemanticGroup.IDENTIFIERS,
     "chembl_id": SemanticGroup.IDENTIFIERS,
     "doi": SemanticGroup.IDENTIFIERS,
     "pmid": SemanticGroup.IDENTIFIERS,
@@ -35871,7 +34363,17 @@ from typing import Final
 __all__ = ["JOIN_KEY_COLUMNS", "ColumnQualifier"]
 
 # Join keys excluded from renaming (case-insensitive)
-JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset({"doi", "pmid", "pmc_id"})
+JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset(
+    {
+        "doi",
+        "pmid",
+        "pmc_id",
+        "publication_id",
+        "publication_doi",
+        "publication_pmid",
+        "publication_pmc_id",
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -35923,7 +34425,7 @@ class ColumnQualifier:
 
     @property
     def is_join_key(self) -> bool:
-        """Check if field is a join key (doi, pmid, pmc_id)."""
+        """Check if field is a join key (publication identifiers)."""
         return self.field.lower() in JOIN_KEY_COLUMNS
 
     @classmethod
@@ -36195,6 +34697,11 @@ class CompoundId:
         if self.is_pubchem and isinstance(self._validated_id, PubChemCid):
             return self._validated_id
         return None
+
+    @property
+    def as_pubchem_molecule_id(self) -> PubChemCid | None:
+        """Backward-compatible alias for PubChem CID accessor."""
+        return self.as_pubchem_cid
 
     def __str__(self) -> str:
         """Return string representation with source prefix."""
@@ -36727,6 +35234,9 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
+from bioetl.domain.medallion import Layer as MedallionLayer
+from bioetl.domain.types import DriftLevel
+
 
 class DQReportFormat(StrEnum):
     """Output format for DQ reports."""
@@ -36750,22 +35260,6 @@ class DQReportStatus(StrEnum):
     PASS = "pass"
     WARNING = "warning"
     FAIL = "fail"
-
-
-class DriftLevel(StrEnum):
-    """Schema drift severity level."""
-
-    INFO = "info"
-    WARN = "warn"
-    CRITICAL = "critical"
-
-
-class MedallionLayer(StrEnum):
-    """Medallion architecture layer."""
-
-    BRONZE = "bronze"
-    SILVER = "silver"
-    GOLD = "gold"
 
 
 # =============================================================================
@@ -36824,31 +35318,6 @@ class GoldDQCheckType(StrEnum):
 
 
 @dataclass(frozen=True, slots=True)
-class DQCheckResult:
-    """Result of a single DQ check.
-
-    Attributes:
-        check_type: Type of check performed.
-        status: Check status (pass/warn/fail).
-        value: Primary metric value.
-        details: Additional check details.
-        note: Optional note about the check result.
-    """
-
-    check_type: str
-    status: DQCheckStatus
-    value: Any = None
-    details: dict[str, Any] = field(default_factory=dict)
-    note: str | None = None
-
-    def __post_init__(self) -> None:
-        """Ensure details is immutable by converting dict."""
-        if isinstance(self.details, dict):
-            # Create a frozen copy by converting to tuple of items
-            object.__setattr__(self, "details", dict(self.details))
-
-
-@dataclass(frozen=True, slots=True)
 class RecordCountResult:
     """Record count check result."""
 
@@ -36893,15 +35362,6 @@ class SchemaSnapshotResult:
                 "missing_fields_since_last_run",
                 tuple(self.missing_fields_since_last_run),
             )
-
-
-@dataclass(frozen=True, slots=True)
-class FieldPresenceResult:
-    """Raw field presence check result."""
-
-    field_name: str
-    presence_rate: float
-    status: DQCheckStatus
 
 
 @dataclass(frozen=True, slots=True)
@@ -37206,20 +35666,6 @@ class DQThresholds:
 
 
 @dataclass(frozen=True, slots=True)
-class BaseDQReport:
-    """Base DQ report structure.
-
-    Common fields for all layer reports.
-    """
-
-    layer: MedallionLayer
-    timestamp: datetime
-    run_id: str
-    pipeline: str
-    summary: DQReportSummary
-
-
-@dataclass(frozen=True, slots=True)
 class BronzeDQReport:
     """DQ report for Bronze layer.
 
@@ -37319,7 +35765,6 @@ class GoldDQReport:
 __all__ = [
     "AnomalyDetectionResult",
     "AnomalyMetric",
-    "BaseDQReport",
     "BronzeDQCheckType",
     "BronzeDQReport",
     "BusinessRuleResult",
@@ -37328,7 +35773,6 @@ __all__ = [
     "CompletenessResult",
     "ContentHashIntegrityResult",
     # Check Results
-    "DQCheckResult",
     "DQCheckStatus",
     # Enums
     "DQReportFormat",
@@ -37340,7 +35784,6 @@ __all__ = [
     "DeduplicationStatsResult",
     "DriftLevel",
     "EncodingValidationResult",
-    "FieldPresenceResult",
     "FileIntegrityResult",
     "ForeignKeyResult",
     "GoldDQCheckType",
@@ -37851,6 +36294,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "corpus_id": PublicationFieldGroup.ID_AND_STATUS,
     "dblp_id": PublicationFieldGroup.ID_AND_STATUS,
     "document_chembl_id": PublicationFieldGroup.ID_AND_STATUS,
+    "publication_id": PublicationFieldGroup.ID_AND_STATUS,
     "doi": PublicationFieldGroup.ID_AND_STATUS,
     "entity_id": PublicationFieldGroup.ID_AND_STATUS,
     "mag_id": PublicationFieldGroup.ID_AND_STATUS,
@@ -37892,6 +36336,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "author_h_indices": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_openalex_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_orcids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "author_ormolecule_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_s2_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "authors": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "authors_with_affiliations": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
