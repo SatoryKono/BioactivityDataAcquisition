@@ -52,6 +52,41 @@ class DQConfigLoader:
                 return candidate
         return None
 
+    def _load_optional(self, *parts: str) -> dict[str, Any]:
+        """Load YAML from DQ path if it exists, else return empty dict."""
+        path = self._resolve_dq_path(*parts)
+        return self._load_yaml(path) if path else {}
+
+    def _merge_hierarchy(
+        self,
+        provider: str,
+        entity: str,
+        inline_overrides: dict[str, Any] | None,
+    ) -> dict[str, Any]:
+        """Build merged config from defaults → provider → entity → inline."""
+        defaults_path = self._resolve_dq_path("_defaults.yaml")
+        if defaults_path is None:
+            raise FileNotFoundError(
+                "Required DQ defaults file not found in configs/quality or configs/dq. "
+                "Create _defaults.yaml with global DQ settings."
+            )
+        merged = self._load_yaml(defaults_path)
+
+        for layer in (
+            self._load_optional("providers", f"{provider}.yaml"),
+            self._load_optional("entities", provider, f"{entity}.yaml"),
+            inline_overrides or {},
+        ):
+            if layer:
+                merged = self._deep_merge(merged, layer)
+
+        if self._relaxed_dq:
+            merged = self._deep_merge(
+                merged,
+                {"thresholds": {"soft_fail": 0.99, "hard_fail": 1.0}},
+            )
+        return merged
+
     def load(
         self,
         provider: str,
@@ -78,52 +113,17 @@ class DQConfigLoader:
             FileNotFoundError: If _defaults.yaml doesn't exist.
             ValidationError: If merged config fails validation.
         """
-        # Cache only when no inline overrides (they may change)
-        # Include relaxed flag in key so test vs prod configs don't mix
         cache_key = f"{provider}:{entity}:relaxed={self._relaxed_dq}"
 
         if inline_overrides is None and cache_key in self._cache:
             return self._cache[cache_key]
 
-        # 1. Load defaults (MUST exist)
-        defaults_path = self._resolve_dq_path("_defaults.yaml")
-        if defaults_path is None:
-            raise FileNotFoundError(
-                "Required DQ defaults file not found in configs/quality or configs/dq. "
-                "Create _defaults.yaml with global DQ settings."
-            )
-        merged = self._load_yaml(defaults_path)
+        merged = self._merge_hierarchy(provider, entity, inline_overrides)
 
-        # 2. Load provider config (optional)
-        provider_path = self._resolve_dq_path("providers", f"{provider}.yaml")
-        provider_config = self._load_yaml(provider_path) if provider_path else {}
-        if provider_config:
-            merged = self._deep_merge(merged, provider_config)
-
-        # 3. Load entity config (optional)
-        entity_path = self._resolve_dq_path("entities", provider, f"{entity}.yaml")
-        entity_config = self._load_yaml(entity_path) if entity_path else {}
-        if entity_config:
-            merged = self._deep_merge(merged, entity_config)
-
-        # 4. Apply inline overrides (optional)
-        if inline_overrides:
-            merged = self._deep_merge(merged, inline_overrides)
-
-        # 5. Test override: relax DQ thresholds for e2e/integration tests
-        # (soft_fail < hard_fail required by ThresholdsConfig validator)
-        if self._relaxed_dq:
-            merged = self._deep_merge(
-                merged,
-                {"thresholds": {"soft_fail": 0.99, "hard_fail": 1.0}},
-            )
-
-        # Normalize and validate via Pydantic
         normalized = self._normalize_to_file_format(merged)
         validated = DQConfigFile.model_validate(normalized)
         domain_config: DQConfig = validated.to_domain()
 
-        # Cache result if no inline overrides
         if inline_overrides is None:
             self._cache[cache_key] = domain_config
 
