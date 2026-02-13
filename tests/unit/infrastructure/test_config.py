@@ -53,6 +53,57 @@ def test_yaml_config_to_domain_default_mode():
     assert domain_config.write_mode is SilverWriteMode.MERGE
 
 
+def test_pipeline_yaml_config_accepts_dq_overrides_alias_equivalently() -> None:
+    """dq_overrides and dq_rules must parse to identical inline DQ config."""
+    base = {
+        "pipeline_name": "test_pipeline",
+        "provider": "test",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "silver.test",
+    }
+
+    cfg_from_rules = PipelineYamlConfig.model_validate(
+        {
+            **base,
+            "dq_rules": {"soft_fail_threshold": 0.06, "hard_fail_threshold": 0.19},
+        }
+    )
+    cfg_from_overrides = PipelineYamlConfig.model_validate(
+        {
+            **base,
+            "dq_overrides": {
+                "soft_fail_threshold": 0.06,
+                "hard_fail_threshold": 0.19,
+            },
+        }
+    )
+
+    assert cfg_from_rules.dq_overrides.soft_fail_threshold == 0.06
+    assert cfg_from_overrides.dq_overrides.soft_fail_threshold == 0.06
+    assert cfg_from_rules.dq_overrides.hard_fail_threshold == 0.19
+    assert cfg_from_overrides.dq_overrides.hard_fail_threshold == 0.19
+
+
+def test_pipeline_yaml_config_serializes_dq_to_canonical_overrides_key() -> None:
+    """Serialized YAML schema uses canonical dq_overrides key."""
+    cfg = PipelineYamlConfig.model_validate(
+        {
+            "pipeline_name": "test_pipeline",
+            "provider": "test",
+            "entity_type": "entity",
+            "primary_keys": ["id"],
+            "silver_table": "silver.test",
+            "dq": {"soft_fail_threshold": 0.07, "hard_fail_threshold": 0.18},
+        }
+    )
+
+    dumped = cfg.model_dump(by_alias=True)
+
+    assert "dq_overrides" in dumped
+    assert "dq_rules" not in dumped
+
+
 @pytest.mark.unit
 class TestMaintenanceConfig:
     """Tests for MaintenanceConfig schema validation."""

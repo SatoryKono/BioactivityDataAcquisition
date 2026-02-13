@@ -168,7 +168,7 @@ def yaml_config_to_domain(
     if resolved_dq_config is not None:
         dq_config = resolved_dq_config
     else:
-        dq_config = yaml_config.dq_rules.to_domain()
+        dq_config = yaml_config.dq_overrides.to_domain()
 
     # Extract transform info for lineage tracking
     transform_version = yaml_config.transform.version

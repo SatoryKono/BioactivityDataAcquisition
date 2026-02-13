@@ -34,7 +34,7 @@ class ConfigLoader:
 
     Resolution order for DQ config:
     1. If dq_config_file present: load from DQ hierarchy
-    2. If dq_rules present: apply as inline overrides
+    2. If dq_overrides present: apply as inline overrides
     3. If both: merge (file hierarchy + inline overrides)
     4. If neither: load defaults from DQ hierarchy
 
@@ -87,7 +87,7 @@ class ConfigLoader:
 
         Resolution order:
         1. If dq_config_file present: load from DQ hierarchy
-        2. If dq_rules present: apply as inline overrides
+        2. If dq_overrides present: apply as inline overrides
         3. If both: merge (file + inline overrides)
         4. If neither: load defaults from DQ hierarchy
 
@@ -103,13 +103,13 @@ class ConfigLoader:
         # Check if dq_config_file is specified
         dq_config_file = getattr(yaml_config, "dq_config_file", None)
 
-        # Get inline dq_rules if present (non-empty)
-        has_inline_rules = self._has_inline_dq_rules(yaml_config)
+        # Get inline dq_overrides if present (non-empty)
+        has_inline_rules = self._has_inline_dq_overrides(yaml_config)
 
         if dq_config_file is not None or has_inline_rules:
             # Use hierarchical DQ config system
             inline_overrides = (
-                self._normalize_inline_dq_rules(yaml_config.dq_rules)
+                self._normalize_inline_dq_overrides(yaml_config.dq_overrides)
                 if has_inline_rules
                 else None
             )
@@ -129,18 +129,18 @@ class ConfigLoader:
             )
         except FileNotFoundError:
             # No DQ hierarchy available, use inline rules as-is
-            return yaml_config.dq_rules.to_domain()
+            return yaml_config.dq_overrides.to_domain()
 
-    def _has_inline_dq_rules(self, yaml_config: PipelineYamlConfig) -> bool:
+    def _has_inline_dq_overrides(self, yaml_config: PipelineYamlConfig) -> bool:
         """Check if YAML config has non-default inline DQ rules.
 
         Args:
             yaml_config: Pipeline YAML configuration.
 
         Returns:
-            True if inline dq_rules contains meaningful overrides.
+            True if inline dq_overrides contains meaningful overrides.
         """
-        dq = yaml_config.dq_rules
+        dq = yaml_config.dq_overrides
 
         # Check for any field validations or non-default thresholds
         has_validations = bool(
@@ -156,17 +156,17 @@ class ConfigLoader:
 
         return has_validations or has_custom_thresholds
 
-    def _normalize_inline_dq_rules(
+    def _normalize_inline_dq_overrides(
         self,
-        dq_rules: Any,
+        dq_overrides: Any,
     ) -> dict[str, Any]:
-        """Normalize inline dq_rules to DQConfigFile format.
+        """Normalize inline dq_overrides to DQConfigFile format.
 
         Converts the Pydantic DQConfig model to a dict compatible with
         the DQConfigLoader merge format.
 
         Args:
-            dq_rules: DQConfig Pydantic model from pipeline config.
+            dq_overrides: DQConfig Pydantic model from pipeline config.
 
         Returns:
             Dict in DQConfigFile format for merge.
@@ -175,39 +175,39 @@ class ConfigLoader:
 
         # Thresholds normalization
         result["thresholds"] = {
-            "soft_fail": dq_rules.soft_fail_threshold,
-            "hard_fail": dq_rules.hard_fail_threshold,
+            "soft_fail": dq_overrides.soft_fail_threshold,
+            "hard_fail": dq_overrides.hard_fail_threshold,
         }
 
         # Direct copy for compatible fields
-        result["strict_validation"] = dq_rules.strict_validation
-        result["invalid_record_policy"] = dq_rules.invalid_record_policy
+        result["strict_validation"] = dq_overrides.strict_validation
+        result["invalid_record_policy"] = dq_overrides.invalid_record_policy
 
         # Report config
         result["report"] = {
-            "enabled": dq_rules.report.enabled,
-            "format": dq_rules.report.format,
-            "include_sample_failures": dq_rules.report.include_sample_failures,
-            "sample_size": dq_rules.report.sample_size,
-            "output_path": dq_rules.report.output_path,
+            "enabled": dq_overrides.report.enabled,
+            "format": dq_overrides.report.format,
+            "include_sample_failures": dq_overrides.report.include_sample_failures,
+            "sample_size": dq_overrides.report.sample_size,
+            "output_path": dq_overrides.report.output_path,
         }
 
         # Validation lists → entity-level (inline = highest priority)
-        if dq_rules.field_validations:
+        if dq_overrides.field_validations:
             result["entity_field_validations"] = [
-                self._field_validation_to_dict(fv) for fv in dq_rules.field_validations
+                self._field_validation_to_dict(fv) for fv in dq_overrides.field_validations
             ]
 
-        if dq_rules.cross_field_validations:
+        if dq_overrides.cross_field_validations:
             result["entity_cross_field_validations"] = [
                 self._cross_field_validation_to_dict(cfv)
-                for cfv in dq_rules.cross_field_validations
+                for cfv in dq_overrides.cross_field_validations
             ]
 
-        if dq_rules.conditional_validations:
+        if dq_overrides.conditional_validations:
             result["entity_conditional_validations"] = [
                 self._conditional_validation_to_dict(cv)
-                for cv in dq_rules.conditional_validations
+                for cv in dq_overrides.conditional_validations
             ]
 
         return result
