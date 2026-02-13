@@ -54,8 +54,8 @@ class Assay(BaseEntity):
 
     # Biological context
     assay_organism: str | None = None
-    # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-    taxonomy_id: int | None = None
+    # Standardized to 'assay_taxonomy_id' for NCBI consistency (was 'tax_id')
+    assay_taxonomy_id: int | None = None
     assay_cell_type: str | None = None
     assay_tissue: str | None = None
     assay_strain: str | None = None

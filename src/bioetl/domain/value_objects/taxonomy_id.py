@@ -164,7 +164,7 @@ def validate_taxonomy_id_str(value: str | int | None) -> str | None:
     """Validate and convert raw value to taxonomy ID string.
 
     Convenience function for use in field_specs converters where
-    string output is needed (e.g., ActivityTransformer for target_taxonomy_id).
+    string output is needed for legacy string-typed consumers.
 
     Args:
         value: Raw taxonomy ID value (string, integer, or None).

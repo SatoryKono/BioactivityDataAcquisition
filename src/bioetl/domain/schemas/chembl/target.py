@@ -44,6 +44,9 @@ class TargetSchema(ETLRecordSchema):
     pref_name: Series[str] | None = pa.Field(
         nullable=True, description="Preferred name."
     )
+    description: Series[str] | None = pa.Field(
+        nullable=True, description="Target description."
+    )
     taxonomy_id: Series[float] | None = pa.Field(
         nullable=True, description="NCBI Taxonomy ID (float for nullable int)."
     )
