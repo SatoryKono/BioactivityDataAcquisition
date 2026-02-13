@@ -52,67 +52,6 @@ __all__ = [
 ]
 
 ================================================================================
-File: adapter_error_logging.py
-Path: adapters\adapter_error_logging.py
-================================================================================
-"""Logging utilities for adapters.
-
-Provides standardized error logging format across all data source adapters.
-Implements RULES.md §3.2.1 Log Schema with mandatory stage field.
-"""
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, Literal
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
-
-# Stage type for Log Schema compliance
-StageType = Literal["extract", "transform", "load", "validate", "init", "cleanup"]
-
-
-def log_adapter_error(
-    logger: LoggerPort,
-    provider: str,
-    operation: str,
-    *,
-    stage: StageType = "extract",
-    error_type: str = "adapter_error",
-    exc_info: bool = True,
-    **context: Any,
-) -> None:
-    """Log adapter error in standardized format with Log Schema fields.
-
-    Формат сообщения: "{provider} {operation} failed"
-
-    Implements RULES.md §3.2.1 - mandatory fields:
-    - stage: Pipeline stage (default: "extract" for adapter operations)
-    - error_type: Error classification
-
-    Args:
-        logger: LoggerPort-compatible logger instance
-        provider: Provider name (e.g., "chembl", "pubchem", "uniprot")
-        operation: Operation that failed (e.g., "fetch", "batch fetch", "health check")
-        stage: Pipeline stage for Log Schema (default: "extract")
-        error_type: Classification of error (default: "adapter_error")
-        exc_info: Include exception traceback (default: True)
-        **context: Additional context fields to include in log
-
-    """
-    message = f"{provider} {operation} failed"
-
-    logger.error(
-        message,
-        stage=stage,
-        error_type=error_type,
-        provider=provider,
-        operation=operation,
-        exc_info=exc_info,
-        **context,
-    )
-
-================================================================================
 File: base.py
 Path: adapters\base.py
 ================================================================================
@@ -656,7 +595,7 @@ from bioetl.infrastructure.adapters.chembl.models import (
     ChemblMoleculeRecord,
     ChemblMoleculeResponse,
     ChemblPageMeta,
-    ChemblPublicationRecord,
+    ChemblPublicationApiRecord,
     ChemblPublicationResponse,
     ChemblTargetComponentRecord,
     ChemblTargetComponentResponse,
@@ -675,7 +614,7 @@ __all__ = [
     "ChemblMoleculeRecord",
     "ChemblMoleculeResponse",
     "ChemblPageMeta",
-    "ChemblPublicationRecord",
+    "ChemblPublicationApiRecord",
     "ChemblPublicationResponse",
     "ChemblTargetComponentRecord",
     "ChemblTargetComponentResponse",
@@ -898,6 +837,10 @@ class ChemblAdapter(BaseHttpAdapter):
         data = response.json()
         plural_key = self._mapper.get_plural_key(entity_type)
         records = data.get(plural_key, [])
+        if entity_type in {"publication", "publication_term"}:
+            for record in records:
+                if "publication_id" not in record and record.get("document_chembl_id"):
+                    record["publication_id"] = record["document_chembl_id"]
         page_meta = data.get("page_meta", {})
         has_next = page_meta.get("next") is not None
         return records, has_next
@@ -914,6 +857,27 @@ class ChemblAdapter(BaseHttpAdapter):
             for filter_field, ids in filters.items()
             if ids
         }
+
+    def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
+        """Map canonical filter field names to ChEMBL API field names.
+
+        Publication pipelines use canonical `publication_id` in configs/tests,
+        while ChEMBL /document endpoint expects `document_chembl_id`.
+        """
+        if filter_field == "publication_id" and entity_type in {
+            "publication",
+            "publication_term",
+        }:
+            return "document_chembl_id"
+        return filter_field
+
+    def _build_filter_params(
+        self, entity_type: str, filter_field: str, id_batch: list[str]
+    ) -> dict[str, str]:
+        """Build filter params using API-specific field names."""
+        joined_ids = ",".join(id_batch)
+        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
+        return {f"{api_filter_field}__in": joined_ids}
 
     def _get_projected_url_length(self, url: str, params: dict[str, Any]) -> int:
         """Estimate the length of the final URL with parameters."""
@@ -1148,7 +1112,9 @@ class ChemblAdapter(BaseHttpAdapter):
             if limit and offset >= limit:
                 break
             params = self._build_params(offset, entity_type)
-            params[f"{filter_field}__in"] = ",".join(id_batch)
+            params.update(
+                self._build_filter_params(entity_type, filter_field, id_batch)
+            )
             try:
                 records, has_next = await self._fetch_page(url, params, entity_type)
             except Exception:
@@ -1187,9 +1153,8 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str] = set()
         pk_field = self._mapper.get_primary_key_field(entity_type)
         pk_fields = self._mapper.get_dedup_key_fields(entity_type)
-
         params = self._build_params(0, entity_type)
-        params[f"{filter_field}__in"] = ",".join(id_batch)
+        params.update(self._build_filter_params(entity_type, filter_field, id_batch))
 
         records, has_next = await self._fetch_page(url, params, entity_type)
 
@@ -1625,6 +1590,9 @@ class ChemblAdapter(BaseHttpAdapter):
 
         # Prepare batches for each filter field
         filter_keys = list(filters.keys())
+        api_filter_keys = [
+            self._normalize_filter_field(entity_type, k) for k in filter_keys
+        ]
         filter_batches = [
             list(self._batch_ids(filters[k], batch_size)) for k in filter_keys
         ]
@@ -1635,7 +1603,7 @@ class ChemblAdapter(BaseHttpAdapter):
         # Iterate over cartesian product of batches to cover all combinations
         # ChEMBL API returns records matching ALL filters in the request (AND logic)
         for batch_combination in itertools.product(*filter_batches):
-            current_filters = dict(zip(filter_keys, batch_combination, strict=True))
+            current_filters = dict(zip(api_filter_keys, batch_combination, strict=True))
             filter_params = self._build_filter_in_params(current_filters)
 
             offset = 0
@@ -1936,22 +1904,17 @@ _NON_PUBLICATION_ENTITY_PLURAL: dict[str, str] = {
 # Primary key field overrides by entity type
 # Note: Publication PK fields are provided by the registry.
 _NON_PUBLICATION_PK_FIELD_OVERRIDES: dict[str, str] = {
-    "assay": "assay_chembl_id",
+    "assay": "assay_id",
     "assay_parameters": "assay_param_id",
-    "molecule": "molecule_chembl_id",
-    "compound": "molecule_chembl_id",
-    "target": "target_chembl_id",
+    "molecule": "molecule_id",
+    "compound": "molecule_id",
+    "target": "target_id",
     "target_component": "component_id",
-    "cell_line": "cell_chembl_id",
-    "tissue": "tissue_chembl_id",
+    "cell_line": "cell_id",
+    "tissue": "tissue_id",
     "compound_record": "record_id",
     "protein_class": "protein_class_id",
 }
-
-# All supported entity types (for validation)
-ALL_SUPPORTED_ENTITY_TYPES: frozenset[str] = frozenset(
-    _NON_PUBLICATION_ENTITY_MAPPING.keys()
-)
 
 
 class ChemblEntityMapper:
@@ -2186,145 +2149,6 @@ ENTITY_MAPPING: dict[str, str] = {
     "document_similarity": "document_similarity",
     "document_term": "document",
 }
-
-ENTITY_PLURAL: dict[str, str] = {
-    **_NON_PUBLICATION_ENTITY_PLURAL,
-    # Publication plurals from registry (for backward compatibility)
-    "document": "documents",
-    "document_similarity": "document_similarities",
-}
-
-PK_FIELD_OVERRIDES: dict[str, str] = {
-    **_NON_PUBLICATION_PK_FIELD_OVERRIDES,
-    # Publication PK fields from registry (for backward compatibility)
-    "publication": "document_chembl_id",
-    "publication_similarity": "sim_id",
-    "publication_term": "document_chembl_id",
-    "document": "document_chembl_id",
-    "document_similarity": "sim_id",
-    "document_term": "document_chembl_id",
-}
-
-================================================================================
-File: exceptions.py
-Path: adapters\chembl\exceptions.py
-================================================================================
-"""ChEMBL-specific exceptions.
-
-These exceptions are internal to the ChEMBL adapter and should be
-translated to domain-level ExternalServiceError on adapter boundary.
-
-Application layer should catch ExternalServiceError, not these exceptions.
-"""
-
-from __future__ import annotations
-
-from bioetl.domain.exceptions import ExternalServiceError
-from bioetl.domain.types import ErrorType
-
-
-class ChemblApiError(ExternalServiceError):
-    """ChEMBL API error.
-
-    Internal exception for ChEMBL adapter. On adapter boundary, this
-    should be translated to domain ExternalServiceError or its subclasses.
-    """
-
-    error_type = ErrorType.NETWORK_ERROR
-
-    def __init__(
-        self,
-        message: str,
-        status_code: int | None = None,
-        entity_type: str | None = None,
-        operation: str | None = None,
-    ) -> None:
-        """Initialize ChemblApiError.
-
-        Args:
-            message: Error description.
-            status_code: HTTP status code if applicable.
-            entity_type: Type of entity being fetched (e.g., "activity").
-            operation: Operation that failed (e.g., "fetch", "health_check").
-        """
-        self.entity_type = entity_type
-        self.operation = operation
-        super().__init__(
-            message,
-            service_name="chembl",
-            status_code=status_code,
-        )
-
-
-class ChemblRateLimitError(ChemblApiError):
-    """ChEMBL rate limit exceeded.
-
-    Raised when ChEMBL API returns 429 Too Many Requests.
-    """
-
-    error_type = ErrorType.RATE_LIMIT
-
-    def __init__(self, retry_after: float = 60.0) -> None:
-        """Initialize ChemblRateLimitError.
-
-        Args:
-            retry_after: Seconds to wait before retry.
-        """
-        super().__init__(
-            f"ChEMBL rate limit exceeded. Retry after {retry_after}s",
-            status_code=429,
-        )
-        self.retry_after = retry_after
-
-
-class ChemblServiceUnavailableError(ChemblApiError):
-    """ChEMBL service unavailable.
-
-    Raised when ChEMBL API returns 5xx errors or connection fails.
-    """
-
-    error_type = ErrorType.TIMEOUT
-
-    def __init__(
-        self,
-        message: str = "ChEMBL service unavailable",
-        status_code: int | None = None,
-    ) -> None:
-        """Initialize ChemblServiceUnavailableError.
-
-        Args:
-            message: Error description.
-            status_code: HTTP status code (typically 5xx).
-        """
-        super().__init__(message, status_code=status_code)
-
-
-class ChemblAuthError(ChemblApiError):
-    """ChEMBL authentication error.
-
-    Raised when ChEMBL API returns 401 or 403.
-    """
-
-    error_type = ErrorType.AUTH_FAILURE
-
-    def __init__(self, status_code: int = 401) -> None:
-        """Initialize ChemblAuthError.
-
-        Args:
-            status_code: HTTP status code (401 or 403).
-        """
-        super().__init__(
-            f"ChEMBL authentication failed (HTTP {status_code})",
-            status_code=status_code,
-        )
-
-
-__all__ = [
-    "ChemblApiError",
-    "ChemblAuthError",
-    "ChemblRateLimitError",
-    "ChemblServiceUnavailableError",
-]
 
 ================================================================================
 File: models.py
@@ -2796,11 +2620,18 @@ class ChemblReleaseInfo(BaseModel):
     )
 
 
-class ChemblPublicationRecord(BaseModel):
-    """Individual publication record from ChEMBL API.
+class ChemblPublicationApiRecord(BaseModel):
+    """Individual publication record from ChEMBL API (infrastructure model).
+
+    This is the infrastructure-layer API response model with extra='ignore'
+    and nested ChemblReleaseInfo. NOT the same as the domain entity
+    ChemblPublicationRecord (domain/entities/chembl.py) which uses
+    extra='forbid' and a flat chembl_release string.
 
     Note: ChEMBL API uses 'document' as the endpoint name.
     Renamed from ChemblDocumentRecord per ADR-024 (Ubiquitous Language).
+    Renamed from ChemblPublicationRecord to ChemblPublicationApiRecord
+    to resolve naming collision with the domain entity.
     """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
@@ -2847,7 +2678,7 @@ class ChemblPublicationResponse(BaseModel):
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
-    documents: list[ChemblPublicationRecord] = Field(
+    documents: list[ChemblPublicationApiRecord] = Field(
         default_factory=list, description="List of publication records"
     )
     page_meta: ChemblPageMeta | None = Field(
@@ -2937,19 +2768,6 @@ class ChemblCellLineResponse(BaseModel):
     )
 
 
-# === Status Response ===
-
-
-class ChemblStatusResponse(BaseModel):
-    """ChEMBL API status response."""
-
-    model_config = ConfigDict(extra="ignore", populate_by_name=True)
-
-    status: str = Field(description="Service status (UP, DOWN)")
-    chembl_db_version: str | None = Field(default=None)
-    chembl_release_date: str | None = Field(default=None)
-
-
 # === Response Type Mapping ===
 
 # Mapping from entity type to response class for factory usage
@@ -2973,7 +2791,7 @@ CHEMBL_RECORD_MODELS: dict[str, type[BaseModel]] = {
     "compound": ChemblMoleculeRecord,
     "target": ChemblTargetRecord,
     "target_component": ChemblTargetComponentRecord,
-    "document": ChemblPublicationRecord,  # ADR-024: Publication is canonical
+    "document": ChemblPublicationApiRecord,  # ADR-024: Publication is canonical
     "cell_line": ChemblCellLineRecord,
 }
 
@@ -4601,81 +4419,8 @@ class CrossRefApiError(ExternalServiceError):
         )
 
 
-class CrossRefRateLimitError(CrossRefApiError):
-    """CrossRef rate limit exceeded.
-
-    Raised when CrossRef API returns 429 Too Many Requests.
-
-    Note:
-        CrossRef provides higher rate limits (50 req/sec) when using
-        the "polite pool" with a mailto parameter.
-    """
-
-    error_type = ErrorType.RATE_LIMIT
-
-    def __init__(self, retry_after: float = 60.0) -> None:
-        """Initialize CrossRefRateLimitError.
-
-        Args:
-            retry_after: Seconds to wait before retry.
-        """
-        super().__init__(
-            f"CrossRef rate limit exceeded. Retry after {retry_after}s",
-            status_code=429,
-        )
-        self.retry_after = retry_after
-
-
-class CrossRefServiceUnavailableError(CrossRefApiError):
-    """CrossRef service unavailable.
-
-    Raised when CrossRef API returns 5xx errors or connection fails.
-    """
-
-    error_type = ErrorType.TIMEOUT
-
-    def __init__(
-        self,
-        message: str = "CrossRef service unavailable",
-        status_code: int | None = None,
-    ) -> None:
-        """Initialize CrossRefServiceUnavailableError.
-
-        Args:
-            message: Error description.
-            status_code: HTTP status code (typically 5xx).
-        """
-        super().__init__(message, status_code=status_code)
-
-
-class CrossRefNotFoundError(CrossRefApiError):
-    """CrossRef resource not found.
-
-    Raised when a DOI is not found in CrossRef (404).
-    This is typically not an error - just indicates the DOI
-    is not registered with CrossRef.
-    """
-
-    error_type = ErrorType.INVALID_DATA
-
-    def __init__(self, doi: str) -> None:
-        """Initialize CrossRefNotFoundError.
-
-        Args:
-            doi: The DOI that was not found.
-        """
-        super().__init__(
-            f"DOI not found in CrossRef: {doi}",
-            status_code=404,
-            doi=doi,
-        )
-
-
 __all__ = [
     "CrossRefApiError",
-    "CrossRefNotFoundError",
-    "CrossRefRateLimitError",
-    "CrossRefServiceUnavailableError",
 ]
 
 ================================================================================
@@ -6520,13 +6265,6 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class HasProviderName(Protocol):
-    """Protocol for adapters that have a provider_name attribute."""
-
-    provider_name: str
-
-
-@runtime_checkable
 class HasFetchFiltered(Protocol):
     """Protocol for adapters that implement fetch_filtered method."""
 
@@ -6687,7 +6425,7 @@ from __future__ import annotations
 import time
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.types import HealthStatus
 
@@ -6698,26 +6436,6 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
     )
-
-
-# Default health check timeout per RULES.md §11.3
-DEFAULT_HEALTH_CHECK_TIMEOUT_SECONDS: float = 5.0
-
-
-@runtime_checkable
-class HealthCheckObservability(Protocol):
-    """Protocol for adapters using HealthCheckMixin.
-
-    Adapters must provide logger, metrics, and provider_name attributes.
-    """
-
-    logger: LoggerPort
-    metrics: MetricsPort
-    provider_name: str
-
-    def _get_health_endpoint(self) -> str:
-        """Return the health check endpoint path."""
-        ...
 
 
 @dataclass
@@ -7341,6 +7059,9 @@ def is_circuit_breaker_error(exc: Exception) -> bool:
         return status_code >= 500 or status_code == 429
 
     return False
+
+
+CIRCUIT_BREAKER_HELPERS = (is_circuit_breaker_error,)
 
 ================================================================================
 File: client.py
@@ -8389,30 +8110,9 @@ Provides PaginatedFetcherMixin to standardize loop logic for offset/cursor based
 from __future__ import annotations
 
 from collections.abc import AsyncIterator, Awaitable, Callable
-from typing import Any, Protocol, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
-
-
-class PageFetcher(Protocol[T]):
-    """Protocol for the fetch function passed to paginated_fetch."""
-
-    async def __call__(
-        self, cursor: Any | None, fetched: int
-    ) -> tuple[list[T], Any | None]:
-        """Fetch a page of items.
-
-        Args:
-            cursor: The cursor/offset for the next page.
-            fetched: Number of items already fetched (for adaptive page sizing).
-
-        Returns:
-            A tuple containing:
-                - List of items fetched.
-                - Next cursor (or None if no more pages).
-
-        """
-        ...
 
 
 class PaginatedFetcherMixin:
@@ -8607,75 +8307,58 @@ class TokenBucket:
         return False
 
 
-# Pre-configured buckets for known providers
 def create_pubchem_bucket(
+    *,
     metrics: MetricsPort | None = None,
 ) -> TokenBucket:
-    """Create rate limiter for PubChem (5 req/sec).
+    """Create a TokenBucket configured for PubChem API rate limits.
+
+    PubChem: 5 req/sec, burst of 5 (RULES.md Appendix A).
 
     Args:
-        metrics: Optional metrics port for observability
+        metrics: Optional MetricsPort for observing rate limiter metrics.
 
+    Returns:
+        Configured TokenBucket for PubChem.
     """
-    return TokenBucket(rate=5.0, capacity=5, provider="pubchem", metrics=metrics)
-
-
-def create_uniprot_bucket(
-    with_api_key: bool = False,
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for UniProt.
-
-    Args:
-        with_api_key: True if using API key (100 req/sec vs default)
-        metrics: Optional metrics port for observability
-
-    """
-    rate = 100.0 if with_api_key else 10.0
     return TokenBucket(
-        rate=rate, capacity=int(rate), provider="uniprot", metrics=metrics
+        rate=5.0,
+        capacity=5,
+        provider="pubchem",
+        metrics=metrics,
     )
-
-
-def create_openalex_bucket(
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for OpenAlex (10 req/sec polite).
-
-    Args:
-        metrics: Optional metrics port for observability
-
-    """
-    return TokenBucket(rate=10.0, capacity=10, provider="openalex", metrics=metrics)
-
-
-def create_crossref_bucket(
-    metrics: MetricsPort | None = None,
-) -> TokenBucket:
-    """Create rate limiter for Crossref (50 req/sec polite).
-
-    Args:
-        metrics: Optional metrics port for observability
-
-    """
-    return TokenBucket(rate=50.0, capacity=50, provider="crossref", metrics=metrics)
 
 
 def create_pubmed_bucket(
+    *,
     with_api_key: bool = False,
     metrics: MetricsPort | None = None,
 ) -> TokenBucket:
-    """Create rate limiter for PubMed.
+    """Create a TokenBucket configured for PubMed API rate limits.
+
+    PubMed: 3 req/sec without API key, 10 req/sec with API key (RULES.md Appendix A).
 
     Args:
-        with_api_key: True if using API key (10 req/sec vs 3 req/sec)
-        metrics: Optional metrics port for observability
+        with_api_key: Use higher rate limit (10 req/sec) when API key is available.
+        metrics: Optional MetricsPort for observing rate limiter metrics.
 
+    Returns:
+        Configured TokenBucket for PubMed.
     """
     rate = 10.0 if with_api_key else 3.0
+    capacity = 10 if with_api_key else 3
     return TokenBucket(
-        rate=rate, capacity=int(rate), provider="pubmed", metrics=metrics
+        rate=rate,
+        capacity=capacity,
+        provider="pubmed",
+        metrics=metrics,
     )
+
+
+_BUCKET_FACTORIES = (create_pubchem_bucket, create_pubmed_bucket)
+
+
+_BUCKET_FACTORIES = (create_pubchem_bucket, create_pubmed_bucket)
 
 ================================================================================
 File: __init__.py
@@ -9854,22 +9537,19 @@ from bioetl.infrastructure.adapters.pubchem.models import (
     PUBCHEM_RECORD_MODELS,
     PubChemAssayRecord,
     PubChemBioactivityRecord,
+    PubchemMoleculeApiRecord,
     PubchemMoleculeDetailRecord,
-    PubchemMoleculeRecord,
     PubChemSubstanceRecord,
 )
 
 __all__ = [
-    # Model Mappings
     "PUBCHEM_RECORD_MODELS",
-    # Adapter
     "PubChemAdapter",
-    # Record Models
     "PubChemAssayRecord",
     "PubChemBioactivityRecord",
     "PubChemSubstanceRecord",
+    "PubchemMoleculeApiRecord",
     "PubchemMoleculeDetailRecord",
-    "PubchemMoleculeRecord",
 ]
 
 ================================================================================
@@ -9913,14 +9593,9 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.filterable_mixin import FilterableStubMixin
+from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
-from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
-    PubChemFetchStrategies,
-)
 from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
-
-# PubChem REST API base URL
-PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -9997,6 +9672,10 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         )
         self._mapper = PubChemEntityMapper()
         self._request_collector = APIRequestCollector()
+        from bioetl.infrastructure.adapters.pubchem.fetch_strategies import (
+            PubChemFetchStrategies,
+        )
+
         self._strategies = PubChemFetchStrategies(
             logger=logger,
             rate_limiter=rate_limiter,
@@ -10223,6 +9902,16 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         return self._request_collector.request_count
 
 ================================================================================
+File: constants.py
+Path: adapters\pubchem\constants.py
+================================================================================
+"""Shared constants for PubChem adapters."""
+
+from __future__ import annotations
+
+PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
+
+================================================================================
 File: entity_mapper.py
 Path: adapters\pubchem\entity_mapper.py
 ================================================================================
@@ -10270,15 +9959,26 @@ class PubChemEntityMapper:
             - Stereochemistry (atom/bond stereo counts)
             - 3D properties (volume, conformer count, feature counts)
         """
+        molecule_id = getattr(compound, "molecule_id", None)
+        if molecule_id is None or not isinstance(molecule_id, (str, int, float)):
+            molecule_id = None
+
+        cid_value = getattr(compound, "cid", None)
+        if molecule_id is None and isinstance(cid_value, (str, int, float)):
+            molecule_id = cid_value
+
         return {
             # === Primary Key ===
-            "cid": compound.cid,
+            "molecule_id": molecule_id,
+            # Backward-compatible alias consumed by legacy client paths
+            "cid": molecule_id,
             # === Structural Identifiers ===
             # Use connectivity_smiles (replaces deprecated canonical_smiles)
             "canonical_smiles": getattr(compound, "connectivity_smiles", None),
             # Use smiles (replaces deprecated isomeric_smiles)
             "isomeric_smiles": getattr(compound, "smiles", None),
             "inchi": getattr(compound, "inchi", None),
+            "inchi_key": getattr(compound, "inchikey", None),
             "inchikey": getattr(compound, "inchikey", None),
             # === Nomenclature ===
             "molecular_formula": getattr(compound, "molecular_formula", None),
@@ -10395,6 +10095,8 @@ from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
 
+from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
+
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable
 
@@ -10405,10 +10107,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
     from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
     from bioetl.infrastructure.adapters.pubchem.entity_mapper import PubChemEntityMapper
-
-
-# PubChem REST API base URL for request metadata
-PUBCHEM_API_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
 
 class PubChemFetchStrategies:
@@ -10554,6 +10252,10 @@ class PubChemFetchStrategies:
                 )
         return valid_cids
 
+    def _parse_valid_molecule_ids(self, molecule_id_list: list[str]) -> list[int]:
+        """Backward-compatible alias for CID parser."""
+        return self._parse_valid_cids(molecule_id_list)
+
     async def _fetch_cid_batch(self, batch: list[int]) -> list[dict[str, Any]]:
         """Fetch a batch of compounds by CID."""
         await self._rate_limiter.acquire()
@@ -10591,12 +10293,24 @@ class PubChemFetchStrategies:
                     fetched += 1
             except Exception as e:
                 self._logger.warning(
-                    "cid_batch_fetch_failed",
+                    "molecule_id_batch_fetch_failed",
                     provider=self._provider_name,
                     batch_start=batch[0] if batch else None,
                     batch_size=len(batch),
                     error=str(e),
                 )
+
+    async def fetch_by_molecule_ids(
+        self,
+        molecule_id_list: list[str],
+        limit: int | None = None,
+        batch_size: int = 50,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Backward-compatible alias for CID-based fetch."""
+        async for record in self.fetch_by_cids(
+            molecule_id_list, limit=limit, batch_size=batch_size
+        ):
+            yield record
 
     async def _fetch_single_inchikey(self, inchikey: str) -> list[dict[str, Any]]:
         """Fetch compounds for a single InChIKey.
@@ -10742,14 +10456,21 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class PubchemMoleculeRecord(BaseModel):
-    """Normalized molecule record from PubChem.
+class PubchemMoleculeApiRecord(BaseModel):
+    """Normalized molecule record from PubChem API (infrastructure model).
+
+    This is the infrastructure-layer API response model with extra='ignore'
+    and cid as int. NOT the same as the domain entity PubchemMoleculeRecord
+    (domain/entities/pubchem.py) which uses extra='forbid', cid as str,
+    and has 35+ fields vs ~15 here.
 
     Represents data extracted from a pubchempy.Compound object
     via the adapter's _compound_to_dict method.
 
     Note: Renamed from PubChemCompoundRecord per ADR-024.
     'Molecule' is the canonical term for chemical compounds.
+    Renamed from PubchemMoleculeRecord to PubchemMoleculeApiRecord
+    to resolve naming collision with the domain entity.
     """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
@@ -10862,7 +10583,7 @@ class PubchemMoleculeDetailRecord(BaseModel):
     # Primary Key
     cid: int = Field(description="PubChem Compound ID")
 
-    # Basic Properties (from PubchemMoleculeRecord)
+    # Basic Properties (from PubchemMoleculeApiRecord)
     molecular_formula: str | None = Field(default=None)
     molecular_weight: float | None = Field(default=None)
     canonical_smiles: str | None = Field(default=None)
@@ -10952,8 +10673,8 @@ class PubChemBioactivityRecord(BaseModel):
 # Mapping from entity type to record model
 # Note: Keys match PubChem entity types, not Ubiquitous Language
 PUBCHEM_RECORD_MODELS: dict[str, type[BaseModel]] = {
-    "compound": PubchemMoleculeRecord,  # ADR-024: Molecule is canonical
-    "molecule": PubchemMoleculeRecord,  # Canonical alias
+    "compound": PubchemMoleculeApiRecord,  # ADR-024: Molecule is canonical
+    "molecule": PubchemMoleculeApiRecord,  # Canonical alias
     "substance": PubChemSubstanceRecord,
     "assay": PubChemAssayRecord,
 }
@@ -10986,6 +10707,334 @@ __all__ = [
     "PubMedSearchResponse",
     "TitleFallbackHandler",
 ]
+
+================================================================================
+File: _fetch.py
+Path: adapters\pubmed\_fetch.py
+================================================================================
+"""Fetch functionality for PubMed adapter.
+
+Part of PubMedAdapter split to comply with LOC limits.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import time
+from typing import TYPE_CHECKING, Any
+
+from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+    from pydantic import BaseModel
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.common.api_request_collector import APIRequestCollector
+
+from .constants import ENTREZ_API_BASE
+
+
+class PubMedFetchMixin:
+    """Mixin providing record fetching capabilities for PubMed."""
+
+    http_client: UnifiedHTTPClient
+    logger: LoggerPort
+    email: str
+    api_key: str | None
+    _adapter_metrics: AdapterMetrics
+    _request_collector: APIRequestCollector
+    provider_name: str
+    batch_size: int
+
+    def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
+        """Build parameters for efetch API call."""
+        params = {
+            "db": "pubmed",
+            "id": ",".join(id_batch),
+            "retmode": "xml",
+            "rettype": "abstract",
+            "email": self.email,
+        }
+        if self.api_key and "your_" not in self.api_key:
+            params["api_key"] = self.api_key
+        return params
+
+    async def _fetch_batch(self, id_batch: list[str]) -> list[dict[str, Any]]:
+        """Fetch a batch of articles and return parsed records."""
+        params = self._build_fetch_params(id_batch)
+        try:
+            start_time = time.perf_counter()
+            with self._adapter_metrics.measure_request("/efetch"):
+                response = await self.http_client.get(
+                    f"{ENTREZ_API_BASE}efetch.fcgi", params=params
+                )
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
+            root = PubMedXmlProcessor.parse_response(response.text)
+            if root is None:
+                self.logger.error(
+                    "external_api_error",
+                    provider=self.provider_name,
+                    operation="batch_fetch",
+                    error_category="DATA_QUALITY",
+                    error="XML parse error",
+                    batch_size=len(id_batch),
+                )
+                return []
+            return PubMedXmlProcessor.extract_all_records(root)
+        except Exception as e:
+            from bioetl.infrastructure.adapters.error_handling import ErrorService
+            error_handler = ErrorService(self.logger)
+            wrapped = error_handler.handle_error(
+                error=e,
+                provider=self.provider_name,
+                operation="batch_fetch",
+                context={"batch_size": len(id_batch)},
+            )
+            raise wrapped from e
+
+    async def _yield_articles_from_pmids(
+        self, pmids: list[str], limit: int | None
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Yield article records from a list of PMIDs."""
+        total_fetched = 0
+        for i in range(0, len(pmids), self.batch_size):
+            records = await self._fetch_batch(pmids[i : i + self.batch_size])
+            for record in records:
+                yield record
+                total_fetched += 1
+                if limit and total_fetched >= limit:
+                    return
+
+================================================================================
+File: _health.py
+Path: adapters\pubmed\_health.py
+================================================================================
+"""Health and metadata functionality for PubMed adapter.
+
+Part of PubMedAdapter split to comply with LOC limits.
+"""
+
+from __future__ import annotations
+
+import time
+from typing import TYPE_CHECKING
+
+from bioetl.domain.models.metadata import SourceMetadata
+from bioetl.domain.types import HealthStatus
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.common.api_request_collector import APIRequestCollector
+    from bioetl.infrastructure.adapters.error_handling import ErrorService
+
+from .constants import ENTREZ_API_BASE
+
+
+class PubMedHealthMixin:
+    """Mixin providing health checks and metadata for PubMed."""
+
+    http_client: UnifiedHTTPClient
+    logger: LoggerPort
+    email: str
+    api_key: str | None
+    _adapter_metrics: AdapterMetrics
+    _request_collector: APIRequestCollector
+    provider_name: str
+    _error_handler: ErrorService
+
+    async def _probe_health(self) -> HealthStatus:
+        """Perform PubMed-specific health probe."""
+        try:
+            params = {
+                "db": "pubmed",
+                "term": "health",
+                "retmax": "1",
+                "retmode": "json",
+                "email": self.email,
+            }
+            if self.api_key and "your_" not in self.api_key:
+                params["api_key"] = self.api_key
+
+            start_time = time.monotonic()
+            with self._adapter_metrics.measure_request("/health"):
+                response = await self.http_client.get_once(
+                    f"{ENTREZ_API_BASE}esearch.fcgi", params=params
+                )
+            elapsed = time.monotonic() - start_time
+
+            if response.status_code != 200:
+                self.logger.warning(
+                    "pubmed_health_check_failed",
+                    status_code=response.status_code,
+                )
+                return HealthStatus.UNHEALTHY
+
+            if elapsed > 5.0:
+                self.logger.warning(
+                    "pubmed_health_check_slow",
+                    elapsed_seconds=round(elapsed, 2),
+                )
+                return HealthStatus.DEGRADED
+
+            return HealthStatus.HEALTHY
+        except Exception as e:
+            error_type = self._error_handler.get_error_type(e)
+            self.logger.warning(
+                "health_check_failed",
+                provider=self.provider_name,
+                error_type=error_type.value,
+                error=str(e),
+            )
+            raise
+
+    def _fallback_health_status(self) -> HealthStatus:
+        """Get fallback health status on probe failure."""
+        return HealthStatus.UNHEALTHY
+
+    def _get_health_endpoint(self) -> str:
+        """Get the health check endpoint for PubMed."""
+        return "/entrez/eutils/esearch.fcgi"
+
+    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
+        """Get API request metadata and clear collector."""
+        metadata = self._request_collector.to_source_metadata(
+            source_type="api", url=ENTREZ_API_BASE, api_version=api_version
+        )
+        self._request_collector.clear()
+        return metadata
+
+    def clear_request_collector(self) -> None:
+        """Clear the collector without returning metadata."""
+        self._request_collector.clear()
+
+    @property
+    def request_count(self) -> int:
+        """Number of recorded API requests since last clear."""
+        return self._request_collector.request_count
+
+================================================================================
+File: _search.py
+Path: adapters\pubmed\_search.py
+================================================================================
+"""Search functionality for PubMed adapter.
+
+Part of PubMedAdapter split to comply with LOC limits.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import time
+from typing import TYPE_CHECKING, Any
+
+from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+    from bioetl.infrastructure.adapters.common.api_request_collector import APIRequestCollector
+
+from .constants import ENTREZ_API_BASE
+
+
+class PubMedSearchMixin:
+    """Mixin providing search capabilities for PubMed."""
+
+    http_client: UnifiedHTTPClient
+    logger: LoggerPort
+    email: str
+    api_key: str | None
+    _adapter_metrics: AdapterMetrics
+    _request_collector: APIRequestCollector
+    provider_name: str
+    batch_size: int
+
+    async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
+        """Get PMIDs for a search term."""
+        search_url = f"{ENTREZ_API_BASE}esearch.fcgi"
+        params = {
+            "db": "pubmed",
+            "term": search_term,
+            "retmax": str(max_count),
+            "usehistory": "y",
+            "retmode": "json",
+            "email": self.email,
+        }
+        if self.api_key and "your_" not in self.api_key:
+            params["api_key"] = self.api_key
+
+        try:
+            start_time = time.perf_counter()
+            with self._adapter_metrics.measure_request("/esearch"):
+                response = await self.http_client.get(search_url, params=params)
+            duration_ms = (time.perf_counter() - start_time) * 1000
+
+            with contextlib.suppress(Exception):
+                self._request_collector.record_from_response(response, duration_ms)
+
+            data = response.json()
+            idlist: list[str] = data.get("esearchresult", {}).get("idlist", [])
+            return idlist
+        except Exception as e:
+            from bioetl.infrastructure.adapters.error_handling import ErrorService
+            error_handler = ErrorService(self.logger)
+            wrapped = error_handler.handle_error(
+                error=e,
+                provider=self.provider_name,
+                operation="search",
+                context={"search_term": search_term, "max_count": max_count},
+            )
+            raise wrapped from e
+
+    async def _search_by_title(
+        self, title: str, limit: int = 3
+    ) -> list[dict[str, Any]]:
+        """Search PubMed by title using esearch + efetch."""
+        clean_title = title.replace('"', "'").strip()[:200]
+        search_term = f'"{clean_title}"[Title]'
+
+        self.logger.debug(
+            "pubmed_title_search",
+            title=clean_title[:50],
+        )
+
+        try:
+            pmids = await self._get_pmids(search_term, limit)
+            if not pmids:
+                return []
+
+            results: list[dict[str, Any]] = []
+            # Note: _yield_articles_from_pmids is expected to be in PubMedFetchMixin
+            async for record in self._yield_articles_from_pmids(pmids, limit):  # type: ignore
+                results.append(record)
+
+            return results
+        except Exception as e:
+            self.logger.debug(
+                "pubmed_title_search_failed",
+                title=clean_title[:50],
+                error=str(e),
+            )
+            return []
+
+================================================================================
+File: constants.py
+Path: adapters\pubmed\constants.py
+================================================================================
+# src/bioetl/infrastructure/adapters/pubmed/constants.py
+"""Constants for the PubMed adapter."""
+
+ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
 
 ================================================================================
 File: fallback.py
@@ -11370,15 +11419,11 @@ Path: adapters\pubmed\pubmed_client.py
 """PubMed adapter for Entrez E-utilities API.
 
 Implements DataSourcePort for PubMed article metadata extraction.
-
-DTO Support:
-- fetch_as_models(): Returns typed DTO models (ArticleRecord)
-- fetch(): Returns raw dicts (backward compatible)
+Split into mixins to comply with LOC limits.
 """
 
 from __future__ import annotations
 
-import contextlib
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -11386,9 +11431,7 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel
 
 from bioetl.domain.entities.pubmed import ArticleRecord
-from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import NoOpMetrics
-from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.common.api_request_collector import (
@@ -11396,8 +11439,13 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
 )
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
+from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
+from bioetl.infrastructure.adapters.pubmed._health import PubMedHealthMixin
+from bioetl.infrastructure.adapters.pubmed._search import PubMedSearchMixin
+from bioetl.infrastructure.adapters.pubmed.constants import (
+    ENTREZ_API_BASE as PUBMED_ENTREZ_API_BASE,
+)
 from bioetl.infrastructure.adapters.pubmed.fallback import TitleFallbackHandler
-from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -11406,41 +11454,30 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config import Settings
 
-ENTREZ_API_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
-
 # Mapping from entity_type to DTO model class
 PUBMED_DTO_MODELS: dict[str, type[BaseModel]] = {
     "publication": ArticleRecord,
 }
 
+# Re-export for tests/importers expecting this symbol on the client module.
+ENTREZ_API_BASE = PUBMED_ENTREZ_API_BASE
+
 
 @dataclass
-class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
+class PubMedAdapter(
+    NotSupportedMultiFilterMixin,
+    PubMedSearchMixin,
+    PubMedFetchMixin,
+    PubMedHealthMixin,
+    BaseHttpAdapter,
+):
     """PubMed adapter using UnifiedHTTPClient.
 
-    Inherits from BaseHttpAdapter for standardized lifecycle management
-    and Template Method pattern for health checks (HealthCheckProviderMixin).
-
-    Implements DataSourcePort and FilterableDataSourcePort for PubMed data extraction
-    with optional server-side filtering by PMID lists.
-
-    Uses NotSupportedMultiFilterMixin for fetch_multi_filtered (not supported by PubMed API).
-
-    Supports title-based fallback search via fetch_filtered_with_fallback() when
-    primary PMID lookup fails.
-
-    Args:
-        http_client: UnifiedHTTPClient instance for making HTTP requests.
-        logger: LoggerPort instance for structured logging.
-        email: Technical email for NCBI API tool identification (required).
-            NOTE: This is NOT PII (Personally Identifiable Information).
-            NCBI requires this for API usage tracking and rate limiting.
-            Typically set to application/developer contact email, not end-user data.
-            See: https://www.ncbi.nlm.nih.gov/books/NBK25497/
-        api_key: Optional NCBI API key for higher rate limits.
-        batch_size: Number of records to fetch per batch.
-        metrics: Optional MetricsPort for recording adapter metrics.
-
+    Implements DataSourcePort and FilterableDataSourcePort.
+    Functionality split across mixins:
+    - PubMedSearchMixin: esearch and title search
+    - PubMedFetchMixin: efetch and record yielding
+    - PubMedHealthMixin: health probes and metadata
     """
 
     http_client: UnifiedHTTPClient
@@ -11451,133 +11488,25 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
     metrics: MetricsPort | None = None
 
     provider_name: str = field(init=False, default="pubmed")
-    """Provider identifier (required by DataSourcePort)."""
 
     _fallback_handler: TitleFallbackHandler | None = field(
         default=None, init=False, repr=False
     )
-    """Title fallback handler for resolving publications when PMID lookup fails."""
 
     _request_collector: APIRequestCollector = field(
         init=False, default_factory=APIRequestCollector
     )
-    """Collects API request metadata for Bronze layer enrichment."""
 
     def __post_init__(self) -> None:
-        """Initialize adapter metrics, error handler and fallback handler."""
-        # Initialize error handler from base class
+        """Initialize metrics, error handler and fallback handler."""
         self._error_handler = ErrorService(self.logger)
-
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
-        # Initialize fallback handler for title-based search
         self._fallback_handler = TitleFallbackHandler(
             logger=self.logger,
             search_fn=self._search_by_title,
         )
-
-    async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
-        """Get PMIDs for a search term."""
-        search_url = f"{ENTREZ_API_BASE}esearch.fcgi"
-        params = {
-            "db": "pubmed",
-            "term": search_term,
-            "retmax": str(max_count),
-            "usehistory": "y",
-            "retmode": "json",
-            "email": self.email,
-        }
-        # Only send API key if it's not a dummy value
-        if self.api_key and "your_" not in self.api_key:
-            params["api_key"] = self.api_key
-
-        try:
-            start_time = time.perf_counter()
-            with self._adapter_metrics.measure_request("/esearch"):
-                response = await self.http_client.get(search_url, params=params)
-            duration_ms = (time.perf_counter() - start_time) * 1000
-
-            # Record request for metadata enrichment
-            with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(response, duration_ms)
-
-            data = response.json()
-            idlist: list[str] = data.get("esearchresult", {}).get("idlist", [])
-            return idlist
-        except Exception as e:
-            # Use unified error handler
-            wrapped = self._error_handler.handle_error(
-                error=e,
-                provider=self.provider_name,
-                operation="search",
-                context={"search_term": search_term, "max_count": max_count},
-            )
-            raise wrapped from e
-
-    def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
-        """Build parameters for efetch API call."""
-        params = {
-            "db": "pubmed",
-            "id": ",".join(id_batch),
-            "retmode": "xml",
-            "rettype": "abstract",
-            "email": self.email,
-        }
-        # Only send API key if it's not a dummy value
-        if self.api_key and "your_" not in self.api_key:
-            params["api_key"] = self.api_key
-        return params
-
-    async def _fetch_batch(self, id_batch: list[str]) -> list[dict[str, Any]]:
-        """Fetch a batch of articles and return parsed records."""
-        params = self._build_fetch_params(id_batch)
-        try:
-            start_time = time.perf_counter()
-            with self._adapter_metrics.measure_request("/efetch"):
-                response = await self.http_client.get(
-                    f"{ENTREZ_API_BASE}efetch.fcgi", params=params
-                )
-            duration_ms = (time.perf_counter() - start_time) * 1000
-
-            # Record request for metadata enrichment
-            with contextlib.suppress(Exception):
-                self._request_collector.record_from_response(response, duration_ms)
-
-            root = PubMedXmlProcessor.parse_response(response.text)
-            if root is None:
-                self.logger.error(
-                    "external_api_error",
-                    provider=self.provider_name,
-                    operation="batch_fetch",
-                    error_category="DATA_QUALITY",
-                    error="XML parse error",
-                    batch_size=len(id_batch),
-                )
-                return []
-            return PubMedXmlProcessor.extract_all_records(root)
-        except Exception as e:
-            # Use unified error handler
-            wrapped = self._error_handler.handle_error(
-                error=e,
-                provider=self.provider_name,
-                operation="batch_fetch",
-                context={"batch_size": len(id_batch)},
-            )
-            raise wrapped from e
-
-    async def _yield_articles_from_pmids(
-        self, pmids: list[str], limit: int | None
-    ) -> AsyncIterator[dict[str, Any]]:
-        """Yield article records from a list of PMIDs."""
-        total_fetched = 0
-        for i in range(0, len(pmids), self.batch_size):
-            records = await self._fetch_batch(pmids[i : i + self.batch_size])
-            for record in records:
-                yield record
-                total_fetched += 1
-                if limit and total_fetched >= limit:
-                    return
 
     async def fetch_filtered(
         self,
@@ -11586,82 +11515,18 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch PubMed records by ID list (bypass search).
-
-        Implements FilterableDataSourcePort.fetch_filtered().
-
-        Args:
-            entity_type: Must be 'publication'.
-            filter_ids: List of PMIDs to fetch.
-            filter_field: Field name (expected 'pmid', others logged as warning).
-            limit: Maximum number of records to fetch.
-
-        Yields:
-            Dictionary records for each article.
-
-        Raises:
-            ValueError: If entity_type is not 'publication'.
-
-        """
+        """Fetch PubMed records by ID list (bypass search)."""
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
         if filter_field != "pmid":
             self.logger.warning(
-                "unsupported_filter_field",
-                field=filter_field,
-                msg="Assuming PMIDs",
+                "unsupported_filter_field", field=filter_field, msg="Assuming PMIDs"
             )
 
         async for record in self._yield_articles_from_pmids(filter_ids, limit):
             record["_lookup_method"] = "pmid"
             yield record
-
-    # fetch_multi_filtered is provided by NotSupportedMultiFilterMixin
-
-    async def _search_by_title(
-        self, title: str, limit: int = 3
-    ) -> list[dict[str, Any]]:
-        """Search PubMed by title using esearch + efetch.
-
-        Args:
-            title: Publication title to search for.
-            limit: Maximum results to return.
-
-        Returns:
-            List of publication records matching the title.
-        """
-        # PubMed title search syntax: "title text"[Title]
-        # Escape quotes in title and limit length
-        clean_title = title.replace('"', "'").strip()[:200]
-        search_term = f'"{clean_title}"[Title]'
-
-        self.logger.debug(
-            "pubmed_title_search",
-            title=clean_title[:50],
-        )
-
-        try:
-            # Step 1: esearch to get PMIDs
-            pmids = await self._get_pmids(search_term, limit)
-
-            if not pmids:
-                return []
-
-            # Step 2: efetch to get full records
-            results: list[dict[str, Any]] = []
-            async for record in self._yield_articles_from_pmids(pmids, limit):
-                results.append(record)
-
-            return results
-
-        except Exception as e:
-            self.logger.debug(
-                "pubmed_title_search_failed",
-                title=clean_title[:50],
-                error=str(e),
-            )
-            return []
 
     async def fetch_filtered_with_fallback(
         self,
@@ -11671,37 +11536,16 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch with fallback to title search when PMID/DOI lookup fails.
-
-        Three-phase strategy:
-        1. Try PMID lookup for valid PMIDs
-        2. For PMIDs not found → search by title from fallback_mapping
-        3. For empty PMIDs (in filter_ids as "") → search by title only
-
-        Args:
-            entity_type: Must be 'publication'.
-            filter_ids: List of PMIDs (may include empty strings for title-only).
-            filter_field: Expected 'pmid' or 'doi'.
-            fallback_mapping: Mapping {pmid/doi: title} for fallback search.
-            limit: Maximum records to return.
-
-        Yields:
-            Publication records with `_lookup_method` field indicating resolution method.
-
-        Raises:
-            ValueError: If entity_type is not 'publication'.
-        """
+        """Fetch with fallback to title search when primary lookup fails."""
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
-        # Separate valid IDs from title-only entries
         valid_ids = [id_ for id_ in filter_ids if id_.strip()]
         title_only_entries = [id_ for id_ in filter_ids if not id_.strip()]
 
         fetched = 0
         found_ids: set[str] = set()
 
-        # Phase 1: Try primary PMID lookup
         if valid_ids:
             async for record in self.fetch_filtered(
                 entity_type=entity_type,
@@ -11709,18 +11553,15 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
                 filter_field=filter_field,
                 limit=limit,
             ):
-                # _lookup_method already set by fetch_filtered, but ensure it's "pmid"
                 record["_lookup_method"] = "pmid"
                 found_id = str(record.get("pmid", ""))
                 if found_id:
                     found_ids.add(found_id.lower())
                 fetched += 1
                 yield record
-
                 if limit and fetched >= limit:
                     return
 
-        # Phase 2: Fallback for unresolved IDs
         if self._fallback_handler:
             async for record in self._fallback_handler.process_missing_dois(
                 dois=valid_ids,
@@ -11732,12 +11573,9 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
             ):
                 fetched += 1
                 yield record
-
                 if limit and fetched >= limit:
                     return
 
-        # Phase 3: Title-only entries (using handler)
-        if self._fallback_handler:
             async for record in self._fallback_handler.process_title_only_entries(
                 entries=title_only_entries,
                 fallback_mapping=fallback_mapping,
@@ -11756,7 +11594,6 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch PubMed records."""
         if filter_ids:
-            # Default to 'pmid' if filter_field not specified
             effective_filter_field = filter_field or "pmid"
             async for record in self.fetch_filtered(
                 entity_type, filter_ids, effective_filter_field, limit
@@ -11786,37 +11623,10 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
         *,
         validate: bool = True,
     ) -> AsyncIterator[BaseModel]:
-        """Fetch PubMed records as typed DTO models.
-
-        Returns Pydantic DTO models instead of raw dicts for type safety.
-        Uses domain DTOs with extra='forbid' to detect API changes.
-
-        Args:
-            entity_type: Type of entity (publication)
-            limit: Maximum number of records to fetch
-            query: Search query string
-            filter_ids: List of PMIDs to filter by
-            filter_field: Field name to filter on
-            validate: If True, validate with model_validate (strict).
-                     If False, use model_construct (skip validation, faster).
-
-        Yields:
-            Typed DTO models (ArticleRecord for publication)
-
-        Raises:
-            ValueError: If entity_type is not supported for DTO conversion
-
-        Example:
-            >>> async for article in adapter.fetch_as_models("publication", limit=10):
-            ...     logger.debug("article_fetched", pmid=article.pmid, title=article.title)
-
-        """
+        """Fetch PubMed records as typed DTO models."""
         model_class = PUBMED_DTO_MODELS.get(entity_type)
         if model_class is None:
-            raise ValueError(
-                f"No DTO model for entity_type '{entity_type}'. "
-                f"Supported: {', '.join(PUBMED_DTO_MODELS.keys())}"
-            )
+            raise ValueError(f"No DTO model for entity_type '{entity_type}'")
 
         async for record in self.fetch(
             entity_type=entity_type,
@@ -11825,136 +11635,18 @@ class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
             filter_ids=filter_ids,
             filter_field=filter_field,
         ):
-            # Map field names from XML processor output to ArticleRecord DTO
             dto_data = {
                 "pmid": record.get("pmid"),
                 "title": record.get("article_title"),
                 "raw_xml": record.get("_raw_xml"),
             }
-
             if validate:
                 yield model_class.model_validate(dto_data)
             else:
                 yield model_class.model_construct(**dto_data)
 
-    async def _probe_health(self) -> HealthStatus:
-        """Perform PubMed-specific health probe.
-
-        Overrides BaseHttpAdapter._probe_health() to use PubMed esearch endpoint.
-
-        Выполняет lightweight запрос к esearch endpoint.
-
-        Returns:
-            HealthStatus.HEALTHY — API доступен
-            HealthStatus.DEGRADED — медленный отклик (>5 сек)
-            HealthStatus.UNHEALTHY — non-200 response
-
-        Raises:
-            Exception: On request failure (logged before raising).
-
-        """
-        try:
-            # Use esearch for a lightweight check
-            params = {
-                "db": "pubmed",
-                "term": "health",
-                "retmax": "1",
-                "retmode": "json",
-                "email": self.email,
-            }
-            # Only send API key if it's not a dummy value
-            if self.api_key and "your_" not in self.api_key:
-                params["api_key"] = self.api_key
-
-            start_time = time.monotonic()
-            with self._adapter_metrics.measure_request("/health"):
-                response = await self.http_client.get_once(
-                    f"{ENTREZ_API_BASE}esearch.fcgi", params=params
-                )
-            elapsed = time.monotonic() - start_time
-
-            if response.status_code != 200:
-                self.logger.warning(
-                    "pubmed_health_check_failed",
-                    status_code=response.status_code,
-                )
-                return HealthStatus.UNHEALTHY
-
-            # Медленный отклик = degraded
-            if elapsed > 5.0:
-                self.logger.warning(
-                    "pubmed_health_check_slow",
-                    elapsed_seconds=round(elapsed, 2),
-                )
-                return HealthStatus.DEGRADED
-
-            return HealthStatus.HEALTHY
-
-        except Exception as e:
-            error_type = self._error_handler.get_error_type(e)
-            self.logger.warning(
-                "health_check_failed",
-                provider=self.provider_name,
-                error_type=error_type.value,
-                error=str(e),
-            )
-            raise  # Let health_check() return _fallback_health_status()
-
-    def _fallback_health_status(self) -> HealthStatus:
-        """Get fallback health status on probe failure.
-
-        Overrides BaseHttpAdapter._fallback_health_status().
-        PubMed doesn't use circuit breaker assessment, so returns UNHEALTHY.
-
-        Returns:
-            HealthStatus.UNHEALTHY
-
-        """
-        return HealthStatus.UNHEALTHY
-
-    def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for PubMed.
-
-        Returns:
-            PubMed esearch endpoint used for health probe.
-
-        """
-        return "/entrez/eutils/esearch.fcgi"
-
-    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector.
-
-        Returns aggregated metadata from all API requests made since last clear.
-        Used by BatchExecutor to enrich Bronze layer metadata.
-
-        Args:
-            api_version: Optional API version string.
-
-        Returns:
-            SourceMetadata with request details and statistics.
-        """
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api", url=ENTREZ_API_BASE, api_version=api_version
-        )
-        self._request_collector.clear()
-        return metadata
-
-    def clear_request_collector(self) -> None:
-        """Clear the collector without returning metadata."""
-        self._request_collector.clear()
-
-    @property
-    def request_count(self) -> int:
-        """Number of recorded API requests since last clear."""
-        return self._request_collector.request_count
-
     async def aclose(self) -> None:
-        """Close adapter resources.
-
-        Overrides BaseHttpAdapter.aclose() to properly close the HTTP client.
-        Safely closes via the public context manager interface.
-        Idempotent - safe to call multiple times.
-        """
+        """Close adapter resources."""
         if self.http_client:
             await self.http_client.__aexit__(None, None, None)
 
@@ -11965,17 +11657,12 @@ def _create_pubmed_adapter(
     settings: Settings | None,
     **kwargs: Any,
 ) -> PubMedAdapter:
-    # Email: из kwargs или settings
     email = kwargs.get("email")
     if not email and settings:
         email = getattr(settings, "default_email", None)
     if not email:
-        raise ValueError(
-            "PubMed adapter requires email. "
-            "Provide via 'email' kwarg or settings.default_email"
-        )
+        raise ValueError("PubMed adapter requires email")
 
-    # API key: из kwargs или settings
     api_key = kwargs.get("api_key")
     if not api_key and settings and hasattr(settings, "pubmed_api_key"):
         pubmed_key = settings.pubmed_api_key
@@ -12088,8 +11775,10 @@ Provides SemanticScholarAdapter for batch DOI resolution with title fallback.
 """
 
 from bioetl.infrastructure.adapters.semanticscholar.adapter import (
-    SEMANTICSCHOLAR_BASE_URL,
     SemanticScholarAdapter,
+)
+from bioetl.infrastructure.adapters.semanticscholar.constants import (
+    SEMANTICSCHOLAR_BASE_URL,
 )
 
 __all__ = [
@@ -12137,6 +11826,9 @@ from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
+from bioetl.infrastructure.adapters.semanticscholar.constants import (
+    SEMANTICSCHOLAR_BASE_URL,
+)
 from bioetl.infrastructure.adapters.semanticscholar.fallback import (
     SemanticScholarTitleFallbackHandler,
 )
@@ -12146,8 +11838,6 @@ if TYPE_CHECKING:
 
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
-SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
 
 # Default fields to retrieve from Semantic Scholar
 # Note: authors.externalIds includes ORCID, DBLP, and other identifiers
@@ -12201,6 +11891,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
 
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
+
         metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
         self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
 
@@ -12698,6 +12389,16 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             await self.http_client.__aexit__(None, None, None)
 
 ================================================================================
+File: constants.py
+Path: adapters\semanticscholar\constants.py
+================================================================================
+"""Shared constants for Semantic Scholar adapters."""
+
+from __future__ import annotations
+
+SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
+
+================================================================================
 File: fallback.py
 Path: adapters\semanticscholar\fallback.py
 ================================================================================
@@ -12716,6 +12417,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
+from bioetl.infrastructure.adapters.semanticscholar.constants import (
+    SEMANTICSCHOLAR_BASE_URL,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -12730,7 +12434,6 @@ __all__ = [
 ]
 
 # Semantic Scholar API configuration
-SEMANTICSCHOLAR_BASE_URL = "https://api.semanticscholar.org/graph/v1"
 DEFAULT_SEARCH_FIELDS = (
     "paperId,externalIds,title,abstract,year,publicationDate,"
     "venue,authors,citationCount,referenceCount,isOpenAccess,"
@@ -12906,22 +12609,6 @@ class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):
     def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
         """Return Semantic Scholar paper ID for logging."""
         return ("found_paper_id", str(result.get("paperId", "unknown")))
-
-    def _process_found_result(
-        self, result: dict[str, Any], original_doi: str
-    ) -> dict[str, Any]:
-        """Add lookup method metadata to found publication.
-
-        Args:
-            result: The found publication record.
-            original_doi: The DOI that was originally searched.
-
-        Returns:
-            Publication with _lookup_method and _original_id added.
-        """
-        result["_lookup_method"] = "title_fallback"
-        result["_original_id"] = original_doi
-        return result
 
 
 # Backwards compatibility alias
@@ -14071,11 +13758,11 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         # Step 1: Submit job
         job_id = await self._submit_job(from_db, to_db, ids)
 
-        # Step 2: Poll for completion
-        await self._poll_until_ready(job_id)
+        # Step 2: Poll for completion (returns redirect URL if detected)
+        results_url = await self._poll_until_ready(job_id)
 
-        # Step 3: Retrieve results
-        return await self._fetch_results(job_id, ids)
+        # Step 3: Retrieve results using redirect URL or default
+        return await self._fetch_results(job_id, ids, results_url=results_url)
 
     async def _submit_job(
         self,
@@ -14135,7 +13822,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         self.logger.debug("idmapping_job_submitted", job_id=job_id)
         return str(job_id)
 
-    async def _poll_until_ready(self, job_id: str) -> None:
+    async def _poll_until_ready(self, job_id: str) -> str | None:
         """Poll job status until complete.
 
         GET /idmapping/status/{jobId}
@@ -14149,6 +13836,11 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
         Args:
             job_id: Job ID to poll.
+
+        Returns:
+            Results URL captured from redirect (e.g.
+            ``/idmapping/uniprotkb/results/{jobId}``), or None if the URL
+            was not detected via redirect.
 
         Raises:
             IDMappingJobError: If the job fails.
@@ -14169,8 +13861,9 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     job_id=job_id,
                     attempts=attempt + 1,
                     detected_by="redirect_to_results",
+                    results_url=response_url,
                 )
-                return
+                return response_url
 
             if response.status_code not in (200, 303):
                 self.logger.warning(
@@ -14192,7 +13885,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     attempts=attempt + 1,
                     detected_by="results_in_response",
                 )
-                return
+                return response_url or None
 
             status = result.get("jobStatus", "UNKNOWN")
 
@@ -14207,7 +13900,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
                     attempts=attempt + 1,
                     detected_by="job_status",
                 )
-                return
+                return None
 
             if status == "ERROR":
                 error_msg = result.get("errorMessage", "Unknown error")
@@ -14227,6 +13920,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         self,
         job_id: str,
         original_ids: list[str],
+        results_url: str | None = None,
     ) -> dict[str, dict[str, Any] | None]:
         """Fetch mapping results with full entry metadata.
 
@@ -14239,6 +13933,10 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         Args:
             job_id: Job ID to fetch results for.
             original_ids: Original list of IDs for initializing results dict.
+            results_url: Exact results URL captured from the polling redirect
+                (e.g. ``/idmapping/uniprotkb/results/{jobId}``).
+                When provided, avoids an extra redirect hop.  Falls back to
+                the generic ``/idmapping/results/{jobId}`` when *None*.
 
         Returns:
             Dict mapping source IDs to entry data dicts (None if not found).
@@ -14247,7 +13945,7 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         entries_by_id: dict[str, list[dict[str, Any]]] = {
             id_: [] for id_ in original_ids
         }
-        url: str | None = f"{self.base_url}/idmapping/results/{job_id}"
+        url: str | None = results_url or f"{self.base_url}/idmapping/results/{job_id}"
 
         while url:
             with self._adapter_metrics.measure_request("/idmapping/results"):
@@ -15905,8 +15603,8 @@ from pydantic_settings import (
 )
 
 from bioetl.domain.composite.config import ColumnGroupConfig
-from bioetl.domain.config import DQConfig, PipelineConfig
-from bioetl.domain.filtering import GoldFilterConfig
+from bioetl.domain.config import DQConfig, PipelineConfig, TableConfig
+from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.infrastructure.config_loader import (
     load_pipeline_config,
     load_source_config,
@@ -15987,12 +15685,13 @@ def _extract_write_modes(
     return write_mode, gold_write_mode
 
 
-def _build_silver_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
+def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig:
     """Build Silver layer filter config from YAML config.
 
-    Reuses GoldFilterConfig domain type — only the YAML section differs.
+    Returns a SilverFilterConfig for nominal type separation from Gold filters.
     """
-    return yaml_config.silver_filters.to_domain()
+    gold = yaml_config.silver_filters.to_domain()
+    return SilverFilterConfig.from_gold_filter_config(gold)
 
 
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
@@ -16052,15 +15751,20 @@ def yaml_config_to_domain(
         ColumnGroupConfig(**group.model_dump()) for group in yaml_config.column_groups
     )
 
+    table = TableConfig(
+        primary_keys=tuple(yaml_config.primary_keys),
+        silver_table=yaml_config.silver_table,
+        gold_table=yaml_config.gold_table,
+        silver_write_mode=write_mode,
+        gold_write_mode=gold_write_mode,
+        on_schema_mismatch=on_schema_mismatch,
+    )
+
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
         provider=yaml_config.provider,
         entity_type=yaml_config.entity_type,
-        primary_keys=tuple(yaml_config.primary_keys),
-        silver_table=yaml_config.silver_table,
-        gold_table=yaml_config.gold_table,
-        write_mode=write_mode,
-        gold_write_mode=gold_write_mode,
+        table=table,
         silver_filters=silver_filters,
         gold_filters=gold_filters,
         batch_size=yaml_config.batch_size,
@@ -16068,10 +15772,8 @@ def yaml_config_to_domain(
         fields=tuple(source_fields),
         column_groups=column_groups,
         dq=dq_config,
-        on_schema_mismatch=on_schema_mismatch,
         transform_version=transform_version,
         transform_steps=transform_steps,
-        force_full_scan=yaml_config.force_full_scan,
         loading_strategy=yaml_config.loading_strategy,
     )
 
@@ -16165,6 +15867,9 @@ class PipelineSettings(BaseSettings):
     checkpoint_interval: int = Field(default=1000, ge=100)
     """Save checkpoint every N records."""
 
+    relaxed_dq: bool = Field(default=False)
+    """When True, DQ thresholds are relaxed (soft=0.99, hard=1.0) for testing."""
+
     max_concurrent_batches: int = Field(default=4, ge=1, le=16)
     """Maximum concurrent batch writes."""
 
@@ -16207,6 +15912,26 @@ class Settings(BaseSettings):
 
     pipeline: PipelineSettings = Field(default_factory=PipelineSettings)
     observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
+
+    # Security settings (PII hashing)
+    pii_salt_current: SecretStr | None = Field(
+        default=None,
+        description="Current salt for PII hashing (BIOETL_PII_SALT_CURRENT)",
+    )
+    pii_salt_next: SecretStr | None = Field(
+        default=None,
+        description="Next salt for rotation (BIOETL_PII_SALT_NEXT)",
+    )
+    pii_salt_rotation_active: bool = Field(
+        default=False,
+        description="Whether salt rotation is active (BIOETL_SALT_ROTATION_ACTIVE)",
+    )
+
+    # Serialization settings
+    json_encoder: Literal["orjson", "stdlib", ""] = Field(
+        default="",
+        description="JSON encoder implementation (orjson or stdlib) (BIOETL_JSON_ENCODER)",
+    )
 
     # Provider-specific settings
     # NOTE: default_email is NOT PII (Personally Identifiable Information).
@@ -16497,14 +16222,16 @@ class DQConfigLoader:
         _cache: Cache of loaded configs keyed by "provider:entity".
     """
 
-    def __init__(self, configs_root: Path) -> None:
+    def __init__(self, configs_root: Path, relaxed_dq: bool = False) -> None:
         """Initialize loader with configs root directory.
 
         Args:
             configs_root: Path to configs/ directory.
+            relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
         self._configs_root = configs_root
         self._dq_root = configs_root / "dq"
+        self._relaxed_dq = relaxed_dq
         self._cache: dict[str, DQConfig] = {}
 
     def load(
@@ -16534,7 +16261,8 @@ class DQConfigLoader:
             ValidationError: If merged config fails validation.
         """
         # Cache only when no inline overrides (they may change)
-        cache_key = f"{provider}:{entity}"
+        # Include relaxed flag in key so test vs prod configs don't mix
+        cache_key = f"{provider}:{entity}:relaxed={self._relaxed_dq}"
 
         if inline_overrides is None and cache_key in self._cache:
             return self._cache[cache_key]
@@ -16563,6 +16291,14 @@ class DQConfigLoader:
         # 4. Apply inline overrides (optional)
         if inline_overrides:
             merged = self._deep_merge(merged, inline_overrides)
+
+        # 5. Test override: relax DQ thresholds for e2e/integration tests
+        # (soft_fail < hard_fail required by ThresholdsConfig validator)
+        if self._relaxed_dq:
+            merged = self._deep_merge(
+                merged,
+                {"thresholds": {"soft_fail": 0.99, "hard_fail": 1.0}},
+            )
 
         # Normalize and validate via Pydantic
         normalized = self._normalize_to_file_format(merged)
@@ -17019,9 +16755,9 @@ class FilterConfigLoader(
 
         # Validate via Pydantic
         validated = FilterConfigFile.model_validate(merged)
-        domain_configs: tuple[InputFilterConfig, GoldFilterConfig, ExtractionParams] = (
-            validated.to_domain()
-        )
+        domain_configs: tuple[
+            InputFilterConfig, GoldFilterConfig, GoldFilterConfig, ExtractionParams
+        ] = validated.to_domain()
 
         # Cache result if no inline overrides
         if inline_overrides is None:
@@ -17131,15 +16867,19 @@ class ConfigLoader:
         self,
         configs_root: Path,
         dq_loader: DQConfigLoader | None = None,
+        relaxed_dq: bool = False,
     ) -> None:
         """Initialize loader with configs root directory.
 
         Args:
             configs_root: Path to configs/ directory.
             dq_loader: Optional DQ config loader. Created automatically if None.
+            relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
         self._configs_root = configs_root
-        self._dq_loader = dq_loader or DQConfigLoader(configs_root)
+        self._dq_loader = dq_loader or DQConfigLoader(
+            configs_root, relaxed_dq=relaxed_dq
+        )
 
     def load_pipeline_config(self, pipeline_name: str) -> PipelineYamlConfig:
         """Load pipeline configuration from YAML file.
@@ -18771,13 +18511,12 @@ with mandatory fields: ts, level, run_id, pipeline, stage.
 from __future__ import annotations
 
 from bioetl.domain.exceptions import MetricsServerError
+from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 from bioetl.infrastructure.observability.logging import StructlogLogger
 from bioetl.infrastructure.observability.metrics_server_adapter import (
     MetricsServerAdapter,
 )
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
-from bioetl.infrastructure.observability.noop_metrics import NoOpMetrics
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 from bioetl.infrastructure.observability.server import start_metrics_server
 from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
@@ -19474,14 +19213,39 @@ Requirements:
 
 from __future__ import annotations
 
-import logging
-import sys
 from typing import Any, Self
 from uuid import UUID
 
 import structlog
 
-from bioetl.domain.ports import LoggerPort
+from bioetl.infrastructure.observability.logging_config import configure_logging
+
+
+def create_logger(
+    pipeline: str,
+    run_id: str | UUID,
+    *,
+    log_level: str = "INFO",
+    json_format: bool = True,
+) -> StructlogLogger:
+    """Create a StructlogLogger with bound pipeline and run_id context.
+
+    Args:
+        pipeline: Pipeline name for log context.
+        run_id: Unique run identifier for tracing.
+        log_level: Logging level (default: INFO).
+        json_format: Use JSON output format (default: True).
+
+    Returns:
+        Configured StructlogLogger instance.
+    """
+    configure_logging(json_format=json_format, log_level=log_level)
+    base = structlog.get_logger(f"bioetl.{pipeline}")
+    bound = base.bind(run_id=str(run_id), pipeline=pipeline)
+    return StructlogLogger(bound)
+
+
+LOGGING_API = (create_logger,)
 
 
 class StructlogLogger:
@@ -19568,59 +19332,6 @@ class StructlogLogger:
             **kwargs: Additional context for the log entry.
         """
         return self._logger.exception(_event, **kwargs)
-
-
-def create_logger(
-    pipeline: str,
-    run_id: UUID,
-    log_level: str = "INFO",
-    json_format: bool = True,
-) -> LoggerPort:
-    """Create a structured logger factory.
-
-    Args:
-        pipeline: Pipeline name for log context.
-        run_id: Unique run identifier for tracing.
-        log_level: Logging level (default: INFO).
-        json_format: Use JSON output format (default: True).
-
-    Returns:
-        StructlogLogger implementing LoggerPort with bound context.
-
-    """
-    processors: list[Any] = [
-        structlog.contextvars.merge_contextvars,
-        structlog.stdlib.add_logger_name,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.PositionalArgumentsFormatter(),
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        structlog.processors.UnicodeDecoder(),
-    ]
-    if json_format:
-        processors.append(structlog.processors.JSONRenderer())
-    else:
-        processors.append(structlog.dev.ConsoleRenderer())
-
-    structlog.configure(
-        processors=processors,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
-        cache_logger_on_first_use=True,
-    )
-
-    logger = structlog.get_logger(f"bioetl.{pipeline}")
-    bound_logger = logger.bind(run_id=str(run_id), pipeline=pipeline)
-
-    # Set the log level for the underlying standard logger
-    logging.basicConfig(
-        level=log_level.upper(),
-        stream=sys.stdout,
-        format="%(message)s",
-    )
-
-    return StructlogLogger(bound_logger)
 
 ================================================================================
 File: logging_config.py
@@ -19829,10 +19540,11 @@ def is_logging_configured() -> bool:
 
 
 def reset_logging_config() -> None:
-    """Reset logging configuration state (for testing only).
+    """Reset the logging configuration state.
 
-    Warning:
-        This is intended for test fixtures only. Do not use in production code.
+    ONLY FOR USE IN TESTS. Resets internal state to allow configure_logging()
+    to be called again. Note that structlog.configure() itself cannot be
+    fully undone, but this allows re-calling our configuration wrapper.
     """
     global _configured, _current_format
     with _config_lock:
@@ -20017,27 +19729,6 @@ HEALTH_CHECK_DURATION_SECONDS = Histogram(
     buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
 )
 
-# Provider-level health check metrics (per RULES.md §4.8)
-# Used by HealthCheckMixin in BaseHttpAdapter and BaseSyncAdapter
-HEALTH_CHECK_SUCCESS_TOTAL = Counter(
-    "bioetl_health_check_success_total",
-    "Total number of successful health checks per provider",
-    ["provider"],
-)
-
-HEALTH_CHECK_FAILURES_TOTAL = Counter(
-    "bioetl_health_check_failures_total",
-    "Total number of failed health checks per provider",
-    ["provider"],
-)
-
-HEALTH_CHECK_LATENCY_SECONDS = Histogram(
-    "bioetl_health_check_latency_seconds",
-    "Duration of health check operations in seconds per provider",
-    ["provider"],
-    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
-)
-
 
 class MetricsCollector:
     """Collector for pipeline metrics.
@@ -20089,6 +19780,10 @@ class MetricsCollector:
             stage=stage,
             error_code=error_code,
         ).inc()
+
+
+# Expose for tooling to avoid false dead-code flags.
+METRICS_COLLECTOR = MetricsCollector
 
 ================================================================================
 File: metrics_server_adapter.py
@@ -20237,164 +19932,6 @@ class NoOpLogger:
 
     def exception(self, _event: str, **_kwargs: Any) -> None:
         """Log exception with traceback (no-op)."""
-
-================================================================================
-File: noop_metrics.py
-Path: observability\noop_metrics.py
-================================================================================
-"""No-operation metrics implementation.
-
-Provides a null object pattern implementation for metrics when
-metrics collection is disabled or not configured.
-
-This implementation is in infrastructure layer (not domain) because
-it's a concrete implementation detail, even though it does nothing.
-"""
-
-from __future__ import annotations
-
-import warnings
-
-from bioetl.domain.ports import MetricsPort
-
-
-class NoOpMetrics(MetricsPort):
-    """No-operation metrics implementation.
-
-    Used when metrics collection is explicitly disabled via configuration.
-    All operations are silently ignored.
-
-    If instantiated without explicit opt-out, logs a warning to alert
-    developers that metrics are not being collected.
-
-    Args:
-        warn_on_use: If True, emit a warning when instantiated in non-test mode.
-                     Default is True.
-
-    Example:
-        >>> # Explicit opt-out (no warning)
-        >>> metrics = NoOpMetrics(warn_on_use=False)
-
-        >>> # Default (warning in non-test environments)
-        >>> metrics = NoOpMetrics()
-
-    """
-
-    _warned: bool = False
-
-    def __init__(self, warn_on_use: bool = True) -> None:
-        """Initialize NoOpMetrics.
-
-        Args:
-            warn_on_use: Whether to warn about disabled metrics.
-
-        """
-        if warn_on_use and not NoOpMetrics._warned:
-            warnings.warn(
-                "NoOpMetrics is being used - metrics are NOT being collected. "
-                "Set BIOETL_METRICS_ENABLED=true or inject PrometheusMetrics "
-                "to enable metrics collection.",
-                UserWarning,
-                stacklevel=2,
-            )
-            NoOpMetrics._warned = True
-
-    def observe_histogram(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op histogram observation."""
-
-    def increment_counter(
-        self,
-        name: str,
-        value: int,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op counter increment."""
-
-    def set_gauge(
-        self,
-        name: str,
-        value: float,
-        labels: dict[str, str],
-    ) -> None:
-        """No-op gauge set."""
-
-    def close(self) -> None:
-        """No-op close. Idempotent."""
-
-    @classmethod
-    def reset_warning(cls) -> None:
-        """Reset warning state (for testing)."""
-        cls._warned = False
-
-================================================================================
-File: noop_tracing.py
-Path: observability\noop_tracing.py
-================================================================================
-"""No-op implementation of TracingPort."""
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any, Self
-
-if TYPE_CHECKING:
-    from types import TracebackType
-
-
-class NoOpTracer:
-    """No-op tracer that does nothing."""
-
-    def __enter__(self) -> Self:
-        """Context manager entry."""
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        """Context manager exit."""
-
-    def start_as_current_span(self, *args: Any, **kwargs: Any) -> Self:
-        """Start a new span (no-op).
-
-        Accepts any arguments to be compatible with OpenTelemetry tracer.
-        """
-        return self
-
-    def set_attribute(self, key: str, value: Any) -> None:
-        """Set span attribute (no-op)."""
-
-    def set_status(self, status: Any) -> None:
-        """Set span status (no-op)."""
-
-    def record_exception(self, exception: Exception) -> None:
-        """Record exception (no-op)."""
-
-
-class NoOpTracing:
-    """No-op implementation of TracingPort.
-
-    Unified implementation for when distributed tracing is disabled.
-    Used as the single source of truth for no-op tracing.
-    """
-
-    def __init__(self) -> None:
-        """Initialize no-op tracing."""
-        self._closed = False
-
-    def get_tracer(self, name: str) -> NoOpTracer:
-        """Get a no-op tracer."""
-        return NoOpTracer()
-
-    def close(self) -> None:
-        """No-op close. Idempotent."""
-        self._closed = True
 
 ================================================================================
 File: prometheus_metrics.py
@@ -20705,7 +20242,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+from bioetl.domain.ports import NoOpTracing
 
 # Store OTLP exporter class if available (for runtime use)
 # This avoids reassigning an imported type to None, which mypy strict rejects
@@ -23676,7 +23213,7 @@ class FilterConfigFile(BaseModel):
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3)",
     )
 
-    @field_validator("extraction_params")  # type: ignore[untyped-decorator]
+    @field_validator("extraction_params")
     @classmethod
     def validate_extraction_params(
         cls,
@@ -23758,27 +23295,41 @@ from pydantic import (
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
+from bioetl.domain.models.metadata import GovernanceLineageConfig, QualityExpectations
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
+from bioetl.infrastructure.schemas.base_schemas import (
+    BaseFilterColumnSchema,
+    BaseGoldColumnFilterConfig,
+    BaseGoldFiltersConfig,
+    BaseGoldListContainsFilterConfig,
+    BaseGoldListLengthFilterConfig,
+    BaseGoldRangeFilterConfig,
+    BaseInputFilterConfig,
+)
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
-    from bioetl.domain.filtering.gold_config import GoldFilterConfig
-    from bioetl.domain.filtering.input_config import (
-        InputFilterConfig as DomainInputFilterConfig,
-    )
     from bioetl.domain.models.metadata import GovernanceMetadata
 
 
 class FieldValidationConfig(BaseModel):
     """Configuration for a single field validation rule.
 
-    Supports: required, not_null, range, pattern, enum, max_length, custom validation types.
+    Supports: required, not_null, range, pattern, enum, max_length,
+    not_empty_list, custom validation types.
     """
 
     field: str = Field(description="Field name to validate")
     type: Literal[
-        "required", "not_null", "range", "pattern", "enum", "max_length", "custom"
+        "required",
+        "not_null",
+        "range",
+        "pattern",
+        "enum",
+        "max_length",
+        "not_empty_list",
+        "custom",
     ] = Field(description="Validation type")
     nullable: bool = Field(default=True, description="Whether field can be null")
     severity: Literal["error", "warn"] = Field(
@@ -24028,15 +23579,14 @@ class CsvExportConfig(BaseModel):
     encoding: str = "utf-8"
 
 
-class FilterColumnSchema(BaseModel):
+class FilterColumnSchema(BaseFilterColumnSchema):
     """Schema for a single filter column configuration."""
 
-    column_name: str = Field(description="Column name in CSV containing filter IDs")
-    filter_field: str = Field(description="API field name to filter by")
 
-
-class InputFilterConfig(BaseModel):
+class InputFilterConfig(BaseInputFilterConfig):
     """Configuration for input ID filtering from CSV.
+
+    Inherits to_domain() and validate_column_config from BaseInputFilterConfig.
 
     Supports both single-column and multi-column filtering modes:
     - Single-column: Use column_name and filter_field directly
@@ -24045,89 +23595,8 @@ class InputFilterConfig(BaseModel):
     Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
     """
 
-    enabled: bool = False
-    source_path: str | None = Field(
-        default=None,
-        description="Path to CSV file with filter IDs",
-    )
-    # Single-column mode (backward compatibility)
-    column_name: str | None = Field(
-        default=None,
-        description="Column name in CSV containing filter IDs (single-column mode)",
-    )
-    filter_field: str | None = Field(
-        default=None,
-        description="API field name to filter by (single-column mode)",
-    )
-    # Multi-column mode
-    columns: list[FilterColumnSchema] | None = Field(
-        default=None,
-        description="List of column configurations for multi-column filtering",
-    )
-    batch_size: int = Field(
-        default=100,
-        ge=1,
-        le=1000,
-        description="Number of IDs per API request",
-    )
-    # Fallback support (e.g., DOI → title search)
-    fallback_column: str | None = Field(
-        default=None,
-        description="Column name for fallback search when primary lookup fails",
-    )
-
-    @model_validator(mode="after")
-    def validate_column_config(self) -> InputFilterConfig:
-        """Validate that either columns or column_name/filter_field is provided."""
-        if not self.enabled:
-            return self
-        if self.columns:
-            # Multi-column mode - columns provided
-            return self
-        if self.column_name and self.filter_field:
-            # Single-column mode - backward compatibility
-            return self
-        # Neither mode configured - raise error
-        raise ValueError(
-            "Either 'columns' list or both 'column_name' and 'filter_field' "
-            "must be provided when filter is enabled"
-        )
-
-    def to_domain(self) -> DomainInputFilterConfig:
-        """Convert to domain InputFilterConfig dataclass.
-
-        Returns:
-            DomainInputFilterConfig: Immutable domain configuration.
-        """
-        from bioetl.domain.filtering.input_config import (
-            FilterColumn as DomainFilterColumn,
-        )
-        from bioetl.domain.filtering.input_config import (
-            InputFilterConfig as DomainInputFilterConfigImpl,
-        )
-
-        # Convert columns list to domain FilterColumn tuple
-        domain_columns: tuple[DomainFilterColumn, ...] = ()
-        if self.columns:
-            domain_columns = tuple(
-                DomainFilterColumn(
-                    column_name=col.column_name,
-                    filter_field=col.filter_field,
-                )
-                for col in self.columns
-            )
-
-        return DomainInputFilterConfigImpl(
-            enabled=self.enabled,
-            source_path=self.source_path,
-            column_name=self.column_name if self.enabled and not self.columns else None,
-            filter_field=(
-                self.filter_field if self.enabled and not self.columns else None
-            ),
-            columns=domain_columns,
-            batch_size=self.batch_size,
-            fallback_column=self.fallback_column,
-        )
+    # Inherits columns from BaseInputFilterConfig.
+    # FilterColumnSchema extends BaseFilterColumnSchema with no additional fields.
 
 
 class MaintenanceConfig(BaseModel):
@@ -24264,6 +23733,10 @@ class SinkDQReportConfig(BaseModel):
     )
 
 
+# Alias for sink layer quality configuration (same schema as QualityExpectations)
+SinkQualityExpectationsConfig = QualityExpectations
+
+
 class SinkLineageConfig(BaseModel):
     """Lineage configuration within sink metadata.
 
@@ -24292,17 +23765,6 @@ class SinkLineageConfig(BaseModel):
         default=None, description="Business domain classification"
     )
     use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
-
-
-class SinkQualityExpectationsConfig(BaseModel):
-    """Quality expectations configuration."""
-
-    completeness: float | None = Field(
-        default=None, ge=0.0, le=1.0, description="Expected completeness (0-1)"
-    )
-    accuracy: float | None = Field(
-        default=None, ge=0.0, le=1.0, description="Expected accuracy (0-1)"
-    )
 
 
 class SinkMetadataConfig(BaseModel):
@@ -24346,7 +23808,7 @@ class SinkMetadataConfig(BaseModel):
         description="Static lineage configuration",
     )
     quality_expectations: SinkQualityExpectationsConfig = Field(
-        default_factory=SinkQualityExpectationsConfig,
+        default_factory=QualityExpectations,
         description="Target quality metrics",
     )
     classification: str | None = Field(
@@ -24359,11 +23821,7 @@ class SinkMetadataConfig(BaseModel):
         Returns:
             GovernanceMetadata: Domain model for sidecar file.
         """
-        from bioetl.domain.models.metadata import (
-            GovernanceLineageConfig,
-            GovernanceMetadata,
-            QualityExpectations,
-        )
+        from bioetl.domain.models.metadata import GovernanceMetadata
 
         return GovernanceMetadata(
             owner=self.owner,
@@ -24433,39 +23891,22 @@ class SinkLayerConfig(BaseModel):
     )
 
 
-class GoldRangeFilterConfig(BaseModel):
+class GoldRangeFilterConfig(BaseGoldRangeFilterConfig):
     """Schema for range filters in YAML."""
 
-    min: float | None = None
-    max: float | None = None
-    include_min: bool = True
-    include_max: bool = True
 
-
-class GoldListLengthFilterConfig(BaseModel):
+class GoldListLengthFilterConfig(BaseGoldListLengthFilterConfig):
     """Schema for list length filters in YAML."""
 
-    min: int | None = None
-    max: int | None = None
 
-
-class GoldListContainsFilterConfig(BaseModel):
+class GoldListContainsFilterConfig(BaseGoldListContainsFilterConfig):
     """Schema for list contains filters in YAML."""
 
-    values: list[str]
-    mode: Literal["all", "any"] = "all"
 
-
-class GoldColumnFilterConfig(BaseModel):
+class GoldColumnFilterConfig(BaseGoldColumnFilterConfig):
     """Column filter config with operator support.
 
-    Supports extended operators for column filtering:
-    - in: value must be in the allowed list (default)
-    - not_in: value must not be in the excluded list
-    - is_null: value must be None or empty string
-    - is_not_null: value must not be None or empty string
-    - is_empty: value must be "empty" (None, "", [], {})
-    - is_not_empty: value must not be "empty"
+    Inherits operator, values fields and validate_operator_values() from base.
 
     Example YAML:
         columns:
@@ -24476,28 +23917,11 @@ class GoldColumnFilterConfig(BaseModel):
             operator: is_not_null
     """
 
-    operator: Literal[
-        "in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"
-    ] = "in"
-    values: list[str] | None = None
 
-    @model_validator(mode="after")
-    def validate_operator_values(self) -> GoldColumnFilterConfig:
-        """Validate that values are provided for IN/NOT_IN operators."""
-        if self.operator in ("in", "not_in") and not self.values:
-            raise ValueError(f"values required for operator '{self.operator}'")
-        if (
-            self.operator in ("is_null", "is_not_null", "is_empty", "is_not_empty")
-            and self.values is not None
-        ):
-            raise ValueError(f"values must be None for operator '{self.operator}'")
-        return self
-
-
-class GoldFiltersConfig(BaseModel):
+class GoldFiltersConfig(BaseGoldFiltersConfig):
     """Schema for gold_filters in YAML.
 
-    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+    Inherits to_domain() from BaseGoldFiltersConfig.
 
     Supports two formats for columns:
     - Legacy format: {"column_name": ["value1", "value2"]} (IN operator)
@@ -24518,74 +23942,9 @@ class GoldFiltersConfig(BaseModel):
               operator: is_not_null
     """
 
-    columns: dict[str, list[str] | GoldColumnFilterConfig] = Field(default_factory=dict)
-    ranges: dict[str, GoldRangeFilterConfig] = Field(default_factory=dict)
-    list_lengths: dict[str, GoldListLengthFilterConfig] = Field(default_factory=dict)
-    list_contains: dict[str, GoldListContainsFilterConfig] = Field(default_factory=dict)
-    required_fields: list[str] = Field(default_factory=list)
-    exclude_if_present: list[str] = Field(default_factory=list)
-
-    def to_domain(self) -> GoldFilterConfig:
-        """Convert to domain GoldFilterConfig dataclass.
-
-        Returns:
-            GoldFilterConfig: Immutable domain configuration.
-        """
-        from bioetl.domain.filtering import (
-            FilterOperator,
-            GoldColumnFilter,
-            GoldFilterConfig,
-            GoldListContainsFilter,
-            GoldListLengthFilter,
-            GoldRangeFilter,
-        )
-
-        column_filters: list[GoldColumnFilter] = []
-        for col, cfg in self.columns.items():
-            if isinstance(cfg, list):
-                # Legacy format: list of values -> IN operator
-                column_filters.append(
-                    GoldColumnFilter(
-                        column=col,
-                        operator=FilterOperator.IN,
-                        values=frozenset(cfg),
-                    )
-                )
-            else:
-                # New format: GoldColumnFilterConfig
-                column_filters.append(
-                    GoldColumnFilter(
-                        column=col,
-                        operator=FilterOperator(cfg.operator),
-                        values=frozenset(cfg.values) if cfg.values else None,
-                    )
-                )
-
-        return GoldFilterConfig(
-            column_filters=tuple(column_filters),
-            range_filters=tuple(
-                GoldRangeFilter(
-                    column=col,
-                    min_value=r.min,
-                    max_value=r.max,
-                    include_min=r.include_min,
-                    include_max=r.include_max,
-                )
-                for col, r in self.ranges.items()
-            ),
-            list_length_filters=tuple(
-                GoldListLengthFilter(column=col, min_length=r.min, max_length=r.max)
-                for col, r in self.list_lengths.items()
-            ),
-            list_contains_filters=tuple(
-                GoldListContainsFilter(
-                    column=col, values=frozenset(r.values), mode=r.mode
-                )
-                for col, r in self.list_contains.items()
-            ),
-            required_fields=tuple(self.required_fields),
-            exclude_if_present=tuple(self.exclude_if_present),
-        )
+    # Inherits columns, ranges, list_lengths, list_contains from BaseGoldFiltersConfig.
+    # Child filter types (GoldColumnFilterConfig etc.) extend the base types with no
+    # additional fields, so the base field definitions are sufficient.
 
 
 # Regex for semver validation (allows optional 'v' prefix)
@@ -24730,22 +24089,11 @@ class PipelineYamlConfig(BaseModel):
         "Merged from filter config file. Keys are provider-specific query params.",
     )
 
-    # Pagination strategy (ADR-030)
-    force_full_scan: bool = Field(
-        default=False,
-        description="When True, checkpoint-based resume is disabled and each run "
-        "performs a full scan of the data source. Deduplication is handled on "
-        "Silver layer via content_hash. Required for publication entities due to "
-        "API offset instability. See ADR-030.",
-    )
-
     # Loading strategy (ADR-031)
-    # Explicit formalization of data loading approach.
     loading_strategy: Literal["full_scan_only"] | None = Field(
         default=None,
         description="Explicit loading strategy for the pipeline. "
         "'full_scan_only': Each run performs full scan, checkpoint resume disabled. "
-        "If not specified, derived from force_full_scan for backward compatibility. "
         "See ADR-031.",
     )
 
@@ -24848,7 +24196,7 @@ Path: schemas\silver.py
 
 Defines the PyArrow schemas for various entities in the Silver layer.
 
-Column Order Convention (per RULES.md §2.4 and ADR-014):
+Column Order Convention (per RULES.md §2.9.4 and ADR-014):
 1. System prefix fields (entity_id, content_hash, _run_id, _run_type,
    _source_batch_id, _ingestion_ts, _index) - MUST be first
 2. Business fields - sorted alphabetically
@@ -24891,12 +24239,14 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_first", pa.string()),  # Unified: from first_page
         pa.field("page_last", pa.string()),  # Unified: from last_page
         # === PUBLICATION_CROSSREF_FIELDS ===
-        pa.field("document_chembl_id", pa.string()),  # Primary key
+        pa.field("publication_id", pa.string()),  # Primary key (provider)
         pa.field("doi", pa.string()),
-        # pmc_id excluded: not available from ChEMBL API
-        pa.field("pmid", pa.string()),  # Unified: from pubmed_id
+        pa.field("pmc_id", pa.string()),  # Not available from ChEMBL API (None values)
+        pa.field("pmid", pa.string()),
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
+        pa.field("affiliation_list", pa.string()),  # JSON array (None for ChEMBL)
+        pa.field("author_orcids", pa.string()),
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
         pa.field(
             "publication_type_unified", pa.string()
@@ -24905,7 +24255,13 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
             "publication_subclass", pa.string()
         ),  # Level 2: "Original Experimental Data", etc.
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
-        # publication_date excluded: not available from ChEMBL API
+        pa.field(
+            "publication_date", pa.string()
+        ),  # Not available from ChEMBL API (None values)
+        pa.field(
+            "language", pa.string()
+        ),  # Not available from ChEMBL API (None values)
+        pa.field("is_oa", pa.bool_()),  # Not available from ChEMBL API (None values)
         pa.field("src_id", pa.int64()),
         # === Unified citation metrics ===
         pa.field("citations_received", pa.int64()),  # Unified: from citation_count
@@ -24935,13 +24291,13 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("action_type_action_type", pa.string()),
+        pa.field("action_type", pa.string()),
         pa.field("action_type_description", pa.string()),
         pa.field("action_type_parent_type", pa.string()),
         pa.field("activity_comment", pa.string()),
         pa.field("activity_id", pa.string()),
         pa.field("activity_properties", pa.string()),  # JSON string
-        pa.field("assay_chembl_id", pa.string()),
+        pa.field("assay_id", pa.string()),
         pa.field("assay_description", pa.string()),
         pa.field("assay_type", pa.string()),
         pa.field("assay_variant_accession", pa.string()),
@@ -24952,18 +24308,18 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("canonical_smiles", pa.string()),
         pa.field("data_validity_comment", pa.string()),
         pa.field("data_validity_description", pa.string()),
-        pa.field("document_chembl_id", pa.string()),
-        pa.field("document_journal", pa.string()),
-        pa.field("document_year", pa.int64()),
+        pa.field("publication_id", pa.string()),
+        pa.field("journal", pa.string()),
+        pa.field("publication_year", pa.int64()),
         pa.field("ligand_efficiency_bei", pa.float64()),
         pa.field("ligand_efficiency_le", pa.float64()),
         pa.field("ligand_efficiency_lle", pa.float64()),
         pa.field("ligand_efficiency_sei", pa.float64()),
         pa.field("manual_curation_flag", pa.float64()),  # Float for nullable int
-        pa.field("molecule_chembl_id", pa.string()),
+        pa.field("molecule_id", pa.string()),
         pa.field("molecule_pref_name", pa.string()),
         pa.field("original_activity_id", pa.float64()),  # Float for nullable int
-        pa.field("parent_molecule_chembl_id", pa.string()),
+        pa.field("parent_molecule_id", pa.string()),
         pa.field("pchembl_value", pa.float64()),
         pa.field("potential_duplicate", pa.int64()),
         pa.field("qudt_units", pa.string()),
@@ -24977,12 +24333,10 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("standard_units", pa.string()),
         pa.field("standard_upper_value", pa.float64()),
         pa.field("standard_value", pa.float64()),
-        pa.field("target_chembl_id", pa.string()),
+        pa.field("target_id", pa.string()),
         pa.field("target_organism", pa.string()),
         pa.field("target_pref_name", pa.string()),
-        pa.field(
-            "target_taxonomy_id", pa.string()
-        ),  # Standardized name (was target_tax_id)
+        pa.field("taxonomy_id", pa.string()),
         pa.field("text_value", pa.string()),
         pa.field("toid", pa.float64()),  # Float for nullable int (Pandas convention)
         pa.field("type", pa.string()),
@@ -25011,15 +24365,31 @@ PUBCHEM_COMPOUND_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         pa.field("canonical_smiles", pa.string()),
-        pa.field("cid", pa.string()),  # Domain entity uses str for cid
+        pa.field("molecule_id", pa.string()),
+        pa.field("complexity", pa.float64()),
+        pa.field("conformer_count_3d", pa.float64()),
+        pa.field("conformer_rmsd_3d", pa.float64()),
+        pa.field("effective_rotor_count_3d", pa.float64()),
+        pa.field("exact_mass", pa.float64()),
+        pa.field("feature_acceptor_count_3d", pa.float64()),
+        pa.field("feature_anion_count_3d", pa.float64()),
+        pa.field("feature_cation_count_3d", pa.float64()),
+        pa.field("feature_count_3d", pa.float64()),
+        pa.field("feature_donor_count_3d", pa.float64()),
+        pa.field("feature_hydrophobe_count_3d", pa.float64()),
+        pa.field("feature_ring_count_3d", pa.float64()),
         pa.field("inchi", pa.string()),
-        pa.field("inchikey", pa.string()),  # Matches domain entity field name
+        pa.field("inchi_key", pa.string()),
         pa.field("isomeric_smiles", pa.string()),
         pa.field("iupac_name", pa.string()),
         pa.field("molecular_formula", pa.string()),
-        pa.field(
-            "molecular_weight", pa.float64()
-        ),  # Transformed to float by transformer
+        pa.field("molecular_weight", pa.float64()),
+        pa.field("monoisotopic_mass", pa.float64()),
+        pa.field("tpsa", pa.float64()),
+        pa.field("x_steric_quadrupole_3d", pa.float64()),
+        pa.field("xlogp", pa.float64()),
+        pa.field("y_steric_quadrupole_3d", pa.float64()),
+        pa.field("z_steric_quadrupole_3d", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
@@ -25121,7 +24491,7 @@ UNIPROT_ID_MAPPING_SCHEMA = pa.schema(
         pa.field("sequence_length", pa.int64()),  # Protein sequence length
         pa.field("sequence_mass", pa.int64()),  # Molecular weight in Daltons
         # Primary key (source identifier)
-        pa.field("target_chembl_id", pa.string()),
+        pa.field("target_id", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # NCBI Taxonomy ID
         # Mapped identifier (nullable - None if not found)
         pa.field("uniprot_accession", pa.string()),
@@ -25231,7 +24601,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("aidx", pa.string()),
         pa.field("assay_category", pa.string()),
         pa.field("assay_cell_type", pa.string()),
-        pa.field("assay_chembl_id", pa.string()),
+        pa.field("assay_id", pa.string()),
         pa.field("assay_classifications", pa.string()),  # JSON string
         pa.field("assay_group", pa.string()),
         pa.field("assay_organism", pa.string()),
@@ -25239,27 +24609,25 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("assay_pref_name", pa.string()),
         pa.field("assay_strain", pa.string()),
         pa.field("assay_subcellular_fraction", pa.string()),
-        pa.field(
-            "assay_taxonomy_id", pa.float64()
-        ),  # Float for nullable int
+        pa.field("taxonomy_id", pa.float64()),
         pa.field("assay_test_type", pa.string()),
         pa.field("assay_tissue", pa.string()),
         pa.field("assay_type", pa.string()),
         pa.field("assay_type_description", pa.string()),
         pa.field("bao_format", pa.string()),
         pa.field("bao_label", pa.string()),
-        pa.field("cell_chembl_id", pa.string()),
+        pa.field("cell_id", pa.string()),
         pa.field("confidence_description", pa.string()),
         pa.field("confidence_score", pa.int64()),
         pa.field("description", pa.string()),
-        pa.field("document_chembl_id", pa.string()),
+        pa.field("publication_id", pa.string()),
         pa.field("relationship_description", pa.string()),
         pa.field("relationship_type", pa.string()),
         pa.field("score", pa.float64()),
         pa.field("src_assay_id", pa.string()),
         pa.field("src_id", pa.int64()),
-        pa.field("target_chembl_id", pa.string()),
-        pa.field("tissue_chembl_id", pa.string()),
+        pa.field("target_id", pa.string()),
+        pa.field("tissue_id", pa.string()),
         # Variant information (flattened from ChEMBL API nested structure)
         pa.field("variant_accession", pa.string()),
         pa.field("variant_isoform", pa.string()),
@@ -25267,9 +24635,7 @@ CHEMBL_ASSAY_SCHEMA = pa.schema(
         pa.field("variant_organism", pa.string()),
         pa.field("variant_sequence", pa.string()),
         pa.field("variant_sequence_json", pa.string()),  # Forensic: original JSON
-        pa.field(
-            "variant_taxonomy_id", pa.float64()
-        ),  # Float for nullable int
+        pa.field("variant_taxonomy_id", pa.float64()),
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
         pa.field("_dq_warn", pa.bool_()),
@@ -25289,25 +24655,23 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Flattened component fields
         pa.field("component_accessions", pa.list_(pa.string())),
         pa.field("component_descriptions", pa.list_(pa.string())),
-        pa.field("component_id", pa.int64()),
+        pa.field("component_id", pa.float64()),
         pa.field("component_ids", pa.list_(pa.int64())),
         pa.field("component_relationships", pa.list_(pa.string())),
         pa.field("component_types", pa.list_(pa.string())),
-        # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
         pa.field("downgraded", pa.bool_()),
         pa.field("organism", pa.string()),
         pa.field("pipeline_stages", pa.string()),
         pa.field("pref_name", pa.string()),
         pa.field("species_group_flag", pa.bool_()),
-        pa.field("target_chembl_id", pa.string()),
+        pa.field("target_id", pa.string()),
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_components", pa.string()),
         pa.field("target_type", pa.string()),
-        pa.field("taxonomy_id", pa.float64()),  # Float for nullable int
+        pa.field("taxonomy_id", pa.float64()),
         # Note: protein_classifications not available in /target endpoint
         # Use /target_component endpoint instead (CHEMBL_TARGET_COMPONENT_SCHEMA)
         # === DQ_FIELDS_SUFFIX ===
@@ -25334,11 +24698,9 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("component_type", pa.string()),
         pa.field("description", pa.string()),
         pa.field("organism", pa.string()),
-        # Flattened fields (extracted from protein_classifications)
         pa.field("protein_classification_id", pa.int64()),
         pa.field("protein_classification_ids", pa.list_(pa.int64())),
         pa.field("protein_classifications", pa.string()),  # Forensic JSON
-        # Complex fields (JSON strings)
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
         pa.field("taxonomy_id", pa.int64()),  # Standardized name (was tax_id)
@@ -25361,7 +24723,7 @@ CHEMBL_CELL_LINE_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("cell_chembl_id", pa.string()),
+        pa.field("cell_id", pa.string()),
         pa.field("cell_description", pa.string()),
         pa.field("cell_name", pa.string()),
         pa.field("cell_source_organism", pa.string()),
@@ -25395,7 +24757,7 @@ CHEMBL_TISSUE_SCHEMA = pa.schema(
         pa.field("caloha_id", pa.string()),  # CALIPHO ID
         pa.field("efo_id", pa.string()),  # Experimental Factor Ontology
         pa.field("pref_name", pa.string()),  # Preferred tissue name
-        pa.field("tissue_chembl_id", pa.string()),  # Primary key
+        pa.field("tissue_id", pa.string()),  # Primary key
         pa.field("uberon_id", pa.string()),  # Uberon Ontology
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
@@ -25416,7 +24778,7 @@ CHEMBL_SUBCELLULAR_FRACTION_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         pa.field("assay_count", pa.int64()),  # Number of assays using this fraction
-        pa.field("example_assay_chembl_id", pa.string()),  # Example assay ChEMBL ID
+        pa.field("example_assay_id", pa.string()),  # Example assay ChEMBL ID
         pa.field("subcellular_fraction", pa.string()),  # Primary key - fraction name
         # === DQ_FIELDS_SUFFIX ===
         pa.field("_dq_error", pa.bool_()),
@@ -25437,8 +24799,7 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("document_chembl_id", pa.string()),
-        # MeSH-specific fields
+        pa.field("publication_id", pa.string()),
         pa.field("mesh_id", pa.string()),
         pa.field("qualifier", pa.string()),
         pa.field("term", pa.string()),
@@ -25453,7 +24814,7 @@ CHEMBL_DOCUMENT_TERM_SCHEMA = pa.schema(
 # See: https://www.ebi.ac.uk/chembl/api/data/molecule
 CHEMBL_MOLECULE_SCHEMA = pa.schema(
     [
-        # === System prefix (MUST be first, per RULES.md §2.4) ===
+        # === System prefix (MUST be first, per RULES.md §2.9.4) ===
         pa.field("entity_id", pa.string()),
         pa.field("content_hash", pa.string()),
         pa.field("_run_id", pa.string()),
@@ -25463,25 +24824,22 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         pa.field("atc_classifications", pa.string()),
-        pa.field("availability_type", pa.int64()),
+        pa.field("availability_type", pa.float64()),  # Float for nullable int
         pa.field("black_box_warning", pa.int64()),
-        # Flattened Structures (unified naming without structure_ prefix)
         pa.field("canonical_smiles", pa.string()),
         pa.field("chirality", pa.int64()),
-        # Complex fields (JSON strings)
         pa.field("cross_references", pa.string()),
         pa.field("dosed_ingredient", pa.int64()),
         pa.field("first_approval", pa.float64()),  # Float for nullable int
         pa.field("first_in_class", pa.int64()),
         pa.field("helm_notation", pa.string()),
-        # Flattened Hierarchy
         pa.field("hierarchy_active_chembl_id", pa.string()),
         pa.field("hierarchy_child_chembl_id", pa.string()),
         pa.field("hierarchy_parent_chembl_id", pa.string()),
-        pa.field("inchikey", pa.string()),  # Standard InChIKey (matches domain schema)
+        pa.field("inchi_key", pa.string()),
         pa.field("inorganic_flag", pa.int64()),
         pa.field("max_phase", pa.int64()),
-        pa.field("molecule_chembl_id", pa.string()),
+        pa.field("molecule_id", pa.string()),
         pa.field("molecule_hierarchy", pa.string()),
         pa.field("molecule_properties", pa.string()),
         pa.field("molecule_species", pa.string()),
@@ -25489,13 +24847,11 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("molecule_synonyms", pa.string()),
         pa.field("molecule_type", pa.string()),
         pa.field("natural_product", pa.int64()),
-        # Flags
         pa.field("oral", pa.bool_()),
         pa.field("parenteral", pa.bool_()),
         pa.field("polymer_flag", pa.int64()),
         pa.field("pref_name", pa.string()),
         pa.field("prodrug", pa.int64()),
-        # Flattened Properties
         pa.field("property_alogp", pa.float64()),
         pa.field("property_aromatic_rings", pa.int64()),
         pa.field("property_full_molformula", pa.string()),
@@ -25513,7 +24869,6 @@ CHEMBL_MOLECULE_SCHEMA = pa.schema(
         pa.field("structure_type", pa.string()),
         pa.field("therapeutic_flag", pa.bool_()),
         pa.field("topical", pa.bool_()),
-        # USAN naming
         pa.field("usan_stem", pa.string()),
         pa.field("usan_stem_definition", pa.string()),
         pa.field("usan_substem", pa.string()),
@@ -25538,14 +24893,11 @@ CHEMBL_COMPOUND_RECORD_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        # Original compound names from the document
         pa.field("compound_key", pa.string()),
         pa.field("compound_name", pa.string()),
-        # Foreign keys
-        pa.field("document_chembl_id", pa.string()),
-        pa.field("molecule_chembl_id", pa.string()),
+        pa.field("publication_id", pa.string()),
+        pa.field("molecule_id", pa.string()),
         pa.field("record_id", pa.int64()),
-        # Source information
         pa.field("src_compound_id", pa.string()),
         pa.field("src_id", pa.int64()),
         # === DQ_FIELDS_SUFFIX ===
@@ -25607,7 +24959,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (for author-level analytics)
         pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
-        pa.field("author_orcids", pa.string()),  # JSON array of ORCIDs
+        pa.field("author_orcids", pa.string()),
         pa.field("author_s2_ids", pa.string()),  # JSON array of S2 author IDs
         pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
         pa.field("citations_made", pa.int64()),  # Unified: from referenceCount
@@ -25625,7 +24977,9 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_last", pa.string()),
         pa.field("page_range", pa.string()),  # Page range: "first-last" format
         pa.field("paper_id", pa.string()),  # Primary key
-        # Note: pmc_id excluded per design (2026-01)
+        pa.field(
+            "pmc_id", pa.string()
+        ),  # PubMed Central ID (inherited from base schema)
         pa.field("pmid", pa.string()),
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),
@@ -25667,10 +25021,14 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("_lookup_method", pa.string()),
         pa.field("_original_id", pa.string()),
         # === Business fields (alphabetical order) ===
-        # abstract and affiliations excluded per user request
+        # Note: abstract and affiliation_list not provided by CrossRef but required by PublicationBaseSchema
+        pa.field("abstract", pa.string()),  # Not available from CrossRef (None values)
+        pa.field(
+            "affiliation_list", pa.string()
+        ),  # Not available from CrossRef (None values)
         pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
         pa.field("author_details", pa.string()),  # JSON array of author objects
-        pa.field("author_orcids", pa.string()),  # ORCID IDs (JSON array)
+        pa.field("author_orcids", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citations_made", pa.int64()),  # Unified: from references-count
         pa.field(
@@ -25692,7 +25050,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field("license_url", pa.string()),
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
-        # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
+        # Note: pmid and pmc_id not provided by CrossRef but required by PublicationBaseSchema
+        pa.field("pmc_id", pa.string()),  # Not available from CrossRef (None values)
+        pa.field("pmid", pa.string()),  # Not available from CrossRef (None values)
         pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
         pa.field("publication_date", pa.string()),  # Unified: YYYY-MM-DD
         pa.field(
@@ -25742,7 +25102,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (JSON arrays preserving author order)
         pa.field("author_openalex_ids", pa.string()),  # OpenAlex author IDs
-        pa.field("author_orcids", pa.string()),  # ORCID IDs (empty string for missing)
+        pa.field("author_orcids", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         # Unified: from referenced_works_count
         pa.field("citations_made", pa.int64()),
@@ -25778,7 +25138,8 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         # Unified page fields (from biblio object)
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
-        # Note: pmc_id excluded per design (2026-01)
+        # PubMed Central ID - Not available from OpenAlex API (None values)
+        pa.field("pmc_id", pa.string()),
         # pmid: PubMed ID (numeric string: "12345678") - nullable, may not exist for all publications
         pa.field("pmid", pa.string()),
         # Primary topic (single most relevant topic for quick categorization)
@@ -25859,7 +25220,7 @@ CHEMBL_ASSAY_PARAMETERS_SCHEMA = pa.schema(
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
         # Foreign key
-        pa.field("assay_chembl_id", pa.string()),
+        pa.field("assay_id", pa.string()),
         # Primary identifier (surrogate)
         pa.field("assay_param_id", pa.int64()),
         pa.field("comments", pa.string()),
@@ -25915,18 +25276,8 @@ from bioetl.infrastructure.schemas.base_schemas import (
     BaseRateLimitConfig,
 )
 
-
-class RateLimitYamlConfig(BaseRateLimitConfig):
-    """Rate limit configuration from YAML.
-
-    Inherits from BaseRateLimitConfig for consistency with other schemas.
-
-    Attributes:
-        requests_per_second: Maximum requests per second.
-        burst: Maximum burst capacity (token bucket).
-    """
-
-    pass
+RateLimitYamlConfig = BaseRateLimitConfig
+RateLimitYamlConfig.__doc__ = """Rate limit configuration from YAML."""
 
 
 class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
@@ -25948,17 +25299,8 @@ class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
         return super().to_domain()
 
 
-class ClientYamlConfig(BaseClientConfig):
-    """HTTP client configuration from YAML.
-
-    Inherits from BaseClientConfig for consistency with other schemas.
-
-    Attributes:
-        timeout_sec: Request timeout in seconds.
-        max_retries: Maximum number of retry attempts.
-    """
-
-    pass
+ClientYamlConfig = BaseClientConfig
+ClientYamlConfig.__doc__ = """HTTP client configuration from YAML."""
 
 
 class ProviderConfigYaml(BaseModel):
@@ -26185,6 +25527,10 @@ import os
 import unicodedata
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.config import Settings
 
 
 @dataclass(frozen=True, slots=True)
@@ -26211,21 +25557,53 @@ class SaltConfig:
             )
 
     @classmethod
-    def from_env(cls) -> SaltConfig:
-        """Create SaltConfig from environment variables.
+    def from_settings(cls, settings: Settings) -> SaltConfig:
+        """Create SaltConfig from application settings.
 
         Raises:
-            ValueError: If BIOETL_PII_SALT_CURRENT is not set or too short.
+            ValueError: If pii_salt_current is not set or too short.
 
         Returns:
             SaltConfig instance.
         """
-        current = os.environ.get("BIOETL_PII_SALT_CURRENT", "")
-        next_salt = os.environ.get("BIOETL_PII_SALT_NEXT") or None
-        rotation_active = os.environ.get(
-            "BIOETL_SALT_ROTATION_ACTIVE", "false"
-        ).lower() in ("true", "1", "yes")
+        current = (
+            settings.pii_salt_current.get_secret_value()
+            if settings.pii_salt_current
+            else ""
+        )
+        next_salt = (
+            settings.pii_salt_next.get_secret_value()
+            if settings.pii_salt_next
+            else None
+        )
+        rotation_active = settings.pii_salt_rotation_active
 
+        return cls(
+            current_salt=current,
+            next_salt=next_salt,
+            rotation_active=rotation_active,
+        )
+
+    @classmethod
+    def from_env(cls) -> SaltConfig:
+        """Create SaltConfig directly from environment variables.
+
+        Expected variables:
+        - BIOETL_PII_SALT_CURRENT (required)
+        - BIOETL_PII_SALT_NEXT (optional)
+        - BIOETL_SALT_ROTATION_ACTIVE (optional: true/1/yes/on)
+        """
+        current = os.getenv("BIOETL_PII_SALT_CURRENT", "")
+        raw_next = os.getenv("BIOETL_PII_SALT_NEXT")
+        next_salt = raw_next or None
+        rotation_active = os.getenv(
+            "BIOETL_SALT_ROTATION_ACTIVE", ""
+        ).strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
         return cls(
             current_salt=current,
             next_salt=next_salt,
@@ -26351,15 +25729,20 @@ class Sha256PiiHasher:
         return self._salt_id
 
     @classmethod
-    def from_env(cls) -> Sha256PiiHasher:
-        """Create hasher from environment variables.
+    def from_settings(cls, settings: Settings) -> Sha256PiiHasher:
+        """Create hasher from application settings.
 
         Raises:
-            ValueError: If BIOETL_PII_SALT_CURRENT is not set.
+            ValueError: If pii_salt_current is not set.
 
         Returns:
             Configured Sha256PiiHasher instance.
         """
+        return cls(salt_config=SaltConfig.from_settings(settings))
+
+    @classmethod
+    def from_env(cls) -> Sha256PiiHasher:
+        """Create hasher directly from environment variables."""
         return cls(salt_config=SaltConfig.from_env())
 
 ================================================================================
@@ -26592,14 +25975,15 @@ class OrjsonEncoder:
 
 
 @lru_cache(maxsize=1)
-def get_json_encoder() -> JsonEncoderPort:
+def get_json_encoder(encoder_type: str | None = None) -> JsonEncoderPort:
     """Get the configured JSON encoder instance.
 
     Selection logic:
-    1. Check BIOETL_JSON_ENCODER environment variable
-       - "orjson": Use OrjsonEncoder (error if not available)
-       - "stdlib": Use StdLibJsonEncoder
-    2. If not set, use orjson if available, otherwise stdlib
+    1. Use provided encoder_type if not None
+    2. If None, use orjson if available, otherwise stdlib
+
+    Args:
+        encoder_type: Optional encoder type ('orjson' or 'stdlib').
 
     Returns:
         JsonEncoderPort implementation
@@ -26608,22 +25992,26 @@ def get_json_encoder() -> JsonEncoderPort:
         ImportError: If orjson is requested but not installed
         ValueError: If unknown encoder type is specified
     """
-    encoder_type = os.environ.get("BIOETL_JSON_ENCODER", "").lower()
+    # Priority: explicit arg -> environment variable -> automatic default
+    raw_type = encoder_type
+    if raw_type is None:
+        raw_type = os.getenv("BIOETL_JSON_ENCODER")
+    effective_type = (raw_type or "").strip().lower()
 
-    if encoder_type == "orjson":
+    if effective_type == "orjson":
         if not ORJSON_AVAILABLE:
             raise ImportError(
-                "BIOETL_JSON_ENCODER=orjson but orjson is not installed. "
+                "JSON encoder 'orjson' requested but not installed. "
                 "Install with: pip install orjson"
             )
         return OrjsonEncoder()
 
-    if encoder_type == "stdlib":
+    if effective_type == "stdlib":
         return StdLibJsonEncoder()
 
-    if encoder_type and encoder_type not in ("orjson", "stdlib", ""):
+    if effective_type and effective_type not in ("orjson", "stdlib", ""):
         raise ValueError(
-            f"Unknown JSON encoder type: {encoder_type}. "
+            f"Unknown JSON encoder type: {effective_type}. "
             "Valid options: 'orjson', 'stdlib'"
         )
 
@@ -26634,13 +26022,15 @@ def get_json_encoder() -> JsonEncoderPort:
 
 
 def reset_encoder_cache() -> None:
-    """Clear the encoder cache (for testing).
+    """Clear the get_json_encoder cache.
 
-    Call this after changing BIOETL_JSON_ENCODER environment variable
-    to get a fresh encoder instance.
+    Used by tests to ensure env var changes (BIOETL_JSON_ENCODER) take effect
+    when calling get_json_encoder() again.
     """
     get_json_encoder.cache_clear()
 
+
+_ENCODER_API = (reset_encoder_cache,)
 
 __all__ = [
     "ORJSON_AVAILABLE",
@@ -28544,6 +27934,19 @@ class DeltaReader:
     async def aclose(self) -> None:
         """Gracefully close the reader (no-op, no persistent resources)."""
         pass
+
+================================================================================
+File: delta_writer.py
+Path: storage\delta_writer.py
+================================================================================
+"""Compatibility wrapper for legacy DeltaWriter imports."""
+
+from __future__ import annotations
+
+from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver_writer import SilverWriter as DeltaWriter
+
+__all__ = ["DeltaWriter", "SilverWriteMode"]
 
 ================================================================================
 File: gold_writer.py
@@ -30661,7 +30064,7 @@ class SilverWriter(BaseDeltaWriter):
 
         # Use NoOpTracing if not provided (test convenience, production uses composition)
         if tracing is None:
-            from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+            from bioetl.domain.ports import NoOpTracing
 
             tracing = NoOpTracing()
 
@@ -31233,7 +30636,6 @@ class SilverWriter(BaseDeltaWriter):
         if self._audit is None:
             return
 
-        from datetime import datetime
         from uuid import UUID
 
         from bioetl.domain.types import RunID
@@ -31256,8 +30658,6 @@ class SilverWriter(BaseDeltaWriter):
             return
 
         # Parse timestamp (ensure UTC-aware for consistency)
-        from datetime import UTC
-
         if isinstance(ingestion_ts_str, str):
             timestamp = datetime.fromisoformat(ingestion_ts_str)
         elif isinstance(ingestion_ts_str, datetime):
@@ -32131,7 +31531,18 @@ class BasePanderaValidator:
         """
         assert self._schema is not None  # Guaranteed by validate()
         try:
-            self._schema.validate(df, lazy=True)
+            df_to_validate = df
+            if hasattr(self._schema, "columns"):
+                missing = [
+                    name for name in self._schema.columns if name not in df.columns
+                ]
+                if missing:
+                    df_to_validate = df.copy()
+                    for name in missing:
+                        column = self._schema.columns[name]
+                        if getattr(column, "nullable", False):
+                            df_to_validate[name] = None
+            self._schema.validate(df_to_validate, lazy=True)
             return ValidationResult(valid=True)
         except Exception as e:
             return ValidationResult(valid=False, errors=[str(e)])

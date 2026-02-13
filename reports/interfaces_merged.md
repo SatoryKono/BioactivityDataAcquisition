@@ -171,6 +171,10 @@ def checkpoint_list(pipeline: str) -> None:
 
     asyncio.run(_list())
 
+
+# Hint for tooling: explicit reference to command function.
+COMMANDS = (checkpoint_list,)
+
 ================================================================================
 File: cleanup.py
 Path: cli\commands\cleanup.py
@@ -411,6 +415,15 @@ def list_pipelines_command() -> None:
     echo_info("Available pipelines:")
     for pipeline in sorted(pipelines):
         echo_info(f"  - {pipeline}")
+
+
+# Explicit command collection to mark usage for tooling.
+COMMANDS = (
+    list_pipelines_command,
+    show_command,
+    show_settings_command,
+    validate_command,
+)
 
 ================================================================================
 File: export.py
@@ -757,6 +770,8 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
             sys.exit(ExitCode.FAIL)
 
 
+COMMANDS = (health_server_command,)
+
 __all__ = ["health"]
 
 ================================================================================
@@ -882,6 +897,8 @@ def echo_health_server_info(enabled: bool, port: int, host: str = "127.0.0.1") -
         click.echo(f"Health server: http://{host}:{port}/health")
 
 
+COMMANDS = (add_health_server_options, echo_health_server_info, health_server_context)
+
 __all__ = [
     "DEFAULT_HEALTH_SERVER_PORT",
     "add_health_server_options",
@@ -987,6 +1004,9 @@ def check_command(pipeline: str, run_id: str) -> None:
 
     asyncio.run(_run())
 
+
+COMMANDS = (release_command, check_command)
+
 ================================================================================
 File: maintenance.py
 Path: cli\commands\maintenance.py
@@ -1063,6 +1083,9 @@ def metrics_server_context() -> Iterator[bool]:
     # Re-exported from entrypoints, use directly
     started = ensure_metrics_server_started()
     yield started
+
+
+COMMANDS = (metrics_server_context,)
 
 ================================================================================
 File: quarantine.py
@@ -1319,6 +1342,14 @@ def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:
         sys.exit(ExitCode.FAIL)
 
 
+COMMANDS = (
+    quarantine_inspect,
+    quarantine_purge,
+    quarantine_replay,
+    quarantine_resolve,
+    quarantine_stats,
+)
+
 __all__ = ["quarantine"]
 
 ================================================================================
@@ -1339,8 +1370,8 @@ import click
 
 from bioetl.application.services import (
     PipelineNotFoundError,
+    PipelineRunResult,
     RunOptions,
-    RunStatus,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.interfaces.cli.commands.health_server_integration import (
@@ -1361,8 +1392,10 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
 
-def _map_status_to_exit_code(status: RunStatus, error_type: str | None) -> ExitCode:
-    """Map RunStatus to CLI exit code.
+def _map_status_to_exit_code(
+    status: PipelineRunResult, error_type: str | None
+) -> ExitCode:
+    """Map PipelineRunResult to CLI exit code.
 
     Args:
         status: Run status from service.
@@ -1371,11 +1404,11 @@ def _map_status_to_exit_code(status: RunStatus, error_type: str | None) -> ExitC
     Returns:
         Appropriate ExitCode for the status.
     """
-    if status == RunStatus.SUCCESS:
+    if status == PipelineRunResult.SUCCESS:
         return ExitCode.OK
-    if status == RunStatus.DRY_RUN:
+    if status == PipelineRunResult.DRY_RUN:
         return ExitCode.OK
-    if status == RunStatus.SHUTDOWN:
+    if status == PipelineRunResult.SHUTDOWN:
         return ExitCode.SIGINT
     # FAILED status - map based on error type
     if error_type:
@@ -1401,7 +1434,7 @@ async def _run_pipeline_async(
     options: RunOptions,
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
-) -> tuple[RunStatus, str | None, str | None, str]:
+) -> tuple[PipelineRunResult, str | None, str | None, str]:
     """Run pipeline asynchronously via service.
 
     Args:
@@ -1425,7 +1458,9 @@ async def _run_pipeline_async(
         return result.status, result.error_message, result.error_type, result.run_id
 
 
-def _echo_run_result(status: RunStatus, error_message: str | None, run_id: str) -> None:
+def _echo_run_result(
+    status: PipelineRunResult, error_message: str | None, run_id: str
+) -> None:
     """Output run result message based on status.
 
     Args:
@@ -1437,16 +1472,16 @@ def _echo_run_result(status: RunStatus, error_message: str | None, run_id: str) 
     short_run_id = run_id[:8] if len(run_id) > 8 else run_id
 
     status_handlers = {
-        RunStatus.SUCCESS: lambda: echo_info(
+        PipelineRunResult.SUCCESS: lambda: echo_info(
             f"Pipeline completed successfully (run_id: {short_run_id})"
         ),
-        RunStatus.DRY_RUN: lambda: echo_info(
+        PipelineRunResult.DRY_RUN: lambda: echo_info(
             f"Dry-run completed (no changes made) (run_id: {short_run_id})"
         ),
-        RunStatus.SHUTDOWN: lambda: echo_warning(
+        PipelineRunResult.SHUTDOWN: lambda: echo_warning(
             f"Pipeline was gracefully shut down (run_id: {short_run_id})"
         ),
-        RunStatus.FAILED: lambda: echo_error(
+        PipelineRunResult.FAILED: lambda: echo_error(
             f"Pipeline failed (run_id: {short_run_id})",
             error_message or "Unknown error",
         ),
@@ -1531,7 +1566,7 @@ def _echo_run_result(status: RunStatus, error_message: str | None, run_id: str) 
 @click.option(
     "--use-cached-bronze/--no-cached-bronze",
     "use_cached_bronze",
-    default=True,
+    default=False,
     help="Load data from Bronze cache instead of API",
     show_default=True,
 )
@@ -1644,9 +1679,9 @@ import click
 
 from bioetl.application.services import (
     PipelineNotFoundError,
+    PipelineRunResult,
     RunOptions,
     RunResult,
-    RunStatus,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.composition.registry import get_default_registry
@@ -1729,18 +1764,18 @@ async def _run_pipelines_batch(
             result = await _run_pipeline_async(service, pipeline, options)
             batch_result.results.append(result)
 
-            if result.status == RunStatus.SUCCESS:
+            if result.status == PipelineRunResult.SUCCESS:
                 batch_result.succeeded += 1
                 echo_info(f"[OK] {pipeline}: completed successfully")
-            elif result.status == RunStatus.DRY_RUN:
+            elif result.status == PipelineRunResult.DRY_RUN:
                 batch_result.skipped += 1
                 echo_info(f"[DRY] {pipeline}: dry-run (no changes)")
-            elif result.status == RunStatus.SHUTDOWN:
+            elif result.status == PipelineRunResult.SHUTDOWN:
                 batch_result.skipped += 1
                 echo_warning(f"[STOP] {pipeline}: gracefully shut down")
                 # Stop processing remaining pipelines on shutdown
                 break
-            elif result.status == RunStatus.FAILED:
+            elif result.status == PipelineRunResult.FAILED:
                 batch_result.failed += 1
                 batch_result.failed_pipelines.append(pipeline)
                 echo_error(
@@ -2123,7 +2158,7 @@ async def _run_composite_async(
 @click.option(
     "--use-cached-bronze/--no-cached-bronze",
     "use_cached_bronze",
-    default=True,
+    default=False,
     help="Load data from Bronze cache instead of API",
     show_default=True,
 )
@@ -2148,8 +2183,9 @@ async def _run_composite_async(
 @click.option(
     "--cached-bronze-dependencies/--no-cached-bronze-dependencies",
     "cached_bronze_dependencies",
-    default=None,
-    help="Override cached Bronze for dependencies (default: follow --use-cached-bronze)",
+    default=False,
+    help="Override cached Bronze for dependencies (default: use API)",
+    show_default=True,
 )
 @click.option(
     "--debug",
@@ -2182,7 +2218,7 @@ def run_composite(
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
     cached_bronze_enrichers: bool | None,
-    cached_bronze_dependencies: bool | None,
+    cached_bronze_dependencies: bool,
     debug: bool,
     health_server: bool,
     health_port: int,
@@ -2627,6 +2663,8 @@ def get_exit_code_for_exception(exc: BaseException) -> ExitCode:
 
     return ExitCode.FAIL
 
+
+EXIT_CODE_HELPERS = (get_exit_code_for_exception,)
 
 __all__ = [
     "EXCEPTION_EXIT_CODES",
@@ -3253,6 +3291,8 @@ async def run_health_server(
     finally:
         await server.stop()
 
+
+RUN_HEALTH_SERVER = run_health_server
 
 __all__ = ["HealthResponse", "HealthServer", "run_health_server"]
 
