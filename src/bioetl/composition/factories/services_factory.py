@@ -531,6 +531,8 @@ class ServicesBuilder:
         """
         callbacks = extract_pipeline_callbacks(pipeline)
 
+        default_table_name = f"{pipeline.config.provider}.{pipeline.config.entity_type}"
+
         return ServicesBuilder.create_record_processor(
             services=pipeline.services,
             context=pipeline.context,
@@ -540,12 +542,12 @@ class ServicesBuilder:
             silver_schema=silver_schema,
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
-            primary_keys=pipeline.config.primary_keys,
-            silver_table=pipeline.config.silver_table,
-            gold_table=pipeline.config.gold_table,
-            silver_write_mode=pipeline.config.write_mode,
-            gold_write_mode=pipeline.config.gold_write_mode,
-            on_schema_mismatch=pipeline.config.on_schema_mismatch,
+            primary_keys=pipeline.config.table.primary_keys,
+            silver_table=pipeline.config.table.silver_table or default_table_name,
+            gold_table=pipeline.config.table.gold_table or default_table_name,
+            silver_write_mode=pipeline.config.table.silver_write_mode,
+            gold_write_mode=pipeline.config.table.gold_write_mode,
+            on_schema_mismatch=pipeline.config.table.on_schema_mismatch,
             transform_callback=callbacks.transform,
             gold_filter_callback=callbacks.gold_filter,
             gold_transform_callback=callbacks.gold_transform,

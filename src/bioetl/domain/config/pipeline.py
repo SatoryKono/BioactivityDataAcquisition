@@ -31,10 +31,7 @@ class PipelineConfig:
 
     Table-related fields (primary_keys, silver_table, gold_table,
     write modes, partition_cols, on_schema_mismatch) are stored in the
-    nested ``table`` field (:class:`TableConfig`).  Convenience
-    properties forward the most common accesses so that
-    ``config.primary_keys`` continues to work alongside the canonical
-    ``config.table.primary_keys`` form.
+    nested ``table`` field (:class:`TableConfig`).
     """
 
     # Identity
@@ -46,7 +43,7 @@ class PipelineConfig:
     table: TableConfig
 
     # Processing
-    silver_filters: SilverFilterConfig | GoldFilterConfig | None = None
+    silver_filters: SilverFilterConfig | None = None
     gold_filters: GoldFilterConfig | None = None
     batch_size: int = 100
     checkpoint_interval: int = 1000
@@ -103,43 +100,3 @@ class PipelineConfig:
     def lock_key(self) -> str:
         """Generate lock key for distributed locking."""
         return f"pipeline:{self.pipeline_name}"
-
-    # ------------------------------------------------------------------
-    # Convenience forwarding properties for backward compatibility.
-    # Canonical access is via ``self.table.<field>``.
-    # ------------------------------------------------------------------
-
-    @property
-    def primary_keys(self) -> tuple[str, ...]:
-        """Shortcut for ``self.table.primary_keys``."""
-        return self.table.primary_keys
-
-    @property
-    def silver_table(self) -> str | None:
-        """Shortcut for ``self.table.silver_table``."""
-        return self.table.silver_table
-
-    @property
-    def gold_table(self) -> str | None:
-        """Shortcut for ``self.table.gold_table``."""
-        return self.table.gold_table
-
-    @property
-    def write_mode(self) -> object:
-        """Shortcut for ``self.table.silver_write_mode``."""
-        return self.table.silver_write_mode
-
-    @property
-    def gold_write_mode(self) -> object:
-        """Shortcut for ``self.table.gold_write_mode``."""
-        return self.table.gold_write_mode
-
-    @property
-    def partition_cols(self) -> tuple[str, ...]:
-        """Shortcut for ``self.table.partition_cols``."""
-        return self.table.partition_cols
-
-    @property
-    def on_schema_mismatch(self) -> str:
-        """Shortcut for ``self.table.on_schema_mismatch``."""
-        return self.table.on_schema_mismatch
