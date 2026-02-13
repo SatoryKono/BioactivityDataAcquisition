@@ -80,12 +80,12 @@ def extract_author_s2_ids(authors: list[dict[str, Any]] | None) -> list[str]:
 
     Example:
         >>> authors = [
-        ...     {"authorId": "1234567890abcdef1234567890abcdef12345678", "name": "John"},
+        ...     {"authorId": "1234567890...", "name": "John"},
         ...     {"authorId": None, "name": "Jane"},
-        ...     {"authorId": "abcdef1234567890abcdef1234567890abcdef12", "name": "Bob"},
+        ...     {"authorId": "abcdef1234...", "name": "Bob"},
         ... ]
         >>> extract_author_s2_ids(authors)
-        ['1234567890abcdef1234567890abcdef12345678', 'abcdef1234567890abcdef1234567890abcdef12']
+        ['1234567890...', 'abcdef1234...']
 
     """
     if not authors:

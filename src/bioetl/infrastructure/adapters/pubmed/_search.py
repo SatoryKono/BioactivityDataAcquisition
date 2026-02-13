@@ -9,10 +9,7 @@ import contextlib
 import time
 from typing import TYPE_CHECKING, Any
 
-from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
-
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
 
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics

@@ -122,7 +122,7 @@ class Sha256PiiHasher:
         >>> config = SaltConfig(current_salt="a" * 64)
         >>> hasher = Sha256PiiHasher(config)
         >>> hasher.hash_value("John Doe")
-        '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069'
+        '7f83b165...'
 
     Implements:
         PiiHasherPort: Domain port for PII hashing.

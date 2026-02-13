@@ -160,7 +160,7 @@ def extract_author_ids(authorships: list[dict[str, Any]]) -> list[str]:
         authorships: List of authorship dicts from OpenAlex API.
 
     Returns:
-        List of OpenAlex author IDs (e.g., ["A1234567890", "", "A9876543210"]).
+        List of OpenAlex author IDs (e.g., ["A123", "", "A456"]).
     """
     author_ids: list[str] = []
     for authorship in authorships:
