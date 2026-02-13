@@ -599,7 +599,7 @@ def test_data_schema_legacy_path_fallback(setup_configs, tmp_path):
     legacy_schema_dir = tmp_path / "configs" / "pipelines" / "data_schema" / "legacys"
     legacy_schema_dir.mkdir(parents=True)
     (legacy_schema_dir / "entity.yaml").write_text(
-        yaml.dump({"column_groups": [{"name": "core", "columns": ["id"]}]})
+        yaml.dump({"column_groups": [{"name": "core", "fields": ["id"]}]})
     )
 
     cfg = {

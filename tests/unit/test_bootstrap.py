@@ -64,16 +64,16 @@ def mock_pipeline_config():
     """Create mock pipeline config."""
     config = MagicMock()
     config.source = {"api": {"rate_limit": 10.0}}
-    # Mock DQ rules with valid defaults to satisfy Pydantic literal checks
-    config.dq_rules.soft_fail_threshold = 0.05
-    config.dq_rules.hard_fail_threshold = 0.20
-    config.dq_rules.invalid_record_policy = "quarantine"
-    config.dq_rules.report.format = "json"
-    config.dq_rules.report.output_path = "reports/dq"
-    config.dq_rules.report.enabled = True
-    config.dq_rules.field_validations = []
-    config.dq_rules.cross_field_validations = []
-    config.dq_rules.conditional_validations = []
+    # Mock DQ overrides with valid defaults to satisfy Pydantic literal checks
+    config.dq_overrides.soft_fail_threshold = 0.05
+    config.dq_overrides.hard_fail_threshold = 0.20
+    config.dq_overrides.invalid_record_policy = "quarantine"
+    config.dq_overrides.report.format = "json"
+    config.dq_overrides.report.output_path = "reports/dq"
+    config.dq_overrides.report.enabled = True
+    config.dq_overrides.field_validations = []
+    config.dq_overrides.cross_field_validations = []
+    config.dq_overrides.conditional_validations = []
     return config
 
 

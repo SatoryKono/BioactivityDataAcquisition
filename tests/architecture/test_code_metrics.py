@@ -490,7 +490,7 @@ class TestFunctionLength:
         "load": 70,  # 67 lines - DQ config loading with merge
         "_normalize_to_file_format": 60,  # 55 lines - File format normalization
         "resolve_dq_config": 55,  # 51 lines - DQ config resolution
-        "_normalize_inline_dq_rules": 60,  # 55 lines - Inline DQ rules normalization
+        "_normalize_inline_dq_overrides": 60,  # 55 lines - Inline DQ overrides normalization
         "yaml_config_to_domain": 70,  # 69 lines - YAML to domain conversion
         # Builder functions
         "build": 65,  # 63 lines - Builder pattern
