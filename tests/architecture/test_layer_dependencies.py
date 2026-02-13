@@ -246,7 +246,6 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
                 "Run manually: lint-imports --config .importlinter"
             )
         # When output is empty (e.g. Windows console capture), run without capture for diagnostics
-        out = result.stdout.strip() or result.stderr.strip() or "(no output captured)"
         # pytest.fail(
         #     f"import-linter contracts violated (exit {result.returncode}):\n{out}\n\n"
         #     "Run manually: lint-imports --config .importlinter"
