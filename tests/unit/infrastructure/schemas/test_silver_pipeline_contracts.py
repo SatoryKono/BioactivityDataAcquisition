@@ -62,7 +62,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("target_id", pa.string()),
         ("target_organism", pa.string()),
         ("target_pref_name", pa.string()),
-        ("taxonomy_id", pa.string()),
+        ("target_taxonomy_id", pa.float64()),
         ("text_value", pa.string()),
         ("toid", pa.float64()),  # Float for nullable int
         ("type", pa.string()),
@@ -92,7 +92,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("assay_pref_name", pa.string()),
         ("assay_strain", pa.string()),
         ("assay_subcellular_fraction", pa.string()),
-        ("taxonomy_id", pa.float64()),  # Float for nullable int
+        ("assay_taxonomy_id", pa.float64()),  # Float for nullable int
         ("assay_test_type", pa.string()),
         ("assay_tissue", pa.string()),
         ("assay_type", pa.string()),
@@ -338,6 +338,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("component_types", pa.list_(pa.string())),
         ("cross_references", pa.string()),
         ("downgraded", pa.bool_()),
+        ("description", pa.string()),
         ("organism", pa.string()),
         ("pipeline_stages", pa.string()),
         ("pref_name", pa.string()),
@@ -450,7 +451,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("inchi_key", pa.string()),
         ("isomeric_smiles", pa.string()),
         ("iupac_name", pa.string()),
-        ("molecular_formula", pa.string()),
+        ("property_full_molformula", pa.string()),
         ("molecular_weight", pa.float64()),
         ("monoisotopic_mass", pa.float64()),
         ("tpsa", pa.float64()),

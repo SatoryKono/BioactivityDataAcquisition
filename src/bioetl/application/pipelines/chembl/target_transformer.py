@@ -172,6 +172,7 @@ class TargetTransformer(BaseChemblTransformer):
             "pref_name": record.get("pref_name"),
             "target_type": record.get("target_type"),
             "organism": record.get("organism"),
+            "description": record.get("description"),
             # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
             "taxonomy_id": taxonomy_id,
             "species_group_flag": record.get("species_group_flag"),

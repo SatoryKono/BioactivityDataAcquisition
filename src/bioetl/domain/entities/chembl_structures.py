@@ -103,6 +103,7 @@ class Target(BaseEntity):
     pref_name: str | None = None
     target_type: str | None = None  # SINGLE PROTEIN, PROTEIN COMPLEX, ORGANISM, etc.
     organism: str | None = None
+    description: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: int | None = None
     species_group_flag: bool | None = None
@@ -150,6 +151,7 @@ class TargetComponent(BaseEntity):
     component_type: str | None = None
     description: str | None = None
     organism: str | None = None
+    description: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: int | None = None
 
@@ -318,6 +320,12 @@ class Molecule(BaseEntity):
     aromatic_ring_count: int | None = None
     hba_count: int | None = None
     hbd_count: int | None = None
+    # Canonical molecule property names for Gold layer
+    mw_freebase: float | None = None
+    ro5_violation_count: int | None = None
+    qed_score: float | None = None
+    molecular_formula: str | None = None
+    ro3_pass: str | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
