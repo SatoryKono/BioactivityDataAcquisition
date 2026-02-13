@@ -9,7 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 
-class UniprotAnnotationSchema(pa.DataFrameModel):  # type: ignore[type-arg]  # Pandera typing limitation
+class UniprotAnnotationSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Functional annotations, cofactors and biophysicochemical properties."""
 
     # === Functional Annotation ===

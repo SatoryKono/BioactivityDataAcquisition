@@ -51,6 +51,7 @@ make lint
 | Task                   | Command                                           |
 | ---------------------- | ------------------------------------------------- |
 | Install dependencies   | `make install`                                    |
+| Verify dependencies    | `make test-deps`                                  |
 | Run all tests          | `make test`                                       |
 | Run linting            | `make lint`                                       |
 | Run on fixtures        | `make run-local`                                  |
