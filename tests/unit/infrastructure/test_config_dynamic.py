@@ -8,6 +8,7 @@ from bioetl.infrastructure.config_loader import (
     load_pipeline_config as load_pipeline_config_cached,
 )
 from bioetl.infrastructure.config_loader import (
+    _normalize_source_config,
     load_source_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -144,8 +145,13 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
                 "client": {"timeout_sec": 60.0, "max_retries": 3},
                 "batch_size": 25,
             },
-            "rate_limit": {"requests_per_second": 3.0, "burst": 10},
+            "rate_limit": {
+                "requests_per_second": 3.0,
+                "burst": 10,
+                "with_api_key": {"requests_per_second": 6.0, "burst": 20},
+            },
             "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+            "health_check": {"endpoint": "/health", "timeout": 5},
         }
     }
     new = {
@@ -157,11 +163,16 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
                 "auth_type": "public",
                 "api_version": "v1",
             },
-            "client": {"timeout_sec": 60.0, "max_retries": 3},
+            "client": {"timeout": 60.0, "max_retries": 3},
             "batch": {"batch_size": 25},
             "provider_config": {"provider": "chembl"},
-            "rate_limit": {"requests_per_second": 3.0, "burst": 10},
+            "rate_limit": {
+                "requests_per_second": 3.0,
+                "burst": 10,
+                "authenticated": {"requests_per_second": 6.0, "burst": 20},
+            },
             "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+            "health_check": {"endpoint": "/health", "timeout_sec": 5},
         }
     }
 
@@ -201,10 +212,14 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
                 "base_url": "https://example.pubmed/api",
                 "auth_type": "api_key",
                 "api_key": "${BIOETL_PUBMED_API_KEY}",
-                "client": {"timeout_sec": 45.0, "max_retries": 4},
+                "client": {"timeout": 45.0, "max_retries": 4},
                 "batch_size": 100,
             },
-            "rate_limit": {"requests_per_second": 5.0, "burst": 15},
+            "rate_limit": {
+                "requests_per_second": 5.0,
+                "burst": 15,
+                "with_api_key": {"requests_per_second": 9.0, "burst": 25},
+            },
             "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
             "health_check": {"endpoint": "/health", "timeout": 5},
         }
@@ -221,9 +236,13 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
             "client": {"timeout_sec": 45.0, "max_retries": 4},
             "batch": {"size": 100},
             "provider_config": {"provider": "pubmed"},
-            "rate_limit": {"requests_per_second": 5.0, "burst": 15},
+            "rate_limit": {
+                "requests_per_second": 5.0,
+                "burst": 15,
+                "authenticated": {"requests_per_second": 9.0, "burst": 25},
+            },
             "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
-            "health_check": {"endpoint": "/health", "timeout": 5},
+            "health_check": {"endpoint": "/health", "timeout_sec": 5},
         }
     }
 
@@ -243,6 +262,32 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
         cfg_legacy.rate_limit.requests_per_second
         == cfg_new.rate_limit.requests_per_second
     )
+
+
+def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
+    """Normalizer should map old/new aliases for rate-limit and timeout keys."""
+    raw = {
+        "source": {
+            "provider_config": {
+                "provider": "pubmed",
+                "client": {"timeout": 42.0, "max_retries": 3},
+                "batch_size": 30,
+            },
+            "rate_limit": {
+                "requests_per_second": 5.0,
+                "with_api_key": {"requests_per_second": 8.0, "burst": 20},
+            },
+            "health_check": {"endpoint": "/health", "timeout": 9},
+        }
+    }
+
+    normalized = _normalize_source_config(raw)
+    source = normalized["source"]
+
+    assert source["rate_limit"]["authenticated"] == source["rate_limit"]["with_api_key"]
+    assert source["health_check"]["timeout_sec"] == 9
+    assert source["provider_config"]["client"]["timeout_sec"] == 42.0
+    assert source["provider_config"]["batch_size"] == 30
 
 
 def test_dq_thresholds_are_validated_once(setup_configs):
