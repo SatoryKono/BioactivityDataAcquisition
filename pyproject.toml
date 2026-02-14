@@ -311,6 +311,8 @@ module = [
     "bioetl.infrastructure.schemas.filter_config",
     # Pandera @pa.check decorators
     "bioetl.domain.schemas.common.publication_base",
+    "bioetl.domain.schemas.uniprot._core",
+    "bioetl.domain.schemas.uniprot._features",
 ]
 disallow_untyped_decorators = false
 
