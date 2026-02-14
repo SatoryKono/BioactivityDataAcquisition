@@ -145,6 +145,7 @@ where = ["src"]
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 # Base options without parallelization (compatible with pytest-benchmark)
@@ -438,6 +439,7 @@ known-first-party = ["bioetl", "tests"]
 # Tests may have unused arguments, ignore import order (handled by isort)
 # C901: Architecture tests perform complex static analysis checks
 # E402: Allow imports after future imports and docstrings
+# RUF012: Mutable class attributes for parametrize test data are intentional
 # RUF012: Mutable class attributes for parametrize test data are intentional
 # RUF059: Unused unpacked variables are common in test fixtures
 "tests/**/*.py" = ["ARG001", "ARG002", "ARG005", "PTH", "SIM", "B017", "I001", "C901", "E402", "RUF012", "RUF059", "T201"]
