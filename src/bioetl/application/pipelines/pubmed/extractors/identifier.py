@@ -70,19 +70,32 @@ class IdentifierExtractor(BaseFieldExtractor):
     - PMID (via get_text utility)
     """
 
-    def extract(self, element: Element | None) -> None:
+    def extract(self, element: Element | None) -> dict[str, str | None] | None:
         """Deprecated: Use extract_all_identifiers instead.
 
-        Required by BaseFieldExtractor ABC.
+        Required by BaseFieldExtractor ABC. Mimics legacy behavior.
         """
-        return None
+        if element is None:
+            return None
+        ids = self.extract_all_identifiers(element)
+        return {
+            "doi": ids.get("doi"),
+            "pmc_id": ids.get("pmc_id"),
+        }
 
-    def normalize(self, raw_value: Any) -> None:
+    def normalize(self, raw_value: Any) -> dict[str, str | None]:
         """Deprecated: Use extract_all_identifiers instead.
 
-        Required by BaseFieldExtractor ABC.
+        Required by BaseFieldExtractor ABC. Mimics legacy behavior.
         """
-        return None
+        # In the old impl, normalize took the output of extract and stripped whitespace.
+        # extract_all_identifiers already normalizes, so we just pass through or ensure structure.
+        if not raw_value:
+            return {"doi": None, "pmc_id": None}
+        return {
+            "doi": raw_value.get("doi"),
+            "pmc_id": raw_value.get("pmc_id"),
+        }
 
     @staticmethod
     def _normalize_text(text: str | None) -> str | None:
@@ -255,9 +268,12 @@ class IdentifierExtractor(BaseFieldExtractor):
             }
             for aid in article_id_list.findall("ArticleId"):
                 id_type = aid.get("IdType")
-                if id_type and id_type not in known_types:
-                    if text := cls._normalize_text(aid.text):
-                        other_ids[id_type] = text
+                if (
+                    id_type
+                    and id_type not in known_types
+                    and (text := cls._normalize_text(aid.text))
+                ):
+                    other_ids[id_type] = text
 
         return AllArticleIds(
             pubmed=ids.get("pubmed"),
