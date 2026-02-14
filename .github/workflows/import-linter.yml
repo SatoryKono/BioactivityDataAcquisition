@@ -32,16 +32,16 @@ jobs:
         uses: astral-sh/setup-uv@v1
 
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv pip install --system .[dev]
 
       - name: Ruff (lint)
-        run: uv run ruff check src tests
+        run: ruff check src tests
 
       - name: Ruff (format check)
-        run: uv run ruff format --check src tests
+        run: ruff format --check src tests
 
       - name: Mypy (strict-ish)
-        run: uv run mypy --config-file pyproject.toml src/bioetl
+        run: mypy --config-file pyproject.toml src/bioetl
 
   arch-tests:
     runs-on: ubuntu-latest
@@ -59,19 +59,19 @@ jobs:
         uses: astral-sh/setup-uv@v1
 
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv pip install --system .[dev]
 
       - name: Architecture tests (all)
-        run: uv run pytest tests/architecture/ -v --tb=short
+        run: pytest tests/architecture/ -v --tb=short
 
       - name: Import Linter contract
-        run: uv run lint-imports --config .importlinter
+        run: lint-imports --config .importlinter
 
       - name: Application layer dependency graph
-        run: uv run python src/tools/scripts/check_application_deps.py
+        run: python src/tools/scripts/check_application_deps.py
 
       - name: Infrastructure layer architecture check
-        run: uv run python src/tools/scripts/check_architecture.py
+        run: python src/tools/scripts/check_architecture.py
 
   unit-tests:
     needs: lint
@@ -96,11 +96,11 @@ jobs:
           key: ${{ runner.os }}-pytest-unit-${{ hashFiles('pyproject.toml', 'pytest.ini') }}
 
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv pip install --system .[dev]
 
       - name: Unit tests with coverage
         run: |
-          uv run pytest tests --ignore=tests/integration --ignore=tests/architecture \
+          pytest tests --ignore=tests/integration --ignore=tests/architecture \
             --ignore=tests/e2e --ignore=tests/contract \
             --cov=src/bioetl --cov-report=xml:coverage-unit.xml --cov-report=term-missing
 
@@ -178,11 +178,11 @@ jobs:
           key: ${{ runner.os }}-pytest-integration-${{ hashFiles('pyproject.toml', 'pytest.ini') }}
 
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv pip install --system .[dev]
 
       - name: Integration tests
         run: |
-          uv run pytest tests/integration -v --tb=short
+          pytest tests/integration -v --tb=short
 
   checks-complete:
     needs:
