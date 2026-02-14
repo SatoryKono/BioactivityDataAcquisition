@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install .[dev]
+          python -m pip install . ruff mypy
 
       - name: Ruff (lint)
         run: ruff check src tests
@@ -202,4 +202,3 @@ jobs:
             exit 1
           fi
           echo "All checks completed successfully."
-

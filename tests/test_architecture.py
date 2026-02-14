@@ -305,20 +305,11 @@ def test_silver_schemas_match_domain_entities(src_dir: Path):
         # Molecule aliases
         "inchi_key": "inchi_key",
         "aromatic_ring_count": "aromatic_ring_count",
-        "atc_classifications": "atc_classifications_json",
-        "cross_references": "cross_references_json",
         "logp": "logp",
-        "molecule_hierarchy": "molecule_hierarchy_json",
-        "molecule_properties": "molecule_properties_json",
-        "molecule_structures": "molecule_structures_json",
-        "molecule_synonyms": "molecule_synonyms_json",
         "logp_method": "logp_method",
         # PubchemMolecule aliases
-        "molecule_id": "molecule_id",
         "xlogp": "logp",
-        "inchi_key": "inchi_key",
         "tpsa": "tpsa",
-        "molecule_id": "molecule_id",
         "polar_surface_area": "tpsa",
         # UniprotTarget aliases
         "organism_id": "taxonomy_id",

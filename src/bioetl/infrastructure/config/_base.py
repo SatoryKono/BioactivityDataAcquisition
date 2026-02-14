@@ -34,6 +34,7 @@ from pydantic_settings import (
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, PipelineConfig, TableConfig
 from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 from bioetl.infrastructure.config_loader import (
     load_pipeline_config,
     load_source_config,
@@ -94,24 +95,20 @@ def _extract_source_fields(yaml_config: PipelineYamlConfig) -> list[str]:
 
 def _extract_write_modes(
     yaml_config: PipelineYamlConfig,
-) -> tuple[
-    Literal["merge", "append", "overwrite"], Literal["append", "overwrite", "scd2"]
-]:
-    """Extract write modes from sink config."""
+) -> tuple[SilverWriteMode, GoldWriteMode]:
+    """Extract and convert write modes from sink config to domain enums."""
     silver_config = yaml_config.sink.get("silver")
     gold_config = yaml_config.sink.get("gold")
 
-    write_mode: Literal["merge", "append", "overwrite"] = "merge"
+    silver_mode = SilverWriteMode.MERGE
     if silver_config and silver_config.mode:
-        # Cast the mode string to the literal type
-        write_mode = silver_config.mode  # type: ignore[assignment]
+        silver_mode = SilverWriteMode.from_string(silver_config.mode)
 
-    gold_write_mode: Literal["append", "overwrite", "scd2"] = "append"
+    gold_mode = GoldWriteMode.APPEND
     if gold_config and gold_config.mode:
-        # Cast the mode string to the literal type
-        gold_write_mode = gold_config.mode  # type: ignore[assignment]
+        gold_mode = GoldWriteMode.from_string(gold_config.mode)
 
-    return write_mode, gold_write_mode
+    return silver_mode, gold_mode
 
 
 def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig:
@@ -119,8 +116,8 @@ def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig
 
     Returns a SilverFilterConfig for nominal type separation from Gold filters.
     """
-    gold = yaml_config.silver_filters.to_domain()
-    return SilverFilterConfig.from_gold_filter_config(gold)
+    base_filters = yaml_config.silver_filters.to_domain()
+    return SilverFilterConfig.from_gold_filter_config(base_filters)
 
 
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
@@ -147,7 +144,7 @@ def yaml_config_to_domain(
     Args:
         yaml_config: Validated PipelineYamlConfig from infrastructure layer.
         resolved_dq_config: Optional pre-resolved DQConfig from ConfigLoader.
-            If provided, this is used instead of converting dq_rules.
+            If provided, this is used instead of converting dq_overrides.
             This supports hierarchical DQ config loading via DQConfigLoader.
 
     Returns:
@@ -171,7 +168,7 @@ def yaml_config_to_domain(
     if resolved_dq_config is not None:
         dq_config = resolved_dq_config
     else:
-        dq_config = yaml_config.dq_rules.to_domain()
+        dq_config = yaml_config.dq_overrides.to_domain()
 
     # Extract transform info for lineage tracking
     transform_version = yaml_config.transform.version
