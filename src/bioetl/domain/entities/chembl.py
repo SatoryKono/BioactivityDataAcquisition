@@ -168,7 +168,7 @@ class ActivityRecord(BaseModel):
     action_type_description: str | None = Field(
         default=None, description="Action type description"
     )
-    action_type_parent: str | None = Field(
+    action_type_parent_type: str | None = Field(
         default=None, description="Parent action type"
     )
 

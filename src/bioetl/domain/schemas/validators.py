@@ -53,7 +53,7 @@ def is_valid_json(series: pd.Series) -> pd.Series:
     """
 
     def check(val: object) -> bool:
-        if pd.isna(val):
+        if pd.isna(val):  # type: ignore[call-overload]
             return True
         try:
             json.loads(str(val))
@@ -75,7 +75,7 @@ def is_valid_json_array(series: pd.Series) -> pd.Series:
     """
 
     def check(val: object) -> bool:
-        if pd.isna(val):
+        if pd.isna(val):  # type: ignore[call-overload]
             return True
         try:
             parsed = json.loads(str(val))
@@ -97,7 +97,7 @@ def is_valid_json_object(series: pd.Series) -> pd.Series:
     """
 
     def check(val: object) -> bool:
-        if pd.isna(val):
+        if pd.isna(val):  # type: ignore[call-overload]
             return True
         try:
             parsed = json.loads(str(val))

@@ -46,6 +46,7 @@ class TestAdapterHealthCheck:
             "pagination.py",  # Pagination mixin, not a DataSourcePort adapter
             "rate_limiter.py",  # Rate limiting utility
             "circuit_breaker.py",  # Circuit breaker utility
+            "health.py",  # Health check mixin, not a DataSourcePort adapter
             "health_monitor.py",  # Health state utility, not a DataSourcePort adapter
             "error_handling.py",  # Error handling utility, not a DataSourcePort adapter
             "fallback.py",  # Title fallback handler utility, not a DataSourcePort adapter
@@ -72,8 +73,14 @@ class TestAdapterHealthCheck:
             # BaseHttpAdapter and BaseSyncAdapter provide health_check()
             # via HealthCheckProviderMixin (Template Method pattern).
             # We use regex to handle multi-line inheritance lists.
-            has_method = "def health_check" in content or "async def health_check" in content
-            inherits_base = re.search(r"class\s+\w+\s*\([^)]*Base(Http|Sync)Adapter", content, re.MULTILINE | re.DOTALL)
+            has_method = (
+                "def health_check" in content or "async def health_check" in content
+            )
+            inherits_base = re.search(
+                r"class\s+\w+\s*\([^)]*Base(Http|Sync)Adapter",
+                content,
+                re.MULTILINE | re.DOTALL,
+            )
             has_mixin = "HealthCheckProviderMixin" in content
 
             has_health_check = has_method or inherits_base or has_mixin

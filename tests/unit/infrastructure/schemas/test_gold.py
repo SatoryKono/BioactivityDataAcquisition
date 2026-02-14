@@ -29,7 +29,7 @@ PUBLICATION_CORE_FIELDS = {"title", "abstract", "authors", "publication_year"}
 
 def get_schema_fields(schema_class) -> set[str]:
     """Extract field names from a Pandera DataFrameModel schema."""
-    # Pandera DataFrameModel does not have __fields__. 
+    # Pandera DataFrameModel does not have __fields__.
     # Use to_schema().columns to get the actual column names (including aliases).
     schema = schema_class.to_schema()
     return set(schema.columns.keys())

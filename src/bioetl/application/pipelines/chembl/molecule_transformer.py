@@ -171,8 +171,8 @@ class MoleculeTransformer(BaseChemblTransformer):
             Dictionary of Molecule business fields.
 
         """
-        # Cast to dict for type-safe access to .get() method
-        rec = cast("dict[str, Any]", record)
+        # BronzeRecord is already a dict[str, Any]
+        rec = record
 
         # Extract structure fields
         structure_data = flatten_nested_dict(

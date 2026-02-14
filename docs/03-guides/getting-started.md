@@ -70,7 +70,13 @@ BIOETL_OPENALEX_API_KEY=your_email@example.com
 
 ## 4. Verify Installation
 
-Run the test suite to ensure everything is correctly configured:
+We recommend running a dependency check before starting the full test suite to ensure all critical runtime packages (`pandas`, `pandera`, `polars`, etc.) are correctly installed.
+
+```bash
+make test-deps
+```
+
+Then run the full test suite:
 
 ```bash
 make test

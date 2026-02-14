@@ -1,8 +1,6 @@
 """ChEMBL data source adapter implementing DataSourcePort.
 
-Uses chembl_webresource_client library. Error handling per RULES.md §3.1.
 Health-aware fetching: HEALTHY=full batch, DEGRADED=batch/2, UNHEALTHY=fail fast.
-DTO support via fetch_as_models() returning typed Pydantic models.
 """
 
 from __future__ import annotations
@@ -16,39 +14,34 @@ from typing import TYPE_CHECKING, Any, NoReturn
 
 from pydantic import BaseModel
 
-from bioetl.domain.entities.chembl import (
-    ActivityRecord,
-    AssayRecord,
-    CellLineRecord,
-    ChemblPublicationRecord,
-    MoleculeRecord,
-    ProteinClassRecord,
-    TargetComponentRecord,
-    TargetRecord,
-)
 from bioetl.domain.exceptions import (
-    CriticalError,
     ExternalServiceError,
     RetryExhaustedError,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
-from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.chembl.constants import (
+    _NO_PAGINATION_ENTITIES,
+    _SILVER_TO_CHEMBL_API_FIELD,
+    CHEMBL_DTO_MODELS,
+)
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
-    CHEMBL_API_BASE,
-    CHEMBL_STATUS_URL,
     ChemblEntityMapper,
+)
+from bioetl.infrastructure.adapters.chembl.health import ChemblHealthMixin
+from bioetl.infrastructure.adapters.chembl.metadata import ChemblMetadataMixin
+from bioetl.infrastructure.adapters.chembl.utils import (
+    compute_composite_key,
+    is_duplicate_record,
+    is_duplicate_record_composite,
 )
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.error_handling import ErrorService
-from bioetl.infrastructure.adapters.http.health import (
-    assess_health_from_circuit_breaker,
-)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
@@ -56,37 +49,12 @@ if TYPE_CHECKING:
 
     from httpx import Response
 
-    from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.ports import LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
-# Mapping from entity_type to DTO model class
-CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
-    "activity": ActivityRecord,
-    "assay": AssayRecord,
-    "molecule": MoleculeRecord,
-    "compound": MoleculeRecord,  # Alias for molecule
-    "target": TargetRecord,
-    "target_component": TargetComponentRecord,
-    "document": ChemblPublicationRecord,
-    "cell_line": CellLineRecord,
-    "protein_class": ProteinClassRecord,
-}
-
-# Entity types that don't support limit/offset pagination
-# These endpoints return all records in a single response
-_NO_PAGINATION_ENTITIES: frozenset[str] = frozenset(
-    {
-        "target",
-        "target_component",
-        "protein_class",
-    }
-)
-
-
 @dataclass
-class ChemblAdapter(BaseHttpAdapter):
+class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
     """ChEMBL data source adapter implementing DataSourcePort.
 
     Configuration: Load from configs/sources/chembl.yaml via AdapterConfig.
@@ -101,21 +69,13 @@ class ChemblAdapter(BaseHttpAdapter):
     extraction_params: ExtractionParams | None = None
 
     provider_name: str = field(init=False, default="chembl")
-    """Provider identifier (required by DataSourcePort)."""
 
-    # Resolved configuration values (computed in __post_init__)
     _page_size: int = field(init=False, default=1000)
     _filter_batch_size: int = field(init=False, default=20)
-
-    # Entity mapper for URL and key resolution
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
-
-    # API request collector for metadata enrichment
     _request_collector: APIRequestCollector = field(
         init=False, default_factory=APIRequestCollector
     )
-
-    # Resolved extraction params (computed in __post_init__)
     _extraction_params: ExtractionParams = field(
         init=False, default_factory=ExtractionParams.empty
     )
@@ -148,32 +108,6 @@ class ChemblAdapter(BaseHttpAdapter):
     @property
     def effective_batch_size(self) -> int:
         """Get configured page size for API requests."""
-        return self._page_size
-
-    def _get_health_status(self) -> HealthStatus:
-        """Get health status from circuit breaker state."""
-        return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
-
-    def _get_effective_batch_size(self) -> int:
-        """Get batch size adjusted for health: full if HEALTHY, half if DEGRADED."""
-        health_status = self._get_health_status()
-        failure_count = self.http_client.circuit_breaker.get_failure_count()
-
-        if health_status == HealthStatus.UNHEALTHY:
-            raise CriticalError(
-                f"ChEMBL adapter is UNHEALTHY after {failure_count} "
-                f"consecutive errors (circuit breaker)"
-            )
-        if health_status == HealthStatus.DEGRADED:
-            reduced = max(100, self._page_size // 2)  # Minimum 100
-            self.logger.warning(
-                "chembl_degraded_mode",
-                provider="chembl",
-                original_batch_size=self._page_size,
-                effective_batch_size=reduced,
-                consecutive_errors=failure_count,
-            )
-            return reduced
         return self._page_size
 
     def _build_params(
@@ -231,17 +165,18 @@ class ChemblAdapter(BaseHttpAdapter):
         }
 
     def _normalize_filter_field(self, entity_type: str, filter_field: str) -> str:
-        """Map canonical filter field names to ChEMBL API field names.
+        """Map Silver field names to ChEMBL API field names."""
+        return _SILVER_TO_CHEMBL_API_FIELD.get(filter_field, filter_field)
 
-        Publication pipelines use canonical `publication_id` in configs/tests,
-        while ChEMBL /document endpoint expects `document_chembl_id`.
-        """
-        if filter_field == "publication_id" and entity_type in {
-            "publication",
-            "publication_term",
-        }:
-            return "document_chembl_id"
-        return filter_field
+    def _get_api_pk_field(self, entity_type: str) -> str:
+        """Get primary key field name as it appears in raw API responses."""
+        pk = self._mapper.get_primary_key_field(entity_type)
+        return _SILVER_TO_CHEMBL_API_FIELD.get(pk, pk)
+
+    def _get_api_dedup_fields(self, entity_type: str) -> tuple[str, ...]:
+        """Get dedup key fields as they appear in raw API responses."""
+        fields = self._mapper.get_dedup_key_fields(entity_type)
+        return tuple(_SILVER_TO_CHEMBL_API_FIELD.get(f, f) for f in fields)
 
     def _build_filter_params(
         self, entity_type: str, filter_field: str, id_batch: list[str]
@@ -262,21 +197,8 @@ class ChemblAdapter(BaseHttpAdapter):
         record: dict[str, Any],
         pk_fields: tuple[str, ...],
     ) -> str:
-        """Compute composite key string from multiple fields.
-
-        Args:
-            record: Record dictionary.
-            pk_fields: Tuple of field names forming the composite key.
-
-        Returns:
-            Serialized composite key string (fields joined with '|').
-        """
-        parts = []
-        for pk_field in pk_fields:
-            value = record.get(pk_field, "")
-            # Normalize to string and handle None
-            parts.append(str(value) if value is not None else "")
-        return "|".join(parts)
+        """Compute composite key string from multiple fields."""
+        return compute_composite_key(record, pk_fields)
 
     def _is_duplicate_record(
         self,
@@ -285,25 +207,10 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_ids: set[str],
         entity_type: str,
     ) -> bool:
-        """Check if record is duplicate and add to seen set if not.
-
-        For backward compatibility, uses single field deduplication.
-        For composite key support, use _is_duplicate_record_composite.
-        """
-        record_id = str(record.get(pk_field, ""))
-        if not record_id:
-            return False
-        if record_id in seen_ids:
-            self.logger.debug(
-                "skipping_duplicate_record",
-                entity_type=entity_type,
-                pk_field=pk_field,
-                record_id=record_id,
-            )
-            self._adapter_metrics.record_dropped_duplicates(entity_type)
-            return True
-        seen_ids.add(record_id)
-        return False
+        """Check if record is duplicate and add to seen set if not."""
+        return is_duplicate_record(
+            record, pk_field, seen_ids, entity_type, self.logger, self._adapter_metrics
+        )
 
     def _is_duplicate_record_composite(
         self,
@@ -312,32 +219,15 @@ class ChemblAdapter(BaseHttpAdapter):
         seen_keys: set[str],
         entity_type: str,
     ) -> bool:
-        """Check if record is duplicate using composite key.
-
-        Args:
-            record: Record dictionary.
-            pk_fields: Tuple of field names forming the composite key.
-            seen_keys: Set of already seen composite keys.
-            entity_type: Entity type for logging.
-
-        Returns:
-            True if record is a duplicate.
-        """
-        composite_key = self._compute_composite_key(record, pk_fields)
-        # Skip records with empty composite key (missing required fields)
-        if not composite_key or composite_key == "|".join([""] * len(pk_fields)):
-            return False
-        if composite_key in seen_keys:
-            self.logger.debug(
-                "skipping_duplicate_record",
-                entity_type=entity_type,
-                pk_fields=pk_fields,
-                composite_key=composite_key,
-            )
-            self._adapter_metrics.record_dropped_duplicates(entity_type)
-            return True
-        seen_keys.add(composite_key)
-        return False
+        """Check if record is duplicate using composite key."""
+        return is_duplicate_record_composite(
+            record,
+            pk_fields,
+            seen_keys,
+            entity_type,
+            self.logger,
+            self._adapter_metrics,
+        )
 
     async def _fetch_page(
         self, url: str, params: dict[str, Any], entity_type: str
@@ -523,8 +413,8 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         url = self._mapper.get_resource_url(entity_type)
         seen_ids: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
-        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)
+        pk_fields = self._get_api_dedup_fields(entity_type)
         params = self._build_params(0, entity_type)
         params.update(self._build_filter_params(entity_type, filter_field, id_batch))
 
@@ -782,8 +672,8 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         total_fetched = 0
         seen_ids: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
-        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)
+        pk_fields = self._get_api_dedup_fields(entity_type)
 
         for id_batch in self._batch_ids(filter_ids, batch_size=self._filter_batch_size):
             async for record in self._fetch_batch_with_reduction(
@@ -814,8 +704,8 @@ class ChemblAdapter(BaseHttpAdapter):
         """
         total_fetched = 0
         seen_keys: set[str] = set()
-        pk_field = self._mapper.get_primary_key_field(entity_type)
-        pk_fields = self._mapper.get_dedup_key_fields(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)
+        pk_fields = self._get_api_dedup_fields(entity_type)
         use_composite = len(pk_fields) > 1
 
         async for records in self._page_iterator(entity_type, limit):
@@ -938,7 +828,7 @@ class ChemblAdapter(BaseHttpAdapter):
             return
 
         url = self._mapper.get_resource_url(entity_type)
-        pk_field = self._mapper.get_primary_key_field(entity_type)
+        pk_field = self._get_api_pk_field(entity_type)
 
         # Determine optimal batch size based on 1000 character limit
         # Start with configured batch size and halve proactively if URL is too long
@@ -1073,99 +963,6 @@ class ChemblAdapter(BaseHttpAdapter):
                 # Fast path - skip validation for trusted data
                 yield model_class.model_construct(**record)
 
-    async def _probe_health(self) -> HealthStatus:
-        """Perform ChEMBL-specific health probe.
-
-        Overrides BaseHttpAdapter._probe_health() to use ChEMBL status endpoint.
-        Uses circuit breaker state for health tracking.
-
-        Returns:
-            HealthStatus based on status endpoint response and circuit breaker state.
-
-        Raises:
-            Exception: On request failure (base class handles via _fallback_health_status).
-
-        """
-        try:
-            with self._adapter_metrics.measure_request("/status"):
-                response = await self.http_client.get_once(CHEMBL_STATUS_URL)
-            return self._handle_health_response(response)
-        except Exception as e:
-            error_type = self._error_handler.get_error_type(e)
-            self.logger.warning(
-                "health_check_failed",
-                provider=self.provider_name,
-                error_type=error_type.value,
-                error=str(e),
-            )
-            raise  # Let base class handle via _fallback_health_status()
-
-    def _fallback_health_status(self) -> HealthStatus:
-        """Return health status based on circuit breaker state.
-
-        Returns:
-            HealthStatus based on circuit breaker failure count.
-
-        """
-        return self._get_health_status()
-
-    def _get_health_endpoint(self) -> str:
-        """Get the health check endpoint for ChEMBL.
-
-        Returns:
-            ChEMBL status endpoint path.
-
-        """
-        return "/chembl/api/data/status.json"
-
-    def _handle_health_response(self, response: Response) -> HealthStatus:
-        """Process health check response.
-
-        Args:
-            response: HTTP response from status endpoint
-
-        Returns:
-            HealthStatus based on response and API status.
-        """
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("status") == "UP":
-                return HealthStatus.HEALTHY
-            else:
-                self.logger.warning(
-                    "health_check_degraded",
-                    provider=self.provider_name,
-                    reason="status_not_up",
-                    api_status=data.get("status"),
-                )
-                return HealthStatus.DEGRADED
-        else:
-            self.logger.warning(
-                "health_check_degraded",
-                provider=self.provider_name,
-                reason="non_200_response",
-                status_code=response.status_code,
-            )
-            return HealthStatus.DEGRADED
-
-    def get_error_stats(self) -> dict[str, Any]:
-        """Get error statistics from circuit breaker for monitoring.
-
-        Returns:
-            Dictionary with circuit breaker stats and health status.
-
-        """
-        return {
-            "circuit_breaker_failures": self.http_client.circuit_breaker.get_failure_count(),
-            "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,
-            "health_status": self._get_health_status().value,
-        }
-
-    def reset_circuit_breaker(self) -> None:
-        """Reset circuit breaker (e.g., after successful recovery)."""
-        self.http_client.circuit_breaker.reset()
-        self.logger.info("chembl_circuit_breaker_reset", provider="chembl")
-
     async def get_entity_count(self, entity_type: str) -> int:
         """Get total count of entities."""
         url = self._mapper.get_resource_url(entity_type)
@@ -1176,24 +973,3 @@ class ChemblAdapter(BaseHttpAdapter):
         page_meta = data.get("page_meta", {})
         total_count: int = page_meta.get("total_count", 0)
         return total_count
-
-    def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector."""
-        extraction_qs = self._extraction_params.to_query_string() or None
-        metadata = self._request_collector.to_source_metadata(
-            source_type="api",
-            url=CHEMBL_API_BASE,
-            api_version=api_version,
-            query_string=extraction_qs,
-        )
-        self._request_collector.clear()
-        return metadata
-
-    def clear_request_collector(self) -> None:
-        """Clear the collector without returning metadata."""
-        self._request_collector.clear()
-
-    @property
-    def request_count(self) -> int:
-        """Number of recorded API requests since last clear."""
-        return self._request_collector.request_count

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.heartbeat import HeartbeatTask
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
-from bioetl.domain.locking import LockContext, LockContextHolder
+from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
@@ -72,6 +72,7 @@ class LockManager:
         self._context_holder = context_holder
         self._heartbeat: HeartbeatTask | None = None
         self._acquired_at: float | None = None  # monotonic timestamp when lock acquired
+        self._fencing_token: FencingToken | None = None
 
     @classmethod
     def create(
@@ -134,16 +135,16 @@ class LockManager:
             context_holder=context_holder,
         )
 
-    async def acquire(self) -> bool:
+    async def acquire(self) -> FencingToken | None:
         """Acquire the distributed lock.
 
         Returns:
-            True if lock was acquired, False otherwise.
+            FencingToken if lock was acquired, None otherwise.
 
         """
         import time
 
-        acquired = await self._lock.acquire(
+        token = await self._lock.acquire(
             key=self._config.lock_key,
             owner_id=self._run_id,
             ttl=self._config.lock_ttl,
@@ -151,8 +152,9 @@ class LockManager:
             wait_timeout=self._config.wait_timeout,
             exclusive=self._config.exclusive,
         )
-        if acquired:
+        if token is not None:
             self._acquired_at = time.monotonic()
+            self._fencing_token = token
             # Update shared context holder for writers
             if self._context_holder is not None:
                 self._context_holder.set(self.get_context())  # type: ignore[arg-type]
@@ -160,6 +162,7 @@ class LockManager:
                 "lock_acquired",
                 lock_key=self._config.lock_key,
                 run_id=str(self._run_id),
+                fencing_sequence=token.sequence,
             )
         else:
             self._logger.error(
@@ -167,7 +170,7 @@ class LockManager:
                 lock_key=self._config.lock_key,
                 run_id=str(self._run_id),
             )
-        return acquired
+        return token
 
     async def release(self) -> None:
         """Release the distributed lock and stop heartbeat."""
@@ -179,6 +182,7 @@ class LockManager:
             self._config.lock_key, self._run_id, exclusive=self._config.exclusive
         )
         self._acquired_at = None
+        self._fencing_token = None
         # Clear shared context holder
         if self._context_holder is not None:
             self._context_holder.clear()
@@ -201,6 +205,7 @@ class LockManager:
             owner_id=self._run_id,
             exclusive=self._config.exclusive,
             acquired_at=self._acquired_at,
+            fencing_token=self._fencing_token,
         )
 
     async def start_heartbeat(self) -> None:
@@ -233,8 +238,8 @@ class LockManager:
             PipelineShutdownError: If lock acquisition fails.
 
         """
-        acquired = await self.acquire()
-        if not acquired:
+        token = await self.acquire()
+        if token is None:
             raise PipelineShutdownError(
                 f"Failed to acquire lock for {self._config.lock_key}"
             )
@@ -245,8 +250,9 @@ class LockManager:
         """Validate that this LockManager still holds the lock.
 
         This is the Safety Guard: before critical operations (e.g., writes),
-        call this method to verify lock ownership. This prevents split-brain
-        scenarios where the lock expired but the writer continued.
+        call this method to verify lock ownership via fencing token validation.
+        This prevents split-brain scenarios where the lock expired but the
+        writer continued.
 
         Returns:
             True if this run_id still holds the lock, False otherwise.
@@ -258,7 +264,12 @@ class LockManager:
                     raise LockLostError(lock_key, run_id)
                 await storage.write_silver(...)
         """
-        return await self._lock.validate_owner(self._config.lock_key, self._run_id)
+        if self._fencing_token is None:
+            return await self._lock.validate_owner(self._config.lock_key, self._run_id)
+
+        return await self._lock.validate_fencing_token(
+            self._config.lock_key, self._fencing_token
+        )
 
     async def __aexit__(
         self,

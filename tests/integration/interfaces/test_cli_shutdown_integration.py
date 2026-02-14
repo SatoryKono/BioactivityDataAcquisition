@@ -8,12 +8,21 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import UUID
 
 import pytest
 
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.domain.locking import FencingToken
 from bioetl.interfaces.cli import cli
+
+_MOCK_TOKEN = FencingToken(
+    sequence=1,
+    key="lock:mock",
+    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
+    issued_at=0.0,
+)
 
 if TYPE_CHECKING:
     from click.testing import CliRunner
@@ -335,7 +344,7 @@ class TestShutdownWithCheckpointManager:
         from bioetl.application.core.lock_manager import LockManager
 
         mock_lock = MagicMock()
-        mock_lock.acquire = AsyncMock(return_value=True)
+        mock_lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
         mock_lock.release = AsyncMock()
         mock_lock.heartbeat = AsyncMock(return_value=True)
 
@@ -366,7 +375,7 @@ class TestShutdownWithCheckpointManager:
 
         # Acquire lock
         acquired = await manager.acquire()
-        assert acquired is True
+        assert acquired is not None
 
         # Start heartbeat
         await manager.start_heartbeat()
@@ -389,7 +398,7 @@ class TestShutdownWithCheckpointManager:
         from bioetl.application.core.lock_manager import LockManager
 
         mock_lock = MagicMock()
-        mock_lock.acquire = AsyncMock(return_value=True)
+        mock_lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
         mock_lock.release = AsyncMock()
         # First heartbeat succeeds, subsequent ones fail
         mock_lock.heartbeat = AsyncMock(side_effect=[True, False])

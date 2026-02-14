@@ -84,7 +84,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        silver_filters: SilverFilterConfig | GoldFilterConfig | None = None,
+        silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -171,7 +171,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             Dictionary of extracted and normalized fields.
 
         """
-        rec = cast("dict[str, Any]", record)
+        rec = record
 
         ids = self._extract_validated_ids(rec)
         author_meta = self._extract_author_metadata(rec.get("authors"))

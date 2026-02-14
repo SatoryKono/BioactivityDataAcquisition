@@ -15,6 +15,7 @@ from typing import get_type_hints
 import pytest
 
 from bioetl.domain import ports
+from bioetl.domain.locking import FencingToken
 
 # ============================================================================
 # Port Lifecycle Contract Tests
@@ -1346,7 +1347,7 @@ class TestLockPortConcurrentAccess:
         lock = MemoryLock()
         num_contenders = 10
         owners = [uuid4() for _ in range(num_contenders)]
-        results: list[bool] = []
+        results: list[FencingToken | None] = []
 
         async def try_acquire(owner_id):
             result = await lock.acquire("shared_key", owner_id)
@@ -1356,7 +1357,7 @@ class TestLockPortConcurrentAccess:
             tasks = [try_acquire(owner) for owner in owners]
             results = await asyncio.gather(*tasks)
 
-            successful_acquires = sum(results)
+            successful_acquires = sum(1 for r in results if r is not None)
             assert successful_acquires == 1, (
                 f"Only one concurrent acquire MUST succeed, got {successful_acquires}"
             )

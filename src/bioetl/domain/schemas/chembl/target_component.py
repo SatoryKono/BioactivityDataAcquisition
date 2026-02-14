@@ -1,49 +1,66 @@
 """Pandera schema for ChEMBL Target Component entity.
 
-Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+Aligned with TargetComponent entity and TargetComponentTransformer output.
 """
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
 from bioetl.domain.schemas.base import ETLRecordSchema
-from bioetl.domain.schemas.constants import TARGET_COMPONENT_RELATIONSHIPS
 
 
 class TargetComponentSchema(ETLRecordSchema):
     """Target Component validation schema for Silver layer."""
 
     # === Primary Key ===
-    targcomp_id: Series[int] = pa.Field(nullable=False, description="Primary key.")
-
-    # === Foreign Keys ===
-    tid: Series[int] = pa.Field(nullable=False, description="FK to target.")
     component_id: Series[int] = pa.Field(
-        nullable=False, description="FK to component_sequences."
+        nullable=False, description="Component ID (primary key)."
     )
 
-    # === Metadata ===
-    relationship: Series[str] | None = pa.Field(
-        nullable=True,
-        isin=list(TARGET_COMPONENT_RELATIONSHIPS),
-        description="Relationship type.",
+    # === Core Metadata ===
+    accession: Series[str] | None = pa.Field(
+        nullable=True, description="UniProt accession."
     )
-    stoichiometry: Series[int] | None = pa.Field(
-        nullable=True,
-        ge=1,
-        description="Stoichiometry.",
+    component_type: Series[str] | None = pa.Field(
+        nullable=True, description="Component type (PROTEIN, DNA, RNA, etc.)."
     )
-    homologue: Series[int] | None = pa.Field(
+    description: Series[str] | None = pa.Field(
+        nullable=True, description="Component description."
+    )
+    organism: Series[str] | None = pa.Field(
+        nullable=True, description="Source organism."
+    )
+    taxonomy_id: Series[pd.Int64Dtype] | None = pa.Field(
+        nullable=True, description="NCBI Taxonomy ID."
+    )
+
+    # === Complex Fields (JSON Strings) ===
+    target_component_synonyms: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of component synonyms."
+    )
+    target_component_xrefs: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of cross references."
+    )
+    protein_classifications: Series[str] | None = pa.Field(
+        nullable=True, description="JSON string of protein classifications (forensic)."
+    )
+
+    # === Flattened Fields ===
+    protein_classification_id: Series[float] | None = pa.Field(
         nullable=True,
-        isin=[0, 1, 2],
-        description="Homologue flag.",
+        coerce=True,
+        description="Primary protein classification ID (first from list).",
+    )
+    protein_classification_ids: Series[object] | None = pa.Field(
+        nullable=True, description="List of protein classification IDs."
     )
 
     class Config:
         """Pandera configuration."""
 
         strict = True
-        ordered = True
+        ordered = False
         coerce = True

@@ -11,6 +11,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
+from uuid import UUID
 
 import polars as pl
 import pytest
@@ -27,9 +28,17 @@ from bioetl.domain.composite.result import (
     MergeResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.locking import FencingToken
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+_MOCK_TOKEN = FencingToken(
+    sequence=1,
+    key="lock:mock",
+    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
+    issued_at=0.0,
+)
 
 
 @pytest.fixture
@@ -47,7 +56,7 @@ def mock_logger() -> MagicMock:
 def mock_lock() -> AsyncMock:
     """Create a mock LockPort."""
     lock = AsyncMock()
-    lock.acquire = AsyncMock(return_value=True)
+    lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
     lock.release = AsyncMock()
     return lock
 

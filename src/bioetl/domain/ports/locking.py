@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID
 
 
@@ -27,7 +28,7 @@ class LockPort(Protocol):
         wait: bool = False,
         wait_timeout: int = 300,
         exclusive: bool = False,
-    ) -> bool:
+    ) -> FencingToken | None:
         """Acquire a lock.
 
         Args:
@@ -39,7 +40,9 @@ class LockPort(Protocol):
             exclusive: If True, acquire an exclusive lock.
 
         Returns:
-            True if the lock was acquired, False otherwise.
+            FencingToken if the lock was acquired, None otherwise.
+            The token contains a monotonically increasing sequence number
+            that can be used for fencing validation.
         """
         ...
 
@@ -96,6 +99,25 @@ class LockPort(Protocol):
 
         Returns:
             True if owner_id currently holds the lock, False otherwise.
+        """
+        ...
+
+    async def validate_fencing_token(
+        self,
+        key: str,
+        token: FencingToken,
+    ) -> bool:
+        """Validate that the given fencing token is still valid for the lock.
+
+        This is the Safety Guard for fencing tokens. Writers SHOULD validate
+        the token before writes to prevent stale lock holders from writing.
+
+        Args:
+            key: The unique key for the lock.
+            token: Fencing token issued by acquire().
+
+        Returns:
+            True if the fencing token is valid for the current lock holder.
         """
         ...
 

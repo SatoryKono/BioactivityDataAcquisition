@@ -8,11 +8,20 @@ import pytest
 from bioetl.application.core.config import LockConfig
 from bioetl.application.core.lock_manager import LockManager
 from bioetl.application.core.shutdown import PipelineShutdownError, ShutdownSignal
+from bioetl.domain.locking import FencingToken
 from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID, RunType
 
 # Test UUID constant for consistent assertions
 TEST_RUN_ID: RunID = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+
+# Reusable test token
+_TEST_TOKEN = FencingToken(
+    sequence=1,
+    key="lock:test_pipeline",
+    owner_id=TEST_RUN_ID,
+    issued_at=100.0,
+)
 
 
 @pytest.fixture
@@ -58,11 +67,14 @@ class TestLockManager:
     async def test_acquire_lock_success(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
-        """Test successful lock acquisition."""
-        mock_lock_port.acquire.return_value = True
+        """Test successful lock acquisition returns FencingToken."""
+        mock_lock_port.acquire.return_value = _TEST_TOKEN
 
-        await lock_manager.acquire()
+        result = await lock_manager.acquire()
 
+        assert result is not None
+        assert isinstance(result, FencingToken)
+        assert result.sequence == 1
         mock_lock_port.acquire.assert_called_once_with(
             key="lock:test_pipeline",
             owner_id=TEST_RUN_ID,
@@ -75,12 +87,12 @@ class TestLockManager:
     async def test_acquire_lock_failure(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
-        """Test failure to acquire lock returns False."""
-        mock_lock_port.acquire.return_value = False
+        """Test failure to acquire lock returns None."""
+        mock_lock_port.acquire.return_value = None
 
         result = await lock_manager.acquire()
 
-        assert result is False
+        assert result is None
 
     async def test_release_lock_success(
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
@@ -102,7 +114,8 @@ class TestLockManager:
     ) -> None:
         """Test heartbeat failure triggers shutdown."""
         # Start heartbeat to initialize the HeartbeatTask
-        mock_lock_port.heartbeat.side_effect = [True, False]  # First success, then fail
+        # First success, then fail.
+        mock_lock_port.heartbeat.side_effect = [True, False]
 
         # Start heartbeat successfully
         await lock_manager.start_heartbeat()
@@ -119,7 +132,7 @@ class TestLockManager:
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
         """Test usage as async context manager."""
-        mock_lock_port.acquire.return_value = True
+        mock_lock_port.acquire.return_value = _TEST_TOKEN
         mock_lock_port.release.return_value = True
         mock_lock_port.heartbeat.return_value = True
 
@@ -151,11 +164,25 @@ class TestLockManager:
         self, lock_manager: LockManager, mock_lock_port: AsyncMock
     ) -> None:
         """Test context manager raises if lock not acquired."""
-        mock_lock_port.acquire.return_value = False
+        mock_lock_port.acquire.return_value = None
 
         with pytest.raises(PipelineShutdownError):
             async with lock_manager:
                 pass
+
+    async def test_validate_uses_fencing_token(
+        self, lock_manager: LockManager, mock_lock_port: AsyncMock
+    ) -> None:
+        """Test validate uses fencing token when available."""
+        lock_manager._fencing_token = _TEST_TOKEN
+        mock_lock_port.validate_fencing_token.return_value = True
+
+        result = await lock_manager.validate()
+
+        assert result is True
+        mock_lock_port.validate_fencing_token.assert_called_once_with(
+            "lock:test_pipeline", _TEST_TOKEN
+        )
 
 
 class TestLockConfig:

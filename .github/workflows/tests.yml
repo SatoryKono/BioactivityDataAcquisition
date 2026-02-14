@@ -22,10 +22,34 @@ env:
   PYTHONUNBUFFERED: 1
 
 jobs:
+  # Smoke check: verify dependencies are installed before running tests
+  smoke-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Install dependencies
+        run: uv sync --extra dev --extra tracing --extra performance
+
+      - name: Smoke check (dependencies + core imports)
+        run: uv run pytest tests/smoke/ -v --tb=short
+
   # Fast tests run first for quick feedback
   test-fast:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    needs: smoke-check  # Only run if smoke check passes
 
     steps:
       - name: Checkout code

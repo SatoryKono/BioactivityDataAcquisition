@@ -146,7 +146,7 @@ class GenericPipelineFactory(Generic[TPipeline]):
         self,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        silver_filters: SilverFilterConfig | GoldFilterConfig | None = None,
+        silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -286,7 +286,11 @@ class GenericPipelineFactory(Generic[TPipeline]):
             observability=observability,
             silver_schema=self.silver_schema,
             gold_schema=self.gold_schema,
-            strict_gold_validation=runtime.strict_gold_validation,
+            strict_gold_validation=(
+                runtime.strict_gold_validation
+                if settings.env != "prod" or settings.test_mode
+                else True
+            ),
             yaml_config=yaml_config,
         )
 
@@ -410,10 +414,10 @@ def build_pipeline_services(
     cached_bronze: CachedBronzeContext | None = None,
     silver_validator: Any = None,
 ) -> PipelineServices:
-    """Build PipelineServices from settings.
+    """Build shared pipeline services using DI container.
 
     Args:
-        pipeline_name: Name of the pipeline for config lookup
+        pipeline_name: Name of the pipeline
         create_data_source_fn: Data source creator function
         settings: Application settings
         logger: Structured logger
@@ -594,11 +598,8 @@ def assemble_runner(
 ) -> PipelineRunner:
     """Assemble a PipelineRunner from a pipeline instance.
 
-    This function handles the construction of the entire pipeline execution graph,
-    using the unified BatchExecutor that combines extraction and processing.
-
-    All services are created directly here (DI pattern) instead of through
-    an intermediate RunnerServices bundle for explicit dependency injection.
+    Handles construction of the pipeline execution graph using BatchExecutor.
+    Services are created directly here (DI pattern).
 
     Args:
         pipeline: Configured pipeline instance
@@ -765,10 +766,8 @@ def _extract_single_dq_config(
     return None
 
 
-def _extract_dq_configs(
-    yaml_config: PipelineYamlConfig | None,
-) -> DQConfigsContext:
-    """Extract DQ report configs for each layer from YAML config.
+def _extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext:
+    """Extract DQ report configs from YAML.
 
     Args:
         yaml_config: Pipeline YAML configuration with sink settings.

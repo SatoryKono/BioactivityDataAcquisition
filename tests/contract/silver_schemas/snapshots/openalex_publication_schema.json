@@ -128,11 +128,7 @@
     "unique": false
   },
   "author_orcids": {
-    "checks": [
-      {
-        "name": "_check_author_orcids"
-      }
-    ],
+    "checks": [],
     "coerce": false,
     "description": "JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     "dtype": "str",
@@ -290,7 +286,7 @@
       }
     ],
     "coerce": false,
-    "description": "ISSN-L (format: XXXX-XXXX)",
+    "description": "ISSN-L (format: NNNN-NNNN)",
     "dtype": "str",
     "nullable": true,
     "required": true,
@@ -539,11 +535,7 @@
     "unique": false
   },
   "title": {
-    "checks": [
-      {
-        "name": "_check_title"
-      }
-    ],
+    "checks": [],
     "coerce": false,
     "description": "Publication title",
     "dtype": "str",

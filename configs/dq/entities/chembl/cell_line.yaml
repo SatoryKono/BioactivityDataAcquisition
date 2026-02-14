@@ -12,11 +12,11 @@ entity: cell_line
 # Cell Line-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: cell_chembl_id
+  - field: cell_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "cell_chembl_id must match CHEMBL format"
+    error_message: "cell_id must match CHEMBL format"
 
   - field: cell_name
     type: pattern
@@ -30,7 +30,7 @@ entity_field_validations:
     nullable: true
     error_message: "cellosaurus_id must match CVCL format"
 
-  - field: cell_source_tax_id
+  - field: cell_source_taxonomy_id
     type: range
     min: 1
     max: 10000000

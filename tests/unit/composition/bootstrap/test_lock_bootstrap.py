@@ -60,7 +60,7 @@ class TestBootstrapLockService:
             owner_id=owner_id,
             ttl=60.0,
         )
-        assert acquired is True
+        assert acquired is not None
 
         # Validate the lock is held by the correct owner
         is_valid = await service.lock_port.validate_owner(

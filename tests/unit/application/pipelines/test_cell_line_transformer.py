@@ -266,6 +266,48 @@ class TestCellLineTransformer:
         assert result["_index"] == 0
 
     @pytest.mark.asyncio
+    async def test_transform_api_record_with_numeric_cell_id(
+        self, transformer, mock_context
+    ):
+        """Test that numeric cell_id from API is replaced with cell_chembl_id.
+
+        ChEMBL /cell_line API returns both cell_id (numeric, e.g. 449)
+        and cell_chembl_id (e.g. CHEMBL3308072). The transformer must
+        use cell_chembl_id as the canonical cell_id for Silver.
+        """
+        record = {
+            "cell_chembl_id": "CHEMBL3308072",
+            "cell_id": 449,
+            "cell_name": "CHO",
+            "cell_description": "Ovarian cells",
+            "cell_source_organism": "Cricetulus griseus",
+            "cell_source_tax_id": 10029,
+            "cell_source_tissue": "Ovarian cells",
+            "cellosaurus_id": "CVCL_0213",
+            "clo_id": "CLO_0002421",
+            "cl_lincs_id": None,
+            "efo_id": None,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["cell_id"] == "CHEMBL3308072"
+
+    @pytest.mark.asyncio
+    async def test_transform_only_cell_chembl_id(self, transformer, mock_context):
+        """Test fallback when only cell_chembl_id is present (no cell_id)."""
+        record = {
+            "cell_chembl_id": "CHEMBL3308072",
+            "cell_name": "CHO",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["cell_id"] == "CHEMBL3308072"
+
+    @pytest.mark.asyncio
     async def test_transform_with_null_values(self, transformer, mock_context):
         """Test transformation handles None values correctly."""
         record = {
