@@ -57,6 +57,8 @@ class BronzeWriter:
     COMPRESSION_CHUNK_SIZE = 256 * 1024
     COMPRESSION_LEVEL = 3
     COMPRESSION_THREADS = -1  # zstd: auto-detect available CPU cores
+    BRONZE_PATH_FORMAT = "{provider}/{entity}/{date}/{filename}"
+    BRONZE_FILE_SUFFIX = ".jsonl.zst"
 
     def __init__(
         self,
@@ -138,21 +140,7 @@ class BronzeWriter:
     def _resolve_bronze_path(
         self, provider: str, entity: str, date_str: str, filename: str
     ) -> str:
-        """Resolve Bronze file path based on flat_structure setting.
-
-        Args:
-            provider: Data provider name (e.g., 'chembl').
-            entity: Entity type (e.g., 'document').
-            date_str: Date string in YYYY-MM-DD format.
-            filename: File name (e.g., 'batch_2026-01-21_uuid.jsonl.zst').
-
-        Returns:
-            Relative path from base_path to the file.
-
-        Path formats:
-            flat_structure=False: {provider}/{entity}/{date}/{filename}
-            flat_structure=True:  {date}/{filename}
-        """
+        """Resolve Bronze file path based on flat_structure setting."""
         if self._flat_structure:
             return f"{date_str}/{filename}"
         return f"{provider}/{entity}/{date_str}/{filename}"

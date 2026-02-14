@@ -64,5 +64,5 @@ class PublicationSimilaritySchema(ETLRecordSchema):
         """Pandera configuration."""
 
         strict = True
-        ordered = True
+        ordered = False
         coerce = True
