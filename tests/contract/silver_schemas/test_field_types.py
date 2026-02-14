@@ -96,6 +96,8 @@ class TestFieldTypes:
 
         numeric_id_fields = {
             "assay_param_id",
+            "assay_taxonomy_id",
+            "target_taxonomy_id",
             "taxonomy_id",
             "cell_source_taxonomy_id",
             "component_id",

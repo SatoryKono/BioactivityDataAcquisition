@@ -186,6 +186,15 @@
     "required": false,
     "unique": false
   },
+  "assay_taxonomy_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "NCBI Taxonomy ID (float for nullable int).",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "assay_test_type": {
     "checks": [
       {
@@ -397,15 +406,6 @@
     "coerce": false,
     "description": "Target ChEMBL ID.",
     "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
-  "taxonomy_id": {
-    "checks": [],
-    "coerce": false,
-    "description": "NCBI Taxonomy ID (float for nullable int).",
-    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
