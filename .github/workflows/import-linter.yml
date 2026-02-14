@@ -27,22 +27,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-          cache-dependency-path: "pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install .[dev]
+        run: uv sync --extra dev
 
       - name: Ruff (lint)
-        run: ruff check src tests
+        run: uv run ruff check src tests
 
       - name: Ruff (format check)
-        run: ruff format --check src tests
+        run: uv run ruff format --check src tests
 
       - name: Mypy (strict-ish)
-        run: mypy --config-file pyproject.toml src/bioetl
+        run: uv run mypy --config-file pyproject.toml src/bioetl
 
   arch-tests:
     runs-on: ubuntu-latest
@@ -56,22 +55,23 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install .[dev]
+        run: uv sync --extra dev
 
       - name: Architecture tests (all)
-        run: pytest tests/architecture/ -v --tb=short
+        run: uv run pytest tests/architecture/ -v --tb=short
 
       - name: Import Linter contract
-        run: lint-imports --config .importlinter
+        run: uv run lint-imports --config .importlinter
 
       - name: Application layer dependency graph
-        run: python src/tools/scripts/check_application_deps.py
+        run: uv run python src/tools/scripts/check_application_deps.py
 
       - name: Infrastructure layer architecture check
-        run: python src/tools/scripts/check_architecture.py
+        run: uv run python src/tools/scripts/check_architecture.py
 
   unit-tests:
     needs: lint
@@ -85,8 +85,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-          cache-dependency-path: "pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
 
       - name: Restore pytest cache
         uses: actions/cache@v4
@@ -95,13 +96,11 @@ jobs:
           key: ${{ runner.os }}-pytest-unit-${{ hashFiles('pyproject.toml', 'pytest.ini') }}
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install .[dev]
+        run: uv sync --extra dev
 
       - name: Unit tests with coverage
         run: |
-          pytest tests --ignore=tests/integration --ignore=tests/architecture \
+          uv run pytest tests --ignore=tests/integration --ignore=tests/architecture \
             --ignore=tests/e2e --ignore=tests/contract \
             --cov=src/bioetl --cov-report=xml:coverage-unit.xml --cov-report=term-missing
 
@@ -168,8 +167,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-          cache-dependency-path: "pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
 
       - name: Restore pytest cache
         uses: actions/cache@v4
@@ -178,13 +178,11 @@ jobs:
           key: ${{ runner.os }}-pytest-integration-${{ hashFiles('pyproject.toml', 'pytest.ini') }}
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install .[dev]
+        run: uv sync --extra dev
 
       - name: Integration tests
         run: |
-          pytest tests/integration -v --tb=short
+          uv run pytest tests/integration -v --tb=short
 
   checks-complete:
     needs:
@@ -202,4 +200,3 @@ jobs:
             exit 1
           fi
           echo "All checks completed successfully."
-
