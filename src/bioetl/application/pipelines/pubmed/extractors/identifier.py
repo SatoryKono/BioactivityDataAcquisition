@@ -6,7 +6,7 @@ Supports complete ArticleIdList and ELocationID extraction for cross-referencing
 
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import Any, TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
@@ -106,6 +106,7 @@ class IdentifierExtractor(BaseFieldExtractor):
             - pii
             - mid
             - publisher_id
+            - pubmed
         """
         ids: dict[str, str | None] = {
             "doi": None,
@@ -113,6 +114,7 @@ class IdentifierExtractor(BaseFieldExtractor):
             "pii": None,
             "mid": None,
             "publisher_id": None,
+            "pubmed": None,
         }
 
         # 1. Check ELocationID (higher priority for DOI/PII)
@@ -124,9 +126,7 @@ class IdentifierExtractor(BaseFieldExtractor):
         return ids
 
     @classmethod
-    def _process_elocation_ids(
-        cls, root: Element, ids: dict[str, str | None]
-    ) -> None:
+    def _process_elocation_ids(cls, root: Element, ids: dict[str, str | None]) -> None:
         """Process ELocationID elements to populate identifiers.
 
         Modifies the ids dictionary in-place.
@@ -139,9 +139,12 @@ class IdentifierExtractor(BaseFieldExtractor):
         # Use .//ELocationID to match original behavior (recursively find in Article)
         for eloc in article.findall(".//ELocationID"):
             eid_type = eloc.get("EIdType")
-            if eid_type in ("doi", "pii") and ids[eid_type] is None:
-                if text := cls._normalize_text(eloc.text):
-                    ids[eid_type] = text
+            if (
+                eid_type in ("doi", "pii")
+                and ids[eid_type] is None
+                and (text := cls._normalize_text(eloc.text))
+            ):
+                ids[eid_type] = text
 
     @classmethod
     def _process_article_id_list(
@@ -163,6 +166,7 @@ class IdentifierExtractor(BaseFieldExtractor):
             "pmc": "pmc_id",
             "mid": "mid",
             "publisher-id": "publisher_id",
+            "pubmed": "pubmed",
         }
 
         for aid in article_id_list.findall("ArticleId"):
@@ -177,3 +181,92 @@ class IdentifierExtractor(BaseFieldExtractor):
             if text := cls._normalize_text(aid.text):
                 ids[field_name] = text
 
+    @classmethod
+    def extract_doi(cls, root: Element) -> str | None:
+        """Extract DOI from ArticleIdList or ELocationID.
+
+        Wrapper around extract_all_identifiers for backward compatibility.
+        """
+        return cls.extract_all_identifiers(root)["doi"]
+
+    @classmethod
+    def extract_pmc_id(cls, root: Element) -> str | None:
+        """Extract PubMed Central ID from ArticleIdList.
+
+        Wrapper around extract_all_identifiers for backward compatibility.
+        """
+        return cls.extract_all_identifiers(root)["pmc_id"]
+
+    @classmethod
+    def extract_pii(cls, root: Element) -> str | None:
+        """Extract PII from ArticleIdList or ELocationID.
+
+        Wrapper around extract_all_identifiers for backward compatibility.
+        """
+        return cls.extract_all_identifiers(root)["pii"]
+
+    @classmethod
+    def extract_mid(cls, root: Element) -> str | None:
+        """Extract MID from ArticleIdList.
+
+        Wrapper around extract_all_identifiers for backward compatibility.
+        """
+        return cls.extract_all_identifiers(root)["mid"]
+
+    @classmethod
+    def extract_publisher_id(cls, root: Element) -> str | None:
+        """Extract Publisher ID from ArticleIdList.
+
+        Wrapper around extract_all_identifiers for backward compatibility.
+        """
+        return cls.extract_all_identifiers(root)["publisher_id"]
+
+    @classmethod
+    def extract_elocation_ids(cls, root: Element) -> ELocationIds:
+        """Extract electronic location identifiers.
+
+        Wrapper using extract_all_identifiers.
+        """
+        ids = cls.extract_all_identifiers(root)
+        return ELocationIds(doi=ids["doi"], pii=ids["pii"])
+
+    @classmethod
+    def parse_all_article_ids(cls, root: Element) -> AllArticleIds:
+        """Extract complete set of article identifiers.
+
+        Wrapper using extract_all_identifiers for core fields, plus an additional
+        scan for 'other_ids' to maintain full compatibility with legacy behavior
+        expected by tests.
+        """
+        ids = cls.extract_all_identifiers(root)
+        other_ids: dict[str, str] = {}
+
+        # Additional scan for other_ids to satisfy legacy contract
+        article_id_list = root.find(".//ArticleIdList")
+        if article_id_list is not None:
+            # Known types to exclude from other_ids
+            known_types = {
+                "doi",
+                "pii",
+                "pmc",
+                "mid",
+                "publisher-id",
+                "pubmed",
+            }
+            for aid in article_id_list.findall("ArticleId"):
+                id_type = aid.get("IdType")
+                if id_type and id_type not in known_types:
+                    if text := cls._normalize_text(aid.text):
+                        other_ids[id_type] = text
+
+        return AllArticleIds(
+            pubmed=ids.get("pubmed"),
+            doi=ids.get("doi"),
+            pmc=ids.get("pmc_id"),
+            pii=ids.get("pii"),
+            mid=ids.get("mid"),
+            publisher_id=ids.get("publisher_id"),
+            pmcid=None,
+            medline=None,
+            other_ids=other_ids,
+        )
