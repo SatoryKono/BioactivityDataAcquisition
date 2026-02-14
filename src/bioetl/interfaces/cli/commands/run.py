@@ -269,15 +269,14 @@ def run(
     echo_health_server_info(health_server, health_port)
 
     # Run pipeline via service
+    coro = _run_pipeline_async(
+        pipeline,
+        options,
+        health_server_enabled=health_server,
+        health_port=health_port,
+    )
     try:
-        status, error_message, error_type, run_id = asyncio.run(
-            _run_pipeline_async(
-                pipeline,
-                options,
-                health_server_enabled=health_server,
-                health_port=health_port,
-            )
-        )
+        status, error_message, error_type, run_id = asyncio.run(coro)
     except PipelineNotFoundError as e:
         echo_error("Pipeline not found", str(e))
         sys.exit(ExitCode.CONFIG_ERROR)
@@ -287,6 +286,9 @@ def run(
     except Exception as e:
         echo_error("Unexpected error during pipeline execution", str(e))
         sys.exit(ExitCode.FAIL)
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
 
     # Map status to exit code and output result
     exit_code = _map_status_to_exit_code(status, error_type)

@@ -145,6 +145,15 @@
     "required": false,
     "unique": false
   },
+  "description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Target description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "downgraded": {
     "checks": [],
     "coerce": false,

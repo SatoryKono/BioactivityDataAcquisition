@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-# ORCID format: XXXX-XXXX-XXXX-XXXX (last char can be X for checksum)
+# ORCID format: NNNN-NNNN-NNNN-NNNN (last char can be X for checksum)
 _ORCID_PATTERN = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
 
 __all__ = [

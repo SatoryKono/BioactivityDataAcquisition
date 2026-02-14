@@ -52,6 +52,12 @@ class ETLRecordSchema(pa.DataFrameModel):
         str_matches=ISO8601_TIMESTAMP_REGEX,
         description="Timestamp when the record was ingested (UTC, ISO 8601 format).",
     )
+    index: Series[int] = pa.Field(
+        alias="_index",
+        nullable=False,
+        ge=0,
+        description="Sequential index of the record in the pipeline run.",
+    )
 
     dq_warn: Series[bool] = pa.Field(
         alias="_dq_warn",
@@ -64,12 +70,6 @@ class ETLRecordSchema(pa.DataFrameModel):
         nullable=False,
         default=False,
         description="Flag for data quality errors.",
-    )
-    index: Series[int] = pa.Field(
-        alias="_index",
-        nullable=False,
-        ge=0,
-        description="Sequential index of the record in the pipeline run.",
     )
 
     class Config:
