@@ -135,6 +135,79 @@ class IdentifierExtractor(BaseFieldExtractor):
         return text.strip() if text else None
 
     @classmethod
+    def extract_all_identifiers(cls, root: Element) -> dict[str, str | None]:
+        """Extract all article identifiers in a single pass.
+
+        Optimized to traverse the XML structure only once for multiple identifiers,
+        reducing overhead compared to calling individual extract methods.
+
+        Args:
+            root: Root PubmedArticle element.
+
+        Returns:
+            Dictionary with normalized values for:
+            - doi
+            - pmc_id
+            - pii
+            - mid
+            - publisher_id
+        """
+        extractor = cls()
+        ids: dict[str, str | None] = {
+            "doi": None,
+            "pmc_id": None,
+            "pii": None,
+            "mid": None,
+            "publisher_id": None,
+        }
+
+        # 1. Check ELocationID (higher priority for DOI/PII)
+        # XML structure: PubmedArticle -> MedlineCitation -> Article -> ELocationID
+        article = root.find(".//Article")
+        if article is not None:
+            # Use .//ELocationID to match original behavior (recursively find in Article)
+            for eloc in article.findall(".//ELocationID"):
+                eid_type = eloc.get("EIdType")
+                if not eid_type or not eloc.text:
+                    continue
+
+                text = extractor._normalize_text(eloc.text)
+                if not text:
+                    continue
+
+                if eid_type == "doi" and ids["doi"] is None:
+                    ids["doi"] = text
+                elif eid_type == "pii" and ids["pii"] is None:
+                    ids["pii"] = text
+
+        # 2. Check ArticleIdList (fallback for DOI/PII, primary for others)
+        # XML structure: PubmedArticle -> PubmedData -> ArticleIdList
+        # Use .//ArticleIdList to match original behavior
+        article_id_list = root.find(".//ArticleIdList")
+        if article_id_list is not None:
+            for aid in article_id_list.findall("ArticleId"):
+                id_type = aid.get("IdType")
+                if not id_type or not aid.text:
+                    continue
+
+                text = extractor._normalize_text(aid.text)
+                if not text:
+                    continue
+
+                if id_type == "doi" and ids["doi"] is None:
+                    ids["doi"] = text
+                elif id_type == "pii" and ids["pii"] is None:
+                    ids["pii"] = text
+                elif id_type == "pmc":
+                    ids["pmc_id"] = text
+                elif id_type == "mid":
+                    ids["mid"] = text
+                elif id_type == "publisher-id":
+                    ids["publisher_id"] = text
+
+        return ids
+
+    @classmethod
     def extract_doi(cls, root: Element) -> str | None:
         """Extract DOI from ArticleIdList or ELocationID.
 
