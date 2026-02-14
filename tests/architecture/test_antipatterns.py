@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import ast
+import json
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 SRC = Path("src/bioetl")
@@ -51,16 +54,48 @@ def test_no_sentinel_values() -> None:
 
 
 def test_no_hardcoded_secrets() -> None:
-    rx = re.compile(r"(password|api_key|secret)\s*=\s*['\"][^'\"]+['\"]", re.I)
+    baseline_path = Path(".secrets.baseline")
+    if not baseline_path.exists():
+        raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
+
+    result = subprocess.run(
+        [sys.executable, "-m", "detect_secrets", "scan", str(SRC)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise AssertionError(
+            "detect-secrets scan failed:\n"
+            f"{result.stderr.strip() or result.stdout.strip()}"
+        )
+
+    try:
+        scan_output = json.loads(result.stdout)
+        baseline_output = json.loads(baseline_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise AssertionError("detect-secrets output is not valid JSON") from exc
+
+    baseline_hashes = {
+        finding.get("hashed_secret")
+        for findings in baseline_output.get("results", {}).values()
+        for finding in findings
+    }
+
     violations: list[str] = []
-    for path in _py_files():
-        if "ports" in path.parts:
-            continue
-        text = path.read_text(encoding="utf-8")
-        for i, line in enumerate(text.splitlines(), 1):
-            if rx.search(line):
-                violations.append(f"{path}:{i}: {line.strip()}")
-    assert not violations, "Hardcoded secrets found:\n" + "\n".join(violations[:50])
+    for file_path, findings in scan_output.get("results", {}).items():
+        for finding in findings:
+            hashed_secret = finding.get("hashed_secret")
+            if hashed_secret and hashed_secret in baseline_hashes:
+                continue
+            line_number = finding.get("line_number", "?")
+            secret_type = finding.get("type", "Secret")
+            violations.append(f"{file_path}:{line_number}: {secret_type}")
+
+    assert not violations, (
+        "Potential secrets detected. Update .secrets.baseline if false positives:\n"
+        + "\n".join(violations[:50])
+    )
 
 
 def test_no_print_in_production() -> None:

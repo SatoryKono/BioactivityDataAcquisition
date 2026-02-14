@@ -135,12 +135,12 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     issn_print: Series[str] = pa.Field(
         nullable=True,
         str_matches=ISSN_PATTERN,
-        description="Print ISSN (format: XXXX-XXXX)",
+        description="Print ISSN (format: NNNN-NNNN)",
     )
     issn_electronic: Series[str] = pa.Field(
         nullable=True,
         str_matches=ISSN_PATTERN,
-        description="Electronic ISSN (format: XXXX-XXXX)",
+        description="Electronic ISSN (format: NNNN-NNNN)",
     )
 
     # === Author ORCID Identifiers (inherited from base, kept for clarity) ===

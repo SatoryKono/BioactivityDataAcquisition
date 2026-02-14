@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import polars as pl
 import pytest
@@ -27,6 +27,14 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.locking import FencingToken
+
+_MOCK_TOKEN = FencingToken(
+    sequence=1,
+    key="lock:mock",
+    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
+    issued_at=0.0,
+)
 
 
 @dataclass
@@ -114,7 +122,7 @@ def create_mock_logger() -> MagicMock:
 def create_mock_lock() -> AsyncMock:
     """Create a mock lock."""
     lock = AsyncMock()
-    lock.acquire = AsyncMock(return_value=True)
+    lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
     lock.release = AsyncMock(return_value=True)
     return lock
 

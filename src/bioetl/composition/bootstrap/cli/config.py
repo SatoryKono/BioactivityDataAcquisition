@@ -6,7 +6,13 @@ Used primarily by CLI configuration operations.
 
 from __future__ import annotations
 
+from typing import cast
+
 from bioetl.application.services import ConfigService
+from bioetl.application.services.config_service import (
+    DomainConfigMapperProtocol,
+    SettingsLoaderProtocol,
+)
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.registry import get_default_registry
@@ -40,8 +46,8 @@ def bootstrap_config_service() -> ConfigService:
 
     return ConfigService(
         logger=noop_logger,
-        _settings_loader=get_settings,
+        _settings_loader=cast(SettingsLoaderProtocol, get_settings),
         _pipeline_config_loader=load_pipeline_config,
-        _domain_config_mapper=yaml_config_to_domain,
+        _domain_config_mapper=cast(DomainConfigMapperProtocol, yaml_config_to_domain),
         _registry_accessor=get_default_registry,
     )

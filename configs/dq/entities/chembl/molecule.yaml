@@ -18,14 +18,14 @@ entity_field_validations:
     error_message: "Molecule ChEMBL ID is required"
 
   # Molecular weight must be positive
-  - field: full_mwt
+  - field: property_full_mwt
     type: range
     min: 0
     nullable: true
     error_message: "Molecular weight must be non-negative"
 
   # ALogP typically between -10 and 10
-  - field: alogp
+  - field: property_alogp
     type: range
     min: -15
     max: 20

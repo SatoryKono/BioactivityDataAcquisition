@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 16:49:09 GMT
+      - Fri, 13 Feb 2026 06:37:23 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -123,7 +123,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 16:49:10 GMT
+      - Fri, 13 Feb 2026 06:37:24 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -133,7 +133,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.46000075340270996'
+      - '0.2999234199523926'
     status:
       code: 200
       message: OK
@@ -167,7 +167,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 16:49:18 GMT
+      - Fri, 13 Feb 2026 06:37:38 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -243,7 +243,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 16:49:19 GMT
+      - Fri, 13 Feb 2026 06:37:39 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -253,7 +253,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.278242826461792'
+      - '0.8882195949554443'
     status:
       code: 200
       message: OK

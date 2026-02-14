@@ -67,8 +67,8 @@ class TargetComponentTransformer(BaseChemblTransformer):
             Dictionary of TargetComponent business fields.
 
         """
-        # Cast to dict for type-safe access to .get() method
-        rec = cast("dict[str, Any]", record)
+        # BronzeRecord is already a dict[str, Any]
+        rec = record
         return {
             # Primary identifier (int)
             "component_id": safe_int(primary_id),

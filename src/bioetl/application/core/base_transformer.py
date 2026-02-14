@@ -116,7 +116,7 @@ class BaseTransformer(ABC):
         entity_type: str | None = None,
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        silver_filters: SilverFilterConfig | GoldFilterConfig | None = None,
+        silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -731,7 +731,7 @@ class BaseTransformer(ABC):
             Extracted value or default.
 
         """
-        current = record
+        current: Any = record
         for key in keys:
             if not isinstance(current, dict):
                 return default

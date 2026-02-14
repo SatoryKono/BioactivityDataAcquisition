@@ -13,7 +13,7 @@ from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config._converters import freeze_sequences, resolve_loading_strategy
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.table import TableConfig
-from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
@@ -46,7 +46,7 @@ class PipelineConfig:
     table: TableConfig
 
     # Processing
-    silver_filters: SilverFilterConfig | GoldFilterConfig | None = None
+    silver_filters: SilverFilterConfig | None = None
     gold_filters: GoldFilterConfig | None = None
     batch_size: int = 100
     checkpoint_interval: int = 1000
@@ -125,12 +125,12 @@ class PipelineConfig:
         return self.table.gold_table
 
     @property
-    def write_mode(self) -> object:
+    def write_mode(self) -> SilverWriteMode | str:
         """Shortcut for ``self.table.silver_write_mode``."""
         return self.table.silver_write_mode
 
     @property
-    def gold_write_mode(self) -> object:
+    def gold_write_mode(self) -> GoldWriteMode | str:
         """Shortcut for ``self.table.gold_write_mode``."""
         return self.table.gold_write_mode
 

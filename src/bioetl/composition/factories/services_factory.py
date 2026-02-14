@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.application.core.batch_executor import BatchExecutor
 from bioetl.application.core.checkpoint_manager import CheckpointManager
@@ -27,7 +27,7 @@ from bioetl.composition.factories.storage import StorageContext, StorageFactory
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import TableConfig
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
@@ -153,13 +153,23 @@ class BaseServicesFactory:
             metadata_coordinator: Optional MetadataCoordinator for centralized
                                 metadata creation across Bronze, Silver, Gold.
             silver_validator: Optional SilverValidatorPort for Pandera validation
-                in SilverWriter. If None, SilverWriter uses NoOpSilverValidator.
+                in SilverWriter. If None, validation is skipped by storage layer.
 
         Returns:
             PipelineServices with all dependencies configured
         """
         # Create metrics first so it can be passed to storage factory
         metrics = cls._create_metrics(settings)
+
+        if (
+            settings.env == "prod"
+            and not settings.test_mode
+            and silver_validator is None
+        ):
+            raise ValueError(
+                "Silver validator is required for production pipelines "
+                f"(pipeline={pipeline_config.pipeline_name})"
+            )
 
         storage_ctx = StorageFactory.create(
             settings,
@@ -422,14 +432,14 @@ class ServicesBuilder:
         primary_keys: Sequence[str],
         silver_table: str,
         gold_table: str | None,
-        silver_write_mode: str,
-        gold_write_mode: str,
-        on_schema_mismatch: str,
+        silver_write_mode: SilverWriteMode | str,
+        gold_write_mode: GoldWriteMode | str,
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
         transform_callback: Any,
         gold_filter_callback: Any,
         gold_transform_callback: Any,
         *,
-        strict_gold_validation: bool = False,
+        strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
         column_groups: tuple[ColumnGroupConfig, ...] = (),
     ) -> RecordProcessor:
@@ -454,7 +464,7 @@ class ServicesBuilder:
             gold_filter_callback: Gold filtering callback
             gold_transform_callback: Silver to Gold transformation callback
             strict_gold_validation: If True, validation fails when gold_schema is None.
-                Default False for backward compatibility.
+                Default True to enforce strict Gold validation.
             lock_validator: Async callable that validates lock ownership.
                 Returns True if lock is still held, False otherwise.
                 Typically LockManager.validate(). If None, lock validation
@@ -470,7 +480,7 @@ class ServicesBuilder:
             gold_table=gold_table,
             silver_write_mode=silver_write_mode,
             gold_write_mode=gold_write_mode,
-            on_schema_mismatch=on_schema_mismatch,  # type: ignore[arg-type]
+            on_schema_mismatch=on_schema_mismatch,
         )
 
         processor_config = RecordProcessorConfig(
@@ -508,7 +518,7 @@ class ServicesBuilder:
         silver_schema: pa.Schema | None,
         gold_schema: Any,
         *,
-        strict_gold_validation: bool = False,
+        strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
     ) -> RecordProcessor:
         """Create RecordProcessor from pipeline instance.
@@ -520,7 +530,7 @@ class ServicesBuilder:
             silver_schema: PyArrow schema for Silver layer
             gold_schema: Pandera schema for Gold layer
             strict_gold_validation: If True, validation fails when gold_schema is None.
-                Default False for backward compatibility.
+                Default True to enforce strict Gold validation.
             lock_validator: Async callable that validates lock ownership.
                 Returns True if lock is still held, False otherwise.
                 Typically LockManager.validate(). If None, lock validation
@@ -541,11 +551,12 @@ class ServicesBuilder:
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
             primary_keys=pipeline.config.primary_keys,
-            silver_table=pipeline.config.silver_table,
+            silver_table=pipeline.config.silver_table
+            or f"{pipeline.config.provider}.{pipeline.config.entity_type}",
             gold_table=pipeline.config.gold_table,
             silver_write_mode=pipeline.config.write_mode,
             gold_write_mode=pipeline.config.gold_write_mode,
-            on_schema_mismatch=pipeline.config.on_schema_mismatch,
+            on_schema_mismatch=pipeline.config.on_schema_mismatch,  # type: ignore[arg-type]
             transform_callback=callbacks.transform,
             gold_filter_callback=callbacks.gold_filter,
             gold_transform_callback=callbacks.gold_transform,
@@ -562,7 +573,7 @@ class ServicesBuilder:
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         *,
-        strict_gold_validation: bool = False,
+        strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
         tracer: TracingPort | None = None,
         memory_monitor: MemoryMonitorPort | None = None,

@@ -129,19 +129,6 @@
     "required": false,
     "unique": false
   },
-  "molecule_id": {
-    "checks": [
-      {
-        "name": "molecule_id_positive"
-      }
-    ],
-    "coerce": false,
-    "description": "PubChem Compound ID (PK)",
-    "dtype": "str",
-    "nullable": false,
-    "required": true,
-    "unique": false
-  },
   "complexity": {
     "checks": [
       {
@@ -485,6 +472,19 @@
     "dtype": "float64",
     "nullable": true,
     "required": false,
+    "unique": false
+  },
+  "molecule_id": {
+    "checks": [
+      {
+        "name": "molecule_id_positive"
+      }
+    ],
+    "coerce": false,
+    "description": "PubChem Compound ID (PK)",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
     "unique": false
   },
   "monoisotopic_mass": {

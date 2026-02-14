@@ -28,7 +28,7 @@ class TestRuntimeConfig:
         assert config.vacuum_after_run is False
         assert config.vacuum_retention_days == 7
         assert config.strict_validation is False
-        assert config.strict_gold_validation is False
+        assert config.strict_gold_validation is True
 
     def test_custom_values(self) -> None:
         """Test custom configuration values."""

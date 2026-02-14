@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import polars as pl
 import pytest
@@ -31,9 +31,17 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.exceptions import RunnerAlreadyExecutedError
+from bioetl.domain.locking import FencingToken
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+_MOCK_TOKEN = FencingToken(
+    sequence=1,
+    key="lock:mock",
+    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
+    issued_at=0.0,
+)
 
 
 # ============================================================================
@@ -57,7 +65,7 @@ def mock_logger() -> MagicMock:
 def mock_lock() -> AsyncMock:
     """Create a mock lock."""
     lock = AsyncMock()
-    lock.acquire.return_value = True
+    lock.acquire.return_value = _MOCK_TOKEN
     lock.release.return_value = True
     return lock
 

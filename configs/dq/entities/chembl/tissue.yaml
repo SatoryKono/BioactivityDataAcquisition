@@ -12,11 +12,11 @@ entity: tissue
 # Tissue-Specific Field Validations
 # =============================================================================
 entity_field_validations:
-  - field: tissue_chembl_id
+  - field: tissue_id
     type: pattern
     pattern: '^CHEMBL\d+$'
     nullable: false
-    error_message: "tissue_chembl_id must match CHEMBL format"
+    error_message: "tissue_id must match CHEMBL format"
 
   - field: pref_name
     type: pattern

@@ -9,7 +9,7 @@ import pandera.pandas as pa
 from pandera.typing import Series
 
 
-class UniprotXrefSchema(pa.DataFrameModel):
+class UniprotXrefSchema(pa.DataFrameModel):  # Pandera typing limitation
     """Database cross-references, taxonomy and GO components."""
 
     # === Cross-References (Extracted) ===

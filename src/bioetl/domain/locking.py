@@ -3,6 +3,7 @@
 Implements RULES.md §3.3 - Writers MUST verify lock held before write.
 
 This module provides:
+- FencingToken: Monotonically increasing token issued on lock acquisition
 - LockContext: Immutable value object representing a held lock
 - LockContextHolder: Mutable holder for sharing lock context between components
 - LockNotHeldError: Exception raised when write attempted without lock
@@ -16,6 +17,29 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.domain.types import RunID
+
+
+@dataclass(frozen=True, slots=True)
+class FencingToken:
+    """Monotonically increasing token issued on lock acquisition.
+
+    Each successful acquire() returns a token with a higher sequence number
+    than any previous token for that key. Writers can compare tokens to
+    detect stale lock holders.
+
+    For MemoryLock (ADR-010): trivial implementation over owner_id + counter.
+
+    Attributes:
+        sequence: Monotonically increasing counter per lock key.
+        key: The lock key this token was issued for.
+        owner_id: RunID of the owner who acquired the lock.
+        issued_at: Monotonic timestamp when the token was issued.
+    """
+
+    sequence: int
+    key: str
+    owner_id: RunID
+    issued_at: float
 
 
 class LockNotHeldError(Exception):
@@ -54,12 +78,14 @@ class LockContext:
         owner_id: RunID that acquired the lock.
         exclusive: True for backfill/rebuild operations.
         acquired_at: Monotonic timestamp when lock was acquired (for TTL checks).
+        fencing_token: Token issued by LockPort.acquire() for fencing validation.
     """
 
     key: str
     owner_id: RunID
     exclusive: bool = False
     acquired_at: float | None = None
+    fencing_token: FencingToken | None = None
 
     @classmethod
     def create(

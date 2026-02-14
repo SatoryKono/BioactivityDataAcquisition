@@ -17,10 +17,10 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAAALyPsQrCQAyGd5/iyOJSpHK2FTcXcRFB3azD0UYsXFtNrmIpfXdTVFBBF8Htvnz5
-        uT8NHNCkSDBpwNVHhAkgo6HkAB6ckTgrC5n5Aw2t91CEXFnXRZKyKuQB0Vj7oQ4kQ+hyc5HR8Abs
-        DHUbvmCW2owFtjAahjoK9Bh2HjgyBVvj5CfGzjawpzKXjFSzriviSqH4zjFsF7ieqw1Szju1XKkn
-        M7VWzTK06avp82e3r+xXWSB/Sb8paOWiU4VUP531Y3n1v/Jt7woAAP//AwASCBojEQIAAA==
+        H4sIAAAAAAAAALyPPQvCQAyGd3/FkcWlSMv5UdxcxEUEddMOh01p4dpqchWl9L+bokIVdBHc7smT
+        l3tTQ4omRoJpDe56RJgCMho6pODBGYmzspCZP9DQeE9FyJV1beRQVoU8YBLqQA9DyRC63FxkFNyB
+        naF2wxfMYpuxwA6GwVhPRjqEyANHpmBrnPzE2NoaEipzyUg169oirhTaP3gPuyVuFmqLlHOkVmvV
+        MTNr1TxDG7+aPn92SWW/ygL5S/pNQSMXnSqka+esH8ur/5VvejcAAAD//wMADc5tTRECAAA=
     headers:
       Access-Control-Allow-Origin:
       - '*'
@@ -35,20 +35,20 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Thu, 12 Feb 2026 16:51:37 GMT
+      - Fri, 13 Feb 2026 06:29:44 GMT
       Keep-Alive:
       - timeout=4, max=40
       NCBI-PHID:
-      - 1D3417763CCE9B7500004D617EDCA127.1.1.m_1
+      - 1D3451B828C5E0A50000381C651F9B9E.1.1.m_1
       NCBI-SID:
-      - 176762BABA7DAF75_DA2ESID
+      - 233A2EEFADC21C4D_948DSID
       Referrer-Policy:
       - origin-when-cross-origin
       Server:
       - Finatra
       Set-Cookie:
-      - ncbi_sid=176762BABA7DAF75_DA2ESID; domain=.nih.gov; path=/; expires=Fri, 12
-        Feb 2027 16:51:38 GMT
+      - ncbi_sid=233A2EEFADC21C4D_948DSID; domain=.nih.gov; path=/; expires=Sat, 13
+        Feb 2027 06:29:44 GMT
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
       Transfer-Encoding:

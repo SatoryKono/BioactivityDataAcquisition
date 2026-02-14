@@ -16,7 +16,7 @@ from uuid import uuid4
 
 import pytest
 
-from bioetl.domain.locking import LockContext, LockNotHeldError
+from bioetl.domain.locking import FencingToken, LockContext, LockNotHeldError
 from bioetl.domain.types import RunID, RunType
 
 
@@ -52,6 +52,80 @@ def exclusive_lock_context(run_id: RunID) -> LockContext:
         owner_id=run_id,
         exclusive=True,
     )
+
+
+class TestFencingToken:
+    """Tests for FencingToken value object."""
+
+    def test_create_token(self, run_id: RunID) -> None:
+        """Test creating a fencing token."""
+        token = FencingToken(
+            sequence=1,
+            key="lock:chembl_activity",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
+
+        assert token.sequence == 1
+        assert token.key == "lock:chembl_activity"
+        assert token.owner_id == run_id
+        assert token.issued_at == 100.0
+
+    def test_immutability(self, run_id: RunID) -> None:
+        """Test that FencingToken is immutable (frozen dataclass)."""
+        token = FencingToken(
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
+
+        with pytest.raises(AttributeError):
+            token.sequence = 2  # type: ignore[misc]
+
+    def test_value_equality(self, run_id: RunID) -> None:
+        """Test that FencingTokens are compared by value."""
+        t1 = FencingToken(
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
+        t2 = FencingToken(
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
+
+        assert t1 == t2
+
+    def test_different_sequences_not_equal(self, run_id: RunID) -> None:
+        """Test that tokens with different sequences are not equal."""
+        t1 = FencingToken(
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
+        t2 = FencingToken(
+            sequence=2,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
+
+        assert t1 != t2
+
+    def test_truthy(self, run_id: RunID) -> None:
+        """Test that FencingToken is truthy (for backward-compatible checks)."""
+        token = FencingToken(
+            sequence=1,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
+        assert token  # truthy
 
 
 class TestLockContext:
@@ -101,6 +175,23 @@ class TestLockContext:
         assert valid_lock_context.matches_table("pubchem_compound") is False
         assert valid_lock_context.matches_table("chembl_molecule") is False
 
+    def test_fencing_token_field_default(self, valid_lock_context: LockContext) -> None:
+        """Test that fencing_token defaults to None."""
+        assert valid_lock_context.fencing_token is None
+
+    def test_fencing_token_field_set(self, run_id: RunID) -> None:
+        """Test LockContext with fencing token."""
+        token = FencingToken(
+            sequence=5,
+            key="lock:test",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
+        ctx = LockContext(key="lock:test", owner_id=run_id, fencing_token=token)
+
+        assert ctx.fencing_token is not None
+        assert ctx.fencing_token.sequence == 5
+
     def test_immutability(self, valid_lock_context: LockContext) -> None:
         """Test that LockContext is immutable (frozen dataclass)."""
         with pytest.raises(AttributeError):
@@ -124,12 +215,18 @@ class TestLockManagerGetContext:
     """Tests for LockManager.get_context() method."""
 
     @pytest.fixture
-    def mock_lock_port(self) -> MagicMock:
+    def mock_lock_port(self, run_id: RunID) -> MagicMock:
         """Create mock LockPort with async methods."""
         from unittest.mock import AsyncMock
 
+        token = FencingToken(
+            sequence=1,
+            key="lock:chembl_activity",
+            owner_id=run_id,
+            issued_at=100.0,
+        )
         mock = MagicMock()
-        mock.acquire = AsyncMock(return_value=True)
+        mock.acquire = AsyncMock(return_value=token)
         mock.release = AsyncMock(return_value=True)
         mock.heartbeat = AsyncMock(return_value=True)
         return mock
@@ -202,6 +299,8 @@ class TestLockManagerGetContext:
         assert ctx.owner_id == run_id
         assert ctx.exclusive is False
         assert ctx.is_valid() is True
+        assert ctx.fencing_token is not None
+        assert ctx.fencing_token.sequence == 1
 
     @pytest.mark.asyncio
     async def test_get_context_exclusive_lock(

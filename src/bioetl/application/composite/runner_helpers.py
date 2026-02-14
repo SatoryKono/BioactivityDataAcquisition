@@ -245,9 +245,11 @@ def get_mergeable_dependencies(
 ) -> list[DependencyConfig]:
     """Get list of dependencies that should be included in merge.
 
-    Excludes dependencies with SKIPPED status or without silver_table since
-    they have no data to merge. This prevents file I/O errors when trying
-    to read non-existent or empty Silver tables.
+    Excludes dependencies without result or without silver_table since
+    they have no data to merge.
+
+    Note: SKIPPED status (due to resume) IS mergeable because the data
+    already exists in the Silver table.
 
     Args:
         dependency_results: All dependency results.
@@ -270,16 +272,6 @@ def get_mergeable_dependencies(
             )
             continue
 
-        # If status indicates skipped, don't include in merge
-        if result.status == DependencyStatus.SKIPPED:
-            logger.debug(
-                "Excluding dependency from merge",
-                dependency=dep_cfg.pipeline,
-                status=result.status.value,
-                reason="skipped",
-            )
-            continue
-
         # If no silver_table configured, can't read data
         if not dep_cfg.silver_table:
             logger.debug(
@@ -289,6 +281,15 @@ def get_mergeable_dependencies(
             )
             continue
 
-        mergeable.append(dep_cfg)
+        # Success and Skipped (resume) are mergeable
+        if result.is_success or result.status == DependencyStatus.SKIPPED:
+            mergeable.append(dep_cfg)
+        else:
+            logger.debug(
+                "Excluding dependency from merge",
+                dependency=dep_cfg.pipeline,
+                status=result.status.value,
+                reason="execution_failed_or_timed_out",
+            )
 
     return mergeable

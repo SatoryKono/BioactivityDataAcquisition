@@ -9,6 +9,7 @@ See docs/02-architecture/decisions/ADR-014-deterministic-writes.md
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 import pytest
 
@@ -109,7 +110,28 @@ class TestBronzeMetadataInvariants:
 
         Path format: bronze/{provider}/{entity}/{date}/
         """
-        # Check for date-based path construction pattern
+        from unittest.mock import Mock
+
+        from bioetl.domain.ports import NoOpMetrics
+        from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+
+        writer = BronzeWriter(
+            base_path="data/output/bronze",
+            logger=Mock(),
+            metrics=NoOpMetrics(),
+        )
+        path = writer._resolve_bronze_path(
+            provider="chembl",
+            entity="activity",
+            date_str="2026-01-21",
+            filename="batch_2026-01-21_123.jsonl.zst",
+        )
+        normalized = path.replace("\\", "/")
+        assert normalized == "chembl/activity/2026-01-21/batch_2026-01-21_123.jsonl.zst"
+        assert re.match(
+            r"^chembl/activity/\d{4}-\d{2}-\d{2}/.+\.jsonl\.zst$",
+            normalized,
+        )
 
 
 class TestSilverLayerInvariants:
@@ -182,6 +204,32 @@ class TestSilverLayerInvariants:
                 pytest.fail(
                     f"SilverWriter seems to use raw '{method}()'. MUST use write_deltalake()."
                 )
+
+    def test_silver_path_is_delta_table_location(self) -> None:
+        """Silver paths MUST resolve to Delta table directories."""
+        from unittest.mock import Mock
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path="data/output/silver", logger=Mock())
+        path = writer._resolve_table_path("chembl.activity")
+        normalized = path.replace("\\", "/")
+        assert normalized == "data/output/silver/chembl/activity"
+
+
+class TestGoldLayerInvariants:
+    """Tests ensuring Gold layer uses Delta table locations."""
+
+    def test_gold_path_is_delta_table_location(self) -> None:
+        """Gold paths MUST resolve to Delta table directories."""
+        from unittest.mock import Mock
+
+        from bioetl.infrastructure.storage.gold_writer import GoldWriter
+
+        writer = GoldWriter(base_path="data/output/gold", logger=Mock())
+        path = writer._resolve_table_path("chembl.activity")
+        normalized = path.replace("\\", "/")
+        assert normalized == "data/output/gold/chembl/activity"
 
 
 from unittest.mock import AsyncMock, Mock

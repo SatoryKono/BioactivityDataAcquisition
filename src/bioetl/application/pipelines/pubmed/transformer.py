@@ -90,7 +90,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         entity_type: str = "publication",
         tracer: TracingPort | None = None,
         metrics: MetricsPort | None = None,
-        silver_filters: SilverFilterConfig | GoldFilterConfig | None = None,
+        silver_filters: SilverFilterConfig | None = None,
         gold_filters: GoldFilterConfig | None = None,
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
@@ -373,10 +373,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             ),
             "citations_received": None,
             "is_oa": None,
-            "_lookup_method": cast("dict[str, Any]", record).get(
-                "_lookup_method", "pmid"
-            ),
-            "_original_id": cast("dict[str, Any]", record).get("_original_id"),
+            "_lookup_method": record.get("_lookup_method", "pmid"),
+            "_original_id": record.get("_original_id"),
             "_dq_warn": False,
             "_dq_error": False,
         }
