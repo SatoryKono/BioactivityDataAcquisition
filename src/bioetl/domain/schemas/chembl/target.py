@@ -52,6 +52,9 @@ class TargetSchema(ETLRecordSchema):
         nullable=True,
         description="Species group flag.",
     )
+    description: Series[str] | None = pa.Field(
+        nullable=True, description="Target description."
+    )
     downgraded: Series[bool] | None = pa.Field(
         nullable=True,
         description="Downgraded flag.",

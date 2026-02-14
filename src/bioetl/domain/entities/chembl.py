@@ -173,7 +173,7 @@ class ActivityRecord(BaseModel):
     )
 
     # Complex fields (JSON serialized for forensic)
-    activity_properties_json: str | None = Field(
+    activity_properties: str | None = Field(
         default=None, description="Activity properties as JSON string"
     )
 
@@ -274,12 +274,13 @@ class AssayRecord(BaseModel):
     )
 
     # Complex fields (JSON serialized)
-    assay_classifications_json: str | None = Field(
+    assay_classifications: str | None = Field(
         default=None, description="Assay classifications as JSON"
     )
-    assay_parameters_json: str | None = Field(
+    assay_parameters: str | None = Field(
         default=None, description="Assay parameters as JSON"
     )
+    # NOTE: _json suffix retained — forensic raw dump, not a renamed business field
     variant_sequence_json: str | None = Field(
         default=None, description="Original variant sequence as JSON"
     )
@@ -415,22 +416,22 @@ class MoleculeRecord(BaseModel):
     inchi_key: str | None = Field(default=None, description="Standard InChI Key")
 
     # Complex fields (JSON serialized)
-    molecule_hierarchy_json: str | None = Field(
+    molecule_hierarchy: str | None = Field(
         default=None, description="Molecule hierarchy as JSON"
     )
-    molecule_properties_json: str | None = Field(
+    molecule_properties: str | None = Field(
         default=None, description="Molecule properties as JSON"
     )
-    molecule_structures_json: str | None = Field(
+    molecule_structures: str | None = Field(
         default=None, description="Molecule structures as JSON"
     )
-    molecule_synonyms_json: str | None = Field(
+    molecule_synonyms: str | None = Field(
         default=None, description="Molecule synonyms as JSON"
     )
-    cross_references_json: str | None = Field(
+    cross_references: str | None = Field(
         default=None, description="Cross references as JSON"
     )
-    atc_classifications_json: str | None = Field(
+    atc_classifications: str | None = Field(
         default=None, description="ATC classifications as JSON"
     )
 
@@ -464,12 +465,8 @@ class TargetRecord(BaseModel):
     )
 
     # Optional fields
-    dap_id: int | None = Field(default=None, description="Drug-Affinity Panel ID")
     pipeline_stages: str | None = Field(
         default=None, description="Pipeline stages JSON"
-    )
-    target_constraints: str | None = Field(
-        default=None, description="Target constraints JSON"
     )
 
     # Flattened component fields
@@ -486,18 +483,15 @@ class TargetRecord(BaseModel):
     component_descriptions: list[str] | None = Field(
         default=None, description="Component descriptions"
     )
-    component_tax_ids: list[int] | None = Field(
-        default=None, description="Component taxonomy IDs"
-    )
 
     # Complex fields (JSON serialized)
-    target_components_json: str | None = Field(
+    target_components: str | None = Field(
         default=None, description="Target components as JSON"
     )
-    target_component_synonyms_json: str | None = Field(
+    target_component_synonyms: str | None = Field(
         default=None, description="Component synonyms as JSON"
     )
-    cross_references_json: str | None = Field(
+    cross_references: str | None = Field(
         default=None, description="Cross references as JSON"
     )
 
@@ -643,13 +637,13 @@ class TargetComponentRecord(BaseModel):
     )
 
     # Complex fields (JSON serialized)
-    target_component_synonyms_json: str | None = Field(
+    target_component_synonyms: str | None = Field(
         default=None, description="Synonyms as JSON"
     )
-    target_component_xrefs_json: str | None = Field(
+    target_component_xrefs: str | None = Field(
         default=None, description="Cross references as JSON"
     )
-    protein_classifications_json: str | None = Field(
+    protein_classifications: str | None = Field(
         default=None, description="Protein classifications as JSON"
     )
 

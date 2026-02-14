@@ -108,7 +108,9 @@ _BIOLOGICAL_CONTEXT = FieldGroup(
             "bao_label",
         ),
         # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
-        FieldSpec("assay_tax_id", target="taxonomy_id", converter=validate_taxonomy_id),
+        FieldSpec(
+            "assay_tax_id", target="assay_taxonomy_id", converter=validate_taxonomy_id
+        ),
     ),
 )
 

@@ -2,10 +2,8 @@ import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
-from datetime import datetime
 
 import pandas as pd
-import numpy as np
 from hypothesis import settings
 import pytest
 import vcr as vcrpy
@@ -266,7 +264,7 @@ CROSSREF_SPECIFIC = [
 
 def _create_minimal_df(columns, provider, entity_id, pk_field, pk_value):
     all_cols = list(set(SYSTEM_COLUMNS + BASE_PUBLICATION_COLUMNS + columns))
-    data = {col: None for col in all_cols}
+    data = dict.fromkeys(all_cols)
 
     # Set required system fields
     data["entity_id"] = entity_id

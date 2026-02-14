@@ -378,6 +378,15 @@
     "required": false,
     "unique": false
   },
+  "molecular_formula": {
+    "checks": [],
+    "coerce": false,
+    "description": "Full molecular formula.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "molecular_weight": {
     "checks": [],
     "coerce": false,
@@ -456,6 +465,15 @@
     "coerce": false,
     "description": "Molecule type.",
     "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "mw_freebase": {
+    "checks": [],
+    "coerce": false,
+    "description": "Molecular weight of parent compound.",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -566,15 +584,6 @@
     "required": false,
     "unique": false
   },
-  "property_full_molformula": {
-    "checks": [],
-    "coerce": false,
-    "description": "Full molecular formula.",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
   "property_full_mwt": {
     "checks": [
       {
@@ -631,15 +640,6 @@
     "required": false,
     "unique": false
   },
-  "property_mw_freebase": {
-    "checks": [],
-    "coerce": false,
-    "description": "Molecular weight of parent compound.",
-    "dtype": "float64",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
   "property_psa": {
     "checks": [
       {
@@ -654,7 +654,21 @@
     "required": false,
     "unique": false
   },
-  "property_qed_weighted": {
+  "property_rtb": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Canonical rotatable bond count.",
+    "dtype": "int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "qed_score": {
     "checks": [
       {
         "name": "greater_than_or_equal_to",
@@ -672,7 +686,7 @@
     "required": false,
     "unique": false
   },
-  "property_ro3_pass": {
+  "ro3_pass": {
     "checks": [
       {
         "name": "isin",
@@ -686,7 +700,7 @@
     "required": false,
     "unique": false
   },
-  "property_ro5_violations": {
+  "ro5_violation_count": {
     "checks": [
       {
         "name": "greater_than_or_equal_to",
@@ -699,20 +713,6 @@
     ],
     "coerce": false,
     "description": "Number of Lipinski rule-of-5 violations.",
-    "dtype": "int64",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
-  "property_rtb": {
-    "checks": [
-      {
-        "name": "greater_than_or_equal_to",
-        "type": "ge"
-      }
-    ],
-    "coerce": false,
-    "description": "Canonical rotatable bond count.",
     "dtype": "int64",
     "nullable": true,
     "required": false,

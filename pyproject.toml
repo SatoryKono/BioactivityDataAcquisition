@@ -298,6 +298,9 @@ module = [
     "bioetl.domain.schemas.uniprot.protein",
     "bioetl.domain.schemas.uniprot.isoform",
     "bioetl.domain.schemas.uniprot.idmapping",
+    # Pandera @pa.check decorators in internal modules
+    "bioetl.domain.schemas.uniprot._core",
+    "bioetl.domain.schemas.uniprot._features",
     "bioetl.domain.schemas.pubmed.article",
     "bioetl.domain.schemas.pubmed.publication",
     "bioetl.domain.schemas.pubchem.compound",
