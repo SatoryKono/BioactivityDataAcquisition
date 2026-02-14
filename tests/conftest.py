@@ -3,8 +3,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
 
-import pandas as pd
-from hypothesis import settings
 import pytest
 
 # Heavy deps are guarded so that minimal CI environments (e.g. detect-secrets
