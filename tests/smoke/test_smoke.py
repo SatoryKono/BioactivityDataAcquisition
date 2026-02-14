@@ -46,6 +46,31 @@ class TestRuntimeDependencies:
 
 
 @pytest.mark.smoke
+class TestDevDependencies:
+    """Verify critical development dependencies are installed and importable."""
+
+    @pytest.mark.parametrize(
+        "module_name",
+        [
+            "detect_secrets",
+            "mypy",
+            "pytest",
+            "hypothesis",
+            "vcr",
+            "importlinter",
+            "psutil",
+            "radon",
+            "xenon",
+        ],
+    )
+    def test_dependency_importable(self, module_name: str) -> None:
+        """Each critical dev dependency must be importable."""
+        import importlib
+
+        importlib.import_module(module_name)
+
+
+@pytest.mark.smoke
 class TestCoreImports:
     """Verify core modules import without errors."""
 

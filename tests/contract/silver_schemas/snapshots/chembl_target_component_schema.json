@@ -77,13 +77,31 @@
     "required": false,
     "unique": false
   },
+  "accession": {
+    "checks": [],
+    "coerce": false,
+    "description": "UniProt accession.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "component_id": {
     "checks": [],
     "coerce": false,
-    "description": "FK to component_sequences.",
+    "description": "Component ID (primary key).",
     "dtype": "int64",
     "nullable": false,
     "required": true,
+    "unique": false
+  },
+  "component_type": {
+    "checks": [],
+    "coerce": false,
+    "description": "Component type (PROTEIN, DNA, RNA, etc.).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
   "content_hash": {
@@ -100,6 +118,15 @@
     "required": true,
     "unique": false
   },
+  "description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Component description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "entity_id": {
     "checks": [],
     "coerce": false,
@@ -109,64 +136,67 @@
     "required": true,
     "unique": false
   },
-  "homologue": {
-    "checks": [
-      {
-        "name": "isin",
-        "type": "isin"
-      }
-    ],
+  "organism": {
+    "checks": [],
     "coerce": false,
-    "description": "Homologue flag.",
-    "dtype": "int64",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
-  "relationship": {
-    "checks": [
-      {
-        "name": "isin",
-        "type": "isin"
-      }
-    ],
-    "coerce": false,
-    "description": "Relationship type.",
+    "description": "Source organism.",
     "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
   },
-  "stoichiometry": {
-    "checks": [
-      {
-        "name": "greater_than_or_equal_to",
-        "type": "ge"
-      }
-    ],
-    "coerce": false,
-    "description": "Stoichiometry.",
-    "dtype": "int64",
+  "protein_classification_id": {
+    "checks": [],
+    "coerce": true,
+    "description": "Primary protein classification ID (first from list).",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
   },
-  "targcomp_id": {
+  "protein_classification_ids": {
     "checks": [],
     "coerce": false,
-    "description": "Primary key.",
-    "dtype": "int64",
-    "nullable": false,
-    "required": true,
+    "description": "List of protein classification IDs.",
+    "dtype": "object",
+    "nullable": true,
+    "required": false,
     "unique": false
   },
-  "tid": {
+  "protein_classifications": {
     "checks": [],
     "coerce": false,
-    "description": "FK to target.",
-    "dtype": "int64",
-    "nullable": false,
-    "required": true,
+    "description": "JSON string of protein classifications (forensic).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_component_synonyms": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of component synonyms.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_component_xrefs": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON string of cross references.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "taxonomy_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "NCBI Taxonomy ID.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
     "unique": false
   }
 }

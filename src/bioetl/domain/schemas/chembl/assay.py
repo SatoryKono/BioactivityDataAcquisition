@@ -65,7 +65,7 @@ class AssaySchema(ETLRecordSchema):
     assay_organism: Series[str] | None = pa.Field(
         nullable=True, description="Organism."
     )
-    taxonomy_id: Series[float] | None = pa.Field(
+    assay_taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
         description="NCBI Taxonomy ID (float for nullable int).",
     )

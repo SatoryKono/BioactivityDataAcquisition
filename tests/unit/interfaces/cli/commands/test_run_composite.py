@@ -11,6 +11,7 @@ import pytest
 from click.testing import CliRunner
 
 from bioetl.application.composite.runner import CompositeRuntimeConfig
+from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run
 from bioetl.domain.composite.result import (
     CompositeResult,
     EnrichmentResult,
@@ -347,7 +348,7 @@ class TestRunCompositeCommand:
 
     def test_successful_execution(self, cli_runner: CliRunner) -> None:
         """Test successful composite pipeline execution via CLI."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication"]
             )
@@ -358,7 +359,7 @@ class TestRunCompositeCommand:
 
     def test_failed_execution(self, cli_runner: CliRunner) -> None:
         """Test failed composite pipeline execution via CLI."""
-        with patch("asyncio.run", return_value=(False, "Config not found")):
+        with mock_asyncio_run(return_value=(False, "Config not found")):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication"]
             )
@@ -369,7 +370,7 @@ class TestRunCompositeCommand:
 
     def test_dry_run_mode(self, cli_runner: CliRunner) -> None:
         """Test dry-run mode displays warning."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication", "--dry-run"]
             )
@@ -379,7 +380,7 @@ class TestRunCompositeCommand:
 
     def test_resume_mode(self, cli_runner: CliRunner) -> None:
         """Test resume mode displays info message."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication", "--resume"]
             )
@@ -389,7 +390,7 @@ class TestRunCompositeCommand:
 
     def test_keyboard_interrupt(self, cli_runner: CliRunner) -> None:
         """Test handling of keyboard interrupt."""
-        with patch("asyncio.run", side_effect=KeyboardInterrupt()):
+        with mock_asyncio_run(side_effect=KeyboardInterrupt):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication"]
             )
@@ -399,7 +400,7 @@ class TestRunCompositeCommand:
 
     def test_unexpected_exception(self, cli_runner: CliRunner) -> None:
         """Test handling of unexpected exception."""
-        with patch("asyncio.run", side_effect=RuntimeError("Unexpected error")):
+        with mock_asyncio_run(side_effect=RuntimeError("Unexpected error")):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication"]
             )
@@ -409,7 +410,7 @@ class TestRunCompositeCommand:
 
     def test_health_server_disabled(self, cli_runner: CliRunner) -> None:
         """Test --no-health-server option."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 ["run-composite", "--composite", "publication", "--no-health-server"],
@@ -419,7 +420,7 @@ class TestRunCompositeCommand:
 
     def test_custom_health_port(self, cli_runner: CliRunner) -> None:
         """Test --health-port option."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 [
@@ -439,7 +440,7 @@ class TestRunCompositeRuntimeConfig:
 
     def test_default_config(self, cli_runner: CliRunner) -> None:
         """Test default runtime config values."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication"]
             )
@@ -448,7 +449,7 @@ class TestRunCompositeRuntimeConfig:
 
     def test_seed_limit_option(self, cli_runner: CliRunner) -> None:
         """Test --seed-limit option."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 ["run-composite", "--composite", "publication", "--seed-limit", "100"],
@@ -458,7 +459,7 @@ class TestRunCompositeRuntimeConfig:
 
     def test_enrich_only_option(self, cli_runner: CliRunner) -> None:
         """Test --enrich-only option parsing."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 [
@@ -474,7 +475,7 @@ class TestRunCompositeRuntimeConfig:
 
     def test_required_only_option(self, cli_runner: CliRunner) -> None:
         """Test --required-only option."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 ["run-composite", "--composite", "publication", "--required-only"],
@@ -484,7 +485,7 @@ class TestRunCompositeRuntimeConfig:
 
     def test_force_enricher_option(self, cli_runner: CliRunner) -> None:
         """Test --force-enricher option."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 [
@@ -500,7 +501,7 @@ class TestRunCompositeRuntimeConfig:
 
     def test_debug_option(self, cli_runner: CliRunner) -> None:
         """Test --debug option."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication", "--debug"]
             )
@@ -509,7 +510,7 @@ class TestRunCompositeRuntimeConfig:
 
     def test_no_cached_bronze_enrichers_option(self, cli_runner: CliRunner) -> None:
         """Test --no-cached-bronze-enrichers forces API for enrichers."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 [
@@ -524,7 +525,7 @@ class TestRunCompositeRuntimeConfig:
 
     def test_no_cached_bronze_dependencies_option(self, cli_runner: CliRunner) -> None:
         """Test --no-cached-bronze-dependencies forces API for dependencies."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 [
@@ -555,7 +556,7 @@ class TestHealthServerInfoOutput:
     def test_health_server_info_displayed(self, cli_runner: CliRunner) -> None:
         """Test health server info is displayed."""
         with (
-            patch("asyncio.run", return_value=(True, None)),
+            mock_asyncio_run(return_value=(True, None)),
             patch(
                 "bioetl.interfaces.cli.commands.run_composite.echo_health_server_info"
             ) as mock_echo,
@@ -619,7 +620,7 @@ class TestRunCompositeAllOptionsOutput:
 
     def test_combined_options_output(self, cli_runner: CliRunner) -> None:
         """Test output with multiple options combined."""
-        with patch("asyncio.run", return_value=(True, None)):
+        with mock_asyncio_run(return_value=(True, None)):
             result = cli_runner.invoke(
                 cli,
                 [
@@ -642,7 +643,7 @@ class TestRunCompositeAllOptionsOutput:
 
     def test_failed_with_unknown_error(self, cli_runner: CliRunner) -> None:
         """Test failed execution with None error message."""
-        with patch("asyncio.run", return_value=(False, None)):
+        with mock_asyncio_run(return_value=(False, None)):
             result = cli_runner.invoke(
                 cli, ["run-composite", "--composite", "publication"]
             )

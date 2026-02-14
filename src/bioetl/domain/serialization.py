@@ -130,7 +130,7 @@ def deserialize_from_json(data: str | bytes) -> dict[str, Any] | list[Any]:
 
 
 def _escape_non_ascii(text: str) -> str:
-    """Escape non-ASCII characters using JSON unicode escape format (\\uXXXX)."""
+    """Escape non-ASCII characters using JSON unicode escape format (\\uNNNN)."""
     return "".join(f"\\u{ord(c):04x}" if ord(c) > 127 else c for c in text)
 
 

@@ -74,6 +74,22 @@ class BasePanderaValidator:
         df = pd.DataFrame(records)
         return self._validate_with_schema(df)
 
+    def _reorder_to_schema(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Reorder DataFrame columns to match schema definition order.
+
+        Preserves extra columns at the end so strict=True still catches them.
+        Skips reordering for DataFrameModel classes that lack .columns.
+        """
+        assert self._schema is not None
+        if not hasattr(self._schema, "columns"):
+            return df
+        schema_cols = list(self._schema.columns.keys())
+        df_cols = df.columns.tolist()
+        schema_set = set(schema_cols)
+        ordered = [c for c in schema_cols if c in df_cols]
+        extra = [c for c in df_cols if c not in schema_set]
+        return df[ordered + extra]
+
     def _validate_with_schema(self, df: pd.DataFrame) -> ValidationResult:
         """Validate DataFrame against schema.
 
@@ -102,6 +118,7 @@ class BasePanderaValidator:
                         column = self._schema.columns[name]
                         if getattr(column, "nullable", False):
                             df_to_validate[name] = None
+            df_to_validate = self._reorder_to_schema(df_to_validate)
             self._schema.validate(df_to_validate, lazy=True)
             return ValidationResult(valid=True)
         except Exception as e:
@@ -184,11 +201,12 @@ class PanderaGoldValidator(BasePanderaValidator):
                 # Filter DF to only schema columns
                 # Handle case where schema column is NOT in df (missing column) - Pandera handles that.
                 cols_to_keep = list(schema_columns.intersection(df.columns))
-                df_to_validate = df[cols_to_keep]
+                df_to_validate = self._reorder_to_schema(df[cols_to_keep])
 
                 self._schema.validate(df_to_validate, lazy=True)
             else:
-                self._schema.validate(df, lazy=True)
+                df_to_validate = self._reorder_to_schema(df)
+                self._schema.validate(df_to_validate, lazy=True)
 
             return ValidationResult(valid=True)
         except Exception as e:

@@ -291,7 +291,7 @@ requires-dist = [
     { name = "mkdocs-mermaid2-plugin", marker = "extra == 'docs'", specifier = ">=1.1" },
     { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=0.25" },
     { name = "mutmut", marker = "extra == 'dev'", specifier = ">=2.5" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = "==1.19.1" },
     { name = "openpyxl", marker = "extra == 'export'", specifier = ">=3.1" },
     { name = "opentelemetry-api", marker = "extra == 'dev'", specifier = ">=1.20" },
     { name = "opentelemetry-api", marker = "extra == 'tests'", specifier = ">=1.20" },

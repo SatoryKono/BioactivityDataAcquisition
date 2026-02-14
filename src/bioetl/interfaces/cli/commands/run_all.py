@@ -321,21 +321,23 @@ def run_all(
         log_level="DEBUG" if debug else "INFO",
     )
 
+    coro = _run_all_pipelines_async(
+        pipelines,
+        options,
+        health_server_enabled=health_server,
+        health_port=health_port,
+    )
     try:
-        batch_result = asyncio.run(
-            _run_all_pipelines_async(
-                pipelines,
-                options,
-                health_server_enabled=health_server,
-                health_port=health_port,
-            )
-        )
+        batch_result = asyncio.run(coro)
     except KeyboardInterrupt:
         echo_warning("Batch run interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
     except Exception as e:
         echo_error("Unexpected error during batch execution", str(e))
         sys.exit(ExitCode.FAIL)
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
 
     # Output summary and exit
     _echo_batch_summary(batch_result, dry_run)

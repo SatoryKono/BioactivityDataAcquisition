@@ -68,6 +68,11 @@ data/output/{layer}/{provider}/{entity}/
 | Silver | `data/output/silver/{provider}/{entity}/` | `data/output/silver/chembl/activity/` |
 | Gold | `data/output/gold/{provider}/{entity}/` | `data/output/gold/chembl/activity/` |
 
+**Bronze file layout (contract):**
+```
+data/output/bronze/{provider}/{entity}/{YYYY-MM-DD}/{filename}.jsonl.zst
+```
+
 **CSV Export** использует тот же путь, что и Delta:
 ```yaml
 csv_export:
