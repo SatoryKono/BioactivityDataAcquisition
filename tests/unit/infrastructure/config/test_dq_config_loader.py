@@ -492,3 +492,42 @@ class TestNormalizeToFileFormat:
 
         assert "cross_field_validations" not in result
         assert len(result["entity_cross_field_validations"]) == 1
+
+
+def test_dq_loader_prefers_new_quality_dir(tmp_path: Path) -> None:
+    """Loader should prioritize configs/quality over legacy configs/dq."""
+    for root_name, hard_fail in (("quality", 0.11), ("dq", 0.44)):
+        root = tmp_path / root_name
+        root.mkdir()
+        (root / "_defaults.yaml").write_text(
+            f"""
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.05
+  hard_fail: {hard_fail}
+common_field_validations: []
+"""
+        )
+
+    loader = DQConfigLoader(tmp_path)
+    config = loader.load("missing", "missing")
+    assert config.hard_fail_threshold == 0.11
+
+
+def test_dq_loader_falls_back_to_legacy_dq_dir(tmp_path: Path) -> None:
+    """Loader should read legacy configs/dq when configs/quality is absent."""
+    root = tmp_path / "dq"
+    root.mkdir()
+    (root / "_defaults.yaml").write_text(
+        """
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.22
+common_field_validations: []
+"""
+    )
+
+    loader = DQConfigLoader(tmp_path)
+    config = loader.load("missing", "missing")
+    assert config.hard_fail_threshold == 0.22

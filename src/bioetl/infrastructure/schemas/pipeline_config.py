@@ -738,7 +738,7 @@ class PipelineYamlConfig(BaseModel):
     DQ Config Resolution:
         The dq_config_file field references an external DQ configuration file
         that is loaded through the DQConfigLoader hierarchy. If both dq_config_file
-        and dq_rules are present, dq_rules acts as inline overrides on top of
+        and dq_overrides are present, dq_overrides acts as inline overrides on top of
         the file-based configuration.
 
     Note:
@@ -758,17 +758,17 @@ class PipelineYamlConfig(BaseModel):
 
     # DQ Configuration
     # - dq_config_file: Reference to external DQ config file (hierarchical loading)
-    # - dq_rules: Inline DQ rules (used as overrides if dq_config_file present)
+    # - dq_overrides: Inline DQ rules (used as overrides if dq_config_file present)
     dq_config_file: str | None = Field(
         default=None,
         description="Path to DQ config file relative to pipeline config. "
         "When set, DQ config is loaded from the hierarchical DQ system. "
-        "Example: ../../dq/entities/chembl/activity.yaml",
+        "Example: ../../quality/entities/chembl/activity.yaml",
     )
-    dq_rules: DQConfig = Field(
+    dq_overrides: DQConfig = Field(
         default_factory=DQConfig,
-        validation_alias=AliasChoices("dq_rules", "dq"),
-        serialization_alias="dq_rules",
+        validation_alias=AliasChoices("dq_overrides", "dq_rules", "dq"),
+        serialization_alias="dq_overrides",
     )
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
 
