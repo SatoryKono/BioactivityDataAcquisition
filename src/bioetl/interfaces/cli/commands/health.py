@@ -87,11 +87,15 @@ def health_server_command(host: str, port: int) -> None:
             await server.stop()
             click.echo("\nHealth server stopped.")
 
+    coro = run()
     try:
-        asyncio.run(run())
+        asyncio.run(coro)
     except KeyboardInterrupt:
         click.echo("\nShutting down...")
         sys.exit(ExitCode.OK)
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
 
 
 @health.command("check")
@@ -134,11 +138,15 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         # Convert to dict format for backward compatibility
         return summary.to_dict()
 
+    coro = run_checks()
     try:
-        results = asyncio.run(run_checks())
+        results = asyncio.run(coro)
     except Exception as e:
         click.echo(f"Error running health checks: {e}", err=True)
         sys.exit(ExitCode.FAIL)
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
 
     if output_json:
         click.echo(json_module.dumps(results, indent=2))

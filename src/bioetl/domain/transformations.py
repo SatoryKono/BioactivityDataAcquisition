@@ -248,6 +248,8 @@ def safe_str(value: Any, default: str | None = None) -> str | None:
     """
     if value is None:
         return default
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
     try:
         return str(value)
     except (ValueError, TypeError):

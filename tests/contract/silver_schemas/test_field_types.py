@@ -64,6 +64,7 @@ class TestFieldTypes:
             "component_ids",
             "component_relationships",
             "component_types",
+            "protein_classification_ids",
         }
 
         unexpected_object_fields = [

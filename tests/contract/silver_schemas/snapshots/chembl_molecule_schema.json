@@ -321,7 +321,7 @@
       }
     ],
     "coerce": false,
-    "description": "Standard InChI Key (27 characters, XXXX-YYYY-Z format).",
+    "description": "Standard InChI Key (27 characters, NNNN-YYYY-Z format).",
     "dtype": "str",
     "nullable": true,
     "required": false,

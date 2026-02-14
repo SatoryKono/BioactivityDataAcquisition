@@ -17,7 +17,7 @@ from bioetl.domain.value_objects.base import ValueObject
 class DOI(ValueObject[str]):
     """Digital Object Identifier.
 
-    Format: 10.XXXX/suffix where XXXX is a registrant code (4+ digits).
+    Format: 10.NNNN/suffix where NNNN is a registrant code (4+ digits).
     Examples: 10.1000/xyz123, 10.12345/abc.def
 
     Invariants:
@@ -70,7 +70,7 @@ class DOI(ValueObject[str]):
         normalized = self._strip_url_prefix(normalized).strip().lower()
 
         if not self._PATTERN.match(normalized):
-            raise ValueError(f"Invalid DOI format: {value!r}. Expected: 10.XXXX/suffix")
+            raise ValueError(f"Invalid DOI format: {value!r}. Expected: 10.NNNN/suffix")
 
         return normalized
 
@@ -93,7 +93,7 @@ class DOI(ValueObject[str]):
         Returns:
             Registrant code string (e.g., '1038' for Nature Publishing).
         """
-        # Format: 10.XXXX/suffix
+        # Format: 10.NNNN/suffix
         return self._value.split("/")[0][3:]  # Skip "10."
 
     @classmethod
