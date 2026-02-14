@@ -132,11 +132,11 @@ class PublicationSchema(ETLRecordSchema):
     )
 
     # === Citation Metrics ===
-    is_referenced_by_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Citation count (times referenced)"
+    is_referenced_by_count: Series[float] | None = pa.Field(
+        nullable=True, ge=0, description="Citation count (float for nullable int)"
     )
-    references_count: Series[int] | None = pa.Field(
-        nullable=True, ge=0, description="Reference count (bibliography size)"
+    references_count: Series[float] | None = pa.Field(
+        nullable=True, ge=0, description="Reference count (float for nullable int)"
     )
 
     # === Funding & Clinical Trials ===
@@ -156,7 +156,7 @@ class PublicationSchema(ETLRecordSchema):
         """Pandera configuration."""
 
         strict = True
-        ordered = True
+        ordered = False
         coerce = True
         name = "PublicationSchema"
         description = "CrossRef Publication Silver layer validation"

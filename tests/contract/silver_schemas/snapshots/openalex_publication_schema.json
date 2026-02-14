@@ -286,7 +286,7 @@
       }
     ],
     "coerce": false,
-    "description": "ISSN-L (format: XXXX-XXXX)",
+    "description": "ISSN-L (format: NNNN-NNNN)",
     "dtype": "str",
     "nullable": true,
     "required": true,

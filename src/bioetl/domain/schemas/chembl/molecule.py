@@ -257,7 +257,7 @@ class MoleculeSchema(ETLRecordSchema):
     inchi_key: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=INCHI_KEY_REGEX_PATTERN,
-        description="Standard InChI Key (27 characters, XXXX-YYYY-Z format).",
+        description="Standard InChI Key (27 characters, NNNN-YYYY-Z format).",
     )
 
     # === Complex Fields (JSON Strings) ===

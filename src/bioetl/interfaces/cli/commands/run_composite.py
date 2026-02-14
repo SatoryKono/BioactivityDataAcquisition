@@ -245,21 +245,23 @@ def run_composite(
     # Display health server info
     echo_health_server_info(health_server, health_port)
 
+    coro = _run_composite_async(
+        composite,
+        runtime,
+        health_server_enabled=health_server,
+        health_port=health_port,
+    )
     try:
-        success, error_message = asyncio.run(
-            _run_composite_async(
-                composite,
-                runtime,
-                health_server_enabled=health_server,
-                health_port=health_port,
-            )
-        )
+        success, error_message = asyncio.run(coro)
     except KeyboardInterrupt:
         echo_warning("Composite pipeline interrupted by user (Ctrl+C)")
         sys.exit(ExitCode.SIGINT)
     except Exception as e:
         echo_error("Unexpected error during composite execution", str(e))
         sys.exit(ExitCode.FAIL)
+    finally:
+        if getattr(coro, "cr_frame", None) is not None:
+            coro.close()
 
     if success:
         echo_info("Composite pipeline completed successfully")
