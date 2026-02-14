@@ -158,29 +158,3 @@ def validate_taxonomy_id(value: str | int | None) -> int | None:
     """
     vo = TaxonomyId.from_raw(value)
     return vo.value if vo else None
-
-
-def validate_taxonomy_id_str(value: str | int | None) -> str | None:
-    """Validate and convert raw value to taxonomy ID string.
-
-    Convenience function for use in field_specs converters where
-    string output is needed (e.g., ActivityTransformer for target_taxonomy_id).
-
-    Args:
-        value: Raw taxonomy ID value (string, integer, or None).
-
-    Returns:
-        Validated string taxonomy ID, or None if invalid.
-
-    Examples:
-        >>> validate_taxonomy_id_str(9606)
-        '9606'
-        >>> validate_taxonomy_id_str("9606")
-        '9606'
-        >>> validate_taxonomy_id_str(None)
-        None
-        >>> validate_taxonomy_id_str("invalid")
-        None
-    """
-    vo = TaxonomyId.from_raw(value)
-    return str(vo.value) if vo else None

@@ -9,8 +9,6 @@ import asyncio
 from typing import Any
 from unittest.mock import patch
 
-import pytest
-
 
 def mock_asyncio_run(
     *,

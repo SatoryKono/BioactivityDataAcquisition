@@ -347,7 +347,7 @@ class TestMoleculeFieldMapping:
             "therapeutic_flag",
             "withdrawn_flag",
             "black_box_warning",
-            "property_qed_weighted",
+            "qed_score",
             "hierarchy_parent_chembl_id",
             "atc_classifications",
         ]
