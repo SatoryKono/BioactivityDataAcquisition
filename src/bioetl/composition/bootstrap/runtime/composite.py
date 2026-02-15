@@ -11,9 +11,9 @@ from pydantic import ValidationError
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointManager
 from bioetl.application.composite.coordinator import EnrichmentCoordinator
+from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
 from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
 from bioetl.application.composite.key_extractor import KeyExtractorService
-from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
