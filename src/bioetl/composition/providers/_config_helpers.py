@@ -23,12 +23,12 @@ if TYPE_CHECKING:
     from typing import Any
 
     from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.models.filter import ExtractionParams
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
 def _get_factories(
-    *,
     data_source_factory_getter: Callable[[], Any],
     http_client_factory_getter: Callable[[], Any],
 ) -> tuple[Any, Any]:
@@ -121,6 +121,35 @@ def _get_adapter_config(provider: str, default_page_size: int = 1000) -> Adapter
 
     # Fallback to domain defaults when config file does not exist
     return AdapterConfig(page_size=default_page_size)
+
+
+def _validate_extraction_input_filter_overlap(
+    extraction_params: ExtractionParams,
+    input_filter: InputFilterConfig,
+    logger: LoggerPort,
+) -> None:
+    """Warn if input_filter field overlaps extraction_params keys."""
+    if not input_filter.enabled or extraction_params.is_empty:
+        return
+
+    filter_field = input_filter.filter_field
+    if filter_field and filter_field in extraction_params.params:
+        logger.warning(
+            "extraction_params_input_filter_overlap",
+            overlap_field=filter_field,
+            extraction_value=str(extraction_params.params[filter_field]),
+            resolution="input_filter will override extraction_params for this field",
+        )
+
+    if input_filter.columns:
+        for col in input_filter.columns:
+            if col.filter_field in extraction_params.params:
+                logger.warning(
+                    "extraction_params_input_filter_overlap",
+                    overlap_field=col.filter_field,
+                    extraction_value=str(extraction_params.params[col.filter_field]),
+                    resolution="input_filter will override",
+                )
 
 
 def _wrap_with_filter(
