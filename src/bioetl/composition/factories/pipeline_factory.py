@@ -423,7 +423,7 @@ def build_pipeline_services(
         logger: Structured logger
         config: Pre-loaded pipeline config (avoids duplicate I/O)
         filter_config: Optional input filter configuration
-        tracer: Optional tracer (created via bootstrap_tracer())
+        tracer: Optional tracer (created via bootstrap_tracer_port())
         dq_monitor: Optional data quality monitor for anomaly detection
         metadata_coordinator: Optional MetadataCoordinator for centralized
                             metadata creation across Bronze, Silver, Gold.

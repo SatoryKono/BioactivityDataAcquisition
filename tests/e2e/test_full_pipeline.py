@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from bioetl.composition.factories.storage import StorageAdapter, StorageContext
 from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -97,7 +97,7 @@ class TestChEMBLPipelineE2E:
             return_value=storage_context,
         ):
             ctx = create_test_context("chembl_activity", limit=e2e_pipeline_limit)
-            runner = bootstrap_pipeline(ctx)
+            runner = bootstrap_pipeline_runner(ctx)
 
             # Execute pipeline
             await runner.run()
@@ -182,7 +182,7 @@ async def test_pubchem_compound_pipeline(
             limit=e2e_pipeline_limit,
             query="aspirin",
         )
-        runner = bootstrap_pipeline(ctx)
+        runner = bootstrap_pipeline_runner(ctx)
 
         # Execute pipeline
         await runner.run()
@@ -258,7 +258,7 @@ async def test_pipeline_resume_after_failure(
         return_value=storage_context,
     ):
         ctx = create_test_context("chembl_activity", limit=5)
-        runner = bootstrap_pipeline(ctx)
+        runner = bootstrap_pipeline_runner(ctx)
 
         await runner.run()
 
@@ -278,7 +278,7 @@ async def test_pipeline_resume_after_failure(
         return_value=storage_context,
     ):
         ctx = create_test_context("chembl_activity", limit=5)
-        runner = bootstrap_pipeline(ctx)
+        runner = bootstrap_pipeline_runner(ctx)
 
         await runner.run()
 
@@ -349,7 +349,7 @@ async def test_pipeline_idempotency(
         return_value=storage_context,
     ):
         ctx = create_test_context("chembl_activity", limit=5)
-        runner = bootstrap_pipeline(ctx)
+        runner = bootstrap_pipeline_runner(ctx)
 
         await runner.run()
 
@@ -370,7 +370,7 @@ async def test_pipeline_idempotency(
             return_value=storage_context,
         ):
             ctx = create_test_context("chembl_activity", limit=5)
-            runner = bootstrap_pipeline(ctx)
+            runner = bootstrap_pipeline_runner(ctx)
 
             await runner.run()
 
