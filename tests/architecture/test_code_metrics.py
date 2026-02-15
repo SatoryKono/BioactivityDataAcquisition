@@ -29,7 +29,7 @@ class TestFileSizeLimits:
     # Note: ports.py was split into ports/ package in main
     EXEMPTIONS = {
         # Application layer exemptions
-        "runner.py": 1090,  # 1086 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py)
+        "runner.py": 1140,  # 1135 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py) + CV quarantine
         "checkpoint.py": 545,  # 544 LOC - CompositeCheckpointState with immutable state transitions + CompositeCheckpointManager
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
@@ -95,7 +95,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 640,  # 637 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + _extract_multi_filter_ids + _resolve_bronze_opts + skip_gold + cross-validation
+        "composite.py": 650,  # 641 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + cross-validation + quarantine wiring
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
@@ -656,6 +656,7 @@ class TestClassSize:
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "EnrichmentCrossValidator": 385,  # 380 lines - Cross-validation with multi-enricher comparison + vectorized mismatch detection
         "DependencyCoordinator": 375,  # 370 lines - Chained dependency coordination with key extraction
+        "EnrichmentCrossValidator": 380,  # 372 lines - Cross-validation with exact/fuzzy/numeric comparison methods
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers
         # Publication adapters with APIRequestCollector (metadata enrichment)
