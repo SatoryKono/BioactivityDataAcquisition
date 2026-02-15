@@ -81,8 +81,8 @@ def seed_molecule_df() -> pl.DataFrame:
                 "CC1=C(C=C(C=C1)NC(=O)C2=CC=C(C=C2)CN3CCN(CC3)C)NC4=NC=CC(=N4)C5=CN=CC=C5",  # Imatinib
             ],
             "max_phase": [4.0, 4.0, 4.0],
-            "property_full_mwt": [180.16, 206.28, 493.60],
-            "property_alogp": [1.19, 3.50, 3.50],
+            "molecular_weight": [180.16, 206.28, 493.60],
+            "logp": [1.19, 3.50, 3.50],
             "therapeutic_flag": [True, True, True],
             "withdrawn_flag": [False, False, False],
         }
@@ -328,15 +328,17 @@ class TestMoleculeFieldMapping:
             "inchi_key": "inchikey",
             "canonical_smiles": "canonical_smiles",  # Same name
             "standard_inchi": "inchi",
-            # ChEMBL -> PubChem (different concepts)
-            "property_full_mwt": "molecular_weight",
-            "property_psa": "tpsa",
+            # ChEMBL -> PubChem (unified alias names)
+            "molecular_weight": "molecular_weight",  # Same after Gold unification
+            "polar_surface_area": "tpsa",
         }
 
+        # Fields that share the same name across providers after Gold unification
+        unified_fields = {"canonical_smiles", "molecular_weight"}
         for chembl_field, pubchem_field in mappings.items():
-            assert (
-                chembl_field != pubchem_field or chembl_field == "canonical_smiles"
-            ), f"Expected different field names for {chembl_field}"
+            assert chembl_field != pubchem_field or chembl_field in unified_fields, (
+                f"Expected different field names for {chembl_field}"
+            )
 
     def test_chembl_only_fields(self) -> None:
         """Verify ChEMBL-only fields are preserved."""

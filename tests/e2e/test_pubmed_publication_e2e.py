@@ -15,7 +15,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,
@@ -70,7 +70,7 @@ async def test_pubmed_publication_full_cycle(e2e_data_dir: Path):
     ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Bronze layer
@@ -110,7 +110,7 @@ async def test_pubmed_publication_date_fields(e2e_data_dir: Path):
     ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check date fields
@@ -152,7 +152,7 @@ async def test_pubmed_publication_journal_fields(e2e_data_dir: Path):
     ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check journal fields
@@ -177,7 +177,7 @@ async def test_pubmed_publication_classification_fields(e2e_data_dir: Path):
     ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check classification fields
@@ -220,7 +220,7 @@ async def test_pubmed_publication_identifier_fields(e2e_data_dir: Path):
     ctx = create_test_context("pubmed_publication", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check identifier fields

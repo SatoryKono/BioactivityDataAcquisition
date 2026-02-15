@@ -16,7 +16,7 @@ from bioetl.composition._pipeline_execution import (
 )
 from bioetl.composition.bootstrap import (
     bootstrap_checkpoint_manager,
-    bootstrap_cleanup,
+    bootstrap_cleanup_service,
     bootstrap_lifecycle_service,
     bootstrap_quarantine_manager,
     load_pipeline_config,
@@ -149,7 +149,7 @@ async def preview_cleanup(pipeline: str) -> CleanupPreview:
     """
     _ensure_registrations()
     config = load_pipeline_config(pipeline)
-    cleanup_service = bootstrap_cleanup()
+    cleanup_service = bootstrap_cleanup_service()
     return await cleanup_service.preview(
         silver_table=config.silver_table,
         gold_table=config.gold_table,

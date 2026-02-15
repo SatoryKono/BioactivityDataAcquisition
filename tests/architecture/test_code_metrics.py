@@ -373,7 +373,7 @@ class TestFunctionLength:
         "execute": 80,  # Execution methods
         # Baseline exemptions for existing functions
         "__init__": 90,  # Constructors can be long (silver_writer: 86)
-        "bootstrap_pipeline": 125,  # 122 lines - Thin orchestrator with delegation
+        "bootstrap_pipeline_runner": 125,  # 122 lines - Thin orchestrator with delegation
         "register_provider": 100,
         "vacuum": 70,
         "archive": 70,
@@ -474,7 +474,7 @@ class TestFunctionLength:
         "add_not_run_results": 65,  # Add not-run enricher results
         # Composite pipeline bootstrap functions
         "_parse_composite_config": 95,  # 93 lines - Composite config parsing with validation
-        "bootstrap_composite_pipeline": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
+        "bootstrap_composite_runner": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
         "run_composite": 70,  # 68 lines - Composite CLI entrypoint with dependency support
         "build_pipeline_context": 60,  # 55 lines - Context building for composite
         "write_gold_merged": 90,  # 88 lines - Gold write with merged enrichers + flat_structure + CSV export
@@ -496,7 +496,7 @@ class TestFunctionLength:
         "build": 65,  # 63 lines - Builder pattern
         "_create_table_collector": 60,  # Storage factory table collector creation
         # Observability functions
-        "bootstrap_observability": 65,  # Observability setup with OpenTelemetry
+        "bootstrap_observability_bundle": 65,  # Observability setup with OpenTelemetry
         # Metadata coordinator functions
         "create_silver_metadata": 85,  # Silver metadata creation with full audit info
         "create_gold_metadata": 75,  # Gold metadata creation with audit info
