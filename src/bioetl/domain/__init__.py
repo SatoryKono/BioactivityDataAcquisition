@@ -15,6 +15,8 @@ This module provides a clean public API for the domain layer, exposing:
 
 from __future__ import annotations
 
+from importlib.metadata import version
+
 # Domain mapping (entity relation mappings)
 # Domain registry (publication entity mappings, ADR-024)
 # Domain constants module
@@ -22,7 +24,7 @@ from __future__ import annotations
 # Composite pipeline subpackage (ADR-026)
 from bioetl.domain import mapping  # noqa: F401
 from bioetl.domain import registry  # noqa: F401
-from bioetl.domain import version
+from bioetl.domain import version  # noqa: F401
 from bioetl.domain import composite, constants, contracts
 
 # Configuration objects
@@ -333,6 +335,8 @@ __all__ = [
     "contracts",
     # Constants
     "constants",
+    # Version module
+    "version",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
@@ -597,4 +601,5 @@ __all__ = [
     "ValueObject",
     "FIELD_TO_GROUP_MAPPING",
     "PublicationFieldGroup",
+    "version",
 ]

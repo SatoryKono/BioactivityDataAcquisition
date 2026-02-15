@@ -19,7 +19,12 @@ from bioetl.composition.providers._config_helpers import (
     _get_circuit_breaker_from_config,
     _get_factories,
     _get_rate_limit_from_config,
+    _validate_extraction_input_filter_overlap,
     _wrap_with_filter,
+)
+from bioetl.composition.providers.factory_loader import (
+    get_data_source_factory,
+    get_http_client_factory,
 )
 from bioetl.composition.providers.provider_registry import (
     HttpConfig,
@@ -61,40 +66,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
-def _validate_extraction_input_filter_overlap(
-    extraction_params: ExtractionParams,
-    input_filter: InputFilterConfig,
-    logger: LoggerPort,
-) -> None:
-    """Warn if input_filter field overlaps extraction_params keys.
-
-    Both are applied as AND in API query. Overlap means one might
-    shadow the other. Log WARNING but do not block.
-    """
-    if not input_filter.enabled or extraction_params.is_empty:
-        return
-
-    filter_field = input_filter.filter_field
-    if filter_field and filter_field in extraction_params.params:
-        logger.warning(
-            "extraction_params_input_filter_overlap",
-            overlap_field=filter_field,
-            extraction_value=str(extraction_params.params[filter_field]),
-            resolution="input_filter will override extraction_params for this field",
-        )
-
-    # Check multi-column mode
-    if input_filter.columns:
-        for col in input_filter.columns:
-            if col.filter_field in extraction_params.params:
-                logger.warning(
-                    "extraction_params_input_filter_overlap",
-                    overlap_field=col.filter_field,
-                    extraction_value=str(extraction_params.params[col.filter_field]),
-                    resolution="input_filter will override",
-                )
-
-
 def _create_chembl_data_source(
     settings: Settings,
     pipeline_config: PipelineYamlConfig,
@@ -111,7 +82,9 @@ def _create_chembl_data_source(
     For document_term entity type, wraps the adapter with PublicationTermDataSource
     to extract terms from publication records (derived entity pattern).
     """
-    DataSourceFactory, HttpClientFactory = _get_factories()
+    DataSourceFactory, HttpClientFactory = _get_factories(
+        get_data_source_factory, get_http_client_factory
+    )
     http_client = HttpClientFactory.create_for_provider("chembl", settings)
 
     # Load adapter configuration from YAML (single source of truth)
@@ -207,7 +180,9 @@ def _create_uniprot_data_source(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create UniProt data source with optional CSV filtering."""
-    DataSourceFactory, HttpClientFactory = _get_factories()
+    DataSourceFactory, HttpClientFactory = _get_factories(
+        get_data_source_factory, get_http_client_factory
+    )
     http_client = HttpClientFactory.create_for_provider("uniprot", settings)
     data_source = DataSourceFactory.create(
         "uniprot",
@@ -228,7 +203,9 @@ def _create_pubmed_data_source(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create PubMed data source with optional CSV filtering."""
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        get_data_source_factory, get_http_client_factory
+    )
     http_client = HttpClientFactory.create_for_provider("pubmed", settings)
 
     # Determine API key: config takes precedence over settings
@@ -277,7 +254,9 @@ def _create_crossref_data_source(
         ValueError: If mailto is not configured in settings or pipeline config.
 
     """
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        get_data_source_factory, get_http_client_factory
+    )
     http_client = HttpClientFactory.create_for_provider("crossref", settings)
 
     # Get mailto from pipeline config or settings
@@ -323,7 +302,9 @@ def _create_openalex_data_source(
         ValueError: If mailto is not configured in settings or pipeline config.
 
     """
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        get_data_source_factory, get_http_client_factory
+    )
     http_client = HttpClientFactory.create_for_provider("openalex", settings)
 
     # Get mailto from pipeline config or settings
@@ -366,7 +347,9 @@ def _create_semanticscholar_data_source(
         Configured DataSourcePort with optional filtering wrapper.
 
     """
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        get_data_source_factory, get_http_client_factory
+    )
     http_client = HttpClientFactory.create_for_provider("semanticscholar", settings)
 
     # Get API key from settings (configured via BIOETL_SEMANTICSCHOLAR_API_KEY env var)
@@ -422,7 +405,9 @@ def _create_uniprot_idmapping_data_source(
     """
     from pathlib import Path
 
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        get_data_source_factory, get_http_client_factory
+    )
 
     # Create HTTP client for ID Mapping API
     http_client = HttpClientFactory.create_for_provider("uniprot", settings)
