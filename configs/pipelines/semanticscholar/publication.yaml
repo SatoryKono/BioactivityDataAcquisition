@@ -26,9 +26,9 @@ gold_table: "semanticscholar_publication"
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/semanticscholar.yaml (provider-specific)
-#   3. configs/dq/entities/semanticscholar/publication.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/semanticscholar.yaml (provider-specific)
+#   3. configs/quality/entities/semanticscholar/publication.yaml (entity-specific)
 
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)
@@ -39,9 +39,9 @@ gold_table: "semanticscholar_publication"
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/semanticscholar.yaml (provider-specific)
-#   3. configs/filter/entities/semanticscholar/publication.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/semanticscholar.yaml (provider-specific)
+#   3. configs/filters/entities/semanticscholar/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink configuration

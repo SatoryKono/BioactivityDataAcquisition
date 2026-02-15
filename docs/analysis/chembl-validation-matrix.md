@@ -14,8 +14,8 @@
 Оба режима записывают в одну таблицу `silver/chembl/publication` и применяют идентичную валидацию:
 
 - **Pandera-схема**: `ChemblPublicationSchema` (наследует `PublicationBaseSchema`)
-- **DQ-конфиг**: `configs/dq/entities/chembl/publication.yaml`
-- **Provider DQ**: `configs/dq/providers/chembl.yaml`
+- **DQ-конфиг**: `configs/quality/entities/chembl/publication.yaml`
+- **Provider DQ**: `configs/quality/providers/chembl.yaml`
 
 ## 3. Матрица валидации полей
 

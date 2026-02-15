@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/publication_term.yaml
+# configs/quality/entities/chembl/publication_term.yaml
 # ChEMBL Publication Term (Document Term)-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

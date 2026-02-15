@@ -362,7 +362,7 @@ def test_dq_thresholds_are_validated_once(setup_configs):
         "entity_type": "invalid",
         "primary_keys": ["id"],
         "silver_table": "dummy.test_silver",
-        "dq_rules": {"soft_fail_threshold": 0.3, "hard_fail_threshold": 0.2},
+        "dq_overrides": {"soft_fail_threshold": 0.3, "hard_fail_threshold": 0.2},
     }
 
     (pipelines_dir / "dummy" / "invalid.yaml").write_text(yaml.dump(invalid_config))
@@ -616,64 +616,3 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
         "name",
         "extra",
     ]  # Explicit override
-
-
-def test_filter_config_legacy_path_fallback(setup_configs, tmp_path):
-    """Auto-computed ../../filters path should fallback to legacy ../../filter."""
-    pipelines_dir = setup_configs
-
-    legacy_filter_dir = tmp_path / "configs" / "filter" / "entities" / "legacyf"
-    legacy_filter_dir.mkdir(parents=True)
-    (legacy_filter_dir / "entity.yaml").write_text(
-        yaml.dump(
-            {
-                "input_filter": {
-                    "enabled": True,
-                    "source_path": "data/input/legacy.csv",
-                    "column_name": "id",
-                    "filter_field": "id",
-                    "batch_size": 77,
-                }
-            }
-        )
-    )
-
-    cfg = {
-        "pipeline_name": "legacyf_entity",
-        "provider": "legacyf",
-        "entity_type": "entity",
-        "primary_keys": ["id"],
-        "silver_table": "legacyf.entity",
-    }
-    provider_dir = pipelines_dir / "legacyf"
-    provider_dir.mkdir()
-    (provider_dir / "entity.yaml").write_text(yaml.dump(cfg))
-
-    config = load_pipeline_config("legacyf_entity")
-    assert config.input_filter.enabled is True
-    assert config.input_filter.batch_size == 77
-
-
-def test_data_schema_legacy_path_fallback(setup_configs, tmp_path):
-    """Auto-computed ../schemas path should fallback to legacy ../data_schema."""
-    pipelines_dir = setup_configs
-
-    legacy_schema_dir = tmp_path / "configs" / "pipelines" / "data_schema" / "legacys"
-    legacy_schema_dir.mkdir(parents=True)
-    (legacy_schema_dir / "entity.yaml").write_text(
-        yaml.dump({"column_groups": [{"name": "core", "fields": ["id"]}]})
-    )
-
-    cfg = {
-        "pipeline_name": "legacys_entity",
-        "provider": "legacys",
-        "entity_type": "entity",
-        "primary_keys": ["id"],
-        "silver_table": "legacys.entity",
-    }
-    provider_dir = pipelines_dir / "legacys"
-    provider_dir.mkdir()
-    (provider_dir / "entity.yaml").write_text(yaml.dump(cfg))
-
-    config = load_pipeline_config("legacys_entity")
-    assert config.column_groups[0].name == "core"

@@ -36,7 +36,7 @@ reducing data volume by approximately 75–90%.
 
 ### Configuration
 
-Defined in `configs/filter/entities/chembl/activity.yaml` under the
+Defined in `configs/filters/entities/chembl/activity.yaml` under the
 `extraction_params` key:
 
 ```yaml

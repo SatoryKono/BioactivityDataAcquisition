@@ -642,7 +642,7 @@ Path: 00-project-rules\04-extending-bioetl.md
 # Pipeline configuration for <Provider> <Entity>.
 #
 # Inherits defaults from ../_defaults.yaml:
-# - dq_rules, circuit_breaker, sink structure, maintenance, input_filter
+# - dq_overrides, circuit_breaker, sink structure, maintenance, input_filter
 
 pipeline_name: <provider>_<entity>
 provider: <provider>
@@ -7791,7 +7791,7 @@ source_file: ../../sources/chembl.yaml
 DQ-правила загружаются иерархически через `DQConfigLoader`:
 
 ```
-configs/dq/
+configs/quality/
 ├── _defaults.yaml                    # Global defaults
 ├── providers/<provider>.yaml         # Provider-level rules
 └── entities/<provider>/<entity>.yaml # Entity-level rules
@@ -7799,14 +7799,14 @@ configs/dq/
 
 Entity configs могут:
 1. Ссылаться на DQ файл: `dq_config_file: ../../dq/entities/chembl/activity.yaml`
-2. Определять inline правила в `dq_rules:`
+2. Определять inline правила в `dq_overrides:`
 3. Комбинировать оба подхода (inline overrides поверх файла)
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
 dq_config_file: ../../dq/entities/chembl/activity.yaml
 
-dq_rules:
+dq_overrides:
   field_validations:
     - field: "activity_id"
       type: "range"
@@ -7823,7 +7823,7 @@ dq_rules:
 3. **Автоматическая валидация**: JSON Schema (`_schema.json`) валидирует структуру
 4. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
 5. **Provider knowledge captured**: API limits, auth requirements в source configs
-6. **Иерархические DQ правила**: Централизация через `configs/dq/` (ADR-027)
+6. **Иерархические DQ правила**: Централизация через `configs/quality/` (ADR-027)
 7. **Separation of concerns**: Source configs отделены от pipeline configs
 
 ### Negative
@@ -7858,7 +7858,7 @@ pipeline_name: chembl_activity
 
 Все DQ правила только в pipeline configs, без иерархической системы.
 
-**Rejected**: Дублирование provider-level правил (например, CHEMBL ID pattern) между entity configs. Иерархическая система (`configs/dq/`) позволяет DRY.
+**Rejected**: Дублирование provider-level правил (например, CHEMBL ID pattern) между entity configs. Иерархическая система (`configs/quality/`) позволяет DRY.
 
 ### D. Provider configs внутри pipelines/
 
@@ -7874,7 +7874,7 @@ pipeline_name: chembl_activity
 | `sink.silver.primary_key` | ✅ PASS | All 20 entity configs specify |
 | `sink.silver.sort_by` | ✅ PASS | All 20 entity configs specify (ADR-014) |
 | `sink.gold.sort_by` | ✅ PASS | All 20 entity configs specify (ADR-014) |
-| `dq_rules` thresholds | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults |
+| `dq_overrides` thresholds | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults |
 | `circuit_breaker` settings | ✅ PASS | 5/300 in `_base.yaml` and source configs |
 | `rate_limit` per provider | ✅ PASS | In 7 source configs |
 | No hardcoded secrets | ✅ PASS | Uses `${ENV_VAR}` syntax where needed |
@@ -8682,7 +8682,7 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
-  dq_rules:
+  dq_overrides:
     # Composite-level thresholds (applied to merge result)
     soft_fail_threshold: 0.10
     hard_fail_threshold: 0.30
@@ -9038,12 +9038,12 @@ Data Quality (DQ) rules were embedded directly in pipeline YAML configuration fi
 Example of duplication:
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.05
   hard_fail_threshold: 0.20
 
 # configs/pipelines/chembl/molecule.yaml
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.05  # Duplicated
   hard_fail_threshold: 0.20  # Duplicated
 ```
@@ -9053,7 +9053,7 @@ dq_rules:
 Extract DQ rules into a hierarchical configuration structure:
 
 ```
-configs/dq/
+configs/quality/
 ├── _defaults.yaml           # Global defaults (Level 1)
 ├── providers/
 │   └── {provider}.yaml      # Provider overrides (Level 2)
@@ -9066,7 +9066,7 @@ configs/dq/
 1. `_defaults.yaml`
 2. `providers/{provider}.yaml`
 3. `entities/{provider}/{entity}.yaml`
-4. Inline `dq_rules` in pipeline config (for exceptional cases)
+4. Inline `dq_overrides` in pipeline config (for exceptional cases)
 
 Pipeline configs reference DQ config via `dq_config_file`:
 ```yaml
@@ -9085,7 +9085,7 @@ dq_config_file: ../../dq/entities/chembl/activity.yaml
    - Thread-safe caching for performance
    - Deep merge with validation list concatenation
 
-3. **Config files**: `configs/dq/`
+3. **Config files**: `configs/quality/`
    - `_defaults.yaml`: Global thresholds (0.05/0.20), common validations
    - `providers/{provider}.yaml`: Provider-specific settings
    - `entities/{provider}/{entity}.yaml`: Entity-specific rules
@@ -9098,7 +9098,7 @@ dq_config_file: ../../dq/entities/chembl/activity.yaml
 - **Separation of Concerns**: Pipeline config focuses on orchestration
 - **Reusability**: Provider-level validations shared across entities
 - **Flexibility**: Entity-specific rules without affecting others
-- **Backward compatible**: Inline `dq_rules` still supported as Level 4 override
+- **Backward compatible**: Inline `dq_overrides` still supported as Level 4 override
 - **Type safety**: Pydantic validation catches config errors early
 - **Performance**: Caching prevents repeated file reads
 
@@ -9160,7 +9160,7 @@ Store DQ rules in a database. Rejected because:
 | RULES.md §3.1.2 DQ Thresholds | PASS | `ThresholdsConfig` enforces 0.05/0.20 defaults |
 | soft_fail < hard_fail | PASS | `ThresholdsConfig.validate_order()` |
 | Hierarchical merge | PASS | `DQConfigLoader._deep_merge()` |
-| Backward compatibility | PASS | Inline `dq_rules` supported as override |
+| Backward compatibility | PASS | Inline `dq_overrides` supported as override |
 
 ## References
 
@@ -9168,7 +9168,7 @@ Store DQ rules in a database. Rejected because:
 - Domain config: `src/bioetl/domain/config.py`
 - Schema: `src/bioetl/infrastructure/schemas/dq_config.py`
 - Loader: `src/bioetl/infrastructure/config/dq_config_loader.py`
-- Config files: `configs/dq/`
+- Config files: `configs/quality/`
 
 ## Changelog
 
@@ -9214,7 +9214,7 @@ This pattern follows ADR-027 (DQ Rules Externalization) to create a consistent h
 Extract filter rules into a hierarchical configuration structure:
 
 ```
-configs/filter/
+configs/filters/
 ├── _defaults.yaml           # Global defaults (Level 1)
 ├── README.md                # Documentation
 ├── providers/
@@ -9248,7 +9248,7 @@ filter_config_file: ../../filter/entities/chembl/activity.yaml
    - Thread-safe caching for performance
    - Deep merge with list deduplication for required_fields/exclude_if_present
 
-3. **Config files**: `configs/filter/`
+3. **Config files**: `configs/filters/`
    - `_defaults.yaml`: Global defaults (batch_size=100)
    - `providers/{provider}.yaml`: Provider-specific settings (e.g., ChEMBL batch_size=20)
    - `entities/{provider}/{entity}.yaml`: Entity-specific rules
@@ -9364,7 +9364,7 @@ Define filters in Python code. Rejected because:
 - Domain models: `src/bioetl/domain/filtering/`
 - Schema: `src/bioetl/infrastructure/schemas/filter_config.py`
 - Loader: `src/bioetl/infrastructure/config/filter_config_loader.py`
-- Config files: `configs/filter/`
+- Config files: `configs/filters/`
 - Tests: `tests/unit/infrastructure/config/test_filter_config_loader.py`
 
 ## Changelog
@@ -11806,8 +11806,8 @@ src/bioetl/infrastructure/schemas/
 ├── base_schemas.py      # Базовые классы (Single Source of Truth)
 ├── pipeline_config.py   # Расширенные классы для pipeline YAML
 ├── source_config.py     # Классы для configs/sources/*.yaml
-├── filter_config.py     # Классы для configs/filter/*.yaml
-├── dq_config.py         # Классы для configs/dq/*.yaml
+├── filter_config.py     # Классы для configs/filters/*.yaml
+├── dq_config.py         # Классы для configs/quality/*.yaml
 ├── composite_config.py  # Классы для composite pipelines
 └── common_config.py     # Re-exports для backward compatibility (DEPRECATED)
 ```
@@ -13048,7 +13048,7 @@ DQ rules are organized in a hierarchical configuration structure that enables:
 ## Hierarchical DQ Config Structure
 
 ```
-configs/dq/
+configs/quality/
 ├── _defaults.yaml           # Level 1: Global defaults
 ├── providers/
 │   └── {provider}.yaml      # Level 2: Provider overrides
@@ -13066,7 +13066,7 @@ Configurations are merged in order (later wins):
 | 1 | `_defaults.yaml` | All pipelines |
 | 2 | `providers/{provider}.yaml` | All entities of provider |
 | 3 | `entities/{provider}/{entity}.yaml` | Specific entity |
-| 4 | Inline `dq_rules` in pipeline | Override for exceptions |
+| 4 | Inline `dq_overrides` in pipeline | Override for exceptions |
 
 **Merge rules**:
 - Scalars: Override (later value wins)
@@ -13097,13 +13097,13 @@ thresholds:
 ### Step 1: Check if provider config exists
 
 ```bash
-ls configs/dq/providers/{provider}.yaml
+ls configs/quality/providers/{provider}.yaml
 ```
 
 If it doesn't exist, create it:
 
 ```yaml
-# configs/dq/providers/{provider}.yaml
+# configs/quality/providers/{provider}.yaml
 version: "1.0.0"
 provider: {provider}
 
@@ -13114,7 +13114,7 @@ provider_field_validations: []
 ### Step 2: Create entity config
 
 ```yaml
-# configs/dq/entities/{provider}/{entity}.yaml
+# configs/quality/entities/{provider}/{entity}.yaml
 version: "1.0.0"
 provider: {provider}
 entity: {entity}
@@ -13268,7 +13268,7 @@ entity_conditional_validations:
 ## Complete Entity DQ Config Example
 
 ```yaml
-# configs/dq/entities/chembl/activity.yaml
+# configs/quality/entities/chembl/activity.yaml
 version: "1.0.0"
 provider: chembl
 entity: activity
@@ -13332,7 +13332,7 @@ pipeline_name: chembl_activity
 dq_config_file: ../../dq/entities/chembl/activity.yaml
 
 # Temporary override for migration period
-dq_rules:
+dq_overrides:
   thresholds:
     hard_fail: 0.30  # Higher tolerance during migration
   field_validations:
@@ -13399,10 +13399,10 @@ ValueError: soft_fail (0.25) must be < hard_fail (0.20)
 ### Error: Required field not found
 
 ```
-FileNotFoundError: Required DQ defaults file not found: configs/dq/_defaults.yaml
+FileNotFoundError: Required DQ defaults file not found: configs/quality/_defaults.yaml
 ```
 
-**Fix**: Create `configs/dq/_defaults.yaml` with global settings.
+**Fix**: Create `configs/quality/_defaults.yaml` with global settings.
 
 ### Validation not applied
 
@@ -14684,7 +14684,7 @@ gold_table: "chembl_activity"
 | `batch_size` | Размер батча (1-5000) | Нет (default: 100) |
 | `checkpoint_interval` | Интервал checkpoint | Нет (default: 10) |
 | `source` | Конфиг источника | Нет (auto-resolved) |
-| `dq_rules` | Inline DQ переопределения | Нет |
+| `dq_overrides` | Inline DQ переопределения | Нет |
 | `sink` | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved) |
 | `circuit_breaker` | Настройки Circuit Breaker | Нет (from base) |
 | `maintenance` | VACUUM настройки | Нет (from base) |
@@ -14707,7 +14707,7 @@ gold_table: "chembl_activity"
 batch_size: 500
 
 # Inline DQ переопределения
-dq_rules:
+dq_overrides:
   field_validations:
     - field: standard_value
       type: range
@@ -14751,10 +14751,10 @@ sink:
 
 DQ правила загружаются в порядке приоритета (позже выигрывают):
 
-1. `configs/dq/_defaults.yaml` — глобальные defaults
-2. `configs/dq/providers/{provider}.yaml` — provider-specific
-3. `configs/dq/entities/{provider}/{entity}.yaml` — entity-specific
-4. Inline `dq_rules` в pipeline конфиге — финальные переопределения
+1. `configs/quality/_defaults.yaml` — глобальные defaults
+2. `configs/quality/providers/{provider}.yaml` — provider-specific
+3. `configs/quality/entities/{provider}/{entity}.yaml` — entity-specific
+4. Inline `dq_overrides` в pipeline конфиге — финальные переопределения
 
 ### Специальная merge логика
 
@@ -14765,7 +14765,7 @@ DQ правила загружаются в порядке приоритета 
 ### Структура DQ конфига
 
 ```yaml
-# configs/dq/_defaults.yaml
+# configs/quality/_defaults.yaml
 thresholds:
   soft_fail: 0.05      # >5% errors → Warning
   hard_fail: 0.20      # >20% errors → Fail Batch
@@ -14791,7 +14791,7 @@ common_field_validations:
 ### Entity-specific DQ правила
 
 ```yaml
-# configs/dq/entities/chembl/activity.yaml
+# configs/quality/entities/chembl/activity.yaml
 entity_field_validations:
   - field: activity_id
     type: required
@@ -14840,9 +14840,9 @@ entity_conditional_validations:
 
 Аналогично DQ, фильтры загружаются иерархически:
 
-1. `configs/filter/_defaults.yaml`
-2. `configs/filter/providers/{provider}.yaml`
-3. `configs/filter/entities/{provider}/{entity}.yaml`
+1. `configs/filters/_defaults.yaml`
+2. `configs/filters/providers/{provider}.yaml`
+3. `configs/filters/entities/{provider}/{entity}.yaml`
 4. Inline `filter_rules` в pipeline конфиге
 
 ### Input Filter
@@ -15100,7 +15100,7 @@ primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
-dq_rules:
+dq_overrides:
   thresholds:
     soft_fail: 0.10
     hard_fail: 0.30
@@ -15186,7 +15186,7 @@ python -m bioetl.main config validate chembl_activity
 
 1. Проверить путь к DQ файлу:
    ```bash
-   ls configs/dq/entities/{provider}/{entity}.yaml
+   ls configs/quality/entities/{provider}/{entity}.yaml
    ```
 
 2. Проверить merge логику — validation lists **concatenate**, не override.
@@ -15727,7 +15727,7 @@ silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
 # Переопределения DQ правил (опционально)
-dq_rules:
+dq_overrides:
   field_validations:
     - field: standard_value
       type: range
@@ -23166,7 +23166,7 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
 3. **If Threshold is Too Strict**:
    - Temporarily increase threshold in `configs/pipelines/{pipeline}.yaml`:
      ```yaml
-     dq_rules:
+     dq_overrides:
        hard_fail_threshold: 0.30  # Increase to 30%
      ```
    - **Warning**: This degrades data quality in Silver/Gold.
@@ -25967,7 +25967,7 @@ sink:
     format: delta 
     mode: overwrite        # Витрины часто перезаписываются целиком или партициями 
  
-dq_rules: 
+dq_overrides: 
   soft_fail_threshold: 0.05  # 5% 
   hard_fail_threshold: 0.20  # 20% (Strict) 
  
@@ -37136,8 +37136,8 @@ Path: archived\audits\config-dedup-analysis.md
 
 This analysis identifies significant duplication between:
 - `configs/pipelines/{provider}/{entity}.yaml` (pipeline configs)
-- `configs/filter/entities/{provider}/{entity}.yaml` (filter entity configs)
-- `configs/dq/entities/{provider}/{entity}.yaml` (DQ entity configs)
+- `configs/filters/entities/{provider}/{entity}.yaml` (filter entity configs)
+- `configs/quality/entities/{provider}/{entity}.yaml` (DQ entity configs)
 
 **Key Findings**:
 - **~195 lines** of duplicated content across 20 pipeline configs
@@ -37169,9 +37169,9 @@ This analysis identifies significant duplication between:
 
 | Section | Description | Action |
 |---------|-------------|--------|
-| `dq_rules.field_validations` | Extends entity DQ config | Keep only overrides |
-| `dq_rules.cross_field_validations` | Extends entity DQ config | Keep only overrides |
-| `dq_rules.conditional_validations` | Extends entity DQ config | Keep only overrides |
+| `dq_overrides.field_validations` | Extends entity DQ config | Keep only overrides |
+| `dq_overrides.cross_field_validations` | Extends entity DQ config | Keep only overrides |
+| `dq_overrides.conditional_validations` | Extends entity DQ config | Keep only overrides |
 | `sink.silver.partition_by` | Entity-specific partitioning | Keep (non-default) |
 | `source.*` (special) | Provider-specific API config (e.g., PubMed search_term) | Keep |
 
@@ -37417,7 +37417,7 @@ silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
 # DQ overrides (only fields that DIFFER from entity DQ config)
-dq_rules:
+dq_overrides:
   field_validations:
     # Override: Extended enum with additional types
     - field: "standard_type"
@@ -37481,7 +37481,7 @@ dq_rules:
 | source_file | 18 | DUPLICATE | Auto-compute |
 | dq_config_file comment | 20-29 | DUPLICATE | Auto-compute |
 | filter_config_file | 31-38 | DUPLICATE | Auto-compute |
-| dq_rules (overrides) | 45-84 | OVERRIDE | Keep only differences |
+| dq_overrides (overrides) | 45-84 | OVERRIDE | Keep only differences |
 | gold_filters | 86-102 | DUPLICATE | Remove (in filter entity) |
 | sink paths | 104-120 | DUPLICATE | Auto-compute |
 | input_filter | 122-128 | DUPLICATE | Remove (in filter entity) |
@@ -37496,7 +37496,7 @@ dq_rules:
 | source_file | 16 | DUPLICATE | Auto-compute |
 | dq_config_file | 18-25 | DUPLICATE | Auto-compute |
 | filter_config_file | 27-34 | DUPLICATE | Auto-compute |
-| dq_rules (overrides) | 40-65 | OVERRIDE | Keep (extended enums, unique validations) |
+| dq_overrides (overrides) | 40-65 | OVERRIDE | Keep (extended enums, unique validations) |
 | gold_filters | 67-83 | DUPLICATE | Remove (in filter entity) |
 | sink paths | 85-102 | DUPLICATE | Auto-compute |
 | input_filter | 104-110 | DUPLICATE | Remove (in filter entity) |
@@ -37543,7 +37543,7 @@ Total unique parameters: 176
 | Parameter | Presence |
 |-----------|----------|
 | `composite` | 1/21 |
-| `composite.dq_rules` | 1/21 |
+| `composite.dq_overrides` | 1/21 |
 | `composite.enrichers` | 1/21 |
 | `composite.execution` | 1/21 |
 | `composite.lineage` | 1/21 |
@@ -37551,10 +37551,10 @@ Total unique parameters: 176
 | `composite.name` | 1/21 |
 | `composite.seed` | 1/21 |
 | `composite.version` | 1/21 |
-| `composite.dq_rules.enricher_overrides` | 1/21 |
-| `composite.dq_rules.hard_fail_threshold` | 1/21 |
-| `composite.dq_rules.required_fields` | 1/21 |
-| `composite.dq_rules.soft_fail_threshold` | 1/21 |
+| `composite.dq_overrides.enricher_overrides` | 1/21 |
+| `composite.dq_overrides.hard_fail_threshold` | 1/21 |
+| `composite.dq_overrides.required_fields` | 1/21 |
+| `composite.dq_overrides.soft_fail_threshold` | 1/21 |
 | `composite.execution.checkpoint_enabled` | 1/21 |
 | `composite.execution.max_concurrency` | 1/21 |
 | `composite.execution.retry` | 1/21 |
@@ -37568,8 +37568,8 @@ Total unique parameters: 176
 | `composite.seed.output_keys` | 1/21 |
 | `composite.seed.pipeline` | 1/21 |
 | `composite.seed.silver_table` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publication` | 1/21 |
-| `composite.dq_rules.enricher_overrides.semanticscholar_publication` | 1/21 |
+| `composite.dq_overrides.enricher_overrides.pubmed_publication` | 1/21 |
+| `composite.dq_overrides.enricher_overrides.semanticscholar_publication` | 1/21 |
 | `composite.execution.retry.backoff_multiplier` | 1/21 |
 | `composite.execution.retry.max_attempts` | 1/21 |
 | `composite.merge.field_priorities.abstract` | 1/21 |
@@ -37580,10 +37580,10 @@ Total unique parameters: 176
 | `composite.merge.field_priorities.tldr` | 1/21 |
 | `composite.merge.output.gold` | 1/21 |
 | `composite.merge.output.silver` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` | 1/21 |
-| `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` | 1/21 |
-| `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` | 1/21 |
-| `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` | 1/21 |
+| `composite.dq_overrides.enricher_overrides.pubmed_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_overrides.enricher_overrides.pubmed_publication.soft_fail_threshold` | 1/21 |
+| `composite.dq_overrides.enricher_overrides.semanticscholar_publication.hard_fail_threshold` | 1/21 |
+| `composite.dq_overrides.enricher_overrides.semanticscholar_publication.soft_fail_threshold` | 1/21 |
 
 ### description
 
@@ -37597,23 +37597,23 @@ Total unique parameters: 176
 |-----------|----------|
 | `dq_config_file` | 15/21 |
 
-### dq_rules
+### dq_overrides
 
 | Parameter | Presence |
 |-----------|----------|
-| `dq_rules` | 6/21 |
-| `dq_rules.conditional_validations` | 2/21 |
-| `dq_rules.cross_field_validations` | 6/21 |
-| `dq_rules.field_validations` | 6/21 |
-| `dq_rules.hard_fail_threshold` | 1/21 |
-| `dq_rules.invalid_record_policy` | 1/21 |
-| `dq_rules.report` | 1/21 |
-| `dq_rules.soft_fail_threshold` | 1/21 |
-| `dq_rules.strict_validation` | 1/21 |
-| `dq_rules.report.enabled` | 1/21 |
-| `dq_rules.report.format` | 1/21 |
-| `dq_rules.report.include_sample_failures` | 1/21 |
-| `dq_rules.report.sample_size` | 1/21 |
+| `dq_overrides` | 6/21 |
+| `dq_overrides.conditional_validations` | 2/21 |
+| `dq_overrides.cross_field_validations` | 6/21 |
+| `dq_overrides.field_validations` | 6/21 |
+| `dq_overrides.hard_fail_threshold` | 1/21 |
+| `dq_overrides.invalid_record_policy` | 1/21 |
+| `dq_overrides.report` | 1/21 |
+| `dq_overrides.soft_fail_threshold` | 1/21 |
+| `dq_overrides.strict_validation` | 1/21 |
+| `dq_overrides.report.enabled` | 1/21 |
+| `dq_overrides.report.format` | 1/21 |
+| `dq_overrides.report.include_sample_failures` | 1/21 |
+| `dq_overrides.report.sample_size` | 1/21 |
 
 ### entity_type
 
@@ -37811,7 +37811,7 @@ Total unique parameters: 176
 
 ## 2. Entity Config Comparison
 
-| Config | pipeline_name | provider | entity_type | version | description | primary_keys | silver_table | gold_table | source_file | source | transform | dq_rules | circuit_breaker | rate_limit | gold_filters | sink | input_filter |
+| Config | pipeline_name | provider | entity_type | version | description | primary_keys | silver_table | gold_table | source_file | source | transform | dq_overrides | circuit_breaker | rate_limit | gold_filters | sink | input_filter |
 |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
 | _base | — | — | — | — | — | — | — | — | — | ✓ | ✓ | ✓ | ✓ | — | — | ✓ | ✓ |
 | chembl/activity | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ | — | — | — | — | — |
@@ -37845,17 +37845,17 @@ Total unique parameters: 176
 - `circuit_breaker.failure_threshold` - present in: _base
 - `circuit_breaker.recovery_timeout` - present in: _base
 - `composite` - present in: composite/publication
-- `composite.dq_rules` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publication` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publication.hard_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.pubmed_publication.soft_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.semanticscholar_publication` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.semanticscholar_publication.hard_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.enricher_overrides.semanticscholar_publication.soft_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.hard_fail_threshold` - present in: composite/publication
-- `composite.dq_rules.required_fields` - present in: composite/publication
-- `composite.dq_rules.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_overrides` - present in: composite/publication
+- `composite.dq_overrides.enricher_overrides` - present in: composite/publication
+- `composite.dq_overrides.enricher_overrides.pubmed_publication` - present in: composite/publication
+- `composite.dq_overrides.enricher_overrides.pubmed_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_overrides.enricher_overrides.pubmed_publication.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_overrides.enricher_overrides.semanticscholar_publication` - present in: composite/publication
+- `composite.dq_overrides.enricher_overrides.semanticscholar_publication.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_overrides.enricher_overrides.semanticscholar_publication.soft_fail_threshold` - present in: composite/publication
+- `composite.dq_overrides.hard_fail_threshold` - present in: composite/publication
+- `composite.dq_overrides.required_fields` - present in: composite/publication
+- `composite.dq_overrides.soft_fail_threshold` - present in: composite/publication
 - `composite.enrichers` - present in: composite/publication
 - `composite.execution` - present in: composite/publication
 - `composite.execution.checkpoint_enabled` - present in: composite/publication
@@ -37888,19 +37888,19 @@ Total unique parameters: 176
 - `composite.version` - present in: composite/publication
 - `description` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
 - `dq_config_file` - present in: chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
-- `dq_rules` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-- `dq_rules.conditional_validations` - present in: _base, chembl/activity
-- `dq_rules.cross_field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-- `dq_rules.field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
-- `dq_rules.hard_fail_threshold` - present in: _base
-- `dq_rules.invalid_record_policy` - present in: _base
-- `dq_rules.report` - present in: _base
-- `dq_rules.report.enabled` - present in: _base
-- `dq_rules.report.format` - present in: _base
-- `dq_rules.report.include_sample_failures` - present in: _base
-- `dq_rules.report.sample_size` - present in: _base
-- `dq_rules.soft_fail_threshold` - present in: _base
-- `dq_rules.strict_validation` - present in: _base
+- `dq_overrides` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_overrides.conditional_validations` - present in: _base, chembl/activity
+- `dq_overrides.cross_field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_overrides.field_validations` - present in: _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
+- `dq_overrides.hard_fail_threshold` - present in: _base
+- `dq_overrides.invalid_record_policy` - present in: _base
+- `dq_overrides.report` - present in: _base
+- `dq_overrides.report.enabled` - present in: _base
+- `dq_overrides.report.format` - present in: _base
+- `dq_overrides.report.include_sample_failures` - present in: _base
+- `dq_overrides.report.sample_size` - present in: _base
+- `dq_overrides.soft_fail_threshold` - present in: _base
+- `dq_overrides.strict_validation` - present in: _base
 - `entity_type` - present in: chembl/activity, chembl/assay, chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, pubmed/publications, semanticscholar/publication, uniprot/idmapping, uniprot/protein
 - `filter_config_file` - present in: chembl/publication, chembl/publication_similarity, chembl/publication_term, composite/publication, pubmed/publications
 - `gold_filters` - present in: composite/publication
@@ -37940,16 +37940,16 @@ Total unique parameters: 176
 - `dq_config_file`
   - Present in (15): chembl/assay_parameters, chembl/cell_line, chembl/compound_record, chembl/molecule, chembl/protein_class, chembl/publication, chembl/publication_similarity, chembl/publication_term, chembl/target, chembl/target_component, crossref/publication, openalex/publication, pubchem/compound, semanticscholar/publication, uniprot/idmapping
   - Missing in (6): composite/publication, _base, chembl/assay, pubmed/publications, chembl/activity, uniprot/protein
-- `dq_rules`
+- `dq_overrides`
   - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
   - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
-- `dq_rules.conditional_validations`
+- `dq_overrides.conditional_validations`
   - Present in (2): _base, chembl/activity
   - Missing in (19): composite/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, uniprot/protein, pubchem/compound, chembl/publication, semanticscholar/publication, chembl/protein_class, chembl/compound_record, uniprot/idmapping, chembl/target, crossref/publication, chembl/molecule, chembl/assay, pubmed/publications, openalex/publication
-- `dq_rules.cross_field_validations`
+- `dq_overrides.cross_field_validations`
   - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
   - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
-- `dq_rules.field_validations`
+- `dq_overrides.field_validations`
   - Present in (6): _base, chembl/activity, chembl/assay, chembl/molecule, chembl/target, pubchem/compound
   - Missing in (15): composite/publication, uniprot/idmapping, chembl/protein_class, chembl/compound_record, crossref/publication, chembl/publication_similarity, chembl/target_component, chembl/cell_line, chembl/assay_parameters, chembl/publication_term, pubmed/publications, openalex/publication, uniprot/protein, semanticscholar/publication, chembl/publication
 - `entity_type`
@@ -38102,7 +38102,7 @@ Analysis of 20 pipeline configs (1 defaults + 19 entity configs) revealed:
 | Missing `sink.silver.primary_key` | Medium | 2/19 (protein_class, target_component) |
 | `source` vs `source_file` inconsistency | High | 3 use inline `source` |
 | `transform` block presence | Info | 7/19 have it (non-ChEMBL) |
-| `dq_rules`/`circuit_breaker` override | Info | Only 1 config (idmapping) |
+| `dq_overrides`/`circuit_breaker` override | Info | Only 1 config (idmapping) |
 
 ---
 
@@ -38130,7 +38130,7 @@ These overrides are legitimate and should remain:
 
 | Override | Configs | Reason |
 |----------|---------|--------|
-| `dq_rules` | uniprot/idmapping | Higher thresholds for ID mapping |
+| `dq_overrides` | uniprot/idmapping | Higher thresholds for ID mapping |
 | `circuit_breaker` | uniprot/idmapping | Custom settings |
 | `rate_limit` | uniprot/idmapping | UniProt API limits |
 | `batch_size` | protein_class, target_component | Full-load strategy |
@@ -38254,7 +38254,7 @@ input_filter:
 
 ```yaml
 # Override DQ thresholds (rare)
-dq_rules:
+dq_overrides:
   soft_fail_threshold: float  # Default: 0.05
   hard_fail_threshold: float  # Default: 0.20
 
@@ -40678,7 +40678,7 @@ The BioETL documentation and security posture demonstrates **production readines
 
 **Configuration Schema**:
 Pipeline configs use inheritance from `_defaults.yaml` with entity-specific overrides. Required fields are distributed between defaults and entity configs:
-- `_defaults.yaml`: `dq_rules`, `circuit_breaker`, `sink`, `maintenance`, `input_filter`
+- `_defaults.yaml`: `dq_overrides`, `circuit_breaker`, `sink`, `maintenance`, `input_filter`
 - Entity configs: `pipeline_name`, `provider`, `entity_type`, `version`, `description`, `primary_keys`, `silver_table`
 
 **Result**: PASS - All pipeline configurations valid
@@ -48120,7 +48120,7 @@ circuit_breaker:
 
 ## Параметры, которые работают корректно ✓
 
-- `dq_rules.soft_fail_threshold` / `hard_fail_threshold` → `infrastructure/config.py:273`
+- `dq_overrides.soft_fail_threshold` / `hard_fail_threshold` → `infrastructure/config.py:273`
 - `gold_filters.*` → `infrastructure/config.py:263`
 - `sink.silver.mode` / `sink.gold.mode` → `infrastructure/config.py:224-231`
 - `sink.silver.on_schema_mismatch` → `infrastructure/config.py:266-270`
@@ -49164,7 +49164,7 @@ Path: archived\pipeline-refactoring-plan.md
 | Секция | Дублирование | Файлы:строки |
 |--------|--------------|--------------|
 | `transform:` | Идентична во всех | `activity.yaml:34-39`, `molecule.yaml:25-30`, и др. |
-| `dq_rules:` | Идентична: `soft=0.05`, `hard=0.20` | `activity.yaml:80-82`, `molecule.yaml:71-73` |
+| `dq_overrides:` | Идентична: `soft=0.05`, `hard=0.20` | `activity.yaml:80-82`, `molecule.yaml:71-73` |
 | `circuit_breaker:` | Идентична: `failure=5`, `recovery=300` | `activity.yaml:84-86`, `molecule.yaml:75-77` |
 | `sink.bronze/silver/gold` | 80% идентична | Все конфиги |
 | `csv_export:` | Полностью идентична | Все конфиги с `csv_export` |
@@ -49180,7 +49180,7 @@ transform:
         - add_metadata
         - calculate_content_hash
 
-dq_rules:
+dq_overrides:
     soft_fail_threshold: 0.05
     hard_fail_threshold: 0.20
 
@@ -49274,7 +49274,7 @@ defaults:
       - add_metadata
       - calculate_content_hash
 
-  dq_rules: &default_dq_rules
+  dq_overrides: &default_dq_overrides
     soft_fail_threshold: 0.05
     hard_fail_threshold: 0.20
 
@@ -49357,7 +49357,7 @@ gold_filters:
 
 # Наследование defaults (anchors):
 transform: *default_transform
-dq_rules: *default_dq_rules
+dq_overrides: *default_dq_overrides
 circuit_breaker: *default_circuit_breaker
 
 sink:
@@ -55437,27 +55437,27 @@ Path: audits\config-gaps-2026-01-19.md
 ## Medium Issues (SHOULD fix)
 
 ### `uniprot/idmapping.yaml`
-- ⚠️ Inline dq_rules thresholds (deprecated per ADR-027)
+- ⚠️ Inline dq_overrides thresholds (deprecated per ADR-027)
 
 ## Low Issues (MAY fix)
 
 ### `chembl/assay.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/assay.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/assay.yaml but not referenced
 
 ### `chembl/assay_parameters.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/assay_parameters.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/assay_parameters.yaml but not referenced
 
 ### `chembl/cell_line.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/cell_line.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/cell_line.yaml but not referenced
 
 ### `chembl/compound_record.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/compound_record.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/compound_record.yaml but not referenced
 
 ### `chembl/molecule.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/molecule.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/molecule.yaml but not referenced
 
 ### `chembl/protein_class.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/protein_class.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/protein_class.yaml but not referenced
 
 ### `chembl/publication.yaml`
 - ℹ️ sink.bronze.path not hierarchical (chembl/document)
@@ -55472,10 +55472,10 @@ Path: audits\config-gaps-2026-01-19.md
 - ℹ️ No dq_config_file and no DQ file at entities/chembl/document_term.yaml
 
 ### `chembl/target.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/target.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/target.yaml but not referenced
 
 ### `chembl/target_component.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/target_component.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/target_component.yaml but not referenced
 
 ### `crossref/publication.yaml`
 - ℹ️ sink.bronze.path not hierarchical (crossref/work)
@@ -55484,22 +55484,22 @@ Path: audits\config-gaps-2026-01-19.md
 - ℹ️ No dq_config_file and no DQ file at entities/crossref/work.yaml
 
 ### `openalex/publication.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/openalex/publication.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/openalex/publication.yaml but not referenced
 
 ### `pubchem/compound.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/pubchem/compound.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/pubchem/compound.yaml but not referenced
 
 ### `pubmed/publications.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/pubmed/publication.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/pubmed/publication.yaml but not referenced
 
 ### `semanticscholar/publication.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/semanticscholar/publication.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/semanticscholar/publication.yaml but not referenced
 
 ### `uniprot/idmapping.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/uniprot/idmapping.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/uniprot/idmapping.yaml but not referenced
 
 ### `uniprot/protein.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/uniprot/protein.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/uniprot/protein.yaml but not referenced
 
 ## Recommended Actions
 
@@ -55511,7 +55511,7 @@ Path: audits\config-gaps-2026-01-19.md
 
 ### Priority 1 (Medium - Should Fix)
 1. Add `version`, `description`, `gold_table` where missing (ADR-025)
-2. Migrate inline `dq_rules` thresholds to `dq_config_file` (ADR-027)
+2. Migrate inline `dq_overrides` thresholds to `dq_config_file` (ADR-027)
 3. Add missing `sink.bronze` and `sink.gold` sections
 
 ### Priority 2 (Low - Nice to Have)
@@ -55561,22 +55561,22 @@ Path: audits\config-gaps-final-2026-01-19.md
 ## Low Issues (MAY fix)
 
 ### `chembl/assay.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/assay.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/assay.yaml but not referenced
 
 ### `chembl/assay_parameters.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/assay_parameters.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/assay_parameters.yaml but not referenced
 
 ### `chembl/cell_line.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/cell_line.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/cell_line.yaml but not referenced
 
 ### `chembl/compound_record.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/compound_record.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/compound_record.yaml but not referenced
 
 ### `chembl/molecule.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/molecule.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/molecule.yaml but not referenced
 
 ### `chembl/protein_class.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/protein_class.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/protein_class.yaml but not referenced
 
 ### `chembl/publication.yaml`
 - ℹ️ sink.bronze.path not hierarchical (chembl/document)
@@ -55591,10 +55591,10 @@ Path: audits\config-gaps-final-2026-01-19.md
 - ℹ️ No dq_config_file and no DQ file at entities/chembl/document_term.yaml
 
 ### `chembl/target.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/target.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/target.yaml but not referenced
 
 ### `chembl/target_component.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/target_component.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/target_component.yaml but not referenced
 
 ### `crossref/publication.yaml`
 - ℹ️ sink.bronze.path not hierarchical (crossref/work)
@@ -55603,19 +55603,19 @@ Path: audits\config-gaps-final-2026-01-19.md
 - ℹ️ No dq_config_file and no DQ file at entities/crossref/work.yaml
 
 ### `openalex/publication.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/openalex/publication.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/openalex/publication.yaml but not referenced
 
 ### `pubchem/compound.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/pubchem/compound.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/pubchem/compound.yaml but not referenced
 
 ### `pubmed/publications.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/pubmed/publication.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/pubmed/publication.yaml but not referenced
 
 ### `semanticscholar/publication.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/semanticscholar/publication.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/semanticscholar/publication.yaml but not referenced
 
 ### `uniprot/protein.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/uniprot/protein.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/uniprot/protein.yaml but not referenced
 
 ## Recommended Actions
 
@@ -55627,7 +55627,7 @@ Path: audits\config-gaps-final-2026-01-19.md
 
 ### Priority 1 (Medium - Should Fix)
 1. Add `version`, `description`, `gold_table` where missing (ADR-025)
-2. Migrate inline `dq_rules` thresholds to `dq_config_file` (ADR-027)
+2. Migrate inline `dq_overrides` thresholds to `dq_config_file` (ADR-027)
 3. Add missing `sink.bronze` and `sink.gold` sections
 
 ### Priority 2 (Low - Nice to Have)
@@ -55705,11 +55705,11 @@ Path: audits\config-gaps.md
 ## Low Issues (MAY fix)
 
 ### `chembl/activity.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/activity.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/activity.yaml but not referenced
 - ℹ️ Missing gold_filters section
 
 ### `chembl/assay.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/chembl/assay.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/chembl/assay.yaml but not referenced
 - ℹ️ Missing gold_filters section
 
 ### `chembl/assay_parameters.yaml`
@@ -55758,7 +55758,7 @@ Path: audits\config-gaps.md
 - ℹ️ Missing gold_filters section
 
 ### `pubmed/publications.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/pubmed/publication.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/pubmed/publication.yaml but not referenced
 - ℹ️ Missing gold_filters section
 
 ### `semanticscholar/publication.yaml`
@@ -55768,7 +55768,7 @@ Path: audits\config-gaps.md
 - ℹ️ Missing gold_filters section
 
 ### `uniprot/protein.yaml`
-- ℹ️ DQ file exists at configs/dq/entities/uniprot/protein.yaml but not referenced
+- ℹ️ DQ file exists at configs/quality/entities/uniprot/protein.yaml but not referenced
 - ℹ️ Missing gold_filters section
 
 ## Recommended Actions
@@ -55781,7 +55781,7 @@ Path: audits\config-gaps.md
 
 ### Priority 1 (Medium - Should Fix)
 1. Add `version`, `description`, `gold_table` where missing (ADR-025)
-2. Migrate inline `dq_rules` thresholds to `dq_config_file` (ADR-027)
+2. Migrate inline `dq_overrides` thresholds to `dq_config_file` (ADR-027)
 3. Add missing `sink.bronze` and `sink.gold` sections
 
 ### Priority 2 (Low - Nice to Have)
@@ -55811,9 +55811,9 @@ Path: audits\config-inventory-2026-01-19.md
 |-----------|----------|--------|-------|
 | `_base.yaml` (was `_defaults.yaml`) | v2.0.0+ | ✅ | v2.0.0, 13271 bytes, named `_base.yaml` per ADR-025 |
 | `_schema.json` | exists | ✅ | v2.0, JSON Schema draft 2020-12, 4541 bytes |
-| `configs/dq/_defaults.yaml` | exists | ✅ | v1.0.0, defines thresholds (soft_fail: 0.05, hard_fail: 0.20) |
-| `configs/dq/providers/` | exists | ✅ | 7 providers: chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot |
-| `configs/dq/entities/` | exists | ✅ | 20 entity-specific DQ configs (full coverage) |
+| `configs/quality/_defaults.yaml` | exists | ✅ | v1.0.0, defines thresholds (soft_fail: 0.05, hard_fail: 0.20) |
+| `configs/quality/providers/` | exists | ✅ | 7 providers: chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot |
+| `configs/quality/entities/` | exists | ✅ | 20 entity-specific DQ configs (full coverage) |
 | `validate_unified_configs.py` | exists | ✅ | 4465 bytes, validates against schema |
 | `DQConfigLoader` | implemented | ✅ | 9160 bytes, integrated with PipelineConfigLoader |
 
@@ -55835,7 +55835,7 @@ Path: audits\config-inventory-2026-01-19.md
 
 ## DQ Configuration Inventory
 
-### DQ Provider Configs (configs/dq/providers/) - 7 providers
+### DQ Provider Configs (configs/quality/providers/) - 7 providers
 | Provider | Notes |
 |----------|-------|
 | chembl | Stricter thresholds (soft 0.05, hard 0.15) |
@@ -55846,7 +55846,7 @@ Path: audits\config-inventory-2026-01-19.md
 | semanticscholar | Higher tolerance for rate limits (soft 0.15, hard 0.40) |
 | uniprot | High quality (soft 0.03, hard 0.10) |
 
-### DQ Entity Configs (configs/dq/entities/) - 20 entities (FULL COVERAGE)
+### DQ Entity Configs (configs/quality/entities/) - 20 entities (FULL COVERAGE)
 
 | Provider | Count | Entities |
 |----------|-------|----------|
@@ -55923,7 +55923,7 @@ The composite pipeline uses a different schema structure per ADR-026:
 
 1. **File naming**: ADR-025 uses `_base.yaml` (not `_defaults.yaml` as mentioned in prompt) for pipeline defaults
 2. **Schema version**: Both `_base.yaml` and `_schema.json` are at v2.0.0 (aligned)
-3. **DQ defaults version**: configs/dq/_defaults.yaml is at v1.0.0
+3. **DQ defaults version**: configs/quality/_defaults.yaml is at v1.0.0
 4. **DQConfigLoader integration**: Properly integrated with `PipelineConfigLoader` in composition layer
 5. **Inheritance chain**: `_base.yaml` → `<provider>/<entity>.yaml` (documented in _base.yaml header)
 
@@ -55933,7 +55933,7 @@ The composite pipeline uses a different schema structure per ADR-026:
 |------|---------|
 | configs/pipelines/_base.yaml | 2.0.0 |
 | configs/pipelines/_schema.json | 2.0 |
-| configs/dq/_defaults.yaml | 1.0.0 |
+| configs/quality/_defaults.yaml | 1.0.0 |
 | composite/publication.yaml | 1.0.0 |
 
 ## Acceptance Criteria Checklist
@@ -55985,7 +55985,7 @@ Pipeline configuration унификация завершена. Все 19 ста
 ### Fixed Issues
 
 #### Medium (P1) - Fixed
-1. **`uniprot/idmapping.yaml`**: Migrated inline `dq_rules` thresholds to external `dq_config_file` (ADR-027 compliance)
+1. **`uniprot/idmapping.yaml`**: Migrated inline `dq_overrides` thresholds to external `dq_config_file` (ADR-027 compliance)
 
 #### Low (P2) - Remaining (by design)
 - 17 configs have DQ files that exist but are not explicitly referenced via `dq_config_file`
@@ -56027,15 +56027,15 @@ Pipeline configuration унификация завершена. Все 19 ста
 - `configs/pipelines/composite/*.yaml` (1 file) - ADR-026 structure
 
 ### DQ Configs (20 files)
-- `configs/dq/entities/chembl/*.yaml` (12 files)
-- `configs/dq/entities/pubchem/*.yaml` (1 file)
-- `configs/dq/entities/uniprot/*.yaml` (2 files)
-- `configs/dq/entities/pubmed/*.yaml` (1 file)
-- `configs/dq/entities/crossref/*.yaml` (1 file)
-- `configs/dq/entities/openalex/*.yaml` (1 file)
-- `configs/dq/entities/semanticscholar/*.yaml` (1 file)
-- `configs/dq/providers/*.yaml` (provider-level defaults)
-- `configs/dq/_defaults.yaml` (global defaults)
+- `configs/quality/entities/chembl/*.yaml` (12 files)
+- `configs/quality/entities/pubchem/*.yaml` (1 file)
+- `configs/quality/entities/uniprot/*.yaml` (2 files)
+- `configs/quality/entities/pubmed/*.yaml` (1 file)
+- `configs/quality/entities/crossref/*.yaml` (1 file)
+- `configs/quality/entities/openalex/*.yaml` (1 file)
+- `configs/quality/entities/semanticscholar/*.yaml` (1 file)
+- `configs/quality/providers/*.yaml` (provider-level defaults)
+- `configs/quality/_defaults.yaml` (global defaults)
 
 ### Scripts Created (PR #1637)
 - `scripts/config_gap_analysis.py` - Config compliance checker
@@ -56089,7 +56089,7 @@ gold_filters:
 
 # DQ configuration (ADR-027)
 dq_config_file: path      # External DQ config reference
-dq_rules: {...}           # Optional inline overrides (field validations only)
+dq_overrides: {...}           # Optional inline overrides (field validations only)
 ```
 
 ## Recommendations
@@ -56097,7 +56097,7 @@ dq_rules: {...}           # Optional inline overrides (field validations only)
 ### Immediate (done)
 - [x] Add `sort_by` to all Silver/Gold sinks (ADR-014 compliance)
 - [x] Add missing required fields (version, description, gold_table)
-- [x] Migrate inline `dq_rules` thresholds to `dq_config_file` (ADR-027)
+- [x] Migrate inline `dq_overrides` thresholds to `dq_config_file` (ADR-027)
 
 ### Future Improvements
 1. **Add `scripts/config_gap_analysis.py` to CI pipeline**
@@ -56387,12 +56387,12 @@ Path: audits\documentation-security-audit-2026-01-21.md
 
 | Компонент | Статус |
 |-----------|--------|
-| DQ defaults (`configs/dq/_defaults.yaml`) | ✓ |
-| DQ providers (`configs/dq/providers/`) | ✓ (7 провайдеров) |
-| DQ entities (`configs/dq/entities/`) | ✓ (7 директорий) |
-| Filter defaults (`configs/filter/_defaults.yaml`) | ✓ |
-| Filter providers (`configs/filter/providers/`) | ✓ (7 провайдеров) |
-| Filter entities (`configs/filter/entities/`) | ✓ (8 директорий, включая composite) |
+| DQ defaults (`configs/quality/_defaults.yaml`) | ✓ |
+| DQ providers (`configs/quality/providers/`) | ✓ (7 провайдеров) |
+| DQ entities (`configs/quality/entities/`) | ✓ (7 директорий) |
+| Filter defaults (`configs/filters/_defaults.yaml`) | ✓ |
+| Filter providers (`configs/filters/providers/`) | ✓ (7 провайдеров) |
+| Filter entities (`configs/filters/entities/`) | ✓ (8 директорий, включая composite) |
 
 ### Pipeline Configurations
 
@@ -56552,14 +56552,14 @@ Path: audits\dq-redundancy-audit-2026-01-20.md
 
 ## Executive Summary
 
-This audit identifies redundant `dq_rules` parameters in pipeline configs that duplicate
-values already defined in the hierarchical DQ configuration (`configs/dq/`).
+This audit identifies redundant `dq_overrides` parameters in pipeline configs that duplicate
+values already defined in the hierarchical DQ configuration (`configs/quality/`).
 
 ### Key Findings
 
 | Metric | Count |
 |--------|-------|
-| Pipeline configs with inline `dq_rules` | 19 |
+| Pipeline configs with inline `dq_overrides` | 19 |
 | Pipeline configs with `dq_config_file` reference | 2 |
 | Entity DQ configs available | 20 |
 | **Fully redundant inline rules (remove entire section)** | **17** |
@@ -56568,13 +56568,13 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 
 ### Recommendation Summary
 
-**17 of 19 pipeline configs have fully redundant `dq_rules` sections that can be removed entirely.**
+**17 of 19 pipeline configs have fully redundant `dq_overrides` sections that can be removed entirely.**
 
 ---
 
 ## DQ Hierarchy Reference Values
 
-### Global Defaults (`configs/dq/_defaults.yaml`)
+### Global Defaults (`configs/quality/_defaults.yaml`)
 
 | Parameter | Value |
 |-----------|-------|
@@ -56601,7 +56601,7 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 
 ### 1. chembl/activity.yaml
 
-**Status:** Has `dq_config_file` AND inline `dq_rules`
+**Status:** Has `dq_config_file` AND inline `dq_overrides`
 
 **dq_config_file:** `../../dq/entities/chembl/activity.yaml` (present)
 
@@ -56625,9 +56625,9 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 
 ### 2. chembl/assay.yaml
 
-**Status:** Inline `dq_rules` only (no `dq_config_file`)
+**Status:** Inline `dq_overrides` only (no `dq_config_file`)
 
-**Entity DQ Config:** `configs/dq/entities/chembl/assay.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/assay.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56645,9 +56645,9 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 
 ### 3. chembl/assay_parameters.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/assay_parameters.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/assay_parameters.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56656,15 +56656,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `type` pattern ^.{1,100}$ nullable:false | `type` pattern ^.{1,100}$ nullable:false | **REDUNDANT** |
 | cross_field: param_linkage | cross_field: param_linkage | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 4. chembl/cell_line.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/cell_line.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/cell_line.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56673,15 +56673,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `cellosaurus_id` pattern CVCL nullable:true | `cellosaurus_id` pattern CVCL nullable:true | **REDUNDANT** |
 | `cell_source_tax_id` range 1-10M nullable:true | `cell_source_tax_id` range 1-10M nullable:true | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 5. chembl/compound_record.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/compound_record.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/compound_record.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56691,15 +56691,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `src_id` range min:1 nullable:true | `src_id` range min:1 nullable:true | **REDUNDANT** |
 | cross_field: record_linkage | cross_field: record_linkage | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 6. chembl/molecule.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/molecule.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/molecule.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56720,9 +56720,9 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 
 ### 7. chembl/protein_class.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/protein_class.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/protein_class.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56732,15 +56732,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `parent_id` range min:1 nullable:true | `parent_id` range min:1 nullable:true | **REDUNDANT** |
 | cross_field: hierarchy_valid | cross_field: hierarchy_valid | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 8. chembl/publication.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/publication.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/publication.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56751,15 +56751,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `doi` pattern ^10\\.\d{4,}/.* nullable:true | `doi` pattern ^10\.\d{4,}/.* nullable:true | **REDUNDANT** |
 | cross_field: publication_identifiable | cross_field: publication_identifiable | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 9. chembl/publication_similarity.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/publication_similarity.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/publication_similarity.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56770,15 +56770,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `avg_tani` range 0-1 nullable:true | `avg_tani` range 0-1 nullable:true | **REDUNDANT** |
 | cross_field: similarity_pair | cross_field: similarity_pair | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 10. chembl/publication_term.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/publication_term.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/publication_term.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56788,15 +56788,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `term` pattern ^.{1,500}$ nullable:false | `term` pattern ^.{1,500}$ nullable:false | **REDUNDANT** |
 | cross_field: term_completeness | cross_field: term_completeness | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 11. chembl/target.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/target.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/target.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56812,9 +56812,9 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 
 ### 12. chembl/target_component.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/chembl/target_component.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/chembl/target_component.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56824,15 +56824,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `tax_id` range 1-10M nullable:true | `tax_id` range 1-10M nullable:true | **REDUNDANT** |
 | cross_field: component_identifiable | cross_field: component_identifiable | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 13. pubchem/compound.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/pubchem/compound.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/pubchem/compound.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56853,7 +56853,7 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 
 ### 14. uniprot/idmapping.yaml
 
-**Status:** Has `dq_config_file` ONLY (no inline `dq_rules`)
+**Status:** Has `dq_config_file` ONLY (no inline `dq_overrides`)
 
 **Recommendation:** **NO ACTION NEEDED.** Already follows ADR-027 best practices.
 
@@ -56861,9 +56861,9 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 
 ### 15. uniprot/protein.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/uniprot/protein.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/uniprot/protein.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56875,15 +56875,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `mass` range 100-10M nullable:true | `mass` range 100-10M nullable:true | **REDUNDANT** |
 | cross_field: protein_identifiable | cross_field: protein_identifiable | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 16. pubmed/publications.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/pubmed/publication.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/pubmed/publication.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56896,15 +56896,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | cross_field: publication_identifiable | cross_field: publication_identifiable | **REDUNDANT** |
 | cross_field: has_identifier | cross_field: has_identifier | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 17. crossref/publication.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/crossref/publication.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/crossref/publication.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56915,15 +56915,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `is_referenced_by_count` range min:0 nullable:true | `is_referenced_by_count` range min:0 nullable:true | **REDUNDANT** |
 | cross_field: publication_identifiable | cross_field: publication_identifiable | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 18. openalex/publication.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/openalex/publication.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/openalex/publication.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56935,15 +56935,15 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `cited_by_count` range min:0 nullable:true | `cited_by_count` range min:0 nullable:true | **REDUNDANT** |
 | cross_field: publication_identifiable | cross_field: publication_identifiable | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 19. semanticscholar/publication.yaml
 
-**Status:** Inline `dq_rules` only
+**Status:** Inline `dq_overrides` only
 
-**Entity DQ Config:** `configs/dq/entities/semanticscholar/publication.yaml` (exists)
+**Entity DQ Config:** `configs/quality/entities/semanticscholar/publication.yaml` (exists)
 
 | Inline Validation | Entity DQ Config | Status |
 |-------------------|------------------|--------|
@@ -56956,13 +56956,13 @@ values already defined in the hierarchical DQ configuration (`configs/dq/`).
 | `influential_citation_count` range min:0 nullable:true | `influential_citation_count` range min:0 nullable:true | **REDUNDANT** |
 | cross_field: publication_identifiable | cross_field: publication_identifiable | **REDUNDANT** |
 
-**Recommendation:** **REMOVE ENTIRE `dq_rules` SECTION.** All rules match entity config exactly.
+**Recommendation:** **REMOVE ENTIRE `dq_overrides` SECTION.** All rules match entity config exactly.
 
 ---
 
 ### 20. composite/publication.yaml
 
-**Status:** Inline `dq_rules` (composite-specific)
+**Status:** Inline `dq_overrides` (composite-specific)
 
 This is a **special case** - composite pipeline has its own DQ thresholds and per-enricher overrides
 that apply to the merge result, not to individual entities.
@@ -56974,7 +56974,7 @@ and per-enricher overrides are composite-specific and do not duplicate entity co
 
 ## Summary Table
 
-| Pipeline | dq_config_file | Inline dq_rules | Recommendation |
+| Pipeline | dq_config_file | Inline dq_overrides | Recommendation |
 |----------|----------------|-----------------|----------------|
 | chembl/activity | Yes | Yes (partial override) | Keep overrides only |
 | chembl/assay | No | Yes (partial overlap) | Add ref, keep unique |
@@ -57003,7 +57003,7 @@ and per-enricher overrides are composite-specific and do not duplicate entity co
 
 ### Phase 1: Remove Fully Redundant Sections (12 files)
 
-Files where entire `dq_rules` section can be removed:
+Files where entire `dq_overrides` section can be removed:
 
 1. `configs/pipelines/chembl/assay_parameters.yaml` (lines 22-44)
 2. `configs/pipelines/chembl/cell_line.yaml` (lines 21-43)
@@ -57021,7 +57021,7 @@ Files where entire `dq_rules` section can be removed:
 
 ### Phase 2: Add dq_config_file References (13 files)
 
-All files that had `dq_rules` removed need `dq_config_file` reference added:
+All files that had `dq_overrides` removed need `dq_config_file` reference added:
 
 ```yaml
 # Add after source_file reference
@@ -57057,7 +57057,7 @@ python -c "from bioetl.domain.config import DQConfig; c = DQConfig.load_hierarch
 
 ## Appendix: Orphan Configs (None Found)
 
-All pipeline configs have corresponding entity DQ configs in `configs/dq/entities/`.
+All pipeline configs have corresponding entity DQ configs in `configs/quality/entities/`.
 
 ---
 
@@ -66142,7 +66142,7 @@ source:
   type: api
   batch_size: 200  # E-utilities limit
 
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.05
   hard_fail_threshold: 0.20
 
@@ -67072,7 +67072,7 @@ source:
     from_db: ChEMBL
     to_db: UniProtKB
 
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.30  # 30% not_found acceptable
   hard_fail_threshold: 0.80  # 80% not_found triggers failure
 
@@ -67253,7 +67253,7 @@ sink:
         format: delta
         mode: overwrite
 
-dq_rules:
+dq_overrides:
     soft_fail_threshold: 0.05   # 5% ошибок → WARNING
     hard_fail_threshold: 0.20   # 20% ошибок → FAIL BATCH
 ```
@@ -67912,7 +67912,7 @@ sink:
         format: delta
         mode: overwrite
 
-dq_rules:
+dq_overrides:
     soft_fail_threshold: 0.05   # 5% ошибок → WARNING
     hard_fail_threshold: 0.20   # 20% ошибок → FAIL BATCH
 ```
@@ -70850,7 +70850,7 @@ source:
     to_db: UniProtKB
 
 # Elevated thresholds for ID mapping
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.30  # 30% not_found acceptable
   hard_fail_threshold: 0.80  # 80% not_found → hard failure
 
@@ -72214,7 +72214,7 @@ Use this checklist when reviewing new or modified pipelines.
 ## 2. Configuration (RULES.md App D)
 
 - [ ] Pipeline config exists at `configs/pipelines/{provider}/{entity}.yaml`
-- [ ] Config includes required sections: `pipeline`, `source`, `sink`, `dq_rules`
+- [ ] Config includes required sections: `pipeline`, `source`, `sink`, `dq_overrides`
 - [ ] `circuit_breaker` and `rate_limit` parameters defined
 - [ ] `load_strategy` specified (`incremental` | `full`)
 - [ ] `forensic_retention` flag set for Critical tables if needed

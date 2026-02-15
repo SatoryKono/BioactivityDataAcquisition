@@ -286,7 +286,7 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
-  dq_rules:
+  dq_overrides:
     # Composite-level thresholds (applied to merge result)
     soft_fail_threshold: 0.10  # 10% errors = warning
     hard_fail_threshold: 0.30  # 30% errors = failure

@@ -28,9 +28,9 @@ Derived pipeline that extracts and flattens publication terms (MeSH, keywords) f
 
 ## Related Configs
 
-- DQ: `configs/dq/entities/chembl/publication_term.yaml`
-- Filters: `configs/filter/entities/chembl/publication_term.yaml`
-- Column groups: `configs/data_schema/chembl/publication_term.yaml`
+- DQ: `configs/quality/entities/chembl/publication_term.yaml`
+- Filters: `configs/filters/entities/chembl/publication_term.yaml`
+- Column groups: `configs/schemas/chembl/publication_term.yaml`
 
 ## Related ADRs
 

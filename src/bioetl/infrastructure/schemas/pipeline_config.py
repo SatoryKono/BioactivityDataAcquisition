@@ -15,7 +15,6 @@ import re
 from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import (
-    AliasChoices,
     BaseModel,
     ConfigDict,
     Field,
@@ -767,8 +766,6 @@ class PipelineYamlConfig(BaseModel):
     )
     dq_overrides: DQConfig = Field(
         default_factory=DQConfig,
-        validation_alias=AliasChoices("dq_overrides", "dq_rules", "dq"),
-        serialization_alias="dq_overrides",
     )
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
 

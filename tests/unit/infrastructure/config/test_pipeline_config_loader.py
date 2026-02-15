@@ -39,28 +39,8 @@ def _base_pipeline_dict() -> dict[str, Any]:
 
 
 @pytest.mark.unit
-def test_resolve_dq_config_accepts_legacy_dq_rules_alias() -> None:
-    """Legacy dq_rules key should be normalized as inline overrides."""
-    dummy = _DummyDQLoader()
-    loader = ConfigLoader(Path("configs"), dq_loader=dummy)
-
-    yaml_config = PipelineYamlConfig.model_validate(
-        {
-            **_base_pipeline_dict(),
-            "dq_rules": {"soft_fail_threshold": 0.06, "hard_fail_threshold": 0.19},
-        }
-    )
-
-    _ = loader.resolve_dq_config(yaml_config)
-
-    assert dummy.calls
-    assert dummy.calls[-1] is not None
-    assert dummy.calls[-1]["thresholds"] == {"soft_fail": 0.06, "hard_fail": 0.19}
-
-
-@pytest.mark.unit
-def test_resolve_dq_config_accepts_canonical_dq_overrides_key() -> None:
-    """Canonical dq_overrides key should be normalized identically."""
+def test_resolve_dq_config_accepts_dq_overrides_key() -> None:
+    """dq_overrides key should be passed as inline overrides."""
     dummy = _DummyDQLoader()
     loader = ConfigLoader(Path("configs"), dq_loader=dummy)
 

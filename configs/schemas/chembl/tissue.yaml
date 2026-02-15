@@ -1,4 +1,4 @@
-# configs/data_schema/chembl/tissue.yaml
+# configs/schemas/chembl/tissue.yaml
 # Column group definitions for ChEMBL Tissue entity
 
 version: "1.0.0"

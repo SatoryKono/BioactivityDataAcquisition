@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/protein_class.yaml
+# configs/quality/entities/chembl/protein_class.yaml
 # ChEMBL Protein Classification-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
