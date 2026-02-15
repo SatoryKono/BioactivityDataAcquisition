@@ -108,8 +108,8 @@ def _extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
             if "src/bioetl" in file_path:
                 idx = file_path.find("src/bioetl")
                 contract_path = file_path[idx:]
-    except Exception:
-        pass
+    except (AttributeError, OSError, TypeError):
+        contract_path = None
 
     # Extract schema version from Config if defined
     version = "1.0"
@@ -148,9 +148,9 @@ def _extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
                             nullable=nullable,
                         )
                     )
-    except Exception:
+    except (AttributeError, TypeError, ValueError):
         # If schema extraction fails, leave columns empty
-        pass
+        columns = []
 
     return SchemaMetadata(
         contract_path=contract_path,
