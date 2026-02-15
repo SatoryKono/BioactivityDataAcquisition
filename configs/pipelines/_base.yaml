@@ -1,491 +1,113 @@
-# configs/pipelines/_base.yaml
-# =============================================================================
-# Unified Base Schema for BioETL Pipeline Configurations
-# =============================================================================
-#
-# This file defines the canonical schema for all pipeline configurations.
-# All entity-specific configs MUST inherit these defaults unless explicitly
-# overriding with documented justification.
-#
-# Version: 2.1.0
-# Reference: RULES.md v5.10, Appendix D; ADR-029 (Convention-based Paths)
-# Last Updated: 2026-01-21
-#
-# Usage:
-#   Entity configs specify only entity-specific fields:
-#   - pipeline_name, provider, entity_type
-#   - primary_keys, silver_table, gold_table
-#   - DQ overrides (only fields that DIFFER from entity DQ config)
-#   - Explicit overrides for paths/configs that differ from convention
-#
-# Inheritance Chain:
-#   _base.yaml (this file) -> <provider>/<entity>.yaml
-#
-# =============================================================================
-#
-# Convention-Based Path Resolution (ADR-029)
-# =============================================================================
-#
-# The config loader auto-computes paths/references from provider and entity_type
-# when not explicitly specified. This reduces duplication across configs.
-#
-# Auto-computed File References:
-#   source_file       -> ../../sources/{provider}.yaml
-#   dq_config_file    -> ../../dq/entities/{provider}/{entity_type}.yaml
-#   filter_config_file -> ../../filter/entities/{provider}/{entity_type}.yaml
-#
-# Auto-computed Sink Paths:
-#   sink.bronze.path           -> data/output/bronze/{provider}/{entity_type}
-#   sink.silver.path           -> data/output/silver/{provider}/{entity_type}
-#   sink.gold.path             -> data/output/gold/{provider}/{entity_type}
-#   sink.silver.csv_export.path -> {sink.silver.path}
-#   sink.gold.csv_export.path   -> {sink.gold.path}
-#
-# Auto-propagated Primary Keys:
-#   sink.silver.primary_key    -> {primary_keys}
-#   sink.silver.sort_by.columns -> {primary_keys}
-#   sink.gold.sort_by.columns   -> {primary_keys}
-#
-# Filter/DQ Rules:
-#   - input_filter and gold_filters are loaded from filter_config_file
-#   - dq_rules are loaded from dq_config_file
-#   - Inline overrides in pipeline config are merged on top
-#
-# =============================================================================
-#
-# Configuration Style Guide
-# =============================================================================
-#
-# Two styles are supported. Choose based on your needs:
-#
-# 1. CONVENTION-BASED MINIMAL (Recommended for new configs)
-#    Use when: Standard paths, no special overrides needed
-#    Benefits: Less duplication, easier maintenance
-#    Example:
-#      pipeline_name: chembl_activity
-#      provider: chembl
-#      entity_type: activity
-#      version: "1.2.0"
-#      primary_keys: ["activity_id"]
-#      silver_table: "chembl_activity"
-#      gold_table: "chembl_activity"
-#      # All paths auto-computed by convention
-#
-# 2. EXPLICIT FULL
-#    Use when: Non-standard paths, complex DQ rules, special overrides
-#    Benefits: Self-documenting, no hidden behavior
-#    Example: See chembl/molecule.yaml, chembl/target.yaml
-#
-# 3. HYBRID (For special cases)
-#    Use when: Mostly convention but need specific overrides
-#    Example: pubmed/publication.yaml (explicit sink paths, convention DQ)
-#
-# =============================================================================
-
-# -----------------------------------------------------------------------------
-# Schema Version
-# -----------------------------------------------------------------------------
+# Base pipeline config format (defaults only).
+# Full documentation: docs/03-guides/CONFIG-GUIDE.md
 schema_version: "2.0.0"
 
-# -----------------------------------------------------------------------------
-# Pipeline Identification (MUST be overridden in entity config)
-# -----------------------------------------------------------------------------
-# pipeline_name: <provider>_<entity>  # MUST: Unique identifier
-# provider: <provider>                 # MUST: chembl | pubchem | uniprot | ...
-# entity_type: <entity>                # MUST: activity | assay | molecule | ...
-# version: "1.0.0"                     # MUST: Semantic version of config
-
-# -----------------------------------------------------------------------------
-# Source Configuration
-# -----------------------------------------------------------------------------
-# NOTE: Source settings (type, load_strategy, rate_limit, circuit_breaker)
-# are defined in configs/sources/<provider>.yaml for DRY compliance.
-# Pipeline configs reference source via: source_file: ../../sources/<provider>.yaml
-
 source:
-  # Default source type (can be overridden for file-based pipelines)
   type: api
-
-  # Load strategy
-  # - full: Complete dataset refresh (default for most pipelines)
-  # - incremental: Delta loads using watermark_field (future enhancement)
   load_strategy: full
 
-  # Watermark field for incremental loads (SHOULD specify when using incremental)
-  # watermark_field: updated_at
-
-# -----------------------------------------------------------------------------
-# Transformation Configuration
-# -----------------------------------------------------------------------------
 transform:
-  # Version of transformation logic (MUST match config version)
-  # version: "1.0.0"  # Inherited from root `version` field
-
-  # Transformation steps (SHOULD document for complex pipelines)
-  # These are implemented in code but documented here for clarity
   steps: []
-  # Example steps:
-  #   - normalize_units      # Standardize measurement units
-  #   - validate_smiles      # Validate SMILES notation
-  #   - deduplicate          # Remove duplicate records
-  #   - enrich_metadata      # Add computed fields
 
-# -----------------------------------------------------------------------------
-# Data Quality Rules
-# -----------------------------------------------------------------------------
 dq_rules:
-  # Soft threshold - triggers WARNING but continues processing
-  # MUST: Default 5% error rate before warning
   soft_fail_threshold: 0.05
-
-  # Hard threshold - triggers FAILURE and stops batch
-  # MUST: Default 20% error rate before failure
   hard_fail_threshold: 0.20
-
-  # Apply stricter validation rules (feature flag)
   strict_validation: false
-
-  # Deviations from defaults MUST be documented with justification
-  # Example: ID mapping may have higher not_found rates (0.30/0.80)
-
-  # ---------------------------------------------------------------------------
-  # Field-Level Validations (Extended DQ)
-  # ---------------------------------------------------------------------------
-  # Define validation rules for specific fields. Types:
-  # - range: Numeric range validation (min/max)
-  # - pattern: Regex pattern matching
-  # - enum: Allowed values validation
-  # - custom: Custom validator function reference
-  #
-  # Example:
-  # field_validations:
-  #   - field: "standard_value"
-  #     type: "range"
-  #     min: 0
-  #     max: 1000000000
-  #     nullable: false
-  #   - field: "molecule_chembl_id"
-  #     type: "pattern"
-  #     pattern: "^CHEMBL\\d+$"
-  #     nullable: false
-  #   - field: "assay_type"
-  #     type: "enum"
-  #     allowed: ["B", "F", "A", "T", "P"]
-  #     nullable: true
-  #   - field: "smiles"
-  #     type: "custom"
-  #     validator: "smiles_validator"
-  #     nullable: true
   field_validations: []
-
-  # ---------------------------------------------------------------------------
-  # Cross-Field Validations
-  # ---------------------------------------------------------------------------
-  # Validate relationships between multiple fields. Conditions:
-  # - all_present: All fields must be non-null
-  # - any_present: At least one field must be non-null
-  # - mutually_exclusive: Only one field can be non-null
-  # - conditional_required: If field A present, field B required
-  # - custom: Custom validation function
-  #
-  # Example:
-  # cross_field_validations:
-  #   - name: "activity_completeness"
-  #     fields: ["standard_value", "standard_units", "standard_type"]
-  #     condition: "all_present"
-  #   - name: "identifier_present"
-  #     fields: ["doi", "pmid", "title"]
-  #     condition: "any_present"
   cross_field_validations: []
-
-  # ---------------------------------------------------------------------------
-  # Conditional Validations
-  # ---------------------------------------------------------------------------
-  # Apply validations only when a condition is met.
-  # Operators: eq, ne, in, not_in
-  #
-  # Example:
-  # conditional_validations:
-  #   - name: "ic50_range_check"
-  #     condition_field: "standard_type"
-  #     condition_value: "IC50"
-  #     condition_operator: "eq"
-  #     then_validations:
-  #       - field: "standard_value"
-  #         type: "range"
-  #         min: 0.001
-  #         max: 100000
-  #         nullable: false
   conditional_validations: []
-
-  # ---------------------------------------------------------------------------
-  # Invalid Record Policy
-  # ---------------------------------------------------------------------------
-  # Policy for handling records that fail validation:
-  # - quarantine: Send to quarantine for manual review (default)
-  # - skip: Log and skip the record silently
-  # - fail: Fail the batch immediately
   invalid_record_policy: "quarantine"
-
-  # ---------------------------------------------------------------------------
-  # DQ Report Configuration
-  # ---------------------------------------------------------------------------
-  # Configuration for DQ report generation
   report:
     enabled: true
-    format: "json"  # json | yaml | csv
+    format: "json"
     include_sample_failures: true
     sample_size: 10
 
-# -----------------------------------------------------------------------------
-# Circuit Breaker Configuration
-# -----------------------------------------------------------------------------
 circuit_breaker:
-  # Number of consecutive failures before circuit opens
-  # MUST: Default 5 failures
   failure_threshold: 5
-
-  # Seconds to wait before attempting recovery (Half-Open state)
-  # MUST: Default 300 seconds (5 minutes)
   recovery_timeout: 300
 
-  # Provider-specific overrides are defined in source configs
-
-# -----------------------------------------------------------------------------
-# Sink Configuration
-# -----------------------------------------------------------------------------
 sink:
-  # ---------------------------------------------------------------------------
-  # Bronze Layer - Raw Data
-  # ---------------------------------------------------------------------------
   bronze:
-    # Output format
     format: jsonl
-
-    # Preserve original JSON structure
     save_json: true
-
-    # MUST: No random elements in writes (ADR-014)
     deterministic: true
-
-    # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
-
-    # DQ report configuration for Bronze layer
     dq_report:
       enabled: true
-
-    # Metadata configuration (when save_metadata: true)
     metadata:
-       lineage:
-         source_system: "<provider>"
-         source_version: "<version>"
-         extraction_method: "api"
-       owner: "data-team"
-       steward: "<pipeline>-owner"
-       description: "Raw <provider> <entity> data"
-       tags: ["<provider>", "<entity>", "raw"]
-       retention_days: 90
-       sla_freshness_hours: 24
-
-    # Flat structure mode (default: true)
-    # Controls whether writer appends {provider}/{entity}/ to path:
-    # - true:  {path}/{date}/batch_...  (path already includes provider/entity)
-    # - false: {path}/{provider}/{entity}/{date}/batch_...
-    # Default is true because all pipeline paths (both convention-based and explicit)
-    # already include provider/entity segments per ADR-029.
-    # Override to false only if path does NOT include provider/entity.
+      lineage:
+        source_system: "<provider>"
+        source_version: "<version>"
+        extraction_method: "api"
+      owner: "data-team"
+      steward: "<pipeline>-owner"
+      description: "Raw <provider> <entity> data"
+      tags: ["<provider>", "<entity>", "raw"]
+      retention_days: 90
+      sla_freshness_hours: 24
     flat_structure: true
 
-    # Path template (overridden per entity)
-    # path: data/output/bronze
-
-  # ---------------------------------------------------------------------------
-  # Silver Layer - Cleansed Data
-  # ---------------------------------------------------------------------------
   silver:
-    # MUST: Use Delta Lake format (not parquet)
     format: delta
-
-    # Write mode
-    # - merge: Upsert based on primary_key (default)
-    # - overwrite: Full table replacement
     mode: merge
-
-    # Schema evolution strategy
     on_schema_mismatch: evolve
-
-    # Data classification
-    # - public: No access restrictions
-    # - internal: Organization-internal only
-    # - restricted: PII or sensitive data
     classification: public
-
-    # Forensic data retention
-    # false: 7-day default retention (default)
-    # true: 30-day retention for critical tables (requires justification)
-    forensic_retention: false  # true только для Critical tables (требует обоснования)
-
-    # MUST: No random elements in writes (ADR-014)
+    forensic_retention: false
     deterministic: true
-
-    # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
-
-    # DQ report configuration for Silver layer
     dq_report:
       enabled: true
-
-    # Metadata configuration (when save_metadata: true)
     metadata:
-       lineage:
-         source_layer: "bronze"
-         transformations: ["deduplication", "normalization", "dq_validation"]
-       quality_expectations:
-         completeness: 0.95
-         accuracy: 0.99
-       description: "Cleansed <provider> <entity> data"
-       tags: ["<provider>", "<entity>", "silver", "validated"]
-
-    # CSV export configuration
+      lineage:
+        source_layer: "bronze"
+        transformations: ["deduplication", "normalization", "dq_validation"]
+      quality_expectations:
+        completeness: 0.95
+        accuracy: 0.99
+      description: "Cleansed <provider> <entity> data"
+      tags: ["<provider>", "<entity>", "silver", "validated"]
     csv_export:
       enabled: true
       delimiter: ","
       header: true
       encoding: "utf-8"
-
-    # Partitioning (default: no partitioning)
-    # Override in entity config when partitioning is needed
     partition_by: []
-
-    # Sort configuration (ADR-014: deterministic writes)
-    # ascending: true is the default for all entity configs
     sort_by:
       ascending: true
-      # columns: [<entity_id>]  # MUST be overridden in entity config
-
-    # Flat structure mode (default: true)
-    # Controls whether writer appends table_name subdirectory to path:
-    # - true:  Delta written directly to {path}/ (path already includes provider/entity)
-    # - false: Delta written to {path}/{table_name}/
-    # Default is true because all pipeline paths already include provider/entity per ADR-029.
-    # CSV: {table_name}.csv at {path} (unchanged regardless of flat_structure)
     flat_structure: true
 
-    # Entity-specific (MUST be overridden):
-    # path: data/output/silver
-    # primary_key: [<entity_id>]
-
-  # ---------------------------------------------------------------------------
-  # Gold Layer - Business-Ready Data
-  # ---------------------------------------------------------------------------
   gold:
-    # Enable Gold layer processing
     enabled: true
-
-    # Strict validation for Gold layer (ADR-018)
     validation:
       strict: true
-
-    # MUST: Use Delta Lake format
     format: delta
-
-    # Write mode (overwrite is common for aggregated Gold tables)
     mode: overwrite
-
-    # MUST: No random elements in writes (ADR-014)
     deterministic: true
-
-    # Save _metadata.yaml sidecar file (disabled by default)
     save_metadata: true
-
-    # DQ report configuration for Gold layer
     dq_report:
       enabled: true
-
-    # Metadata configuration (when save_metadata: true)
     metadata:
-        lineage:
-          source_layer: "silver"
-          filters_applied: true
-        business_domain: "drug-discovery"
-        use_cases: ["ml-training", "reporting", "analytics"]
-        description: "Business-ready <provider> <entity> data"
-        tags: ["<provider>", "<entity>", "gold", "ml-ready"]
-
-    # CSV export configuration
+      lineage:
+        source_layer: "silver"
+        filters_applied: true
+      business_domain: "drug-discovery"
+      use_cases: ["ml-training", "reporting", "analytics"]
+      description: "Business-ready <provider> <entity> data"
+      tags: ["<provider>", "<entity>", "gold", "ml-ready"]
     csv_export:
       enabled: true
       delimiter: ","
       header: true
       encoding: "utf-8"
-
-    # Sort configuration (ADR-014: deterministic writes)
-    # ascending: true is the default for all entity configs
     sort_by:
       ascending: true
-      # columns: [<entity_id>]  # MUST be overridden in entity config
-
-    # Flat structure mode (default: true)
-    # Controls whether writer appends table_name subdirectory to path:
-    # - true:  Delta written directly to {path}/ (path already includes provider/entity)
-    # - false: Delta written to {path}/{table_name}/
-    # Default is true because all pipeline paths already include provider/entity per ADR-029.
-    # CSV: {table_name}.csv at {path} (unchanged regardless of flat_structure)
     flat_structure: true
 
-    # Entity-specific (MUST be overridden):
-    # path: data/output/gold
-
-# -----------------------------------------------------------------------------
-# Maintenance Configuration
-# -----------------------------------------------------------------------------
 maintenance:
-  # Automatic VACUUM execution
   auto_vacuum: false
-
-  # Retention period for VACUUM (days)
   vacuum_retention_days: 7
 
-# -----------------------------------------------------------------------------
-# Input Filter Configuration
-# -----------------------------------------------------------------------------
 input_filter:
-  # Enable filtering by input CSV
   enabled: false
-
-  # Default batch size for filtered processing
   batch_size: 100
-
-  # Entity-specific (when enabled):
-  # source_path: data/input/<entity>.csv
-  # column_name: <id_column>
-  # filter_field: <api_field>
-  # fallback_column: <fallback_field>  # Optional: for DOI resolution
-
-# -----------------------------------------------------------------------------
-# Gold Filters Configuration
-# -----------------------------------------------------------------------------
-# Entity-specific gold filters are defined in each pipeline config.
-# Common patterns:
-#
-# gold_filters:
-#   columns:
-#     <field>: [<allowed_values>]
-#   ranges:
-#     <field>:
-#       min: <value>
-#       max: <value>
-#       include_min: true/false
-#       include_max: true/false
-#   required_fields:
-#     - <field1>
-#     - <field2>
-#   list_lengths:
-#     <list_field>:
-#       min: <value>
-#       max: <value>
-#   list_contains:
-#     <list_field>:
-#       values: [<value>]
-#       mode: any/all
