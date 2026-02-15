@@ -75,5 +75,3 @@ def get_int(node: ET.Element | None) -> int | None:
                 pass
     return None
 
-
-PARSER_HELPERS = (get_text, get_int)

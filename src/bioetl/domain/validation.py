@@ -408,5 +408,3 @@ def validate_inchi_key(key: str | None) -> bool:
         return False
     return bool(_INCHI_KEY_PATTERN.match(key.strip()))
 
-
-VALIDATION_API = (validate_publication_year, validate_inchi_key)
