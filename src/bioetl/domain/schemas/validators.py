@@ -10,19 +10,22 @@ Usage in DataFrameModel schemas:
         mass: Series[float] = pa.Field(nullable=True, is_non_negative=True)
         score: Series[int] = pa.Field(nullable=True, in_range={"min_val": 0, "max_val": 100})
         smiles: Series[str] = pa.Field(nullable=True, max_str_length=10000)
+
+Note: ``from __future__ import annotations`` is intentionally omitted.
+Pandera's ``get_first_arg_type`` uses ``inspect.signature`` to resolve the
+first-parameter annotation of check functions at registration time.  Under
+PEP 649 (Python 3.14+) lazy evaluation may prevent correct resolution of
+type-alias annotations such as ``PandasData = Union[pd.Series, pd.DataFrame]``,
+leaving the built-in check dispatchers without ``pd.Series`` / ``pd.DataFrame``
+keys and causing ``KeyError: <class 'pandas.Series'>`` at validation time.
+Keeping annotations evaluated eagerly avoids this class of issues.
 """
 
-from __future__ import annotations
-
 import json
-from typing import TYPE_CHECKING
 
 import pandas as pd
 import pandera as pa
 from pandera.extensions import register_check_method  # type: ignore[attr-defined]
-
-if TYPE_CHECKING:
-    pass
 
 __all__ = [
     "in_closed_range",
@@ -216,3 +219,49 @@ def str_matches_pattern(pandas_obj: pd.Series, *, pattern: str) -> pd.Series:
         field: Series[str] = pa.Field(str_matches_pattern={"pattern": r"^CHEMBL\\d+$"})
     """
     return pandas_obj.isna() | pandas_obj.str.match(pattern)
+
+
+# =============================================================================
+# PANDERA PANDAS BACKEND COMPATIBILITY (Python 3.14+)
+# =============================================================================
+
+
+def _ensure_pandera_pandas_checks() -> None:
+    """Ensure pandera's pandas check functions are registered for pd.Series.
+
+    On Python 3.14+ (PEP 649), pandera's ``get_first_arg_type`` may fail to
+    resolve the ``PandasData = Union[pd.Series, pd.DataFrame]`` type alias
+    used in ``pandera.backends.pandas.builtin_checks``.  When this happens the
+    built-in check ``Dispatcher`` objects only contain a ``typing.Any`` key and
+    column-level validation raises ``KeyError: <class 'pandas.Series'>``.
+
+    This function forces the import of the pandas backend module and, if the
+    dispatchers are still missing concrete pandas types, patches them in
+    explicitly.
+    """
+    import inspect
+    import typing
+
+    from pandera.api.checks import Check
+
+    try:
+        import pandera.backends.pandas.builtin_checks as pd_checks  # noqa: F401
+    except ImportError:  # pragma: no cover
+        return
+
+    for name, dispatcher in Check.CHECK_FUNCTION_REGISTRY.items():
+        if pd.Series in dispatcher._function_registry:
+            continue
+        # The pandas implementation lives in builtin_checks as a module-level
+        # function with the same name as the dispatcher key.
+        pd_fn = None
+        candidate = getattr(pd_checks, name, None)
+        if candidate is not None and inspect.isfunction(candidate):
+            pd_fn = candidate
+        if pd_fn is None:
+            continue
+        dispatcher._function_registry[pd.Series] = pd_fn
+        dispatcher._function_registry[pd.DataFrame] = pd_fn
+
+
+_ensure_pandera_pandas_checks()
