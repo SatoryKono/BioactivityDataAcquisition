@@ -113,6 +113,12 @@ repos:
           - jsonschema>=4.0.0
           - pyyaml>=6.0
 
+      - id: audit-root-cleanliness
+        name: Audit repository root layout allowlist
+        entry: python scripts/audit_root_cleanliness.py
+        language: python
+        pass_filenames: false
+        stages: [pre-commit]
       - id: check-root-vcr-cassettes
         name: Block root-level VCR cassette files
         entry: python scripts/check_root_vcr_cassettes.py
