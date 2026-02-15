@@ -17,10 +17,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar
 
-from bioetl.composition.providers import (
+from bioetl.composition.providers.loader import ensure_providers_loaded
+from bioetl.composition.providers.provider_registry import (
     DataSourceCreator,
     ProviderRegistry,
-    ensure_providers_loaded,
 )
 
 if TYPE_CHECKING:
