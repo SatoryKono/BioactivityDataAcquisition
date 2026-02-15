@@ -83,41 +83,31 @@ from bioetl.domain.value_objects.taxonomy_id import (
 )
 
 __all__ = [
-    # Academic IDs
+    "DOI",
     "ISSN",
     "ORCID",
-    "OpenAlexId",
-    "SemanticScholarId",
-    # Activity
-    "ActivityValue",
-    "ConfidenceScore",
-    "RelationOperator",
-    # Activity Values
-    "ActivityType",
-    "Concentration",
-    "ConcentrationUnit",
-    "PChemblValue",
-    # Base
-    "ValueObject",
-    # Chemical
     "SMILES",
-    "InChIKey",
-    "MolecularWeight",
-    "PublicationYear",
-    # Compound IDs
+    "ActivityType",
+    "ActivityValue",
     "AssayId",
+    "ChemblId",
     "CompoundId",
     "CompoundSource",
-    # DQ Result
+    "Concentration",
+    "ConcentrationUnit",
+    "ConfidenceScore",
     "DQEvaluationStatus",
-    # Identifiers
-    "ChemblId",
+    "InChIKey",
+    "MolecularWeight",
+    "OpenAlexId",
+    "PChemblValue",
     "PubChemCid",
-    "UniProtId",
-    # Publications
-    "DOI",
     "PubMedId",
-    # Taxonomy
+    "PublicationYear",
+    "RelationOperator",
+    "SemanticScholarId",
     "TaxonomyId",
+    "UniProtId",
+    "ValueObject",
     "validate_taxonomy_id",
 ]
