@@ -76,6 +76,8 @@ class RunnerFactory:
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         self._ensure_registrations()
+        # bootstrap currently requires concrete PipelineRunContext.
+        # RunnerFactoryPort stays decoupled by accepting PipelineRunContextInput.
         pipeline_context = cast("PipelineRunContext", context)
         runner: PipelineRunner = bootstrap_pipeline_runner(
             pipeline_context, registry=self._registry
