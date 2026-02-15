@@ -28,8 +28,8 @@ class TableConfig:
     silver_table: str | None = None
     gold_table: str | None = None
     # Write modes using domain enums (R1 refactoring)
-    silver_write_mode: SilverWriteMode | str = SilverWriteMode.MERGE
-    gold_write_mode: GoldWriteMode | str = GoldWriteMode.APPEND
+    silver_write_mode: SilverWriteMode = SilverWriteMode.MERGE
+    gold_write_mode: GoldWriteMode = GoldWriteMode.APPEND
     partition_cols: tuple[str, ...] = ()
     # Schema drift handling for Silver layer
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error"
