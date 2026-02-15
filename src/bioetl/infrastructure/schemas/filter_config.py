@@ -25,11 +25,9 @@ from pydantic import BaseModel, Field, field_validator
 
 from bioetl.domain.filtering import (
     GoldFilterConfig,
-)
-from bioetl.domain.filtering import InputFilterConfig as DomainInputFilterConfig
-from bioetl.domain.filtering import (
     SilverFilterConfig,
 )
+from bioetl.domain.filtering import InputFilterConfig as DomainInputFilterConfig
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
