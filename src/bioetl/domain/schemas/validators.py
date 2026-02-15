@@ -123,7 +123,6 @@ json_object_check = pa.Check(is_valid_json_object, name="valid_json_object")
 
 @register_check_method(
     statistics=["min_value"],
-    supported_types=(pd.Series,),
 )
 def is_non_negative(pandas_obj: pd.Series, *, min_value: float | bool = 0) -> pd.Series:
     """Check that values are non-negative (>= 0).
@@ -142,7 +141,6 @@ def is_non_negative(pandas_obj: pd.Series, *, min_value: float | bool = 0) -> pd
 
 @register_check_method(
     statistics=["min_value"],
-    supported_types=(pd.Series,),
 )
 def is_positive(pandas_obj: pd.Series, *, min_value: int | bool = 1) -> pd.Series:
     """Check that values are positive (>= 1).
@@ -161,7 +159,6 @@ def is_positive(pandas_obj: pd.Series, *, min_value: int | bool = 1) -> pd.Serie
 
 @register_check_method(
     statistics=["min_val", "max_val"],
-    supported_types=(pd.Series,),
 )
 def in_closed_range(
     pandas_obj: pd.Series,
@@ -181,7 +178,6 @@ def in_closed_range(
 
 @register_check_method(
     statistics=["max_len"],
-    supported_types=(pd.Series,),
 )
 def max_str_length(pandas_obj: pd.Series, *, max_len: int) -> pd.Series:
     """Check that string length is within limit.
@@ -194,7 +190,6 @@ def max_str_length(pandas_obj: pd.Series, *, max_len: int) -> pd.Series:
 
 @register_check_method(
     statistics=["prefix"],
-    supported_types=(pd.Series,),
 )
 def str_starts_with(pandas_obj: pd.Series, *, prefix: str) -> pd.Series:
     """Check that strings start with a prefix.
@@ -207,7 +202,6 @@ def str_starts_with(pandas_obj: pd.Series, *, prefix: str) -> pd.Series:
 
 @register_check_method(
     statistics=["pattern"],
-    supported_types=(pd.Series,),
 )
 def str_matches_pattern(pandas_obj: pd.Series, *, pattern: str) -> pd.Series:
     """Check that strings match a regex pattern.
