@@ -177,4 +177,4 @@ def test_provider_name(adapter):
 
 def test_health_endpoint(adapter):
     """Test that health endpoint is correct."""
-    assert adapter._get_health_endpoint() == "/entrez/eutils/esearch.fcgi"
+    assert adapter._get_health_endpoint() == "/entrez/eutils/einfo.fcgi"

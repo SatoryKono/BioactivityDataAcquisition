@@ -140,6 +140,7 @@ class EnricherCVStats:
         passed: Records that passed validation.
         warned: Records with warnings (1 mismatch).
         errored: Records with enricher error (2+ mismatches).
+        field_mismatches: Per-field mismatch counts, e.g. (("title", 12), ("doi", 0)).
     """
 
     enricher: str
@@ -147,6 +148,7 @@ class EnricherCVStats:
     passed: int = 0
     warned: int = 0
     errored: int = 0
+    field_mismatches: tuple[tuple[str, int], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
