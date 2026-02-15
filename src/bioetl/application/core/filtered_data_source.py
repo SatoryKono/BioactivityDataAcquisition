@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
+from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.domain.ports import FilterableDataSourcePort, InputFilterPort
 
 if TYPE_CHECKING:
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 
-class FilteredDataSource:
+class FilteredDataSource(_SourceMetadataDelegationMixin):
     """Wraps a DataSourcePort to add CSV-based filtering.
 
     Decorator pattern: loads filter IDs from CSV, calls fetch_filtered() on
@@ -349,20 +350,3 @@ class FilteredDataSource:
     async def aclose(self) -> None:
         """Delegate close to wrapped adapter."""
         await self._data_source.aclose()
-
-    def get_source_metadata(self, api_version: str | None = None) -> Any:
-        """Delegate get_source_metadata to wrapped data source.
-
-        Returns API request metadata collected by the underlying adapter.
-        Used by BatchExecutor to enrich Bronze layer metadata.
-
-        Args:
-            api_version: Optional API version string.
-
-        Returns:
-            SourceMetadata with request details, or None if not supported.
-        """
-        get_metadata = getattr(self._data_source, "get_source_metadata", None)
-        if get_metadata is not None and callable(get_metadata):
-            return get_metadata(api_version)
-        return None
