@@ -109,9 +109,9 @@ async def test_health_check_returns_degraded_on_slow_response(
     # Mock time.monotonic to simulate slow response
     # _probe_health does: start_time = time.monotonic() then elapsed = time.monotonic() - start_time
     # We need elapsed > 5.0
-    import bioetl.infrastructure.adapters.pubmed.pubmed_client as pubmed_module
+    import bioetl.infrastructure.adapters.pubmed._health as health_module
 
-    original_monotonic = pubmed_module.time.monotonic
+    original_monotonic = health_module.time.monotonic
     call_count = [0]  # Use list to allow modification in closure
 
     def mock_monotonic():
@@ -119,11 +119,11 @@ async def test_health_check_returns_degraded_on_slow_response(
         # First call returns 0, second call returns 6
         return 0.0 if call_count[0] == 1 else 6.0
 
-    pubmed_module.time.monotonic = mock_monotonic
+    health_module.time.monotonic = mock_monotonic
     try:
         result = await adapter._probe_health()
     finally:
-        pubmed_module.time.monotonic = original_monotonic
+        health_module.time.monotonic = original_monotonic
 
     assert result == HealthStatus.DEGRADED
     # Verify a slow response warning was logged

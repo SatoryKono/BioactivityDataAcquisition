@@ -32,20 +32,7 @@ if TYPE_CHECKING:
 
 
 def _path_to_table_name(path: str) -> str:
-    """Convert a full path to a table name by stripping layer prefix.
-
-    Handles both relative and absolute paths:
-    - "silver/chembl/activity" → "chembl/activity"
-    - "data/output/silver/chembl/activity" → "chembl/activity"
-    - "gold/composite/publication" → "composite/publication"
-    - "data/output/gold/composite/publication" → "composite/publication"
-
-    Args:
-        path: Path containing a layer segment (silver/, gold/, bronze/).
-
-    Returns:
-        Table name with layer prefix stripped.
-    """
+    """Convert a full path to a table name by stripping layer prefix."""
     # Normalize path separators
     normalized = path.replace("\\", "/")
 
@@ -459,20 +446,7 @@ class MergeService:
     def _infer_pipeline_from_table(self, table_path: str) -> str | None:
         """Infer pipeline name from Silver table path.
 
-        Converts a table path like "silver/chembl/publication" to
-        pipeline name "chembl_publication".
-
-        Args:
-            table_path: Silver table path.
-
-        Returns:
-            Pipeline name or None if cannot be inferred.
-
-        Example:
-            >>> merger._infer_pipeline_from_table("silver/chembl/publication")
-            'chembl_publication'
-            >>> merger._infer_pipeline_from_table("silver/crossref/publication")
-            'crossref_publication'
+        Converts "silver/chembl/publication" → "chembl_publication".
         """
         # Check if path contains a recognized layer prefix
         normalized = table_path.replace("\\", "/")
@@ -526,26 +500,7 @@ class MergeService:
         )
 
     def _parse_pipeline_name(self, pipeline: str) -> tuple[str, str]:
-        """Parse pipeline name into (provider, entity).
-
-        Pipeline names follow the format "{provider}_{entity}".
-        For example: 'chembl_publication' → ('chembl', 'publication').
-
-        Args:
-            pipeline: Pipeline name in format "provider_entity".
-
-        Returns:
-            Tuple of (provider, entity).
-
-        Raises:
-            ValueError: If pipeline name doesn't contain underscore separator.
-
-        Example:
-            >>> merger._parse_pipeline_name("chembl_publication")
-            ('chembl', 'publication')
-            >>> merger._parse_pipeline_name("crossref_publication")
-            ('crossref', 'publication')
-        """
+        """Parse 'provider_entity' into (provider, entity) tuple."""
         if "_" not in pipeline:
             raise ValueError(
                 f"Pipeline name '{pipeline}' must be in format 'provider_entity'"
@@ -554,45 +509,14 @@ class MergeService:
         return (parts[0], parts[1])
 
     def _extract_field_from_qualified(self, column: str) -> str:
-        """Extract field name from qualified column name.
-
-        Args:
-            column: Column name, possibly in qualified format.
-
-        Returns:
-            Field name if qualified (x.y.z → z), or original column name if not.
-
-        Example:
-            >>> merger._extract_field_from_qualified("chembl.publication.title")
-            'title'
-            >>> merger._extract_field_from_qualified("title")
-            'title'
-            >>> merger._extract_field_from_qualified("crossref.title")
-            'crossref.title'
-        """
+        """Extract field name from qualified column (x.y.z → z)."""
         parts = column.split(".")
         if len(parts) == 3:
             return parts[2]
         return column
 
     def _find_next_suffix(self, base_col: str, existing_cols: set[str]) -> str:
-        """Find next available suffix for a conflicting column.
-
-        Iterates through A, B, C, ... Z, AA, AB, ... to find an unused suffix.
-
-        Args:
-            base_col: Base column name without suffix.
-            existing_cols: Set of existing column names.
-
-        Returns:
-            Next available suffix letter(s).
-
-        Example:
-            >>> merger._find_next_suffix("title", {"title", "title.A", "title.B"})
-            'C'
-            >>> merger._find_next_suffix("title", {"title"})
-            'A'
-        """
+        """Find next available A/B/C/... suffix for a conflicting column."""
         # Generate suffixes: A, B, C, ..., Z, AA, AB, ...
         suffix_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -621,31 +545,8 @@ class MergeService:
     ) -> tuple[pl.DataFrame, pl.DataFrame]:
         """Detect and resolve column name conflicts between seed and enricher.
 
-        After prefix application, there may still be conflicts when:
-        - Seed already has a prefixed column (e.g., "crossref.title")
-        - Enricher gets the same prefix (e.g., "crossref.title")
-
-        Resolution: Keep seed columns unchanged, add incremental suffixes
-        (A, B, C, ...) to enricher columns.
-
-        Args:
-            seed_df: Seed DataFrame (columns are NOT renamed).
-            enricher_df: Enricher DataFrame (already with prefixes applied).
-            join_keys: Set of join key columns to exclude from conflict resolution.
-
-        Returns:
-            Tuple of (seed_df unchanged, modified_enricher_df) with conflicts resolved.
-
-        Example:
-            >>> seed = pl.DataFrame({"doi": ["10.1/a"], "title": ["T1"]})
-            >>> enricher = pl.DataFrame({"doi": ["10.1/a"], "title": ["T2"]})
-            >>> seed_out, enricher_out = merger._detect_and_resolve_conflicts(
-            ...     seed, enricher, {"doi"}
-            ... )
-            >>> seed_out.columns
-            ['doi', 'title']
-            >>> enricher_out.columns
-            ['doi', 'title.A']
+        Keeps seed columns unchanged, adds .A/.B suffixes to enricher columns.
+        Join keys are excluded from conflict resolution.
         """
         seed_cols = set(seed_df.columns)
         enricher_cols = set(enricher_df.columns)
@@ -681,30 +582,8 @@ class MergeService:
     ) -> pl.DataFrame:
         """Apply join strategy with qualified column renaming.
 
-        Column renaming uses ColumnRenamer to apply {provider}.{entity}.{field}
-        format to enricher columns for qualified column matching.
-
-        Join keys (doi, pmid, pmc_id) are normalized to lowercase for
-        case-insensitive matching across providers.
-
-        Conflict resolution:
-        - After prefixing, remaining conflicts get .A/.B suffixes
-
-        Args:
-            seed_df: Seed DataFrame to join to.
-            enricher_dfs: Mapping of enricher pipeline name to DataFrame.
-            enrichers: Sequence of enricher configurations.
-            seed_pipeline: Seed pipeline name (unused, kept for compatibility).
-
-        Returns:
-            Merged DataFrame with all enricher data joined.
-
-        Example:
-            >>> # Cross-provider merge: chembl_publication + crossref_publication
-            >>> # Column "title" in enricher → "crossref.publication.title"
-            >>> merged = await merger._apply_joins(
-            ...     seed_df, enricher_dfs, enrichers, "chembl_publication"
-            ... )
+        Renames enricher columns to {provider}.{entity}.{field} format,
+        normalizes join keys to lowercase, and resolves conflicts with .A/.B suffixes.
         """
         merged = seed_df
 
@@ -803,30 +682,49 @@ class MergeService:
         right_key: str,
         pipeline_name: str,
     ) -> pl.DataFrame:
-        """Execute a Polars join with temp column handling.
+        """Execute a Polars join with temp column handling and type coercion."""
+        import polars as pl
 
-        When left_key != right_key, Polars drops the right_on column.
-        This method uses a temp column to preserve the qualified join key.
-
-        Args:
-            left_df: Left DataFrame (seed/merged).
-            right_df: Right DataFrame (enricher/dependency).
-            left_key: Column name in left_df for join.
-            right_key: Column name in right_df for join.
-            pipeline_name: Pipeline name for suffix and temp column naming.
-
-        Returns:
-            Joined DataFrame.
-        """
         how = self._get_polars_join_type()
 
         if left_key not in left_df.columns or right_key not in right_df.columns:
+            self._logger.warning(
+                "Join skipped: key not found in columns",
+                pipeline=pipeline_name,
+                left_key=left_key,
+                right_key=right_key,
+                left_columns=left_df.columns
+                if left_key not in left_df.columns
+                else None,
+                right_columns=right_df.columns
+                if right_key not in right_df.columns
+                else None,
+            )
             return left_df
+
+        # Coerce join keys to String to handle int64/float64 mismatches (e.g. nullable IDs)
+        # This is the safest way to join IDs from different sources.
+        # We also strip '.0' from the end of stringified floats to ensure '4044.0' matches '4044'.
+        if left_df[left_key].dtype != right_df[right_key].dtype:
+            self._logger.debug(
+                "Coercing join keys to String due to type mismatch",
+                pipeline=pipeline_name,
+                left_key=left_key,
+                left_type=str(left_df[left_key].dtype),
+                right_key=right_key,
+                right_type=str(right_df[right_key].dtype),
+            )
+            left_df = left_df.with_columns(
+                pl.col(left_key).cast(pl.String).str.replace(r"\.0$", "", literal=False)
+            )
+            right_df = right_df.with_columns(
+                pl.col(right_key)
+                .cast(pl.String)
+                .str.replace(r"\.0$", "", literal=False)
+            )
 
         if left_key != right_key:
             # Use temp column to preserve qualified join key in right_df
-            import polars as pl
-
             temp_join_col = f"__temp_join_{pipeline_name}"
             right_df = right_df.with_columns(pl.col(right_key).alias(temp_join_col))
             return left_df.join(
@@ -854,26 +752,8 @@ class MergeService:
     ) -> pl.DataFrame:
         """Apply joins for dependency tables.
 
-        Dependencies are simpler than enrichers:
-        - Always 1:1 cardinality (no aggregation)
-        - Single or composite join keys
-        - No special cardinality handling
-
-        For multi-field filter dependencies (e.g., compound_record filtered by
-        molecule_chembl_id + document_chembl_id), uses composite key join on
-        all join_keys simultaneously.
-
-        Column renaming uses ColumnRenamer to apply {provider}.{entity}.{field}
-        format to dependency columns for qualified column matching.
-
-        Args:
-            merged_df: DataFrame with seed data (possibly already enriched).
-            dependency_dfs: Mapping of dependency pipeline name to DataFrame.
-            dependencies: Sequence of dependency configurations.
-            seed_pipeline: Seed pipeline name for join key resolution.
-
-        Returns:
-            DataFrame with dependency data joined.
+        Dependencies use 1:1 cardinality with single or composite join keys.
+        Columns are renamed to {provider}.{entity}.{field} format.
         """
         result = merged_df
 

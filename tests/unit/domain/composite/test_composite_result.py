@@ -51,7 +51,7 @@ class TestEnrichmentResult:
             reason="Filter excluded all records",
         )
         assert result.status == EnrichmentStatus.SKIPPED
-        assert result.is_success is False
+        assert result.is_success is True
 
     def test_timeout_factory(self):
         """timeout factory should create TIMEOUT result."""

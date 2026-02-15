@@ -266,12 +266,23 @@ class MemoryLock(LockPort):
             return existing_owner == str(owner_id)
 
     async def validate_fencing_token(self, key: str, token: FencingToken) -> bool:
-        """Validate that the given fencing token is still valid for the lock."""
+        """Validate that the given fencing token is still valid for the lock.
+
+        Args:
+            key: Lock key.
+            token: Fencing token to validate.
+
+        Returns:
+            True if the fencing token matches the current lock holder.
+        """
         async with self._global_lock:
             if key not in self._locks:
                 return False
             existing_owner, lock, expires_at, _, sequence = self._locks[key]
-            if token.key != key or not lock.locked():
+            if token.key != key:
+                return False
+
+            if not lock.locked():
                 return False
             if expires_at is not None and time.monotonic() > expires_at:
                 return False

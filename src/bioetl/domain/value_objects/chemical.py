@@ -25,7 +25,7 @@ class InChIKey(ValueObject[str]):
     """InChI Key value object.
 
     InChI Keys are 27-character strings in the format:
-    XXXXXXXXXXXXXX-YYYYYYYYYY-Z
+    AAAAAAAAAAAAAA-BBBBBBBBBB-Z
 
     Where:
     - First 14 characters: connectivity layer (molecular skeleton)
@@ -67,7 +67,7 @@ class InChIKey(ValueObject[str]):
         if not self._PATTERN.match(normalized):
             raise ValueError(
                 f"Invalid InChI Key format: {value!r}. "
-                "Expected: XXXXXXXXXXXXXX-YYYYYYYYYY-Z (27 chars)"
+                "Expected: AAAAAAAAAAAAAA-BBBBBBBBBB-Z (27 chars)"
             )
 
         return normalized

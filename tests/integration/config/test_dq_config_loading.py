@@ -234,9 +234,10 @@ class TestBackwardCompatibility:
         # Load a pipeline config
         yaml_config = config_loader.load_pipeline_config("chembl_activity")
 
-        # Check dq_rules exists and has expected structure
-        assert hasattr(yaml_config, "dq_rules")
-        assert hasattr(yaml_config.dq_rules, "soft_fail_threshold")
+        # Check dq_overrides exists and has expected structure
+        # (field renamed from dq_rules; YAML key accepted via AliasChoices)
+        assert hasattr(yaml_config, "dq_overrides")
+        assert hasattr(yaml_config.dq_overrides, "soft_fail_threshold")
 
     def test_hierarchy_overrides_inline_defaults(
         self,

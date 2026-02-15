@@ -170,6 +170,20 @@ class TestLockManager:
             async with lock_manager:
                 pass
 
+    async def test_validate_uses_fencing_token(
+        self, lock_manager: LockManager, mock_lock_port: AsyncMock
+    ) -> None:
+        """Test validate uses fencing token when available."""
+        lock_manager._fencing_token = _TEST_TOKEN
+        mock_lock_port.validate_fencing_token.return_value = True
+
+        result = await lock_manager.validate()
+
+        assert result is True
+        mock_lock_port.validate_fencing_token.assert_called_once_with(
+            "lock:test_pipeline", _TEST_TOKEN
+        )
+
 
 class TestLockConfig:
     """Tests for LockConfig dataclass."""

@@ -232,7 +232,7 @@ class PubChemFetchStrategies:
         """Fetch compounds for a single InChIKey.
 
         PubChem supports InChIKey lookup via the 'inchikey' namespace.
-        InChIKey format: XXXXXXXXXXXXXX-YYYYYYYYYY-Z (27 characters).
+        InChIKey format: AAAAAAAAAAAAAA-BBBBBBBBBB-Z (27 characters).
 
         Args:
             inchikey: Standard InChIKey string.
@@ -274,7 +274,7 @@ class PubChemFetchStrategies:
             if not inchikey or not inchikey.strip():
                 continue
 
-            # Basic InChIKey format validation (27 chars, XXXX-YYYY-Z pattern)
+            # Basic InChIKey format validation (27 chars, NNNN-YYYY-Z pattern)
             cleaned = inchikey.strip()
             if len(cleaned) != 27 or cleaned.count("-") != 2:
                 self._logger.warning(

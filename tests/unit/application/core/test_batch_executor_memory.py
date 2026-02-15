@@ -15,7 +15,7 @@ from bioetl.application.core.shutdown import ShutdownSignal
 from bioetl.domain.config import MemoryConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.error_classifier import ErrorClassifier
-from bioetl.domain.ports import MemoryMonitorPort
+from bioetl.domain.ports import MemoryMonitorPort, MetricsPort
 from bioetl.domain.types import RunType, ValidationResult
 
 
@@ -24,9 +24,10 @@ def mock_services():
     """Create mock pipeline services."""
     services = MagicMock(spec=PipelineServices)
     services.storage = AsyncMock()
-    services.metrics = AsyncMock()
+    services.metrics = MagicMock(spec=MetricsPort)
     services.quarantine = AsyncMock()
     services.data_source = AsyncMock()
+    services.data_source.get_source_metadata = MagicMock(return_value=None)
     services.logger = MagicMock()
     return services
 

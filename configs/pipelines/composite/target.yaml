@@ -68,6 +68,7 @@ composite:
     - pipeline: chembl_target_component
       join_keys:
         - primary_component_id      # Scalar join key from seed (int)
+      filter_field: component_id    # Target API filter field
       required: false       # Optional - some targets have no components
       timeout_seconds: 600
       silver_table: silver/chembl/target_component
@@ -231,6 +232,8 @@ composite:
       # === Enriched component data (from target_component dependency) ===
       - name: enriched_components
         fields:
+          - component_type
+          - description
           - protein_classification_id
           - protein_classification_ids
         provider_order: [chembl]
@@ -292,13 +295,8 @@ composite:
       - chembl.target.target_components
       - chembl.target.cross_references
       # --- ChEMBL target_component exclusions ---
-      - chembl.target_component.accession
       - chembl.target_component.primary_component_id
-      - chembl.target_component.component_type
-      - chembl.target_component.description
-      - chembl.target_component.organism
       - chembl.target_component.protein_classifications
-      - chembl.target_component.taxonomy_id
       - chembl.target_component.target_component_synonyms
       - chembl.target_component.target_component_xrefs
       # --- ChEMBL protein_class exclusions ---

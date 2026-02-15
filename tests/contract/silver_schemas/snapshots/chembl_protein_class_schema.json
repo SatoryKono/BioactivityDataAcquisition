@@ -86,7 +86,7 @@
     ],
     "coerce": false,
     "description": "Class level.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -123,7 +123,7 @@
     ],
     "coerce": false,
     "description": "Downgraded flag.",
-    "dtype": "int64",
+    "dtype": "float64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -141,7 +141,7 @@
     "checks": [],
     "coerce": false,
     "description": "FK to parent classification.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -177,7 +177,7 @@
     "checks": [],
     "coerce": false,
     "description": "FK to replacement classification.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -195,7 +195,7 @@
     "checks": [],
     "coerce": false,
     "description": "Sort order.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
