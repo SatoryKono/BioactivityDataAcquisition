@@ -630,3 +630,169 @@ class TestEnricherWithoutPairing:
         # Only crossref validated (1 enricher stats)
         assert len(stats.enricher_stats) == 1
         assert stats.enricher_stats[0].enricher == "crossref_publication"
+
+
+class TestCvDetailsColumn:
+    """Tests for _cv_details per-record mismatch detail column."""
+
+    def test_no_mismatches_gives_null_details(self):
+        """All records match -> _cv_details is null for all rows."""
+        pairing = _make_pairing(
+            fields=(
+                FieldComparisonSpec(field_name="doi", method=ComparisonMethod.EXACT),
+            )
+        )
+        config = _make_config(pairings=(pairing,))
+        validator = EnrichmentCrossValidator(config, _make_logger())
+
+        df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1/a", "10.1/b"],
+                "crossref.publication.doi": ["10.1/a", "10.1/b"],
+            }
+        )
+
+        result_df, _ = validator.validate(
+            df, ["crossref_publication"], "chembl_publication"
+        )
+
+        assert "_cv_details" in result_df.columns
+        assert result_df["_cv_details"][0] is None
+        assert result_df["_cv_details"][1] is None
+
+    def test_single_field_mismatch_in_details(self):
+        """One mismatch -> _cv_details contains enricher and field name."""
+        pairing = _make_pairing(
+            fields=(
+                FieldComparisonSpec(field_name="doi", method=ComparisonMethod.EXACT),
+                FieldComparisonSpec(field_name="volume", method=ComparisonMethod.EXACT),
+            )
+        )
+        config = _make_config(pairings=(pairing,))
+        validator = EnrichmentCrossValidator(config, _make_logger())
+
+        df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1/a"],
+                "crossref.publication.doi": ["10.1/a"],
+                "chembl.publication.volume": ["1"],
+                "crossref.publication.volume": ["WRONG"],
+            }
+        )
+
+        result_df, _ = validator.validate(
+            df, ["crossref_publication"], "chembl_publication"
+        )
+
+        details = json.loads(result_df["_cv_details"][0])
+        assert len(details) == 1
+        assert details[0]["enricher"] == "crossref_publication"
+        assert details[0]["field_mismatches"] == ["volume"]
+
+    def test_multiple_field_mismatches_in_details(self):
+        """Multiple mismatches -> all fields listed in details."""
+        pairing = _make_pairing(
+            fields=(
+                FieldComparisonSpec(field_name="doi", method=ComparisonMethod.EXACT),
+                FieldComparisonSpec(field_name="volume", method=ComparisonMethod.EXACT),
+                FieldComparisonSpec(field_name="issue", method=ComparisonMethod.EXACT),
+            )
+        )
+        config = _make_config(pairings=(pairing,))
+        validator = EnrichmentCrossValidator(config, _make_logger())
+
+        df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1/a"],
+                "crossref.publication.doi": ["WRONG"],
+                "chembl.publication.volume": ["1"],
+                "crossref.publication.volume": ["WRONG"],
+                "chembl.publication.issue": ["5"],
+                "crossref.publication.issue": ["5"],  # matches
+            }
+        )
+
+        result_df, _ = validator.validate(
+            df, ["crossref_publication"], "chembl_publication"
+        )
+
+        details = json.loads(result_df["_cv_details"][0])
+        assert details[0]["enricher"] == "crossref_publication"
+        assert sorted(details[0]["field_mismatches"]) == ["doi", "volume"]
+
+    def test_multiple_enrichers_in_details(self):
+        """Mismatches from multiple enrichers -> multiple entries in array."""
+        pairing_cr = _make_pairing(
+            enricher="crossref_publication",
+            fields=(
+                FieldComparisonSpec(field_name="doi", method=ComparisonMethod.EXACT),
+            ),
+        )
+        pairing_oa = _make_pairing(
+            enricher="openalex_publication",
+            fields=(
+                FieldComparisonSpec(field_name="volume", method=ComparisonMethod.EXACT),
+            ),
+        )
+        config = _make_config(pairings=(pairing_cr, pairing_oa))
+        validator = EnrichmentCrossValidator(config, _make_logger())
+
+        df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1/a"],
+                "crossref.publication.doi": ["WRONG"],
+                "chembl.publication.volume": ["1"],
+                "openalex.publication.volume": ["WRONG"],
+            }
+        )
+
+        result_df, _ = validator.validate(
+            df,
+            ["crossref_publication", "openalex_publication"],
+            "chembl_publication",
+        )
+
+        details = json.loads(result_df["_cv_details"][0])
+        assert len(details) == 2
+        enrichers = {d["enricher"] for d in details}
+        assert enrichers == {"crossref_publication", "openalex_publication"}
+
+    def test_mixed_rows_some_null_some_with_details(self):
+        """Some rows match, some don't -> mixed null/detail values."""
+        pairing = _make_pairing(
+            fields=(
+                FieldComparisonSpec(field_name="doi", method=ComparisonMethod.EXACT),
+            )
+        )
+        config = _make_config(pairings=(pairing,))
+        validator = EnrichmentCrossValidator(config, _make_logger())
+
+        df = pl.DataFrame(
+            {
+                "chembl.publication.doi": ["10.1/a", "10.1/b", "10.1/c"],
+                "crossref.publication.doi": ["10.1/a", "WRONG", "10.1/c"],
+            }
+        )
+
+        result_df, _ = validator.validate(
+            df, ["crossref_publication"], "chembl_publication"
+        )
+
+        assert result_df["_cv_details"][0] is None  # match
+        assert result_df["_cv_details"][1] is not None  # mismatch
+        assert result_df["_cv_details"][2] is None  # match
+
+        details = json.loads(result_df["_cv_details"][1])
+        assert details[0]["field_mismatches"] == ["doi"]
+
+    def test_disabled_cv_has_no_details_column(self):
+        """When CV is disabled, _cv_details column should not be added."""
+        config = _make_config(enabled=False)
+        validator = EnrichmentCrossValidator(config, _make_logger())
+
+        df = pl.DataFrame({"a": [1]})
+        result_df, _ = validator.validate(
+            df, ["crossref_publication"], "chembl_publication"
+        )
+
+        assert "_cv_details" not in result_df.columns
