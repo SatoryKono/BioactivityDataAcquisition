@@ -1,6 +1,6 @@
 # ChEMBL Target Component Pipeline Specification
 
-*Version 1.0.0 | Aligned with RULES.md v5.17*
+*Version 1.0.0 | Aligned with RULES.md v5.18*
 
 ---
 
