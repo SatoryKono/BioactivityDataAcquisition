@@ -22,6 +22,7 @@ from __future__ import annotations
 # Composite pipeline subpackage (ADR-026)
 from bioetl.domain import mapping  # noqa: F401
 from bioetl.domain import registry  # noqa: F401
+from bioetl.domain import version
 from bioetl.domain import composite, constants, contracts
 
 # Configuration objects
@@ -327,6 +328,7 @@ from bioetl.domain.value_objects.publication_field_groups import (
 __all__ = [
     # Composite pipeline (subpackage)
     "composite",
+    "version",
     # Data contracts (subpackage)
     "contracts",
     # Constants
