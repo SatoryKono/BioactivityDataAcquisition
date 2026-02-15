@@ -56,19 +56,7 @@
         "null"
       ]
     },
-    "dap_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
     "pipeline_stages": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "target_constraints": {
       "type": [
         "string",
         "null"
