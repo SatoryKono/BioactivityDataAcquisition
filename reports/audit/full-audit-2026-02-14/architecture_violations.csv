@@ -1,0 +1,267 @@
+category,severity,file,line,source_layer,target,message,rule
+di_violation,HIGH,src/bioetl/application/composite/merger.py,88,application,self._deduplicator = EnricherDeduplicator(logger),Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/composite/merger.py,89,application,self._aggregator = EnricherAggregator(logger),Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/composite/merger.py,90,application,self._renamer = ColumnRenamer(logger),Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/composite/merger.py,92,application,self._orderer = ColumnOrderer(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/composite/runner.py,192,application,self._fsm = FSMStateHelper(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/base.py,103,application,self._shutdown_signal = ShutdownSignal(),Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/batch_executor.py,151,application,self._batch_metrics = BatchMetricsRecorder(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/batch_executor.py,155,application,self._transformer = BatchTransformer(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/batch_executor.py,169,application,self._writer = BatchWriter(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/batch_executor.py,181,application,self._tracing = BatchTracingManager(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/lock_manager.py,220,application,self._heartbeat = HeartbeatTask(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/record_processor.py,72,application,self._batch_metrics = BatchMetricsRecorder(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/record_processor.py,76,application,self._transformer = BatchTransformer(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/core/record_processor.py,90,application,self._writer = BatchWriter(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/application/pipelines/pubmed/extractors/date.py,195,application,self._medline_parser = MedlineDateParser(),Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/domain/aggregates/quarantine_entry.py,368,domain,self._resolution_info = ResolutionInfo(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/domain/aggregates/quarantine_entry.py,414,domain,self._resolution_info = ResolutionInfo(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+di_violation,HIGH,src/bioetl/domain/aggregates/quarantine_entry.py,454,domain,self._resolution_info = ResolutionInfo(,Possible hard-coded dependency instantiation in class,"Dependencies should be injected, not instantiated in application/domain"
+naming,LOW,src/tools/scripts/duplicate_function_analyzer.py,172,scripts,visit_Call,Function/method name is not snake_case,Naming policy: functions must be snake_case
+di_violation,MEDIUM,src/bioetl/application/composite/checkpoint.py,263,application,seed_result = SeedResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/composite/checkpoint.py,277,application,"status=DependencyStatus(dr_data[""status""]),",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/composite/checkpoint.py,289,application,"status=EnrichmentStatus(er_data[""status""]),",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/composite/checkpoint.py,316,application,state = CompositePipelineState(state_value),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/composite/column_renamer.py,145,application,"qualifier = ColumnQualifier(provider, entity, col)",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/composite/preflight_validator.py,192,application,result = PreflightValidationResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/composite/runner.py,1058,application,context = DQReportContext(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/base_transformer.py,813,application,"entity_id=EntityID(entity_id),",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/base_transformer.py,814,application,"content_hash=ContentHash(content_hash),",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/batch_executor.py,159,application,quarantine_manager=QuarantineManager(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/batch_executor.py,363,application,source_metadata = SourceMetadata(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/batch_executor.py,379,application,batch_id = BatchID(uuid4()),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/cleanup_service.py,175,application,result = CleanupResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+naming,MEDIUM,src/bioetl/application/core/preflight_service.py,45,application,_HealthAggregator,Class name is not PascalCase,Naming policy: classes must be PascalCase
+di_violation,MEDIUM,src/bioetl/application/core/preflight_service.py,114,application,report = HealthReport(results=component_results),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/preflight_service.py,126,application,result = ComponentHealthResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/preflight_service.py,133,application,result = ComponentHealthResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/preflight_service.py,167,application,result = ComponentHealthResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/preflight_service.py,176,application,result = ComponentHealthResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/preflight_service.py,183,application,result = ComponentHealthResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+naming,MEDIUM,src/bioetl/application/core/preflight_service.py,279,application,_MedallionConfigValidator,Class name is not PascalCase,Naming policy: classes must be PascalCase
+di_violation,MEDIUM,src/bioetl/application/core/preflight_service.py,350,application,write_mode_policy = WriteModePolicy(),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/preflight_service.py,771,application,report = PreflightReport(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/core/record_processor.py,80,application,quarantine_manager=QuarantineManager(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/pipelines/chembl/__init__.py,14,application,"transformer = ActivityTransformer(provider=""chembl"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/pipelines/generic.py,11,application,factory = GenericPipelineFactory(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/pipelines/pubmed/transformer.py,354,application,raw_author_data = AuthorExtractor().extract(article) or [],Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/pipelines/pubmed/transformer.py,617,application,raw_date = DateExtractor().extract(pub_date_node),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/bronze_cleanup_service.py,96,application,cleanup_result = CleanupResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/config_service.py,234,application,info = SettingsInfo(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/config_service.py,326,application,info = PipelineInfo(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/dq_report_service.py,219,application,result = DQReportResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/dq_report_service.py,348,application,output_path = Path(context.bronze_output_path),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/dq_report_service.py,350,application,output_path = Path(config.output_path),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/dq_report_service.py,429,application,output_path = Path(context.silver_output_path),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/dq_report_service.py,431,application,output_path = Path(config.output_path),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/dq_report_service.py,505,application,output_path = Path(context.gold_output_path),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/dq_report_service.py,507,application,output_path = Path(config.output_path),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/health_service.py,165,application,summary = HealthCheckSummary(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/medallion_lifecycle.py,92,application,result = ClearResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/pipeline_runner_service.py,364,application,vacuum = VacuumConfig(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/pipeline_runner_service.py,381,application,"run_type=RunType(options.run_type),",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/shutdown_service.py,55,application,"shutdown_service = ShutdownService(logger=logger, metrics=metrics)",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/application/services/vacuum_service.py,211,application,vacuum_result = VacuumAllResult(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/aggregates/batch.py,186,domain,batch_id = BatchID(uuid4()),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/aggregates/batch.py,301,domain,record = BatchRecord(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/aggregates/quarantine_entry.py,227,domain,payload_hash = ContentHash(hash_value),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/configs/__init__.py,15,domain,config = BaseProviderConfig(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/configs/__init__.py,18,domain,"rate_limit=RateLimitConfig(requests_per_second=5.0, burst=10),",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/bioactivity.py,213,domain,entity_id = EntityID(str(activity_id)),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/bioactivity.py,220,domain,"content_hash=ContentHash(content_hash_str),",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/bioactivity.py,221,domain,"run_id=RunID(run_id) if isinstance(run_id, UUID) else run_id,",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/bioactivity.py,225,domain,"source_batch_id=BatchID(source_batch_id) if source_batch_id else None,",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,35,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,188,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,295,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,445,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,516,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,568,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,593,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,628,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/chembl.py,664,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/crossref.py,55,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/pubchem.py,50,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/entities/pubmed.py,46,domain,"model_config = ConfigDict(frozen=True, extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/mapping/publication_type_classification.py,1553,domain,entry = PublicationTypeEntry(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/models/metadata.py,351,domain,"model_config = ConfigDict(extra=""forbid"")",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/models/metadata.py,736,domain,model_config = ConfigDict(populate_by_name=True),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/ports/filtering.py,28,domain,filter_reader = CsvFilterReader(logger=logger),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+naming,MEDIUM,src/bioetl/domain/ports/noop.py,37,domain,_NoOpSpan,Class name is not PascalCase,Naming policy: classes must be PascalCase
+naming,MEDIUM,src/bioetl/domain/ports/noop.py,66,domain,_NoOpOtelTracer,Class name is not PascalCase,Naming policy: classes must be PascalCase
+di_violation,MEDIUM,src/bioetl/domain/services/activity_aggregator.py,296,domain,result_conc = Concentration(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/services/normalization_config.py,144,domain,concentration_range=ConcentrationRangeConfig(,Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/services/unit_converter.py,68,domain,"concentration = Concentration(value=value, unit=source_unit)",Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/value_objects/compound_ids.py,62,domain,validated_id = ChemblId(self.value),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/value_objects/compound_ids.py,70,domain,validated_id = PubChemCid(cid_int),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/value_objects/compound_ids.py,125,domain,source = CompoundSource(source.lower()),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+di_violation,MEDIUM,src/bioetl/domain/value_objects/compound_ids.py,228,domain,chembl_id = ChemblId(value),Possible method-level concrete instantiation,Avoid method-level concrete construction in business layers
+anti_pattern,MEDIUM,src/bioetl/infrastructure/storage/bronze_writer.py,59,infrastructure,COMPRESSION_THREADS = -1  # zstd: auto-detect available CPU cores,Sentinel value detected,Prefer None/Optional over sentinel values
+anti_pattern,MEDIUM,src/tools/_gen.py,20,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/_gen_pydocbot.py,2,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,246,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,251,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,285,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,286,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,287,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,288,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,289,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,290,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,292,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,293,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,328,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,334,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,335,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,336,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,337,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,338,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,339,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,340,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,353,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,356,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,362,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,365,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,381,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,382,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,385,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,386,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,387,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,388,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,389,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,390,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,391,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,418,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,425,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,431,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,432,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,433,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,434,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,435,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,436,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,442,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,446,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,449,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,458,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,466,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,549,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,550,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,551,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,552,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,553,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,554,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,555,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,557,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,584,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,585,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,586,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,587,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,588,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,593,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,619,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,626,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,632,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,633,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,634,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,635,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,636,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,637,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,643,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,647,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,650,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,659,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,667,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,745,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,752,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,759,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,769,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,770,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,771,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,776,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,779,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,788,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/file_merger.py,796,,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_application_deps.py,69,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_application_deps.py,81,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_application_deps.py,83,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_application_deps.py,86,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_architecture.py,93,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_architecture.py,95,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_architecture.py,98,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_constructor_args.py,53,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_constructor_args.py,66,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_constructor_args.py,69,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_constructor_args.py,72,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_constructor_args.py,77,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/check_constructor_args.py,80,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/cleanup_cache.py,10,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/cleanup_cache.py,16,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/cleanup_cache.py,22,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/cleanup_cache.py,27,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/cleanup_cache.py,40,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/cleanup_cache.py,45,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/cleanup_cache.py,47,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,92,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,93,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,94,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,97,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,98,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,99,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,125,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,127,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,129,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,131,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,133,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,139,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,141,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,146,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/config_matrix_generator.py,267,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/generate_contracts.py,23,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/generate_contracts.py,40,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/generate_contracts.py,49,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/generate_contracts.py,52,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/generate_contracts.py,55,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/lint_terminology.py,126,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/lint_terminology.py,204,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/lint_terminology.py,275,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/lint_terminology.py,294,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/lint_terminology.py,296,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,38,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,39,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,55,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,66,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,68,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,71,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,74,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,91,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,95,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,131,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,132,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,133,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,134,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,135,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,136,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,139,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,140,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,150,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,154,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,155,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,157,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,159,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,161,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrate_openalex_citation_count.py,162,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/migrations/rename_structure_fields.py,270,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,119,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,120,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,121,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,122,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,137,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,144,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,146,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,148,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,149,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,150,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,151,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,152,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,153,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,156,scripts,print(,print() usage detected,Use LoggerPort/structured logging
+anti_pattern,MEDIUM,src/tools/scripts/validate_unified_configs.py,159,scripts,print(,print() usage detected,Use LoggerPort/structured logging

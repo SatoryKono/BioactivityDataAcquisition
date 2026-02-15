@@ -43,7 +43,8 @@ class PublicationTypeEntry:
 
 
 # ============================================================================
-# Classification table: 214 entries translated from unified_classification.csv
+# Classification table: 214 entries translated from
+# data/input/reference/unified_classification.csv
 #
 # Each tuple: (unified_type, subclass, class_code,
 #               openalex_keys, crossref_keys, pubmed_keys, s2_keys)
