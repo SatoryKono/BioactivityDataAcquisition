@@ -67,7 +67,7 @@ def test_no_literal_write_modes_in_domain_config() -> None:
 
     all_pure_literals: list[tuple[str, int, str]] = []
     for config_path in existing_paths:
-        source = config_path.read_text()
+        source = config_path.read_text(encoding="utf-8")
         tree = ast.parse(source)
 
         checker = WriteModeTypeChecker()
