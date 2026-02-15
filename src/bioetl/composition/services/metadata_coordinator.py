@@ -54,20 +54,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
-
-
-def _get_bioetl_version() -> str:
-    """Get BioETL package version.
-
-    Returns:
-        Package version string.
-
-    Raises:
-        PackageNotFoundError: If bioetl package is not installed.
-    """
-    from importlib.metadata import version as pkg_version
-
-    return pkg_version("bioetl")
+from bioetl.domain.version import get_version as _get_bioetl_version
 
 
 class MetadataCoordinator:

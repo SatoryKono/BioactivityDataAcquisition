@@ -10,10 +10,11 @@ from __future__ import annotations
 
 import inspect
 from datetime import UTC, datetime
-from importlib.metadata import version as pkg_version
 from platform import node as hostname
 from platform import python_version
 from typing import TYPE_CHECKING, Any, Literal
+
+from bioetl.domain.version import get_version as _get_bioetl_version
 
 if TYPE_CHECKING:
     from bioetl.domain.medallion import GoldWriteMode
@@ -22,18 +23,6 @@ if TYPE_CHECKING:
         SchemaMetadata,
         SilverMetadata,
     )
-
-
-def _get_bioetl_version() -> str:
-    """Get bioetl package version.
-
-    Returns:
-        Version string or 'unknown' if not installed.
-    """
-    try:
-        return pkg_version("bioetl")
-    except Exception:
-        return "unknown"
 
 
 def _get_git_commit_cached() -> str | None:
