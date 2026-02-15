@@ -53,6 +53,21 @@ from bioetl.infrastructure.adapters.uniprot.idmapping_client import (
     UniProtIDMappingClient,
 )
 
+
+def _get_data_source_factory() -> Any:
+    """Lazy-resolve DataSourceFactory to avoid circular imports."""
+    from bioetl.composition.factories.data_source_factory import DataSourceFactory
+
+    return DataSourceFactory
+
+
+def _get_http_client_factory() -> Any:
+    """Lazy-resolve HttpClientFactory to avoid circular imports."""
+    from bioetl.composition.factories.http_client_factory import HttpClientFactory
+
+    return HttpClientFactory
+
+
 if TYPE_CHECKING:
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -111,7 +126,10 @@ def _create_chembl_data_source(
     For document_term entity type, wraps the adapter with PublicationTermDataSource
     to extract terms from publication records (derived entity pattern).
     """
-    DataSourceFactory, HttpClientFactory = _get_factories()
+    DataSourceFactory, HttpClientFactory = _get_factories(
+        data_source_factory_getter=_get_data_source_factory,
+        http_client_factory_getter=_get_http_client_factory,
+    )
     http_client = HttpClientFactory.create_for_provider("chembl", settings)
 
     # Load adapter configuration from YAML (single source of truth)
@@ -207,7 +225,10 @@ def _create_uniprot_data_source(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create UniProt data source with optional CSV filtering."""
-    DataSourceFactory, HttpClientFactory = _get_factories()
+    DataSourceFactory, HttpClientFactory = _get_factories(
+        data_source_factory_getter=_get_data_source_factory,
+        http_client_factory_getter=_get_http_client_factory,
+    )
     http_client = HttpClientFactory.create_for_provider("uniprot", settings)
     data_source = DataSourceFactory.create(
         "uniprot",
@@ -228,7 +249,10 @@ def _create_pubmed_data_source(
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create PubMed data source with optional CSV filtering."""
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        data_source_factory_getter=_get_data_source_factory,
+        http_client_factory_getter=_get_http_client_factory,
+    )
     http_client = HttpClientFactory.create_for_provider("pubmed", settings)
 
     # Determine API key: config takes precedence over settings
@@ -277,7 +301,10 @@ def _create_crossref_data_source(
         ValueError: If mailto is not configured in settings or pipeline config.
 
     """
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        data_source_factory_getter=_get_data_source_factory,
+        http_client_factory_getter=_get_http_client_factory,
+    )
     http_client = HttpClientFactory.create_for_provider("crossref", settings)
 
     # Get mailto from pipeline config or settings
@@ -323,7 +350,10 @@ def _create_openalex_data_source(
         ValueError: If mailto is not configured in settings or pipeline config.
 
     """
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        data_source_factory_getter=_get_data_source_factory,
+        http_client_factory_getter=_get_http_client_factory,
+    )
     http_client = HttpClientFactory.create_for_provider("openalex", settings)
 
     # Get mailto from pipeline config or settings
@@ -366,7 +396,10 @@ def _create_semanticscholar_data_source(
         Configured DataSourcePort with optional filtering wrapper.
 
     """
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        data_source_factory_getter=_get_data_source_factory,
+        http_client_factory_getter=_get_http_client_factory,
+    )
     http_client = HttpClientFactory.create_for_provider("semanticscholar", settings)
 
     # Get API key from settings (configured via BIOETL_SEMANTICSCHOLAR_API_KEY env var)
@@ -422,7 +455,10 @@ def _create_uniprot_idmapping_data_source(
     """
     from pathlib import Path
 
-    _, HttpClientFactory = _get_factories()
+    _, HttpClientFactory = _get_factories(
+        data_source_factory_getter=_get_data_source_factory,
+        http_client_factory_getter=_get_http_client_factory,
+    )
 
     # Create HTTP client for ID Mapping API
     http_client = HttpClientFactory.create_for_provider("uniprot", settings)

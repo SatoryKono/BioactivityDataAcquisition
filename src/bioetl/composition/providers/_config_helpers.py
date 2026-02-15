@@ -7,6 +7,7 @@ audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
@@ -26,12 +27,17 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
-def _get_factories() -> tuple[Any, Any]:
-    """Lazy import factories to avoid circular imports."""
-    from bioetl.composition.factories.data_source_factory import DataSourceFactory
-    from bioetl.composition.factories.http_client_factory import HttpClientFactory
+def _get_factories(
+    *,
+    data_source_factory_getter: Callable[[], Any],
+    http_client_factory_getter: Callable[[], Any],
+) -> tuple[Any, Any]:
+    """Resolve factory classes via injected getters.
 
-    return DataSourceFactory, HttpClientFactory
+    Keeps this helper module decoupled from factory modules to avoid
+    cross-import dependency chains.
+    """
+    return data_source_factory_getter(), http_client_factory_getter()
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
