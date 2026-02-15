@@ -656,7 +656,6 @@ class TestClassSize:
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "EnrichmentCrossValidator": 385,  # 380 lines - Cross-validation with multi-enricher comparison + vectorized mismatch detection
         "DependencyCoordinator": 375,  # 370 lines - Chained dependency coordination with key extraction
-        "EnrichmentCrossValidator": 380,  # 372 lines - Cross-validation with exact/fuzzy/numeric comparison methods
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers
         # Publication adapters with APIRequestCollector (metadata enrichment)
