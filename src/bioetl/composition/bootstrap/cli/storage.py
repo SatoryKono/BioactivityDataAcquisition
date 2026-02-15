@@ -13,6 +13,7 @@ Note:
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Callable
 from pathlib import Path
 
@@ -68,6 +69,11 @@ def bootstrap_cleanup() -> CleanupService:
     Returns:
         CleanupService configured for the current environment.
     """
+    warnings.warn(
+        "bootstrap_cleanup() is deprecated, use bootstrap_cleanup_service() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_cleanup_service()
 
 

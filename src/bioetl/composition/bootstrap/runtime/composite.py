@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
@@ -556,6 +557,11 @@ def bootstrap_composite_pipeline(
     Returns:
         CompositePipelineRunner ready for execution.
     """
+    warnings.warn(
+        "bootstrap_composite_pipeline() is deprecated, use bootstrap_composite_runner() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
 
 
