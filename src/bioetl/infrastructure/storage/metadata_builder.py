@@ -160,16 +160,8 @@ def _extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
     )
 
 
-class SilverMetadataBuilder:
-    """Builder for Silver layer metadata objects.
-
-    Extracts the metadata building logic from SilverWriter to reduce
-    file size and improve testability.
-
-    Used for:
-    - Standard Silver metadata (when MetadataCoordinator is not available)
-    - Merged Silver metadata (for composite pipelines)
-    """
+class _MetadataBuilderBase:
+    """Shared initialization for Silver/Gold metadata builders."""
 
     def __init__(
         self,
@@ -184,6 +176,18 @@ class SilverMetadataBuilder:
         """
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
+
+
+class SilverMetadataBuilder(_MetadataBuilderBase):
+    """Builder for Silver layer metadata objects.
+
+    Extracts the metadata building logic from SilverWriter to reduce
+    file size and improve testability.
+
+    Used for:
+    - Standard Silver metadata (when MetadataCoordinator is not available)
+    - Merged Silver metadata (for composite pipelines)
+    """
 
     def build_merged_metadata(
         self,
@@ -296,7 +300,7 @@ class SilverMetadataBuilder:
         )
 
 
-class GoldMetadataBuilder:
+class GoldMetadataBuilder(_MetadataBuilderBase):
     """Builder for Gold layer metadata objects.
 
     Extracts the metadata building logic from GoldWriter to reduce
@@ -306,20 +310,6 @@ class GoldMetadataBuilder:
     - Standard Gold metadata (when MetadataCoordinator is not available)
     - Merged Gold metadata (for composite pipelines)
     """
-
-    def __init__(
-        self,
-        transform_version: str | None = None,
-        transform_steps: tuple[str, ...] | None = None,
-    ) -> None:
-        """Initialize metadata builder.
-
-        Args:
-            transform_version: Semver version of transform (e.g., '1.0.0').
-            transform_steps: Tuple of transform step names.
-        """
-        self._transform_version = transform_version
-        self._transform_steps = transform_steps or ()
 
     def build_fallback_metadata(
         self,
