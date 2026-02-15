@@ -11,7 +11,7 @@ entity: publication
 # =============================================================================
 # Publication-Specific Field Validations
 # =============================================================================
-entity_field_validations:
+field_validations:
   - field: paper_id
     type: pattern
     pattern: '^[a-f0-9]{40}$'
@@ -86,7 +86,7 @@ entity_field_validations:
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-entity_cross_field_validations:
+cross_field_validations:
   - name: publication_identifiable
     fields:
       - paper_id
@@ -97,7 +97,7 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations:
+conditional_validations:
   - name: journal_article_requires_title
     condition_field: publication_type
     condition_value: JournalArticle

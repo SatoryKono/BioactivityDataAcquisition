@@ -371,9 +371,41 @@ def _normalize_source_pagination(
             provider_config.setdefault("batch_size", batch["batch_size"])
         elif "size" in batch:
             provider_config.setdefault("batch_size", batch["size"])
+        elif "api_batch_size" in batch:
+            provider_config.setdefault("batch_size", batch["api_batch_size"])
         _copy_keys(batch, provider_config, ("page_size", "max_url_length"))
     elif isinstance(batch, int):
         provider_config.setdefault("batch_size", batch)
+
+
+def _promote_top_level_source_sections(raw: dict[str, Any]) -> dict[str, Any]:
+    """Promote top-level source sections into ``source`` when missing.
+
+    Supports flat source config format:
+    - top-level ``api``, ``client``, ``batch``
+    - optional top-level ``rate_limit``, ``circuit_breaker``, ``health_check``
+    with no explicit ``source`` section.
+    """
+    if "source" in raw and isinstance(raw.get("source"), dict):
+        return raw
+
+    if not isinstance(raw.get("api"), dict):
+        return raw
+
+    source: dict[str, Any] = {
+        "type": "api",
+        "load_strategy": "full",
+        "api": raw["api"],
+    }
+
+    for key in ("client", "batch", "rate_limit", "circuit_breaker", "health_check"):
+        value = raw.get(key)
+        if value is not None:
+            source[key] = value
+
+    promoted = raw.copy()
+    promoted["source"] = source
+    return promoted
 
 
 def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
@@ -385,7 +417,7 @@ def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
     - :func:`_normalize_source_auth` — auth_type, api_key
     - :func:`_normalize_source_pagination` — batch / page_size configuration
     """
-    config = raw.copy()
+    config = _promote_top_level_source_sections(raw).copy()
     source = config.get("source")
     if not isinstance(source, dict):
         return config

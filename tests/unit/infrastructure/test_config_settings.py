@@ -180,9 +180,9 @@ class TestYamlConfigToDomain:
         assert result.pipeline_name == "test_pipeline"
         assert result.provider == "test"
         assert result.entity_type == "entity"
-        assert result.primary_keys == ("id",)  # Lists converted to tuples
-        assert result.silver_table == "silver_table"
-        assert result.gold_table == "gold_table"
+        assert result.table.primary_keys == ("id",)  # Lists converted to tuples
+        assert result.table.silver_table == "silver_table"
+        assert result.table.gold_table == "gold_table"
         assert result.batch_size == 200
         assert result.checkpoint_interval == 2000
 

@@ -11,7 +11,7 @@ entity: compound_record
 # =============================================================================
 # Compound Record-Specific Field Validations
 # =============================================================================
-entity_field_validations:
+field_validations:
   - field: record_id
     type: range
     min: 1
@@ -38,7 +38,7 @@ entity_field_validations:
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-entity_cross_field_validations:
+cross_field_validations:
   - name: record_linkage
     fields:
       - molecule_id
@@ -49,4 +49,4 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+conditional_validations: []

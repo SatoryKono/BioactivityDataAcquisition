@@ -244,6 +244,8 @@ class TestCreateTableCollector:
         """Test handling of pipelines with None tables."""
         mock_registry.return_value.list_pipelines.return_value = ["pipeline1"]
         mock_config = MagicMock()
+        mock_config.provider = "chembl"
+        mock_config.entity_type = "activity"
         mock_config.silver_table = None
         mock_config.gold_table = None
         mock_load_config.return_value = mock_config
@@ -252,8 +254,8 @@ class TestCreateTableCollector:
 
         tables = collector("all")
 
-        # Should return empty list when tables are None
-        assert tables == []
+        # Should use fallback provider.entity when table names are omitted
+        assert tables == [("chembl.activity", "silver"), ("chembl.activity", "gold")]
 
     @patch("bioetl.composition.bootstrap.cli.storage.load_pipeline_config")
     @patch("bioetl.composition.bootstrap.cli.storage.get_default_registry")
@@ -270,6 +272,8 @@ class TestCreateTableCollector:
 
         def config_for_pipeline(name: str) -> MagicMock:
             config = MagicMock()
+            config.provider = "chembl"
+            config.entity_type = "activity"
             if name == "pipeline_z":
                 config.silver_table = "z_silver"
                 config.gold_table = "z_gold"

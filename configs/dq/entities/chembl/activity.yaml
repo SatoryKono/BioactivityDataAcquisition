@@ -11,7 +11,7 @@ entity: activity
 # =============================================================================
 # Activity-Specific Field Validations
 # =============================================================================
-entity_field_validations:
+field_validations:
   # Activity ID is required
   - field: activity_id
     type: required
@@ -65,7 +65,7 @@ entity_field_validations:
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-entity_cross_field_validations:
+cross_field_validations:
   # If standard_value present, standard_units should be present
   - name: value_requires_units
     fields:
@@ -79,7 +79,7 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations:
+conditional_validations:
   # When assay_type is 'B' (Binding), target should be present
   - name: binding_requires_target
     condition_field: assay_type

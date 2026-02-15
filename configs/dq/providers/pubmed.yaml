@@ -15,7 +15,7 @@ thresholds:
 # =============================================================================
 # PubMed Common Field Validations
 # =============================================================================
-provider_field_validations:
+field_validations:
   # PMID format validation
   - field: pmid
     type: range

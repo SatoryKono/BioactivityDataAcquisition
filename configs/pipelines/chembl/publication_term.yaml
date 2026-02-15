@@ -22,7 +22,6 @@ primary_keys: ["entity_id"]
 silver_table: "chembl_publication_term"
 gold_table: "chembl_publication_term"
 
-source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -31,7 +30,6 @@ source_file: ../../sources/chembl.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/publication_term.yaml (entity-specific)
-dq_config_file: ../../dq/entities/chembl/publication_term.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -41,27 +39,10 @@ dq_config_file: ../../dq/entities/chembl/publication_term.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_term.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-filter_config_file: ../../filter/entities/chembl/publication_term.yaml
-data_schema_file: ../../data_schema/chembl/publication_term.yaml
 
 # Entity-specific sink overrides
 sink:
-  bronze:
-    path: "data/output/bronze/chembl/publication_term"
+  bronze: {}
   silver:
-    path: "data/output/silver/chembl/publication_term"
-    primary_key: ["entity_id"]
     partition_by: ["term_type"]
-    sort_by:
-      columns: ["entity_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/chembl/publication_term"
-  gold:
-    path: "data/output/gold/chembl/publication_term"
-    sort_by:
-      columns: ["entity_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/chembl/publication_term"
-
+  gold: {}
