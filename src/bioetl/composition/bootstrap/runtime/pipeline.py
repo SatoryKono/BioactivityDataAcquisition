@@ -9,6 +9,7 @@ CLI commands should use this via composition/entrypoints.py.
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.runtime.assembly import (
@@ -176,4 +177,9 @@ def bootstrap_pipeline(
     Returns:
         PipelineRunner: Fully configured runner ready for execution.
     """
+    warnings.warn(
+        "bootstrap_pipeline() is deprecated, use bootstrap_pipeline_runner() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_pipeline_runner(ctx=ctx, registry=registry)

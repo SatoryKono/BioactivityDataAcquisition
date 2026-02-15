@@ -11,6 +11,7 @@ Note:
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
@@ -56,6 +57,11 @@ def bootstrap_quarantine() -> QuarantinePort:
     Returns:
         QuarantinePort implementation for quarantine operations.
     """
+    warnings.warn(
+        "bootstrap_quarantine() is deprecated, use bootstrap_quarantine_port() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_quarantine_port()
 
 
@@ -93,4 +99,9 @@ def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
     Returns:
         CheckpointPort implementation for checkpoint operations.
     """
+    warnings.warn(
+        "bootstrap_checkpoint() is deprecated, use bootstrap_checkpoint_port() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_checkpoint_port(pipeline_name=pipeline_name)
