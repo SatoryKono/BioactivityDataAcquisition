@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 from typing import TYPE_CHECKING, Any, Self
 
+from bioetl.application.core._data_source_mixins import SourceMetadataDelegationMixin
 from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 
-class SubcellularFractionDataSource:
+class SubcellularFractionDataSource(SourceMetadataDelegationMixin):
     """Wraps a DataSourcePort to extract subcellular fraction records."""
 
     SOURCE_ENTITY_TYPE = "assay"
@@ -285,13 +286,6 @@ class SubcellularFractionDataSource:
 
         for record in records.values():
             yield record
-
-    def get_source_metadata(self, api_version: str | None = None) -> Any:
-        """Delegate get_source_metadata to wrapped data source if supported."""
-        get_metadata = getattr(self._data_source, "get_source_metadata", None)
-        if get_metadata is not None and callable(get_metadata):
-            return get_metadata(api_version)
-        return None
 
 
 __all__ = ["SubcellularFractionDataSource"]
