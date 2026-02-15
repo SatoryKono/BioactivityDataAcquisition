@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.application.core._data_source_mixins import SourceMetadataDelegationMixin
+from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.domain.ports import FilterableDataSourcePort, InputFilterPort
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 
-class FilteredDataSource(SourceMetadataDelegationMixin):
+class FilteredDataSource(_SourceMetadataDelegationMixin):
     """Wraps a DataSourcePort to add CSV-based filtering.
 
     Decorator pattern: loads filter IDs from CSV, calls fetch_filtered() on
