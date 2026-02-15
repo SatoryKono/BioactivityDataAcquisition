@@ -1,8 +1,17 @@
 """Pipeline components and base classes.
 
-NOTE: ADR-0005 introduces PipelineConfig, RuntimeConfig, PipelineServices
-for decomposed pipeline configuration. Use BasePipeline.from_config() instead of
-direct constructor.
+NOTE: This facade has no active consumers. All symbols should be imported
+directly from their defining submodules:
+
+- ``bioetl.application.core.runner``             — PipelineRunner
+- ``bioetl.application.core.base``               — BasePipeline
+- ``bioetl.application.core.batch_executor``      — BatchExecutor
+- ``bioetl.application.core.batch_transformer``   — BatchTransformer, TransformResult
+- ``bioetl.application.core.batch_writer``        — BatchWriter
+- ``bioetl.application.core.checkpoint_manager``  — CheckpointManager
+- ``bioetl.application.core.cleanup_service``     — CleanupService, CleanupResult
+- ``bioetl.application.core.lock_manager``        — LockManager
+- ``bioetl.application.core.shutdown``            — ShutdownService, ShutdownSignal
 
 Configuration consolidation (all in bioetl.domain.config):
 - PipelineConfig: Static pipeline configuration
@@ -11,108 +20,4 @@ Configuration consolidation (all in bioetl.domain.config):
 
 from __future__ import annotations
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.application.core.base_transformer import BaseTransformer
-from bioetl.application.core.batch_executor import BatchExecutor
-from bioetl.application.core.batch_transformer import (
-    BatchTransformer,
-    StreamingBatchProcessor,
-    TransformedRecord,
-    TransformResult,
-)
-from bioetl.application.core.batch_writer import BatchWriter
-from bioetl.application.core.checkpoint_manager import CheckpointManager
-from bioetl.application.core.cleanup_service import (
-    CleanupPreview,
-    CleanupResult,
-    CleanupService,
-    LayerInfo,
-)
-from bioetl.application.core.dict_transformers import (
-    aggregate_nested_lists,
-    extract_list_field,
-    flatten_nested_dict,
-    normalize_string,
-    parse_date_field,
-    safe_extract,
-    validate_smiles,
-)
-from bioetl.application.core.lock_manager import LockManager
-from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.application.core.postrun_service import (
-    DQEvaluationStatus,
-    DQResult,
-    PostrunResult,
-    PostrunService,
-    VacuumResult,
-)
-from bioetl.application.core.preflight_service import PreflightService
-from bioetl.application.core.quarantine_manager import QuarantineManager
-from bioetl.application.core.runner import PipelineRunner
-from bioetl.application.core.shutdown import (
-    PipelineShutdownError,
-    ShutdownReason,
-    ShutdownService,
-    ShutdownSignal,
-    create_shutdown_service,
-)
-from bioetl.application.services.medallion_lifecycle import MedallionLifecycleService
-from bioetl.application.services.medallion_types import (
-    ClearResult,
-    PrepareResult,
-)
-from bioetl.domain.config import MemoryConfig, PipelineConfig, RuntimeConfig
-from bioetl.domain.medallion import (
-    Layer,
-    WriteMode,
-    WriteModePolicy,
-)
-from bioetl.domain.ports import MemoryStats
-
-__all__ = [
-    "BasePipeline",
-    "BaseTransformer",
-    "BatchExecutor",
-    "BatchTransformer",
-    "BatchWriter",
-    "CheckpointManager",
-    "CleanupPreview",
-    "CleanupResult",
-    "CleanupService",
-    "ClearResult",
-    "DQEvaluationStatus",
-    "DQResult",
-    "Layer",
-    "LayerInfo",
-    "LockManager",
-    "MedallionLifecycleService",
-    "MemoryConfig",
-    "MemoryStats",
-    "PipelineConfig",
-    "PipelineRunner",
-    "PipelineServices",
-    "PipelineShutdownError",
-    "PostrunResult",
-    "PostrunService",
-    "PreflightService",
-    "PrepareResult",
-    "QuarantineManager",
-    "RuntimeConfig",
-    "ShutdownReason",
-    "ShutdownService",
-    "ShutdownSignal",
-    "StreamingBatchProcessor",
-    "TransformResult",
-    "TransformedRecord",
-    "VacuumResult",
-    "WriteMode",
-    "WriteModePolicy",
-    "aggregate_nested_lists",
-    "create_shutdown_service",
-    "extract_list_field",
-    "flatten_nested_dict",
-    "normalize_string",
-    "parse_date_field",
-    "safe_extract",
-    "validate_smiles",
-]
+__all__: list[str] = []
