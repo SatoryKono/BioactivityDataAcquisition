@@ -10,7 +10,7 @@ bootstrap details.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import RunnablePort
+    from bioetl.domain.types import PipelineRunContextInput
 
 
 class RunnerFactory:
@@ -56,7 +57,7 @@ class RunnerFactory:
         """Get the effective registry instance."""
         return self._registry if self._registry is not None else get_default_registry()
 
-    def create(self, context: PipelineRunContext) -> RunnablePort:
+    def create(self, context: PipelineRunContextInput) -> RunnablePort:
         """Create a configured pipeline runner.
 
         Args:
@@ -75,8 +76,9 @@ class RunnerFactory:
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         self._ensure_registrations()
+        pipeline_context = cast("PipelineRunContext", context)
         runner: PipelineRunner = bootstrap_pipeline_runner(
-            context, registry=self._registry
+            pipeline_context, registry=self._registry
         )
         return runner
 

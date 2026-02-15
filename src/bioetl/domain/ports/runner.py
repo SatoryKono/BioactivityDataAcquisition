@@ -5,10 +5,9 @@ Defines protocols for pipeline runner creation and execution.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
-if TYPE_CHECKING:
-    from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.types import PipelineRunContextInput
 
 
 @runtime_checkable
@@ -40,7 +39,7 @@ class RunnerFactoryPort(Protocol):
 
     def create(
         self,
-        context: PipelineRunContext,
+        context: PipelineRunContextInput,
     ) -> RunnablePort:
         """Create a configured pipeline runner.
 

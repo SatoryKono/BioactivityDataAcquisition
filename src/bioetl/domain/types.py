@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any, NewType, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, NewType, Protocol, TypeAlias, TypedDict
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -49,6 +49,26 @@ class SilverRecord(TypedDict, total=False):
     entity_id: str
     content_hash: str
     # Other fields are dynamic based on entity type
+
+
+class PipelineRunContextInput(Protocol):
+    """Dependency-neutral contract for pipeline runner input context.
+
+    This protocol captures the core fields required to create and execute
+    a pipeline run without coupling leaf port modules to
+    ``bioetl.domain.context.PipelineRunContext``.
+    """
+
+    pipeline_name: str
+    run_id: RunID
+    run_type: RunType
+    resume: bool
+    dry_run: bool
+    limit: int | None
+    query: str | None
+    log_level: str
+    ignore_yaml_filter: bool
+    skip_gold: bool
 
 
 class RunType(StrEnum):

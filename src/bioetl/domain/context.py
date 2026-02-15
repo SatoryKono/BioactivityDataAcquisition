@@ -14,8 +14,8 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.ports.observability import LoggerPort
+from bioetl.domain.types import PipelineRunContextInput, RunID, RunType
 
 
 def _now_utc() -> datetime:
@@ -320,7 +320,7 @@ class PipelineContext:
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineRunContext:
+class PipelineRunContext(PipelineRunContextInput):
     """Context object encapsulating pipeline launch parameters.
 
     Used to pass runtime arguments from CLI/Orchestrator to the Composition Root.
