@@ -15,10 +15,10 @@ import copy
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from bioetl.domain.config import DQConfig
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
+
+from .base_config_loader import _load_yaml_file
 
 
 class DQConfigLoader:
@@ -145,12 +145,7 @@ class DQConfigLoader:
         Returns:
             Parsed YAML content or empty dict.
         """
-        if not path.exists():
-            return {}
-
-        with open(path, encoding="utf-8") as f:
-            content = yaml.safe_load(f)
-            return content if content is not None else {}
+        return _load_yaml_file(path)
 
     def _deep_merge(
         self,
