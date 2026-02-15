@@ -21,7 +21,7 @@ from __future__ import annotations
 # Subpackage registrations (make them importable as bioetl.domain.<name>)
 from bioetl.domain import mapping  # noqa: F401
 from bioetl.domain import registry  # noqa: F401
-from bioetl.domain import version
+from bioetl.domain import version  # noqa: F401
 from bioetl.domain import composite, constants, contracts
 
 # Events
@@ -32,5 +32,4 @@ __all__ = [
     "composite",
     "constants",
     "contracts",
-    "version",
 ]
