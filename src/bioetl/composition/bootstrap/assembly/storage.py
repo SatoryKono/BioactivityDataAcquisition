@@ -11,6 +11,7 @@ Note:
 
 from __future__ import annotations
 
+import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -134,4 +135,9 @@ def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
     Returns:
         StorageAdapter configured for the current environment.
     """
+    warnings.warn(
+        "bootstrap_storage() is deprecated, use bootstrap_storage_adapter() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_storage_adapter(enable_csv_export=enable_csv_export)

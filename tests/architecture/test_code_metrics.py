@@ -308,6 +308,9 @@ class TestFunctionComplexity:
         "_apply_dependency_joins": 13,  # CC=12 - Dependency join logic with multiple join strategies
         # Publication type classification (domain taxonomy mapping)
         "classify_publication_type": 10,  # CC=9 - Publication type classification with multi-level taxonomy lookup
+        # Cross-validation domain/application (ADR-026)
+        "FieldComparisonSpec": 8,  # CC=7 - Field comparison spec __post_init__ with type validation
+        "validate": 14,  # CC=13 - EnrichmentCrossValidator.validate() with multi-enricher comparison loop
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -651,6 +654,7 @@ class TestClassSize:
         # Composite pipeline services (ADR-026)
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
+        "EnrichmentCrossValidator": 385,  # 380 lines - Cross-validation with multi-enricher comparison + vectorized mismatch detection
         "DependencyCoordinator": 375,  # 370 lines - Chained dependency coordination with key extraction
         "EnrichmentCrossValidator": 380,  # 372 lines - Cross-validation with exact/fuzzy/numeric comparison methods
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)

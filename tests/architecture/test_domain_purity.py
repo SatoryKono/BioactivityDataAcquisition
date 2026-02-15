@@ -280,6 +280,8 @@ class TestDomainComplexity:
             "classify_publication_type": 10,  # CC=9 - Publication type classification with multi-level taxonomy lookup
             # Page range abbreviation expansion (normalization)
             "_expand_abbreviated_page": 7,  # CC=6 - Page range expansion with digit extraction and rollover
+            # Cross-validation domain models (ADR-026)
+            "FieldComparisonSpec": 8,  # CC=7 - Field comparison spec __post_init__ with type validation
         }
 
         violations = []
