@@ -96,7 +96,7 @@ class EnrichmentCrossValidator:
             enricher_provider, enricher_entity = self._parse_pipeline(enricher_pipeline)
 
             # Count mismatches per row for this enricher
-            mismatch_count, compared_count = self._count_mismatches_vectorized(
+            mismatch_count, _compared_count = self._count_mismatches_vectorized(
                 merged_df,
                 pairing,
                 seed_provider,
@@ -180,7 +180,7 @@ class EnrichmentCrossValidator:
             seed_prefix = f"{seed_provider}.{seed_entity}."
             seed_cols = [c for c in quarantine_df.columns if c.startswith(seed_prefix)]
             if seed_cols:
-                quarantine_payloads = quarantine_df.select(seed_cols).to_dicts()
+                quarantine_payloads = quarantine_df.select(seed_cols).to_dicts()  # noqa: F841
 
             self._logger.warning(
                 "Seed records quarantined due to multiple enricher errors",
@@ -389,7 +389,7 @@ class EnrichmentCrossValidator:
 
         # Absolute difference / max(|seed|, 1)
         diff = (s - e).abs()
-        denominator = s.abs().zip_with(s.abs() > 1.0, pl.Series([1.0] * len(df)))
+        _denominator = s.abs().zip_with(s.abs() > 1.0, pl.Series([1.0] * len(df)))
         # Simpler: use pl.max_horizontal
         denom = (
             pl.DataFrame({"a": s.abs(), "b": pl.Series([1.0] * len(df))})
