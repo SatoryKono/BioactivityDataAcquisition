@@ -287,20 +287,19 @@ class Molecule(BaseEntity):
     hierarchy_active_chembl_id: str | None = None
     hierarchy_child_chembl_id: str | None = None  # For parent molecules
 
-    # Flattened Properties
-    property_alogp: float | None = None
+    # Flattened Properties (canonical alias names, unified for Gold)
+    logp: float | None = None
+    logp_method: str | None = None
     mw_freebase: float | None = None
-    property_full_mwt: float | None = None
-    property_hba: int | None = None
-    property_hbd: int | None = None
-    property_psa: float | None = None
-    property_rtb: int | None = None
+    molecular_weight: float | None = None
+    hba_count: int | None = None
+    hbd_count: int | None = None
+    polar_surface_area: float | None = None
+    rotatable_bond_count: int | None = None
     ro5_violation_count: int | None = None
-    property_heavy_atoms: int | None = None
-    property_aromatic_rings: int | None = None
+    heavy_atom_count: int | None = None
+    aromatic_ring_count: int | None = None
     qed_score: float | None = None
-    # Note: property_acd_logd, property_acd_logp, property_acd_most_apka,
-    # property_acd_most_bpka are not available in the public ChEMBL API
     molecular_formula: str | None = None
     ro3_pass: str | None = None  # "Y" or "N"
 
@@ -309,16 +308,6 @@ class Molecule(BaseEntity):
     standard_inchi: str | None = None
     # Standardized to 'inchi_key' (no underscore) for IUPAC/PubChem consistency
     inchi_key: str | None = None
-    # Canonical property aliases (unified naming)
-    logp: float | None = None
-    logp_method: str | None = None
-    molecular_weight: float | None = None
-    polar_surface_area: float | None = None
-    rotatable_bond_count: int | None = None
-    heavy_atom_count: int | None = None
-    aromatic_ring_count: int | None = None
-    hba_count: int | None = None
-    hbd_count: int | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()

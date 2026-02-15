@@ -375,34 +375,39 @@ class MoleculeRecord(BaseModel):
         default=None, description="Child molecule ChEMBL ID"
     )
 
-    # Flattened properties
-    property_alogp: float | None = Field(default=None, description="ALogP value")
-    property_mw_freebase: float | None = Field(
+    # Flattened properties (canonical alias names, unified for Gold)
+    logp: float | None = Field(default=None, description="Partition coefficient (ALogP)")
+    logp_method: str | None = Field(default=None, description="Source method for logp")
+    mw_freebase: float | None = Field(
         default=None, description="Molecular weight (freebase)"
     )
-    property_full_mwt: float | None = Field(
+    molecular_weight: float | None = Field(
         default=None, description="Full molecular weight"
     )
-    property_hba: int | None = Field(default=None, description="H-bond acceptor count")
-    property_hbd: int | None = Field(default=None, description="H-bond donor count")
-    property_psa: float | None = Field(default=None, description="Polar surface area")
-    property_rtb: int | None = Field(default=None, description="Rotatable bond count")
-    property_ro5_violations: int | None = Field(
+    hba_count: int | None = Field(default=None, description="H-bond acceptor count")
+    hbd_count: int | None = Field(default=None, description="H-bond donor count")
+    polar_surface_area: float | None = Field(
+        default=None, description="Polar surface area"
+    )
+    rotatable_bond_count: int | None = Field(
+        default=None, description="Rotatable bond count"
+    )
+    ro5_violation_count: int | None = Field(
         default=None, description="Rule of 5 violations"
     )
-    property_heavy_atoms: int | None = Field(
+    heavy_atom_count: int | None = Field(
         default=None, description="Heavy atom count"
     )
-    property_aromatic_rings: int | None = Field(
+    aromatic_ring_count: int | None = Field(
         default=None, description="Aromatic ring count"
     )
-    property_qed_weighted: float | None = Field(
+    qed_score: float | None = Field(
         default=None, description="QED weighted score"
     )
-    property_full_molformula: str | None = Field(
+    molecular_formula: str | None = Field(
         default=None, description="Full molecular formula"
     )
-    property_ro3_pass: str | None = Field(
+    ro3_pass: str | None = Field(
         default=None, description="Rule of 3 pass (Y/N)"
     )
 
