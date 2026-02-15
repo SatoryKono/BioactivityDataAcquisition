@@ -376,7 +376,9 @@ class MoleculeRecord(BaseModel):
     )
 
     # Flattened properties (canonical alias names, unified for Gold)
-    logp: float | None = Field(default=None, description="Partition coefficient (ALogP)")
+    logp: float | None = Field(
+        default=None, description="Partition coefficient (ALogP)"
+    )
     logp_method: str | None = Field(default=None, description="Source method for logp")
     mw_freebase: float | None = Field(
         default=None, description="Molecular weight (freebase)"
@@ -395,21 +397,15 @@ class MoleculeRecord(BaseModel):
     ro5_violation_count: int | None = Field(
         default=None, description="Rule of 5 violations"
     )
-    heavy_atom_count: int | None = Field(
-        default=None, description="Heavy atom count"
-    )
+    heavy_atom_count: int | None = Field(default=None, description="Heavy atom count")
     aromatic_ring_count: int | None = Field(
         default=None, description="Aromatic ring count"
     )
-    qed_score: float | None = Field(
-        default=None, description="QED weighted score"
-    )
+    qed_score: float | None = Field(default=None, description="QED weighted score")
     molecular_formula: str | None = Field(
         default=None, description="Full molecular formula"
     )
-    ro3_pass: str | None = Field(
-        default=None, description="Rule of 3 pass (Y/N)"
-    )
+    ro3_pass: str | None = Field(default=None, description="Rule of 3 pass (Y/N)")
 
     # Flattened structures (unified naming without structure_ prefix)
     canonical_smiles: str | None = Field(
