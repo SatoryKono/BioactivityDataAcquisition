@@ -11,7 +11,7 @@ entity: target_component
 # =============================================================================
 # Target Component-Specific Field Validations
 # =============================================================================
-entity_field_validations:
+field_validations:
   - field: component_id
     type: range
     min: 1
@@ -42,7 +42,7 @@ entity_field_validations:
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-entity_cross_field_validations:
+cross_field_validations:
   - name: component_identifiable
     fields:
       - component_id
@@ -53,4 +53,4 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+conditional_validations: []

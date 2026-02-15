@@ -21,7 +21,6 @@ primary_keys: ["openalex_id"]
 silver_table: "openalex_publication"
 gold_table: "openalex_publication"
 
-source_file: ../../sources/openalex.yaml
 
 # Pipeline-specific source configuration
 source:
@@ -35,13 +34,11 @@ source:
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/openalex.yaml (provider-specific)
 #   3. configs/dq/entities/openalex/publication.yaml (entity-specific)
-dq_config_file: ../../dq/entities/openalex/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)
 # -----------------------------------------------------------------------------
 # Use data_schema_file for layer-specific column configuration (silver/gold).
-data_schema_file: ../../data_schema/openalex/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -57,24 +54,9 @@ data_schema_file: ../../data_schema/openalex/publication.yaml
 # without table_name subdirectory, matching chembl_publication pattern
 sink:
   bronze:
-    path: "data/output/bronze/openalex/publication"
     flat_structure: true  # Path already includes provider/entity
   silver:
-    path: "data/output/silver/openalex/publication"
-    primary_key: ["openalex_id"]
     partition_by: ["year"]
-    sort_by:
-      columns: ["openalex_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/openalex/publication"
     flat_structure: true
   gold:
-    path: "data/output/gold/openalex/publication"
-    sort_by:
-      columns: ["openalex_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/openalex/publication"
     flat_structure: true
-

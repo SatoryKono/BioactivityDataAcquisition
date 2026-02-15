@@ -13,7 +13,7 @@ from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config._converters import freeze_sequences, resolve_loading_strategy
 from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.table import TableConfig
-from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteMode
+from bioetl.domain.medallion import LoadingStrategy
 
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
@@ -29,12 +29,11 @@ class PipelineConfig:
     This is the consolidated domain configuration object that combines
     identity, data quality, table, and processing settings.
 
-    Table-related fields (primary_keys, silver_table, gold_table,
-    write modes, partition_cols, on_schema_mismatch) are stored in the
-    nested ``table`` field (:class:`TableConfig`).  Convenience
-    properties forward the most common accesses so that
-    ``config.primary_keys`` continues to work alongside the canonical
-    ``config.table.primary_keys`` form.
+    Table-related fields are stored in the nested ``table`` field
+    (:class:`TableConfig`). Use ``config.table.<field>`` for direct
+    access. Effective Silver/Gold table names are exposed as
+    ``effective_silver_table`` and ``effective_gold_table`` with
+    fallback to ``{provider}.{entity_type}``.
     """
 
     # Identity
@@ -104,42 +103,12 @@ class PipelineConfig:
         """Generate lock key for distributed locking."""
         return f"pipeline:{self.pipeline_name}"
 
-    # ------------------------------------------------------------------
-    # Convenience forwarding properties for backward compatibility.
-    # Canonical access is via ``self.table.<field>``.
-    # ------------------------------------------------------------------
+    @property
+    def effective_silver_table(self) -> str:
+        """Имя Silver-таблицы с fallback на provider.entity."""
+        return self.table.silver_table or f"{self.provider}.{self.entity_type}"
 
     @property
-    def primary_keys(self) -> tuple[str, ...]:
-        """Shortcut for ``self.table.primary_keys``."""
-        return self.table.primary_keys
-
-    @property
-    def silver_table(self) -> str | None:
-        """Shortcut for ``self.table.silver_table``."""
-        return self.table.silver_table
-
-    @property
-    def gold_table(self) -> str | None:
-        """Shortcut for ``self.table.gold_table``."""
-        return self.table.gold_table
-
-    @property
-    def write_mode(self) -> SilverWriteMode | str:
-        """Shortcut for ``self.table.silver_write_mode``."""
-        return self.table.silver_write_mode
-
-    @property
-    def gold_write_mode(self) -> GoldWriteMode | str:
-        """Shortcut for ``self.table.gold_write_mode``."""
-        return self.table.gold_write_mode
-
-    @property
-    def partition_cols(self) -> tuple[str, ...]:
-        """Shortcut for ``self.table.partition_cols``."""
-        return self.table.partition_cols
-
-    @property
-    def on_schema_mismatch(self) -> str:
-        """Shortcut for ``self.table.on_schema_mismatch``."""
-        return self.table.on_schema_mismatch
+    def effective_gold_table(self) -> str:
+        """Имя Gold-таблицы с fallback на provider.entity."""
+        return self.table.gold_table or f"{self.provider}.{self.entity_type}"

@@ -11,7 +11,7 @@ entity: publication_term
 # =============================================================================
 # Publication Term-Specific Field Validations
 # =============================================================================
-entity_field_validations:
+field_validations:
   - field: entity_id
     type: pattern
     pattern: '^[a-f0-9]{64}$'
@@ -43,7 +43,7 @@ entity_field_validations:
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-entity_cross_field_validations:
+cross_field_validations:
   - name: term_completeness
     fields:
       - publication_id
@@ -55,4 +55,4 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations: []
+conditional_validations: []

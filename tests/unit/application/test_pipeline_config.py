@@ -26,9 +26,9 @@ class TestPipelineConfig:
         assert config.pipeline_name == "test_pipeline"
         assert config.provider == "test_provider"
         assert config.entity_type == "test_entity"
-        assert config.primary_keys == ("id",)  # Lists converted to tuples
-        assert config.silver_table == "test_silver"
-        assert config.gold_table is None
+        assert config.table.primary_keys == ("id",)  # Lists converted to tuples
+        assert config.effective_silver_table == "test_silver"
+        assert config.effective_gold_table == f"{config.provider}.{config.entity_type}"
         assert config.batch_size == 100  # default
         assert config.checkpoint_interval == 1000  # default
 
@@ -47,7 +47,7 @@ class TestPipelineConfig:
             checkpoint_interval=5000,
         )
 
-        assert config.gold_table == "chembl_activity_gold"
+        assert config.effective_gold_table == "chembl_activity_gold"
         assert config.batch_size == 500
         assert config.checkpoint_interval == 5000
 

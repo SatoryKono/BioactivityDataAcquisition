@@ -11,7 +11,7 @@ entity: publication
 # =============================================================================
 # Publication-Specific Field Validations
 # =============================================================================
-entity_field_validations:
+field_validations:
   - field: openalex_id
     type: pattern
     pattern: '^W\d+$'
@@ -101,7 +101,7 @@ entity_field_validations:
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-entity_cross_field_validations:
+cross_field_validations:
   - name: publication_identifiable
     fields:
       - openalex_id
@@ -115,7 +115,7 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations:
+conditional_validations:
   - name: article_requires_title
     condition_field: type
     condition_value:

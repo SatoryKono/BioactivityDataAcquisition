@@ -1,4 +1,3 @@
-data_schema_file: ../../data_schema/chembl/assay.yaml
 # configs/pipelines/chembl/assay.yaml
 # =============================================================================
 # ChEMBL Assay Pipeline Configuration
@@ -21,7 +20,7 @@ gold_table: "chembl_assay"
 # -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)
 # -----------------------------------------------------------------------------
-dq_rules:
+dq_overrides:
   field_validations:
     # Override: Entity has nullable:true, pipeline requires non-null
     - field: "assay_type"
@@ -53,10 +52,5 @@ dq_rules:
 # Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
-    primary_key: ["assay_id"]
-    sort_by:
-      columns: ["assay_id"]
     partition_by: ["assay_type"]
-  gold:
-    sort_by:
-      columns: ["assay_id"]
+  gold: {}
