@@ -1,6 +1,6 @@
 # ChEMBL Activity Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.17*
+*Version 1.2.0 | Aligned with RULES.md v5.18*
 
 ______________________________________________________________________
 

@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.17 | Last updated: 2026-02-10*
+*Synced with RULES.md v5.18 | Last updated: 2026-02-10*
 
 > **Documentation Update:** 2026-02-10
 > - Codebase metrics updated: ~1,094 Python files, ~115,351 LOC, ~7,090 tests

@@ -1,7 +1,7 @@
 # BioETL Architecture Audit Report
 
 **Дата:** 2026-02-10
-**Версия кодовой базы:** v5.14.0 (RULES.md v5.17)
+**Версия кодовой базы:** v5.14.0 (RULES.md v5.18)
 **Аудитор:** Claude Opus 4.6 (automated)
 **Ветка:** `claude/bioetl-architecture-audit-nttXM`
 
