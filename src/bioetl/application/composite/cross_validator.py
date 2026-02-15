@@ -137,7 +137,7 @@ class EnrichmentCrossValidator:
         enricher_provider, enricher_entity = self._parse_pipeline(enricher_pipeline)
         total = len(df)
 
-        mismatch_count, _ = self._count_mismatches_vectorized(
+        mismatch_count, _, field_mismatches = self._count_mismatches_vectorized(
             df, pairing, seed_provider, seed_entity, enricher_provider, enricher_entity
         )
 
@@ -154,6 +154,7 @@ class EnrichmentCrossValidator:
             passed=pass_count,
             warned=warn_count,
             errored=error_count,
+            field_mismatches=field_mismatches,
         )
 
         # Null enricher columns where ENRICHER_ERROR
@@ -162,6 +163,8 @@ class EnrichmentCrossValidator:
                 df, is_error, enricher_provider, enricher_entity, enricher_pipeline
             )
 
+        field_mismatches_tuple = tuple(field_mismatches.items())
+
         return _EnricherValidationResult(
             stats=EnricherCVStats(
                 enricher=enricher_pipeline,
@@ -169,6 +172,7 @@ class EnrichmentCrossValidator:
                 passed=pass_count,
                 warned=warn_count,
                 errored=error_count,
+                field_mismatches=field_mismatches_tuple,
             ),
             is_error=is_error,
             is_warning=is_warning,
@@ -266,17 +270,19 @@ class EnrichmentCrossValidator:
         seed_entity: str,
         enricher_provider: str,
         enricher_entity: str,
-    ) -> tuple[pl.Series, pl.Series]:
+    ) -> tuple[pl.Series, pl.Series, dict[str, int]]:
         """Count field mismatches per row using vectorized Polars operations.
 
         Returns:
-            Tuple of (mismatch_count Series, compared_count Series).
+            Tuple of (mismatch_count Series, compared_count Series,
+            per-field mismatch counts dict).
         """
         import polars as pl
 
         n = len(df)
         mismatch_total = pl.Series("_mm", [0] * n, dtype=pl.Int32)
         compared_total = pl.Series("_cmp", [0] * n, dtype=pl.Int32)
+        field_mismatch_counts: dict[str, int] = {}
 
         for spec in pairing.fields:
             if spec.method == ComparisonMethod.SKIP:
@@ -302,8 +308,9 @@ class EnrichmentCrossValidator:
             )
             is_mismatch = both_present & ~match_result
             mismatch_total = mismatch_total + is_mismatch.cast(pl.Int32)
+            field_mismatch_counts[spec.field_name] = int(is_mismatch.sum())
 
-        return mismatch_total, compared_total
+        return mismatch_total, compared_total, field_mismatch_counts
 
     def _compare_field(
         self,
