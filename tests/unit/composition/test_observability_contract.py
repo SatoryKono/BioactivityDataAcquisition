@@ -208,7 +208,9 @@ class TestBootstrapMetrics:
 
     def test_disabled_metrics_returns_noop_metrics(self) -> None:
         """Test that disabled metrics returns NoOpMetrics, not None."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics_port
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
@@ -220,7 +222,9 @@ class TestBootstrapMetrics:
 
     def test_noop_metrics_no_warning_when_disabled(self) -> None:
         """Test that NoOpMetrics doesn't warn when explicitly disabled."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics_port
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         # Reset warning state
         NoOpMetrics.reset_warning()
@@ -244,7 +248,9 @@ class TestBootstrapMetrics:
         mock_start_server: MagicMock,
     ) -> None:
         """Test that enabled metrics returns PrometheusMetrics."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics_port
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         mock_metrics = MagicMock()
         mock_prometheus.return_value = mock_metrics

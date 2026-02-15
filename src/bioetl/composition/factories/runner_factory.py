@@ -75,7 +75,9 @@ class RunnerFactory:
         from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         self._ensure_registrations()
-        runner: PipelineRunner = bootstrap_pipeline_runner(context, registry=self._registry)
+        runner: PipelineRunner = bootstrap_pipeline_runner(
+            context, registry=self._registry
+        )
         return runner
 
     def list_pipelines(self) -> list[str]:
