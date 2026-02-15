@@ -30,10 +30,8 @@ from bioetl.domain.events import PipelineEvent
 __all__ = [
     "PipelineEvent",
     "composite",
-    "version",
     # Data contracts (subpackage)
     "contracts",
     # Constants
     "constants",
-    "contracts",
 ]
