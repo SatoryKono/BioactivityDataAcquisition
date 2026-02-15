@@ -30,6 +30,20 @@ from bioetl.domain.types import RunType
 E2E_DEFAULT_TIMEOUT = 120
 
 
+_E2E_VCR_CASSETTE_DIR_BY_TEST: dict[str, str] = {
+    "test_pubchem_compound_pipeline": "pubchem",
+    "test_health_check": "pubmed",
+    "test_chembl_and_uniprot_sequential_run": "multi_provider",
+}
+
+
+_E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
+    "TestChEMBLPipelineE2E.test_chembl_activity_full_run": (
+        "test_chembl_pipeline_e2e_test_chembl_activity_full_run"
+    ),
+}
+
+
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     """Automatically apply default timeout to all E2E tests.
 
@@ -46,6 +60,25 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             if existing_timeout is None:
                 # Add default E2E timeout
                 item.add_marker(pytest.mark.timeout(E2E_DEFAULT_TIMEOUT))
+
+
+@pytest.fixture
+def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
+    """Return provider-specific cassette directory for E2E tests."""
+    test_name = request.node.name
+    provider_dir = _E2E_VCR_CASSETTE_DIR_BY_TEST.get(test_name, "chembl")
+    cassette_dir = (
+        Path(__file__).resolve().parents[1] / "fixtures" / "vcr" / provider_dir
+    )
+    cassette_dir.mkdir(parents=True, exist_ok=True)
+    return cassette_dir
+
+
+@pytest.fixture
+def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
+    """Return normalized cassette file name in snake_case format."""
+    node_name = request.node.name
+    return _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(node_name, node_name)
 
 
 @pytest.fixture(scope="session", autouse=True)
