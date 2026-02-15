@@ -14,7 +14,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,
@@ -52,7 +52,7 @@ async def test_uniprot_protein_full_cycle(e2e_data_dir: Path):
     ctx = create_test_context("uniprot_protein", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Bronze layer
@@ -85,7 +85,7 @@ async def test_uniprot_protein_metadata_fields(e2e_data_dir: Path):
     ctx = create_test_context("uniprot_protein", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check metadata fields
@@ -117,7 +117,7 @@ async def test_uniprot_protein_sequence_fields(e2e_data_dir: Path):
     ctx = create_test_context("uniprot_protein", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check sequence fields

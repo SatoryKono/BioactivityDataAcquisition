@@ -161,9 +161,9 @@ def patch_storage_factory(storage_paths: dict[str, Path]):
 
 @pytest.fixture
 def patch_checkpoint(fake_checkpoint: InMemoryCheckpoint):
-    """Patch bootstrap_checkpoint to return fake checkpoint."""
+    """Patch bootstrap_checkpoint_port to return fake checkpoint."""
     with patch(
-        "bioetl.composition.bootstrap.bootstrap_checkpoint",
+        "bioetl.composition.bootstrap.bootstrap_checkpoint_port",
         return_value=fake_checkpoint,
     ):
         yield fake_checkpoint
@@ -171,9 +171,9 @@ def patch_checkpoint(fake_checkpoint: InMemoryCheckpoint):
 
 @pytest.fixture
 def patch_quarantine(fake_quarantine: InMemoryQuarantine):
-    """Patch bootstrap_quarantine to return fake quarantine."""
+    """Patch bootstrap_quarantine_port to return fake quarantine."""
     with patch(
-        "bioetl.composition.bootstrap.bootstrap_quarantine",
+        "bioetl.composition.bootstrap.bootstrap_quarantine_port",
         return_value=fake_quarantine,
     ):
         yield fake_quarantine

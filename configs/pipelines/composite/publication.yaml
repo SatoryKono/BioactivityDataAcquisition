@@ -414,6 +414,73 @@ composite:
     # gold: data/output/gold/composite/publication (auto)
 
   # ---------------------------------------------------------------------------
+  # Cross-Validation Configuration (Pre-Merge)
+  # ---------------------------------------------------------------------------
+  # Compares paired fields between seed and each enricher before merge.
+  # Detects mismatches and flags/nullifies divergent enricher data.
+  # Rules:
+  #   1 mismatch   -> WARNING
+  #   2+ mismatches -> ENRICHER_ERROR (null all enricher fields for that record)
+  #   2+ enrichers with ENRICHER_ERROR -> QUARANTINE seed record
+  cross_validation:
+    enabled: true
+    warning_threshold: 1
+    error_threshold: 2
+    quarantine_threshold: 2
+    fuzzy_threshold: 0.8
+    numeric_tolerance: 0.10
+    enricher_pairings:
+      # CrossRef: 8 paired fields
+      - enricher_pipeline: crossref_publication
+        fields:
+          - { field: doi, method: exact }
+          - { field: title, method: fuzzy, threshold: 0.8 }
+          - { field: volume, method: exact }
+          - { field: issue, method: exact }
+          - { field: page_first, method: exact }
+          - { field: page_last, method: exact }
+          - { field: publication_year, method: exact }
+          - { field: citations_received, method: numeric_tolerance, threshold: 0.10 }
+
+      # OpenAlex: 9 paired fields
+      - enricher_pipeline: openalex_publication
+        fields:
+          - { field: doi, method: exact }
+          - { field: pmid, method: exact }
+          - { field: title, method: fuzzy, threshold: 0.8 }
+          - { field: volume, method: exact }
+          - { field: issue, method: exact }
+          - { field: page_first, method: exact }
+          - { field: page_last, method: exact }
+          - { field: publication_year, method: exact }
+          - { field: citations_received, method: numeric_tolerance, threshold: 0.10 }
+
+      # PubMed: 8 paired fields (no citations_received)
+      - enricher_pipeline: pubmed_publication
+        fields:
+          - { field: doi, method: exact }
+          - { field: pmid, method: exact }
+          - { field: title, method: fuzzy, threshold: 0.8 }
+          - { field: volume, method: exact }
+          - { field: issue, method: exact }
+          - { field: page_first, method: exact }
+          - { field: page_last, method: exact }
+          - { field: publication_year, method: exact }
+
+      # SemanticScholar: 9 paired fields
+      - enricher_pipeline: semanticscholar_publication
+        fields:
+          - { field: doi, method: exact }
+          - { field: pmid, method: exact }
+          - { field: title, method: fuzzy, threshold: 0.8 }
+          - { field: volume, method: exact }
+          - { field: issue, method: exact }
+          - { field: page_first, method: exact }
+          - { field: page_last, method: exact }
+          - { field: publication_year, method: exact }
+          - { field: citations_received, method: numeric_tolerance, threshold: 0.10 }
+
+  # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
   dq_rules:

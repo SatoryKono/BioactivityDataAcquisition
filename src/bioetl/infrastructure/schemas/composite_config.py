@@ -24,6 +24,7 @@ from bioetl.domain.composite.config import (
     ColumnGroupConfig,
     CompositeConfig,
     CompositeDQConfig,
+    CrossValidationConfig,
     DependencyConfig,
     DQOverrideConfig,
     EnricherConfig,
@@ -31,6 +32,11 @@ from bioetl.domain.composite.config import (
     LineageConfig,
     MergeConfig,
     SeedConfig,
+)
+from bioetl.domain.composite.cross_validation import (
+    ComparisonMethod,
+    EnricherFieldPairing,
+    FieldComparisonSpec,
 )
 from bioetl.domain.composite.strategy import (
     ConflictResolution,
@@ -545,6 +551,87 @@ class LineageSchema(BaseModel):
         )
 
 
+class FieldComparisonSpecSchema(BaseModel):
+    """Pydantic schema for a single field comparison specification."""
+
+    field: str = Field(..., min_length=1, description="Unified Silver column name")
+    method: Literal["exact", "fuzzy", "numeric_tolerance", "skip"] = Field(
+        default="exact", description="Comparison method"
+    )
+    threshold: float = Field(
+        default=0.0, ge=0.0, le=1.0, description="Threshold for fuzzy/numeric"
+    )
+
+    def to_domain(self) -> FieldComparisonSpec:
+        """Convert to domain FieldComparisonSpec."""
+        return FieldComparisonSpec(
+            field_name=self.field,
+            method=ComparisonMethod(self.method),
+            threshold=self.threshold,
+        )
+
+
+class EnricherFieldPairingSchema(BaseModel):
+    """Pydantic schema for enricher field pairing."""
+
+    enricher_pipeline: str = Field(
+        ..., min_length=1, description="Enricher pipeline name"
+    )
+    fields: list[FieldComparisonSpecSchema] = Field(
+        ..., min_length=1, description="Field comparison specs"
+    )
+
+    def to_domain(self) -> EnricherFieldPairing:
+        """Convert to domain EnricherFieldPairing."""
+        return EnricherFieldPairing(
+            enricher_pipeline=self.enricher_pipeline,
+            fields=tuple(f.to_domain() for f in self.fields),
+        )
+
+
+class CrossValidationSchema(BaseModel):
+    """Pydantic schema for cross-validation configuration."""
+
+    enabled: bool = Field(default=True, description="Enable cross-validation")
+    warning_threshold: int = Field(
+        default=1, ge=1, description="Mismatches to trigger WARNING"
+    )
+    error_threshold: int = Field(
+        default=2, ge=2, description="Mismatches to trigger ENRICHER_ERROR"
+    )
+    quarantine_threshold: int = Field(
+        default=2, ge=1, description="Enricher errors to quarantine seed"
+    )
+    fuzzy_threshold: float = Field(
+        default=0.8, gt=0.0, le=1.0, description="Jaccard threshold for fuzzy"
+    )
+    numeric_tolerance: float = Field(
+        default=0.10, gt=0.0, le=1.0, description="Relative tolerance for numeric"
+    )
+    enricher_pairings: list[EnricherFieldPairingSchema] = Field(
+        default_factory=list, description="Per-enricher field pairings"
+    )
+
+    @model_validator(mode="after")
+    def validate_thresholds(self) -> Self:
+        """Ensure warning_threshold < error_threshold."""
+        if self.warning_threshold >= self.error_threshold:
+            raise ValueError("warning_threshold must be < error_threshold")
+        return self
+
+    def to_domain(self) -> CrossValidationConfig:
+        """Convert to domain CrossValidationConfig."""
+        return CrossValidationConfig(
+            enabled=self.enabled,
+            warning_threshold=self.warning_threshold,
+            error_threshold=self.error_threshold,
+            quarantine_threshold=self.quarantine_threshold,
+            fuzzy_threshold=self.fuzzy_threshold,
+            numeric_tolerance=self.numeric_tolerance,
+            enricher_pairings=tuple(p.to_domain() for p in self.enricher_pairings),
+        )
+
+
 class CompositeConfigSchema(BaseModel):
     """Pydantic schema for complete composite pipeline configuration.
 
@@ -577,6 +664,10 @@ class CompositeConfigSchema(BaseModel):
     )
     lineage: LineageSchema = Field(
         default_factory=LineageSchema, description="Lineage tracking configuration"
+    )
+    cross_validation: CrossValidationSchema = Field(
+        default_factory=CrossValidationSchema,
+        description="Cross-validation configuration for pre-merge checks",
     )
 
     @model_validator(mode="after")
@@ -654,6 +745,7 @@ class CompositeConfigSchema(BaseModel):
             dq=self.dq_overrides.to_domain(),
             execution=self.execution.to_domain(),
             lineage=self.lineage.to_domain(),
+            cross_validation=self.cross_validation.to_domain(),
         )
 
 
@@ -689,10 +781,13 @@ __all__ = [
     "CompositeConfigFileSchema",
     "CompositeConfigSchema",
     "CompositeDQSchema",
+    "CrossValidationSchema",
     "DQOverrideSchema",
     "DependencySchema",
+    "EnricherFieldPairingSchema",
     "EnricherSchema",
     "ExecutionSchema",
+    "FieldComparisonSpecSchema",
     "LineageSchema",
     "MergeOutputSchema",
     "MergeSchema",
