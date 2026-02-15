@@ -117,13 +117,25 @@ async def test_fetch_publications(pubmed_adapter: PubMedAdapter):
 
 
 @pytest.mark.integration
-@pytest.mark.vcr
 async def test_health_check(pubmed_adapter: PubMedAdapter):
-    """
-    Tests the health check for the PubMed API.
-    This test requires a VCR cassette. To record:
-    pytest tests/integration/adapters/test_pubmed.py::test_health_check --vcr-record=new_episodes
-    """
-    async with pubmed_adapter.http_client:
-        status = await pubmed_adapter.health_check()
-        assert status == HealthStatus.HEALTHY
+    """Tests the health check for the PubMed API using einfo.fcgi."""
+    mock_einfo_json = {
+        "header": {"type": "einfo", "version": "0.3"},
+        "einforesult": {
+            "dbinfo": {
+                "dbname": "pubmed",
+                "menuname": "PubMed",
+                "description": "PubMed bibliographic record",
+                "count": "37000000",
+            }
+        },
+    }
+
+    with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
+        respx_mock.get("einfo.fcgi").mock(
+            return_value=Response(200, json=mock_einfo_json)
+        )
+
+        async with pubmed_adapter.http_client:
+            status = await pubmed_adapter.health_check()
+            assert status == HealthStatus.HEALTHY
