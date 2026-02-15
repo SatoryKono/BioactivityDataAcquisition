@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/tissue.yaml
+# configs/quality/entities/chembl/tissue.yaml
 # ChEMBL Tissue-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

@@ -41,7 +41,7 @@ def _write_temp_pipeline_config(
                 "batch_size: 10",
                 "checkpoint_interval: 100",
                 "sink: {}",
-                "dq_rules:",
+                "dq_overrides:",
                 f"  soft_fail_threshold: {soft_threshold}",
                 f"  hard_fail_threshold: {hard_threshold}",
             ]
@@ -50,7 +50,7 @@ def _write_temp_pipeline_config(
     )
 
     # Create DQ defaults file (required by DQConfigLoader)
-    dq_dir = base_path / "configs" / "dq"
+    dq_dir = base_path / "configs" / "quality"
     dq_dir.mkdir(parents=True, exist_ok=True)
     dq_defaults_path = dq_dir / "_defaults.yaml"
     dq_defaults_path.write_text(

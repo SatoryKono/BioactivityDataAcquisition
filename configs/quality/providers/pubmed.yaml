@@ -1,4 +1,4 @@
-# configs/dq/providers/pubmed.yaml
+# configs/quality/providers/pubmed.yaml
 # PubMed-specific DQ rules
 # Inherits from: _defaults.yaml
 

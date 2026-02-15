@@ -1,6 +1,6 @@
 """Pydantic schemas for standalone DQ configuration files.
 
-Validates external YAML files (configs/dq/*.yaml) before converting
+Validates external YAML files (configs/quality/*.yaml) before converting
 to domain objects. Supports hierarchical merge of configurations.
 
 Implements RULES.md §3.1.2 DQ Thresholds.
@@ -84,7 +84,7 @@ class ThresholdsConfig(BaseModel):
 class DQConfigFile(BaseModel):
     """Complete DQ configuration file schema.
 
-    Represents structure of configs/dq/*.yaml files.
+    Represents structure of configs/quality/*.yaml files.
     Supports three levels of field validations for hierarchical merge:
     - common_*: from _defaults.yaml
     - provider_*: from providers/{provider}.yaml

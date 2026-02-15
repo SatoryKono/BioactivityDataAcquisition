@@ -16,12 +16,12 @@ Data Quality (DQ) rules were embedded directly in pipeline YAML configuration fi
 Example of duplication:
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.05
   hard_fail_threshold: 0.20
 
 # configs/pipelines/chembl/molecule.yaml
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.05  # Duplicated
   hard_fail_threshold: 0.20  # Duplicated
 ```
@@ -31,7 +31,7 @@ dq_rules:
 Extract DQ rules into a hierarchical configuration structure:
 
 ```
-configs/dq/
+configs/quality/
 ├── _defaults.yaml           # Global defaults (Level 1)
 ├── providers/
 │   └── {provider}.yaml      # Provider overrides (Level 2)
@@ -44,7 +44,7 @@ configs/dq/
 1. `_defaults.yaml`
 2. `providers/{provider}.yaml`
 3. `entities/{provider}/{entity}.yaml`
-4. Inline `dq_rules` in pipeline config (for exceptional cases)
+4. Inline `dq_overrides` in pipeline config (for exceptional cases)
 
 Pipeline configs reference DQ config via `dq_config_file`:
 ```yaml
@@ -63,7 +63,7 @@ dq_config_file: ../../dq/entities/chembl/activity.yaml
    - Thread-safe caching for performance
    - Deep merge with validation list concatenation
 
-3. **Config files**: `configs/dq/`
+3. **Config files**: `configs/quality/`
    - `_defaults.yaml`: Global thresholds (0.05/0.20), common validations
    - `providers/{provider}.yaml`: Provider-specific settings
    - `entities/{provider}/{entity}.yaml`: Entity-specific rules
@@ -76,7 +76,7 @@ dq_config_file: ../../dq/entities/chembl/activity.yaml
 - **Separation of Concerns**: Pipeline config focuses on orchestration
 - **Reusability**: Provider-level validations shared across entities
 - **Flexibility**: Entity-specific rules without affecting others
-- **Backward compatible**: Inline `dq_rules` still supported as Level 4 override
+- **Backward compatible**: Inline `dq_overrides` still supported as Level 4 override
 - **Type safety**: Pydantic validation catches config errors early
 - **Performance**: Caching prevents repeated file reads
 
@@ -138,7 +138,7 @@ Store DQ rules in a database. Rejected because:
 | RULES.md §3.1.2 DQ Thresholds | PASS | `ThresholdsConfig` enforces 0.05/0.20 defaults |
 | soft_fail < hard_fail | PASS | `ThresholdsConfig.validate_order()` |
 | Hierarchical merge | PASS | `DQConfigLoader._deep_merge()` |
-| Backward compatibility | PASS | Inline `dq_rules` supported as override |
+| Backward compatibility | PASS | Inline `dq_overrides` supported as override |
 
 ## References
 
@@ -146,7 +146,7 @@ Store DQ rules in a database. Rejected because:
 - Domain config: `src/bioetl/domain/config.py`
 - Schema: `src/bioetl/infrastructure/schemas/dq_config.py`
 - Loader: `src/bioetl/infrastructure/config/dq_config_loader.py`
-- Config files: `configs/dq/`
+- Config files: `configs/quality/`
 
 ## Changelog
 

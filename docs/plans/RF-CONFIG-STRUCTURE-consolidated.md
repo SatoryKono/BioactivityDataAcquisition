@@ -17,10 +17,10 @@
 | **1** | 1.1: Сужение типа `silver_filters` | ✅ ВЫПОЛНЕНО | PR #2122 |
 | **1** | 1.2: Выделение BaseFilterConfig | ❌ НЕ НАЧАТО | — |
 | **1** | 1.3: Сужение write_mode типов | ⚠️ ЧАСТИЧНО | PR #2122 (конвертация на границе есть, `\| str` в объявлении остался) |
-| **2** | 2.1: DQ загрузчик — fallback путей | ✅ ВЫПОЛНЕНО | PR #2122 (`configs/quality/` + `configs/dq/`) |
+| **2** | 2.1: DQ загрузчик — fallback путей | ✅ ВЫПОЛНЕНО | PR #2122 (`configs/quality/` + `configs/quality/`) |
 | **2** | 2.2: Алиас `dq_overrides` | ✅ ВЫПОЛНЕНО | PR #2122/2123 (Pydantic AliasChoices) |
 | **2** | 2.3: Source-конфиги — двойной формат | ❌ НЕ НАЧАТО | — |
-| **2** | 2.4: Filter загрузчик — fallback путей | ✅ ВЫПОЛНЕНО | PR #2122 (`configs/filters/` + `configs/filter/`) |
+| **2** | 2.4: Filter загрузчик — fallback путей | ✅ ВЫПОЛНЕНО | PR #2122 (`configs/filters/` + `configs/filters/`) |
 | **2** | 2.5: Schemas загрузчик — fallback путей | ✅ ВЫПОЛНЕНО | PR #2122 |
 | **2** | 2.6: Convention-based defaults | ✅ ВЫПОЛНЕНО | PR #2123 (`config_loader.py` +216 строк) |
 | **3** | 3.1-3.4: Миграция вызовов и удаление свойств | ❌ НЕ НАЧАТО | — |

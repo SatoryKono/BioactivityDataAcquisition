@@ -17,7 +17,7 @@ Use this checklist when reviewing new or modified pipelines.
 ## 2. Configuration (RULES.md App D)
 
 - [ ] Pipeline config exists at `configs/pipelines/{provider}/{entity}.yaml`
-- [ ] Config includes required sections: `pipeline`, `source`, `sink`, `dq_rules`
+- [ ] Config includes required sections: `pipeline`, `source`, `sink`, `dq_overrides`
 - [ ] `circuit_breaker` and `rate_limit` parameters defined
 - [ ] `load_strategy` specified (`incremental` | `full`)
 - [ ] `forensic_retention` flag set for Critical tables if needed

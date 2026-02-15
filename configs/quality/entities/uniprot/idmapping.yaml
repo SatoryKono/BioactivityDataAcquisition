@@ -1,4 +1,4 @@
-# configs/dq/entities/uniprot/idmapping.yaml
+# configs/quality/entities/uniprot/idmapping.yaml
 # UniProt ID Mapping-specific DQ rules
 # Inherits from: _defaults.yaml → providers/uniprot.yaml
 

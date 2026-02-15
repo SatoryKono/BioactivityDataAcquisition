@@ -1,4 +1,4 @@
-# configs/dq/entities/uniprot/protein.yaml
+# configs/quality/entities/uniprot/protein.yaml
 # UniProt Protein-specific DQ rules
 # Inherits from: _defaults.yaml → providers/uniprot.yaml
 

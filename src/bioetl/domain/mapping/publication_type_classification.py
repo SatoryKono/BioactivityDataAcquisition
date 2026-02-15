@@ -7,7 +7,7 @@ PubMed, Semantic Scholar) to a 3-level unified hierarchy:
 - Level 2 (subclass): ~25 groupings (e.g. "Original Experimental Data")
 - Level 3 (unified_type): 214 specific types (e.g. "Journal Article")
 
-Reference CSV: configs/data_schema/publication_type_classification.csv
+Reference CSV: configs/schemas/publication_type_classification.csv
 
 The lookup tables are built at import time from a pure Python constant
 (no I/O). Keys are normalized to lowercase for case-insensitive matching.

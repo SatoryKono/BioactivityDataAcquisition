@@ -21,7 +21,7 @@ from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 @pytest.fixture
 def test_configs_root(tmp_path: Path) -> Path:
     """Create test config structure with hierarchical filter configs."""
-    filter_root = tmp_path / "filter"
+    filter_root = tmp_path / "filters"
     filter_root.mkdir()
 
     # _defaults.yaml
@@ -260,7 +260,7 @@ class TestFilterConfigLoaderErrors:
 
     def test_missing_defaults_raises(self, tmp_path: Path) -> None:
         """Missing _defaults.yaml should raise FileNotFoundError."""
-        filter_root = tmp_path / "filter"
+        filter_root = tmp_path / "filters"
         filter_root.mkdir()
         # No _defaults.yaml created
 
@@ -271,7 +271,7 @@ class TestFilterConfigLoaderErrors:
 
     def test_invalid_yaml_raises(self, tmp_path: Path) -> None:
         """Invalid YAML should raise appropriate error."""
-        filter_root = tmp_path / "filter"
+        filter_root = tmp_path / "filters"
         filter_root.mkdir()
         (filter_root / "_defaults.yaml").write_text(
             """
@@ -440,7 +440,7 @@ class TestFilterConfigLoaderExtractionParams:
 
     def test_extraction_params_from_entity_config(self, tmp_path: Path) -> None:
         """Extraction params should be loaded from entity config."""
-        filter_root = tmp_path / "filter"
+        filter_root = tmp_path / "filters"
         filter_root.mkdir()
 
         (filter_root / "_defaults.yaml").write_text(
@@ -480,7 +480,7 @@ extraction_params:
 
     def test_extraction_params_inline_override(self, tmp_path: Path) -> None:
         """Inline overrides should update extraction_params."""
-        filter_root = tmp_path / "filter"
+        filter_root = tmp_path / "filters"
         filter_root.mkdir()
 
         (filter_root / "_defaults.yaml").write_text(
@@ -510,7 +510,7 @@ class TestFilterConfigLoaderIntegration:
 
     def test_load_with_list_filters(self, tmp_path: Path) -> None:
         """Test loading configs with list_lengths and list_contains."""
-        filter_root = tmp_path / "filter"
+        filter_root = tmp_path / "filters"
         filter_root.mkdir()
 
         (filter_root / "_defaults.yaml").write_text(
@@ -559,37 +559,16 @@ gold_filters:
         assert contains_filter.mode == "any"
 
 
-def test_filter_loader_prefers_new_filters_dir(tmp_path: Path) -> None:
-    """Loader should prioritize configs/filters over legacy configs/filter."""
-    for root_name, batch in (("filters", 111), ("filter", 222)):
-        root = tmp_path / root_name
-        root.mkdir()
-        (root / "_defaults.yaml").write_text(
-            f"""
-version: "1.0.0"
-input_filter:
-  enabled: false
-  batch_size: {batch}
-gold_filters:
-  required_fields: []
-"""
-        )
-
-    loader = FilterConfigLoader(tmp_path)
-    input_filter, _, _, _ = loader.load("missing", "missing")
-    assert input_filter.batch_size == 111
-
-
-def test_filter_loader_falls_back_to_legacy_filter_dir(tmp_path: Path) -> None:
-    """Loader should read legacy configs/filter when configs/filters is absent."""
-    root = tmp_path / "filter"
+def test_filter_loader_reads_filters_dir(tmp_path: Path) -> None:
+    """Loader should read configs/filters directory."""
+    root = tmp_path / "filters"
     root.mkdir()
     (root / "_defaults.yaml").write_text(
         """
 version: "1.0.0"
 input_filter:
   enabled: false
-  batch_size: 333
+  batch_size: 111
 gold_filters:
   required_fields: []
 """
@@ -597,4 +576,4 @@ gold_filters:
 
     loader = FilterConfigLoader(tmp_path)
     input_filter, _, _, _ = loader.load("missing", "missing")
-    assert input_filter.batch_size == 333
+    assert input_filter.batch_size == 111

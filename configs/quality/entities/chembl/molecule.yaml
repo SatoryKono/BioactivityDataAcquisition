@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/molecule.yaml
+# configs/quality/entities/chembl/molecule.yaml
 # ChEMBL Molecule-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

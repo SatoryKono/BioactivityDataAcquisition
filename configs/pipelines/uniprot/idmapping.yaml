@@ -37,9 +37,9 @@ source:
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ config is loaded from hierarchical files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/uniprot.yaml (provider-specific)
-#   3. configs/dq/entities/uniprot/idmapping.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/uniprot.yaml (provider-specific)
+#   3. configs/quality/entities/uniprot/idmapping.yaml (entity-specific)
 #
 # Entity-specific config contains:
 #   - Elevated thresholds: soft_fail=0.30, hard_fail=0.80 (ID mapping may have many not_found)
@@ -50,9 +50,9 @@ source:
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/uniprot.yaml (provider-specific)
-#   3. configs/filter/entities/uniprot/idmapping.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/uniprot.yaml (provider-specific)
+#   3. configs/filters/entities/uniprot/idmapping.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Sink configuration

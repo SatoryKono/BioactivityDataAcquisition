@@ -97,7 +97,7 @@
 |--------|-----|--------|
 | SilverFilterConfig nominal type separation | #2122 | — |
 | BaseConfigLoader abstraction | #2122 | — |
-| `dq_rules` → `dq_overrides` rename | #2122 | — |
+| `dq_overrides` → `dq_overrides` rename | #2122 | — |
 | Directory fallback (filters/filter, quality/dq) | #2122 | — |
 | Deprecated bootstrap alias → canonical names | #2134 | `401ccbe` |
 | Monitor deprecated aliases (runtime warnings) | #2134 | — |
@@ -158,4 +158,4 @@ grep -rn "from bioetl.*_bootstrap\|from bioetl.*bootstrap" src/bioetl/ --include
 | Target DTO-only fields | Удалены из config/docs | `dap_id`, `target_constraints`, `component_tax_ids` не используются downstream |
 | `_normalize_source_config` | Декомпозиция на 4 функции | 147 LOC → 40 LOC, CC>15 → CC<10 |
 | Filter config types | SilverFilterConfig nominal type | Structurally identical to Gold but type-distinct |
-| DQ config naming | `dq_overrides` (backward-compat alias `dq_rules`) | AliasChoices обеспечивает обратную совместимость |
+| DQ config naming | `dq_overrides` (backward-compat alias `dq_overrides`) | AliasChoices обеспечивает обратную совместимость |

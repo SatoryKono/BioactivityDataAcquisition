@@ -16,8 +16,8 @@
 Оба режима записывают в одну таблицу `silver/semanticscholar/publication` и применяют идентичную валидацию:
 
 - **Pandera-схема**: `SemanticScholarPublicationSchema` (наследует `PublicationBaseSchema`)
-- **DQ-конфиг**: `configs/dq/entities/semanticscholar/publication.yaml`
-- **Provider DQ**: `configs/dq/providers/semanticscholar.yaml`
+- **DQ-конфиг**: `configs/quality/entities/semanticscholar/publication.yaml`
+- **Provider DQ**: `configs/quality/providers/semanticscholar.yaml`
 
 ## 3. Матрица валидации полей
 

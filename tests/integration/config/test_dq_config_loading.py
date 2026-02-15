@@ -227,15 +227,14 @@ class TestDQConfigFileStructure:
 
 @pytest.mark.integration
 class TestBackwardCompatibility:
-    """Tests for backward compatibility with inline dq_rules."""
+    """Tests for backward compatibility with inline dq_overrides."""
 
-    def test_inline_dq_rules_still_work(self, config_loader: ConfigLoader) -> None:
-        """Pipeline configs with inline dq_rules should still work."""
+    def test_inline_dq_overrides_still_work(self, config_loader: ConfigLoader) -> None:
+        """Pipeline configs with inline dq_overrides should still work."""
         # Load a pipeline config
         yaml_config = config_loader.load_pipeline_config("chembl_activity")
 
         # Check dq_overrides exists and has expected structure
-        # (field renamed from dq_rules; YAML key accepted via AliasChoices)
         assert hasattr(yaml_config, "dq_overrides")
         assert hasattr(yaml_config.dq_overrides, "soft_fail_threshold")
 
@@ -248,5 +247,5 @@ class TestBackwardCompatibility:
         resolved_dq = config_loader.resolve_dq_config(yaml_config)
 
         # Resolved config should have validations from hierarchy
-        # (inline dq_rules in pipeline configs typically don't have validations)
+        # (inline dq_overrides in pipeline configs typically don't have validations)
         assert len(resolved_dq.field_validations) >= 0

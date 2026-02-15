@@ -197,7 +197,7 @@ silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
 # Переопределения DQ правил (опционально)
-dq_rules:
+dq_overrides:
   field_validations:
     - field: standard_value
       type: range

@@ -78,7 +78,7 @@ source:
     to_db: UniProtKB
 
 # Elevated thresholds for ID mapping
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.30  # 30% not_found acceptable
   hard_fail_threshold: 0.80  # 80% not_found → hard failure
 
