@@ -15,6 +15,8 @@ This module provides a clean public API for the domain layer, exposing:
 
 from __future__ import annotations
 
+from importlib.metadata import version
+
 # Domain mapping (entity relation mappings)
 # Domain registry (publication entity mappings, ADR-024)
 # Domain constants module
@@ -597,4 +599,5 @@ __all__ = [
     "ValueObject",
     "FIELD_TO_GROUP_MAPPING",
     "PublicationFieldGroup",
+    "version",
 ]
