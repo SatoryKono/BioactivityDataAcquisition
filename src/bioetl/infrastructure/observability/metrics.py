@@ -216,6 +216,3 @@ class MetricsCollector:
             error_code=error_code,
         ).inc()
 
-
-# Expose for tooling to avoid false dead-code flags.
-METRICS_COLLECTOR = MetricsCollector

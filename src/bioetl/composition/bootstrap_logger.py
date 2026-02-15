@@ -137,8 +137,6 @@ class BootstrapLogger:
         self._logger.error(event, **kwargs)
 
 
-BOOTSTRAP_LOGGER_EXPORTS = (BootstrapLogger, reset_bootstrap_logger)
-
 __all__ = [
     "BootstrapLogger",
     "get_bootstrap_logger",
