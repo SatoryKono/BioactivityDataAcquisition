@@ -17,4 +17,4 @@ jobs:
       - name: Install detect-secrets
         run: pip install detect-secrets pytest pytest-asyncio
       - name: Run detect-secrets baseline check
-        run: pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q --noconftest -o "addopts="
+        run: pytest tests/architecture/test_antipatterns.py::test_no_hardcoded_secrets -q --noconftest -o "addopts=" -o "filterwarnings=" -o "timeout=0"
