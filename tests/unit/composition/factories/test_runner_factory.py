@@ -125,7 +125,7 @@ class TestRunnerFactoryCreate:
             patch("bioetl.composition.factories.runner_factory.register_all_providers"),
             patch("bioetl.composition.factories.runner_factory.register_all_pipelines"),
             patch(
-                "bioetl.composition.bootstrap.bootstrap_pipeline_runner",
+                "bioetl.composition.factories.runner_factory.build_pipeline_runner",
                 return_value=mock_runner,
             ),
         ):
@@ -143,13 +143,13 @@ class TestRunnerFactoryCreate:
             patch("bioetl.composition.factories.runner_factory.register_all_providers"),
             patch("bioetl.composition.factories.runner_factory.register_all_pipelines"),
             patch(
-                "bioetl.composition.bootstrap.bootstrap_pipeline_runner",
+                "bioetl.composition.factories.runner_factory.build_pipeline_runner",
                 return_value=mock_runner,
             ) as mock_bootstrap,
         ):
             factory.create(mock_context)
 
-            # Verify bootstrap_pipeline_runner was called with the custom registry
+            # Verify build_pipeline_runner was called with the custom registry
             mock_bootstrap.assert_called_once_with(
                 mock_context, registry=custom_registry
             )

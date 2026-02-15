@@ -12,6 +12,8 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING
 
+from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
@@ -70,6 +72,10 @@ def bootstrap_pipeline_runner(
         >>> register_all_pipelines(registry=registry)
         >>> runner = bootstrap_pipeline_runner(ctx, registry=registry)
     """
+    # Explicit registration retained for deterministic bootstrap semantics.
+    register_all_providers()
+    register_all_pipelines(registry=registry)
+
     return build_pipeline_runner(ctx=ctx, registry=registry)
 
 
