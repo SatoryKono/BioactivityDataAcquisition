@@ -12,13 +12,13 @@
 
 | Слой | Источник | Описание |
 |------|----------|----------|
-| **Extraction** | `configs/filter/entities/chembl/{entity}.yaml` → `extraction_params` | Серверные фильтры API (query params). Только у Activity. |
+| **Extraction** | `configs/filters/entities/chembl/{entity}.yaml` → `extraction_params` | Серверные фильтры API (query params). Только у Activity. |
 | **Transformer** | `application/pipelines/chembl/{entity}_transformer.py` | Конвертация типов, Value Objects (InChIKey, SMILES, TaxonomyId), safe_float/safe_int |
 | **Silver Schema** | `domain/schemas/chembl/{entity}.py` (Pandera) | Структурная валидация: типы, nullable, regex, enum, range. `strict=True` |
-| **DQ Rules** | `configs/dq/entities/chembl/{entity}.yaml` | Бизнес-правила: required, range, enum, pattern, cross-field, conditional |
-| **Silver Filter** | `configs/filter/entities/chembl/{entity}.yaml` → `silver_filters` | Доменные gates перед записью в Silver (только Activity) |
+| **DQ Rules** | `configs/quality/entities/chembl/{entity}.yaml` | Бизнес-правила: required, range, enum, pattern, cross-field, conditional |
+| **Silver Filter** | `configs/filters/entities/chembl/{entity}.yaml` → `silver_filters` | Доменные gates перед записью в Silver (только Activity) |
 | **Gold Schema** | `domain/contracts/gold/chembl.py` (Pandera DataFrameModel) | Финальная структурная валидация. `strict=True`, int→float coercion |
-| **Gold Filter** | `configs/filter/entities/chembl/{entity}.yaml` → `gold_filters` | Фильтры качества для Gold слоя |
+| **Gold Filter** | `configs/filters/entities/chembl/{entity}.yaml` → `gold_filters` | Фильтры качества для Gold слоя |
 
 **DQ thresholds** (наследование: `_defaults.yaml` → `providers/chembl.yaml` → `entities/chembl/{entity}.yaml`):
 - **soft_fail**: >5% ошибок → Warning
@@ -386,8 +386,8 @@
 
 - **Silver Schemas**: `src/bioetl/domain/schemas/chembl/{entity}.py`
 - **Gold Schemas**: `src/bioetl/domain/contracts/gold/chembl.py`
-- **DQ Rules**: `configs/dq/entities/chembl/{entity}.yaml`
-- **Filter Rules**: `configs/filter/entities/chembl/{entity}.yaml`
+- **DQ Rules**: `configs/quality/entities/chembl/{entity}.yaml`
+- **Filter Rules**: `configs/filters/entities/chembl/{entity}.yaml`
 - **Transformers**: `src/bioetl/application/pipelines/chembl/{entity}_transformer.py`
 - **Schema Constants**: `src/bioetl/domain/schemas/constants.py`
 - **Validation Functions**: `src/bioetl/domain/validation.py`

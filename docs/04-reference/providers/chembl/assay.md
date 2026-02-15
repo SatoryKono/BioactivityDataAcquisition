@@ -52,7 +52,7 @@ sink:
         format: delta
         mode: overwrite
 
-dq_rules:
+dq_overrides:
     soft_fail_threshold: 0.05   # 5% ошибок → WARNING
     hard_fail_threshold: 0.20   # 20% ошибок → FAIL BATCH
 ```

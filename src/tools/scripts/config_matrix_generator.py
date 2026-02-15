@@ -185,7 +185,7 @@ def main():
             "source_file",
             "source",
             "transform",
-            "dq_rules",
+            "dq_overrides",
             "circuit_breaker",
             "rate_limit",
             "gold_filters",

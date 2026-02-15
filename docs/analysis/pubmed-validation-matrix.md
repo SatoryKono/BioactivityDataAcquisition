@@ -17,8 +17,8 @@
 Оба режима записывают в одну таблицу `silver/pubmed/publication` и применяют идентичную валидацию:
 
 - **Pandera-схема**: `PubMedPublicationSchema` (наследует `PublicationBaseSchema`)
-- **DQ-конфиг**: `configs/dq/entities/pubmed/publication.yaml`
-- **Provider DQ**: `configs/dq/providers/pubmed.yaml`
+- **DQ-конфиг**: `configs/quality/entities/pubmed/publication.yaml`
+- **Provider DQ**: `configs/quality/providers/pubmed.yaml`
 
 ## 3. Матрица валидации полей
 

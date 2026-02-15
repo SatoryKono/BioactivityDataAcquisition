@@ -15275,7 +15275,7 @@ def yaml_config_to_domain(
     Args:
         yaml_config: Validated PipelineYamlConfig from infrastructure layer.
         resolved_dq_config: Optional pre-resolved DQConfig from ConfigLoader.
-            If provided, this is used instead of converting dq_rules.
+            If provided, this is used instead of converting dq_overrides.
             This supports hierarchical DQ config loading via DQConfigLoader.
 
     Returns:
@@ -15298,7 +15298,7 @@ def yaml_config_to_domain(
     if resolved_dq_config is not None:
         dq_config = resolved_dq_config
     else:
-        dq_config = yaml_config.dq_rules.to_domain()
+        dq_config = yaml_config.dq_overrides.to_domain()
 
     # Extract transform info for lineage tracking
     transform_version = yaml_config.transform.version
@@ -15716,9 +15716,9 @@ Path: config\dq_config_loader.py
 """DQ Configuration loader with hierarchical merge.
 
 Loads and merges DQ configurations from:
-1. configs/dq/_defaults.yaml (global defaults)
-2. configs/dq/providers/{provider}.yaml (provider-specific)
-3. configs/dq/entities/{provider}/{entity}.yaml (entity-specific)
+1. configs/quality/_defaults.yaml (global defaults)
+2. configs/quality/providers/{provider}.yaml (provider-specific)
+3. configs/quality/entities/{provider}/{entity}.yaml (entity-specific)
 4. Inline overrides from pipeline config
 
 Implements RULES.md §3.1.2 DQ Thresholds.
@@ -15743,7 +15743,7 @@ class DQConfigLoader:
 
     Attributes:
         _configs_root: Root path to configs/ directory.
-        _dq_root: Path to configs/dq/ directory.
+        _dq_root: Path to configs/quality/ directory.
         _cache: Cache of loaded configs keyed by "provider:entity".
     """
 
@@ -15794,7 +15794,7 @@ class DQConfigLoader:
         if not defaults_path.exists():
             raise FileNotFoundError(
                 f"Required DQ defaults file not found: {defaults_path}. "
-                "Create configs/dq/_defaults.yaml with global DQ settings."
+                "Create configs/quality/_defaults.yaml with global DQ settings."
             )
         merged = self._load_yaml(defaults_path)
 
@@ -15989,9 +15989,9 @@ Path: config\filter_config_loader.py
 """Filter Configuration loader with hierarchical merge.
 
 Loads and merges filter configurations from:
-1. configs/filter/_defaults.yaml (global defaults)
-2. configs/filter/providers/{provider}.yaml (provider-specific)
-3. configs/filter/entities/{provider}/{entity}.yaml (entity-specific)
+1. configs/filters/_defaults.yaml (global defaults)
+2. configs/filters/providers/{provider}.yaml (provider-specific)
+3. configs/filters/entities/{provider}/{entity}.yaml (entity-specific)
 4. Inline overrides from pipeline config
 
 Implements ADR-028: Filter Rules Externalization.
@@ -16016,7 +16016,7 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
     Thread-safe with internal caching for performance.
 
     Attributes:
-        _filter_root: Path to configs/filter/ directory.
+        _filter_root: Path to configs/filters/ directory.
     """
 
     def __init__(self, configs_root: Path) -> None:
@@ -16064,7 +16064,7 @@ class FilterConfigLoader(BaseConfigLoader[tuple[InputFilterConfig, GoldFilterCon
         if not defaults_path.exists():
             raise FileNotFoundError(
                 f"Required filter defaults file not found: {defaults_path}. "
-                "Create configs/filter/_defaults.yaml with global filter settings."
+                "Create configs/filters/_defaults.yaml with global filter settings."
             )
         merged = self._load_yaml(defaults_path)
 
@@ -16183,7 +16183,7 @@ class ConfigLoader:
 
     Resolution order for DQ config:
     1. If dq_config_file present: load from DQ hierarchy
-    2. If dq_rules present: apply as inline overrides
+    2. If dq_overrides present: apply as inline overrides
     3. If both: merge (file hierarchy + inline overrides)
     4. If neither: load defaults from DQ hierarchy
 
@@ -16232,7 +16232,7 @@ class ConfigLoader:
 
         Resolution order:
         1. If dq_config_file present: load from DQ hierarchy
-        2. If dq_rules present: apply as inline overrides
+        2. If dq_overrides present: apply as inline overrides
         3. If both: merge (file + inline overrides)
         4. If neither: load defaults from DQ hierarchy
 
@@ -16248,13 +16248,13 @@ class ConfigLoader:
         # Check if dq_config_file is specified
         dq_config_file = getattr(yaml_config, "dq_config_file", None)
 
-        # Get inline dq_rules if present (non-empty)
-        has_inline_rules = self._has_inline_dq_rules(yaml_config)
+        # Get inline dq_overrides if present (non-empty)
+        has_inline_rules = self._has_inline_dq_overrides(yaml_config)
 
         if dq_config_file is not None or has_inline_rules:
             # Use hierarchical DQ config system
             inline_overrides = (
-                self._normalize_inline_dq_rules(yaml_config.dq_rules)
+                self._normalize_inline_dq_overrides(yaml_config.dq_overrides)
                 if has_inline_rules
                 else None
             )
@@ -16274,18 +16274,18 @@ class ConfigLoader:
             )
         except FileNotFoundError:
             # No DQ hierarchy available, use inline rules as-is
-            return yaml_config.dq_rules.to_domain()
+            return yaml_config.dq_overrides.to_domain()
 
-    def _has_inline_dq_rules(self, yaml_config: PipelineYamlConfig) -> bool:
+    def _has_inline_dq_overrides(self, yaml_config: PipelineYamlConfig) -> bool:
         """Check if YAML config has non-default inline DQ rules.
 
         Args:
             yaml_config: Pipeline YAML configuration.
 
         Returns:
-            True if inline dq_rules contains meaningful overrides.
+            True if inline dq_overrides contains meaningful overrides.
         """
-        dq = yaml_config.dq_rules
+        dq = yaml_config.dq_overrides
 
         # Check for any field validations or non-default thresholds
         has_validations = bool(
@@ -16301,17 +16301,17 @@ class ConfigLoader:
 
         return has_validations or has_custom_thresholds
 
-    def _normalize_inline_dq_rules(
+    def _normalize_inline_dq_overrides(
         self,
-        dq_rules: Any,
+        dq_overrides: Any,
     ) -> dict[str, Any]:
-        """Normalize inline dq_rules to DQConfigFile format.
+        """Normalize inline dq_overrides to DQConfigFile format.
 
         Converts the Pydantic DQConfig model to a dict compatible with
         the DQConfigLoader merge format.
 
         Args:
-            dq_rules: DQConfig Pydantic model from pipeline config.
+            dq_overrides: DQConfig Pydantic model from pipeline config.
 
         Returns:
             Dict in DQConfigFile format for merge.
@@ -16320,39 +16320,39 @@ class ConfigLoader:
 
         # Thresholds normalization
         result["thresholds"] = {
-            "soft_fail": dq_rules.soft_fail_threshold,
-            "hard_fail": dq_rules.hard_fail_threshold,
+            "soft_fail": dq_overrides.soft_fail_threshold,
+            "hard_fail": dq_overrides.hard_fail_threshold,
         }
 
         # Direct copy for compatible fields
-        result["strict_validation"] = dq_rules.strict_validation
-        result["invalid_record_policy"] = dq_rules.invalid_record_policy
+        result["strict_validation"] = dq_overrides.strict_validation
+        result["invalid_record_policy"] = dq_overrides.invalid_record_policy
 
         # Report config
         result["report"] = {
-            "enabled": dq_rules.report.enabled,
-            "format": dq_rules.report.format,
-            "include_sample_failures": dq_rules.report.include_sample_failures,
-            "sample_size": dq_rules.report.sample_size,
-            "output_path": dq_rules.report.output_path,
+            "enabled": dq_overrides.report.enabled,
+            "format": dq_overrides.report.format,
+            "include_sample_failures": dq_overrides.report.include_sample_failures,
+            "sample_size": dq_overrides.report.sample_size,
+            "output_path": dq_overrides.report.output_path,
         }
 
         # Validation lists → entity-level (inline = highest priority)
-        if dq_rules.field_validations:
+        if dq_overrides.field_validations:
             result["entity_field_validations"] = [
-                self._field_validation_to_dict(fv) for fv in dq_rules.field_validations
+                self._field_validation_to_dict(fv) for fv in dq_overrides.field_validations
             ]
 
-        if dq_rules.cross_field_validations:
+        if dq_overrides.cross_field_validations:
             result["entity_cross_field_validations"] = [
                 self._cross_field_validation_to_dict(cfv)
-                for cfv in dq_rules.cross_field_validations
+                for cfv in dq_overrides.cross_field_validations
             ]
 
-        if dq_rules.conditional_validations:
+        if dq_overrides.conditional_validations:
             result["entity_conditional_validations"] = [
                 self._conditional_validation_to_dict(cv)
-                for cv in dq_rules.conditional_validations
+                for cv in dq_overrides.conditional_validations
             ]
 
         return result
@@ -21842,7 +21842,7 @@ class CompositeConfigSchema(BaseModel):
         ..., min_length=1, description="List of enricher configurations"
     )
     merge: MergeSchema = Field(..., description="Merge step configuration")
-    dq_rules: CompositeDQSchema = Field(
+    dq_overrides: CompositeDQSchema = Field(
         default_factory=CompositeDQSchema, description="Data quality configuration"
     )
     execution: ExecutionSchema = Field(
@@ -21905,7 +21905,7 @@ class CompositeConfigSchema(BaseModel):
             dependencies=tuple(d.to_domain() for d in self.dependencies),
             enrichers=tuple(e.to_domain() for e in self.enrichers),
             merge=self.merge.to_domain(),
-            dq=self.dq_rules.to_domain(),
+            dq=self.dq_overrides.to_domain(),
             execution=self.execution.to_domain(),
             lineage=self.lineage.to_domain(),
         )
@@ -21959,7 +21959,7 @@ Path: schemas\dq_config.py
 ================================================================================
 """Pydantic schemas for standalone DQ configuration files.
 
-Validates external YAML files (configs/dq/*.yaml) before converting
+Validates external YAML files (configs/quality/*.yaml) before converting
 to domain objects. Supports hierarchical merge of configurations.
 
 Implements RULES.md §3.1.2 DQ Thresholds.
@@ -22043,7 +22043,7 @@ class ThresholdsConfig(BaseModel):
 class DQConfigFile(BaseModel):
     """Complete DQ configuration file schema.
 
-    Represents structure of configs/dq/*.yaml files.
+    Represents structure of configs/quality/*.yaml files.
     Supports three levels of field validations for hierarchical merge:
     - common_*: from _defaults.yaml
     - provider_*: from providers/{provider}.yaml
@@ -22488,7 +22488,7 @@ Path: schemas\filter_config.py
 ================================================================================
 """Pydantic schemas for standalone filter configuration files.
 
-Validates external YAML files (configs/filter/*.yaml) before converting
+Validates external YAML files (configs/filters/*.yaml) before converting
 to domain objects. Supports hierarchical merge of configurations.
 
 This module uses base classes from `base_schemas` to eliminate duplication
@@ -22602,7 +22602,7 @@ class GoldFiltersFileConfig(BaseGoldFiltersConfig):
 class FilterConfigFile(BaseModel):
     """Complete filter configuration file schema.
 
-    Represents structure of configs/filter/*.yaml files.
+    Represents structure of configs/filters/*.yaml files.
     Supports hierarchical merge from defaults -> provider -> entity.
 
     Attributes:
@@ -23571,7 +23571,7 @@ class PipelineYamlConfig(BaseModel):
     DQ Config Resolution:
         The dq_config_file field references an external DQ configuration file
         that is loaded through the DQConfigLoader hierarchy. If both dq_config_file
-        and dq_rules are present, dq_rules acts as inline overrides on top of
+        and dq_overrides are present, dq_overrides acts as inline overrides on top of
         the file-based configuration.
 
     Note:
@@ -23591,17 +23591,17 @@ class PipelineYamlConfig(BaseModel):
 
     # DQ Configuration
     # - dq_config_file: Reference to external DQ config file (hierarchical loading)
-    # - dq_rules: Inline DQ rules (used as overrides if dq_config_file present)
+    # - dq_overrides: Inline DQ rules (used as overrides if dq_config_file present)
     dq_config_file: str | None = Field(
         default=None,
         description="Path to DQ config file relative to pipeline config. "
         "When set, DQ config is loaded from the hierarchical DQ system. "
         "Example: ../../dq/entities/chembl/activity.yaml",
     )
-    dq_rules: DQConfig = Field(
+    dq_overrides: DQConfig = Field(
         default_factory=DQConfig,
-        validation_alias=AliasChoices("dq_rules", "dq"),
-        serialization_alias="dq_rules",
+        validation_alias=AliasChoices("dq_overrides", "dq"),
+        serialization_alias="dq_overrides",
     )
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
 

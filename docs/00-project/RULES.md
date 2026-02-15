@@ -523,7 +523,7 @@ Gold читает из Silver (Medallion flow), поэтому видит Silver
 **Формат конфигурации:**
 
 ```yaml
-# configs/data_schema/{provider}/{entity}.yaml
+# configs/schemas/{provider}/{entity}.yaml
 column_groups: [...]  # Shared groups
 
 silver:
@@ -1436,7 +1436,7 @@ sink:
       columns: ["activity_id"]
 
 # DQ Overrides (applied on top of entity DQ config)
-dq_rules:
+dq_overrides:
   field_validations:
     - field: "standard_value"
       type: "range"

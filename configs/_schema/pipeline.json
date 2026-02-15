@@ -92,7 +92,7 @@
       "type": "object",
       "description": "Pipeline-specific source configuration (overrides values from source_file)"
     },
-    "dq_rules": {
+    "dq_overrides": {
       "type": "object",
       "properties": {
         "soft_fail_threshold": {

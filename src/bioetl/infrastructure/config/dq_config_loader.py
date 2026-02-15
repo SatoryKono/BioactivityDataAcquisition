@@ -1,9 +1,9 @@
 """DQ Configuration loader with hierarchical merge.
 
 Loads and merges DQ configurations from:
-1. configs/quality/_defaults.yaml (fallback: configs/dq/_defaults.yaml) (global defaults)
-2. configs/quality/providers/{provider}.yaml (fallback: configs/dq/providers/{provider}.yaml) (provider-specific)
-3. configs/quality/entities/{provider}/{entity}.yaml (fallback: configs/dq/entities/{provider}/{entity}.yaml) (entity-specific)
+1. configs/quality/_defaults.yaml (global defaults)
+2. configs/quality/providers/{provider}.yaml (provider-specific)
+3. configs/quality/entities/{provider}/{entity}.yaml (entity-specific)
 4. Inline overrides from pipeline config
 
 Implements RULES.md §3.1.2 DQ Thresholds.
@@ -28,7 +28,7 @@ class DQConfigLoader:
 
     Attributes:
         _configs_root: Root path to configs/ directory.
-        _dq_roots: Paths to configs/quality and configs/dq directories.
+        _dq_root: Path to configs/quality directory.
         _cache: Cache of loaded configs keyed by "provider:entity".
     """
 
@@ -40,22 +40,14 @@ class DQConfigLoader:
             relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
         self._configs_root = configs_root
-        self._dq_roots = (configs_root / "quality", configs_root / "dq")
+        self._dq_root = configs_root / "quality"
         self._relaxed_dq = relaxed_dq
         self._cache: dict[str, DQConfig] = {}
 
-    def _resolve_dq_path(self, *parts: str) -> Path | None:
-        """Resolve DQ config path with new->legacy directory fallback."""
-        for root in self._dq_roots:
-            candidate = root.joinpath(*parts)
-            if candidate.exists():
-                return candidate
-        return None
-
     def _load_optional(self, *parts: str) -> dict[str, Any]:
         """Load YAML from DQ path if it exists, else return empty dict."""
-        path = self._resolve_dq_path(*parts)
-        return self._load_yaml(path) if path else {}
+        path = self._dq_root.joinpath(*parts)
+        return self._load_yaml(path) if path.exists() else {}
 
     def _merge_hierarchy(
         self,
@@ -64,10 +56,10 @@ class DQConfigLoader:
         inline_overrides: dict[str, Any] | None,
     ) -> dict[str, Any]:
         """Build merged config from defaults → provider → entity → inline."""
-        defaults_path = self._resolve_dq_path("_defaults.yaml")
-        if defaults_path is None:
+        defaults_path = self._dq_root / "_defaults.yaml"
+        if not defaults_path.exists():
             raise FileNotFoundError(
-                "Required DQ defaults file not found in configs/quality or configs/dq. "
+                "Required DQ defaults file not found in configs/quality/. "
                 "Create _defaults.yaml with global DQ settings."
             )
         merged = self._load_yaml(defaults_path)

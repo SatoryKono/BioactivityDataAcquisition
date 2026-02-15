@@ -31,8 +31,8 @@ Merges publication data from multiple providers into a unified composite publica
 
 ## Related Configs
 
-- Field map: `configs/data_schema/composite/publication.yaml`
-- Filters: `configs/filter/entities/composite/publication.yaml`
+- Field map: `configs/schemas/composite/publication.yaml`
+- Filters: `configs/filters/entities/composite/publication.yaml`
 
 ## Related ADRs
 

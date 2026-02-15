@@ -1,4 +1,4 @@
-# configs/filter/entities/chembl/publication_similarity.yaml
+# configs/filters/entities/chembl/publication_similarity.yaml
 # =============================================================================
 # ChEMBL Publication Similarity Filter Configuration
 # =============================================================================

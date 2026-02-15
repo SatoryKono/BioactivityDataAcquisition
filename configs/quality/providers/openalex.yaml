@@ -1,4 +1,4 @@
-# configs/dq/providers/openalex.yaml
+# configs/quality/providers/openalex.yaml
 # OpenAlex-specific DQ rules
 # Inherits from: _defaults.yaml
 

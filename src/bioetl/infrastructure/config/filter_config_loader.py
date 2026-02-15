@@ -1,9 +1,9 @@
 """Filter Configuration loader with hierarchical merge.
 
 Loads and merges filter configurations from:
-1. configs/filters/_defaults.yaml (fallback: configs/filter/_defaults.yaml) (global defaults)
-2. configs/filters/providers/{provider}.yaml (fallback: configs/filter/providers/{provider}.yaml) (provider-specific)
-3. configs/filters/entities/{provider}/{entity}.yaml (fallback: configs/filter/entities/{provider}/{entity}.yaml) (entity-specific)
+1. configs/filters/_defaults.yaml (global defaults)
+2. configs/filters/providers/{provider}.yaml (provider-specific)
+3. configs/filters/entities/{provider}/{entity}.yaml (entity-specific)
 4. Inline overrides from pipeline config
 
 Implements ADR-028: Filter Rules Externalization.
@@ -37,7 +37,7 @@ class FilterConfigLoader(
     Thread-safe with internal caching for performance.
 
     Attributes:
-        _filter_roots: Paths to configs/filters and configs/filter directories.
+        _filter_root: Path to configs/filters directory.
     """
 
     def __init__(self, configs_root: Path) -> None:
@@ -47,15 +47,7 @@ class FilterConfigLoader(
             configs_root: Path to configs/ directory.
         """
         super().__init__(configs_root)
-        self._filter_roots = (configs_root / "filters", configs_root / "filter")
-
-    def _resolve_filter_path(self, *parts: str) -> Path | None:
-        """Resolve filter config path with new->legacy directory fallback."""
-        for root in self._filter_roots:
-            candidate = root.joinpath(*parts)
-            if candidate.exists():
-                return candidate
-        return None
+        self._filter_root = configs_root / "filters"
 
     def load(
         self,
@@ -92,23 +84,25 @@ class FilterConfigLoader(
             return self._cache[cache_key]
 
         # 1. Load defaults (MUST exist)
-        defaults_path = self._resolve_filter_path("_defaults.yaml")
-        if defaults_path is None:
+        defaults_path = self._filter_root / "_defaults.yaml"
+        if not defaults_path.exists():
             raise FileNotFoundError(
-                "Required filter defaults file not found in configs/filters or "
-                "configs/filter. Create _defaults.yaml with global filter settings."
+                "Required filter defaults file not found in configs/filters/. "
+                "Create _defaults.yaml with global filter settings."
             )
         merged = self._load_yaml(defaults_path)
 
         # 2. Load provider config (optional)
-        provider_path = self._resolve_filter_path("providers", f"{provider}.yaml")
-        provider_config = self._load_yaml(provider_path) if provider_path else {}
+        provider_path = self._filter_root / "providers" / f"{provider}.yaml"
+        provider_config = (
+            self._load_yaml(provider_path) if provider_path.exists() else {}
+        )
         if provider_config:
             merged = self._deep_merge(merged, provider_config)
 
         # 3. Load entity config (optional)
-        entity_path = self._resolve_filter_path("entities", provider, f"{entity}.yaml")
-        entity_config = self._load_yaml(entity_path) if entity_path else {}
+        entity_path = self._filter_root / "entities" / provider / f"{entity}.yaml"
+        entity_config = self._load_yaml(entity_path) if entity_path.exists() else {}
         if entity_config:
             merged = self._deep_merge(merged, entity_config)
 

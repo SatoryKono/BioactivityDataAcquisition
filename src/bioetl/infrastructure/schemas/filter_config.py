@@ -1,6 +1,6 @@
 """Pydantic schemas for standalone filter configuration files.
 
-Validates external YAML files (configs/filter/*.yaml) before converting
+Validates external YAML files (configs/filters/*.yaml) before converting
 to domain objects. Supports hierarchical merge of configurations.
 
 This module uses base classes from `base_schemas` to eliminate duplication
@@ -140,7 +140,7 @@ class GoldFiltersFileConfig(BaseGoldFiltersConfig):
 class FilterConfigFile(BaseModel):
     """Complete filter configuration file schema.
 
-    Represents structure of configs/filter/*.yaml files.
+    Represents structure of configs/filters/*.yaml files.
     Supports hierarchical merge from defaults -> provider -> entity.
 
     Attributes:

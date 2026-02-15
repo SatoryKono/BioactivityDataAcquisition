@@ -88,7 +88,7 @@ Deviations from defaults should be documented in entity config rationale.
 
 ### Field-level validations
 
-`dq_rules.field_validations` supports:
+`dq_overrides.field_validations` supports:
 
 - `range`: numeric min/max
 - `pattern`: regex validation
@@ -97,7 +97,7 @@ Deviations from defaults should be documented in entity config rationale.
 
 ### Cross-field validations
 
-`dq_rules.cross_field_validations` supports conditions:
+`dq_overrides.cross_field_validations` supports conditions:
 
 - `all_present`
 - `any_present`
@@ -107,7 +107,7 @@ Deviations from defaults should be documented in entity config rationale.
 
 ### Conditional validations
 
-`dq_rules.conditional_validations` applies checks when condition is met.
+`dq_overrides.conditional_validations` applies checks when condition is met.
 
 Supported operators:
 
@@ -118,7 +118,7 @@ Supported operators:
 
 ### Invalid record policy
 
-`dq_rules.invalid_record_policy` values:
+`dq_overrides.invalid_record_policy` values:
 
 - `quarantine` (default)
 - `skip`
@@ -126,7 +126,7 @@ Supported operators:
 
 ### DQ report
 
-`dq_rules.report` defaults:
+`dq_overrides.report` defaults:
 
 - `enabled: true`
 - `format: json` (`json | yaml | csv`)
@@ -252,5 +252,5 @@ Auto-propagated primary keys:
 Rule loading:
 
 - `input_filter` and `gold_filters` are loaded from `filter_config_file`
-- `dq_rules` are loaded from `dq_config_file`
+- `dq_overrides` are loaded from `dq_config_file`
 - Inline pipeline values are merged on top of file-based defaults
