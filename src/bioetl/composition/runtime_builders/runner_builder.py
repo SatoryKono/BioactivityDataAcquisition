@@ -6,8 +6,9 @@ PipelineRunner without importing from ``bioetl.composition.bootstrap``.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.composition.builders import FilterConfigBuilder
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
@@ -28,8 +29,8 @@ if TYPE_CHECKING:
         PipelineRunContext,
         VacuumConfig,
     )
-    from bioetl.infrastructure.config import Settings
     from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
         InputFilterConfig as YamlInputFilter,
     )
@@ -166,34 +167,65 @@ def _build_observability_bundle(
 def build_pipeline_runner(
     ctx: PipelineRunContext,
     registry: PipelineRegistry | None = None,
+    *,
+    get_default_registry_fn: Callable[[], PipelineRegistry] | None = None,
+    register_all_providers_fn: Callable[[], None] | None = None,
+    register_all_pipelines_fn: Callable[..., None] | None = None,
+    get_settings_fn: Callable[[], Settings] | None = None,
+    load_pipeline_config_fn: Callable[[str], Any] | None = None,
+    build_observability_bundle_fn: Callable[..., ObservabilityBundle] | None = None,
+    assemble_vacuum_settings_fn: Callable[..., VacuumSettings] | None = None,
+    assemble_runtime_config_fn: Callable[..., RuntimeConfig] | None = None,
+    assemble_filter_config_fn: Callable[..., InputFilterConfig | None] | None = None,
+    assemble_cached_bronze_context_fn: Callable[
+        [PipelineRunContext], CachedBronzeContext
+    ]
+    | None = None,
 ) -> PipelineRunner:
     """Assemble and return a fully configured PipelineRunner."""
-    effective_registry = registry if registry is not None else get_default_registry()
+    get_default_registry_fn = get_default_registry_fn or get_default_registry
+    register_all_providers_fn = register_all_providers_fn or register_all_providers
+    register_all_pipelines_fn = register_all_pipelines_fn or register_all_pipelines
+    get_settings_fn = get_settings_fn or get_settings
+    load_pipeline_config_fn = load_pipeline_config_fn or load_pipeline_config
+    build_observability_bundle_fn = (
+        build_observability_bundle_fn or _build_observability_bundle
+    )
+    assemble_vacuum_settings_fn = (
+        assemble_vacuum_settings_fn or _assemble_vacuum_settings
+    )
+    assemble_runtime_config_fn = assemble_runtime_config_fn or _assemble_runtime_config
+    assemble_filter_config_fn = assemble_filter_config_fn or _assemble_filter_config
+    assemble_cached_bronze_context_fn = (
+        assemble_cached_bronze_context_fn or _assemble_cached_bronze_context
+    )
 
-    register_all_providers()
-    register_all_pipelines(registry=registry)
+    effective_registry = registry if registry is not None else get_default_registry_fn()
 
-    settings = get_settings()
-    yaml_config = load_pipeline_config(ctx.pipeline_name)
+    register_all_providers_fn()
+    register_all_pipelines_fn(registry=registry)
 
-    observability = _build_observability_bundle(
+    settings = get_settings_fn()
+    yaml_config = load_pipeline_config_fn(ctx.pipeline_name)
+
+    observability = build_observability_bundle_fn(
         pipeline=ctx.pipeline_name,
         ctx=ctx,
         settings=settings,
     )
 
-    vacuum = _assemble_vacuum_settings(
+    vacuum = assemble_vacuum_settings_fn(
         cli_vacuum=ctx.vacuum,
         yaml_maintenance=yaml_config.maintenance,
     )
 
-    runtime_config = _assemble_runtime_config(
+    runtime_config = assemble_runtime_config_fn(
         ctx=ctx,
         heartbeat_interval=settings.pipeline.heartbeat_interval,
         vacuum=vacuum,
     )
 
-    filter_config = _assemble_filter_config(
+    filter_config = assemble_filter_config_fn(
         yaml_filter=yaml_config.input_filter,
         ctx=ctx,
         test_mode=settings.test_mode,
@@ -208,7 +240,7 @@ def build_pipeline_runner(
             source="cli" if ctx.input_filter.enabled else "config",
         )
 
-    cached_bronze = _assemble_cached_bronze_context(ctx)
+    cached_bronze = assemble_cached_bronze_context_fn(ctx)
 
     if cached_bronze.enabled:
         observability.logger.info(

@@ -12,10 +12,15 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.runtime.assembly import assemble_filter_config
+from bioetl.composition.bootstrap.runtime.observability import (
+    bootstrap_observability_bundle,
+)
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
-from bioetl.composition.registry import PipelineRegistry
+from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
+from bioetl.infrastructure.config import get_settings, load_pipeline_config
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
@@ -76,7 +81,17 @@ def bootstrap_pipeline_runner(
     register_all_providers()
     register_all_pipelines(registry=registry)
 
-    return build_pipeline_runner(ctx=ctx, registry=registry)
+    return build_pipeline_runner(
+        ctx=ctx,
+        registry=registry,
+        get_default_registry_fn=get_default_registry,
+        register_all_providers_fn=register_all_providers,
+        register_all_pipelines_fn=register_all_pipelines,
+        get_settings_fn=get_settings,
+        load_pipeline_config_fn=load_pipeline_config,
+        build_observability_bundle_fn=bootstrap_observability_bundle,
+        assemble_filter_config_fn=assemble_filter_config,
+    )
 
 
 def bootstrap_pipeline(
