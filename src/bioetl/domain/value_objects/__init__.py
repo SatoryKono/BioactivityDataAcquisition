@@ -12,6 +12,18 @@ Categories:
 - Activity Values: Concentration, ActivityType, PChemblValue, ActivityValue
 - Activity: ConfidenceScore, RelationOperator
 
+DQ report types, column order, and other internal types should be imported
+directly from their submodules:
+- ``bioetl.domain.value_objects.dq_report``
+- ``bioetl.domain.value_objects.dq_metrics``
+- ``bioetl.domain.value_objects.dq_result``
+- ``bioetl.domain.value_objects.column_order``
+- ``bioetl.domain.value_objects.column_qualifier``
+- ``bioetl.domain.value_objects.publication_field_groups``
+- ``bioetl.domain.value_objects.bronze_result``
+- ``bioetl.domain.value_objects.silver_result``
+- ``bioetl.domain.value_objects.run_context``
+
 Usage:
     >>> from bioetl.domain.value_objects import ChemblId, DOI
     >>> molecule_id = ChemblId("CHEMBL25")
@@ -20,25 +32,6 @@ Usage:
     >>> doi = DOI("10.1038/nature12373")
     >>> doi.url
     'https://doi.org/10.1038/nature12373'
-
-    >>> from bioetl.domain.value_objects import CompoundId, ConfidenceScore
-    >>> cid = CompoundId.from_chembl("CHEMBL25")
-    >>> cid.source
-    <CompoundSource.CHEMBL: 'chembl'>
-    >>> score = ConfidenceScore(9)
-    >>> score.is_high_confidence
-    True
-
-    >>> from bioetl.domain.value_objects import InChIKey, SMILES, PublicationYear
-    >>> key = InChIKey("BSYNRYMUTXBXSQ-UHFFFAOYSA-N")
-    >>> key.connectivity_layer
-    'BSYNRYMUTXBXSQ'
-    >>> smiles = SMILES.canonical("CC(=O)OC1=CC=CC=C1C(=O)O")
-    >>> smiles.is_canonical
-    True
-    >>> year = PublicationYear(2020)
-    >>> year.decade
-    2020
 
 See also:
 - DDD patterns: https://martinfowler.com/bliki/ValueObject.html
@@ -63,177 +56,58 @@ from bioetl.domain.value_objects.activity_values import (
     PChemblValue,
 )
 from bioetl.domain.value_objects.base import ValueObject
-from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.chemical import (
     SMILES,
     InChIKey,
     MolecularWeight,
     PublicationYear,
 )
-from bioetl.domain.value_objects.column_order import (
-    DEFAULT_COLUMN_ORDER,
-    PUBLICATION_FIELD_GROUPS,
-    ColumnOrderConfig,
-    SemanticGroup,
-)
-from bioetl.domain.value_objects.column_qualifier import (
-    JOIN_KEY_COLUMNS,
-    ColumnQualifier,
-)
 from bioetl.domain.value_objects.compound_ids import (
     AssayId,
     CompoundId,
-    CompoundIdUnion,
     CompoundSource,
 )
-from bioetl.domain.value_objects.dq_metrics import (
-    BatchDQMetrics,
-    ColumnStats,
-    SchemaDriftInfo,
-)
-from bioetl.domain.value_objects.dq_report import (
-    AnomalyDetectionResult,
-    AnomalyMetric,
-    BronzeDQCheckType,
-    BronzeDQReport,
-    BusinessRuleResult,
-    BusinessRulesResult,
-    CategoricalDistribution,
-    CompletenessResult,
-    ContentHashIntegrityResult,
-    DataFreshnessResult,
-    DeduplicationStatsResult,
-    DQCheckStatus,
-    DQReportFormat,
-    DQReportStatus,
-    DQReportSummary,
-    DQThresholds,
-    DriftLevel,
-    EncodingValidationResult,
-    FileIntegrityResult,
-    ForeignKeyResult,
-    GoldDQCheckType,
-    GoldDQReport,
-    MedallionLayer,
-    NullRateResult,
-    NumericDistribution,
-    RecordCountResult,
-    ReferentialIntegrityResult,
-    SCDIntegrityResult,
-    SchemaDriftResult,
-    SchemaSnapshotResult,
-    SilverDQCheckType,
-    SilverDQReport,
-    StatisticalMetric,
-    StatisticalProfileResult,
-    TypeConformanceResult,
-    UniquenessResult,
-    ValueDistributionResult,
-)
-from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
+from bioetl.domain.value_objects.dq_result import DQEvaluationStatus
 from bioetl.domain.value_objects.identifiers import (
     ChemblId,
     PubChemCid,
     UniProtId,
 )
-from bioetl.domain.value_objects.publication_field_groups import (
-    DEFAULT_FIELD_GROUP_CONFIG,
-    FIELD_TO_GROUP_MAPPING,
-    FieldGroupConfig,
-    PublicationFieldGroup,
-)
 from bioetl.domain.value_objects.publications import (
     DOI,
     PubMedId,
 )
-from bioetl.domain.value_objects.run_context import RunContext
-from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.domain.value_objects.taxonomy_id import (
     TaxonomyId,
     validate_taxonomy_id,
 )
 
 __all__ = [
-    "DEFAULT_COLUMN_ORDER",
-    "DEFAULT_FIELD_GROUP_CONFIG",
     "DOI",
-    "FIELD_TO_GROUP_MAPPING",
     "ISSN",
-    "JOIN_KEY_COLUMNS",
     "ORCID",
-    "PUBLICATION_FIELD_GROUPS",
     "SMILES",
     "ActivityType",
     "ActivityValue",
-    "AnomalyDetectionResult",
-    "AnomalyMetric",
     "AssayId",
-    "BatchDQMetrics",
-    "BronzeDQCheckType",
-    "BronzeDQReport",
-    "BronzeWriteResult",
-    "BusinessRuleResult",
-    "BusinessRulesResult",
-    "CategoricalDistribution",
     "ChemblId",
-    "ColumnOrderConfig",
-    "ColumnQualifier",
-    "ColumnStats",
-    "CompletenessResult",
     "CompoundId",
-    "CompoundIdUnion",
     "CompoundSource",
     "Concentration",
     "ConcentrationUnit",
     "ConfidenceScore",
-    "ContentHashIntegrityResult",
-    "DQCheckStatus",
     "DQEvaluationStatus",
-    "DQReportFormat",
-    "DQReportStatus",
-    "DQReportSummary",
-    "DQResult",
-    "DQThresholds",
-    "DataFreshnessResult",
-    "DeduplicationStatsResult",
-    "DriftLevel",
-    "EncodingValidationResult",
-    "FieldGroupConfig",
-    "FileIntegrityResult",
-    "ForeignKeyResult",
-    "GoldDQCheckType",
-    "GoldDQReport",
     "InChIKey",
-    "MedallionLayer",
     "MolecularWeight",
-    "NullRateResult",
-    "NumericDistribution",
     "OpenAlexId",
     "PChemblValue",
     "PubChemCid",
     "PubMedId",
-    "PublicationFieldGroup",
     "PublicationYear",
-    "RecordCountResult",
-    "ReferentialIntegrityResult",
     "RelationOperator",
-    "RunContext",
-    "SCDIntegrityResult",
-    "SchemaDriftInfo",
-    "SchemaDriftResult",
-    "SchemaSnapshotResult",
-    "SemanticGroup",
     "SemanticScholarId",
-    "SilverDQCheckType",
-    "SilverDQReport",
-    "SilverWriteResult",
-    "StatisticalMetric",
-    "StatisticalProfileResult",
     "TaxonomyId",
-    "TypeConformanceResult",
     "UniProtId",
-    "UniquenessResult",
-    "ValueDistributionResult",
     "ValueObject",
     "validate_taxonomy_id",
 ]
