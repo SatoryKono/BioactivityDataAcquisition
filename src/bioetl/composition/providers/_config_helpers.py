@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
-    RateLimitConfig,
+    RateLimitContext,
 )
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
@@ -57,22 +57,22 @@ def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
     return source_config.batch_size if source_config else default
 
 
-def _get_rate_limit_from_config(provider: str) -> RateLimitConfig:
+def _get_rate_limit_from_config(provider: str) -> RateLimitContext:
     """Get rate limit configuration from source config or defaults.
 
     Args:
         provider: Provider name (e.g., 'chembl', 'pubchem').
 
     Returns:
-        RateLimitConfig with rate and capacity values.
+        RateLimitContext with rate and capacity values.
     """
     source_config = _get_source_config(provider)
     if source_config:
-        return RateLimitConfig(
+        return RateLimitContext(
             rate=source_config.rate_limit.requests_per_second,
             capacity=source_config.rate_limit.burst,
         )
-    return RateLimitConfig(rate=5.0, capacity=10)
+    return RateLimitContext(rate=5.0, capacity=10)
 
 
 def _get_circuit_breaker_from_config(provider: str) -> CircuitBreakerConfig:

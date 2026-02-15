@@ -11,8 +11,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from bioetl.application.services.bronze_cleanup_service import (
+    BronzeCleanupResult,
     BronzeCleanupService,
-    CleanupResult,
 )
 
 
@@ -52,13 +52,13 @@ def bronze_cleanup_service(mock_storage, mock_logger):
 
 
 @pytest.mark.unit
-class TestCleanupResult:
-    """Test CleanupResult dataclass."""
+class TestBronzeCleanupResult:
+    """Test BronzeCleanupResult dataclass."""
 
     def test_cleanup_result_creation(self):
-        """Test CleanupResult can be created."""
+        """Test BronzeCleanupResult can be created."""
         now = datetime.now(UTC)
-        result = CleanupResult(
+        result = BronzeCleanupResult(
             files_removed=10,
             bytes_freed=1024 * 1024,
             directories_removed=5,
@@ -73,9 +73,9 @@ class TestCleanupResult:
         assert result.cutoff_date == now
 
     def test_cleanup_result_dry_run(self):
-        """Test CleanupResult with dry_run flag."""
+        """Test BronzeCleanupResult with dry_run flag."""
         now = datetime.now(UTC)
-        result = CleanupResult(
+        result = BronzeCleanupResult(
             files_removed=10,
             bytes_freed=1024 * 1024,
             directories_removed=5,
