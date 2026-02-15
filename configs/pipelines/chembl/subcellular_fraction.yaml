@@ -23,7 +23,6 @@ primary_keys: ["entity_id"]
 silver_table: "chembl_subcellular_fraction"
 gold_table: "chembl_subcellular_fraction"
 
-source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -32,7 +31,6 @@ source_file: ../../sources/chembl.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/subcellular_fraction.yaml (entity-specific)
-dq_config_file: ../../dq/entities/chembl/subcellular_fraction.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -41,25 +39,9 @@ dq_config_file: ../../dq/entities/chembl/subcellular_fraction.yaml
 #   1. configs/filter/_defaults.yaml (global defaults)
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/subcellular_fraction.yaml (entity-specific)
-filter_config_file: ../../filter/entities/chembl/subcellular_fraction.yaml
-data_schema_file: ../../data_schema/chembl/subcellular_fraction.yaml
 
 # Entity-specific sink overrides
 sink:
-  bronze:
-    path: "data/output/bronze/chembl/subcellular_fraction"
-  silver:
-    path: "data/output/silver/chembl/subcellular_fraction"
-    primary_key: ["entity_id"]
-    sort_by:
-      columns: ["subcellular_fraction"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/chembl/subcellular_fraction"
-  gold:
-    path: "data/output/gold/chembl/subcellular_fraction"
-    sort_by:
-      columns: ["subcellular_fraction"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/chembl/subcellular_fraction"
+  bronze: {}
+  silver: {}
+  gold: {}

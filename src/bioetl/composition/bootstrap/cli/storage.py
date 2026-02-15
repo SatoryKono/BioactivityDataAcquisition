@@ -162,11 +162,19 @@ def _create_table_collector() -> Callable[[str], list[tuple[str, str]]]:
         gold_tables: set[str] = set()
 
         for pipeline_name in pipelines:
-            config = load_pipeline_config(pipeline_name)
-            if config.silver_table:
-                silver_tables.add(config.silver_table)
-            if config.gold_table:
-                gold_tables.add(config.gold_table)
+            pipeline_cfg = load_pipeline_config(pipeline_name)
+            silver_table = (
+                pipeline_cfg.silver_table
+                or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
+            )
+            gold_table = (
+                pipeline_cfg.gold_table
+                or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
+            )
+            if silver_table:
+                silver_tables.add(silver_table)
+            if gold_table:
+                gold_tables.add(gold_table)
 
         tables: list[tuple[str, str]] = []
         if layer in ("all", "silver"):

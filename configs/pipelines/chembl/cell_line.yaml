@@ -13,7 +13,6 @@ primary_keys: ["cell_id"]
 silver_table: "chembl_cell_line"
 gold_table: "chembl_cell_line"
 
-source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -22,8 +21,6 @@ source_file: ../../sources/chembl.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/cell_line.yaml (entity-specific)
-dq_config_file: ../../dq/entities/chembl/cell_line.yaml
-data_schema_file: ../../data_schema/chembl/cell_line.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -36,21 +33,6 @@ data_schema_file: ../../data_schema/chembl/cell_line.yaml
 
 # Entity-specific sink overrides
 sink:
-  bronze:
-    path: "data/output/bronze/chembl/cell_line"
-  silver:
-    path: "data/output/silver/chembl/cell_line"
-    primary_key: ["cell_id"]
-    sort_by:
-      columns: ["cell_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/chembl/cell_line"
-  gold:
-    path: "data/output/gold/chembl/cell_line"
-    sort_by:
-      columns: ["cell_id", "cell_name"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/chembl/cell_line"
-
+  bronze: {}
+  silver: {}
+  gold: {}

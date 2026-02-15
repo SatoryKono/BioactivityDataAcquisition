@@ -31,7 +31,7 @@ def test_yaml_config_to_domain_mapping():
 
     assert isinstance(domain_config, PipelineConfig)
     assert domain_config.pipeline_name == "test_pipeline"
-    assert domain_config.write_mode is SilverWriteMode.APPEND
+    assert domain_config.table.silver_write_mode is SilverWriteMode.APPEND
     # Table config verification
     assert domain_config.table.silver_write_mode is SilverWriteMode.APPEND
     assert domain_config.table.silver_table == "silver.test"
@@ -50,7 +50,7 @@ def test_yaml_config_to_domain_default_mode():
 
     domain_config = yaml_config_to_domain(yaml_config)
 
-    assert domain_config.write_mode is SilverWriteMode.MERGE
+    assert domain_config.table.silver_write_mode is SilverWriteMode.MERGE
 
 
 def test_pipeline_yaml_config_accepts_dq_overrides_alias_equivalently() -> None:

@@ -15,7 +15,7 @@ thresholds:
 # =============================================================================
 # OpenAlex Common Field Validations
 # =============================================================================
-provider_field_validations:
+field_validations:
   # OpenAlex ID format validation
   - field: openalex_id
     type: pattern

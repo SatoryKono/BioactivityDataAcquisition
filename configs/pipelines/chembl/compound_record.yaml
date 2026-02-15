@@ -16,7 +16,6 @@ primary_keys: ["record_id"]
 silver_table: "chembl_compound_record"
 gold_table: "chembl_compound_record"
 
-source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -25,8 +24,6 @@ source_file: ../../sources/chembl.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/compound_record.yaml (entity-specific)
-dq_config_file: ../../dq/entities/chembl/compound_record.yaml
-data_schema_file: ../../data_schema/chembl/compound_record.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -39,21 +36,6 @@ data_schema_file: ../../data_schema/chembl/compound_record.yaml
 
 # Entity-specific sink overrides
 sink:
-  bronze:
-    path: "data/output/bronze/chembl/compound_record"
-  silver:
-    path: "data/output/silver/chembl/compound_record"
-    primary_key: ["record_id"]
-    sort_by:
-      columns: ["record_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/chembl/compound_record"
-  gold:
-    path: "data/output/gold/chembl/compound_record"
-    sort_by:
-      columns: ["molecule_id", "publication_id", "record_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/chembl/compound_record"
-
+  bronze: {}
+  silver: {}
+  gold: {}

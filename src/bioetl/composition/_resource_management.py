@@ -148,11 +148,18 @@ async def preview_cleanup(pipeline: str) -> CleanupPreview:
         42
     """
     _ensure_registrations()
-    config = load_pipeline_config(pipeline)
+    pipeline_cfg = load_pipeline_config(pipeline)
     cleanup_service = bootstrap_cleanup_service()
+    silver_table = (
+        pipeline_cfg.silver_table
+        or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
+    )
+    gold_table = (
+        pipeline_cfg.gold_table or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
+    )
     return await cleanup_service.preview(
-        silver_table=config.silver_table,
-        gold_table=config.gold_table,
+        silver_table=silver_table,
+        gold_table=gold_table,
     )
 
 

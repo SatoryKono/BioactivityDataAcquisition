@@ -17,7 +17,7 @@ thresholds:
 # =============================================================================
 # ID Mapping-Specific Field Validations
 # =============================================================================
-entity_field_validations:
+field_validations:
   - field: target_id
     type: pattern
     pattern: '^CHEMBL\d+$'
@@ -42,12 +42,12 @@ entity_field_validations:
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-entity_cross_field_validations: []
+cross_field_validations: []
 
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations:
+conditional_validations:
   # When mapping_status is 'found', accession should be present
   - name: found_has_accession
     condition_field: mapping_status

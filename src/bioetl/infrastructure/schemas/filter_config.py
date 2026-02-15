@@ -23,9 +23,12 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field, field_validator
 
-from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.filtering import (
-    InputFilterConfig as DomainInputFilterConfig,
+    GoldFilterConfig,
+)
+from bioetl.domain.filtering import InputFilterConfig as DomainInputFilterConfig
+from bioetl.domain.filtering import (
+    SilverFilterConfig,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
@@ -99,13 +102,13 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
         exclude_if_present: Exclude if field has value.
     """
 
-    def to_domain(self) -> SilverFilterConfig:
+    def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
         """Convert to domain SilverFilterConfig dataclass.
 
         Returns:
             SilverFilterConfig: Immutable domain filter configuration.
         """
-        return SilverFilterConfig.from_gold_filter_config(super().to_domain())
+        return SilverFilterConfig.from_base(super().to_domain())
 
 
 class GoldFiltersFileConfig(BaseGoldFiltersConfig):

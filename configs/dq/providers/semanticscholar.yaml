@@ -16,7 +16,7 @@ thresholds:
 # =============================================================================
 # Semantic Scholar Common Field Validations
 # =============================================================================
-provider_field_validations:
+field_validations:
   # Paper ID format validation (40-char hex string)
   - field: paper_id
     type: pattern

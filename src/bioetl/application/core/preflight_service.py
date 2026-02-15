@@ -350,7 +350,7 @@ class _MedallionConfigValidator:
         write_mode_policy = WriteModePolicy()
 
         # Validate Silver write mode
-        silver_mode = self._config.write_mode
+        silver_mode = self._config.table.silver_write_mode
         silver_mode_value = str(silver_mode)
         try:
             write_mode_policy.validate(Layer.SILVER, WriteMode(silver_mode_value))
@@ -369,7 +369,7 @@ class _MedallionConfigValidator:
             )
 
         # Validate Gold write mode
-        gold_mode = self._config.gold_write_mode
+        gold_mode = self._config.table.gold_write_mode
         gold_mode_value = str(gold_mode)
         effective_gold_mode = "merge" if gold_mode_value == "scd2" else gold_mode_value
         try:

@@ -104,7 +104,9 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         from deltalake import DeltaTable
 
         # Config says silver_table is 'chembl_activity' (underscore) not slash
-        silver_table_name = runner.pipeline.config.silver_table  # e.g., chembl_activity
+        silver_table_name = (
+            runner.pipeline.config.effective_silver_table
+        )  # e.g., chembl_activity
         silver_table_path = f"{self.silver_path}/{silver_table_name}"
 
         dt_silver = DeltaTable(silver_table_path)
@@ -118,9 +120,9 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
 
         # Verify Gold Delta Table
         # Check what the factory uses if gold_table is None
-        # runner.pipeline.config.gold_table might be None if config doesn't set it.
+        # runner.pipeline.config.effective_gold_table might be None if config doesn't set it.
         # But GoldWriter usually gets a default or config must exist.
-        gold_table_name = runner.pipeline.config.gold_table
+        gold_table_name = runner.pipeline.config.effective_gold_table
 
         # If config returns None, it means the pipeline default is used or config is incomplete for tests.
         # ChEMBL Activity usually has `gold_table: chembl.activity` or `chembl_activity`.
