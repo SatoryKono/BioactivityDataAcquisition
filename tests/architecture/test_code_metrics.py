@@ -30,6 +30,7 @@ class TestFileSizeLimits:
     EXEMPTIONS = {
         # Application layer exemptions
         "runner.py": 1140,  # 1135 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py) + CV quarantine
+        "cross_validator.py": 540,  # 528 LOC - Cross-validation service with module-level comparison helpers + per-record detail builders
         "checkpoint.py": 545,  # 544 LOC - CompositeCheckpointState with immutable state transitions + CompositeCheckpointManager
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
