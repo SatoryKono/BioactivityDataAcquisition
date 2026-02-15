@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.domain.config import DQConfig
+from bioetl.infrastructure.config.converters import dq_overrides_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config_loader import load_pipeline_config as load_yaml_config
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -129,7 +130,7 @@ class ConfigLoader:
             )
         except FileNotFoundError:
             # No DQ hierarchy available, use inline overrides as-is
-            return yaml_config.dq_overrides.to_domain()
+            return dq_overrides_to_domain(yaml_config)
 
     def _has_inline_dq_overrides(self, yaml_config: PipelineYamlConfig) -> bool:
         """Check if YAML config has non-default inline DQ overrides.
