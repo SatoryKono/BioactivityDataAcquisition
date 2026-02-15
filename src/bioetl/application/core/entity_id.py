@@ -31,4 +31,3 @@ def compute_publication_term_entity_id(
     normalized_term = term.lower().strip() if term else ""
     composite = f"{publication_id}:{term_type}:{normalized_term}"
     return hashlib.sha256(composite.encode()).hexdigest()[:16]
-

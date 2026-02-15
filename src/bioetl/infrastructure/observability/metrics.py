@@ -215,4 +215,3 @@ class MetricsCollector:
             stage=stage,
             error_code=error_code,
         ).inc()
-
