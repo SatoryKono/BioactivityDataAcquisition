@@ -9,6 +9,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
+__all__ = [
+    "CompositeLineageMetadata",
+    "EnrichmentStatusRecord",
+    "FieldSource",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class FieldSource:
