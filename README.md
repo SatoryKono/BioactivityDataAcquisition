@@ -11,18 +11,18 @@
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data
 from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, analysis-ready **Delta Lake** warehouse.
 
----
+______________________________________________________________________
 
 ## Key Features
 
-* **Medallion Architecture**: Structured data flow (Bronze -> Silver -> Gold) ensuring data quality and traceability.
-* **Delta Lake Core**: ACID transactions, schema enforcement, and time travel capabilities.
-* **Resilience**: Built-in circuit breakers, exponential backoff retries, and dead-letter queues (Quarantine).
-* **Local-First Design**: In-memory locking, local file storage -- no external services required ([ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
-* **Deterministic Writes**: Reproducible outputs and deterministic retries ([ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md)).
-* **Observability by Design**: Metrics, tracing, and logging ports ([ADR-017](docs/02-architecture/decisions/ADR-017-observability-architecture.md)).
-* **Unified HTTP Client**: Standardized rate limiting, retry, and telemetry ([ADR-032](docs/02-architecture/decisions/ADR-032-unified-http-client.md)).
-* **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.
+- **Medallion Architecture**: Structured data flow (Bronze -> Silver -> Gold) ensuring data quality and traceability.
+- **Delta Lake Core**: ACID transactions, schema enforcement, and time travel capabilities.
+- **Resilience**: Built-in circuit breakers, exponential backoff retries, and dead-letter queues (Quarantine).
+- **Local-First Design**: In-memory locking, local file storage -- no external services required ([ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
+- **Deterministic Writes**: Reproducible outputs and deterministic retries ([ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md)).
+- **Observability by Design**: Metrics, tracing, and logging ports ([ADR-017](docs/02-architecture/decisions/ADR-017-observability-architecture.md)).
+- **Unified HTTP Client**: Standardized rate limiting, retry, and telemetry ([ADR-032](docs/02-architecture/decisions/ADR-032-unified-http-client.md)).
+- **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.
 
 ## Architecture Overview
 
@@ -52,45 +52,45 @@ BioETL follows **Hexagonal Architecture** (Ports & Adapters) with **Domain-Drive
 
 The domain layer implements Domain-Driven Design patterns:
 
-| Component | Description |
-|-----------|-------------|
-| **Ports** | Protocol interfaces for dependency inversion (`domain/ports/`) |
-| **Aggregates** | Domain aggregates with invariant protection (`domain/aggregates/`) |
-| **Value Objects** | Immutable domain primitives (`domain/value_objects/`) |
-| **Entities** | Domain entities per provider (`domain/entities/`) |
-| **Schemas** | Pydantic models for data validation (`domain/schemas/`) |
+| Component         | Description                                                        |
+| ----------------- | ------------------------------------------------------------------ |
+| **Ports**         | Protocol interfaces for dependency inversion (`domain/ports/`)     |
+| **Aggregates**    | Domain aggregates with invariant protection (`domain/aggregates/`) |
+| **Value Objects** | Immutable domain primitives (`domain/value_objects/`)              |
+| **Entities**      | Domain entities per provider (`domain/entities/`)                  |
+| **Schemas**       | Pydantic models for data validation (`domain/schemas/`)            |
 
 ## Supported Providers
 
-| Provider | Entity Types | Status | Rate Limit |
-|----------|-------------|--------|------------|
-| **ChEMBL** | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity | Production | None |
-| **PubChem** | Compound | Production | 5 req/sec |
-| **UniProt** | Protein, ID Mapping | Production | 100 req/sec |
-| **PubMed** | Publication | Production | 3 req/sec |
-| **CrossRef** | Publication | Production | Polite pool |
-| **OpenAlex** | Publication | Production | ~10 req/sec |
-| **Semantic Scholar** | Publication | Production | 100 req/5min |
+| Provider             | Entity Types                                                                                                                             | Status     | Rate Limit   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------ |
+| **ChEMBL**           | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity | Production | None         |
+| **PubChem**          | Compound                                                                                                                                 | Production | 5 req/sec    |
+| **UniProt**          | Protein, ID Mapping                                                                                                                      | Production | 100 req/sec  |
+| **PubMed**           | Publication                                                                                                                              | Production | 3 req/sec    |
+| **CrossRef**         | Publication                                                                                                                              | Production | Polite pool  |
+| **OpenAlex**         | Publication                                                                                                                              | Production | ~10 req/sec  |
+| **Semantic Scholar** | Publication                                                                                                                              | Production | 100 req/5min |
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [API Reference](docs/04-reference/api/index.md) | Full API documentation with mkdocstrings |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 33 ADRs explaining design choices |
-| [Ubiquitous Language](docs/00-project/glossary.md) | Domain terminology and canonical naming |
-| [RULES.md](docs/00-project/RULES.md) | Project governance and requirements (v5.17) |
-| [Project Map](docs/00-project/00-map.md) | Documentation navigator and code map |
-| [CLI Reference](docs/04-reference/cli.md) | Command-line interface documentation |
-| [Operations Runbooks](docs/05-operations/runbooks/) | Incident response and procedures |
+| Document                                                  | Description                                 |
+| --------------------------------------------------------- | ------------------------------------------- |
+| [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 33 ADRs explaining design choices           |
+| [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
+| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.17) |
+| [Project Map](docs/00-project/00-map.md)                  | Documentation navigator and code map        |
+| [CLI Reference](docs/04-reference/cli.md)                 | Command-line interface documentation        |
+| [Operations Runbooks](docs/05-operations/runbooks/)       | Incident response and procedures            |
 
 ## Quick Start
 
 ### Prerequisites
 
-* **Python**: Version 3.11 or higher.
-* **Make**: For running automation commands.
-* **Docker**: Optional, legacy-only (see [Legacy Distributed Mode](#legacy-distributed-mode-rejected--unsupported)).
+- **Python**: Version 3.11 or higher.
+- **Make**: For running automation commands.
+- **Docker**: Optional, legacy-only (see [Legacy Distributed Mode](#legacy-distributed-mode-rejected--unsupported)).
 
 ### Installation
 
@@ -105,6 +105,7 @@ cd BioactivityDataAcquisition
 ```
 
 The script will:
+
 - Check prerequisites (Python 3.11+, Git, Make)
 - Create virtual environment and install dependencies
 - Set up pre-commit hooks
@@ -117,21 +118,25 @@ For quick setup without tests: `./dev_setup.sh --quick`
 
 1. **Clone and Install**:
    Initialize the virtual environment and install project dependencies.
+
    ```bash
    git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
    cd BioactivityDataAcquisition
    make install
    ```
 
-2. **Configure Environment** *(optional)*:
+1. **Configure Environment** *(optional)*:
    Copy the example configuration if you need API keys for providers.
+
    ```bash
    cp .env.example .env
    ```
+
    *Note: Secrets follow the pattern `BIOETL_{PROVIDER}_{KEY}`.*
 
-3. **Verify Installation**:
+1. **Verify Installation**:
    Run tests to ensure everything works.
+
    ```bash
    make lint && make test
    ```
@@ -168,6 +173,12 @@ bioetl checkpoint list
 
 ## Development
 
+### Repository Hygiene
+
+- Do **not** store domain datasets or reference data files in repository root.
+- Keep machine-consumed reference datasets under semantic paths in `data/` (for example, `data/input/reference/`).
+- Keep optional human-facing spreadsheet copies under `docs/reference/`.
+- Unified publication classifier canonical format is CSV at `data/input/reference/unified_classification.csv`; Excel is optional documentation copy at `docs/reference/unified_classification.xlsx`.
 ### Local diagnostic artifacts
 
 Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
@@ -180,43 +191,58 @@ bioetl checkpoint list
 
 The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.
 
-* **Quick Check (with dependencies auto-synced and coverage):**
+- **Quick Check (with dependencies auto-synced and coverage):**
+
   ```bash
   ./scripts/run_pytest.sh
   ```
+
   The helper bootstraps the virtual environment (installs `pytest-cov`, `orjson`, `syrupy`, and other test-only dependencies) and reproduces the default CI command with coverage output.
 
   If you prefer to run the command manually, activate the local virtual environment first to avoid `--cov` argument errors:
+
   ```bash
   source .venv/bin/activate
   # Install test extras so pytest-asyncio/pytest-cov options are available
   pip install -e ".[dev,tests]"
   python -m pytest tests --cov=src/bioetl --cov-report=term
   ```
+
   With `uv`, the equivalent is:
+
   ```bash
   uv sync --extra dev --extra tests
   uv run python -m pytest tests --cov=src/bioetl --cov-report=term
   ```
+
   Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`), выполните повторную синхронизацию:
+
   ```bash
   uv sync --extra dev --extra tests --extra tracing
   ```
+
   Скрипт `./scripts/run_pytest.sh` проверяет наличие плагинов и автоматически доустанавливает их при необходимости.
 
-* **Run All Tests**:
+- **Run All Tests**:
+
   ```bash
   make test
   ```
-* **Run Unit Tests Only** (Fast, no I/O):
+
+- **Run Unit Tests Only** (Fast, no I/O):
+
   ```bash
   make test-unit
   ```
-* **Run Integration Tests** (Uses VCR.py cassettes, no network required):
+
+- **Run Integration Tests** (Uses VCR.py cassettes, no network required):
+
   ```bash
   make test-integration
   ```
-* **Run Architecture Tests**:
+
+- **Run Architecture Tests**:
+
   ```bash
   make arch-test
   ```
@@ -225,16 +251,16 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
 
 Strict quality standards are enforced using `ruff`, `mypy`, and other tools.
 
-* **Linting & Formatting**:
+- **Linting & Formatting**:
   ```bash
   make lint      # Check only
   make lint-fix  # Auto-fix and format
   ```
-* **Type Checking**:
+- **Type Checking**:
   ```bash
   make typecheck # Strict mypy
   ```
-* **Complexity Check**:
+- **Complexity Check**:
   ```bash
   make complexity
   ```
@@ -314,6 +340,7 @@ make docker-down
 ## Security
 
 Please review our **[Security Policy](SECURITY.md)** for:
+
 - Threat model and trust boundaries
 - Secret management guidelines
 - Data validation architecture
@@ -324,8 +351,8 @@ Please review our **[Security Policy](SECURITY.md)** for:
 Please read **[RULES.md](docs/00-project/RULES.md)** before contributing.
 
 1. Ensure all tests pass: `make test`
-2. Check types and linting: `make lint`
-3. Follow the **RFC 2119** keywords in requirements.
+1. Check types and linting: `make lint`
+1. Follow the **RFC 2119** keywords in requirements.
 
 ## License
 
