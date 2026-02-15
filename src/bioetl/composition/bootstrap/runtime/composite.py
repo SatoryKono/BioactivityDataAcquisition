@@ -13,6 +13,7 @@ from bioetl.application.composite.checkpoint import CompositeCheckpointManager
 from bioetl.application.composite.coordinator import EnrichmentCoordinator
 from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
 from bioetl.application.composite.key_extractor import KeyExtractorService
+from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner import (
     CompositePipelineRunner,
@@ -479,12 +480,21 @@ def bootstrap_composite_runner(
     # Load field group registry for semantic column grouping and Gold filtering
     field_group_registry = _load_field_group_registry(config.name, logger)
 
+    # Create cross-validator if enabled
+    cross_validator: EnrichmentCrossValidator | None = None
+    if config.cross_validation.enabled:
+        cross_validator = EnrichmentCrossValidator(
+            config=config.cross_validation,
+            logger=logger,
+        )
+
     merger = MergeService(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
         delta_reader=delta_reader,
         field_group_registry=field_group_registry,
+        cross_validator=cross_validator,
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"
