@@ -145,6 +145,7 @@ where = ["src"]
 # ============ PYTEST ============
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 # Base options without parallelization (compatible with pytest-benchmark)
