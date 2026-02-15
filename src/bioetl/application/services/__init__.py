@@ -16,8 +16,8 @@ Administrative services for CLI operations:
 from __future__ import annotations
 
 from bioetl.application.services.bronze_cleanup_service import (
+    BronzeCleanupResult,
     BronzeCleanupService,
-    CleanupResult,
 )
 from bioetl.application.services.checkpoint_service import (
     CheckpointInfo,
@@ -86,10 +86,10 @@ from bioetl.application.services.vacuum_service import (
 )
 
 __all__ = [
+    "BronzeCleanupResult",
     "BronzeCleanupService",
     "CheckpointInfo",
     "CheckpointService",
-    "CleanupResult",
     "ClearResult",
     "ColumnInfo",
     "ConfigService",
