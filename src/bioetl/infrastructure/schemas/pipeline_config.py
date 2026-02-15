@@ -39,7 +39,6 @@ from bioetl.infrastructure.schemas.base_schemas import (
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
 
 if TYPE_CHECKING:
-    from bioetl.domain.config import PipelineConfig
     from bioetl.domain.models.metadata import GovernanceMetadata
 
 
@@ -733,17 +732,13 @@ class TransformConfig(BaseModel):
 class PipelineYamlConfig(BaseModel):
     """Strict schema for pipeline YAML configuration.
 
-    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
+    Pydantic model for YAML parsing.
 
     DQ Config Resolution:
         The dq_config_file field references an external DQ configuration file
         that is loaded through the DQConfigLoader hierarchy. If both dq_config_file
         and dq_overrides are present, dq_overrides acts as inline overrides on top of
         the file-based configuration.
-
-    Note:
-        The `to_domain()` method delegates to `yaml_config_to_domain()` in
-        `bioetl.infrastructure.config` to avoid code duplication.
     """
 
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
@@ -903,17 +898,3 @@ class PipelineYamlConfig(BaseModel):
         # Gold MAY use delta or parquet (RULES.md §2.1) - no validation needed
 
         return self
-
-    def to_domain(self) -> PipelineConfig:
-        """Convert to domain PipelineConfig dataclass.
-
-        Delegates to `yaml_config_to_domain()` in `bioetl.infrastructure.config`
-        to avoid code duplication. This method provides a consistent API
-        across all Pydantic models.
-
-        Returns:
-            PipelineConfig: Immutable domain configuration.
-        """
-        from bioetl.infrastructure.config import yaml_config_to_domain
-
-        return yaml_config_to_domain(self)

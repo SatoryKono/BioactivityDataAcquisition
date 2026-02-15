@@ -256,8 +256,8 @@ class TestYamlConfigToDomain:
         assert result.dq.soft_fail_threshold == 0.10
         assert result.dq.hard_fail_threshold == 0.30
 
-    def test_pipeline_yaml_config_to_domain_method(self) -> None:
-        """Test PipelineYamlConfig.to_domain() method provides consistent API."""
+    def test_pipeline_yaml_config_converter_function(self) -> None:
+        """Test converter function maps PipelineYamlConfig consistently."""
         from bioetl.infrastructure.schemas.pipeline_config import (
             DQConfig,
             GoldFiltersConfig,
@@ -280,17 +280,12 @@ class TestYamlConfigToDomain:
             sink={},
         )
 
-        # Test that to_domain() method works and is equivalent to yaml_config_to_domain()
-        result_method = yaml_config.to_domain()
-        result_function = yaml_config_to_domain(yaml_config)
+        result = yaml_config_to_domain(yaml_config)
 
-        assert isinstance(result_method, PipelineConfig)
-        assert result_method.pipeline_name == result_function.pipeline_name
-        assert result_method.provider == result_function.provider
-        assert (
-            result_method.dq.soft_fail_threshold
-            == result_function.dq.soft_fail_threshold
-        )
+        assert isinstance(result, PipelineConfig)
+        assert result.pipeline_name == "test"
+        assert result.provider == "test"
+        assert result.dq.soft_fail_threshold == 0.05
 
     def test_gold_filters_config_to_domain_method(self) -> None:
         """Test GoldFiltersConfig.to_domain() method."""
