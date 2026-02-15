@@ -218,79 +218,85 @@
         "null"
       ]
     },
-    "property_alogp": {
+    "logp": {
       "type": [
         "number",
         "null"
       ]
     },
-    "property_mw_freebase": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_full_mwt": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_hba": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_hbd": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_psa": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_rtb": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_ro5_violations": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_heavy_atoms": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_aromatic_rings": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_qed_weighted": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "property_full_molformula": {
+    "logp_method": {
       "type": [
         "string",
         "null"
       ]
     },
-    "property_ro3_pass": {
+    "mw_freebase": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "molecular_weight": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "hba_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "hbd_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "polar_surface_area": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "rotatable_bond_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "ro5_violation_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "heavy_atom_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "aromatic_ring_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "qed_score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "molecular_formula": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "ro3_pass": {
       "type": [
         "string",
         "null"
