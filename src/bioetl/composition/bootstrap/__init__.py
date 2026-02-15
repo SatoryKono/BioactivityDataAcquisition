@@ -68,9 +68,6 @@ from bioetl.composition.bootstrap.runtime import (
 from bioetl.infrastructure.config import load_pipeline_config
 
 __all__ = [
-    # Assembly
-    "bootstrap_quarantine_port",
-    # CLI services
     "HealthServerDependencies",
     "bootstrap_bronze_cleanup_service",
     "bootstrap_checkpoint_manager",
@@ -82,17 +79,16 @@ __all__ = [
     "bootstrap_health_service",
     "bootstrap_lifecycle_service",
     "bootstrap_lock_service",
-    "bootstrap_metrics_service",
-    "bootstrap_quarantine_manager",
-    "bootstrap_quarantine_service",
-    "bootstrap_vacuum_service",
-    # Runtime services
     "bootstrap_logger_port",
     "bootstrap_metrics_port",
+    "bootstrap_metrics_service",
     "bootstrap_pipeline_runner",
     "bootstrap_pipeline_runner_service",
+    "bootstrap_quarantine_manager",
+    "bootstrap_quarantine_port",
+    "bootstrap_quarantine_service",
+    "bootstrap_vacuum_service",
     "load_composite_config",
-    "maybe_start_metrics_server",
-    # Config loader
     "load_pipeline_config",
+    "maybe_start_metrics_server",
 ]
