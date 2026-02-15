@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True, slots=True)
-class CleanupResult:
+class BronzeCleanupResult:
     """Result of Bronze cleanup operation.
 
     Attributes:
@@ -66,7 +66,7 @@ class BronzeCleanupService:
         self,
         retention_days: int = 90,
         dry_run: bool = False,
-    ) -> CleanupResult:
+    ) -> BronzeCleanupResult:
         """Clean up old Bronze files based on retention policy.
 
         Removes files older than the specified retention period.
@@ -77,7 +77,7 @@ class BronzeCleanupService:
             dry_run: If True, only show what would be removed.
 
         Returns:
-            CleanupResult with cleanup statistics.
+            BronzeCleanupResult with cleanup statistics.
         """
         cutoff_date = datetime.now(UTC) - timedelta(days=retention_days)
 
@@ -93,7 +93,7 @@ class BronzeCleanupService:
             dry_run=dry_run,
         )
 
-        cleanup_result = CleanupResult(
+        cleanup_result = BronzeCleanupResult(
             files_removed=result["files_removed"],
             bytes_freed=result["bytes_freed"],
             directories_removed=result["directories_removed"],
@@ -105,7 +105,7 @@ class BronzeCleanupService:
 
         return cleanup_result
 
-    def _log_result(self, result: CleanupResult) -> None:
+    def _log_result(self, result: BronzeCleanupResult) -> None:
         """Log cleanup result.
 
         Args:
