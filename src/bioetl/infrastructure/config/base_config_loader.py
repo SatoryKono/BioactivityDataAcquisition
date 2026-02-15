@@ -22,6 +22,16 @@ import yaml
 T = TypeVar("T")
 
 
+def _load_yaml_file(path: Path) -> dict[str, Any]:
+    """Load YAML file, returning empty dict if missing or empty."""
+    if not path.exists():
+        return {}
+
+    with open(path, encoding="utf-8") as f:
+        content = yaml.safe_load(f)
+        return content if content is not None else {}
+
+
 class BaseConfigLoader(ABC, Generic[T]):
     """Abstract base class for hierarchical config loaders.
 
@@ -76,12 +86,7 @@ class BaseConfigLoader(ABC, Generic[T]):
         Returns:
             Parsed YAML content or empty dict.
         """
-        if not path.exists():
-            return {}
-
-        with open(path, encoding="utf-8") as f:
-            content = yaml.safe_load(f)
-            return content if content is not None else {}
+        return _load_yaml_file(path)
 
     def _deep_merge_base(
         self,
@@ -153,4 +158,4 @@ class BaseConfigLoader(ABC, Generic[T]):
         return base + override
 
 
-__all__ = ["BaseConfigLoader"]
+__all__ = ["BaseConfigLoader", "_load_yaml_file"]
