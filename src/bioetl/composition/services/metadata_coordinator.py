@@ -343,9 +343,9 @@ class MetadataCoordinator:
                 if "src/bioetl" in file_path:
                     idx = file_path.find("src/bioetl")
                     contract_path = file_path[idx:]
-        except Exception:
+        except (AttributeError, OSError, TypeError):
             # Module may not have __file__ or path extraction may fail
-            pass
+            contract_path = None
 
         # Extract schema version from Config if defined
         version = "1.0"
@@ -386,9 +386,9 @@ class MetadataCoordinator:
                                 nullable=nullable,
                             )
                         )
-        except Exception:
+        except (AttributeError, TypeError, ValueError):
             # If schema extraction fails, leave columns empty
-            pass
+            columns = []
 
         return SchemaMetadata(
             contract_path=contract_path,

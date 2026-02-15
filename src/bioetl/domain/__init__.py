@@ -323,7 +323,6 @@ from bioetl.domain.value_objects.publication_field_groups import (
     FIELD_TO_GROUP_MAPPING,
     PublicationFieldGroup,
 )
-from bioetl.domain.version import get_version
 
 __all__ = [
     # Composite pipeline (subpackage)
@@ -332,7 +331,6 @@ __all__ = [
     "contracts",
     # Constants
     "constants",
-    "get_version",
     # Configuration
     "DEFAULT_VALIDATION_CONFIG",
     "DQConfig",
