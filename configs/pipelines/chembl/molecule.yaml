@@ -51,7 +51,7 @@ dq_rules:
       allowed: ["MOL", "SEQ", "NONE", "BOTH"]
       nullable: true
     # Override: Entity has min:0 only, pipeline has stricter range 10-10000
-    - field: "full_mwt"
+    - field: "property_full_mwt"
       type: "range"
       min: 10
       max: 10000
@@ -63,25 +63,25 @@ dq_rules:
       validator: "smiles_validator"
       nullable: true
     # Override: Entity has min:-15, pipeline uses min:-10 (stricter)
-    - field: "alogp"
+    - field: "property_alogp"
       type: "range"
       min: -10
       max: 20
       nullable: true
     # Unique: Not in entity config
-    - field: "hba"
+    - field: "property_hba"
       type: "range"
       min: 0
       max: 50
       nullable: true
     # Unique: Not in entity config
-    - field: "hbd"
+    - field: "property_hbd"
       type: "range"
       min: 0
       max: 30
       nullable: true
     # Unique: Not in entity config
-    - field: "psa"
+    - field: "property_psa"
       type: "range"
       min: 0
       max: 1000
@@ -90,7 +90,7 @@ dq_rules:
   # Unique cross-field validation (not in entity config)
   cross_field_validations:
     - name: "structure_completeness"
-      fields: ["canonical_smiles", "standard_inchi", "standard_inchi_key"]
+      fields: ["canonical_smiles", "standard_inchi", "inchi_key"]
       condition: "any_present"
       error_message: "At least one structure identifier required"
 
