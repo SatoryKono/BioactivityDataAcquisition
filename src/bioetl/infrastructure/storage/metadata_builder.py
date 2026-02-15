@@ -179,6 +179,12 @@ class _MetadataBuilderBase:
         transform_version: str | None = None,
         transform_steps: tuple[str, ...] | None = None,
     ) -> None:
+        """Initialize metadata builder.
+
+        Args:
+            transform_version: Semver version of transform (e.g., '1.0.0').
+            transform_steps: Tuple of transform step names.
+        """
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
 
