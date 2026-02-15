@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING
 from bioetl.domain.composite.cross_validation import (
     ComparisonMethod,
     CrossValidationStats,
-    CrossValidationVerdict,
     EnricherCVStats,
 )
 from bioetl.domain.services.text_similarity import jaccard_similarity
