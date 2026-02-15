@@ -118,7 +118,7 @@ class TestFileSizeLimits:
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
         "storage_factory.py": 400,  # Extracted from storage.py
-        "observability.py": 475,  # Bootstrap observability + deprecated aliases
+        "observability.py": 500,  # Bootstrap observability + deprecated aliases + warnings.warn
         # Application layer exemptions
         "base_transformer.py": 825,  # 821 LOC - BaseTransformer with silver_filters + should_write_silver()
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
@@ -656,7 +656,6 @@ class TestClassSize:
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "EnrichmentCrossValidator": 385,  # 380 lines - Cross-validation with multi-enricher comparison + vectorized mismatch detection
         "DependencyCoordinator": 375,  # 370 lines - Chained dependency coordination with key extraction
-        "EnrichmentCrossValidator": 380,  # 372 lines - Cross-validation with exact/fuzzy/numeric comparison methods
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers
         # Publication adapters with APIRequestCollector (metadata enrichment)
