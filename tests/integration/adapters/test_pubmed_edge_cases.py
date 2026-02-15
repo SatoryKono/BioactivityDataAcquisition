@@ -376,9 +376,7 @@ class TestPubMedEdgeCases:
         """Test health check when API returns error."""
         with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
             # Health check uses einfo.fcgi endpoint (lightweight DB info)
-            respx_mock.get("einfo.fcgi").mock(
-                return_value=Response(500, text="Error")
-            )
+            respx_mock.get("einfo.fcgi").mock(return_value=Response(500, text="Error"))
 
             async with pubmed_adapter.http_client:
                 status = await pubmed_adapter.health_check()

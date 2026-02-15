@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - BioETL/0.1.0 (contact@example.com)
     method: GET
-    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed&retmode=json
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed&retmode=json&email=test%40example.com
   response:
     body:
       string: '{"header":{"type":"einfo","version":"0.3"},"einforesult":{"dbinfo":{"dbname":"pubmed","menuname":"PubMed","description":"PubMed
