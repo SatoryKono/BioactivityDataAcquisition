@@ -29,7 +29,6 @@ Usage:
 """
 
 from bioetl.domain.services.activity_aggregator import ActivityAggregator
-from bioetl.domain.services.text_similarity import jaccard_similarity, normalize_text
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 from bioetl.domain.services.data_normalization_service import (
     DefaultDataNormalizationService,
@@ -42,6 +41,7 @@ from bioetl.domain.services.dq_serializer import DQReportSerializer
 from bioetl.domain.services.identity_service import IdentityService
 from bioetl.domain.services.normalization_config import NormalizationConfig
 from bioetl.domain.services.normalization_service import NormalizationService
+from bioetl.domain.services.text_similarity import jaccard_similarity, normalize_text
 from bioetl.domain.services.unit_converter import UnitConverter
 from bioetl.domain.services.value_validator import ValueValidator
 

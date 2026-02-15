@@ -25,7 +25,10 @@ from bioetl.domain.services.text_similarity import jaccard_similarity
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.domain.composite.config import CrossValidationConfig, EnricherFieldPairing
+    from bioetl.domain.composite.config import (
+        CrossValidationConfig,
+        EnricherFieldPairing,
+    )
     from bioetl.domain.ports import LoggerPort
 
 
@@ -188,9 +191,7 @@ class EnrichmentCrossValidator:
 
         # Compute aggregate stats
         errored_count = int((enricher_error_counts > 0).sum())
-        warned_count = int(
-            (has_warning & (enricher_error_counts == 0)).sum()
-        )
+        warned_count = int((has_warning & (enricher_error_counts == 0)).sum())
         passed_count = total_records - errored_count - warned_count
 
         stats = CrossValidationStats(
@@ -391,9 +392,11 @@ class EnrichmentCrossValidator:
         diff = (s - e).abs()
         denominator = s.abs().zip_with(s.abs() > 1.0, pl.Series([1.0] * len(df)))
         # Simpler: use pl.max_horizontal
-        denom = pl.DataFrame({"a": s.abs(), "b": pl.Series([1.0] * len(df))}).select(
-            pl.max_horizontal("a", "b")
-        ).to_series()
+        denom = (
+            pl.DataFrame({"a": s.abs(), "b": pl.Series([1.0] * len(df))})
+            .select(pl.max_horizontal("a", "b"))
+            .to_series()
+        )
 
         relative_diff = diff / denom
 

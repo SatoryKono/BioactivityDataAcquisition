@@ -828,9 +828,7 @@ class CrossValidationConfig:
                 f"error_threshold must be >= 2, got {self.error_threshold}"
             )
         if self.warning_threshold >= self.error_threshold:
-            raise ValueError(
-                "warning_threshold must be < error_threshold"
-            )
+            raise ValueError("warning_threshold must be < error_threshold")
         if self.quarantine_threshold < 1:
             raise ValueError(
                 f"quarantine_threshold must be >= 1, got {self.quarantine_threshold}"
