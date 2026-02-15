@@ -317,6 +317,26 @@ Access the docs at `http://localhost:8000`.
 └── pyproject.toml            # Dependencies & Tool configuration
 ```
 
+### Root layout policy
+
+Repository root is protected by `scripts/audit_root_cleanliness.py` (pre-commit + CI job `root-hygiene`).
+Only approved top-level entries are allowed.
+
+**Core allowed root entries**:
+
+- Source and tests: `src/`, `tests/`
+- Documentation and references: `docs/`, `README.md`, `CHANGELOG.md`
+- Build/configuration: `pyproject.toml`, `uv.lock`, `Makefile`, `.pre-commit-config.yaml`, `.github/`
+- Operational/project assets: `configs/`, `scripts/`, `assets/`, `data/`, `reports/`, `grafana/`
+- Legacy tracked root artifacts listed in the allowlist inside `scripts/audit_root_cleanliness.py`
+
+**Where to place artifacts**:
+
+- Test artifacts and run reports → `reports/`
+- Logs and diagnostic dumps → `reports/` (or nested folder by run date/provider)
+- Coverage artifacts (`coverage.xml`, `htmlcov/`, `.coverage*`) → keep out of git, generate locally/CI only
+- Reference datasets and static lookup files → `docs/` (documentation reference) or `data/` (runtime/local data)
+
 ## Legacy Distributed Mode (REJECTED / UNSUPPORTED)
 
 > **CRITICAL WARNING**: Distributed deployment and Redis Locking are **STRICTLY PROHIBITED** by [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md).
