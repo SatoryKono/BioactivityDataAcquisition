@@ -85,7 +85,7 @@
 | target_chembl_id | string | FK на мишень |
 | target_organism | string | Организм мишени |
 | target_pref_name | string | Предпочтительное имя мишени |
-| target_taxonomy_id | string | NCBI Taxonomy ID мишени (унифицированное имя) |
+| target_taxonomy_id | float64 | NCBI Taxonomy ID мишени (nullable int, унифицированное имя) |
 | text_value | string | Исходное текстовое значение |
 | toid | float64 | Target Ontology ID (nullable int) |
 | type | string | Тип активности |
