@@ -14,7 +14,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,
@@ -53,7 +53,7 @@ async def test_chembl_target_full_cycle(e2e_data_dir: Path):
     ctx = create_test_context("chembl_target", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Bronze layer
@@ -89,7 +89,7 @@ async def test_chembl_target_cross_references(e2e_data_dir: Path):
     ctx = create_test_context("chembl_target", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Get records and check cross_references

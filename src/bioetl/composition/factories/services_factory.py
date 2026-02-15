@@ -185,7 +185,7 @@ class BaseServicesFactory:
         quarantine = cls._create_quarantine(settings)
 
         # Use provided tracer or fallback to NoOpTracing
-        # Tracer should be created via bootstrap_tracer() for consistent configuration
+        # Tracer should be created via bootstrap_tracer_port() for consistent configuration
         if tracer is None:
             from bioetl.domain.ports import NoOpTracing
 

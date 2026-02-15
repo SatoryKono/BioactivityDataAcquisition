@@ -26,7 +26,7 @@ class RunnerFactory:
     """Factory for creating pipeline runners.
 
     Implements RunnerFactoryPort protocol for PipelineRunnerService.
-    Delegates to bootstrap_pipeline() for actual runner creation.
+    Delegates to bootstrap_pipeline_runner() for actual runner creation.
 
     Attributes:
         registry: Optional custom registry for test isolation.
@@ -72,10 +72,10 @@ class RunnerFactory:
         # Import inside method to avoid circular import:
         # composition/bootstrap.py -> _bootstrap/__init__.py -> _bootstrap/runner.py
         # -> factories/runner_factory.py -> composition/bootstrap.py
-        from bioetl.composition.bootstrap import bootstrap_pipeline
+        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         self._ensure_registrations()
-        runner: PipelineRunner = bootstrap_pipeline(context, registry=self._registry)
+        runner: PipelineRunner = bootstrap_pipeline_runner(context, registry=self._registry)
         return runner
 
     def list_pipelines(self) -> list[str]:

@@ -63,12 +63,12 @@ class ObservabilityBundle:
         if self.logger is None:
             raise ObservabilityContractError(
                 "Logger is required. Cannot run pipeline without structured logging. "
-                "Use bootstrap_observability() to create a valid bundle."
+                "Use bootstrap_observability_bundle() to create a valid bundle."
             )
         if self.metrics is None:
             raise ObservabilityContractError(
                 "Metrics port is required. Use NoOpMetrics when metrics are disabled. "
-                "Use bootstrap_observability() to create a valid bundle."
+                "Use bootstrap_observability_bundle() to create a valid bundle."
             )
 
     @classmethod
