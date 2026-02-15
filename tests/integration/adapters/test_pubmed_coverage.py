@@ -268,7 +268,19 @@ async def test_search_by_title_error(pubmed_adapter: PubMedAdapter, mock_logger)
 
 @pytest.mark.integration
 async def test_probe_health_explicit(pubmed_adapter: PubMedAdapter):
-    mock_health_json = {"header": {"type": "einfo", "version": "0.3"}, "einforesult": {"dbinfo": {"dbname": "pubmed", "menuname": "PubMed", "description": "PubMed bibliographic record", "dbbuild": "Build250214-2337m.1", "count": "37000000", "lastupdate": "2025/02/15 06:07"}}}
+    mock_health_json = {
+        "header": {"type": "einfo", "version": "0.3"},
+        "einforesult": {
+            "dbinfo": {
+                "dbname": "pubmed",
+                "menuname": "PubMed",
+                "description": "PubMed bibliographic record",
+                "dbbuild": "Build250214-2337m.1",
+                "count": "37000000",
+                "lastupdate": "2025/02/15 06:07",
+            }
+        },
+    }
     with respx.mock(base_url=ENTREZ_API_BASE) as respx_mock:
         respx_mock.get("einfo.fcgi").mock(
             return_value=Response(200, json=mock_health_json)
@@ -281,7 +293,19 @@ async def test_probe_health_explicit(pubmed_adapter: PubMedAdapter):
 
 @pytest.mark.integration
 async def test_probe_health_degraded(pubmed_adapter: PubMedAdapter):
-    mock_health_json = {"header": {"type": "einfo", "version": "0.3"}, "einforesult": {"dbinfo": {"dbname": "pubmed", "menuname": "PubMed", "description": "PubMed bibliographic record", "dbbuild": "Build250214-2337m.1", "count": "37000000", "lastupdate": "2025/02/15 06:07"}}}
+    mock_health_json = {
+        "header": {"type": "einfo", "version": "0.3"},
+        "einforesult": {
+            "dbinfo": {
+                "dbname": "pubmed",
+                "menuname": "PubMed",
+                "description": "PubMed bibliographic record",
+                "dbbuild": "Build250214-2337m.1",
+                "count": "37000000",
+                "lastupdate": "2025/02/15 06:07",
+            }
+        },
+    }
 
     # We want to test the timing branch.
     # BaseHttpAdapter or the mixin might use time.monotonic()
