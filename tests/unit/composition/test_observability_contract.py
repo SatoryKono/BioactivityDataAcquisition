@@ -204,23 +204,27 @@ class TestBootstrapObservability:
 
 @pytest.mark.unit
 class TestBootstrapMetrics:
-    """Tests for bootstrap_metrics() function."""
+    """Tests for bootstrap_metrics_port() function."""
 
     def test_disabled_metrics_returns_noop_metrics(self) -> None:
         """Test that disabled metrics returns NoOpMetrics, not None."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
 
-        result = bootstrap_metrics(settings)
+        result = bootstrap_metrics_port(settings)
 
         assert result is not None
         assert isinstance(result, NoOpMetrics)
 
     def test_noop_metrics_no_warning_when_disabled(self) -> None:
         """Test that NoOpMetrics doesn't warn when explicitly disabled."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         # Reset warning state
         NoOpMetrics.reset_warning()
@@ -232,7 +236,7 @@ class TestBootstrapMetrics:
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            bootstrap_metrics(settings)
+            bootstrap_metrics_port(settings)
             # No warning should be raised
             assert len(w) == 0
 
@@ -244,7 +248,9 @@ class TestBootstrapMetrics:
         mock_start_server: MagicMock,
     ) -> None:
         """Test that enabled metrics returns PrometheusMetrics."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         mock_metrics = MagicMock()
         mock_prometheus.return_value = mock_metrics
@@ -254,7 +260,7 @@ class TestBootstrapMetrics:
         settings.observability.metrics_enabled = True
         settings.observability.metrics_server_enabled = False
 
-        result = bootstrap_metrics(settings)
+        result = bootstrap_metrics_port(settings)
 
         assert result is mock_metrics
         mock_prometheus.assert_called_once()
