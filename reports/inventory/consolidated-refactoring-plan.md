@@ -1,12 +1,12 @@
 # Консолидированный план рефакторинга BioETL
 
-**Дата:** 2026-02-13
+**Дата:** 2026-02-15 (обновлено после мержа main)
 **Источники:** Верифицированные данные из 4 независимых аудитов (codex branches B1-B4),
 консолидированных в двух ветках:
 - `claude/code-inventory-duplication-audit-HsTsk` — inventory-report.md
 - `claude/code-inventory-audit-eUknn` — consolidated-audit-plan.md, branch-comparison.md
 
-**Статус:** VERIFIED — все находки перепроверены grep-поиском по актуальной кодовой базе
+**Статус:** RE-VERIFIED — все находки перепроверены grep-поиском после мержа 144 файлов из main (2026-02-15)
 
 ---
 
@@ -58,7 +58,7 @@
 
 | # | RF-ID | Что | Где | LOC | Рекомендация |
 |---|-------|-----|-----|-----|--------------|
-| 1 | RF-DUP-001 | `_load_yaml()` — байт-в-байт идентичный метод | `BaseConfigLoader` (line 70) и `DQConfigLoader` (line 131) | ~15 | DQConfigLoader наследует от BaseConfigLoader → удалить переопределение |
+| 1 | RF-DUP-001 | `_load_yaml()` — байт-в-байт идентичный метод | `BaseConfigLoader` (line 70) и `DQConfigLoader` (line 139) | ~15 | DQConfigLoader НЕ наследует от BaseConfigLoader → извлечь shared utility |
 | 2 | RF-DUP-002 | `__init__()` — идентичный конструктор | `SilverMetadataBuilder` (line 185) и `GoldMetadataBuilder` (line 321) в `metadata_builder.py` | ~7×2 | Извлечь `_MetadataBuilderBase` |
 | 3 | RF-DUP-003 | `get_source_metadata()` — идентичная delegation | `FilteredDataSource` (line 353), `PublicationTermDataSource` (line 574), `SubcellularFractionDataSource` (line 289) | ~6×3 | Извлечь mixin `SourceMetadataDelegationMixin` |
 
@@ -104,7 +104,7 @@ ARCH-001 запрещает cross-import между infrastructure и compositio
 
 | # | ID | Действие | Файлы | Тесты |
 |---|-----|----------|-------|-------|
-| 2.1 | RF-DUP-001 | Удалить `_load_yaml` из DQConfigLoader (наследуется) | `dq_config_loader.py` | `pytest tests/ -k config_loader` |
+| 2.1 | RF-DUP-001 | Извлечь shared `_load_yaml_file()` utility (DQConfigLoader не наследует BaseConfigLoader) | `base_config_loader.py`, `dq_config_loader.py` | `pytest tests/ -k config_loader` |
 | 2.2 | RF-DUP-002 | Извлечь `_MetadataBuilderBase` с общим `__init__` | `metadata_builder.py` | `pytest tests/ -k metadata_builder` |
 | 2.3 | RF-DUP-003 | Извлечь mixin для `get_source_metadata` | 3 data_source файла | `pytest tests/ -k data_source` |
 | 2.4 | RF-NAME-003 | Rename `LineageMetadata` → `CompositeLineageMetadata` в composite/lineage.py | `lineage.py` + imports | `pytest tests/ -k lineage` |
@@ -114,7 +114,7 @@ ARCH-001 запрещает cross-import между infrastructure и compositio
 
 | # | ID | Действие | Результат |
 |---|-----|----------|-----------|
-| 3.1 | CI-001 | Настроить import-linter в CI | Защита ARCH-001 |
+| ~~3.1~~ | ~~CI-001~~ | ~~Настроить import-linter в CI~~ | **УЖЕ ВЫПОЛНЕНО** — `.importlinter` + `.github/workflows/import-linter.yml` в main |
 | 3.2 | DOC-001 | ADR для schema↔domain pair convention | Документация |
 | 3.3 | VERIFY-001 | Проверить orphan module (subcellular_fraction_data_source) | Решение: keep/remove |
 | 3.4 | VERIFY-002 | Проверить TEST_ONLY объекты | Baseline |
@@ -142,7 +142,7 @@ ARCH-001 запрещает cross-import между infrastructure и compositio
                                   2.5 RF-CROSS-001 (независимо)
                                         │
                                         ├── Фаза 3 (после Фазы 2)
-                                        │     3.1 CI-001 (независимо)
+                                        │     3.1 CI-001 ✅ DONE (уже в main)
                                         │     3.2 DOC-001 (независимо)
                                         │     3.3 VERIFY-001 → решение
                                         │     3.4 VERIFY-002 → решение
@@ -161,7 +161,7 @@ ARCH-001 запрещает cross-import между infrastructure и compositio
 |-------|----------|
 | 1 | `pytest tests/ -x` passes, `ruff check` clean, 0 DEAD objects, 0 name collisions |
 | 2 | `pytest tests/ -x` passes, 0 LOC identical duplication, architecture tests pass |
-| 3 | `lint-imports` clean, ADR written, all TEST_ONLY/orphan objects classified |
+| 3 | `lint-imports` clean (уже в CI), ADR written, all TEST_ONLY/orphan objects classified |
 | 4 | Decision doc for each investigation |
 
 ---
