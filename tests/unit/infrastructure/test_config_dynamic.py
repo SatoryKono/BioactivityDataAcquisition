@@ -292,6 +292,158 @@ def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
     assert source["provider_config"]["batch_size"] == 30
 
 
+@pytest.mark.parametrize(
+    ("variant", "raw"),
+    [
+        (
+            "legacy",
+            {
+                "source": {
+                    "type": "api",
+                    "provider_config": {
+                        "provider": "chembl",
+                        "base_url": "https://example.chembl/api",
+                        "client": {"timeout_sec": 22.0, "max_retries": 2},
+                        "batch_size": 40,
+                    },
+                    "rate_limit": {"requests_per_second": 4.0, "burst": 8},
+                    "circuit_breaker": {
+                        "failure_threshold": 5,
+                        "recovery_timeout": 300,
+                    },
+                    "health_check": {"endpoint": "/health", "timeout": 5},
+                    "retry": {"max_attempts": 3},
+                    "entities": {"activity": {"enabled": True}},
+                }
+            },
+        ),
+        (
+            "new_nested",
+            {
+                "source": {
+                    "type": "api",
+                    "provider_config": {"provider": "chembl"},
+                    "api": {"base_url": "https://example.chembl/api"},
+                    "client": {"timeout": 22.0, "max_retries": 2},
+                    "batch": {"size": 40},
+                    "rate_limit": {"requests_per_second": 4.0, "burst": 8},
+                    "circuit_breaker": {
+                        "failure_threshold": 5,
+                        "recovery_timeout": 300,
+                    },
+                    "health_check": {"endpoint": "/health", "timeout": 5},
+                    "retry": {"max_attempts": 3},
+                    "entities": {"activity": {"enabled": True}},
+                }
+            },
+        ),
+        (
+            "new_flat",
+            {
+                "type": "api",
+                "provider_config": {"provider": "chembl"},
+                "api": {"base_url": "https://example.chembl/api"},
+                "client": {"timeout": 22.0, "max_retries": 2},
+                "batch": {"size": 40},
+                "rate_limit": {"requests_per_second": 4.0, "burst": 8},
+                "circuit_breaker": {
+                    "failure_threshold": 5,
+                    "recovery_timeout": 300,
+                },
+                "health_check": {"endpoint": "/health", "timeout": 5},
+                "retry": {"max_attempts": 3},
+                "entities": {"activity": {"enabled": True}},
+            },
+        ),
+    ],
+)
+def test_normalize_source_config_supports_legacy_new_nested_and_flat(
+    variant: str, raw: dict[str, object]
+) -> None:
+    """Normalizer should support legacy, nested-new and flat-root source schemas."""
+    normalized = _normalize_source_config(raw)
+    source = normalized["source"]
+
+    assert source["provider_config"]["base_url"] == "https://example.chembl/api"
+    assert source["provider_config"]["client"]["timeout_sec"] == 22.0
+    assert source["provider_config"]["batch_size"] == 40
+    assert source["rate_limit"]["requests_per_second"] == 4.0
+    assert source["circuit_breaker"]["failure_threshold"] == 5
+    assert source["health_check"]["timeout_sec"] == 5
+    assert source["retry"]["max_attempts"] == 3
+    assert source["entities"]["activity"]["enabled"] is True
+
+
+@pytest.mark.parametrize("variant", ["legacy", "new_nested", "new_flat"])
+def test_load_source_config_supports_legacy_new_nested_and_flat(
+    tmp_path, monkeypatch, variant: str
+) -> None:
+    """load_source_config should validate all supported source schema variants."""
+    load_source_config.cache_clear()
+
+    provider_name = f"chembl_{variant}"
+    sources_dir = tmp_path / "configs" / "sources"
+    sources_dir.mkdir(parents=True, exist_ok=True)
+
+    if variant == "legacy":
+        config_data = {
+            "source": {
+                "provider_config": {
+                    "provider": "chembl",
+                    "base_url": "https://example.chembl/api",
+                    "client": {"timeout_sec": 30.0, "max_retries": 4},
+                    "batch_size": 50,
+                },
+                "rate_limit": {"requests_per_second": 3.0, "burst": 7},
+                "circuit_breaker": {
+                    "failure_threshold": 6,
+                    "recovery_timeout": 180,
+                },
+            }
+        }
+    elif variant == "new_nested":
+        config_data = {
+            "source": {
+                "provider_config": {"provider": "chembl"},
+                "api": {"base_url": "https://example.chembl/api"},
+                "client": {"timeout": 30.0, "max_retries": 4},
+                "batch": {"size": 50},
+                "rate_limit": {"requests_per_second": 3.0, "burst": 7},
+                "circuit_breaker": {
+                    "failure_threshold": 6,
+                    "recovery_timeout": 180,
+                },
+            }
+        }
+    else:
+        config_data = {
+            "provider_config": {"provider": "chembl"},
+            "api": {"base_url": "https://example.chembl/api"},
+            "client": {"timeout": 30.0, "max_retries": 4},
+            "batch": {"size": 50},
+            "rate_limit": {"requests_per_second": 3.0, "burst": 7},
+            "circuit_breaker": {
+                "failure_threshold": 6,
+                "recovery_timeout": 180,
+            },
+            "health_check": {"endpoint": "/health", "timeout": 5},
+            "retry": {"max_attempts": 3},
+            "entities": {"activity": {"enabled": True}},
+        }
+
+    monkeypatch.chdir(tmp_path)
+    (sources_dir / f"{provider_name}.yaml").write_text(yaml.dump(config_data))
+
+    cfg = load_source_config(provider_name)
+
+    assert cfg.base_url == "https://example.chembl/api"
+    assert cfg.timeout_sec == 30.0
+    assert cfg.max_retries == 4
+    assert cfg.batch_size == 50
+    assert cfg.rate_limit.requests_per_second == 3.0
+    assert cfg.circuit_breaker.failure_threshold == 6
+
+
 def test_dq_thresholds_are_validated_once(setup_configs):
     """DQ thresholds must satisfy domain invariants even in YAML schema."""
     pipelines_dir = setup_configs

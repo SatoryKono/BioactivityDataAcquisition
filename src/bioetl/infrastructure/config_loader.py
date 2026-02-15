@@ -413,6 +413,30 @@ def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
     compatible output while preserving backward compatibility.
     """
     config = raw.copy()
+
+    # Support flat root-level source format:
+    # api/client/batch and related source-section keys can live at root.
+    if "source" not in config and any(
+        key in config for key in ("api", "client", "batch")
+    ):
+        source_section_keys = {
+            "type",
+            "load_strategy",
+            "batch_size",
+            "provider_config",
+            "api",
+            "client",
+            "batch",
+            "rate_limit",
+            "circuit_breaker",
+            "health_check",
+            "retry",
+            "entities",
+        }
+        config["source"] = {
+            key: value for key, value in config.items() if key in source_section_keys
+        }
+
     source = config.get("source")
     if not isinstance(source, dict):
         return config
