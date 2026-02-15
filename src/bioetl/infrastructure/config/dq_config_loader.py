@@ -16,8 +16,9 @@ from pathlib import Path
 from typing import Any
 
 from bioetl.domain.config import DQConfig
-from bioetl.infrastructure.config.base_config_loader import _load_yaml_file
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
+
+from .base_config_loader import _load_yaml_file
 
 
 class DQConfigLoader:
