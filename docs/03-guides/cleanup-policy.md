@@ -1,9 +1,11 @@
 # Cleanup Policy
+
 *Синхронизировано с RULES.md v5.18 (2026-01-06)*
 
 This document defines deterministic cleanup rules and automation for removing caches, build artifacts, and temporary files.
 
 ## Уровни Требований (RFC 2119)
+
 - **MUST**: Абсолютное требование.
 - **SHOULD**: Сильная рекомендация.
 - **MAY**: На усмотрение разработчика.
@@ -11,6 +13,7 @@ This document defines deterministic cleanup rules and automation for removing ca
 ## 1. Whitelist Patterns (Cleanup Targets)
 
 ### 1.1. Python Artifacts
+
 - `**/__pycache__/`
 - `.pytest_cache/`
 - `.mypy_cache/`
@@ -18,16 +21,19 @@ This document defines deterministic cleanup rules and automation for removing ca
 - `**/*.pyc`, `**/*.pyo`, `**/*.pyd`
 
 ### 1.2. Coverage
+
 - `.coverage*`
 - `coverage.xml`
 - `htmlcov/`
 
 ### 1.3. Build/Dist
+
 - `build/`
 - `dist/`
 - `**/*.egg-info/`
 
 ### 1.4. Logs/Temp
+
 - `**/*.log`
 - `**/*.tmp`
 - `**/*report*.txt`
@@ -36,71 +42,79 @@ This document defines deterministic cleanup rules and automation for removing ca
 - `project_rules_failures.txt`
 
 ### 1.5. IDE/OS
+
 - `.idea/workspace.xml`
 - `.DS_Store`
 - `Thumbs.db`
 - `.ipynb_checkpoints/`
 
 ### 1.6. JavaScript (if applicable)
+
 - `node_modules/`
 - `.next/`
 - `web/dist/`
 
 ### 1.7. Vercel Cache
+
 - `.vercel/cache/` (keep `.vercel/project.json`)
 
 ## 2. Exclusions (MUST NOT Remove)
 
-| Path | Reason |
-|------|--------|
-| `src/**` | Source code |
-| `configs/**` | Runtime configs |
-| `tests/**` | Tests |
-| `docs/**` | Documentation |
-| `qc/golden/**` | Golden test data |
-| `data/input/**` | Input datasets |
-| `.gitignore` | Git config |
+| Path                      | Reason           |
+| ------------------------- | ---------------- |
+| `src/**`                  | Source code      |
+| `configs/**`              | Runtime configs  |
+| `tests/**`                | Tests            |
+| `docs/**`                 | Documentation    |
+| `qc/golden/**`            | Golden test data |
+| `data/input/**`           | Input datasets   |
+| `.gitignore`              | Git config       |
 | `.pre-commit-config.yaml` | Pre-commit hooks |
-| `.vscode/settings.json` | IDE settings |
-| `.windsurf/**` | Windsurf rules |
-| `.trae/**` | Trae rules |
-| `.cursor/rules/**` | Cursor rules |
+| `.vscode/settings.json`   | IDE settings     |
+| `.windsurf/**`            | Windsurf rules   |
+| `.trae/**`                | Trae rules       |
+| `.cursor/rules/**`        | Cursor rules     |
 
 ## 3. Data Retention (Medallion Architecture)
 
 ### 3.1. Bronze Layer
-| Parameter | Value |
-|-----------|-------|
-| Retention | 90 дней hot → Archive (local archive policy) |
-| Format | JSONL + zstd |
-| Path | `bronze/{format_version}/{provider}/{entity}/{date}/` |
+
+| Parameter | Value                                                 |
+| --------- | ----------------------------------------------------- |
+| Retention | 90 дней hot → Archive (local archive policy)          |
+| Format    | JSONL + zstd                                          |
+| Path      | `bronze/{format_version}/{provider}/{entity}/{date}/` |
 
 ### 3.2. Silver Layer
-| Parameter | Value |
-|-----------|-------|
-| Retention | Постоянно |
-| Format | Delta Lake |
-| VACUUM | **MUST** еженедельно, `retention_period=7 days` |
-| Forensic | 7 дней (default), 30 дней для Critical tables |
+
+| Parameter | Value                                           |
+| --------- | ----------------------------------------------- |
+| Retention | Постоянно                                       |
+| Format    | Delta Lake                                      |
+| VACUUM    | **MUST** еженедельно, `retention_period=7 days` |
+| Forensic  | 7 дней (default), 30 дней для Critical tables   |
 
 ### 3.3. Gold Layer
-| Parameter | Value |
-|-----------|-------|
-| Retention | Постоянно |
-| Format | Delta/Parquet |
+
+| Parameter | Value         |
+| --------- | ------------- |
+| Retention | Постоянно     |
+| Format    | Delta/Parquet |
 
 ### 3.4. Quarantine (`common.quarantine`)
-| Parameter | Value |
-|-----------|-------|
-| Retention | 30 дней (local retention policy) |
-| Triage | Еженедельно |
-| Purge | `make quarantine-purge PIPELINE=...` |
+
+| Parameter | Value                                |
+| --------- | ------------------------------------ |
+| Retention | 30 дней (local retention policy)     |
+| Triage    | Еженедельно                          |
+| Purge     | `make quarantine-purge PIPELINE=...` |
 
 ### 3.5. Logs and Metrics
-| Type | Retention |
-|------|-----------|
-| Logs | 30 дней |
-| Metrics | 90 дней |
+
+| Type    | Retention |
+| ------- | --------- |
+| Logs    | 30 дней   |
+| Metrics | 90 дней   |
 
 ## 4. Automation
 
@@ -112,12 +126,12 @@ All whitelist patterns **MUST** be in `.gitignore`.
 
 Location: `src/tools/cleanup_project.py`
 
-| Flag | Behavior |
-|------|----------|
-| `--dry-run` | Prints candidates and sizes (default) |
-| `--apply` | Deletes candidates |
+| Flag             | Behavior                                     |
+| ---------------- | -------------------------------------------- |
+| `--dry-run`      | Prints candidates and sizes (default)        |
+| `--apply`        | Deletes candidates                           |
 | `--archive-logs` | Moves logs to `reports/` instead of deleting |
-| `--purge-logs` | Forces deletion of logs |
+| `--purge-logs`   | Forces deletion of logs                      |
 
 Logging: Structured JSON via `UnifiedLogger`.
 
@@ -129,6 +143,7 @@ make vacuum-silver RETENTION_DAYS=7
 ```
 
 **VACUUM MUST** запускаться еженедельно для:
+
 - Очистки старых файлов.
 - Уменьшения стоимости хранения.
 
@@ -149,16 +164,17 @@ make quarantine-purge PIPELINE=chembl_activity
 
 ### 5.1. Post-Cleanup Validation
 
-| Check | Command |
-|-------|---------|
-| Tests pass | `pytest -q` (without network) |
-| Golden tests green | `pytest tests/golden/ -v` |
+| Check                     | Command                                                     |
+| ------------------------- | ----------------------------------------------------------- |
+| Tests pass                | `pytest -q` (without network)                               |
+| Golden tests green        | `pytest tests/golden/ -v`                                   |
 | Class inventory unchanged | Compare `tests/project_rules/class_inventory_baseline.json` |
-| Smoke run | One pipeline, identical artifacts |
+| Smoke run                 | One pipeline, identical artifacts                           |
 
 ### 5.2. Checksum Verification
 
 After cleanup, verify checksums of critical artifacts:
+
 ```bash
 make verify-checksums
 ```
@@ -209,6 +225,7 @@ make quarantine-purge DAYS=30
 ### 7.1. Pre-commit Hooks (MUST)
 
 `.pre-commit-config.yaml` **MUST** forbid:
+
 - `*.pyc`
 - `__pycache__`
 - `.env` files with secrets
@@ -217,13 +234,28 @@ make quarantine-purge DAYS=30
 
 `compiled-artifacts-block.yml` **MUST** fail builds if compiled artifacts are present.
 
-### 7.3. Scheduled Jobs (SHOULD)
+### 7.3. Root Audit Artifacts Policy (MUST)
 
-| Job | Schedule | Action |
-|-----|----------|--------|
-| `vacuum-silver` | Weekly (Sunday 02:00 UTC) | VACUUM Delta tables |
-| `quarantine-purge` | Daily (03:00 UTC) | Purge records >30 days |
-| `log-rotate` | Daily (04:00 UTC) | Archive logs >30 days |
+Root-level audit artifacts **MUST NOT** be committed.
+
+| Artifact           | Generator                                                      | Frequency              | Storage Policy                                                                               |
+| ------------------ | -------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| `coverage.json`    | Local `pytest --cov ... --cov-report=json` or CI coverage jobs | On demand / per CI run | Keep local only; attach to CI artifacts if needed; never commit to repository root           |
+| `all_fixtures.txt` | Fixture inventory/debug scripts run by maintainers             | On demand              | Keep local only; if needed for review, attach to PR/CI artifacts, not git-tracked root files |
+
+Enforcement:
+
+- `.gitignore` **MUST** include `/coverage.json` and `/all_fixtures.txt`.
+- CI **MUST** run a root-level allowlist check from `.github/root-allowlist.txt`.
+- Any intentional new root-level tracked file **MUST** be added to `.github/root-allowlist.txt` in the same PR with justification.
+
+### 7.4. Scheduled Jobs (SHOULD)
+
+| Job                | Schedule                  | Action                 |
+| ------------------ | ------------------------- | ---------------------- |
+| `vacuum-silver`    | Weekly (Sunday 02:00 UTC) | VACUUM Delta tables    |
+| `quarantine-purge` | Daily (03:00 UTC)         | Purge records >30 days |
+| `log-rotate`       | Daily (04:00 UTC)         | Archive logs >30 days  |
 
 ## 8. Disaster Recovery Cleanup
 
@@ -278,9 +310,9 @@ make clean-staging
 
 Production cleanup **MUST** be done through CI/CD only. Manual cleanup **MUST NOT**.
 
-| Action | Approval Required |
-|--------|-------------------|
-| VACUUM | No (automated) |
-| Quarantine purge | No (automated, >30 days) |
-| Bronze archive | No (local retention policy) |
-| Manual delete | Yes (P0 incident only) |
+| Action           | Approval Required           |
+| ---------------- | --------------------------- |
+| VACUUM           | No (automated)              |
+| Quarantine purge | No (automated, >30 days)    |
+| Bronze archive   | No (local retention policy) |
+| Manual delete    | Yes (P0 incident only)      |
