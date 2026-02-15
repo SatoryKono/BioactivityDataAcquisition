@@ -103,11 +103,11 @@ def analyze_standard_config(config: dict, gaps: ConfigGaps) -> None:
                 )
 
     # === ADR-027: DQ rules ===
-    if "dq_rules" in config:
-        dq = config["dq_rules"]
+    if "dq_overrides" in config:
+        dq = config["dq_overrides"]
         # Check for inline thresholds (deprecated)
         if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
-            gaps.medium.append("Inline dq_rules thresholds (deprecated per ADR-027)")
+            gaps.medium.append("Inline dq_overrides thresholds (deprecated per ADR-027)")
 
     # Check for dq_config_file reference
     if "dq_config_file" not in config:
@@ -174,11 +174,11 @@ def analyze_composite_config(config: dict, gaps: ConfigGaps) -> None:
             gaps.low.append("Missing composite.merge.output.gold")
 
     # === ADR-027: DQ rules in composite ===
-    if "dq_rules" in config:
-        dq = config["dq_rules"]
+    if "dq_overrides" in config:
+        dq = config["dq_overrides"]
         if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
             gaps.medium.append(
-                "Inline dq_rules thresholds in composite (deprecated per ADR-027)"
+                "Inline dq_overrides thresholds in composite (deprecated per ADR-027)"
             )
 
     # Note: Composite pipelines don't have standard sink structure
@@ -295,7 +295,7 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
             "",
             "### Priority 1 (Medium - Should Fix)",
             "1. Add `version`, `description`, `gold_table` where missing (ADR-025)",
-            "2. Migrate inline `dq_rules` thresholds to `dq_config_file` (ADR-027)",
+            "2. Migrate inline `dq_overrides` thresholds to `dq_config_file` (ADR-027)",
             "3. Add missing `sink.bronze` and `sink.gold` sections",
             "",
             "### Priority 2 (Low - Nice to Have)",

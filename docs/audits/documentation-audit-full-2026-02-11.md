@@ -231,7 +231,7 @@
 | № | Документ | Предложение | Ссылка на код | Соответствует | План устранения |
 |---|----------|-------------|---------------|---------------|-----------------|
 | 1 | `pipeline-configuration.md` | «_base.yaml — 491 строка» | `configs/pipelines/_base.yaml` | Да | — |
-| 2 | `pipeline-configuration.md` | «31 DQ файл» | `configs/dq/` | Да (31 файл) | — |
+| 2 | `pipeline-configuration.md` | «31 DQ файл» | `configs/quality/` | Да (31 файл) | — |
 | 3 | `local-storage-layout.md` | «Bronze: data/output/bronze/{provider}/{entity}» | `infrastructure/config/config_loader.py:163` | Да | — |
 | 4 | `cli.md` | «Все CLI команды и exit codes» | `interfaces/cli/commands/`, `exit_codes.py` | Да | — |
 | 5 | `data-layers.md` | «Bronze: JSONL+zstd, Silver: Delta Lake, Gold: Delta Lake» | `bronze_writer.py`, `silver_writer.py`, `gold_writer.py` | Да | — |

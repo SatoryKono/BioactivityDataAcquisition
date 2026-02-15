@@ -37,9 +37,9 @@ gold_table: "chembl_target"
 source_file: ../../sources/chembl.yaml
 
 # DQ rules loaded from hierarchical config files (ADR-027):
-#   1. configs/dq/_defaults.yaml
-#   2. configs/dq/providers/chembl.yaml
-#   3. configs/dq/entities/chembl/target.yaml
+#   1. configs/quality/_defaults.yaml
+#   2. configs/quality/providers/chembl.yaml
+#   3. configs/quality/entities/chembl/target.yaml
 dq_config_file: ../../dq/entities/chembl/target.yaml
 
 # Paths auto-computed by convention (ADR-029),

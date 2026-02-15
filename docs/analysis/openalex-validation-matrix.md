@@ -16,8 +16,8 @@
 Оба режима записывают в одну таблицу `silver/openalex/publication` и применяют идентичную валидацию:
 
 - **Pandera-схема**: `OpenAlexPublicationSchema` (наследует `PublicationBaseSchema`)
-- **DQ-конфиг**: `configs/dq/entities/openalex/publication.yaml`
-- **Provider DQ**: `configs/dq/providers/openalex.yaml`
+- **DQ-конфиг**: `configs/quality/entities/openalex/publication.yaml`
+- **Provider DQ**: `configs/quality/providers/openalex.yaml`
 
 ## 3. Матрица валидации полей
 

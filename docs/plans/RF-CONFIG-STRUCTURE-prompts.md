@@ -259,7 +259,7 @@ partition_cols, on_schema_mismatch
 УДАЛИТЬ: source_file, dq_config_file, data_schema_file, filter_config_file,
 sink.*.path, sink.silver.primary_key, sink.*.sort_by, sink.*.csv_export.path
 
-ПЕРЕИМЕНОВАТЬ: dq_rules → dq_overrides
+ПЕРЕИМЕНОВАТЬ: dq_overrides → dq_overrides
 
 ОСТАВИТЬ: pipeline_name, provider, entity_type, version, description,
 primary_keys, silver_table, gold_table, sink.silver.partition_by,
@@ -281,15 +281,15 @@ write_mode (если не default), dq_overrides (содержимое)
 КОНТЕКСТ: Загрузчик (2c360d5) уже поддерживает оба формата через нормализацию.
 
 ПЕРЕИМЕНОВАНИЯ:
-- configs/dq/_defaults.yaml: common_field_validations → field_validations
-- configs/dq/providers/*.yaml: provider_field_validations → field_validations
-- configs/dq/entities/*/*.yaml: entity_field_validations → field_validations
+- configs/quality/_defaults.yaml: common_field_validations → field_validations
+- configs/quality/providers/*.yaml: provider_field_validations → field_validations
+- configs/quality/entities/*/*.yaml: entity_field_validations → field_validations
 Аналогично для cross_field_validations и conditional_validations.
 
 ШАГИ:
-1. find configs/dq/ -name "*.yaml" | wc -l
+1. find configs/quality/ -name "*.yaml" | wc -l
 2. Применить переименования
-3. grep -rn "common_field_validations\|provider_field_validations\|entity_field_validations" configs/dq/ → 0
+3. grep -rn "common_field_validations\|provider_field_validations\|entity_field_validations" configs/quality/ → 0
 
 ВЕРИФИКАЦИЯ:
 - pytest tests/ -k "dq" -v
@@ -306,9 +306,9 @@ write_mode (если не default), dq_overrides (содержимое)
 Загрузчики УЖЕ поддерживают новые пути (fallback из PR #2122).
 
 ПЕРЕИМЕНОВАНИЯ:
-1. configs/dq/ → configs/quality/
-2. configs/filter/ → configs/filters/
-3. configs/data_schema/ → configs/schemas/
+1. configs/quality/ → configs/quality/
+2. configs/filters/ → configs/filters/
+3. configs/schemas/ → configs/schemas/
 4. configs/composite/field_groups/ → configs/schemas/composite/field_groups/
 5. configs/pipelines/_schema.json → configs/_schema/pipeline.json
 6. configs/pipelines/_composite_schema.json → configs/_schema/composite.json
@@ -348,9 +348,9 @@ write_mode (если не default), dq_overrides (содержимое)
 
 ОЧИСТКА:
 - Удалить fallback-код из dq_config_loader.py, filter_config_loader.py
-- Удалить алиас dq_rules из pipeline_config.py (оставить только dq_overrides)
+- Удалить алиас dq_overrides из pipeline_config.py (оставить только dq_overrides)
 - grep -rn "common_field_validations\|provider_field_validations" configs/ → 0
-- grep -rn "configs/dq/" docs/ → 0
+- grep -rn "configs/quality/" docs/ → 0
 
 ДОКУМЕНТАЦИЯ:
 - Обновить ADR-027, ADR-028, ADR-029 с новыми путями

@@ -35,7 +35,7 @@ sink:
 # -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)
 # -----------------------------------------------------------------------------
-# Only rules that EXTEND or DIFFER from configs/dq/entities/chembl/activity.yaml
+# Only rules that EXTEND or DIFFER from configs/quality/entities/chembl/activity.yaml
 # Redundant rules (same as entity config) have been removed per ADR-027.
 dq_overrides:
   field_validations:

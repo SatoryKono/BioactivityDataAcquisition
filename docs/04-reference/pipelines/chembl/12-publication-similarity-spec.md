@@ -28,9 +28,9 @@ Extracts publication similarity data (Tanimoto coefficients) from the ChEMBL `/d
 
 ## Related Configs
 
-- DQ: `configs/dq/entities/chembl/publication_similarity.yaml`
-- Filters: `configs/filter/entities/chembl/publication_similarity.yaml`
-- Column groups: `configs/data_schema/chembl/publication_similarity.yaml`
+- DQ: `configs/quality/entities/chembl/publication_similarity.yaml`
+- Filters: `configs/filters/entities/chembl/publication_similarity.yaml`
+- Column groups: `configs/schemas/chembl/publication_similarity.yaml`
 
 ## Related ADRs
 

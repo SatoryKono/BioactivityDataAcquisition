@@ -21,7 +21,7 @@
 # Full field coverage update (2026-01-28):
 # This configuration now includes ALL 181 extractable fields (100% coverage).
 # Previously included 142 of 181 fields (78.5%).
-# See config/data_schema/composite/publication.yaml for complete field mappings.
+# See configs/schemas/composite/publication.yaml for complete field mappings.
 #
 # Version: 1.1.0
 # Reference: ADR-026 Composite Pipeline Pattern
@@ -534,7 +534,7 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
-  dq_rules:
+  dq_overrides:
     # Composite-level thresholds (applied to merge result)
     soft_fail_threshold: 0.10  # 10% errors = warning
     hard_fail_threshold: 0.30  # 30% errors = failure
@@ -756,9 +756,9 @@ gold_filters:
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filter rules are loaded from hierarchical config files:
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/composite.yaml (provider-specific)
-#   3. configs/filter/entities/composite/publication.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/composite.yaml (provider-specific)
+#   3. configs/filters/entities/composite/publication.yaml (entity-specific)
 filter_config_file: ../../filter/entities/composite/publication.yaml
 
 # -----------------------------------------------------------------------------

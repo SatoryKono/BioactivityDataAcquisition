@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/compound_record.yaml
+# configs/quality/entities/chembl/compound_record.yaml
 # ChEMBL Compound Record-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

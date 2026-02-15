@@ -46,11 +46,11 @@ unified_record = apply_field_mapping(provider_record, "chembl")
 
 ### 1.2. YAML Data Schemas
 **Файлы обновлены (5):**
-- ✅ `configs/data_schema/chembl/publication.yaml`
-- ✅ `configs/data_schema/crossref/publication.yaml`
-- ✅ `configs/data_schema/openalex/publication.yaml`
-- ✅ `configs/data_schema/pubmed/publication.yaml`
-- ✅ `configs/data_schema/semanticscholar/publication.yaml`
+- ✅ `configs/schemas/chembl/publication.yaml`
+- ✅ `configs/schemas/crossref/publication.yaml`
+- ✅ `configs/schemas/openalex/publication.yaml`
+- ✅ `configs/schemas/pubmed/publication.yaml`
+- ✅ `configs/schemas/semanticscholar/publication.yaml`
 
 **Изменения:**
 - Переименованы поля в `column_groups`
@@ -139,7 +139,7 @@ class PublicationEntityBase(BaseEntity):
 
 ## ✅ Фаза 5: Composite Schema (ЗАВЕРШЕНО)
 
-**Файл:** `configs/data_schema/composite/publication.yaml` (10,735 bytes)
+**Файл:** `configs/schemas/composite/publication.yaml` (10,735 bytes)
 
 **Содержит:**
 - Unified field names в `column_groups`
@@ -249,7 +249,7 @@ make test
 
 - [ADR-029: Data Schema Externalization](docs/02-architecture/decisions/ADR-029-data-schema-externalization.md)
 - [RULES.md §2.6: Int→Float Coercion](docs/RULES.md)
-- [Composite Publication Schema](configs/data_schema/composite/publication.yaml)
+- [Composite Publication Schema](configs/schemas/composite/publication.yaml)
 
 ---
 

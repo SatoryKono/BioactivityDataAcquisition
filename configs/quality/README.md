@@ -21,7 +21,7 @@ quality/
 1. `_defaults.yaml` (lowest)
 1. `providers/{provider}.yaml`
 1. `entities/{provider}/{entity}.yaml`
-1. Inline `dq_rules` in pipeline config (highest)
+1. Inline `dq_overrides` in pipeline config (highest)
 
 ## Quick Start
 
@@ -53,7 +53,7 @@ quality/
 ```yaml
 # pipelines/{provider}/{entity}.yaml
 dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
-dq_rules:
+dq_overrides:
   thresholds:
     hard_fail: 0.30  # Temporary override
 ```

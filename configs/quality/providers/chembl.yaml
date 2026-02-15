@@ -1,4 +1,4 @@
-# configs/dq/providers/chembl.yaml
+# configs/quality/providers/chembl.yaml
 # ChEMBL-specific DQ rules
 # Inherits from: _defaults.yaml
 

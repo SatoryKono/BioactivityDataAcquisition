@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/publication_similarity.yaml
+# configs/quality/entities/chembl/publication_similarity.yaml
 # ChEMBL Publication Similarity (Document Similarity)-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

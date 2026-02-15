@@ -33,7 +33,7 @@
 # Pipeline configuration for <Provider> <Entity>.
 #
 # Inherits defaults from ../_defaults.yaml:
-# - dq_rules, circuit_breaker, sink structure, maintenance, input_filter
+# - dq_overrides, circuit_breaker, sink structure, maintenance, input_filter
 #
 # IMPORTANT: Use Canonical Terms from 02-naming-policy.md
 ```
