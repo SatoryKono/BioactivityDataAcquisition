@@ -43,7 +43,7 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v5.17)
+│   ├── RULES.md                 # Canonical rules document (v5.18)
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Tools & Setup
 │   ├── rules-summary.md         # TL;DR of RULES.md
@@ -350,11 +350,11 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-02-03   | v5.17 (Local-Only sync)      |
+| RULES.md                 | 2026-02-03   | v5.18 (Local-Only sync)      |
 | REQUIREMENTS.md          | 2026-02-04   | v1.5 (Local-Only sync)       |
 | glossary.md              | 2026-02-06   | v2.5 (Ubiquitous Language)   |
 | 00-map.md                | 2026-02-08   | v7.2 Doc Audit Sync          |
-| rules-summary.md         | 2026-02-03   | v5.17 Synced                 |
+| rules-summary.md         | 2026-02-03   | v5.18 Synced                 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
 | ADR-001..033             | 2026-02-10   | All 33 ADRs documented       |
