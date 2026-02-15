@@ -198,7 +198,7 @@ def build_pipeline_runner(
 
     observability = build_observability_bundle_fn(
         pipeline=ctx.pipeline_name,
-        ctx=ctx,
+        run_id=ctx.run_id,
         settings=settings,
     )
 
