@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import yaml
 from pydantic import SecretStr
@@ -117,7 +117,7 @@ def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig
     Returns a SilverFilterConfig for nominal type separation from Gold filters.
     """
     base_filters = yaml_config.silver_filters.to_domain()
-    return SilverFilterConfig.from_gold_filter_config(base_filters)
+    return SilverFilterConfig.from_base(base_filters)
 
 
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
@@ -125,7 +125,7 @@ def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
 
     Delegates to GoldFiltersConfig.to_domain() for consolidation pattern.
     """
-    return yaml_config.gold_filters.to_domain()
+    return cast("GoldFilterConfig", yaml_config.gold_filters.to_domain())
 
 
 def yaml_config_to_domain(

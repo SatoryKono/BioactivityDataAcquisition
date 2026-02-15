@@ -1,9 +1,10 @@
-"""Tests for SilverFilterConfig and its relation with GoldFilterConfig."""
+"""Tests for Silver/Gold nominal type separation over shared BaseFilterConfig."""
 
 from __future__ import annotations
 
 import pytest
 
+from bioetl.domain.filtering._base_filter_config import BaseFilterConfig
 from bioetl.domain.filtering.column_filter import GoldColumnFilter
 from bioetl.domain.filtering.gold_config import GoldFilterConfig
 from bioetl.domain.filtering.range_filter import GoldRangeFilter
@@ -12,18 +13,19 @@ from bioetl.domain.filtering.silver_config import SilverFilterConfig
 
 @pytest.mark.unit
 class TestFilterConfigTypeSeparation:
-    """Silver is a subtype of Gold for structural reuse, but nominal typing
-    distinguishes the two at the type-checker level."""
-
-    def test_silver_is_subclass_of_gold(self) -> None:
-        assert issubclass(SilverFilterConfig, GoldFilterConfig)
+    def test_silver_is_not_subclass_of_gold(self) -> None:
+        assert issubclass(SilverFilterConfig, GoldFilterConfig) is False
 
     def test_gold_is_not_subclass_of_silver(self) -> None:
         assert issubclass(GoldFilterConfig, SilverFilterConfig) is False
 
-    def test_silver_instance_is_also_gold_instance(self) -> None:
+    def test_silver_and_gold_both_extend_base(self) -> None:
+        assert issubclass(SilverFilterConfig, BaseFilterConfig)
+        assert issubclass(GoldFilterConfig, BaseFilterConfig)
+
+    def test_silver_instance_is_not_gold_instance(self) -> None:
         silver = SilverFilterConfig(required_fields=("id",))
-        assert isinstance(silver, GoldFilterConfig)
+        assert isinstance(silver, GoldFilterConfig) is False
 
     def test_gold_instance_is_not_silver_instance(self) -> None:
         gold = GoldFilterConfig(required_fields=("id",))
@@ -31,10 +33,8 @@ class TestFilterConfigTypeSeparation:
 
 
 @pytest.mark.unit
-class TestSilverFromGoldFilterConfig:
-    """from_gold_filter_config creates equivalent config behavior."""
-
-    def test_from_gold_copies_all_fields(self) -> None:
+class TestSilverFromBaseFilterConfig:
+    def test_from_base_copies_all_fields(self) -> None:
         gold = GoldFilterConfig(
             required_fields=("id",),
             exclude_if_present=("deleted",),
@@ -46,7 +46,7 @@ class TestSilverFromGoldFilterConfig:
             ),
         )
 
-        silver = SilverFilterConfig.from_gold_filter_config(gold)
+        silver = SilverFilterConfig.from_base(gold)
 
         assert silver == SilverFilterConfig(
             required_fields=("id",),
@@ -82,6 +82,6 @@ class TestSilverFromGoldFilterConfig:
                 GoldRangeFilter(column="score", min_value=0.0, max_value=10.0),
             ),
         )
-        silver = SilverFilterConfig.from_gold_filter_config(gold)
+        silver = SilverFilterConfig.from_base(gold)
 
         assert silver.should_include(record) == gold.should_include(record)

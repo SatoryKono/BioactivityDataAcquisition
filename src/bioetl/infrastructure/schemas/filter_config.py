@@ -21,11 +21,16 @@ Usage:
 
 from __future__ import annotations
 
+from typing import cast
+
 from pydantic import BaseModel, Field, field_validator
 
-from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.filtering import (
-    InputFilterConfig as DomainInputFilterConfig,
+    GoldFilterConfig,
+)
+from bioetl.domain.filtering import InputFilterConfig as DomainInputFilterConfig
+from bioetl.domain.filtering import (
+    SilverFilterConfig,
 )
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.base_schemas import (
@@ -105,7 +110,7 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
         Returns:
             SilverFilterConfig: Immutable domain filter configuration.
         """
-        return SilverFilterConfig.from_gold_filter_config(super().to_domain())
+        return SilverFilterConfig.from_base(super().to_domain())
 
 
 class GoldFiltersFileConfig(BaseGoldFiltersConfig):
@@ -133,7 +138,7 @@ class GoldFiltersFileConfig(BaseGoldFiltersConfig):
         Returns:
             GoldFilterConfig: Immutable domain configuration.
         """
-        return super().to_domain()
+        return cast("GoldFilterConfig", super().to_domain())
 
 
 class FilterConfigFile(BaseModel):
