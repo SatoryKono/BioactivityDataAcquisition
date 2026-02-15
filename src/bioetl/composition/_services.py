@@ -20,7 +20,7 @@ from bioetl.composition.bootstrap import (
     bootstrap_lock_service,
     bootstrap_metrics_service,
     bootstrap_pipeline_runner_service,
-    bootstrap_quarantine,
+    bootstrap_quarantine_port,
     bootstrap_quarantine_service,
     bootstrap_vacuum_service,
 )
@@ -299,4 +299,4 @@ def get_quarantine_store(pipeline: str) -> QuarantinePort:
         >>> records = await store.inspect("chembl_activity", limit=10)
     """
     _ensure_registrations()
-    return bootstrap_quarantine()
+    return bootstrap_quarantine_port()

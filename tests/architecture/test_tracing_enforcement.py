@@ -311,7 +311,7 @@ class TestObservabilityBootstrap:
             bootstrap_path = Path("src/bioetl/composition/bootstrap/__init__.py")
             if bootstrap_path.exists():
                 source = bootstrap_path.read_text()
-                exists = "bootstrap_observability" in source
+                exists = "bootstrap_observability_bundle" in source
 
         assert exists, "Observability factory or bootstrap function should exist"
 
