@@ -310,14 +310,7 @@ class TestGoldWriterMetadataIntegration:
         mock_metadata_writer: MockMetadataWriter,
     ) -> None:
         """Test that GoldWriter calls metadata writer after write."""
-        import pandera as pa_pandera
-
-        # Create strict Pandera schema
-        class GoldSchema(pa_pandera.DataFrameSchema):
-            """Test Gold schema."""
-
-            class Config:
-                strict = True
+        import pandera.pandas as pa_pandera
 
         schema = pa_pandera.DataFrameSchema(
             columns={
@@ -370,7 +363,7 @@ class TestGoldWriterMetadataIntegration:
         mock_logger: MagicMock,
     ) -> None:
         """Test that GoldWriter uses NoOpMetadataWriter when not provided."""
-        import pandera as pa_pandera
+        import pandera.pandas as pa_pandera
 
         schema = pa_pandera.DataFrameSchema(
             columns={

@@ -329,9 +329,9 @@ def validate_non_empty_string(value: str | None) -> str | None:
 # =============================================================================
 
 # DOI regex pattern per DOI Handbook (https://www.doi.org/doi_handbook/2_Numbering.html)
-# Format: 10.XXXX/suffix where:
+# Format: 10.NNNN/suffix where:
 #   - 10. is the fixed prefix
-#   - XXXX is registrant code (minimum 4 digits)
+#   - NNNN is registrant code (minimum 4 digits)
 #   - suffix is the identifier (minimum 1 non-whitespace character)
 # Aligned with DOI Value Object: \S+ forbids whitespace in DOI suffix.
 DOI_REGEX_PATTERN: str = r"^10\.\d{4,}/\S+$"
@@ -341,7 +341,7 @@ _DOI_PATTERN = re.compile(DOI_REGEX_PATTERN)
 def validate_doi(doi: str | None) -> bool:
     """Validate DOI format.
 
-    Checks if DOI matches the standard format: 10.XXXX/...
+    Checks if DOI matches the standard format: 10.NNNN/...
 
     Args:
         doi: DOI string to validate.
@@ -369,7 +369,7 @@ def validate_doi(doi: str | None) -> bool:
 # InChI Key Validation
 # =============================================================================
 
-# InChI Key format: XXXXXXXXXXXXXX-YYYYYYYYYY-Z
+# InChI Key format: AAAAAAAAAAAAAA-BBBBBBBBBB-Z
 # - First block: 14 uppercase letters (connectivity layer)
 # - Second block: 10 uppercase letters (stereochemistry + isotopes)
 # - Third block: 1 uppercase letter (protonation)
@@ -382,7 +382,7 @@ _INCHI_KEY_PATTERN = re.compile(INCHI_KEY_REGEX_PATTERN)
 def validate_inchi_key(key: str | None) -> bool:
     """Validate InChI Key format.
 
-    InChI Key is a 27-character string in format: XXXXXXXXXXXXXX-YYYYYYYYYY-Z
+    InChI Key is a 27-character string in format: AAAAAAAAAAAAAA-BBBBBBBBBB-Z
     where each block contains only uppercase letters A-Z.
 
     Args:

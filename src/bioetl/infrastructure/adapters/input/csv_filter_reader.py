@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from bioetl.domain.filtering import FilterColumn, FilterLoadResult
+from bioetl.domain.transformations import safe_str
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -49,13 +50,13 @@ class CsvFilterReader:
                 f"Column '{column_name}' not found in CSV. Available columns: {available}"
             )
 
-        result: list[str] = (
-            df.select(pl.col(column_name).cast(pl.Utf8).str.strip_chars())
-            .filter(pl.col(column_name).is_not_null())
-            .filter(pl.col(column_name) != "")
-            .to_series()
-            .to_list()
-        )
+        # Extract values and convert to string safely (handling float IDs)
+        raw_values = df.select(pl.col(column_name)).to_series().to_list()
+        result = [
+            s
+            for v in raw_values
+            if (s_val := safe_str(v, "")) is not None and (s := s_val.strip()) != ""
+        ]
         return result
 
     def _compute_duplicate_stats(
@@ -89,7 +90,10 @@ class CsvFilterReader:
         """Build valid row-wise combinations for client-side filtering."""
         combinations: set[tuple[str, ...]] = set()
         for row in df.select(column_names).iter_rows():
-            combo = tuple(str(val).strip() if val is not None else "" for val in row)
+            combo = tuple(
+                s_val.strip() if (s_val := safe_str(val, "")) is not None else ""
+                for val in row
+            )
             if all(combo):  # Skip rows with empty values
                 combinations.add(combo)
         return combinations
