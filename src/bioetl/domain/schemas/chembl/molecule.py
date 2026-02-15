@@ -210,7 +210,7 @@ class MoleculeSchema(ETLRecordSchema):
     molecular_weight: Series[float] | None = pa.Field(
         nullable=True, description="Full molecular weight including salts."
     )
-    property_mw_freebase: Series[float] | None = pa.Field(
+    mw_freebase: Series[float] | None = pa.Field(
         nullable=True, description="Molecular weight of parent compound."
     )
     polar_surface_area: Series[float] | None = pa.Field(
@@ -219,7 +219,7 @@ class MoleculeSchema(ETLRecordSchema):
     rotatable_bond_count: Series[int] | None = pa.Field(
         nullable=True, ge=0, description="Rotatable bonds count."
     )
-    property_ro5_violations: Series[int] | None = pa.Field(
+    ro5_violation_count: Series[int] | None = pa.Field(
         nullable=True,
         ge=0,
         le=4,
@@ -237,13 +237,13 @@ class MoleculeSchema(ETLRecordSchema):
     aromatic_ring_count: Series[int] | None = pa.Field(
         nullable=True, ge=0, description="Aromatic rings count."
     )
-    property_qed_weighted: Series[float] | None = pa.Field(
+    qed_score: Series[float] | None = pa.Field(
         nullable=True, ge=0, le=1, description="Quantitative Estimate of Drug-likeness."
     )
-    property_full_molformula: Series[str] | None = pa.Field(
+    molecular_formula: Series[str] | None = pa.Field(
         nullable=True, description="Full molecular formula."
     )
-    property_ro3_pass: Series[str] | None = pa.Field(
+    ro3_pass: Series[str] | None = pa.Field(
         nullable=True, isin=["Y", "N"], description="Rule-of-3 compliance (Y/N)."
     )
 
@@ -257,7 +257,7 @@ class MoleculeSchema(ETLRecordSchema):
     inchi_key: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=INCHI_KEY_REGEX_PATTERN,
-        description="Standard InChI Key (27 characters, XXXX-YYYY-Z format).",
+        description="Standard InChI Key (27 characters, NNNN-YYYY-Z format).",
     )
 
     # === Complex Fields (JSON Strings) ===

@@ -11,12 +11,13 @@ NOTE: These tests are currently SKIPPED due to existing issues with:
 Focus on test_infrastructure.py for E2E infrastructure testing.
 """
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline
 from bioetl.composition.factories.storage import StorageAdapter, StorageContext
+from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -43,7 +44,7 @@ class TestChEMBLPipelineE2E:
         bronze_writer = BronzeWriter(
             base_path=str(storage_paths["bronze"]),
             logger=logger,
-            metrics=AsyncMock(),
+            metrics=NoOpMetrics(),
             save_json=True,
             json_path=str(storage_paths["bronze"] / "json"),
         )
@@ -142,7 +143,7 @@ async def test_pubchem_compound_pipeline(
     bronze_writer = BronzeWriter(
         base_path=str(e2e_temp_storage["bronze"]),
         logger=logger,
-        metrics=AsyncMock(),
+        metrics=NoOpMetrics(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
     )
@@ -222,7 +223,7 @@ async def test_pipeline_resume_after_failure(
     bronze_writer = BronzeWriter(
         base_path=str(e2e_temp_storage["bronze"]),
         logger=logger,
-        metrics=AsyncMock(),
+        metrics=NoOpMetrics(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
     )
@@ -313,7 +314,7 @@ async def test_pipeline_idempotency(
     bronze_writer = BronzeWriter(
         base_path=str(e2e_temp_storage["bronze"]),
         logger=logger,
-        metrics=AsyncMock(),
+        metrics=NoOpMetrics(),
         save_json=True,
         json_path=str(e2e_temp_storage["bronze"] / "json"),
     )

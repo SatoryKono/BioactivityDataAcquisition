@@ -13,6 +13,7 @@ from click.testing import CliRunner
 
 from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.exit_codes import ExitCode
+from tests.unit.interfaces.cli.commands.conftest import mock_asyncio_run
 
 
 @pytest.fixture
@@ -65,7 +66,7 @@ class TestHealthServerCommand:
         mock_server_instance.stop = AsyncMock()
         mock_server_cls.return_value = mock_server_instance
 
-        with patch("asyncio.run", side_effect=KeyboardInterrupt()):
+        with mock_asyncio_run(side_effect=KeyboardInterrupt):
             result = cli_runner.invoke(cli, ["health", "server"])
 
         # Verify output
@@ -93,7 +94,7 @@ class TestHealthServerCommand:
         mock_server_instance.stop = AsyncMock()
         mock_server_cls.return_value = mock_server_instance
 
-        with patch("asyncio.run", side_effect=KeyboardInterrupt()):
+        with mock_asyncio_run(side_effect=KeyboardInterrupt):
             result = cli_runner.invoke(
                 cli, ["health", "server", "--host", "127.0.0.1", "--port", "9090"]
             )
@@ -118,7 +119,7 @@ class TestHealthServerCommand:
         mock_server_instance.stop = AsyncMock()
         mock_server_cls.return_value = mock_server_instance
 
-        with patch("asyncio.run", side_effect=KeyboardInterrupt()):
+        with mock_asyncio_run(side_effect=KeyboardInterrupt):
             result = cli_runner.invoke(cli, ["health", "server"])
 
         assert "Shutting down..." in result.output
@@ -129,7 +130,7 @@ class TestHealthServerCommand:
         cli_runner: CliRunner,
     ) -> None:
         """Test that health server accepts -p short form for port."""
-        with patch("asyncio.run", side_effect=KeyboardInterrupt()):
+        with mock_asyncio_run(side_effect=KeyboardInterrupt):
             result = cli_runner.invoke(
                 cli, ["health", "server", "--host", "localhost", "-p", "8888"]
             )
@@ -164,7 +165,7 @@ class TestHealthCheckCommand:
             "pubchem": {"status": "healthy", "latency_ms": "15.30", "endpoint": "/pug"},
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         assert "Running health checks..." in result.output
@@ -185,7 +186,7 @@ class TestHealthCheckCommand:
             "pubchem": {"status": "unhealthy", "error": "Connection refused"},
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         assert "Some providers unhealthy." in result.output
@@ -208,7 +209,7 @@ class TestHealthCheckCommand:
             },
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         assert "[WARN]" in result.output
@@ -228,7 +229,7 @@ class TestHealthCheckCommand:
             "chembl": {"status": "healthy", "latency_ms": "10.50", "endpoint": "/api"},
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(cli, ["health", "check", "--json"])
 
         # JSON output should include structure
@@ -251,7 +252,7 @@ class TestHealthCheckCommand:
             "pubchem": {"status": "healthy", "latency_ms": "15.30", "endpoint": "/pug"},
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(
                 cli,
                 ["health", "check", "--provider", "chembl", "--provider", "pubchem"],
@@ -273,7 +274,7 @@ class TestHealthCheckCommand:
             "chembl": {"status": "healthy", "latency_ms": "25.50", "endpoint": "/api"},
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         assert "25.50ms" in result.output
@@ -292,7 +293,7 @@ class TestHealthCheckCommand:
             "chembl": {"status": "unhealthy", "error": "Connection timeout"},
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         assert "Connection timeout" in result.output
@@ -303,7 +304,7 @@ class TestHealthCheckCommand:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check handles exceptions gracefully."""
-        with patch("asyncio.run", side_effect=Exception("Unexpected error")):
+        with mock_asyncio_run(side_effect=Exception("Unexpected error")):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         assert "Error running health checks" in result.output
@@ -322,7 +323,7 @@ class TestHealthCheckCommand:
             "chembl": {"status": "unknown", "error": "No health check method"},
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         assert "[FAIL]" in result.output
@@ -685,7 +686,7 @@ class TestHealthCheckEdgeCases:
         cli_runner: CliRunner,
     ) -> None:
         """Test health check with empty provider list."""
-        with patch("asyncio.run", return_value={}):
+        with mock_asyncio_run(return_value={}):
             result = cli_runner.invoke(cli, ["health", "check"])
 
         # Should show "All providers healthy" even with no providers
@@ -702,7 +703,7 @@ class TestHealthCheckEdgeCases:
             "pubchem": {"status": "healthy", "latency_ms": "15.00"},
         }
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(
                 cli,
                 [
@@ -725,7 +726,7 @@ class TestHealthCheckEdgeCases:
         """Test health check with -p short form for provider."""
         results = {"chembl": {"status": "healthy", "latency_ms": "10.00"}}
 
-        with patch("asyncio.run", return_value=results):
+        with mock_asyncio_run(return_value=results):
             result = cli_runner.invoke(cli, ["health", "check", "-p", "chembl"])
 
         assert "Running health checks..." in result.output

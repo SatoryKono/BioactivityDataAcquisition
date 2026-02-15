@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.domain.filtering import SilverFilterConfig
 from bioetl.domain.models.filter import ExtractionParams
 from bioetl.infrastructure.schemas.filter_config import FilterConfigFile
 
@@ -130,6 +131,14 @@ class TestExtractionParamsToDomain:
         assert isinstance(extraction_params, ExtractionParams)
         assert extraction_params.is_empty
         assert extraction_params.params == {}
+
+    def test_to_domain_returns_silver_filter_config_type(self) -> None:
+        """to_domain() should return SilverFilterConfig for silver filters."""
+        config = FilterConfigFile()
+
+        _, silver_filters, _, _ = config.to_domain()
+
+        assert isinstance(silver_filters, SilverFilterConfig)
 
     def test_to_domain_returns_four_tuple(self) -> None:
         """to_domain() should return a 4-tuple."""

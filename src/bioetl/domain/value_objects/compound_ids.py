@@ -140,7 +140,7 @@ class CompoundId:
     def numeric_id(self) -> int:
         """Get the numeric part of the identifier.
 
-        For ChEMBL: extracts number from CHEMBLXXX
+        For ChEMBL: extracts number from CHEMBLNNN
         For PubChem: returns the CID as integer
 
         Returns:
