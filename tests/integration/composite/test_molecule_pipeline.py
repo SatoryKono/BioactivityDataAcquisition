@@ -336,9 +336,9 @@ class TestMoleculeFieldMapping:
         # Fields that share the same name across providers after Gold unification
         unified_fields = {"canonical_smiles", "molecular_weight"}
         for chembl_field, pubchem_field in mappings.items():
-            assert (
-                chembl_field != pubchem_field or chembl_field in unified_fields
-            ), f"Expected different field names for {chembl_field}"
+            assert chembl_field != pubchem_field or chembl_field in unified_fields, (
+                f"Expected different field names for {chembl_field}"
+            )
 
     def test_chembl_only_fields(self) -> None:
         """Verify ChEMBL-only fields are preserved."""
