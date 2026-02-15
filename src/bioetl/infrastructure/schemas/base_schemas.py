@@ -11,19 +11,15 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
-from bioetl.domain.configs.base import (
-    BaseClientConfig as DomainBaseClientConfig,
-)
+from bioetl.domain.configs.base import BaseClientConfig as DomainBaseClientConfig
 from bioetl.domain.configs.base import (
     RateLimitConfig,
 )
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 
 if TYPE_CHECKING:
-    from bioetl.domain.filtering import GoldFilterConfig
-    from bioetl.domain.filtering.input_config import (
-        FilterColumn as DomainFilterColumn,
-    )
+    from bioetl.domain.filtering import BaseFilterConfig
+    from bioetl.domain.filtering.input_config import FilterColumn as DomainFilterColumn
     from bioetl.domain.filtering.input_config import (
         InputFilterConfig as DomainInputFilterConfig,
     )
@@ -548,11 +544,11 @@ class BaseGoldFiltersConfig(BaseModel):
         description="Exclude if field has value",
     )
 
-    def to_domain(self) -> GoldFilterConfig:
-        """Convert to domain GoldFilterConfig dataclass.
+    def to_domain(self) -> BaseFilterConfig:
+        """Convert to domain base filter config dataclass.
 
         Returns:
-            GoldFilterConfig: Immutable domain configuration.
+            BaseFilterConfig: Immutable domain configuration.
         """
         from bioetl.domain.filtering import (
             FilterOperator,
