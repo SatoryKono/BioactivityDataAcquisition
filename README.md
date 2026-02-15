@@ -168,6 +168,14 @@ bioetl checkpoint list
 
 ## Development
 
+### Local diagnostic artifacts
+
+Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
+
+* Временные диагностические дампы сохраняйте в `tmp/`.
+* Логи локальных запусков сохраняйте в `logs/`.
+* Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
+
 ### Testing
 
 The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.

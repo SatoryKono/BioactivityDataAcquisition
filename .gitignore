@@ -45,6 +45,9 @@ data/_output/
 full_log.txt
 final_report*.txt
 project_rules_failures.txt
+git_commit_*.txt
+*_gitshow_err.txt
+log_test.txt
 
 # IDE / Editors
 .idea/
