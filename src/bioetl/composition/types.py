@@ -15,7 +15,7 @@ Typed contexts for bootstrap functions (replacing untyped tuples):
 - PipelineCallbacksContext: transform, gold_filter, gold_transform callbacks
 - DQConfigsContext: Bronze/Silver/Gold DQ report configurations
 - DQOutputPathsContext: DQ report output paths and flat_structure flag
-- RateLimitConfig: rate and capacity for token bucket
+- RateLimitContext: rate and capacity for token bucket
 - CircuitBreakerConfig: failure_threshold and recovery_timeout
 """
 
@@ -26,7 +26,7 @@ from bioetl.composition.bootstrap_contexts import (
     DQConfigsContext,
     DQOutputPathsContext,
     PipelineCallbacksContext,
-    RateLimitConfig,
+    RateLimitContext,
 )
 from bioetl.composition.factories.storage import StorageAdapter
 from bioetl.composition.observability import ObservabilityBundle
@@ -45,7 +45,7 @@ __all__ = [
     "PipelineCallbacksContext",
     "PipelineDefinition",
     "PipelineRegistry",
-    "RateLimitConfig",
+    "RateLimitContext",
     "StorageAdapter",
     "create_registry",
     "get_default_registry",
