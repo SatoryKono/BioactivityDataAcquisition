@@ -165,7 +165,7 @@ source_file: ../../sources/chembl.yaml
 DQ-правила загружаются иерархически через `DQConfigLoader`:
 
 ```
-configs/dq/
+configs/quality/
 ├── _defaults.yaml                    # Global defaults
 ├── providers/<provider>.yaml         # Provider-level rules
 └── entities/<provider>/<entity>.yaml # Entity-level rules
@@ -173,14 +173,14 @@ configs/dq/
 
 Entity configs могут:
 1. Ссылаться на DQ файл: `dq_config_file: ../../dq/entities/chembl/activity.yaml`
-2. Определять inline правила в `dq_rules:`
+2. Определять inline правила в `dq_overrides:`
 3. Комбинировать оба подхода (inline overrides поверх файла)
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
 dq_config_file: ../../dq/entities/chembl/activity.yaml
 
-dq_rules:
+dq_overrides:
   field_validations:
     - field: "activity_id"
       type: "range"
@@ -197,7 +197,7 @@ dq_rules:
 3. **Автоматическая валидация**: JSON Schema (`_schema.json`) валидирует структуру
 4. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
 5. **Provider knowledge captured**: API limits, auth requirements в source configs
-6. **Иерархические DQ правила**: Централизация через `configs/dq/` (ADR-027)
+6. **Иерархические DQ правила**: Централизация через `configs/quality/` (ADR-027)
 7. **Separation of concerns**: Source configs отделены от pipeline configs
 
 ### Negative
@@ -232,7 +232,7 @@ pipeline_name: chembl_activity
 
 Все DQ правила только в pipeline configs, без иерархической системы.
 
-**Rejected**: Дублирование provider-level правил (например, CHEMBL ID pattern) между entity configs. Иерархическая система (`configs/dq/`) позволяет DRY.
+**Rejected**: Дублирование provider-level правил (например, CHEMBL ID pattern) между entity configs. Иерархическая система (`configs/quality/`) позволяет DRY.
 
 ### D. Provider configs внутри pipelines/
 
@@ -248,7 +248,7 @@ pipeline_name: chembl_activity
 | `sink.silver.primary_key` | ✅ PASS | All 19 entity configs specify (auto-propagated) |
 | `sink.silver.sort_by` | ✅ PASS | All 19 entity configs (ADR-014, auto-propagated from primary_keys) |
 | `sink.gold.sort_by` | ✅ PASS | All 19 entity configs (ADR-014, auto-propagated from primary_keys) |
-| `dq_rules` thresholds | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults |
+| `dq_overrides` thresholds | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults |
 | `circuit_breaker` settings | ✅ PASS | 5/300 in `_base.yaml` and source configs |
 | `rate_limit` per provider | ✅ PASS | In 7 source configs |
 | No hardcoded secrets | ✅ PASS | Uses `${ENV_VAR}` syntax where needed |

@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/publication.yaml
+# configs/quality/entities/chembl/publication.yaml
 # ChEMBL Publication (Document)-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

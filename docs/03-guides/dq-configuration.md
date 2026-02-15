@@ -14,7 +14,7 @@ DQ rules are organized in a hierarchical configuration structure that enables:
 ## Hierarchical DQ Config Structure
 
 ```
-configs/dq/
+configs/quality/
 ├── _defaults.yaml           # Level 1: Global defaults
 ├── providers/
 │   └── {provider}.yaml      # Level 2: Provider overrides
@@ -32,7 +32,7 @@ Configurations are merged in order (later wins):
 | 1 | `_defaults.yaml` | All pipelines |
 | 2 | `providers/{provider}.yaml` | All entities of provider |
 | 3 | `entities/{provider}/{entity}.yaml` | Specific entity |
-| 4 | Inline `dq_rules` in pipeline | Override for exceptions |
+| 4 | Inline `dq_overrides` in pipeline | Override for exceptions |
 
 **Merge rules**:
 - Scalars: Override (later value wins)
@@ -87,13 +87,13 @@ Two validations are applied globally to all entities:
 ### Step 1: Check if provider config exists
 
 ```bash
-ls configs/dq/providers/{provider}.yaml
+ls configs/quality/providers/{provider}.yaml
 ```
 
 If it doesn't exist, create it:
 
 ```yaml
-# configs/dq/providers/{provider}.yaml
+# configs/quality/providers/{provider}.yaml
 version: "1.0.0"
 provider: {provider}
 
@@ -104,7 +104,7 @@ provider_field_validations: []
 ### Step 2: Create entity config
 
 ```yaml
-# configs/dq/entities/{provider}/{entity}.yaml
+# configs/quality/entities/{provider}/{entity}.yaml
 version: "1.0.0"
 provider: {provider}
 entity: {entity}
@@ -258,7 +258,7 @@ entity_conditional_validations:
 ## Complete Entity DQ Config Example
 
 ```yaml
-# configs/dq/entities/chembl/activity.yaml
+# configs/quality/entities/chembl/activity.yaml
 version: "1.0.0"
 provider: chembl
 entity: activity
@@ -322,7 +322,7 @@ pipeline_name: chembl_activity
 dq_config_file: ../../dq/entities/chembl/activity.yaml
 
 # Temporary override for migration period
-dq_rules:
+dq_overrides:
   thresholds:
     hard_fail: 0.30  # Higher tolerance during migration
   field_validations:
@@ -389,10 +389,10 @@ ValueError: soft_fail (0.25) must be < hard_fail (0.20)
 ### Error: Required field not found
 
 ```
-FileNotFoundError: Required DQ defaults file not found: configs/dq/_defaults.yaml
+FileNotFoundError: Required DQ defaults file not found: configs/quality/_defaults.yaml
 ```
 
-**Fix**: Create `configs/dq/_defaults.yaml` with global settings.
+**Fix**: Create `configs/quality/_defaults.yaml` with global settings.
 
 ### Validation not applied
 

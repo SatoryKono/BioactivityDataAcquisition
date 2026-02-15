@@ -9,7 +9,7 @@ source:
 transform:
   steps: []
 
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.05
   hard_fail_threshold: 0.20
   strict_validation: false

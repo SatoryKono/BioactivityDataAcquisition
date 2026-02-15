@@ -155,7 +155,7 @@ gold_table: "chembl_activity"
 | `batch_size`          | Размер батча (1-5000)              | Нет (default: 100)   |
 | `checkpoint_interval` | Интервал checkpoint                | Нет (default: 10)    |
 | `source`              | Конфиг источника                   | Нет (auto-resolved)  |
-| `dq_rules`            | Inline DQ переопределения          | Нет                  |
+| `dq_overrides`            | Inline DQ переопределения          | Нет                  |
 | `sink`                | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
 | `circuit_breaker`     | Настройки Circuit Breaker          | Нет (from base)      |
 | `maintenance`         | VACUUM настройки                   | Нет (from base)      |
@@ -178,7 +178,7 @@ gold_table: "chembl_activity"
 batch_size: 500
 
 # Inline DQ переопределения
-dq_rules:
+dq_overrides:
   field_validations:
     - field: standard_value
       type: range
@@ -295,10 +295,10 @@ ______________________________________________________________________
 
 DQ правила загружаются в порядке приоритета (позже выигрывают):
 
-1. `configs/dq/_defaults.yaml` — глобальные defaults
-1. `configs/dq/providers/{provider}.yaml` — provider-specific
-1. `configs/dq/entities/{provider}/{entity}.yaml` — entity-specific
-1. Inline `dq_rules` в pipeline конфиге — финальные переопределения
+1. `configs/quality/_defaults.yaml` — глобальные defaults
+1. `configs/quality/providers/{provider}.yaml` — provider-specific
+1. `configs/quality/entities/{provider}/{entity}.yaml` — entity-specific
+1. Inline `dq_overrides` в pipeline конфиге — финальные переопределения
 
 ### Специальная merge логика
 
@@ -309,7 +309,7 @@ DQ правила загружаются в порядке приоритета 
 ### Структура DQ конфига
 
 ```yaml
-# configs/dq/_defaults.yaml
+# configs/quality/_defaults.yaml
 thresholds:
   soft_fail: 0.05      # >5% errors → Warning
   hard_fail: 0.20      # >20% errors → Fail Batch
@@ -335,7 +335,7 @@ common_field_validations:
 ### Entity-specific DQ правила
 
 ```yaml
-# configs/dq/entities/chembl/activity.yaml
+# configs/quality/entities/chembl/activity.yaml
 entity_field_validations:
   - field: activity_id
     type: required
@@ -384,9 +384,9 @@ ______________________________________________________________________
 
 Аналогично DQ, фильтры загружаются иерархически:
 
-1. `configs/filter/_defaults.yaml`
-1. `configs/filter/providers/{provider}.yaml`
-1. `configs/filter/entities/{provider}/{entity}.yaml`
+1. `configs/filters/_defaults.yaml`
+1. `configs/filters/providers/{provider}.yaml`
+1. `configs/filters/entities/{provider}/{entity}.yaml`
 1. Inline `filter_rules` в pipeline конфиге
 
 ### Input Filter
@@ -646,7 +646,7 @@ primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
-dq_rules:
+dq_overrides:
   thresholds:
     soft_fail: 0.10
     hard_fail: 0.30
@@ -735,7 +735,7 @@ bioetl config validate chembl_activity
 1. Проверить путь к DQ файлу:
 
    ```bash
-   ls configs/dq/entities/{provider}/{entity}.yaml
+   ls configs/quality/entities/{provider}/{entity}.yaml
    ```
 
 1. Проверить merge логику — validation lists **concatenate**, не override.

@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/subcellular_fraction.yaml
+# configs/quality/entities/chembl/subcellular_fraction.yaml
 # ChEMBL Subcellular Fraction-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

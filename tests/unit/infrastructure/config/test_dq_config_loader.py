@@ -21,7 +21,7 @@ from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 @pytest.fixture
 def test_configs_root(tmp_path: Path) -> Path:
     """Create test config structure with hierarchical DQ configs."""
-    dq_root = tmp_path / "dq"
+    dq_root = tmp_path / "quality"
     dq_root.mkdir()
 
     # _defaults.yaml
@@ -273,7 +273,7 @@ class TestDQConfigLoaderErrors:
 
     def test_missing_defaults_raises(self, tmp_path: Path) -> None:
         """Missing _defaults.yaml should raise FileNotFoundError."""
-        dq_root = tmp_path / "dq"
+        dq_root = tmp_path / "quality"
         dq_root.mkdir()
         # No _defaults.yaml created
 
@@ -284,7 +284,7 @@ class TestDQConfigLoaderErrors:
 
     def test_invalid_yaml_raises(self, tmp_path: Path) -> None:
         """Invalid YAML should raise appropriate error."""
-        dq_root = tmp_path / "dq"
+        dq_root = tmp_path / "quality"
         dq_root.mkdir()
         (dq_root / "_defaults.yaml").write_text(
             """
@@ -302,7 +302,7 @@ thresholds:
 
     def test_invalid_threshold_order_raises(self, tmp_path: Path) -> None:
         """soft_fail >= hard_fail should raise ValidationError."""
-        dq_root = tmp_path / "dq"
+        dq_root = tmp_path / "quality"
         dq_root.mkdir()
         (dq_root / "_defaults.yaml").write_text(
             """
@@ -494,40 +494,20 @@ class TestNormalizeToFileFormat:
         assert len(result["entity_cross_field_validations"]) == 1
 
 
-def test_dq_loader_prefers_new_quality_dir(tmp_path: Path) -> None:
-    """Loader should prioritize configs/quality over legacy configs/dq."""
-    for root_name, hard_fail in (("quality", 0.11), ("dq", 0.44)):
-        root = tmp_path / root_name
-        root.mkdir()
-        (root / "_defaults.yaml").write_text(
-            f"""
-version: "1.0.0"
-thresholds:
-  soft_fail: 0.05
-  hard_fail: {hard_fail}
-common_field_validations: []
-"""
-        )
-
-    loader = DQConfigLoader(tmp_path)
-    config = loader.load("missing", "missing")
-    assert config.hard_fail_threshold == 0.11
-
-
-def test_dq_loader_falls_back_to_legacy_dq_dir(tmp_path: Path) -> None:
-    """Loader should read legacy configs/dq when configs/quality is absent."""
-    root = tmp_path / "dq"
+def test_dq_loader_reads_quality_dir(tmp_path: Path) -> None:
+    """Loader should read configs/quality directory."""
+    root = tmp_path / "quality"
     root.mkdir()
     (root / "_defaults.yaml").write_text(
         """
 version: "1.0.0"
 thresholds:
   soft_fail: 0.05
-  hard_fail: 0.22
+  hard_fail: 0.11
 common_field_validations: []
 """
     )
 
     loader = DQConfigLoader(tmp_path)
     config = loader.load("missing", "missing")
-    assert config.hard_fail_threshold == 0.22
+    assert config.hard_fail_threshold == 0.11

@@ -101,7 +101,7 @@ merge:
 File: _defaults.yaml
 Path: dq\_defaults.yaml
 ================================================================================
- # configs/dq/_defaults.yaml
+ # configs/quality/_defaults.yaml
 # Global DQ defaults for all BioETL pipelines
 # RULES.md §3.1.2: DQ Thresholds
 #
@@ -166,7 +166,7 @@ common_cross_field_validations: []
 File: activity.yaml
 Path: dq\entities\chembl\activity.yaml
 ================================================================================
-# configs/dq/entities/chembl/activity.yaml
+# configs/quality/entities/chembl/activity.yaml
 # ChEMBL Activity-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -263,7 +263,7 @@ entity_conditional_validations:
 File: assay.yaml
 Path: dq\entities\chembl\assay.yaml
 ================================================================================
-# configs/dq/entities/chembl/assay.yaml
+# configs/quality/entities/chembl/assay.yaml
 # ChEMBL Assay-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -308,7 +308,7 @@ entity_conditional_validations: []
 File: assay_parameters.yaml
 Path: dq\entities\chembl\assay_parameters.yaml
 ================================================================================
-# configs/dq/entities/chembl/assay_parameters.yaml
+# configs/quality/entities/chembl/assay_parameters.yaml
 # ChEMBL Assay Parameters-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -360,7 +360,7 @@ entity_conditional_validations: []
 File: cell_line.yaml
 Path: dq\entities\chembl\cell_line.yaml
 ================================================================================
-# configs/dq/entities/chembl/cell_line.yaml
+# configs/quality/entities/chembl/cell_line.yaml
 # ChEMBL Cell Line-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -412,7 +412,7 @@ entity_conditional_validations: []
 File: compound_record.yaml
 Path: dq\entities\chembl\compound_record.yaml
 ================================================================================
-# configs/dq/entities/chembl/compound_record.yaml
+# configs/quality/entities/chembl/compound_record.yaml
 # ChEMBL Compound Record-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -469,7 +469,7 @@ entity_conditional_validations: []
 File: molecule.yaml
 Path: dq\entities\chembl\molecule.yaml
 ================================================================================
-# configs/dq/entities/chembl/molecule.yaml
+# configs/quality/entities/chembl/molecule.yaml
 # ChEMBL Molecule-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -517,7 +517,7 @@ entity_conditional_validations: []
 File: protein_class.yaml
 Path: dq\entities\chembl\protein_class.yaml
 ================================================================================
-# configs/dq/entities/chembl/protein_class.yaml
+# configs/quality/entities/chembl/protein_class.yaml
 # ChEMBL Protein Classification-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -577,7 +577,7 @@ entity_conditional_validations: []
 File: publication.yaml
 Path: dq\entities\chembl\publication.yaml
 ================================================================================
-# configs/dq/entities/chembl/publication.yaml
+# configs/quality/entities/chembl/publication.yaml
 # ChEMBL Publication (Document)-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -647,7 +647,7 @@ entity_conditional_validations: []
 File: publication_similarity.yaml
 Path: dq\entities\chembl\publication_similarity.yaml
 ================================================================================
-# configs/dq/entities/chembl/publication_similarity.yaml
+# configs/quality/entities/chembl/publication_similarity.yaml
 # ChEMBL Publication Similarity (Document Similarity)-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -713,7 +713,7 @@ entity_conditional_validations: []
 File: publication_term.yaml
 Path: dq\entities\chembl\publication_term.yaml
 ================================================================================
-# configs/dq/entities/chembl/publication_term.yaml
+# configs/quality/entities/chembl/publication_term.yaml
 # ChEMBL Publication Term (Document Term)-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -776,7 +776,7 @@ entity_conditional_validations: []
 File: target.yaml
 Path: dq\entities\chembl\target.yaml
 ================================================================================
-# configs/dq/entities/chembl/target.yaml
+# configs/quality/entities/chembl/target.yaml
 # ChEMBL Target-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -823,7 +823,7 @@ entity_conditional_validations: []
 File: target_component.yaml
 Path: dq\entities\chembl\target_component.yaml
 ================================================================================
-# configs/dq/entities/chembl/target_component.yaml
+# configs/quality/entities/chembl/target_component.yaml
 # ChEMBL Target Component-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
@@ -884,7 +884,7 @@ entity_conditional_validations: []
 File: publication.yaml
 Path: dq\entities\crossref\publication.yaml
 ================================================================================
-# configs/dq/entities/crossref/publication.yaml
+# configs/quality/entities/crossref/publication.yaml
 # CrossRef Publication (Work)-specific DQ rules
 # Inherits from: _defaults.yaml → providers/crossref.yaml
 
@@ -956,7 +956,7 @@ entity_conditional_validations: []
 File: publication.yaml
 Path: dq\entities\openalex\publication.yaml
 ================================================================================
-# configs/dq/entities/openalex/publication.yaml
+# configs/quality/entities/openalex/publication.yaml
 # OpenAlex Publication-specific DQ rules
 # Inherits from: _defaults.yaml → providers/openalex.yaml
 
@@ -1055,7 +1055,7 @@ entity_conditional_validations: []
 File: compound.yaml
 Path: dq\entities\pubchem\compound.yaml
 ================================================================================
-# configs/dq/entities/pubchem/compound.yaml
+# configs/quality/entities/pubchem/compound.yaml
 # PubChem Compound-specific DQ rules
 # Inherits from: _defaults.yaml → providers/pubchem.yaml
 
@@ -1095,7 +1095,7 @@ entity_conditional_validations: []
 File: publication.yaml
 Path: dq\entities\pubmed\publication.yaml
 ================================================================================
-# configs/dq/entities/pubmed/publication.yaml
+# configs/quality/entities/pubmed/publication.yaml
 # PubMed Publication-specific DQ rules
 # Inherits from: _defaults.yaml → providers/pubmed.yaml
 
@@ -1183,7 +1183,7 @@ entity_conditional_validations: []
 File: publication.yaml
 Path: dq\entities\semanticscholar\publication.yaml
 ================================================================================
-# configs/dq/entities/semanticscholar/publication.yaml
+# configs/quality/entities/semanticscholar/publication.yaml
 # Semantic Scholar Publication-specific DQ rules
 # Inherits from: _defaults.yaml → providers/semanticscholar.yaml
 
@@ -1260,7 +1260,7 @@ entity_conditional_validations: []
 File: idmapping.yaml
 Path: dq\entities\uniprot\idmapping.yaml
 ================================================================================
-# configs/dq/entities/uniprot/idmapping.yaml
+# configs/quality/entities/uniprot/idmapping.yaml
 # UniProt ID Mapping-specific DQ rules
 # Inherits from: _defaults.yaml → providers/uniprot.yaml
 
@@ -1326,7 +1326,7 @@ entity_conditional_validations:
 File: protein.yaml
 Path: dq\entities\uniprot\protein.yaml
 ================================================================================
-# configs/dq/entities/uniprot/protein.yaml
+# configs/quality/entities/uniprot/protein.yaml
 # UniProt Protein-specific DQ rules
 # Inherits from: _defaults.yaml → providers/uniprot.yaml
 
@@ -1399,7 +1399,7 @@ entity_conditional_validations: []
 File: target.yaml
 Path: dq\entities\uniprot\target.yaml
 ================================================================================
-# configs/dq/entities/uniprot/target.yaml
+# configs/quality/entities/uniprot/target.yaml
 # UniProt Target-specific DQ rules
 # Inherits from: _defaults.yaml → providers/uniprot.yaml
 
@@ -1438,7 +1438,7 @@ entity_conditional_validations: []
 File: chembl.yaml
 Path: dq\providers\chembl.yaml
 ================================================================================
-# configs/dq/providers/chembl.yaml
+# configs/quality/providers/chembl.yaml
 # ChEMBL-specific DQ rules
 # Inherits from: _defaults.yaml
 
@@ -1485,7 +1485,7 @@ provider_field_validations:
 File: crossref.yaml
 Path: dq\providers\crossref.yaml
 ================================================================================
-# configs/dq/providers/crossref.yaml
+# configs/quality/providers/crossref.yaml
 # CrossRef-specific DQ rules
 # Inherits from: _defaults.yaml
 
@@ -1522,7 +1522,7 @@ provider_field_validations:
 File: openalex.yaml
 Path: dq\providers\openalex.yaml
 ================================================================================
-# configs/dq/providers/openalex.yaml
+# configs/quality/providers/openalex.yaml
 # OpenAlex-specific DQ rules
 # Inherits from: _defaults.yaml
 
@@ -1566,7 +1566,7 @@ provider_field_validations:
 File: pubchem.yaml
 Path: dq\providers\pubchem.yaml
 ================================================================================
-# configs/dq/providers/pubchem.yaml
+# configs/quality/providers/pubchem.yaml
 # PubChem-specific DQ rules
 # Inherits from: _defaults.yaml
 
@@ -1595,7 +1595,7 @@ provider_field_validations:
 File: pubmed.yaml
 Path: dq\providers\pubmed.yaml
 ================================================================================
-# configs/dq/providers/pubmed.yaml
+# configs/quality/providers/pubmed.yaml
 # PubMed-specific DQ rules
 # Inherits from: _defaults.yaml
 
@@ -1647,7 +1647,7 @@ provider_field_validations:
 File: semanticscholar.yaml
 Path: dq\providers\semanticscholar.yaml
 ================================================================================
-# configs/dq/providers/semanticscholar.yaml
+# configs/quality/providers/semanticscholar.yaml
 # Semantic Scholar-specific DQ rules
 # Inherits from: _defaults.yaml
 
@@ -1699,7 +1699,7 @@ provider_field_validations:
 File: uniprot.yaml
 Path: dq\providers\uniprot.yaml
 ================================================================================
-# configs/dq/providers/uniprot.yaml
+# configs/quality/providers/uniprot.yaml
 # UniProt-specific DQ rules
 # Inherits from: _defaults.yaml
 
@@ -1728,7 +1728,7 @@ provider_field_validations:
 File: _defaults.yaml
 Path: filter\_defaults.yaml
 ================================================================================
-# configs/filter/_defaults.yaml
+# configs/filters/_defaults.yaml
 # =============================================================================
 # Global Filter Configuration Defaults
 # =============================================================================
@@ -1795,7 +1795,7 @@ gold_filters:
 File: activity.yaml
 Path: filter\entities\chembl\activity.yaml
 ================================================================================
-# configs/filter/entities/chembl/activity.yaml
+# configs/filters/entities/chembl/activity.yaml
 # =============================================================================
 # ChEMBL Activity Filter Configuration
 # =============================================================================
@@ -1852,7 +1852,7 @@ gold_filters:
 File: assay.yaml
 Path: filter\entities\chembl\assay.yaml
 ================================================================================
-# configs/filter/entities/chembl/assay.yaml
+# configs/filters/entities/chembl/assay.yaml
 # =============================================================================
 # ChEMBL Assay Filter Configuration
 # =============================================================================
@@ -1897,7 +1897,7 @@ gold_filters:
 File: assay_parameters.yaml
 Path: filter\entities\chembl\assay_parameters.yaml
 ================================================================================
-# configs/filter/entities/chembl/assay_parameters.yaml
+# configs/filters/entities/chembl/assay_parameters.yaml
 # =============================================================================
 # ChEMBL Assay Parameters Filter Configuration
 # =============================================================================
@@ -1934,7 +1934,7 @@ gold_filters:
 File: cell_line.yaml
 Path: filter\entities\chembl\cell_line.yaml
 ================================================================================
-# configs/filter/entities/chembl/cell_line.yaml
+# configs/filters/entities/chembl/cell_line.yaml
 # =============================================================================
 # ChEMBL Cell Line Filter Configuration
 # =============================================================================
@@ -1969,7 +1969,7 @@ gold_filters:
 File: compound_record.yaml
 Path: filter\entities\chembl\compound_record.yaml
 ================================================================================
-# configs/filter/entities/chembl/compound_record.yaml
+# configs/filters/entities/chembl/compound_record.yaml
 # =============================================================================
 # ChEMBL Compound Record Filter Configuration
 # =============================================================================
@@ -2006,7 +2006,7 @@ gold_filters:
 File: molecule.yaml
 Path: filter\entities\chembl\molecule.yaml
 ================================================================================
-# configs/filter/entities/chembl/molecule.yaml
+# configs/filters/entities/chembl/molecule.yaml
 # =============================================================================
 # ChEMBL Molecule Filter Configuration
 # =============================================================================
@@ -2050,7 +2050,7 @@ gold_filters:
 File: protein_class.yaml
 Path: filter\entities\chembl\protein_class.yaml
 ================================================================================
-# configs/filter/entities/chembl/protein_class.yaml
+# configs/filters/entities/chembl/protein_class.yaml
 # =============================================================================
 # ChEMBL Protein Class Filter Configuration
 # =============================================================================
@@ -2086,7 +2086,7 @@ gold_filters:
 File: publication.yaml
 Path: filter\entities\chembl\publication.yaml
 ================================================================================
-# configs/filter/entities/chembl/publication.yaml
+# configs/filters/entities/chembl/publication.yaml
 # =============================================================================
 # ChEMBL Publication Filter Configuration
 # =============================================================================
@@ -2135,7 +2135,7 @@ gold_filters:
 File: publication_similarity.yaml
 Path: filter\entities\chembl\publication_similarity.yaml
 ================================================================================
-# configs/filter/entities/chembl/publication_similarity.yaml
+# configs/filters/entities/chembl/publication_similarity.yaml
 # =============================================================================
 # ChEMBL Publication Similarity Filter Configuration
 # =============================================================================
@@ -2175,7 +2175,7 @@ gold_filters:
 File: publication_term.yaml
 Path: filter\entities\chembl\publication_term.yaml
 ================================================================================
-# configs/filter/entities/chembl/publication_term.yaml
+# configs/filters/entities/chembl/publication_term.yaml
 # =============================================================================
 # ChEMBL Publication Term Filter Configuration
 # =============================================================================
@@ -2217,7 +2217,7 @@ gold_filters:
 File: target.yaml
 Path: filter\entities\chembl\target.yaml
 ================================================================================
-# configs/filter/entities/chembl/target.yaml
+# configs/filters/entities/chembl/target.yaml
 # =============================================================================
 # ChEMBL Target Filter Configuration
 # =============================================================================
@@ -2275,7 +2275,7 @@ gold_filters:
 File: target_component.yaml
 Path: filter\entities\chembl\target_component.yaml
 ================================================================================
-# configs/filter/entities/chembl/target_component.yaml
+# configs/filters/entities/chembl/target_component.yaml
 # =============================================================================
 # ChEMBL Target Component Filter Configuration
 # =============================================================================
@@ -2315,7 +2315,7 @@ gold_filters:
 File: publication.yaml
 Path: filter\entities\composite\publication.yaml
 ================================================================================
-# configs/filter/entities/composite/publication.yaml
+# configs/filters/entities/composite/publication.yaml
 # =============================================================================
 # Composite Publication Filter Configuration
 # =============================================================================
@@ -2347,7 +2347,7 @@ gold_filters:
 File: publication.yaml
 Path: filter\entities\crossref\publication.yaml
 ================================================================================
-# configs/filter/entities/crossref/publication.yaml
+# configs/filters/entities/crossref/publication.yaml
 # =============================================================================
 # CrossRef Publication Filter Configuration
 # =============================================================================
@@ -2392,7 +2392,7 @@ gold_filters:
 File: publication.yaml
 Path: filter\entities\openalex\publication.yaml
 ================================================================================
-# configs/filter/entities/openalex/publication.yaml
+# configs/filters/entities/openalex/publication.yaml
 # =============================================================================
 # OpenAlex Publication Filter Configuration
 # =============================================================================
@@ -2437,7 +2437,7 @@ gold_filters:
 File: compound.yaml
 Path: filter\entities\pubchem\compound.yaml
 ================================================================================
-# configs/filter/entities/pubchem/compound.yaml
+# configs/filters/entities/pubchem/compound.yaml
 # =============================================================================
 # PubChem Compound Filter Configuration
 # =============================================================================
@@ -2477,7 +2477,7 @@ gold_filters:
 File: publication.yaml
 Path: filter\entities\pubmed\publication.yaml
 ================================================================================
-# configs/filter/entities/pubmed/publication.yaml
+# configs/filters/entities/pubmed/publication.yaml
 # =============================================================================
 # PubMed Publication Filter Configuration
 # =============================================================================
@@ -2518,7 +2518,7 @@ gold_filters:
 File: publication.yaml
 Path: filter\entities\semanticscholar\publication.yaml
 ================================================================================
-# configs/filter/entities/semanticscholar/publication.yaml
+# configs/filters/entities/semanticscholar/publication.yaml
 # =============================================================================
 # Semantic Scholar Publication Filter Configuration
 # =============================================================================
@@ -2563,7 +2563,7 @@ gold_filters:
 File: idmapping.yaml
 Path: filter\entities\uniprot\idmapping.yaml
 ================================================================================
-# configs/filter/entities/uniprot/idmapping.yaml
+# configs/filters/entities/uniprot/idmapping.yaml
 # =============================================================================
 # UniProt ID Mapping Filter Configuration
 # =============================================================================
@@ -2600,7 +2600,7 @@ gold_filters:
 File: protein.yaml
 Path: filter\entities\uniprot\protein.yaml
 ================================================================================
-# configs/filter/entities/uniprot/protein.yaml
+# configs/filters/entities/uniprot/protein.yaml
 # =============================================================================
 # UniProt Protein Filter Configuration
 # =============================================================================
@@ -2643,7 +2643,7 @@ gold_filters:
 File: chembl.yaml
 Path: filter\providers\chembl.yaml
 ================================================================================
-# configs/filter/providers/chembl.yaml
+# configs/filters/providers/chembl.yaml
 # =============================================================================
 # ChEMBL Provider Filter Configuration
 # =============================================================================
@@ -2677,7 +2677,7 @@ gold_filters:
 File: crossref.yaml
 Path: filter\providers\crossref.yaml
 ================================================================================
-# configs/filter/providers/crossref.yaml
+# configs/filters/providers/crossref.yaml
 # =============================================================================
 # CrossRef Provider Filter Configuration
 # =============================================================================
@@ -2705,7 +2705,7 @@ gold_filters:
 File: openalex.yaml
 Path: filter\providers\openalex.yaml
 ================================================================================
-# configs/filter/providers/openalex.yaml
+# configs/filters/providers/openalex.yaml
 # =============================================================================
 # OpenAlex Provider Filter Configuration
 # =============================================================================
@@ -2733,7 +2733,7 @@ gold_filters:
 File: pubchem.yaml
 Path: filter\providers\pubchem.yaml
 ================================================================================
-# configs/filter/providers/pubchem.yaml
+# configs/filters/providers/pubchem.yaml
 # =============================================================================
 # PubChem Provider Filter Configuration
 # =============================================================================
@@ -2762,7 +2762,7 @@ gold_filters:
 File: pubmed.yaml
 Path: filter\providers\pubmed.yaml
 ================================================================================
-# configs/filter/providers/pubmed.yaml
+# configs/filters/providers/pubmed.yaml
 # =============================================================================
 # PubMed Provider Filter Configuration
 # =============================================================================
@@ -2790,7 +2790,7 @@ gold_filters:
 File: semanticscholar.yaml
 Path: filter\providers\semanticscholar.yaml
 ================================================================================
-# configs/filter/providers/semanticscholar.yaml
+# configs/filters/providers/semanticscholar.yaml
 # =============================================================================
 # Semantic Scholar Provider Filter Configuration
 # =============================================================================
@@ -2818,7 +2818,7 @@ gold_filters:
 File: uniprot.yaml
 Path: filter\providers\uniprot.yaml
 ================================================================================
-# configs/filter/providers/uniprot.yaml
+# configs/filters/providers/uniprot.yaml
 # =============================================================================
 # UniProt Provider Filter Configuration
 # =============================================================================
@@ -3092,7 +3092,7 @@ Path: pipelines\_base.yaml
 #
 # Filter/DQ Rules:
 #   - input_filter and gold_filters are loaded from filter_config_file
-#   - dq_rules are loaded from dq_config_file
+#   - dq_overrides are loaded from dq_config_file
 #   - Inline overrides in pipeline config are merged on top
 #
 # Minimal Pipeline Config Example:
@@ -3159,7 +3159,7 @@ transform:
 # -----------------------------------------------------------------------------
 # Data Quality Rules
 # -----------------------------------------------------------------------------
-dq_rules:
+dq_overrides:
   # Soft threshold - triggers WARNING but continues processing
   # MUST: Default 5% error rate before warning
   soft_fail_threshold: 0.05
@@ -3548,9 +3548,9 @@ gold_table: "chembl_activity"
 # -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)
 # -----------------------------------------------------------------------------
-# Only rules that EXTEND or DIFFER from configs/dq/entities/chembl/activity.yaml
+# Only rules that EXTEND or DIFFER from configs/quality/entities/chembl/activity.yaml
 # Redundant rules (same as entity config) have been removed per ADR-027.
-dq_rules:
+dq_overrides:
   field_validations:
     # Override: Entity has min:0 only, pipeline adds max for extreme outliers
     - field: "standard_value"
@@ -3616,7 +3616,7 @@ gold_table: "chembl_assay"
 # -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)
 # -----------------------------------------------------------------------------
-dq_rules:
+dq_overrides:
   field_validations:
     # Override: Entity has nullable:true, pipeline requires non-null
     - field: "assay_type"
@@ -3676,18 +3676,18 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/assay_parameters.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/assay_parameters.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/assay_parameters.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/assay_parameters.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/assay_parameters.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
@@ -3737,18 +3737,18 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/cell_line.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/cell_line.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/cell_line.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/cell_line.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/cell_line.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
@@ -3800,18 +3800,18 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/compound_record.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/compound_record.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/compound_record.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/compound_record.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/compound_record.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
@@ -3860,25 +3860,25 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/molecule.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/molecule.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/molecule.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/molecule.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/molecule.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # -----------------------------------------------------------------------------
 # Inline DQ Overrides (applied on top of dq_config_file)
 # -----------------------------------------------------------------------------
 # Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
-dq_rules:
+dq_overrides:
   field_validations:
     # Unique: Not in entity config
     - field: "molecule_type"
@@ -3986,18 +3986,18 @@ checkpoint_interval: 500
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/protein_class.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/protein_class.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/protein_class.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/protein_class.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/protein_class.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
@@ -4056,18 +4056,18 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/publication.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/publication.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/publication.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 filter_config_file: ../../filter/entities/chembl/publication.yaml
 
@@ -4129,18 +4129,18 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/publication_similarity.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/publication_similarity.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/publication_similarity.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/publication_similarity.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 filter_config_file: ../../filter/entities/chembl/publication_similarity.yaml
 
@@ -4201,18 +4201,18 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/publication_term.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/publication_term.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/publication_term.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/publication_term.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/publication_term.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 filter_config_file: ../../filter/entities/chembl/publication_term.yaml
 
@@ -4263,25 +4263,25 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/target.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/target.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/target.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/target.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/target.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # -----------------------------------------------------------------------------
 # Inline DQ Overrides (applied on top of dq_config_file)
 # -----------------------------------------------------------------------------
 # Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
-dq_rules:
+dq_overrides:
   field_validations:
     # Override: Extended enum with more target types than entity config (17 vs 8)
     - field: "target_type"
@@ -4355,18 +4355,18 @@ source_file: ../../sources/chembl.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/target_component.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/target_component.yaml (entity-specific)
 dq_config_file: ../../dq/entities/chembl/target_component.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/target_component.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/target_component.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
@@ -4744,7 +4744,7 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
-  dq_rules:
+  dq_overrides:
     # Composite-level thresholds (applied to merge result)
     soft_fail_threshold: 0.10  # 10% errors = warning
     hard_fail_threshold: 0.30  # 30% errors = failure
@@ -4805,9 +4805,9 @@ gold_filters:
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filter rules are loaded from hierarchical config files:
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/composite.yaml (provider-specific)
-#   3. configs/filter/entities/composite/publication.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/composite.yaml (provider-specific)
+#   3. configs/filters/entities/composite/publication.yaml (entity-specific)
 filter_config_file: ../../filter/entities/composite/publication.yaml
 
 # -----------------------------------------------------------------------------
@@ -4846,18 +4846,18 @@ source_file: ../../sources/crossref.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/crossref.yaml (provider-specific)
-#   3. configs/dq/entities/crossref/publication.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/crossref.yaml (provider-specific)
+#   3. configs/quality/entities/crossref/publication.yaml (entity-specific)
 dq_config_file: ../../dq/entities/crossref/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/crossref.yaml (provider-specific)
-#   3. configs/filter/entities/crossref/publication.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/crossref.yaml (provider-specific)
+#   3. configs/filters/entities/crossref/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
@@ -4924,18 +4924,18 @@ source:
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/openalex.yaml (provider-specific)
-#   3. configs/dq/entities/openalex/publication.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/openalex.yaml (provider-specific)
+#   3. configs/quality/entities/openalex/publication.yaml (entity-specific)
 dq_config_file: ../../dq/entities/openalex/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/openalex.yaml (provider-specific)
-#   3. configs/filter/entities/openalex/publication.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/openalex.yaml (provider-specific)
+#   3. configs/filters/entities/openalex/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
@@ -4990,25 +4990,25 @@ source_file: ../../sources/pubchem.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/pubchem.yaml (provider-specific)
-#   3. configs/dq/entities/pubchem/compound.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/pubchem.yaml (provider-specific)
+#   3. configs/quality/entities/pubchem/compound.yaml (entity-specific)
 dq_config_file: ../../dq/entities/pubchem/compound.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/pubchem.yaml (provider-specific)
-#   3. configs/filter/entities/pubchem/compound.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/pubchem.yaml (provider-specific)
+#   3. configs/filters/entities/pubchem/compound.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # -----------------------------------------------------------------------------
 # Inline DQ Overrides (applied on top of dq_config_file)
 # -----------------------------------------------------------------------------
 # Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
-dq_rules:
+dq_overrides:
   field_validations:
     # Unique: Not in entity config
     - field: "molecular_formula"
@@ -5181,18 +5181,18 @@ source_file: ../../sources/semanticscholar.yaml
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/semanticscholar.yaml (provider-specific)
-#   3. configs/dq/entities/semanticscholar/publication.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/semanticscholar.yaml (provider-specific)
+#   3. configs/quality/entities/semanticscholar/publication.yaml (entity-specific)
 dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/semanticscholar.yaml (provider-specific)
-#   3. configs/filter/entities/semanticscholar/publication.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/semanticscholar.yaml (provider-specific)
+#   3. configs/filters/entities/semanticscholar/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink configuration
@@ -5266,9 +5266,9 @@ source:
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ config is loaded from hierarchical files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/uniprot.yaml (provider-specific)
-#   3. configs/dq/entities/uniprot/idmapping.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/uniprot.yaml (provider-specific)
+#   3. configs/quality/entities/uniprot/idmapping.yaml (entity-specific)
 #
 # Entity-specific config contains:
 #   - Elevated thresholds: soft_fail=0.30, hard_fail=0.80 (ID mapping may have many not_found)
@@ -5280,9 +5280,9 @@ dq_config_file: ../../dq/entities/uniprot/idmapping.yaml
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/uniprot.yaml (provider-specific)
-#   3. configs/filter/entities/uniprot/idmapping.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/uniprot.yaml (provider-specific)
+#   3. configs/filters/entities/uniprot/idmapping.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Sink configuration

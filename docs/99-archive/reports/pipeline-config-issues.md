@@ -37,7 +37,7 @@ The project uses a **flat schema** rather than the **nested schema** proposed in
 | `transform.version` | `version` | **Equivalent** - root level |
 | `transform.steps` | Not implemented | **SHOULD** - optional |
 | `sink.silver.*` | `sink.silver.*` | **Matching** |
-| `dq_rules.*` | Inherited from `_defaults.yaml` | **OK** - DRY principle |
+| `dq_overrides.*` | Inherited from `_defaults.yaml` | **OK** - DRY principle |
 | `circuit_breaker.*` | Inherited from `_defaults.yaml`/source | **OK** - DRY principle |
 | `rate_limit.*` | In source configs | **OK** - separation of concerns |
 
@@ -67,8 +67,8 @@ No critical violations were detected. All MUST requirements are satisfied:
 | `sink.silver.format: delta` | PASS | Inherited from `_defaults.yaml` |
 | `sink.silver.mode` | PASS | Inherited as `merge` |
 | `sink.silver.primary_key` | PASS | All configs define `primary_key` |
-| `dq_rules.soft_fail_threshold` | PASS | 0.05 in `_defaults.yaml` |
-| `dq_rules.hard_fail_threshold` | PASS | 0.20 in `_defaults.yaml` |
+| `dq_overrides.soft_fail_threshold` | PASS | 0.05 in `_defaults.yaml` |
+| `dq_overrides.hard_fail_threshold` | PASS | 0.20 in `_defaults.yaml` |
 | `circuit_breaker.failure_threshold` | PASS | 5 in `_defaults.yaml` |
 | `circuit_breaker.recovery_timeout` | PASS | 300 in `_defaults.yaml` |
 | `rate_limit.requests_per_second` | PASS | In source configs |

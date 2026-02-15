@@ -31,7 +31,7 @@ This pattern follows ADR-027 (DQ Rules Externalization) to create a consistent h
 Extract filter rules into a hierarchical configuration structure:
 
 ```
-configs/filter/
+configs/filters/
 ├── _defaults.yaml           # Global defaults (Level 1)
 ├── README.md                # Documentation
 ├── providers/
@@ -65,7 +65,7 @@ filter_config_file: ../../filter/entities/chembl/activity.yaml
    - Thread-safe caching for performance
    - Deep merge with list deduplication for required_fields/exclude_if_present
 
-3. **Config files**: `configs/filter/`
+3. **Config files**: `configs/filters/`
    - `_defaults.yaml`: Global defaults (batch_size=100)
    - `providers/{provider}.yaml`: Provider-specific settings (e.g., ChEMBL batch_size=20)
    - `entities/{provider}/{entity}.yaml`: Entity-specific rules
@@ -149,10 +149,10 @@ Bronze extraction. Сокращают объём трафика — API возв
 
 #### Конфигурация
 
-Размещается в `configs/filter/` hierarchy как секция `extraction_params`:
+Размещается в `configs/filters/` hierarchy как секция `extraction_params`:
 
 ```yaml
-# configs/filter/entities/chembl/activity.yaml
+# configs/filters/entities/chembl/activity.yaml
 extraction_params:
   standard_type__in: "IC50,Ki"
   standard_units: "nM"
@@ -166,7 +166,7 @@ extraction_params:
 
 #### Merge order
 
-`configs/filter/_defaults.yaml` → `providers/{provider}.yaml`
+`configs/filters/_defaults.yaml` → `providers/{provider}.yaml`
 → `entities/{provider}/{entity}.yaml`
 
 Entity-level `extraction_params` полностью заменяет provider-level
@@ -257,7 +257,7 @@ Define filters in Python code. Rejected because:
 - Domain models: `src/bioetl/domain/filtering/`
 - Schema: `src/bioetl/infrastructure/schemas/filter_config.py`
 - Loader: `src/bioetl/infrastructure/config/filter_config_loader.py`
-- Config files: `configs/filter/`
+- Config files: `configs/filters/`
 - Tests: `tests/unit/infrastructure/config/test_filter_config_loader.py`
 
 ## Changelog

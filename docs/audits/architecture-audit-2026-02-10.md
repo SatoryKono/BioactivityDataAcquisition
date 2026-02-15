@@ -185,7 +185,7 @@
 - Policy: quarantine | skip | fail (configurable)
 
 **DQ Thresholds:**
-- soft_fail: 5%, hard_fail: 20% — `configs/dq/_defaults.yaml:16-18`
+- soft_fail: 5%, hard_fail: 20% — `configs/quality/_defaults.yaml:16-18`
 - Pydantic validation: `soft_fail < hard_fail` enforced
 - 3-level hierarchy: defaults → provider → entity → inline
 
@@ -197,7 +197,7 @@
 **DQ Metrics:** 20 check types across Bronze (5), Silver (8), Gold (7)
 
 **Externalized DQ Rules:**
-- 30+ YAML configs в `configs/dq/` — entities/, providers/, _defaults.yaml
+- 30+ YAML configs в `configs/quality/` — entities/, providers/, _defaults.yaml
 - Cross-field validations, conditional validations
 
 **Замечания:**

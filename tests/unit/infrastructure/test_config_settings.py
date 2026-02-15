@@ -167,7 +167,7 @@ class TestYamlConfigToDomain:
             batch_size=200,
             checkpoint_interval=2000,
             source=SourceConfig(),
-            dq_rules=DQConfig(
+            dq_overrides=DQConfig(
                 soft_fail_threshold=0.05,
                 hard_fail_threshold=0.20,
             ),
@@ -212,7 +212,7 @@ class TestYamlConfigToDomain:
                     {"name": "field3", "type": "float"},
                 ]
             ),
-            dq_rules=DQConfig(
+            dq_overrides=DQConfig(
                 soft_fail_threshold=0.05,
                 hard_fail_threshold=0.20,
             ),
@@ -243,7 +243,7 @@ class TestYamlConfigToDomain:
             batch_size=100,
             checkpoint_interval=1000,
             source=SourceConfig(),
-            dq_rules=DQConfig(
+            dq_overrides=DQConfig(
                 soft_fail_threshold=0.10,
                 hard_fail_threshold=0.30,
             ),
@@ -276,7 +276,7 @@ class TestYamlConfigToDomain:
             batch_size=100,
             checkpoint_interval=1000,
             source=SourceConfig(),
-            dq_rules=DQConfig(),
+            dq_overrides=DQConfig(),
             sink={},
         )
 

@@ -37,12 +37,6 @@ import yaml
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
-_PATH_ALIAS_GROUPS: tuple[tuple[str, str], ...] = (
-    ("filters", "filter"),
-    ("quality", "dq"),
-    ("schemas", "data_schema"),
-)
-
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     """Deep merge two dictionaries, with override taking precedence."""
@@ -98,43 +92,12 @@ def _apply_file_reference_defaults(
     )
 
 
-def _try_swap_dir(
-    base_dir: Path, parts: tuple[str, ...], old: str, new: str
-) -> Path | None:
-    """Replace *old* segment with *new* in *parts* and return path if it exists."""
-    if old not in parts:
-        return None
-    swapped = Path(*[new if p == old else p for p in parts])
-    candidate = base_dir / swapped
-    return candidate if candidate.exists() else None
-
-
-def _resolve_with_path_aliases(base_dir: Path, relative_path: str) -> Path | None:
-    """Resolve file path using new-first aliases with legacy fallback."""
-    direct_path = base_dir / relative_path
-    if direct_path.exists():
-        return direct_path
-
-    parts = Path(relative_path).parts
-    for new_dir, legacy_dir in _PATH_ALIAS_GROUPS:
-        result = _try_swap_dir(base_dir, parts, new_dir, legacy_dir)
-        if result is not None:
-            return result
-        result = _try_swap_dir(base_dir, parts, legacy_dir, new_dir)
-        if result is not None:
-            return result
-
-    return None
-
-
 def _load_column_groups_config(
     config_path: Path, column_groups_file: str
 ) -> list[dict[str, Any]] | None:
     """Load column group configuration from column_groups_file."""
-    column_groups_path = _resolve_with_path_aliases(
-        config_path.parent, column_groups_file
-    )
-    if column_groups_path is None:
+    column_groups_path = config_path.parent / column_groups_file
+    if not column_groups_path.exists():
         return None
 
     with open(column_groups_path, encoding="utf-8") as f:
@@ -167,8 +130,8 @@ def _load_data_schema_config(
     Returns:
         Dictionary with column_groups, silver, and gold keys, or None if file not found.
     """
-    schema_path = _resolve_with_path_aliases(config_path.parent, data_schema_file)
-    if schema_path is None:
+    schema_path = config_path.parent / data_schema_file
+    if not schema_path.exists():
         return None
 
     with open(schema_path, encoding="utf-8") as f:
@@ -482,8 +445,8 @@ def _load_filter_config(
     Returns:
         Loaded filter config dict or None if file doesn't exist.
     """
-    filter_path = _resolve_with_path_aliases(config_path.parent, filter_config_file)
-    if filter_path is None:
+    filter_path = config_path.parent / filter_config_file
+    if not filter_path.exists():
         return None
 
     with open(filter_path, encoding="utf-8") as f:

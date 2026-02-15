@@ -1,4 +1,4 @@
-# configs/dq/providers/crossref.yaml
+# configs/quality/providers/crossref.yaml
 # CrossRef-specific DQ rules
 # Inherits from: _defaults.yaml
 

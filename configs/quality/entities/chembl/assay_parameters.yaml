@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/assay_parameters.yaml
+# configs/quality/entities/chembl/assay_parameters.yaml
 # ChEMBL Assay Parameters-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

@@ -92,8 +92,8 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 | Configuration | `configs/pipelines/chembl/activity.yaml` |
 | Entity Definition | `src/bioetl/domain/entities/bioactivity.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
-| Gold Filter | `configs/filter/entities/chembl/activity.yaml` |
-| Data Quality | `configs/dq/entities/chembl/activity.yaml` |
+| Gold Filter | `configs/filters/entities/chembl/activity.yaml` |
+| Data Quality | `configs/quality/entities/chembl/activity.yaml` |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
 
 ---

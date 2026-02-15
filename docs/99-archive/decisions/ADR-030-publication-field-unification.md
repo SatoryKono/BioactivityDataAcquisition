@@ -3,7 +3,7 @@
 **Status:** Proposed
 **Date:** 2026-01-29
 **Decision makers:** @BioETL-Team
-**Relates to:** ADR-024 (Entity Naming Unification), configs/composite/field_groups/publication.yaml, configs/data_schema/composite/publication.yaml
+**Relates to:** ADR-024 (Entity Naming Unification), configs/composite/field_groups/publication.yaml, configs/schemas/composite/publication.yaml
 
 > **Note**: This is a draft outside the ADR registry. ADR-030 is reserved for the publication pagination strategy in `ADR-030-publication-pagination-strategy.md`. Track current work in `PUBLICATION_FIELD_UNIFICATION_PROGRESS.md`.
 
@@ -86,7 +86,7 @@ Update the following areas in one coordinated release:
 
 - `configs/composite/field_groups/publication.yaml`
 - `configs/pipelines/composite/publication.yaml`
-- `configs/data_schema/{provider}/publication.yaml` for chembl, crossref, openalex, pubmed, semanticscholar
+- `configs/schemas/{provider}/publication.yaml` for chembl, crossref, openalex, pubmed, semanticscholar
 - `src/bioetl/application/pipelines/{provider}/transformer.py` for the same providers
 - Any schema validators and tests that reference legacy field names
 
@@ -99,5 +99,5 @@ Update the following areas in one coordinated release:
 
 - `configs/composite/field_groups/publication.yaml`
 - `configs/pipelines/composite/publication.yaml`
-- `configs/data_schema/composite/publication.yaml`
+- `configs/schemas/composite/publication.yaml`
 - `src/bioetl/application/pipelines/crossref/transformer.py`
