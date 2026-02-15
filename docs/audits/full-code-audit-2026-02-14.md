@@ -1,46 +1,53 @@
 # ПОЛНЫЙ АУДИТ КОДОВОЙ БАЗЫ BioETL
 
-**Дата:** 2026-02-14
-**Версия:** 1.0.0
-**Статус:** PASS (9.2/10)
+**Дата:** 2026-02-15 (обновление аудита 2026-02-14)
+**Версия:** 1.1.0
+**Статус:** PASS (9.5/10)
+**Ветка:** main (актуализация)
 
 ---
 
 ## EXECUTIVE SUMMARY
 
-| Метрика | Значение |
-|---------|----------|
-| Всего файлов кода | 511 |
-| Классов | 926 |
-| Публичных функций | 1,459 |
-| Пайплайнов | 21 |
-| Тестовых файлов | ~565 |
-| Архитектурных нарушений | 0 |
-| Мёртвого кода (классы) | 0 |
+| Метрика | Значение | Δ vs 2026-02-14 |
+|---------|----------|-----------------|
+| Всего файлов кода | 520 | +9 |
+| Классов | 895 | −31 |
+| Публичных функций | 1,466 | +7 |
+| Пайплайнов (YAML) | 21 (+1 base +5 composite) | — |
+| Тестовых файлов | 569 | +4 |
+| Тестов (unit+arch) | 10,249 | новая метрика |
+| Coverage | 86.72% | +1.7% |
+| Архитектурных нарушений | 0 | — |
+| Функций CC > 10 | 40 (1 grade D, 39 grade C) | новая метрика |
+| mypy strict | PASS (520 files) | — |
+| ruff | PASS (0 issues) | — |
 
 ---
 
 ## 1. СТРУКТУРА СЛОЁВ
 
-### Domain Layer (175 файлов, 1.1 MB)
+### Domain Layer (177 файлов, 2.8 MB)
 
 | Подмодуль | Классов | Функций | Назначение |
 |-----------|---------|---------|------------|
 | `aggregates/` | 6 | 20+ | DDD агрегаты (Batch, PipelineRun, QuarantineEntry) |
 | `composite/` | 10+ | 15+ | Composite pipeline state (ADR-026) |
 | `config/` | 6 | 10+ | PipelineConfig, RuntimeConfig, DQConfig |
-| `contracts/` | 25+ | - | Gold layer Pandera schemas |
+| `contracts/` | 25+ | - | Gold layer Pandera schemas (23 gold schemas) |
 | `entities/` | 30+ | - | Domain entities (Molecule, Target, Activity...) |
 | `exceptions/` | 45+ | - | Domain exception hierarchy |
 | `filtering/` | 8 | 5 | Gold/Input filter configuration |
 | `models/` | 5 | - | ExtractionParams, Filter |
-| `ports/` | 55+ | - | Protocol interfaces for DI |
-| `schemas/` | 30+ | - | Silver layer Pandera schemas |
+| `ports/` | 38+ | - | Protocol interfaces for DI |
+| `schemas/` | 20+ | - | Silver layer Pandera schemas (20 silver schemas) |
 | `services/` | 8 | 20+ | IdentityService, NormalizationService |
 | `types/` | 20+ | - | Type aliases, enums |
 | `value_objects/` | 20+ | - | ChemblId, DOI, PubMedId... |
 
-### Application Layer (128 файлов, 1.1 MB)
+**Классов в слое:** 420
+
+### Application Layer (129 файлов, 2.5 MB)
 
 | Подмодуль | Классов | Функций | Назначение |
 |-----------|---------|---------|------------|
@@ -57,7 +64,9 @@
 | `services/` | 20+ | 40+ | PipelineRunnerService, HealthService... |
 | `services/dq/` | 6 | 30+ | BronzeAnalyzer, GoldAnalyzer |
 
-### Infrastructure Layer (130 файлов, 1.0 MB)
+**Классов в слое:** 183
+
+### Infrastructure Layer (134 файлов, 2.6 MB)
 
 | Подмодуль | Классов | Функций | Назначение |
 |-----------|---------|---------|------------|
@@ -81,7 +90,9 @@
 | `storage/` | 8 | 30+ | BronzeWriter, SilverWriter, GoldWriter |
 | `validation/` | 2 | 10 | PanderaValidator |
 
-### Composition Layer (50 файлов, 372.5 KB)
+**Классов в слое:** 255
+
+### Composition Layer (50 файлов, 833 KB)
 
 | Подмодуль | Классов | Функций | Назначение |
 |-----------|---------|---------|------------|
@@ -91,7 +102,9 @@
 | `services/` | 2 | 10 | MetadataCoordinator, versioning |
 | Root | 6 | 25+ | entrypoints, registry, builders |
 
-### Interfaces Layer (28 файлов, 94.6 KB)
+**Классов в слое:** 33
+
+### Interfaces Layer (28 файлов, 292 KB)
 
 | Подмодуль | Классов | Функций | Назначение |
 |-----------|---------|---------|------------|
@@ -99,7 +112,9 @@
 | `cli/` | 3 | 20+ | Main CLI, options |
 | `factories/` | 2 | 10 | Pipeline factories |
 | `http/` | 2 | 5 | Health server |
-| `orchestration/` | - | 10+ | Orchestration helpers |
+| `orchestration/` | - | - | Reserved for future use (пустой модуль) |
+
+**Классов в слое:** 4
 
 ---
 
@@ -139,6 +154,14 @@
 | composite/publication | chembl_publication | pubmed, crossref, openalex, semanticscholar |
 | composite/target | chembl_target | uniprot_protein |
 
+### Gold Schemas: 23
+
+14 ChEMBL + 2 Composite (CompositePublicationGoldSchema, CompositeMoleculeGoldSchema) + 1 PubChem + 4 Publications (PubMed, CrossRef, OpenAlex, SemanticScholar) + 2 UniProt
+
+### Silver Schemas: 20
+
+12 ChEMBL + 1 PubChem + 1 PubMed + 2 CrossRef (PublicationEnrichedSchema, PublicationSchema) + 1 OpenAlex + 1 SemanticScholar + 2 UniProt (IDMapping, Protein)
+
 ---
 
 ## 3. КЛЮЧЕВЫЕ СУЩНОСТИ ПО СЛОЯМ
@@ -158,6 +181,8 @@
 | HealthCheckPort | domain/ports/health_check.py | 10-40 | All adapters |
 | RateLimiterPort | domain/ports/resilience.py | 15-35 | TokenBucketRateLimiter |
 | CircuitBreakerPort | domain/ports/resilience.py | 40-70 | CircuitBreaker |
+
+**Всего Protocol-классов в domain/ports/: 38**
 
 ### Application Services
 
@@ -201,28 +226,38 @@
 
 ## 4. ПОКРЫТИЕ ТЕСТАМИ
 
-| Слой | Unit Tests | Integration Tests | Coverage |
-|------|------------|-------------------|----------|
-| domain | ~80 файлов | ~5 файлов | ~90% |
-| application | ~150 файлов | ~20 файлов | ~85% |
-| infrastructure | ~100 файлов | ~15 файлов | ~80% |
-| composition | ~20 файлов | ~3 файлов | ~85% |
-| interfaces | ~10 файлов | ~2 файлов | ~75% |
-| **Итого** | **~360 файлов** | **~45 файлов** | **~85%** |
+| Метрика | Значение |
+|---------|----------|
+| Тестов passed | 10,249 |
+| Тестов skipped | 21 |
+| Тестовых файлов | 569 |
+| **Coverage** | **86.72%** |
+| Время прогона | 92.56s (parallel) |
+
+### Coverage по слоям
+
+| Слой | Файлов кода | Тестовых файлов | Статус |
+|------|-------------|-----------------|--------|
+| domain | 177 | ~80 | Полное |
+| application | 129 | ~150 | Полное |
+| infrastructure | 134 | ~100 | Полное |
+| composition | 50 | ~20 | Полное |
+| interfaces | 28 | ~10 | Базовое |
 
 ### Сущности с недостаточным покрытием
 
-| Сущность | Файл | Причина |
-|----------|------|---------|
-| Aggregator | application/composite/aggregator.py | Нет dedicated unit tests |
-| dict_transformers | application/core/dict_transformers.py | Нет dedicated unit tests |
-| orchestration/* | interfaces/orchestration/ | Минимальное покрытие |
+| Сущность | Файл | Статус |
+|----------|------|--------|
+| ~~Aggregator~~ | ~~application/composite/aggregator.py~~ | **DONE** (17 тестов) |
+| ~~dict_transformers~~ | ~~application/core/dict_transformers.py~~ | **DONE** (49 тестов) |
+| orchestration/* | interfaces/orchestration/ | Пустой модуль, нечего тестировать |
+| CLI commands (health, config, run) | interfaces/cli/commands/ | Covered, но не 100% |
 
 ---
 
 ## 5. АРХИТЕКТУРНЫЕ ПРОВЕРКИ
 
-### ARCH-001: Import Matrix PASS
+### ARCH-001: Import Matrix — PASS
 
 | From \ To | domain | application | infrastructure | composition | interfaces |
 |-----------|--------|-------------|----------------|-------------|------------|
@@ -232,53 +267,115 @@
 | **composition** | ok | ok | ok | ok | ok (none) |
 | **interfaces** | ok | ok | ok | ok | ok |
 
-**Нарушений не обнаружено.**
+**Нарушений: 0**
 
-### ARCH-002: Domain Purity PASS
+### ARCH-002: Domain Purity — PASS
 
 - Нет `import requests/httpx/aiohttp` в domain
 - Нет `open()` операций в domain
 - Нет прямого `import structlog` в domain
 
-### AP-002: Direct structlog Import PASS
+### ARCH-008: Port Facade — PASS
+
+- Все импорты портов через `bioetl.domain.ports`, не через внутренние модули
+
+### AP-002: Direct structlog Import — PASS
 
 - Application/Interfaces не импортируют structlog напрямую
 
-### AP-005: Hardcoded Secrets PASS
+### AP-005: Hardcoded Secrets — PASS
 
 - Нет хардкод паролей в production коде
 
-### AP-006: Print Statements PASS
+### AP-006: Print Statements — PASS
 
-- Print statements только в interfaces/cli (допустимо)
+- Нет `print()` в production коде
+
+### DI-003: Service Locator — PASS
+
+- Нет ServiceLocator/Container.resolve паттернов
 
 ---
 
-## 6. МЁРТВЫЙ КОД
+## 6. КАЧЕСТВО КОДА
+
+### 6.1 Static Analysis
+
+| Инструмент | Результат | Детали |
+|-----------|----------|--------|
+| ruff | **PASS** | 0 issues |
+| mypy --strict | **PASS** | 520 files clean |
+| F401 (unused imports) | **PASS** | 0 violations |
+
+### 6.2 Cyclomatic Complexity (Radon/Xenon)
+
+| Слой | Avg CC | Grade | Xenon Check |
+|------|--------|-------|-------------|
+| domain | 2.03 | **A** | PASS (strict A/A/A) |
+| application | 15.0* | C | 18 functions CC > 10 |
+| infrastructure | 14.35* | C | 14 functions CC > 10 |
+| composition | 14.33* | C | 3 functions CC > 10 |
+| interfaces | 11.0* | C | 2 functions CC > 10 |
+
+*\*Средний CC только по функциям с CC ≥ 11 (из-за флага -nc). Реальный средний CC по всем функциям значительно ниже.*
+
+### 6.3 Функции CC > 10 (всего 40)
+
+**Grade D (CC 21-30) — 1 функция:**
+
+| Функция | Файл | CC | Рекомендация |
+|---------|------|----|--------------|
+| `MergeService.merge` | application/composite/merger.py:103 | D | P1: требует рефакторинга |
+
+**Grade C (CC 11-20) — 39 функций (top-10):**
+
+| Функция | Файл | Слой |
+|---------|------|------|
+| merger.py (4 функции) | application/composite/ | application |
+| silver_analyzer.py (3 функции) | application/services/dq/ | application |
+| _checks_integrity.py (2 функции) | application/services/dq/ | application |
+| _checks_statistical.py (2 функции) | application/services/dq/ | application |
+| chembl/client.py (4 функции) | infrastructure/adapters/chembl/ | infrastructure |
+| uniprot/idmapping_client.py (2 функции) | infrastructure/adapters/uniprot/ | infrastructure |
+| semanticscholar/adapter.py (2 функции) | infrastructure/adapters/ | infrastructure |
+| storage_factory.py (1 функция) | composition/factories/ | composition |
+| metadata_coordinator.py (2 функции) | composition/services/ | composition |
+| gold_writer.py (1 функция) | infrastructure/storage/ | infrastructure |
+
+### 6.4 Maintainability Index
+
+| Слой | Файлы с MI grade C или хуже | Детали |
+|------|----------------------------|--------|
+| domain | 0 | Все A/B |
+| application | 1 | `merger.py` (MI = 5.91, grade C) |
+| infrastructure | 0 | Все A/B |
+| composition | 0 | Все A/B |
+
+---
+
+## 7. МЁРТВЫЙ КОД
 
 ### Неиспользуемые классы: 0
 
-Все 926 классов используются в коде или тестах.
+Все 895 классов используются в коде или тестах.
 
-### Неиспользуемые функции
+### Неиспользуемые функции/модули
 
-| Функция | Файл | Severity | Рекомендация |
-|---------|------|----------|--------------|
-| register_provider | composition/providers/decorators.py:25 | LOW | Удалить или задокументировать как public API |
-| register_all_transformers | composition/factories/transformer_factory.py:128 | LOW | Удалить или вызывать в bootstrap |
+| Элемент | Файл | Severity | Статус |
+|---------|------|----------|--------|
+| `@register_provider` decorator | composition/providers/decorators.py | LOW | 0 usages в production (только docstring examples) |
+| `composition/types.py` re-export модуль | composition/types.py | LOW | 0 потребителей в production, 14 в тесте самого модуля |
 
-### Deprecated Aliases (для backward compatibility)
+### Deprecated Aliases — Миграция завершена
 
-В `composition/bootstrap/__init__.py` найдено 15+ deprecated aliases:
-- `bootstrap_pipeline` -> `bootstrap_pipeline_runner`
-- `bootstrap_checkpoint` -> `bootstrap_checkpoint_port`
-- `bootstrap_observability` -> `bootstrap_observability_bundle`
-
-**Рекомендация:** Добавить `@deprecated` декораторы и запланировать удаление.
+В `composition/bootstrap/` deprecated aliases с `warnings.warn(DeprecationWarning)`:
+- 11 deprecated функций в 6 модулях
+- **0 callsites за пределами bootstrap модуля** — миграция на canonical names завершена
+- Aliases сохранены для backward compatibility; удаление в следующем мажорном релизе
 
 ---
 
-## 7. ДУБЛИРУЮЩИЙСЯ КОД
+## 8. ДУБЛИРУЮЩИЙСЯ КОД
 
 ### Обнаружено минимальное дублирование
 
@@ -291,7 +388,7 @@
 
 ---
 
-## 8. РАСХОЖДЕНИЯ КОД-ДОКУМЕНТАЦИЯ
+## 9. РАСХОЖДЕНИЯ КОД-ДОКУМЕНТАЦИЯ
 
 ### Проверено соответствие:
 
@@ -306,28 +403,32 @@
 
 | Файл | Требуется | Приоритет |
 |------|-----------|-----------|
-| docs/00-project/RULES.md | Обновить статистику сущностей | LOW |
+| docs/00-project/RULES.md | Обновить статистику (520 файлов, 895 классов, 23 gold schemas) | LOW |
 | docs/02-architecture/README.md | Добавить composite pipeline архитектуру | MEDIUM |
 
 ---
 
-## 9. SCORING
+## 10. SCORING
 
-| Категория | Вес | Оценка | Взвешенная |
-|-----------|-----|--------|------------|
-| Architecture (ARCH) | 30% | 10/10 | 3.0 |
-| Anti-Patterns (AP) | 25% | 10/10 | 2.5 |
-| DI Violations (DI) | 20% | 9/10 | 1.8 |
-| Naming (NAME) | 10% | 9/10 | 0.9 |
-| Types (TYPE) | 10% | 9/10 | 0.9 |
-| Testing (TEST) | 5% | 8.5/10 | 0.425 |
-| **ИТОГО** | **100%** | - | **9.525/10** |
+| Категория | Вес | Оценка | Взвешенная | Комментарий |
+|-----------|-----|--------|------------|-------------|
+| Architecture (ARCH) | 30% | 10/10 | 3.0 | 0 нарушений import matrix, domain purity, port facade |
+| Anti-Patterns (AP) | 25% | 10/10 | 2.5 | 0 structlog leaks, 0 print, 0 secrets, 0 service locator |
+| DI Violations (DI) | 20% | 10/10 | 2.0 | 0 hard-coded constructors, 0 callsites deprecated (migrated) |
+| Naming (NAME) | 10% | 9/10 | 0.9 | Корректные suffixes, prefixes |
+| Types (TYPE) | 10% | 10/10 | 1.0 | mypy --strict PASS, 520 files clean |
+| Testing (TEST) | 5% | 9/10 | 0.45 | 86.72% coverage, 10,249 тестов |
+| **ИТОГО** | **100%** | - | **9.85/10** |  |
+
+**Complexity penalty:** −0.35 (1 grade D function: `MergeService.merge`)
+
+**Итоговый score: 9.5/10**
 
 **Статус: PASS**
 
 ---
 
-## 10. РЕКОМЕНДАЦИИ
+## 11. РЕКОМЕНДАЦИИ
 
 ### Критические (P0)
 *Нет критических проблем*
@@ -335,15 +436,18 @@
 ### Высокий приоритет (P1)
 1. ~~Добавить unit тесты для `application/composite/aggregator.py`~~ — **DONE** (17 тестов)
 2. ~~Добавить unit тесты для `application/core/dict_transformers.py`~~ — **DONE** (49 тестов)
+3. **NEW:** Рефакторинг `MergeService.merge` (grade D, CC 21-30) — единственная функция grade D в кодовой базе. Файл `merger.py` также имеет MI = 5.91 (grade C), единственный файл ниже порога.
 
 ### Средний приоритет (P2)
-1. Удалить или задокументировать `register_provider` decorator
+1. Удалить или задокументировать `register_provider` decorator (0 usages в production)
 2. ~~Добавить `@deprecated` warning для legacy bootstrap functions~~ — **DONE** (11 функций в 6 модулях)
-3. Расширить тестирование `interfaces/orchestration/`
+3. ~~Миграция callsites deprecated functions~~ — **DONE** (0 callsites за пределами bootstrap)
+4. **NEW:** Снизить CC функций grade C в application/services/dq/ (5 функций: silver_analyzer, _checks_integrity, _checks_statistical)
 
 ### Низкий приоритет (P3)
-1. Обновить статистику в RULES.md
-2. Консолидировать `composition/types.py` с основными модулями
+1. Обновить статистику в RULES.md (520 файлов, 895 классов, 23 gold schemas, 20 silver schemas)
+2. Удалить `composition/types.py` и его тест (0 потребителей в production)
+3. **NEW:** Снизить CC в infrastructure adapters (chembl/client.py — 4 функции grade C)
 
 ---
 
@@ -409,11 +513,11 @@
 ## ПРИЛОЖЕНИЕ B: ПРОМТЫ ДЛЯ РЕАЛИЗАЦИИ РЕКОМЕНДАЦИЙ
 
 > Каждый промт — самодостаточная инструкция для AI-агента.
-> Реализованные рекомендации (P1-1, P1-2, P2-2) исключены из списка.
+> Реализованные рекомендации помечены ~~strikethrough~~.
 
 ---
 
-### PROMPT-1 (P2-1): Документировать `register_provider` decorator как public API
+### ~~PROMPT-1 (P2-1): Документировать `register_provider` decorator~~ — актуально
 
 **Контекст:**
 - Файл: `src/bioetl/composition/providers/decorators.py`
@@ -421,225 +525,73 @@
   с примерами, протестирован в `tests/unit/composition/providers/test_provider_registry.py`
 - **Ни один адаптер** в production-коде не использует его как decorator.
   Все 7 провайдеров регистрируются императивно в `composition/providers/registration.py`.
-- Аудит пометил как "unused function", но фактически это public API для
-  будущих/внешних плагинов.
-
-**Промт:**
-
-```
-Прочитай src/bioetl/composition/providers/decorators.py и
-src/bioetl/composition/providers/registration.py.
-
-Задача: определить судьбу @register_provider decorator.
-
-Вариант A — Удалить (если декоратор не планируется использовать):
-1. Удалить src/bioetl/composition/providers/decorators.py
-2. Убрать re-export из composition/providers/__init__.py
-3. Обновить тесты: удалить тесты @register_provider из
-   tests/unit/composition/providers/test_provider_registry.py
-4. Убрать из __all__ в composition/providers/__init__.py
-
-Вариант B — Задокументировать как public API (рекомендуется):
-1. Добавить в docstring модуля composition/providers/__init__.py
-   раздел "Public API" с указанием что @register_provider —
-   декларативная альтернатива императивной регистрации в registration.py.
-2. Добавить в RULES.md секцию о двух способах регистрации провайдеров.
-3. Перевести хотя бы один адаптер (например, самый простой — pubchem)
-   на использование @register_provider как reference implementation:
-   - Добавить @register_provider("pubchem", http_rate=5.0) на класс
-     PubChemAdapter
-   - Убрать императивную регистрацию pubchem из registration.py
-   - Проверить, что тесты проходят
-
-Не меняй файлы кроме указанных. Запусти тесты после изменений.
-```
+- **Подтверждено аудитом 2026-02-15:** 0 actual usages, 3 references — все docstring examples.
 
 ---
 
-### PROMPT-2 (P2-3): Расширить тестирование interfaces/orchestration/
+### ~~PROMPT-2 (P2-3): Расширить тестирование interfaces/orchestration/~~ — не требуется
+
+**Подтверждено аудитом 2026-02-15:** Модуль пустой (reserved for future use), нечего тестировать.
+
+---
+
+### PROMPT-3 (P3-1): Обновить статистику в RULES.md — актуально
+
+**Актуальные числа (2026-02-15):**
+- Файлов кода: 520 (было 511)
+- Классов: 895 (было 926)
+- Публичных функций: 1,466 (было 1,459)
+- Gold schemas: 23 (включая 2 composite)
+- Silver schemas: 20
+- Domain ports (Protocol): 38
+- Coverage: 86.72%
+- Тестов: 10,249
+
+---
+
+### PROMPT-4 (P3-2): Удалить composition/types.py — актуально
+
+**Подтверждено аудитом 2026-02-15:** 0 потребителей в production, 14 import refs — все в тесте самого модуля.
+
+---
+
+### ~~PROMPT-5 (BONUS): Миграция deprecated bootstrap callsites~~ — **DONE**
+
+**Подтверждено аудитом 2026-02-15:** 0 callsites deprecated функций за пределами bootstrap модуля.
+
+---
+
+### PROMPT-6 (NEW P1): Рефакторинг MergeService.merge
 
 **Контекст:**
-- `src/bioetl/interfaces/orchestration/__init__.py` — 20 строк, модуль
-  зарезервирован для будущих нужд (Celery, Airflow интеграции).
-- Содержит только `__all__: list[str] = []` и docstring.
-- Нет тестов, но и нечего тестировать — модуль пустой.
+- `src/bioetl/application/composite/merger.py:103` — `MergeService.merge` grade **D** (CC 21-30)
+- Единственная функция grade D в кодовой базе
+- Файл `merger.py` имеет MI = 5.91 (grade C), единственный файл ниже порога
 
 **Промт:**
 
 ```
-Прочитай src/bioetl/interfaces/orchestration/__init__.py.
+Прочитай src/bioetl/application/composite/merger.py.
 
-Модуль пустой (reserved for future use). Действия:
+Задача: рефакторинг MergeService.merge() для снижения CC < 15 (grade B).
 
-1. Создай минимальный architecture test в
-   tests/architecture/test_orchestration_boundaries.py
-   который проверяет:
-   - orchestration/ НЕ импортирует из application/ или domain/ напрямую
-     (будущие интеграции должны идти через composition/)
-   - orchestration/__init__.py экспортирует пустой __all__
+Подход:
+1. Извлечь логические блоки в private methods:
+   - Validation logic → _validate_merge_inputs()
+   - Column alignment → _align_columns()
+   - Conflict resolution → _resolve_conflicts()
+   - Final assembly → _assemble_result()
 
-2. Тест должен быть forward-looking: когда модуль наполнится кодом,
-   architecture test будет ловить нарушения import boundaries.
+2. Каждый новый метод должен:
+   - Иметь CC ≤ 10 (grade B)
+   - Иметь type annotations
+   - Быть покрытым существующими тестами (через integration)
 
-Паттерн теста — см. tests/architecture/test_bootstrap_layer_boundaries.py
-для примера стиля.
-
-Запусти pytest tests/architecture/ -v после создания.
-```
-
----
-
-### PROMPT-3 (P3-1): Обновить статистику в RULES.md
-
-**Контекст:**
-- `docs/00-project/RULES.md` содержит числовые данные о сущностях,
-  пайплайнах и coverage, которые могут расходиться с текущим состоянием.
-- Аудит показал 21 пайплайн, 926 классов, 511 файлов кода.
-
-**Промт:**
-
-```
-Прочитай docs/00-project/RULES.md.
-
-Задача: найти и обновить числовые данные, которые не соответствуют
-текущему состоянию кодовой базы. Используй данные из аудита:
-
-Актуальные числа:
-- Пайплайнов: 21 (13 ChEMBL + 1 PubChem + 2 UniProt + 1 PubMed +
-  1 CrossRef + 1 OpenAlex + 1 SemanticScholar + 1 tissue)
-- Composite pipelines: 5 (activity, assay, molecule, publication, target)
-- Провайдеров: 7 (chembl, pubchem, uniprot, pubmed, crossref,
-  openalex, semanticscholar)
-- Файлов кода: 511
-- Классов: 926
-- Domain ports: 55+
-- Gold schemas: 21
-- Silver schemas: 19
-
-Найди в RULES.md числа, которые отличаются, и обнови их.
-Не меняй никакую другую логику или текст. Только числовые данные.
-
-Для каждого изменения оставь комментарий формата:
-  <!-- Updated: was X, now Y (audit 2026-02-14) -->
-в строке над изменённым числом.
-```
-
----
-
-### PROMPT-4 (P3-2): Консолидировать composition/types.py
-
-**Контекст:**
-- `src/bioetl/composition/types.py` — 52 строки, чистый re-export модуль.
-- Реэкспортирует: `ObservabilityBundle`, `StorageAdapter`, `PipelineRegistry`,
-  `PipelineDefinition`, `create_registry`, `get_default_registry`,
-  плюс typed contexts (`PipelineCallbacksContext`, `DQConfigsContext`,
-  `DQOutputPathsContext`, `RateLimitConfig`, `CircuitBreakerConfig`).
-- Все эти типы уже доступны через свои "домашние" модули.
-- **Потребители:** только `tests/unit/composition/test_types.py`.
-  Production-код не импортирует из `bioetl.composition.types`.
-
-**Промт:**
-
-```
-Задача: определить, используется ли composition/types.py кем-то, и решить
-его судьбу.
-
-1. Поищи импорты из bioetl.composition.types в production-коде:
-   grep -rn "from bioetl.composition.types" src/bioetl/ --include="*.py"
-
-2. Поищи импорты в тестах:
-   grep -rn "from bioetl.composition.types" tests/ --include="*.py"
-
-Результат предыдущей проверки: потребитель только один —
-tests/unit/composition/test_types.py (тест самого модуля).
-
-Если потребителей кроме теста нет:
-   - Удалить src/bioetl/composition/types.py
-   - Удалить tests/unit/composition/test_types.py
-   - Убрать из composition/__init__.py если импортируется
-   - Проверить, что тесты проходят
-
-Не забудь запустить тесты и mypy после изменений.
-```
-
----
-
-### PROMPT-5 (BONUS): Миграция deprecated bootstrap callsites
-
-**Контекст:**
-- В P2-2 добавлены `warnings.warn(DeprecationWarning)` для 11 функций.
-- Обнаружены **активные callsites** deprecated функций в production-коде:
-  - `bootstrap_quarantine()` в `composition/bootstrap/assembly/_services.py:302`
-  - `bootstrap_cleanup()` в `composition/bootstrap/cli/_resource_management.py:152`
-  - `bootstrap_pipeline()` в `composition/bootstrap/runtime/_pipeline_execution.py:190`
-  - `bootstrap_pipeline()` в `composition/factories/runner_factory.py:78`
-
-**Промт:**
-
-```
-Задача: найти все вызовы deprecated bootstrap functions в production-коде
-и перевести на canonical names.
-
-Deprecated -> Canonical:
-- bootstrap_checkpoint       -> bootstrap_checkpoint_port
-- bootstrap_quarantine       -> bootstrap_quarantine_port
-- bootstrap_storage          -> bootstrap_storage_adapter
-- bootstrap_cleanup          -> bootstrap_cleanup_service
-- bootstrap_pipeline         -> bootstrap_pipeline_runner
-- bootstrap_composite_pipeline -> bootstrap_composite_runner
-- bootstrap_logger           -> bootstrap_logger_port
-- bootstrap_tracer           -> bootstrap_tracer_port
-- bootstrap_metrics          -> bootstrap_metrics_port
-- bootstrap_dq_monitor       -> bootstrap_dq_monitor_port
-- bootstrap_observability    -> bootstrap_observability_bundle
-
-Известные callsites (по данным аудита 2026-02-14):
-- bootstrap_quarantine()     в composition/bootstrap/assembly/_services.py:302
-- bootstrap_cleanup()        в composition/bootstrap/cli/_resource_management.py:152
-- bootstrap_pipeline()       в composition/bootstrap/runtime/_pipeline_execution.py:190
-- bootstrap_pipeline()       в composition/factories/runner_factory.py:78
-
-Для каждой deprecated функции:
-1. grep -rn "bootstrap_<old_name>" src/bioetl/ --include="*.py"
-   (исключая определение самой deprecated функции и re-exports)
-2. Если находятся callsites — заменить на canonical name
-3. Аналогично в tests/ — обновить тестовые вызовы
-
-После замены всех callsites:
-- Запустить pytest -x для проверки
-- Если все тесты зелёные, deprecated aliases можно будет удалить
-  в следующем мажорном релизе
-```
-
----
-
-### PROMPT-6 (BONUS): Тест на работоспособность deprecation warnings
-
-**Промт:**
-
-```
-Задача: добавить тест, проверяющий что deprecated bootstrap aliases
-вызывают DeprecationWarning.
-
-Создай файл tests/unit/composition/bootstrap/test_deprecation_warnings.py:
-
-1. Для каждой deprecated функции напиши тест вида:
-   def test_bootstrap_<name>_emits_deprecation_warning():
-       with pytest.warns(DeprecationWarning, match="<old_name>.*deprecated"):
-           <вызов deprecated функции с минимальными аргументами>
-
-2. Функции, требующие Settings (bootstrap_tracer, bootstrap_metrics,
-   bootstrap_dq_monitor, bootstrap_observability), — замокай Settings
-   через unittest.mock.
-
-3. Функции, требующие PipelineRunContext (bootstrap_pipeline) —
-   пропусти через pytest.mark.skip("requires full composition context").
-
-4. Простые функции (bootstrap_quarantine, bootstrap_cleanup,
-   bootstrap_storage) — вызывай напрямую, предварительно замокав
-   get_settings() через monkeypatch.
-
-Запусти pytest tests/unit/composition/bootstrap/test_deprecation_warnings.py -v.
+3. Проверки после рефакторинга:
+   - uv run xenon --max-absolute B --max-modules B --max-average A src/bioetl/application/composite/merger.py
+   - uv run radon mi src/bioetl/application/composite/merger.py -s
+   - pytest tests/unit/application/composite/ -v
+   - mypy src/bioetl/application/composite/merger.py
 ```
 
 ---
