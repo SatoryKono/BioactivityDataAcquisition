@@ -44,6 +44,7 @@ __all__ = [
     "DependencyConfig",
     "EnricherCardinality",
     "EnricherConfig",
+    "EnricherFieldPairing",
     "ExecutionConfig",
     "LayerColumnConfig",
     "LineageConfig",

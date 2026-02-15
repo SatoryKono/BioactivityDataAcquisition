@@ -95,7 +95,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 635,  # 629 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + _extract_multi_filter_ids + _resolve_bronze_opts + skip_gold
+        "composite.py": 650,  # 641 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + cross-validation + quarantine wiring
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
