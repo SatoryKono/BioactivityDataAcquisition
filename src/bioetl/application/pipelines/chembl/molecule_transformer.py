@@ -57,10 +57,18 @@ _PROPERTIES_FIELDS: dict[str, Any] = {
     "ro3_pass": None,
 }
 
-# Rename mapping for properties fields (num_ro5_violations -> ro5_violations)
+# Rename mapping: all property_* fields → canonical alias names for Gold unification
 _PROPERTIES_RENAMES: dict[str, str] = {
+    "property_alogp": "logp",
     "property_mw_freebase": "mw_freebase",
+    "property_full_mwt": "molecular_weight",
+    "property_hba": "hba_count",
+    "property_hbd": "hbd_count",
+    "property_psa": "polar_surface_area",
+    "property_rtb": "rotatable_bond_count",
     "property_num_ro5_violations": "ro5_violation_count",
+    "property_heavy_atoms": "heavy_atom_count",
+    "property_aromatic_rings": "aromatic_ring_count",
     "property_qed_weighted": "qed_score",
     "property_full_molformula": "molecular_formula",
     "property_ro3_pass": "ro3_pass",
@@ -205,16 +213,8 @@ class MoleculeTransformer(BaseChemblTransformer):
             _PROPERTIES_FIELDS,
             renames=_PROPERTIES_RENAMES,
         )
-        # Legacy convenience aliases derived from canonical property_* fields.
-        properties["logp"] = properties.get("property_alogp")
-        properties["polar_surface_area"] = properties.get("property_psa")
-        properties["rotatable_bond_count"] = properties.get("property_rtb")
-        properties["heavy_atom_count"] = properties.get("property_heavy_atoms")
-        properties["aromatic_ring_count"] = properties.get("property_aromatic_rings")
-        properties["molecular_weight"] = properties.get("property_full_mwt")
-        properties["hba_count"] = properties.get("property_hba")
-        properties["hbd_count"] = properties.get("property_hbd")
-        if properties.get("property_alogp") is not None:
+        # Derive logp_method from the renamed logp field
+        if properties.get("logp") is not None:
             properties["logp_method"] = "alogp"
 
         return {

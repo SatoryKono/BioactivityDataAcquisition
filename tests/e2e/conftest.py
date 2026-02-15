@@ -73,7 +73,7 @@ def e2e_environment():
     except ImportError:
         pass  # Pandera may not have this submodule in all versions
 
-    # Register all pipelines (required for bootstrap_pipeline to work)
+    # Register all pipelines (required for bootstrap_pipeline_runner to work)
     from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 
     register_all_pipelines()
@@ -203,7 +203,7 @@ def create_test_context(
         filter_field: Поле для фильтрации (обязательно если указаны filter_ids)
 
     Returns:
-        PipelineRunContext для передачи в bootstrap_pipeline
+        PipelineRunContext для передачи в bootstrap_pipeline_runner
     """
     from bioetl.domain.context import InputFilterContext
 

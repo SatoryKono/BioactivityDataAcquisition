@@ -20,7 +20,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,
@@ -59,7 +59,7 @@ async def test_chembl_publication_term_full_cycle(e2e_data_dir: Path):
     ctx = create_test_context("chembl_publication_term", limit=5)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Bronze layer (uses publication_term path per ADR-024 naming)
@@ -100,7 +100,7 @@ async def test_chembl_publication_term_types(e2e_data_dir: Path):
     ctx = create_test_context("chembl_publication_term", limit=10)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check term types
@@ -132,7 +132,7 @@ async def test_chembl_publication_term_mesh_fields(e2e_data_dir: Path):
     ctx = create_test_context("chembl_publication_term", limit=10)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check MeSH fields presence
