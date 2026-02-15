@@ -11,6 +11,10 @@ Scope: `src/bioetl/**` import graph (`grimp.build_graph("bioetl")`) and `.import
 - Informational (MAY): 0
 - Layer contracts: 5/5 kept (`domain-independence`, `application-independence`, `infrastructure-independence`, `composition-no-interfaces`, `no-direct-instantiation-in-application`)
 
+## Critical Findings
+
+No MUST-level violations confirmed by current `.importlinter` contract set and direct code verification.
+
 ## Moderate Findings
 
 ## [MODERATE] Domain package import cycle (`ports` ↔ `context`)
@@ -21,7 +25,7 @@ Scope: `src/bioetl/**` import graph (`grimp.build_graph("bioetl")`) and `.import
 - `src/bioetl/domain/ports/runner.py:10-11`
 - `src/bioetl/domain/context.py:17`
 
-**Rule Violated**: Circular imports in architecture components (anti-pattern checklist: circular imports).
+**Rule Violated**: RULES.md anti-pattern checklist — circular imports between architecture components (SHOULD fix).
 
 **Evidence**:
 
@@ -46,11 +50,14 @@ from bioetl.domain.ports import LoggerPort
 **Recommendation**:
 
 ```python
-# Prefer importing from a leaf module instead of package aggregator:
-from bioetl.domain.ports.observability import LoggerPort
+from typing import TYPE_CHECKING
 
-# Keep context types in a dependency-neutral module if both sides need them:
-# bioetl.domain.contracts.shared (example)
+if TYPE_CHECKING:
+    # Keep RULES.md import convention (facade import), but avoid runtime back-edge.
+    from bioetl.domain.ports import LoggerPort
+
+# Optional: move shared runner/context typing contracts to a neutral domain module
+# and keep facade re-export in bioetl.domain.ports.
 ```
 
 **Verification**:
@@ -71,7 +78,7 @@ ______________________________________________________________________
 - `src/bioetl/infrastructure/config/pipeline_config_loader.py:25-26`
 - `src/bioetl/infrastructure/config/__init__.py:22-36`
 
-**Rule Violated**: Circular imports in configuration subsystem.
+**Rule Violated**: RULES.md anti-pattern checklist — circular imports between architecture components (SHOULD fix).
 
 **Evidence**:
 
@@ -124,7 +131,7 @@ ______________________________________________________________________
 - `src/bioetl/composition/bootstrap/runtime/__init__.py:58-60`
 - `src/bioetl/composition/bootstrap/runtime/runner.py:14-17`
 
-**Rule Violated**: Circular imports inside composition root internals.
+**Rule Violated**: RULES.md anti-pattern checklist — circular imports between architecture components (SHOULD fix).
 
 **Evidence**:
 
@@ -176,7 +183,7 @@ ______________________________________________________________________
 - `src/bioetl/composition/providers/registration.py:16-23`
 - `src/bioetl/composition/providers/_config_helpers.py:29-34`
 
-**Rule Violated**: Circular imports in provider registration/factory assembly.
+**Rule Violated**: RULES.md anti-pattern checklist — circular imports between architecture components (SHOULD fix).
 
 **Evidence**:
 
