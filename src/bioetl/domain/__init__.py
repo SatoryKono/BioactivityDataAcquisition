@@ -15,26 +15,14 @@ This module provides a clean public API for the domain layer, exposing:
 
 from __future__ import annotations
 
-# Composite pipeline subpackage (ADR-026)
-from bioetl.domain import composite
-
-# Data contracts (Gold layer Pandera schemas)
-from bioetl.domain import contracts
-
-# Domain constants module
-from bioetl.domain import constants
-
+# Domain mapping (entity relation mappings)
 # Domain registry (publication entity mappings, ADR-024)
+# Domain constants module
+# Data contracts (Gold layer Pandera schemas)
+# Composite pipeline subpackage (ADR-026)
+from bioetl.domain import mapping  # noqa: F401
 from bioetl.domain import registry  # noqa: F401
-from bioetl.domain.registry import (
-    LEGACY_PUBLICATION_ALIASES,
-    PUBLICATION_ENTITY_TYPES,
-    PublicationMapping,
-    get_publication_mapping,
-    is_legacy_publication_alias,
-    is_publication_entity,
-    validate_publication_entity_type,
-)
+from bioetl.domain import composite, constants, contracts
 
 # Configuration objects
 from bioetl.domain.config import (
@@ -53,6 +41,9 @@ from bioetl.domain.configs import (
     RateLimitConfig,
 )
 
+# Domain constants
+from bioetl.domain.constants import META_FIELDS
+
 # Context objects
 from bioetl.domain.context import (
     PipelineContext,
@@ -60,7 +51,7 @@ from bioetl.domain.context import (
 )
 
 # Entities (Domain objects)
-from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities (dataclass)
+from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities (dataclass); CrossRef; OpenAlex; PubMed; Publication Base (for composite pipelines, ADR-024); SemanticScholar
     ActivityRecord,
     ArticleRecord,
     Assay,
@@ -75,23 +66,18 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     ChemblPublicationRecord,
     ChemblPublicationTermRecord,
     CompoundRecord,
-    # CrossRef
     CrossRefPublicationEntity,
     DocumentSimilarity,
     DocumentTerm,
     Molecule,
     MoleculeRecord,
-    # OpenAlex
     OpenAlexPublicationEntity,
     ProteinClassification,
     PubchemMolecule,
     PubchemMoleculeRecord,
-    # PubMed
-    PubMedPublicationEntity,
-    # Publication Base (for composite pipelines, ADR-024)
     PublicationEntityBase,
     PublicationRecord,
-    # SemanticScholar
+    PubMedPublicationEntity,
     SemanticScholarPublicationEntity,
     SubcellularFraction,
     Target,
@@ -101,9 +87,6 @@ from bioetl.domain.entities import (  # DTO Records (Pydantic); Domain Entities 
     Tissue,
     UniprotTarget,
 )
-
-# Domain mapping (entity relation mappings)
-from bioetl.domain import mapping  # noqa: F401
 
 # Error classifier
 from bioetl.domain.error_classifier import ErrorClassifier
@@ -157,9 +140,6 @@ from bioetl.domain.exceptions import (
     ValidationError,
 )
 
-# Extraction filtering (ADR-028 §3)
-from bioetl.domain.models import ExtractionParams
-
 # Filter configuration
 from bioetl.domain.filtering import (
     FilterLoadResult,
@@ -176,6 +156,9 @@ from bioetl.domain.locking import FencingToken, LockContext, LockNotHeldError
 
 # Medallion policies
 from bioetl.domain.medallion import ClearPolicy, MedallionPolicy
+
+# Extraction filtering (ADR-028 §3)
+from bioetl.domain.models import ExtractionParams
 
 # Pure domain normalization (REFACTOR-004)
 from bioetl.domain.normalization import (
@@ -202,11 +185,11 @@ from bioetl.domain.ports import (
     BronzeMetadataInput,
     CheckpointPort,
     CircuitBreakerPort,
-    DQMonitorPort,
-    DQReportWriterPort,
     DataNormalizationPort,
     DataSourcePort,
     DeltaReaderPort,
+    DQMonitorPort,
+    DQReportWriterPort,
     FilterableDataSourcePort,
     GoldDQAnalyzerPort,
     GoldDQConfigPort,
@@ -248,6 +231,15 @@ from bioetl.domain.ports import (
     StoragePort,
     TracingPort,
 )
+from bioetl.domain.registry import (
+    LEGACY_PUBLICATION_ALIASES,
+    PUBLICATION_ENTITY_TYPES,
+    PublicationMapping,
+    get_publication_mapping,
+    is_legacy_publication_alias,
+    is_publication_entity,
+    validate_publication_entity_type,
+)
 
 # Resilience (domain value objects)
 from bioetl.domain.resilience import CircuitBreakerConfig, RetryConfig
@@ -263,9 +255,6 @@ from bioetl.domain.serialization import (
 
 # Domain services
 from bioetl.domain.services import IdentityService
-
-# Domain constants
-from bioetl.domain.constants import META_FIELDS
 
 # Pure domain transformations
 from bioetl.domain.transformations import (
@@ -325,8 +314,8 @@ from bioetl.domain.value_objects import (
     MolecularWeight,
     PChemblValue,
     PubChemCid,
-    PubMedId,
     PublicationYear,
+    PubMedId,
     UniProtId,
     ValueObject,
 )
