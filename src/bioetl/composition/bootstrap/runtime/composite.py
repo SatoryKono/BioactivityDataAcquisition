@@ -1,18 +1,9 @@
-"""Bootstrap functions for Composite Pipeline execution.
-
-Handles initialization and wiring for CompositePipelineRunner.
-See ADR-026 for architectural decisions.
-
-Composite pipelines execute multiple related pipelines in sequence:
-1. Seed phase: Fetch primary entities (e.g., publications)
-2. Enrichment phase: Fetch supplementary data using seed keys
-3. Merge phase: Combine results into unified datasets
-"""
+"""Bootstrap functions for Composite Pipeline execution. See ADR-026."""
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 import yaml
@@ -67,22 +58,22 @@ COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
 FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
 
 
-def load_composite_config(name: str) -> CompositeConfig:
-    """Load and parse composite pipeline configuration from YAML.
+def _to_id_str(val: Any) -> str:
+    """Convert value to ID string, handling float-to-int conversion.
 
-    Uses Pydantic schema validation (CompositeConfigFileSchema) to ensure
-    configuration is valid before converting to domain objects.
-
-    Args:
-        name: Composite pipeline name (e.g., 'publication').
-
-    Returns:
-        CompositeConfig instance.
-
-    Raises:
-        FileNotFoundError: If config file doesn't exist.
-        ValueError: If config is invalid (wraps Pydantic ValidationError).
+    External APIs (like ChEMBL) often expect integer IDs and return 400
+    if given floats (e.g., '4044.0'). This helper ensures '4044.0'
+    becomes '4044'.
     """
+    if val is None:
+        return ""
+    if isinstance(val, float) and val.is_integer():
+        return str(int(val))
+    return str(val)
+
+
+def load_composite_config(name: str) -> CompositeConfig:
+    """Load and validate composite pipeline configuration from YAML."""
     config_path = COMPOSITE_CONFIG_DIR / f"{name}.yaml"
     if not config_path.exists():
         raise FileNotFoundError(f"Composite config not found: {config_path}")
@@ -127,7 +118,7 @@ def _build_fallback_mapping(
         .unique(subset=[filter_key])
         .iter_rows()
     )
-    return {str(k): str(t) for k, t in pairs}
+    return {_to_id_str(k): str(t) for k, t in pairs}
 
 
 def _find_filter_key(
@@ -169,7 +160,7 @@ def _extract_filter_ids_from_keys(
     key_values = keys.select(filter_key).drop_nulls().unique().to_series().to_list()
     if not key_values:
         return None, None, None
-    filter_ids = tuple(str(v) for v in key_values)
+    filter_ids = tuple(_to_id_str(v) for v in key_values)
     fallback = _build_fallback_mapping(keys, filter_key, enricher_cfg.join_keys)
     return filter_ids, filter_key, fallback
 
@@ -188,7 +179,7 @@ def _extract_field_values(
     values = keys.select(field).drop_nulls().unique().to_series().to_list()
     if not values:
         return None
-    return tuple(str(v) for v in values)
+    return tuple(_to_id_str(v) for v in values)
 
 
 def _extract_multi_filter_ids(
@@ -419,7 +410,7 @@ def bootstrap_composite_runner(
                             keys.select(key).drop_nulls().unique().to_series().to_list()
                         )
                         if key_values:
-                            filter_ids = tuple(str(v) for v in key_values)
+                            filter_ids = tuple(_to_id_str(v) for v in key_values)
                             # Use filter_field from config if set, otherwise use join_key
                             filter_field = dep_cfg.filter_field or key
                             break

@@ -8,6 +8,7 @@ from bioetl.infrastructure.config_loader import (
     load_pipeline_config as load_pipeline_config_cached,
 )
 from bioetl.infrastructure.config_loader import (
+    _normalize_source_config,
     load_source_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -123,6 +124,172 @@ def test_load_fallback_no_underscore(setup_configs):
     assert config.pipeline_name == "simple"
 
 
+def test_load_source_config_legacy_and_new_format_equivalent_chembl(
+    tmp_path, monkeypatch
+):
+    """New source format should normalize to same result as legacy format (chembl)."""
+    load_source_config.cache_clear()
+
+    sources_dir = tmp_path / "configs" / "sources"
+    sources_dir.mkdir(parents=True)
+
+    legacy = {
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "provider_config": {
+                "provider": "chembl",
+                "base_url": "https://example.chembl/api",
+                "auth_type": "public",
+                "api_version": "v1",
+                "client": {"timeout_sec": 60.0, "max_retries": 3},
+                "batch_size": 25,
+            },
+            "rate_limit": {
+                "requests_per_second": 3.0,
+                "burst": 10,
+                "with_api_key": {"requests_per_second": 6.0, "burst": 20},
+            },
+            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+            "health_check": {"endpoint": "/health", "timeout": 5},
+        }
+    }
+    new = {
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "api": {
+                "base_url": "https://example.chembl/api",
+                "auth_type": "public",
+                "api_version": "v1",
+            },
+            "client": {"timeout": 60.0, "max_retries": 3},
+            "batch": {"batch_size": 25},
+            "provider_config": {"provider": "chembl"},
+            "rate_limit": {
+                "requests_per_second": 3.0,
+                "burst": 10,
+                "authenticated": {"requests_per_second": 6.0, "burst": 20},
+            },
+            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+            "health_check": {"endpoint": "/health", "timeout_sec": 5},
+        }
+    }
+
+    monkeypatch.chdir(tmp_path)
+    (sources_dir / "chembl_legacy.yaml").write_text(yaml.dump(legacy))
+    (sources_dir / "chembl_new.yaml").write_text(yaml.dump(new))
+
+    cfg_legacy = load_source_config("chembl_legacy")
+    load_source_config.cache_clear()
+    cfg_new = load_source_config("chembl_new")
+
+    assert cfg_legacy.base_url == cfg_new.base_url
+    assert cfg_legacy.timeout_sec == cfg_new.timeout_sec
+    assert cfg_legacy.max_retries == cfg_new.max_retries
+    assert cfg_legacy.batch_size == cfg_new.batch_size
+    assert (
+        cfg_legacy.rate_limit.requests_per_second
+        == cfg_new.rate_limit.requests_per_second
+    )
+
+
+def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
+    tmp_path, monkeypatch
+):
+    """New source format should normalize to same result as legacy format (pubmed)."""
+    load_source_config.cache_clear()
+
+    sources_dir = tmp_path / "configs" / "sources"
+    sources_dir.mkdir(parents=True)
+
+    legacy = {
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "provider_config": {
+                "provider": "pubmed",
+                "base_url": "https://example.pubmed/api",
+                "auth_type": "api_key",
+                "api_key": "${BIOETL_PUBMED_API_KEY}",
+                "client": {"timeout": 45.0, "max_retries": 4},
+                "batch_size": 100,
+            },
+            "rate_limit": {
+                "requests_per_second": 5.0,
+                "burst": 15,
+                "with_api_key": {"requests_per_second": 9.0, "burst": 25},
+            },
+            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+            "health_check": {"endpoint": "/health", "timeout": 5},
+        }
+    }
+    new = {
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "api": {
+                "base_url": "https://example.pubmed/api",
+                "auth_type": "api_key",
+                "api_key": "${BIOETL_PUBMED_API_KEY}",
+            },
+            "client": {"timeout_sec": 45.0, "max_retries": 4},
+            "batch": {"size": 100},
+            "provider_config": {"provider": "pubmed"},
+            "rate_limit": {
+                "requests_per_second": 5.0,
+                "burst": 15,
+                "authenticated": {"requests_per_second": 9.0, "burst": 25},
+            },
+            "circuit_breaker": {"failure_threshold": 5, "recovery_timeout": 300},
+            "health_check": {"endpoint": "/health", "timeout_sec": 5},
+        }
+    }
+
+    monkeypatch.chdir(tmp_path)
+    (sources_dir / "pubmed_legacy.yaml").write_text(yaml.dump(legacy))
+    (sources_dir / "pubmed_new.yaml").write_text(yaml.dump(new))
+
+    cfg_legacy = load_source_config("pubmed_legacy")
+    load_source_config.cache_clear()
+    cfg_new = load_source_config("pubmed_new")
+
+    assert cfg_legacy.base_url == cfg_new.base_url
+    assert cfg_legacy.timeout_sec == cfg_new.timeout_sec
+    assert cfg_legacy.max_retries == cfg_new.max_retries
+    assert cfg_legacy.batch_size == cfg_new.batch_size
+    assert (
+        cfg_legacy.rate_limit.requests_per_second
+        == cfg_new.rate_limit.requests_per_second
+    )
+
+
+def test_normalize_source_config_maps_rate_limit_and_timeout_aliases() -> None:
+    """Normalizer should map old/new aliases for rate-limit and timeout keys."""
+    raw = {
+        "source": {
+            "provider_config": {
+                "provider": "pubmed",
+                "client": {"timeout": 42.0, "max_retries": 3},
+                "batch_size": 30,
+            },
+            "rate_limit": {
+                "requests_per_second": 5.0,
+                "with_api_key": {"requests_per_second": 8.0, "burst": 20},
+            },
+            "health_check": {"endpoint": "/health", "timeout": 9},
+        }
+    }
+
+    normalized = _normalize_source_config(raw)
+    source = normalized["source"]
+
+    assert source["rate_limit"]["authenticated"] == source["rate_limit"]["with_api_key"]
+    assert source["health_check"]["timeout_sec"] == 9
+    assert source["provider_config"]["client"]["timeout_sec"] == 42.0
+    assert source["provider_config"]["batch_size"] == 30
+
+
 def test_dq_thresholds_are_validated_once(setup_configs):
     """DQ thresholds must satisfy domain invariants even in YAML schema."""
     pipelines_dir = setup_configs
@@ -194,8 +361,11 @@ def test_convention_based_source_file(setup_configs, tmp_path):
     config = load_pipeline_config("testprovider_entity")
 
     # source_file should be auto-computed
-    assert config.dq_config_file == "../../dq/entities/testprovider/entity.yaml"
-    assert config.filter_config_file == "../../filter/entities/testprovider/entity.yaml"
+    assert config.dq_config_file == "../../quality/entities/testprovider/entity.yaml"
+    assert (
+        config.filter_config_file == "../../filters/entities/testprovider/entity.yaml"
+    )
+    assert config.data_schema_file == "../schemas/testprovider/entity.yaml"
 
 
 def test_convention_based_sink_paths(setup_configs, tmp_path):
@@ -283,7 +453,7 @@ def test_filter_config_merging(setup_configs, tmp_path):
     pipelines_dir = setup_configs
 
     # Create filter config directory structure
-    filter_dir = tmp_path / "configs" / "filter" / "entities" / "filtertest"
+    filter_dir = tmp_path / "configs" / "filters" / "entities" / "filtertest"
     filter_dir.mkdir(parents=True)
 
     # Create filter entity config with complete input_filter
@@ -309,7 +479,7 @@ def test_filter_config_merging(setup_configs, tmp_path):
         "entity_type": "entity",
         "primary_keys": ["id"],
         "silver_table": "filter.entity",
-        # filter_config_file will be auto-computed to ../../filter/entities/filtertest/entity.yaml
+        # filter_config_file will be auto-computed to ../../filters/entities/filtertest/entity.yaml
     }
 
     filter_pipeline_dir = pipelines_dir / "filtertest"
@@ -331,7 +501,7 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
     pipelines_dir = setup_configs
 
     # Create filter config directory structure
-    filter_dir = tmp_path / "configs" / "filter" / "entities" / "override"
+    filter_dir = tmp_path / "configs" / "filters" / "entities" / "override"
     filter_dir.mkdir(parents=True)
 
     # Create filter entity config
@@ -384,3 +554,64 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
         "name",
         "extra",
     ]  # Explicit override
+
+
+def test_filter_config_legacy_path_fallback(setup_configs, tmp_path):
+    """Auto-computed ../../filters path should fallback to legacy ../../filter."""
+    pipelines_dir = setup_configs
+
+    legacy_filter_dir = tmp_path / "configs" / "filter" / "entities" / "legacyf"
+    legacy_filter_dir.mkdir(parents=True)
+    (legacy_filter_dir / "entity.yaml").write_text(
+        yaml.dump(
+            {
+                "input_filter": {
+                    "enabled": True,
+                    "source_path": "data/input/legacy.csv",
+                    "column_name": "id",
+                    "filter_field": "id",
+                    "batch_size": 77,
+                }
+            }
+        )
+    )
+
+    cfg = {
+        "pipeline_name": "legacyf_entity",
+        "provider": "legacyf",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "legacyf.entity",
+    }
+    provider_dir = pipelines_dir / "legacyf"
+    provider_dir.mkdir()
+    (provider_dir / "entity.yaml").write_text(yaml.dump(cfg))
+
+    config = load_pipeline_config("legacyf_entity")
+    assert config.input_filter.enabled is True
+    assert config.input_filter.batch_size == 77
+
+
+def test_data_schema_legacy_path_fallback(setup_configs, tmp_path):
+    """Auto-computed ../schemas path should fallback to legacy ../data_schema."""
+    pipelines_dir = setup_configs
+
+    legacy_schema_dir = tmp_path / "configs" / "pipelines" / "data_schema" / "legacys"
+    legacy_schema_dir.mkdir(parents=True)
+    (legacy_schema_dir / "entity.yaml").write_text(
+        yaml.dump({"column_groups": [{"name": "core", "fields": ["id"]}]})
+    )
+
+    cfg = {
+        "pipeline_name": "legacys_entity",
+        "provider": "legacys",
+        "entity_type": "entity",
+        "primary_keys": ["id"],
+        "silver_table": "legacys.entity",
+    }
+    provider_dir = pipelines_dir / "legacys"
+    provider_dir.mkdir()
+    (provider_dir / "entity.yaml").write_text(yaml.dump(cfg))
+
+    config = load_pipeline_config("legacys_entity")
+    assert config.column_groups[0].name == "core"

@@ -130,7 +130,7 @@ class ISSN(ValueObject[str]):
     """International Standard Serial Number.
 
     ISSN is a unique identifier for serial publications (journals, magazines).
-    Format: XXXX-XXXX where X is a digit (last digit can be 'X' for checksum 10).
+    Format: NNNN-NNNN where N is a digit (last digit can be 'X' for checksum 10).
 
     Examples: 0378-5955, 2049-3630, 0317-847X
 
@@ -156,7 +156,7 @@ class ISSN(ValueObject[str]):
 
         match = self._PATTERN.match(normalized)
         if not match:
-            raise ValueError(f"Invalid ISSN format: {value!r}. Expected: XXXX-XXXX")
+            raise ValueError(f"Invalid ISSN format: {value!r}. Expected: NNNN-NNNN")
 
         first_part = match.group(1)
         second_part = match.group(2).upper()
@@ -182,7 +182,7 @@ class ORCID(ValueObject[str]):
     """Open Researcher and Contributor ID.
 
     ORCID is a unique identifier for researchers.
-    Format: XXXX-XXXX-XXXX-XXXX where X is a digit (last digit can be 'X').
+    Format: NNNN-NNNN-NNNN-NNNN where N is a digit (last digit can be 'X').
 
     Example: 0000-0002-1825-0097, 0000-0001-5109-3700
 
@@ -226,7 +226,7 @@ class ORCID(ValueObject[str]):
         match = self._PATTERN.match(normalized)
         if not match:
             raise ValueError(
-                f"Invalid ORCID format: {value!r}. Expected: XXXX-XXXX-XXXX-XXXX"
+                f"Invalid ORCID format: {value!r}. Expected: NNNN-NNNN-NNNN-NNNN"
             )
 
         parts = [match.group(i) for i in range(1, 5)]

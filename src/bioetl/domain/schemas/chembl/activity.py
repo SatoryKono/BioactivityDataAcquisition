@@ -189,7 +189,7 @@ class ActivitySchema(ETLRecordSchema):
     target_organism: Series[str] | None = pa.Field(
         nullable=True, description="Target organism."
     )
-    taxonomy_id: Series[float] | None = pa.Field(
+    target_taxonomy_id: Series[float] | None = pa.Field(
         nullable=True,
         description="Target taxonomy ID (nullable int pattern).",
     )

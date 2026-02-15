@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.config import DQConfig, PipelineConfig, TableConfig
+from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
 
 def _make_config(**overrides: object) -> PipelineConfig:
@@ -305,8 +306,8 @@ class TestPipelineConfig:
             primary_keys=["id"],
             silver_table="my_silver",
             gold_table="my_gold",
-            silver_write_mode="merge",
-            gold_write_mode="append",
+            silver_write_mode=SilverWriteMode.MERGE,
+            gold_write_mode=GoldWriteMode.APPEND,
         )
         config = PipelineConfig(
             pipeline_name="test",

@@ -94,7 +94,7 @@ dev = [
     # Resource monitoring
     "psutil>=5.9",
     "respx>=0.21",
-    "mypy>=1.10",
+    "mypy==1.19.1",
     "ruff>=0.4",
     "black>=24.0",
     "basedpyright>=1.0",
@@ -295,9 +295,7 @@ module = [
     "bioetl.infrastructure.schemas.pipeline_config",
     "bioetl.infrastructure.schemas.common_config",
     # Pandera DataFrameModel schemas with @pa.check decorators
-    "bioetl.domain.schemas.uniprot.protein",
-    "bioetl.domain.schemas.uniprot.isoform",
-    "bioetl.domain.schemas.uniprot.idmapping",
+    "bioetl.domain.schemas.uniprot.*",
     "bioetl.domain.schemas.pubmed.article",
     "bioetl.domain.schemas.pubmed.publication",
     "bioetl.domain.schemas.pubchem.compound",

@@ -2,29 +2,32 @@ import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
-from datetime import datetime
 
-import pandas as pd
-import numpy as np
-from hypothesis import settings
 import pytest
-import vcr as vcrpy
 
-# --- Hypothesis Configuration ---
-# Profiles defined in docs/03-guides/testing.md
-# ci: max_examples=10
-# fast: max_examples=5
-# dev: max_examples=50 (default)
-# thorough: max_examples=200
+# Heavy deps are guarded so that minimal CI environments (e.g. detect-secrets
+# workflow, which only installs pytest) can still collect tests without
+# ImportError.
+try:
+    import pandas as pd
+except ImportError:  # pragma: no cover
+    pd = None  # type: ignore[assignment]
 
-settings.register_profile("ci", max_examples=10)
-settings.register_profile("fast", max_examples=5)
-settings.register_profile("dev", max_examples=50)
-settings.register_profile("thorough", max_examples=200)
+try:
+    from hypothesis import settings as _hyp_settings
 
-# Load profile from env or default to 'dev'
-profile = os.getenv("HYPOTHESIS_PROFILE", "dev")
-settings.load_profile(profile)
+    _hyp_settings.register_profile("ci", max_examples=10)
+    _hyp_settings.register_profile("fast", max_examples=5)
+    _hyp_settings.register_profile("dev", max_examples=50)
+    _hyp_settings.register_profile("thorough", max_examples=200)
+    _hyp_settings.load_profile(os.getenv("HYPOTHESIS_PROFILE", "dev"))
+except ImportError:  # pragma: no cover
+    pass
+
+try:
+    import vcr as vcrpy
+except ImportError:  # pragma: no cover
+    vcrpy = None  # type: ignore[assignment]
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -35,7 +38,7 @@ def default_vcr_record_mode() -> None:
     - Local runs default to `once` to allow recording missing interactions.
     - Explicit VCR_RECORD_MODE always has priority.
     """
-    if "VCR_RECORD_MODE" in os.environ:
+    if vcrpy is None or "VCR_RECORD_MODE" in os.environ:
         return
 
     os.environ["VCR_RECORD_MODE"] = "none" if os.getenv("CI") else "once"
@@ -105,6 +108,8 @@ def query_ignore_email(request_1: Any, request_2: Any) -> bool:
 @pytest.fixture(scope="module")
 def vcr(vcr_config: dict[str, object]) -> Any:  # type: ignore[override]
     """Configure VCR instance with custom matchers."""
+    if vcrpy is None:
+        pytest.skip("vcrpy not installed")
     vcr_instance = vcrpy.VCR(**vcr_config)
     vcr_instance.register_matcher("query_ignore_email", query_ignore_email)
     return vcr_instance
@@ -265,8 +270,10 @@ CROSSREF_SPECIFIC = [
 
 
 def _create_minimal_df(columns, provider, entity_id, pk_field, pk_value):
+    if pd is None:
+        pytest.skip("pandas not installed")
     all_cols = list(set(SYSTEM_COLUMNS + BASE_PUBLICATION_COLUMNS + columns))
-    data = {col: None for col in all_cols}
+    data = dict.fromkeys(all_cols)
 
     # Set required system fields
     data["entity_id"] = entity_id

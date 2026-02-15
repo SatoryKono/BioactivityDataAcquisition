@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 
+from bioetl.domain.filtering import SilverFilterConfig
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 
 
@@ -406,6 +407,12 @@ class TestFilterConfigFile:
         assert input_filter.filter_field == "id"
         assert input_filter.batch_size == 20
 
+    def test_to_domain_silver_filters_type(self, loader: FilterConfigLoader) -> None:
+        """Silver filters should be converted to SilverFilterConfig."""
+        _, silver_filters, _, _ = loader.load("test_provider", "test_entity")
+
+        assert isinstance(silver_filters, SilverFilterConfig)
+
     def test_to_domain_gold_filters(self, loader: FilterConfigLoader) -> None:
         """Gold filters should be converted correctly."""
         _, _, gold_filters, _ = loader.load("test_provider", "test_entity")
@@ -550,3 +557,44 @@ gold_filters:
         assert contains_filter.column == "types"
         assert contains_filter.values == frozenset(["A", "B"])
         assert contains_filter.mode == "any"
+
+
+def test_filter_loader_prefers_new_filters_dir(tmp_path: Path) -> None:
+    """Loader should prioritize configs/filters over legacy configs/filter."""
+    for root_name, batch in (("filters", 111), ("filter", 222)):
+        root = tmp_path / root_name
+        root.mkdir()
+        (root / "_defaults.yaml").write_text(
+            f"""
+version: "1.0.0"
+input_filter:
+  enabled: false
+  batch_size: {batch}
+gold_filters:
+  required_fields: []
+"""
+        )
+
+    loader = FilterConfigLoader(tmp_path)
+    input_filter, _, _, _ = loader.load("missing", "missing")
+    assert input_filter.batch_size == 111
+
+
+def test_filter_loader_falls_back_to_legacy_filter_dir(tmp_path: Path) -> None:
+    """Loader should read legacy configs/filter when configs/filters is absent."""
+    root = tmp_path / "filter"
+    root.mkdir()
+    (root / "_defaults.yaml").write_text(
+        """
+version: "1.0.0"
+input_filter:
+  enabled: false
+  batch_size: 333
+gold_filters:
+  required_fields: []
+"""
+    )
+
+    loader = FilterConfigLoader(tmp_path)
+    input_filter, _, _, _ = loader.load("missing", "missing")
+    assert input_filter.batch_size == 333
