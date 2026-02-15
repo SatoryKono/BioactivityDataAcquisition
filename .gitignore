@@ -45,6 +45,9 @@ data/_output/
 full_log.txt
 final_report*.txt
 project_rules_failures.txt
+git_commit_*.txt
+*_gitshow_err.txt
+log_test.txt
 
 # IDE / Editors
 .idea/
@@ -127,3 +130,7 @@ gold/test_merged/part-00000-b6b05ee6-01a5-4345-976d-4cd349289aa1-c000.snappy.par
 /data/_dq_reports/21d59cae-1fcf-4e0c-b3fc-29f40921ceb6_dq_report.json
 data/input/bronze/chembl/publication/2026-02-09/batch_2026-02-09_045cc68f-7052-45e0-97d8-4919c31ecf2a.jsonl.zst
 /data/input/bronze
+
+# Root-level generated artifacts (MUST NOT be committed)
+/coverage.json
+/all_fixtures.txt
