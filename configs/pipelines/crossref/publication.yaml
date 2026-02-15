@@ -19,7 +19,6 @@ primary_keys: ["doi"]
 silver_table: "crossref_publication"
 gold_table: "crossref_publication"
 
-source_file: ../../sources/crossref.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -28,13 +27,11 @@ source_file: ../../sources/crossref.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/crossref.yaml (provider-specific)
 #   3. configs/dq/entities/crossref/publication.yaml (entity-specific)
-dq_config_file: ../../dq/entities/crossref/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)
 # -----------------------------------------------------------------------------
 # Use data_schema_file for layer-specific column configuration (silver/gold).
-data_schema_file: ../../data_schema/crossref/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -45,30 +42,14 @@ data_schema_file: ../../data_schema/crossref/publication.yaml
 #   3. configs/filter/entities/crossref/publication.yaml (entity-specific)
 # Explicit path needed because entity_type is 'work' (CrossRef API term)
 # but filter file uses project entity name 'publication'.
-filter_config_file: ../../filter/entities/crossref/publication.yaml
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides
 # Note: flat_structure=true because paths already include provider/entity
 sink:
   bronze:
-    path: "data/output/bronze/crossref/publication"
     flat_structure: true  # Path already includes provider/entity
   silver:
-    path: "data/output/silver/crossref/publication"
-    primary_key: ["doi"]
-    sort_by:
-      columns: ["doi"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/crossref/publication"
     flat_structure: true
   gold:
-    path: "data/output/gold/crossref/publication"
-    sort_by:
-      columns: ["doi"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/crossref/publication"
     flat_structure: true
-

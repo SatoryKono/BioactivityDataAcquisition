@@ -15,7 +15,7 @@ thresholds:
 # =============================================================================
 # UniProt Common Field Validations
 # =============================================================================
-provider_field_validations:
+field_validations:
   # UniProt accession format
   - field: accession
     type: pattern

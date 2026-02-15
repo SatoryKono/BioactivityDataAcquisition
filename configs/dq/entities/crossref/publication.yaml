@@ -11,7 +11,7 @@ entity: publication
 # =============================================================================
 # Publication-Specific Field Validations
 # =============================================================================
-entity_field_validations:
+field_validations:
   - field: doi
     type: pattern
     pattern: '^10\.\d{4,}/\S+$'
@@ -80,7 +80,7 @@ entity_field_validations:
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-entity_cross_field_validations:
+cross_field_validations:
   - name: publication_identifiable
     fields:
       - doi
@@ -91,7 +91,7 @@ entity_cross_field_validations:
 # =============================================================================
 # Conditional Validations
 # =============================================================================
-entity_conditional_validations:
+conditional_validations:
   - name: article_requires_title
     condition_field: type
     condition_value:

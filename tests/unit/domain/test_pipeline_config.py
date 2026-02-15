@@ -36,14 +36,14 @@ class TestPipelineConfig:
         assert config.pipeline_name == "test_pipeline"
         assert config.provider == "test_provider"
         assert config.entity_type == "test_entity"
-        assert config.primary_keys == ("id",)  # Lists converted to tuples
-        assert config.silver_table == "test_silver"
+        assert config.table.primary_keys == ("id",)  # Lists converted to tuples
+        assert config.effective_silver_table == "test_silver"
 
     def test_default_values(self) -> None:
         """Test default values for optional fields."""
         config = _make_config()
 
-        assert config.gold_table is None
+        assert config.effective_gold_table == f"{config.provider}.{config.entity_type}"
         assert config.batch_size == 100
         assert config.checkpoint_interval == 1000
         assert config.fields == ()  # Empty tuple
@@ -151,10 +151,10 @@ class TestPipelineConfig:
             ),
         )
 
-        assert len(config.primary_keys) == 3
-        assert "org_id" in config.primary_keys
-        assert "entity_id" in config.primary_keys
-        assert "version" in config.primary_keys
+        assert len(config.table.primary_keys) == 3
+        assert "org_id" in config.table.primary_keys
+        assert "entity_id" in config.table.primary_keys
+        assert "version" in config.table.primary_keys
 
     def test_full_configuration(self) -> None:
         """Test with all fields specified."""
@@ -182,9 +182,9 @@ class TestPipelineConfig:
         assert config.pipeline_name == "chembl_activity"
         assert config.provider == "chembl"
         assert config.entity_type == "activity"
-        assert config.primary_keys == ("activity_id", "assay_id")
-        assert config.silver_table == "chembl_activity_silver"
-        assert config.gold_table == "chembl_activity_gold"
+        assert config.table.primary_keys == ("activity_id", "assay_id")
+        assert config.effective_silver_table == "chembl_activity_silver"
+        assert config.effective_gold_table == "chembl_activity_gold"
         assert config.batch_size == 250
         assert config.checkpoint_interval == 2500
         assert len(config.fields) == 4
@@ -250,7 +250,7 @@ class TestPipelineConfig:
 
         # Tuples don't support item assignment - raises TypeError
         with pytest.raises(TypeError):
-            config.primary_keys[0] = "new_key"  # type: ignore[index]
+            config.table.primary_keys[0] = "new_key"  # type: ignore[index]
 
     def test_immutable_fields(self) -> None:
         """Test that fields tuple cannot be mutated."""
@@ -293,11 +293,11 @@ class TestPipelineConfig:
             fields=["f1", "f2"],
         )
 
-        assert isinstance(config.primary_keys, tuple)
-        assert isinstance(config.partition_cols, tuple)
+        assert isinstance(config.table.primary_keys, tuple)
+        assert isinstance(config.table.partition_cols, tuple)
         assert isinstance(config.fields, tuple)
-        assert config.primary_keys == ("id", "version")
-        assert config.partition_cols == ("col1",)
+        assert config.table.primary_keys == ("id", "version")
+        assert config.table.partition_cols == ("col1",)
         assert config.fields == ("f1", "f2")
 
     def test_table_field_is_single_source_of_truth(self) -> None:
@@ -322,10 +322,10 @@ class TestPipelineConfig:
         assert config.table.gold_table == "my_gold"
 
         # Convenience properties forward correctly
-        assert config.silver_table == config.table.silver_table
-        assert config.gold_table == config.table.gold_table
-        assert config.primary_keys == config.table.primary_keys
-        assert config.write_mode == config.table.silver_write_mode
-        assert config.gold_write_mode == config.table.gold_write_mode
-        assert config.partition_cols == config.table.partition_cols
-        assert config.on_schema_mismatch == config.table.on_schema_mismatch
+        assert config.effective_silver_table == config.table.silver_table
+        assert config.effective_gold_table == config.table.gold_table
+        assert config.table.primary_keys == config.table.primary_keys
+        assert config.table.silver_write_mode == config.table.silver_write_mode
+        assert config.table.gold_write_mode == config.table.gold_write_mode
+        assert config.table.partition_cols == config.table.partition_cols
+        assert config.table.on_schema_mismatch == config.table.on_schema_mismatch

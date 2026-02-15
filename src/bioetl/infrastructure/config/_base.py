@@ -117,7 +117,7 @@ def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig
     Returns a SilverFilterConfig for nominal type separation from Gold filters.
     """
     base_filters = yaml_config.silver_filters.to_domain()
-    return SilverFilterConfig.from_gold_filter_config(base_filters)
+    return SilverFilterConfig.from_base(base_filters)
 
 
 def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:

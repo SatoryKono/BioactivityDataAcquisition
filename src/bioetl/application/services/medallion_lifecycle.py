@@ -270,8 +270,8 @@ class MedallionLifecycleService:
 
         policy = MedallionPolicy.for_run_type(runtime.run_type)
 
-        gold_table = config.gold_table or f"{config.provider}.{config.entity_type}"
-        silver_table = config.silver_table or f"{config.provider}.{config.entity_type}"
+        gold_table = config.effective_gold_table
+        silver_table = config.effective_silver_table
 
         result = await self.clear(
             policy=policy,
@@ -326,7 +326,7 @@ class MedallionLifecycleService:
                 "stage": "optimize",
                 "retention_days": runtime.vacuum_retention_days,
                 "dry_run": runtime.dry_run,
-                "target": config.silver_table,
+                "target": config.effective_silver_table,
             },
         )
 
@@ -336,19 +336,17 @@ class MedallionLifecycleService:
             # even if table names differ (custom Gold table).
 
             # Optimize based on Silver table name (covers Silver layer + Bronze)
-            silver_table = (
-                config.silver_table or f"{config.provider}.{config.entity_type}"
-            )
+            silver_table = config.effective_silver_table
             await self.storage.optimize(
                 table_name=silver_table,
                 retention_hours=runtime.vacuum_retention_days * 24,
                 dry_run=runtime.dry_run,
             )
 
-            gold_table = config.gold_table or f"{config.provider}.{config.entity_type}"
+            gold_table = config.effective_gold_table
 
             # Optimize based on Gold table name if different (covers Gold layer)
-            if gold_table != config.silver_table:
+            if gold_table != config.effective_silver_table:
                 await self.storage.optimize(
                     table_name=gold_table,
                     retention_hours=runtime.vacuum_retention_days * 24,

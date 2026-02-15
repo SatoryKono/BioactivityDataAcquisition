@@ -1,4 +1,3 @@
-data_schema_file: ../../data_schema/uniprot/protein.yaml
 # configs/pipelines/uniprot/protein.yaml
 # =============================================================================
 # UniProt Protein Pipeline Configuration
@@ -24,10 +23,5 @@ gold_table: "uniprot_protein"
 # Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
-    primary_key: ["accession"]
-    sort_by:
-      columns: ["accession"]
     partition_by: ["organism"]
-  gold:
-    sort_by:
-      columns: ["accession"]
+  gold: {}

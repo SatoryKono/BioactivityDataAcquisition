@@ -15,7 +15,7 @@ thresholds:
 # =============================================================================
 # CrossRef Common Field Validations
 # =============================================================================
-provider_field_validations:
+field_validations:
   # DOI format validation (applies to all CrossRef entities)
   - field: doi
     type: pattern

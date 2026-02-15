@@ -1,4 +1,4 @@
- # configs/dq/_defaults.yaml
+# configs/dq/_defaults.yaml
 # Global DQ defaults for all BioETL pipelines
 # RULES.md §3.1.2: DQ Thresholds
 #
@@ -40,7 +40,7 @@ report:
 # =============================================================================
 # Common Field Validations (applied to ALL entities)
 # =============================================================================
-common_field_validations:
+field_validations:
   # Content hash must be present after transform
   - field: _content_hash
     type: required
@@ -57,4 +57,4 @@ common_field_validations:
 # =============================================================================
 # Common Cross-Field Validations
 # =============================================================================
-common_cross_field_validations: []
+cross_field_validations: []

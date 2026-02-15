@@ -18,7 +18,6 @@ silver_table: "uniprot_idmapping"
 gold_table: "uniprot_idmapping"
 
 # Reference to provider source config (common UniProt settings)
-source_file: ../../sources/uniprot.yaml
 
 # Entity-specific source overrides for ID Mapping
 source:
@@ -46,8 +45,6 @@ source:
 #   - Elevated thresholds: soft_fail=0.30, hard_fail=0.80 (ID mapping may have many not_found)
 #   - Field validations: target_id, mapping_status, uniprot_accession
 #   - Conditional validations: found_has_accession
-dq_config_file: ../../dq/entities/uniprot/idmapping.yaml
-data_schema_file: ../../data_schema/uniprot/idmapping.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -60,24 +57,9 @@ data_schema_file: ../../data_schema/uniprot/idmapping.yaml
 
 # Sink configuration
 sink:
-  bronze:
+  bronze: {}
     # ID Mapping doesn't write Bronze (data comes from API, not raw files)
     # NOTE: enabled: false is not yet implemented in code, so Bronze is still written
-    path: "data/output/bronze/uniprot/idmapping"
   silver:
-    path: "data/output/silver/uniprot/idmapping"
-    primary_key: ["target_id"]
     partition_by: []  # No partitioning - small dataset
-    sort_by:
-      columns: ["target_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/uniprot/idmapping"
-  gold:
-    path: "data/output/gold/uniprot/idmapping"
-    sort_by:
-      columns: ["target_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/uniprot/idmapping"
-
+  gold: {}

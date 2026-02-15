@@ -15,7 +15,7 @@ thresholds:
 # =============================================================================
 # ChEMBL Common Field Validations
 # =============================================================================
-provider_field_validations:
+field_validations:
   # ChEMBL ID format validation (applies to all ChEMBL entities)
   - field: molecule_id
     type: pattern

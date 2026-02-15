@@ -24,7 +24,6 @@ primary_keys: ["publication_id"]
 silver_table: "chembl_publication"
 gold_table: "chembl_publication"
 
-source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -33,7 +32,6 @@ source_file: ../../sources/chembl.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/publication.yaml (entity-specific)
-dq_config_file: ../../dq/entities/chembl/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -43,37 +41,20 @@ dq_config_file: ../../dq/entities/chembl/publication.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-filter_config_file: ../../filter/entities/chembl/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)
 # -----------------------------------------------------------------------------
 # Use data_schema_file for layer-specific column configuration (silver/gold).
 # Falls back to column_groups_file if data_schema_file not specified.
-data_schema_file: ../../data_schema/chembl/publication.yaml
 
 # Entity-specific sink overrides
 # Note: dq_report.enabled inherited from _base.yaml for all layers
 sink:
   bronze:
-    path: "data/output/bronze/chembl/publication"
     flat_structure: true  # Files written directly under path/{date}/, without provider/entity subdirs
   silver:
-    path: "data/output/silver/chembl/publication"
-    primary_key: ["publication_id"]
     partition_by: ["doc_type"]
-    sort_by:
-      columns: ["publication_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/chembl/publication"
     flat_structure: true  # Delta directly in path, files named {table}_*.ext
   gold:
-    path: "data/output/gold/chembl/publication"
-    sort_by:
-      columns: ["publication_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/chembl/publication"
     flat_structure: true  # Delta directly in path, files named {table}_*.ext
-
