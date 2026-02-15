@@ -29,6 +29,7 @@ Usage:
 """
 
 from bioetl.domain.services.activity_aggregator import ActivityAggregator
+from bioetl.domain.services.text_similarity import jaccard_similarity, normalize_text
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 from bioetl.domain.services.data_normalization_service import (
     DefaultDataNormalizationService,
@@ -60,4 +61,6 @@ __all__ = [
     "NormalizationService",
     "UnitConverter",
     "ValueValidator",
+    "jaccard_similarity",
+    "normalize_text",
 ]
