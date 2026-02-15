@@ -9,6 +9,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
+__all__ = [
+    "CompositeLineageMetadata",
+    "EnrichmentStatusRecord",
+    "FieldSource",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class FieldSource:
@@ -31,7 +37,7 @@ class EnrichmentStatusRecord:
 
 
 @dataclass(frozen=True, slots=True)
-class LineageMetadata:
+class CompositeLineageMetadata:
     """Complete lineage metadata for a merged record."""
 
     composite_run_id: str
@@ -80,8 +86,8 @@ class LineageMetadata:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, object]) -> LineageMetadata:
-        """Create LineageMetadata from dictionary."""
+    def from_dict(cls, data: dict[str, object]) -> CompositeLineageMetadata:
+        """Create CompositeLineageMetadata from dictionary."""
         enrichment_status = _parse_enrichment_status(data.get("_enrichment_status", {}))
         enrichment_timestamps = _parse_timestamps(
             data.get("_enrichment_timestamps", {})

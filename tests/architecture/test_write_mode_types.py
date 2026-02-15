@@ -67,7 +67,7 @@ def test_no_literal_write_modes_in_domain_config() -> None:
 
     all_pure_literals: list[tuple[str, int, str]] = []
     for config_path in existing_paths:
-        source = config_path.read_text()
+        source = config_path.read_text(encoding="utf-8")
         tree = ast.parse(source)
 
         checker = WriteModeTypeChecker()
@@ -183,11 +183,11 @@ def test_pipeline_config_converts_strings_to_enums() -> None:
         ),
     )
 
-    assert isinstance(config.write_mode, SilverWriteMode)
-    assert config.write_mode == SilverWriteMode.MERGE
+    assert isinstance(config.table.silver_write_mode, SilverWriteMode)
+    assert config.table.silver_write_mode == SilverWriteMode.MERGE
 
-    assert isinstance(config.gold_write_mode, GoldWriteMode)
-    assert config.gold_write_mode == GoldWriteMode.SCD2
+    assert isinstance(config.table.gold_write_mode, GoldWriteMode)
+    assert config.table.gold_write_mode == GoldWriteMode.SCD2
 
 
 def test_overwrite_for_silver_raises_error() -> None:

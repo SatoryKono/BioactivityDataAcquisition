@@ -29,11 +29,12 @@ class TestFileSizeLimits:
     # Note: ports.py was split into ports/ package in main
     EXEMPTIONS = {
         # Application layer exemptions
-        "runner.py": 1090,  # 1086 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py)
+        "runner.py": 1140,  # 1135 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py) + CV quarantine
+        "cross_validator.py": 540,  # 528 LOC - Cross-validation service with module-level comparison helpers + per-record detail builders
         "checkpoint.py": 545,  # 544 LOC - CompositeCheckpointState with immutable state transitions + CompositeCheckpointManager
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
-        "config.py": 1030,  # 1024 LOC - domain/composite/config.py with MergeConfig.preserve_all_sources + ColumnGroupConfig + DataSchemaConfig/LayerColumnConfig + DependencyConfig.filter_fields dual-key
+        "config.py": 1110,  # 1102 LOC - domain/composite/config.py with MergeConfig.preserve_all_sources + ColumnGroupConfig + DataSchemaConfig/LayerColumnConfig + DependencyConfig.filter_fields dual-key + CrossValidationConfig
         # Domain layer exemptions (baseline)
         "medallion.py": 340,  # 336 LOC - Medallion layer enums and policies
         "result.py": 460,  # 459 LOC - CompositeResult with EnrichmentResult, MergeResult, SeedResult, DependencyResult dataclasses + factory methods
@@ -95,7 +96,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 635,  # 629 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + _extract_multi_filter_ids + _resolve_bronze_opts + skip_gold
+        "composite.py": 650,  # 641 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + cross-validation + quarantine wiring
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
@@ -113,17 +114,17 @@ class TestFileSizeLimits:
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "idmapping_client.py": 660,  # 651 LOC
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + loading_strategy (ADR-031) + column_groups + extraction_params + DQ severity/max_length/not_null
-        "composite_config.py": 705,  # 699 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields
+        "composite_config.py": 800,  # 796 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields + CrossValidationSchema
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
         "storage_factory.py": 400,  # Extracted from storage.py
-        "observability.py": 475,  # Bootstrap observability + deprecated aliases
+        "observability.py": 500,  # Bootstrap observability + deprecated aliases + warnings.warn
         # Application layer exemptions
         "base_transformer.py": 825,  # 821 LOC - BaseTransformer with silver_filters + should_write_silver()
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "subcellular_fraction_data_source.py": 520,  # 518 LOC - Derived entity wrapper with FilterableDataSourcePort delegation
-        "merger.py": 1795,  # 1765 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
+        "merger.py": 1805,  # 1799 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join + cross-validation integration
         "extractors.py": 510,  # 506 LOC OpenAlex, 413 CrossRef, 349 S2 (author + page parsing split to submodules)
         # UniProt extraction helpers
         "comments.py": 580,  # 578 LOC - UniProt comment extraction helpers with isoform/subcellular/disease details
@@ -270,7 +271,7 @@ class TestFunctionComplexity:
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
         # Composite pipeline merge service
-        "merge": 23,  # CC=22 - MergeService.merge() orchestrates seed/enricher/dependency join with conflict resolution
+        "merge": 30,  # CC=29 - MergeService.merge() orchestrates seed/enricher/dependency join with cross-validation and conflict resolution
         "_apply_explicit_rules": 11,  # CC=10 - Explicit field priority rules (refactored with helper methods)
         "_apply_joins": 15,  # CC=13 - Join logic with multiple enrichers
         "_coalesce_prefer_seed": 16,  # CC=15 - Type-safe coalesce with seed priority and null handling
@@ -308,6 +309,9 @@ class TestFunctionComplexity:
         "_apply_dependency_joins": 13,  # CC=12 - Dependency join logic with multiple join strategies
         # Publication type classification (domain taxonomy mapping)
         "classify_publication_type": 10,  # CC=9 - Publication type classification with multi-level taxonomy lookup
+        # Cross-validation domain/application (ADR-026)
+        "FieldComparisonSpec": 8,  # CC=7 - Field comparison spec __post_init__ with type validation
+        "validate": 14,  # CC=13 - EnrichmentCrossValidator.validate() with multi-enricher comparison loop
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -373,7 +377,7 @@ class TestFunctionLength:
         "execute": 80,  # Execution methods
         # Baseline exemptions for existing functions
         "__init__": 90,  # Constructors can be long (silver_writer: 86)
-        "bootstrap_pipeline": 125,  # 122 lines - Thin orchestrator with delegation
+        "bootstrap_pipeline_runner": 125,  # 122 lines - Thin orchestrator with delegation
         "register_provider": 100,
         "vacuum": 70,
         "archive": 70,
@@ -474,7 +478,7 @@ class TestFunctionLength:
         "add_not_run_results": 65,  # Add not-run enricher results
         # Composite pipeline bootstrap functions
         "_parse_composite_config": 95,  # 93 lines - Composite config parsing with validation
-        "bootstrap_composite_pipeline": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
+        "bootstrap_composite_runner": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
         "run_composite": 70,  # 68 lines - Composite CLI entrypoint with dependency support
         "build_pipeline_context": 60,  # 55 lines - Context building for composite
         "write_gold_merged": 90,  # 88 lines - Gold write with merged enrichers + flat_structure + CSV export
@@ -496,7 +500,7 @@ class TestFunctionLength:
         "build": 65,  # 63 lines - Builder pattern
         "_create_table_collector": 60,  # Storage factory table collector creation
         # Observability functions
-        "bootstrap_observability": 65,  # Observability setup with OpenTelemetry
+        "bootstrap_observability_bundle": 65,  # Observability setup with OpenTelemetry
         # Metadata coordinator functions
         "create_silver_metadata": 85,  # Silver metadata creation with full audit info
         "create_gold_metadata": 75,  # Gold metadata creation with audit info
@@ -651,6 +655,7 @@ class TestClassSize:
         # Composite pipeline services (ADR-026)
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
+        "EnrichmentCrossValidator": 385,  # 380 lines - Cross-validation with multi-enricher comparison + vectorized mismatch detection
         "DependencyCoordinator": 375,  # 370 lines - Chained dependency coordination with key extraction
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers

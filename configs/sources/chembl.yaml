@@ -45,9 +45,9 @@ entities:
     - assay_parameters   # Experimental parameters
     - cell_line          # Cell line reference data
     - compound_record    # Molecule-document links
-    - document           # Scientific publications
-    - document_similarity  # Document Tanimoto coefficients
-    - document_term      # MeSH headings and keywords
+    - publication           # Scientific publications
+    - publication_similarity  # Document Tanimoto coefficients
+    - publication_term      # MeSH headings and keywords
     - molecule           # Chemical compounds
     - protein_class      # Protein classification hierarchy
     - target             # Biological targets
@@ -70,6 +70,6 @@ entity_notes:
     protein_class:
         description: "Reference table for protein classification"
         typical_volume: "~1.5K records"
-    document_term:
+    publication_term:
         description: "Derived entity - extracted from document records"
-        derived_from: "document"
+        derived_from: "publication"

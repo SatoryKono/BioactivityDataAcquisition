@@ -302,6 +302,4 @@ async def run_health_server(
         await server.stop()
 
 
-RUN_HEALTH_SERVER = run_health_server
-
 __all__ = ["HealthResponse", "HealthServer", "run_health_server"]

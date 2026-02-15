@@ -6,7 +6,7 @@ This package contains domain models for composite pipeline orchestration:
 - EnrichmentResult: Result of enrichment execution
 - MergeStrategy: Strategy for merging enriched data
 - ConflictResolution: Strategy for field conflict resolution
-- LineageMetadata: Provenance tracking for merged records
+- CompositeLineageMetadata: Provenance tracking for merged records
 - CompositePipelineState: FSM states for pipeline execution lifecycle
 
 See ADR-026 for architectural decisions.
@@ -14,10 +14,21 @@ See ADR-026 for architectural decisions.
 
 from bioetl.domain.composite.config import (
     CompositeConfig,
+    CrossValidationConfig,
     DependencyConfig,
     EnricherConfig,
     MergeConfig,
     SeedConfig,
+)
+from bioetl.domain.composite.cross_validation import (
+    ComparisonMethod,
+    CrossValidationStats,
+    CrossValidationVerdict,
+    EnricherCVStats,
+    EnricherFieldPairing,
+    FieldComparisonSpec,
+    FieldMismatch,
+    RecordCrossValidationResult,
 )
 from bioetl.domain.composite.field_groups import (
     FieldGroupDefinition,
@@ -27,9 +38,9 @@ from bioetl.domain.composite.field_groups import (
     build_field_group_registry,
 )
 from bioetl.domain.composite.lineage import (
+    CompositeLineageMetadata,
     EnrichmentStatusRecord,
     FieldSource,
-    LineageMetadata,
 )
 from bioetl.domain.composite.result import (
     CompositeResult,
@@ -54,27 +65,36 @@ from bioetl.domain.composite.strategy import (
 )
 
 __all__ = [
+    "ComparisonMethod",
     "CompositeConfig",
+    "CompositeLineageMetadata",
     "CompositePipelineState",
     "CompositeResult",
     "ConflictResolution",
+    "CrossValidationConfig",
+    "CrossValidationStats",
+    "CrossValidationVerdict",
     "DependencyConfig",
     "DependencyResult",
     "DependencyStatus",
+    "EnricherCVStats",
     "EnricherConfig",
+    "EnricherFieldPairing",
     "EnrichmentResult",
     "EnrichmentStatus",
     "EnrichmentStatusRecord",
     "FallbackStrategy",
+    "FieldComparisonSpec",
     "FieldGroupDefinition",
     "FieldGroupId",
     "FieldGroupRegistry",
     "FieldMapping",
+    "FieldMismatch",
     "FieldSource",
-    "LineageMetadata",
     "MergeConfig",
     "MergeResult",
     "MergeStrategy",
+    "RecordCrossValidationResult",
     "SeedConfig",
     "SeedResult",
     "TransitionRules",

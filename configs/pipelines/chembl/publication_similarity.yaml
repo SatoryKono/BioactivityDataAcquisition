@@ -19,7 +19,6 @@ primary_keys: ["sim_id"]
 silver_table: "chembl_publication_similarity"
 gold_table: "chembl_publication_similarity"
 
-source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -28,7 +27,6 @@ source_file: ../../sources/chembl.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/publication_similarity.yaml (entity-specific)
-dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -38,27 +36,10 @@ dq_config_file: ../../dq/entities/chembl/publication_similarity.yaml
 #   2. configs/filter/providers/chembl.yaml (provider-specific)
 #   3. configs/filter/entities/chembl/publication_similarity.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
-filter_config_file: ../../filter/entities/chembl/publication_similarity.yaml
-data_schema_file: ../../data_schema/chembl/publication_similarity.yaml
 
 # Entity-specific sink overrides
 sink:
-  bronze:
-    path: "data/output/bronze/chembl/publication_similarity"
+  bronze: {}
   silver:
-    path: "data/output/silver/chembl/publication_similarity"
-    primary_key: ["sim_id"]
     partition_by: []  # No good partition key
-    sort_by:
-      columns: ["sim_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/chembl/publication_similarity"
-  gold:
-    path: "data/output/gold/chembl/publication_similarity"
-    sort_by:
-      columns: ["sim_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/chembl/publication_similarity"
-
+  gold: {}

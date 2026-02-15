@@ -22,11 +22,13 @@ JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "ou
 if TYPE_CHECKING:
     import polars as pl
 
+    from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
     from bioetl.domain.composite.config import (
         DependencyConfig,
         EnricherConfig,
         MergeConfig,
     )
+    from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
 
@@ -79,12 +81,14 @@ class MergeService:
         logger: LoggerPort,
         delta_reader: DeltaReaderPort | None = None,
         field_group_registry: FieldGroupRegistry | None = None,
+        cross_validator: EnrichmentCrossValidator | None = None,
     ) -> None:
         self._config = merge_config
         self._storage = storage
         self._logger = logger
         self._delta_reader = delta_reader
         self._field_group_registry = field_group_registry
+        self._cross_validator = cross_validator
         self._deduplicator = EnricherDeduplicator(logger)
         self._aggregator = EnricherAggregator(logger)
         self._renamer = ColumnRenamer(logger)
@@ -240,6 +244,27 @@ class MergeService:
                 total_columns=len(merged_df.columns),
             )
 
+        # Step 3c: Cross-validate seed vs enricher fields (pre-merge check)
+        cv_stats: CrossValidationStats | None = None
+        quarantine_payloads: list[dict[str, object]] = []
+        if self._cross_validator is not None:
+            enricher_pipelines_joined = [
+                e.pipeline for e in enrichers if e.pipeline in enricher_dfs
+            ]
+            if enricher_pipelines_joined and effective_seed_pipeline:
+                merged_df, cv_stats = self._cross_validator.validate(
+                    merged_df,
+                    enricher_pipelines_joined,
+                    effective_seed_pipeline,
+                )
+                # Extract quarantine payloads from _cv_quarantine column
+                if "_cv_quarantine" in merged_df.columns:
+                    import polars as pl
+
+                    q_df = merged_df.filter(pl.col("_cv_quarantine"))
+                    if len(q_df) > 0:
+                        quarantine_payloads = q_df.to_dicts()
+
         # Step 4: Resolve conflicts
         merged_df = self._resolve_conflicts(
             df=merged_df,
@@ -313,6 +338,8 @@ class MergeService:
             duration_seconds=duration,
             output_silver_path=self._config.output_silver_path,
             output_gold_path=self._config.output_gold_path,
+            cross_validation_stats=cv_stats,
+            quarantine_payloads=tuple(quarantine_payloads),
         )
 
     async def _read_silver_table(self, path: str) -> pl.DataFrame:

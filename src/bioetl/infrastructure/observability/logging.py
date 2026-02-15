@@ -49,9 +49,6 @@ def create_logger(
     return StructlogLogger(bound)
 
 
-LOGGING_API = (create_logger,)
-
-
 class StructlogLogger:
     """Formal LoggerPort adapter wrapping structlog.
 

@@ -36,12 +36,14 @@ class PubMedHealthMixin:
     _error_handler: ErrorService
 
     async def _probe_health(self) -> HealthStatus:
-        """Perform PubMed-specific health probe."""
+        """Perform PubMed-specific health probe.
+
+        Uses einfo.fcgi (database info) instead of esearch.fcgi (search)
+        for a lightweight connectivity check without running a query.
+        """
         try:
-            params = {
+            params: dict[str, str] = {
                 "db": "pubmed",
-                "term": "health",
-                "retmax": "1",
                 "retmode": "json",
                 "email": self.email,
             }
@@ -51,7 +53,7 @@ class PubMedHealthMixin:
             start_time = time.monotonic()
             with self._adapter_metrics.measure_request("/health"):
                 response = await self.http_client.get_once(
-                    f"{ENTREZ_API_BASE}esearch.fcgi", params=params
+                    f"{ENTREZ_API_BASE}einfo.fcgi", params=params
                 )
             elapsed = time.monotonic() - start_time
 
@@ -86,7 +88,7 @@ class PubMedHealthMixin:
 
     def _get_health_endpoint(self) -> str:
         """Get the health check endpoint for PubMed."""
-        return "/entrez/eutils/esearch.fcgi"
+        return "/entrez/eutils/einfo.fcgi"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
         """Get API request metadata and clear collector."""

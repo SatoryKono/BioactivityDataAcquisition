@@ -18,6 +18,7 @@ Note:
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
@@ -143,20 +144,12 @@ def bootstrap_logger(
     run_id: UUID | None = None,
     log_level: str = "INFO",
 ) -> LoggerPort:
-    """Create a logger for pipeline execution.
-
-    .. deprecated::
-        Use :func:`bootstrap_logger_port` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Args:
-        pipeline: Pipeline name for logger context.
-        run_id: Unique run identifier. If None, generates a new UUID.
-        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
-
-    Returns:
-        UnifiedLogger implementing LoggerPort with Log Schema enforcement.
-    """
+    """Deprecated: use :func:`bootstrap_logger_port` instead."""
+    warnings.warn(
+        "bootstrap_logger() is deprecated, use bootstrap_logger_port() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_logger_port(pipeline=pipeline, run_id=run_id, log_level=log_level)
 
 
@@ -190,19 +183,12 @@ def bootstrap_tracer(
     settings: Settings,
     service_name: str = "bioetl",
 ) -> TracingPort:
-    """Bootstrap distributed tracing for runtime execution.
-
-    .. deprecated::
-        Use :func:`bootstrap_tracer_port` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Args:
-        settings: Application settings (MUST be injected, not loaded globally).
-        service_name: Name of the service for tracing context.
-
-    Returns:
-        TracingPort instance (OpenTelemetryTracer or NoOpTracing).
-    """
+    """Deprecated: use :func:`bootstrap_tracer_port` instead."""
+    warnings.warn(
+        "bootstrap_tracer() is deprecated, use bootstrap_tracer_port() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_tracer_port(settings=settings, service_name=service_name)
 
 
@@ -268,21 +254,12 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
-    """Bootstrap metrics with optional server start for runtime execution.
-
-    .. deprecated::
-        Use :func:`bootstrap_metrics_port` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Args:
-        settings: Application settings.
-
-    Returns:
-        MetricsPort instance (PrometheusMetrics or NoOpMetrics).
-
-    Raises:
-        MetricsServerError: If fail_fast=True and server fails to start.
-    """
+    """Deprecated: use :func:`bootstrap_metrics_port` instead."""
+    warnings.warn(
+        "bootstrap_metrics() is deprecated, use bootstrap_metrics_port() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_metrics_port(settings=settings)
 
 
@@ -337,19 +314,12 @@ def bootstrap_dq_monitor_port(
 def bootstrap_dq_monitor(
     settings: Settings, logger: LoggerPort | None = None
 ) -> DQMonitorPort | None:
-    """Bootstrap data quality monitor for anomaly detection.
-
-    .. deprecated::
-        Use :func:`bootstrap_dq_monitor_port` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Args:
-        settings: Application settings.
-        logger: Optional logger for DQ monitor. If None, uses NoOpLogger.
-
-    Returns:
-        Configured DQMonitorPort or None if disabled.
-    """
+    """Deprecated: use :func:`bootstrap_dq_monitor_port` instead."""
+    warnings.warn(
+        "bootstrap_dq_monitor() is deprecated, use bootstrap_dq_monitor_port() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_dq_monitor_port(settings=settings, logger=logger)
 
 
@@ -428,24 +398,12 @@ def bootstrap_observability(
     settings: Settings,
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
-    """Bootstrap all observability components for pipeline execution.
-
-    .. deprecated::
-        Use :func:`bootstrap_observability_bundle` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Args:
-        pipeline: Pipeline name for logger context.
-        run_id: Unique run identifier.
-        settings: Application settings.
-        log_level: Logging level (DEBUG, INFO, WARNING, ERROR). Default: INFO.
-
-    Returns:
-        Configured ObservabilityBundle instance with valid implementations.
-
-    Raises:
-        ObservabilityContractError: If bundle creation fails validation.
-    """
+    """Deprecated: use :func:`bootstrap_observability_bundle` instead."""
+    warnings.warn(
+        "bootstrap_observability() is deprecated, use bootstrap_observability_bundle() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_observability_bundle(
         pipeline=pipeline, run_id=run_id, settings=settings, log_level=log_level
     )

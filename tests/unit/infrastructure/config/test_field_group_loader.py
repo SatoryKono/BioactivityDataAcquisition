@@ -189,7 +189,7 @@ class TestLoadRealConfig:
 
     @pytest.fixture()
     def real_config_path(self) -> Path:
-        return Path("configs/composite/field_groups/publication.yaml")
+        return Path("configs/schemas/composite/field_groups/publication.yaml")
 
     def test_real_config_exists(self, real_config_path: Path) -> None:
         assert real_config_path.exists(), (

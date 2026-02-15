@@ -169,10 +169,10 @@ class TestBootstrapLayerBoundaries:
         content = observability_file.read_text(encoding="utf-8")
 
         required_functions = [
-            "bootstrap_logger",
-            "bootstrap_tracer",
-            "bootstrap_metrics",
-            "bootstrap_observability",
+            "bootstrap_logger_port",
+            "bootstrap_tracer_port",
+            "bootstrap_metrics_port",
+            "bootstrap_observability_bundle",
         ]
 
         missing = []
@@ -257,7 +257,7 @@ class TestBootstrapFunctionCategorization:
             "bootstrap_health_service",
             "bootstrap_lock_service",
             "bootstrap_metrics_service",
-            "bootstrap_cleanup",
+            "bootstrap_cleanup_service",
             "bootstrap_lifecycle_service",
             "bootstrap_vacuum_service",
             "bootstrap_export_service",
@@ -290,14 +290,14 @@ class TestBootstrapFunctionCategorization:
         content = runtime_init.read_text(encoding="utf-8")
 
         expected_runtime_functions = [
-            "bootstrap_pipeline",
-            "bootstrap_observability",
-            "bootstrap_logger",
-            "bootstrap_tracer",
-            "bootstrap_metrics",
-            "bootstrap_dq_monitor",
+            "bootstrap_pipeline_runner",
+            "bootstrap_observability_bundle",
+            "bootstrap_logger_port",
+            "bootstrap_tracer_port",
+            "bootstrap_metrics_port",
+            "bootstrap_dq_monitor_port",
             "bootstrap_pipeline_runner_service",
-            "bootstrap_composite_pipeline",
+            "bootstrap_composite_runner",
             "load_composite_config",
         ]
 
@@ -327,9 +327,9 @@ class TestBootstrapFunctionCategorization:
         content = assembly_init.read_text(encoding="utf-8")
 
         expected_assembly_functions = [
-            "bootstrap_checkpoint",
-            "bootstrap_quarantine",
-            "bootstrap_storage",
+            "bootstrap_checkpoint_port",
+            "bootstrap_quarantine_port",
+            "bootstrap_storage_adapter",
         ]
 
         missing = []

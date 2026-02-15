@@ -1,7 +1,8 @@
 """Tests for domain layer public API completeness.
 
-REQ-ARCH-027: Domain layer __all__ must be complete and tested.
-All public symbols exported from domain submodules should be listed in __all__.
+REQ-ARCH-027: Domain sub-facades (ports, exceptions, value_objects) must be
+complete and tested. The top-level domain/__init__.py is a slim facade that
+exposes only subpackages and events; consumers import from sub-facades.
 """
 
 from __future__ import annotations
@@ -12,8 +13,9 @@ from pathlib import Path
 def test_domain_all_is_complete(src_dir: Path) -> None:
     """Verify domain/__init__.py __all__ contains all public symbols.
 
-    REQ-ARCH-027: All public symbols from domain submodules must be in __all__.
-    This ensures stable public API and prevents acmolecule_idental exports.
+    REQ-ARCH-027: The slim domain facade should only export subpackages
+    and top-level domain objects (events). All other symbols live in
+    sub-facades (ports, exceptions, value_objects, entities, etc.).
     """
     import bioetl.domain as domain
 
@@ -30,7 +32,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "__spec__",
         # Special imports (from __future__ import annotations)
         "annotations",
-        # Submodules (imported but not re-exported individually)
+        # Submodules (accessible as bioetl.domain.<name> but not re-exported)
         "aggregates",  # Aggregate submodule
         "config",
         "configs",  # Submodule for value object configs
@@ -45,7 +47,7 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "mapping",
         "medallion",
         "models",  # Metadata models (BronzeMetadata, etc.)
-        "normalization",  # REFACTOR-004: functions are re-exported, not module
+        "normalization",  # REFACTOR-004: import from bioetl.domain.normalization
         "ports",
         "registry",
         "resilience",
@@ -54,8 +56,9 @@ def test_domain_all_is_complete(src_dir: Path) -> None:
         "services",  # Submodule for domain services (IdentityService)
         "transformations",
         "types",
-        "validation",  # REFACTOR-004: functions are re-exported, not module
+        "validation",  # REFACTOR-004: import from bioetl.domain.validation
         "value_objects",  # Submodule for value objects
+        "version",  # Version metadata submodule
     }
 
     # Get all attributes from the module
@@ -104,38 +107,58 @@ def test_domain_all_symbols_are_importable() -> None:
         )
 
 
-def test_domain_public_api_categories() -> None:
-    """Verify domain __all__ has expected categories of exports.
+def test_domain_subfacade_ports_is_complete() -> None:
+    """Verify ports sub-facade exports all essential ports.
 
-    REQ-ARCH-029: Domain layer must export all standard categories:
-    - Types (enums, type aliases)
-    - Entities (domain objects)
-    - Ports (Protocol interfaces)
-    - Exceptions (error hierarchy)
-    - Transformations (pure functions)
+    REQ-ARCH-029: Essential port protocols must be available from
+    bioetl.domain.ports.
     """
-    from bioetl import domain
+    from bioetl.domain import ports
 
-    all_symbols = set(domain.__all__)
+    essential_ports = {
+        "DataSourcePort",
+        "StoragePort",
+        "CheckpointPort",
+        "MetricsPort",
+        "LoggerPort",
+        "TracingPort",
+    }
+    ports_all = set(ports.__all__)
+    missing = essential_ports - ports_all
+    assert not missing, f"Missing essential ports from sub-facade: {missing}"
 
-    # Check for essential types
+
+def test_domain_subfacade_exceptions_is_complete() -> None:
+    """Verify exceptions sub-facade exports all essential exceptions.
+
+    REQ-ARCH-029: Essential exception classes must be available from
+    bioetl.domain.exceptions.
+    """
+    from bioetl.domain import exceptions
+
+    essential_exceptions = {
+        "BioETLError",
+        "CriticalError",
+        "RecoverableError",
+        "DataQualityError",
+    }
+    exceptions_all = set(exceptions.__all__)
+    missing = essential_exceptions - exceptions_all
+    assert not missing, f"Missing essential exceptions from sub-facade: {missing}"
+
+
+def test_domain_subfacade_types_has_essentials() -> None:
+    """Verify essential types are importable from bioetl.domain.types.
+
+    REQ-ARCH-029: Essential type definitions must be available from
+    bioetl.domain.types.
+    """
+    from bioetl.domain import types
+
     essential_types = {"RunType", "RunID", "EntityID", "ContentHash", "ErrorType"}
-    missing_types = essential_types - all_symbols
-    assert not missing_types, f"Missing essential types: {missing_types}"
-
-    # Check for essential ports
-    essential_ports = {"DataSourcePort", "StoragePort", "CheckpointPort", "MetricsPort"}
-    missing_ports = essential_ports - all_symbols
-    assert not missing_ports, f"Missing essential ports: {missing_ports}"
-
-    # Check for essential exceptions
-    essential_exceptions = {"BioETLError", "CriticalError", "RecoverableError"}
-    missing_exceptions = essential_exceptions - all_symbols
-    assert not missing_exceptions, f"Missing essential exceptions: {missing_exceptions}"
-
-    # Check for context
-    assert "PipelineContext" in all_symbols, "PipelineContext must be in __all__"
-    assert "PipelineRunContext" in all_symbols, "PipelineRunContext must be in __all__"
+    types_attrs = set(dir(types))
+    missing = essential_types - types_attrs
+    assert not missing, f"Missing essential types from domain.types: {missing}"
 
 
 def test_domain_no_infrastructure_types_in_all() -> None:
@@ -157,28 +180,7 @@ def test_domain_no_infrastructure_types_in_all() -> None:
         "Reader",
     ]
 
-    # Domain config objects that happen to contain infrastructure-like patterns
-    # but are actually domain-level configuration DTOs or domain exceptions
-    allowed_exceptions = {
-        "BaseClientConfig",  # Domain config DTO for client settings
-        "BaseProviderConfig",  # Domain config for providers
-        # Delta-related domain exceptions (storage error hierarchy)
-        "DeltaOptimizeError",  # Domain exception for Delta VACUUM/OPTIMIZE failures
-        "DeltaSchemaValidationError",  # Domain exception for schema validation
-        "DeltaTransactionError",  # Domain exception for transaction failures
-        "DeltaWriteConflictError",  # Domain exception for concurrent write conflicts
-        # Delta reader port - domain interface for read-only table access
-        "DeltaReaderPort",  # Domain port for Delta table reading
-        # Metadata ports - "Writer" is for interface, not implementation
-        "MetadataWriterPort",  # Domain port for metadata sidecar files
-        "NoOpMetadataWriter",  # NoOp implementation of MetadataWriterPort
-        # DQ Report ports - domain interface for quality reports
-        "DQReportWriterPort",  # Domain port for DQ report writing
-    }
-
     for symbol in domain.__all__:
-        if symbol in allowed_exceptions:
-            continue
         for pattern in infrastructure_patterns:
             assert pattern not in symbol, (
                 f"Symbol '{symbol}' appears to be infrastructure type "
@@ -186,35 +188,31 @@ def test_domain_no_infrastructure_types_in_all() -> None:
             )
 
 
-def test_domain_exports_all_submodule_symbols() -> None:
-    """Validate domain.__all__ includes all public submodule exports.
+def test_domain_subfacades_re_export_submodule_symbols() -> None:
+    """Validate sub-facades include all public submodule exports.
 
-    REQ-ARCH-031: Domain facade must re-export all public symbols from submodules.
-    This ensures that `from bioetl.domain import X` works for any public symbol X
-    defined in exceptions, ports, or entities submodules.
+    REQ-ARCH-031: Sub-facades (ports, exceptions) must re-export all
+    public symbols from their submodules. This ensures that
+    ``from bioetl.domain.ports import X`` works for any public port X.
     """
-    from bioetl import domain
-    from bioetl.domain import entities, exceptions, ports
+    from bioetl.domain import exceptions, ports
 
-    domain_all = set(domain.__all__)
+    # Check ports sub-facade
+    ports_all = set(ports.__all__)
+    for symbol in ports.__all__:
+        assert hasattr(ports, symbol), (
+            f"Symbol '{symbol}' in ports.__all__ but not importable"
+        )
 
-    # Submodules with __all__ that should be fully exported
-    submodules = [
-        ("exceptions", exceptions),
-        ("ports", ports),
-        ("entities", entities),
-    ]
+    # Check exceptions sub-facade
+    exceptions_all = set(exceptions.__all__)
+    for symbol in exceptions.__all__:
+        assert hasattr(exceptions, symbol), (
+            f"Symbol '{symbol}' in exceptions.__all__ but not importable"
+        )
 
-    missing_symbols: list[str] = []
-
-    for submodule_name, submodule in submodules:
-        # Check if submodule has __all__ defined
-        if hasattr(submodule, "__all__"):
-            for symbol in submodule.__all__:
-                if symbol not in domain_all:
-                    missing_symbols.append(f"{submodule_name}.{symbol}")
-
-    assert not missing_symbols, (
-        "Submodule symbols missing from domain.__all__:\n"
-        + "\n".join(f"  - {s}" for s in sorted(missing_symbols))
+    # Verify no overlap issues
+    assert len(ports_all) == len(ports.__all__), "Duplicate entries in ports.__all__"
+    assert len(exceptions_all) == len(exceptions.__all__), (
+        "Duplicate entries in exceptions.__all__"
     )

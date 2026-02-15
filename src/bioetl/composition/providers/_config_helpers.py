@@ -7,12 +7,13 @@ audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.filtered_data_source import FilteredDataSource
 from bioetl.composition.bootstrap_contexts import (
     CircuitBreakerConfig,
-    RateLimitConfig,
+    RateLimitContext,
 )
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
@@ -22,16 +23,21 @@ if TYPE_CHECKING:
     from typing import Any
 
     from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.models.filter import ExtractionParams
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
-def _get_factories() -> tuple[Any, Any]:
-    """Lazy import factories to avoid circular imports."""
-    from bioetl.composition.factories.data_source_factory import DataSourceFactory
-    from bioetl.composition.factories.http_client_factory import HttpClientFactory
+def _get_factories(
+    data_source_factory_getter: Callable[[], Any],
+    http_client_factory_getter: Callable[[], Any],
+) -> tuple[Any, Any]:
+    """Resolve factory classes via injected getters.
 
-    return DataSourceFactory, HttpClientFactory
+    Keeps this helper module decoupled from factory modules to avoid
+    cross-import dependency chains.
+    """
+    return data_source_factory_getter(), http_client_factory_getter()
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
@@ -57,22 +63,22 @@ def _get_batch_size_from_config(provider: str, default: int = 100) -> int:
     return source_config.batch_size if source_config else default
 
 
-def _get_rate_limit_from_config(provider: str) -> RateLimitConfig:
+def _get_rate_limit_from_config(provider: str) -> RateLimitContext:
     """Get rate limit configuration from source config or defaults.
 
     Args:
         provider: Provider name (e.g., 'chembl', 'pubchem').
 
     Returns:
-        RateLimitConfig with rate and capacity values.
+        RateLimitContext with rate and capacity values.
     """
     source_config = _get_source_config(provider)
     if source_config:
-        return RateLimitConfig(
+        return RateLimitContext(
             rate=source_config.rate_limit.requests_per_second,
             capacity=source_config.rate_limit.burst,
         )
-    return RateLimitConfig(rate=5.0, capacity=10)
+    return RateLimitContext(rate=5.0, capacity=10)
 
 
 def _get_circuit_breaker_from_config(provider: str) -> CircuitBreakerConfig:
@@ -115,6 +121,35 @@ def _get_adapter_config(provider: str, default_page_size: int = 1000) -> Adapter
 
     # Fallback to domain defaults when config file does not exist
     return AdapterConfig(page_size=default_page_size)
+
+
+def _validate_extraction_input_filter_overlap(
+    extraction_params: ExtractionParams,
+    input_filter: InputFilterConfig,
+    logger: LoggerPort,
+) -> None:
+    """Warn if input_filter field overlaps extraction_params keys."""
+    if not input_filter.enabled or extraction_params.is_empty:
+        return
+
+    filter_field = input_filter.filter_field
+    if filter_field and filter_field in extraction_params.params:
+        logger.warning(
+            "extraction_params_input_filter_overlap",
+            overlap_field=filter_field,
+            extraction_value=str(extraction_params.params[filter_field]),
+            resolution="input_filter will override extraction_params for this field",
+        )
+
+    if input_filter.columns:
+        for col in input_filter.columns:
+            if col.filter_field in extraction_params.params:
+                logger.warning(
+                    "extraction_params_input_filter_overlap",
+                    overlap_field=col.filter_field,
+                    extraction_value=str(extraction_params.params[col.filter_field]),
+                    resolution="input_filter will override",
+                )
 
 
 def _wrap_with_filter(
