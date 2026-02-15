@@ -17,7 +17,7 @@ from bioetl.domain.mapping.publication_type_classification import (
 _CSV_PATH = (
     Path(__file__).resolve().parents[2]
     / "configs"
-    / "data_schema"
+    / "schemas"
     / "publication_type_classification.csv"
 )
 

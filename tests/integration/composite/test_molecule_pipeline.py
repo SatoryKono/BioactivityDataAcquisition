@@ -386,7 +386,7 @@ class TestCompositeMoleculeConfig:
         """Verify data schema file exists."""
         from pathlib import Path
 
-        schema_path = Path("configs/data_schema/composite/molecule.yaml")
+        schema_path = Path("configs/schemas/composite/molecule.yaml")
         assert schema_path.exists(), f"Data schema file not found: {schema_path}"
 
     def test_config_loads_successfully(self) -> None:
