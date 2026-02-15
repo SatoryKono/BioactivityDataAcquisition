@@ -1,6 +1,6 @@
 # Промпты для модификации кода — BioETL Refactoring
 
-**Дата:** 2026-02-13
+**Дата:** 2026-02-15 (обновлено после мержа main)
 **Источник:** consolidated-refactoring-plan.md
 
 Каждый промпт самодостаточен и может быть передан агенту для автономного выполнения.
@@ -213,16 +213,17 @@ Commit message:
 
 ---
 
-### PROMPT 2.1 — RF-DUP-001: Удалить дублирующий _load_yaml из DQConfigLoader
+### PROMPT 2.1 — RF-DUP-001: Извлечь shared _load_yaml_file utility
 
 ```
-Задача: Удалить дублирующее переопределение метода _load_yaml из DQConfigLoader,
-так как он наследуется от BaseConfigLoader.
+Задача: Устранить дупликацию _load_yaml между BaseConfigLoader и DQConfigLoader.
 
-Контекст:
-- BaseConfigLoader (infrastructure/config/base_config_loader.py:70) определяет _load_yaml
-- DQConfigLoader (infrastructure/config/dq_config_loader.py:131) наследует от BaseConfigLoader
-  но переопределяет _load_yaml ИДЕНТИЧНЫМ кодом
+Контекст (проверено 2026-02-15):
+- BaseConfigLoader (infrastructure/config/base_config_loader.py:70) — ABC Generic[T]
+- DQConfigLoader (infrastructure/config/dq_config_loader.py:24) — standalone class,
+  НЕ наследует от BaseConfigLoader
+- Оба имеют идентичный метод _load_yaml(self, path: Path) -> dict[str, Any]
+  (line 70 и line 139 соответственно)
 
 Оба метода:
   def _load_yaml(self, path: Path) -> dict[str, Any]:
@@ -234,25 +235,38 @@ Commit message:
 
 Шаги:
 
-1. Прочитать оба файла и убедиться что:
-   a) DQConfigLoader наследует от BaseConfigLoader
-   b) Методы _load_yaml байт-в-байт идентичны
+1. Прочитать оба файла и подтвердить идентичность методов.
 
-2. Если (a) и (b) подтверждены:
-   - Удалить метод _load_yaml из DQConfigLoader
-   - Оставить комментарий если нужно: # Inherits _load_yaml from BaseConfigLoader
+2. Создать module-level утилиту в base_config_loader.py:
 
-3. Если DQConfigLoader НЕ наследует от BaseConfigLoader:
-   - НЕ удалять метод
-   - Вместо этого: создать module-level функцию _load_yaml_file(path) в
-     base_config_loader.py и делегировать из обоих классов
+   def _load_yaml_file(path: Path) -> dict[str, Any]:
+       """Load YAML file, returning empty dict if missing or empty."""
+       if not path.exists():
+           return {}
+       with open(path, encoding="utf-8") as f:
+           content = yaml.safe_load(f)
+           return content if content is not None else {}
+
+3. В BaseConfigLoader._load_yaml:
+   - Делегировать: return _load_yaml_file(path)
+
+4. В dq_config_loader.py:
+   - Добавить import: from .base_config_loader import _load_yaml_file
+   - В DQConfigLoader._load_yaml:
+     Делегировать: return _load_yaml_file(path)
+   - Или (проще): удалить _load_yaml из DQConfigLoader и использовать
+     _load_yaml_file напрямую в вызывающих методах
+
+5. Проверить что FilterConfigLoader и PipelineConfigLoader не имеют
+   аналогичного дубликата:
+   grep -rn "def _load_yaml" src/bioetl/infrastructure/config/
 
 Верификация:
   pytest tests/ -k "config_loader or dq_config" -v
   pytest tests/ -x --timeout=120
 
 Commit message:
-  refactor: remove duplicate _load_yaml from DQConfigLoader (RF-DUP-001)
+  refactor: extract shared _load_yaml_file utility (RF-DUP-001)
 ```
 
 ---
@@ -486,66 +500,22 @@ Commit message:
 
 ---
 
-### PROMPT 3.1 — CI-001: Настроить import-linter
+### ~~PROMPT 3.1 — CI-001: Настроить import-linter~~ ✅ ВЫПОЛНЕНО
 
 ```
-Задача: Настроить import-linter для защиты архитектурных границ (ARCH-001).
+СТАТУС: УЖЕ ВЫПОЛНЕНО в main.
 
-Шаги:
+import-linter уже настроен:
+- Конфигурация: .importlinter (INI-формат, 5 контрактов)
+- CI: .github/workflows/import-linter.yml → job `arch-tests` → step `lint-imports --config .importlinter`
+- Контракты покрывают:
+  - domain-independence (domain ⊄ application/composition/infrastructure/interfaces)
+  - application-independence (application ⊄ composition/infrastructure/interfaces)
+  - infrastructure-independence (infrastructure ⊄ application/interfaces)
+  - composition-no-interfaces (composition ⊄ interfaces)
+  - no-direct-instantiation-in-application (application ⊄ concrete adapters)
 
-1. Добавить зависимость в pyproject.toml:
-   В секцию [project.optional-dependencies] → dev:
-   "import-linter>=2.0",
-
-2. Добавить конфигурацию в pyproject.toml:
-
-   [tool.importlinter]
-   root_packages = ["bioetl"]
-
-   [[tool.importlinter.contracts]]
-   name = "Domain must not import infrastructure, composition, or interfaces"
-   type = "forbidden"
-   source_modules = ["bioetl.domain"]
-   forbidden_modules = [
-       "bioetl.infrastructure",
-       "bioetl.composition",
-       "bioetl.interfaces",
-       "bioetl.application",
-   ]
-
-   [[tool.importlinter.contracts]]
-   name = "Application must not import infrastructure, composition, or interfaces"
-   type = "forbidden"
-   source_modules = ["bioetl.application"]
-   forbidden_modules = [
-       "bioetl.infrastructure",
-       "bioetl.composition",
-       "bioetl.interfaces",
-   ]
-
-   [[tool.importlinter.contracts]]
-   name = "Infrastructure must not import application, composition, or interfaces"
-   type = "forbidden"
-   source_modules = ["bioetl.infrastructure"]
-   forbidden_modules = [
-       "bioetl.application",
-       "bioetl.composition",
-       "bioetl.interfaces",
-   ]
-
-3. Запустить:
-   pip install import-linter
-   lint-imports
-
-4. Если найдены нарушения:
-   - TYPE_CHECKING импорты: добавить в ignore_imports
-   - Реальные нарушения: задокументировать как отдельные issues
-
-5. Добавить в Makefile (если есть секция lint):
-   lint-imports
-
-Commit message:
-  ci: add import-linter for ARCH-001 enforcement (CI-001)
+Никаких действий не требуется. Пропустить этот промпт.
 ```
 
 ---
@@ -676,12 +646,13 @@ src/bioetl/application/core/subcellular_fraction_data_source.py (297 LOC).
 
 Шаги:
 
-1. Установить import-linter (если не установлен):
-   pip install import-linter grimp
+1. import-linter уже настроен (.importlinter). Запустить:
+   lint-imports --config .importlinter
 
-2. Запустить lint-imports (если конфигурация настроена в PROMPT 3.1)
+2. Установить grimp для графового анализа:
+   pip install grimp
 
-3. Дополнительно — Python скрипт для детекции циклов:
+3. Python скрипт для детекции циклов:
 
    import grimp
    graph = grimp.build_graph("bioetl")
@@ -819,24 +790,14 @@ src/bioetl/application/core/subcellular_fraction_data_source.py (297 LOC).
 
 ---
 
-### PROMPT CFG-002: Обновить pyproject.toml после добавления import-linter
+### ~~PROMPT CFG-002: Обновить pyproject.toml после добавления import-linter~~ ✅ ВЫПОЛНЕНО
 
 ```
-Задача: После PROMPT 3.1 проверить что pyproject.toml корректен.
+СТАТУС: УЖЕ ВЫПОЛНЕНО в main.
 
-Шаги:
-
-1. Проверить синтаксис:
-   python -c "import tomllib; tomllib.load(open('pyproject.toml', 'rb'))"
-
-2. Проверить что import-linter добавлен в dev dependencies:
-   grep "import-linter" pyproject.toml
-
-3. Проверить что [tool.importlinter] секция парсится:
-   lint-imports --show-contracts
-
-4. Запустить полный lint:
-   make lint (или эквивалент)
+import-linter настроен через .importlinter (INI-формат, не pyproject.toml).
+CI workflow запускает: lint-imports --config .importlinter.
+Никаких действий не требуется.
 ```
 
 ---
@@ -852,9 +813,10 @@ src/bioetl/application/core/subcellular_fraction_data_source.py (297 LOC).
 6. PROMPT 2.3 (RF-DUP-003)   ┘
 7. PROMPT 2.4 (RF-NAME-003)  ─── после 4-6
 8. PROMPT 2.5 (RF-CROSS-001) ─── после 4-6
-9. PROMPT 3.1 (CI-001)       ─── параллельно ──── PROMPT 3.2 (DOC-001)
-10. PROMPT 3.3-3.5            ─── исследование
-11. PROMPT 4.1-4.2            ─── опционально
+9. PROMPT 3.1 (CI-001)       ✅ DONE
+10. PROMPT 3.2 (DOC-001)     ─── независимо
+11. PROMPT 3.3-3.5            ─── исследование
+12. PROMPT 4.1-4.2            ─── опционально
 ```
 
 ---
