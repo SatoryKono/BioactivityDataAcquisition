@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from bioetl.domain.composite.cross_validation import CrossValidationStats
-    from bioetl.domain.composite.lineage import LineageMetadata
+    from bioetl.domain.composite.lineage import CompositeLineageMetadata
 
 
 class EnrichmentStatus(StrEnum):
@@ -317,7 +317,7 @@ class CompositeResult:
     total_duration_seconds: float = 0.0
     started_at: datetime | None = None
     completed_at: datetime | None = None
-    lineage: LineageMetadata | None = None
+    lineage: CompositeLineageMetadata | None = None
     had_warnings: bool = False
     _required_enrichers: frozenset[str] = field(default_factory=frozenset)
     _required_dependencies: frozenset[str] = field(default_factory=frozenset)
