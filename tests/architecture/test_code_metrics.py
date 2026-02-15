@@ -29,7 +29,7 @@ class TestFileSizeLimits:
     # Note: ports.py was split into ports/ package in main
     EXEMPTIONS = {
         # Application layer exemptions
-        "runner.py": 1090,  # 1086 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py)
+        "runner.py": 1140,  # 1135 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py) + CV quarantine
         "checkpoint.py": 545,  # 544 LOC - CompositeCheckpointState with immutable state transitions + CompositeCheckpointManager
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
@@ -652,6 +652,7 @@ class TestClassSize:
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "DependencyCoordinator": 375,  # 370 lines - Chained dependency coordination with key extraction
+        "EnrichmentCrossValidator": 380,  # 372 lines - Cross-validation with exact/fuzzy/numeric comparison methods
         "CompositePipelineRunner": 1080,  # 1059 lines - Composite pipeline orchestrator (FSM helpers extracted to fsm_helper.py)
         "CompositeCheckpointState": 305,  # 304 lines - Immutable checkpoint state with serialization helpers
         # Publication adapters with APIRequestCollector (metadata enrichment)
