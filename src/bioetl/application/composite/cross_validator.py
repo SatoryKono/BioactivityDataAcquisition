@@ -294,7 +294,7 @@ class EnrichmentCrossValidator:
                 )
                 continue
 
-            both_present = self._both_non_empty_mask(df, seed_col, enricher_col)
+            both_present = _both_non_empty_mask(df, seed_col, enricher_col)
             compared_total = compared_total + both_present.cast(pl.Int32)
 
             match_result = self._compare_field(
@@ -304,20 +304,6 @@ class EnrichmentCrossValidator:
             mismatch_total = mismatch_total + is_mismatch.cast(pl.Int32)
 
         return mismatch_total, compared_total
-
-    @staticmethod
-    def _both_non_empty_mask(
-        df: pl.DataFrame, seed_col: str, enricher_col: str
-    ) -> pl.Series:
-        """Create mask where both columns are non-null and non-empty."""
-        import polars as pl
-
-        mask = df[seed_col].is_not_null() & df[enricher_col].is_not_null()
-        for col in (seed_col, enricher_col):
-            dtype = df[col].dtype
-            if dtype == pl.String or dtype == pl.Utf8:
-                mask = mask & (df[col].str.len_chars() > 0)
-        return mask
 
     def _compare_field(
         self,
@@ -334,76 +320,13 @@ class EnrichmentCrossValidator:
         import polars as pl
 
         if method == ComparisonMethod.EXACT:
-            return self._compare_exact(df, seed_col, enricher_col)
+            return _compare_exact(df, seed_col, enricher_col)
         elif method == ComparisonMethod.FUZZY:
-            return self._compare_fuzzy(df, seed_col, enricher_col, threshold)
+            return _compare_fuzzy(df, seed_col, enricher_col, threshold)
         elif method == ComparisonMethod.NUMERIC_TOLERANCE:
-            return self._compare_numeric(df, seed_col, enricher_col, threshold)
+            return _compare_numeric(df, seed_col, enricher_col, threshold)
         else:
             return pl.Series([True] * len(df))
-
-    @staticmethod
-    def _compare_exact(df: pl.DataFrame, seed_col: str, enricher_col: str) -> pl.Series:
-        """Exact comparison after stripping whitespace."""
-        import polars as pl
-
-        s = df[seed_col].cast(pl.String).str.strip_chars()
-        e = df[enricher_col].cast(pl.String).str.strip_chars()
-        return s.eq(e) | s.is_null() | e.is_null()
-
-    @staticmethod
-    def _compare_fuzzy(
-        df: pl.DataFrame,
-        seed_col: str,
-        enricher_col: str,
-        threshold: float,
-    ) -> pl.Series:
-        """Fuzzy comparison using Jaccard similarity on word sets."""
-        import polars as pl
-
-        def _fuzzy_match(row: dict) -> bool:  # type: ignore[type-arg]
-            s_val = row["seed"]
-            e_val = row["enricher"]
-            if s_val is None or e_val is None:
-                return True
-            return jaccard_similarity(str(s_val), str(e_val)) >= threshold
-
-        return (
-            df.select(
-                pl.col(seed_col).alias("seed"),
-                pl.col(enricher_col).alias("enricher"),
-            )
-            .select(
-                pl.struct(["seed", "enricher"])
-                .map_elements(_fuzzy_match, return_dtype=pl.Boolean)
-                .alias("match")
-            )
-            .to_series()
-        )
-
-    @staticmethod
-    def _compare_numeric(
-        df: pl.DataFrame,
-        seed_col: str,
-        enricher_col: str,
-        tolerance: float,
-    ) -> pl.Series:
-        """Numeric comparison with relative tolerance.
-
-        |seed - enricher| / max(|seed|, 1) <= tolerance
-        """
-        import polars as pl
-
-        s = df[seed_col].cast(pl.Float64, strict=False)
-        e = df[enricher_col].cast(pl.Float64, strict=False)
-        diff = (s - e).abs()
-        denom = (
-            pl.DataFrame({"a": s.abs(), "b": pl.Series([1.0] * len(df))})
-            .select(pl.max_horizontal("a", "b"))
-            .to_series()
-        )
-        relative_diff = diff / denom
-        return (relative_diff <= tolerance) | s.is_null() | e.is_null()
 
     @staticmethod
     def _parse_pipeline(pipeline: str) -> tuple[str, str]:
@@ -414,3 +337,83 @@ class EnrichmentCrossValidator:
                 f"Pipeline name '{pipeline}' must be in format 'provider_entity'"
             )
         return parts[0], parts[1]
+
+
+# --- Module-level comparison helpers (extracted to reduce class size) ---
+
+
+def _both_non_empty_mask(
+    df: pl.DataFrame, seed_col: str, enricher_col: str
+) -> pl.Series:
+    """Create mask where both columns are non-null and non-empty."""
+    import polars as pl
+
+    mask = df[seed_col].is_not_null() & df[enricher_col].is_not_null()
+    for col in (seed_col, enricher_col):
+        dtype = df[col].dtype
+        if dtype == pl.String or dtype == pl.Utf8:
+            mask = mask & (df[col].str.len_chars() > 0)
+    return mask
+
+
+def _compare_exact(df: pl.DataFrame, seed_col: str, enricher_col: str) -> pl.Series:
+    """Exact comparison after stripping whitespace."""
+    import polars as pl
+
+    s = df[seed_col].cast(pl.String).str.strip_chars()
+    e = df[enricher_col].cast(pl.String).str.strip_chars()
+    return s.eq(e) | s.is_null() | e.is_null()
+
+
+def _compare_fuzzy(
+    df: pl.DataFrame,
+    seed_col: str,
+    enricher_col: str,
+    threshold: float,
+) -> pl.Series:
+    """Fuzzy comparison using Jaccard similarity on word sets."""
+    import polars as pl
+
+    def _fuzzy_match(row: dict) -> bool:  # type: ignore[type-arg]
+        s_val = row["seed"]
+        e_val = row["enricher"]
+        if s_val is None or e_val is None:
+            return True
+        return jaccard_similarity(str(s_val), str(e_val)) >= threshold
+
+    return (
+        df.select(
+            pl.col(seed_col).alias("seed"),
+            pl.col(enricher_col).alias("enricher"),
+        )
+        .select(
+            pl.struct(["seed", "enricher"])
+            .map_elements(_fuzzy_match, return_dtype=pl.Boolean)
+            .alias("match")
+        )
+        .to_series()
+    )
+
+
+def _compare_numeric(
+    df: pl.DataFrame,
+    seed_col: str,
+    enricher_col: str,
+    tolerance: float,
+) -> pl.Series:
+    """Numeric comparison with relative tolerance.
+
+    |seed - enricher| / max(|seed|, 1) <= tolerance
+    """
+    import polars as pl
+
+    s = df[seed_col].cast(pl.Float64, strict=False)
+    e = df[enricher_col].cast(pl.Float64, strict=False)
+    diff = (s - e).abs()
+    denom = (
+        pl.DataFrame({"a": s.abs(), "b": pl.Series([1.0] * len(df))})
+        .select(pl.max_horizontal("a", "b"))
+        .to_series()
+    )
+    relative_diff = diff / denom
+    return (relative_diff <= tolerance) | s.is_null() | e.is_null()
