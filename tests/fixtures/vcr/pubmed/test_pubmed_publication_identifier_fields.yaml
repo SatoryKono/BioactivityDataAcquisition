@@ -490,14 +490,12 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=health&retmax=1&retmode=json&email=default%40example.com
+    uri: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed&retmode=json&email=default%40example.com
   response:
     body:
-      string: '{"header":{"type":"esearch","version":"0.3"},"esearchresult":{"count":"7748364","retmax":"1","retstart":"0","idlist":["41447041"],"translationset":[{"from":"health","to":"\"health\"[MeSH
-        Terms] OR \"health\"[All Fields] OR \"health''s\"[All Fields] OR \"healthful\"[All
-        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}],"querytranslation":"\"health\"[MeSH
-        Terms] OR \"health\"[All Fields] OR \"health s\"[All Fields] OR \"healthful\"[All
-        Fields] OR \"healthfulness\"[All Fields] OR \"healths\"[All Fields]"}}
+      string: '{"header":{"type":"einfo","version":"0.3"},"einforesult":{"dbinfo":{"dbname":"pubmed","menuname":"PubMed","description":"PubMed
+        bibliographic record","dbbuild":"Build250214-2337m.1","count":"37000000","lastupdate":"2025/02/15
+        06:07"}}}
 
         '
     headers:
