@@ -158,4 +158,4 @@ class BaseConfigLoader(ABC, Generic[T]):
         return base + override
 
 
-__all__ = ["BaseConfigLoader", "_load_yaml_file"]
+__all__ = ["BaseConfigLoader"]
