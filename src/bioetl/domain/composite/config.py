@@ -818,6 +818,11 @@ class CrossValidationConfig:
 
     def _validate(self) -> None:
         """Validate configuration invariants."""
+        self._validate_thresholds()
+        self._validate_tolerances()
+
+    def _validate_thresholds(self) -> None:
+        """Validate threshold ordering invariants."""
         if self.warning_threshold < 1:
             raise ValueError(
                 f"warning_threshold must be >= 1, got {self.warning_threshold}"
@@ -832,6 +837,9 @@ class CrossValidationConfig:
             raise ValueError(
                 f"quarantine_threshold must be >= 1, got {self.quarantine_threshold}"
             )
+
+    def _validate_tolerances(self) -> None:
+        """Validate fuzzy and numeric tolerance ranges."""
         if not 0.0 < self.fuzzy_threshold <= 1.0:
             raise ValueError(
                 f"fuzzy_threshold must be in (0.0, 1.0], got {self.fuzzy_threshold}"
