@@ -22,9 +22,7 @@ from bioetl.domain.composite.aggregation import (
     EnricherCardinality,
 )
 from bioetl.domain.composite.cross_validation import (
-    ComparisonMethod,
     EnricherFieldPairing,
-    FieldComparisonSpec,
 )
 from bioetl.domain.composite.strategy import (
     ConflictResolution,

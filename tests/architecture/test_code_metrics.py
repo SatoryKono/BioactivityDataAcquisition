@@ -33,7 +33,7 @@ class TestFileSizeLimits:
         "checkpoint.py": 545,  # 544 LOC - CompositeCheckpointState with immutable state transitions + CompositeCheckpointManager
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
-        "config.py": 1030,  # 1024 LOC - domain/composite/config.py with MergeConfig.preserve_all_sources + ColumnGroupConfig + DataSchemaConfig/LayerColumnConfig + DependencyConfig.filter_fields dual-key
+        "config.py": 1110,  # 1102 LOC - domain/composite/config.py with MergeConfig.preserve_all_sources + ColumnGroupConfig + DataSchemaConfig/LayerColumnConfig + DependencyConfig.filter_fields dual-key + CrossValidationConfig
         # Domain layer exemptions (baseline)
         "medallion.py": 340,  # 336 LOC - Medallion layer enums and policies
         "result.py": 460,  # 459 LOC - CompositeResult with EnrichmentResult, MergeResult, SeedResult, DependencyResult dataclasses + factory methods
@@ -113,7 +113,7 @@ class TestFileSizeLimits:
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "idmapping_client.py": 660,  # 651 LOC
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + loading_strategy (ADR-031) + column_groups + extraction_params + DQ severity/max_length/not_null
-        "composite_config.py": 705,  # 699 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields
+        "composite_config.py": 800,  # 796 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields + CrossValidationSchema
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory
