@@ -1,7 +1,7 @@
 # tests/unit/domain/composite/test_lineage.py
 """Unit tests for composite pipeline lineage models.
 
-Tests for LineageMetadata, FieldSource, EnrichmentStatusRecord and helper functions.
+Tests for CompositeLineageMetadata, FieldSource, EnrichmentStatusRecord and helper functions.
 """
 
 from __future__ import annotations
@@ -11,9 +11,9 @@ from datetime import UTC, datetime
 import pytest
 
 from bioetl.domain.composite.lineage import (
+    CompositeLineageMetadata,
     EnrichmentStatusRecord,
     FieldSource,
-    LineageMetadata,
     _ensure_utc,
     _parse_datetime,
     _parse_enrichment_status,
@@ -115,12 +115,12 @@ class TestEnrichmentStatusRecord:
             record.status = "error"  # type: ignore[misc]
 
 
-class TestLineageMetadata:
-    """Tests for LineageMetadata dataclass."""
+class TestCompositeLineageMetadata:
+    """Tests for CompositeLineageMetadata dataclass."""
 
     def test_create_lineage_metadata_minimal(self) -> None:
-        """Create LineageMetadata with minimal required fields."""
-        metadata = LineageMetadata(
+        """Create CompositeLineageMetadata with minimal required fields."""
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="unified_publication",
         )
@@ -134,11 +134,11 @@ class TestLineageMetadata:
         assert metadata.created_at is None
 
     def test_create_lineage_metadata_full(self) -> None:
-        """Create LineageMetadata with all fields."""
+        """Create CompositeLineageMetadata with all fields."""
         ts = datetime(2024, 5, 15, 10, 30, 0, tzinfo=UTC)
         enrichment_ts = datetime(2024, 5, 15, 10, 35, 0, tzinfo=UTC)
 
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-456",
             composite_name="unified_publication",
             source_providers=("chembl", "crossref", "pubmed"),
@@ -160,7 +160,7 @@ class TestLineageMetadata:
 
     def test_source_providers_list_converted_to_tuple(self) -> None:
         """Lists should be converted to tuples for immutability."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
             source_providers=["chembl", "crossref"],  # type: ignore
@@ -169,12 +169,12 @@ class TestLineageMetadata:
         assert metadata.source_providers == ("chembl", "crossref")
 
 
-class TestLineageMetadataHasEnrichment:
-    """Tests for LineageMetadata.has_enrichment method."""
+class TestCompositeLineageMetadataHasEnrichment:
+    """Tests for CompositeLineageMetadata.has_enrichment method."""
 
     def test_has_enrichment_success(self) -> None:
         """has_enrichment returns True for successful enrichment."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
             enrichment_status={
@@ -187,7 +187,7 @@ class TestLineageMetadataHasEnrichment:
 
     def test_has_enrichment_not_found(self) -> None:
         """has_enrichment returns False for not_found status."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
             enrichment_status={
@@ -198,7 +198,7 @@ class TestLineageMetadataHasEnrichment:
 
     def test_has_enrichment_error(self) -> None:
         """has_enrichment returns False for error status."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
             enrichment_status={
@@ -209,7 +209,7 @@ class TestLineageMetadataHasEnrichment:
 
     def test_has_enrichment_missing_provider(self) -> None:
         """has_enrichment returns False for missing provider."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
             enrichment_status={},
@@ -217,12 +217,12 @@ class TestLineageMetadataHasEnrichment:
         assert metadata.has_enrichment("crossref") is False
 
 
-class TestLineageMetadataSuccessfulEnrichers:
-    """Tests for LineageMetadata.successful_enrichers property."""
+class TestCompositeLineageMetadataSuccessfulEnrichers:
+    """Tests for CompositeLineageMetadata.successful_enrichers property."""
 
     def test_successful_enrichers_multiple(self) -> None:
         """successful_enrichers returns all providers with success status."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
             enrichment_status={
@@ -240,7 +240,7 @@ class TestLineageMetadataSuccessfulEnrichers:
 
     def test_successful_enrichers_none(self) -> None:
         """successful_enrichers returns empty tuple when none successful."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
             enrichment_status={
@@ -254,7 +254,7 @@ class TestLineageMetadataSuccessfulEnrichers:
 
     def test_successful_enrichers_empty_status(self) -> None:
         """successful_enrichers returns empty tuple when no enrichments."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
             enrichment_status={},
@@ -262,12 +262,12 @@ class TestLineageMetadataSuccessfulEnrichers:
         assert metadata.successful_enrichers == ()
 
 
-class TestLineageMetadataToDict:
-    """Tests for LineageMetadata.to_dict method."""
+class TestCompositeLineageMetadataToDict:
+    """Tests for CompositeLineageMetadata.to_dict method."""
 
     def test_to_dict_minimal(self) -> None:
         """to_dict serializes minimal metadata."""
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-123",
             composite_name="test",
         )
@@ -287,7 +287,7 @@ class TestLineageMetadataToDict:
         ts = datetime(2024, 5, 15, 10, 30, 0, tzinfo=UTC)
         enrichment_ts = datetime(2024, 5, 15, 10, 35, 0, tzinfo=UTC)
 
-        metadata = LineageMetadata(
+        metadata = CompositeLineageMetadata(
             composite_run_id="run-456",
             composite_name="unified_publication",
             source_providers=("chembl", "crossref"),
@@ -311,8 +311,8 @@ class TestLineageMetadataToDict:
         assert result["_lineage_created_at"] == ts.isoformat()
 
 
-class TestLineageMetadataFromDict:
-    """Tests for LineageMetadata.from_dict classmethod."""
+class TestCompositeLineageMetadataFromDict:
+    """Tests for CompositeLineageMetadata.from_dict classmethod."""
 
     def test_from_dict_minimal(self) -> None:
         """from_dict deserializes minimal data."""
@@ -320,7 +320,7 @@ class TestLineageMetadataFromDict:
             "_composite_run_id": "run-123",
             "_composite_name": "test",
         }
-        metadata = LineageMetadata.from_dict(data)
+        metadata = CompositeLineageMetadata.from_dict(data)
 
         assert metadata.composite_run_id == "run-123"
         assert metadata.composite_name == "test"
@@ -339,7 +339,7 @@ class TestLineageMetadataFromDict:
             "_seed_record_id": "chembl-doc-123",
             "_lineage_created_at": "2024-05-15T10:30:00+00:00",
         }
-        metadata = LineageMetadata.from_dict(data)
+        metadata = CompositeLineageMetadata.from_dict(data)
 
         assert metadata.source_providers == ("chembl", "crossref")
         assert len(metadata.enrichment_status) == 2
@@ -353,7 +353,7 @@ class TestLineageMetadataFromDict:
     def test_from_dict_roundtrip(self) -> None:
         """to_dict followed by from_dict preserves data."""
         ts = datetime(2024, 5, 15, 10, 30, 0, tzinfo=UTC)
-        original = LineageMetadata(
+        original = CompositeLineageMetadata(
             composite_run_id="run-789",
             composite_name="test_pipeline",
             source_providers=("a", "b"),
@@ -367,7 +367,7 @@ class TestLineageMetadataFromDict:
         )
 
         serialized = original.to_dict()
-        restored = LineageMetadata.from_dict(serialized)
+        restored = CompositeLineageMetadata.from_dict(serialized)
 
         assert restored.composite_run_id == original.composite_run_id
         assert restored.composite_name == original.composite_name
