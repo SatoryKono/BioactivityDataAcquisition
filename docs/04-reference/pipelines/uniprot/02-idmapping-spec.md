@@ -244,7 +244,7 @@ source:
     from_db: ChEMBL
     to_db: UniProtKB
 
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.30  # 30% not_found acceptable
   hard_fail_threshold: 0.80  # 80% not_found triggers failure
 

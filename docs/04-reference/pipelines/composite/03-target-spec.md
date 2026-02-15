@@ -36,7 +36,7 @@ Builds a composite target table by chaining ChEMBL target data with dependent pi
 
 ## Related Configs
 
-- Filters: `configs/filter/entities/composite/target.yaml`
+- Filters: `configs/filters/entities/composite/target.yaml`
 
 ## Related ADRs
 

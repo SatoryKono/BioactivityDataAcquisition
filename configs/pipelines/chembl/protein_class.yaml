@@ -23,17 +23,17 @@ checkpoint_interval: 500
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/chembl.yaml (provider-specific)
-#   3. configs/dq/entities/chembl/protein_class.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/chembl.yaml (provider-specific)
+#   3. configs/quality/entities/chembl/protein_class.yaml (entity-specific)
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/chembl.yaml (provider-specific)
-#   3. configs/filter/entities/chembl/protein_class.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/chembl.yaml (provider-specific)
+#   3. configs/filters/entities/chembl/protein_class.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides

@@ -1,4 +1,4 @@
-# configs/dq/entities/pubchem/compound.yaml
+# configs/quality/entities/pubchem/compound.yaml
 # PubChem Compound-specific DQ rules
 # Inherits from: _defaults.yaml → providers/pubchem.yaml
 

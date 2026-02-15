@@ -136,7 +136,7 @@
 
 Подтверждено:
 
-- Тесты/схемы пока еще явно поддерживают `dq_rules` alias.
+- Тесты/схемы пока еще явно поддерживают `dq_overrides` alias.
 
 **Корректировка:**
 
@@ -204,5 +204,5 @@ ______________________________________________________________________
 
 - [ ] Перенести каталоги на `quality/filters/schemas/_schema` через `git mv`.
 - [ ] Обновить docs/ADR ссылки на новые пути.
-- [ ] Удалить fallback-код и legacy alias (`dq_rules`) только после подтвержденной миграции.
+- [ ] Удалить fallback-код и legacy alias (`dq_overrides`) только после подтвержденной миграции.
 - [ ] Финальный прогон: `mypy --strict src/bioetl/`, `pytest tests/ -x --timeout=120`, `pytest --cov=src/bioetl --cov-fail-under=85`.

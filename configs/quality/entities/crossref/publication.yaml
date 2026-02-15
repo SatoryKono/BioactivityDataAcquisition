@@ -1,4 +1,4 @@
-# configs/dq/entities/crossref/publication.yaml
+# configs/quality/entities/crossref/publication.yaml
 # CrossRef Publication (Work)-specific DQ rules
 # Inherits from: _defaults.yaml → providers/crossref.yaml
 

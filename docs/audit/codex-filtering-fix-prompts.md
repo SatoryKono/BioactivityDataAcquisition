@@ -176,28 +176,28 @@ GoldFilterConfig на SilverFilterConfig. FilterConfigLoader.load() также
 
 ---
 
-## FIX-5: dq_rules → dq_overrides rename (MEDIUM, оставить как есть)
+## FIX-5: dq_overrides → dq_overrides rename (MEDIUM, оставить как есть)
 
 ```
-Контекст: В ветке codex поле dq_rules в PipelineYamlConfig переименовано
-в dq_overrides с backward-compatible AliasChoices("dq_overrides", "dq_rules", "dq").
+Контекст: В ветке codex поле dq_overrides в PipelineYamlConfig переименовано
+в dq_overrides с backward-compatible AliasChoices("dq_overrides", "dq_overrides", "dq").
 Это КОРРЕКТНОЕ изменение. Аудит не выявил проблем.
 
-Задача: Убедиться, что все вызовы dq_rules заменены на dq_overrides:
+Задача: Убедиться, что все вызовы dq_overrides заменены на dq_overrides:
 
 1. src/bioetl/infrastructure/schemas/pipeline_config.py:
-   - Поле: `dq_overrides: DQConfig` с validation_alias=AliasChoices("dq_overrides", "dq_rules", "dq")
+   - Поле: `dq_overrides: DQConfig` с validation_alias=AliasChoices("dq_overrides", "dq_overrides", "dq")
    - serialization_alias="dq_overrides"
 
 2. src/bioetl/infrastructure/config/pipeline_config_loader.py:
-   - _has_inline_dq_rules → _has_inline_dq_overrides
-   - _normalize_inline_dq_rules → _normalize_inline_dq_overrides
-   - Все обращения yaml_config.dq_rules → yaml_config.dq_overrides
+   - _has_inline_dq_overrides → _has_inline_dq_overrides
+   - _normalize_inline_dq_overrides → _normalize_inline_dq_overrides
+   - Все обращения yaml_config.dq_overrides → yaml_config.dq_overrides
 
 3. src/bioetl/infrastructure/config/_base.py:
-   - yaml_config.dq_rules.to_domain() → yaml_config.dq_overrides.to_domain()
+   - yaml_config.dq_overrides.to_domain() → yaml_config.dq_overrides.to_domain()
 
-4. Тесты: проверить что тесты dq_overrides + legacy dq_rules alias работают.
+4. Тесты: проверить что тесты dq_overrides + legacy dq_overrides alias работают.
 
 НЕ ТРЕБУЕТ ИЗМЕНЕНИЙ если уже реализовано как в codex-ветке. Просто верифицировать.
 ```
@@ -309,15 +309,15 @@ timeout/timeout_sec конвертации.
    grep -rn "from_base" src/bioetl/ --include="*.py"
    # Должно быть пусто
 
-8. Проверка backward-compatibility dq_rules alias:
+8. Проверка backward-compatibility dq_overrides alias:
    python -c "
    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
    cfg = PipelineYamlConfig.model_validate({
        'pipeline_name': 'test', 'provider': 'p', 'entity_type': 'e',
        'primary_keys': ['id'], 'silver_table': 'silver.t',
-       'dq_rules': {'soft_fail_threshold': 0.1}
+       'dq_overrides': {'soft_fail_threshold': 0.1}
    })
    assert cfg.dq_overrides.soft_fail_threshold == 0.1
-   print('dq_rules alias OK')
+   print('dq_overrides alias OK')
    "
 ```

@@ -1,4 +1,4 @@
-# configs/dq/entities/semanticscholar/publication.yaml
+# configs/quality/entities/semanticscholar/publication.yaml
 # Semantic Scholar Publication-specific DQ rules
 # Inherits from: _defaults.yaml → providers/semanticscholar.yaml
 

@@ -16,8 +16,8 @@
 Оба режима записывают в одну таблицу `silver/crossref/publication` и применяют идентичную валидацию:
 
 - **Pandera-схема**: `PublicationEnrichedSchema` (наследует `PublicationBaseSchema`)
-- **DQ-конфиг**: `configs/dq/entities/crossref/publication.yaml`
-- **Provider DQ**: `configs/dq/providers/crossref.yaml`
+- **DQ-конфиг**: `configs/quality/entities/crossref/publication.yaml`
+- **Provider DQ**: `configs/quality/providers/crossref.yaml`
 
 ## 3. Матрица валидации полей
 

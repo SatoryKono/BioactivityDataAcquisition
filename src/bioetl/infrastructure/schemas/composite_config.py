@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, Self
 
-from pydantic import AliasChoices, BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
@@ -656,7 +656,6 @@ class CompositeConfigSchema(BaseModel):
     merge: MergeSchema = Field(..., description="Merge step configuration")
     dq_overrides: CompositeDQSchema = Field(
         default_factory=CompositeDQSchema,
-        validation_alias=AliasChoices("dq_overrides", "dq_rules", "dq"),
         description="Data quality configuration",
     )
     execution: ExecutionSchema = Field(

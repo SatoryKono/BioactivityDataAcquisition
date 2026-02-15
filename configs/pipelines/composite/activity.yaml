@@ -255,7 +255,7 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
-  dq_rules:
+  dq_overrides:
     # Composite-level thresholds (applied to merge result)
     soft_fail_threshold: 0.10  # 10% errors = warning
     hard_fail_threshold: 0.30  # 30% errors = failure
@@ -377,7 +377,7 @@ gold_filters:
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filter rules are loaded from hierarchical config files:
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/composite.yaml (provider-specific)
-#   3. configs/filter/entities/composite/activity.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/composite.yaml (provider-specific)
+#   3. configs/filters/entities/composite/activity.yaml (entity-specific)
 filter_config_file: ../../filter/entities/composite/activity.yaml

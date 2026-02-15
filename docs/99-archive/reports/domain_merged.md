@@ -5434,8 +5434,8 @@ class DQRulesDict(TypedDict, total=False):
 class DQConfigFileDict(TypedDict, total=False):
     """YAML structure for standalone DQ config file.
 
-    Used in configs/dq/_defaults.yaml, configs/dq/providers/*.yaml,
-    and configs/dq/entities/{provider}/*.yaml.
+    Used in configs/quality/_defaults.yaml, configs/quality/providers/*.yaml,
+    and configs/quality/entities/{provider}/*.yaml.
     """
 
     # Metadata
@@ -5578,7 +5578,7 @@ class PipelineConfigDict(TypedDict, total=False):
     # 1. Reference to external file (recommended)
     dq_config_file: str  # Relative path, e.g., "../../dq/entities/chembl/activity.yaml"
     # 2. Inline rules (legacy, or for overrides)
-    dq_rules: DQRulesDict
+    dq_overrides: DQRulesDict
 
     # Circuit Breaker
     circuit_breaker: CircuitBreakerDict

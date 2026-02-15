@@ -62,7 +62,7 @@ FROM chembl.publication;
 If you have custom DQ rules referencing these fields:
 
 ```yaml
-# configs/dq/entities/chembl/publication.yaml
+# configs/quality/entities/chembl/publication.yaml
 
 # BEFORE (5.9)
 - field: citation_count
@@ -212,11 +212,11 @@ bioetl run --pipeline uniprot_protein --run-type rebuild --yes
 ```yaml
 # BEFORE (5.9)
 silver_config:
-  column_groups_file: configs/data_schema/chembl/activity.yaml
+  column_groups_file: configs/schemas/chembl/activity.yaml
 
 # AFTER (5.14)
 silver_config:
-  data_schema_file: configs/data_schema/chembl/activity.yaml
+  data_schema_file: configs/schemas/chembl/activity.yaml
 ```
 
 **Note:** Old parameter still works (deprecated warning), will be removed in 6.0.

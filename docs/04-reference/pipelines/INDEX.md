@@ -39,7 +39,7 @@ The `composite_publication` pipeline merges provider Silver tables into a unifie
 - **Seed**: `chembl_publication`
 - **Enrichers**: `crossref_publication`, `openalex_publication`, `pubmed_publication`, `semanticscholar_publication`
 - **Config**: `configs/pipelines/composite/publication.yaml`
-- **Field map**: `configs/data_schema/composite/publication.yaml`
+- **Field map**: `configs/schemas/composite/publication.yaml`
 
 ______________________________________________________________________
 

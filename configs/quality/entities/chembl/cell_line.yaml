@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/cell_line.yaml
+# configs/quality/entities/chembl/cell_line.yaml
 # ChEMBL Cell Line-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

@@ -216,7 +216,7 @@ source:
   type: api
   batch_size: 200  # E-utilities limit
 
-dq_rules:
+dq_overrides:
   soft_fail_threshold: 0.05
   hard_fail_threshold: 0.20
 

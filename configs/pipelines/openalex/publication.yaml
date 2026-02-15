@@ -31,9 +31,9 @@ source:
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/dq/_defaults.yaml (global defaults)
-#   2. configs/dq/providers/openalex.yaml (provider-specific)
-#   3. configs/dq/entities/openalex/publication.yaml (entity-specific)
+#   1. configs/quality/_defaults.yaml (global defaults)
+#   2. configs/quality/providers/openalex.yaml (provider-specific)
+#   3. configs/quality/entities/openalex/publication.yaml (entity-specific)
 
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)
@@ -44,9 +44,9 @@ source:
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filter/_defaults.yaml (global defaults)
-#   2. configs/filter/providers/openalex.yaml (provider-specific)
-#   3. configs/filter/entities/openalex/publication.yaml (entity-specific)
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/openalex.yaml (provider-specific)
+#   3. configs/filters/entities/openalex/publication.yaml (entity-specific)
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # Entity-specific sink overrides

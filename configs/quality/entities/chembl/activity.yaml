@@ -1,4 +1,4 @@
-# configs/dq/entities/chembl/activity.yaml
+# configs/quality/entities/chembl/activity.yaml
 # ChEMBL Activity-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 

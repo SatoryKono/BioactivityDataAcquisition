@@ -1,4 +1,4 @@
-# configs/dq/entities/openalex/publication.yaml
+# configs/quality/entities/openalex/publication.yaml
 # OpenAlex Publication-specific DQ rules
 # Inherits from: _defaults.yaml → providers/openalex.yaml
 

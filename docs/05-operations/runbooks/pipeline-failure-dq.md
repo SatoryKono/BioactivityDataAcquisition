@@ -35,7 +35,7 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
 3. **If Threshold is Too Strict**:
    - Temporarily increase threshold in `configs/pipelines/{pipeline}.yaml`:
      ```yaml
-     dq_rules:
+     dq_overrides:
        hard_fail_threshold: 0.30  # Increase to 30%
      ```
    - **Warning**: This degrades data quality in Silver/Gold.

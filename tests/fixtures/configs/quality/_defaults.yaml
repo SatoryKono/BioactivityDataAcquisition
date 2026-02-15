@@ -1,5 +1,5 @@
 # Test defaults for DQ config tests
-# Simplified version of configs/dq/_defaults.yaml for testing
+# Simplified version of configs/quality/_defaults.yaml for testing
 
 version: "1.0.0"
 
