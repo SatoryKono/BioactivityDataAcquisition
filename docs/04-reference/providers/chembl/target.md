@@ -39,7 +39,6 @@
 | `component_ids` | `list[int]` | ID компонентов |
 | `component_types` | `list[str]` | Типы компонентов |
 | `component_organisms` | `list[str]` | Организмы компонентов |
-| `component_tax_ids` | `list[int]` | Taxonomy IDs компонентов |
 
 ### Связи
 
@@ -58,7 +57,7 @@
 
 Компоненты мишени (`target_components`) агрегируются в списки:
 - `component_accessions`, `component_ids`, `component_types`
-- `component_organisms`, `component_tax_ids`
+- `component_organisms`
 
 ### Entity ID
 
