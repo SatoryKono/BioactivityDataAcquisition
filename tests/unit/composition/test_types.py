@@ -63,7 +63,7 @@ class TestTypesModuleExports:
             "DQConfigsContext",
             "DQOutputPathsContext",
             "PipelineCallbacksContext",
-            "RateLimitConfig",
+            "RateLimitContext",
         ]
         for name in expected_exports:
             assert name in types.__all__, f"{name} not in __all__"
@@ -86,7 +86,7 @@ class TestTypesModuleExports:
             "DQConfigsContext",
             "DQOutputPathsContext",
             "PipelineCallbacksContext",
-            "RateLimitConfig",
+            "RateLimitContext",
         }
         assert set(types.__all__) == expected
 

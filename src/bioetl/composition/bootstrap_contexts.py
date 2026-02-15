@@ -35,7 +35,7 @@ __all__ = [
     "DQConfigsContext",
     "DQOutputPathsContext",
     "PipelineCallbacksContext",
-    "RateLimitConfig",
+    "RateLimitContext",
 ]
 
 
@@ -104,7 +104,7 @@ class DQOutputPathsContext:
 
 
 @dataclass(frozen=True)
-class RateLimitConfig:
+class RateLimitContext:
     """Typed context for rate limiting configuration.
 
     Replaces untyped tuple[float, int] from _get_rate_limit_from_config().
