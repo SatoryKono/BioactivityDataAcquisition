@@ -123,7 +123,7 @@ class TestFileSizeLimits:
         "base_transformer.py": 825,  # 821 LOC - BaseTransformer with silver_filters + should_write_silver()
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "subcellular_fraction_data_source.py": 520,  # 518 LOC - Derived entity wrapper with FilterableDataSourcePort delegation
-        "merger.py": 1795,  # 1765 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
+        "merger.py": 1805,  # 1799 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join + cross-validation integration
         "extractors.py": 510,  # 506 LOC OpenAlex, 413 CrossRef, 349 S2 (author + page parsing split to submodules)
         # UniProt extraction helpers
         "comments.py": 580,  # 578 LOC - UniProt comment extraction helpers with isoform/subcellular/disease details
