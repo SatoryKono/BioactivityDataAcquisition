@@ -66,7 +66,7 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
         # Verify Silver Delta Table
         from deltalake import DeltaTable
 
-        silver_table_name = runner.pipeline.config.silver_table
+        silver_table_name = runner.pipeline.config.effective_silver_table
         silver_table_path = f"{self.silver_path}/{silver_table_name}"
 
         dt_silver = DeltaTable(silver_table_path)
@@ -83,7 +83,7 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
         assert "cell_name" in silver_df.column_names
 
         # Verify Gold Delta Table
-        gold_table_name = runner.pipeline.config.gold_table
+        gold_table_name = runner.pipeline.config.effective_gold_table
         if not gold_table_name:
             gold_table_name = f"{runner.pipeline.config.provider}.{runner.pipeline.config.entity_type}"
 
@@ -114,7 +114,7 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
         # Verify Silver Delta Table has source columns
         from deltalake import DeltaTable
 
-        silver_table_name = runner.pipeline.config.silver_table
+        silver_table_name = runner.pipeline.config.effective_silver_table
         silver_table_path = f"{self.silver_path}/{silver_table_name}"
 
         dt_silver = DeltaTable(silver_table_path)
