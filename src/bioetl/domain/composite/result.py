@@ -8,9 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.lineage import LineageMetadata
 
 
@@ -283,11 +284,17 @@ class MergeResult:
     output_silver_path: str | None = None
     output_gold_path: str | None = None
     lineage_summary: dict[str, int] = field(default_factory=dict)
+    cross_validation_stats: CrossValidationStats | None = None
+    quarantine_payloads: tuple[dict[str, Any], ...] = ()
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
         if isinstance(self.sources_used, list):
             object.__setattr__(self, "sources_used", tuple(self.sources_used))
+        if isinstance(self.quarantine_payloads, list):
+            object.__setattr__(
+                self, "quarantine_payloads", tuple(self.quarantine_payloads)
+            )
 
     @property
     def enrichment_rate(self) -> float:

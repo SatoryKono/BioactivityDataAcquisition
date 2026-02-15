@@ -281,8 +281,9 @@ def _normalize_health_check(source: dict[str, Any]) -> None:
         source["health_check"] = _sync_timeout_aliases(hc)
 
 
-_API_KEYS = ("base_url", "auth_type", "api_key", "api_version")
-_BATCH_KEYS = ("batch_size", "page_size", "max_url_length")
+_ENDPOINT_KEYS: tuple[str, ...] = ("base_url", "api_version")
+_AUTH_KEYS: tuple[str, ...] = ("auth_type", "api_key")
+_BATCH_KEYS: tuple[str, ...] = ("batch_size", "page_size", "max_url_length")
 
 
 def _get_dict_or_empty(container: dict[str, Any], key: str) -> dict[str, Any]:
@@ -298,20 +299,64 @@ def _copy_keys(src: dict[str, Any], dst: dict[str, Any], keys: tuple[str, ...]) 
             dst.setdefault(key, src[key])
 
 
-def _project_legacy_to_new_style(
-    source: dict[str, Any], provider_config: dict[str, Any]
-) -> None:
-    """Project legacy ``provider_config`` fields into new-style keys in-place."""
-    api_norm = _get_dict_or_empty(source, "api")
-    _copy_keys(provider_config, api_norm, _API_KEYS)
-    if api_norm:
-        source["api"] = api_norm
+def _normalize_source_rate_limits(source: dict[str, Any]) -> None:
+    """Normalize rate limiting aliases and health check timeouts.
 
+    Reconciles ``with_api_key`` ↔ ``authenticated`` in rate_limit
+    and ``timeout`` ↔ ``timeout_sec`` in health_check.
+    """
+    _normalize_rate_limit(source)
+    _normalize_health_check(source)
+
+
+def _normalize_source_endpoints(
+    source: dict[str, Any],
+    provider_config: dict[str, Any],
+    api: dict[str, Any],
+) -> None:
+    """Normalize endpoint/URL and client configuration.
+
+    Copies endpoint keys (base_url, api_version) from *api* into
+    *provider_config* and reconciles the ``client`` section
+    bidirectionally with timeout syncing.
+    """
+    _copy_keys(api, provider_config, _ENDPOINT_KEYS)
+
+    # Project legacy client into new-style section
     if isinstance(provider_config.get("client"), dict):
         client_norm = _get_dict_or_empty(source, "client")
         legacy_client = _sync_timeout_aliases(provider_config["client"])
         source["client"] = _deep_merge(legacy_client, client_norm)
 
+    # Consume new-style client back into provider_config
+    client = source.pop("client", None)
+    if isinstance(client, dict):
+        existing = _get_dict_or_empty(provider_config, "client")
+        existing = _sync_timeout_aliases(existing) if existing else {}
+        provider_config["client"] = _deep_merge(existing, _sync_timeout_aliases(client))
+
+
+def _normalize_source_auth(
+    provider_config: dict[str, Any],
+    api: dict[str, Any],
+) -> None:
+    """Normalize authentication configuration.
+
+    Copies auth keys (auth_type, api_key) from *api* into *provider_config*.
+    """
+    _copy_keys(api, provider_config, _AUTH_KEYS)
+
+
+def _normalize_source_pagination(
+    source: dict[str, Any],
+    provider_config: dict[str, Any],
+) -> None:
+    """Normalize pagination and batch configuration.
+
+    Projects legacy batch keys into the ``batch`` section, then consumes
+    the section back into *provider_config*.
+    """
+    # Project legacy batch keys into batch section
     batch_norm = _get_dict_or_empty(source, "batch")
     _copy_keys(provider_config, batch_norm, _BATCH_KEYS)
     if "batch_size" in provider_config:
@@ -319,32 +364,7 @@ def _project_legacy_to_new_style(
     if batch_norm:
         source["batch"] = batch_norm
 
-
-def _consume_api_to_legacy(
-    source: dict[str, Any], provider_config: dict[str, Any]
-) -> None:
-    """Pop ``api`` from *source* and copy keys into *provider_config*."""
-    api = source.pop("api", None)
-    if isinstance(api, dict):
-        _copy_keys(api, provider_config, _API_KEYS)
-
-
-def _consume_client_to_legacy(
-    source: dict[str, Any], provider_config: dict[str, Any]
-) -> None:
-    """Pop ``client`` from *source* and merge into *provider_config*."""
-    client = source.pop("client", None)
-    if not isinstance(client, dict):
-        return
-    existing = _get_dict_or_empty(provider_config, "client")
-    existing = _sync_timeout_aliases(existing) if existing else {}
-    provider_config["client"] = _deep_merge(existing, _sync_timeout_aliases(client))
-
-
-def _consume_batch_to_legacy(
-    source: dict[str, Any], provider_config: dict[str, Any]
-) -> None:
-    """Pop ``batch`` from *source* and merge into *provider_config*."""
+    # Consume batch section back into provider_config
     batch = source.pop("batch", None)
     if isinstance(batch, dict):
         if "batch_size" in batch:
@@ -356,22 +376,14 @@ def _consume_batch_to_legacy(
         provider_config.setdefault("batch_size", batch)
 
 
-def _consume_new_style_to_legacy(
-    source: dict[str, Any], provider_config: dict[str, Any]
-) -> None:
-    """Pop new-style keys from *source* and merge into *provider_config*."""
-    _consume_api_to_legacy(source, provider_config)
-    _consume_client_to_legacy(source, provider_config)
-    _consume_batch_to_legacy(source, provider_config)
-
-
 def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
     """Normalize source config across legacy/new schemas before validation.
 
-    Supported input schemas:
-    - Legacy: ``source.provider_config.*`` and ``rate_limit.with_api_key``
-    - New: ``source.api`` + ``source.client`` + ``source.batch``
-      and ``rate_limit.authenticated``
+    Delegates to concern-specific normalizers:
+    - :func:`_normalize_source_rate_limits` — rate limit and health check aliases
+    - :func:`_normalize_source_endpoints` — base_url, api_version, client config
+    - :func:`_normalize_source_auth` — auth_type, api_key
+    - :func:`_normalize_source_pagination` — batch / page_size configuration
     """
     config = raw.copy()
     source = config.get("source")
@@ -380,17 +392,24 @@ def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
 
     source_norm = source.copy()
 
-    _normalize_rate_limit(source_norm)
-    _normalize_health_check(source_norm)
-
     provider_config = source_norm.get("provider_config")
     if not isinstance(provider_config, dict):
         provider_config = {}
 
+    # Build merged API section from legacy provider_config + new-style api
+    api_norm = _get_dict_or_empty(source_norm, "api")
     if provider_config:
-        _project_legacy_to_new_style(source_norm, provider_config)
+        _copy_keys(provider_config, api_norm, (*_ENDPOINT_KEYS, *_AUTH_KEYS))
+    if api_norm:
+        source_norm["api"] = api_norm
+    api = source_norm.pop("api", None)
+    if not isinstance(api, dict):
+        api = {}
 
-    _consume_new_style_to_legacy(source_norm, provider_config)
+    _normalize_source_rate_limits(source_norm)
+    _normalize_source_endpoints(source_norm, provider_config, api)
+    _normalize_source_auth(provider_config, api)
+    _normalize_source_pagination(source_norm, provider_config)
 
     if provider_config:
         source_norm["provider_config"] = provider_config

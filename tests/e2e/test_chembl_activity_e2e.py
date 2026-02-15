@@ -14,7 +14,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,
@@ -55,7 +55,7 @@ async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
     ctx = create_test_context("chembl_activity", limit=10)
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Bronze layer
@@ -93,7 +93,7 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
     ctx1 = create_test_context("chembl_activity", limit=5)
 
     # Act - First run
-    runner1 = bootstrap_pipeline(ctx1)
+    runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
     count_after_first = assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
@@ -101,7 +101,7 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
 
     # Act - Second run with same limit
     ctx2 = create_test_context("chembl_activity", limit=5)
-    runner2 = bootstrap_pipeline(ctx2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
     count_after_second = assert_silver_table_has_records(
         e2e_data_dir, "chembl_activity", expected_min=1
@@ -125,7 +125,7 @@ async def test_pipeline_resume_from_checkpoint(e2e_data_dir: Path):
     """
     # Arrange - First run with limit
     ctx1 = create_test_context("chembl_activity", limit=3, resume=False)
-    runner1 = bootstrap_pipeline(ctx1)
+    runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
     first_count = assert_silver_table_has_records(
@@ -134,7 +134,7 @@ async def test_pipeline_resume_from_checkpoint(e2e_data_dir: Path):
 
     # Arrange - Second run with resume
     ctx2 = create_test_context("chembl_activity", limit=3, resume=True)
-    runner2 = bootstrap_pipeline(ctx2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
 
     second_count = assert_silver_table_has_records(

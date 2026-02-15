@@ -17,7 +17,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_bronze_files_exist,
@@ -74,7 +74,7 @@ async def test_chembl_publication_full_cycle(e2e_data_dir: Path):
     )
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Bronze layer
@@ -112,7 +112,7 @@ async def test_chembl_publication_metadata_fields(e2e_data_dir: Path):
     )
 
     # Act
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Assert - Check publication fields

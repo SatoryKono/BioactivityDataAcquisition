@@ -194,7 +194,6 @@ composite:
         fields:
           - target_id
           - primary_component_id
-          - dap_id
           - uniprot_accession
           - mapping_status
         provider_order: [chembl, uniprot]
@@ -286,7 +285,6 @@ composite:
       - name: references
         fields:
           - pipeline_stages
-          - target_constraints
         provider_order: [chembl]
 
     # Fields excluded from merged output (Silver + Gold)

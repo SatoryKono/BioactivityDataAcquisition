@@ -232,7 +232,7 @@ class TestBootstrapAdapterIsolation:
     """Tests ensuring bootstrap doesn't directly import adapters."""
 
     def test_bootstrap_no_direct_adapter_imports(self, src_dir: Path) -> None:
-        """bootstrap_pipeline MUST NOT import concrete adapters directly.
+        """bootstrap_pipeline_runner MUST NOT import concrete adapters directly.
 
         REQ-ARCH-COMP-001: Composition Root delegates adapter creation to factories.
         Adding a new provider should only require changes in:
@@ -241,10 +241,10 @@ class TestBootstrapAdapterIsolation:
 
         This prevents tight coupling and ensures the factory pattern is enforced.
 
-        Note: bootstrap_pipeline() is now defined in composition/bootstrap/runtime/pipeline.py
+        Note: bootstrap_pipeline_runner() is now defined in composition/bootstrap/runtime/pipeline.py
         as part of the CLI/runtime split (see CLAUDE.md §2.1).
         """
-        # bootstrap_pipeline is now in composition/bootstrap/runtime/pipeline.py
+        # bootstrap_pipeline_runner is now in composition/bootstrap/runtime/pipeline.py
         bootstrap_file = (
             src_dir / "bioetl" / "composition" / "bootstrap" / "runtime" / "pipeline.py"
         )
@@ -281,7 +281,7 @@ class TestBootstrapAdapterIsolation:
                 violations.append(f"{description}: {matches}")
 
         assert not violations, (
-            "bootstrap_pipeline() must not import concrete adapters directly.\n"
+            "bootstrap_pipeline_runner() must not import concrete adapters directly.\n"
             "Use ProviderRegistry and factories "
             "(DataSourceFactory, HttpClientFactory) instead.\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
@@ -369,6 +369,6 @@ class TestInterfacesBootstrapIsolation:
             "Correct:\n"
             "  from bioetl.composition.entrypoints import create_pipeline_runner\n\n"
             "Wrong:\n"
-            "  from bioetl.composition.bootstrap import bootstrap_pipeline\n\n"
+            "  from bioetl.composition.bootstrap import bootstrap_pipeline_runner\n\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )

@@ -16,7 +16,7 @@ from typing import Any
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
 from .conftest import (
     assert_silver_table_has_records,
@@ -49,7 +49,7 @@ async def test_chembl_target_then_activity_chain(e2e_data_dir: Path):
     """
     # Step 1: Run Target pipeline
     target_ctx = create_test_context("chembl_target", limit=3)
-    target_runner = bootstrap_pipeline(target_ctx)
+    target_runner = bootstrap_pipeline_runner(target_ctx)
     await target_runner.run()
 
     target_count = assert_silver_table_has_records(
@@ -58,7 +58,7 @@ async def test_chembl_target_then_activity_chain(e2e_data_dir: Path):
 
     # Step 2: Run Activity pipeline
     activity_ctx = create_test_context("chembl_activity", limit=5)
-    activity_runner = bootstrap_pipeline(activity_ctx)
+    activity_runner = bootstrap_pipeline_runner(activity_ctx)
     await activity_runner.run()
 
     activity_count = assert_silver_table_has_records(
@@ -80,7 +80,7 @@ async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
     """
     # Step 1: Run Molecule pipeline
     molecule_ctx = create_test_context("chembl_molecule", limit=3)
-    molecule_runner = bootstrap_pipeline(molecule_ctx)
+    molecule_runner = bootstrap_pipeline_runner(molecule_ctx)
     await molecule_runner.run()
 
     molecule_count = assert_silver_table_has_records(
@@ -89,7 +89,7 @@ async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
 
     # Step 2: Run Activity pipeline
     activity_ctx = create_test_context("chembl_activity", limit=5)
-    activity_runner = bootstrap_pipeline(activity_ctx)
+    activity_runner = bootstrap_pipeline_runner(activity_ctx)
     await activity_runner.run()
 
     activity_count = assert_silver_table_has_records(
@@ -127,7 +127,7 @@ async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
 
     for pipeline_name, table_name, limit in pipelines_in_order:
         ctx = create_test_context(pipeline_name, limit=limit)
-        runner = bootstrap_pipeline(ctx)
+        runner = bootstrap_pipeline_runner(ctx)
         await runner.run()
 
         count = assert_silver_table_has_records(
@@ -150,7 +150,7 @@ async def test_parallel_independent_pipelines(e2e_data_dir: Path):
     """
     # Run UniProt pipeline
     uniprot_ctx = create_test_context("uniprot_protein", limit=3)
-    uniprot_runner = bootstrap_pipeline(uniprot_ctx)
+    uniprot_runner = bootstrap_pipeline_runner(uniprot_ctx)
     await uniprot_runner.run()
 
     uniprot_count = assert_silver_table_has_records(
@@ -171,12 +171,12 @@ async def test_pipeline_isolation(e2e_data_dir: Path):
     """
     # Run Target pipeline
     target_ctx = create_test_context("chembl_target", limit=3)
-    target_runner = bootstrap_pipeline(target_ctx)
+    target_runner = bootstrap_pipeline_runner(target_ctx)
     await target_runner.run()
 
     # Run Molecule pipeline
     molecule_ctx = create_test_context("chembl_molecule", limit=3)
-    molecule_runner = bootstrap_pipeline(molecule_ctx)
+    molecule_runner = bootstrap_pipeline_runner(molecule_ctx)
     await molecule_runner.run()
 
     # Get records from both tables
@@ -205,7 +205,7 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
     """
     # First run
     ctx1 = create_test_context("chembl_target", limit=3)
-    runner1 = bootstrap_pipeline(ctx1)
+    runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
     first_count = assert_silver_table_has_records(
@@ -214,7 +214,7 @@ async def test_rerun_same_pipeline_twice(e2e_data_dir: Path):
 
     # Second run
     ctx2 = create_test_context("chembl_target", limit=3)
-    runner2 = bootstrap_pipeline(ctx2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
 
     second_count = assert_silver_table_has_records(

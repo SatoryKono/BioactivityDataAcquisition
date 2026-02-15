@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.17 (Chained Dependencies), 2026-02-03*
+*Версия: 5.18 (Statistics Update), 2026-02-15*
 
 ## Введение (Quick Reference)
 
@@ -270,7 +270,8 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 **Причина**: Pandas/Polars исторически не поддерживали nullable integers без специального типа `Int64` (с заглавной I). Float — единственный способ представить `int + NULL` без потери данных для больших значений. `NaN` используется для отсутствующих значений.
 
-**Затронутые поля (~34 occurrences)**:
+<!-- Updated: was ~34, now ~88 (audit 2026-02-14) -->
+**Затронутые поля (~88 occurrences)**:
 
 > **Примечание**: Для получения актуального числа occurrences:
 > `grep -rn "coerce=True" src/bioetl/infrastructure/schemas/ src/bioetl/domain/schemas/ --include="*.py" | grep -c "Series\[float\]"`
@@ -501,7 +502,8 @@ merge:
 | `PUBLICATION_TYPES`             | Типы документов                         | Да                |
 | `TRASH`                         | Внутренние, избыточные, low-value       | **Нет**           |
 
-**Конфигурация:** `configs/composite/field_groups/publication.yaml` — 94 базовых поля, маппинг на провайдерские колонки.
+<!-- Updated: was 94, now 106 (audit 2026-02-14) -->
+**Конфигурация:** `configs/composite/field_groups/publication.yaml` — 106 базовых полей, маппинг на провайдерские колонки.
 
 **Доменные модели** (`domain/composite/field_groups.py`):
 
@@ -916,8 +918,9 @@ from __future__ import annotations
 > **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
 > и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
 > они не содержат type annotations, требующих отложенной эвалюации.
-> Текущее состояние: 468 из 499 файлов (93.8%) содержат импорт;
-> 31 файл без импорта — все `__init__.py`.
+<!-- Updated: was 468/499 (93.8%), now 481/517 (93.0%); was 31, now 36 (audit 2026-02-14) -->
+> Текущее состояние: 481 из 517 файлов (93.0%) содержат импорт;
+> 36 файлов без импорта — 32 `__init__.py` и 4 файла данных/утилит.
 
 #### 4.4.2. Type Hints
 
@@ -1154,18 +1157,22 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 **MUST NOT** делать утверждения без верификации:
 
+<!-- Updated: was 527 LOC / 8 методов, now 818 LOC / 21 метод (audit 2026-02-14) -->
+
 | ❌ Неверно                      | ✅ Верно                                                                                                           |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| "PreflightService — god object" | "PreflightService (`preflight_service.py`, 527 LOC, 8 методов) имеет 4 публичных метода с единой ответственностью" |
+| "PreflightService — god object" | "PreflightService (`preflight_service.py`, 818 LOC, 21 метод) имеет 4 публичных метода с единой ответственностью" |
 | "Компонент перегружен"          | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам"                                         |
 | "Нет валидации X"               | "Валидация X отсутствует в `file.py` (проверено grep по 'X')"                                                      |
 
 #### 7.1.4. Типичные Ложные Выводы
 
+<!-- Updated: ChemblAdapter was 517, now 975; GoldWriter was 593, now 946 (audit 2026-02-14) -->
+
 | Паттерн                             | Почему ошибочен                                                         | Пример из кодовой базы                                                                         |
 | ----------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| "500+ LOC = god object"             | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден | `ChemblAdapter` (517 LOC) делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
-| "Монолит требует декомпозиции"      | Файл с делегированием — НЕ монолит                                      | `GoldWriter` (593 LOC) делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны          |
+| "500+ LOC = god object"             | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден | `ChemblAdapter` (975 LOC) делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
+| "Монолит требует декомпозиции"      | Файл с делегированием — НЕ монолит                                      | `GoldWriter` (946 LOC) делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны          |
 | "NoOp default = нарушение DI"       | Null Object Pattern валиден для опциональных зависимостей               | `NoOpMetrics`, `NoOpTracing`                                                                   |
 | "Optional parameter = нарушение DI" | \`policy: Policy                                                        | None = None\` — допустимый паттерн для value objects                                           |
 | "click.echo в CLI = нарушение"      | User-facing output — законная ответственность interfaces слоя           | `cli.py` confirmation prompts                                                                  |
@@ -1210,9 +1217,10 @@ grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/archived/refactoring-pla
 
 **Контрпримеры (НЕ монолиты, несмотря на размер):**
 
-- `ChemblAdapter` (517 LOC): Делегирует 4 компонентам, когезивная ответственность
-- `GoldWriter` (593 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
-- `PreflightService` (527 LOC): 8 методов с единой ответственностью (preflight validation)
+<!-- Updated: ChemblAdapter was 517→975; GoldWriter was 593→946; PreflightService was 527→818 (audit 2026-02-14) -->
+- `ChemblAdapter` (975 LOC): Делегирует 4 компонентам, когезивная ответственность
+- `GoldWriter` (946 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
+- `PreflightService` (818 LOC): 21 метод с единой ответственностью (preflight validation)
 
 ### 7.2. Обновление Документации
 
@@ -1524,6 +1532,7 @@ fields:
 
 ## История Изменений (Changelog)
 
+- **5.18** (2026-02-15): Statistics Update. Обновлены числовые данные по результатам аудита 2026-02-14: файлов кода (499→517), future annotations (468→481), Int→Float coercion occurrences (~34→~88), publication field groups (94→106), LOC для ChemblAdapter (517→975), GoldWriter (593→946), PreflightService (527→818).
 - **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key_source` и `filter_field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
 - **5.16** (2026-02-02): ADR Registry Update + Doc Sync. Добавлен ADR-032 в реестр (Приложение F): Unified HTTP Client Pattern. Синхронизация метрик с кодовой базой.
 - **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composite/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.

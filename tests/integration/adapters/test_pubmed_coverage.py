@@ -281,7 +281,6 @@ async def test_probe_health_explicit(pubmed_adapter: PubMedAdapter):
 
 @pytest.mark.integration
 async def test_probe_health_degraded(pubmed_adapter: PubMedAdapter):
-
     mock_health_json = {"esearchresult": {"idlist": ["1"]}}
 
     # We want to test the timing branch.

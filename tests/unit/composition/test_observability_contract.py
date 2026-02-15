@@ -2,7 +2,7 @@
 
 Verifies that:
 1. ObservabilityBundle enforces required components (logger, metrics)
-2. bootstrap_observability() always returns valid implementations
+2. bootstrap_observability_bundle() always returns valid implementations
 3. NoOpMetrics is used as fallback when Prometheus disabled
 4. Pipeline cannot run without valid logger
 5. Health-check metrics are properly recorded
@@ -98,7 +98,7 @@ class TestObservabilityBundle:
 
 @pytest.mark.unit
 class TestBootstrapObservability:
-    """Tests for bootstrap_observability() function."""
+    """Tests for bootstrap_observability_bundle() function."""
 
     @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.runtime.observability.PrometheusMetrics")
@@ -111,7 +111,7 @@ class TestBootstrapObservability:
     ) -> None:
         """Test that bootstrap returns bundle with valid implementations."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_observability,
+            bootstrap_observability_bundle,
         )
 
         # Setup mocks
@@ -128,7 +128,7 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
 
-        bundle = bootstrap_observability(
+        bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
             run_id=uuid4(),
             settings=settings,
@@ -146,7 +146,7 @@ class TestBootstrapObservability:
     ) -> None:
         """Test that NoOpMetrics is used when metrics disabled."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_observability,
+            bootstrap_observability_bundle,
         )
 
         mock_logger = MagicMock()
@@ -158,7 +158,7 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
 
-        bundle = bootstrap_observability(
+        bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
             run_id=uuid4(),
             settings=settings,
@@ -173,7 +173,7 @@ class TestBootstrapObservability:
     ) -> None:
         """Test that bootstrap logs observability initialization."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_observability,
+            bootstrap_observability_bundle,
         )
 
         mock_logger = MagicMock()
@@ -184,7 +184,7 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
 
-        bootstrap_observability(
+        bootstrap_observability_bundle(
             pipeline="test_pipeline",
             run_id=uuid4(),
             settings=settings,
@@ -463,14 +463,14 @@ class TestObservabilityPreflightValidation:
 
     @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
-    def test_bootstrap_observability_calls_preflight_validation(
+    def test_bootstrap_observability_bundle_calls_preflight_validation(
         self,
         mock_unified_logger_cls: MagicMock,
         mock_start_server: MagicMock,
     ) -> None:
-        """Test that bootstrap_observability calls preflight validation."""
+        """Test that bootstrap_observability_bundle calls preflight validation."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_observability,
+            bootstrap_observability_bundle,
         )
 
         mock_logger = MagicMock()
@@ -482,7 +482,7 @@ class TestObservabilityPreflightValidation:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
 
-        bootstrap_observability(
+        bootstrap_observability_bundle(
             pipeline="test_pipeline",
             run_id=uuid4(),
             settings=settings,
