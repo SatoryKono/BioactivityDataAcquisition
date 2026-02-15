@@ -1,35 +1,21 @@
-"""Tests for composition bootstrap context declarations."""
+"""Tests for composition/bootstrap_contexts.py module exports."""
 
 from __future__ import annotations
 
-import ast
-from pathlib import Path
 
+class TestBootstrapContextsModuleExports:
+    """Tests for bootstrap context naming and module exports."""
 
-def _get_bootstrap_contexts_ast() -> ast.Module:
-    source = Path("src/bioetl/composition/bootstrap_contexts.py").read_text(
-        encoding="utf-8"
-    )
-    return ast.parse(source)
+    def test_rate_limit_context_importable(self) -> None:
+        """RateLimitContext is importable from bootstrap_contexts."""
+        from bioetl.composition.bootstrap_contexts import RateLimitContext
 
+        assert RateLimitContext is not None
 
-class TestRateLimitContextNaming:
-    """Regression tests for composition rate limit context naming."""
+    def test_legacy_rate_limit_config_not_exported(self) -> None:
+        """Legacy RateLimitConfig is not exported from bootstrap_contexts."""
+        from bioetl.composition import bootstrap_contexts
 
-    def test_rate_limit_context_class_declared(self) -> None:
-        """RateLimitContext class is declared in bootstrap_contexts."""
-        module_ast = _get_bootstrap_contexts_ast()
-        class_names = {
-            node.name for node in module_ast.body if isinstance(node, ast.ClassDef)
-        }
-
-        assert "RateLimitContext" in class_names
-
-    def test_legacy_rate_limit_config_not_declared(self) -> None:
-        """Legacy RateLimitConfig class name is no longer declared."""
-        module_ast = _get_bootstrap_contexts_ast()
-        class_names = {
-            node.name for node in module_ast.body if isinstance(node, ast.ClassDef)
-        }
-
-        assert "RateLimitConfig" not in class_names
+        assert "RateLimitContext" in bootstrap_contexts.__all__
+        assert "RateLimitConfig" not in bootstrap_contexts.__all__
+        assert not hasattr(bootstrap_contexts, "RateLimitConfig")
