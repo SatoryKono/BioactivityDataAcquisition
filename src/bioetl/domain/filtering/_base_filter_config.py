@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Self
 
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
@@ -24,6 +24,18 @@ class BaseFilterConfig:
     list_contains_filters: tuple[GoldListContainsFilter, ...] = ()
     required_fields: tuple[str, ...] = ()
     exclude_if_present: tuple[str, ...] = ()
+
+    @classmethod
+    def from_base(cls, other: BaseFilterConfig) -> Self:
+        """Create a config of current type by copying all filter fields."""
+        return cls(
+            column_filters=other.column_filters,
+            range_filters=other.range_filters,
+            list_length_filters=other.list_length_filters,
+            list_contains_filters=other.list_contains_filters,
+            required_fields=other.required_fields,
+            exclude_if_present=other.exclude_if_present,
+        )
 
     def should_include(self, record: dict[str, Any]) -> bool:
         """Check whether a record passes all configured filters."""

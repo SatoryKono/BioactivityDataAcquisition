@@ -81,3 +81,25 @@ class TestSilverFromBaseAndBehavior:
         silver = SilverFilterConfig.from_base(gold)
 
         assert silver.should_include(record) == gold.should_include(record)
+
+
+@pytest.mark.unit
+class TestBaseFromBaseFactory:
+    """BaseFilterConfig.from_base keeps logic in one place for all descendants."""
+
+    def test_gold_from_base_copies_all_fields_and_type(self) -> None:
+        source = GoldFilterConfig(
+            required_fields=("id",),
+            exclude_if_present=("deleted",),
+            column_filters=(
+                GoldColumnFilter(column="status", values=frozenset({"ACTIVE"})),
+            ),
+            range_filters=(
+                GoldRangeFilter(column="score", min_value=0.0, max_value=10.0),
+            ),
+        )
+
+        gold_copy = GoldFilterConfig.from_base(source)
+
+        assert isinstance(gold_copy, GoldFilterConfig)
+        assert gold_copy == source
