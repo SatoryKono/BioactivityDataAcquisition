@@ -270,7 +270,7 @@ class TestFunctionComplexity:
         "_check_value_distribution": 18,  # CC=17 - Value distribution analysis
         "_check_schema_drift": 14,  # CC=13 - Schema drift detection
         # Composite pipeline merge service
-        "merge": 23,  # CC=22 - MergeService.merge() orchestrates seed/enricher/dependency join with conflict resolution
+        "merge": 30,  # CC=29 - MergeService.merge() orchestrates seed/enricher/dependency join with cross-validation and conflict resolution
         "_apply_explicit_rules": 11,  # CC=10 - Explicit field priority rules (refactored with helper methods)
         "_apply_joins": 15,  # CC=13 - Join logic with multiple enrichers
         "_coalesce_prefer_seed": 16,  # CC=15 - Type-safe coalesce with seed priority and null handling

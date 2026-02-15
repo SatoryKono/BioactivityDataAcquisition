@@ -12,6 +12,7 @@ See plan: Pre-Merge Cross-Validation for Composite Publication Pipeline.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.cross_validation import (
@@ -29,6 +30,16 @@ if TYPE_CHECKING:
         EnricherFieldPairing,
     )
     from bioetl.domain.ports import LoggerPort
+
+
+@dataclass
+class _EnricherValidationResult:
+    """Internal result from validating one enricher against seed."""
+
+    stats: EnricherCVStats
+    is_error: pl.Series  # Boolean series: True where enricher error
+    is_warning: pl.Series  # Boolean series: True where warning
+    df: pl.DataFrame  # Potentially modified DataFrame (nullified columns)
 
 
 class EnrichmentCrossValidator:
@@ -76,95 +87,139 @@ class EnrichmentCrossValidator:
 
         seed_provider, seed_entity = self._parse_pipeline(seed_pipeline)
         total_records = len(merged_df)
+
+        # Track per-row aggregates across all enrichers
+        enricher_error_counts = pl.Series("_ee", [0] * total_records, dtype=pl.Int32)
+        has_warning = pl.Series("_hw", [False] * total_records, dtype=pl.Boolean)
         enricher_stats_list: list[EnricherCVStats] = []
-
-        # Track enricher error counts per row (for quarantine decision)
-        enricher_error_counts = pl.Series(
-            "_cv_enricher_errors", [0] * total_records, dtype=pl.Int32
-        )
-
-        # Track any warnings per row
-        has_warning = pl.Series(
-            "_cv_has_warning", [False] * total_records, dtype=pl.Boolean
-        )
 
         for enricher_pipeline in enricher_pipelines:
             pairing = self._config.get_pairing(enricher_pipeline)
             if pairing is None:
                 continue
 
-            enricher_provider, enricher_entity = self._parse_pipeline(enricher_pipeline)
+            result = self._validate_enricher(
+                merged_df, pairing, seed_provider, seed_entity, enricher_pipeline
+            )
+            merged_df = result.df
+            enricher_stats_list.append(result.stats)
+            enricher_error_counts = enricher_error_counts + result.is_error.cast(
+                pl.Int32
+            )
+            has_warning = has_warning | result.is_warning
 
-            # Count mismatches per row for this enricher
-            mismatch_count, compared_count = self._count_mismatches_vectorized(
-                merged_df,
-                pairing,
-                seed_provider,
-                seed_entity,
-                enricher_provider,
-                enricher_entity,
+        # Add CV metadata and build stats
+        merged_df, stats = self._finalize(
+            merged_df,
+            enricher_error_counts,
+            has_warning,
+            enricher_stats_list,
+            total_records,
+            seed_provider,
+            seed_entity,
+        )
+        return merged_df, stats
+
+    def _validate_enricher(
+        self,
+        df: pl.DataFrame,
+        pairing: EnricherFieldPairing,
+        seed_provider: str,
+        seed_entity: str,
+        enricher_pipeline: str,
+    ) -> _EnricherValidationResult:
+        """Validate a single enricher against seed fields.
+
+        Returns validation result with per-row verdicts and optionally
+        nullified enricher columns.
+        """
+
+        enricher_provider, enricher_entity = self._parse_pipeline(enricher_pipeline)
+        total = len(df)
+
+        mismatch_count, _ = self._count_mismatches_vectorized(
+            df, pairing, seed_provider, seed_entity, enricher_provider, enricher_entity
+        )
+
+        is_error = mismatch_count >= self._config.error_threshold
+        is_warning = (mismatch_count >= self._config.warning_threshold) & ~is_error
+
+        error_count = int(is_error.sum())
+        warn_count = int(is_warning.sum())
+        pass_count = total - error_count - warn_count
+
+        self._logger.info(
+            "Cross-validation for enricher",
+            enricher=enricher_pipeline,
+            passed=pass_count,
+            warned=warn_count,
+            errored=error_count,
+        )
+
+        # Null enricher columns where ENRICHER_ERROR
+        if error_count > 0:
+            df = self._nullify_enricher_columns(
+                df, is_error, enricher_provider, enricher_entity, enricher_pipeline
             )
 
-            # Determine verdicts
-            is_error = mismatch_count >= self._config.error_threshold
-            is_warning = (mismatch_count >= self._config.warning_threshold) & ~is_error
-            is_pass = ~is_error & ~is_warning
-
-            error_count = is_error.sum()
-            warn_count = is_warning.sum()
-            pass_count = is_pass.sum()
-
-            self._logger.info(
-                "Cross-validation for enricher",
+        return _EnricherValidationResult(
+            stats=EnricherCVStats(
                 enricher=enricher_pipeline,
-                passed=int(pass_count),
-                warned=int(warn_count),
-                errored=int(error_count),
-            )
+                total_records=total,
+                passed=pass_count,
+                warned=warn_count,
+                errored=error_count,
+            ),
+            is_error=is_error,
+            is_warning=is_warning,
+            df=df,
+        )
 
-            enricher_stats_list.append(
-                EnricherCVStats(
-                    enricher=enricher_pipeline,
-                    total_records=total_records,
-                    passed=int(pass_count),
-                    warned=int(warn_count),
-                    errored=int(error_count),
-                )
-            )
+    def _nullify_enricher_columns(
+        self,
+        df: pl.DataFrame,
+        is_error: pl.Series,
+        enricher_provider: str,
+        enricher_entity: str,
+        enricher_pipeline: str,
+    ) -> pl.DataFrame:
+        """Null all enricher-prefixed columns where is_error is True."""
+        import polars as pl
 
-            # Null enricher columns where ENRICHER_ERROR
-            if int(error_count) > 0:
-                enricher_prefix = f"{enricher_provider}.{enricher_entity}."
-                enricher_cols = [
-                    c for c in merged_df.columns if c.startswith(enricher_prefix)
-                ]
-                if enricher_cols:
-                    merged_df = merged_df.with_columns(
-                        [
-                            pl.when(is_error)
-                            .then(pl.lit(None))
-                            .otherwise(pl.col(c))
-                            .alias(c)
-                            for c in enricher_cols
-                        ]
-                    )
-                    self._logger.info(
-                        "Nullified enricher columns for error records",
-                        enricher=enricher_pipeline,
-                        columns_nullified=len(enricher_cols),
-                        records_affected=int(error_count),
-                    )
+        prefix = f"{enricher_provider}.{enricher_entity}."
+        cols = [c for c in df.columns if c.startswith(prefix)]
+        if not cols:
+            return df
 
-            # Accumulate per-row error counts and warnings
-            enricher_error_counts = enricher_error_counts + is_error.cast(pl.Int32)
-            has_warning = has_warning | is_warning
+        df = df.with_columns(
+            [
+                pl.when(is_error).then(pl.lit(None)).otherwise(pl.col(c)).alias(c)
+                for c in cols
+            ]
+        )
+        self._logger.info(
+            "Nullified enricher columns for error records",
+            enricher=enricher_pipeline,
+            columns_nullified=len(cols),
+            records_affected=int(is_error.sum()),
+        )
+        return df
 
-        # Determine quarantine (2+ enricher errors)
+    def _finalize(
+        self,
+        df: pl.DataFrame,
+        enricher_error_counts: pl.Series,
+        has_warning: pl.Series,
+        enricher_stats_list: list[EnricherCVStats],
+        total_records: int,
+        seed_provider: str,
+        seed_entity: str,
+    ) -> tuple[pl.DataFrame, CrossValidationStats]:
+        """Add CV metadata columns and compute aggregate stats."""
         is_quarantine = enricher_error_counts >= self._config.quarantine_threshold
         quarantine_count = int(is_quarantine.sum())
 
-        # Add CV metadata columns
-        merged_df = merged_df.with_columns(
+        df = df.with_columns(
             [
                 has_warning.alias("_cv_warn"),
                 (enricher_error_counts > 0).alias("_cv_error"),
@@ -172,23 +227,13 @@ class EnrichmentCrossValidator:
             ]
         )
 
-        # Build quarantine payloads
-        quarantine_payloads: list[dict[str, object]] = []
         if quarantine_count > 0:
-            quarantine_df = merged_df.filter(is_quarantine)
-            # Extract seed columns only (for quarantine record)
-            seed_prefix = f"{seed_provider}.{seed_entity}."
-            seed_cols = [c for c in quarantine_df.columns if c.startswith(seed_prefix)]
-            if seed_cols:
-                quarantine_payloads = quarantine_df.select(seed_cols).to_dicts()
-
             self._logger.warning(
                 "Seed records quarantined due to multiple enricher errors",
                 quarantine_count=quarantine_count,
                 threshold=self._config.quarantine_threshold,
             )
 
-        # Compute aggregate stats
         errored_count = int((enricher_error_counts > 0).sum())
         warned_count = int((has_warning & (enricher_error_counts == 0)).sum())
         passed_count = total_records - errored_count - warned_count
@@ -211,7 +256,7 @@ class EnrichmentCrossValidator:
             quarantined=quarantine_count,
         )
 
-        return merged_df, stats
+        return df, stats
 
     def _count_mismatches_vectorized(
         self,
@@ -223,20 +268,6 @@ class EnrichmentCrossValidator:
         enricher_entity: str,
     ) -> tuple[pl.Series, pl.Series]:
         """Count field mismatches per row using vectorized Polars operations.
-
-        For each field in the pairing:
-        1. Resolve qualified column names
-        2. Skip if either column doesn't exist
-        3. Compare values where both are non-null
-        4. Count mismatches
-
-        Args:
-            df: Merged DataFrame.
-            pairing: Field comparison specs for this enricher.
-            seed_provider: Seed provider name.
-            seed_entity: Seed entity name.
-            enricher_provider: Enricher provider name.
-            enricher_entity: Enricher entity name.
 
         Returns:
             Tuple of (mismatch_count Series, compared_count Series).
@@ -263,29 +294,30 @@ class EnrichmentCrossValidator:
                 )
                 continue
 
-            # Both non-null mask
-            both_present = df[seed_col].is_not_null() & df[enricher_col].is_not_null()
-
-            # For string columns, also check for empty strings
-            seed_dtype = df[seed_col].dtype
-            enricher_dtype = df[enricher_col].dtype
-            if seed_dtype == pl.String or seed_dtype == pl.Utf8:
-                both_present = both_present & (df[seed_col].str.len_chars() > 0)
-            if enricher_dtype == pl.String or enricher_dtype == pl.Utf8:
-                both_present = both_present & (df[enricher_col].str.len_chars() > 0)
-
+            both_present = self._both_non_empty_mask(df, seed_col, enricher_col)
             compared_total = compared_total + both_present.cast(pl.Int32)
 
-            # Compute match for this field
             match_result = self._compare_field(
                 df, seed_col, enricher_col, spec.method, spec.threshold
             )
-
-            # Mismatch = both present AND not matching
             is_mismatch = both_present & ~match_result
             mismatch_total = mismatch_total + is_mismatch.cast(pl.Int32)
 
         return mismatch_total, compared_total
+
+    @staticmethod
+    def _both_non_empty_mask(
+        df: pl.DataFrame, seed_col: str, enricher_col: str
+    ) -> pl.Series:
+        """Create mask where both columns are non-null and non-empty."""
+        import polars as pl
+
+        mask = df[seed_col].is_not_null() & df[enricher_col].is_not_null()
+        for col in (seed_col, enricher_col):
+            dtype = df[col].dtype
+            if dtype == pl.String or dtype == pl.Utf8:
+                mask = mask & (df[col].str.len_chars() > 0)
+        return mask
 
     def _compare_field(
         self,
@@ -298,17 +330,6 @@ class EnrichmentCrossValidator:
         """Compare a single field between seed and enricher.
 
         Returns a boolean Series where True = match, False = mismatch.
-        Null values are treated as True (skip).
-
-        Args:
-            df: DataFrame containing both columns.
-            seed_col: Qualified seed column name.
-            enricher_col: Qualified enricher column name.
-            method: Comparison method.
-            threshold: Threshold for fuzzy/numeric.
-
-        Returns:
-            Boolean Series (True = match or skip, False = mismatch).
         """
         import polars as pl
 
@@ -319,45 +340,35 @@ class EnrichmentCrossValidator:
         elif method == ComparisonMethod.NUMERIC_TOLERANCE:
             return self._compare_numeric(df, seed_col, enricher_col, threshold)
         else:
-            # SKIP or unknown -> treat as match
             return pl.Series([True] * len(df))
 
-    def _compare_exact(
-        self, df: pl.DataFrame, seed_col: str, enricher_col: str
-    ) -> pl.Series:
-        """Exact comparison after stripping whitespace.
-
-        Casts both to String for consistent comparison.
-        """
+    @staticmethod
+    def _compare_exact(df: pl.DataFrame, seed_col: str, enricher_col: str) -> pl.Series:
+        """Exact comparison after stripping whitespace."""
         import polars as pl
 
         s = df[seed_col].cast(pl.String).str.strip_chars()
         e = df[enricher_col].cast(pl.String).str.strip_chars()
-        # Null-safe: if either is null, treat as "match" (skip)
         return s.eq(e) | s.is_null() | e.is_null()
 
+    @staticmethod
     def _compare_fuzzy(
-        self,
         df: pl.DataFrame,
         seed_col: str,
         enricher_col: str,
         threshold: float,
     ) -> pl.Series:
-        """Fuzzy comparison using Jaccard similarity on word sets.
-
-        Uses map_elements for row-by-row Jaccard computation.
-        """
+        """Fuzzy comparison using Jaccard similarity on word sets."""
         import polars as pl
 
         def _fuzzy_match(row: dict) -> bool:  # type: ignore[type-arg]
             s_val = row["seed"]
             e_val = row["enricher"]
             if s_val is None or e_val is None:
-                return True  # Skip nulls
-            sim = jaccard_similarity(str(s_val), str(e_val))
-            return sim >= threshold
+                return True
+            return jaccard_similarity(str(s_val), str(e_val)) >= threshold
 
-        result = (
+        return (
             df.select(
                 pl.col(seed_col).alias("seed"),
                 pl.col(enricher_col).alias("enricher"),
@@ -369,10 +380,9 @@ class EnrichmentCrossValidator:
             )
             .to_series()
         )
-        return result
 
+    @staticmethod
     def _compare_numeric(
-        self,
         df: pl.DataFrame,
         seed_col: str,
         enricher_col: str,
@@ -386,20 +396,13 @@ class EnrichmentCrossValidator:
 
         s = df[seed_col].cast(pl.Float64, strict=False)
         e = df[enricher_col].cast(pl.Float64, strict=False)
-
-        # Absolute difference / max(|seed|, 1)
         diff = (s - e).abs()
-        denominator = s.abs().zip_with(s.abs() > 1.0, pl.Series([1.0] * len(df)))
-        # Simpler: use pl.max_horizontal
         denom = (
             pl.DataFrame({"a": s.abs(), "b": pl.Series([1.0] * len(df))})
             .select(pl.max_horizontal("a", "b"))
             .to_series()
         )
-
         relative_diff = diff / denom
-
-        # Match if relative diff <= tolerance (or either is null)
         return (relative_diff <= tolerance) | s.is_null() | e.is_null()
 
     @staticmethod

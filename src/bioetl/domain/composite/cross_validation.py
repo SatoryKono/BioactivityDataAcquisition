@@ -53,13 +53,14 @@ class FieldComparisonSpec:
         """Validate specification."""
         if not self.field_name:
             raise ValueError("field_name cannot be empty")
-        if self.method == ComparisonMethod.FUZZY and self.threshold <= 0:
+        needs_threshold = self.method in (
+            ComparisonMethod.FUZZY,
+            ComparisonMethod.NUMERIC_TOLERANCE,
+        )
+        if needs_threshold and self.threshold <= 0:
             raise ValueError(
-                f"Fuzzy comparison requires positive threshold, got {self.threshold}"
-            )
-        if self.method == ComparisonMethod.NUMERIC_TOLERANCE and self.threshold <= 0:
-            raise ValueError(
-                f"Numeric tolerance requires positive threshold, got {self.threshold}"
+                f"{self.method} comparison requires positive threshold, "
+                f"got {self.threshold}"
             )
 
 
