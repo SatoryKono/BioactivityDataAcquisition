@@ -40,6 +40,7 @@ class _EnricherValidationResult:
     is_error: pl.Series  # Boolean series: True where enricher error
     is_warning: pl.Series  # Boolean series: True where warning
     df: pl.DataFrame  # Potentially modified DataFrame (nullified columns)
+    detail: pl.Series  # JSON string per row, null where no mismatches
 
 
 class EnrichmentCrossValidator:
@@ -92,6 +93,7 @@ class EnrichmentCrossValidator:
         enricher_error_counts = pl.Series("_ee", [0] * total_records, dtype=pl.Int32)
         has_warning = pl.Series("_hw", [False] * total_records, dtype=pl.Boolean)
         enricher_stats_list: list[EnricherCVStats] = []
+        enricher_details: list[pl.Series] = []
 
         for enricher_pipeline in enricher_pipelines:
             pairing = self._config.get_pairing(enricher_pipeline)
@@ -107,6 +109,7 @@ class EnrichmentCrossValidator:
                 pl.Int32
             )
             has_warning = has_warning | result.is_warning
+            enricher_details.append(result.detail)
 
         # Add CV metadata and build stats
         merged_df, stats = self._finalize(
@@ -114,6 +117,7 @@ class EnrichmentCrossValidator:
             enricher_error_counts,
             has_warning,
             enricher_stats_list,
+            enricher_details,
             total_records,
             seed_provider,
             seed_entity,
@@ -137,8 +141,15 @@ class EnrichmentCrossValidator:
         enricher_provider, enricher_entity = self._parse_pipeline(enricher_pipeline)
         total = len(df)
 
-        mismatch_count, _, field_mismatches = self._count_mismatches_vectorized(
-            df, pairing, seed_provider, seed_entity, enricher_provider, enricher_entity
+        mismatch_count, _, field_mismatches, field_mismatch_bools = (
+            self._count_mismatches_vectorized(
+                df,
+                pairing,
+                seed_provider,
+                seed_entity,
+                enricher_provider,
+                enricher_entity,
+            )
         )
 
         is_error = mismatch_count >= self._config.error_threshold
@@ -165,6 +176,11 @@ class EnrichmentCrossValidator:
 
         field_mismatches_tuple = tuple(field_mismatches.items())
 
+        # Build per-row detail JSON for this enricher
+        detail = _build_enricher_detail(
+            enricher_pipeline, field_mismatch_bools, mismatch_count
+        )
+
         return _EnricherValidationResult(
             stats=EnricherCVStats(
                 enricher=enricher_pipeline,
@@ -177,6 +193,7 @@ class EnrichmentCrossValidator:
             is_error=is_error,
             is_warning=is_warning,
             df=df,
+            detail=detail,
         )
 
     def _nullify_enricher_columns(
@@ -215,6 +232,7 @@ class EnrichmentCrossValidator:
         enricher_error_counts: pl.Series,
         has_warning: pl.Series,
         enricher_stats_list: list[EnricherCVStats],
+        enricher_details: list[pl.Series],
         total_records: int,
         seed_provider: str,
         seed_entity: str,
@@ -223,11 +241,14 @@ class EnrichmentCrossValidator:
         is_quarantine = enricher_error_counts >= self._config.quarantine_threshold
         quarantine_count = int(is_quarantine.sum())
 
+        cv_details = _combine_cv_details(enricher_details, total_records)
+
         df = df.with_columns(
             [
                 has_warning.alias("_cv_warn"),
                 (enricher_error_counts > 0).alias("_cv_error"),
                 is_quarantine.alias("_cv_quarantine"),
+                cv_details.alias("_cv_details"),
             ]
         )
 
@@ -270,12 +291,12 @@ class EnrichmentCrossValidator:
         seed_entity: str,
         enricher_provider: str,
         enricher_entity: str,
-    ) -> tuple[pl.Series, pl.Series, dict[str, int]]:
+    ) -> tuple[pl.Series, pl.Series, dict[str, int], dict[str, pl.Series]]:
         """Count field mismatches per row using vectorized Polars operations.
 
         Returns:
             Tuple of (mismatch_count Series, compared_count Series,
-            per-field mismatch counts dict).
+            per-field mismatch counts dict, per-field boolean mismatch Series).
         """
         import polars as pl
 
@@ -283,6 +304,7 @@ class EnrichmentCrossValidator:
         mismatch_total = pl.Series("_mm", [0] * n, dtype=pl.Int32)
         compared_total = pl.Series("_cmp", [0] * n, dtype=pl.Int32)
         field_mismatch_counts: dict[str, int] = {}
+        field_mismatch_bools: dict[str, pl.Series] = {}
 
         for spec in pairing.fields:
             if spec.method == ComparisonMethod.SKIP:
@@ -309,8 +331,14 @@ class EnrichmentCrossValidator:
             is_mismatch = both_present & ~match_result
             mismatch_total = mismatch_total + is_mismatch.cast(pl.Int32)
             field_mismatch_counts[spec.field_name] = int(is_mismatch.sum())
+            field_mismatch_bools[spec.field_name] = is_mismatch
 
-        return mismatch_total, compared_total, field_mismatch_counts
+        return (
+            mismatch_total,
+            compared_total,
+            field_mismatch_counts,
+            field_mismatch_bools,
+        )
 
     def _compare_field(
         self,
@@ -346,7 +374,81 @@ class EnrichmentCrossValidator:
         return parts[0], parts[1]
 
 
-# --- Module-level comparison helpers (extracted to reduce class size) ---
+# --- Module-level helpers (extracted to reduce class size) ---
+
+
+def _build_enricher_detail(
+    enricher_pipeline: str,
+    field_mismatch_bools: dict[str, pl.Series],
+    mismatch_count: pl.Series,
+) -> pl.Series:
+    """Build per-row JSON detail string for one enricher.
+
+    For rows with mismatches, produces JSON like:
+    {"enricher": "crossref_publication", "field_mismatches": ["title", "volume"]}
+
+    Returns null for rows with no mismatches.
+    """
+    import json
+
+    import polars as pl
+
+    n = len(mismatch_count)
+    if not field_mismatch_bools:
+        return pl.Series("_detail", [None] * n, dtype=pl.String)
+
+    bool_df = pl.DataFrame(field_mismatch_bools)
+
+    def _row_to_json(row: dict) -> str | None:  # type: ignore[type-arg]
+        fields = [f for f, v in row.items() if v]
+        if not fields:
+            return None
+        return json.dumps(
+            {"enricher": enricher_pipeline, "field_mismatches": fields},
+            ensure_ascii=False,
+        )
+
+    return bool_df.select(
+        pl.struct(bool_df.columns)
+        .map_elements(_row_to_json, return_dtype=pl.String)
+        .alias("_detail")
+    ).to_series()
+
+
+def _combine_cv_details(
+    enricher_details: list[pl.Series], total_records: int
+) -> pl.Series:
+    """Combine per-enricher detail series into a single _cv_details column.
+
+    Merges non-null detail JSON objects from each enricher into a JSON array
+    per row. Returns null for rows with no mismatches across any enricher.
+
+    Example output per row:
+    [{"enricher": "crossref_publication", "field_mismatches": ["title"]},
+     {"enricher": "pubmed_publication", "field_mismatches": ["volume"]}]
+    """
+    import json
+
+    import polars as pl
+
+    if not enricher_details:
+        return pl.Series("_cv_details", [None] * total_records, dtype=pl.String)
+
+    cols = {f"_d{i}": s for i, s in enumerate(enricher_details)}
+    detail_df = pl.DataFrame(cols)
+
+    def _merge_row(row: dict) -> str | None:  # type: ignore[type-arg]
+        parts = [v for v in row.values() if v is not None]
+        if not parts:
+            return None
+        items = [json.loads(p) for p in parts]
+        return json.dumps(items, ensure_ascii=False)
+
+    return detail_df.select(
+        pl.struct(detail_df.columns)
+        .map_elements(_merge_row, return_dtype=pl.String)
+        .alias("_cv_details")
+    ).to_series()
 
 
 def _both_non_empty_mask(
