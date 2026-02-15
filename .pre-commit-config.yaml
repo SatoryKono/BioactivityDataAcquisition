@@ -112,3 +112,9 @@ repos:
         additional_dependencies:
           - jsonschema>=4.0.0
           - pyyaml>=6.0
+
+      - id: check-root-vcr-cassettes
+        name: Block root-level VCR cassette files
+        entry: python scripts/check_root_vcr_cassettes.py
+        language: system
+        pass_filenames: false
