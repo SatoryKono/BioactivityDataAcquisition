@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
@@ -26,7 +27,7 @@ class RunnerFactory:
     """Factory for creating pipeline runners.
 
     Implements RunnerFactoryPort protocol for PipelineRunnerService.
-    Delegates to bootstrap_pipeline() for actual runner creation.
+    Delegates to build_pipeline_runner() for actual runner creation.
 
     Attributes:
         registry: Optional custom registry for test isolation.
@@ -69,13 +70,8 @@ class RunnerFactory:
             ValueError: If pipeline name is unknown or config is invalid.
             FileNotFoundError: If pipeline config file is missing.
         """
-        # Import inside method to avoid circular import:
-        # composition/bootstrap.py -> _bootstrap/__init__.py -> _bootstrap/runner.py
-        # -> factories/runner_factory.py -> composition/bootstrap.py
-        from bioetl.composition.bootstrap import bootstrap_pipeline
-
         self._ensure_registrations()
-        runner: PipelineRunner = bootstrap_pipeline(context, registry=self._registry)
+        runner: PipelineRunner = build_pipeline_runner(context, registry=self._registry)
         return runner
 
     def list_pipelines(self) -> list[str]:

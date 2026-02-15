@@ -1,0 +1,47 @@
+# configs/dq/entities/chembl/assay_parameters.yaml
+# ChEMBL Assay Parameters-specific DQ rules
+# Inherits from: _defaults.yaml → providers/chembl.yaml
+
+version: "1.0.0"
+provider: chembl
+entity: assay_parameters
+
+# Thresholds: inherit from provider
+
+# =============================================================================
+# Assay Parameters-Specific Field Validations
+# =============================================================================
+field_validations:
+  - field: assay_param_id
+    type: range
+    min: 1
+    nullable: false
+    error_message: "Assay parameter ID is required and must be positive"
+
+  - field: assay_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: false
+    error_message: "assay_id must match CHEMBL format"
+
+  - field: type
+    type: pattern
+    pattern: '^.{1,100}$'
+    nullable: false
+    error_message: "Parameter type is required"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+cross_field_validations:
+  - name: param_linkage
+    fields:
+      - assay_param_id
+      - assay_id
+    condition: all_present
+    error_message: "Both param ID and assay ID are required"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+conditional_validations: []

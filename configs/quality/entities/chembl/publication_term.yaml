@@ -1,0 +1,58 @@
+# configs/dq/entities/chembl/publication_term.yaml
+# ChEMBL Publication Term (Document Term)-specific DQ rules
+# Inherits from: _defaults.yaml → providers/chembl.yaml
+
+version: "1.0.0"
+provider: chembl
+entity: publication_term
+
+# Thresholds: inherit from provider
+
+# =============================================================================
+# Publication Term-Specific Field Validations
+# =============================================================================
+field_validations:
+  - field: entity_id
+    type: pattern
+    pattern: '^[a-f0-9]{64}$'
+    nullable: false
+    error_message: "entity_id must be a 64-char SHA256 hash"
+
+  - field: publication_id
+    type: pattern
+    pattern: '^CHEMBL\d+$'
+    nullable: false
+    error_message: "publication_id must match CHEMBL format"
+
+  - field: term_type
+    type: enum
+    allowed:
+      - MESH_HEADING
+      - KEYWORD
+      - AUTHOR
+      - INSTITUTION
+    nullable: false
+    error_message: "term_type is required and must be valid"
+
+  - field: term
+    type: pattern
+    pattern: '^.{1,500}$'
+    nullable: false
+    error_message: "term is required and must not exceed 500 chars"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+cross_field_validations:
+  - name: term_completeness
+    fields:
+      - publication_id
+      - term
+      - term_type
+    condition: all_present
+    error_message: "All term fields are required"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+conditional_validations: []

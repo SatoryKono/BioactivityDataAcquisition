@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
@@ -11,6 +12,7 @@ from pydantic import ValidationError
 
 from bioetl.application.composite.checkpoint import CompositeCheckpointManager
 from bioetl.application.composite.coordinator import EnrichmentCoordinator
+from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
 from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
@@ -479,12 +481,21 @@ def bootstrap_composite_runner(
     # Load field group registry for semantic column grouping and Gold filtering
     field_group_registry = _load_field_group_registry(config.name, logger)
 
+    # Create cross-validator if enabled
+    cross_validator: EnrichmentCrossValidator | None = None
+    if config.cross_validation.enabled:
+        cross_validator = EnrichmentCrossValidator(
+            config=config.cross_validation,
+            logger=logger,
+        )
+
     merger = MergeService(
         merge_config=config.merge,
         storage=storage,
         logger=logger,
         delta_reader=delta_reader,
         field_group_registry=field_group_registry,
+        cross_validator=cross_validator,
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"
@@ -498,6 +509,15 @@ def bootstrap_composite_runner(
 
     # Create DQ report service for composite
     dq_report_service = _create_dq_report_service(logger, settings)
+
+    # Create quarantine port for cross-validation quarantine records
+    quarantine_port = None
+    if config.cross_validation.enabled:
+        from bioetl.composition.bootstrap.assembly.checkpoint import (
+            bootstrap_quarantine_port,
+        )
+
+        quarantine_port = bootstrap_quarantine_port()
 
     return CompositePipelineRunner(
         config=config,
@@ -514,6 +534,7 @@ def bootstrap_composite_runner(
         lock=lock,
         run_id=effective_run_id,
         dq_report_service=dq_report_service,
+        quarantine_port=quarantine_port,
     )
 
 
@@ -536,6 +557,11 @@ def bootstrap_composite_pipeline(
     Returns:
         CompositePipelineRunner ready for execution.
     """
+    warnings.warn(
+        "bootstrap_composite_pipeline() is deprecated, use bootstrap_composite_runner() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
 
 

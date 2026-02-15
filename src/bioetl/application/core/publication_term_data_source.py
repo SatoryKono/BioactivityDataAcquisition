@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
+from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.domain.ports import FilterableDataSourcePort
 
@@ -34,7 +35,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 
-class PublicationTermDataSource:
+class PublicationTermDataSource(_SourceMetadataDelegationMixin):
     """Wraps a DataSourcePort to extract terms from publication records.
 
     This is a Decorator pattern implementation that transforms the publication
@@ -570,20 +571,3 @@ class PublicationTermDataSource:
                 limit=limit,
             ):
                 yield record
-
-    def get_source_metadata(self, api_version: str | None = None) -> Any:
-        """Delegate get_source_metadata to wrapped data source.
-
-        Returns API request metadata collected by the underlying adapter.
-        Used by BatchExecutor to enrich Bronze layer metadata.
-
-        Args:
-            api_version: Optional API version string.
-
-        Returns:
-            SourceMetadata with request details, or None if not supported.
-        """
-        get_metadata = getattr(self._data_source, "get_source_metadata", None)
-        if get_metadata is not None and callable(get_metadata):
-            return get_metadata(api_version)
-        return None

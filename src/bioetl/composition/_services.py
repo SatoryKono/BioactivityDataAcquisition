@@ -20,16 +20,16 @@ from bioetl.composition.bootstrap import (
     bootstrap_lock_service,
     bootstrap_metrics_service,
     bootstrap_pipeline_runner_service,
-    bootstrap_quarantine,
+    bootstrap_quarantine_port,
     bootstrap_quarantine_service,
     bootstrap_vacuum_service,
 )
 
 if TYPE_CHECKING:
     from bioetl.application.services import (
+        BronzeCleanupResult,
         BronzeCleanupService,
         CheckpointService,
-        CleanupResult,
         ConfigService,
         ExportService,
         HealthService,
@@ -160,7 +160,7 @@ def get_lock_service() -> LockService:
 async def cleanup_bronze(
     retention_days: int = 90,
     dry_run: bool = False,
-) -> CleanupResult:
+) -> BronzeCleanupResult:
     """Clean up old Bronze files based on retention policy.
 
     Convenience function for Bronze cleanup operations.
@@ -171,14 +171,14 @@ async def cleanup_bronze(
         dry_run: If True, only show what would be removed.
 
     Returns:
-        CleanupResult with cleanup statistics.
+        BronzeCleanupResult with cleanup statistics.
 
     Example:
         >>> result = await cleanup_bronze(retention_days=90, dry_run=True)
         >>> logger.info("cleanup_preview", files_to_remove=result.files_removed)
     """
     service = get_bronze_cleanup_service()
-    result: CleanupResult = await service.cleanup(
+    result: BronzeCleanupResult = await service.cleanup(
         retention_days=retention_days,
         dry_run=dry_run,
     )
@@ -299,4 +299,4 @@ def get_quarantine_store(pipeline: str) -> QuarantinePort:
         >>> records = await store.inspect("chembl_activity", limit=10)
     """
     _ensure_registrations()
-    return bootstrap_quarantine()
+    return bootstrap_quarantine_port()

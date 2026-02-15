@@ -310,15 +310,15 @@ class TestCompositionRootIntegrity:
     """Tests ensuring composition root is the only assembly point."""
 
     def test_bootstrap_imports_from_factories(self, src_dir: Path) -> None:
-        """bootstrap_pipeline() should use factories, not direct instantiation.
+        """bootstrap_pipeline_runner() should use factories, not direct instantiation.
 
-        Composition root (bootstrap_pipeline) should delegate creation to factories
+        Composition root (bootstrap_pipeline_runner) should delegate creation to factories
         rather than having inline instantiation of complex objects.
 
-        Note: bootstrap_pipeline() is now defined in composition/bootstrap/runtime/pipeline.py
+        Note: bootstrap_pipeline_runner() is now defined in composition/bootstrap/runtime/pipeline.py
         as part of the CLI/runtime split (see CLAUDE.md §2.1).
         """
-        # bootstrap_pipeline is now in composition/bootstrap/runtime/pipeline.py
+        # bootstrap_pipeline_runner is now in composition/bootstrap/runtime/pipeline.py
         bootstrap_file = (
             src_dir / "bioetl" / "composition" / "bootstrap" / "runtime" / "pipeline.py"
         )
@@ -338,7 +338,7 @@ class TestCompositionRootIntegrity:
         )
 
         assert has_factory_usage, (
-            "bootstrap_pipeline() should delegate to factories for object creation.\n"
+            "bootstrap_pipeline_runner() should delegate to factories for object creation.\n"
             "Expected factory imports or usage, found none."
         )
 

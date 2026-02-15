@@ -54,20 +54,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
-
-
-def _get_bioetl_version() -> str:
-    """Get BioETL package version.
-
-    Returns:
-        Package version string.
-
-    Raises:
-        PackageNotFoundError: If bioetl package is not installed.
-    """
-    from importlib.metadata import version as pkg_version
-
-    return pkg_version("bioetl")
+from bioetl.domain.version import get_version as _get_bioetl_version
 
 
 class MetadataCoordinator:
@@ -356,9 +343,9 @@ class MetadataCoordinator:
                 if "src/bioetl" in file_path:
                     idx = file_path.find("src/bioetl")
                     contract_path = file_path[idx:]
-        except Exception:
+        except (AttributeError, OSError, TypeError):
             # Module may not have __file__ or path extraction may fail
-            pass
+            contract_path = None
 
         # Extract schema version from Config if defined
         version = "1.0"
@@ -399,9 +386,9 @@ class MetadataCoordinator:
                                 nullable=nullable,
                             )
                         )
-        except Exception:
+        except (AttributeError, TypeError, ValueError):
             # If schema extraction fails, leave columns empty
-            pass
+            columns = []
 
         return SchemaMetadata(
             contract_path=contract_path,

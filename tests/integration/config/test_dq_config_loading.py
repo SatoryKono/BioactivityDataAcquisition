@@ -122,7 +122,7 @@ class TestRealConfigValidation:
         """All ChEMBL entity configs should load without errors."""
         entities = ["activity", "assay", "molecule", "target"]
         for entity in entities:
-            entity_path = Path(f"configs/dq/entities/chembl/{entity}.yaml")
+            entity_path = Path(f"configs/quality/entities/chembl/{entity}.yaml")
             if entity_path.exists():
                 config = dq_loader.load("chembl", entity)
                 assert config.soft_fail_threshold < config.hard_fail_threshold
@@ -143,7 +143,7 @@ class TestRealConfigValidation:
         """Provider configs should be loadable."""
         import yaml
 
-        providers_dir = Path("configs/dq/providers")
+        providers_dir = Path("configs/quality/providers")
         if providers_dir.exists():
             for provider_file in providers_dir.glob("*.yaml"):
                 with open(provider_file) as f:
@@ -160,7 +160,7 @@ class TestDQConfigFileStructure:
         """_defaults.yaml should have all required sections."""
         import yaml
 
-        defaults_path = Path("configs/dq/_defaults.yaml")
+        defaults_path = Path("configs/quality/_defaults.yaml")
         assert defaults_path.exists(), "Missing _defaults.yaml"
 
         with open(defaults_path) as f:
@@ -176,7 +176,7 @@ class TestDQConfigFileStructure:
         """Provider config files should have consistent format."""
         import yaml
 
-        providers_dir = Path("configs/dq/providers")
+        providers_dir = Path("configs/quality/providers")
         if not providers_dir.exists():
             pytest.skip("No providers directory")
 
@@ -198,7 +198,7 @@ class TestDQConfigFileStructure:
         """Entity config files should have provider and entity fields."""
         import yaml
 
-        entities_dir = Path("configs/dq/entities")
+        entities_dir = Path("configs/quality/entities")
         if not entities_dir.exists():
             pytest.skip("No entities directory")
 

@@ -1,4 +1,3 @@
-data_schema_file: ../../data_schema/chembl/activity.yaml
 # configs/pipelines/chembl/activity.yaml
 # =============================================================================
 # ChEMBL Activity Pipeline Configuration
@@ -30,20 +29,15 @@ gold_table: "chembl_activity"
 # Sink Configuration (ADR-014, ADR-025)
 # -----------------------------------------------------------------------------
 sink:
-  silver:
-    primary_key: ["activity_id"]
-    sort_by:
-      columns: ["activity_id"]
-  gold:
-    sort_by:
-      columns: ["activity_id"]
+  silver: {}
+  gold: {}
 
 # -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)
 # -----------------------------------------------------------------------------
 # Only rules that EXTEND or DIFFER from configs/dq/entities/chembl/activity.yaml
 # Redundant rules (same as entity config) have been removed per ADR-027.
-dq_rules:
+dq_overrides:
   field_validations:
     # Override: Entity has min:0 only, pipeline adds max for extreme outliers
     - field: "standard_value"

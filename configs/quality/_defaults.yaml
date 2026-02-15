@@ -1,0 +1,60 @@
+# configs/dq/_defaults.yaml
+# Global DQ defaults for all BioETL pipelines
+# RULES.md §3.1.2: DQ Thresholds
+#
+# Merge priority (lowest to highest):
+# 1. This file (_defaults.yaml)
+# 2. providers/{provider}.yaml
+# 3. entities/{provider}/{entity}.yaml
+# 4. Inline overrides in pipeline config
+
+version: "1.0.0"
+
+# =============================================================================
+# Threshold Configuration (RULES.md §3.1.2)
+# =============================================================================
+thresholds:
+  soft_fail: 0.05      # >5% errors → Warning
+  hard_fail: 0.20      # >20% errors → Fail Batch
+
+# =============================================================================
+# Validation Mode
+# =============================================================================
+strict_validation: false  # Feature flag for stricter rules
+
+# =============================================================================
+# Invalid Record Handling
+# =============================================================================
+invalid_record_policy: quarantine  # quarantine | skip | fail
+
+# =============================================================================
+# Report Configuration
+# =============================================================================
+report:
+  enabled: true
+  format: json           # json | yaml | csv
+  include_sample_failures: true
+  sample_size: 10
+  output_path: null      # null = use pipeline output dir
+
+# =============================================================================
+# Common Field Validations (applied to ALL entities)
+# =============================================================================
+field_validations:
+  # Content hash must be present after transform
+  - field: _content_hash
+    type: required
+    nullable: false
+    error_message: "Content hash is required for deduplication"
+
+  # Ingestion timestamp must be valid ISO format
+  - field: _ingestion_ts
+    type: pattern
+    pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
+    nullable: false
+    error_message: "Ingestion timestamp must be ISO 8601 format"
+
+# =============================================================================
+# Common Cross-Field Validations
+# =============================================================================
+cross_field_validations: []

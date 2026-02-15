@@ -13,7 +13,6 @@ primary_keys: ["component_id"]
 silver_table: chembl_target_component
 gold_table: chembl_target_component
 
-source_file: ../../sources/chembl.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -22,8 +21,6 @@ source_file: ../../sources/chembl.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/chembl.yaml (provider-specific)
 #   3. configs/dq/entities/chembl/target_component.yaml (entity-specific)
-dq_config_file: ../../dq/entities/chembl/target_component.yaml
-data_schema_file: ../../data_schema/chembl/target_component.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -36,22 +33,7 @@ data_schema_file: ../../data_schema/chembl/target_component.yaml
 
 # Entity-specific sink overrides
 sink:
-  bronze:
-    path: "data/output/bronze/chembl/target_component"
+  bronze: {}
   silver:
-    path: "data/output/silver/chembl/target_component"
-    primary_key: ["component_id"]
     partition_by: ["organism"]
-    sort_by:
-      columns: ["component_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/chembl/target_component"
-  gold:
-    path: "data/output/gold/chembl/target_component"
-    sort_by:
-      columns: ["component_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/chembl/target_component"
-
+  gold: {}

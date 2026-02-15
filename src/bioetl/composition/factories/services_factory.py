@@ -185,7 +185,7 @@ class BaseServicesFactory:
         quarantine = cls._create_quarantine(settings)
 
         # Use provided tracer or fallback to NoOpTracing
-        # Tracer should be created via bootstrap_tracer() for consistent configuration
+        # Tracer should be created via bootstrap_tracer_port() for consistent configuration
         if tracer is None:
             from bioetl.domain.ports import NoOpTracing
 
@@ -432,8 +432,8 @@ class ServicesBuilder:
         primary_keys: Sequence[str],
         silver_table: str,
         gold_table: str | None,
-        silver_write_mode: SilverWriteMode | str,
-        gold_write_mode: GoldWriteMode | str,
+        silver_write_mode: SilverWriteMode,
+        gold_write_mode: GoldWriteMode,
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
         transform_callback: Any,
         gold_filter_callback: Any,
@@ -550,13 +550,12 @@ class ServicesBuilder:
             silver_schema=silver_schema,
             gold_schema=gold_schema,
             dq_config=pipeline.config.dq,
-            primary_keys=pipeline.config.primary_keys,
-            silver_table=pipeline.config.silver_table
-            or f"{pipeline.config.provider}.{pipeline.config.entity_type}",
-            gold_table=pipeline.config.gold_table,
-            silver_write_mode=pipeline.config.write_mode,
-            gold_write_mode=pipeline.config.gold_write_mode,
-            on_schema_mismatch=pipeline.config.on_schema_mismatch,  # type: ignore[arg-type]
+            primary_keys=pipeline.config.table.primary_keys,
+            silver_table=pipeline.config.effective_silver_table,
+            gold_table=pipeline.config.effective_gold_table,
+            silver_write_mode=pipeline.config.table.silver_write_mode,
+            gold_write_mode=pipeline.config.table.gold_write_mode,
+            on_schema_mismatch=pipeline.config.table.on_schema_mismatch,
             transform_callback=callbacks.transform,
             gold_filter_callback=callbacks.gold_filter,
             gold_transform_callback=callbacks.gold_transform,

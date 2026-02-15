@@ -21,6 +21,9 @@ from bioetl.domain.composite.aggregation import (
     AggregationFunction,
     EnricherCardinality,
 )
+from bioetl.domain.composite.cross_validation import (
+    EnricherFieldPairing,
+)
 from bioetl.domain.composite.strategy import (
     ConflictResolution,
     FallbackStrategy,
@@ -35,11 +38,13 @@ __all__ = [
     "ColumnGroupConfig",
     "CompositeConfig",
     "CompositeDQConfig",
+    "CrossValidationConfig",
     "DQOverrideConfig",
     "DataSchemaConfig",
     "DependencyConfig",
     "EnricherCardinality",
     "EnricherConfig",
+    "EnricherFieldPairing",
     "ExecutionConfig",
     "LayerColumnConfig",
     "LineageConfig",
@@ -777,6 +782,82 @@ class LineageConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class CrossValidationConfig:
+    """Configuration for pre-merge cross-validation of seed vs enricher data.
+
+    Cross-validation compares paired fields between seed and each enricher
+    before merge. Mismatches are counted per record:
+    - 0 mismatches: PASS
+    - 1 mismatch: WARNING (configurable via warning_threshold)
+    - 2+ mismatches: ENRICHER_ERROR, all enricher fields nullified
+    - 2+ enrichers with ENRICHER_ERROR: seed record quarantined
+
+    Attributes:
+        enabled: Whether cross-validation is active. Default True.
+        warning_threshold: Number of mismatches to trigger WARNING. Default 1.
+        error_threshold: Number of mismatches to trigger ENRICHER_ERROR. Default 2.
+        quarantine_threshold: Number of enricher errors to quarantine seed. Default 2.
+        fuzzy_threshold: Jaccard similarity threshold for fuzzy comparisons.
+        numeric_tolerance: Relative tolerance for numeric comparisons (0.10 = 10%).
+        enricher_pairings: Field comparison specs per enricher.
+    """
+
+    enabled: bool = True
+    warning_threshold: int = 1
+    error_threshold: int = 2
+    quarantine_threshold: int = 2
+    fuzzy_threshold: float = 0.8
+    numeric_tolerance: float = 0.10
+    enricher_pairings: tuple[EnricherFieldPairing, ...] = ()
+
+    def __post_init__(self) -> None:
+        """Validate and convert types."""
+        if isinstance(self.enricher_pairings, list):
+            object.__setattr__(self, "enricher_pairings", tuple(self.enricher_pairings))
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate configuration invariants."""
+        self._validate_thresholds()
+        self._validate_tolerances()
+
+    def _validate_thresholds(self) -> None:
+        """Validate threshold ordering invariants."""
+        if self.warning_threshold < 1:
+            raise ValueError(
+                f"warning_threshold must be >= 1, got {self.warning_threshold}"
+            )
+        if self.error_threshold < 2:
+            raise ValueError(
+                f"error_threshold must be >= 2, got {self.error_threshold}"
+            )
+        if self.warning_threshold >= self.error_threshold:
+            raise ValueError("warning_threshold must be < error_threshold")
+        if self.quarantine_threshold < 1:
+            raise ValueError(
+                f"quarantine_threshold must be >= 1, got {self.quarantine_threshold}"
+            )
+
+    def _validate_tolerances(self) -> None:
+        """Validate fuzzy and numeric tolerance ranges."""
+        if not 0.0 < self.fuzzy_threshold <= 1.0:
+            raise ValueError(
+                f"fuzzy_threshold must be in (0.0, 1.0], got {self.fuzzy_threshold}"
+            )
+        if not 0.0 < self.numeric_tolerance <= 1.0:
+            raise ValueError(
+                f"numeric_tolerance must be in (0.0, 1.0], got {self.numeric_tolerance}"
+            )
+
+    def get_pairing(self, enricher_pipeline: str) -> EnricherFieldPairing | None:
+        """Get field pairing for a specific enricher."""
+        for pairing in self.enricher_pairings:
+            if pairing.enricher_pipeline == enricher_pipeline:
+                return pairing
+        return None
+
+
+@dataclass(frozen=True, slots=True)
 class CompositeConfig:
     """Complete composite pipeline configuration.
 
@@ -804,6 +885,7 @@ class CompositeConfig:
         dq: Data quality configuration.
         execution: Execution options.
         lineage: Lineage tracking configuration.
+        cross_validation: Cross-validation configuration for pre-merge checks.
 
     Example:
         >>> config = CompositeConfig(
@@ -827,6 +909,9 @@ class CompositeConfig:
     dq: CompositeDQConfig = field(default_factory=CompositeDQConfig)
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)
     lineage: LineageConfig = field(default_factory=LineageConfig)
+    cross_validation: CrossValidationConfig = field(
+        default_factory=CrossValidationConfig
+    )
 
     def __post_init__(self) -> None:
         """Validate and convert types."""

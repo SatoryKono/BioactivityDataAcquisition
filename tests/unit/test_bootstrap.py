@@ -79,14 +79,14 @@ def mock_pipeline_config():
 
 @pytest.mark.unit
 class TestBootstrapLogger:
-    """Tests for bootstrap_logger function."""
+    """Tests for bootstrap_logger_port function."""
 
-    def test_bootstrap_logger_creates_logger(self):
-        """Test that bootstrap_logger creates a logger."""
-        from bioetl.composition.bootstrap import bootstrap_logger
+    def test_bootstrap_logger_port_creates_logger(self):
+        """Test that bootstrap_logger_port creates a logger."""
+        from bioetl.composition.bootstrap import bootstrap_logger_port
 
         run_id = uuid4()
-        logger = bootstrap_logger(
+        logger = bootstrap_logger_port(
             pipeline="test_pipeline",
             run_id=run_id,
             log_level="INFO",
@@ -97,7 +97,7 @@ class TestBootstrapLogger:
 
 @pytest.mark.unit
 class TestBootstrapPipeline:
-    """Tests for bootstrap_pipeline function."""
+    """Tests for bootstrap_pipeline_runner function."""
 
     @patch(
         "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_observability_bundle"
@@ -111,7 +111,7 @@ class TestBootstrapPipeline:
         mock_logger: MagicMock,
     ):
         """Test that unknown pipeline name raises ValueError."""
-        from bioetl.composition.bootstrap import bootstrap_pipeline
+        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         # Configure settings with required observability attributes
         mock_settings.metrics_port = 8000
@@ -140,7 +140,7 @@ class TestBootstrapPipeline:
             limit=None,
         )
         with pytest.raises(ValueError, match="Configuration file not found"):
-            bootstrap_pipeline(ctx)
+            bootstrap_pipeline_runner(ctx)
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
@@ -158,14 +158,14 @@ class TestBootstrapPipeline:
         mock_get_registry: MagicMock,
         mock_logger: MagicMock,
     ) -> None:
-        """Test that bootstrap_pipeline creates runner without starting metrics server.
+        """Test that bootstrap_pipeline_runner creates runner without starting metrics server.
 
-        After refactoring, bootstrap_metrics() no longer starts the metrics server.
+        After refactoring, bootstrap_metrics_port() no longer starts the metrics server.
         Server startup is handled by entrypoints via maybe_start_metrics_server().
-        This test verifies that bootstrap_pipeline creates a runner successfully
+        This test verifies that bootstrap_pipeline_runner creates a runner successfully
         regardless of metrics server state.
         """
-        from bioetl.composition.bootstrap import bootstrap_pipeline
+        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         # Create proper mock settings with required attributes
         test_settings = MagicMock()
@@ -174,7 +174,7 @@ class TestBootstrapPipeline:
         test_settings.pipeline = MagicMock()
         test_settings.pipeline.heartbeat_interval = 30
         test_settings.pipeline.vacuum_retention_days = 7
-        # Add observability settings for bootstrap_metrics()
+        # Add observability settings for bootstrap_metrics_port()
         test_settings.observability = MagicMock()
         test_settings.observability.metrics_enabled = True
         test_settings.observability.metrics_server_enabled = True
@@ -215,7 +215,7 @@ class TestBootstrapPipeline:
         )
 
         # Should return runner - bootstrap no longer starts metrics server
-        result = bootstrap_pipeline(ctx)
+        result = bootstrap_pipeline_runner(ctx)
 
         assert result is mock_runner
         # Verify observability was bootstrapped (creates MetricsPort, but doesn't start server)
@@ -240,8 +240,8 @@ class TestBootstrapPipeline:
         mock_settings,
         mock_logger,
     ):
-        """Test bootstrap_pipeline creates chembl_activity pipeline."""
-        from bioetl.composition.bootstrap import bootstrap_pipeline
+        """Test bootstrap_pipeline_runner creates chembl_activity pipeline."""
+        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         mock_settings.test_mode = False
         mock_get_settings.return_value = mock_settings
@@ -275,7 +275,7 @@ class TestBootstrapPipeline:
             resume=False,
             limit=100,
         )
-        result = bootstrap_pipeline(ctx)
+        result = bootstrap_pipeline_runner(ctx)
 
         assert result is mock_runner
         mock_factory.create_runner.assert_called_once()
@@ -465,9 +465,9 @@ class TestChemblActivityFactory:
 
 @pytest.mark.unit
 class TestBootstrapMetrics:
-    """Tests for bootstrap_metrics function with metrics configuration.
+    """Tests for bootstrap_metrics_port function with metrics configuration.
 
-    Note: After refactoring, bootstrap_metrics() only creates the MetricsPort
+    Note: After refactoring, bootstrap_metrics_port() only creates the MetricsPort
     without starting the server. Server startup is now handled by
     maybe_start_metrics_server() which is called by entrypoints.
     """
@@ -477,8 +477,8 @@ class TestBootstrapMetrics:
         self,
         mock_prometheus: MagicMock,
     ) -> None:
-        """Test that bootstrap_metrics returns PrometheusMetrics when enabled."""
-        from bioetl.composition.bootstrap import bootstrap_metrics
+        """Test that bootstrap_metrics_port returns PrometheusMetrics when enabled."""
+        from bioetl.composition.bootstrap import bootstrap_metrics_port
 
         # Create mock settings with metrics config
         settings = MagicMock()
@@ -487,7 +487,7 @@ class TestBootstrapMetrics:
         mock_metrics = MagicMock()
         mock_prometheus.return_value = mock_metrics
 
-        result = bootstrap_metrics(settings)
+        result = bootstrap_metrics_port(settings)
 
         assert result is mock_metrics
         mock_prometheus.assert_called_once()
@@ -495,17 +495,17 @@ class TestBootstrapMetrics:
     def test_bootstrap_metrics_disabled_returns_noop_metrics(self) -> None:
         """Test that disabled metrics returns NoOpMetrics (not None).
 
-        Per Unified Observability Contract, bootstrap_metrics() always
+        Per Unified Observability Contract, bootstrap_metrics_port() always
         returns a valid MetricsPort implementation. When metrics are
         disabled, NoOpMetrics is used as a silent fallback.
         """
-        from bioetl.composition.bootstrap import bootstrap_metrics
+        from bioetl.composition.bootstrap import bootstrap_metrics_port
         from bioetl.domain.ports import NoOpMetrics
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
 
-        result = bootstrap_metrics(settings)
+        result = bootstrap_metrics_port(settings)
 
         assert result is not None
         assert isinstance(result, NoOpMetrics)
@@ -516,7 +516,7 @@ class TestMaybeStartMetricsServer:
     """Tests for maybe_start_metrics_server function.
 
     This function handles metrics server startup as a side-effect
-    that was removed from bootstrap_metrics() to keep bootstrap pure.
+    that was removed from bootstrap_metrics_port() to keep bootstrap pure.
     """
 
     @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
@@ -625,7 +625,7 @@ class TestMaybeStartMetricsServer:
 
 @pytest.mark.unit
 class TestBootstrapVacuumConfig:
-    """Tests for bootstrap_pipeline vacuum configuration merging."""
+    """Tests for bootstrap_pipeline_runner vacuum configuration merging."""
 
     @patch("bioetl.composition.bootstrap.runtime.pipeline.get_default_registry")
     @patch("bioetl.composition.bootstrap.runtime.pipeline.assemble_filter_config")
@@ -643,7 +643,7 @@ class TestBootstrapVacuumConfig:
         mock_get_registry: MagicMock,
     ) -> None:
         """Test that YAML auto_vacuum config is used when CLI doesn't override."""
-        from bioetl.composition.bootstrap import bootstrap_pipeline
+        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         # Create settings with all required observability attributes
         settings = MagicMock()
@@ -686,7 +686,7 @@ class TestBootstrapVacuumConfig:
             # vacuum defaults to VacuumConfig(enabled=False)
         )
 
-        bootstrap_pipeline(ctx)
+        bootstrap_pipeline_runner(ctx)
 
         # Verify runtime config was passed with YAML values
         call_args = mock_factory.create_runner.call_args
@@ -710,7 +710,7 @@ class TestBootstrapVacuumConfig:
         mock_get_registry: MagicMock,
     ) -> None:
         """Test that CLI vacuum options override YAML config."""
-        from bioetl.composition.bootstrap import bootstrap_pipeline
+        from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 
         # Create settings with all required observability attributes
         settings = MagicMock()
@@ -754,7 +754,7 @@ class TestBootstrapVacuumConfig:
             vacuum=VacuumConfig(enabled=True, retention_days=30),  # CLI override
         )
 
-        bootstrap_pipeline(ctx)
+        bootstrap_pipeline_runner(ctx)
 
         # Verify runtime config was passed with CLI values (overriding YAML)
         call_args = mock_factory.create_runner.call_args

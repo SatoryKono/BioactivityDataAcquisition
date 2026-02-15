@@ -14,7 +14,7 @@ from uuid import uuid4
 from bioetl.application.core.shutdown import PipelineShutdownError
 from bioetl.application.services import PipelineRunResult, RunOptions, RunResult
 from bioetl.composition.bootstrap import (
-    bootstrap_pipeline,
+    bootstrap_pipeline_runner,
     maybe_start_metrics_server,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
@@ -93,7 +93,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         options: User-facing run options.
 
     Returns:
-        PipelineRunContext ready for bootstrap_pipeline.
+        PipelineRunContext ready for bootstrap_pipeline_runner.
     """
     # Build InputFilterContext from CLI options
     # Priority: multi_filter_ids > filter_ids > input_csv > disabled
@@ -126,7 +126,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
 
     # Build VacuumConfig from CLI options (None means use YAML default)
     # Note: VacuumConfig here only captures CLI overrides.
-    # The final merge with YAML config happens in bootstrap_pipeline.
+    # The final merge with YAML config happens in bootstrap_pipeline_runner.
     # Tri-state logic:
     #   - None: No CLI override, use YAML default
     #   - True: CLI explicitly enables vacuum (--vacuum)
@@ -187,7 +187,7 @@ def create_pipeline_runner(name: str, options: RunOptions) -> PipelineRunner:
     """
     _ensure_registrations()
     ctx = build_pipeline_context(name, options)
-    return bootstrap_pipeline(ctx)
+    return bootstrap_pipeline_runner(ctx)
 
 
 async def run_pipeline(name: str, options: RunOptions) -> RunResult:

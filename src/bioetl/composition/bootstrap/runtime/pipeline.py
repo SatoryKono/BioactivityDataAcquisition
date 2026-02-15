@@ -9,20 +9,17 @@ CLI commands should use this via composition/entrypoints.py.
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
-from bioetl.composition.bootstrap.runtime.assembly import (
-    assemble_cached_bronze_context,
-    assemble_filter_config,
-    assemble_runtime_config,
-    assemble_vacuum_settings,
-)
+from bioetl.composition.bootstrap.runtime.assembly import assemble_filter_config
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
 from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
+from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 from bioetl.infrastructure.config import get_settings, load_pipeline_config
 
 if TYPE_CHECKING:
@@ -80,82 +77,20 @@ def bootstrap_pipeline_runner(
         >>> register_all_pipelines(registry=registry)
         >>> runner = bootstrap_pipeline_runner(ctx, registry=registry)
     """
-    # Use provided registry or default
-    effective_registry = registry if registry is not None else get_default_registry()
-
-    # Explicit registration (idempotent for default registry)
+    # Explicit registration retained for deterministic bootstrap semantics.
     register_all_providers()
     register_all_pipelines(registry=registry)
 
-    settings = get_settings()
-
-    # Load validated YAML config first to check for existence
-    yaml_config = load_pipeline_config(ctx.pipeline_name)
-
-    # Bootstrap unified observability (includes metrics server start if enabled)
-    observability = bootstrap_observability_bundle(
-        pipeline=ctx.pipeline_name,
-        run_id=ctx.run_id,
-        settings=settings,
-        log_level=ctx.log_level,
-    )
-
-    # Assemble vacuum settings (CLI overrides YAML)
-    vacuum = assemble_vacuum_settings(
-        cli_vacuum=ctx.vacuum,
-        yaml_maintenance=yaml_config.maintenance,
-    )
-
-    # Assemble runtime config from resolved parameters
-    runtime_config = assemble_runtime_config(
-        run_type=ctx.run_type,
-        resume=ctx.resume,
-        limit=ctx.limit,
-        query=ctx.query,
-        dry_run=ctx.dry_run,
-        heartbeat_interval=settings.pipeline.heartbeat_interval,
-        vacuum=vacuum,
-        skip_gold=ctx.skip_gold,
-    )
-
-    # Assemble filter config (CLI/direct IDs override YAML)
-    filter_config = assemble_filter_config(
-        yaml_filter=yaml_config.input_filter,
+    return build_pipeline_runner(
         ctx=ctx,
-        test_mode=settings.test_mode,
-    )
-
-    if filter_config:
-        observability.logger.info(
-            "input_filter_enabled",
-            csv_path=filter_config.source_path,
-            column=filter_config.column_name,
-            filter_field=filter_config.filter_field,
-            source="cli" if ctx.input_filter.enabled else "config",
-        )
-
-    # Assemble cached bronze context
-    cached_bronze = assemble_cached_bronze_context(ctx)
-
-    if cached_bronze.enabled:
-        observability.logger.info(
-            "cached_bronze_mode_enabled",
-            bronze_path=cached_bronze.bronze_path,
-            bronze_date=cached_bronze.bronze_date,
-        )
-
-    # Resolve pipeline factory and delegate runner creation
-    pipeline_def = effective_registry.get(ctx.pipeline_name)
-    factory = pipeline_def.factory
-
-    return factory.create_runner(
-        run_id=ctx.run_id,
-        runtime=runtime_config,
-        settings=settings,
-        observability=observability,
-        filter_config=filter_config,
-        config=yaml_config,
-        cached_bronze=cached_bronze,
+        registry=registry,
+        get_default_registry_fn=get_default_registry,
+        register_all_providers_fn=register_all_providers,
+        register_all_pipelines_fn=register_all_pipelines,
+        get_settings_fn=get_settings,
+        load_pipeline_config_fn=load_pipeline_config,
+        build_observability_bundle_fn=bootstrap_observability_bundle,
+        assemble_filter_config_fn=assemble_filter_config,
     )
 
 
@@ -176,4 +111,9 @@ def bootstrap_pipeline(
     Returns:
         PipelineRunner: Fully configured runner ready for execution.
     """
+    warnings.warn(
+        "bootstrap_pipeline() is deprecated, use bootstrap_pipeline_runner() instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return bootstrap_pipeline_runner(ctx=ctx, registry=registry)

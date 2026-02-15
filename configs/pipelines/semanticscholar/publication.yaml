@@ -21,7 +21,6 @@ primary_keys: ["paper_id"]
 silver_table: "semanticscholar_publication"
 gold_table: "semanticscholar_publication"
 
-source_file: ../../sources/semanticscholar.yaml
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -30,13 +29,11 @@ source_file: ../../sources/semanticscholar.yaml
 #   1. configs/dq/_defaults.yaml (global defaults)
 #   2. configs/dq/providers/semanticscholar.yaml (provider-specific)
 #   3. configs/dq/entities/semanticscholar/publication.yaml (entity-specific)
-dq_config_file: ../../dq/entities/semanticscholar/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)
 # -----------------------------------------------------------------------------
 # Use data_schema_file for layer-specific column configuration (silver/gold).
-data_schema_file: ../../data_schema/semanticscholar/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -52,24 +49,9 @@ data_schema_file: ../../data_schema/semanticscholar/publication.yaml
 # without table_name subdirectory, matching chembl_publication pattern
 sink:
   bronze:
-    path: "data/output/bronze/semanticscholar/publication"
     flat_structure: true  # Path already includes provider/entity
   silver:
-    path: "data/output/silver/semanticscholar/publication"
-    primary_key: ["paper_id"]
     partition_by: ["year"]
-    sort_by:
-      columns: ["paper_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/silver/semanticscholar/publication"
     flat_structure: true
   gold:
-    path: "data/output/gold/semanticscholar/publication"
-    sort_by:
-      columns: ["paper_id"]
-      ascending: true
-    csv_export:
-      path: "data/output/gold/semanticscholar/publication"
     flat_structure: true
-

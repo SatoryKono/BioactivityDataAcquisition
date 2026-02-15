@@ -1,0 +1,116 @@
+# configs/dq/entities/pubmed/publication.yaml
+# PubMed Publication-specific DQ rules
+# Inherits from: _defaults.yaml → providers/pubmed.yaml
+
+version: "1.0.0"
+provider: pubmed
+entity: publication
+
+# Thresholds: inherit from provider (soft 0.05, hard 0.15)
+
+# =============================================================================
+# Publication-Specific Field Validations
+# =============================================================================
+field_validations:
+  - field: pmid
+    type: range
+    min: 1
+    max: 10000000000
+    nullable: false
+    error_message: "PMID is required and must be a positive integer"
+
+  - field: title
+    type: max_length
+    max_length: 2000
+    nullable: true
+    error_message: "Title must not exceed 2000 characters"
+
+  - field: title
+    type: not_null
+    nullable: true
+    severity: warn
+    error_message: "Missing title — record will be filtered before Gold"
+
+  - field: title
+    type: pattern
+    pattern: '\S'
+    nullable: true
+    severity: warn
+    error_message: "Title should not be empty or whitespace-only"
+
+  - field: doi
+    type: pattern
+    pattern: '^10\.\d{4,}/\S+$'
+    nullable: true
+    error_message: "DOI must match format 10.XXXX/suffix (no whitespace)"
+
+  - field: publication_year
+    type: range
+    min: 1500
+    max: 2100
+    nullable: true
+    error_message: "Publication year out of valid range"
+
+  - field: pub_type
+    type: enum
+    allowed:
+      - Journal Article
+      - Review
+      - Letter
+      - Editorial
+      - Clinical Trial
+      - Meta-Analysis
+      - Case Reports
+      - Comparative Study
+      - Evaluation Study
+    nullable: true
+
+  - field: pmc_id
+    type: pattern
+    pattern: '^PMC\d+$'
+    nullable: true
+    error_message: "PMC ID must start with PMC followed by digits"
+
+  - field: citations_received
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Citation count must be non-negative"
+
+  - field: citations_received
+    type: range
+    min: 0
+    max: 10000000
+    nullable: true
+    severity: warn
+    error_message: "Unusually high citation count"
+
+  - field: citations_made
+    type: range
+    min: 0
+    nullable: true
+    error_message: "Reference count must be non-negative"
+
+# =============================================================================
+# Cross-Field Validations
+# =============================================================================
+cross_field_validations:
+  - name: publication_identifiable
+    fields:
+      - pmid
+      - title
+    condition: all_present
+    error_message: "Publication must have PMID and title"
+
+  - name: has_identifier
+    fields:
+      - pmid
+      - doi
+      - pmc_id
+    condition: any_present
+    error_message: "At least one identifier required"
+
+# =============================================================================
+# Conditional Validations
+# =============================================================================
+conditional_validations: []
