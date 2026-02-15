@@ -36,6 +36,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Validate VCR cassette placement
+        run: python scripts/check_root_vcr_cassettes.py
+
       - name: Install uv
         uses: astral-sh/setup-uv@v1
 

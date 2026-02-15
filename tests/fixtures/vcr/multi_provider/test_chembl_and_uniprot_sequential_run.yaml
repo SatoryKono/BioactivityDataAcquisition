@@ -6681,7 +6681,7 @@ interactions:
     uri: https://rest.uniprot.org/uniprotkb/search?format=json&query=accession%3AP62988&size=1
   response:
     body:
-      string: !!binary |
+      string: !!binary | # pragma: allowlist secret
         H4sIAAAAAAAA/1yOT4vCQAzFv0vOZSmL2Oqta4vbQ6Xrn9Miy3QMMqzOlEwqltLvbkZ7MpeE98h7
         vwEIfXdhD8vfAdAy9fu+RVhCaZVmc0OIoCVzVdRnWqP3xllx6/nnIk3F66ypyfF/U55EPnyVP3/f
         hyrbiKWsdaxYHnbakWTGH3EEZsrdovIhanhTpvq8qIrtusgl54p0xhyfa+8EFOp4tZ4lYj2PgBF4
@@ -6746,7 +6746,7 @@ interactions:
     uri: https://rest.uniprot.org/uniprotkb/search?fields=accession%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Corganism_id%2Clineage%2Csequence%2Clength%2Cmass%2Cprotein_existence%2Cannotation_score%2Creviewed%2Cdate_created%2Cdate_modified%2Cversion%2Ccc_function%2Ccc_catalytic_activity%2Ccc_activity_regulation%2Ccc_subunit%2Ccc_pathway%2Ccc_subcellular_location%2Ccc_tissue_specificity%2Ccc_alternative_products%2Ccc_disease%2Ccc_cofactor%2Cph_dependence%2Ctemp_dependence%2Ckinetics%2Cabsorption%2Credox_potential%2Ccc_induction%2Ccc_caution%2Ccc_similarity%2Ccc_pharmaceutical%2Cft_domain%2Cft_binding%2Cft_site%2Cft_act_site%2Cft_mod_res%2Cxref_pdb%2Cxref_chembl%2Cxref_drugbank%2Cxref_guidetopharmacology%2Cgo_id%2Cxref_interpro%2Cxref_pfam%2Cxref_reactome%2Ckeyword&format=json&query=%2A&size=3
   response:
     body:
-      string: !!binary |
+      string: !!binary | # pragma: allowlist secret
         H4sIAAAAAAAA/+xd63OjuJb/vn8FlS87XRv3GD+wnf0k877ItEA0Gd+tqSlik4RtDL6Au9szNf/7
         HgmwwXESO/28temZamMszltHR+In9V8XWZhv4iK/uPqfvy7CpMi23nYdXlxdvE8ikqWFNRWy8GMU
         fgqXwi/0U5TnHXb7zcXlxTqLVkG2RYtFmOdRmsBDqIu68nA61CX4fVNS+HBjLuGn2TuPyn8Y72fI

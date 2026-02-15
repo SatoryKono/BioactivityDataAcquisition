@@ -173,6 +173,20 @@ bioetl checkpoint list
 
 ## Development
 
+### Repository Hygiene
+
+- Do **not** store domain datasets or reference data files in repository root.
+- Keep machine-consumed reference datasets under semantic paths in `data/` (for example, `data/input/reference/`).
+- Keep optional human-facing spreadsheet copies under `docs/reference/`.
+- Unified publication classifier canonical format is CSV at `data/input/reference/unified_classification.csv`; Excel is optional documentation copy at `docs/reference/unified_classification.xlsx`.
+### Local diagnostic artifacts
+
+Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
+
+* Временные диагностические дампы сохраняйте в `tmp/`.
+* Логи локальных запусков сохраняйте в `logs/`.
+* Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
+
 ### Testing
 
 The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.
