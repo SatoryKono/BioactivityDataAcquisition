@@ -230,6 +230,3 @@ def is_circuit_breaker_error(exc: Exception) -> bool:
         return status_code >= 500 or status_code == 429
 
     return False
-
-
-CIRCUIT_BREAKER_HELPERS = (is_circuit_breaker_error,)

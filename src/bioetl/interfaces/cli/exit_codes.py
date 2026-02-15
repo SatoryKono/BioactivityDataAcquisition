@@ -117,8 +117,6 @@ def get_exit_code_for_exception(exc: BaseException) -> ExitCode:
     return ExitCode.FAIL
 
 
-EXIT_CODE_HELPERS = (get_exit_code_for_exception,)
-
 __all__ = [
     "EXCEPTION_EXIT_CODES",
     "ExitCode",
