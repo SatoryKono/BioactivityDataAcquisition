@@ -2,7 +2,7 @@
 
 Verifies that:
 1. ObservabilityBundle enforces required components (logger, metrics)
-2. bootstrap_observability() always returns valid implementations
+2. bootstrap_observability_bundle() always returns valid implementations
 3. NoOpMetrics is used as fallback when Prometheus disabled
 4. Pipeline cannot run without valid logger
 5. Health-check metrics are properly recorded
@@ -98,7 +98,7 @@ class TestObservabilityBundle:
 
 @pytest.mark.unit
 class TestBootstrapObservability:
-    """Tests for bootstrap_observability() function."""
+    """Tests for bootstrap_observability_bundle() function."""
 
     @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.runtime.observability.PrometheusMetrics")
@@ -111,7 +111,7 @@ class TestBootstrapObservability:
     ) -> None:
         """Test that bootstrap returns bundle with valid implementations."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_observability,
+            bootstrap_observability_bundle,
         )
 
         # Setup mocks
@@ -128,7 +128,7 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
 
-        bundle = bootstrap_observability(
+        bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
             run_id=uuid4(),
             settings=settings,
@@ -146,7 +146,7 @@ class TestBootstrapObservability:
     ) -> None:
         """Test that NoOpMetrics is used when metrics disabled."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_observability,
+            bootstrap_observability_bundle,
         )
 
         mock_logger = MagicMock()
@@ -158,7 +158,7 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
 
-        bundle = bootstrap_observability(
+        bundle = bootstrap_observability_bundle(
             pipeline="test_pipeline",
             run_id=uuid4(),
             settings=settings,
@@ -173,7 +173,7 @@ class TestBootstrapObservability:
     ) -> None:
         """Test that bootstrap logs observability initialization."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_observability,
+            bootstrap_observability_bundle,
         )
 
         mock_logger = MagicMock()
@@ -184,7 +184,7 @@ class TestBootstrapObservability:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
 
-        bootstrap_observability(
+        bootstrap_observability_bundle(
             pipeline="test_pipeline",
             run_id=uuid4(),
             settings=settings,
@@ -204,23 +204,27 @@ class TestBootstrapObservability:
 
 @pytest.mark.unit
 class TestBootstrapMetrics:
-    """Tests for bootstrap_metrics() function."""
+    """Tests for bootstrap_metrics_port() function."""
 
     def test_disabled_metrics_returns_noop_metrics(self) -> None:
         """Test that disabled metrics returns NoOpMetrics, not None."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         settings = MagicMock()
         settings.observability.metrics_enabled = False
 
-        result = bootstrap_metrics(settings)
+        result = bootstrap_metrics_port(settings)
 
         assert result is not None
         assert isinstance(result, NoOpMetrics)
 
     def test_noop_metrics_no_warning_when_disabled(self) -> None:
         """Test that NoOpMetrics doesn't warn when explicitly disabled."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         # Reset warning state
         NoOpMetrics.reset_warning()
@@ -232,7 +236,7 @@ class TestBootstrapMetrics:
 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            bootstrap_metrics(settings)
+            bootstrap_metrics_port(settings)
             # No warning should be raised
             assert len(w) == 0
 
@@ -244,7 +248,9 @@ class TestBootstrapMetrics:
         mock_start_server: MagicMock,
     ) -> None:
         """Test that enabled metrics returns PrometheusMetrics."""
-        from bioetl.composition.bootstrap.runtime.observability import bootstrap_metrics
+        from bioetl.composition.bootstrap.runtime.observability import (
+            bootstrap_metrics_port,
+        )
 
         mock_metrics = MagicMock()
         mock_prometheus.return_value = mock_metrics
@@ -254,7 +260,7 @@ class TestBootstrapMetrics:
         settings.observability.metrics_enabled = True
         settings.observability.metrics_server_enabled = False
 
-        result = bootstrap_metrics(settings)
+        result = bootstrap_metrics_port(settings)
 
         assert result is mock_metrics
         mock_prometheus.assert_called_once()
@@ -457,14 +463,14 @@ class TestObservabilityPreflightValidation:
 
     @patch("bioetl.composition.bootstrap.runtime.observability.start_metrics_server")
     @patch("bioetl.composition.bootstrap.runtime.observability.UnifiedLogger")
-    def test_bootstrap_observability_calls_preflight_validation(
+    def test_bootstrap_observability_bundle_calls_preflight_validation(
         self,
         mock_unified_logger_cls: MagicMock,
         mock_start_server: MagicMock,
     ) -> None:
-        """Test that bootstrap_observability calls preflight validation."""
+        """Test that bootstrap_observability_bundle calls preflight validation."""
         from bioetl.composition.bootstrap.runtime.observability import (
-            bootstrap_observability,
+            bootstrap_observability_bundle,
         )
 
         mock_logger = MagicMock()
@@ -476,7 +482,7 @@ class TestObservabilityPreflightValidation:
         settings.observability.tracing_enabled = False
         settings.observability.dq_monitor_enabled = False
 
-        bootstrap_observability(
+        bootstrap_observability_bundle(
             pipeline="test_pipeline",
             run_id=uuid4(),
             settings=settings,

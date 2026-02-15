@@ -19,7 +19,7 @@ from uuid import uuid4
 import pytest
 from deltalake import DeltaTable
 
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunID, RunType
 
@@ -57,7 +57,7 @@ async def test_vacuum_runs_after_successful_pipeline(e2e_data_dir: Path):
         vacuum=VacuumConfig(enabled=True, retention_days=7),  # Enable VACUUM
     )
 
-    runner = bootstrap_pipeline(ctx)
+    runner = bootstrap_pipeline_runner(ctx)
     await runner.run()
 
     # Verify Silver table exists
@@ -85,7 +85,7 @@ async def test_vacuum_respects_retention_days(e2e_data_dir: Path):
     # Run pipeline twice to create multiple versions
     for _ in range(2):
         ctx = create_test_context("chembl_activity", limit=3)
-        runner = bootstrap_pipeline(ctx)
+        runner = bootstrap_pipeline_runner(ctx)
         await runner.run()
         await asyncio.sleep(0.1)  # Small delay between runs
 
@@ -210,7 +210,7 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     """
     # Step 1: Run ChEMBL Target pipeline
     chembl_ctx = create_test_context("chembl_target", limit=3)
-    chembl_runner = bootstrap_pipeline(chembl_ctx)
+    chembl_runner = bootstrap_pipeline_runner(chembl_ctx)
     await chembl_runner.run()
 
     chembl_count = assert_silver_table_has_records(
@@ -219,7 +219,7 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
 
     # Step 2: Run UniProt Protein pipeline
     uniprot_ctx = create_test_context("uniprot_protein", limit=3)
-    uniprot_runner = bootstrap_pipeline(uniprot_ctx)
+    uniprot_runner = bootstrap_pipeline_runner(uniprot_ctx)
     await uniprot_runner.run()
 
     uniprot_count = assert_silver_table_has_records(
@@ -253,7 +253,7 @@ async def test_multiple_chembl_entities_parallel_safe(e2e_data_dir: Path):
 
     for pipeline_name in pipelines:
         ctx = create_test_context(pipeline_name, limit=2)
-        runner = bootstrap_pipeline(ctx)
+        runner = bootstrap_pipeline_runner(ctx)
         await runner.run()
 
     # Verify all tables exist with data
@@ -315,7 +315,7 @@ async def test_failed_run_preserves_partial_data(e2e_data_dir: Path):
     """
     # First run - should succeed
     ctx1 = create_test_context("chembl_activity", limit=3)
-    runner1 = bootstrap_pipeline(ctx1)
+    runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
     initial_count = assert_silver_table_has_records(
@@ -324,7 +324,7 @@ async def test_failed_run_preserves_partial_data(e2e_data_dir: Path):
 
     # Second run - more records
     ctx2 = create_test_context("chembl_activity", limit=5)
-    runner2 = bootstrap_pipeline(ctx2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
 
     # Data should be preserved/incremented
@@ -352,7 +352,7 @@ async def test_rebuild_clears_existing_data(e2e_data_dir: Path):
     """
     # First run - create initial data
     ctx1 = create_test_context("chembl_activity", limit=3, run_type=RunType.INCREMENTAL)
-    runner1 = bootstrap_pipeline(ctx1)
+    runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
     assert_silver_table_has_records(e2e_data_dir, "chembl_activity", expected_min=1)
@@ -363,7 +363,7 @@ async def test_rebuild_clears_existing_data(e2e_data_dir: Path):
         limit=2,
         run_type=RunType.REBUILD,
     )
-    runner2 = bootstrap_pipeline(ctx2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
 
     # After rebuild, count should be from the new run only
@@ -392,7 +392,7 @@ async def test_backfill_clears_silver_only(e2e_data_dir: Path):
         limit=3,
         run_type=RunType.INCREMENTAL,
     )
-    runner1 = bootstrap_pipeline(ctx1)
+    runner1 = bootstrap_pipeline_runner(ctx1)
     await runner1.run()
 
     assert_silver_table_has_records(e2e_data_dir, "chembl_activity", expected_min=1)
@@ -403,7 +403,7 @@ async def test_backfill_clears_silver_only(e2e_data_dir: Path):
         limit=5,
         run_type=RunType.BACKFILL,
     )
-    runner2 = bootstrap_pipeline(ctx2)
+    runner2 = bootstrap_pipeline_runner(ctx2)
     await runner2.run()
 
     # Silver should have records from backfill
