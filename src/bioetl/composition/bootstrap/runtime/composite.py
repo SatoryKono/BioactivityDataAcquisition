@@ -509,6 +509,15 @@ def bootstrap_composite_runner(
     # Create DQ report service for composite
     dq_report_service = _create_dq_report_service(logger, settings)
 
+    # Create quarantine port for cross-validation quarantine records
+    quarantine_port = None
+    if config.cross_validation.enabled:
+        from bioetl.composition.bootstrap.assembly.checkpoint import (
+            bootstrap_quarantine_port,
+        )
+
+        quarantine_port = bootstrap_quarantine_port()
+
     return CompositePipelineRunner(
         config=config,
         runtime=runtime,
@@ -524,6 +533,7 @@ def bootstrap_composite_runner(
         lock=lock,
         run_id=effective_run_id,
         dq_report_service=dq_report_service,
+        quarantine_port=quarantine_port,
     )
 
 
