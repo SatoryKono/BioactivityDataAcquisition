@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
-    from bioetl.domain.ports import LockPort, LoggerPort
+    from bioetl.domain.ports import LockPort, LoggerPort, QuarantinePort
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,6 +143,7 @@ class CompositePipelineRunner:
         dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
         | None = None,
         dependency_coordinator: DependencyCoordinator | None = None,
+        quarantine_port: QuarantinePort | None = None,
     ) -> None:
         """Initialize composite pipeline runner.
 
@@ -165,6 +166,7 @@ class CompositePipelineRunner:
             dependencies_runner_factory: Factory to create dependency PipelineRunner.
                 Takes pipeline name and keys DataFrame.
             dependency_coordinator: Coordinator for running dependencies.
+            quarantine_port: Optional quarantine port for cross-validation quarantine.
         """
         self._config = config
         self._runtime = runtime
@@ -185,6 +187,7 @@ class CompositePipelineRunner:
         self._final_state: CompositePipelineState | None = None
         self._dq_report_service = dq_report_service
         self._preflight_validator = preflight_validator
+        self._quarantine_port = quarantine_port
 
         # Initialize FSM helper for state transition logic
         from bioetl.application.composite.fsm_helper import FSMStateHelper
@@ -779,6 +782,9 @@ class CompositePipelineRunner:
                 # Generate DQ reports if service is available
                 await self._generate_dq_reports(merge_result)
 
+                # Write quarantine records for cross-validation failures
+                await self._write_cv_quarantine(merge_result)
+
             except Exception as merge_error:
                 # Log FSM transition to FAILED
                 self._fsm.log_fsm_transition(
@@ -1086,4 +1092,44 @@ class CompositePipelineRunner:
                 "dq_reports_failed",
                 composite=self._config.name,
                 error=str(e),
+            )
+
+    async def _write_cv_quarantine(self, merge_result: MergeResult) -> None:
+        """Write cross-validation quarantine records if any exist.
+
+        Args:
+            merge_result: Result of the merge operation.
+        """
+        if self._quarantine_port is None or not merge_result.quarantine_payloads:
+            return
+
+        from bioetl.domain.types import BatchID
+
+        now = datetime.now(tz=UTC)
+        pipeline_name = f"composite:{self._config.name}"
+        written = 0
+
+        for payload in merge_result.quarantine_payloads:
+            try:
+                await self._quarantine_port.write(
+                    pipeline=pipeline_name,
+                    error_code="CROSS_VALIDATION_QUARANTINE",
+                    payload=dict(payload),
+                    bronze_batch_id=cast(BatchID, self._run_id),
+                    run_id=self._run_id,
+                    ingestion_ts=now,
+                )
+                written += 1
+            except Exception as e:
+                self._logger.warning(
+                    "Failed to write quarantine record",
+                    pipeline=pipeline_name,
+                    error=str(e),
+                )
+
+        if written > 0:
+            self._logger.info(
+                "Cross-validation quarantine records written",
+                composite=self._config.name,
+                quarantine_count=written,
             )
