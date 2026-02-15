@@ -407,4 +407,3 @@ def validate_inchi_key(key: str | None) -> bool:
     if not key or not isinstance(key, str):
         return False
     return bool(_INCHI_KEY_PATTERN.match(key.strip()))
-
