@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.application.core._data_source_mixins import SourceMetadataDelegationMixin
+from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.domain.ports import FilterableDataSourcePort
 
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 
-class PublicationTermDataSource(SourceMetadataDelegationMixin):
+class PublicationTermDataSource(_SourceMetadataDelegationMixin):
     """Wraps a DataSourcePort to extract terms from publication records.
 
     This is a Decorator pattern implementation that transforms the publication

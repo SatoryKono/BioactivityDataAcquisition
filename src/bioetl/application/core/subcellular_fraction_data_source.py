@@ -9,7 +9,7 @@ from __future__ import annotations
 import hashlib
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.application.core._data_source_mixins import SourceMetadataDelegationMixin
+from bioetl.application.core._data_source_mixins import _SourceMetadataDelegationMixin
 from bioetl.domain.ports import FilterableDataSourcePort
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import HealthStatus
 
 
-class SubcellularFractionDataSource(SourceMetadataDelegationMixin):
+class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
     """Wraps a DataSourcePort to extract subcellular fraction records."""
 
     SOURCE_ENTITY_TYPE = "assay"

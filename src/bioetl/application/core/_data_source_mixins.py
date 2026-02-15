@@ -9,7 +9,7 @@ class _HasWrappedDataSource(Protocol):
     _data_source: object
 
 
-class SourceMetadataDelegationMixin:
+class _SourceMetadataDelegationMixin:
     """Mixin for delegating get_source_metadata to wrapped data source."""
 
     def get_source_metadata(
