@@ -15,6 +15,7 @@ from bioetl.domain.services import (
     DataNormalizationService,
     DefaultDataNormalizationService,
 )
+from bioetl.domain.services._author_helpers import hash_author_name
 
 
 class TestDefaultDataNormalizationServiceInit:
@@ -138,7 +139,7 @@ class TestNormalizeAuthors:
         parsed = json.loads(result)
         assert len(parsed) == 2
         # Hashes should be consistent
-        expected_hash_john = service._hash_pii("John Doe", "test_salt")
+        expected_hash_john = hash_author_name("John Doe", "test_salt")
         assert parsed[0] == expected_hash_john
 
     def test_normalize_authors_string(self) -> None:
@@ -422,38 +423,38 @@ class TestHashPii:
     def test_hash_consistency(self) -> None:
         """Test that same input produces same hash."""
         service = DefaultDataNormalizationService()
-        hash1 = service._hash_pii("John Doe", "salt123")
-        hash2 = service._hash_pii("John Doe", "salt123")
+        hash1 = hash_author_name("John Doe", "salt123")
+        hash2 = hash_author_name("John Doe", "salt123")
         assert hash1 == hash2
 
     def test_different_salt_different_hash(self) -> None:
         """Test that different salt produces different hash."""
         service = DefaultDataNormalizationService()
-        hash1 = service._hash_pii("John Doe", "salt1")
-        hash2 = service._hash_pii("John Doe", "salt2")
+        hash1 = hash_author_name("John Doe", "salt1")
+        hash2 = hash_author_name("John Doe", "salt2")
         assert hash1 != hash2
 
     def test_different_value_different_hash(self) -> None:
         """Test that different value produces different hash."""
         service = DefaultDataNormalizationService()
-        hash1 = service._hash_pii("John Doe", "salt")
-        hash2 = service._hash_pii("Jane Smith", "salt")
+        hash1 = hash_author_name("John Doe", "salt")
+        hash2 = hash_author_name("Jane Smith", "salt")
         assert hash1 != hash2
 
     def test_case_normalization(self) -> None:
         """Test that hashing is case-insensitive per RULES.md §5.4."""
         service = DefaultDataNormalizationService()
-        hash_lower = service._hash_pii("john doe", "salt")
-        hash_upper = service._hash_pii("JOHN DOE", "salt")
-        hash_mixed = service._hash_pii("John Doe", "salt")
+        hash_lower = hash_author_name("john doe", "salt")
+        hash_upper = hash_author_name("JOHN DOE", "salt")
+        hash_mixed = hash_author_name("John Doe", "salt")
         assert hash_lower == hash_upper == hash_mixed
 
     def test_whitespace_normalization(self) -> None:
         """Test that leading/trailing whitespace is stripped before hashing."""
         service = DefaultDataNormalizationService()
-        hash_clean = service._hash_pii("john doe", "salt")
-        hash_padded = service._hash_pii("  john doe  ", "salt")
-        hash_tabs = service._hash_pii("\tjohn doe\t", "salt")
+        hash_clean = hash_author_name("john doe", "salt")
+        hash_padded = hash_author_name("  john doe  ", "salt")
+        hash_tabs = hash_author_name("\tjohn doe\t", "salt")
         assert hash_clean == hash_padded == hash_tabs
 
     def test_hash_formula_matches_rules_md(self) -> None:
@@ -468,14 +469,14 @@ class TestHashPii:
         normalized = value.strip().lower()
         expected_hash = hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
-        actual_hash = service._hash_pii(value, salt)
+        actual_hash = hash_author_name(value, salt)
         assert actual_hash == expected_hash
 
     def test_empty_salt_allowed(self) -> None:
         """Test that empty salt works (edge case)."""
         service = DefaultDataNormalizationService()
         # Should not raise
-        result = service._hash_pii("test", "")
+        result = hash_author_name("test", "")
         assert len(result) == 64  # SHA-256 hex digest length
 
 
