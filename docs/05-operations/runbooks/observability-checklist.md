@@ -108,10 +108,10 @@ cat logs/bioetl.log | jq 'select(.run_id and .pipeline and .stage)'
 When creating a new adapter:
 
 1. [ ] Implement `health_check()` method
-1. [ ] Use `structlog` for all logging
-1. [ ] Include `run_id` in all log messages
+1. [ ] Use `LoggerPort` (injected via DI) for all logging
+1. [ ] Include `run_id`, `pipeline`, `stage` in all log messages (Log Schema §3.2.1)
 1. [ ] Add rate limiting (TokenBucket)
-1. [ ] Register metrics in composition layer
+1. [ ] Register metrics in composition layer (`bootstrap/runtime/observability.py`)
 1. [ ] Add integration test with VCR cassette
 
 ## Architecture Test
