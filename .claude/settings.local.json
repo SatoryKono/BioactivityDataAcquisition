@@ -92,7 +92,10 @@
       "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" diff --stat)",
       "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" status)",
       "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" log --oneline -5)",
-      "Bash(VCR_RECORD_MODE=all uv run python -m pytest:*)"
+      "Bash(VCR_RECORD_MODE=all uv run python -m pytest:*)",
+      "Bash(while read f)",
+      "Bash(do grep -qL \"target_tax_id\" \"$f\")",
+      "Bash(do rm -v \"$f\")"
     ]
   },
   "enabledPlugins": {
