@@ -721,18 +721,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         limit: int | None,
         offset: int = 0,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Perform standard paginated fetch with client-side deduplication.
-
-        ChEMBL API pagination can return duplicate records across pages
-        due to unstable sorting or data changes between requests.
-        This method deduplicates records using composite key for entities
-        with multiple primary key fields, or single field otherwise.
-
-        Args:
-            entity_type: Type of entity to fetch.
-            limit: Maximum number of records to fetch.
-            offset: API offset to start from (for checkpoint resume).
-        """
+        """Perform standard paginated fetch with client-side deduplication."""
         total_fetched = 0
         seen_keys: set[str] = set()
         pk_field = self._get_api_pk_field(entity_type)
