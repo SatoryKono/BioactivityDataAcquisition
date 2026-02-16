@@ -388,4 +388,4 @@ GET https://api.semanticscholar.org/graph/v1/paper/search?query=...&fields=...&l
 
 ---
 
-*Последнее обновление: 2026-01-06*
+*Последнее обновление: 2026-02-15*

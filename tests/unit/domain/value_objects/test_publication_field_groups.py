@@ -176,7 +176,6 @@ class TestFieldToGroupMapping:
             "affiliation_list",
             "author_count",
             "author_openalex_ids",
-            "author_ormolecule_ids",
             "author_h_indices",
             "ror_ids",
         }
@@ -601,7 +600,6 @@ class TestFieldMappingCompleteness:
             "volume",
             "affiliation_list",
             "author_openalex_ids",
-            "author_ormolecule_ids",
             "authors",
             "institution_ids",
             "subject_keywords",
@@ -697,7 +695,6 @@ class TestFieldMappingCompleteness:
             "volume",
             "affiliation_list",
             "author_openalex_ids",
-            "author_ormolecule_ids",
             "author_s2_ids",
             "tldr",
             "citations_received",

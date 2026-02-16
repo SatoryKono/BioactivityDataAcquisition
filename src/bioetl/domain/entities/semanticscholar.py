@@ -52,7 +52,6 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
         subject_fields: JSON string of fields of study.
         publication_type: JSON string of publication types.
         author_s2_ids: JSON string of S2 author IDs (40-char hex).
-        author_ormolecule_ids: JSON string of ORCID identifiers.
         author_h_indices: JSON string of h-index values.
         citation_contexts: JSON string of citation context sentences.
 
@@ -93,7 +92,6 @@ class SemanticScholarPublicationEntity(PublicationEntityBase):
 
     # Author identifiers (for author-level analytics and disambiguation)
     author_s2_ids: str | None = None  # JSON array of S2 author IDs (40-char hex)
-    author_ormolecule_ids: str | None = None  # JSON array of ORCID identifiers
     author_h_indices: str | None = None  # JSON array of h-index values
 
     # Citation context (for citation sentiment analysis)
