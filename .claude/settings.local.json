@@ -95,7 +95,8 @@
       "Bash(VCR_RECORD_MODE=all uv run python -m pytest:*)",
       "Bash(while read f)",
       "Bash(do grep -qL \"target_tax_id\" \"$f\")",
-      "Bash(do rm -v \"$f\")"
+      "Bash(do rm -v \"$f\")",
+      "Bash(head:*)"
     ]
   },
   "enabledPlugins": {
