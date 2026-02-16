@@ -149,6 +149,11 @@ composite:
     # Multiple sources with field overlap. Seed values take priority.
     preserve_all_sources: false
 
+    # Field renames for namespace disambiguation
+    field_mappings:
+      # target_component.description conflicts with target.description
+      "chembl.target_component.description": "component_description"
+
     # Output paths for merged data
     output:
       silver: data/output/silver/composite/target
@@ -232,7 +237,7 @@ composite:
       - name: enriched_components
         fields:
           - component_type
-          - description
+          - component_description
           - protein_classification_id
           - protein_classification_ids
         provider_order: [chembl]
