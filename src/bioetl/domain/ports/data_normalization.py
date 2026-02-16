@@ -101,3 +101,25 @@ class DataNormalizationPort(Protocol):
         Partial dates: [year,month]->YYYY-MM-30, [year]->YYYY-12-31.
         """
         ...
+
+    def normalize_title(self, title: str | None) -> str | None:
+        """Normalize publication title: HTML cleanup, whitespace, unicode NFC, trim.
+
+        Args:
+            title: Raw title string (may contain HTML tags, extra whitespace).
+
+        Returns:
+            Normalized title or None if input is None/empty.
+        """
+        ...
+
+    def normalize_abstract(self, abstract: str | None) -> str | None:
+        """Normalize publication abstract: HTML cleanup, whitespace, unicode NFC, trim.
+
+        Args:
+            abstract: Raw abstract string (may contain HTML tags, extra whitespace).
+
+        Returns:
+            Normalized abstract or None if input is None/empty.
+        """
+        ...
