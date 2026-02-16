@@ -104,7 +104,8 @@
       "Bash(__NEW_LINE_0b0ade94245ccb8d__ echo \"\")",
       "Bash(UPDATE_SNAPSHOTS=1 uv run python -m pytest:*)",
       "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" mv src/bioetl/application/pipelines/uniprot/extractors/utils.py src/bioetl/application/pipelines/uniprot/extractors/extractor_helpers.py)",
-      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" mv:*)"
+      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" mv:*)",
+      "Bash(git check-ignore:*)"
     ]
   },
   "enabledPlugins": {
