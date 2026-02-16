@@ -101,9 +101,7 @@ class DefaultDataNormalizationService:
             return year, False
         return year, True
 
-    def normalize_authors(
-        self, authors: list[str] | str | None
-    ) -> str | None:
+    def normalize_authors(self, authors: list[str] | str | None) -> str | None:
         """Parse and serialize author names. Returns JSON string or None."""
         return self._author_service.normalize_author_list(authors)
 

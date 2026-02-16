@@ -111,9 +111,7 @@ class TestNormalizeAuthorList:
 
         assert result is not None
         # Should produce same result as without extra whitespace
-        expected = service.normalize_author_list(
-            ["John Doe", "Jane Smith"]
-        )
+        expected = service.normalize_author_list(["John Doe", "Jane Smith"])
         assert result == expected
 
     def test_case_preserved_in_output(
@@ -126,9 +124,7 @@ class TestNormalizeAuthorList:
         parsed = json.loads(result)
         assert parsed == ["John Doe"]
 
-    def test_deterministic_output(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_deterministic_output(self, service: AuthorNormalizationService) -> None:
         """Test that normalization is deterministic."""
         authors = ["John Doe"]
         result1 = service.normalize_author_list(authors)
