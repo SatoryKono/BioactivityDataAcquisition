@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 16 Feb 2026 12:15:48 GMT
+      - Mon, 16 Feb 2026 12:18:19 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -250,7 +250,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 16 Feb 2026 12:15:50 GMT
+      - Mon, 16 Feb 2026 12:18:21 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -260,7 +260,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.20263004302978516'
+      - '0.2824411392211914'
     status:
       code: 200
       message: OK
