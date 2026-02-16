@@ -67,16 +67,23 @@ class AuthorNormalizationService:
         """
         if not affiliations:
             return None
+        normalized = self._normalize_affiliation_list(affiliations)
+        return (
+            serialize_to_json(sorted(normalized), ensure_ascii=False)
+            if normalized
+            else None
+        )
+
+    @staticmethod
+    def _normalize_affiliation_list(
+        affiliations: list[str] | list[dict[str, Any]],
+    ) -> list[str]:
+        """Extract, normalize, and deduplicate affiliation strings."""
         aff_strings = extract_affiliation_strings(affiliations)
-        if not aff_strings:
-            return None
         normalized = [
             c for aff in aff_strings if (c := normalize_affiliation_string(aff))
         ]
-        if not normalized:
-            return None
-        unique = deduplicate_case_insensitive(normalized)
-        return serialize_to_json(sorted(unique), ensure_ascii=False)
+        return deduplicate_case_insensitive(normalized)
 
     def extract_affiliations_from_authors(
         self,
