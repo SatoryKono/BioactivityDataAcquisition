@@ -13,7 +13,7 @@ provider: chembl
 # -----------------------------------------------------------------------------
 # ChEMBL API optimal batch size for most endpoints
 input_filter:
-  batch_size: 20
+    batch_size: 1000
 
 # -----------------------------------------------------------------------------
 # Gold Filter Defaults
@@ -21,9 +21,9 @@ input_filter:
 # Common patterns across ChEMBL entities
 # (Entity-specific overrides in entities/chembl/*.yaml)
 gold_filters:
-  # Most ChEMBL entities use these fields
-  required_fields: []
+    # Most ChEMBL entities use these fields
+    required_fields: [ ]
 
-  # Common columns filter patterns
-  # (Entity-specific values in entity configs)
-  columns: {}
+    # Common columns filter patterns
+    # (Entity-specific values in entity configs)
+    columns: { }

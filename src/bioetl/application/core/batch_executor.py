@@ -62,7 +62,7 @@ class BatchResult:
 class BatchExecutor:
     """Unified executor for ETL batches: fetch → transform → write with tracing."""
 
-    DEFAULT_BATCH_SIZE = 100
+    DEFAULT_BATCH_SIZE = 1000
     DEFAULT_CHECKPOINT_INTERVAL = 1000
 
     def __init__(

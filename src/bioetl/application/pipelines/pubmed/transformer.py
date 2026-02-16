@@ -265,42 +265,57 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     def _extract_author_block(
         self, article: ET.Element, raw_author_data: list[RawAuthor]
     ) -> dict[str, Any]:
-        """Extract and process author-related fields from article XML."""
-        normalized_authors = (
-            AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
+        """Extract and process author-related fields from article XML.
+
+        Uses unified normalization service for authors and affiliations.
+        """
+        # Normalize author names using unified service
+        normalizer = self._data_normalizer
+        salt = self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+
+        # Extract author names for hashing
+        author_names = (
+            [AuthorExtractor().normalize(raw_author_data)] if raw_author_data else []
         )
-        hashed_authors = self.hash_pii_list(normalized_authors) or []
+        # Flatten if normalize returns list
+        if author_names and isinstance(author_names[0], list):
+            author_names = author_names[0]
+
+        # Use unified normalization (parse + hash + serialize in one call)
+        authors_json = normalizer.normalize_author_list(author_names, salt=salt)
 
         authors_with_affiliations = self._build_authors_with_affiliations(
             raw_author_data
         )
 
-        # Unique affiliations across all authors
-        affiliation_values: list[str] = []
-        for author in raw_author_data:
-            affiliation_values.extend(
-                aff for aff in (author.get("affiliations") or []) if aff
-            )
-        unique_affiliations = sorted(set(affiliation_values))
+        # Extract affiliations using unified service
+        affiliation_strings = normalizer.extract_affiliations_from_authors(raw_author_data)
 
-        # Structured affiliations with identifiers
+        # Normalize affiliations using unified service (already deduplicated & sorted)
+        affiliation_list_json = (
+            normalizer.normalize_affiliations(affiliation_strings)
+            if affiliation_strings
+            else None
+        )
+
+        # Structured affiliations with identifiers (PubMed-specific)
         structured_affs = AuthorExtractor.parse_structured_affiliations(article)
         processed = self._process_structured_affiliations(structured_affs)
 
+        # Count from parsed JSON
+        import json
+        author_count = len(json.loads(authors_json)) if authors_json else 0
+
         return {
-            "authors": self.serialize_json_list(hashed_authors),
+            "authors": authors_json,
             "authors_with_affiliations": (
                 self.serialize_json_list(authors_with_affiliations)
                 if authors_with_affiliations
                 else None
             ),
-            "affiliation_list": (
-                self.serialize_json_list(unique_affiliations)
-                if unique_affiliations
-                else None
-            ),
+            "affiliation_list": affiliation_list_json,
             "affiliation_structured": self.serialize_json_list(processed),
-            "author_count": len(hashed_authors),
+            "author_count": author_count,
         }
 
     def _extract_identifiers(self, root: ET.Element) -> dict[str, Any]:

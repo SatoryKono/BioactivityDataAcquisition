@@ -14,11 +14,13 @@ entity: activity
 # -----------------------------------------------------------------------------
 # Filter activities by activity_id from CSV
 input_filter:
-  enabled: true
-  source_path: "data/input/activity.csv"
-  column_name: "activity_id"
-  filter_field: "activity_id"
-  batch_size: 20
+    enabled: false
+    source_path: "data/input/activity.csv"
+    column_name: "activity_id"
+    filter_field: "activity_id"
+
+batch_size: 1000
+page_size: 1000
 
 # ---------------------------------------------------------------------------
 # Extraction-Level Filtering (ADR-028 §3)
@@ -42,29 +44,32 @@ input_filter:
 #     &pchembl_value__isnull=false
 #     &standard_flag=1
 extraction_params:
-  # Measurement types: IC50 (inhibitor concentration) and Ki (inhibition constant)
-  standard_type__in: "IC50,Ki"
+    # Measurement types: IC50 (inhibitor concentration) and Ki (inhibition constant)
+    standard_type__in: "IC50,Ki"
 
-  # Standardized units: nanomolar only
-  standard_units: "nM"
+    # Standardized units: nanomolar only
+    standard_units: "nM"
 
-  # Exact measurements only (exclude censored: >, <, ~)
-  standard_relation: "="
+    # Exact measurements only (exclude censored: >, <, ~)
+    standard_relation: "="
 
-  # Assay types: Binding and Functional (exclude ADMET, Toxicity, etc.)
-  assay_type__in: "B,F"
+    # Assay types: Binding and Functional (exclude ADMET, Toxicity, etc.)
+    assay_type__in: "B,F"
 
-  # Exclude potential duplicate records
-  potential_duplicate: 0
+    # Exclude potential duplicate records
+    potential_duplicate: 0
 
-  # Exclude records flagged with data validity issues
-  data_validity_comment__isnull: true
+    # Exclude records flagged with data validity issues
+    data_validity_comment__isnull: true
 
-  # Only records with standardized pChEMBL value
-  pchembl_value__isnull: false
+    # Only records with standardized pChEMBL value
+    pchembl_value__isnull: false
 
-  # Only ChEMBL-standardized values (manual curation flag)
-  standard_flag: 1
+    # Only ChEMBL-standardized values (manual curation flag)
+    standard_flag: 1
+
+    # Only records with known target organism (exclude missing taxonomy)
+    target_tax_id__isnull: false
 
 # -----------------------------------------------------------------------------
 # Silver Filters — Domain-level quality gates (applied BEFORE Silver write)
@@ -72,74 +77,74 @@ extraction_params:
 # Records that fail these filters are excluded from the Silver layer entirely.
 # These enforce domain invariants and physically plausible value ranges.
 silver_filters:
-  # Column value filters — strict inclusion lists
-  columns:
-    # Only IC50 and Ki measurements
-    standard_type: [IC50, Ki]
-    # Only exact measurements (no censored: >, <, ~)
-    standard_relation: ["="]
-    # Only nanoMolar units
-    standard_units: [nM]
-    # Binding (B) and Functional (F) assays only
-    assay_type: [B, F]
-    # Exclude potential duplicates (0 = not duplicate)
-    potential_duplicate: ["0"]
+    # Column value filters — strict inclusion lists
+    columns:
+        # Only IC50 and Ki measurements
+        standard_type: [ IC50, Ki ]
+        # Only exact measurements (no censored: >, <, ~)
+        standard_relation: [ "=" ]
+        # Only nanoMolar units
+        standard_units: [ nM ]
+        # Binding (B) and Functional (F) assays only
+        assay_type: [ B, F ]
+        # Exclude potential duplicates (0 = not duplicate)
+        potential_duplicate: [ "0" ]
 
-  # Numeric range filters
-  ranges:
-    activity_id:
-      min: 1
-      max: 10000000000  # 10^10
-    standard_value:
-      min: 0
-      include_min: false  # Exclude exactly 0
-    pchembl_value:
-      min: 3
-      max: 10
-    publication_year:
-      min: 1950
-      max: 2050
+    # Numeric range filters
+    ranges:
+        activity_id:
+            min: 1
+            max: 10000000000  # 10^10
+        standard_value:
+            min: 0
+            include_min: false  # Exclude exactly 0
+        pchembl_value:
+            min: 3
+            max: 10
+        publication_year:
+            min: 1950
+            max: 2050
 
-  # Required fields — must be non-null for silver
-  required_fields:
-    - activity_id
-    - molecule_id
-    - target_id
-    - publication_id
-    - standard_value
-    - pchembl_value
+    # Required fields — must be non-null for silver
+    required_fields:
+        - activity_id
+        - molecule_id
+        - target_id
+        - publication_id
+        - standard_value
+        - pchembl_value
 
-  # Exclude records with data validity issues (field must be null / absent)
-  exclude_if_present:
-    - data_validity_comment
+    # Exclude records with data validity issues (field must be null / absent)
+    exclude_if_present:
+        - data_validity_comment
 
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------
 # Strict criteria for high-quality activity data
 gold_filters:
-  # Column value filters - inclusion lists
-  columns:
-    # Only IC50 and Ki measurements
-    standard_type: [IC50, Ki]
-    # Only nanoMolar units for consistency
-    standard_units: [nM]
-    # Only exact values (no inequalities)
-    standard_relation: ["="]
-    # Binding (B) and Functional (F) assays only
-    assay_type: [B, F]
-    # Exclude potential duplicates
-    potential_duplicate: ["0"]
+    # Column value filters - inclusion lists
+    columns:
+        # Only IC50 and Ki measurements
+        standard_type: [ IC50, Ki ]
+        # Only nanoMolar units for consistency
+        standard_units: [ nM ]
+        # Only exact values (no inequalities)
+        standard_relation: [ "=" ]
+        # Binding (B) and Functional (F) assays only
+        assay_type: [ B, F ]
+        # Exclude potential duplicates
+        potential_duplicate: [ "0" ]
 
-  # Numeric range filters
-  ranges:
-    standard_value:
-      min: 0
-      include_min: false  # Exclude exactly 0 (invalid)
+    # Numeric range filters
+    ranges:
+        standard_value:
+            min: 0
+            include_min: false  # Exclude exactly 0 (invalid)
 
-  # Required fields - must be non-null
-  required_fields:
-    - standard_type
-    - standard_value
-    - standard_units
-    - target_id
+    # Required fields - must be non-null
+    required_fields:
+        - standard_type
+        - standard_value
+        - standard_units
+        - target_id

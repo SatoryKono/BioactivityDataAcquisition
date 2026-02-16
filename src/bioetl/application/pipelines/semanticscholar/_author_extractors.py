@@ -176,6 +176,12 @@ def extract_author_h_indices(authors: list[dict[str, Any]] | None) -> list[int |
 def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
     """Extract affiliations from authors list.
 
+    .. deprecated:: 2.2.0
+        This function is deprecated and will be removed in version 3.0.0.
+        Use :meth:`~bioetl.domain.services.author_normalization_service.AuthorNormalizationService.normalize_affiliations`
+        instead for unified cross-provider affiliation normalization with HTML cleanup
+        and case-insensitive deduplication.
+
     Semantic Scholar authors may have affiliations as a list of strings.
 
     Args:
@@ -189,6 +195,14 @@ def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
         >>> extract_affiliations(authors)
         ['Univ A', 'Univ B']
     """
+    import warnings
+
+    warnings.warn(
+        "extract_affiliations() is deprecated and will be removed in version 3.0.0. "
+        "Use AuthorNormalizationService.normalize_affiliations() for unified affiliation normalization.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if not authors:
         return []
 
