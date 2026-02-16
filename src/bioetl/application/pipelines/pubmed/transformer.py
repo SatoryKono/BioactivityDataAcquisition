@@ -297,26 +297,27 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         }
 
     def _extract_identifiers(self, root: ET.Element) -> dict[str, Any]:
-        """Extract and normalize all identifier fields from PubMed XML root."""
+        """Extract and normalize all identifier fields from PubMed XML root.
+
+        Optimized to use single-pass extraction for secondary identifiers.
+        """
         raw_pmid = get_text(root.find(".//PMID"))
         pmid_vo = PubMedId.from_raw(raw_pmid)
 
-        raw_doi = IdentifierExtractor.extract_doi(root)
-        doi_vo = DOI.from_raw(raw_doi)
+        # Single pass extraction for all other identifiers
+        identifiers = IdentifierExtractor.extract_all_identifiers(root)
+
+        doi_vo = DOI.from_raw(identifiers["doi"])
 
         return {
             "pmid": str(pmid_vo) if pmid_vo else None,
             "doi": str(doi_vo) if doi_vo else None,
-            "pii": self._data_normalizer.normalize_to_string(
-                IdentifierExtractor.extract_pii(root)
-            ),
-            "mid": self._data_normalizer.normalize_to_string(
-                IdentifierExtractor.extract_mid(root)
-            ),
+            "pii": self._data_normalizer.normalize_to_string(identifiers["pii"]),
+            "mid": self._data_normalizer.normalize_to_string(identifiers["mid"]),
             "publisher_id": self._data_normalizer.normalize_to_string(
-                IdentifierExtractor.extract_publisher_id(root)
+                identifiers["publisher_id"]
             ),
-            "pmc_id": normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root)),
+            "pmc_id": normalize_pmc_id(identifiers["pmc_id"]),
         }
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
