@@ -38,8 +38,8 @@ Request correlation is provided via `run_id` in structured logs.
 ### Implementation
 
 ```python
-# Default: NoOpTracing (zero overhead)
-from bioetl.infrastructure.observability.noop_tracing import NoOpTracing
+# Default: NoOpTracing (zero overhead) — lives in domain/ports/noop.py
+from bioetl.domain.ports import NoOpTracing
 tracing = NoOpTracing()
 
 # Extension point: OpenTelemetryTracer (when distributed deployment needed)
@@ -111,10 +111,10 @@ Local-Only Deployment principle:
 
 | File | Purpose |
 |------|---------|
-| `infrastructure/observability/noop_tracing.py` | NoOpTracing, NoOpTracer (default) |
-| `infrastructure/observability/tracing.py` | OpenTelemetryTracer (extension point) |
+| `domain/ports/noop.py` | NoOpTracing, _NoOpOtelTracer, _NoOpSpan (default) |
 | `domain/ports/observability.py` | TracingPort protocol |
-| `composition/factories/observability.py` | DI wiring (returns NoOpTracing) |
+| `infrastructure/observability/tracing.py` | OpenTelemetryTracer + NoOpTracing re-export |
+| `composition/bootstrap/runtime/observability.py` | DI wiring (`bootstrap_tracer_port`) |
 
 ## Consequences
 
@@ -140,13 +140,12 @@ If distributed deployment becomes necessary:
    pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
    ```
 
-2. Update factory in `composition/factories/observability.py`:
-   ```python
-   def create_tracing(config: Config) -> TracingPort:
-       if config.tracing_enabled:
-           return OpenTelemetryTracer(service_name="bioetl")
-       return NoOpTracing()
+2. Enable tracing via environment variable:
+   ```bash
+   export BIOETL_OBSERVABILITY__TRACING_ENABLED=true
    ```
+   The bootstrap in `composition/bootstrap/runtime/observability.py` will
+   automatically return `OpenTelemetryTracer` instead of `NoOpTracing`.
 
 3. Deploy OpenTelemetry Collector or Jaeger
 
