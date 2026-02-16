@@ -239,7 +239,7 @@ class AuthorNormalizationService:
                     if name and isinstance(name, str) and name.strip():
                         names.append(name.strip())
 
-            return names if names else None
+            return names
 
         except (ValueError, TypeError):
             return None
