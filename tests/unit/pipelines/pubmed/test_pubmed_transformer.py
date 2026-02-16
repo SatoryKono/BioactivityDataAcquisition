@@ -17,6 +17,13 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, RunType
 
 
+def _hash_author(name: str) -> str:
+    """Compute expected SHA-256 hash for author name with empty salt."""
+    import hashlib
+
+    return hashlib.sha256(name.strip().lower().encode()).hexdigest()
+
+
 @pytest.fixture
 def transformer() -> PubMedPublicationTransformer:
     """Create a PubMedPublicationTransformer instance."""
@@ -515,7 +522,10 @@ class TestExtractBusinessData:
         assert result["title"] == "Complete Test Article"
         assert result["abstract"] == "Full abstract text here."
         # Authors are now JSON-serialized
-        assert json.loads(result["authors"]) == ["Doe, J", "Smith, Jane"]
+        assert json.loads(result["authors"]) == [
+            _hash_author("Doe, J"),
+            _hash_author("Smith, Jane"),
+        ]
         assert result["journal"] == "Test Journal"
         assert result["journal_name_short"] == "Test J"
         assert result["issn"] == "1234-5678"
@@ -689,7 +699,10 @@ class TestTransformImplCollectiveAuthors:
 
         assert result is not None
         # Authors are now JSON-serialized
-        assert json.loads(result["authors"]) == ["Doe, J", "WHO Collaborative Group"]
+        assert json.loads(result["authors"]) == [
+            _hash_author("Doe, J"),
+            _hash_author("WHO Collaborative Group"),
+        ]
 
 
 class TestTransformImplSpecialCharacters:
@@ -731,7 +744,10 @@ class TestTransformImplSpecialCharacters:
         assert result is not None
         assert result["title"] == "Effect of α-tocopherol on β-cells"
         # Authors are now JSON-serialized
-        assert json.loads(result["authors"]) == ["Müller, H", "García, M"]
+        assert json.loads(result["authors"]) == [
+            _hash_author("Müller, H"),
+            _hash_author("García, M"),
+        ]
 
 
 class TestTransformImplXMLEntities:

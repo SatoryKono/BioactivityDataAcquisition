@@ -34,24 +34,26 @@ class AuthorNormalizationService:
     def normalize_author_list(
         self,
         authors: list[str] | list[dict[str, Any]] | str | None,
-        salt: str,
+        salt: str | None = None,
     ) -> str | None:
-        """Parse, normalize, and hash author names to JSON string.
+        """Parse, normalize, and optionally hash author names to JSON string.
 
         Args:
             authors: Author data in any supported format.
             salt: Salt for PII hashing (RULES.md §5.4).
+                  If None, names are serialized without hashing.
 
         Returns:
-            JSON string of hashed author names, or None if empty.
+            JSON string of (hashed) author names, or None if empty.
         """
         if not authors:
             return None
         author_names = self._parse_author_names(authors)
         if not author_names:
             return None
-        hashed = [hash_author_name(name, salt) for name in author_names]
-        return serialize_to_json(hashed, ensure_ascii=True)
+        if salt is not None:
+            author_names = [hash_author_name(name, salt) for name in author_names]
+        return serialize_to_json(author_names, ensure_ascii=True)
 
     def normalize_affiliations(
         self,

@@ -246,7 +246,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         # Normalize author names using unified service
         normalizer = self._data_normalizer
         salt = (
-            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else None
         )
 
         # Extract author names for hashing

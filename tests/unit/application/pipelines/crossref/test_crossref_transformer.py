@@ -24,6 +24,16 @@ from bioetl.domain.mapping.publication_type_classification import (
 from bioetl.domain.normalization import extract_first_string, normalize_doi
 from bioetl.domain.types import RunID, RunType
 
+# Helper for verifying hashed author names (RULES.md §5.4)
+_AUTHOR_HASH_LEN = 64  # SHA-256 hex digest length
+
+
+def _hash_author(name: str) -> str:
+    """Compute expected SHA-256 hash for author name with empty salt."""
+    import hashlib
+
+    return hashlib.sha256(name.strip().lower().encode()).hexdigest()
+
 
 @pytest.fixture
 def transformer():
@@ -138,8 +148,12 @@ def test_extract_business_data_full(transformer, sample_publication):
 
     assert data["doi"] == "10.1234/test.article"
     assert data["title"] == "Test Article Title"
-    # Authors are now JSON-serialized list
-    assert json.loads(data["authors"]) == ["John Doe", "Jane Smith", "Anonymous"]
+    # Authors are hashed per RULES.md §5.4 (SHA-256 with empty salt in test)
+    assert json.loads(data["authors"]) == [
+        _hash_author("John Doe"),
+        _hash_author("Jane Smith"),
+        _hash_author("Anonymous"),
+    ]
     assert data["journal"] == "Journal of Testing"
     assert data["journal_name_short"] == "J Test Sci"
     assert data["publication_year"] == 2023
