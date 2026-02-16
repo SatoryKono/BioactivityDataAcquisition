@@ -57,9 +57,8 @@ class DataNormalizationPort(Protocol):
     def normalize_authors(
         self,
         authors: list[str] | str | None,
-        salt: str,
     ) -> str | None:
-        """Hash author names for PII protection. Accepts list, JSON, or delimited string."""
+        """Normalize author names. Accepts list, JSON, or delimited string."""
         ...
 
     def strip_html_tags(self, text: str | None) -> str | None:
@@ -127,9 +126,8 @@ class DataNormalizationPort(Protocol):
     def normalize_author_list(
         self,
         authors: list[str] | list[dict[str, Any]] | str | None,
-        salt: str,
     ) -> str | None:
-        """Parse, normalize, and hash author names to JSON string.
+        """Parse and normalize author names to JSON string.
 
         Accepts multiple input formats:
         - list[str]: ["John Doe", "Jane Smith"]
@@ -137,7 +135,7 @@ class DataNormalizationPort(Protocol):
         - str: "John Doe; Jane Smith" or JSON array
         - None
 
-        Returns JSON string of hashed author names or None if empty.
+        Returns JSON string of normalized author names or None if empty.
         """
         ...
 

@@ -138,9 +138,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
         )
 
-        # Extract author names and normalize (parse + hash + serialize)
+        # Extract author names and normalize (parse + serialize)
         raw_authors = extract_authors(rec)
-        authors_json = normalizer.normalize_author_list(raw_authors, salt=salt)
+        authors_json = normalizer.normalize_author_list(raw_authors)
 
         # Extract author ORCID identifiers (not PII - designed for public identification)
         author_orcids = extract_author_orcids(rec)

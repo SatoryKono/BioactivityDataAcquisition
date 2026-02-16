@@ -208,10 +208,7 @@ class PublicationTransformer(BaseChemblTransformer):
         # ChEMBL authors is a concatenated string - parse, hash, serialize to JSON
         # Uses normalize_author_list() for unified cross-provider handling
         raw_authors = data.get("authors")
-        salt = (
-            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
-        )
-        data["authors"] = normalizer.normalize_author_list(raw_authors, salt=salt)
+        data["authors"] = normalizer.normalize_author_list(raw_authors)
 
         # Lookup metadata (direct extraction, no enrichment)
         data["_lookup_method"] = "direct"
