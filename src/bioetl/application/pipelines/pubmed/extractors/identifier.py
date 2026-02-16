@@ -10,6 +10,9 @@ from typing import TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
+from bioetl.application.pipelines.pubmed.extractors.identifier_helper import (
+    IdentifierExtractionHelper,
+)
 
 
 class ArticleIdentifiers(TypedDict):
@@ -352,6 +355,8 @@ class IdentifierExtractor(BaseFieldExtractor):
         - MID (from ArticleIdList)
         - Publisher ID (from ArticleIdList)
 
+        Delegates to IdentifierExtractionHelper to keep class size manageable.
+
         Args:
             root: Root PubmedArticle element.
 
@@ -367,44 +372,12 @@ class IdentifierExtractor(BaseFieldExtractor):
             "publisher_id": None,
         }
 
-        # 1. Scan Article for ELocationID (DOI, PII)
-        article = root.find(".//Article")
-        if article is not None:
-            for eloc in article.findall(".//ELocationID"):
-                eid_type = eloc.get("EIdType")
-                if not eid_type or not eloc.text:
-                    continue
-
-                normalized = extractor._normalize_text(eloc.text)
-                if not normalized:
-                    continue
-
-                if eid_type == "doi":
-                    result["doi"] = normalized
-                elif eid_type == "pii":
-                    result["pii"] = normalized
-
-        # 2. Scan ArticleIdList for remaining IDs (and fallbacks)
-        article_id_list = root.find(".//ArticleIdList")
-        if article_id_list is not None:
-            for aid in article_id_list.findall("ArticleId"):
-                id_type = aid.get("IdType")
-                if not id_type or not aid.text:
-                    continue
-
-                normalized = extractor._normalize_text(aid.text)
-                if not normalized:
-                    continue
-
-                if id_type == "doi" and result["doi"] is None:
-                    result["doi"] = normalized
-                elif id_type == "pii" and result["pii"] is None:
-                    result["pii"] = normalized
-                elif id_type == "pmc":
-                    result["pmc_id"] = normalized
-                elif id_type == "mid":
-                    result["mid"] = normalized
-                elif id_type == "publisher-id":
-                    result["publisher_id"] = normalized
+        # Delegate extraction logic to helper
+        IdentifierExtractionHelper.extract_from_article(
+            root, result, extractor._normalize_text
+        )
+        IdentifierExtractionHelper.extract_from_article_id_list(
+            root, result, extractor._normalize_text
+        )
 
         return result

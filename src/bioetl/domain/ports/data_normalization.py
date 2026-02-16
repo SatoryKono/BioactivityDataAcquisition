@@ -61,6 +61,17 @@ class DataNormalizationPort(Protocol):
         """Normalize author names. Accepts list, JSON, or delimited string."""
         ...
 
+    def normalize_author_keys(
+        self,
+        authors: list[str] | list[dict[str, Any]] | str | None,
+    ) -> str | None:
+        """Create normalized search keys for authors.
+
+        Used for fuzzy matching and deduplication.
+        Returns comma-delimited string of simplified names.
+        """
+        ...
+
     def strip_html_tags(self, text: str | None) -> str | None:
         """Remove HTML tags, decode entities, normalize whitespace."""
         ...
