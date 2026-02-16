@@ -77,13 +77,6 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     )
-    author_ormolecule_ids: Series[str] | None = pa.Field(
-        nullable=True,
-        description=(
-            "Backward-compatible author identifier field "
-            "(legacy alias for cross-provider pipelines)."
-        ),
-    )
 
     # === Publication metadata (common to all providers) ===
     journal: Series[str] = pa.Field(

@@ -10,7 +10,7 @@ import pytest
 from bioetl.application.pipelines.crossref.extractors import (
     extract_affiliations,
     extract_author_details,
-    extract_author_ormolecule_ids,
+    extract_author_orcids,
     extract_authors,
     extract_content_domain,
     extract_dates,
@@ -642,17 +642,17 @@ class TestExtractAuthorDetails:
         assert result[0]["ormolecule_id"] is None
 
 
-class TestExtractAuthorOrmolecule_ids:
-    """Tests for extract_author_ormolecule_ids function."""
+class TestExtractAuthorOrcids:
+    """Tests for extract_author_orcids function."""
 
-    def test_extract_multiple_ormolecule_ids(self) -> None:
+    def test_extract_multiple_orcids(self) -> None:
         """Should extract ORCIDs from multiple authors."""
         publication = {
             "author": [
                 {
                     "given": "John",
                     "family": "Doe",
-                    "ORCID": "https://ormolecule_id.org/0000-0001-2345-6789",
+                    "ORCID": "https://orcid.org/0000-0001-2345-6789",
                 },
                 {"given": "Jane", "family": "Smith"},
                 {
@@ -662,20 +662,20 @@ class TestExtractAuthorOrmolecule_ids:
                 },
             ]
         }
-        result = extract_author_ormolecule_ids(publication)
+        result = extract_author_orcids(publication)
         assert result == ["0000-0001-2345-6789", "0000-0002-3456-7890"]
 
-    def test_extract_single_ormolecule_id(self) -> None:
+    def test_extract_single_orcid(self) -> None:
         """Should extract single ORCID."""
         publication = {
             "author": [
                 {"given": "John", "family": "Doe", "ORCID": "0000-0001-2345-6789"}
             ]
         }
-        result = extract_author_ormolecule_ids(publication)
+        result = extract_author_orcids(publication)
         assert result == ["0000-0001-2345-6789"]
 
-    def test_no_ormolecule_ids(self) -> None:
+    def test_no_orcids(self) -> None:
         """Should return empty list when no ORCIDs present."""
         publication = {
             "author": [
@@ -683,12 +683,12 @@ class TestExtractAuthorOrmolecule_ids:
                 {"given": "Jane", "family": "Smith"},
             ]
         }
-        result = extract_author_ormolecule_ids(publication)
+        result = extract_author_orcids(publication)
         assert result == []
 
     def test_empty_publication(self) -> None:
         """Should return empty list for empty publication."""
-        result = extract_author_ormolecule_ids({})
+        result = extract_author_orcids({})
         assert result == []
 
     def test_normalizes_url_prefix(self) -> None:
@@ -698,11 +698,11 @@ class TestExtractAuthorOrmolecule_ids:
                 {
                     "given": "John",
                     "family": "Doe",
-                    "ORCID": "https://ormolecule_id.org/0000-0001-2345-6789",
+                    "ORCID": "https://orcid.org/0000-0001-2345-6789",
                 }
             ]
         }
-        result = extract_author_ormolecule_ids(publication)
+        result = extract_author_orcids(publication)
         assert result == ["0000-0001-2345-6789"]
 
     def test_http_url_prefix(self) -> None:
@@ -712,14 +712,14 @@ class TestExtractAuthorOrmolecule_ids:
                 {
                     "given": "John",
                     "family": "Doe",
-                    "ORCID": "http://ormolecule_id.org/0000-0001-2345-6789",
+                    "ORCID": "http://orcid.org/0000-0001-2345-6789",
                 }
             ]
         }
-        result = extract_author_ormolecule_ids(publication)
+        result = extract_author_orcids(publication)
         assert result == ["0000-0001-2345-6789"]
 
-    def test_invalid_ormolecule_id_excluded(self) -> None:
+    def test_invalid_orcid_excluded(self) -> None:
         """Should exclude invalid ORCIDs."""
         publication = {
             "author": [
@@ -727,7 +727,7 @@ class TestExtractAuthorOrmolecule_ids:
                 {"given": "Jane", "family": "Smith", "ORCID": "0000-0001-2345-6789"},
             ]
         }
-        result = extract_author_ormolecule_ids(publication)
+        result = extract_author_orcids(publication)
         assert result == ["0000-0001-2345-6789"]
 
 

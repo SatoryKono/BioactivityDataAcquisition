@@ -383,7 +383,6 @@ class ColumnOrderer:
             "pmid": "publication_pmid",
             "pmc_id": "publication_pmc_id",
             "doi": "publication_doi",
-            "author_orcids": "author_ormolecule_ids",
         }
         if field_name in legacy_to_unified:
             aliases.add(legacy_to_unified[field_name])

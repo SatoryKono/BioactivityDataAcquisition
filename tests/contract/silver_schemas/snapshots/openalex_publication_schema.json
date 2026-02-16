@@ -136,15 +136,6 @@
     "required": false,
     "unique": false
   },
-  "author_ormolecule_ids": {
-    "checks": [],
-    "coerce": false,
-    "description": "Backward-compatible author identifier field (legacy alias for cross-provider pipelines).",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
-    "unique": false
-  },
   "authors": {
     "checks": [],
     "coerce": false,

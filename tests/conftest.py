@@ -148,7 +148,6 @@ BASE_PUBLICATION_COLUMNS = [
     "authors",
     "affiliation_list",
     "author_orcids",
-    "author_ormolecule_ids",
     "journal",
     "publication_year",
     "publication_date",

@@ -6,7 +6,7 @@ from __future__ import annotations
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
     extract_author_h_indices,
-    extract_author_ormolecule_ids,
+    extract_author_orcids,
     extract_author_s2_ids,
     extract_authors,
     extract_citation_contexts,
@@ -631,26 +631,26 @@ class TestExtractAuthorS2Ids:
         assert result == ["abc123"]
 
 
-class TestExtractAuthorOrmolecule_ids:
-    """Tests for extract_author_ormolecule_ids function."""
+class TestExtractAuthorOrcids:
+    """Tests for extract_author_orcids function."""
 
-    def test_extract_ormolecule_ids(self) -> None:
+    def test_extract_orcids(self) -> None:
         """Test extracting ORCID identifiers."""
         authors = [
             {"name": "John", "externalIds": {"ORCID": "0000-0001-2345-6789"}},
             {"name": "Jane", "externalIds": {"ORCID": "0000-0002-3456-7890"}},
         ]
-        result = extract_author_ormolecule_ids(authors)
+        result = extract_author_orcids(authors)
         assert result == ["0000-0001-2345-6789", "0000-0002-3456-7890"]
 
-    def test_placeholder_for_missing_ormolecule_id(self) -> None:
+    def test_placeholder_for_missing_orcid(self) -> None:
         """Test that empty string is used for missing ORCID."""
         authors = [
             {"name": "John", "externalIds": {"ORCID": "0000-0001-2345-6789"}},
             {"name": "Jane", "externalIds": None},
             {"name": "Bob", "externalIds": {"DBLP": "some-dblp-id"}},
         ]
-        result = extract_author_ormolecule_ids(authors)
+        result = extract_author_orcids(authors)
         assert result == ["0000-0001-2345-6789", "", ""]
 
     def test_missing_external_ids_key(self) -> None:
@@ -659,23 +659,23 @@ class TestExtractAuthorOrmolecule_ids:
             {"name": "John", "externalIds": {"ORCID": "0000-0001-2345-6789"}},
             {"name": "Jane"},  # No externalIds key
         ]
-        result = extract_author_ormolecule_ids(authors)
+        result = extract_author_orcids(authors)
         assert result == ["0000-0001-2345-6789", ""]
 
     def test_empty_list(self) -> None:
         """Test with empty list."""
-        assert extract_author_ormolecule_ids([]) == []
+        assert extract_author_orcids([]) == []
 
     def test_none_input(self) -> None:
         """Test with None input."""
-        assert extract_author_ormolecule_ids(None) == []
+        assert extract_author_orcids(None) == []
 
     def test_strip_whitespace(self) -> None:
         """Test that ORCIDs are stripped of whitespace."""
         authors = [
             {"name": "John", "externalIds": {"ORCID": "  0000-0001-2345-6789  "}}
         ]
-        result = extract_author_ormolecule_ids(authors)
+        result = extract_author_orcids(authors)
         assert result == ["0000-0001-2345-6789"]
 
 
