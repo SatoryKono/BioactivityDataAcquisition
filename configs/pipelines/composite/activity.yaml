@@ -380,4 +380,4 @@ gold_filters:
 #   1. configs/filters/_defaults.yaml (global defaults)
 #   2. configs/filters/providers/composite.yaml (provider-specific)
 #   3. configs/filters/entities/composite/activity.yaml (entity-specific)
-filter_config_file: ../../filter/entities/composite/activity.yaml
+filter_config_file: ../../filters/entities/composite/activity.yaml

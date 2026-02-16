@@ -1,5 +1,5 @@
 # Target Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.18*
+*Version: 1.0.0 | Aligned with RULES.md v5.19*
 
 ## Overview
 

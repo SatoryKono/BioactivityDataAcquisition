@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.18 (Statistics Update), 2026-02-15*
+*Версия: 5.19 (Statistics Update), 2026-02-16*
 
 ## Введение (Quick Reference)
 

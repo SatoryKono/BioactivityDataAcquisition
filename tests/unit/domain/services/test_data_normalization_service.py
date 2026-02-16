@@ -152,9 +152,7 @@ class TestNormalizeAuthors:
     def test_normalize_authors_json_string(self) -> None:
         """Test normalizing JSON-serialized authors."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors(
-            '["John Doe", "Jane Smith"]'
-        )
+        result = service.normalize_authors('["John Doe", "Jane Smith"]')
 
         assert result is not None
         parsed = json.loads(result)

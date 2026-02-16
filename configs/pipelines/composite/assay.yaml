@@ -344,4 +344,4 @@ gold_filters:
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-filter_config_file: ../../filter/entities/composite/assay.yaml
+filter_config_file: ../../filters/entities/composite/assay.yaml

@@ -24,6 +24,7 @@ from bioetl.domain.mapping.publication_type_classification import (
 from bioetl.domain.normalization import extract_first_string, normalize_doi
 from bioetl.domain.types import RunID, RunType
 
+
 @pytest.fixture
 def transformer():
     """Create a CrossRefPublicationTransformer instance."""

@@ -18,7 +18,6 @@ from bioetl.domain.services._author_helpers import (
     parse_author_names,
 )
 
-
 # Note: hash_author_name import removed - no longer hashing author names
 
 

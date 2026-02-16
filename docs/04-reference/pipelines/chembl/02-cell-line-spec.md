@@ -1,6 +1,6 @@
 # ChEMBL Cell Line Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.18*
+*Version 1.2.0 | Aligned with RULES.md v5.19*
 
 ______________________________________________________________________
 
