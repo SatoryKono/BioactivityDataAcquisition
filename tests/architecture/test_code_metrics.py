@@ -45,6 +45,7 @@ class TestFileSizeLimits:
         "validation.py": 450,  # 430 LOC - Pure domain validation functions (SMILES, DOI, InChI Key, year, molecular weight)
         "activity_aggregator.py": 400,  # 392 LOC - Activity aggregation with multiple strategies
         "normalization_service.py": 420,  # 411 LOC - Normalization service with validation
+        "data_normalization_service.py": 380,  # 365 LOC - Data normalization with multiple field handlers
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 400,  # 396 LOC
@@ -628,6 +629,7 @@ class TestClassSize:
         "SilverDQAnalyzer": 600,  # 593 lines - Silver layer DQ analysis with extracted helper methods
         # Domain services
         "NormalizationService": 370,  # 364 lines - Normalization service with validation
+        "DefaultDataNormalizationService": 350,  # 332 lines - Data normalization with multiple field handlers
         "ActivityAggregator": 320,  # 311 lines - Activity aggregation with multiple strategies
         "ValueValidator": 320,  # 311 lines - Value objects validation
         # Domain value objects (aggregates with rich behavior)
@@ -822,6 +824,7 @@ class TestGodObjectDetection:
         "ErrorService": "Cohesive utility - all methods relate to error classification and logging",
         # Domain services (cohesive services with single responsibility)
         "NormalizationService": "Cohesive service - all methods relate to value normalization",
+        "DefaultDataNormalizationService": "Cohesive service - all methods relate to data normalization across fields",
         "ActivityAggregator": "Cohesive service - all methods relate to activity aggregation strategies",
         "ValueValidator": "Cohesive validator - all methods relate to domain value validation",
         # Lifecycle orchestration service
