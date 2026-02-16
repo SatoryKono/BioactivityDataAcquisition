@@ -112,10 +112,10 @@ forbidden_modules =
 
 | Файл | Строки | Что исправить |
 |------|--------|---------------|
-| `docs/03-guides/metrics-monitoring.md` | ~42, 54, 210, 399, 427 | Все env vars `BIOETL_*_ENABLED/PORT` → `BIOETL_OBSERVABILITY__*` |
-| `docs/04-reference/cli.md` | ~469 | `BIOETL_TRACING_ENABLED` → `BIOETL_OBSERVABILITY__TRACING_ENABLED` |
-| `docs/04-reference/api/infrastructure/observability.md` | ~211 | Аналогичная замена |
-| `docs/05-operations/runbooks/observability-checklist.md` | Проверить все env vars | Аналогичная замена |
+| `docs/03-guides/metrics-monitoring.md` | ~42, 54, 210, 399, 427 | Observability settings → `BIOETL_OBSERVABILITY__*` (КРОМЕ `BIOETL_METRICS_PORT` — остаётся top-level) |
+| `docs/04-reference/cli.md` | ~469 | `BIOETL_TRACING_ENABLED` → `BIOETL_OBSERVABILITY__TRACING_ENABLED` (КРОМЕ `BIOETL_METRICS_PORT`) |
+| `docs/04-reference/api/infrastructure/observability.md` | ~211 | Аналогичная замена (КРОМЕ `BIOETL_METRICS_PORT`) |
+| `docs/05-operations/runbooks/observability-checklist.md` | Проверить все env vars | Аналогичная замена (КРОМЕ `BIOETL_METRICS_PORT`) |
 
 **Действие:** Глобальная замена по документации. Добавить примечание о вложенной структуре настроек:
 
@@ -123,6 +123,10 @@ forbidden_modules =
 > **Примечание:** BioETL использует pydantic-settings с `env_nested_delimiter="__"`.
 > Observability-настройки вложены в секцию `observability`, поэтому env var формат:
 > `BIOETL_OBSERVABILITY__<FIELD_NAME>`.
+>
+> **Исключение:** `BIOETL_METRICS_PORT` остаётся top-level полем в `Settings` (не вложено),
+> так как `metrics_port` используется runtime startup (`src/bioetl/composition/bootstrap/runtime/observability.py:249`).
+> Использовать: `BIOETL_METRICS_PORT=9090` (НЕ `BIOETL_OBSERVABILITY__METRICS_PORT`).
 ```
 
 ### 2.2 ADR-022: Некорректные пути файлов (HIGH)
