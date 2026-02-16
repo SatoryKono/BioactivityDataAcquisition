@@ -39,6 +39,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-031](ADR-031-loading-strategy-formalization.md) | Loading Strategy Formalization | Accepted | Data Loading | 2026-01-26 |
 | [ADR-032](ADR-032-unified-http-client.md) | Unified HTTP Client Pattern | Accepted | HTTP/Networking | 2026-01-28 |
 | [ADR-033](ADR-033-publication-validation-strategy.md) | Publication Metadata Validation Strategy | Proposed | Data Quality | 2026-02-06 |
+| [ADR-034](ADR-034-schema-domain-pairs.md) | Schema↔Domain Configuration Pairs | Accepted | Architecture | 2026-02-15 |
 
 ## ADRs by Category
 
@@ -48,6 +49,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-020](ADR-020-basepipeline-decomposition.md): BasePipeline Decomposition (God Object removal)
 - [ADR-024](ADR-024-entity-naming-unification.md): Entity Naming Unification
 - [ADR-026](ADR-026-composite-pipeline-pattern.md): Composite Pipeline Pattern
+- [ADR-034](ADR-034-schema-domain-pairs.md): Schema↔Domain Configuration Pairs — Domain frozen dataclasses vs Infrastructure Pydantic models
 
 ### Storage
 - [ADR-001](ADR-001-delta-lake-vs-parquet.md): Delta Lake vs Parquet

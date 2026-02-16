@@ -49,6 +49,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reduces unnecessary API overhead for 1:1 key lookups (e.g., molecule_chembl_id → molecule)
   - File: `src/bioetl/infrastructure/adapters/chembl/client.py`
 
+### Changed
+
+- **Documentation Metrics Sync**: Updated codebase statistics across all docs
+  - ADR count: 33 → 34 (ADR-034: Schema↔Domain Configuration Pairs)
+  - Test functions: ~7,090 → ~11,985
+  - Python files: ~1,094 → ~1,114 (534 src + 580 tests)
+  - RULES.md bumped to v5.19
+  - Affected files: RULES.md, 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md, README.md
+
 ### Fixed
 
 - **CrossRef Silver Path Mismatch**: Changed `entity_type: work` → `entity_type: publication`
