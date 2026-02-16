@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Author Keys Normalization**: Added `author_keys` field (pipe-delimited `Surname_F` format) across all publication pipelines
+  - Propagated to all 5 publication Silver PyArrow schemas, 4 publication Gold Pandera schemas, and field group mapping
+  - Field group: `AUTHOR_AND_AFFILIATIONS` — ensures inclusion in Gold output
+  - Updated all contract tests, schema stability snapshots, and pipeline contract expectations
+  - Files: `silver.py`, `publications.py`, `publication_field_groups.py`, plus 3 test files
+
 - **Publication Classification Fields in Silver Output**: Classification fields now present in Silver Delta tables
   - Added 3 classification fields to all 5 publication PyArrow schemas: `publication_type_unified` (Level 3: 214 types), `publication_subclass` (Level 2: ~25 groupings), `publication_class` (Level 1: EXP/REV/PEER)
   - Affected schemas: `CHEMBL_PUBLICATION_SCHEMA`, `PUBMED_PUBLICATION_SCHEMA`, `SEMANTICSCHOLAR_PUBLICATION_SCHEMA`, `CROSSREF_PUBLICATION_SCHEMA`, `OPENALEX_PUBLICATION_SCHEMA`
@@ -50,6 +56,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - File: `src/bioetl/infrastructure/adapters/chembl/client.py`
 
 ### Changed
+
+- **Gold Contract JSON Sync**: Regenerated all 4 publication Gold contract JSONs from Pandera schemas
+  - PubMed, CrossRef, OpenAlex, SemanticScholar contracts updated with all current fields
+  - Added missing fields: `author_keys`, `affiliation_list`, `author_orcids`, classification fields, and more
+  - Contracts now match actual Gold Pandera schemas exactly
+
+- **Enum Validation Audit Report**: Comprehensive audit of all enum-validated fields
+  - Report: `reports/enum_validation_audit_2026-02-16.md`
+  - Covers: Pandera `isin=` validations, DQ configs (`type: enum`), Gold filter configs
+  - Documents all centralized constants, domain StrEnums, and 3-level publication type taxonomy
 
 - **Documentation Metrics Sync**: Updated codebase statistics across all docs
   - ADR count: 33 → 34 (ADR-034: Schema↔Domain Configuration Pairs)
