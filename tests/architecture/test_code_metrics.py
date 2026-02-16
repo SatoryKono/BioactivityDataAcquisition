@@ -312,6 +312,11 @@ class TestFunctionComplexity:
         # Cross-validation domain/application (ADR-026)
         "FieldComparisonSpec": 8,  # CC=7 - Field comparison spec __post_init__ with type validation
         "validate": 14,  # CC=13 - EnrichmentCrossValidator.validate() with multi-enricher comparison loop
+        # Author/affiliation normalization helpers (type-checking branches)
+        "normalize_affiliations": 7,  # CC=6 - Affiliation normalization with walrus + None filtering
+        "_extract_name_from_item": 7,  # CC=6 - Name extraction from str or dict
+        "_extract_single_affiliation": 8,  # CC=7 - Affiliation extraction with multi-key probe
+        "collect_affiliations_from_authors": 9,  # CC=8 - Author affiliation collection with type checks
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
