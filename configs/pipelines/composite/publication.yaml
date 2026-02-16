@@ -194,7 +194,7 @@ composite:
             - "openalex.publication.pmc_id"
             - "semanticscholar.publication.dblp_id"
             - "semanticscholar.publication.affiliation_list"
-            - "semanticscholar.publication.author_orcids",
+            - "semanticscholar.publication.author_orcids"
             - "semanticscholar.publication.citation_contexts"
             - "semanticscholar.publication.influential_citation_count"
             - "semanticscholar.publication.pmc_id"
