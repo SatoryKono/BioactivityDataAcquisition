@@ -57,15 +57,15 @@
 | `journal` | `str \| None` | Название журнала |
 | `volume` | `str \| None` | Том |
 | `pages` | `str \| None` | Страницы |
-| `year` | `int \| None` | Год публикации (1500-2100) |
+| `publication_year` | `int \| None` | Год публикации (1500-2100) |
 | `publication_date` | `str \| None` | Дата публикации (YYYY-MM-DD) |
 
 ### Метрики цитирования
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `citation_count` | `int \| None` | Количество цитирований |
-| `reference_count` | `int \| None` | Количество ссылок в публикации |
+| `citations_received` | `int \| None` | Количество цитирований |
+| `citations_made`     | `int \| None` | Количество ссылок в публикации |
 
 ### Open Access
 
@@ -337,10 +337,10 @@ gold_filters:
   "volume": "523",
   "pages": "561-567",
   "venue": "Nature",
-  "year": 2015,
+  "publication_year": 2015,
   "publication_date": "2015-07-22",
-  "citation_count": 892,
-  "reference_count": 50,
+  "citations_received": 892,
+  "citations_made": 50,
   "is_open_access": true,
   "open_access_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4536825/pdf/...",
   "open_access_status": "GREEN",
