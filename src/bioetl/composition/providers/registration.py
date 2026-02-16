@@ -429,7 +429,7 @@ def _create_uniprot_idmapping_data_source(
         if hasattr(pipeline_config.source, "input_path")
         else "data/input/target.csv"
     )
-    input_path = Path(input_path_str)
+    input_path = Path(input_path_str or "data/input/target.csv")
 
     # Get database names from API config
     from_db = "ChEMBL"
