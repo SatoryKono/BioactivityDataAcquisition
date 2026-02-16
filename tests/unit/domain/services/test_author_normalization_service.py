@@ -9,6 +9,11 @@ import json
 
 import pytest
 
+from bioetl.domain.services._author_helpers import (
+    deduplicate_case_insensitive,
+    hash_author_name,
+    normalize_affiliation_string,
+)
 from bioetl.domain.services.author_normalization_service import (
     AuthorNormalizationService,
 )
