@@ -74,6 +74,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-031](decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization           | -                  |
 | [ADR-032](decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | §3.1               |
 | [ADR-033](decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | -                  |
+| [ADR-034](decisions/ADR-034-schema-domain-pairs.md)              | Schema↔Domain Configuration Pairs        | -                  |
 
 ______________________________________________________________________
 
