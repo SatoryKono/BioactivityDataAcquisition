@@ -17,13 +17,6 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, RunType
 
 
-def _hash_author(name: str) -> str:
-    """Compute expected SHA-256 hash for author name with empty salt."""
-    import hashlib
-
-    return hashlib.sha256(name.strip().lower().encode()).hexdigest()
-
-
 @pytest.fixture
 def transformer() -> PubMedPublicationTransformer:
     """Create a PubMedPublicationTransformer instance."""

@@ -138,9 +138,7 @@ class TestNormalizeAuthors:
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 2
-        # Hashes should be consistent
-        expected_hash_john = hash_author_name("John Doe", "test_salt")
-        assert parsed[0] == expected_hash_john
+        assert parsed == ["John Doe", "Jane Smith"]
 
     def test_normalize_authors_string(self) -> None:
         """Test normalizing semicolon-separated authors."""
@@ -166,8 +164,8 @@ class TestNormalizeAuthors:
         """Test empty authors returns None."""
         service = DefaultDataNormalizationService()
         assert service.normalize_authors(None) is None
-        assert service.normalize_authors([], salt="test_salt") is None
-        assert service.normalize_authors("", salt="test_salt") is None
+        assert service.normalize_authors([]) is None
+        assert service.normalize_authors("") is None
 
 
 class TestStripHtmlTags:

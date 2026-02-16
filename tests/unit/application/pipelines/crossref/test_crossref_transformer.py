@@ -24,17 +24,6 @@ from bioetl.domain.mapping.publication_type_classification import (
 from bioetl.domain.normalization import extract_first_string, normalize_doi
 from bioetl.domain.types import RunID, RunType
 
-# Helper for verifying hashed author names (RULES.md §5.4)
-_AUTHOR_HASH_LEN = 64  # SHA-256 hex digest length
-
-
-def _hash_author(name: str) -> str:
-    """Compute expected SHA-256 hash for author name with empty salt."""
-    import hashlib
-
-    return hashlib.sha256(name.strip().lower().encode()).hexdigest()
-
-
 @pytest.fixture
 def transformer():
     """Create a CrossRefPublicationTransformer instance."""
