@@ -17,8 +17,8 @@ source:
             timeout_sec: 60.0
             max_retries: 3
         max_url_length: 2000
-        batch_size: 1000
-        page_size: 1000  # Minimum allowed by schema (ge=100)
+        batch_size: 20  # IDs per API request for filtered queries (input_filter)
+        page_size: 1000  # Records per page for paginated (non-filtered) queries
         api_version: null
 
     circuit_breaker:

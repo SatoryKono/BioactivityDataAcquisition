@@ -88,7 +88,9 @@
       "Bash(Select-String -Pattern \"passed|failed\")",
       "Bash(Select-Object -Last 3)",
       "Bash(mypy:*)",
-      "WebFetch(domain:www.ebi.ac.uk)"
+      "WebFetch(domain:www.ebi.ac.uk)",
+      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" diff --stat)",
+      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" status)"
     ]
   },
   "enabledPlugins": {
