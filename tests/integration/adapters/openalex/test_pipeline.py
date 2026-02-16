@@ -132,17 +132,9 @@ class TestOpenAlexPublicationTransformerIntegration:
         )
 
         authorships = [
-            {
-                "author": {
-                    "orcid": "https://orcid.org/0000-0001-2345-6789"
-                }
-            },
+            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
             {"author": {"orcid": None}},
-            {
-                "author": {
-                    "orcid": "https://orcid.org/0000-0002-3456-789X"
-                }
-            },
+            {"author": {"orcid": "https://orcid.org/0000-0002-3456-789X"}},
         ]
 
         result = extract_author_orcids(authorships)
