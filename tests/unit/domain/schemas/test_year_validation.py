@@ -384,8 +384,6 @@ class TestPubMedYearValidation:
             "gene_symbols": None,
             "publication_types": None,
             # Note: affiliation_list inherited from base (unified field name)
-            # Author identifiers
-            "author_ormolecule_ids": None,
             # Author-affiliation mapping
             "authors_with_affiliations": None,
         }
