@@ -14,10 +14,12 @@ from bioetl.domain.services._author_helpers import (
     collect_affiliations_from_authors,
     deduplicate_case_insensitive,
     extract_affiliation_strings,
-    hash_author_name,
     normalize_affiliation_string,
     parse_author_names,
 )
+
+
+# Note: hash_author_name import removed - no longer hashing author names
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,24 +36,22 @@ class AuthorNormalizationService:
     def normalize_author_list(
         self,
         authors: list[str] | list[dict[str, Any]] | str | None,
-        salt: str,
     ) -> str | None:
-        """Parse, normalize, and hash author names to JSON string.
+        """Parse and normalize author names to JSON string.
 
         Args:
             authors: Author data in any supported format.
-            salt: Salt for PII hashing (RULES.md §5.4).
 
         Returns:
-            JSON string of hashed author names, or None if empty.
+            JSON string of normalized author names, or None if empty.
         """
         if not authors:
             return None
         author_names = self._parse_author_names(authors)
         if not author_names:
             return None
-        hashed = [hash_author_name(name, salt) for name in author_names]
-        return serialize_to_json(hashed, ensure_ascii=True)
+
+        return serialize_to_json(author_names, ensure_ascii=True)
 
     def normalize_affiliations(
         self,
