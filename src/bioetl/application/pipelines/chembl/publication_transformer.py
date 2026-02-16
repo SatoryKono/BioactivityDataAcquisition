@@ -209,6 +209,7 @@ class PublicationTransformer(BaseChemblTransformer):
         # Uses normalize_author_list() for unified cross-provider handling
         raw_authors = data.get("authors")
         data["authors"] = normalizer.normalize_author_list(raw_authors)
+        data["author_keys"] = normalizer.normalize_author_keys(raw_authors)
 
         # Lookup metadata (direct extraction, no enrichment)
         data["_lookup_method"] = "direct"

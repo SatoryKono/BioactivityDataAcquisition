@@ -209,6 +209,22 @@ class DefaultDataNormalizationService:
 
         return normalized if normalized else None
 
+    def normalize_author_keys(
+        self,
+        authors: list[str] | list[dict[str, Any]] | str | None,
+    ) -> str | None:
+        """Normalize author names to short ``Surname_F`` keys.
+
+        Delegates to AuthorNormalizationService.
+
+        Args:
+            authors: Author data in any supported format.
+
+        Returns:
+            Pipe-delimited string of short keys or None if empty.
+        """
+        return self._author_service.normalize_author_keys(authors)
+
     def normalize_author_list(
         self,
         authors: list[str] | list[dict[str, Any]] | str | None,

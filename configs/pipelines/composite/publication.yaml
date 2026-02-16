@@ -261,6 +261,12 @@ composite:
                 - crossref       # CrossRef has most complete ORCID data
                 - openalex
                 - semanticscholar
+            author_keys:
+                - crossref       # CrossRef has best structured author names
+                - openalex
+                - pubmed
+                - semanticscholar
+                - chembl
             author_details:
                 - crossref       # CrossRef-unique detailed author objects
             author_s2_ids:
@@ -399,6 +405,7 @@ composite:
                 fields:
                     - author_count
                     - author_details
+                    - author_keys
                     - author_h_indices
                     - author_openalex_ids
                     - author_orcids

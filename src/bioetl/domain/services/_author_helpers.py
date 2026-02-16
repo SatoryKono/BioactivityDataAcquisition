@@ -131,6 +131,80 @@ def deduplicate_case_insensitive(strings: list[str]) -> list[str]:
     return list(seen.values())
 
 
+def _is_initials(token: str) -> bool:
+    """Check if token looks like initials (1-3 uppercase letters, optionally dotted)."""
+    cleaned = token.replace(".", "")
+    return 1 <= len(cleaned) <= 3 and cleaned.isalpha() and cleaned.isupper()
+
+
+def _surname_initial_from_comma(name: str) -> str | None:
+    """Parse ``LastName, Rest`` format (PubMed / inverted)."""
+    parts = name.split(",", 1)
+    surname = parts[0].strip()
+    rest = parts[1].strip()
+    if not surname:
+        return None
+    if not rest:
+        return surname
+    return f"{surname}_{rest[0].upper()}"
+
+
+def _surname_initial_from_tokens(tokens: list[str]) -> str:
+    """Parse space-separated tokens into ``Surname_F`` key.
+
+    Detects three patterns:
+    - Trailing initials (ChEMBL): ``["Smith", "JA"]`` → ``"Smith_J"``
+    - Leading initials: ``["X.", "Zhou"]`` → ``"Zhou_X"``
+    - Standard order: ``["John", "Doe"]`` → ``"Doe_J"``
+    """
+    # Format: "LastName Initials" (ChEMBL: "Smith JA", "Zhou X")
+    if _is_initials(tokens[-1]):
+        surname = " ".join(tokens[:-1])
+        initial = tokens[-1].replace(".", "")[0].upper()
+        return f"{surname}_{initial}"
+
+    # Format: "Initial. LastName" (e.g. "X. Zhou")
+    if _is_initials(tokens[0]):
+        surname = " ".join(tokens[1:])
+        initial = tokens[0].replace(".", "")[0].upper()
+        return f"{surname}_{initial}"
+
+    # Format: "FirstName [Middle...] LastName" (CrossRef, OpenAlex, S2)
+    return f"{tokens[-1]}_{tokens[0][0].upper()}"
+
+
+def normalize_to_surname_initial(name: str) -> str | None:
+    """Convert author name to ``Surname_F`` short key.
+
+    Handles multiple input formats:
+    - ``"Doe, John"`` → ``"Doe_J"``    (LastName, FirstName)
+    - ``"Doe, J"``    → ``"Doe_J"``    (LastName, Initial)
+    - ``"Doe, JA"``   → ``"Doe_J"``    (LastName, Initials)
+    - ``"John Doe"``  → ``"Doe_J"``    (FirstName LastName)
+    - ``"Smith JA"``  → ``"Smith_J"``  (LastName Initials — ChEMBL)
+    - ``"X. Zhou"``   → ``"Zhou_X"``   (Initial. LastName)
+    - ``"Madonna"``   → ``"Madonna"``  (single name — no initial)
+    - ``"WHO"``       → ``"WHO"``      (organization — no underscore)
+
+    Returns:
+        Short key string, or None if name is empty.
+    """
+    if not name or not name.strip():
+        return None
+    name = name.strip()
+
+    # Format: "LastName, Rest" (PubMed / inverted)
+    if "," in name:
+        return _surname_initial_from_comma(name)
+
+    # Split on whitespace
+    tokens = name.split()
+    if len(tokens) == 1:
+        return tokens[0]
+
+    return _surname_initial_from_tokens(tokens)
+
+
 def collect_affiliations_from_authors(
     authors: list[dict[str, Any]],
 ) -> list[str]:

@@ -15,6 +15,7 @@ from bioetl.domain.services._author_helpers import (
     deduplicate_case_insensitive,
     extract_affiliation_strings,
     normalize_affiliation_string,
+    normalize_to_surname_initial,
     parse_author_names,
 )
 
@@ -97,6 +98,25 @@ class AuthorNormalizationService:
         ]
         unique = deduplicate_case_insensitive(normalized)
         return sorted(unique)
+
+    def normalize_author_keys(
+        self,
+        authors: list[str] | list[dict[str, Any]] | str | None,
+    ) -> str | None:
+        """Normalize author names to short ``Surname_F`` keys.
+
+        Args:
+            authors: Author data in any supported format.
+
+        Returns:
+            Pipe-delimited string of short keys (e.g. ``"Doe_J|Smith_A"``),
+            or None if empty.
+        """
+        if not authors:
+            return None
+        author_names = self._parse_author_names(authors)
+        keys = [k for name in author_names if (k := normalize_to_surname_initial(name))]
+        return "|".join(keys) if keys else None
 
     def _parse_author_names(
         self,

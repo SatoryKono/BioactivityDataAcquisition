@@ -87,6 +87,7 @@ class PublicationEntityBase(BaseEntity):
         None  # JSON-serialized list of unique affiliations (unified field name)
     )
     author_orcids: str | None = None  # JSON array of ORCID identifiers
+    author_keys: str | None = None  # Pipe-delimited Surname_F short keys
 
     # Journal information
     journal: str | None = None
