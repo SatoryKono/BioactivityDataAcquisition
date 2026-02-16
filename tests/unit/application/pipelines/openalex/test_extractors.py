@@ -202,16 +202,8 @@ class TestExtractAuthorOrcids:
     def test_extract_orcids_from_urls(self) -> None:
         """Should extract ORCID IDs from full URLs."""
         authorships = [
-            {
-                "author": {
-                    "orcid": "https://orcid.org/0000-0001-2345-6789"
-                }
-            },
-            {
-                "author": {
-                    "orcid": "https://orcid.org/0000-0002-3456-789X"
-                }
-            },
+            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
+            {"author": {"orcid": "https://orcid.org/0000-0002-3456-789X"}},
         ]
         result = extract_author_orcids(authorships)
         assert result == ["0000-0001-2345-6789", "0000-0002-3456-789X"]
@@ -219,17 +211,9 @@ class TestExtractAuthorOrcids:
     def test_extract_orcids_preserves_order(self) -> None:
         """Should preserve order and return same length as input."""
         authorships = [
-            {
-                "author": {
-                    "orcid": "https://orcid.org/0000-0001-2345-6789"
-                }
-            },
+            {"author": {"orcid": "https://orcid.org/0000-0001-2345-6789"}},
             {"author": {"orcid": None}},
-            {
-                "author": {
-                    "orcid": "https://orcid.org/0000-0003-4567-8901"
-                }
-            },
+            {"author": {"orcid": "https://orcid.org/0000-0003-4567-8901"}},
         ]
         result = extract_author_orcids(authorships)
         assert len(result) == 3
@@ -254,14 +238,8 @@ class TestExtractAuthorOrcids:
     def test_extract_orcids_invalid_format(self) -> None:
         """Should return empty string for invalid ORCID format."""
         authorships = [
-            {
-                "author": {
-                    "orcid": "https://orcid.org/invalid-orcid"
-                }
-            },
-            {
-                "author": {"orcid": "https://orcid.org/0000-0001"}
-            },  # Too short
+            {"author": {"orcid": "https://orcid.org/invalid-orcid"}},
+            {"author": {"orcid": "https://orcid.org/0000-0001"}},  # Too short
             {"author": {"orcid": "not-a-url"}},
         ]
         result = extract_author_orcids(authorships)
@@ -270,11 +248,7 @@ class TestExtractAuthorOrcids:
     def test_extract_orcids_http_url(self) -> None:
         """Should handle http:// URLs (not just https://)."""
         authorships = [
-            {
-                "author": {
-                    "orcid": "http://orcid.org/0000-0001-2345-6789"
-                }
-            },
+            {"author": {"orcid": "http://orcid.org/0000-0001-2345-6789"}},
         ]
         result = extract_author_orcids(authorships)
         assert result == ["0000-0001-2345-6789"]
@@ -305,11 +279,7 @@ class TestExtractAuthorOrcids:
     def test_extract_orcids_with_checksum_x(self) -> None:
         """Should accept ORCID with X checksum digit."""
         authorships = [
-            {
-                "author": {
-                    "orcid": "https://orcid.org/0000-0002-1825-009X"
-                }
-            },
+            {"author": {"orcid": "https://orcid.org/0000-0002-1825-009X"}},
         ]
         result = extract_author_orcids(authorships)
         assert result == ["0000-0002-1825-009X"]
