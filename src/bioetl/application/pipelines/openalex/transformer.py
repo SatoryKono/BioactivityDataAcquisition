@@ -152,7 +152,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         # Extract and normalize authors using unified service (PII)
         normalizer = self._data_normalizer
         salt = (
-            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else None
         )
 
         raw_authors = extract_authors(rec.get("authorships", []))

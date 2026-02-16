@@ -14,6 +14,13 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import BronzeRecord, RunType
 
 
+def _hash_author(name: str) -> str:
+    """Compute expected SHA-256 hash for author name with empty salt."""
+    import hashlib
+
+    return hashlib.sha256(name.strip().lower().encode()).hexdigest()
+
+
 @pytest.fixture
 def mock_services():
     services = MagicMock()
@@ -142,8 +149,8 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     assert silver_record["title"] == "Test Title"
     assert silver_record["journal"] == "Test Journal"
     assert silver_record["abstract"] == "Test Abstract"
-    # Authors are now JSON-serialized
-    assert json.loads(silver_record["authors"]) == ["Doe, J"]
+    # Authors are hashed per RULES.md §5.4
+    assert json.loads(silver_record["authors"]) == [_hash_author("Doe, J")]
     # Date fields
     assert silver_record["publication_year"] == 2023
     assert silver_record["pub_date"] == "2023-03-15"
