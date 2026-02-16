@@ -30,7 +30,6 @@ from bioetl.domain.version import get_version
 __all__ = [
     "PipelineEvent",
     "composite",
-    "version",
     "get_version",
     # Data contracts (subpackage)
     "contracts",
