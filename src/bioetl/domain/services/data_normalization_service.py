@@ -107,20 +107,7 @@ class DefaultDataNormalizationService:
         self, authors: list[str] | str | None, salt: str
     ) -> str | None:
         """Parse, hash, and serialize author names. Returns JSON string or None."""
-        author_list = self.parse_authors_to_list(authors)
-        if not author_list:
-            return None
-        hashed = [self._hash_pii(name, salt) for name in author_list]
-        return serialize_to_json(hashed, ensure_ascii=True)
-
-    def _hash_pii(self, value: str, salt: str) -> str:
-        """Hash a PII value with salt using SHA-256 per RULES.md §5.4.
-
-        Normalization: strip whitespace, lowercase before hashing.
-        Formula: sha256(lowercase(value) + SALT)
-        """
-        normalized = value.strip().lower()
-        return hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
+        return self._author_service.normalize_author_list(authors, salt)
 
     def strip_html_tags(self, text: str | None) -> str | None:
         """Remove HTML tags, decode entities, normalize whitespace."""
@@ -176,41 +163,6 @@ class DefaultDataNormalizationService:
 
         # Delegate to AuthorNormalizationService (same parsing logic)
         return self._author_service._parse_author_names(authors)
-
-    def _parse_authors_from_list(self, authors: list[Any]) -> list[str]:
-        """Parse author list, filtering non-strings and empty values."""
-        return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
-
-    def _parse_authors_string(self, text: str) -> list[str]:
-        """Parse string as JSON or delimited format."""
-        json_result = self._parse_authors_from_json(text)
-        return json_result if json_result is not None else self._parse_delimited(text)
-
-    def _parse_authors_from_json(self, text: str) -> list[str] | None:
-        """Try to parse JSON array of authors."""
-        if not text.startswith("["):
-            return None
-        parsed = self._try_json_loads(text)
-        if isinstance(parsed, list):
-            return self._filter_json_authors(parsed)
-        return None
-
-    def _try_json_loads(self, text: str) -> Any:
-        """Attempt JSON parsing, returning None on failure."""
-        try:
-            return deserialize_from_json(text)
-        except ValueError:
-            return None
-
-    def _filter_json_authors(self, items: list[Any]) -> list[str]:
-        """Filter and convert JSON array items to author strings."""
-        return [str(a).strip() for a in items if a is not None and str(a).strip()]
-
-    def _parse_delimited(self, text: str) -> list[str]:
-        """Parse delimited string (semicolon or comma separated)."""
-        delimiter = ";" if ";" in text else ","
-        parts = text.split(delimiter) if delimiter in text else [text]
-        return [a.strip() for a in parts if a.strip()]
 
     def normalize_partial_date(self, date_str: str | None) -> str | None:
         """Normalize partial date to full YYYY-MM-DD format (end of period).
