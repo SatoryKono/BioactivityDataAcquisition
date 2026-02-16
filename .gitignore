@@ -134,3 +134,25 @@ data/input/bronze/chembl/publication/2026-02-09/batch_2026-02-09_045cc68f-7052-4
 # Root-level generated artifacts (MUST NOT be committed)
 /coverage.json
 /all_fixtures.txt
+
+# Root-level VCR cassettes (MUST be in tests/fixtures/vcr/)
+/test_backfill_*
+/test_chembl_*
+/test_failed_*
+/test_full_pipeline_*
+/test_multiple_*
+/test_pipeline_*
+/test_pubchem_*
+/test_rebuild_*
+/test_run_type_*
+/test_vacuum_*
+
+# Stale caches
+.ruff_cache_cli/
+
+# Temp scripts
+/run_extract.bat
+/test_author_quick.py
+
+# Reports (generated, 100+ MB)
+/reports/
