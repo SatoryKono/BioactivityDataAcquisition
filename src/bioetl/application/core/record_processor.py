@@ -19,6 +19,8 @@ from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.quarantine_manager import QuarantineManager
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import Span
+
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.protocols import (
@@ -212,7 +214,7 @@ class RecordProcessor:
         span.__enter__()
         return span
 
-    def _end_span(self, span: Any, error: Exception | None = None) -> None:
+    def _end_span(self, span: Span, error: Exception | None = None) -> None:
         """End a tracing span."""
         if not span:
             return

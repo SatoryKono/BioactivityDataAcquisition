@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class PipelineFactoryProtocol(Protocol):
+class PipelineFactoryPort(Protocol):
     """Protocol for pipeline factories."""
 
     pipeline_name: str
@@ -71,7 +71,7 @@ class PipelineFactoryProtocol(Protocol):
 class PipelineDefinition(NamedTuple):
     """Definition of a registered pipeline."""
 
-    factory: PipelineFactoryProtocol
+    factory: PipelineFactoryPort
     """Factory instance."""
 
     silver_schema: pa.Schema | None
@@ -110,7 +110,7 @@ class PipelineRegistry:
 
     def register_factory(
         self,
-        factory: PipelineFactoryProtocol,
+        factory: PipelineFactoryPort,
     ) -> None:
         """Register a pipeline factory instance.
 
@@ -186,7 +186,7 @@ class PipelineRegistry:
     def register(
         self,
         key: str,
-        value: PipelineFactoryProtocol,
+        value: PipelineFactoryPort,
     ) -> None:
         """Register a pipeline factory (unified API).
 

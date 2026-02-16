@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING, Any
 from bioetl.domain.ports import NoOpTracing
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import Span
+
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import TracingPort
@@ -139,7 +141,7 @@ class BatchTracingManager:
 
     def set_execution_stats(
         self,
-        span: Any | None,
+        span: Span | None,
         *,
         total_fetched: int,
         total_bronze: int,
@@ -175,7 +177,7 @@ class BatchTracingManager:
 
     def set_batch_result(
         self,
-        span: Any | None,
+        span: Span | None,
         *,
         bronze_count: int,
         silver_count: int,
@@ -202,7 +204,7 @@ class BatchTracingManager:
 
     def set_transform_result(
         self,
-        span: Any | None,
+        span: Span | None,
         *,
         silver_count: int,
         gold_count: int,
@@ -224,7 +226,7 @@ class BatchTracingManager:
         span.set_attribute("bioetl.gold_count", gold_count)
         span.set_attribute("bioetl.quarantined_count", quarantined_count)
 
-    def end_span(self, span: Any | None, error: Exception | None = None) -> None:
+    def end_span(self, span: Span | None, error: Exception | None = None) -> None:
         """End a tracing span.
 
         Args:
@@ -239,7 +241,7 @@ class BatchTracingManager:
             span.record_exception(error)
         span.__exit__(None, None, None)
 
-    def end_span_with_shutdown(self, span: Any | None) -> None:
+    def end_span_with_shutdown(self, span: Span | None) -> None:
         """End span marking it as shutdown.
 
         Args:

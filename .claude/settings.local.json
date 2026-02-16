@@ -102,7 +102,9 @@
       "Bash(__NEW_LINE_78b0c7612e69a05e__ echo \"\")",
       "Bash(__NEW_LINE_0dbd58ea3983ca15__ echo \"\")",
       "Bash(__NEW_LINE_0b0ade94245ccb8d__ echo \"\")",
-      "Bash(UPDATE_SNAPSHOTS=1 uv run python -m pytest:*)"
+      "Bash(UPDATE_SNAPSHOTS=1 uv run python -m pytest:*)",
+      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" mv src/bioetl/application/pipelines/uniprot/extractors/utils.py src/bioetl/application/pipelines/uniprot/extractors/extractor_helpers.py)",
+      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" mv:*)"
     ]
   },
   "enabledPlugins": {

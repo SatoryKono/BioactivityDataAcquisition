@@ -64,6 +64,7 @@ column_groups:
   - name: authors
     fields:
       - authors
+      - author_keys            # Pipe-delimited Surname_F short keys (all providers)
       - author_count
       - authors_with_affiliations
     provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]

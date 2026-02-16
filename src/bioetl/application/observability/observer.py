@@ -25,6 +25,8 @@ from bioetl.domain.events import PipelineEvent
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from opentelemetry.trace import Span
+
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID, RunType
 
@@ -65,7 +67,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         self.tracer = tracer
 
         self.start_time: float | None = None
-        self.span: Any = None
+        self.span: Span | None = None
 
     def __enter__(self) -> PipelineObserver:
         """Start observation (Span + Log + Metric)."""

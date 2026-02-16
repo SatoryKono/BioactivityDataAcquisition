@@ -28,6 +28,8 @@ from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 from bioetl.domain.resilience import RetryConfig
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import Span
+
     from bioetl.domain.ports import (
         CircuitBreakerPort,
         LoggerPort,
@@ -332,7 +334,7 @@ class UnifiedHTTPClient:
         method: str,
         url: str,
         attempt: int,
-        span: Any,
+        span: Span,
         kwargs: dict[str, Any],
     ) -> httpx.Response | tuple[bool, int, int, Exception | None]:
         """Execute a single request attempt, returning response or retry info.

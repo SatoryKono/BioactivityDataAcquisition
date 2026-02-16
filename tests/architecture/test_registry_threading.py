@@ -21,17 +21,17 @@ from bioetl.composition.factories.pipeline_factories import register_all_pipelin
 from bioetl.composition.registry import PipelineRegistry, create_registry
 
 if TYPE_CHECKING:
-    from bioetl.composition.registry import PipelineFactoryProtocol
+    from bioetl.composition.registry import PipelineFactoryPort
 
 
-def create_mock_factory(name: str) -> PipelineFactoryProtocol:
+def create_mock_factory(name: str) -> PipelineFactoryPort:
     """Create a mock factory for testing.
 
     Args:
         name: Pipeline name for the factory.
 
     Returns:
-        Mock factory implementing PipelineFactoryProtocol.
+        Mock factory implementing PipelineFactoryPort.
     """
     factory = MagicMock()
     factory.pipeline_name = name

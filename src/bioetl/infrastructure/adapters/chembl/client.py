@@ -28,16 +28,16 @@ from bioetl.infrastructure.adapters.chembl.constants import (
     _SILVER_TO_CHEMBL_API_FIELD,
     CHEMBL_DTO_MODELS,
 )
+from bioetl.infrastructure.adapters.chembl.deduplication import (
+    compute_composite_key,
+    is_duplicate_record,
+    is_duplicate_record_composite,
+)
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     ChemblEntityMapper,
 )
 from bioetl.infrastructure.adapters.chembl.health import ChemblHealthMixin
 from bioetl.infrastructure.adapters.chembl.metadata import ChemblMetadataMixin
-from bioetl.infrastructure.adapters.chembl.utils import (
-    compute_composite_key,
-    is_duplicate_record,
-    is_duplicate_record_composite,
-)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )

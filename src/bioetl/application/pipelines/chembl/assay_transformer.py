@@ -28,7 +28,7 @@ from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 # Mapping for variant sequence fields extraction (from ChEMBL nested structure)
@@ -159,7 +159,7 @@ class AssayTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract Assay business data from bronze record.
 

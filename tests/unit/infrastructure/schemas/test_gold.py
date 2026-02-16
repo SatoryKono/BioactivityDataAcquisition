@@ -358,6 +358,7 @@ class TestGoldSchemaValidation:
             "page_first": "100",
             "page_last": "110",
             "authors": '["Author One", "Author Two"]',
+            "author_keys": "One_A|Two_A",
             "affiliation_list": '["University A", "University B"]',
             "affiliation_structured": '[{"text": "University A", "ror_id": null}]',
             "authors_with_affiliations": '[{"name_hash": "abc123", "initials": "AO", "affiliations": []}]',

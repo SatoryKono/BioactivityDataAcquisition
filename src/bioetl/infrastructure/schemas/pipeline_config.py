@@ -358,6 +358,12 @@ class ApiConfig(BaseModel):
     base_url: str | None = None
     rate_limit: float | None = None
     timeout: int | None = None
+    from_db: str | None = Field(
+        default=None, description="Source database for ID mapping (e.g., ChEMBL)"
+    )
+    to_db: str | None = Field(
+        default=None, description="Target database for ID mapping (e.g., UniProtKB)"
+    )
 
     def to_domain(self) -> BaseClientConfig:
         """Convert to domain BaseClientConfig dataclass.
@@ -422,6 +428,10 @@ class SourceConfig(BaseModel):
     api_key: str | None = None
     fields: list[dict[str, str]] = Field(default_factory=list)
     api: ApiConfig = Field(default_factory=ApiConfig)
+
+    input_path: str | None = Field(
+        default=None, description="Path to input file for file-based sources"
+    )
 
     # Source file fields (from configs/sources/*.yaml)
     type: Literal["api", "file"] = "api"
@@ -746,6 +756,9 @@ class PipelineYamlConfig(BaseModel):
     provider: str
     entity_type: str
     version: str = "v1"
+    description: str | None = Field(
+        default=None, description="Human-readable pipeline description"
+    )
 
     batch_size: int = Field(default=100, ge=1, le=5000)
     filter_batch_size: int | None = Field(

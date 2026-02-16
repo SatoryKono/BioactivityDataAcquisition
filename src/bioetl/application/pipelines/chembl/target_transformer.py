@@ -20,7 +20,7 @@ from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 class TargetTransformer(BaseChemblTransformer):
@@ -126,7 +126,7 @@ class TargetTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract Target business data from bronze record.
 

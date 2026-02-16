@@ -774,11 +774,15 @@ class LineageConfig:
         track_field_sources: Track which source provided each field.
         track_timestamps: Include enrichment timestamps.
         track_status: Include per-record enrichment status.
+        provider_lookup_fields: Per-provider mapping of lookup metadata field names.
+        track_source_for_fields: Field names requiring source tracking for overlapping data.
     """
 
     track_field_sources: bool = True
     track_timestamps: bool = True
     track_status: bool = True
+    provider_lookup_fields: dict[str, dict[str, str]] = field(default_factory=dict)
+    track_source_for_fields: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

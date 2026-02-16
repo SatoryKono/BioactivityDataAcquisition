@@ -66,6 +66,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
 
     # Authors and affiliations
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
     affiliation_list: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of unique affiliations
@@ -220,6 +221,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     issn_electronic: Series[str] = pa.Field(nullable=True)
 
     # Author identifiers
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
     author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCID IDs
     author_details: Series[str] = pa.Field(
         nullable=True
@@ -336,6 +338,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     ror_ids: Series[str] = pa.Field(nullable=True)  # JSON array of ROR URLs
 
     # Author identifiers
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
     author_openalex_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
     author_orcids: Series[str] = pa.Field(nullable=True)  # ORCID IDs
 
@@ -426,6 +429,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
 
     # Author identifiers
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
     author_s2_ids: Series[str] = pa.Field(nullable=True)  # JSON array (40-char hex)
     author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCIDs
     author_h_indices: Series[str] = pa.Field(

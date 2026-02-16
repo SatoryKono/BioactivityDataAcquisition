@@ -23,7 +23,7 @@ from bioetl.domain.transformations import safe_int
 from bioetl.domain.value_objects import validate_taxonomy_id
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 # JSON fields to serialize
@@ -55,7 +55,7 @@ class TargetComponentTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract TargetComponent business data from bronze record.
 

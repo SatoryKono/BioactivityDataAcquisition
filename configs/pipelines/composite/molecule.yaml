@@ -205,7 +205,6 @@ composite:
         fields:
           - molecular_weight
           - molecular_formula
-          - molecular_weight
           - logp
           - logp_method
           - polar_surface_area

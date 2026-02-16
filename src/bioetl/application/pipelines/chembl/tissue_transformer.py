@@ -14,7 +14,7 @@ from bioetl.domain.entities.chembl_tissue import Tissue
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 class TissueTransformer(BaseChemblTransformer):
@@ -43,7 +43,7 @@ class TissueTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract Tissue business data from bronze record.
 

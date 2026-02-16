@@ -30,6 +30,7 @@ column_groups:
   - name: authors
     fields:
       - authors
+      - author_keys
       - author_openalex_ids
       - author_orcids
 

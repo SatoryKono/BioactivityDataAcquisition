@@ -541,6 +541,14 @@ class LineageSchema(BaseModel):
     track_status: bool = Field(
         default=True, description="Include per-record enrichment status"
     )
+    provider_lookup_fields: dict[str, dict[str, str]] = Field(
+        default_factory=dict,
+        description="Per-provider mapping of lookup metadata field names",
+    )
+    track_source_for_fields: list[str] = Field(
+        default_factory=list,
+        description="Field names requiring source tracking for overlapping data",
+    )
 
     def to_domain(self) -> LineageConfig:
         """Convert to immutable domain LineageConfig."""
@@ -548,6 +556,8 @@ class LineageSchema(BaseModel):
             track_field_sources=self.track_field_sources,
             track_timestamps=self.track_timestamps,
             track_status=self.track_status,
+            provider_lookup_fields=self.provider_lookup_fields,
+            track_source_for_fields=tuple(self.track_source_for_fields),
         )
 
 
