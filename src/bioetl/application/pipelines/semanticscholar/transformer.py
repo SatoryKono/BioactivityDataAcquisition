@@ -147,7 +147,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         Uses unified normalization service for authors and affiliations.
         """
         normalizer = self._data_normalizer
-        salt = self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+        salt = (
+            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+        )
 
         # Extract and normalize author names using unified service
         raw_authors = extract_authors(authors_list)
@@ -160,7 +162,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         # Extract and normalize affiliations using unified service
         affiliations = extract_affiliations(authors_list)
-        affiliations_json = normalizer.normalize_affiliations(affiliations) if affiliations else None
+        affiliations_json = (
+            normalizer.normalize_affiliations(affiliations) if affiliations else None
+        )
 
         return {
             "authors": authors_json,

@@ -84,14 +84,18 @@ class TestNormalizeAuthorList:
         parsed = json.loads(result)
         assert len(parsed) == 2
 
-    def test_empty_inputs_return_none(self, service: AuthorNormalizationService) -> None:
+    def test_empty_inputs_return_none(
+        self, service: AuthorNormalizationService
+    ) -> None:
         """Test that empty inputs return None."""
         assert service.normalize_author_list(None, salt="test") is None
         assert service.normalize_author_list([], salt="test") is None
         assert service.normalize_author_list("", salt="test") is None
         assert service.normalize_author_list("   ", salt="test") is None
 
-    def test_whitespace_normalization(self, service: AuthorNormalizationService) -> None:
+    def test_whitespace_normalization(
+        self, service: AuthorNormalizationService
+    ) -> None:
         """Test that whitespace is normalized in author names."""
         authors = ["  John Doe  ", "Jane Smith"]
         result = service.normalize_author_list(authors, salt="test_salt")
@@ -158,7 +162,9 @@ class TestNormalizeAffiliations:
         assert "Harvard" in parsed
         assert "Stanford" in parsed
 
-    def test_whitespace_normalization(self, service: AuthorNormalizationService) -> None:
+    def test_whitespace_normalization(
+        self, service: AuthorNormalizationService
+    ) -> None:
         """Test that whitespace is normalized in affiliations."""
         affiliations = ["  MIT  ", "MIT", "  MIT"]
         result = service.normalize_affiliations(affiliations)
@@ -206,7 +212,9 @@ class TestNormalizeAffiliations:
         parsed = json.loads(result)
         assert len(parsed) == 2
 
-    def test_empty_inputs_return_none(self, service: AuthorNormalizationService) -> None:
+    def test_empty_inputs_return_none(
+        self, service: AuthorNormalizationService
+    ) -> None:
         """Test that empty inputs return None."""
         assert service.normalize_affiliations(None) is None
         assert service.normalize_affiliations([]) is None
