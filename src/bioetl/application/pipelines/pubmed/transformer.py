@@ -246,25 +246,26 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         # Normalize author names using unified service
         normalizer = self._data_normalizer
 
-        # Extract author names
-        author_names = (
-            [AuthorExtractor().normalize(raw_author_data)] if raw_author_data else []
+        # Extract author names (normalize returns list[str], so we wrap it to match expectations)
+        # Actually, normalize_author_list expects list[str] | str | list[dict], so list[str] is fine.
+        # But AuthorExtractor().normalize() returns list[str].
+        author_list: list[str] = (
+            AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
         )
-        # Flatten if normalize returns list
-        if author_names and isinstance(author_names[0], list):
-            author_names = author_names[0]
 
         # Use unified normalization (parse + serialize in one call)
-        authors_json = normalizer.normalize_author_list(author_names)
-        author_keys = normalizer.normalize_author_keys(author_names)
+        authors_json = normalizer.normalize_author_list(author_list)
+        author_keys = normalizer.normalize_author_keys(author_list)
 
         authors_with_affiliations = self._build_authors_with_affiliations(
             raw_author_data
         )
 
         # Extract affiliations using unified service
+        # Cast RawAuthor (TypedDict) to dict[str, Any] for Mypy
+        raw_authors_dict = cast("list[dict[str, Any]]", raw_author_data)
         affiliation_strings = normalizer.extract_affiliations_from_authors(
-            raw_author_data
+            raw_authors_dict
         )
 
         # Normalize affiliations using unified service (already deduplicated & sorted)

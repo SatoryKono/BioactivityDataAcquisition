@@ -21,9 +21,11 @@ from bioetl.application.pipelines.pubmed.extractors.classification import (
 )
 from bioetl.application.pipelines.pubmed.extractors.date import DateExtractor
 from bioetl.application.pipelines.pubmed.extractors.identifier import (
+    IdentifierExtractor,
+)
+from bioetl.application.pipelines.pubmed.extractors.identifier_types import (
     AllArticleIds,
     ELocationIds,
-    IdentifierExtractor,
 )
 
 __all__ = [
