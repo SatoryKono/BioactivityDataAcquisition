@@ -271,7 +271,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         # Normalize author names using unified service
         normalizer = self._data_normalizer
-        salt = self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+        salt = (
+            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+        )
 
         # Extract author names for hashing
         author_names = (
@@ -289,7 +291,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         )
 
         # Extract affiliations using unified service
-        affiliation_strings = normalizer.extract_affiliations_from_authors(raw_author_data)
+        affiliation_strings = normalizer.extract_affiliations_from_authors(
+            raw_author_data
+        )
 
         # Normalize affiliations using unified service (already deduplicated & sorted)
         affiliation_list_json = (
@@ -304,6 +308,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Count from parsed JSON
         import json
+
         author_count = len(json.loads(authors_json)) if authors_json else 0
 
         return {

@@ -748,6 +748,12 @@ class PipelineYamlConfig(BaseModel):
     version: str = "v1"
 
     batch_size: int = Field(default=100, ge=1, le=5000)
+    filter_batch_size: int | None = Field(
+        default=None,
+        ge=1,
+        le=5000,
+        description="Batch size when input_filter is active. Overrides batch_size.",
+    )
     checkpoint_interval: int = Field(default=1000, ge=100)
 
     # DQ Configuration

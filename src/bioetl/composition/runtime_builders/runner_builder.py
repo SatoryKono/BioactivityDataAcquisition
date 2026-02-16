@@ -30,6 +30,7 @@ if TYPE_CHECKING:
         VacuumConfig,
     )
     from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import (
         InputFilterConfig as YamlInputFilter,
@@ -115,13 +116,14 @@ def _assemble_cached_bronze_context(ctx: PipelineRunContext) -> CachedBronzeCont
 def _build_observability_bundle(
     *,
     pipeline: str,
-    ctx: PipelineRunContext,
+    run_id: RunID,
     settings: Settings,
+    log_level: str = "INFO",
 ) -> ObservabilityBundle:
     logger = UnifiedLogger(
         pipeline=pipeline,
-        run_id=ctx.run_id,
-        log_level=ctx.log_level,
+        run_id=run_id,
+        log_level=log_level,
         json_format=True,
     )
     tracer = (
@@ -198,8 +200,9 @@ def build_pipeline_runner(
 
     observability = build_observability_bundle_fn(
         pipeline=ctx.pipeline_name,
-        ctx=ctx,
+        run_id=ctx.run_id,
         settings=settings,
+        log_level=ctx.log_level,
     )
 
     vacuum = assemble_vacuum_settings_fn(
@@ -227,6 +230,17 @@ def build_pipeline_runner(
             filter_field=filter_config.filter_field,
             source="cli" if ctx.input_filter.enabled else "config",
         )
+
+    # Auto-adjust batch_size based on filter presence
+    filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
+    if filter_config and filter_batch_size is not None:
+        observability.logger.info(
+            "batch_size_auto_adjusted",
+            original=yaml_config.batch_size,
+            adjusted=filter_batch_size,
+            reason="input_filter_active",
+        )
+        yaml_config.batch_size = filter_batch_size
 
     cached_bronze = assemble_cached_bronze_context_fn(ctx)
 

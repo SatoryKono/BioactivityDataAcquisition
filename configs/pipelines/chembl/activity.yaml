@@ -25,6 +25,7 @@ primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 batch_size: 1000
+filter_batch_size: 20
 
 # -----------------------------------------------------------------------------
 # Sink Configuration (ADR-014, ADR-025)
