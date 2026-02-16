@@ -28,10 +28,10 @@ from bioetl.domain.registry.publication import (
 )
 
 __all__ = [
-    "FieldAlias",
     "LEGACY_PUBLICATION_ALIASES",
     "MOLECULE_FIELD_ALIASES",
     "PUBLICATION_ENTITY_TYPES",
+    "FieldAlias",
     "PublicationMapping",
     "get_all_aliases_for_provider",
     "get_canonical_name",
@@ -40,4 +40,4 @@ __all__ = [
     "is_legacy_publication_alias",
     "is_publication_entity",
     "validate_publication_entity_type",
-]
+]  # RUF022: sorted by category (constants, classes, functions)

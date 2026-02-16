@@ -30,7 +30,6 @@ from typing import Any
 
 from bioetl.domain.schemas.constants import (
     CANONICAL_HBA_COUNT_RANGE,
-    CANONICAL_HBD_COUNT_RANGE,
     CANONICAL_HEAVY_ATOM_COUNT_RANGE,
     CANONICAL_LOGP_RANGE,
     CANONICAL_POLAR_SURFACE_AREA_RANGE,
