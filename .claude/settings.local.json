@@ -96,7 +96,12 @@
       "Bash(while read f)",
       "Bash(do grep -qL \"target_tax_id\" \"$f\")",
       "Bash(do rm -v \"$f\")",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(__NEW_LINE_b96da1532ab9cd6b__ echo \"=== PIPELINE SUMMARY ===\")",
+      "Bash(__NEW_LINE_6ab85db068e860a3__ echo \"\")",
+      "Bash(__NEW_LINE_78b0c7612e69a05e__ echo \"\")",
+      "Bash(__NEW_LINE_0dbd58ea3983ca15__ echo \"\")",
+      "Bash(__NEW_LINE_0b0ade94245ccb8d__ echo \"\")"
     ]
   },
   "enabledPlugins": {

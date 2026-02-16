@@ -30,14 +30,13 @@ class TestNormalizeAuthorList:
     def test_list_of_strings(self, service: AuthorNormalizationService) -> None:
         """Test normalization with list of author name strings."""
         authors = ["John Doe", "Jane Smith"]
-        result = service.normalize_author_list(authors, salt="test_salt")
+        result = service.normalize_author_list(authors)
 
         assert result is not None
         parsed = json.loads(result)
         assert isinstance(parsed, list)
         assert len(parsed) == 2
-        assert all(isinstance(h, str) for h in parsed)
-        assert all(len(h) == 64 for h in parsed)  # SHA-256 hex digest
+        assert parsed == ["John Doe", "Jane Smith"]
 
     def test_list_of_dicts_with_name(self, service: AuthorNormalizationService) -> None:
         """Test normalization with list of author dicts (PubMed/CrossRef format)."""
@@ -45,49 +44,58 @@ class TestNormalizeAuthorList:
             {"name": "John Doe", "orcid": "0000-0001-2345-6789"},
             {"name": "Jane Smith", "affiliation": ["MIT"]},
         ]
+        result = service.normalize_author_list(authors)
         result = service.normalize_author_list(authors, salt="test_salt")
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 2
+        assert parsed == ["John Doe", "Jane Smith"]
 
     def test_semicolon_delimited_string(
         self, service: AuthorNormalizationService
     ) -> None:
         """Test normalization with semicolon-delimited string (ChEMBL format)."""
         authors = "John Doe; Jane Smith; Bob Johnson"
+        result = service.normalize_author_list(authors)
         result = service.normalize_author_list(authors, salt="test_salt")
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 3
+        assert parsed == ["John Doe", "Jane Smith", "Bob Johnson"]
 
     def test_comma_delimited_string(self, service: AuthorNormalizationService) -> None:
         """Test normalization with comma-delimited string."""
         authors = "John Doe, Jane Smith, Bob Johnson"
-        result = service.normalize_author_list(authors, salt="test_salt")
+        result = service.normalize_author_list(authors)
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 3
+        assert parsed == ["John Doe", "Jane Smith", "Bob Johnson"]
 
     def test_json_string_of_names(self, service: AuthorNormalizationService) -> None:
         """Test normalization with JSON array string."""
         authors = '["John Doe", "Jane Smith"]'
+        result = service.normalize_author_list(authors)
         result = service.normalize_author_list(authors, salt="test_salt")
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 2
+        assert parsed == ["John Doe", "Jane Smith"]
 
     def test_json_string_of_dicts(self, service: AuthorNormalizationService) -> None:
         """Test normalization with JSON array of dicts."""
         authors = '[{"name": "John Doe"}, {"name": "Jane Smith"}]'
+        result = service.normalize_author_list(authors)
         result = service.normalize_author_list(authors, salt="test_salt")
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 2
+        assert parsed == ["John Doe", "Jane Smith"]
 
     def test_empty_inputs_return_none(
         self, service: AuthorNormalizationService

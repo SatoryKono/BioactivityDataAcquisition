@@ -205,7 +205,7 @@ composite:
             - "crossref.publication.subject_keywords"
             - "pubmed.publication.gene_symbols"
             - "crossref.publication.references"
-            - "crossref.publication.license_url"
+            - "crossref.publication.license_url"1
 
         # Output paths for merged data
         output:
