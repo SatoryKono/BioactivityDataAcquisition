@@ -64,16 +64,22 @@ class ColumnRenamer:
         pipeline: str,
         *,
         exclude_join_keys: bool = True,
+        field_aliases: dict[str, str] | None = None,
     ) -> pl.DataFrame:
         """Rename all business columns to qualified format.
 
         Transforms column names from 'field' to '{provider}.{entity}.{field}'.
+        When ``field_aliases`` is provided, provider-specific field names are
+        first normalized to canonical names before qualification.
 
         Args:
             df: DataFrame to rename.
             pipeline: Pipeline name in format 'provider_entity'.
             exclude_join_keys: If True, join keys (doi, pmid, pmc_id)
                 are NOT renamed. Default: True.
+            field_aliases: Optional mapping of provider-specific field names
+                to canonical names (e.g., ``{"h_bond_acceptor_count": "hba_count"}``).
+                Used to normalize field names across providers.
 
         Returns:
             DataFrame with renamed columns.
@@ -88,6 +94,7 @@ class ColumnRenamer:
             columns=df.columns,
             pipeline=pipeline,
             exclude_join_keys=exclude_join_keys,
+            field_aliases=field_aliases,
         )
 
         if not rename_map:
@@ -108,13 +115,21 @@ class ColumnRenamer:
         pipeline: str,
         *,
         exclude_join_keys: bool = True,
+        field_aliases: dict[str, str] | None = None,
     ) -> dict[str, str]:
         """Build rename mapping {old_name: new_name}.
+
+        When ``field_aliases`` is provided, provider-specific field names
+        are normalized to canonical names in the qualified output. For example,
+        with alias ``{"h_bond_acceptor_count": "hba_count"}``, the column
+        ``h_bond_acceptor_count`` becomes ``pubchem.compound.hba_count``.
 
         Args:
             columns: List of column names.
             pipeline: Pipeline name in format 'provider_entity'.
             exclude_join_keys: If True, exclude join keys from mapping.
+            field_aliases: Optional mapping of provider-specific field names
+                to canonical names.
 
         Returns:
             Dictionary mapping old column names to new qualified names.
@@ -141,8 +156,19 @@ class ColumnRenamer:
                 self._logger.debug("Skipping join key column", column=col)
                 continue
 
-            # Build qualified name
-            qualifier = ColumnQualifier(provider, entity, col)
+            # Normalize field name via alias if available
+            canonical_field = col
+            if field_aliases and col in field_aliases:
+                canonical_field = field_aliases[col]
+                self._logger.debug(
+                    "Applying field alias",
+                    original=col,
+                    canonical=canonical_field,
+                    provider=provider,
+                )
+
+            # Build qualified name using (possibly normalized) field name
+            qualifier = ColumnQualifier(provider, entity, canonical_field)
             rename_map[col] = str(qualifier)
 
         return rename_map
