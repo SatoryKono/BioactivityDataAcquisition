@@ -122,17 +122,17 @@ ls tests/architecture/test_*.py
 | **Язык** | Python 3.11+ |
 | **Стиль документации** | Русский, RFC 2119 keywords |
 
-### 1.1. Метрики Кодовой Базы (2026-02-10)
+### 1.1. Метрики Кодовой Базы (2026-02-16)
 
 | Метрика | Значение |
 |---------|----------|
-| **Python-файлов** | ~1,094 (522 src + 552 tests) |
-| **Строк кода** | ~115,351 (src/bioetl/) |
-| **Тестов** | ~7,090 (функций test_) |
-| **ADR** | 33 |
+| **Python-файлов** | ~1,114 (534 src + 580 tests) |
+| **Строк кода** | ~115,656 (src/bioetl/) |
+| **Тестов** | ~11,985 (функций test_) |
+| **ADR** | 34 |
 | **Провайдеров** | 7 |
 | **Pipeline-конфигураций** | 27 |
-| **Конфиг-файлов всего** | 123 (pipelines, dq, filter, sources, composite) |
+| **Конфиг-файлов всего** | 123 (pipelines, quality, filters, sources, schemas) |
 
 ---
 
@@ -391,11 +391,11 @@ async def aclose() -> None                             # Graceful shutdown
 
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
-| **Unit** | `tests/unit/` | ~6,359 | In-memory fakes предпочтительны |
-| **Integration** | `tests/integration/` | ~167 | VCR.py для HTTP |
-| **Architecture** | `tests/architecture/` | ~400 | Проверка слоёв, контракты портов |
+| **Unit** | `tests/unit/` | ~9,279 | In-memory fakes предпочтительны |
+| **Integration** | `tests/integration/` | ~375 | VCR.py для HTTP |
+| **Architecture** | `tests/architecture/` | ~1,173 | Проверка слоёв, контракты портов |
 
-**Всего:** ~7,090 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
+**Всего:** ~11,985 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
 ### Основные команды
 
