@@ -41,6 +41,7 @@ ALLOWED_ROOT_ENTRIES: frozenset[str] = frozenset(
         "pyproject.toml",
         "reports",
         "requirements.txt",
+        "run_extract.bat",
         "scripts",
         "src",
         "tests",
