@@ -301,32 +301,26 @@ class TestPrivateMethods:
         """Create service instance."""
         return AuthorNormalizationService()
 
-    def test_hash_author_name_consistency(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_hash_author_name_consistency(self) -> None:
         """Test that hashing is consistent."""
-        hash1 = service._hash_author_name("John Doe", "salt")
-        hash2 = service._hash_author_name("John Doe", "salt")
+        hash1 = hash_author_name("John Doe", "salt")
+        hash2 = hash_author_name("John Doe", "salt")
 
         assert hash1 == hash2
         assert len(hash1) == 64  # SHA-256 hex digest
 
-    def test_normalize_affiliation_string_pipeline(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_normalize_affiliation_string_pipeline(self) -> None:
         """Test affiliation string normalization pipeline."""
         # HTML + whitespace + unicode
         text = "<b>MIT</b>  &amp;  Harvard  "
-        result = service._normalize_affiliation_string(text)
+        result = normalize_affiliation_string(text)
 
         assert result == "MIT & Harvard"
 
-    def test_deduplicate_case_insensitive_preserves_first(
-        self, service: AuthorNormalizationService
-    ) -> None:
+    def test_deduplicate_case_insensitive_preserves_first(self) -> None:
         """Test that deduplication preserves first occurrence case."""
         strings = ["MIT", "mit", "Harvard", "HARVARD"]
-        result = service._deduplicate_case_insensitive(strings)
+        result = deduplicate_case_insensitive(strings)
 
         assert "MIT" in result  # First occurrence preserved
         assert "mit" not in result
