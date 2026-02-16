@@ -198,7 +198,22 @@ def extract_author_orcids(authorships: list[dict[str, Any]]) -> list[str]:
 
 
 def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
-    """Extract unique affiliations from authorships (sorted)."""
+    """Extract unique affiliations from authorships (sorted).
+
+    .. deprecated:: 2.2.0
+        This function is deprecated and will be removed in version 3.0.0.
+        Use :meth:`~bioetl.domain.services.author_normalization_service.AuthorNormalizationService.normalize_affiliations`
+        instead for unified cross-provider affiliation normalization with HTML cleanup
+        and case-insensitive deduplication.
+    """
+    import warnings
+
+    warnings.warn(
+        "extract_affiliations() is deprecated and will be removed in version 3.0.0. "
+        "Use AuthorNormalizationService.normalize_affiliations() for unified affiliation normalization.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     affiliations: set[str] = set()
     for authorship in authorships:
         institutions = authorship.get("institutions", [])

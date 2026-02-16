@@ -6,6 +6,7 @@ Tests the unified data normalization service for text and publication metadata.
 from __future__ import annotations
 
 import json
+import unicodedata
 
 import pytest
 
@@ -476,3 +477,148 @@ class TestHashPii:
         # Should not raise
         result = service._hash_pii("test", "")
         assert len(result) == 64  # SHA-256 hex digest length
+
+
+class TestNormalizeTitle:
+    """Tests for normalize_title method."""
+
+    @pytest.mark.parametrize(
+        "title,expected",
+        [
+            # Basic normalization
+            ("Simple Title", "Simple Title"),
+            ("  Title with spaces  ", "Title with spaces"),
+            # HTML cleanup
+            ("<b>Bold Title</b>", "Bold Title"),
+            ("<p>Paragraph <i>italic</i></p>", "Paragraph italic"),
+            ("Title with &lt;HTML&gt; entities", "Title with <HTML> entities"),
+            ("Title with &amp; &quot;quotes&quot;", 'Title with & "quotes"'),
+            # Whitespace normalization
+            ("Title  with   multiple    spaces", "Title with multiple spaces"),
+            ("Title\twith\ttabs", "Title with tabs"),
+            ("Title\nwith\nnewlines", "Title with newlines"),
+            ("Title\r\nwith\r\nCRLF", "Title with CRLF"),
+            ("  Title  \n  with  \t  mixed  ", "Title with mixed"),
+            # Control characters
+            ("Title\x00with\x01control", "Titlewithcontrol"),
+            ("Title\x7fwith\x9fmore", "Titlewithmore"),
+            # Empty/None cases
+            (None, None),
+            ("", None),
+            ("   ", None),
+            ("\t\n", None),
+            # Unicode normalization (NFC)
+            ("Café", "Café"),  # Already NFC
+            ("Café", "Café"),  # NFD é (e + combining acute) -> NFC é
+            ("naïve", "naïve"),  # NFD ï -> NFC ï
+            # Complex cases
+            (
+                "<b>Title</b>  with   &lt;tags&gt;\nand\twhitespace",
+                "Title with <tags> and whitespace",
+            ),
+            ("  <p>  Study of α-particles  </p>  ", "Study of α-particles"),
+        ],
+    )
+    def test_normalize_title(self, title: str | None, expected: str | None) -> None:
+        """Test title normalization with various inputs."""
+        service = DefaultDataNormalizationService()
+        result = service.normalize_title(title)
+        assert result == expected
+
+    def test_unicode_nfc_normalization(self) -> None:
+        """Test that unicode is normalized to NFC form."""
+        service = DefaultDataNormalizationService()
+
+        # Create NFD string (decomposed form: e + combining acute accent)
+        nfd_title = unicodedata.normalize("NFD", "Café")
+        # Verify it's actually NFD
+        assert unicodedata.is_normalized("NFD", nfd_title)
+        assert not unicodedata.is_normalized("NFC", nfd_title)
+
+        # Normalize should convert to NFC
+        result = service.normalize_title(nfd_title)
+        assert unicodedata.is_normalized("NFC", result)
+        assert result == "Café"
+
+    def test_idempotency(self) -> None:
+        """Test that normalization is idempotent."""
+        service = DefaultDataNormalizationService()
+        title = "<b>Test</b>  with   spaces"
+
+        normalized_once = service.normalize_title(title)
+        normalized_twice = service.normalize_title(normalized_once)
+
+        assert normalized_once == normalized_twice
+
+
+class TestNormalizeAbstract:
+    """Tests for normalize_abstract method."""
+
+    @pytest.mark.parametrize(
+        "abstract,expected",
+        [
+            # Basic cases
+            ("Simple abstract.", "Simple abstract."),
+            ("  Abstract with spaces  ", "Abstract with spaces"),
+            # HTML cleanup (common in PubMed abstracts)
+            ("<p>Background: Study of proteins.</p>", "Background: Study of proteins."),
+            (
+                "<b>Results:</b> We found <i>p</i> &lt; 0.05",
+                "Results: We found p < 0.05",
+            ),
+            ("Abstract with &alpha;-helix", "Abstract with α-helix"),
+            # Whitespace normalization
+            ("Line 1\nLine 2\nLine 3", "Line 1 Line 2 Line 3"),
+            ("Abstract  with   extra    spaces", "Abstract with extra spaces"),
+            # Control characters (can appear in raw data)
+            ("Abstract\x00with\x01control", "Abstractwithcontrol"),
+            # Empty cases
+            (None, None),
+            ("", None),
+            ("   ", None),
+            # Unicode characters (scientific symbols)
+            (
+                "Study of α-particles and β-radiation",
+                "Study of α-particles and β-radiation",
+            ),
+            ("Temperature ±2°C", "Temperature ±2°C"),
+            # Complex real-world case
+            (
+                "<p><b>Background:</b> Study of &alpha;-helix.\n\n"
+                "<b>Methods:</b>  We analyzed  proteins.</p>",
+                "Background: Study of α-helix. Methods: We analyzed proteins.",
+            ),
+        ],
+    )
+    def test_normalize_abstract(
+        self, abstract: str | None, expected: str | None
+    ) -> None:
+        """Test abstract normalization with various inputs."""
+        service = DefaultDataNormalizationService()
+        result = service.normalize_abstract(abstract)
+        assert result == expected
+
+    def test_preserves_special_characters(self) -> None:
+        """Test that scientific special characters are preserved."""
+        service = DefaultDataNormalizationService()
+
+        abstract = "Study found p<0.05, R²=0.98, ±2σ, α=0.01"
+        result = service.normalize_abstract(abstract)
+
+        # Special characters should be preserved
+        assert "p<0.05" in result
+        assert "R²=0.98" in result
+        assert "±2σ" in result
+        assert "α=0.01" in result
+
+    def test_long_abstract_performance(self) -> None:
+        """Test normalization of long abstracts (performance check)."""
+        service = DefaultDataNormalizationService()
+
+        # Create a long abstract (typical length ~3000 chars)
+        long_abstract = "<p>" + ("Study of proteins. " * 150) + "</p>"
+
+        # Should complete without issues
+        result = service.normalize_abstract(long_abstract)
+        assert result is not None
+        assert len(result) > 2000

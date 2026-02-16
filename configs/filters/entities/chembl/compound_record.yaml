@@ -15,18 +15,18 @@ entity: compound_record
 # Filter by molecule_id from molecule CSV
 # NOTE: ChEMBL API doesn't support filtering by record_id directly
 input_filter:
-  enabled: true
-  source_path: "data/input/molecule.csv"
-  column_name: "molecule_chembl_id"
-  filter_field: "molecule_id"
-  batch_size: 10
+    enabled: true
+    source_path: "data/input/molecule.csv"
+    column_name: "molecule_chembl_id"
+    filter_field: "molecule_id"
+    batch_size: 1
 
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------
 # Criteria for valid compound records
 gold_filters:
-  # Required fields - must have both molecule and document references
-  required_fields:
-    - molecule_id
-    - publication_id
+    # Required fields - must have both molecule and document references
+    required_fields:
+        - molecule_id
+        - publication_id

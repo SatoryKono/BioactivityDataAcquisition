@@ -24,6 +24,7 @@ description: "Extract biological activity records from ChEMBL API"
 primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
+batch_size: 1000
 
 # -----------------------------------------------------------------------------
 # Sink Configuration (ADR-014, ADR-025)

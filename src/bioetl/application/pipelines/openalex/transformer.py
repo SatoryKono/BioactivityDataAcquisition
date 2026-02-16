@@ -149,19 +149,21 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             reconstruct_abstract(abstract_index)
         )
 
-        # Extract and hash authors (PII)
-        # Authors stored as JSON-serialized list for unified format across providers
-        raw_authors = extract_authors(rec.get("authorships", []))
-        hashed_authors = self.hash_pii_list(raw_authors) or []
+        # Extract and normalize authors using unified service (PII)
+        normalizer = self._data_normalizer
+        salt = self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
 
-        # Extract affiliations
+        raw_authors = extract_authors(rec.get("authorships", []))
+        authors_json = normalizer.normalize_author_list(raw_authors, salt=salt)
+
+        # Extract and normalize affiliations using unified service
         authorships = rec.get("authorships")
         raw_affiliations = (
             extract_affiliations(authorships) if isinstance(authorships, list) else None
         )
-        serialized_affiliations = (
-            self.serialize_json(raw_affiliations)
-            if raw_affiliations is not None
+        affiliations_json = (
+            normalizer.normalize_affiliations(raw_affiliations)
+            if raw_affiliations
             else None
         )
 
@@ -222,8 +224,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "mag_id": external_ids.get("mag_id"),
             "title": rec.get("title"),
             "abstract": abstract,
-            "authors": self.serialize_json_list(hashed_authors),
-            "affiliation_list": serialized_affiliations,
+            "authors": authors_json,
+            "affiliation_list": affiliations_json,
             "institution_ids": institution_ids,
             "institution_country_codes": institution_country_codes,
             # ROR IDs (may be empty if not returned by Works API)

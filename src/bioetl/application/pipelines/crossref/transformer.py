@@ -132,10 +132,13 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         issn_by_type = extract_issn_by_type(rec)
         published_date = extract_published_date(rec)
 
-        # Extract and hash PII fields (RULES.md §5.4)
-        # Authors stored as JSON-serialized list for unified format across providers
+        # Extract and normalize authors using unified service (RULES.md §5.4)
+        normalizer = self._data_normalizer
+        salt = self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+
+        # Extract author names and normalize (parse + hash + serialize)
         raw_authors = extract_authors(rec)
-        hashed_authors = self.hash_pii_list(raw_authors) or []
+        authors_json = normalizer.normalize_author_list(raw_authors, salt=salt)
 
         # Extract author ORCID identifiers (not PII - designed for public identification)
         author_orcids = extract_author_orcids(rec)
@@ -146,6 +149,11 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         raw_author_details = extract_author_details(rec)
         hashed_author_details = self._hash_author_details(raw_author_details)
         serialized_author_details = self.serialize_json(hashed_author_details)
+
+        # Extract and normalize affiliations using unified service
+        affiliations_json = normalizer.normalize_affiliations(
+            [aff for author in raw_author_details for aff in author.get("affiliations", [])]
+        )
 
         # Extract bibliographic references (not PII - public citation data)
         raw_references = extract_references(rec)
@@ -173,9 +181,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "pmid": None,
             "pmc_id": None,
             "abstract": None,
-            "affiliation_list": None,
+            "affiliation_list": affiliations_json,
             "title": extract_first_string(rec.get("title", [])),
-            "authors": self.serialize_json_list(hashed_authors),
+            "authors": authors_json,
             **journal_info,
             **page_info,
             **dates,

@@ -92,6 +92,12 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
 def extract_affiliations(publication: dict[str, Any]) -> list[str]:
     """Extract unique affiliations from CrossRef publication.
 
+    .. deprecated:: 2.2.0
+        This function is deprecated and will be removed in version 3.0.0.
+        Use :meth:`~bioetl.domain.services.author_normalization_service.AuthorNormalizationService.normalize_affiliations`
+        instead for unified cross-provider affiliation normalization with HTML cleanup
+        and case-insensitive deduplication.
+
     CrossRef affiliations are often nested inside author objects.
     Format: author -> affiliation -> [{'name': 'University...'}] or string list.
 
@@ -110,6 +116,14 @@ def extract_affiliations(publication: dict[str, Any]) -> list[str]:
         ... })
         ['University A', 'University B']
     """
+    import warnings
+
+    warnings.warn(
+        "extract_affiliations() is deprecated and will be removed in version 3.0.0. "
+        "Use AuthorNormalizationService.normalize_affiliations() for unified affiliation normalization.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     affiliations: set[str] = set()
     for author in publication.get("author", []):
         if not isinstance(author, dict):

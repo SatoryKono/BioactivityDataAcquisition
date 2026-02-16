@@ -123,3 +123,45 @@ class DataNormalizationPort(Protocol):
             Normalized abstract or None if input is None/empty.
         """
         ...
+
+    def normalize_author_list(
+        self,
+        authors: list[str] | list[dict[str, Any]] | str | None,
+        salt: str,
+    ) -> str | None:
+        """Parse, normalize, and hash author names to JSON string.
+
+        Accepts multiple input formats:
+        - list[str]: ["John Doe", "Jane Smith"]
+        - list[dict]: [{"name": "John Doe", "orcid": "..."}]
+        - str: "John Doe; Jane Smith" or JSON array
+        - None
+
+        Returns JSON string of hashed author names or None if empty.
+        """
+        ...
+
+    def normalize_affiliations(
+        self,
+        affiliations: list[str] | list[dict[str, Any]] | None,
+    ) -> str | None:
+        """Extract, normalize, and deduplicate affiliations to JSON string.
+
+        Normalizes, deduplicates (case-insensitive), and sorts alphabetically.
+        Returns JSON string or None if empty.
+        """
+        ...
+
+    def extract_affiliations_from_authors(
+        self,
+        authors: list[dict[str, Any]],
+    ) -> list[str]:
+        """Extract unique affiliations from author objects.
+
+        Args:
+            authors: List of author dicts with 'affiliations' key.
+
+        Returns:
+            List of unique normalized affiliation strings (sorted).
+        """
+        ...

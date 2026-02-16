@@ -198,6 +198,15 @@ composite:
             - "semanticscholar.publication.citation_contexts"
             - "semanticscholar.publication.influential_citation_count"
             - "semanticscholar.publication.pmc_id"
+            - "chembl.publication.src_id"
+            - "pubmed.publication.abstract_structured"
+            - "pubmed.publication.affiliation_structured"
+            - "pubmed.publication.subject_keywords"
+            - "crossref.publication.subject_keywords"
+            - "pubmed.publication.gene_symbols"
+            - "crossref.publication.references"
+            - "crossref.publication.license_url"
+
         # Output paths for merged data
         output:
             silver: data/output/silver/composite/publication

@@ -15,6 +15,7 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_author_h_indices,
     extract_author_orcids,
     extract_author_s2_ids,
+    extract_authors,
     extract_citation_contexts,
     extract_external_ids,
     extract_fields_of_study,
@@ -141,12 +142,28 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         }
 
     def _extract_author_metadata(self, authors_list: Any) -> dict[str, Any]:
-        """Extract author identifiers, h-indices, and affiliations."""
+        """Extract author identifiers, h-indices, and affiliations.
+
+        Uses unified normalization service for authors and affiliations.
+        """
+        normalizer = self._data_normalizer
+        salt = self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+
+        # Extract and normalize author names using unified service
+        raw_authors = extract_authors(authors_list)
+        authors_json = normalizer.normalize_author_list(raw_authors, salt=salt)
+
+        # Extract author metadata (not PII)
         author_s2_ids = extract_author_s2_ids(authors_list)
         author_orcids = extract_author_orcids(authors_list)
         author_h_indices = extract_author_h_indices(authors_list)
+
+        # Extract and normalize affiliations using unified service
         affiliations = extract_affiliations(authors_list)
+        affiliations_json = normalizer.normalize_affiliations(affiliations) if affiliations else None
+
         return {
+            "authors": authors_json,
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
             if author_s2_ids
             else None,
@@ -156,9 +173,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "author_h_indices": self.serialize_json_list(author_h_indices)
             if any(h is not None for h in author_h_indices)
             else None,
-            "affiliation_list": self.serialize_json_list(affiliations)
-            if affiliations
-            else None,
+            "affiliation_list": affiliations_json,
         }
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:

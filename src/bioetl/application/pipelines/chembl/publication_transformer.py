@@ -184,9 +184,12 @@ class PublicationTransformer(BaseChemblTransformer):
             **map_field_groups(record, _PUBLICATION_GROUPS),
         }
 
-        # Strip HTML from abstract field using DataNormalizationService
+        # Normalize text fields using DataNormalizationService
+        # Уровень A: Bronze → Silver базовая нормализация
+        # - HTML-очистка, whitespace, unicode NFC, trim
         normalizer = self._data_normalizer
-        data["abstract"] = normalizer.strip_html_tags(data.get("abstract"))
+        data["title"] = normalizer.normalize_title(data.get("title"))
+        data["abstract"] = normalizer.normalize_abstract(data.get("abstract"))
 
         # Validate DOI using Value Object (returns None for invalid/empty)
         data["publication_pmid"] = data.get("publication_pmid") or record.get("pmid")
@@ -201,16 +204,12 @@ class PublicationTransformer(BaseChemblTransformer):
         )
         data["pmid"] = data.get("publication_pmid")
 
-        # Hash PII field (RULES.md §5.4)
-        # ChEMBL authors is a concatenated string - parse to list, hash, serialize to JSON
-        # Authors stored as JSON-serialized list for unified format across providers
+        # Normalize authors using unified service (RULES.md §5.4)
+        # ChEMBL authors is a concatenated string - parse, hash, serialize to JSON
+        # Uses normalize_author_list() for unified cross-provider handling
         raw_authors = data.get("authors")
-        if raw_authors:
-            author_list = normalizer.parse_authors_to_list(raw_authors)
-            hashed_authors = self.hash_pii_list(author_list) or []
-            data["authors"] = self.serialize_json_list(hashed_authors)
-        else:
-            data["authors"] = None
+        salt = self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
+        data["authors"] = normalizer.normalize_author_list(raw_authors, salt=salt)
 
         # Lookup metadata (direct extraction, no enrichment)
         data["_lookup_method"] = "direct"
