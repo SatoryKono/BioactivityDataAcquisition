@@ -90,7 +90,8 @@
       "Bash(mypy:*)",
       "WebFetch(domain:www.ebi.ac.uk)",
       "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" diff --stat)",
-      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" status)"
+      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" status)",
+      "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" log --oneline -5)"
     ]
   },
   "enabledPlugins": {
