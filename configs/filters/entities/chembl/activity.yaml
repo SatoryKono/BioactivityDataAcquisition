@@ -19,8 +19,8 @@ input_filter:
     column_name: "activity_id"
     filter_field: "activity_id"
 
-batch_size: 1000
-page_size: 1000
+batch_size: 1500
+page_size: 1500
 
 # ---------------------------------------------------------------------------
 # Extraction-Level Filtering (ADR-028 §3)

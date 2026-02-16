@@ -75,11 +75,22 @@
 | `open_access_url` | `str \| None` | Прямая ссылка на PDF |
 | `open_access_status` | `str \| None` | Статус OA: GREEN, GOLD, HYBRID, BRONZE |
 
+### Авторы и идентификаторы
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `author_keys` | `str \| None` | Нормализованные ключи авторов (`Surname_F`), разделённые `\|` |
+| `author_s2_ids` | `str \| None` | JSON-массив Semantic Scholar author IDs |
+| `author_orcids` | `str \| None` | JSON-массив ORCID идентификаторов |
+| `author_h_indices` | `str \| None` | JSON-массив h-index значений |
+| `affiliation_list` | `str \| None` | JSON-массив аффилиаций |
+
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `fields_of_study` | `str` | JSON-массив научных областей |
+| `publication_class` | `str` | Класс публикации: EXP, REV, PEER |
+| `subject_fields` | `str \| None` | JSON-массив научных областей |
 | `publication_types` | `str` | JSON-массив типов публикации |
 
 ### Lookup Metadata
@@ -388,4 +399,4 @@ GET https://api.semanticscholar.org/graph/v1/paper/search?query=...&fields=...&l
 
 ---
 
-*Последнее обновление: 2026-02-15*
+*Последнее обновление: 2026-02-16*
