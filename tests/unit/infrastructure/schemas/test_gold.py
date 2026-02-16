@@ -173,7 +173,7 @@ class TestGoldPublicationSchemaCoreFields:
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             # SemanticScholar excluded: transformer pops raw authors,
-            # uses author_s2_ids/author_ormolecule_ids instead
+            # uses author_s2_ids/author_orcids instead
         ],
     )
     def test_schema_has_authors_field(self, schema_class, name):
