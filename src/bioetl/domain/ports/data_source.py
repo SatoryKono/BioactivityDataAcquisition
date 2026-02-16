@@ -47,6 +47,7 @@ class DataSourcePort(Protocol):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from the data source (async generator).
 
@@ -60,6 +61,9 @@ class DataSourcePort(Protocol):
             query: Optional search query for providers that support it (e.g., PubChem, UniProt).
             filter_ids: Optional set of IDs to filter by (for adapters that support filtering).
             filter_field: Optional field name to filter on (for adapters that support filtering).
+            offset: Optional starting offset for checkpoint-based resume.
+                Adapters with offset pagination (e.g., ChEMBL) start fetching from
+                this position. Others may ignore this parameter.
 
         Yields:
             A dictionary representing a single record from the data source.

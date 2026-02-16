@@ -200,37 +200,26 @@ class BatchExecutor:
         self,
         limit: int | None,
         query: str | None = None,
+        offset: int | None = None,
     ) -> None:
-        """Execute the pipeline with memory-efficient adaptive batch sizing.
-
-        Orchestrates the complete data flow: fetch → transform → write for
-        all records from the data source. Handles graceful shutdown and
-        checkpointing.
+        """Execute the pipeline: fetch → transform → write.
 
         Args:
             limit: Maximum number of records to process. None means no limit.
             query: Optional query string for data source filtering.
+            offset: Starting offset for checkpoint resume (records already processed).
 
         Raises:
             PipelineShutdownError: If shutdown signal received during execution.
-            Exception: Any exception from data source or processing.
-
-        Note:
-            After execution, counters are updated:
-            - records_fetched: Total records retrieved from source
-            - records_bronze: Records written to Bronze layer
-            - records_silver: Records written to Silver layer
-            - records_gold: Records written to Gold layer
-            - records_quarantined: Records sent to quarantine
 
         """
-        # Store query string for metadata enrichment
+        self._resume_offset = offset or 0
         self._query_string = query
 
         root_span = self._tracing.start_execution_span()
 
         try:
-            await self._run_extraction_loop(limit, query)
+            await self._run_extraction_loop(limit, query, offset=offset)
             self._tracing.set_execution_stats(
                 root_span,
                 total_fetched=self.records_fetched,
@@ -250,21 +239,28 @@ class BatchExecutor:
         else:
             self._tracing.end_span(root_span)
 
-    async def _run_extraction_loop(self, limit: int | None, query: str | None) -> None:
+    async def _run_extraction_loop(
+        self,
+        limit: int | None,
+        query: str | None,
+        offset: int | None = None,
+    ) -> None:
         """Run the main extraction and processing loop.
 
         Args:
             limit: Maximum number of records to process.
             query: Optional query string for data source.
+            offset: Starting offset for data source (checkpoint resume).
 
         """
         batch: list[dict[str, Any]] = []
         current_batch_size = self.batch_size
         check_interval = self._get_memory_check_interval()
 
-        async for raw_record in self._extract(limit, query):
+        async for raw_record in self._extract(limit, query, offset=offset):
             if self._shutdown_signal.is_requested:
-                await self._checkpoint_manager.save_checkpoint(self.records_fetched)
+                total = self._resume_offset + self.records_fetched
+                await self._checkpoint_manager.save_checkpoint(total)
                 raise PipelineShutdownError("Shutdown during extraction")
 
             batch.append(raw_record)
@@ -281,7 +277,8 @@ class BatchExecutor:
                 current_batch_size = self._maybe_recover_batch_size(current_batch_size)
 
             if self.records_fetched % self.checkpoint_interval == 0:
-                await self._checkpoint_manager.save_checkpoint(self.records_fetched)
+                total = self._resume_offset + self.records_fetched
+                await self._checkpoint_manager.save_checkpoint(total)
 
         if batch:
             start_index = self.records_fetched - len(batch)
@@ -528,7 +525,8 @@ class BatchExecutor:
     async def _handle_shutdown(self, span: Span | None) -> None:
         """Handle graceful shutdown with checkpoint save."""
         try:
-            await self._checkpoint_manager.save_checkpoint(self.records_fetched)
+            total = self._resume_offset + self.records_fetched
+            await self._checkpoint_manager.save_checkpoint(total)
         except Exception:
             pass  # Ignore errors during emergency checkpoint save
 
@@ -611,13 +609,17 @@ class BatchExecutor:
     # -------------------------------------------------------------------------
 
     async def _extract(
-        self, limit: int | None, query: str | None = None
+        self,
+        limit: int | None,
+        query: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Extract records from data source.
 
         Args:
             limit: Maximum number of records to extract. None means no limit.
             query: Optional query string for server-side filtering.
+            offset: Starting offset for checkpoint resume.
 
         Yields:
             Raw records as dictionaries from the data source.
@@ -627,6 +629,7 @@ class BatchExecutor:
             entity_type=self._config.entity_type,
             limit=limit,
             query=query,
+            offset=offset,
         ):
             yield record
 
