@@ -422,28 +422,24 @@ class TestHashPii:
 
     def test_hash_consistency(self) -> None:
         """Test that same input produces same hash."""
-        service = DefaultDataNormalizationService()
         hash1 = hash_author_name("John Doe", "salt123")
         hash2 = hash_author_name("John Doe", "salt123")
         assert hash1 == hash2
 
     def test_different_salt_different_hash(self) -> None:
         """Test that different salt produces different hash."""
-        service = DefaultDataNormalizationService()
         hash1 = hash_author_name("John Doe", "salt1")
         hash2 = hash_author_name("John Doe", "salt2")
         assert hash1 != hash2
 
     def test_different_value_different_hash(self) -> None:
         """Test that different value produces different hash."""
-        service = DefaultDataNormalizationService()
         hash1 = hash_author_name("John Doe", "salt")
         hash2 = hash_author_name("Jane Smith", "salt")
         assert hash1 != hash2
 
     def test_case_normalization(self) -> None:
         """Test that hashing is case-insensitive per RULES.md §5.4."""
-        service = DefaultDataNormalizationService()
         hash_lower = hash_author_name("john doe", "salt")
         hash_upper = hash_author_name("JOHN DOE", "salt")
         hash_mixed = hash_author_name("John Doe", "salt")
@@ -451,7 +447,6 @@ class TestHashPii:
 
     def test_whitespace_normalization(self) -> None:
         """Test that leading/trailing whitespace is stripped before hashing."""
-        service = DefaultDataNormalizationService()
         hash_clean = hash_author_name("john doe", "salt")
         hash_padded = hash_author_name("  john doe  ", "salt")
         hash_tabs = hash_author_name("\tjohn doe\t", "salt")
@@ -461,7 +456,6 @@ class TestHashPii:
         """Test hash formula matches RULES.md §5.4: sha256(lowercase(value) + SALT)."""
         import hashlib
 
-        service = DefaultDataNormalizationService()
         value = "  John Doe  "
         salt = "test_salt"
 
@@ -474,8 +468,6 @@ class TestHashPii:
 
     def test_empty_salt_allowed(self) -> None:
         """Test that empty salt works (edge case)."""
-        service = DefaultDataNormalizationService()
-        # Should not raise
         result = hash_author_name("test", "")
         assert len(result) == 64  # SHA-256 hex digest length
 
