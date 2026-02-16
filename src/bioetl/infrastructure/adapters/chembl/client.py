@@ -415,7 +415,21 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         seen_ids: set[str] = set()
         pk_field = self._get_api_pk_field(entity_type)
         pk_fields = self._get_api_dedup_fields(entity_type)
+
+        # Detect 1:1 PK filter: filter on entity's own single PK, batch fits in page.
+        # N IDs → at most N records → no limit/offset pagination needed.
+        # For 1:N (e.g. activity by molecule_id) pagination is preserved.
+        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
+        skip_pagination = (
+            len(pk_fields) == 1
+            and pk_fields[0] == api_filter_field
+            and len(id_batch) <= self._page_size
+        )
+
         params = self._build_params(0, entity_type)
+        if skip_pagination:
+            params.pop("limit", None)
+            params.pop("offset", None)
         params.update(self._build_filter_params(entity_type, filter_field, id_batch))
 
         records, has_next = await self._fetch_page(url, params, entity_type)
