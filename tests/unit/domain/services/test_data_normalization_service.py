@@ -131,9 +131,9 @@ class TestNormalizeAuthors:
     """Tests for normalize_authors method."""
 
     def test_normalize_authors_list(self) -> None:
-        """Test hashing list of authors."""
+        """Test normalizing list of authors."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors(["John Doe", "Jane Smith"], salt="test_salt")
+        result = service.normalize_authors(["John Doe", "Jane Smith"])
 
         assert result is not None
         parsed = json.loads(result)
@@ -143,19 +143,19 @@ class TestNormalizeAuthors:
         assert parsed[0] == expected_hash_john
 
     def test_normalize_authors_string(self) -> None:
-        """Test hashing semicolon-separated authors."""
+        """Test normalizing semicolon-separated authors."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors("John Doe; Jane Smith", salt="test_salt")
+        result = service.normalize_authors("John Doe; Jane Smith")
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 2
 
     def test_normalize_authors_json_string(self) -> None:
-        """Test hashing JSON-serialized authors."""
+        """Test normalizing JSON-serialized authors."""
         service = DefaultDataNormalizationService()
         result = service.normalize_authors(
-            '["John Doe", "Jane Smith"]', salt="test_salt"
+            '["John Doe", "Jane Smith"]'
         )
 
         assert result is not None
@@ -165,7 +165,7 @@ class TestNormalizeAuthors:
     def test_normalize_authors_empty(self) -> None:
         """Test empty authors returns None."""
         service = DefaultDataNormalizationService()
-        assert service.normalize_authors(None, salt="test_salt") is None
+        assert service.normalize_authors(None) is None
         assert service.normalize_authors([], salt="test_salt") is None
         assert service.normalize_authors("", salt="test_salt") is None
 

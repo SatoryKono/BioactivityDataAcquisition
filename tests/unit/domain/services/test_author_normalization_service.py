@@ -45,7 +45,6 @@ class TestNormalizeAuthorList:
             {"name": "Jane Smith", "affiliation": ["MIT"]},
         ]
         result = service.normalize_author_list(authors)
-        result = service.normalize_author_list(authors, salt="test_salt")
 
         assert result is not None
         parsed = json.loads(result)
@@ -58,7 +57,6 @@ class TestNormalizeAuthorList:
         """Test normalization with semicolon-delimited string (ChEMBL format)."""
         authors = "John Doe; Jane Smith; Bob Johnson"
         result = service.normalize_author_list(authors)
-        result = service.normalize_author_list(authors, salt="test_salt")
 
         assert result is not None
         parsed = json.loads(result)
@@ -79,7 +77,6 @@ class TestNormalizeAuthorList:
         """Test normalization with JSON array string."""
         authors = '["John Doe", "Jane Smith"]'
         result = service.normalize_author_list(authors)
-        result = service.normalize_author_list(authors, salt="test_salt")
 
         assert result is not None
         parsed = json.loads(result)
@@ -90,7 +87,6 @@ class TestNormalizeAuthorList:
         """Test normalization with JSON array of dicts."""
         authors = '[{"name": "John Doe"}, {"name": "Jane Smith"}]'
         result = service.normalize_author_list(authors)
-        result = service.normalize_author_list(authors, salt="test_salt")
 
         assert result is not None
         parsed = json.loads(result)
@@ -101,44 +97,47 @@ class TestNormalizeAuthorList:
         self, service: AuthorNormalizationService
     ) -> None:
         """Test that empty inputs return None."""
-        assert service.normalize_author_list(None, salt="test") is None
-        assert service.normalize_author_list([], salt="test") is None
-        assert service.normalize_author_list("", salt="test") is None
-        assert service.normalize_author_list("   ", salt="test") is None
+        assert service.normalize_author_list(None) is None
+        assert service.normalize_author_list([]) is None
+        assert service.normalize_author_list("") is None
+        assert service.normalize_author_list("   ") is None
 
     def test_whitespace_normalization(
         self, service: AuthorNormalizationService
     ) -> None:
         """Test that whitespace is normalized in author names."""
         authors = ["  John Doe  ", "Jane Smith"]
-        result = service.normalize_author_list(authors, salt="test_salt")
+        result = service.normalize_author_list(authors)
 
         assert result is not None
-        # Should produce same hash as without extra whitespace
+        # Should produce same result as without extra whitespace
         expected = service.normalize_author_list(
-            ["John Doe", "Jane Smith"], salt="test_salt"
+            ["John Doe", "Jane Smith"]
         )
         assert result == expected
 
-    def test_case_insensitive_hashing(
+    def test_case_preserved(
         self, service: AuthorNormalizationService
     ) -> None:
-        """Test that hashing is case-insensitive per RULES.md §5.4."""
-        result_lower = service.normalize_author_list(["john doe"], salt="test")
-        result_upper = service.normalize_author_list(["JOHN DOE"], salt="test")
-        result_mixed = service.normalize_author_list(["John Doe"], salt="test")
+        """Test that case is preserved in author names."""
+        result_lower = service.normalize_author_list(["john doe"])
+        result_upper = service.normalize_author_list(["JOHN DOE"])
+        result_mixed = service.normalize_author_list(["John Doe"])
 
-        assert result_lower == result_upper == result_mixed
+        # Case is preserved, so results should differ
+        assert result_lower != result_upper
+        assert result_lower != result_mixed
+        assert result_upper != result_mixed
 
-    def test_different_salt_different_hash(
+    def test_consistent_serialization(
         self, service: AuthorNormalizationService
     ) -> None:
-        """Test that different salt produces different hashes."""
+        """Test that same input produces consistent output."""
         authors = ["John Doe"]
-        result1 = service.normalize_author_list(authors, salt="salt1")
-        result2 = service.normalize_author_list(authors, salt="salt2")
+        result1 = service.normalize_author_list(authors)
+        result2 = service.normalize_author_list(authors)
 
-        assert result1 != result2
+        assert result1 == result2
 
 
 class TestNormalizeAffiliations:
