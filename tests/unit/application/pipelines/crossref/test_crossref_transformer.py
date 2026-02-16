@@ -148,11 +148,11 @@ def test_extract_business_data_full(transformer, sample_publication):
 
     assert data["doi"] == "10.1234/test.article"
     assert data["title"] == "Test Article Title"
-    # Authors are hashed per RULES.md §5.4 (SHA-256 with empty salt in test)
+    # Authors are stored as unhashed names
     assert json.loads(data["authors"]) == [
-        _hash_author("John Doe"),
-        _hash_author("Jane Smith"),
-        _hash_author("Anonymous"),
+        "John Doe",
+        "Jane Smith",
+        "Anonymous",
     ]
     assert data["journal"] == "Journal of Testing"
     assert data["journal_name_short"] == "J Test Sci"

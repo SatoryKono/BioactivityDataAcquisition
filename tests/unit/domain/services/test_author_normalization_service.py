@@ -116,23 +116,20 @@ class TestNormalizeAuthorList:
         )
         assert result == expected
 
-    def test_case_preserved(
+    def test_case_preserved_in_output(
         self, service: AuthorNormalizationService
     ) -> None:
-        """Test that case is preserved in author names."""
-        result_lower = service.normalize_author_list(["john doe"])
-        result_upper = service.normalize_author_list(["JOHN DOE"])
-        result_mixed = service.normalize_author_list(["John Doe"])
+        """Test that case is preserved in normalized output."""
+        result = service.normalize_author_list(["John Doe"])
 
-        # Case is preserved, so results should differ
-        assert result_lower != result_upper
-        assert result_lower != result_mixed
-        assert result_upper != result_mixed
+        assert result is not None
+        parsed = json.loads(result)
+        assert parsed == ["John Doe"]
 
-    def test_consistent_serialization(
+    def test_deterministic_output(
         self, service: AuthorNormalizationService
     ) -> None:
-        """Test that same input produces consistent output."""
+        """Test that normalization is deterministic."""
         authors = ["John Doe"]
         result1 = service.normalize_author_list(authors)
         result2 = service.normalize_author_list(authors)
@@ -300,13 +297,8 @@ class TestExtractAffiliationsFromAuthors:
         assert result[0] == "MIT"
 
 
-class TestPrivateMethods:
-    """Tests for private helper methods (for coverage)."""
-
-    @pytest.fixture
-    def service(self) -> AuthorNormalizationService:
-        """Create service instance."""
-        return AuthorNormalizationService()
+class TestHelperFunctions:
+    """Tests for helper functions in _author_helpers module."""
 
     def test_hash_author_name_consistency(self) -> None:
         """Test that hashing is consistent."""

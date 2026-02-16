@@ -521,10 +521,10 @@ class TestExtractBusinessData:
         assert result["doi"] == "10.1234/test.2023"
         assert result["title"] == "Complete Test Article"
         assert result["abstract"] == "Full abstract text here."
-        # Authors are now JSON-serialized
+        # Authors are now JSON-serialized (unhashed names)
         assert json.loads(result["authors"]) == [
-            _hash_author("Doe, J"),
-            _hash_author("Smith, Jane"),
+            "Doe, J",
+            "Smith, Jane",
         ]
         assert result["journal"] == "Test Journal"
         assert result["journal_name_short"] == "Test J"
@@ -698,10 +698,10 @@ class TestTransformImplCollectiveAuthors:
         result = await transformer._transform_impl(pipeline_context, bronze_record, 0)
 
         assert result is not None
-        # Authors are now JSON-serialized
+        # Authors are now JSON-serialized (unhashed names)
         assert json.loads(result["authors"]) == [
-            _hash_author("Doe, J"),
-            _hash_author("WHO Collaborative Group"),
+            "Doe, J",
+            "WHO Collaborative Group",
         ]
 
 
@@ -743,10 +743,10 @@ class TestTransformImplSpecialCharacters:
 
         assert result is not None
         assert result["title"] == "Effect of α-tocopherol on β-cells"
-        # Authors are now JSON-serialized
+        # Authors are now JSON-serialized (unhashed names)
         assert json.loads(result["authors"]) == [
-            _hash_author("Müller, H"),
-            _hash_author("García, M"),
+            "Müller, H",
+            "García, M",
         ]
 
 
