@@ -129,20 +129,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         record: BronzeRecord,
         index: int,
     ) -> None:
-        """Validate raw XML and parse it before extraction.
-
-        Parses the XML upfront and caches the root element. This allows
-        ET.ParseError to be caught and converted to ValueError, which
-        BaseTransformer.transform() handles gracefully.
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Raw Bronze record containing _raw_xml field.
-            index: Sequential index of the record (unused).
+        """Validate raw XML and parse it, caching the root element.
 
         Raises:
             ValueError: If _raw_xml is missing, empty, or malformed XML.
-
         """
         raw_xml = record.get("_raw_xml")
         if not raw_xml or not isinstance(raw_xml, str):
@@ -160,23 +150,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             raise ValueError(f"XML parse error: {e}") from e
 
     def _is_valid_date_format(self, date_str: str | None) -> bool:
-        """Validate that date string matches expected ISO format.
-
-        Accepts:
-        - YYYY-MM-DD (full date with valid month 01-12 and day 01-31)
-        - YYYY-MM (partial with valid month 01-12)
-        - YYYY (year only)
-
-        This validation ensures that invalid dates like "2024-13-99", "n/a",
-        or malformed strings don't propagate to _compute_publication_date,
-        which would produce inconsistent results.
-
-        Args:
-            date_str: Date string to validate.
-
-        Returns:
-            True if date format is valid, False otherwise.
-        """
+        """Validate that date string matches YYYY, YYYY-MM, or YYYY-MM-DD format."""
         if not date_str:
             return False
         return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
