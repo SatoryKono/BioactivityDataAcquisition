@@ -672,7 +672,7 @@ class TestClassSize:
         # Common adapter base classes
         "BaseTitleFallbackHandler": 320,  # 314 lines - Base fallback handler with provider_prefix + default event properties
         # PubMed transformer with comprehensive field extraction
-        "PubMedPublicationTransformer": 700,  # 691 lines - PubMed XML extraction with date/identifier validation + author extractor + unified field names + publication type classification
+        "PubMedPublicationTransformer": 700,  # 686 lines - PubMed XML extraction with date/identifier validation + author extractor + unified field names + publication type classification
         # PubChem adapter fetch strategies
         "PubChemFetchStrategies": 330,  # PubChem fetch strategies with SMILES, CID, InChIKey support
         # UniProt extraction helper classes
