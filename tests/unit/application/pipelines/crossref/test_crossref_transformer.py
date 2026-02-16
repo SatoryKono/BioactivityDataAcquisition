@@ -615,11 +615,12 @@ def test_extract_business_data_date_year_only(transformer):
 async def test_transform_includes_base_schema_fields_as_none(
     transformer, pipeline_context
 ):
-    """Test that base schema fields are included with None values.
+    """Test that base schema fields exist in the Silver record.
 
-    CrossRef doesn't provide abstract, affiliation_list, pmid, or pmc_id,
-    but these fields must exist in the Silver record with None values
-    to satisfy PublicationBaseSchema inheritance requirements for Pandera validation.
+    CrossRef doesn't provide abstract, pmid, or pmc_id (set to None).
+    affiliation_list is extracted from author affiliation data when present.
+    These fields must exist to satisfy PublicationBaseSchema inheritance
+    requirements for Pandera validation.
     """
     publication = {
         "DOI": "10.1234/test",
@@ -636,11 +637,13 @@ async def test_transform_includes_base_schema_fields_as_none(
     result = await transformer.transform(pipeline_context, publication, index=0)
 
     assert result is not None
-    # Fields from base schema must exist with None values
+    # Fields from base schema must exist
     assert "abstract" in result
     assert result["abstract"] is None
     assert "affiliation_list" in result
-    assert result["affiliation_list"] is None
+    # Affiliations are extracted from author data when present
+    assert result["affiliation_list"] is not None
+    assert "University A" in result["affiliation_list"]
     assert "pmid" in result
     assert result["pmid"] is None
     assert "pmc_id" in result
