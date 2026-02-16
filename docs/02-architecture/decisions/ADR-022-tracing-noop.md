@@ -32,19 +32,44 @@ This overhead provides no benefit for single-process local execution.
 
 ## The Decision
 
+### TracingPort = OpenTelemetry Facade (deliberate choice)
+
+`TracingPort` is intentionally modeled after the **OpenTelemetry Tracing API**.
+`get_tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
+(`start_as_current_span`, span context manager, `set_attribute`, `record_exception`).
+
+**Why OTel as the port surface?**
+
+1. **Industry standard** — OTel is the CNCF-graduated vendor-neutral tracing API.
+   Adopting its surface avoids inventing a bespoke abstraction.
+2. **Zero-cost migration** — switching from `NoOpTracing` to `OpenTelemetryTracer`
+   requires only a composition wiring change; application code stays the same.
+3. **Ecosystem compatibility** — any OTel-compatible backend (Jaeger, Zipkin, Tempo,
+   OTLP Collector) can be plugged in without modifying the port contract.
+4. **`Any` return type** — `get_tracer()` returns `Any` to avoid a hard dependency
+   on the `opentelemetry` package in the domain layer while preserving the OTel
+   calling convention in all implementations.
+
+### Default: NoOpTracing (Null Object Pattern)
+
 Use **Null Object Pattern** (`NoOpTracing`) as the default tracing implementation.
 Request correlation is provided via `run_id` in structured logs.
 
 ### Implementation
 
 ```python
-# Default: NoOpTracing (zero overhead) — lives in domain/ports/noop.py
+# Default: NoOpTracing (zero overhead, mirrors OTel API) — lives in domain/ports/noop.py
 from bioetl.domain.ports import NoOpTracing
 tracing = NoOpTracing()
 
-# Extension point: OpenTelemetryTracer (when distributed deployment needed)
+# Extension point: real OTel adapter (when distributed deployment needed)
 from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 tracing = OpenTelemetryTracer(service_name="bioetl")
+
+# Both implementations expose the same OTel calling convention:
+otel_tracer = tracing.get_tracer("bioetl.pipeline")
+with otel_tracer.start_as_current_span("my_operation", attributes={...}):
+    ...  # works identically with NoOp or real OTel
 ```
 
 ### Correlation via run_id (RULES.md §4.5)
@@ -111,9 +136,9 @@ Local-Only Deployment principle:
 
 | File | Purpose |
 |------|---------|
+| `domain/ports/observability.py` | TracingPort protocol (OTel facade contract) |
 | `domain/ports/noop.py` | NoOpTracing, _NoOpOtelTracer, _NoOpSpan (default) |
-| `domain/ports/observability.py` | TracingPort protocol |
-| `infrastructure/observability/tracing.py` | OpenTelemetryTracer + NoOpTracing re-export |
+| `infrastructure/observability/tracing.py` | OpenTelemetryTracer (real OTel adapter) + NoOpTracing re-export |
 | `composition/bootstrap/runtime/observability.py` | DI wiring (`bootstrap_tracer_port`) |
 
 ## Consequences

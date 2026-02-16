@@ -1,25 +1,29 @@
-"""Tracing infrastructure — Null Object Pattern implementation.
+"""OpenTelemetry tracer adapter — real TracingPort implementation.
+
+TracingPort is deliberately shaped as an OpenTelemetry Tracing API facade
+(see ADR-017, ADR-022).  This module provides ``OpenTelemetryTracer`` — the
+concrete adapter that delegates to the OTel SDK.
 
 Design Decision (ADR-010, ADR-022):
-    Local-Only Deployment does not require distributed tracing.
-    NoOpTracing (default) provides:
-    - Compliance with TracingPort interface
-    - Extension point for future distributed deployment
-    - Zero overhead in current configuration
+    Local-Only Deployment does not require distributed tracing by default.
+    ``NoOpTracing`` (in ``domain/ports/noop.py``) is the zero-overhead default.
+    ``OpenTelemetryTracer`` activates when ``tracing_enabled=True`` and
+    provides real span collection via OTLP or Console exporter.
+
+    Both implementations expose the same OTel-compatible API surface
+    (``get_tracer → start_as_current_span → Span``), so switching between
+    them requires no application code changes — only composition wiring.
 
 Correlation:
     Instead of trace_id, run_id is used (RULES.md §4.5).
     All structured logs include run_id for request correlation.
 
 Extension Point:
-    To enable tracing, use OpenTelemetryTracer (provided below),
-    register in composition/factories/observability.py.
+    To enable tracing, set ``BIOETL_OBSERVABILITY__TRACING_ENABLED=true``.
+    The composition layer (``bootstrap_tracer_port``) will return
+    ``OpenTelemetryTracer`` instead of ``NoOpTracing``.
 
-Available Implementations:
-    - NoOpTracing: Null Object Pattern, default for Local-Only
-    - OpenTelemetryTracer: Real OTel implementation (requires opentelemetry deps)
-
-Implements TracingPort.
+Implements TracingPort (OTel facade).
 """
 
 from __future__ import annotations
@@ -54,7 +58,14 @@ except ImportError:
 
 
 class OpenTelemetryTracer:
-    """Real OpenTelemetry tracer implementation."""
+    """Concrete TracingPort adapter backed by the OpenTelemetry SDK.
+
+    This is the "real" half of the OTel facade: ``get_tracer()`` delegates
+    to ``opentelemetry.trace.get_tracer()``, returning a genuine OTel
+    ``Tracer`` that creates exportable spans.  The port contract (TracingPort)
+    is intentionally aligned with the OTel API, so this adapter is a thin
+    wrapper rather than a translation layer.
+    """
 
     def __init__(self, service_name: str = "bioetl"):
         """Initialize OpenTelemetry tracer.

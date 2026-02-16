@@ -37,7 +37,12 @@ class MetricsPort(Protocol):
 
 @runtime_checkable
 class TracingPort(Protocol):
-    """Port for distributed tracing (OpenTelemetry)."""
+    """Port for distributed tracing — an OpenTelemetry Tracing API facade.
+
+    Deliberately modeled after the OTel API: get_tracer() returns an
+    OTel-compatible Tracer (start_as_current_span, Span context manager).
+    This is an intentional design choice — see ADR-022 for the rationale.
+    """
     def get_tracer(self, name: str) -> Any: ...
     def close(self) -> None: ...
 ```
@@ -90,7 +95,7 @@ live in `domain/ports/noop.py` (no I/O dependencies), while `NoOpLogger` lives i
 |------|---------------------|----------|
 | `LoggerPort` | `NoOpLogger` | `infrastructure/observability/noop_logger.py` |
 | `MetricsPort` | `NoOpMetrics` | `domain/ports/noop.py` |
-| `TracingPort` | `NoOpTracing` | `domain/ports/noop.py` |
+| `TracingPort` | `NoOpTracing` | `domain/ports/noop.py` (mirrors OTel API surface) |
 
 **Key Features of NoOp Implementations:**
 - Null Object Pattern: silently ignore all operations
@@ -177,7 +182,7 @@ src/bioetl/infrastructure/observability/
     logging_config.py       # Centralized structlog configuration
     metrics.py              # Prometheus metric definitions
     prometheus_metrics.py   # PrometheusMetrics adapter
-    tracing.py              # OpenTelemetryTracer + NoOpTracing re-export
+    tracing.py              # OpenTelemetryTracer (real OTel facade adapter)
     noop_logger.py          # NoOpLogger (adapter-level fallback)
     server.py               # Prometheus HTTP server
     anomaly/                # DataQualityMonitor
