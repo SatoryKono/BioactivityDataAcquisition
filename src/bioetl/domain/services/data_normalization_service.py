@@ -10,6 +10,7 @@ import unicodedata
 from dataclasses import dataclass, field
 from html import unescape
 from typing import TYPE_CHECKING, Any
+
 from bioetl.domain.services._date_helpers import (
     format_date_parts as _format_date_parts,
 )

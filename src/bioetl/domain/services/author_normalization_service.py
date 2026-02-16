@@ -71,9 +71,7 @@ class AuthorNormalizationService:
         if not aff_strings:
             return None
         normalized = [
-            c
-            for aff in aff_strings
-            if (c := normalize_affiliation_string(aff))
+            c for aff in aff_strings if (c := normalize_affiliation_string(aff))
         ]
         if not normalized:
             return None
@@ -96,9 +94,7 @@ class AuthorNormalizationService:
         if not all_affiliations:
             return []
         normalized = [
-            c
-            for aff in all_affiliations
-            if (c := normalize_affiliation_string(aff))
+            c for aff in all_affiliations if (c := normalize_affiliation_string(aff))
         ]
         unique = deduplicate_case_insensitive(normalized)
         return sorted(unique)
