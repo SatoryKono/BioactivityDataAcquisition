@@ -5,14 +5,11 @@ Pure domain service (no I/O) per RULES.md §1.1.
 
 from __future__ import annotations
 
-import hashlib
 import re
 import unicodedata
 from dataclasses import dataclass, field
 from html import unescape
 from typing import TYPE_CHECKING, Any
-
-from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 from bioetl.domain.services._date_helpers import (
     format_date_parts as _format_date_parts,
 )
@@ -183,67 +180,15 @@ class DefaultDataNormalizationService:
         return _format_date_parts(date_parts)
 
     def normalize_title(self, title: str | None) -> str | None:
-        """Normalize publication title: HTML cleanup, whitespace, unicode NFC, trim.
-
-        Normalization steps:
-        1. Strip HTML tags and decode entities
-        2. Remove control characters (0x00-0x1F, 0x7F-0x9F)
-        3. Normalize unicode to NFC form
-        4. Collapse multiple whitespace to single space
-        5. Trim leading/trailing whitespace
-
-        Args:
-            title: Raw title string (may contain HTML tags, extra whitespace).
-
-        Returns:
-            Normalized title or None if input is None/empty after normalization.
-
-        Examples:
-            >>> service.normalize_title("<b>Hello</b>  World")
-            'Hello World'
-            >>> service.normalize_title("Café")  # é normalized to NFC
-            'Café'
-        """
+        """Normalize title: strip HTML, control chars, NFC unicode, collapse whitespace."""
         return self._normalize_text_field(title)
 
     def normalize_abstract(self, abstract: str | None) -> str | None:
-        """Normalize publication abstract: HTML cleanup, whitespace, unicode NFC, trim.
-
-        Uses same normalization pipeline as normalize_title():
-        1. Strip HTML tags and decode entities
-        2. Remove control characters
-        3. Normalize unicode to NFC form
-        4. Collapse multiple whitespace to single space
-        5. Trim leading/trailing whitespace
-
-        Args:
-            abstract: Raw abstract string (may contain HTML tags, extra whitespace).
-
-        Returns:
-            Normalized abstract or None if input is None/empty after normalization.
-
-        Examples:
-            >>> service.normalize_abstract("<p>Study of α-particles</p>")
-            'Study of α-particles'
-        """
+        """Normalize abstract: strip HTML, control chars, NFC unicode, collapse whitespace."""
         return self._normalize_text_field(abstract)
 
     def _normalize_text_field(self, text: str | None) -> str | None:
-        """Internal method: normalize text field through complete pipeline.
-
-        Pipeline steps (order matters):
-        1. Strip HTML tags and decode HTML entities
-        2. Remove control characters (0x00-0x1F, 0x7F-0x9F)
-        3. Normalize unicode to NFC (canonical composition)
-        4. Collapse multiple whitespace (spaces, tabs, newlines) to single space
-        5. Trim leading/trailing whitespace
-
-        Args:
-            text: Raw text to normalize.
-
-        Returns:
-            Normalized text or None if input is None/empty after normalization.
-        """
+        """Normalize text: HTML → control chars → NFC → whitespace → trim."""
         if not text:
             return None
 
