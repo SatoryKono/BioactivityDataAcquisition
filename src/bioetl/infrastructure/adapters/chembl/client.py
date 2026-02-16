@@ -257,17 +257,27 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             self._handle_error(e)
 
     async def _page_iterator(
-        self, entity_type: str, limit: int | None = None
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        start_offset: int = 0,
     ) -> AsyncIterator[list[dict[str, Any]]]:
-        """Yield pages of records."""
+        """Yield pages of records.
+
+        Args:
+            entity_type: Type of entity to fetch.
+            limit: Maximum number of records to yield.
+            start_offset: API offset to start fetching from (for checkpoint resume).
+        """
         url = self._mapper.get_resource_url(entity_type)
-        offset = 0
+        offset = start_offset
+        records_yielded = 0
         while True:
             params = self._build_params(offset, entity_type)
             # Optimize limit: if we have a global limit and it's smaller than effective batch size
             # Skip for entities that don't support pagination
             if limit is not None and "limit" in params:
-                remaining = limit - offset
+                remaining = limit - records_yielded
                 if remaining > 0:
                     params["limit"] = min(params["limit"], remaining)
                 elif remaining <= 0:
@@ -277,6 +287,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             if not records:
                 break
             yield records
+            records_yielded += len(records)
             if not has_next:
                 break
             # Fix: increment by actual records fetched to handle dynamic limits correctly
@@ -708,6 +719,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         self,
         entity_type: str,
         limit: int | None,
+        offset: int = 0,
     ) -> AsyncIterator[dict[str, Any]]:
         """Perform standard paginated fetch with client-side deduplication.
 
@@ -715,6 +727,11 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         due to unstable sorting or data changes between requests.
         This method deduplicates records using composite key for entities
         with multiple primary key fields, or single field otherwise.
+
+        Args:
+            entity_type: Type of entity to fetch.
+            limit: Maximum number of records to fetch.
+            offset: API offset to start from (for checkpoint resume).
         """
         total_fetched = 0
         seen_keys: set[str] = set()
@@ -722,7 +739,9 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         pk_fields = self._get_api_dedup_fields(entity_type)
         use_composite = len(pk_fields) > 1
 
-        async for records in self._page_iterator(entity_type, limit):
+        async for records in self._page_iterator(
+            entity_type, limit, start_offset=offset
+        ):
             for record in records:
                 if use_composite:
                     composite_key = self._compute_composite_key(record, pk_fields)
@@ -762,6 +781,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from ChEMBL.
 
@@ -773,6 +793,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             query: Unused for ChEMBL
             filter_ids: List of IDs to filter by (for deterministic batching)
             filter_field: Field name to filter on
+            offset: API offset to start from (for checkpoint resume)
 
         Yields:
             Dictionary records from ChEMBL API
@@ -784,7 +805,9 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             ):
                 yield record
         else:
-            async for record in self._fetch_standard(entity_type, limit):
+            async for record in self._fetch_standard(
+                entity_type, limit, offset=offset or 0
+            ):
                 yield record
 
     async def fetch_filtered(

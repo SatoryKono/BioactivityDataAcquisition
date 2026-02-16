@@ -141,11 +141,17 @@ class PipelineRunner:
                         runtime=self._runtime,
                     )
 
-                    # Execute pipeline
-                    await self._checkpoint_manager.load_checkpoint()
+                    # Execute pipeline (with checkpoint-based offset resume)
+                    checkpoint_meta = await self._checkpoint_manager.load_checkpoint()
+                    offset = (
+                        checkpoint_meta.get("records_processed")
+                        if checkpoint_meta
+                        else None
+                    )
                     await self._executor.execute(
                         limit=self._runtime.limit,
                         query=self._runtime.query,
+                        offset=offset,
                     )
 
                     # Post-run: DQ checks, DQ reports, and VACUUM

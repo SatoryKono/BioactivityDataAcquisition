@@ -144,6 +144,7 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from PubChem. Supports SMILES/CID filtering and name search."""
         if filter_ids and filter_field:

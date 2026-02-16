@@ -327,6 +327,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records with optional filtering from internal CSV config."""
         _ = filter_ids, filter_field  # External params ignored, use internal config
@@ -339,7 +340,7 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
                 yield record
         else:
             async for record in self._data_source.fetch(
-                entity_type=entity_type, limit=limit, query=query
+                entity_type=entity_type, limit=limit, query=query, offset=offset
             ):
                 yield record
 

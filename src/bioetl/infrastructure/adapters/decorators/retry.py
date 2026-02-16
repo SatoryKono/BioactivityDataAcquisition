@@ -193,6 +193,7 @@ class RetryingDataSourceDecorator:
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records with retry logic.
 
@@ -205,6 +206,7 @@ class RetryingDataSourceDecorator:
             query: Optional search query.
             filter_ids: Optional IDs to filter by.
             filter_field: Optional field to filter on.
+            offset: Optional starting offset for checkpoint resume.
 
         Yields:
             Dictionary records from the data source.
@@ -226,6 +228,7 @@ class RetryingDataSourceDecorator:
                     query=query,
                     filter_ids=filter_ids,
                     filter_field=filter_field,
+                    offset=offset,
                 ):
                     yield record
 
