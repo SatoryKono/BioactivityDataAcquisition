@@ -134,9 +134,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         # Extract and normalize authors using unified service (RULES.md §5.4)
         normalizer = self._data_normalizer
-        salt = (
-            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
-        )
 
         # Extract author names and normalize (parse + serialize)
         raw_authors = extract_authors(rec)
