@@ -1,10 +1,12 @@
 """Pandera schema for ChEMBL Molecule entity.
 
 Aligned with RULES.md v5.0 and ChEMBL 34 schema.
+RF-NORM-06: Nullable int strategy — pd.Int64Dtype for physicochemical counts.
 """
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -184,28 +186,28 @@ class MoleculeSchema(ETLRecordSchema):
     molecular_weight: Series[float] | None = pa.Field(
         nullable=True, description="Full molecular weight including salts."
     )
-    hba_count: Series[int] | None = pa.Field(
+    hba_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, ge=0, description="Hydrogen bond acceptors count."
     )
-    hbd_count: Series[int] | None = pa.Field(
+    hbd_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, ge=0, description="Hydrogen bond donors count."
     )
     polar_surface_area: Series[float] | None = pa.Field(
         nullable=True, ge=0, description="Polar surface area (PSA/tPSA)."
     )
-    rotatable_bond_count: Series[int] | None = pa.Field(
+    rotatable_bond_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, ge=0, description="Rotatable bonds count."
     )
-    ro5_violation_count: Series[int] | None = pa.Field(
+    ro5_violation_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=0,
         le=4,
         description="Number of Lipinski rule-of-5 violations.",
     )
-    heavy_atom_count: Series[int] | None = pa.Field(
+    heavy_atom_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, ge=0, description="Heavy (non-hydrogen) atoms count."
     )
-    aromatic_ring_count: Series[int] | None = pa.Field(
+    aromatic_ring_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, ge=0, description="Aromatic rings count."
     )
     qed_score: Series[float] | None = pa.Field(
