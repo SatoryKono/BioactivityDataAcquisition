@@ -156,7 +156,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         )
 
         raw_authors = extract_authors(rec.get("authorships", []))
-        authors_json = normalizer.normalize_author_list(raw_authors, salt=salt)
+        authors_json = normalizer.normalize_author_list(raw_authors)
 
         # Extract and normalize affiliations using unified service
         authorships = rec.get("authorships")

@@ -102,10 +102,10 @@ class DefaultDataNormalizationService:
         return year, True
 
     def normalize_authors(
-        self, authors: list[str] | str | None, salt: str
+        self, authors: list[str] | str | None
     ) -> str | None:
-        """Parse, hash, and serialize author names. Returns JSON string or None."""
-        return self._author_service.normalize_author_list(authors, salt)
+        """Parse and serialize author names. Returns JSON string or None."""
+        return self._author_service.normalize_author_list(authors)
 
     def strip_html_tags(self, text: str | None) -> str | None:
         """Remove HTML tags, decode entities, normalize whitespace."""
@@ -214,20 +214,18 @@ class DefaultDataNormalizationService:
     def normalize_author_list(
         self,
         authors: list[str] | list[dict[str, Any]] | str | None,
-        salt: str,
     ) -> str | None:
-        """Parse, normalize, and hash author names to JSON string.
+        """Parse and normalize author names to JSON string.
 
         Delegates to AuthorNormalizationService.
 
         Args:
             authors: Author data in any supported format (list, dict, string, JSON).
-            salt: Salt for PII hashing per RULES.md §5.4.
 
         Returns:
-            JSON string of hashed author names or None if empty.
+            JSON string of normalized author names or None if empty.
         """
-        return self._author_service.normalize_author_list(authors, salt)
+        return self._author_service.normalize_author_list(authors)
 
     def normalize_affiliations(
         self,

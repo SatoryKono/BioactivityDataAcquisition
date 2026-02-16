@@ -245,11 +245,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         # Normalize author names using unified service
         normalizer = self._data_normalizer
-        salt = (
-            self._pii_hasher.get_salt() if hasattr(self._pii_hasher, "get_salt") else ""
-        )
 
-        # Extract author names for hashing
+        # Extract author names
         author_names = (
             [AuthorExtractor().normalize(raw_author_data)] if raw_author_data else []
         )
@@ -257,8 +254,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         if author_names and isinstance(author_names[0], list):
             author_names = author_names[0]
 
-        # Use unified normalization (parse + hash + serialize in one call)
-        authors_json = normalizer.normalize_author_list(author_names, salt=salt)
+        # Use unified normalization (parse + serialize in one call)
+        authors_json = normalizer.normalize_author_list(author_names)
 
         authors_with_affiliations = self._build_authors_with_affiliations(
             raw_author_data
