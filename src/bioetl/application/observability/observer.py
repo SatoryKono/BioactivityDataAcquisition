@@ -153,7 +153,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             try:
                 self.span.set_attribute("bioetl.status", status)
                 self.span.set_attribute("bioetl.duration_ms", duration * 1000)
-                if status == "failed":
+                if status == "failed" and exc_val is not None:
                     self.span.record_exception(exc_val)
                     self.span.set_attribute("error", True)
                 self.span.__exit__(exc_type, exc_val, exc_tb)

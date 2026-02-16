@@ -247,12 +247,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         normalizer = self._data_normalizer
 
         # Extract author names
-        author_names = (
-            [AuthorExtractor().normalize(raw_author_data)] if raw_author_data else []
+        author_names: list[str] = (
+            AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
         )
-        # Flatten if normalize returns list
-        if author_names and isinstance(author_names[0], list):
-            author_names = author_names[0]
 
         # Use unified normalization (parse + serialize in one call)
         authors_json = normalizer.normalize_author_list(author_names)
@@ -264,7 +261,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Extract affiliations using unified service
         affiliation_strings = normalizer.extract_affiliations_from_authors(
-            raw_author_data
+            cast("list[dict[str, Any]]", raw_author_data)
         )
 
         # Normalize affiliations using unified service (already deduplicated & sorted)

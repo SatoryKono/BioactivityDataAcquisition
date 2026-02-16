@@ -531,6 +531,7 @@ class TestPipelineRunnerRun:
         mock_executor.execute.assert_called_once_with(
             limit=None,
             query=None,
+            offset=None,
         )
 
     @pytest.mark.asyncio
