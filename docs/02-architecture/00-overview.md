@@ -1,6 +1,6 @@
 # Architecture Overview
 
-*Synced with RULES.md v5.18 (2026-02-09)*
+*Synced with RULES.md v5.19 (2026-02-16)*
 
 ## Quick Navigation
 
@@ -37,7 +37,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 See [decisions/README.md](decisions/README.md) for full index with categories.
 
-33 ADRs documenting key architectural decisions:
+34 ADRs documenting key architectural decisions:
 
 | ADR                                                               | Topic                                    | RULES.md Reference |
 | ----------------------------------------------------------------- | ---------------------------------------- | ------------------ |

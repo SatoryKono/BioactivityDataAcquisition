@@ -918,9 +918,9 @@ from __future__ import annotations
 > **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
 > и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
 > они не содержат type annotations, требующих отложенной эвалюации.
-<!-- Updated: was 468/499 (93.8%), now 481/517 (93.0%); was 31, now 36 (audit 2026-02-14) -->
-> Текущее состояние: 481 из 517 файлов (93.0%) содержат импорт;
-> 36 файлов без импорта — 32 `__init__.py` и 4 файла данных/утилит.
+<!-- Updated: was 481/517 (93.0%), now 497/534 (93.1%); was 36, now 37 (audit 2026-02-16) -->
+> Текущее состояние: 497 из 534 файлов (93.1%) содержат импорт;
+> 37 файлов без импорта — 33 `__init__.py` и 4 файла данных/утилит.
 
 #### 4.4.2. Type Hints
 
@@ -1529,9 +1529,11 @@ fields:
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization           | Accepted           | 2026-01-26 |
 | [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | Accepted           | 2026-01-28 |
 | [ADR-033](02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Accepted           | 2026-02    |
+| [ADR-034](02-architecture/decisions/ADR-034-schema-domain-pairs.md)              | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
 
 ## История Изменений (Changelog)
 
+- **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.
 - **5.18** (2026-02-15): Statistics Update. Обновлены числовые данные по результатам аудита 2026-02-14: файлов кода (499→517), future annotations (468→481), Int→Float coercion occurrences (~34→~88), publication field groups (94→106), LOC для ChemblAdapter (517→975), GoldWriter (593→946), PreflightService (527→818).
 - **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key_source` и `filter_field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
 - **5.16** (2026-02-02): ADR Registry Update + Doc Sync. Добавлен ADR-032 в реестр (Приложение F): Unified HTTP Client Pattern. Синхронизация метрик с кодовой базой.
