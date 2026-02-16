@@ -86,7 +86,7 @@
     ],
     "coerce": false,
     "description": "Aromatic rings count.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -229,7 +229,7 @@
     ],
     "coerce": false,
     "description": "Hydrogen bond acceptors count.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -243,7 +243,7 @@
     ],
     "coerce": false,
     "description": "Hydrogen bond donors count.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -257,7 +257,7 @@
     ],
     "coerce": false,
     "description": "Heavy (non-hydrogen) atoms count.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -606,7 +606,7 @@
     ],
     "coerce": false,
     "description": "Number of Lipinski rule-of-5 violations.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
@@ -620,7 +620,7 @@
     ],
     "coerce": false,
     "description": "Rotatable bonds count.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
