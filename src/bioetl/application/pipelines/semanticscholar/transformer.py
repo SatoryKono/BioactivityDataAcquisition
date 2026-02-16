@@ -151,6 +151,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         # Extract and normalize author names using unified service
         raw_authors = extract_authors(authors_list)
         authors_json = normalizer.normalize_author_list(raw_authors)
+        author_keys = normalizer.normalize_author_keys(raw_authors)
 
         # Extract author metadata (not PII)
         author_s2_ids = extract_author_s2_ids(authors_list)
@@ -165,6 +166,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
         return {
             "authors": authors_json,
+            "author_keys": author_keys,
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
             if author_s2_ids
             else None,

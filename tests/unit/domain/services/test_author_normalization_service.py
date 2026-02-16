@@ -13,6 +13,7 @@ from bioetl.domain.services._author_helpers import (
     deduplicate_case_insensitive,
     hash_author_name,
     normalize_affiliation_string,
+    normalize_to_surname_initial,
 )
 from bioetl.domain.services.author_normalization_service import (
     AuthorNormalizationService,
@@ -321,3 +322,129 @@ class TestHelperFunctions:
         assert "mit" not in result
         assert "Harvard" in result
         assert "HARVARD" not in result
+
+
+class TestNormalizeToSurnameInitial:
+    """Tests for normalize_to_surname_initial helper."""
+
+    @pytest.mark.parametrize(
+        ("name", "expected"),
+        [
+            # Standard FirstName LastName (CrossRef, OpenAlex, S2)
+            ("John Doe", "Doe_J"),
+            ("Jane Smith", "Smith_J"),
+            ("Yanyong Kang", "Kang_Y"),
+            # FirstName Middle LastName
+            ("John A. Doe", "Doe_J"),
+            ("John Allen Doe", "Doe_J"),
+            # LastName, FirstName (PubMed inverted)
+            ("Doe, John", "Doe_J"),
+            ("Smith, Jane", "Smith_J"),
+            # LastName, Initial (PubMed)
+            ("Doe, J", "Doe_J"),
+            ("Smith, A", "Smith_A"),
+            # LastName, Initials (PubMed)
+            ("Doe, JA", "Doe_J"),
+            ("Smith, AB", "Smith_A"),
+            # LastName Initials (ChEMBL)
+            ("Smith J", "Smith_J"),
+            ("Smith JA", "Smith_J"),
+            ("Zhou X", "Zhou_X"),
+            # Initial. LastName
+            ("X. Zhou", "Zhou_X"),
+            ("J. Doe", "Doe_J"),
+            # Multi-word surname with comma
+            ("Van der Berg, Jan", "Van der Berg_J"),
+            # Single name (organization or mononym)
+            ("Madonna", "Madonna"),
+            ("WHO", "WHO"),
+            # Organization-like multi-word (no initials detected)
+            ("World Health Organization", "Organization_W"),
+        ],
+        ids=[
+            "first_last",
+            "first_last_2",
+            "east_asian",
+            "first_middle_last",
+            "first_middle_last_full",
+            "last_comma_first",
+            "last_comma_first_2",
+            "last_comma_initial",
+            "last_comma_initial_2",
+            "last_comma_initials",
+            "last_comma_initials_2",
+            "chembl_single_initial",
+            "chembl_double_initials",
+            "chembl_single_letter",
+            "initial_dot_last",
+            "initial_dot_last_2",
+            "multi_word_surname",
+            "mononym",
+            "acronym",
+            "org_multi_word",
+        ],
+    )
+    def test_name_formats(self, name: str, expected: str) -> None:
+        """Test various name format conversions."""
+        assert normalize_to_surname_initial(name) == expected
+
+    @pytest.mark.parametrize(
+        "name",
+        [None, "", "   "],
+        ids=["none", "empty", "whitespace"],
+    )
+    def test_empty_returns_none(self, name: str | None) -> None:
+        """Test that empty/None inputs return None."""
+        assert normalize_to_surname_initial(name) is None  # type: ignore[arg-type]
+
+    def test_leading_trailing_whitespace_stripped(self) -> None:
+        """Test that whitespace around name is stripped."""
+        assert normalize_to_surname_initial("  John Doe  ") == "Doe_J"
+
+    def test_comma_only_surname(self) -> None:
+        """Test surname with comma but no first name."""
+        assert normalize_to_surname_initial("Doe,") == "Doe"
+
+
+class TestNormalizeAuthorKeys:
+    """Tests for normalize_author_keys method on AuthorNormalizationService."""
+
+    @pytest.fixture
+    def service(self) -> AuthorNormalizationService:
+        return AuthorNormalizationService()
+
+    def test_list_of_strings(self, service: AuthorNormalizationService) -> None:
+        """Test pipe-delimited output from list of name strings."""
+        result = service.normalize_author_keys(["John Doe", "Jane Smith"])
+        assert result == "Doe_J|Smith_J"
+
+    def test_list_of_dicts(self, service: AuthorNormalizationService) -> None:
+        """Test with list of author dicts (name key)."""
+        authors = [{"name": "John Doe"}, {"name": "Jane Smith"}]
+        result = service.normalize_author_keys(authors)
+        assert result == "Doe_J|Smith_J"
+
+    def test_semicolon_delimited_chembl(
+        self, service: AuthorNormalizationService
+    ) -> None:
+        """Test with ChEMBL semicolon-delimited string."""
+        result = service.normalize_author_keys("Smith J; Doe JA; Zhou X")
+        assert result == "Smith_J|Doe_J|Zhou_X"
+
+    def test_empty_returns_none(self, service: AuthorNormalizationService) -> None:
+        """Test that empty inputs return None."""
+        assert service.normalize_author_keys(None) is None
+        assert service.normalize_author_keys([]) is None
+        assert service.normalize_author_keys("") is None
+
+    def test_single_author(self, service: AuthorNormalizationService) -> None:
+        """Test with single author (no pipe delimiter)."""
+        result = service.normalize_author_keys(["John Doe"])
+        assert result == "Doe_J"
+
+    def test_mixed_formats(self, service: AuthorNormalizationService) -> None:
+        """Test with mixed name formats in one list."""
+        result = service.normalize_author_keys(
+            ["John Doe", "Smith, J", "X. Zhou", "WHO"]
+        )
+        assert result == "Doe_J|Smith_J|Zhou_X|WHO"

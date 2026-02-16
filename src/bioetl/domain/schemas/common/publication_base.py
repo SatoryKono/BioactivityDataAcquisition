@@ -77,6 +77,10 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     )
+    author_keys: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Pipe-delimited short author keys (Surname_F format)",
+    )
 
     # === Publication metadata (common to all providers) ===
     journal: Series[str] = pa.Field(

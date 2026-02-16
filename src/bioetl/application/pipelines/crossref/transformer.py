@@ -138,6 +138,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         # Extract author names and normalize (parse + serialize)
         raw_authors = extract_authors(rec)
         authors_json = normalizer.normalize_author_list(raw_authors)
+        author_keys = normalizer.normalize_author_keys(raw_authors)
 
         # Extract author ORCID identifiers (not PII - designed for public identification)
         author_orcids = extract_author_orcids(rec)
@@ -187,6 +188,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "affiliation_list": affiliations_json,
             "title": extract_first_string(rec.get("title", [])),
             "authors": authors_json,
+            "author_keys": author_keys,
             **journal_info,
             **page_info,
             **dates,

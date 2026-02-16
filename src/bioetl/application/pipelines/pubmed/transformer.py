@@ -256,6 +256,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Use unified normalization (parse + serialize in one call)
         authors_json = normalizer.normalize_author_list(author_names)
+        author_keys = normalizer.normalize_author_keys(author_names)
 
         authors_with_affiliations = self._build_authors_with_affiliations(
             raw_author_data
@@ -284,6 +285,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         return {
             "authors": authors_json,
+            "author_keys": author_keys,
             "authors_with_affiliations": (
                 self.serialize_json_list(authors_with_affiliations)
                 if authors_with_affiliations
