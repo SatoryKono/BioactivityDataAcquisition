@@ -22,8 +22,8 @@ manual edits in 3+ locations with no cross-validation.
 ## Decision
 
 Create `configs/enums/chembl.yaml` as the **single source of truth** (SSOT) for all
-ChEMBL DB enum values. Modify `domain/schemas/constants.py` to load values from this
-YAML file at module import time using `@functools.cache`.
+ChEMBL DB enum values. Keep `domain/schemas/constants.py` as pure Python (no I/O) to
+preserve domain purity (ARCH-002). Enforce sync between YAML and Python via tests.
 
 ### Structure
 
@@ -32,23 +32,17 @@ configs/enums/
 └── chembl.yaml    # All ChEMBL DB enum values, versioned
 ```
 
-### Loading mechanism
+### Sync mechanism
 
-```python
-# domain/schemas/constants.py
-@functools.cache
-def _load_chembl_enums() -> dict[str, Any]:
-    with _ENUMS_YAML_PATH.open() as f:
-        return yaml.safe_load(f)
+`domain/schemas/constants.py` contains pure Python frozensets (no file I/O).
+`tests/unit/domain/schemas/test_constants_yaml.py` verifies that every Python
+constant matches the corresponding YAML value exactly.
 
-STANDARD_RELATIONS: frozenset[str] = _fs("activity", "standard_relations")
-```
-
-**Key properties:**
-- Public API (`STANDARD_RELATIONS`, `ASSAY_TYPES`, etc.) is unchanged
-- All consumers import from `constants.py` as before — zero migration cost
-- `@functools.cache` ensures one file read per process
-- YAML file is versioned (`version: "chembl_35"`) for audit trail
+**Workflow for ChEMBL version update:**
+1. Update `configs/enums/chembl.yaml` (bump version, add/remove values)
+2. Run tests — sync tests fail, showing exactly which constants diverge
+3. Update `constants.py` to match
+4. Tests pass
 
 ### What is NOT externalized
 
@@ -59,14 +53,19 @@ STANDARD_RELATIONS: frozenset[str] = _fs("activity", "standard_relations")
 
 ## Alternatives Considered
 
-### A. Keep hardcoded Python frozensets (status quo)
+### A. Runtime YAML loading in constants.py
+
+Load YAML at module import time via `@functools.cache`. Rejected because:
+- Violates ARCH-002 (domain purity — no I/O in domain layer)
+- `open()` in domain detected by architecture tests
+
+### B. Keep hardcoded Python only (status quo)
 
 Rejected because:
-- Duplication across Python and YAML configs
-- No SSOT for ChEMBL DB version upgrades
-- Manual sync required between constants.py and filter/DQ configs
+- No declared SSOT for ChEMBL DB version upgrades
+- Duplication across Python and YAML configs with no validation
 
-### B. Lazy runtime loading (deferred validation)
+### C. Lazy runtime loading (deferred validation)
 
 Would require rewriting all Pandera schemas to use factory functions instead of
 class-level `pa.Field(isin=...)`. Rejected because:
@@ -74,7 +73,7 @@ class-level `pa.Field(isin=...)`. Rejected because:
 - Lose type safety at class definition time
 - Pandera class-level validators are idiomatic
 
-### C. Build-time codegen (YAML → Python)
+### D. Build-time codegen (YAML -> Python)
 
 Generate `constants.py` from YAML via template. Rejected because:
 - Adds build step complexity
@@ -85,18 +84,17 @@ Generate `constants.py` from YAML via template. Rejected because:
 
 ### Positive
 
-- **SSOT**: One file to update when ChEMBL DB version changes
+- **SSOT**: `configs/enums/chembl.yaml` is the declared authoritative source
+- **Domain purity preserved**: `constants.py` has no I/O, passes ARCH-002 checks
 - **Zero migration cost**: Public API unchanged, all consumers work as-is
 - **Versionable**: `version: "chembl_35"` enables audit and rollback
 - **Consistent**: Follows `configs/` hierarchy pattern (ADR-027, ADR-028)
-- **Cross-validation**: Tests can verify filter/DQ configs reference valid enum values
+- **Enforced sync**: Tests catch drift between YAML and Python immediately
 
 ### Negative
 
-- **File I/O at import**: One `yaml.safe_load()` call when `constants` module loads
-  (~1ms, cached). Acceptable: `domain/schemas/` already depends on Pandera (external lib)
-- **Path coupling**: `constants.py` uses relative path to `configs/enums/chembl.yaml`.
-  Mitigated by test `test_chembl_yaml_exists`
+- **Two-step update**: Must update both YAML and Python when values change
+  (mitigated by tests that pinpoint exact mismatches)
 
 ### Neutral
 
@@ -108,15 +106,15 @@ Generate `constants.py` from YAML via template. Rejected because:
 
 | Requirement | Status | Notes |
 |-------------|--------|-------|
+| Domain purity (ARCH-002) | PASS | No I/O in `constants.py` |
 | Public API unchanged | PASS | All `__all__` exports identical |
 | Types preserved | PASS | `frozenset[str]`, `tuple[float, ...]` |
-| Cached loading | PASS | `@functools.cache` — one read per process |
-| Tests | PASS | `tests/unit/domain/schemas/test_constants_yaml.py` |
+| Sync enforcement | PASS | 20 sync tests in `test_constants_yaml.py` |
 
 ## References
 
 - ADR-027: DQ Rules Externalization
 - ADR-028: Filter Rules Externalization
 - `configs/enums/chembl.yaml` — SSOT file
-- `src/bioetl/domain/schemas/constants.py` — loader
-- `tests/unit/domain/schemas/test_constants_yaml.py` — tests
+- `src/bioetl/domain/schemas/constants.py` — pure Python constants
+- `tests/unit/domain/schemas/test_constants_yaml.py` — sync tests
