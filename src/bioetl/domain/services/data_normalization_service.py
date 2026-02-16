@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import unicodedata
 from dataclasses import dataclass, field
 from html import unescape
 from typing import TYPE_CHECKING, Any
@@ -19,6 +20,7 @@ if TYPE_CHECKING:
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
+_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 _DATE_FULL_FMT = "{0:04d}-{1:02d}-{2:02d}"
 _DOI_URL_PREFIXES = ("https://doi.org/", "http://doi.org/", "doi:")
 
@@ -278,3 +280,86 @@ class DefaultDataNormalizationService:
         if len(parts) == 2:
             return _DATE_FULL_FMT.format(year, parts[1], monthrange(year, parts[1])[1])
         return _DATE_FULL_FMT.format(year, 12, 31)
+
+    def normalize_title(self, title: str | None) -> str | None:
+        """Normalize publication title: HTML cleanup, whitespace, unicode NFC, trim.
+
+        Normalization steps:
+        1. Strip HTML tags and decode entities
+        2. Remove control characters (0x00-0x1F, 0x7F-0x9F)
+        3. Normalize unicode to NFC form
+        4. Collapse multiple whitespace to single space
+        5. Trim leading/trailing whitespace
+
+        Args:
+            title: Raw title string (may contain HTML tags, extra whitespace).
+
+        Returns:
+            Normalized title or None if input is None/empty after normalization.
+
+        Examples:
+            >>> service.normalize_title("<b>Hello</b>  World")
+            'Hello World'
+            >>> service.normalize_title("Café")  # é normalized to NFC
+            'Café'
+        """
+        return self._normalize_text_field(title)
+
+    def normalize_abstract(self, abstract: str | None) -> str | None:
+        """Normalize publication abstract: HTML cleanup, whitespace, unicode NFC, trim.
+
+        Uses same normalization pipeline as normalize_title():
+        1. Strip HTML tags and decode entities
+        2. Remove control characters
+        3. Normalize unicode to NFC form
+        4. Collapse multiple whitespace to single space
+        5. Trim leading/trailing whitespace
+
+        Args:
+            abstract: Raw abstract string (may contain HTML tags, extra whitespace).
+
+        Returns:
+            Normalized abstract or None if input is None/empty after normalization.
+
+        Examples:
+            >>> service.normalize_abstract("<p>Study of α-particles</p>")
+            'Study of α-particles'
+        """
+        return self._normalize_text_field(abstract)
+
+    def _normalize_text_field(self, text: str | None) -> str | None:
+        """Internal method: normalize text field through complete pipeline.
+
+        Pipeline steps (order matters):
+        1. Strip HTML tags and decode HTML entities
+        2. Remove control characters (0x00-0x1F, 0x7F-0x9F)
+        3. Normalize unicode to NFC (canonical composition)
+        4. Collapse multiple whitespace (spaces, tabs, newlines) to single space
+        5. Trim leading/trailing whitespace
+
+        Args:
+            text: Raw text to normalize.
+
+        Returns:
+            Normalized text or None if input is None/empty after normalization.
+        """
+        if not text:
+            return None
+
+        # Step 1: Strip HTML tags and decode entities
+        normalized = _HTML_TAG_PATTERN.sub("", text)
+        normalized = unescape(normalized)
+
+        # Step 2: Remove control characters
+        normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
+
+        # Step 3: Unicode NFC normalization (canonical composition)
+        normalized = unicodedata.normalize("NFC", normalized)
+
+        # Step 4: Collapse multiple whitespace to single space
+        normalized = _WHITESPACE_PATTERN.sub(" ", normalized)
+
+        # Step 5: Trim leading/trailing whitespace
+        normalized = normalized.strip()
+
+        return normalized if normalized else None
