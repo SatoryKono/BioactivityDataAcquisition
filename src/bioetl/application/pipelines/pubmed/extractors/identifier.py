@@ -6,72 +6,19 @@ Supports complete ArticleIdList and ELocationID extraction for cross-referencing
 
 from __future__ import annotations
 
-from typing import TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
 from bioetl.application.pipelines.pubmed.extractors.identifier_helper import (
     IdentifierExtractionHelper,
 )
-
-
-class ArticleIdentifiers(TypedDict):
-    """Identifier data container (raw or normalized)."""
-
-    doi: str | None
-    pmc_id: str | None
-
-
-class CombinedIdentifiers(TypedDict):
-    """Container for multiple identifiers extracted in a single pass."""
-
-    doi: str | None
-    pmc_id: str | None
-    pii: str | None
-    mid: str | None
-    publisher_id: str | None
-
-
-# Aliases for clarity in extractor API
-RawIdentifiers = ArticleIdentifiers
-NormalizedIdentifiers = ArticleIdentifiers
-
-
-class AllArticleIds(TypedDict, total=False):
-    """Complete set of article identifiers from PubMed.
-
-    ArticleIdList can contain various ID types:
-    - pubmed: PubMed ID
-    - doi: Digital Object Identifier
-    - pmc: PubMed Central ID
-    - pii: Publisher Item Identifier
-    - mid: Manuscript ID (PMC submission)
-    - publisher-id: Publisher-specific identifier
-    - pmcid: Alternative PMC ID format
-    - medline: MEDLINE unique ID
-    """
-
-    pubmed: str | None
-    doi: str | None
-    pmc: str | None
-    pii: str | None
-    mid: str | None
-    publisher_id: str | None
-    pmcid: str | None
-    medline: str | None
-    other_ids: dict[str, str]  # Any other ID types encountered
-
-
-class ELocationIds(TypedDict, total=False):
-    """Electronic location identifiers from ELocationID elements.
-
-    ELocationID provides additional identifiers like:
-    - doi: Digital Object Identifier
-    - pii: Publisher Item Identifier
-    """
-
-    doi: str | None
-    pii: str | None
+from bioetl.application.pipelines.pubmed.extractors.identifier_types import (
+    AllArticleIds,
+    CombinedIdentifiers,
+    ELocationIds,
+    NormalizedIdentifiers,
+    RawIdentifiers,
+)
 
 
 class IdentifierExtractor(BaseFieldExtractor):
@@ -116,32 +63,11 @@ class IdentifierExtractor(BaseFieldExtractor):
 
     def _extract_doi_raw(self, root: Element) -> str | None:
         """Extract raw DOI from ArticleIdList or ELocationID."""
-        article = root.find(".//Article")
-        if article is None:
-            return None
-
-        # Try ELocationID first
-        for eloc in article.findall(".//ELocationID"):
-            if eloc.get("EIdType") == "doi" and eloc.text:
-                return eloc.text
-
-        # Fallback to ArticleIdList
-        article_id_list = root.find(".//ArticleIdList")
-        if article_id_list is not None:
-            for aid in article_id_list.findall("ArticleId"):
-                if aid.get("IdType") == "doi" and aid.text:
-                    return aid.text
-
-        return None
+        return IdentifierExtractionHelper.extract_doi_raw(root)
 
     def _extract_pmc_raw(self, root: Element) -> str | None:
         """Extract raw PMC ID from ArticleIdList."""
-        article_id_list = root.find(".//ArticleIdList")
-        if article_id_list is not None:
-            for aid in article_id_list.findall("ArticleId"):
-                if aid.get("IdType") == "pmc" and aid.text:
-                    return aid.text
-        return None
+        return IdentifierExtractionHelper.extract_pmc_raw(root)
 
     def _normalize_text(self, text: str | None) -> str | None:
         """Normalize text by stripping whitespace."""
@@ -291,22 +217,8 @@ class IdentifierExtractor(BaseFieldExtractor):
             PII string or None.
         """
         extractor = cls()
-
-        # Try ELocationID first
-        article = root.find(".//Article")
-        if article is not None:
-            for eloc in article.findall(".//ELocationID"):
-                if eloc.get("EIdType") == "pii" and eloc.text:
-                    return extractor._normalize_text(eloc.text)
-
-        # Fallback to ArticleIdList
-        article_id_list = root.find(".//ArticleIdList")
-        if article_id_list is not None:
-            for aid in article_id_list.findall("ArticleId"):
-                if aid.get("IdType") == "pii" and aid.text:
-                    return extractor._normalize_text(aid.text)
-
-        return None
+        raw = IdentifierExtractionHelper.extract_pii_raw(root)
+        return extractor._normalize_text(raw)
 
     @classmethod
     def extract_mid(cls, root: Element) -> str | None:
@@ -319,12 +231,8 @@ class IdentifierExtractor(BaseFieldExtractor):
             MID string or None.
         """
         extractor = cls()
-        article_id_list = root.find(".//ArticleIdList")
-        if article_id_list is not None:
-            for aid in article_id_list.findall("ArticleId"):
-                if aid.get("IdType") == "mid" and aid.text:
-                    return extractor._normalize_text(aid.text)
-        return None
+        raw = IdentifierExtractionHelper.extract_mid_raw(root)
+        return extractor._normalize_text(raw)
 
     @classmethod
     def extract_publisher_id(cls, root: Element) -> str | None:
@@ -337,12 +245,8 @@ class IdentifierExtractor(BaseFieldExtractor):
             Publisher ID string or None.
         """
         extractor = cls()
-        article_id_list = root.find(".//ArticleIdList")
-        if article_id_list is not None:
-            for aid in article_id_list.findall("ArticleId"):
-                if aid.get("IdType") == "publisher-id" and aid.text:
-                    return extractor._normalize_text(aid.text)
-        return None
+        raw = IdentifierExtractionHelper.extract_publisher_id_raw(root)
+        return extractor._normalize_text(raw)
 
     @classmethod
     def extract_all_identifiers(cls, root: Element) -> CombinedIdentifiers:
