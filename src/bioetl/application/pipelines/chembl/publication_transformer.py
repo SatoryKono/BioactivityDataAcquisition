@@ -38,7 +38,7 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 # Declarative field groups for ChemblPublication entity
@@ -166,7 +166,7 @@ class PublicationTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract ChemblPublication business data from bronze record.
 

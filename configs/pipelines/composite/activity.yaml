@@ -134,7 +134,6 @@ composite:
           - assay_id
           - target_id
           - publication_id
-          - record_id
         provider_order: [chembl]
 
       # === Standardized activity values ===

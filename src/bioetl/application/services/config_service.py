@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class PipelineSettingsProtocol(Protocol):
+class PipelineSettingsPort(Protocol):
     """Protocol for pipeline-specific settings."""
 
     batch_size: int
@@ -27,7 +27,7 @@ class PipelineSettingsProtocol(Protocol):
 
 
 @runtime_checkable
-class SettingsProtocol(Protocol):
+class SettingsPort(Protocol):
     """Protocol for application settings."""
 
     env: str
@@ -36,7 +36,7 @@ class SettingsProtocol(Protocol):
     test_mode: bool
     metrics_enabled: bool
     metrics_port: int
-    pipeline: PipelineSettingsProtocol
+    pipeline: PipelineSettingsPort
 
     @property
     def bronze_path(self) -> str | Path:
@@ -69,7 +69,7 @@ class SettingsProtocol(Protocol):
 
 
 @runtime_checkable
-class PipelineYamlConfigProtocol(Protocol):
+class PipelineYamlConfigPort(Protocol):
     """Protocol for pipeline YAML configuration."""
 
     provider: str
@@ -83,7 +83,7 @@ class PipelineYamlConfigProtocol(Protocol):
 
 
 @runtime_checkable
-class PipelineRegistryProtocol(Protocol):
+class PipelineRegistryPort(Protocol):
     """Protocol for pipeline registry."""
 
     def list_pipelines(self) -> list[str]:
@@ -91,34 +91,34 @@ class PipelineRegistryProtocol(Protocol):
         ...
 
 
-class SettingsLoaderProtocol(Protocol):
+class SettingsLoaderPort(Protocol):
     """Protocol for loading application settings."""
 
-    def __call__(self) -> SettingsProtocol:
+    def __call__(self) -> SettingsPort:
         """Load settings."""
         ...
 
 
-class PipelineConfigLoaderProtocol(Protocol):
+class PipelineConfigLoaderPort(Protocol):
     """Protocol for loading pipeline YAML configuration."""
 
-    def __call__(self, pipeline_name: str) -> PipelineYamlConfigProtocol:
+    def __call__(self, pipeline_name: str) -> PipelineYamlConfigPort:
         """Load pipeline configuration."""
         ...
 
 
-class DomainConfigMapperProtocol(Protocol):
+class DomainConfigMapperPort(Protocol):
     """Protocol for mapping YAML configuration to domain configuration."""
 
-    def __call__(self, yaml_config: PipelineYamlConfigProtocol) -> PipelineConfig:
+    def __call__(self, yaml_config: PipelineYamlConfigPort) -> PipelineConfig:
         """Map YAML config to domain config."""
         ...
 
 
-class RegistryAccessorProtocol(Protocol):
+class RegistryAccessorPort(Protocol):
     """Protocol for accessing the pipeline registry."""
 
-    def __call__(self) -> PipelineRegistryProtocol:
+    def __call__(self) -> PipelineRegistryPort:
         """Access registry."""
         ...
 
@@ -199,10 +199,10 @@ class ConfigService:
     """
 
     logger: LoggerPort
-    _settings_loader: SettingsLoaderProtocol
-    _pipeline_config_loader: PipelineConfigLoaderProtocol
-    _domain_config_mapper: DomainConfigMapperProtocol
-    _registry_accessor: RegistryAccessorProtocol
+    _settings_loader: SettingsLoaderPort
+    _pipeline_config_loader: PipelineConfigLoaderPort
+    _domain_config_mapper: DomainConfigMapperPort
+    _registry_accessor: RegistryAccessorPort
 
     def get_settings(self) -> SettingsInfo:
         """Get application settings.

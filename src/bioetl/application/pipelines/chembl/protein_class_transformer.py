@@ -21,7 +21,7 @@ from bioetl.domain.entities import ProteinClassification
 from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 # Declarative field groups for ProteinClassification entity
@@ -65,7 +65,7 @@ class ProteinClassTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract ProteinClassification business data from bronze record.
 

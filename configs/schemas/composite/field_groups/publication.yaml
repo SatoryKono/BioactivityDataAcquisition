@@ -273,6 +273,14 @@ groups:
         columns:
           - pubmed.publication.author_count
 
+      - base_name: author_keys
+        columns:
+          - chembl.publication.author_keys
+          - crossref.publication.author_keys
+          - openalex.publication.author_keys
+          - pubmed.publication.author_keys
+          - semanticscholar.publication.author_keys
+
       - base_name: author_h_indices
         columns:
           - semanticscholar.publication.author_h_indices

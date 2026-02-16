@@ -208,6 +208,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("pmid", pa.string()),
         ("abstract", pa.string()),
         ("affiliation_list", pa.string()),  # Not available from ChEMBL (None values)
+        ("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         ("author_orcids", pa.string()),  # Not available from ChEMBL (None values)
         ("publication_type", pa.string()),
         ("publication_type_unified", pa.string()),
@@ -565,6 +566,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("affiliation_list", pa.string()),
         ("affiliation_structured", pa.string()),
         ("author_count", pa.int64()),
+        ("author_keys", pa.string()),
         ("authors", pa.string()),
         ("authors_with_affiliations", pa.string()),
         ("chemical_count", pa.int64()),
@@ -628,6 +630,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("affiliation_list", pa.string()),
         ("alternative_id", pa.list_(pa.string())),
         ("author_details", pa.string()),
+        ("author_keys", pa.string()),
         ("author_orcids", pa.string()),
         ("authors", pa.string()),
         ("citations_made", pa.int64()),
@@ -678,6 +681,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("_original_id", pa.string()),
         ("abstract", pa.string()),
         ("affiliation_list", pa.string()),
+        ("author_keys", pa.string()),
         ("author_openalex_ids", pa.string()),
         ("author_orcids", pa.string()),
         ("authors", pa.string()),
@@ -732,6 +736,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("abstract", pa.string()),
         ("affiliation_list", pa.string()),
         ("author_h_indices", pa.string()),
+        ("author_keys", pa.string()),
         ("author_orcids", pa.string()),
         ("author_s2_ids", pa.string()),
         ("citation_contexts", pa.string()),

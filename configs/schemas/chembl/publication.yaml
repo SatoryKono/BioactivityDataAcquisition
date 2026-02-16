@@ -30,6 +30,7 @@ column_groups:
   - name: authors
     fields:
       - authors
+      - author_keys
 
   - name: journal
     fields:

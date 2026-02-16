@@ -22,7 +22,7 @@ from bioetl.domain.entities import DocumentTerm
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 class PublicationTermTransformer(BaseChemblTransformer):
@@ -121,7 +121,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract term data from the record.
 

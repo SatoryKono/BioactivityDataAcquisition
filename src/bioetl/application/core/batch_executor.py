@@ -28,6 +28,8 @@ from bioetl.domain.types import BatchID
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+    from opentelemetry.trace import Span
+
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
@@ -523,7 +525,7 @@ class BatchExecutor:
             self._tracing.end_span(span, e)
             raise
 
-    async def _handle_shutdown(self, span: Any | None) -> None:
+    async def _handle_shutdown(self, span: Span | None) -> None:
         """Handle graceful shutdown with checkpoint save."""
         try:
             await self._checkpoint_manager.save_checkpoint(self.records_fetched)

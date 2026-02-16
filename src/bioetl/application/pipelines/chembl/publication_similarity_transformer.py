@@ -19,7 +19,7 @@ from bioetl.domain.entities import DocumentSimilarity
 from bioetl.domain.transformations import safe_float, safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 class PublicationSimilarityTransformer(BaseChemblTransformer):
@@ -39,7 +39,7 @@ class PublicationSimilarityTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract PublicationSimilarity business data from bronze record.
 

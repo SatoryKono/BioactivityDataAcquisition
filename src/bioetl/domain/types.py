@@ -42,6 +42,9 @@ in the domain layer. At runtime, this is a pyarrow.Schema object.
 BronzeRecord: TypeAlias = dict[str, Any]
 """Untyped dictionary representing a raw record from the source."""
 
+PrimaryId: TypeAlias = str | int
+"""Primary identifier extracted from a Bronze record (e.g., ChEMBL ID string or numeric ID)."""
+
 
 class SilverRecord(TypedDict, total=False):
     """Normalized record for Silver layer."""

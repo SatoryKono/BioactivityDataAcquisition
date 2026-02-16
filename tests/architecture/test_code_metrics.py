@@ -34,7 +34,7 @@ class TestFileSizeLimits:
         "checkpoint.py": 545,  # 544 LOC - CompositeCheckpointState with immutable state transitions + CompositeCheckpointManager
         "base.py": 600,  # Base classes may be larger
         # Infrastructure layer exemptions
-        "config.py": 1110,  # 1102 LOC - domain/composite/config.py with MergeConfig.preserve_all_sources + ColumnGroupConfig + DataSchemaConfig/LayerColumnConfig + DependencyConfig.filter_fields dual-key + CrossValidationConfig
+        "config.py": 1120,  # 1113 LOC - domain/composite/config.py with MergeConfig.preserve_all_sources + ColumnGroupConfig + DataSchemaConfig/LayerColumnConfig + DependencyConfig.filter_fields dual-key + CrossValidationConfig + LineageConfig.provider_lookup_fields/track_source_for_fields
         # Domain layer exemptions (baseline)
         "medallion.py": 340,  # 336 LOC - Medallion layer enums and policies
         "result.py": 460,  # 459 LOC - CompositeResult with EnrichmentResult, MergeResult, SeedResult, DependencyResult dataclasses + factory methods
@@ -73,7 +73,7 @@ class TestFileSizeLimits:
         "compound.py": 415,  # 412 LOC - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass + nullable int handling
         "protein.py": 485,  # 481 LOC - UniProt target schema + deprecated alias __getattr__ (v2.0) + extended extraction helpers
         # Domain contracts/gold (Gold layer Pandera schemas)
-        "publications.py": 470,  # 464 LOC - Gold layer publication schemas with author/institution identifiers + PubMed pii/mid/publisher_id + CrossRef author_orcids/details/references + S2 authors
+        "publications.py": 475,  # 472 LOC - Gold layer publication schemas with author/institution identifiers + author_keys + PubMed pii/mid/publisher_id + CrossRef author_orcids/details/references + S2 authors
         # Note: chembl.py exemption at line 39 covers both domain/entities/chembl.py and domain/contracts/gold/chembl.py
         # Domain DQ models (data quality reports and serialization)
         "dq_serializer.py": 450,  # 447 LOC - DQ report serialization logic (increased for CC reduction)
@@ -114,7 +114,7 @@ class TestFileSizeLimits:
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "idmapping_client.py": 660,  # 651 LOC
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + loading_strategy (ADR-031) + column_groups + extraction_params + DQ severity/max_length/not_null
-        "composite_config.py": 800,  # 796 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields + CrossValidationSchema
+        "composite_config.py": 810,  # 805 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields + CrossValidationSchema + LineageSchema.provider_lookup_fields/track_source_for_fields
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory

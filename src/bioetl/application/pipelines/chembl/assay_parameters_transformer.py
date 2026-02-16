@@ -21,7 +21,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
 from bioetl.domain.entities.chembl_assay_parameters import AssayParameters
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 # Known parameter types for validation/metrics
@@ -115,7 +115,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract AssayParameters business data from bronze record.
 
