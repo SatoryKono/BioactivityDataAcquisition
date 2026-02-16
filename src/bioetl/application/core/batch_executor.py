@@ -245,14 +245,7 @@ class BatchExecutor:
         query: str | None,
         offset: int | None = None,
     ) -> None:
-        """Run the main extraction and processing loop.
-
-        Args:
-            limit: Maximum number of records to process.
-            query: Optional query string for data source.
-            offset: Starting offset for data source (checkpoint resume).
-
-        """
+        """Run the main extraction and processing loop."""
         batch: list[dict[str, Any]] = []
         current_batch_size = self.batch_size
         check_interval = self._get_memory_check_interval()
@@ -614,17 +607,7 @@ class BatchExecutor:
         query: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Extract records from data source.
-
-        Args:
-            limit: Maximum number of records to extract. None means no limit.
-            query: Optional query string for server-side filtering.
-            offset: Starting offset for checkpoint resume.
-
-        Yields:
-            Raw records as dictionaries from the data source.
-
-        """
+        """Extract records from data source."""
         async for record in self._services.data_source.fetch(
             entity_type=self._config.entity_type,
             limit=limit,
