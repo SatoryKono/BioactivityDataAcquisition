@@ -30,6 +30,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `APIRequestCollector.to_source_metadata()` accepts `query_string` parameter
   - Integration tests in `tests/integration/chembl/test_activity_extraction_params.py`
   - Provider documentation: `docs/providers/chembl.md`
+
+- **Cross-Validation for Composite Publication Pipeline**: Enricher data is now validated
+  against seed before merge (ADR-026 extension)
+  - Compares paired fields (doi, title, volume, issue, page_first, page_last, publication_year, citations_received) between seed and each enricher
+  - Mismatch thresholds: 1 mismatch → WARNING, 2+ → ENRICHER_ERROR (nullify enricher fields), 2+ enrichers with errors → QUARANTINE seed record
+  - Supports `exact`, `fuzzy` (Levenshtein threshold=0.8), and `numeric_tolerance` (10%) comparison methods
+  - Configuration: `configs/pipelines/composite/publication.yaml` → `cross_validation` section
+
+- **Composite Publication Exclude Fields**: 40 redundant enricher columns removed from output
+  - 31 CV-validated enricher fields excluded (doi, title, volume, issue, page_first, page_last, publication_year, pmid per enricher) — seed_priority makes these redundant
+  - 9 additional low-value fields excluded (publication_subclass, publication_type_unified, language, is_oa, citations_made, publication_date, content_domain_domains, pmc_id, dblp_id)
+  - `citations_received` intentionally kept — providers may report different counts
+  - Configuration: `configs/pipelines/composite/publication.yaml` → `merge.exclude_fields`
+
+- **ChEMBL Adapter Pagination Skip Optimization**: Skips limit/offset pagination for batch
+  requests where filter field equals primary key and batch fits in one page
+  - Reduces unnecessary API overhead for 1:1 key lookups (e.g., molecule_chembl_id → molecule)
+  - File: `src/bioetl/infrastructure/adapters/chembl/client.py`
+
+### Fixed
+
+- **CrossRef Silver Path Mismatch**: Changed `entity_type: work` → `entity_type: publication`
+  in `configs/pipelines/crossref/publication.yaml`
+  - Root cause: CrossRef used API term `work` as entity_type, causing Silver data to be written
+    to `silver/crossref/work/`. The composite merger reads from `silver/crossref/publication`
+    (inferred from pipeline name `crossref_publication`), resulting in empty enrichment results.
+  - All other publication providers already use `entity_type: publication`
+  - CrossRef adapter accepts both `work` and `publication` values — no adapter changes needed
+  - Updated stale config comments and provider reference documentation
+
 ## [5.14.0] - 2026-02-09
 
 ### Changed
