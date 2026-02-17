@@ -1,26 +1,79 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # BioETL Diagram Rendering Script
-# Renders Mermaid (.mmd) diagrams to high-resolution PNG images
-# Version: 1.0 | Date: 2026-01-20
+# Renders Mermaid (.mermaid) diagrams to PNG images
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MERMAID_DIR="$SCRIPT_DIR/mermaid"
+MERMAID_DIR="$SCRIPT_DIR"
 IMAGES_DIR="$SCRIPT_DIR/images"
 
-# Configuration
-WIDTH=2400
-HEIGHT=1800
-SCALE=3  # 3x scale ≈ 300 DPI for print
-BACKGROUND="transparent"  # or "white" for print
+# Defaults (can be overridden via flags)
+WIDTH=1200
+HEIGHT=800
+SCALE=2
+BACKGROUND="transparent"
+INPUT_GLOB="*.mermaid"
 
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+
+usage() {
+    cat <<'EOF'
+Usage: ./render_diagrams.sh [options]
+
+Options:
+  --width <px>         Image width in pixels (default: 1200)
+  --height <px>        Image height in pixels (default: 800)
+  --scale <n>          Render scale factor (default: 2)
+  --background <color> Background color (default: transparent)
+  --output-dir <path>  Output directory (default: ./images)
+  --input-glob <glob>  Input file glob in diagrams dir (default: *.mermaid)
+  -h, --help           Show this help
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --width)
+            WIDTH="$2"
+            shift 2
+            ;;
+        --height)
+            HEIGHT="$2"
+            shift 2
+            ;;
+        --scale)
+            SCALE="$2"
+            shift 2
+            ;;
+        --background)
+            BACKGROUND="$2"
+            shift 2
+            ;;
+        --output-dir)
+            IMAGES_DIR="$2"
+            shift 2
+            ;;
+        --input-glob)
+            INPUT_GLOB="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Unknown option: $1${NC}"
+            usage
+            exit 1
+            ;;
+    esac
+done
 
 echo "========================================="
 echo "BioETL Diagram Rendering"
@@ -48,7 +101,15 @@ echo -e "${GREEN}✓ mermaid-cli (mmdc) found${NC}"
 echo ""
 
 # Count total diagrams
-total_diagrams=$(find "$MERMAID_DIR" -name "*.mmd" | wc -l)
+shopt -s nullglob
+files=("$MERMAID_DIR"/$INPUT_GLOB)
+total_diagrams=${#files[@]}
+
+if [ "$total_diagrams" -eq 0 ]; then
+    echo -e "${YELLOW}No diagrams found for pattern '$INPUT_GLOB' in $MERMAID_DIR${NC}"
+    exit 0
+fi
+
 echo "Found $total_diagrams Mermaid diagrams to render"
 echo ""
 
@@ -57,10 +118,10 @@ count=0
 success=0
 failed=0
 
-for file in "$MERMAID_DIR"/*.mmd; do
+for file in "${files[@]}"; do
     if [ -f "$file" ]; then
         count=$((count + 1))
-        filename=$(basename "$file" .mmd)
+        filename=$(basename "$file" .mermaid)
         output="$IMAGES_DIR/${filename}.png"
 
         echo -e "${YELLOW}[$count/$total_diagrams]${NC} Rendering: $filename"
