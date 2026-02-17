@@ -18,11 +18,6 @@ Convention-based path resolution (ADR-029):
         - sink.silver.csv_export.path: {sink.silver.path}
         - sink.gold.csv_export.path: {sink.gold.path}
 
-    Primary Key Propagation:
-        - sink.silver.primary_key: {primary_keys}
-        - sink.silver.sort_by.columns: {primary_keys}
-        - sink.gold.sort_by.columns: {primary_keys}
-
     This reduces duplication between pipeline configs and filter/dq entity configs.
 """
 
@@ -162,19 +157,9 @@ def _apply_layer_defaults(
 ) -> None:
     """Apply convention-based defaults for a single medallion layer.
 
-    Sets path, sort_by.columns, csv_export.path if not specified.
-    For silver layer, also sets primary_key.
+    Sets path and csv_export.path if not specified.
     """
     layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
-
-    if primary_keys:
-        # Silver layer gets primary_key propagation
-        if layer_name == "silver":
-            layer.setdefault("primary_key", list(primary_keys))
-
-        # Both silver and gold get sort_by.columns propagation
-        sort_by = layer.setdefault("sort_by", {})
-        sort_by.setdefault("columns", list(primary_keys))
 
     # Auto-set csv_export path to match layer path
     csv_export = layer.setdefault("csv_export", {})
@@ -567,7 +552,6 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     Convention-based defaults auto-compute:
     - File references (source_file, dq_config_file, filter_config_file)
     - Sink paths (bronze/silver/gold paths)
-    - Primary key propagation to sink.silver.primary_key and sort_by
 
     Filter config merging:
     - input_filter and gold_filters from filter_config_file are merged
@@ -608,6 +592,12 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
     _load_column_groups_section(config, entity_config, config_path)
     _load_source_section(config, config_path)
+
+    # Strip intermediate loader keys not in the Pydantic model.
+    # These are consumed during the loading process above but are not
+    # part of PipelineYamlConfig (which uses extra="forbid").
+    config.pop("source_file", None)
+    config.pop("data_schema", None)
 
     validated: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
     return validated

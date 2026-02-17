@@ -6,8 +6,6 @@
 # Data License: Public Domain (US Government)
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 100
     provider_config:
         provider: pubmed

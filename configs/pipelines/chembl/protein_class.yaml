@@ -39,6 +39,5 @@ checkpoint_interval: 500
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver:
-    partition_by: ["class_level"]
+  silver: {}
   gold: {}

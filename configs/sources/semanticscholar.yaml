@@ -13,8 +13,6 @@
 # Get API key at: https://www.semanticscholar.org/product/api
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 50  # Reduced batch size for rate limit safety
     provider_config:
         provider: semanticscholar

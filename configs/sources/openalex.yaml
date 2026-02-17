@@ -7,8 +7,6 @@
 # Data License: CC0 (Public Domain)
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 50  # Max DOIs per batch request (recommended)
     provider_config:
         provider: openalex

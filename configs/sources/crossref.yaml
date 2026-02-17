@@ -7,8 +7,6 @@
 # Data License: CC0 metadata, varies for full text
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 50  # Max DOIs per batch request
     provider_config:
         provider: crossref
