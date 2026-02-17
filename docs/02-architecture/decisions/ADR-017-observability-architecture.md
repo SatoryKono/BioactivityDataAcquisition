@@ -82,13 +82,15 @@ Metrics are exposed at `http://localhost:{BIOETL_METRICS_PORT}/metrics` (default
 
 ### 3. NoOp Implementations for Testing
 
-Each port has a corresponding NoOp implementation in `infrastructure/observability/`:
+Each port has a corresponding NoOp implementation. `NoOpMetrics` and `NoOpTracing`
+live in `domain/ports/noop.py` (no I/O dependencies), while `NoOpLogger` lives in
+`infrastructure/observability/noop_logger.py` (adapter-level fallback):
 
-| Port | NoOp Implementation | Purpose |
-|------|---------------------|---------|
-| `LoggerPort` | `NoOpLogger` | Silent logging for tests |
-| `MetricsPort` | `NoOpMetrics` | Metric collection disabled |
-| `TracingPort` | `NoOpTracing` | Tracing disabled |
+| Port | NoOp Implementation | Location |
+|------|---------------------|----------|
+| `LoggerPort` | `NoOpLogger` | `infrastructure/observability/noop_logger.py` |
+| `MetricsPort` | `NoOpMetrics` | `domain/ports/noop.py` |
+| `TracingPort` | `NoOpTracing` | `domain/ports/noop.py` |
 
 **Key Features of NoOp Implementations:**
 - Null Object Pattern: silently ignore all operations
@@ -165,29 +167,40 @@ src/bioetl/domain/ports/observability.py
 ### Adapter Location
 
 ```
+src/bioetl/domain/ports/
+    observability.py        # LoggerPort, MetricsPort, TracingPort, DQMonitorPort
+    noop.py                 # NoOpTracing, NoOpMetrics (no I/O, usable by all layers)
+
 src/bioetl/infrastructure/observability/
-    logging.py          # structlog adapter
-    metrics.py          # Prometheus metric definitions
-    prometheus_metrics.py # PrometheusMetrics adapter
-    tracing.py          # OpenTelemetry adapter
-    noop_logger.py      # NoOpLogger
-    noop_metrics.py     # NoOpMetrics
-    noop_tracing.py     # NoOpTracing
+    logging.py              # StructlogLogger adapter
+    unified_logger.py       # UnifiedLogger (Log Schema enforcement)
+    logging_config.py       # Centralized structlog configuration
+    metrics.py              # Prometheus metric definitions
+    prometheus_metrics.py   # PrometheusMetrics adapter
+    tracing.py              # OpenTelemetryTracer + NoOpTracing re-export
+    noop_logger.py          # NoOpLogger (adapter-level fallback)
+    server.py               # Prometheus HTTP server
+    anomaly/                # DataQualityMonitor
 ```
 
 ### Dependency Injection
 
 ```python
-# composition/factories/observability.py
-def create_metrics(config: Config) -> MetricsPort:
-    if config.metrics_enabled:
-        return PrometheusMetrics()
-    return NoOpMetrics(warn_on_use=False)
+# composition/bootstrap/runtime/observability.py
+def bootstrap_metrics_port(settings: Settings) -> MetricsPort:
+    if not settings.observability.metrics_enabled:
+        return NoOpMetrics(warn_on_use=False)
+    return PrometheusMetrics()
 
-def create_logger(config: Config) -> LoggerPort:
-    if config.logging_enabled:
-        return configure_structlog()
-    return NoOpLogger()
+def bootstrap_logger_port(
+    pipeline: str, run_id: UUID | None = None, log_level: str = "INFO",
+) -> LoggerPort:
+    return UnifiedLogger(pipeline=pipeline, run_id=run_id or uuid4(), log_level=log_level)
+
+def bootstrap_tracer_port(settings: Settings, service_name: str = "bioetl") -> TracingPort:
+    if settings.observability.tracing_enabled:
+        return OpenTelemetryTracer(service_name=service_name)
+    return NoOpTracing()
 ```
 
 ### Usage in Pipeline

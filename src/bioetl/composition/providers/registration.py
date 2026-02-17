@@ -425,9 +425,7 @@ def _create_uniprot_idmapping_data_source(
 
     # Get input path from pipeline config
     input_path_str = (
-        pipeline_config.source.input_path
-        if hasattr(pipeline_config.source, "input_path")
-        else "data/input/target.csv"
+        getattr(pipeline_config.source, "input_path", None) or "data/input/target.csv"
     )
     input_path = Path(input_path_str or "data/input/target.csv")
 
