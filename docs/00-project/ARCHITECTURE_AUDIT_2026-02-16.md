@@ -15,17 +15,17 @@
 | Tests passed | `pytest tests/` | **11693 passed**, 1 failed, 234 skipped |
 | mypy errors | `mypy src/bioetl --strict` | **1** (unused `type: ignore` in `memory_monitor.py:146`) |
 | Circular imports | `python -c "from bioetl.domain import *"` | **PASS** |
-| Class count | `grep -r "^class " src/ --include="*.py" \| wc -l` | **906** |
-| Python file count | `find src/ -name "*.py" \| wc -l` | **552** |
-| Total LOC (src/bioetl) | `wc -l src/bioetl/**/*.py` | **114,547** |
-| Average module size | 114,547 / 527 | **~217 lines** |
+| Class count | `grep -r "^class " src/ --include="*.py" \| wc -l` | **911** |
+| Python file count | `find src/ -name "*.py" \| wc -l` | **559** |
+| Total LOC (src/bioetl) | `wc -l src/bioetl/**/*.py` | **116,062** |
+| Average module size | 116,062 / 534 | **~217 lines** |
 | TODO/FIXME/HACK | `grep -rE "(TODO\|FIXME\|XXX\|HACK)" src/` | **0** |
 | print() in production code | `grep -r "print(" src/bioetl --include="*.py"` | **0** |
 | Hardcoded secrets | `grep -rE "(api_key\|password\|secret)\s*=" src/` | **0** real violations (14 matches are parameter names, not literal values) |
 | Port/Protocol count | Protocols in `domain/ports/` | **38** |
 | `@runtime_checkable` count | decorators in `domain/ports/` | **38** (100%) |
-| ADR documents | `ls docs/02-architecture/decisions/` | **30** (ADR-001 through ADR-030) |
-| VCR cassettes | `find tests/fixtures/vcr -name "*.yaml"` | **95** |
+| ADR documents | `ls docs/02-architecture/decisions/` | **34** (ADR-001 through ADR-034) |
+| VCR cassettes | `find tests/fixtures/vcr -type f` | **136** |
 | Unit test files | `find tests -name "*.py" -path "*/unit/*"` | **408** |
 | Architecture test files | `find tests -name "*.py" -path "*/architecture/*"` | **53** |
 | Contract test files | `find tests -name "*.py" -path "*/contract/*"` | **13** |
@@ -313,7 +313,7 @@ All import boundary checks passed with **zero violations**:
 
 **Score: 9/10**
 
-**ADR (Architecture Decision Records):** 30 ADRs (ADR-001 through ADR-030) covering:
+**ADR (Architecture Decision Records):** 34 ADRs (ADR-001 through ADR-034) covering:
 - ADR-001: Delta Lake vs Parquet
 - ADR-002: Medallion Architecture
 - ADR-003: In-Memory Locking Strategy
@@ -352,7 +352,7 @@ All import boundary checks passed with **zero violations**:
 | 7 | Logging & Observability | 8% | 10 | 0.80 | UnifiedLogger, Prometheus, OpenTelemetry, zero prints |
 | 8 | Testing | 8% | 9 | 0.72 | 90.63% coverage, VCR, snapshots, architecture tests |
 | 9 | Security & Secrets | 8% | 10 | 0.80 | SecretStr, PII hashing with salt rotation, bandit |
-| 10 | Documentation | 7% | 9 | 0.63 | 30 ADRs, active CHANGELOG, Gold contracts |
+| 10 | Documentation | 7% | 9 | 0.63 | 34 ADRs, active CHANGELOG, Gold contracts |
 | **Total** | | **100%** | | **9.75** | |
 
 ### 3.2. Interpretation
@@ -475,17 +475,18 @@ The BioETL codebase demonstrates exceptional architectural discipline. The layer
 
 | Metric | Value |
 |--------|-------|
-| Total classes | 906 |
-| Total Python files (src/) | 552 |
-| Total LOC (src/bioetl/) | 114,547 |
+| Total classes | 911 |
+| Total Python files (src/) | 559 |
+| Total Python files (src/bioetl/) | 534 |
+| Total LOC (src/bioetl/) | 116,062 |
 | Average module size | ~217 lines |
 | Port protocols | 38 |
-| ADR documents | 30 |
-| VCR cassettes | 95 |
+| ADR documents | 34 |
+| VCR cassettes | 136 |
 | Entity types supported | 7 providers (ChEMBL, PubChem, PubMed, UniProt, Crossref, OpenAlex, Semantic Scholar) |
 | Pandera schemas | 44 files |
-| Gold contracts | 5 modules |
-| Test files (total) | 551+ |
+| Gold contracts | 8 files |
+| Test files (total) | 583 |
 
 ## Appendix B. Architecture Enforcement Stack
 

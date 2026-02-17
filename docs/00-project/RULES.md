@@ -62,13 +62,16 @@
 Интерфейсы определяются в пакете `domain/ports/` через `typing.Protocol`:
 
 - **Design-time**: `mypy --strict` проверяет соответствие типов во время сборки. Основной механизм контроля.
-- **Runtime Boundary**: Следующие порты **SHOULD** быть `@runtime_checkable` для boundary validation в composition layer:
+- **Runtime Boundary**: Следующие критические порты **SHOULD** быть `@runtime_checkable` для boundary validation в composition layer:
   - `DataSourcePort` — для проверки адаптеров при регистрации
   - `FilterableDataSourcePort` — для проверки расширенных адаптеров
   - `HealthCheckPort` — для проверки health-check capability
   - `StoragePort` — для проверки storage backends
 
-  Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) используют structural subtyping без runtime проверок и **MAY** не иметь `@runtime_checkable`. Семантика поведения в runtime не проверяется типами.
+  Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime_checkable`.
+
+  > **Текущее состояние:** Все 38 портов декорированы `@runtime_checkable` (100% coverage).
+  > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
 
 ```python
@@ -1029,7 +1032,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 ### 5.6. Среды (Environments)
 
-- **Dev**: Локальная разработка (Docker Compose). Данные: фикстуры или сэмпл Bronze.
+- **Dev**: Локальная разработка (Local-Only, см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)). Данные: фикстуры или сэмпл Bronze.
 - **Staging**: Полная копия архитектуры. Данные: Prod-like (обфусцированные). Тест деплоя.
 - **Prod**: Боевая среда. Доступ на запись только у CI/CD.
 
@@ -1321,18 +1324,20 @@ ______________________________________________________________________
 
 **Структура папок:** `src/bioetl/infrastructure/adapters/{provider}/`
 
-| Источник     | Библиотека                  | Rate Limit               | Retry Strategy          | Auth Type       | Health Check                                                                  |
-| ------------ | --------------------------- | ------------------------ | ----------------------- | --------------- | ----------------------------------------------------------------------------- |
-| **ChEMBL**   | `httpx` via `UnifiedHTTPClient` | Нет явного лимита        | Exponential backoff     | Public          | `GET /chembl/api/data/status`                                                 |
-| **PubChem**  | `pubchempy`                 | 5 req/sec                | 429 -> wait Retry-After | Public          | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
-| **UniProt**  | `unipressed`                | 100 req/sec (c API key)  | Exponential backoff     | API Key         | Lightweight Search Probe                                                      |
-| **OpenAlex** | `pyalex`                    | 10 req/sec (polite pool) | 429 -> backoff          | API Key (Email) | Generic Probe\*                                                               |
-| **Semantic** | `semanticscholar`           | 100 req/5min             | Sliding window          | API Key         | Generic Probe\*                                                               |
-| **PubMed**   | `biopython`                 | 3 req/sec (10 c key)     | 429 -> backoff          | API Key         | Generic Probe\*                                                               |
-| **Crossref** | `habanero`                  | 50 req/sec (polite pool) | Exponential backoff     | Email           | Generic Probe\*                                                               |
-| **GtoP**     | `pyGtoP` (deprecated)       | -                        | -                       | None            | -                                                                             |
+| Источник     | Библиотека                        | Rate Limit               | Retry Strategy          | Auth Type       | Health Check                                                                  |
+| ------------ | --------------------------------- | ------------------------ | ----------------------- | --------------- | ----------------------------------------------------------------------------- |
+| **ChEMBL**   | `httpx` via `UnifiedHTTPClient`   | Нет явного лимита        | Exponential backoff     | Public          | `GET /chembl/api/data/status`                                                 |
+| **PubChem**  | `pubchempy` via `BaseSyncAdapter` | 5 req/sec                | 429 -> wait Retry-After | Public          | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
+| **UniProt**  | `httpx` via `UnifiedHTTPClient`   | 100 req/sec (c API key)  | Exponential backoff     | API Key         | Lightweight Search Probe                                                      |
+| **OpenAlex** | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (polite pool) | 429 -> backoff          | API Key (Email) | Generic Probe\*                                                               |
+| **Semantic** | `httpx` via `UnifiedHTTPClient`   | 100 req/5min             | Sliding window          | API Key         | Generic Probe\*                                                               |
+| **PubMed**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec (10 c key)     | 429 -> backoff          | API Key         | Generic Probe\*                                                               |
+| **Crossref** | `httpx` via `UnifiedHTTPClient`   | 50 req/sec (polite pool) | Exponential backoff     | Email           | Generic Probe\*                                                               |
 
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.
+
+> **Каноническая конфигурация rate limits** (burst, batch_size, конкретные числа) находится в
+> `configs/sources/{provider}.yaml`. Подробная таблица: [pipeline-configuration.md](../03-guides/pipeline-configuration.md#provider-rate-limits).
 
 ### А.1. Формирование URL для ChEMBL API
 
@@ -1529,7 +1534,7 @@ fields:
 | [ADR-030](02-architecture/decisions/ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy          | Accepted           | 2026-01-26 |
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization           | Accepted           | 2026-01-26 |
 | [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | Accepted           | 2026-01-28 |
-| [ADR-033](02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Accepted           | 2026-02    |
+| [ADR-033](02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Proposed           | 2026-02-06 |
 | [ADR-034](02-architecture/decisions/ADR-034-schema-domain-pairs.md)              | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
 
 ## История Изменений (Changelog)
