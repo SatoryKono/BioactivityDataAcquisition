@@ -1,0 +1,138 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TD
+    subgraph Init["Phase 1: Initialize Composite"]
+        A1[Load Composite Config] --> A2[Validate Seed + Enrichers]
+        A2 --> A3[Set skip_gold=true\nfor Sub-Pipelines]
+        A3 --> A4[Initialize FSM]
+        A4 --> A5[Resume from Checkpoint?]
+        A5 -->|Yes| A6[Load Completed Stages]
+        A5 -->|No| A7[Start Fresh]
+    end
+
+    subgraph Seed["Phase 2: Seed Execution"]
+        S1[Run Seed Pipeline\nwith skip_gold=true] --> S2[Extract from API]
+        S2 --> S3[Bronze Layer Write]
+        S3 --> S4[Transform & Normalize]
+        S4 --> S5[Silver Layer Write]
+        S5 --> S6[Extract Join Keys]
+        S6 --> S7{DQ Thresholds Met?}
+        S7 -->|No| S_ERR[Fail Composite]
+        S7 -->|Yes| S8[Save Keys to Checkpoint]
+        S8 --> S9[Mark Seed COMPLETED]
+    end
+
+    subgraph Deps["Phase 3: Dependencies (Optional)"]
+        D1{Dependencies\nConfigured?} -->|No| Skip1[Skip Phase]
+        D1 -->|Yes| D2[Run Dependency Pipelines\nwith skip_gold=true]
+        D2 --> D3[Each Writes Bronze + Silver]
+        D3 --> D4[Mark Dependencies COMPLETED]
+    end
+
+    subgraph Enrich["Phase 4: Enrichment (Parallel)"]
+        E1[Filter Keys by\nEnricher Conditions] --> E2[Fan-Out Enrichers\nmax_concurrency=4]
+        E2 --> E3a[Enricher 1\nCrossRef]
+        E2 --> E3b[Enricher 2\nOpenAlex]
+        E2 --> E3c[Enricher 3\nPubMed]
+        E2 --> E3d[Enricher 4\nSemanticScholar]
+        
+        E3a --> E4a[Run with skip_gold=true]
+        E3b --> E4b[Run with skip_gold=true]
+        E3c --> E4c[Run with skip_gold=true]
+        E3d --> E4d[Run with skip_gold=true]
+        
+        E4a --> E5a[Bronze + Silver Only]
+        E4b --> E5b[Bronze + Silver Only]
+        E4c --> E5c[Bronze + Silver Only]
+        E4d --> E5d[Bronze + Silver Only]
+        
+        E5a --> E6[Gather Results]
+        E5b --> E6
+        E5c --> E6
+        E5d --> E6
+        
+        E6 --> E7{All Required\nEnrichers OK?}
+        E7 -->|No| E_ERR[Fail Composite]
+        E7 -->|Yes| E8[Mark Enrichment COMPLETED]
+    end
+
+    subgraph Merge["Phase 5: Cross-Validation & Merge"]
+        M1[Load Silver Tables] --> M2[Join Seed + Enrichers\nleft_outer on keys]
+        M2 --> M3[Cross-Validation Check]
+        
+        subgraph CV["Cross-Validation"]
+            CV1["Compare Paired Fields:\ndoi, title, volume, issue,\npage_first, page_last,\npublication_year,\ncitations_received"]
+            CV2["Count Mismatches\nper Record"]
+            CV3{"Verdict?"}
+            CV3 -->|0 mismatches| CV4[PASS]
+            CV3 -->|1 mismatch| CV5[WARNING]
+            CV3 -->|2+ mismatches| CV6[ENRICHER_ERROR\nnullify enricher cols]
+            CV6 --> CV7{2+ enrichers\nwith errors?}
+            CV7 -->|Yes| CV8[QUARANTINE seed record]
+            CV7 -->|No| CV9[Keep record]
+        end
+        
+        M3 --> M4[Apply Verdicts]
+        M4 --> M5[Exclude Redundant Fields\n40 CV-validated + low-value]
+        M5 --> M6[Conflict Resolution:\nseed_priority]
+        M6 --> M7[Write to Silver Composite]
+        M7 --> M8[Mark Merge COMPLETED]
+    end
+
+    subgraph Gold["Phase 6: Gold Output"]
+        G1[Load Silver Composite] --> G2[Apply Gold Filters]
+        G2 --> G3[Pandera Schema Validation]
+        G3 --> G4{Validation OK?}
+        G4 -->|No| G_ERR[Quarantine\nInvalid Records]
+        G4 -->|Yes| G5[Write to Gold Layer]
+        G5 --> G6[Delta Lake ACID Write]
+        G6 --> G7[Mark Gold COMPLETED]
+    end
+
+    subgraph Final["Phase 7: Finalize"]
+        F1[Publish DQ Metrics] --> F2[Delete Checkpoint]
+        F2 --> F3[Update Composite Run State]
+        F3 --> F4[Export Metrics]
+        F4 --> F5[Exit Success]
+    end
+
+    subgraph Monitoring["Monitoring & Observability"]
+        direction LR
+        O1["📊 Composite Metrics:\n- enrichers_completed\n- enrichers_failed\n- cv_errors\n- cv_warnings"]
+        O2["🔍 Tracing:\nSpan per enricher\nParent span for composite"]
+        O3["📝 Logging:\nStructured with\ncomposite_run_id"]
+    end
+
+    %% Flow connections
+    A7 --> S1
+    A6 --> S1
+    S9 --> D1
+    Skip1 --> E1
+    D4 --> E1
+    E8 --> M1
+    M8 --> G1
+    G7 --> F1
+    
+    %% Error paths
+    S_ERR --> F_ERR[Composite Failed]
+    E_ERR --> F_ERR
+    G_ERR --> F1
+    
+    %% Styling
+    style Init fill:#E8F5E9
+    style Seed fill:#E3F2FD
+    style Deps fill:#FFF3E0
+    style Enrich fill:#FCE4EC
+    style Merge fill:#F3E5F5
+    style Gold fill:#FFE0B2
+    style Final fill:#E0F7FA
+    style Monitoring fill:#FFFDE7
+    style CV fill:#FFF9C4
+    
+    %% Highlight skip_gold
+    style A3 fill:#FFCDD2,stroke:#D32F2F,stroke-width:3px
+    style S1 fill:#BBDEFB,stroke:#1976D2,stroke-width:3px
+    style D2 fill:#BBDEFB,stroke:#1976D2,stroke-width:3px
+    style E4a fill:#BBDEFB,stroke:#1976D2,stroke-width:3px
+    style E4b fill:#BBDEFB,stroke:#1976D2,stroke-width:3px
+    style E4c fill:#BBDEFB,stroke:#1976D2,stroke-width:3px
+    style E4d fill:#BBDEFB,stroke:#1976D2,stroke-width:3px

@@ -8,13 +8,16 @@ graph TD
     subgraph Silver["Silver Layer"]
         S1[Normalized Data - Delta Lake]
         S2[Merge by entity_id]
-        LocalFS[Schema Enforcement]
+        S3[Schema Enforcement]
+        S4[Classification Fields: 3-level taxonomy]
+        S5[Author Keys: Surname_F format]
     end
 
     subgraph Gold["Gold Layer"]
         G1[Business Data - Delta Lake]
         G2[Strict Validation - Pandera]
         G3[SCD Type 2 / Overwrite]
+        G4[Full Classification + Author Metadata]
     end
 
     subgraph Quarantine["Quarantine"]

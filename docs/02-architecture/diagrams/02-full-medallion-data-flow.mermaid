@@ -19,13 +19,13 @@ flowchart LR
     subgraph Silver_Layer["Silver Layer"]
         direction TB
         SilverWriter["SilverWriter"]
-        Silver[("Silver Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta Lake\n⏱️ Retention: Permanent\n✅ Validation: Pandera (soft)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash")]
+        Silver[("Silver Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta Lake\n⏱️ Retention: Permanent\n✅ Validation: Pandera (soft)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash\n📊 Classification: 3-level taxonomy\n   - publication_class (L1: EXP/REV/PEER)\n   - publication_subclass (L2: ~25 types)\n   - publication_type_unified (L3: 214 types)\n✍️ Author: author_keys (Surname_F)")]
     end
 
     subgraph Gold_Layer["Gold Layer"]
         direction TB
         GoldWriter["GoldWriter"]
-        Gold[("Gold Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta/Parquet\n⏱️ Retention: Permanent\n✅ Validation: Pandera (strict)\n🔄 Strategy: SCD2/Append")]
+        Gold[("Gold Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta/Parquet\n⏱️ Retention: Permanent\n✅ Validation: Pandera (strict)\n🔄 Strategy: SCD2/Append\n📊 Classification: Full taxonomy\n✍️ Author: author_keys + ORCIDs")]
     end
 
     subgraph DQ_Branch["Data Quality Branch"]

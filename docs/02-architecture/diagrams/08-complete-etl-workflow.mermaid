@@ -9,6 +9,9 @@ flowchart TD
         A5 --> A6
         A6 --> A7[Start Heartbeat Thread]
         A7 --> A8[Run Preflight Checks]
+        A8 --> A9{skip_gold set?}
+        A9 -->|Yes| A9a[Sub-Pipeline Mode\nSkip Gold Phase]
+        A9 -->|No| A9b[Standalone Mode\nFull Pipeline]
     end
 
     subgraph Extract["Phase 2: Extract"]
@@ -70,10 +73,13 @@ flowchart TD
         E2 -->|No| E_ERR2[LockNotHeldError]
         E2 -->|Yes| E3[Delta Lake Merge]
         E3 --> E4[Upsert by content_hash]
-        E4 --> E5[Write Gold Layer]
-        E5 --> E6[Pandera Strict Validation]
-        E6 --> E7[Post-Write Lock Check]
-        E7 --> F1
+        E4 --> E5{skip_gold flag?}
+        E5 -->|Yes| E_SKIP[Skip Gold Layer\nComposite Only]
+        E5 -->|No| E6[Write Gold Layer]
+        E6 --> E7[Pandera Strict Validation]
+        E7 --> E8[Post-Write Lock Check]
+        E8 --> F1
+        E_SKIP --> F1
     end
 
     subgraph Finalize["Phase 6: Finalize"]
@@ -91,7 +97,8 @@ flowchart TD
     end
 
     %% Flow connections
-    A8 --> B1
+    A9a --> B1
+    A9b --> B1
     C5 --> D1
     D7 --> E1
 

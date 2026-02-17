@@ -1,3 +1,6 @@
-%% Placeholder diagram
-%% The original .mmd source is not in the repo.
-%% See docs/02-architecture/diagrams/ for current Mermaid sources.
+%% See: docs/02-architecture/diagrams/26-composite-pipeline-workflow.mermaid
+%% This is the detailed composite pipeline workflow diagram showing:
+%% - skip_gold flag usage in sub-pipelines
+%% - Seed → Dependencies → Enrichers (parallel) → Merge → Gold flow
+%% - Cross-validation with paired field comparison
+%% - Enricher verdict logic (PASS/WARNING/ENRICHER_ERROR/QUARANTINE)
