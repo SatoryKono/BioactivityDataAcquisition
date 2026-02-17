@@ -98,6 +98,11 @@ ______________________________________________________________________
 
 ## Configuration Files
 
+Rule for deterministic ordering:
+
+- `sort_by` for Silver/Gold can be inherited from `configs/pipelines/_base.yaml`.
+- After merge/default resolution each pipeline must have non-empty effective `sink.silver.sort_by.columns` and `sink.gold.sort_by.columns`; empty override is invalid.
+
 All pipeline configs are in `configs/pipelines/`:
 
 ```

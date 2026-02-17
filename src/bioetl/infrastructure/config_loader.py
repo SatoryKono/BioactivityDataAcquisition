@@ -214,6 +214,34 @@ def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
     return config
 
 
+def _validate_effective_sort_by(config: dict[str, Any]) -> None:
+    """Validate that effective sort keys are present after merge/defaults.
+
+    Rule: pipeline configs MAY inherit ``sort_by`` from ``configs/pipelines/_base.yaml``,
+    but after deep-merge and convention defaults each pipeline MUST have effective
+    ``sink.silver.sort_by.columns`` and ``sink.gold.sort_by.columns``.
+
+    Raises:
+        ValueError: If effective sort columns are missing or empty.
+    """
+    sink = config.get("sink")
+    if not isinstance(sink, dict):
+        raise ValueError("Pipeline config MUST define sink section")
+
+    for layer_name in ("silver", "gold"):
+        layer = sink.get(layer_name)
+        if not isinstance(layer, dict):
+            raise ValueError(f"Pipeline config MUST define sink.{layer_name} section")
+
+        sort_by = layer.get("sort_by")
+        columns = sort_by.get("columns") if isinstance(sort_by, dict) else None
+        if not isinstance(columns, list) or not columns:
+            raise ValueError(
+                "Pipeline config MUST have effective sink."
+                f"{layer_name}.sort_by.columns after merge/defaults"
+            )
+
+
 def _sync_timeout_aliases(d: dict[str, Any]) -> dict[str, Any]:
     """Ensure ``timeout`` and ``timeout_sec`` are kept in sync."""
     result = d.copy()
@@ -608,6 +636,7 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
     _load_column_groups_section(config, entity_config, config_path)
     _load_source_section(config, config_path)
+    _validate_effective_sort_by(config)
 
     validated: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
     return validated

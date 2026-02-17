@@ -480,6 +480,65 @@ def test_convention_based_primary_key_propagation(setup_configs, tmp_path):
     assert config.sink["gold"].sort_by.columns == ["pk_field1", "pk_field2"]
 
 
+def test_sort_by_inheritance_from_base_validated(setup_configs, tmp_path):
+    """sort_by MAY be inherited from _base.yaml with post-merge validation."""
+    pipelines_dir = setup_configs
+
+    base_config = {
+        "sink": {
+            "silver": {"sort_by": {"ascending": True}},
+            "gold": {"sort_by": {"ascending": True}},
+        }
+    }
+    (pipelines_dir / "_base.yaml").write_text(yaml.dump(base_config))
+
+    config_data = {
+        "pipeline_name": "inherit_sort",
+        "provider": "inherit",
+        "entity_type": "entity",
+        "primary_keys": ["record_id"],
+        "silver_table": "inherit.entity",
+    }
+
+    inherit_dir = pipelines_dir / "inherit"
+    inherit_dir.mkdir()
+    (inherit_dir / "entity.yaml").write_text(yaml.dump(config_data))
+
+    config = load_pipeline_config("inherit_entity")
+
+    assert config.sink["silver"].sort_by.columns == ["record_id"]
+    assert config.sink["gold"].sort_by.columns == ["record_id"]
+    assert config.sink["silver"].sort_by.ascending is True
+    assert config.sink["gold"].sort_by.ascending is True
+
+
+def test_sort_by_validation_fails_without_effective_columns(setup_configs, tmp_path):
+    """Loading MUST fail when effective sink.silver/gold.sort_by.columns are empty."""
+    pipelines_dir = setup_configs
+
+    config_data = {
+        "pipeline_name": "missing_sort",
+        "provider": "nosort",
+        "entity_type": "entity",
+        "primary_keys": ["record_id"],
+        "silver_table": "nosort.entity",
+        "sink": {
+            "silver": {"sort_by": {"columns": []}},
+            "gold": {"sort_by": {"columns": []}},
+        },
+    }
+
+    nosort_dir = pipelines_dir / "nosort"
+    nosort_dir.mkdir()
+    (nosort_dir / "entity.yaml").write_text(yaml.dump(config_data))
+
+    with pytest.raises(
+        ValueError,
+        match=r"MUST have effective sink\.(silver|gold)\.sort_by\.columns",
+    ):
+        load_pipeline_config("nosort_entity")
+
+
 def test_explicit_paths_override_convention(setup_configs, tmp_path):
     """Verify explicitly specified paths override convention defaults."""
     pipelines_dir = setup_configs
