@@ -40,15 +40,15 @@ Introduce explicit `LoadingStrategy` enum and formalize loading behavior:
 ### 1. LoadingStrategy Enum
 
 ```python
-class LoadingStrategy(str, Enum):
+class LoadingStrategy(StrEnum):
     """Loading strategy for pipeline data extraction."""
 
     FULL_SCAN_ONLY = "full_scan_only"
     """Each run performs full scan. Checkpoint resume disabled."""
-
-    WATERMARK_BASED = "watermark_based"
-    """Incremental loading via watermark. PLACEHOLDER - NOT YET IMPLEMENTED."""
 ```
+
+> **Note:** `WATERMARK_BASED` strategy is planned but not yet implemented.
+> See [Future Work](#future-work) for prerequisites and implementation plan.
 
 ### 2. PipelineConfig Field
 
@@ -78,20 +78,11 @@ force_full_scan: true
 loading_strategy: full_scan_only
 ```
 
-### 4. WatermarkStrategyPort (Placeholder)
+### 4. WatermarkStrategyPort (Future Work)
 
-```python
-@runtime_checkable
-class WatermarkStrategyPort(Protocol):
-    """Port for watermark-based incremental loading.
-
-    PLACEHOLDER - NOT YET IMPLEMENTED.
-    """
-
-    async def get_watermark(self, pipeline_name: str) -> datetime | int | str | None: ...
-    async def update_watermark(self, pipeline_name: str, watermark: ...) -> None: ...
-    async def clear_watermark(self, pipeline_name: str) -> None: ...
-```
+> **NOT YET IMPLEMENTED.** The `WatermarkStrategyPort` and `WATERMARK_BASED` enum value
+> will be added when watermark-based incremental loading is needed.
+> See [Future Work](#future-work) for the planned interface and prerequisites.
 
 ### 5. Validation Rules
 
@@ -120,13 +111,11 @@ class WatermarkStrategyPort(Protocol):
 
 1. **Migration effort**: Existing configs need `loading_strategy` field
 2. **Two fields**: Both `force_full_scan` and `loading_strategy` exist (temporary)
-3. **Unused port**: `WatermarkStrategyPort` is a placeholder
 
 ### Mitigations
 
 - **Migration**: All publication configs updated with `loading_strategy: full_scan_only`
 - **Two fields**: `loading_strategy` takes precedence; `force_full_scan` maintained for compatibility
-- **Unused port**: Clearly marked as placeholder; NoOp implementation provided
 
 ## Why Publication !== Activity
 
@@ -142,17 +131,15 @@ class WatermarkStrategyPort(Protocol):
 ### Files Modified
 
 **Domain:**
-- `src/bioetl/domain/medallion.py` — Add `LoadingStrategy` enum
-- `src/bioetl/domain/config.py` — Add `loading_strategy` field to `PipelineConfig`
-- `src/bioetl/domain/ports/watermark.py` — Add `WatermarkStrategyPort` (placeholder)
-- `src/bioetl/domain/ports/__init__.py` — Export new port
+- `src/bioetl/domain/medallion.py` — Add `LoadingStrategy` enum (currently: `FULL_SCAN_ONLY` only)
+- `src/bioetl/domain/config/pipeline.py` — Add `loading_strategy` field to `PipelineConfig`
 
 **Application:**
 - `src/bioetl/application/core/checkpoint_manager.py` — Use `LoadingStrategy` for validation
 
 **Infrastructure:**
 - `src/bioetl/infrastructure/schemas/pipeline_config.py` — Add `loading_strategy` to YAML schema
-- `src/bioetl/infrastructure/config/_base.py` — Pass `loading_strategy` in conversion
+- `src/bioetl/infrastructure/config/converters.py` — Pass `loading_strategy` in conversion
 
 **Composition:**
 - `src/bioetl/composition/factories/services_factory.py` — Pass `loading_strategy` to CheckpointManager
@@ -183,10 +170,20 @@ Prerequisites:
 3. Ensure API supports filtering by watermark
 
 Steps:
-1. Implement `LocalWatermarkStorage` adapter
-2. Add `watermark_field` to pipeline config
-3. Update fetchers to use watermark filtering
-4. Add integration tests with VCR
+1. Add `WATERMARK_BASED = "watermark_based"` to `LoadingStrategy` enum
+2. Create `src/bioetl/domain/ports/watermark.py` with `WatermarkStrategyPort`:
+   ```python
+   @runtime_checkable
+   class WatermarkStrategyPort(Protocol):
+       async def get_watermark(self, pipeline_name: str) -> datetime | int | str | None: ...
+       async def update_watermark(self, pipeline_name: str, watermark: ...) -> None: ...
+       async def clear_watermark(self, pipeline_name: str) -> None: ...
+   ```
+3. Export `WatermarkStrategyPort` from `src/bioetl/domain/ports/__init__.py`
+4. Implement `LocalWatermarkStorage` adapter
+5. Add `watermark_field` to pipeline config
+6. Update fetchers to use watermark filtering
+7. Add integration tests with VCR
 
 ### Strategy Migration
 

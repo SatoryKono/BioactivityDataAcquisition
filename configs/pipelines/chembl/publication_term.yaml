@@ -43,6 +43,5 @@ gold_table: "chembl_publication_term"
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver:
-    partition_by: ["term_type"]
+  silver: {}
   gold: {}

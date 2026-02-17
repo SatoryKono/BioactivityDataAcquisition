@@ -239,7 +239,7 @@ Define filters in Python code. Rejected because:
 
 | Provider | Default Batch Size | Notes |
 |----------|-------------------|-------|
-| ChEMBL | 20 | API optimal |
+| ChEMBL | 1000 | API optimal (entity-level overrides: molecule=20, activity=1500) |
 | PubChem | 1 | SMILES search limitation |
 | UniProt | 100 | OR-query batching |
 | PubMed | 100 | NCBI E-utilities |
@@ -278,3 +278,4 @@ Define filters in Python code. Rejected because:
 | 2026-01-20 | Claude Code | Initial version |
 | 2026-02-09 | Claude Code | Added §3 Extraction-Level Filtering (extraction_params) |
 | 2026-02-17 | Claude Code | Consolidated filter merge: removed legacy `_load_filter_config`/`_merge_filter_config` from `config_loader.py`, unified via `FilterConfigLoader._merge_hierarchy()`. All 4 filter sections (`input_filter`, `silver_filters`, `gold_filters`, `extraction_params`) now load from full hierarchy. |
+| 2026-02-17 | Claude Code | Fixed: ChEMBL provider batch_size in table: 20 → 1000 (actual provider default) |

@@ -1,0 +1,80 @@
+# configs/quality/entities/composite/assay.yaml
+# Composite Assay-specific DQ rules
+# Applied to merged output of composite assay pipeline.
+
+version: "1.0.0"
+provider: composite
+entity: assay
+
+# =============================================================================
+# Composite Thresholds
+# =============================================================================
+thresholds:
+  soft_fail_threshold: 0.10  # 10% errors = warning
+  hard_fail_threshold: 0.30  # 30% errors = failure
+
+# =============================================================================
+# Required Fields in Gold Output
+# =============================================================================
+required_fields:
+  - assay_id
+  - assay_type
+
+# =============================================================================
+# Field-Level Validation Rules
+# =============================================================================
+field_validations:
+  assay_id:
+    type: string
+    nullable: false
+    pattern: "^CHEMBL\\d+$"
+    description: "ChEMBL assay ID (primary key)"
+
+  cell_id:
+    type: string
+    nullable: true
+    pattern: "^CHEMBL\\d+$"
+    description: "FK to cell_line (nullable)"
+
+  tissue_id:
+    type: string
+    nullable: true
+    pattern: "^CHEMBL\\d+$"
+    description: "FK to tissue (nullable)"
+
+  target_id:
+    type: string
+    nullable: true
+    pattern: "^CHEMBL\\d+$"
+    description: "FK to target"
+
+  assay_type:
+    type: string
+    nullable: false
+    allowed: ["B", "F", "A", "T", "P", "U"]
+    description: "Assay type classification"
+
+  confidence_score:
+    type: integer
+    nullable: true
+    min_value: 0
+    max_value: 9
+    description: "Target confidence score (0-9)"
+
+  assay_taxonomy_id:
+    type: integer
+    nullable: true
+    min_value: 1
+    description: "NCBI Taxonomy ID"
+
+  cell_source_taxonomy_id:
+    type: integer
+    nullable: true
+    min_value: 1
+    description: "Cell line source organism taxonomy ID"
+
+  bao_format:
+    type: string
+    nullable: true
+    pattern: "^BAO:\\d+$"
+    description: "BioAssay Ontology format ID"
