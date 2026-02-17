@@ -97,8 +97,9 @@ def main() -> int:
     args = parser.parse_args()
 
     configs_dir = Path("configs/pipelines")
-    schema_path = configs_dir / "_schema.json"
-    composite_schema_path = configs_dir / "_composite_schema.json"
+    schema_dir = Path("configs/_schema")
+    schema_path = schema_dir / "pipeline.json"
+    composite_schema_path = schema_dir / "composite.json"
 
     schema = load_schema(schema_path)
     composite_schema = load_schema(composite_schema_path)
