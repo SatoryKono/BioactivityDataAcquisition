@@ -519,6 +519,18 @@ def _merge_filter_config(
         config["extraction_params"] = merged_extraction_params
 
 
+def _merge_data_schema_into_config(
+    config: dict[str, Any], data_schema: dict[str, Any]
+) -> None:
+    """Merge loaded data schema (column_groups, silver, gold) into pipeline config."""
+    if "column_groups" in data_schema:
+        config["column_groups"] = data_schema["column_groups"]
+    if "silver" in data_schema:
+        config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
+    if "gold" in data_schema:
+        config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
+
+
 def _load_column_groups_section(
     config: dict[str, Any],
     entity_config: dict[str, Any],
@@ -538,14 +550,7 @@ def _load_column_groups_section(
             pass  # Fall back to column_groups_file below
         else:
             if data_schema:
-                if "column_groups" in data_schema:
-                    config["column_groups"] = data_schema["column_groups"]
-                if "silver" in data_schema:
-                    config.setdefault("data_schema", {})["silver"] = data_schema[
-                        "silver"
-                    ]
-                if "gold" in data_schema:
-                    config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
+                _merge_data_schema_into_config(config, data_schema)
                 return
 
     if column_groups_file := config.get("column_groups_file"):
