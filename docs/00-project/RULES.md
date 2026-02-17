@@ -1321,16 +1321,15 @@ ______________________________________________________________________
 
 **Структура папок:** `src/bioetl/infrastructure/adapters/{provider}/`
 
-| Источник     | Библиотека                  | Rate Limit               | Retry Strategy          | Auth Type       | Health Check                                                                  |
-| ------------ | --------------------------- | ------------------------ | ----------------------- | --------------- | ----------------------------------------------------------------------------- |
-| **ChEMBL**   | `httpx` via `UnifiedHTTPClient` | Нет явного лимита        | Exponential backoff     | Public          | `GET /chembl/api/data/status`                                                 |
-| **PubChem**  | `pubchempy`                 | 5 req/sec                | 429 -> wait Retry-After | Public          | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
-| **UniProt**  | `unipressed`                | 100 req/sec (c API key)  | Exponential backoff     | API Key         | Lightweight Search Probe                                                      |
-| **OpenAlex** | `pyalex`                    | 10 req/sec (polite pool) | 429 -> backoff          | API Key (Email) | Generic Probe\*                                                               |
-| **Semantic** | `semanticscholar`           | 100 req/5min             | Sliding window          | API Key         | Generic Probe\*                                                               |
-| **PubMed**   | `biopython`                 | 3 req/sec (10 c key)     | 429 -> backoff          | API Key         | Generic Probe\*                                                               |
-| **Crossref** | `habanero`                  | 50 req/sec (polite pool) | Exponential backoff     | Email           | Generic Probe\*                                                               |
-| **GtoP**     | `pyGtoP` (deprecated)       | -                        | -                       | None            | -                                                                             |
+| Источник     | Библиотека                        | Rate Limit               | Retry Strategy          | Auth Type       | Health Check                                                                  |
+| ------------ | --------------------------------- | ------------------------ | ----------------------- | --------------- | ----------------------------------------------------------------------------- |
+| **ChEMBL**   | `httpx` via `UnifiedHTTPClient`   | Нет явного лимита        | Exponential backoff     | Public          | `GET /chembl/api/data/status`                                                 |
+| **PubChem**  | `pubchempy` via `BaseSyncAdapter` | 5 req/sec                | 429 -> wait Retry-After | Public          | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
+| **UniProt**  | `httpx` via `UnifiedHTTPClient`   | 100 req/sec (c API key)  | Exponential backoff     | API Key         | Lightweight Search Probe                                                      |
+| **OpenAlex** | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (polite pool) | 429 -> backoff          | API Key (Email) | Generic Probe\*                                                               |
+| **Semantic** | `httpx` via `UnifiedHTTPClient`   | 100 req/5min             | Sliding window          | API Key         | Generic Probe\*                                                               |
+| **PubMed**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec (10 c key)     | 429 -> backoff          | API Key         | Generic Probe\*                                                               |
+| **Crossref** | `httpx` via `UnifiedHTTPClient`   | 50 req/sec (polite pool) | Exponential backoff     | Email           | Generic Probe\*                                                               |
 
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.
 
