@@ -1,0 +1,86 @@
+%% Title: Composition Root Wiring — Full DI Graph
+%% Covers: RULES.md §1.1 (Composition Layer), ADR-005
+%% Rank: 3 (Score 9.00) — Complete dependency injection assembly
+%% Updated: 2026-02-17
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    subgraph Entry["Entry Point"]
+        CLI["CLI run command"]
+        BOOT["bootstrap/runtime/assembly.py"]
+    end
+
+    subgraph Factories["Composition Factories"]
+        direction TB
+        BL["BootstrapLogger\n• configure structlog"]
+        HCF["HttpClientFactory\n• create(provider)\n→ UnifiedHTTPClient"]
+        DSF["DataSourceFactory\n• create(provider, config)\n→ DataSourcePort impl"]
+        STF["StorageFactory\n• create(config)\n→ BronzeWriter + SilverWriter\n  + GoldWriter"]
+        STA["StorageAdapter\n• create_bronze()\n• create_silver()\n• create_gold()"]
+        SB["ServicesBuilder\n• with_storage()\n• with_lock()\n• with_logger()\n• with_metrics()\n• build() → PipelineServices"]
+        RF["RunnerFactory\n• create_runner()\n→ PipelineRunner"]
+        DQF["DQServicesFactory\n• create()\n→ DQ analyzers + monitor"]
+        GPF["GenericPipelineFactory\n• _pipeline_class\n• _transformer_class\n• _gold_schema"]
+    end
+
+    subgraph Registry["Registration"]
+        PR["ProviderRegistry\n• 8 providers registered"]
+        DSR["DataSourceRegistry\n• facade → ProviderRegistry"]
+        PLREG["PipelineRegistry\n• pipeline_name → factory"]
+        OB["ObservabilityBundle\n• logger + metrics + tracing"]
+    end
+
+    subgraph Created["Created Instances"]
+        direction TB
+        UHC["UnifiedHTTPClient\n+ TokenBucket\n+ CircuitBreaker"]
+        ADP["Provider Adapter\n(ChemblAdapter, etc.)"]
+        BW["BronzeWriter"]
+        SW["SilverWriter"]
+        GW["GoldWriter"]
+        ML["MemoryLock"]
+        LC["LocalCheckpoint"]
+        UQ["UnifiedQuarantine"]
+        SLL["StructlogLogger"]
+        PMM["PrometheusMetrics"]
+        NOT["NoOpTracing"]
+        PS["PipelineServices\n(frozen bundle)"]
+        RUN["PipelineRunner\n(fully assembled)"]
+    end
+
+    %% Bootstrap flow
+    CLI --> BOOT
+    BOOT --> BL
+    BL --> SLL
+    BOOT --> HCF
+    HCF --> UHC
+    BOOT --> DSF
+    DSF -->|"uses"| PR
+    DSF -->|"uses"| UHC
+    DSF --> ADP
+    BOOT --> STF
+    STF --> STA
+    STA --> BW & SW & GW
+    BOOT --> DQF
+    BOOT --> SB
+    SB -->|"injects storage"| BW & SW & GW
+    SB -->|"injects lock"| ML
+    SB -->|"injects checkpoint"| LC
+    SB -->|"injects quarantine"| UQ
+    SB -->|"injects logger"| SLL
+    SB -->|"injects metrics"| PMM
+    SB -->|"injects tracing"| NOT
+    SB --> PS
+    BOOT --> RF
+    RF -->|"uses"| PS
+    RF -->|"uses"| ADP
+    RF --> RUN
+
+    %% Registry connections
+    GPF -->|"registered in"| PLREG
+    PR -->|"contains"| DSR
+
+    %% Styling
+    style Entry fill:#f3e5f5,stroke:#6a1b9a
+    style Factories fill:#fce4ec,stroke:#c62828
+    style Registry fill:#fff3e0,stroke:#e65100
+    style Created fill:#e8f5e9,stroke:#2e7d32
