@@ -606,6 +606,7 @@ _run_id → _run_id → pipeline_run_id
 
 См. [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) и [ADR-022](02-architecture/decisions/ADR-022-tracing-noop.md) для NoOp Tracing.
 
+- **TracingPort = OTel facade**: `TracingPort` сознательно моделирует OpenTelemetry Tracing API (`get_tracer → start_as_current_span → Span`). Это обеспечивает единый calling convention для NoOp и реального OTel бэкенда. См. ADR-022.
 - **Correlation ID**: `run_id` обязателен во всех логах, метриках и блокировках.
 - **Retention**: Логи хранятся 30 дней, метрики — 90 дней.
 - **Логи**: Структурированный JSON.
