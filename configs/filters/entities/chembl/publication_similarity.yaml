@@ -16,6 +16,20 @@ entity: publication_similarity
 input_filter:
   enabled: false
 
+# ---------------------------------------------------------------------------
+# Extraction-Level Filtering (ADR-028 §3)
+# ---------------------------------------------------------------------------
+# NOT configured for publication_similarity.
+#
+# Reason: Gold filter uses derived field max_tani = max(mol_tani, tid_tani) >= 0.5.
+# The API only exposes individual mol_tani and tid_tani fields.
+# Filtering on individual fields (e.g., mol_tani__gte=0.5 AND tid_tani__gte=0.5)
+# would incorrectly exclude records where one score is high but the other is low
+# (e.g., mol_tani=0.8, tid_tani=0.1 → max_tani=0.8 passes gold but would fail
+# an API-level tid_tani__gte filter). Using OR logic is not supported by the API.
+#
+# Dataset size (~50K records) does not justify the risk of data loss.
+
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------
