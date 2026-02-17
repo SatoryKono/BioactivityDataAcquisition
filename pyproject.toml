@@ -62,7 +62,7 @@ tests = [
     # Testing frameworks
     "pytest>=8.0",
     "pytest-cov>=4.0",
-    "pytest-asyncio>=0.23",
+    "pytest-asyncio>=0.23,<1.0",
     "pytest-xdist>=3.5",
     "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "syrupy>=4.0",
@@ -86,7 +86,7 @@ tests = [
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",
-    "pytest-asyncio>=0.23",
+    "pytest-asyncio>=0.23,<1.0",
     "pytest-xdist>=3.5",
     "pytest-timeout>=2.3",  # Catch stuck tests (prevents CI hangs)
     "pytest-benchmark>=4.0",
@@ -506,7 +506,7 @@ dev = [
     # Core testing
     "pytest>=8.0",
     "pytest-cov>=4.0",
-    "pytest-asyncio>=0.23",
+    "pytest-asyncio>=0.23,<1.0",
     "pytest-xdist>=3.5",
     "pytest-timeout>=2.3", # Catch stuck tests (prevents CI hangs)
     "pytest-benchmark>=4.0",
