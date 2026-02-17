@@ -7,13 +7,14 @@ Usage: python scripts/generate_contracts.py
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 # Ensure project root is in python path
-project_root = Path(__file__).resolve().parent.parent
+project_root = Path(__file__).resolve().parents[3]
 sys.path.append(str(project_root / "src"))
 
 try:
-    from bioetl.interfaces.contracts import (
+    from bioetl.domain.contracts.gold import (
         ChEMBLActivityGoldSchema,
         PubChemCompoundGoldSchema,
         PubMedPublicationGoldSchema,
@@ -23,9 +24,9 @@ except ImportError as e:
     print(f"Error importing schemas: {e}")
     sys.exit(1)
 
-CONTRACTS_DIR = project_root / "docs" / "contracts"
+CONTRACTS_DIR = project_root / "docs" / "04-reference" / "contracts" / "gold"
 
-ENTITY_SCHEMA_MAP = {
+ENTITY_SCHEMA_MAP: dict[str, Any] = {
     "chembl_activity": ChEMBLActivityGoldSchema,
     "pubchem_compound": PubChemCompoundGoldSchema,
     "uniprot_protein": UniProtProteinGoldSchema,
@@ -33,7 +34,7 @@ ENTITY_SCHEMA_MAP = {
 }
 
 
-def generate_contracts():
+def generate_contracts() -> None:
     CONTRACTS_DIR.mkdir(parents=True, exist_ok=True)
 
     for entity, schema_cls in ENTITY_SCHEMA_MAP.items():
