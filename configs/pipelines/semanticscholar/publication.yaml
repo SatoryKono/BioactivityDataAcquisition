@@ -51,7 +51,6 @@ sink:
   bronze:
     flat_structure: true  # Path already includes provider/entity
   silver:
-    partition_by: ["year"]
     flat_structure: true
   gold:
     flat_structure: true

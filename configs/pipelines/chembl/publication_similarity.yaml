@@ -40,6 +40,5 @@ gold_table: "chembl_publication_similarity"
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver:
-    partition_by: []  # No good partition key
+  silver: {}
   gold: {}
