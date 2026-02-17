@@ -6,7 +6,7 @@
 
 This document defines standards for creating, maintaining, and versioning architecture diagrams in the BioETL project.
 
----
+______________________________________________________________________
 
 ## 1. General Principles
 
@@ -14,7 +14,7 @@ This document defines standards for creating, maintaining, and versioning archit
 
 - **Primary format**: Mermaid or PlantUML (text-based)
 - **Rationale**: Version control friendly, diff-able, reviewable in PRs
-- **Binary images**: Generated artifacts only, NOT committed to git
+- **Binary images**: Generated artifacts in `docs/02-architecture/diagrams/png/` (updated together with source diagrams when needed)
 
 ### 1.2 Single Responsibility (MUST)
 
@@ -28,7 +28,7 @@ This document defines standards for creating, maintaining, and versioning archit
 - Follow naming conventions from RULES.md §2
 - Reference RULES.md sections where applicable
 
----
+______________________________________________________________________
 
 ## 2. File Organization
 
@@ -37,14 +37,14 @@ This document defines standards for creating, maintaining, and versioning archit
 ```
 docs/02-architecture/diagrams/
 ├── 00-diagramming-policy.md     # This file
-├── 01-high-level.mermaid        # System overview
-├── 02-medallion.mermaid         # Data flow layers
-├── 03-pipeline-sequence.mermaid # Pipeline execution
-├── 04-error-flow.mermaid        # Error handling
-├── 05-layers-interaction.mermaid # Layer interaction
-├── 05-locking.mermaid           # Concurrency
-├── 06-pipeline-execution.mermaid # Detailed execution
-└── 07-medallion-flow.mermaid    # Data flow through layers
+├── diagrams-index.md            # Index of all diagrams
+├── top-50-diagrams.md           # Prioritized backlog
+├── mermaid/                     # Source diagrams (.mermaid)
+│   ├── 01-high-level.mermaid
+│   └── ...
+└── png/                         # Rendered diagrams (.png)
+    ├── 01-high-level.png
+    └── ...
 ```
 
 ### 2.2 Naming Convention (MUST)
@@ -57,7 +57,16 @@ docs/02-architecture/diagrams/
 - Topic in kebab-case
 - Extension: `.mermaid` (standardized)
 
----
+### 2.3 Diagram Definition of Done (MUST)
+
+Новая или обновлённая диаграмма считается готовой только когда:
+
+- есть исходник `.mermaid` в `mermaid/`;
+- есть `.png` в `png/`;
+- есть запись в `diagrams-index.md`;
+- есть контекстный абзац со ссылкой в `docs/02-architecture/*.md`.
+
+______________________________________________________________________
 
 ## 3. Format Standards
 
@@ -109,7 +118,7 @@ Use for:
 └─────────┘     └─────────┘     └─────────┘
 ```
 
----
+______________________________________________________________________
 
 ## 4. Content Guidelines
 
@@ -130,16 +139,17 @@ Every diagram MUST include:
 ### 4.3 Colors (SHOULD)
 
 Recommended color scheme:
-| Element | Color | Hex |
-|---------|-------|-----|
-| Bronze Layer | Orange | #FFA500 |
-| Silver Layer | Silver | #C0C0C0 |
-| Gold Layer | Gold | #FFD700 |
-| Error/Quarantine | Red | #FF6B6B |
-| Success | Green | #4CAF50 |
-| External | Blue | #2196F3 |
 
----
+| Element          | Color  | Hex     |
+| ---------------- | ------ | ------- |
+| Bronze Layer     | Orange | #FFA500 |
+| Silver Layer     | Silver | #C0C0C0 |
+| Gold Layer       | Gold   | #FFD700 |
+| Error/Quarantine | Red    | #FF6B6B |
+| Success          | Green  | #4CAF50 |
+| External         | Blue   | #2196F3 |
+
+______________________________________________________________________
 
 ## 5. Maintenance
 
@@ -165,14 +175,14 @@ Update diagrams when:
 - Mark outdated diagrams with `<!-- NEEDS UPDATE -->`
 - Track in `../../00-map.md`
 
----
+______________________________________________________________________
 
 ## 6. Tools
 
 ### 6.1 Recommended Editors
 
 | Tool                        | Format   | Notes                              |
-|-----------------------------|----------|------------------------------------|
+| --------------------------- | -------- | ---------------------------------- |
 | VS Code + Mermaid Extension | Mermaid  | Live preview                       |
 | PlantUML Server             | PlantUML | Docker: `plantuml/plantuml-server` |
 | Mermaid Live Editor         | Mermaid  | https://mermaid.live               |
@@ -185,21 +195,21 @@ Update diagrams when:
   run: npx @mermaid-js/mermaid-cli -i docs/**/*.mermaid
 ```
 
----
+______________________________________________________________________
 
 ## 7. Diagram Catalog
 
-| ID | Name                    | Format   | Covers            |
-|----|-------------------------|----------|-------------------|
-| 01 | High-Level Architecture | Mermaid  | §1.1 Layers       |
-| 02 | Medallion Flow          | Mermaid  | §2.1 Data Flow    |
-| 03 | Pipeline Sequence       | PlantUML | §3 Execution      |
-| 04 | Error Handling          | Mermaid  | §3.1 Errors       |
-| 05 | Locking                 | PlantUML | §3.3 Concurrency  |
-| 06 | Class Diagram           | Mermaid  | Domain Objects    |
-| 07 | Deployment              | Mermaid  | §5.6 Environments |
+| ID  | Name                    | Format   | Covers            |
+| --- | ----------------------- | -------- | ----------------- |
+| 01  | High-Level Architecture | Mermaid  | §1.1 Layers       |
+| 02  | Medallion Flow          | Mermaid  | §2.1 Data Flow    |
+| 03  | Pipeline Sequence       | PlantUML | §3 Execution      |
+| 04  | Error Handling          | Mermaid  | §3.1 Errors       |
+| 05  | Locking                 | PlantUML | §3.3 Concurrency  |
+| 06  | Class Diagram           | Mermaid  | Domain Objects    |
+| 07  | Deployment              | Mermaid  | §5.6 Environments |
 
----
+______________________________________________________________________
 
 ## 8. Examples
 
@@ -249,7 +259,7 @@ Worker -> MemoryLock: release lock
 @enduml
 ```
 
----
+______________________________________________________________________
 
 ## Related Documents
 
