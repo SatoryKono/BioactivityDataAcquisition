@@ -140,6 +140,24 @@ configs/pipelines/
 
 ______________________________________________________________________
 
+______________________________________________________________________
+
+## Canonical PK Migration Matrix
+
+| Pipeline                  | Old PK                                                                            | New PK                                                   | Breaking                     | Migration Strategy                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| `chembl_publication`      | `document_chembl_id`                                                              | `publication_id`                                         | Yes (public contract rename) | Add `publication_id` → backfill from `document_chembl_id` → dual-write → drop legacy in next major |
+| `chembl_publication_term` | `document_chembl_id`                                                              | `publication_id`                                         | Yes                          | Add `publication_id` → backfill from `document_chembl_id` → dual-write → drop legacy in next major |
+| `chembl_target`           | `target_chembl_id`                                                                | `target_id`                                              | Yes                          | Add `target_id` → backfill from `target_chembl_id` → dual-write → drop legacy in next major        |
+| `chembl_target_component` | `target_chembl_id`                                                                | `target_id`                                              | Yes                          | Add `target_id` → backfill from `target_chembl_id` → dual-write → drop legacy in next major        |
+| `chembl_molecule`         | `molecule_chembl_id`                                                              | `molecule_id`                                            | Yes                          | Add `molecule_id` → backfill from `molecule_chembl_id` → dual-write → drop legacy in next major    |
+| `chembl_activity`         | `molecule_chembl_id`, `target_chembl_id`, `assay_chembl_id`, `document_chembl_id` | `molecule_id`, `target_id`, `assay_id`, `publication_id` | Yes                          | Add canonical columns → backfill from legacy IDs → dual-write → drop legacy in next major          |
+| `chembl_assay`            | `assay_chembl_id`, `target_chembl_id`, `document_chembl_id`, `cell_chembl_id`     | `assay_id`, `target_id`, `publication_id`, `cell_id`     | Yes                          | Add canonical columns → backfill from legacy IDs → dual-write → drop legacy in next major          |
+| `chembl_assay_parameters` | `assay_chembl_id`                                                                 | `assay_id`                                               | Yes                          | Add `assay_id` → backfill from `assay_chembl_id` → dual-write → drop legacy in next major          |
+| `chembl_cell_line`        | `cell_chembl_id`                                                                  | `cell_id`                                                | Yes                          | Add `cell_id` → backfill from `cell_chembl_id` → dual-write → drop legacy in next major            |
+| `chembl_compound_record`  | `molecule_chembl_id`, `document_chembl_id`                                        | `molecule_id`, `publication_id`                          | Yes                          | Add canonical columns → backfill from legacy IDs → dual-write → drop legacy in next major          |
+| `uniprot_idmapping`       | `target_chembl_id`                                                                | `target_id`                                              | Yes                          | Add `target_id` → backfill from `target_chembl_id` → dual-write → drop legacy in next major        |
+
 ## Related Documentation
 
 - [RULES.md](../RULES.md) - Project governance
