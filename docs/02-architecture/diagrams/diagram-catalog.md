@@ -72,32 +72,34 @@
 
 ## Категория 2: Потоки Данных (60 диаграмм)
 
-### 2.1 End-to-End Data Flow (10)
-51. **Complete Pipeline Flow** - Flowchart - От API до Gold layer
-52. **Bronze Layer Flow** - Sequence - Fetch → JSONL → Compress → Store
-53. **Silver Layer Flow** - Sequence - Transform → Validate → Delta Merge
-54. **Gold Layer Flow** - Sequence - Filter → Validate → Delta Write
-55. **Incremental Run Flow** - Activity - Checkpoint → Fetch → Process → Write
-56. **Backfill Run Flow** - Activity - Clear → Full Fetch → Process
-57. **Rebuild Run Flow** - Activity - Exclusive Lock → Clear All → Rebuild
-58. **Data Lineage** - Flowchart - Data provenance через слои
-59. **Content Hash Calculation** - Activity - SHA256 hashing алгоритм
-60. **Medallion Transformation** - Flowchart - Bronze → Silver → Gold трансформации
+### 2.1 End-to-End Data Flow (12)
+51. **Complete Pipeline Flow** - Flowchart - От API до Gold layer с skip_gold логикой
+52. **Composite Pipeline Workflow** - Flowchart - Seed → Dependencies → Enrichers → Cross-Validation → Merge → Gold
+53. **Bronze Layer Flow** - Sequence - Fetch → JSONL → Compress → Store
+54. **Silver Layer Flow** - Sequence - Transform → Validate → Delta Merge
+55. **Gold Layer Flow** - Sequence - Filter → Validate → Delta Write
+56. **Incremental Run Flow** - Activity - Checkpoint → Fetch → Process → Write
+57. **Backfill Run Flow** - Activity - Clear → Full Fetch → Process
+58. **Rebuild Run Flow** - Activity - Exclusive Lock → Clear All → Rebuild
+59. **Data Lineage** - Flowchart - Data provenance через слои
+60. **Content Hash Calculation** - Activity - SHA256 hashing алгоритм
+61. **Medallion Transformation** - Flowchart - Bronze → Silver → Gold с 3-уровневой классификацией
+62. **Publication Classification Fields** - Flowchart - 3-level taxonomy + author_keys propagation
 
 ### 2.2 Provider-Specific Flows (14)
-61. **ChEMBL Activity Pipeline** - Sequence - Полный flow для activity
-62. **ChEMBL Molecule Pipeline** - Sequence - Molecule fetch → transform → write
-63. **ChEMBL Target Pipeline** - Sequence - Target data processing
-64. **PubChem Compound Pipeline** - Sequence - PubChem API → Storage
-65. **UniProt Protein Pipeline** - Sequence - UniProt fetch → parse → store
-66. **CrossRef Publication Pipeline** - Sequence - CrossRef API flow
-67. **OpenAlex Work Pipeline** - Sequence - OpenAlex processing
-68. **PubMed Article Pipeline** - Sequence - NCBI E-utilities flow
-69. **SemanticScholar Pipeline** - Sequence - Semantic Scholar API
-70. **ChEMBL Assay Pipeline** - Sequence - Assay data flow
-71. **ChEMBL Compound Record Pipeline** - Sequence - Compound records
-72. **UniProt ID Mapping** - Sequence - ID mapping transformation
-73. **ChEMBL Cell Line Pipeline** - Sequence - Cell line data
+63. **ChEMBL Activity Pipeline** - Sequence - Полный flow для activity
+64. **ChEMBL Molecule Pipeline** - Sequence - Molecule fetch → transform → write
+65. **ChEMBL Target Pipeline** - Sequence - Target data processing
+66. **PubChem Compound Pipeline** - Sequence - PubChem API → Storage
+67. **UniProt Protein Pipeline** - Sequence - UniProt fetch → parse → store
+68. **CrossRef Publication Pipeline** - Sequence - CrossRef API flow
+69. **OpenAlex Work Pipeline** - Sequence - OpenAlex processing
+70. **PubMed Article Pipeline** - Sequence - NCBI E-utilities flow
+71. **SemanticScholar Pipeline** - Sequence - Semantic Scholar API
+72. **ChEMBL Assay Pipeline** - Sequence - Assay data flow
+73. **ChEMBL Compound Record Pipeline** - Sequence - Compound records
+74. **UniProt ID Mapping** - Sequence - ID mapping transformation
+75. **ChEMBL Cell Line Pipeline** - Sequence - Cell line data
 74. **ChEMBL Protein Class Pipeline** - Sequence - Protein classification
 
 ### 2.3 Transformation Flows (12)

@@ -1,0 +1,97 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    subgraph Schema["Publication Schema Fields"]
+        subgraph Core["Core Identifiers"]
+            publication_id["publication_id (primary)"]
+            doi["doi"]
+            pmid["pmid"]
+            pmc_id["pmc_id"]
+            title["title"]
+        end
+        
+        subgraph Classification["3-Level Classification Taxonomy"]
+            direction TB
+            L1["Level 1: publication_class<br/>━━━━━━━━━━━━━━━━<br/>EXP (Experimental)<br/>REV (Review)<br/>PEER (Peer-reviewed)"]
+            L2["Level 2: publication_subclass<br/>━━━━━━━━━━━━━━━━<br/>~25 groupings<br/>e.g., Research Article,<br/>Systematic Review,<br/>Case Report"]
+            L3["Level 3: publication_type_unified<br/>━━━━━━━━━━━━━━━━<br/>214 specific types<br/>e.g., journal-article,<br/>review-article,<br/>proceedings-article"]
+            
+            L1 --> L2
+            L2 --> L3
+        end
+        
+        subgraph Authors["Author Metadata"]
+            author_keys["author_keys (NEW)<br/>━━━━━━━━━━━━━━━━<br/>Pipe-delimited format<br/>Surname_F|Surname_F|..."]
+            author_orcids["author_orcids<br/>━━━━━━━━━━━━━━━━<br/>List of ORCIDs"]
+            affiliation_list["affiliation_list<br/>━━━━━━━━━━━━━━━━<br/>Author affiliations"]
+        end
+        
+        subgraph Citations["Citation Metrics"]
+            citations_received["citations_received<br/>(formerly citation_count)"]
+            citations_made["citations_made"]
+        end
+        
+        subgraph Metadata["Publication Metadata"]
+            journal["journal"]
+            publication_year["publication_year"]
+            volume["volume"]
+            issue["issue"]
+            page_first["page_first"]
+            page_last["page_last"]
+            publication_date["publication_date (ISO)"]
+            language["language"]
+            is_oa["is_oa (Open Access)"]
+        end
+    end
+    
+    subgraph Providers["Provider-Specific Sources"]
+        direction LR
+        ChEMBL["ChEMBL<br/>Seed Pipeline"]
+        CrossRef["CrossRef<br/>Enricher"]
+        OpenAlex["OpenAlex<br/>Enricher"]
+        PubMed["PubMed<br/>Enricher"]
+        SemanticScholar["Semantic Scholar<br/>Enricher"]
+    end
+    
+    subgraph Layers["Data Flow"]
+        Bronze["Bronze Layer<br/>━━━━━━━━━━━━━━<br/>Raw JSON + zstd"]
+        Silver["Silver Layer<br/>━━━━━━━━━━━━━━<br/>Delta Lake<br/>+ Classification<br/>+ author_keys"]
+        Gold["Gold Layer<br/>━━━━━━━━━━━━━━<br/>Strict validation<br/>Full taxonomy"]
+    end
+    
+    %% Data flow
+    ChEMBL --> Bronze
+    CrossRef --> Bronze
+    OpenAlex --> Bronze
+    PubMed --> Bronze
+    SemanticScholar --> Bronze
+    
+    Bronze --> Silver
+    Silver --> Gold
+    
+    %% Field propagation
+    Classification -.->|Added in Silver| Silver
+    Authors -.->|Added in Silver| Silver
+    Classification -.->|Validated| Gold
+    Authors -.->|Validated| Gold
+    
+    %% Field groups
+    subgraph FieldGroups["Field Groups (Composite Merge)"]
+        AUTHOR_AND_AFFILIATIONS["AUTHOR_AND_AFFILIATIONS<br/>━━━━━━━━━━━━━━━━<br/>• author_keys<br/>• author_orcids<br/>• affiliation_list"]
+        CLASSIFICATION_GROUP["CLASSIFICATION<br/>━━━━━━━━━━━━━━━━<br/>• publication_class<br/>• publication_subclass<br/>• publication_type_unified"]
+    end
+    
+    Authors -.->|Grouped| AUTHOR_AND_AFFILIATIONS
+    Classification -.->|Grouped| CLASSIFICATION_GROUP
+    
+    AUTHOR_AND_AFFILIATIONS -.->|Included in Gold| Gold
+    CLASSIFICATION_GROUP -.->|Included in Gold| Gold
+    
+    %% Styling
+    style Classification fill:#E8F5E9,stroke:#4CAF50,stroke-width:3px
+    style Authors fill:#E3F2FD,stroke:#2196F3,stroke-width:3px
+    style author_keys fill:#FFECB3,stroke:#FF9800,stroke-width:3px
+    style L1 fill:#C8E6C9
+    style L2 fill:#A5D6A7
+    style L3 fill:#81C784
+    style Silver fill:#C0C0C0,color:#000
+    style Gold fill:#FFD700,color:#000

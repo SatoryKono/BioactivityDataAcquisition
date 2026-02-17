@@ -1,8 +1,8 @@
 # BioETL Architecture Diagrams
 
-*Updated: 2026-02-09*
+*Updated: 2026-02-17*
 
-В каталоге 34 исходных файла диаграмм Mermaid, документирующих архитектуру BioETL.
+В каталоге 36 исходных файлов диаграмм Mermaid, документирующих архитектуру BioETL.
 
 ## Diagram Overview
 
@@ -10,8 +10,8 @@
 |---|------|-------------|
 | 01a | `01-full-system-component.mermaid` | Full system component diagram (C4-style) |
 | 01b | `01-high-level.mermaid` | High-level system overview |
-| 02a | `02-full-medallion-data-flow.mermaid` | Medallion architecture data flow (detailed) |
-| 02b | `02-medallion.mermaid` | Medallion architecture (simplified) |
+| 02a | `02-full-medallion-data-flow.mermaid` | Medallion architecture data flow (detailed, with classification) |
+| 02b | `02-medallion.mermaid` | Medallion architecture (simplified, with 3-level taxonomy) |
 | 03a | `03-pipeline-execution-happy-path.mermaid` | Pipeline execution sequence (happy path) |
 | 03b | `03-pipeline-sequence.mermaid` | Pipeline sequence diagram |
 | 04a | `04-domain-layer-class-diagram.mermaid` | Domain layer ports, entities, config |
@@ -23,7 +23,7 @@
 | 06b | `06-pipeline-execution.mermaid` | Pipeline execution flow |
 | 07a | `07-circuit-breaker-states.mermaid` | Circuit breaker state machine |
 | 07b | `07-medallion-flow.mermaid` | Medallion data flow |
-| 08a | `08-complete-etl-workflow.mermaid` | Complete ETL workflow |
+| 08a | `08-complete-etl-workflow.mermaid` | Complete ETL workflow (with skip_gold logic) |
 | 08b | `08-domain-ddd.mermaid` | Domain-driven design diagram |
 | 09 | `09-full-er-diagram.mermaid` | Entity-relationship diagram |
 | 10 | `10-infrastructure-layer-class-diagram.mermaid` | Infrastructure layer classes |
@@ -41,6 +41,8 @@
 | 23 | `23-silver-writer-class.mermaid` | SilverWriter class diagram |
 | 24 | `24-hash-service-class.mermaid` | Hash service class diagram |
 | 25 | `25-circuit-breaker-observer-class.mermaid` | CircuitBreaker class diagram |
+| 26 | `26-composite-pipeline-workflow.mermaid` | Composite pipeline workflow (seed → enrichers → merge) |
+| 27 | `27-publication-classification-fields.mermaid` | Publication 3-level classification + author_keys |
 
 ## Rendering to PNG
 
