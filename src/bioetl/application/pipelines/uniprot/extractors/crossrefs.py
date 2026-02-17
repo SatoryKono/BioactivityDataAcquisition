@@ -311,7 +311,9 @@ class CrossRefExtractor:
         )
 
     @classmethod
-    def extract_go_by_aspect(cls, xrefs: Any, aspect: str) -> str | None:
+    def extract_go_by_aspect(
+        cls, xrefs: Any, aspect: str
+    ) -> str | None:  # Any: untyped UniProt JSON
         """Extract GO terms filtered by aspect.
 
         Args:

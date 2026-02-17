@@ -29,9 +29,13 @@ if TYPE_CHECKING:
 
 
 def _get_factories(
-    data_source_factory_getter: Callable[[], Any],
-    http_client_factory_getter: Callable[[], Any],
-) -> tuple[Any, Any]:
+    data_source_factory_getter: Callable[
+        [], Any
+    ],  # Any: factory type varies per provider
+    http_client_factory_getter: Callable[
+        [], Any
+    ],  # Any: factory type varies per provider
+) -> tuple[Any, Any]:  # Any: resolved factory instances
     """Resolve factory classes via injected getters.
 
     Keeps this helper module decoupled from factory modules to avoid

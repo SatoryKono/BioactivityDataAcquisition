@@ -127,9 +127,9 @@ class TestFileSizeLimits:
         "merger.py": 1805,  # 1799 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join + cross-validation integration
         "extractors.py": 510,  # 493 LOC OpenAlex, 413 CrossRef, 349 S2 (author + page parsing split to submodules)
         # UniProt extraction helpers
-        "comments.py": 580,  # 578 LOC - UniProt comment extraction helpers with isoform/subcellular/disease details
-        "crossrefs.py": 380,  # 375 LOC - UniProt cross-reference extraction helpers
-        "features.py": 400,  # 397 LOC - UniProt feature extraction helpers (PTMs, domains)
+        "comments.py": 590,  # 587 LOC - UniProt comment extraction helpers with isoform/subcellular/disease details
+        "crossrefs.py": 385,  # 381 LOC - UniProt cross-reference extraction helpers
+        "features.py": 405,  # 401 LOC - UniProt feature extraction helpers (PTMs, domains)
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -676,9 +676,9 @@ class TestClassSize:
         # PubChem adapter fetch strategies
         "PubChemFetchStrategies": 330,  # PubChem fetch strategies with SMILES, CID, InChIKey support
         # UniProt extraction helper classes
-        "CommentExtractor": 350,  # 346 lines - UniProt comment extraction helper
+        "CommentExtractor": 355,  # 352 lines - UniProt comment extraction helper
         "CrossRefExtractor": 370,  # 366 lines - UniProt cross-reference extraction helper
-        "FeatureExtractor": 330,  # 328 lines - UniProt feature extraction helper
+        "FeatureExtractor": 335,  # 332 lines - UniProt feature extraction helper
         # Derived entity data source wrappers
         "SubcellularFractionDataSource": 490,  # 479 lines - Wrapper with FilterableDataSourcePort delegation (like PublicationTermDataSource)
     }

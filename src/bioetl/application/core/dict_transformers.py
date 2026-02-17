@@ -31,7 +31,9 @@ T = TypeVar("T")
 def flatten_nested_dict(
     data: dict[str, Any] | None,
     prefix: str,
-    field_mapping: dict[str, Callable[[Any], Any] | None],
+    field_mapping: dict[
+        str, Callable[[Any], Any] | None
+    ],  # Any: heterogeneous record values
     renames: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Разворачивает вложенный словарь в плоскую структуру с префиксом.
@@ -283,7 +285,7 @@ def safe_extract(
     record: dict[str, Any],
     key: str,
     default: T | None = None,
-) -> T | Any | None:
+) -> T | Any | None:  # Any: dict value type unknown at extraction time
     """Безопасно извлекает значение из словаря с логированием.
 
     Обёртка над dict.get() для унифицированного извлечения полей.
