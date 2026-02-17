@@ -19,20 +19,20 @@ make lint && make test && git commit
 
 Before contributing, read these documents:
 
-| Document | Purpose |
-|----------|---------|
-| [docs/RULES.md](docs/RULES.md) | Project constitution (MUST read) |
-| [AGENT.md](AGENT.md) | Development workflow and patterns |
-| [docs/00-map.md](docs/00-map.md) | Documentation navigator |
+| Document                         | Purpose                           |
+| -------------------------------- | --------------------------------- |
+| [docs/RULES.md](docs/RULES.md)   | Project constitution (MUST read)  |
+| [AGENT.md](AGENT.md)             | Development workflow and patterns |
+| [docs/00-map.md](docs/00-map.md) | Documentation navigator           |
 
 ## Workflow
 
 1. **Create branch** from `main`
-2. **Read** relevant sections of RULES.md
-3. **Implement** following architecture constraints
-4. **Test** (`make test` before AND after changes)
-5. **Lint** (`make lint`)
-6. **Commit** using Conventional Commits format
+1. **Read** relevant sections of RULES.md
+1. **Implement** following architecture constraints
+1. **Test** (`make test` before AND after changes)
+1. **Lint** (`make lint`)
+1. **Commit** using Conventional Commits format
 
 ## Commit Format
 
@@ -43,6 +43,7 @@ Before contributing, read these documents:
 **Types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
 **Examples:**
+
 - `feat(chembl): add activity pipeline`
 - `fix(pubchem): handle rate limit 429`
 - `docs: update architecture diagram`
@@ -51,13 +52,13 @@ Before contributing, read these documents:
 
 ### Layer Dependencies (MUST follow)
 
-| From ↓ / To → | domain | application | composition | infrastructure | interfaces |
-|---------------|--------|-------------|-------------|----------------|------------|
-| **domain** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **application** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **composition** | ✅ | ✅ | ✅ | ✅ | ❌ |
-| **infrastructure** | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **interfaces** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| From ↓ / To →      | domain | application | composition | infrastructure | interfaces |
+| ------------------ | ------ | ----------- | ----------- | -------------- | ---------- |
+| **domain**         | ✅     | ❌          | ❌          | ❌             | ❌         |
+| **application**    | ✅     | ✅          | ❌          | ❌             | ❌         |
+| **composition**    | ✅     | ✅          | ✅          | ✅             | ❌         |
+| **infrastructure** | ✅     | ❌          | ❌          | ✅             | ❌         |
+| **interfaces**     | ✅     | ✅          | ✅          | ✅             | ✅         |
 
 ### Key Rules
 
@@ -69,13 +70,21 @@ Before contributing, read these documents:
 
 ## Testing Requirements
 
-| Type | Directory | Requirements |
-|------|-----------|--------------|
-| Unit | `tests/unit/` | No mocking domain entities, mock ports only |
-| Integration | `tests/integration/` | VCR.py for HTTP, sanitize secrets from cassettes |
-| Architecture | `tests/test_architecture.py` | Validates layer imports |
+| Type         | Directory                    | Requirements                                     |
+| ------------ | ---------------------------- | ------------------------------------------------ |
+| Unit         | `tests/unit/`                | No mocking domain entities, mock ports only      |
+| Integration  | `tests/integration/`         | VCR.py for HTTP, sanitize secrets from cassettes |
+| Architecture | `tests/test_architecture.py` | Validates layer imports                          |
 
 **Coverage target:** ≥85% line coverage
+
+## Branch Protection (Required Status Checks)
+
+For PRs to `main`, configure GitHub branch protection/rulesets to require:
+
+- `Schema Governance Status` (from `.github/workflows/schema-governance.yml`)
+
+This keeps contract export drift as a blocking gate while schema parity remains non-blocking and visible in the CI report.
 
 ## Pull Request Checklist
 
@@ -102,18 +111,22 @@ Before contributing, read these documents:
 ### Common Issues
 
 **1. "Watermark not found" errors**
+
 - Check S3/MinIO connectivity (`make test-integration` usually catches this).
 - Ensure `Watermark` class usage is consistent (use `Watermark.from_*` factory methods).
 
 **2. "Lock acquisition failed"**
+
 - Check Redis is running: `docker ps`.
 - Check logs for "Lock lost" messages.
 
 **3. "Missing dependencies"**
+
 - Run `uv sync --extra dev --extra tracing`.
 - Check `pyproject.toml` for new groups.
 
 **4. "ERROR: Missing required plugins: pytest-asyncio>=0.23, pytest-cov>=4.0"**
+
 - Установите тестовые зависимости перед запуском: `make install` или `pip install -e .[tests]`.
 - При использовании uv запустите `uv sync --extra tests --extra dev`.
 - Убедитесь, что активировано корректное окружение (`uv run` или `source .venv/bin/activate`).
