@@ -10,6 +10,7 @@ Convention-based path resolution (ADR-029):
         - source_file: ../../sources/{provider}.yaml
         - dq_config_file: ../../quality/entities/{provider}/{entity_type}.yaml
         - filter_config_file: ../../filters/entities/{provider}/{entity_type}.yaml
+        - data_schema_file: ../../schemas/{provider}/{entity_type}.yaml
 
     Sink Paths:
         - sink.bronze.path: data/output/bronze/{provider}/{entity_type}
@@ -79,7 +80,7 @@ def _apply_file_reference_defaults(
     )
     config.setdefault(
         "data_schema_file",
-        f"../schemas/{provider}/{entity_type}.yaml",
+        f"../../schemas/{provider}/{entity_type}.yaml",
     )
     config.setdefault(
         "column_groups_file",
@@ -123,11 +124,17 @@ def _load_data_schema_config(
         data_schema_file: Relative path to data schema YAML.
 
     Returns:
-        Dictionary with column_groups, silver, and gold keys, or None if file not found.
+        Dictionary with column_groups, silver, and gold keys, or None if empty.
+
+    Raises:
+        FileNotFoundError: If the resolved schema path does not exist.
     """
-    schema_path = config_path.parent / data_schema_file
+    schema_path = (config_path.parent / data_schema_file).resolve()
     if not schema_path.exists():
-        return None
+        raise FileNotFoundError(
+            f"Data schema file not found: {schema_path} "
+            f"(resolved from '{data_schema_file}' relative to {config_path.parent})"
+        )
 
     with open(schema_path, encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
@@ -502,6 +509,18 @@ def _apply_hierarchical_filter_config(
             config[section] = merged_filters[section]
 
 
+def _merge_data_schema_into_config(
+    config: dict[str, Any], data_schema: dict[str, Any]
+) -> None:
+    """Merge loaded data schema (column_groups, silver, gold) into pipeline config."""
+    if "column_groups" in data_schema:
+        config["column_groups"] = data_schema["column_groups"]
+    if "silver" in data_schema:
+        config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
+    if "gold" in data_schema:
+        config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
+
+
 def _load_column_groups_section(
     config: dict[str, Any],
     entity_config: dict[str, Any],
@@ -515,15 +534,14 @@ def _load_column_groups_section(
         return
 
     if data_schema_file := config.get("data_schema_file"):
-        data_schema = _load_data_schema_config(config_path, data_schema_file)
-        if data_schema:
-            if "column_groups" in data_schema:
-                config["column_groups"] = data_schema["column_groups"]
-            if "silver" in data_schema:
-                config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
-            if "gold" in data_schema:
-                config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
-            return
+        try:
+            data_schema = _load_data_schema_config(config_path, data_schema_file)
+        except FileNotFoundError:
+            pass  # Fall back to column_groups_file below
+        else:
+            if data_schema:
+                _merge_data_schema_into_config(config, data_schema)
+                return
 
     if column_groups_file := config.get("column_groups_file"):
         column_groups = _load_column_groups_config(config_path, column_groups_file)
