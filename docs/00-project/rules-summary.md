@@ -1,6 +1,6 @@
 # Rules Summary
 
-*Автоматически сгенерировано из RULES.md v5.20 (2026-02-03)*
+*Автоматически сгенерировано из RULES.md v5.20 (2026-02-17)*
 
 > **Note**: Этот документ — выжимка из `docs/RULES.md`. Канонический источник правил — `RULES.md`.
 
@@ -105,7 +105,7 @@
 
 - PEP8, ruff, mypy (strict)
 - Логирование: `UnifiedLogger`. **print() MUST NOT**
-- Тесты: Unit, Integration (VCR.py), E2E. Coverage ≥80%
+- Тесты: Unit, Integration (VCR.py), E2E. Coverage ≥85%
 - Zero-sum class count при дублировании
 
 ## 7. Anti-Patterns (MUST NOT)
@@ -125,7 +125,7 @@
 4. Locks: MemoryLock (local), TTL 90s, Heartbeat 30s, Max 4h.
 5. DR: RPO 24h, RTO 4h, Game Days ежегодно.
 6. Schema Evolution: 14-дневный deprecation period, dual-write.
-7. Coverage ≥80%, mypy --strict, zero-sum class count.
+7. Coverage ≥85%, mypy --strict, zero-sum class count.
 
 ---
 
