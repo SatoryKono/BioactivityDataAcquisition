@@ -7,8 +7,8 @@
 #
 # Auto-computed by convention:
 #   - source_file: ../../sources/chembl.yaml
-#   - dq_config_file: ../../dq/entities/chembl/activity.yaml
-#   - filter_config_file: ../../filter/entities/chembl/activity.yaml
+#   - dq_config_file: ../../quality/entities/chembl/activity.yaml
+#   - filter_config_file: ../../filters/entities/chembl/activity.yaml
 #   - input_filter: loaded from filter_config_file
 #   - gold_filters: loaded from filter_config_file
 #   - sink paths: data/output/{layer}/chembl/activity
