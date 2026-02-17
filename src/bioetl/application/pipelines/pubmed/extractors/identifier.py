@@ -166,6 +166,68 @@ class IdentifierExtractor(BaseFieldExtractor):
         return extractor._normalize_text(raw)
 
     @classmethod
+    def extract_all_identifiers(cls, root: Element) -> dict[str, str | None]:
+        """Extract all relevant identifiers in a single pass.
+
+        Optimized to scan ELocationID (for DOI/PII) and ArticleIdList (for others)
+        only once each, reducing XML traversal overhead compared to individual calls.
+
+        Returns:
+            Dictionary with keys: doi, pii, pmc_id, mid, publisher_id.
+            Values are normalized strings (stripped) or None.
+        """
+        extractor = cls()
+        result: dict[str, str | None] = {
+            "doi": None,
+            "pii": None,
+            "pmc_id": None,
+            "mid": None,
+            "publisher_id": None,
+        }
+
+        # 1. Scan ELocationID (Priority for DOI, PII)
+        article = root.find(".//Article")
+        if article is not None:
+            for eloc in article.findall("ELocationID"):
+                eid_type = eloc.get("EIdType")
+                if not eid_type or not eloc.text:
+                    continue
+
+                normalized = extractor._normalize_text(eloc.text)
+                if not normalized:
+                    continue
+
+                if eid_type == "doi" and result["doi"] is None:
+                    result["doi"] = normalized
+                elif eid_type == "pii" and result["pii"] is None:
+                    result["pii"] = normalized
+
+        # 2. Scan ArticleIdList (Fallback for DOI/PII, Primary for others)
+        article_id_list = root.find(".//ArticleIdList")
+        if article_id_list is not None:
+            for aid in article_id_list.findall("ArticleId"):
+                id_type = aid.get("IdType")
+                if not id_type or not aid.text:
+                    continue
+
+                normalized = extractor._normalize_text(aid.text)
+                if not normalized:
+                    continue
+
+                if id_type == "doi" and result["doi"] is None:
+                    result["doi"] = normalized
+                elif id_type == "pii" and result["pii"] is None:
+                    result["pii"] = normalized
+                elif id_type == "pmc" and result["pmc_id"] is None:
+                    result["pmc_id"] = normalized
+                elif id_type == "mid" and result["mid"] is None:
+                    result["mid"] = normalized
+                elif id_type == "publisher-id" and result["publisher_id"] is None:
+                    result["publisher_id"] = normalized
+
+        return result
+
+    @classmethod
     def parse_all_article_ids(cls, root: Element) -> AllArticleIds:
         """Extract complete set of article identifiers from ArticleIdList.
 
