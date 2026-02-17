@@ -1,0 +1,12 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
+component_id,S2.1,YES,EMPTY,target_component_transformer.py:74,chembl.py:626,target_component.py:23,chembl.py:604,integer,false,true,OK
+accession,S2.2,YES,EMPTY,target_component_transformer.py:40,chembl.py:629,target_component.py:30,chembl.py:607,string,true,false,OK
+component_type,S2.2,YES,EMPTY,target_component_transformer.py:40,chembl.py:630,target_component.py:34,chembl.py:608,string,true,false,OK
+description,S2.3,YES,EMPTY,target_component_transformer.py:40,chembl.py:631,target_component.py:38,chembl.py:609,string,true,false,OK
+organism,S2.3,YES,EMPTY,target_component_transformer.py:40,chembl.py:632,target_component.py:42,chembl.py:610,string,true,false,OK
+taxonomy_id,S2.3,YES,EMPTY,target_component_transformer.py:42,chembl.py:633,target_component.py:48,chembl.py:611,number,true,false,RENAME:tax_id->taxonomy_id
+target_component_synonyms,S2.4,YES,EMPTY,target_component_transformer.py:78,chembl.py:641,target_component.py:55,chembl.py:614,string,true,false,OK
+target_component_xrefs,S2.4,YES,EMPTY,target_component_transformer.py:78,chembl.py:644,target_component.py:60,chembl.py:615,string,true,false,OK
+protein_classifications,S2.4,YES,EMPTY,target_component_transformer.py:78,chembl.py:647,target_component.py:65,chembl.py:616,string,true,false,OK
+protein_classification_id,S2.5,YES,EMPTY,target_component_transformer.py:91,MISSING,target_component.py:72,chembl.py:617,integer,true,false,DERIVED
+protein_classification_ids,S2.5,YES,EMPTY,target_component_transformer.py:80,chembl.py:636,target_component.py:78,chembl.py:620,array,true,false,NESTED
