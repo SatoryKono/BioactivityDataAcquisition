@@ -51,9 +51,7 @@ class TestLoadDataSchemaConfig:
         config_path.touch()
 
         with pytest.raises(FileNotFoundError, match="Data schema file not found"):
-            _load_data_schema_config(
-                config_path, "../../schemas/chembl/molecule.yaml"
-            )
+            _load_data_schema_config(config_path, "../../schemas/chembl/molecule.yaml")
 
     def test_existing_file_loads_column_groups(self, tmp_path: Path) -> None:
         """Existing data_schema_file with column_groups must load correctly."""
@@ -66,9 +64,7 @@ class TestLoadDataSchemaConfig:
         schema_path = tmp_path / "schemas" / "chembl" / "molecule.yaml"
         schema_path.parent.mkdir(parents=True)
         schema_path.write_text(
-            "column_groups:\n"
-            "  - name: identifiers\n"
-            "    fields: [molecule_id]\n"
+            "column_groups:\n  - name: identifiers\n    fields: [molecule_id]\n"
         )
 
         result = _load_data_schema_config(
@@ -120,9 +116,7 @@ class TestLoadDataSchemaConfig:
         schema_path.parent.mkdir(parents=True)
         schema_path.write_text("version: '1.0.0'\n")
 
-        result = _load_data_schema_config(
-            config_path, "../../schemas/test/entity.yaml"
-        )
+        result = _load_data_schema_config(config_path, "../../schemas/test/entity.yaml")
 
         assert result is None
 
@@ -133,6 +127,4 @@ class TestLoadDataSchemaConfig:
         config_path.touch()
 
         with pytest.raises(FileNotFoundError, match=str(tmp_path)):
-            _load_data_schema_config(
-                config_path, "../../schemas/chembl/molecule.yaml"
-            )
+            _load_data_schema_config(config_path, "../../schemas/chembl/molecule.yaml")
