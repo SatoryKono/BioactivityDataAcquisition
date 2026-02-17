@@ -22,7 +22,7 @@ ______________________________________________________________________
 - **Deterministic Writes**: Reproducible outputs and deterministic retries ([ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md)).
 - **Observability by Design**: Metrics, tracing, and logging ports ([ADR-017](docs/02-architecture/decisions/ADR-017-observability-architecture.md)).
 - **Unified HTTP Client**: Standardized rate limiting, retry, and telemetry ([ADR-032](docs/02-architecture/decisions/ADR-032-unified-http-client.md)).
-- **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures.
+- **Strict Governance**: Comprehensive rules for schema evolution, data contracts, and operational procedures, including governance-gate severity (`blocking` / `warning`) classification.
 
 ## Architecture Overview
 
@@ -74,15 +74,18 @@ The domain layer implements Domain-Driven Design patterns:
 
 ## Documentation
 
-| Document                                                  | Description                                 |
-| --------------------------------------------------------- | ------------------------------------------- |
-| [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 34 ADRs explaining design choices           |
-| [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
-| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.19) |
-| [Project Map](docs/00-project/00-map.md)                  | Documentation navigator and code map        |
-| [CLI Reference](docs/04-reference/cli.md)                 | Command-line interface documentation        |
-| [Operations Runbooks](docs/05-operations/runbooks/)       | Incident response and procedures            |
+| Document                                                                                   | Description                                                 |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| [API Reference](docs/04-reference/api/index.md)                                            | Full API documentation with mkdocstrings                    |
+| [Architecture Decisions](docs/02-architecture/decisions/)                                  | 35 ADRs explaining design choices                           |
+| [Ubiquitous Language](docs/00-project/glossary.md)                                         | Domain terminology and canonical naming                     |
+| [RULES.md](docs/00-project/RULES.md)                                                       | Project governance and requirements (v5.21)                 |
+| [Schema Governance](docs/02-architecture/Schema-Governance.md)                             | Lifecycle, drift handling, contract versioning, SCD2 matrix |
+| [ADR-035](docs/02-architecture/decisions/ADR-035-target-schema-architecture-2026.md)       | Target Schema Architecture 2026 roadmap and risk model      |
+| [Governance Gate Severity](docs/02-architecture/Schema-Governance.md#scd2-decision-matrix) | `blocking` vs `warning` classification policy               |
+| [Project Map](docs/00-project/00-map.md)                                                   | Documentation navigator and code map                        |
+| [CLI Reference](docs/04-reference/cli.md)                                                  | Command-line interface documentation                        |
+| [Operations Runbooks](docs/05-operations/runbooks/)                                        | Incident response and procedures                            |
 
 ## Quick Start
 
@@ -179,13 +182,14 @@ bioetl checkpoint list
 - Keep machine-consumed reference datasets under semantic paths in `data/` (for example, `data/input/reference/`).
 - Keep optional human-facing spreadsheet copies under `docs/reference/`.
 - Unified publication classifier canonical format is CSV at `data/input/reference/unified_classification.csv`; Excel is optional documentation copy at `docs/reference/unified_classification.xlsx`.
+
 ### Local diagnostic artifacts
 
 Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
 
-* Временные диагностические дампы сохраняйте в `tmp/`.
-* Логи локальных запусков сохраняйте в `logs/`.
-* Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
+- Временные диагностические дампы сохраняйте в `tmp/`.
+- Логи локальных запусков сохраняйте в `logs/`.
+- Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
 
 ### Testing
 
@@ -284,7 +288,7 @@ Access the docs at `http://localhost:8000`.
 │   ├── 02-architecture/      # Layer docs, diagrams, ADRs (34 decisions)
 │   ├── 00-project/
 │   │   ├── glossary.md       # Ubiquitous Language glossary
-│   │   └── RULES.md          # Project governance (v5.19)
+│   │   └── RULES.md          # Project governance (v5.21)
 │   └── ...
 ├── src/
 │   └── bioetl/

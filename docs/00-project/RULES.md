@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.19 (Statistics Update), 2026-02-16*
+*Версия: 5.21 (Target Schema Architecture 2026), 2026-02-17*
 
 ## Введение (Quick Reference)
 
@@ -62,7 +62,9 @@
 Интерфейсы определяются в пакете `domain/ports/` через `typing.Protocol`:
 
 - **Design-time**: `mypy --strict` проверяет соответствие типов во время сборки. Основной механизм контроля.
+
 - **Runtime Boundary**: Следующие критические порты **SHOULD** быть `@runtime_checkable` для boundary validation в composition layer:
+
   - `DataSourcePort` — для проверки адаптеров при регистрации
   - `FilterableDataSourcePort` — для проверки расширенных адаптеров
   - `HealthCheckPort` — для проверки health-check capability
@@ -72,6 +74,7 @@
 
   > **Текущее состояние:** Все 38 портов декорированы `@runtime_checkable` (100% coverage).
   > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
+
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
 
 ```python
@@ -164,7 +167,7 @@ class MyAdapter:
 ### 2.2. Политика Дрейфа Схемы (Schema Drift)
 
 | Уровень  | Условие                                  |
-|----------|------------------------------------------|
+| -------- | ---------------------------------------- |
 | Info     | Новые поля (любое количество)            |
 | Critical | Пропавшее обязательное поле / смена типа |
 
@@ -244,19 +247,20 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 Единая таблица `common.quarantine` для всех сущностей.
 
-- `ingestion_ts` (Timestamp): Время инцидента. [Код: `QuarantineEntry._created_at`]
+- `ingestion_ts` (Timestamp): Время инцидента. \[Код: `QuarantineEntry._created_at`\]
 
-- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`). [Код: `QuarantineEntry._pipeline_name`]
+- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`). \[Код: `QuarantineEntry._pipeline_name`\]
 
-- `error_code` (String): Тип ошибки (напр., `SCHEMA_VIOLATION`). [Код: `QuarantineEntry._error_code`]
+- `error_code` (String): Тип ошибки (напр., `SCHEMA_VIOLATION`). \[Код: `QuarantineEntry._error_code`\]
 
-- `payload` (JSON/Text): Сырая запись (**Truncated to 64KB**). [Код: `QuarantineEntry._payload`]
+- `payload` (JSON/Text): Сырая запись (**Truncated to 64KB**). \[Код: `QuarantineEntry._payload`\]
 
-- `payload_hash` (String): Для дедупликации ошибок. [Код: `QuarantineEntry._payload_hash`]
+- `payload_hash` (String): Для дедупликации ошибок. \[Код: `QuarantineEntry._payload_hash`\]
 
-- `bronze_batch_id` (UUID): Ссылка на пакет исходных данных. [Код: `QuarantineEntry._batch_id` (BatchID)]
+- `bronze_batch_id` (UUID): Ссылка на пакет исходных данных. \[Код: `QuarantineEntry._batch_id` (BatchID)\]
 
 - `dq_status` (String): `NEW` | `UNDER_REVIEW` | `IGNORED` | `REPROCESSED` | `EXPIRED`.
+
   - `NEW`: Только что создана, ждёт разбора.
   - `UNDER_REVIEW`: Анализируется оператором.
   - `IGNORED`: Разобрана и признана неактуальной.
@@ -274,6 +278,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 **Причина**: Pandas/Polars исторически не поддерживали nullable integers без специального типа `Int64` (с заглавной I). Float — единственный способ представить `int + NULL` без потери данных для больших значений. `NaN` используется для отсутствующих значений.
 
 <!-- Updated: was ~34, now ~88 (audit 2026-02-14) -->
+
 **Затронутые поля (~88 occurrences)**:
 
 > **Примечание**: Для получения актуального числа occurrences:
@@ -335,6 +340,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 > (`configs/sources/{provider}.yaml`), а не непосредственно в pipeline config.
 > Pipeline config ссылается на источник через convention-based resolution
 > (`source_file: ../../sources/{provider}.yaml`) или явно через поле `data_schema_file`.
+
 - **Hybrid**: Incremental ежедневно + Full еженедельно для обеспечения консистентности.
 
 ### 2.8. Генерация ID Сущности (Entity ID)
@@ -506,6 +512,7 @@ merge:
 | `TRASH`                         | Внутренние, избыточные, low-value       | **Нет**           |
 
 <!-- Updated: was 94, now 106 (audit 2026-02-14) -->
+
 **Конфигурация:** `configs/composite/field_groups/publication.yaml` — 106 базовых полей, маппинг на провайдерские колонки.
 
 **Доменные модели** (`domain/composite/field_groups.py`):
@@ -564,6 +571,50 @@ _run_id → _run_id → pipeline_run_id
 
 - Сохранять оригинальные имена в Silver (упрощает отладку)
 - Применять бизнес-имена только в Gold (`_run_id` → `pipeline_run_id`, `pmid` → `pubmed_id`)
+
+### 2.10. Target Schema Architecture 2026 (Governance Gate)
+
+См. [Schema Governance](../02-architecture/Schema-Governance.md) и [ADR-035](../02-architecture/decisions/ADR-035-target-schema-architecture-2026.md).
+
+#### 2.10.1 Schema Lifecycle (MUST)
+
+Любое изменение схемы MUST проходить этапы: Draft -> Review -> Governance Gate -> Release -> Deprecation/Removal.
+
+#### 2.10.2 Drift Classification (MUST)
+
+Результат governance-gate MUST быть классифицирован:
+
+- **blocking**: блокирует публикацию Gold до обновления контракта/миграции.
+- **warning**: не блокирует релиз, но требует тикет и SLA на обработку.
+
+#### 2.10.3 Contract Versioning (MUST)
+
+Схемы должны использовать SemVer-подобную классификацию:
+
+- MAJOR — breaking contract,
+- MINOR — additive backward-compatible changes,
+- PATCH — non-breaking metadata/constraint updates.
+
+Breaking changes MUST сопровождаться ADR и планом миграции.
+
+#### 2.10.4 PK & Partition Strategy (SHOULD)
+
+- Business PK SHOULD оставаться стабильным и независимым от content hash.
+- Silver/Gold partition keys SHOULD иметь ограниченную кардинальность.
+- Использование UUID/hash как partition key MUST NOT применяться без отдельного ADR-исключения.
+
+#### 2.10.5 JSON Typing Standard (MUST)
+
+- Пропуски и неизвестные значения MUST кодироваться как `null` (sentinel values запрещены).
+- Даты MUST быть в формате `YYYY-MM-DD`, timestamps — ISO-8601 UTC.
+- Нормализация перед hash/checks MUST включать trim строк, округление float, NaN/Inf -> null.
+
+#### 2.10.6 SCD2 Decision Matrix (MUST)
+
+Для Gold-изменений решение MUST приниматься через SCD2-матрицу:
+
+- изменение, ведущее к потере семантики/данных -> `blocking`;
+- аддитивное изменение без потери историчности -> `warning`.
 
 ## 3. Обработка Ошибок и Наблюдаемость
 
@@ -922,7 +973,9 @@ from __future__ import annotations
 > **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
 > и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
 > они не содержат type annotations, требующих отложенной эвалюации.
+
 <!-- Updated: was 497/534 (93.1%), now 501/534 (93.8%); was 37, now 33 (audit 2026-02-17) -->
+
 > Текущее состояние: 501 из 534 файлов (93.8%) содержат импорт;
 > 33 файла без импорта — все `__init__.py` (re-export only).
 
@@ -1024,11 +1077,11 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 #### 5.5.1. Detailed DR Procedures (Runbook)
 
-| Сценарий                      | Действие                                                                                                                                                                         |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--run-type rebuild` (если затронут Silver). |
+| Сценарий                      | Действие                                                                                                                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--run-type rebuild` (если затронут Silver).      |
 | **Потеря чекпоинта**          | Удалить файл чекпоинта: `data/output/checkpoints/{pipeline_name}.json`, затем запустить `--run-type rebuild` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это). |
-| **Отказ региона AWS**         | Переключение DNS на Failover Region. Развертывание Infrastructure-as-Code (Terraform) в резервном регионе.                                                                       |
+| **Отказ региона AWS**         | Переключение DNS на Failover Region. Развертывание Infrastructure-as-Code (Terraform) в резервном регионе.                                                                            |
 
 ### 5.6. Среды (Environments)
 
@@ -1163,11 +1216,11 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 <!-- Updated: was 527 LOC / 8 методов, now 818 LOC / 21 метод (audit 2026-02-14) -->
 
-| ❌ Неверно                      | ✅ Верно                                                                                                           |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| ❌ Неверно                      | ✅ Верно                                                                                                          |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | "PreflightService — god object" | "PreflightService (`preflight_service.py`, 818 LOC, 21 метод) имеет 4 публичных метода с единой ответственностью" |
-| "Компонент перегружен"          | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам"                                         |
-| "Нет валидации X"               | "Валидация X отсутствует в `file.py` (проверено grep по 'X')"                                                      |
+| "Компонент перегружен"          | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам"                                        |
+| "Нет валидации X"               | "Валидация X отсутствует в `file.py` (проверено grep по 'X')"                                                     |
 
 #### 7.1.4. Типичные Ложные Выводы
 
@@ -1222,6 +1275,7 @@ grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/archived/refactoring-pla
 **Контрпримеры (НЕ монолиты, несмотря на размер):**
 
 <!-- Updated: ChemblAdapter was 517→975; GoldWriter was 593→946; PreflightService was 527→818 (audit 2026-02-14) -->
+
 - `ChemblAdapter` (975 LOC): Делегирует 4 компонентам, когезивная ответственность
 - `GoldWriter` (946 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
 - `PreflightService` (818 LOC): 21 метод с единой ответственностью (preflight validation)
@@ -1352,20 +1406,20 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 
 **Маппинг entity → API resource** (`_NON_PUBLICATION_ENTITY_MAPPING`):
 
-| Entity Type        | API Resource             | Primary Key              |
-| ------------------ | ------------------------ | ------------------------ |
-| `activity`         | `activity`               | `activity_id`            |
-| `assay`            | `assay`                  | `assay_chembl_id`        |
-| `assay_parameters` | `assay`                  | *(composite)*            |
-| `cell_line`        | `cell_line`              | `cell_chembl_id`         |
-| `compound`         | `molecule`               | `molecule_chembl_id`     |
-| `compound_record`  | `compound_record`        | `record_id`              |
-| `molecule`         | `molecule`               | `molecule_chembl_id`     |
-| `protein_class`    | `protein_classification` | `protein_class_id`       |
-| `publication`      | `document`               | `document_chembl_id`     |
-| `target`           | `target`                 | `target_chembl_id`       |
-| `target_component` | `target_component`       | `component_id`           |
-| `tissue`           | `tissue`                 | `tissue_chembl_id`       |
+| Entity Type        | API Resource             | Primary Key          |
+| ------------------ | ------------------------ | -------------------- |
+| `activity`         | `activity`               | `activity_id`        |
+| `assay`            | `assay`                  | `assay_chembl_id`    |
+| `assay_parameters` | `assay`                  | *(composite)*        |
+| `cell_line`        | `cell_line`              | `cell_chembl_id`     |
+| `compound`         | `molecule`               | `molecule_chembl_id` |
+| `compound_record`  | `compound_record`        | `record_id`          |
+| `molecule`         | `molecule`               | `molecule_chembl_id` |
+| `protein_class`    | `protein_classification` | `protein_class_id`   |
+| `publication`      | `document`               | `document_chembl_id` |
+| `target`           | `target`                 | `target_chembl_id`   |
+| `target_component` | `target_component`       | `component_id`       |
+| `tissue`           | `tissue`                 | `tissue_chembl_id`   |
 
 **Query parameters** (формируются в `ChemblAdapter._build_params()`):
 
@@ -1397,14 +1451,14 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | **P2** | Падение второстепенного пайплайна                | 8 часов     | 24 часа            |
 | **P3** | Warning / DQ аномалии                            | 24 часа     | Next Sprint        |
 
-| Ошибка                 | Симптом                                        | Действие                                                          |
-| ---------------------- | ---------------------------------------------- | ----------------------------------------------------------------- |
-| Auth failure           | `401 Unauthorized` в логах                     | Проверить/обновить `BIOETL_{PROVIDER}_API_KEY`                    |
-| Rate limit exhausted   | `429` + пик `errors_total{type="recoverable"}` | Уменьшить `requests_per_second` в конфиге                         |
-| Schema mismatch (Gold) | Pipeline fail + `schema_violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR            |
+| Ошибка                 | Симптом                                        | Действие                                                                                                |
+| ---------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Auth failure           | `401 Unauthorized` в логах                     | Проверить/обновить `BIOETL_{PROVIDER}_API_KEY`                                                          |
+| Rate limit exhausted   | `429` + пик `errors_total{type="recoverable"}` | Уменьшить `requests_per_second` в конфиге                                                               |
+| Schema mismatch (Gold) | Pipeline fail + `schema_violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR                                                  |
 | Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или удалить файл `data/output/checkpoints/{pipeline_name}.json` для рестарта |
-| >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа      |
-| Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; `make release-lock PIPELINE=...`        |
+| >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа                                            |
+| Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; `make release-lock PIPELINE=...`                                              |
 
 ## Приложение D: Схема Конфигурации Пайплайна
 
@@ -1535,10 +1589,12 @@ fields:
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization           | Accepted           | 2026-01-26 |
 | [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | Accepted           | 2026-01-28 |
 | [ADR-033](02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Proposed           | 2026-02-06 |
-| [ADR-034](02-architecture/decisions/ADR-034-schema-domain-pairs.md)              | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
+| [ADR-034](02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
+| [ADR-035](02-architecture/decisions/ADR-035-target-schema-architecture-2026.md)    | Target Schema Architecture 2026          | Accepted           | 2026-02-17 |
 
 ## История Изменений (Changelog)
 
+- **5.21** (2026-02-17): Target Schema Architecture 2026. Добавлена §2.10 (Schema Lifecycle, Drift Classification, Contract Versioning, PK/Partition Strategy, JSON Typing Standard, SCD2 Decision Matrix). Добавлен ADR-035 в реестр (Приложение F).
 - **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test_`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.
 - **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.
 - **5.18** (2026-02-15): Statistics Update. Обновлены числовые данные по результатам аудита 2026-02-14: файлов кода (499→517), future annotations (468→481), Int→Float coercion occurrences (~34→~88), publication field groups (94→106), LOC для ChemblAdapter (517→975), GoldWriter (593→946), PreflightService (527→818).
