@@ -103,9 +103,9 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Content Domain ===
-    content_domain_domains: Series[object] = pa.Field(
+    content_domain_domains: Series[str] = pa.Field(
         nullable=True,
-        description="Content domain domains (list of strings)",
+        description="Canonical JSON array of content domain domains.",
     )
     content_domain_crossmark_restriction: Series[bool] = pa.Field(
         nullable=True,
@@ -114,9 +114,9 @@ class PublicationEnrichedSchema(PublicationBaseSchema):
     )
 
     # === Alternative Identifiers ===
-    alternative_id: Series[object] = pa.Field(
+    alternative_id: Series[str] = pa.Field(
         nullable=True,
-        description="Alternative IDs (publisher-specific, e.g., PII)",
+        description="Canonical JSON array of alternative IDs (publisher-specific, e.g., PII).",
     )
 
     # === Canonical Publication Date ===

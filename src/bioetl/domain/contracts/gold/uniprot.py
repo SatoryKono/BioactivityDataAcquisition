@@ -57,7 +57,7 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     reactome_xrefs: Series[str] = pa.Field(nullable=True)
 
     # Basic protein data
-    gene_names: Series[object] = pa.Field(nullable=True)  # list[str]
+    gene_names: Series[str] = pa.Field(nullable=True)  # list[str]
     organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 → float
     protein_name: Series[str] = pa.Field(nullable=True)
     sequence_length: Series[float] = pa.Field(
