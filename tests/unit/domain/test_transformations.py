@@ -168,6 +168,42 @@ class TestGenerateContentHash:
 
 
 @pytest.mark.unit
+class TestContentHashStabilityRegressionMatrix:
+    """Regression matrix for canonical content hash stability."""
+
+    @pytest.mark.parametrize(
+        ("left", "right"),
+        [
+            pytest.param(
+                {"a": 1, "b": 2, "nested": {"x": 1, "y": 2}},
+                {"nested": {"y": 2, "x": 1}, "b": 2, "a": 1},
+                id="key-order-permutation",
+            ),
+            pytest.param(
+                {"name": "  aspirin  ", "code": "\tCHEMBL1\n"},
+                {"name": "aspirin", "code": "CHEMBL1"},
+                id="string-trim",
+            ),
+            pytest.param(
+                {"value": 1.1234567890123},
+                {"value": 1.1234567890},
+                id="float-precision-rounding",
+            ),
+            pytest.param(
+                {"score": float("nan"), "limit": float("inf")},
+                {"score": None, "limit": None},
+                id="nan-inf-normalization",
+            ),
+        ],
+    )
+    def test_hash_stability_matrix(self, left, right):
+        """Hashes remain stable for equivalent canonical forms."""
+        left_hash = generate_content_hash(left, "chembl")
+        right_hash = generate_content_hash(right, "chembl")
+        assert left_hash == right_hash
+
+
+@pytest.mark.unit
 class TestGenerateEntityId:
     """Test entity ID generation."""
 

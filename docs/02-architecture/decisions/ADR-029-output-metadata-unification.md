@@ -9,19 +9,19 @@
 
 Bronze/Silver/Gold Medallion layers использовали разные структуры для `output`-метаданных в sidecar-файлах:
 
-| Layer | Класс | Поля |
-|-------|-------|------|
-| Bronze | `OutputMetadata` | `total_records`, `total_bytes`, `files`, `format`, `compression` |
-| Silver | `SilverOutputMetadata` | `record_count`, `content_hash` |
-| Gold | `GoldOutputMetadata` | `record_count`, `partition_count`, `total_bytes`, `format` |
+| Layer  | Класс                  | Поля                                                             |
+| ------ | ---------------------- | ---------------------------------------------------------------- |
+| Bronze | `OutputMetadata`       | `total_records`, `total_bytes`, `files`, `format`, `compression` |
+| Silver | `SilverOutputMetadata` | `record_count`, `content_hash`                                   |
+| Gold   | `GoldOutputMetadata`   | `record_count`, `partition_count`, `total_bytes`, `format`       |
 
 ### Проблемы
 
 1. **Несогласованное именование**: `total_records` vs `record_count`
-2. **Отсутствует общий контракт**: Усложняет downstream-аналитику и мониторинг
-3. **Пропущенные поля**: `total_bytes` отсутствует в Silver
-4. **Нет timestamps записи**: Отсутствуют `write_started_at`/`write_completed_at`
-5. **Дублирование delta_version**: В Silver версии есть в `DeltaMetrics`, но не в output
+1. **Отсутствует общий контракт**: Усложняет downstream-аналитику и мониторинг
+1. **Пропущенные поля**: `total_bytes` отсутствует в Silver
+1. **Нет timestamps записи**: Отсутствуют `write_started_at`/`write_completed_at`
+1. **Дублирование delta_version**: В Silver версии есть в `DeltaMetrics`, но не в output
 
 ## Decision
 
@@ -39,7 +39,9 @@ class BaseOutputMetadata(BaseModel):
     total_bytes: int = Field(ge=0, description="Total size in bytes")
     content_hash: str | None = Field(description="SHA256 hash for change detection")
     write_started_at: datetime | None = Field(description="Write start timestamp")
-    write_completed_at: datetime | None = Field(description="Write completion timestamp")
+    write_completed_at: datetime | None = Field(
+        description="Write completion timestamp"
+    )
 
     @computed_field
     @property
@@ -55,9 +57,11 @@ class BronzeOutputExt(BaseModel):
     format: str = "jsonl+zstd"
     compression: str = "zstd"
 
+
 class SilverOutputExt(BaseModel):
     delta_version_before: int | None
     delta_version_after: int | None
+
 
 class GoldOutputExt(BaseModel):
     partition_count: int = 0
@@ -68,21 +72,94 @@ class GoldOutputExt(BaseModel):
 
 ```python
 class BronzeMetadata(BaseModel):
-    output: BaseOutputMetadata          # Unified base
-    output_ext: BronzeOutputExt         # Layer-specific
+    output: BaseOutputMetadata  # Unified base
+    output_ext: BronzeOutputExt  # Layer-specific
+
 
 class SilverMetadata(BaseModel):
-    output: BaseOutputMetadata          # Unified base
-    output_ext: SilverOutputExt         # Layer-specific
+    output: BaseOutputMetadata  # Unified base
+    output_ext: SilverOutputExt  # Layer-specific
+
 
 class GoldMetadata(BaseModel):
-    output: BaseOutputMetadata          # Unified base
-    output_ext: GoldOutputExt           # Layer-specific
+    output: BaseOutputMetadata  # Unified base
+    output_ext: GoldOutputExt  # Layer-specific
 ```
 
 ### Metadata Schema Version Bump
 
 Версия metadata schema увеличена с `1.0` до `1.1` для всех слоёв.
+
+### Formal Specification: Content Hash Algorithm (Normative)
+
+Данная спецификация фиксирует алгоритм из RULES §2.8/§2.8.1 как формальный контракт для
+`output.content_hash` и всех downstream-потребителей.
+
+#### Inputs
+
+- `provider: str` — идентификатор провайдера (`chembl`, `pubchem`, ...).
+- `record: Mapping[str, JSONValue]` — запись до сериализации.
+- `exclude_none: bool = false` — политика включения `null`-полей в хэш.
+
+#### Excluded Field Set
+
+Из входного `record` перед нормализацией **MUST** исключаться поля:
+
+1. Точные имена: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`.
+1. DQ-поля: любой ключ, удовлетворяющий шаблону `_dq_*`.
+
+#### Canonicalization Rules
+
+После удаления excluded-полей значения **MUST** быть нормализованы рекурсивно:
+
+1. `float`:
+   - если `isnan(v)` или `isinf(v)` → `null`;
+   - иначе `round(v, 10)`.
+1. `datetime` → `YYYY-MM-DD` (date-part only).
+1. `date` → `YYYY-MM-DD`.
+1. `str` → `strip()`.
+1. `dict`/`list` → рекурсивная нормализация всех дочерних значений.
+
+#### None Policy
+
+- Если `exclude_none=false` (default), поля со значением `null` **MUST** сохраняться в
+  canonical JSON.
+- Если `exclude_none=true`, поля со значением `null` **MUST** удаляться до сериализации.
+
+#### Canonical JSON Requirements
+
+Нормализованный объект **MUST** сериализоваться как canonical JSON с параметрами:
+
+- `sort_keys=true`
+- `separators=(',', ':')` (без пробелов)
+- `ensure_ascii=true`
+
+#### Hash Function
+
+Итоговый digest **MUST** вычисляться по формуле:
+
+```text
+content_hash = sha256( provider || canonical_json )
+```
+
+где `||` — конкатенация строк UTF-8 без разделителя.
+
+#### Reference Pseudocode
+
+```text
+function generate_content_hash(provider, record, exclude_none=false):
+    filtered = remove_excluded_fields(record)
+    normalized = normalize_recursive(filtered)
+    if exclude_none:
+        normalized = drop_none_fields(normalized)
+    canonical_json = json.dumps(
+        normalized,
+        sort_keys=true,
+        separators=(',', ':'),
+        ensure_ascii=true,
+    )
+    return sha256_hex(provider + canonical_json)
+```
 
 ### Backward Compatibility
 
@@ -111,15 +188,15 @@ class OutputMetadata(BaseModel):
 ### Positive
 
 1. **Unified analytics**: Все слои экспортируют одинаковые базовые метрики
-2. **Duration tracking**: `write_duration_ms` доступен через computed field
-3. **Change detection**: `content_hash` доступен на всех слоях
-4. **Monitoring consistency**: Prometheus/Grafana dashboards могут использовать единый набор метрик
-5. **Type safety**: `extra="forbid"` предотвращает случайные поля
+1. **Duration tracking**: `write_duration_ms` доступен через computed field
+1. **Change detection**: `content_hash` доступен на всех слоях
+1. **Monitoring consistency**: Prometheus/Grafana dashboards могут использовать единый набор метрик
+1. **Type safety**: `extra="forbid"` предотвращает случайные поля
 
 ### Negative
 
 1. **Breaking change**: Существующий код использующий `output.total_records` (Bronze) требует обновления
-2. **Schema migration**: Существующие sidecar-файлы v1.0 не совместимы с v1.1
+1. **Schema migration**: Существующие sidecar-файлы v1.0 не совместимы с v1.1
 
 ### Neutral
 
@@ -131,21 +208,26 @@ class OutputMetadata(BaseModel):
 ### Files Modified
 
 **Domain Models:**
-- `src/bioetl/domain/models/metadata.py` — BaseOutputMetadata, *OutputExt классы
+
+- `src/bioetl/domain/models/metadata.py` — BaseOutputMetadata, \*OutputExt классы
 
 **DTOs:**
+
 - `src/bioetl/domain/ports/metadata_coordinator.py` — Добавлены `version_before`, `total_bytes`, `partition_count`
 
 **Services:**
-- `src/bioetl/composition/services/metadata_coordinator.py` — Обновлены create_*_metadata методы
+
+- `src/bioetl/composition/services/metadata_coordinator.py` — Обновлены create\_\*\_metadata методы
 
 **Infrastructure:**
-- `src/bioetl/infrastructure/storage/bronze_writer.py` — _build_full_bronze_metadata
+
+- `src/bioetl/infrastructure/storage/bronze_writer.py` — \_build_full_bronze_metadata
 - `src/bioetl/infrastructure/storage/metadata_builder.py` — Silver/Gold builders
 
 ### JSON Output Format
 
 **Before (v1.0):**
+
 ```json
 {
   "output": {
@@ -157,6 +239,7 @@ class OutputMetadata(BaseModel):
 ```
 
 **After (v1.1):**
+
 ```json
 {
   "output": {
@@ -178,7 +261,7 @@ class OutputMetadata(BaseModel):
 
 ### Unit Tests
 
-- `tests/unit/domain/models/test_metadata_output.py` — BaseOutputMetadata, *OutputExt
+- `tests/unit/domain/models/test_metadata_output.py` — BaseOutputMetadata, \*OutputExt
 
 ### Architecture Tests
 
