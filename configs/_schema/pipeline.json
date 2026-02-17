@@ -1,289 +1,1806 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://bioetl/pipeline-config-schema-v2.1",
-  "title": "BioETL Pipeline Configuration Schema v2.1",
-  "description": "Schema for BioETL pipeline configurations. Note: 'sink' is optional when using convention-based path resolution (ADR-029).",
-  "type": "object",
+  "$defs": {
+    "ApiConfig": {
+      "description": "Configuration for API connection details.\n\nPydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.",
+      "properties": {
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Url"
+        },
+        "rate_limit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate Limit"
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout"
+        },
+        "from_db": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Source database for ID mapping (e.g., ChEMBL)",
+          "title": "From Db"
+        },
+        "to_db": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Target database for ID mapping (e.g., UniProtKB)",
+          "title": "To Db"
+        }
+      },
+      "title": "ApiConfig",
+      "type": "object"
+    },
+    "BaseFilterColumnSchema": {
+      "description": "Base class for filter column configuration.\n\nRepresents a single column mapping for input filtering.\n\nAttributes:\n    column_name: Column name in CSV containing filter IDs.\n    filter_field: API field name to filter by.",
+      "properties": {
+        "column_name": {
+          "description": "Column name in CSV containing filter IDs",
+          "title": "Column Name",
+          "type": "string"
+        },
+        "filter_field": {
+          "description": "API field name to filter by",
+          "title": "Filter Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column_name",
+        "filter_field"
+      ],
+      "title": "BaseFilterColumnSchema",
+      "type": "object"
+    },
+    "BaseGoldColumnFilterConfig": {
+      "description": "Base class for Gold column filter configuration.\n\nSupports extended operators for column filtering:\n- in: value must be in the allowed list (default)\n- not_in: value must not be in the excluded list\n- is_null: value must be None or empty string\n- is_not_null: value must not be None or empty string\n- is_empty: value must be \"empty\" (None, \"\", [], {})\n- is_not_empty: value must not be \"empty\"\n\nAttributes:\n    operator: Filter operator.\n    values: Allowed/excluded values (for in/not_in operators).",
+      "properties": {
+        "operator": {
+          "default": "in",
+          "description": "Filter operator",
+          "enum": [
+            "in",
+            "not_in",
+            "is_null",
+            "is_not_null",
+            "is_empty",
+            "is_not_empty"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Allowed/excluded values (for in/not_in operators)",
+          "title": "Values"
+        }
+      },
+      "title": "BaseGoldColumnFilterConfig",
+      "type": "object"
+    },
+    "BaseGoldListContainsFilterConfig": {
+      "description": "Base class for Gold list contains filter configuration.\n\nAttributes:\n    values: Values that must be present in the list.\n    mode: Match mode ('all' or 'any').",
+      "properties": {
+        "values": {
+          "description": "Values that must be present in the list",
+          "items": {
+            "type": "string"
+          },
+          "title": "Values",
+          "type": "array"
+        },
+        "mode": {
+          "default": "all",
+          "description": "Match mode ('all' or 'any')",
+          "enum": [
+            "all",
+            "any"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "BaseGoldListContainsFilterConfig",
+      "type": "object"
+    },
+    "BaseGoldListLengthFilterConfig": {
+      "description": "Base class for Gold list length filter configuration.\n\nAttributes:\n    min: Minimum list length.\n    max: Maximum list length.",
+      "properties": {
+        "min": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Minimum list length",
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Maximum list length",
+          "title": "Max"
+        }
+      },
+      "title": "BaseGoldListLengthFilterConfig",
+      "type": "object"
+    },
+    "BaseGoldRangeFilterConfig": {
+      "description": "Base class for Gold range filter configuration.\n\nAttributes:\n    min: Minimum value (inclusive by default).\n    max: Maximum value (inclusive by default).\n    include_min: Whether to include minimum value.\n    include_max: Whether to include maximum value.",
+      "properties": {
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Minimum value",
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Maximum value",
+          "title": "Max"
+        },
+        "include_min": {
+          "default": true,
+          "description": "Whether to include minimum value",
+          "title": "Include Min",
+          "type": "boolean"
+        },
+        "include_max": {
+          "default": true,
+          "description": "Whether to include maximum value",
+          "title": "Include Max",
+          "type": "boolean"
+        }
+      },
+      "title": "BaseGoldRangeFilterConfig",
+      "type": "object"
+    },
+    "CircuitBreakerConfig": {
+      "description": "Circuit Breaker configuration.\n\nPydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.",
+      "properties": {
+        "failure_threshold": {
+          "default": 5,
+          "minimum": 1,
+          "title": "Failure Threshold",
+          "type": "integer"
+        },
+        "recovery_timeout": {
+          "default": 300,
+          "minimum": 60,
+          "title": "Recovery Timeout",
+          "type": "integer"
+        }
+      },
+      "title": "CircuitBreakerConfig",
+      "type": "object"
+    },
+    "ClientSourceConfig": {
+      "description": "HTTP client configuration from source YAML.",
+      "properties": {
+        "timeout_sec": {
+          "default": 30.0,
+          "maximum": 300.0,
+          "minimum": 1.0,
+          "title": "Timeout Sec",
+          "type": "number"
+        },
+        "max_retries": {
+          "default": 3,
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Retries",
+          "type": "integer"
+        }
+      },
+      "title": "ClientSourceConfig",
+      "type": "object"
+    },
+    "ColumnGroupSchema": {
+      "description": "Pydantic schema for column group configuration.\n\nDefines how columns are grouped and ordered in merged output.",
+      "properties": {
+        "name": {
+          "description": "Group name for logging",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "fields": {
+          "description": "Explicit field names to include",
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regex pattern to match field names",
+          "title": "Pattern"
+        },
+        "provider_order": {
+          "description": "Order of providers within this group",
+          "items": {
+            "type": "string"
+          },
+          "title": "Provider Order",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ColumnGroupSchema",
+      "type": "object"
+    },
+    "ConditionalValidationConfig": {
+      "description": "Configuration for conditional validation rule.",
+      "properties": {
+        "name": {
+          "description": "Unique validation rule name",
+          "title": "Name",
+          "type": "string"
+        },
+        "condition_field": {
+          "description": "Field to check for condition",
+          "title": "Condition Field",
+          "type": "string"
+        },
+        "condition_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "Value(s) that trigger",
+          "title": "Condition Value"
+        },
+        "condition_operator": {
+          "default": "eq",
+          "description": "Comparison operator",
+          "enum": [
+            "eq",
+            "ne",
+            "in",
+            "not_in"
+          ],
+          "title": "Condition Operator",
+          "type": "string"
+        },
+        "then_validations": {
+          "description": "Validations to apply when condition is true",
+          "items": {
+            "$ref": "#/$defs/FieldValidationConfig"
+          },
+          "title": "Then Validations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "condition_field",
+        "condition_value"
+      ],
+      "title": "ConditionalValidationConfig",
+      "type": "object"
+    },
+    "CrossFieldValidationConfig": {
+      "description": "Configuration for cross-field validation rule.",
+      "properties": {
+        "name": {
+          "description": "Unique validation rule name",
+          "title": "Name",
+          "type": "string"
+        },
+        "fields": {
+          "description": "Fields involved in validation",
+          "items": {
+            "type": "string"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "condition": {
+          "description": "Validation condition type",
+          "enum": [
+            "all_present",
+            "any_present",
+            "mutually_exclusive",
+            "conditional_required",
+            "custom"
+          ],
+          "title": "Condition",
+          "type": "string"
+        },
+        "trigger_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Field that triggers conditional requirement",
+          "title": "Trigger Field"
+        },
+        "required_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Field required when trigger is present",
+          "title": "Required Field"
+        },
+        "validator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom validator name",
+          "title": "Validator"
+        },
+        "error_message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom error message",
+          "title": "Error Message"
+        }
+      },
+      "required": [
+        "name",
+        "fields",
+        "condition"
+      ],
+      "title": "CrossFieldValidationConfig",
+      "type": "object"
+    },
+    "CsvExportConfig": {
+      "description": "Configuration for CSV export.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        },
+        "delimiter": {
+          "default": ",",
+          "title": "Delimiter",
+          "type": "string"
+        },
+        "header": {
+          "default": true,
+          "title": "Header",
+          "type": "boolean"
+        },
+        "encoding": {
+          "default": "utf-8",
+          "title": "Encoding",
+          "type": "string"
+        }
+      },
+      "title": "CsvExportConfig",
+      "type": "object"
+    },
+    "DQConfig": {
+      "description": "Data Quality configuration.\n\nPydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.\n\nAttributes:\n    soft_fail_threshold: Error rate threshold for warnings (0.0-1.0).\n    hard_fail_threshold: Error rate threshold for failures (0.0-1.0).\n    strict_validation: If True, apply stricter validation rules.\n        Use with caution as it may reject more records.\n    field_validations: Field-level validation rules.\n    cross_field_validations: Cross-field validation rules.\n    conditional_validations: Conditional validation rules.\n    invalid_record_policy: Policy for invalid records (quarantine/skip/fail).\n    report: DQ report configuration.",
+      "properties": {
+        "soft_fail_threshold": {
+          "default": 0.05,
+          "title": "Soft Fail Threshold",
+          "type": "number"
+        },
+        "hard_fail_threshold": {
+          "default": 0.2,
+          "title": "Hard Fail Threshold",
+          "type": "number"
+        },
+        "strict_validation": {
+          "default": false,
+          "description": "Apply stricter validation rules (feature flag)",
+          "title": "Strict Validation",
+          "type": "boolean"
+        },
+        "field_validations": {
+          "description": "Field-level validation rules",
+          "items": {
+            "$ref": "#/$defs/FieldValidationConfig"
+          },
+          "title": "Field Validations",
+          "type": "array"
+        },
+        "cross_field_validations": {
+          "description": "Cross-field validation rules",
+          "items": {
+            "$ref": "#/$defs/CrossFieldValidationConfig"
+          },
+          "title": "Cross Field Validations",
+          "type": "array"
+        },
+        "conditional_validations": {
+          "description": "Conditional validation rules",
+          "items": {
+            "$ref": "#/$defs/ConditionalValidationConfig"
+          },
+          "title": "Conditional Validations",
+          "type": "array"
+        },
+        "invalid_record_policy": {
+          "default": "quarantine",
+          "description": "Policy for invalid records",
+          "enum": [
+            "quarantine",
+            "skip",
+            "fail"
+          ],
+          "title": "Invalid Record Policy",
+          "type": "string"
+        },
+        "report": {
+          "$ref": "#/$defs/DQReportConfig",
+          "description": "DQ report configuration"
+        }
+      },
+      "title": "DQConfig",
+      "type": "object"
+    },
+    "DQReportConfig": {
+      "description": "Configuration for DQ report generation.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Generate DQ reports",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "format": {
+          "default": "json",
+          "description": "Report format",
+          "enum": [
+            "json",
+            "yaml",
+            "csv"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "include_sample_failures": {
+          "default": true,
+          "description": "Include sample failed records",
+          "title": "Include Sample Failures",
+          "type": "boolean"
+        },
+        "sample_size": {
+          "default": 10,
+          "description": "Number of sample failures",
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Sample Size",
+          "type": "integer"
+        },
+        "output_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom output path",
+          "title": "Output Path"
+        }
+      },
+      "title": "DQReportConfig",
+      "type": "object"
+    },
+    "FieldValidationConfig": {
+      "description": "Configuration for a single field validation rule.\n\nSupports: required, not_null, range, pattern, enum, max_length,\nnot_empty_list, custom validation types.",
+      "properties": {
+        "field": {
+          "description": "Field name to validate",
+          "title": "Field",
+          "type": "string"
+        },
+        "type": {
+          "description": "Validation type",
+          "enum": [
+            "required",
+            "not_null",
+            "range",
+            "pattern",
+            "enum",
+            "max_length",
+            "not_empty_list",
+            "custom"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "nullable": {
+          "default": true,
+          "description": "Whether field can be null",
+          "title": "Nullable",
+          "type": "boolean"
+        },
+        "severity": {
+          "default": "error",
+          "description": "Severity level (error or warn)",
+          "enum": [
+            "error",
+            "warn"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Minimum value (range)",
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Maximum value (range)",
+          "title": "Max"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Regex pattern",
+          "title": "Pattern"
+        },
+        "allowed": {
+          "description": "Allowed values",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed",
+          "type": "array"
+        },
+        "max_length": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Maximum string length",
+          "title": "Max Length"
+        },
+        "validator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom validator name",
+          "title": "Validator"
+        },
+        "error_message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom error message",
+          "title": "Error Message"
+        }
+      },
+      "required": [
+        "field",
+        "type"
+      ],
+      "title": "FieldValidationConfig",
+      "type": "object"
+    },
+    "GoldFiltersConfig": {
+      "description": "Schema for gold_filters in YAML.\n\nInherits to_domain() from BaseGoldFiltersConfig.\n\nSupports two formats for columns:\n- Legacy format: {\"column_name\": [\"value1\", \"value2\"]} (IN operator)\n- New format: {\"column_name\": {\"operator\": \"in\", \"values\": [\"value1\", \"value2\"]}}\n\nExample YAML (legacy format):\n    gold_filters:\n      columns:\n        standard_type: [IC50, Ki]\n\nExample YAML (new format):\n    gold_filters:\n      columns:\n        standard_type:\n          operator: in\n          values: [IC50, Ki]\n        pchembl_value:\n          operator: is_not_null",
+      "properties": {
+        "columns": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "$ref": "#/$defs/BaseGoldColumnFilterConfig"
+              }
+            ]
+          },
+          "description": "Column value filters",
+          "title": "Columns",
+          "type": "object"
+        },
+        "ranges": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BaseGoldRangeFilterConfig"
+          },
+          "description": "Numeric range filters",
+          "title": "Ranges",
+          "type": "object"
+        },
+        "list_lengths": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BaseGoldListLengthFilterConfig"
+          },
+          "description": "List length filters",
+          "title": "List Lengths",
+          "type": "object"
+        },
+        "list_contains": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BaseGoldListContainsFilterConfig"
+          },
+          "description": "List contains filters",
+          "title": "List Contains",
+          "type": "object"
+        },
+        "required_fields": {
+          "description": "Required non-null fields",
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Fields",
+          "type": "array"
+        },
+        "exclude_if_present": {
+          "description": "Exclude if field has value",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude If Present",
+          "type": "array"
+        }
+      },
+      "title": "GoldFiltersConfig",
+      "type": "object"
+    },
+    "InputFilterConfig": {
+      "description": "Configuration for input ID filtering from CSV.\n\nInherits to_domain() and validate_column_config from BaseInputFilterConfig.\n\nSupports both single-column and multi-column filtering modes:\n- Single-column: Use column_name and filter_field directly\n- Multi-column: Use columns list for AND-logic filtering\n\nPydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Whether input filtering is enabled",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "source_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to CSV file with filter IDs",
+          "title": "Source Path"
+        },
+        "column_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Column name in CSV containing filter IDs (single-column mode)",
+          "title": "Column Name"
+        },
+        "filter_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "API field name to filter by (single-column mode)",
+          "title": "Filter Field"
+        },
+        "columns": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/BaseFilterColumnSchema"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "List of column configurations for multi-column filtering",
+          "title": "Columns"
+        },
+        "batch_size": {
+          "default": 100,
+          "description": "Number of IDs per API request",
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "fallback_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Column name for fallback search when primary lookup fails",
+          "title": "Fallback Column"
+        }
+      },
+      "title": "InputFilterConfig",
+      "type": "object"
+    },
+    "MaintenanceConfig": {
+      "description": "Configuration for automated maintenance operations.\n\nControls automatic VACUUM and other maintenance tasks after pipeline runs.\n\nAttributes:\n    auto_vacuum: Enable automatic VACUUM after successful run.\n    vacuum_retention_days: Minimum age of files to remove (days).",
+      "properties": {
+        "auto_vacuum": {
+          "default": false,
+          "description": "Enable automatic VACUUM after successful pipeline run",
+          "title": "Auto Vacuum",
+          "type": "boolean"
+        },
+        "vacuum_retention_days": {
+          "default": 7,
+          "description": "Minimum age of files to remove during VACUUM (days)",
+          "maximum": 365,
+          "minimum": 1,
+          "title": "Vacuum Retention Days",
+          "type": "integer"
+        }
+      },
+      "title": "MaintenanceConfig",
+      "type": "object"
+    },
+    "ProviderSourceConfig": {
+      "description": "Provider-specific configuration from source YAML.\n\nPydantic model for parsing provider_config section from configs/sources/*.yaml.",
+      "properties": {
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "base_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Url"
+        },
+        "client": {
+          "$ref": "#/$defs/ClientSourceConfig"
+        },
+        "max_url_length": {
+          "default": 2000,
+          "maximum": 8000,
+          "minimum": 500,
+          "title": "Max Url Length",
+          "type": "integer"
+        },
+        "batch_size": {
+          "default": 100,
+          "maximum": 5000,
+          "minimum": 1,
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 1000,
+          "maximum": 10000,
+          "minimum": 100,
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "api_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Version"
+        },
+        "default_email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default Email"
+        }
+      },
+      "title": "ProviderSourceConfig",
+      "type": "object"
+    },
+    "QualityExpectations": {
+      "description": "Quality expectations for data governance.\n\nDefines target quality metrics for the data layer.\n\nAttributes:\n    completeness: Expected completeness rate (0.0-1.0).\n    accuracy: Expected accuracy rate (0.0-1.0).",
+      "properties": {
+        "completeness": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Expected completeness (0-1)",
+          "title": "Completeness"
+        },
+        "accuracy": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Expected accuracy (0-1)",
+          "title": "Accuracy"
+        }
+      },
+      "title": "QualityExpectations",
+      "type": "object"
+    },
+    "RateLimitSourceConfig": {
+      "description": "Rate limit configuration from source YAML.\n\nPydantic model for parsing rate_limit section from configs/sources/*.yaml.",
+      "properties": {
+        "requests_per_second": {
+          "default": 5.0,
+          "maximum": 100.0,
+          "minimum": 0.1,
+          "title": "Requests Per Second",
+          "type": "number"
+        },
+        "burst": {
+          "default": 10,
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Burst",
+          "type": "integer"
+        }
+      },
+      "title": "RateLimitSourceConfig",
+      "type": "object"
+    },
+    "SinkDQReportConfig": {
+      "description": "DQ report configuration for sink layers.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Enable DQ report generation for this layer",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "output_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Output path for report. None = alongside data files.",
+          "title": "Output Path"
+        },
+        "format": {
+          "default": "json",
+          "description": "Report output format",
+          "enum": [
+            "json",
+            "yaml",
+            "html"
+          ],
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "title": "SinkDQReportConfig",
+      "type": "object"
+    },
+    "SinkLayerConfig": {
+      "description": "Configuration for a specific data layer (Bronze, Silver, Gold).",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        },
+        "format": {
+          "default": "delta",
+          "enum": [
+            "jsonl",
+            "delta",
+            "parquet"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mode"
+        },
+        "save_json": {
+          "default": false,
+          "title": "Save Json",
+          "type": "boolean"
+        },
+        "save_metadata": {
+          "default": false,
+          "description": "Save _metadata.yaml sidecar file with lineage and QC info",
+          "title": "Save Metadata",
+          "type": "boolean"
+        },
+        "csv_export": {
+          "$ref": "#/$defs/CsvExportConfig"
+        },
+        "primary_key": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Primary Key",
+          "type": "array"
+        },
+        "partition_by": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Partition By",
+          "type": "array"
+        },
+        "sort_by": {
+          "$ref": "#/$defs/SortByConfig"
+        },
+        "deterministic": {
+          "default": true,
+          "description": "Enable deterministic write order",
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "on_schema_mismatch": {
+          "default": "error",
+          "description": "How to handle schema drift",
+          "enum": [
+            "error",
+            "evolve",
+            "ignore"
+          ],
+          "title": "On Schema Mismatch",
+          "type": "string"
+        },
+        "dq_report": {
+          "$ref": "#/$defs/SinkDQReportConfig",
+          "description": "DQ report generation settings for this layer"
+        },
+        "flat_structure": {
+          "default": false,
+          "description": "If True, Delta data written directly to path without table_name subdirectory. CSV, metadata, and DQ reports use {table_name}_* naming pattern.",
+          "title": "Flat Structure",
+          "type": "boolean"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SinkMetadataConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Governance metadata configuration for sidecar files. Includes owner, steward, tags, retention, SLA, and lineage info."
+        }
+      },
+      "title": "SinkLayerConfig",
+      "type": "object"
+    },
+    "SinkLineageConfig": {
+      "description": "Lineage configuration within sink metadata.\n\nCaptures static lineage information for governance purposes.",
+      "properties": {
+        "source_system": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Source system identifier",
+          "title": "Source System"
+        },
+        "source_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Version of source system",
+          "title": "Source Version"
+        },
+        "extraction_method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Extraction method (api, csv, parquet)",
+          "title": "Extraction Method"
+        },
+        "source_layer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Source Medallion layer (bronze, silver)",
+          "title": "Source Layer"
+        },
+        "transformations": {
+          "description": "Transformation steps applied",
+          "items": {
+            "type": "string"
+          },
+          "title": "Transformations",
+          "type": "array"
+        },
+        "filters_applied": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Whether filters were applied",
+          "title": "Filters Applied"
+        },
+        "business_domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Business domain classification",
+          "title": "Business Domain"
+        },
+        "use_cases": {
+          "description": "Intended use cases",
+          "items": {
+            "type": "string"
+          },
+          "title": "Use Cases",
+          "type": "array"
+        }
+      },
+      "title": "SinkLineageConfig",
+      "type": "object"
+    },
+    "SinkMetadataConfig": {
+      "description": "Governance metadata configuration for sink layers.\n\nCaptures data stewardship and compliance information from pipeline YAML.\nThis is written to the _metadata.yaml sidecar file alongside execution metadata.\n\nExample YAML:\n    sink:\n      bronze:\n        save_metadata: true\n        metadata:\n          owner: \"data-team\"\n          steward: \"chembl-owner\"\n          description: \"Raw ChEMBL activity data\"\n          tags: [\"chembl\", \"activity\", \"raw\"]\n          retention_days: 90\n          sla_freshness_hours: 24\n          lineage:\n            source_system: \"chembl\"\n            extraction_method: \"api\"",
+      "properties": {
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Data owner team/individual",
+          "title": "Owner"
+        },
+        "steward": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Data steward",
+          "title": "Steward"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable data description",
+          "title": "Description"
+        },
+        "tags": {
+          "description": "Classification tags for discovery",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "retention_days": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Data retention period in days",
+          "title": "Retention Days"
+        },
+        "sla_freshness_hours": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SLA for data freshness in hours",
+          "title": "Sla Freshness Hours"
+        },
+        "lineage": {
+          "$ref": "#/$defs/SinkLineageConfig",
+          "description": "Static lineage configuration"
+        },
+        "quality_expectations": {
+          "$ref": "#/$defs/QualityExpectations",
+          "description": "Target quality metrics"
+        },
+        "classification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Data classification (public, internal, restricted)",
+          "title": "Classification"
+        }
+      },
+      "title": "SinkMetadataConfig",
+      "type": "object"
+    },
+    "SortByConfig": {
+      "description": "Configuration for deterministic sorting.\n\nExample YAML:\n    sort_by:\n      columns: [target_chembl_id, pref_name]\n      ascending: true",
+      "properties": {
+        "columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "ascending": {
+          "default": true,
+          "title": "Ascending",
+          "type": "boolean"
+        }
+      },
+      "title": "SortByConfig",
+      "type": "object"
+    },
+    "SourceConfig": {
+      "description": "Configuration for the data source.\n\nParses both pipeline source settings and configs/sources/*.yaml structure.\nThe `rate_limit`, `circuit_breaker`, and `provider_config` fields capture\nsettings from source configuration files that were previously ignored.",
+      "properties": {
+        "load_strategy": {
+          "default": "full",
+          "enum": [
+            "full",
+            "incremental"
+          ],
+          "title": "Load Strategy",
+          "type": "string"
+        },
+        "search_term": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Search Term"
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Email"
+        },
+        "api_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Api Key"
+        },
+        "fields": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "api": {
+          "$ref": "#/$defs/ApiConfig"
+        },
+        "input_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to input file for file-based sources",
+          "title": "Input Path"
+        },
+        "type": {
+          "default": "api",
+          "enum": [
+            "api",
+            "file"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "batch_size": {
+          "default": 100,
+          "maximum": 5000,
+          "minimum": 1,
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "rate_limit": {
+          "$ref": "#/$defs/RateLimitSourceConfig"
+        },
+        "circuit_breaker": {
+          "$ref": "#/$defs/CircuitBreakerConfig"
+        },
+        "provider_config": {
+          "$ref": "#/$defs/ProviderSourceConfig"
+        }
+      },
+      "title": "SourceConfig",
+      "type": "object"
+    },
+    "TransformConfig": {
+      "description": "Configuration for transform versioning and steps.\n\nTracks the version and steps of the transformation applied to data,\nenabling full lineage tracking in Silver/Gold metadata.\n\nAttributes:\n    version: Semver-formatted version string (e.g., \"1.0.0\", \"v2.1.0\").\n    steps: List of transformation step names applied in order.\n\nExample YAML:\n    transform:\n      version: \"1.0.0\"\n      steps:\n        - normalize_values\n        - add_metadata\n        - calculate_content_hash",
+      "properties": {
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transform version in semver format (e.g., '1.0.0')",
+          "title": "Version"
+        },
+        "steps": {
+          "description": "List of transformation steps applied",
+          "items": {
+            "type": "string"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "title": "TransformConfig",
+      "type": "object"
+    }
+  },
+  "description": "Strict schema for pipeline YAML configuration.\n\nPydantic model for YAML parsing.\n\nDQ Config Resolution:\n    The dq_config_file field references an external DQ configuration file\n    that is loaded through the DQConfigLoader hierarchy. If both dq_config_file\n    and dq_overrides are present, dq_overrides acts as inline overrides on top of\n    the file-based configuration.",
+  "properties": {
+    "pipeline_name": {
+      "title": "Pipeline Name",
+      "type": "string"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    },
+    "entity_type": {
+      "title": "Entity Type",
+      "type": "string"
+    },
+    "version": {
+      "default": "v1",
+      "title": "Version",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Human-readable pipeline description",
+      "title": "Description"
+    },
+    "batch_size": {
+      "default": 100,
+      "maximum": 5000,
+      "minimum": 1,
+      "title": "Batch Size",
+      "type": "integer"
+    },
+    "filter_batch_size": {
+      "anyOf": [
+        {
+          "maximum": 5000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Batch size when input_filter is active. Overrides batch_size.",
+      "title": "Filter Batch Size"
+    },
+    "checkpoint_interval": {
+      "default": 1000,
+      "minimum": 100,
+      "title": "Checkpoint Interval",
+      "type": "integer"
+    },
+    "dq_config_file": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Path to DQ config file relative to pipeline config. When set, DQ config is loaded from the hierarchical DQ system. Example: ../../quality/entities/chembl/activity.yaml",
+      "title": "Dq Config File"
+    },
+    "dq_overrides": {
+      "$ref": "#/$defs/DQConfig"
+    },
+    "circuit_breaker": {
+      "$ref": "#/$defs/CircuitBreakerConfig"
+    },
+    "filter_config_file": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Path to filter config file relative to pipeline config. When set, filter config is loaded from the hierarchical filter system. Example: ../../filter/entities/chembl/activity.yaml",
+      "title": "Filter Config File"
+    },
+    "filter_rules": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Inline filter overrides. Applied on top of filter_config_file. Format: {input_filter: {...}, gold_filters: {...}}",
+      "title": "Filter Rules"
+    },
+    "column_groups_file": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Path to column group config file relative to pipeline config.",
+      "title": "Column Groups File"
+    },
+    "data_schema_file": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Path to data schema file with layer-specific columns (silver/gold).",
+      "title": "Data Schema File"
+    },
+    "primary_keys": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Primary Keys",
+      "type": "array"
+    },
+    "silver_table": {
+      "minLength": 1,
+      "title": "Silver Table",
+      "type": "string"
+    },
+    "gold_table": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gold Table"
+    },
+    "silver_filters": {
+      "$ref": "#/$defs/GoldFiltersConfig"
+    },
+    "gold_filters": {
+      "$ref": "#/$defs/GoldFiltersConfig"
+    },
+    "sink": {
+      "additionalProperties": {
+        "$ref": "#/$defs/SinkLayerConfig"
+      },
+      "title": "Sink",
+      "type": "object"
+    },
+    "source": {
+      "$ref": "#/$defs/SourceConfig"
+    },
+    "input_filter": {
+      "$ref": "#/$defs/InputFilterConfig"
+    },
+    "maintenance": {
+      "$ref": "#/$defs/MaintenanceConfig"
+    },
+    "transform": {
+      "$ref": "#/$defs/TransformConfig"
+    },
+    "column_groups": {
+      "description": "Optional column ordering groups for Silver/Gold output",
+      "items": {
+        "$ref": "#/$defs/ColumnGroupSchema"
+      },
+      "title": "Column Groups",
+      "type": "array"
+    },
+    "extraction_params": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "description": "Server-side API query parameters for Bronze extraction (ADR-028 §3). Merged from filter config file. Keys are provider-specific query params.",
+      "title": "Extraction Params",
+      "type": "object"
+    },
+    "loading_strategy": {
+      "anyOf": [
+        {
+          "const": "full_scan_only",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Explicit loading strategy for the pipeline. 'full_scan_only': Each run performs full scan, checkpoint resume disabled. See ADR-031.",
+      "title": "Loading Strategy"
+    }
+  },
   "required": [
     "pipeline_name",
     "provider",
     "entity_type",
-    "version",
     "primary_keys",
-    "silver_table",
-    "gold_table"
+    "silver_table"
   ],
-  "properties": {
-    "pipeline_name": {
-      "type": "string",
-      "pattern": "^[a-z]+_[a-z_]+$",
-      "description": "Unique pipeline identifier in format {provider}_{entity}"
-    },
-    "provider": {
-      "type": "string",
-      "enum": ["chembl", "pubchem", "uniprot", "pubmed", "crossref", "openalex", "semanticscholar"],
-      "description": "Data provider name"
-    },
-    "entity_type": {
-      "type": "string",
-      "description": "Entity type (e.g., activity, assay, molecule, work for CrossRef)"
-    },
-    "version": {
-      "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+$",
-      "description": "Semantic version of config"
-    },
-    "description": {
-      "type": "string",
-      "description": "Human-readable description of the pipeline"
-    },
-    "primary_keys": {
-      "type": "array",
-      "items": {"type": "string"},
-      "minItems": 1,
-      "description": "Primary key field(s) for entity. Auto-propagated to sink.silver.primary_key and sort_by.columns"
-    },
-    "silver_table": {
-      "type": "string",
-      "description": "Silver layer table name"
-    },
-    "gold_table": {
-      "type": "string",
-      "description": "Gold layer table name"
-    },
-    "loading_strategy": {
-      "type": "string",
-      "enum": ["incremental", "full_scan_only"],
-      "default": "incremental",
-      "description": "Data loading strategy. 'full_scan_only' disables checkpoint resume (ADR-031)"
-    },
-    "batch_size": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 10000,
-      "description": "Override default batch size for API requests (provider default used if not specified)"
-    },
-    "checkpoint_interval": {
-      "type": "integer",
-      "minimum": 1,
-      "description": "Override checkpoint interval (records processed between checkpoints)"
-    },
-    "source_file": {
-      "type": "string",
-      "description": "Reference to source configuration file. Auto-computed as ../../sources/{provider}.yaml if not specified"
-    },
-    "dq_config_file": {
-      "type": "string",
-      "description": "Reference to DQ configuration file. Auto-computed as ../../dq/entities/{provider}/{entity_type}.yaml if not specified"
-    },
-    "filter_config_file": {
-      "type": "string",
-      "description": "Reference to filter configuration file. Auto-computed as ../../filter/entities/{provider}/{entity_type}.yaml if not specified"
-    },
-    "column_groups_file": {
-      "type": "string",
-      "description": "Reference to column groups file (legacy). Prefer data_schema_file for new configs"
-    },
-    "data_schema_file": {
-      "type": "string",
-      "description": "Reference to data schema file with layer-specific column definitions (silver/gold)"
-    },
-    "source": {
-      "type": "object",
-      "description": "Pipeline-specific source configuration (overrides values from source_file)"
-    },
-    "dq_overrides": {
-      "type": "object",
-      "properties": {
-        "soft_fail_threshold": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1,
-          "default": 0.05
-        },
-        "hard_fail_threshold": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1,
-          "default": 0.20
-        }
-      }
-    },
-    "sink": {
-      "type": "object",
-      "description": "Sink configuration for medallion layers. Optional when using convention-based paths (ADR-029)",
-      "properties": {
-        "bronze": {
-          "type": "object",
-          "description": "Bronze layer configuration. Path auto-computed if not specified",
-          "properties": {
-            "path": {"type": "string", "description": "Output path. Default: data/output/bronze/{provider}/{entity_type}"},
-            "flat_structure": {"type": "boolean", "default": true, "description": "If true, path already includes provider/entity"}
-          }
-        },
-        "silver": {
-          "type": "object",
-          "description": "Silver layer configuration. Path, primary_key, sort_by auto-computed if not specified",
-          "properties": {
-            "path": {"type": "string", "description": "Output path. Default: data/output/silver/{provider}/{entity_type}"},
-            "primary_key": {
-              "type": "array",
-              "items": {"type": "string"},
-              "description": "Merge key. Default: primary_keys from root"
-            },
-            "partition_by": {
-              "type": "array",
-              "items": {"type": "string"},
-              "description": "Partition columns. Default: [] (no partitioning)"
-            },
-            "sort_by": {
-              "type": "object",
-              "description": "Sort configuration for deterministic writes (ADR-014)",
-              "properties": {
-                "columns": {
-                  "type": "array",
-                  "items": {"type": "string"},
-                  "description": "Sort columns. Default: primary_keys"
-                },
-                "ascending": {"type": "boolean", "default": true}
-              }
-            },
-            "csv_export": {
-              "type": "object",
-              "properties": {
-                "path": {"type": "string", "description": "CSV export path. Default: same as silver path"}
-              }
-            },
-            "flat_structure": {"type": "boolean", "default": true}
-          }
-        },
-        "gold": {
-          "type": "object",
-          "description": "Gold layer configuration. Path, sort_by auto-computed if not specified",
-          "properties": {
-            "path": {"type": "string", "description": "Output path. Default: data/output/gold/{provider}/{entity_type}"},
-            "sort_by": {
-              "type": "object",
-              "description": "Sort configuration for deterministic writes (ADR-014)",
-              "properties": {
-                "columns": {
-                  "type": "array",
-                  "items": {"type": "string"},
-                  "description": "Sort columns. Default: primary_keys"
-                },
-                "ascending": {"type": "boolean", "default": true}
-              }
-            },
-            "csv_export": {
-              "type": "object",
-              "properties": {
-                "path": {"type": "string", "description": "CSV export path. Default: same as gold path"}
-              }
-            },
-            "flat_structure": {"type": "boolean", "default": true}
-          }
-        }
-      }
-    },
-    "input_filter": {
-      "type": "object",
-      "properties": {
-        "enabled": {"type": "boolean"},
-        "source_path": {"type": "string"},
-        "column_name": {"type": "string"},
-        "filter_field": {"type": "string"},
-        "batch_size": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 10000
-        },
-        "fallback_column": {"type": "string"}
-      }
-    },
-    "gold_filters": {
-      "type": "object",
-      "properties": {
-        "required_fields": {
-          "type": "array",
-          "items": {"type": "string"}
-        },
-        "exclude_if_present": {
-          "type": "array",
-          "items": {"type": "string"}
-        },
-        "columns": {
-          "type": "object",
-          "description": "Column filters with operator support",
-          "additionalProperties": {
-            "oneOf": [
-              {
-                "type": "array",
-                "items": {"type": "string"},
-                "description": "Legacy format: list of allowed values (IN operator)"
-              },
-              {
-                "type": "object",
-                "description": "Extended format with operator",
-                "required": ["operator"],
-                "properties": {
-                  "operator": {
-                    "type": "string",
-                    "enum": ["in", "not_in", "is_null", "is_not_null", "is_empty", "is_not_empty"]
-                  },
-                  "values": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Values for IN/NOT_IN operators"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "ranges": {
-          "type": "object",
-          "description": "Numeric range filters",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "min": {"type": "number"},
-              "max": {"type": "number"},
-              "include_min": {"type": "boolean", "default": true},
-              "include_max": {"type": "boolean", "default": true}
-            }
-          }
-        },
-        "list_lengths": {
-          "type": "object",
-          "description": "List length filters",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "min": {"type": "integer"},
-              "max": {"type": "integer"}
-            }
-          }
-        },
-        "list_contains": {
-          "type": "object",
-          "description": "List contains filters",
-          "additionalProperties": {
-            "type": "object",
-            "required": ["values"],
-            "properties": {
-              "values": {
-                "type": "array",
-                "items": {"type": "string"}
-              },
-              "mode": {
-                "type": "string",
-                "enum": ["all", "any"],
-                "default": "all"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  "title": "PipelineYamlConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
 }

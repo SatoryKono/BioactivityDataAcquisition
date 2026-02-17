@@ -115,12 +115,17 @@ def test_req_data_009_gold_is_strict(config_path):
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_delta_003_forensic_retention(config_path):
-    """Forensic retention must be configurable."""
+    """Forensic retention must be configurable via maintenance settings.
+
+    Note: forensic_retention was removed from sink.silver because the
+    Pydantic SinkLayerConfig model (single source of truth) does not
+    support it.  Retention is now controlled via maintenance.vacuum_retention_days.
+    """
     config = load_config_with_defaults(config_path)
 
-    silver_sink = config.get("sink", {}).get("silver", {})
-    assert "forensic_retention" in silver_sink, (
-        f"'forensic_retention' key missing in silver sink of {config_path}"
+    maintenance = config.get("maintenance", {})
+    assert "vacuum_retention_days" in maintenance, (
+        f"'vacuum_retention_days' key missing in maintenance of {config_path}"
     )
 
 
