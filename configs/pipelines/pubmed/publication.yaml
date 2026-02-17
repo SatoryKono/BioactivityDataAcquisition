@@ -24,7 +24,6 @@ gold_table: "pubmed_publication"
 # Source Configuration (provider-specific API settings)
 # -----------------------------------------------------------------------------
 source:
-  search_term: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"
   email: "${BIOETL_PUBMED_EMAIL}"
   api_key: "${BIOETL_PUBMED_API_KEY}"
 
@@ -48,7 +47,6 @@ sink:
   bronze:
     flat_structure: true  # Path already includes provider/entity
   silver:
-    partition_by: ["pub_year"]
     flat_structure: true
   gold:
     flat_structure: true

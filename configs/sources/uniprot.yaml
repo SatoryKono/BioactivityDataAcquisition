@@ -6,8 +6,6 @@
 # Data License: CC BY 4.0
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 200  # UniProt handles slightly larger batches well
     provider_config:
         provider: uniprot

@@ -65,6 +65,5 @@ dq_overrides:
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver:
-    partition_by: ["target_type"]
+  silver: {}
   gold: {}

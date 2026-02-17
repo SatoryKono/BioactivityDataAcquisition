@@ -94,6 +94,5 @@ dq_overrides:
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver:
-    partition_by: ["batch_date"]
+  silver: {}
   gold: {}

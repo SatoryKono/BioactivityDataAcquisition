@@ -49,8 +49,6 @@ dq_overrides:
 # -----------------------------------------------------------------------------
 # Sink Overrides (only non-convention values)
 # -----------------------------------------------------------------------------
-# Note: partition_by is entity-specific and differs from convention
 sink:
-  silver:
-    partition_by: ["assay_type"]
+  silver: {}
   gold: {}
