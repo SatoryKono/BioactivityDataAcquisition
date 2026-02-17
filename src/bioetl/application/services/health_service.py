@@ -31,7 +31,7 @@ class DataSourceFactoryPort(Protocol):
         ...
 
     @staticmethod
-    def create(provider_name: str) -> Any:
+    def create(provider: str) -> Any:
         """Create a data source adapter for the given provider."""
         ...
 
