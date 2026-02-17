@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
 
 # Type aliases for helper class parameters
-HttpTransport = Any  # Any: untyped HTTP transport (UnifiedHTTPClient)
+HttpTransport = Any  # Any: untyped HTTP transport
 BaseMetrics = Any  # Any: untyped adapter metrics wrapper
 
 
