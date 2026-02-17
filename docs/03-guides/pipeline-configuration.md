@@ -113,14 +113,14 @@ configs/
 
 ### Статистика конфигураций
 
-| Категория                 | Количество | Описание                               |
-| ------------------------- | ---------- | -------------------------------------- |
-| Pipeline configs (entity) | 21         | Regular ETL pipelines                  |
-| Composite configs         | 5          | Multi-provider pipelines (ADR-026)     |
+| Категория                 | Количество | Описание                                          |
+| ------------------------- | ---------- | ------------------------------------------------- |
+| Pipeline configs (entity) | 21         | Regular ETL pipelines                             |
+| Composite configs         | 5          | Multi-provider pipelines (ADR-026)                |
 | DQ configs                | 31         | 1 defaults + 7 providers + 22 entities + 1 schema |
-| Filter configs            | 8          | 1 defaults + 7 providers               |
-| Source configs            | 7          | Один на провайдера                     |
-| **Итого**                 | **71**     | Все конфиги валидированы               |
+| Filter configs            | 8          | 1 defaults + 7 providers                          |
+| Source configs            | 7          | Один на провайдера                                |
+| **Итого**                 | **71**     | Все конфиги валидированы                          |
 
 ______________________________________________________________________
 
@@ -155,7 +155,7 @@ gold_table: "chembl_activity"
 | `batch_size`          | Размер батча (1-5000)              | Нет (default: 100)   |
 | `checkpoint_interval` | Интервал checkpoint                | Нет (default: 10)    |
 | `source`              | Конфиг источника                   | Нет (auto-resolved)  |
-| `dq_overrides`            | Inline DQ переопределения          | Нет                  |
+| `dq_overrides`        | Inline DQ переопределения          | Нет                  |
 | `sink`                | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
 | `circuit_breaker`     | Настройки Circuit Breaker          | Нет (from base)      |
 | `maintenance`         | VACUUM настройки                   | Нет (from base)      |
@@ -233,6 +233,56 @@ composite:
     conflict_resolution: prefer_seed  # При конфликте — seed выигрывает
 ```
 
+### Изменение контракта в v6.0 (breaking)
+
+Начиная с **BioETL 6.0.0** поле `composite.version` снова является обязательным в основном контракте (`configs/_schema/composite.json`).
+
+**Старый формат (legacy, до v6):**
+
+```yaml
+schema_version: "2.0.0"
+composite:
+  name: composite_publication
+  # version отсутствует
+  seed:
+    pipeline: chembl_publication
+    output_keys: [publication_id, doi]
+    silver_table: silver/chembl/publication
+  enrichers:
+    - pipeline: crossref_publication
+      join_keys: [doi]
+  merge:
+    output:
+      silver: silver/composite/publication
+      gold: gold/composite/publication
+```
+
+**Новый формат (v6+):**
+
+```yaml
+schema_version: "2.0.0"
+composite:
+  name: composite_publication
+  version: "1.1.0"
+  seed:
+    pipeline: chembl_publication
+    output_keys: [publication_id, doi]
+    silver_table: silver/chembl/publication
+  enrichers:
+    - pipeline: crossref_publication
+      join_keys: [doi]
+  merge:
+    output:
+      silver: silver/composite/publication
+      gold: gold/composite/publication
+```
+
+**Migration notes**
+
+- Добавьте `composite.version` во все пользовательские composite YAML.
+- Во время перехода runtime сохраняет явную совместимость для legacy-файлов и выдаёт `DeprecationWarning`.
+- **Deprecation window:** поддержка legacy-формата удаляется в **BioETL 6.2.0**.
+
 ### Доступные Composite Pipelines
 
 | Composite               | Seed                 | Enrichers                                                           | Описание                      |
@@ -258,14 +308,14 @@ ______________________________________________________________________
 
 Пути и ссылки вычисляются автоматически из `provider` и `entity_type`:
 
-| Поле                 | Auto-computed значение                                |
-| -------------------- | ----------------------------------------------------- |
-| `source_file`        | `../../sources/{provider}.yaml`                       |
-| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml`     |
+| Поле                 | Auto-computed значение                                 |
+| -------------------- | ------------------------------------------------------ |
+| `source_file`        | `../../sources/{provider}.yaml`                        |
+| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml` |
 | `filter_config_file` | `../../filters/entities/{provider}/{entity_type}.yaml` |
-| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`         |
-| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`         |
-| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`           |
+| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`          |
+| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`          |
+| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`            |
 
 ### Авто-пропагация sort_by (ADR-014 compliance)
 

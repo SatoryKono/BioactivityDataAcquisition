@@ -35,7 +35,9 @@ from bioetl.infrastructure.config.field_group_loader import (
     load_field_groups,
 )
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
+from bioetl.infrastructure.schemas.composite_config import (
+    validate_composite_config_payload,
+)
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 if TYPE_CHECKING:
@@ -97,7 +99,7 @@ def load_composite_config(name: str) -> CompositeConfig:
 
     try:
         # Validate using Pydantic schema
-        schema = CompositeConfigFileSchema.model_validate(raw)
+        schema = validate_composite_config_payload(raw)
         # Convert to immutable domain objects
         config: CompositeConfig = schema.to_domain()
         return config
