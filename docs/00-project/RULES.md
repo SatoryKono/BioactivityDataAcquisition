@@ -1333,6 +1333,9 @@ ______________________________________________________________________
 
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.
 
+> **Каноническая конфигурация rate limits** (burst, batch_size, конкретные числа) находится в
+> `configs/sources/{provider}.yaml`. Подробная таблица: [pipeline-configuration.md](../03-guides/pipeline-configuration.md#provider-rate-limits).
+
 ### А.1. Формирование URL для ChEMBL API
 
 URL-адреса для ChEMBL формируются в `infrastructure/adapters/chembl/entity_mapper.py`:
