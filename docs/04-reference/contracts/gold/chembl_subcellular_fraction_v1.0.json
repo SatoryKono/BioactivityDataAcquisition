@@ -30,15 +30,9 @@
       },
       "type": "array"
     },
-    "compound_key": {
+    "assay_count": {
       "items": {
-        "type": "string"
-      },
-      "type": "array"
-    },
-    "compound_name": {
-      "items": {
-        "type": "string"
+        "type": "number"
       },
       "type": "array"
     },
@@ -54,43 +48,25 @@
       },
       "type": "array"
     },
+    "example_assay_chembl_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
     "index": {
       "items": {
         "type": "integer"
       },
       "type": "array"
     },
-    "molecule_id": {
+    "subcellular_fraction": {
       "items": {
         "type": "string"
-      },
-      "type": "array"
-    },
-    "publication_id": {
-      "items": {
-        "type": "string"
-      },
-      "type": "array"
-    },
-    "record_id": {
-      "items": {
-        "type": "number"
-      },
-      "type": "array"
-    },
-    "src_compound_id": {
-      "items": {
-        "type": "string"
-      },
-      "type": "array"
-    },
-    "src_id": {
-      "items": {
-        "type": "number"
       },
       "type": "array"
     }
   },
-  "title": "ChEMBLCompoundRecordGoldSchema",
+  "title": "ChEMBLSubcellularFractionGoldSchema",
   "type": "object"
 }

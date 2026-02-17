@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip test lint run-local docker-up docker-down docker-reset seed-local clean clean-all
+.PHONY: help install install-uv install-pip test lint run-local contracts-export docker-up docker-down docker-reset seed-local clean clean-all
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -200,6 +200,11 @@ run-local: ## Run sample pipeline (ChEMBL activity with limit)
 	@echo "$(BLUE)Running ChEMBL activity pipeline (limit=10)...$(NC)"
 	$(RUN) bioetl run --pipeline chembl_activity --limit 10
 
+contracts-export: ## Export Gold contracts to docs/04-reference/contracts/gold/
+	@echo "$(BLUE)Exporting Gold contracts...$(NC)"
+	$(RUN) python src/tools/scripts/generate_contracts.py
+	@echo "$(GREEN)Contracts exported to docs/04-reference/contracts/gold/$(NC)"
+
 clean: ## Clean up generated files (Python artifacts, caches, build outputs)
 	@echo "$(YELLOW)Cleaning Python artifacts...$(NC)"
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -358,14 +363,9 @@ docs-serve: ## Serve documentation locally
 docs-build: ## Build documentation
 	$(RUN) mkdocs build
 
-contracts-check: ## Generate and check data contracts
-	@echo "$(BLUE)Generating data contracts...$(NC)"
-ifdef UV_EXISTS
-	uv run python scripts/generate_contracts.py
-else
-	$(VENV_PYTHON) scripts/generate_contracts.py
-endif
-	@echo "$(GREEN)Contracts generated!$(NC)"
+contracts-check: ## DEPRECATED: use `make contracts-export`
+	@echo "$(YELLOW)Deprecated target. Use make contracts-export$(NC)"
+	@$(MAKE) contracts-export
 
 # Version management
 version: ## Show current version

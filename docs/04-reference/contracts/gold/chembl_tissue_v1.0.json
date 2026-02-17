@@ -30,25 +30,19 @@
       },
       "type": "array"
     },
-    "compound_key": {
+    "bto_id": {
       "items": {
         "type": "string"
       },
       "type": "array"
     },
-    "compound_name": {
+    "caloha_id": {
       "items": {
         "type": "string"
       },
       "type": "array"
     },
-    "content_hash": {
-      "items": {
-        "type": "string"
-      },
-      "type": "array"
-    },
-    "entity_id": {
+    "efo_id": {
       "items": {
         "type": "string"
       },
@@ -60,37 +54,25 @@
       },
       "type": "array"
     },
-    "molecule_id": {
+    "pref_name": {
       "items": {
         "type": "string"
       },
       "type": "array"
     },
-    "publication_id": {
+    "tissue_chembl_id": {
       "items": {
         "type": "string"
       },
       "type": "array"
     },
-    "record_id": {
-      "items": {
-        "type": "number"
-      },
-      "type": "array"
-    },
-    "src_compound_id": {
+    "uberon_id": {
       "items": {
         "type": "string"
-      },
-      "type": "array"
-    },
-    "src_id": {
-      "items": {
-        "type": "number"
       },
       "type": "array"
     }
   },
-  "title": "ChEMBLCompoundRecordGoldSchema",
+  "title": "ChEMBLTissueGoldSchema",
   "type": "object"
 }

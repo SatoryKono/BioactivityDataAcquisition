@@ -1,206 +1,276 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "Semantic Scholar Publication Gold Contract",
-  "description": "Gold layer data contract for Semantic Scholar Publication Gold Contract. Auto-generated from Pandera schema SemanticScholarPublicationGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "paper_id": {
-      "type": "string"
-    },
-    "doi": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pmid": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "arxiv_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "corpus_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "tldr": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "year": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "publication_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "journal": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "volume": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pages": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "first_page": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "last_page": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "venue": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "citation_count": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "minimum": 0
-    },
-    "reference_count": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "minimum": 0
-    },
-    "is_oa": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "open_access_url": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "oa_status": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "fields_of_study": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "publication_types": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "source": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_lookup_method": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_original_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_dq_error": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
     },
     "_dq_warn": {
-      "type": "boolean"
-    },
-    "_dq_error": {
-      "type": "boolean"
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
     },
     "_index": {
-      "type": "integer"
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "_ingestion_ts": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_lookup_method": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_original_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "abstract": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "affiliation_list": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "author_h_indices": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "author_keys": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "author_orcids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "author_s2_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "authors": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "citation_contexts": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "citations_made": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "citations_received": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "corpus_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "dblp_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "doi": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "influential_citation_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "is_oa": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
+    },
+    "issue": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "journal": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "oa_status": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "open_access_url": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "page_first": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "page_last": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "page_range": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "paper_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pmid": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_date": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_types": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_year": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "subject_fields": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "title": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "tldr": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "volume": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_dq_error",
-    "_dq_warn",
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "paper_id"
-  ]
+  "title": "SemanticScholarPublicationGoldSchema",
+  "type": "object"
 }

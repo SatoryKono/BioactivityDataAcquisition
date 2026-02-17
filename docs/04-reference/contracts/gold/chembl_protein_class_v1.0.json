@@ -1,108 +1,114 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "ChEMBL Protein Class Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Protein Class Gold Contract. Auto-generated from Pandera schema ChEMBLProteinClassGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "protein_class_id": {
-      "type": "number",
-      "minimum": 1
-    },
-    "parent_id": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "minimum": 1
-    },
-    "class_level": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "minimum": 1,
-      "maximum": 8
-    },
-    "pref_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "short_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "protein_class_desc": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "definition": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "sort_order": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "replaced_by": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "minimum": 1
-    },
-    "downgraded": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "enum": [
-        0,
-        1
-      ]
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
     },
     "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
-    "_index": {
-      "type": "integer"
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "class_level": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "definition": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "downgraded": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "parent_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "pref_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "protein_class_desc": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "protein_class_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "replaced_by": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "short_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "sort_order": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "protein_class_id"
-  ]
+  "title": "ChEMBLProteinClassGoldSchema",
+  "type": "object"
 }

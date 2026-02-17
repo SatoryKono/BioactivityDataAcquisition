@@ -179,13 +179,14 @@ bioetl checkpoint list
 - Keep machine-consumed reference datasets under semantic paths in `data/` (for example, `data/input/reference/`).
 - Keep optional human-facing spreadsheet copies under `docs/reference/`.
 - Unified publication classifier canonical format is CSV at `data/input/reference/unified_classification.csv`; Excel is optional documentation copy at `docs/reference/unified_classification.xlsx`.
+
 ### Local diagnostic artifacts
 
 Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
 
-* Временные диагностические дампы сохраняйте в `tmp/`.
-* Логи локальных запусков сохраняйте в `logs/`.
-* Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
+- Временные диагностические дампы сохраняйте в `tmp/`.
+- Логи локальных запусков сохраняйте в `logs/`.
+- Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
 
 ### Testing
 
@@ -274,6 +275,16 @@ make docs-serve
 ```
 
 Access the docs at `http://localhost:8000`.
+
+### Contracts
+
+Use a single supported command to regenerate Gold JSON Schema contracts:
+
+```bash
+make contracts-export
+```
+
+This command exports contracts to `docs/04-reference/contracts/gold/` via `src/tools/scripts/generate_contracts.py`.
 
 ## Project Structure
 

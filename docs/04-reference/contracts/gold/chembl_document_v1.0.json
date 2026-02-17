@@ -1,186 +1,210 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "ChEMBL Document Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Document Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "document_chembl_id": {
-      "type": "string"
-    },
-    "pmid": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "doi": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "authors": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "abstract": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "doc_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_full_title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "year": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "publication_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "volume": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "issue": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "first_page": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "last_page": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "src_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "citation_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "is_oa": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "language": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_source": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_lookup_method": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_original_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_dq_error": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
     },
     "_dq_warn": {
-      "type": "boolean"
-    },
-    "_dq_error": {
-      "type": "boolean"
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
     },
     "_index": {
-      "type": "integer"
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "_ingestion_ts": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_lookup_method": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_original_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "abstract": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "authors": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "chembl_release": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "citations_made": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "citations_received": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "creation_date": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "doi": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "issue": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "journal": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "page_first": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "page_last": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pmid": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_doi": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_pmc_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_pmid": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_year": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "src_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "title": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "volume": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_dq_error",
-    "_dq_warn",
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "document_chembl_id",
-    "entity_id"
-  ]
+  "title": "ChEMBLDocumentGoldSchema",
+  "type": "object"
 }

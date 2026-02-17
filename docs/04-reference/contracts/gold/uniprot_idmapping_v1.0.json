@@ -1,59 +1,144 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "UniProt ID Mapping Gold Contract",
-  "description": "Gold layer data contract for UniProt ID Mapping Gold Contract. Auto-generated from Pandera schema UniProtIDMappingGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "target_chembl_id": {
-      "type": "string"
-    },
-    "uniprot_accession": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "mapping_status": {
-      "type": "string"
-    },
     "_dq_warn": {
-      "type": "boolean"
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
     },
     "_index": {
-      "type": "integer"
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "_ingestion_ts": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "all_mappings": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "annotation_score": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "gene_primary": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "mapping_status": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "organism_common": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "organism_scientific": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "protein_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "reviewed": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
+    },
+    "sequence_length": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "sequence_mass": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "target_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "taxonomy_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "uniprot_accession": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "uniprot_entry_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_dq_warn",
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "mapping_status",
-    "target_chembl_id"
-  ]
+  "title": "UniProtIDMappingGoldSchema",
+  "type": "object"
 }

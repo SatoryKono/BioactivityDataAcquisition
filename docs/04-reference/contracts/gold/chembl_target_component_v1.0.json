@@ -1,99 +1,120 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "ChEMBL Target Component Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Target Component Gold Contract. Auto-generated from Pandera schema ChEMBLTargetComponentGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "component_id": {
-      "type": "number"
-    },
-    "accession": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "component_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "description": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "organism": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "taxonomy_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "target_component_synonyms": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "target_component_xrefs": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "protein_classifications": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "protein_classification_ids": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
     },
     "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
-    "_index": {
-      "type": "integer"
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "accession": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "component_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "component_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "description": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "organism": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "protein_classification_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "protein_classification_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "protein_classifications": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "target_component_synonyms": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "target_component_xrefs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "taxonomy_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "component_id",
-    "content_hash",
-    "entity_id"
-  ]
+  "title": "ChEMBLTargetComponentGoldSchema",
+  "type": "object"
 }

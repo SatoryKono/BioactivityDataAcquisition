@@ -1,75 +1,222 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "UniProt Protein Gold Contract",
-  "description": "Gold layer data contract for UniProt Protein Gold Contract. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "accession": {
-      "type": "string"
-    },
-    "entry_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "protein_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "gene_names": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "organism_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "sequence_length": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
     },
     "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
-    "_index": {
-      "type": "integer"
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "accession": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "active_sites": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "activity_regulation": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "annotation_score": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "binding_sites": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "catalytic_activity": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "chembl_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "disease_involvement": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "domains": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "drugbank_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entry_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "features_json": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "function_comment": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "gene_names": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "go_terms": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "interpro_xrefs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "organism_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "pathway": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pdb_xrefs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pfam_xrefs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "protein_existence": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "protein_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "reactome_xrefs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "reviewed": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
+    },
+    "sequence_length": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "similarity_comment": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "subcellular_location": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "tissue_specificity": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "accession",
-    "content_hash",
-    "entity_id"
-  ]
+  "title": "UniProtProteinGoldSchema",
+  "type": "object"
 }

@@ -1,354 +1,384 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "PubMed Publication Gold Contract",
-  "description": "Gold layer data contract for PubMed Publication Gold Contract. Auto-generated from Pandera schema PubMedPublicationGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "pmid": {
-      "type": "string"
-    },
-    "doi": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "abstract": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "abstract_structured": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "vernacular_title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_abbrev": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_iso_abbrev": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_issn_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "issn": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "nlm_unique_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "volume": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "issue": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pages": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "medline_pgn": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "first_page": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "last_page": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "authors": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pub_date": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pub_month": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "pub_day": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "publication_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "year": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "publication_year": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "accepted_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "received_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "revised_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "epub_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "date_completed": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "date_revised": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "publication_status": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "publication_type_list": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "publication_types": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "keywords": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "mesh_terms": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "citation_subset": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "language": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "country": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "author_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "mesh_heading_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "keyword_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "grant_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "reference_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "chemical_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "source": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_lookup_method": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_original_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_dq_error": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
     },
     "_dq_warn": {
-      "type": "boolean"
-    },
-    "_dq_error": {
-      "type": "boolean"
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
     },
     "_index": {
-      "type": "integer"
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "_ingestion_ts": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_lookup_method": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_original_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "abstract": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "abstract_structured": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
+    },
+    "affiliation_list": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "affiliation_structured": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "author_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "author_keys": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "authors": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "authors_with_affiliations": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "chemical_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "chemicals": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "citation_subset": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "citations_made": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "country": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "databanks": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "date_completed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "date_revised": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "doi": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "gene_symbols": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "grant_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "issn": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "issue": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "journal": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "journal_iso_abbrev": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "journal_issn_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "journal_name_short": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "keyword_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "language": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "medline_pgn": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mesh_heading_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "mid": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "nlm_unique_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "page_first": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "page_last": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "page_range": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pii": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pmc_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pmid": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pub_day": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "pub_month": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "publication_date": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_status": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_type_list": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_types": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_year": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "publisher_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "subject_keywords": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "subject_mesh": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "title": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "volume": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_dq_error",
-    "_dq_warn",
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "pmid"
-  ]
+  "title": "PubMedPublicationGoldSchema",
+  "type": "object"
 }

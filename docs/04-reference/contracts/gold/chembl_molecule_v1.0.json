@@ -1,351 +1,366 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "ChEMBL Molecule Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Molecule Gold Contract. Auto-generated from Pandera schema ChEMBLMoleculeGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "molecule_chembl_id": {
-      "type": "string"
-    },
-    "pref_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "molecule_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "structure_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "max_phase": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "first_approval": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "chirality": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "dosed_ingredient": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "availability_type": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "usan_stem": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "usan_stem_definition": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "usan_substem": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "usan_year": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "helm_notation": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "molecule_species": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "oral": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "parenteral": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "topical": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "black_box_warning": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "natural_product": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "first_in_class": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "prodrug": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "therapeutic_flag": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "withdrawn_flag": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "inorganic_flag": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "polymer_flag": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "molecule_hierarchy": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "molecule_properties": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "molecule_structures": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "molecule_synonyms": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cross_references": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "atc_classifications": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "hierarchy_parent_chembl_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "hierarchy_active_chembl_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "hierarchy_child_chembl_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "logp": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "logp_method": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "mw_freebase": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "molecular_weight": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "hba_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "hbd_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "polar_surface_area": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "rotatable_bond_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "ro5_violation_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "heavy_atom_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "aromatic_ring_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "qed_score": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "molecular_formula": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "ro3_pass": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "canonical_smiles": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "standard_inchi": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "inchikey": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
     },
     "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
-    "_index": {
-      "type": "integer"
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "aromatic_ring_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "atc_classifications": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "availability_type": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "black_box_warning": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "canonical_smiles": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "chirality": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cross_references": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dosed_ingredient": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "first_approval": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "first_in_class": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "hba_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "hbd_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "heavy_atom_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "helm_notation": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "hierarchy_active_chembl_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "hierarchy_child_chembl_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "hierarchy_parent_chembl_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "inchi_key": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "inorganic_flag": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "logp": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "logp_method": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "max_phase": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "molecular_formula": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "molecular_weight": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "molecule_hierarchy": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "molecule_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "molecule_properties": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "molecule_species": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "molecule_structures": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "molecule_synonyms": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "molecule_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mw_freebase": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "natural_product": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "oral": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
+    },
+    "parenteral": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
+    },
+    "polar_surface_area": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "polymer_flag": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "pref_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "prodrug": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "qed_score": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "ro3_pass": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ro5_violation_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "rotatable_bond_count": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "standard_inchi": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "structure_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "therapeutic_flag": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
+    },
+    "topical": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
+    },
+    "usan_stem": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "usan_stem_definition": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "usan_substem": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "usan_year": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "withdrawn_flag": {
+      "items": {
+        "type": "boolean"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "molecule_chembl_id"
-  ]
+  "title": "ChEMBLMoleculeGoldSchema",
+  "type": "object"
 }

@@ -1,343 +1,378 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "ChEMBL Activity Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Activity Gold Contract. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "activity_id": {
-      "type": "string"
-    },
-    "molecule_chembl_id": {
-      "type": "string"
-    },
-    "target_chembl_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "assay_chembl_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "document_chembl_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "record_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "src_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "canonical_smiles": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "molecule_pref_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "parent_molecule_chembl_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "target_pref_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "target_organism": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "target_taxonomy_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "assay_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "assay_description": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "assay_variant_accession": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "assay_variant_mutation": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "bao_endpoint": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "bao_format": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "bao_label": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "value": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "units": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "relation": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "upper_value": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "text_value": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "standard_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "standard_value": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "standard_units": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "standard_relation": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "standard_upper_value": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "standard_text_value": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "standard_flag": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "pchembl_value": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "ligand_efficiency_bei": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "ligand_efficiency_le": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "ligand_efficiency_lle": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "ligand_efficiency_sei": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "qudt_units": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "uo_units": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "document_journal": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "document_year": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "activity_comment": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "data_validity_comment": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "data_validity_description": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "potential_duplicate": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "action_type_action_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "action_type_description": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "action_type_parent_type": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "activity_properties": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "toid": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
     },
     "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
-    "_index": {
-      "type": "integer"
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "action_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "action_type_description": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "action_type_parent_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "activity_comment": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "activity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "activity_properties": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "assay_description": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "assay_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "assay_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "assay_variant_accession": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "assay_variant_mutation": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "bao_endpoint": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "bao_format": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "bao_label": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "canonical_smiles": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "data_validity_comment": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "data_validity_description": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "journal": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ligand_efficiency_bei": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "ligand_efficiency_le": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "ligand_efficiency_lle": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "ligand_efficiency_sei": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "molecule_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "molecule_pref_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "parent_molecule_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pchembl_value": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "potential_duplicate": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "publication_doi": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_pmc_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_pmid": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_year": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "qudt_units": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "record_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "relation": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "src_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "standard_flag": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "standard_relation": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "standard_text_value": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "standard_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "standard_units": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "standard_upper_value": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "standard_value": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "target_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "target_organism": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "target_pref_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "target_taxonomy_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "text_value": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "toid": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "units": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "uo_units": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "upper_value": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "value": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "activity_id",
-    "content_hash",
-    "entity_id",
-    "molecule_chembl_id"
-  ]
+  "title": "ChEMBLActivityGoldSchema",
+  "type": "object"
 }

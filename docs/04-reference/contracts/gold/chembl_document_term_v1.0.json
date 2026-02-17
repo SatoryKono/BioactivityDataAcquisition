@@ -1,65 +1,84 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "ChEMBL Document Term Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Document Term Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentTermGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "document_chembl_id": {
-      "type": "string"
-    },
-    "term": {
-      "type": "string"
-    },
-    "term_type": {
-      "type": "string"
-    },
-    "mesh_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "qualifier": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
     },
     "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
-    "_index": {
-      "type": "integer"
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "mesh_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "publication_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "qualifier": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "term": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "term_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "document_chembl_id",
-    "entity_id",
-    "term",
-    "term_type"
-  ]
+  "title": "ChEMBLDocumentTermGoldSchema",
+  "type": "object"
 }

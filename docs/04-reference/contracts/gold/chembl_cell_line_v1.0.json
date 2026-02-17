@@ -1,91 +1,108 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$version": "1.0.0",
-  "title": "ChEMBL Cell Line Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Cell Line Gold Contract. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
-  "type": "object",
   "properties": {
-    "entity_id": {
-      "type": "string"
-    },
-    "content_hash": {
-      "type": "string"
-    },
-    "cell_chembl_id": {
-      "type": "string"
-    },
-    "cell_name": {
-      "type": "string"
-    },
-    "cell_description": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_tissue": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_organism": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_taxonomy_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "cellosaurus_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cl_lincs_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "efo_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "_run_id": {
-      "type": "string"
-    },
-    "_run_type": {
-      "type": "string"
-    },
-    "_source_batch_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
     },
     "_ingestion_ts": {
-      "type": "string"
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
-    "_index": {
-      "type": "integer"
+    "_run_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_run_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "_source_batch_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cell_description": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cell_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cell_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cell_source_organism": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cell_source_taxonomy_id": {
+      "items": {
+        "type": "number"
+      },
+      "type": "array"
+    },
+    "cell_source_tissue": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cellosaurus_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cl_lincs_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "content_hash": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "efo_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "entity_id": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "index": {
+      "items": {
+        "type": "integer"
+      },
+      "type": "array"
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "cell_chembl_id",
-    "cell_name",
-    "content_hash",
-    "entity_id"
-  ]
+  "title": "ChEMBLCellLineGoldSchema",
+  "type": "object"
 }
