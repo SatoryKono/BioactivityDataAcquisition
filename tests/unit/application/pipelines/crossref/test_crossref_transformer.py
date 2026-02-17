@@ -377,10 +377,10 @@ async def test_transform_issn_single(transformer, pipeline_context):
 
 
 def test_extract_business_data_subject_list(transformer):
-    """Test subjects extraction."""
+    """Test subjects extraction (serialized as canonical JSON string)."""
     publication = {"DOI": "10.1234/test", "subject": ["Biology", "Chemistry"]}
     data = transformer._extract_business_data(publication)
-    assert data["subject_keywords"] == ["Biology", "Chemistry"]
+    assert data["subject_keywords"] == '["Biology","Chemistry"]'
 
 
 @pytest.mark.asyncio

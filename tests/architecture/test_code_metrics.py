@@ -114,7 +114,7 @@ class TestFileSizeLimits:
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "idmapping_client.py": 660,  # 651 LOC
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + loading_strategy (ADR-031) + column_groups + extraction_params + DQ severity/max_length/not_null
-        "composite_config.py": 810,  # 805 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields + CrossValidationSchema + LineageSchema.provider_lookup_fields/track_source_for_fields
+        "composite_config.py": 860,  # 857 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields + CrossValidationSchema + LineageSchema.provider_lookup_fields/track_source_for_fields + composite version contract (v6)
         # Interfaces layer exemptions
         "cli.py": 550,  # 536 LOC - CLI commands, options, vacuum-all
         # New exemptions for split storage factory

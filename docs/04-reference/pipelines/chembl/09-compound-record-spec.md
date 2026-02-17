@@ -1,23 +1,23 @@
 # ChEMBL Compound Record Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.19*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `chembl_compound_record` |
-| **Provider** | ChEMBL (EBI) |
-| **Entity** | compound_record |
+| Parameter        | Value                                                   |
+| ---------------- | ------------------------------------------------------- |
+| **Pipeline ID**  | `chembl_compound_record`                                |
+| **Provider**     | ChEMBL (EBI)                                            |
+| **Entity**       | compound_record                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/compound_record` |
-| **Library** | `chembl_webresource_client` |
-| **Rate Limit** | None |
-| **Health Check** | `/chembl/api/data/status.json` |
-| **Auth Type** | None (public API) |
+| **Library**      | `chembl_webresource_client`                             |
+| **Rate Limit**   | None                                                    |
+| **Health Check** | `/chembl/api/data/status.json`                          |
+| **Auth Type**    | None (public API)                                       |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -33,43 +33,45 @@ Compound Records link **molecules to publications** with original naming:
 ### 2.2. Use Cases
 
 1. **Compound Name Resolution**: Find molecules by literature names
-2. **Publication Mining**: Find all compounds mentioned in a paper
-3. **Source Attribution**: Track data provenance
-4. **Name Normalization**: Map publication names to ChEMBL IDs
+1. **Publication Mining**: Find all compounds mentioned in a paper
+1. **Source Attribution**: Track data provenance
+1. **Name Normalization**: Map publication names to ChEMBL IDs
 
 ### 2.3. Entity Relationships
 
 ```
 compound_record
     │
-    ├──FK──► molecule.molecule_chembl_id (M:1)
+    ├──FK──► molecule.molecule_id (M:1)
     │
-    ├──FK──► document.document_chembl_id (M:1)
+    ├──FK──► document.publication_id (M:1)
     │
     └──◄──FK──activity.record_id (1:M)
 ```
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
 ### 3.1. API Fields
 
-| # | API Field | Type | Nullable | Description |
-|---|-----------|------|----------|-------------|
-| 1 | `record_id` | int | No | Primary key |
-| 2 | `molecule_chembl_id` | string | No | FK to molecule |
-| 3 | `document_chembl_id` | string | No | FK to document |
-| 4 | `src_id` | int | No | Source ID |
-| 5 | `compound_key` | string | Yes | Compound key in document |
-| 6 | `compound_name` | string | Yes | Compound name in document |
-| 7 | `src_compound_id` | string | Yes | Source compound ID |
+| #   | API Field         | Type   | Nullable | Description               |
+| --- | ----------------- | ------ | -------- | ------------------------- |
+| 1   | `record_id`       | int    | No       | Primary key               |
+| 2   | `molecule_id`     | string | No       | FK to molecule            |
+| 3   | `publication_id`  | string | No       | FK to document            |
+| 4   | `src_id`          | int    | No       | Source ID                 |
+| 5   | `compound_key`    | string | Yes      | Compound key in document  |
+| 6   | `compound_name`   | string | Yes      | Compound name in document |
+| 7   | `src_compound_id` | string | Yes      | Source compound ID        |
 
----
+______________________________________________________________________
 
 ## 4. Validation
 
 ### 4.1. Pandera Schema
+
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
 
 ```python
 class CompoundRecordSchema(ETLRecordSchema):
@@ -82,11 +84,11 @@ class CompoundRecordSchema(ETLRecordSchema):
     )
 
     # === Foreign Keys ===
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
     )
-    document_chembl_id: Series[str] = pa.Field(
+    publication_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
     )
@@ -106,7 +108,7 @@ class CompoundRecordSchema(ETLRecordSchema):
         coerce = True
 ```
 
----
+______________________________________________________________________
 
 ## 5. Pipeline Configuration
 
@@ -122,32 +124,32 @@ gold_table: "chembl_compound_record"
 
 gold_filters:
   required_fields:
-    - molecule_chembl_id
-    - document_chembl_id
+    - molecule_id
+    - publication_id
 
 input_filter:
   enabled: true
   source_path: "data/input/molecule.csv"
-  column_name: "molecule_chembl_id"
-  filter_field: "molecule_chembl_id"
+  column_name: "molecule_id"
+  filter_field: "molecule_id"
   batch_size: 20
 ```
 
----
+______________________________________________________________________
 
 ## 6. Dependencies
 
 ### 6.1. Upstream
 
-| Dependency | Type | Required |
-|------------|------|----------|
-| ChEMBL API | API | Yes |
-| `chembl_molecule` | Pipeline | Recommended |
+| Dependency           | Type     | Required    |
+| -------------------- | -------- | ----------- |
+| ChEMBL API           | API      | Yes         |
+| `chembl_molecule`    | Pipeline | Recommended |
 | `chembl_publication` | Pipeline | Recommended |
 
 ### 6.2. Downstream
 
-| Consumer | Impact |
-|----------|--------|
-| `chembl_activity` | FK reference (record_id) |
-| Compound-literature analysis | Provenance tracking |
+| Consumer                     | Impact                   |
+| ---------------------------- | ------------------------ |
+| `chembl_activity`            | FK reference (record_id) |
+| Compound-literature analysis | Provenance tracking      |

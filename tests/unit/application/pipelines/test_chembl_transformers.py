@@ -742,8 +742,8 @@ class TestTargetComponentTransformer:
         assert classifications[0]["protein_classification_id"] == 1015
         assert classifications[1]["protein_classification_id"] == 422
 
-        # Check flattened IDs list
-        assert result["protein_classification_ids"] == [1015, 422]
+        # Check flattened IDs list (serialized as canonical JSON string)
+        assert result["protein_classification_ids"] == "[1015,422]"
 
     @pytest.mark.asyncio
     async def test_transform_with_empty_protein_classifications(

@@ -4,7 +4,7 @@
 **Scope:** Full documentation system audit (docs/, configs/, RULES.md)
 **Methodology:** Cross-referencing docs ↔ code ↔ ADRs ↔ configs
 **Auditor:** External independent auditor
-**Code reference:** RULES.md v5.19, 34 ADRs, 180+ doc files
+**Code reference:** RULES.md v5.20, 34 ADRs, 180+ doc files
 
 ---
 
@@ -619,5 +619,5 @@ ls configs/pipelines/*/*.yaml | wc -l                    # 26
 
 ---
 
-*Audit produced 2026-02-17. Cross-referenced against RULES.md v5.19,
+*Audit produced 2026-02-17. Cross-referenced against RULES.md v5.20,
 34 ADRs, 534 Python source files, 477 test files, 26 pipeline configs.*

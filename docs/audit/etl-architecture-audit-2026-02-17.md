@@ -3,7 +3,7 @@
 **Date:** 2026-02-17
 **Version:** BioETL v5.14.0
 **Auditor:** Claude (automated)
-**Methodology:** ai-selfreview-rules.md v1.1.0 (synced with RULES.md v5.19)
+**Methodology:** ai-selfreview-rules.md v1.1.0 (synced with RULES.md v5.20)
 
 ---
 
