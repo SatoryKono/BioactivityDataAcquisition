@@ -92,7 +92,8 @@ ______________________________________________________________________
 ## Schema Files
 
 Provider schemas live in `src/bioetl/domain/schemas/` and Gold contracts in `src/bioetl/domain/contracts/gold/`.
-JSON contract exports are in `docs/contracts/gold/`.
+Contracts governance: [`docs/04-reference/contracts/README.md`](../contracts/README.md).
+JSON contract exports are in `docs/04-reference/contracts/gold/`.
 
 ______________________________________________________________________
 
