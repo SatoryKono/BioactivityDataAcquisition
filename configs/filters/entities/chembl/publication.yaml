@@ -20,6 +20,57 @@ input_filter:
   filter_field: "publication_id"
   batch_size: 16
 
+# ---------------------------------------------------------------------------
+# Extraction-Level Filtering (ADR-028 §3)
+# ---------------------------------------------------------------------------
+# Server-side query parameters appended to every ChEMBL Document API request.
+# Syntax: ChEMBL django-style lookups (__in, __isnull, __gte, __lte, etc.)
+# Reference: https://chembl.gitbook.io/chembl-interface-documentation/web-services/chembl-data-web-services
+#
+# These params reduce API traffic by excluding patents, books, and records
+# outside the valid publication year range at the API level.
+# Does NOT affect content_hash (ADR-014).
+# Logged in SourceMetadata.query_string for audit/reproducibility.
+#
+# Resulting API URL pattern:
+#   /chembl/api/data/document?format=json&limit=1000&offset=0
+#     &doc_type=PUBLICATION
+#     &year__gte=1950
+#     &year__lte=2050
+extraction_params:
+    # Publications only (exclude patents, books, etc.)
+    doc_type: "PUBLICATION"
+
+    # Year range lower bound (inclusive)
+    year__gte: 1950
+
+    # Year range upper bound (inclusive)
+    year__lte: 2050
+
+# -----------------------------------------------------------------------------
+# Silver Filters — Domain-level quality gates (applied BEFORE Silver write)
+# -----------------------------------------------------------------------------
+# Records that fail these filters are excluded from the Silver layer entirely.
+# Defence-in-depth: mirrors extraction_params to catch API inconsistencies.
+silver_filters:
+    # Column value filters — strict inclusion lists
+    columns:
+        # Publications only (mirrors extraction_params doc_type)
+        doc_type: [PUBLICATION]
+
+    # Numeric range filters
+    ranges:
+        # Mirrors extraction_params year range (field renamed in transformer)
+        publication_year:
+            min: 1950
+            max: 2050
+
+    # Required fields — must be non-null for silver
+    required_fields:
+        - publication_id
+        - doc_type
+        - title
+
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------
