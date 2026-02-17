@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
+  "$changelog": "../CHANGELOG.md#100",
   "title": "CrossRef Publication Gold Contract",
   "description": "Gold layer data contract for CrossRef Publication Gold Contract. Auto-generated from Pandera schema CrossRefPublicationGoldSchema.",
   "type": "object",

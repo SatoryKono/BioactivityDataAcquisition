@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
+  "$changelog": "../CHANGELOG.md#100",
   "title": "Composite Publication Gold Contract",
   "description": "Gold layer data contract for Composite Publication. Merged multi-source entity combining chembl_publication (seed) with crossref, openalex, pubmed, and semanticscholar enrichers. Uses qualified column names ({provider}.{entity}.{field}) for enricher fields.",
   "type": "object",
@@ -31,7 +32,10 @@
       "description": "Run type (incremental/full)"
     },
     "_source_batch_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Source batch identifier"
     },
     "_ingestion_ts": {
@@ -43,15 +47,24 @@
       "description": "Record index within batch"
     },
     "_source": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Original data source (seed provider)"
     },
     "_lookup_method": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Lookup method used: direct, doi, pmid, title_fallback"
     },
     "_original_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Original identifier used for lookup"
     },
     "_composite_run_id": {

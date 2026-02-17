@@ -7,6 +7,7 @@ See docs/02-architecture/decisions/ADR-018-gold-strict-validation.md
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -43,6 +44,7 @@ REQUIRED_SCHEMAS = (
 REQUIRED_SCHEMA_PROPERTIES = {
     "$schema",
     "$version",
+    "$changelog",
     "title",
     "description",
     "type",
@@ -197,4 +199,46 @@ class TestGoldSchemaContracts:
             "Unversioned schema files found:\n"
             + "\n".join(f"  - {s}" for s in sorted(unversioned))
             + "\n\nAll Gold contracts must include version (e.g., entity_v1.0.json)."
+        )
+
+    @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))
+    def test_filename_version_matches_schema_version(
+        self, contracts_path: Path, schema_name: str
+    ) -> None:
+        """Filename version MUST match $version in schema."""
+        schema_path = contracts_path / schema_name
+
+        if not schema_path.exists():
+            pytest.skip(f"Schema {schema_name} not found (covered by existence test)")
+
+        match = re.search(r"_v(\d+)\.(\d+)\.json$", schema_name)
+        assert match, (
+            f"Schema filename does not follow *_vX.Y.json pattern: {schema_name}"
+        )
+
+        with schema_path.open() as f:
+            schema = json.load(f)
+
+        expected_version = f"{match.group(1)}.{match.group(2)}.0"
+        assert schema.get("$version") == expected_version, (
+            f"{schema_name} has $version={schema.get('$version')}, "
+            f"expected {expected_version} from filename"
+        )
+
+    @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))
+    def test_schema_has_changelog_link(
+        self, contracts_path: Path, schema_name: str
+    ) -> None:
+        """Each schema MUST contain changelog link metadata."""
+        schema_path = contracts_path / schema_name
+
+        if not schema_path.exists():
+            pytest.skip(f"Schema {schema_name} not found (covered by existence test)")
+
+        with schema_path.open() as f:
+            schema = json.load(f)
+
+        changelog = schema.get("$changelog")
+        assert isinstance(changelog, str) and changelog.strip(), (
+            f"{schema_name} missing non-empty $changelog link"
         )

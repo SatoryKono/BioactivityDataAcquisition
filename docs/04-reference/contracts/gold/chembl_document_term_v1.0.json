@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
+  "$changelog": "../CHANGELOG.md#100",
   "title": "ChEMBL Document Term Gold Contract",
   "description": "Gold layer data contract for ChEMBL Document Term Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentTermGoldSchema.",
   "type": "object",
