@@ -392,6 +392,7 @@ class DiagramInfo:
     png_width: int = 0
     png_height: int = 0
     line_count: int = 0
+    render_success: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -430,10 +431,13 @@ def render_all_diagrams(diagrams: list[DiagramInfo]) -> None:
         for i, diagram in enumerate(diagrams):
             png_path = RENDER_DIR / f"{diagram.stem}.png"
             if png_path.exists() and png_path.stat().st_size > 0:
-                # Already rendered
-                diagram.png_path = png_path
+                # Already rendered - check if it's a placeholder or real render
                 img = Image.open(png_path)
                 diagram.png_width, diagram.png_height = img.size
+                # Placeholder images are 800x100, real renders are larger
+                is_placeholder = (diagram.png_width == 800 and diagram.png_height == 100)
+                diagram.png_path = png_path
+                diagram.render_success = not is_placeholder
                 print(f"  [{i + 1}/{len(diagrams)}] Cached: {diagram.filename}")
                 continue
 
@@ -447,6 +451,7 @@ def render_all_diagrams(diagrams: list[DiagramInfo]) -> None:
                 _create_error_placeholder(png_path, diagram.filename, str(e))
                 diagram.png_path = png_path
                 diagram.png_width, diagram.png_height = 800, 100
+                diagram.render_success = False
 
         browser.close()
 
@@ -520,6 +525,7 @@ try {{
                 diagram.png_path = png_path
                 diagram.png_width = int(bbox["width"])
                 diagram.png_height = int(bbox["height"])
+                diagram.render_success = True
                 print(f"    OK: {diagram.png_width}x{diagram.png_height}")
             else:
                 raise RuntimeError("SVG bounding box too small")
@@ -799,7 +805,7 @@ def _add_verification_checklist(doc: Document, diagrams: list[DiagramInfo]) -> N
     """Add verification checklist."""
     doc.add_heading("Verification Checklist", level=1)
 
-    rendered_count = sum(1 for d in diagrams if d.png_path and d.png_path.exists())
+    rendered_count = sum(1 for d in diagrams if d.render_success)
     failed_count = len(diagrams) - rendered_count
 
     checks = [
