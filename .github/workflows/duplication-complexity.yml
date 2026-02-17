@@ -166,12 +166,7 @@ jobs:
       - name: Run jscpd for duplication detection
         run: |
           mkdir -p reports/jscpd
-          npx jscpd@4.0.8 src tests \
-            --config .jscpd.json \
-            --threshold 5 \
-            --format python \
-            --reporters "console,html,json" \
-            --output reports/jscpd
+          npx jscpd@4.0.8 src tests --config .jscpd.json --threshold 5 --format python --reporters "console,html,json" --output reports/jscpd
 
       - name: Upload reports
         uses: actions/upload-artifact@v4
