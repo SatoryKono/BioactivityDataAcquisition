@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.19*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `openalex_publication` |
-| **Provider** | OpenAlex |
-| **Entity** | publication (works) |
+| Parameter        | Value                            |
+| ---------------- | -------------------------------- |
+| **Pipeline ID**  | `openalex_publication`           |
+| **Provider**     | OpenAlex                         |
+| **Entity**       | publication (works)              |
 | **API Endpoint** | `https://api.openalex.org/works` |
-| **Library** | `httpx` (REST API) |
-| **Rate Limit** | 10 req/sec (polite pool) |
-| **Health Check** | `/works?per_page=1` |
-| **Auth Type** | API Key (email-based, optional) |
+| **Library**      | `httpx` (REST API)               |
+| **Rate Limit**   | 10 req/sec (polite pool)         |
+| **Health Check** | `/works?per_page=1`              |
+| **Auth Type**    | API Key (email-based, optional)  |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -34,11 +34,11 @@ OpenAlex provides **comprehensive academic metadata**:
 ### 2.2. Use Cases
 
 1. **DOI Enrichment**: Add concepts and OA data to publications
-2. **Concept Classification**: Categorize publications by topics
-3. **Institution Analysis**: Track research by institution
-4. **Open Access Tracking**: Monitor OA status
+1. **Concept Classification**: Categorize publications by topics
+1. **Institution Analysis**: Track research by institution
+1. **Open Access Tracking**: Monitor OA status
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
@@ -55,75 +55,72 @@ url = f"https://api.openalex.org/works/{openalex_id}"
 
 # Batch search
 url = "https://api.openalex.org/works"
-params = {
-    "filter": f"doi:{doi1}|{doi2}|{doi3}",
-    "per_page": 200
-}
+params = {"filter": f"doi:{doi1}|{doi2}|{doi3}", "per_page": 200}
 ```
 
 ### 3.2. Complete API Fields
 
-| # | API Field | JSON Type | Nullable | Description |
-|---|-----------|-----------|----------|-------------|
-| 1 | `id` | string | No | OpenAlex ID (W[0-9]+) |
-| 2 | `doi` | string | Yes | DOI |
-| 3 | `title` | string | Yes | Title |
-| 4 | `display_name` | string | Yes | Display name |
-| 5 | `publication_year` | int | Yes | Year |
-| 6 | `publication_date` | string | Yes | Full date |
-| 7 | `type` | string | Yes | Work type |
-| 8 | `cited_by_count` | int | Yes | Citation count |
-| 9 | `is_oa` | boolean | Yes | Open access flag |
-| 10 | `is_retracted` | boolean | Yes | Retracted flag |
-| 11 | `open_access` | object | Yes | OA details |
-| 12 | `authorships` | array | Yes | Authors with affiliations |
-| 13 | `concepts` | array | Yes | Topic concepts |
-| 14 | `primary_location` | object | Yes | Primary source |
-| 15 | `biblio` | object | Yes | Bibliographic info |
-| 16 | `abstract_inverted_index` | object | Yes | Abstract (inverted) |
-| 17 | `language` | string | Yes | Language code |
+| #   | API Field                 | JSON Type | Nullable | Description               |
+| --- | ------------------------- | --------- | -------- | ------------------------- |
+| 1   | `id`                      | string    | No       | OpenAlex ID (W[0-9]+)     |
+| 2   | `doi`                     | string    | Yes      | DOI                       |
+| 3   | `title`                   | string    | Yes      | Title                     |
+| 4   | `display_name`            | string    | Yes      | Display name              |
+| 5   | `publication_year`        | int       | Yes      | Year                      |
+| 6   | `publication_date`        | string    | Yes      | Full date                 |
+| 7   | `type`                    | string    | Yes      | Work type                 |
+| 8   | `cited_by_count`          | int       | Yes      | Citation count            |
+| 9   | `is_oa`                   | boolean   | Yes      | Open access flag          |
+| 10  | `is_retracted`            | boolean   | Yes      | Retracted flag            |
+| 11  | `open_access`             | object    | Yes      | OA details                |
+| 12  | `authorships`             | array     | Yes      | Authors with affiliations |
+| 13  | `concepts`                | array     | Yes      | Topic concepts            |
+| 14  | `primary_location`        | object    | Yes      | Primary source            |
+| 15  | `biblio`                  | object    | Yes      | Bibliographic info        |
+| 16  | `abstract_inverted_index` | object    | Yes      | Abstract (inverted)       |
+| 17  | `language`                | string    | Yes      | Language code             |
 
 ### 3.3. Nested Structure: authorships
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `author.id` | string | Author OpenAlex ID |
-| `author.display_name` | string | Author name |
-| `author.orcid` | string | ORCID |
-| `institutions[*].id` | string | Institution IDs |
-| `institutions[*].display_name` | string | Institution names |
-| `raw_affiliation_string` | string | Raw affiliation |
+| Field                          | Type   | Description        |
+| ------------------------------ | ------ | ------------------ |
+| `author.id`                    | string | Author OpenAlex ID |
+| `author.display_name`          | string | Author name        |
+| `author.orcid`                 | string | ORCID              |
+| `institutions[*].id`           | string | Institution IDs    |
+| `institutions[*].display_name` | string | Institution names  |
+| `raw_affiliation_string`       | string | Raw affiliation    |
 
 ### 3.4. Nested Structure: concepts
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Concept OpenAlex ID |
-| `display_name` | string | Concept name |
-| `level` | int | Hierarchy level (0-5) |
-| `score` | float | Relevance score (0-1) |
+| Field          | Type   | Description           |
+| -------------- | ------ | --------------------- |
+| `id`           | string | Concept OpenAlex ID   |
+| `display_name` | string | Concept name          |
+| `level`        | int    | Hierarchy level (0-5) |
+| `score`        | float  | Relevance score (0-1) |
 
 ### 3.5. Nested Structure: primary_location
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `source.id` | string | Source OpenAlex ID |
+| Field                 | Type   | Description        |
+| --------------------- | ------ | ------------------ |
+| `source.id`           | string | Source OpenAlex ID |
 | `source.display_name` | string | Journal/venue name |
-| `source.issn_l` | string | ISSN-L |
-| `pdf_url` | string | PDF URL |
-| `landing_page_url` | string | Landing page |
+| `source.issn_l`       | string | ISSN-L             |
+| `pdf_url`             | string | PDF URL            |
+| `landing_page_url`    | string | Landing page       |
 
----
+______________________________________________________________________
 
 ## 4. Transformation
 
 ### 4.1. Entity ID Strategy
 
-| Parameter | Value |
-|-----------|-------|
-| **Entity ID Field** | `openalex_id` |
-| **ID Source** | `from_api` |
-| **Format** | OpenAlex ID (W[0-9]+) |
+| Parameter           | Value                 |
+| ------------------- | --------------------- |
+| **Entity ID Field** | `openalex_id`         |
+| **ID Source**       | `from_api`            |
+| **Format**          | OpenAlex ID (W[0-9]+) |
 
 ### 4.2. Abstract Reconstruction
 
@@ -141,27 +138,25 @@ def reconstruct_abstract(inverted_index: dict) -> str:
             positions[idx] = word
 
     # Reconstruct in order
-    return " ".join(
-        positions[i] for i in sorted(positions.keys())
-    )
+    return " ".join(positions[i] for i in sorted(positions.keys()))
 ```
 
 ### 4.3. Flattening Strategy
 
-| Nested Path | Flattened Name | Strategy |
-|-------------|----------------|----------|
-| `id` | `openalex_id` | Extract (strip URL prefix) |
-| `open_access.is_oa` | `is_oa` | Extract boolean |
-| `open_access.oa_status` | `oa_status` | Extract string |
-| `primary_location.source.display_name` | `journal` | Extract |
-| `primary_location.source.issn_l` | `issn` | Extract |
-| `biblio.volume` | `volume` | Extract |
-| `biblio.issue` | `issue` | Extract |
-| `authorships[*]` | `authors` | JSON array |
-| `concepts[*]` | `concepts` | JSON array |
-| `abstract_inverted_index` | `abstract` | Reconstruct |
+| Nested Path                            | Flattened Name | Strategy                   |
+| -------------------------------------- | -------------- | -------------------------- |
+| `id`                                   | `openalex_id`  | Extract (strip URL prefix) |
+| `open_access.is_oa`                    | `is_oa`        | Extract boolean            |
+| `open_access.oa_status`                | `oa_status`    | Extract string             |
+| `primary_location.source.display_name` | `journal`      | Extract                    |
+| `primary_location.source.issn_l`       | `issn`         | Extract                    |
+| `biblio.volume`                        | `volume`       | Extract                    |
+| `biblio.issue`                         | `issue`        | Extract                    |
+| `authorships[*]`                       | `authors`      | JSON array                 |
+| `concepts[*]`                          | `concepts`     | JSON array                 |
+| `abstract_inverted_index`              | `abstract`     | Reconstruct                |
 
----
+______________________________________________________________________
 
 ## 5. Validation
 
@@ -233,18 +228,18 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
         coerce = True
 ```
 
----
+______________________________________________________________________
 
 ## 6. Cross-Provider Mapping
 
-| This Entity Field | Maps To | Provider | Field |
-|-------------------|---------|----------|-------|
-| `doi` | ChEMBL | ChEMBL | `document.doi` |
-| `doi` | CrossRef | CrossRef | `DOI` |
-| `doi` | Semantic Scholar | S2 | `externalIds.DOI` |
-| `openalex_id` | OpenAlex Works | OpenAlex | `id` |
+| This Entity Field | Maps To          | Provider | Field             |
+| ----------------- | ---------------- | -------- | ----------------- |
+| `doi`             | ChEMBL           | ChEMBL   | `document.doi`    |
+| `doi`             | CrossRef         | CrossRef | `DOI`             |
+| `doi`             | Semantic Scholar | S2       | `externalIds.DOI` |
+| `openalex_id`     | OpenAlex Works   | OpenAlex | `id`              |
 
----
+______________________________________________________________________
 
 ## 7. Pipeline Configuration
 
@@ -254,9 +249,13 @@ provider: openalex
 entity_type: publication
 version: "1.2.0"
 
-primary_keys: ["openalex_id"]
+primary_keys: ["publication_id"]
 silver_table: "openalex_publication"
 gold_table: "openalex_publication"
+
+
+legacy_key_aliases:
+  publication_id: ["openalex_id"]
 
 source:
   type: api
@@ -267,7 +266,7 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["openalex_id"]
+    primary_key: ["publication_id"]
     partition_by: []
   gold:
     path: "data/output/gold"
@@ -284,7 +283,7 @@ input_filter:
   batch_size: 50
 ```
 
----
+______________________________________________________________________
 
 ## 8. Special Considerations
 

@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.19*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `semanticscholar_publication` |
-| **Provider** | Semantic Scholar |
-| **Entity** | publication (paper) |
+| Parameter        | Value                                             |
+| ---------------- | ------------------------------------------------- |
+| **Pipeline ID**  | `semanticscholar_publication`                     |
+| **Provider**     | Semantic Scholar                                  |
+| **Entity**       | publication (paper)                               |
 | **API Endpoint** | `https://api.semanticscholar.org/graph/v1/paper/` |
-| **Library** | `httpx` (REST API) |
-| **Rate Limit** | 100 req/5min (public), higher with API key |
-| **Health Check** | `/paper/search?query=test&limit=1` |
-| **Auth Type** | API Key (recommended) |
+| **Library**      | `httpx` (REST API)                                |
+| **Rate Limit**   | 100 req/5min (public), higher with API key        |
+| **Health Check** | `/paper/search?query=test&limit=1`                |
+| **Auth Type**    | API Key (recommended)                             |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -34,11 +34,11 @@ Semantic Scholar provides **AI-enhanced academic data**:
 ### 2.2. Use Cases
 
 1. **Citation Impact**: Track influential citations (not just counts)
-2. **TLDR Summaries**: Quick paper understanding
-3. **Research Area Analysis**: Classify by fields of study
-4. **Cross-Database Linking**: Maps to DOI, PubMed, arXiv
+1. **TLDR Summaries**: Quick paper understanding
+1. **Research Area Analysis**: Classify by fields of study
+1. **Cross-Database Linking**: Maps to DOI, PubMed, arXiv
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
@@ -59,93 +59,93 @@ url = f"https://api.semanticscholar.org/graph/v1/paper/PMID:{pmid}"
 # Common params
 params = {
     "fields": "paperId,corpusId,externalIds,title,abstract,tldr,"
-              "year,referenceCount,citationCount,influentialCitationCount,"
-              "isOpenAccess,openAccessPdf,fieldsOfStudy,s2FieldsOfStudy,"
-              "publicationTypes,publicationDate,journal,authors"
+    "year,referenceCount,citationCount,influentialCitationCount,"
+    "isOpenAccess,openAccessPdf,fieldsOfStudy,s2FieldsOfStudy,"
+    "publicationTypes,publicationDate,journal,authors"
 }
 headers = {"x-api-key": api_key}  # Optional but recommended
 ```
 
 ### 3.2. Complete API Fields
 
-| # | API Field | JSON Type | Nullable | Description |
-|---|-----------|-----------|----------|-------------|
-| 1 | `paperId` | string | No | S2 Paper ID (40-char hex) |
-| 2 | `corpusId` | int | Yes | S2 Corpus ID |
-| 3 | `externalIds` | object | Yes | External IDs (DOI, PMID, etc.) |
-| 4 | `title` | string | Yes | Paper title |
-| 5 | `abstract` | string | Yes | Abstract text |
-| 6 | `tldr` | object | Yes | AI-generated summary |
-| 7 | `year` | int | Yes | Publication year |
-| 8 | `referenceCount` | int | Yes | Number of references |
-| 9 | `citationCount` | int | Yes | Number of citations |
-| 10 | `influentialCitationCount` | int | Yes | Influential citations |
-| 11 | `isOpenAccess` | boolean | Yes | OA flag |
-| 12 | `openAccessPdf` | object | Yes | OA PDF info |
-| 13 | `fieldsOfStudy` | array | Yes | Research fields |
-| 14 | `s2FieldsOfStudy` | array | Yes | S2-specific fields |
-| 15 | `publicationTypes` | array | Yes | Publication types |
-| 16 | `publicationDate` | string | Yes | Full date |
-| 17 | `journal` | object | Yes | Journal info |
-| 18 | `authors` | array | Yes | Author list |
+| #   | API Field                  | JSON Type | Nullable | Description                    |
+| --- | -------------------------- | --------- | -------- | ------------------------------ |
+| 1   | `paperId`                  | string    | No       | S2 Paper ID (40-char hex)      |
+| 2   | `corpusId`                 | int       | Yes      | S2 Corpus ID                   |
+| 3   | `externalIds`              | object    | Yes      | External IDs (DOI, PMID, etc.) |
+| 4   | `title`                    | string    | Yes      | Paper title                    |
+| 5   | `abstract`                 | string    | Yes      | Abstract text                  |
+| 6   | `tldr`                     | object    | Yes      | AI-generated summary           |
+| 7   | `year`                     | int       | Yes      | Publication year               |
+| 8   | `referenceCount`           | int       | Yes      | Number of references           |
+| 9   | `citationCount`            | int       | Yes      | Number of citations            |
+| 10  | `influentialCitationCount` | int       | Yes      | Influential citations          |
+| 11  | `isOpenAccess`             | boolean   | Yes      | OA flag                        |
+| 12  | `openAccessPdf`            | object    | Yes      | OA PDF info                    |
+| 13  | `fieldsOfStudy`            | array     | Yes      | Research fields                |
+| 14  | `s2FieldsOfStudy`          | array     | Yes      | S2-specific fields             |
+| 15  | `publicationTypes`         | array     | Yes      | Publication types              |
+| 16  | `publicationDate`          | string    | Yes      | Full date                      |
+| 17  | `journal`                  | object    | Yes      | Journal info                   |
+| 18  | `authors`                  | array     | Yes      | Author list                    |
 
 ### 3.3. Nested Structure: externalIds
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `DOI` | string | DOI |
-| `PubMed` | string | PubMed ID |
-| `PMCID` | string | PMC ID |
-| `ArXiv` | string | arXiv ID |
-| `MAG` | string | Microsoft Academic Graph ID |
-| `CorpusId` | int | S2 Corpus ID |
+| Field      | Type   | Description                 |
+| ---------- | ------ | --------------------------- |
+| `DOI`      | string | DOI                         |
+| `PubMed`   | string | PubMed ID                   |
+| `PMCID`    | string | PMC ID                      |
+| `ArXiv`    | string | arXiv ID                    |
+| `MAG`      | string | Microsoft Academic Graph ID |
+| `CorpusId` | int    | S2 Corpus ID                |
 
 ### 3.4. Nested Structure: tldr
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `model` | string | Model used |
-| `text` | string | TLDR summary text |
+| Field   | Type   | Description       |
+| ------- | ------ | ----------------- |
+| `model` | string | Model used        |
+| `text`  | string | TLDR summary text |
 
 ### 3.5. Nested Structure: journal
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Journal name |
-| `volume` | string | Volume |
-| `pages` | string | Page range |
+| Field    | Type   | Description  |
+| -------- | ------ | ------------ |
+| `name`   | string | Journal name |
+| `volume` | string | Volume       |
+| `pages`  | string | Page range   |
 
----
+______________________________________________________________________
 
 ## 4. Transformation
 
 ### 4.1. Entity ID Strategy
 
-| Parameter | Value |
-|-----------|-------|
-| **Entity ID Field** | `paper_id` |
-| **ID Source** | `from_api` |
-| **Format** | 40-character hex string |
+| Parameter           | Value                   |
+| ------------------- | ----------------------- |
+| **Entity ID Field** | `paper_id`              |
+| **ID Source**       | `from_api`              |
+| **Format**          | 40-character hex string |
 
 ### 4.2. Flattening Strategy
 
-| Nested Path | Flattened Name | Strategy |
-|-------------|----------------|----------|
-| `paperId` | `paper_id` | Direct |
-| `externalIds.DOI` | `doi` | Extract |
-| `externalIds.PubMed` | `pmid` | Extract |
-| `externalIds.PMCID` | `pmcid` | Extract |
-| `externalIds.ArXiv` | `arxiv_id` | Extract |
-| `tldr.text` | `tldr` | Extract |
-| `journal.name` | `journal` | Extract |
-| `journal.volume` | `volume` | Extract |
-| `journal.pages` | `pages` | Extract |
-| `openAccessPdf.url` | `open_access_url` | Extract |
-| `fieldsOfStudy` | `fields_of_study` | JSON array |
-| `publicationTypes` | `publication_types` | JSON array |
-| `authors[*]` | `authors` | JSON array |
+| Nested Path          | Flattened Name      | Strategy   |
+| -------------------- | ------------------- | ---------- |
+| `paperId`            | `paper_id`          | Direct     |
+| `externalIds.DOI`    | `doi`               | Extract    |
+| `externalIds.PubMed` | `pmid`              | Extract    |
+| `externalIds.PMCID`  | `pmcid`             | Extract    |
+| `externalIds.ArXiv`  | `arxiv_id`          | Extract    |
+| `tldr.text`          | `tldr`              | Extract    |
+| `journal.name`       | `journal`           | Extract    |
+| `journal.volume`     | `volume`            | Extract    |
+| `journal.pages`      | `pages`             | Extract    |
+| `openAccessPdf.url`  | `open_access_url`   | Extract    |
+| `fieldsOfStudy`      | `fields_of_study`   | JSON array |
+| `publicationTypes`   | `publication_types` | JSON array |
+| `authors[*]`         | `authors`           | JSON array |
 
----
+______________________________________________________________________
 
 ## 5. Validation
 
@@ -238,19 +238,19 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
         coerce = True
 ```
 
----
+______________________________________________________________________
 
 ## 6. Cross-Provider Mapping
 
-| This Entity Field | Maps To | Provider | Field |
-|-------------------|---------|----------|-------|
-| `doi` | ChEMBL | ChEMBL | `document.doi` |
-| `doi` | CrossRef | CrossRef | `DOI` |
-| `doi` | OpenAlex | OpenAlex | `doi` |
-| `pmid` | PubMed | PubMed | `pmid` |
-| `arxiv_id` | arXiv | arXiv | ID |
+| This Entity Field | Maps To  | Provider | Field          |
+| ----------------- | -------- | -------- | -------------- |
+| `doi`             | ChEMBL   | ChEMBL   | `document.doi` |
+| `doi`             | CrossRef | CrossRef | `DOI`          |
+| `doi`             | OpenAlex | OpenAlex | `doi`          |
+| `pmid`            | PubMed   | PubMed   | `pmid`         |
+| `arxiv_id`        | arXiv    | arXiv    | ID             |
 
----
+______________________________________________________________________
 
 ## 7. Pipeline Configuration
 
@@ -260,9 +260,13 @@ provider: semanticscholar
 entity_type: publication
 version: "1.2.0"
 
-primary_keys: ["paper_id"]
+primary_keys: ["publication_id"]
 silver_table: "semanticscholar_publication"
 gold_table: "semanticscholar_publication"
+
+
+legacy_key_aliases:
+  publication_id: ["paper_id"]
 
 source:
   type: api
@@ -273,7 +277,7 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["paper_id"]
+    primary_key: ["publication_id"]
     partition_by: []
   gold:
     path: "data/output/gold"
@@ -290,7 +294,7 @@ input_filter:
   batch_size: 100
 ```
 
----
+______________________________________________________________________
 
 ## 8. Special Considerations
 

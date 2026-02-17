@@ -271,9 +271,13 @@ provider: uniprot
 entity_type: protein
 version: "1.2.0"
 
-primary_keys: ["accession"]
+primary_keys: ["target_id"]
 silver_table: "uniprot_protein"
 gold_table: "uniprot_protein"
+
+
+legacy_key_aliases:
+  target_id: ["accession"]
 
 source_file: ../../sources/uniprot.yaml
 
@@ -289,7 +293,7 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["accession"]
+    primary_key: ["target_id"]
     partition_by: []
   gold:
     path: "data/output/gold"

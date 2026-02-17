@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.19*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `pubmed_publication` |
-| **Provider** | PubMed (NCBI) |
-| **Entity** | publication |
+| Parameter        | Value                                            |
+| ---------------- | ------------------------------------------------ |
+| **Pipeline ID**  | `pubmed_publication`                             |
+| **Provider**     | PubMed (NCBI)                                    |
+| **Entity**       | publication                                      |
 | **API Endpoint** | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/` |
-| **Library** | `httpx` (E-utilities API) |
-| **Rate Limit** | 3 req/sec (10 with API key) |
-| **Health Check** | `/einfo.fcgi` |
-| **Auth Type** | API Key (NCBI_API_KEY) |
+| **Library**      | `httpx` (E-utilities API)                        |
+| **Rate Limit**   | 3 req/sec (10 with API key)                      |
+| **Health Check** | `/einfo.fcgi`                                    |
+| **Auth Type**    | API Key (NCBI_API_KEY)                           |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -34,11 +34,11 @@ PubMed publications are **biomedical literature** with MeSH indexing:
 ### 2.2. Use Cases
 
 1. **Literature Mining**: Search biomedical publications
-2. **MeSH-based Filtering**: Find papers by medical terms
-3. **Citation Enrichment**: Add metadata to ChEMBL documents
-4. **Funding Analysis**: Track grant-supported research
+1. **MeSH-based Filtering**: Find papers by medical terms
+1. **Citation Enrichment**: Add metadata to ChEMBL documents
+1. **Funding Analysis**: Track grant-supported research
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
@@ -49,12 +49,7 @@ import httpx
 
 # Step 1: Search for PMIDs (esearch)
 search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-params = {
-    "db": "pubmed",
-    "term": f"{pmid}[uid]",
-    "retmode": "json",
-    "api_key": api_key
-}
+params = {"db": "pubmed", "term": f"{pmid}[uid]", "retmode": "json", "api_key": api_key}
 
 # Step 2: Fetch full records (efetch)
 fetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
@@ -63,59 +58,59 @@ params = {
     "id": ",".join(pmids),
     "rettype": "xml",
     "retmode": "xml",
-    "api_key": api_key
+    "api_key": api_key,
 }
 ```
 
 ### 3.2. Complete API Fields (from XML)
 
-| # | XML Path | Type | Nullable | Description |
-|---|----------|------|----------|-------------|
-| 1 | `PMID` | int | No | PubMed ID (PK) |
-| 2 | `ArticleTitle` | str | No | Title |
-| 3 | `Abstract/AbstractText` | str | Yes | Abstract |
-| 4 | `AuthorList/Author` | array | Yes | Authors |
-| 5 | `Journal/Title` | str | Yes | Journal name |
-| 6 | `Journal/ISOAbbreviation` | str | Yes | ISO abbreviation |
-| 7 | `Journal/ISSN` | str | Yes | ISSN |
-| 8 | `PubDate/Year` | int | Yes | Publication year |
-| 9 | `PubDate/Month` | str | Yes | Publication month |
-| 10 | `Volume` | str | Yes | Volume |
-| 11 | `Issue` | str | Yes | Issue |
-| 12 | `MedlinePgn` | str | Yes | Page numbers |
-| 13 | `ArticleIdList/DOI` | str | Yes | DOI |
-| 14 | `ArticleIdList/PMC` | str | Yes | PMC ID |
-| 15 | `MeshHeadingList` | array | Yes | MeSH terms |
-| 16 | `KeywordList` | array | Yes | Keywords |
-| 17 | `PublicationTypeList` | array | Yes | Publication types |
-| 18 | `Language` | str | Yes | Language code |
-| 19 | `GrantList` | array | Yes | Grants |
+| #   | XML Path                  | Type  | Nullable | Description       |
+| --- | ------------------------- | ----- | -------- | ----------------- |
+| 1   | `PMID`                    | int   | No       | PubMed ID (PK)    |
+| 2   | `ArticleTitle`            | str   | No       | Title             |
+| 3   | `Abstract/AbstractText`   | str   | Yes      | Abstract          |
+| 4   | `AuthorList/Author`       | array | Yes      | Authors           |
+| 5   | `Journal/Title`           | str   | Yes      | Journal name      |
+| 6   | `Journal/ISOAbbreviation` | str   | Yes      | ISO abbreviation  |
+| 7   | `Journal/ISSN`            | str   | Yes      | ISSN              |
+| 8   | `PubDate/Year`            | int   | Yes      | Publication year  |
+| 9   | `PubDate/Month`           | str   | Yes      | Publication month |
+| 10  | `Volume`                  | str   | Yes      | Volume            |
+| 11  | `Issue`                   | str   | Yes      | Issue             |
+| 12  | `MedlinePgn`              | str   | Yes      | Page numbers      |
+| 13  | `ArticleIdList/DOI`       | str   | Yes      | DOI               |
+| 14  | `ArticleIdList/PMC`       | str   | Yes      | PMC ID            |
+| 15  | `MeshHeadingList`         | array | Yes      | MeSH terms        |
+| 16  | `KeywordList`             | array | Yes      | Keywords          |
+| 17  | `PublicationTypeList`     | array | Yes      | Publication types |
+| 18  | `Language`                | str   | Yes      | Language code     |
+| 19  | `GrantList`               | array | Yes      | Grants            |
 
----
+______________________________________________________________________
 
 ## 4. Transformation
 
 ### 4.1. Entity ID Strategy
 
-| Parameter | Value |
-|-----------|-------|
-| **Entity ID Field** | `pmid` |
-| **ID Source** | `from_api` |
-| **Format** | Integer (positive) |
+| Parameter           | Value              |
+| ------------------- | ------------------ |
+| **Entity ID Field** | `pmid`             |
+| **ID Source**       | `from_api`         |
+| **Format**          | Integer (positive) |
 
 ### 4.2. XML Parsing Notes
 
 PubMed returns XML. Key transformations:
 
-| XML Element | Silver Field | Transformation |
-|-------------|--------------|----------------|
-| `PMID` | `pmid` | Parse as int |
-| `Abstract/AbstractText[@Label]` | `abstract_structured` | Check for structured |
-| `AuthorList/Author/ForeName + LastName` | `authors` | Concatenate |
-| `MeshHeadingList/MeshHeading` | `mesh_headings` | JSON array |
-| `PubDate/Year + Month + Day` | `publication_date` | Parse to date |
+| XML Element                             | Silver Field          | Transformation       |
+| --------------------------------------- | --------------------- | -------------------- |
+| `PMID`                                  | `pmid`                | Parse as int         |
+| `Abstract/AbstractText[@Label]`         | `abstract_structured` | Check for structured |
+| `AuthorList/Author/ForeName + LastName` | `authors`             | Concatenate          |
+| `MeshHeadingList/MeshHeading`           | `mesh_headings`       | JSON array           |
+| `PubDate/Year + Month + Day`            | `publication_date`    | Parse to date        |
 
----
+______________________________________________________________________
 
 ## 5. Validation
 
@@ -187,18 +182,18 @@ class ArticleSchema(ETLRecordSchema):
         coerce = True
 ```
 
----
+______________________________________________________________________
 
 ## 6. Cross-Provider Mapping
 
-| This Entity Field | Maps To | Provider | Field |
-|-------------------|---------|----------|-------|
-| `pmid` | ChEMBL | ChEMBL | `document.pubmed_id` |
-| `doi` | CrossRef | CrossRef | `DOI` |
-| `doi` | OpenAlex | OpenAlex | `doi` |
-| `pmc_id` | PMC | PMC | PMCID |
+| This Entity Field | Maps To  | Provider | Field                |
+| ----------------- | -------- | -------- | -------------------- |
+| `pmid`            | ChEMBL   | ChEMBL   | `document.pubmed_id` |
+| `doi`             | CrossRef | CrossRef | `DOI`                |
+| `doi`             | OpenAlex | OpenAlex | `doi`                |
+| `pmc_id`          | PMC      | PMC      | PMCID                |
 
----
+______________________________________________________________________
 
 ## 7. Pipeline Configuration
 
@@ -208,9 +203,13 @@ provider: pubmed
 entity_type: publications
 version: "1.2.0"
 
-primary_keys: ["pmid"]
+primary_keys: ["publication_id"]
 silver_table: "pubmed_publication"
 gold_table: "pubmed_publication"
+
+
+legacy_key_aliases:
+  publication_id: ["pmid"]
 
 source:
   type: api
@@ -225,7 +224,7 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["pmid"]
+    primary_key: ["publication_id"]
     partition_by: []
   gold:
     path: "data/output/gold"
@@ -242,7 +241,7 @@ input_filter:
   batch_size: 200
 ```
 
----
+______________________________________________________________________
 
 ## 8. Special Considerations
 

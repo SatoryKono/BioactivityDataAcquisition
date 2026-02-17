@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.19*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `crossref_publication` |
-| **Provider** | CrossRef |
-| **Entity** | publication |
-| **API Endpoint** | `https://api.crossref.org/works/` |
-| **Library** | `httpx` (REST API) |
-| **Rate Limit** | 50 req/sec (polite pool with mailto) |
-| **Health Check** | `/works?rows=1` |
-| **Auth Type** | None (mailto header for polite pool) |
+| Parameter        | Value                                |
+| ---------------- | ------------------------------------ |
+| **Pipeline ID**  | `crossref_publication`               |
+| **Provider**     | CrossRef                             |
+| **Entity**       | publication                          |
+| **API Endpoint** | `https://api.crossref.org/works/`    |
+| **Library**      | `httpx` (REST API)                   |
+| **Rate Limit**   | 50 req/sec (polite pool with mailto) |
+| **Health Check** | `/works?rows=1`                      |
+| **Auth Type**    | None (mailto header for polite pool) |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -34,11 +34,11 @@ CrossRef provides **authoritative DOI metadata**:
 ### 2.2. Use Cases
 
 1. **DOI Enrichment**: Add metadata to ChEMBL documents by DOI
-2. **Citation Analysis**: Track citation counts
-3. **Funder Analysis**: Identify funding sources
-4. **Open Access Tracking**: Determine OA status
+1. **Citation Analysis**: Track citation counts
+1. **Funder Analysis**: Identify funding sources
+1. **Open Access Tracking**: Determine OA status
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
@@ -55,68 +55,68 @@ response = await client.get(url, headers=headers)
 
 ### 3.2. Complete API Fields
 
-| # | API Field | JSON Type | Nullable | Description |
-|---|-----------|-----------|----------|-------------|
-| 1 | `DOI` | string | No | Primary key |
-| 2 | `title` | array | Yes | Title(s) |
-| 3 | `author` | array | Yes | Authors |
-| 4 | `container-title` | array | Yes | Journal name(s) |
-| 5 | `publisher` | string | Yes | Publisher |
-| 6 | `published-print` | object | Yes | Print date |
-| 7 | `published-online` | object | Yes | Online date |
-| 8 | `volume` | string | Yes | Volume |
-| 9 | `issue` | string | Yes | Issue |
-| 10 | `page` | string | Yes | Page range |
-| 11 | `type` | string | Yes | Work type |
-| 12 | `ISSN` | array | Yes | ISSNs |
-| 13 | `subject` | array | Yes | Subjects |
-| 14 | `abstract` | string | Yes | Abstract (HTML) |
-| 15 | `is-referenced-by-count` | int | Yes | Cited by count |
-| 16 | `references-count` | int | Yes | Reference count |
-| 17 | `license` | array | Yes | License info |
-| 18 | `funder` | array | Yes | Funders |
-| 19 | `link` | array | Yes | Links |
-| 20 | `language` | string | Yes | Language code |
+| #   | API Field                | JSON Type | Nullable | Description     |
+| --- | ------------------------ | --------- | -------- | --------------- |
+| 1   | `DOI`                    | string    | No       | Primary key     |
+| 2   | `title`                  | array     | Yes      | Title(s)        |
+| 3   | `author`                 | array     | Yes      | Authors         |
+| 4   | `container-title`        | array     | Yes      | Journal name(s) |
+| 5   | `publisher`              | string    | Yes      | Publisher       |
+| 6   | `published-print`        | object    | Yes      | Print date      |
+| 7   | `published-online`       | object    | Yes      | Online date     |
+| 8   | `volume`                 | string    | Yes      | Volume          |
+| 9   | `issue`                  | string    | Yes      | Issue           |
+| 10  | `page`                   | string    | Yes      | Page range      |
+| 11  | `type`                   | string    | Yes      | Work type       |
+| 12  | `ISSN`                   | array     | Yes      | ISSNs           |
+| 13  | `subject`                | array     | Yes      | Subjects        |
+| 14  | `abstract`               | string    | Yes      | Abstract (HTML) |
+| 15  | `is-referenced-by-count` | int       | Yes      | Cited by count  |
+| 16  | `references-count`       | int       | Yes      | Reference count |
+| 17  | `license`                | array     | Yes      | License info    |
+| 18  | `funder`                 | array     | Yes      | Funders         |
+| 19  | `link`                   | array     | Yes      | Links           |
+| 20  | `language`               | string    | Yes      | Language code   |
 
----
+______________________________________________________________________
 
 ## 4. Transformation
 
 ### 4.1. Entity ID Strategy
 
-| Parameter | Value |
-|-----------|-------|
-| **Entity ID Field** | `doi` |
-| **ID Source** | `from_api` |
-| **Format** | DOI (10.xxx/yyy) |
+| Parameter           | Value            |
+| ------------------- | ---------------- |
+| **Entity ID Field** | `doi`            |
+| **ID Source**       | `from_api`       |
+| **Format**          | DOI (10.xxx/yyy) |
 
 ### 4.2. Field Normalization
 
-| Field | Normalization | Before | After |
-|-------|---------------|--------|-------|
-| `doi` | lowercase, strip | `"10.1234/ABC "` | `"10.1234/abc"` |
-| `title` | Extract first | `["Title 1"]` | `"Title 1"` |
-| `author` | Format names | `[{given, family}]` | JSON array |
-| `container-title` | Extract first | `["Journal"]` | `"Journal"` |
-| `page` | Split to first/last | `"123-456"` | first=123, last=456 |
-| `published-print.date-parts` | Parse to date | `[[2024,1,15]]` | `"2024-01-15"` |
-| `abstract` | Strip HTML | `"<p>Text</p>"` | `"Text"` |
+| Field                        | Normalization       | Before              | After               |
+| ---------------------------- | ------------------- | ------------------- | ------------------- |
+| `doi`                        | lowercase, strip    | `"10.1234/ABC "`    | `"10.1234/abc"`     |
+| `title`                      | Extract first       | `["Title 1"]`       | `"Title 1"`         |
+| `author`                     | Format names        | `[{given, family}]` | JSON array          |
+| `container-title`            | Extract first       | `["Journal"]`       | `"Journal"`         |
+| `page`                       | Split to first/last | `"123-456"`         | first=123, last=456 |
+| `published-print.date-parts` | Parse to date       | `[[2024,1,15]]`     | `"2024-01-15"`      |
+| `abstract`                   | Strip HTML          | `"<p>Text</p>"`     | `"Text"`            |
 
 ### 4.3. Flattening Strategy
 
-| Nested Path | Flattened Name | Strategy |
-|-------------|----------------|----------|
-| `title[0]` | `title` | Extract first |
-| `container-title[0]` | `journal` | Extract first |
-| `author[*]` | `authors` | JSON array |
-| `published-print.date-parts[0]` | `year`, `published_print` | Parse |
-| `published-online.date-parts[0]` | `published_online` | Parse |
-| `ISSN` | `issn` | JSON array |
-| `subject` | `subjects` | JSON array |
-| `funder[*]` | `funders` | JSON array (separate table option) |
-| `license[0].URL` | `license_url` | Extract first |
+| Nested Path                      | Flattened Name            | Strategy                           |
+| -------------------------------- | ------------------------- | ---------------------------------- |
+| `title[0]`                       | `title`                   | Extract first                      |
+| `container-title[0]`             | `journal`                 | Extract first                      |
+| `author[*]`                      | `authors`                 | JSON array                         |
+| `published-print.date-parts[0]`  | `year`, `published_print` | Parse                              |
+| `published-online.date-parts[0]` | `published_online`        | Parse                              |
+| `ISSN`                           | `issn`                    | JSON array                         |
+| `subject`                        | `subjects`                | JSON array                         |
+| `funder[*]`                      | `funders`                 | JSON array (separate table option) |
+| `license[0].URL`                 | `license_url`             | Extract first                      |
 
----
+______________________________________________________________________
 
 ## 5. Validation
 
@@ -183,18 +183,18 @@ class PublicationEnrichedSchema(ETLRecordSchema):
         coerce = True
 ```
 
----
+______________________________________________________________________
 
 ## 6. Cross-Provider Mapping
 
-| This Entity Field | Maps To | Provider | Field |
-|-------------------|---------|----------|-------|
-| `doi` | ChEMBL | ChEMBL | `document.doi` |
-| `doi` | OpenAlex | OpenAlex | `doi` |
-| `doi` | Semantic Scholar | S2 | `externalIds.DOI` |
-| `doi` | PubMed | PubMed | ArticleIdList/DOI |
+| This Entity Field | Maps To          | Provider | Field             |
+| ----------------- | ---------------- | -------- | ----------------- |
+| `doi`             | ChEMBL           | ChEMBL   | `document.doi`    |
+| `doi`             | OpenAlex         | OpenAlex | `doi`             |
+| `doi`             | Semantic Scholar | S2       | `externalIds.DOI` |
+| `doi`             | PubMed           | PubMed   | ArticleIdList/DOI |
 
----
+______________________________________________________________________
 
 ## 7. Pipeline Configuration
 
@@ -204,9 +204,13 @@ provider: crossref
 entity_type: publication
 version: "1.2.0"
 
-primary_keys: ["doi"]
+primary_keys: ["publication_id"]
 silver_table: "crossref_publication"
 gold_table: "crossref_publication"
+
+
+legacy_key_aliases:
+  publication_id: ["doi"]
 
 source:
   type: api
@@ -217,7 +221,7 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["doi"]
+    primary_key: ["publication_id"]
     partition_by: []
   gold:
     path: "data/output/gold"
@@ -236,7 +240,7 @@ input_filter:
   batch_size: 50
 ```
 
----
+______________________________________________________________________
 
 ## 8. Special Considerations
 
@@ -244,9 +248,7 @@ input_filter:
 
 ```python
 # Use mailto header for higher rate limits
-headers = {
-    "User-Agent": "BioETL/1.0 (mailto:admin@example.com)"
-}
+headers = {"User-Agent": "BioETL/1.0 (mailto:admin@example.com)"}
 ```
 
 ### 8.2. Rate Limiting
