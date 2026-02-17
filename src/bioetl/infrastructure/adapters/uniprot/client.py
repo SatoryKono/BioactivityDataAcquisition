@@ -176,7 +176,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
 
     async def _fetch_non_protein_filtered(
         self,
-        strategy: Any,
+        strategy: Any,  # Any: callable fetch strategy (async generator factory)
         filter_ids: list[str],
         limit: int | None,
     ) -> AsyncIterator[dict[str, Any]]:
@@ -202,7 +202,7 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
 
     async def _fetch_proteins_batched(
         self,
-        strategy: Any,
+        strategy: Any,  # Any: callable fetch strategy (async generator factory)
         filter_ids: list[str],
         filter_field: str,
         limit: int | None,

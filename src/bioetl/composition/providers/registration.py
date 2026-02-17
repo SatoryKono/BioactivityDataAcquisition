@@ -122,7 +122,7 @@ def _create_pubchem_adapter(
     http_client: UnifiedHTTPClient | None = None,
     logger: LoggerPort | None = None,
     settings: Settings | None = None,
-    **kwargs: Any,
+    **kwargs: Any,  # Any: forwarded adapter kwar...
 ) -> DataSourcePort:
     """Create PubChem adapter with all dependencies injected from Composition Root."""
     if logger is None:

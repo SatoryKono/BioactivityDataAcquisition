@@ -171,6 +171,7 @@ class MetricsCollector:
     Wraps Prometheus metrics with pipeline context.
     """
 
+    # Any: optional Prometheus Co...
     def __init__(self, pipeline_name: str, registry: Any = None):
         """Initialize the metrics collector.
 

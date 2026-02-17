@@ -172,12 +172,13 @@ class PublicationBaseSchema(ETLRecordSchema):
 
     # @pa.check("title", name="title_not_empty")
     # @classmethod
-    # def _check_title(cls, series: Any) -> Any:
+    # def _check_title(cls, series: Any) -> Any:  # Any: Pandera coerce target ...
     #     """Validate title is not empty when present (null is allowed)."""
     #     return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
 
     # @pa.check("author_orcids", name="orcid_format")
     # @classmethod
+    # Any: Pandera coerce target ...
     # def _check_author_orcids(cls, series: Any) -> Any:
     #     """Validate ORCID format in JSON array elements."""
     #     _pattern = re.compile(ORCID_PATTERN)

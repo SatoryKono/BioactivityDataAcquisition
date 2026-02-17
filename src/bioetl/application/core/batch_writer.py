@@ -406,7 +406,7 @@ class BatchWriter:
             self._end_span(span, e)
             raise
 
-    def _get_schema_columns(self, schema: Any) -> set[str] | None:
+    def _get_schema_columns(self, schema: Any) -> set[str] | None:  # Any: schema type
         """Extract column names from Pandera schema.
 
         Args:

@@ -6,6 +6,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Self
 
+# Any: Record values are heterogeneous (str | int | float | list | None).
+# Filter methods accept ``dict[str, Any]`` because record schemas vary
+# across pipelines and cannot be statically typed.
 from bioetl.domain.filtering.column_filter import FilterOperator, GoldColumnFilter
 from bioetl.domain.filtering.list_filters import (
     GoldListContainsFilter,
@@ -37,7 +40,7 @@ class BaseFilterConfig:
             exclude_if_present=other.exclude_if_present,
         )
 
-    def should_include(self, record: dict[str, Any]) -> bool:
+    def should_include(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
         """Проверяет все правила фильтрации."""
         checks = [
             self._check_required_fields,
@@ -49,18 +52,22 @@ class BaseFilterConfig:
         ]
         return all(check(record) for check in checks)
 
+    # Any: record vals vary
     def _check_required_fields(self, record: dict[str, Any]) -> bool:
         """Проверяет наличие обязательных полей."""
         return all(record.get(fld) not in (None, "") for fld in self.required_fields)
 
+    # Any: record vals vary
     def _check_exclude_if_present(self, record: dict[str, Any]) -> bool:
         """Проверяет отсутствие исключающих полей."""
         return all(record.get(fld) in (None, "") for fld in self.exclude_if_present)
 
+    # Any: record vals vary
     def _check_column_filters(self, record: dict[str, Any]) -> bool:
         """Проверяет соответствие значений колонок фильтрам."""
         return all(self._check_single_column(record, f) for f in self.column_filters)
 
+    # Any: record vals vary
     def _check_single_column(self, record: dict[str, Any], f: GoldColumnFilter) -> bool:
         """Проверяет одну колонку по оператору."""
         val = record.get(f.column)
@@ -69,32 +76,38 @@ class BaseFilterConfig:
             return False
         return checker(self, val, f.values)
 
+    # Any: val varies
     def _check_op_in(self, val: Any, values: frozenset[str] | None) -> bool:
         """Проверяет оператор IN."""
         return str(val) in values  # type: ignore[operator]
 
+    # Any: val varies
     def _check_op_not_in(self, val: Any, values: frozenset[str] | None) -> bool:
         """Проверяет оператор NOT_IN."""
         return str(val) not in values  # type: ignore[operator]
 
+    # Any: val varies
     def _check_op_is_null(self, val: Any, _values: frozenset[str] | None) -> bool:
         """Проверяет оператор IS_NULL."""
         return val is None or val == ""
 
+    # Any: val varies
     def _check_op_is_not_null(self, val: Any, _values: frozenset[str] | None) -> bool:
         """Проверяет оператор IS_NOT_NULL."""
         return val is not None and val != ""
 
+    # Any: val varies
     def _check_op_is_empty(self, val: Any, _values: frozenset[str] | None) -> bool:
         """Проверяет оператор IS_EMPTY."""
         return self._is_empty_value(val)
 
+    # Any: val varies
     def _check_op_is_not_empty(self, val: Any, _values: frozenset[str] | None) -> bool:
         """Проверяет оператор IS_NOT_EMPTY."""
         return not self._is_empty_value(val)
 
     @staticmethod
-    def _is_empty_value(val: Any) -> bool:
+    def _is_empty_value(val: Any) -> bool:  # Any: record value type varies
         """Проверяет, является ли значение 'пустым'."""
         if val is None:
             return True
@@ -102,10 +115,12 @@ class BaseFilterConfig:
             return True
         return isinstance(val, (list, dict, set)) and len(val) == 0
 
+    # Any: record vals vary
     def _check_range_filters(self, record: dict[str, Any]) -> bool:
         """Проверяет попадание значений в диапазоны."""
         return all(self._check_single_range(record, f) for f in self.range_filters)
 
+    # Any: record vals vary
     def _check_list_length_filters(self, record: dict[str, Any]) -> bool:
         """Проверяет длину списков в колонках."""
         return all(
@@ -113,14 +128,16 @@ class BaseFilterConfig:
         )
 
     def _check_single_list_length(
-        self, record: dict[str, Any], f: GoldListLengthFilter
+        self,
+        record: dict[str, Any],
+        f: GoldListLengthFilter,  # Any: record vals vary
     ) -> bool:
         """Проверяет длину одного списка."""
         length = self._get_list_length(record.get(f.column))
         return self._length_in_bounds(length, f.min_length, f.max_length)
 
     @staticmethod
-    def _get_list_length(val: Any) -> int:
+    def _get_list_length(val: Any) -> int:  # Any: record value type varies
         """Вычисляет длину значения как списка."""
         if val is None:
             return 0
@@ -137,6 +154,7 @@ class BaseFilterConfig:
             return False
         return not (max_len is not None and length > max_len)
 
+    # Any: record vals vary
     def _check_list_contains_filters(self, record: dict[str, Any]) -> bool:
         """Проверяет содержание списков."""
         return all(
@@ -145,7 +163,9 @@ class BaseFilterConfig:
         )
 
     def _check_single_list_contains(
-        self, record: dict[str, Any], f: GoldListContainsFilter
+        self,
+        record: dict[str, Any],
+        f: GoldListContainsFilter,  # Any: record vals vary
     ) -> bool:
         """Проверяет содержание одного списка."""
         val = record.get(f.column)
@@ -156,7 +176,7 @@ class BaseFilterConfig:
         return self._matches_contains_mode(val_set, f.values, f.mode)
 
     @staticmethod
-    def _to_string_set(val: Any) -> set[str]:
+    def _to_string_set(val: Any) -> set[str]:  # Any: record value type varies
         """Преобразует значение в множество строк."""
         if not isinstance(val, list):
             val = [val]
@@ -171,6 +191,7 @@ class BaseFilterConfig:
             return val_set.issubset(allowed)
         return bool(val_set.intersection(allowed))
 
+    # Any: record vals vary
     def _check_single_range(self, record: dict[str, Any], f: GoldRangeFilter) -> bool:
         """Проверяет одно значение на попадание в диапазон."""
         val = record.get(f.column)
@@ -217,7 +238,7 @@ class BaseFilterConfig:
         return not any(all_filters)
 
 
-_OPERATOR_CHECKERS: dict[
+_OPERATOR_CHECKERS: dict[  # Any: record value type varies per column
     FilterOperator, Callable[[BaseFilterConfig, Any, frozenset[str] | None], bool]
 ] = {
     FilterOperator.IN: BaseFilterConfig._check_op_in,

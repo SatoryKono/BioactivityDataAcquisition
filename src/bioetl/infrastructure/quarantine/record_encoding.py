@@ -9,7 +9,7 @@ import hashlib
 from typing import Any
 
 
-def quote_literal(value: Any) -> str:
+def quote_literal(value: Any) -> str:  # Any: accepts str, int, floa...
     """Safely quote a literal value for a Delta Lake predicate.
 
     Args:

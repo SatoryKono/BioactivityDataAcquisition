@@ -60,9 +60,9 @@ class PipelineCallbacksContext:
             Implements GoldTransformCallback protocol.
     """
 
-    transform: Any  # TransformCallback protocol
-    gold_filter: Any  # GoldFilterCallback protocol
-    gold_transform: Any  # GoldTransformCallback protocol
+    transform: Any  # Any: callback signature var...
+    gold_filter: Any  # Any: callback signature var...
+    gold_transform: Any  # Any: callback signature var...
 
 
 @dataclass(frozen=True)

@@ -580,7 +580,7 @@ class GoldWriter(BaseDeltaWriter):
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         silver_refs: list[Any] | None = None,
-        gold_schema: Any | None = None,
+        gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or None
     ) -> None:
         """Write Gold layer metadata sidecar file.
 
@@ -668,6 +668,7 @@ class GoldWriter(BaseDeltaWriter):
             entity=entity_name,
         )
 
+    # Any: executor forwards arbi...
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
         """Run a function in the executor."""
         loop = asyncio.get_running_loop()

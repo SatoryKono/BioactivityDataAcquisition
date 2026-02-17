@@ -61,8 +61,13 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         return field_value, field_name, False
 
     def prepare_field_value(
-        self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool
-    ) -> Any:
+        # Any: dynamic config value f...
+        self,
+        field_name: str,
+        field: FieldInfo,
+        value: Any,
+        value_is_complex: bool,
+    ) -> Any:  # Any: dynamic config value passed to pydantic
         """Prepare value of a field."""
         return value
 

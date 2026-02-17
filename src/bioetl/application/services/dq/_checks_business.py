@@ -25,8 +25,8 @@ def _check_not_null_rule(df: pl.DataFrame, column: str) -> tuple[bool, int | Non
 def _check_range_rule(
     df: pl.DataFrame,
     column: str,
-    min_val: Any | None,
-    max_val: Any | None,
+    min_val: Any | None,  # Any: numeric boundary (int/float depending on column type)
+    max_val: Any | None,  # Any: numeric boundary (int/float depending on column type)
 ) -> tuple[bool, int]:
     """Check range rule for a column."""
     violations = 0
@@ -39,7 +39,9 @@ def _check_range_rule(
 
 
 def _check_in_list_rule(
-    df: pl.DataFrame, column: str, allowed: list[Any]
+    df: pl.DataFrame,
+    column: str,
+    allowed: list[Any],  # Any: heterogeneous allowed ...
 ) -> tuple[bool, int | None]:
     """Check in_list rule for a column."""
     if not allowed:
@@ -59,7 +61,8 @@ def _check_regex_rule(
 
 
 def _evaluate_single_rule(
-    df: pl.DataFrame, rule: dict[str, Any]
+    df: pl.DataFrame,
+    rule: dict[str, Any],  # Any: heterogeneous DQ rule config values
 ) -> tuple[bool, int | None]:
     """Evaluate a single business rule."""
     column = rule.get("column")
@@ -80,7 +83,8 @@ def _evaluate_single_rule(
 
 
 def check_business_rules(
-    df: pl.DataFrame, rules: list[dict[str, Any]]
+    df: pl.DataFrame,
+    rules: list[dict[str, Any]],  # Any: heterogeneous DQ rule ...
 ) -> BusinessRulesResult:
     """Validate business rules."""
     if not rules:

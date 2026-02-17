@@ -21,8 +21,8 @@ if TYPE_CHECKING:
     )
 
 # Type aliases for helper class parameters
-HttpTransport = Any
-BaseMetrics = Any
+HttpTransport = Any  # Any: untyped HTTP transport (UnifiedHTTPClient)
+BaseMetrics = Any  # Any: untyped adapter metrics wrapper
 
 
 class DoiBatchProcessor:
@@ -38,7 +38,7 @@ class DoiBatchProcessor:
         metrics: BaseMetrics,
         mailto: str,
         api_base: str,
-        headers_fn: Any,  # Callable returning dict[str, str]
+        headers_fn: Any,  # Any: Callable returning dict[str, str]
         request_collector: APIRequestCollector | None = None,
     ) -> None:
         """Initialize batch processor.
@@ -199,7 +199,7 @@ class SearchPaginator:
         metrics: BaseMetrics,
         mailto: str,
         api_base: str,
-        headers_fn: Any,  # Callable returning dict[str, str]
+        headers_fn: Any,  # Any: Callable returning dict[str, str]
         request_collector: APIRequestCollector | None = None,
     ) -> None:
         """Initialize search paginator."""

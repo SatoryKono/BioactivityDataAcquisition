@@ -475,11 +475,11 @@ class BatchExecutor:
     async def _execute_with_span(
         self,
         name: str,
-        coro: Any,
+        coro: Any,  # Any: Awaitable (generic coroutine)
         batch_id: BatchID,
         count: int,
-        on_error: Any = None,
-    ) -> Any:
+        on_error: Any = None,  # Any: fallback return value type varies
+    ) -> Any:  # Any: coroutine return type varies
         """Execute coroutine with tracing span."""
         span = self._tracing.start_layer_span(name, batch_id, count)
         try:
@@ -632,7 +632,7 @@ class BatchExecutor:
         self,
         records: list[dict[str, Any]],
         batch_id: BatchID,
-        bronze_result: Any,
+        bronze_result: Any,  # Any: BronzeWriteResult (avoids circular import)
         silver_records: list[dict[str, Any]],
         gold_records: list[dict[str, Any]],
     ) -> None:
@@ -670,7 +670,7 @@ class BatchExecutor:
 
     def _build_dataframe_from_records(
         self, records: list[dict[str, Any]]
-    ) -> Any | None:
+    ) -> Any | None:  # Any: pl.DataFrame (avoids polars import at module level)
         """Build a Polars DataFrame from records, returning None on failure."""
         if not records:
             return None

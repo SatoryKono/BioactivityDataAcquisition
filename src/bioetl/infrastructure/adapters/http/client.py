@@ -126,7 +126,7 @@ class UnifiedHTTPClient:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,
+        exc_tb: Any,  # Any: traceback type from __aexit__ protocol
     ) -> None:
         """Exit async context manager."""
         if self._client:
@@ -238,7 +238,7 @@ class UnifiedHTTPClient:
         client: httpx.AsyncClient,
         method: str,
         url: str,
-        **kwargs: Any,
+        **kwargs: Any,  # Any: raw HTTP request kwargs (params, headers, json)
     ) -> httpx.Response:
         """Execute a single HTTP request attempt."""
         await self.rate_limiter.acquire()
@@ -248,7 +248,7 @@ class UnifiedHTTPClient:
         self,
         method: str,
         url: str,
-        **kwargs: Any,
+        **kwargs: Any,  # Any: raw HTTP request kwargs (params, headers, json)
     ) -> httpx.Response:
         """Execute request with retries, exponential backoff, and observability.
 
@@ -335,7 +335,7 @@ class UnifiedHTTPClient:
         url: str,
         attempt: int,
         span: Span,
-        kwargs: dict[str, Any],
+        kwargs: dict[str, Any],  # Any: raw HTTP request kwargs (params, headers, json)
     ) -> httpx.Response | tuple[bool, int, int, Exception | None]:
         """Execute a single request attempt, returning response or retry info.
 
@@ -389,7 +389,7 @@ class UnifiedHTTPClient:
     async def get(
         self,
         url: str,
-        params: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,  # Any: JSON values
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send GET request.
@@ -415,8 +415,8 @@ class UnifiedHTTPClient:
     async def post(
         self,
         url: str,
-        json: dict[str, Any] | None = None,
-        data: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,  # Any: raw HTTP JSON response
+        data: dict[str, Any] | None = None,  # Any: raw HTTP form data values
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send POST request.
@@ -455,7 +455,7 @@ class UnifiedHTTPClient:
     async def get_once(
         self,
         url: str,
-        params: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,  # Any: JSON values
         headers: dict[str, str] | None = None,
     ) -> httpx.Response:
         """Send single GET request without retries.

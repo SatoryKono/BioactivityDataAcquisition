@@ -159,8 +159,8 @@ class ConfigLoader:
 
     def _normalize_inline_dq_overrides(
         self,
-        dq_overrides: Any,
-    ) -> dict[str, Any]:
+        dq_overrides: Any,  # Any: Pydantic model instance
+    ) -> dict[str, Any]:  # Any: dynamic YAML config values
         """Normalize inline dq_overrides to DQConfigFile format.
 
         Converts the Pydantic DQConfig model to a dict compatible with
@@ -172,7 +172,7 @@ class ConfigLoader:
         Returns:
             Dict in DQConfigFile format for merge.
         """
-        result: dict[str, Any] = {}
+        result: dict[str, Any] = {}  # Any: dynamic YAML config values
 
         # Thresholds normalization
         result["thresholds"] = {
@@ -214,6 +214,7 @@ class ConfigLoader:
 
         return result
 
+    # Any: Pydantic model instance
     def _field_validation_to_dict(self, fv: Any) -> dict[str, Any]:
         """Convert FieldValidationConfig to dict.
 
@@ -223,7 +224,7 @@ class ConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {
+        result: dict[str, Any] = {  # Any: dynamic YAML config values
             "field": fv.field,
             "type": fv.type,
             "nullable": fv.nullable,
@@ -242,6 +243,7 @@ class ConfigLoader:
             result["error_message"] = fv.error_message
         return result
 
+    # Any: Pydantic model instance
     def _cross_field_validation_to_dict(self, cfv: Any) -> dict[str, Any]:
         """Convert CrossFieldValidationConfig to dict.
 
@@ -251,7 +253,7 @@ class ConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {
+        result: dict[str, Any] = {  # Any: dynamic YAML config values
             "name": cfv.name,
             "fields": list(cfv.fields),
             "condition": cfv.condition,
@@ -266,6 +268,7 @@ class ConfigLoader:
             result["error_message"] = cfv.error_message
         return result
 
+    # Any: Pydantic model instance
     def _conditional_validation_to_dict(self, cv: Any) -> dict[str, Any]:
         """Convert ConditionalValidationConfig to dict.
 
@@ -275,7 +278,7 @@ class ConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {
+        result: dict[str, Any] = {  # Any: dynamic YAML config values
             "name": cv.name,
             "condition_field": cv.condition_field,
             "condition_value": (

@@ -31,21 +31,26 @@ class NoOpLogger:
 
     """
 
-    def bind(self, **_kwargs: Any) -> Self:
+    def bind(self, **_kwargs: Any) -> Self:  # Any: LoggerPort context kwa...
         """Bind additional context (no-op, returns self)."""
         return self
 
+    # Any: LoggerPort context kwa...
     def info(self, _event: str, **_kwargs: Any) -> None:
         """Log info message (no-op)."""
 
+    # Any: LoggerPort context kwa...
     def warning(self, _event: str, **_kwargs: Any) -> None:
         """Log warning message (no-op)."""
 
+    # Any: LoggerPort context kwa...
     def error(self, _event: str, **_kwargs: Any) -> None:
         """Log error message (no-op)."""
 
+    # Any: LoggerPort context kwa...
     def debug(self, _event: str, **_kwargs: Any) -> None:
         """Log debug message (no-op)."""
 
+    # Any: LoggerPort context kwa...
     def exception(self, _event: str, **_kwargs: Any) -> None:
         """Log exception with traceback (no-op)."""
