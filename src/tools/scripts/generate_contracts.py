@@ -13,7 +13,7 @@ project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root / "src"))
 
 try:
-    from bioetl.interfaces.contracts import (
+    from bioetl.domain.contracts.gold import (
         ChEMBLActivityGoldSchema,
         PubChemCompoundGoldSchema,
         PubMedPublicationGoldSchema,

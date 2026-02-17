@@ -1,0 +1,106 @@
+name: Schema Governance
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'src/bioetl/domain/contracts/**'
+      - 'src/bioetl/domain/entities/**'
+      - 'src/bioetl/infrastructure/schemas/**'
+      - 'src/tools/scripts/generate_contracts.py'
+      - 'src/tools/verify_schema_parity.py'
+      - '.github/workflows/schema-governance.yml'
+  pull_request:
+    paths:
+      - 'src/bioetl/domain/contracts/**'
+      - 'src/bioetl/domain/entities/**'
+      - 'src/bioetl/infrastructure/schemas/**'
+      - 'src/tools/scripts/generate_contracts.py'
+      - 'src/tools/verify_schema_parity.py'
+      - '.github/workflows/schema-governance.yml'
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.11"
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUNBUFFERED: 1
+
+jobs:
+  contracts-export:
+    name: Contracts Export (blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Verify contract schema imports
+        run: |
+          uv run python -c "
+          from bioetl.domain.contracts.gold import (
+              ChEMBLActivityGoldSchema,
+              ChEMBLAssayGoldSchema,
+              ChEMBLMoleculeGoldSchema,
+              ChEMBLTargetGoldSchema,
+              PubChemCompoundGoldSchema,
+              PubMedPublicationGoldSchema,
+              UniProtProteinGoldSchema,
+          )
+          print('All gold schema contracts imported successfully')
+          "
+
+  schema-parity:
+    name: Schema Parity + PK Coverage (non-blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Verify schema parity (Domain → Silver → Gold)
+        run: uv run python src/tools/verify_schema_parity.py
+
+  schema-governance-status:
+    name: Schema Governance Status
+    runs-on: ubuntu-latest
+    needs: [contracts-export, schema-parity]
+    if: always()
+
+    steps:
+      - name: Check governance results
+        run: |
+          if [[ "${{ needs.contracts-export.result }}" == "failure" ]]; then
+            echo "::error::Contracts export failed — schema imports are broken"
+            exit 1
+          fi
+          if [[ "${{ needs.schema-parity.result }}" == "failure" ]]; then
+            echo "::warning::Schema parity check reported mismatches (non-blocking)"
+          fi
+          echo "::notice::Schema governance checks completed"
