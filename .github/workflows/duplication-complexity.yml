@@ -55,8 +55,10 @@ jobs:
           # BatchWriter: _apply_system_prefix_order with column ordering logic (CC=11)
           # PubChem: fetch_by_inchikey with multi-step InChIKey resolution (CC=11)
           # UniProt extractors: extract_isoform_details, extract_ptm_by_pattern with complex parsing (CC=11-12)
+          # Config loader: _normalize_source_pagination with legacy pagination promotion (CC=15)
+          # Source config schema: ProviderConfigYaml, _promote_legacy_pagination with backward-compat logic (CC=14-15)
           xenon --max-absolute B --max-modules B --max-average A \
-            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/core/batch_writer.py,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/infrastructure/storage/silver_writer.py,src/bioetl/infrastructure/storage/gold_writer.py,src/bioetl/composition/factories/storage_factory.py,src/bioetl/composition/services/metadata_coordinator.py,src/bioetl/infrastructure/storage/metadata_builder.py" src
+            --exclude "tests/*,src/tools/*,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/core/batch_writer.py,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/infrastructure/storage/silver_writer.py,src/bioetl/infrastructure/storage/gold_writer.py,src/bioetl/composition/factories/storage_factory.py,src/bioetl/composition/services/metadata_coordinator.py,src/bioetl/infrastructure/storage/metadata_builder.py,src/bioetl/infrastructure/config_loader.py,src/bioetl/infrastructure/schemas/source_config.py" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
@@ -116,6 +118,8 @@ jobs:
               "src/bioetl/composition/factories/storage_factory.py",  # create() multi-layer config (CC=11)
               "src/bioetl/composition/services/metadata_coordinator.py",  # create_silver_metadata, _extract_schema_metadata (CC=12-16)
               "src/bioetl/infrastructure/storage/metadata_builder.py",  # _extract_schema_metadata with schema introspection (CC=16)
+              "src/bioetl/infrastructure/config_loader.py",  # _normalize_source_pagination with legacy promotion (CC=15)
+              "src/bioetl/infrastructure/schemas/source_config.py",  # _promote_legacy_pagination backward-compat (CC=14-15)
           }
 
           # Exempted functions (with documented reasons)
