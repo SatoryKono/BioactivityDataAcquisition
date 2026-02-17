@@ -120,7 +120,7 @@ class DQReportContext:
     bronze_date_str: str | None = None  # Date string (YYYY-MM-DD) for filename
 
     # Silver context
-    silver_data: Any | None = None  # pl.DataFrame
+    silver_data: Any | None = None  # Any: pl.DataFrame (avoids polars import)
     silver_target_table: str | None = None
     silver_source_batch_ids: list[str] | None = None
     silver_primary_keys: list[str] | None = None
@@ -130,11 +130,12 @@ class DQReportContext:
     silver_output_path: str | None = None
 
     # Gold context
-    gold_data: Any | None = None  # pl.DataFrame
+    gold_data: Any | None = None  # Any: pl.DataFrame (avoids polars import)
     gold_target_table: str | None = None
     gold_required_fields: list[str] | None = None
+    # Any: heterogeneous DQ metri...
     gold_business_rules: list[dict[str, Any]] | None = None
-    gold_baseline_stats: dict[str, Any] | None = None
+    gold_baseline_stats: dict[str, Any] | None = None  # Any: heterogeneous DQ metri...
     gold_output_path: str | None = None
 
     # DQ thresholds
@@ -229,7 +230,7 @@ class DQReportService:
         return result
 
     @staticmethod
-    def _is_config_enabled(config: Any) -> bool:
+    def _is_config_enabled(config: Any) -> bool:  # Any: heterogeneous DQ metric values
         """Check if a config is present and enabled."""
         return config is not None and config.enabled
 

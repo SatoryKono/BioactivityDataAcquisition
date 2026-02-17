@@ -73,7 +73,7 @@ _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 ]
 
 
-def _mask_secrets(value: Any) -> Any:
+def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitrary type
     """Mask potential secrets in log values.
 
     Args:
@@ -93,7 +93,7 @@ def _mask_secrets(value: Any) -> Any:
 
 
 def secret_filter_processor(
-    logger: Any,
+    logger: Any,  # Any: structlog wrapped logger instance
     _method_name: str,
     event_dict: dict[str, Any],
 ) -> dict[str, Any]:

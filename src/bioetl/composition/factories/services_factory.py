@@ -139,7 +139,7 @@ class BaseServicesFactory:
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
-        silver_validator: Any = None,
+        silver_validator: Any = None,  # Any: SilverValidatorPort (optional lazy import)
     ) -> PipelineServices:
         """Create services with injected data source.
 
@@ -282,7 +282,7 @@ class BaseServicesFactory:
         settings: Settings,
         pipeline_config: PipelineYamlConfig,
         logger: LoggerPort,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: heterogeneous DQ service instances
         """Create DQ services if any layer has dq_report enabled.
 
         Args:
@@ -427,17 +427,17 @@ class ServicesBuilder:
         provider: str,
         entity_type: str,
         silver_schema: pa.Schema | None,
-        gold_schema: Any,
-        dq_config: Any,
+        gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
+        dq_config: Any,  # Any: DQ config type varies per pipeline
         primary_keys: Sequence[str],
         silver_table: str,
         gold_table: str | None,
         silver_write_mode: SilverWriteMode,
         gold_write_mode: GoldWriteMode,
         on_schema_mismatch: Literal["error", "evolve", "ignore"],
-        transform_callback: Any,
-        gold_filter_callback: Any,
-        gold_transform_callback: Any,
+        transform_callback: Any,  # Any: callback signature varies (sync/async)
+        gold_filter_callback: Any,  # Any: callback signature varies (sync/async)
+        gold_transform_callback: Any,  # Any: callback signature varies (sync/async)
         *,
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
@@ -516,7 +516,7 @@ class ServicesBuilder:
     def create_record_processor_from_pipeline(
         pipeline: BasePipeline,
         silver_schema: pa.Schema | None,
-        gold_schema: Any,
+        gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
         *,
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
@@ -568,7 +568,7 @@ class ServicesBuilder:
     def create_batch_executor_from_pipeline(
         pipeline: BasePipeline,
         silver_schema: pa.Schema | None,
-        gold_schema: Any,
+        gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
         checkpoint_manager: CheckpointManager,
         shutdown_signal: ShutdownSignal,
         *,

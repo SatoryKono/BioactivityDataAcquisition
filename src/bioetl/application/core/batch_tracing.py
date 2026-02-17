@@ -62,7 +62,7 @@ class BatchTracingManager:
         self._initial_batch_size = initial_batch_size
         self._adaptive_sizing_enabled = adaptive_sizing_enabled
 
-    def start_execution_span(self) -> Any | None:
+    def start_execution_span(self) -> Any | None:  # Any: OTel Span (avoids open...
         """Start root tracing span for pipeline execution.
 
         Returns:
@@ -86,7 +86,7 @@ class BatchTracingManager:
 
     def start_batch_span(
         self, batch_id: BatchID, record_count: int, start_index: int
-    ) -> Any | None:
+    ) -> Any | None:  # Any: OTel Span (avoids opentelemetry import)
         """Start tracing span for a batch.
 
         Args:
@@ -118,7 +118,7 @@ class BatchTracingManager:
         batch_id: BatchID,
         count: int,
         input_count: bool = False,
-    ) -> Any:
+    ) -> Any:  # Any: OTel Span (avoids opentelemetry import)
         """Start a tracing span for a layer operation.
 
         Args:

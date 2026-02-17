@@ -79,6 +79,7 @@ def _parse_table_name(table_name: str) -> tuple[str, str]:
     return "unknown", table_name if table_name else "unknown"
 
 
+# Any: dynamic Pandera schema...
 def _extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
     """Extract schema metadata from a Pandera DataFrameModel.
 
@@ -193,7 +194,7 @@ class SilverMetadataBuilder(_MetadataBuilderBase):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: heterogeneous metadata values
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,
@@ -314,12 +315,12 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
     def build_fallback_metadata(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: heterogeneous metadata values
         mode: GoldWriteMode,
-        scd_config: dict[str, Any] | None = None,
+        scd_config: dict[str, Any] | None = None,  # Any: dynamic layer config
         ingestion_ts: datetime | None = None,
-        run_id: Any | None = None,
-        gold_schema: Any | None = None,
+        run_id: Any | None = None,  # Any: heterogeneous run ID (str, int, UUID)
+        gold_schema: Any | None = None,  # Any: dynamic Pandera schema class
     ) -> GoldMetadata:
         """Build Gold metadata using fallback logic (no coordinator).
 
@@ -419,11 +420,11 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: heterogeneous metadata values
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,
-        gold_schema: Any | None = None,
+        gold_schema: Any | None = None,  # Any: dynamic Pandera schema class
     ) -> GoldMetadata:
         """Build Gold metadata for merged composite data.
 

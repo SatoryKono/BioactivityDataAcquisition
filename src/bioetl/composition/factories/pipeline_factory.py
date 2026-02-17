@@ -114,8 +114,8 @@ class GenericPipelineFactory(Generic[TPipeline]):
         pipeline_class: type[TPipeline],
         provider: str,
         silver_schema: pa.Schema | None = None,
-        gold_schema: Any = None,
-        pandera_silver_schema: Any = None,
+        gold_schema: Any = None,  # Any: Pandera DataFrameModel (no common base type)
+        pandera_silver_schema: Any = None,  # Any: Pandera DataFrameModel...
         data_source_creator: DataSourceCreator | None = None,
         transformer_class: type[BaseTransformer] | None = None,
     ) -> None:
@@ -300,8 +300,8 @@ def create_pipeline_factory(
     pipeline_class: type[TPipeline],
     provider: str,
     silver_schema: pa.Schema | None = None,
-    gold_schema: Any = None,
-    pandera_silver_schema: Any = None,
+    gold_schema: Any = None,  # Any: Pandera DataFrameModel (no common base type)
+    pandera_silver_schema: Any = None,  # Any: Pandera DataFrameModel...
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
     """Convenience function for creating pipeline factories."""
@@ -412,7 +412,7 @@ def build_pipeline_services(
     dq_monitor: DQMonitorPort | None = None,
     metadata_coordinator: MetadataCoordinator | None = None,
     cached_bronze: CachedBronzeContext | None = None,
-    silver_validator: Any = None,
+    silver_validator: Any = None,  # Any: SilverValidatorPort (optional lazy import)
 ) -> PipelineServices:
     """Build shared pipeline services using DI container.
 
@@ -490,7 +490,7 @@ def create_pipeline_with_services(
     dq_monitor: DQMonitorPort | None = None,
     metrics: MetricsPort | None = None,
     cached_bronze: CachedBronzeContext | None = None,
-    pandera_silver_schema: Any = None,
+    pandera_silver_schema: Any = None,  # Any: Pandera DataFrameModel...
 ) -> BasePipeline:
     """Create pipeline instance with services.
 
@@ -592,7 +592,7 @@ def assemble_runner(
     pipeline: BasePipeline,
     observability: ObservabilityBundle,
     silver_schema: pa.Schema | None,
-    gold_schema: Any,
+    gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
@@ -735,10 +735,10 @@ def assemble_runner(
 
 
 def _extract_single_dq_config(
-    sink: Any,
+    sink: Any,  # Any: dynamic Pydantic sink config (heterogeneous per pipeline)
     layer_name: str,
-    config_class: Any,
-) -> Any | None:
+    config_class: Any,  # Any: Pydantic model class (...
+) -> Any | None:  # Any: DQ report config varies by layer
     """Extract DQ config for a single layer.
 
     Args:
@@ -800,12 +800,12 @@ def _extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsCont
     )
 
 
-def _get_layer_path(config: Any) -> str | None:
+def _get_layer_path(config: Any) -> str | None:  # Any: dynamic sink layer config
     """Extract path from layer config if available."""
     return getattr(config, "path", None) if config else None
 
 
-def _has_flat_structure(config: Any) -> bool:
+def _has_flat_structure(config: Any) -> bool:  # Any: dynamic sink layer config
     """Check if layer config has flat_structure enabled."""
     return bool(config and getattr(config, "flat_structure", False))
 

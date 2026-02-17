@@ -457,7 +457,7 @@ class QuarantineEntry:
             reason="Retention period exceeded",
         )
 
-    def add_metadata(self, key: str, value: Any) -> None:
+    def add_metadata(self, key: str, value: Any) -> None:  # Any: metadata vals
         """Add metadata to the entry.
 
         Only allowed while entry is not resolved.

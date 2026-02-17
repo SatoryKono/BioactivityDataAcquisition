@@ -56,10 +56,11 @@ class _NoOpSpan:
     ) -> None:
         """Context manager exit."""
 
+    # Any: OTel Tracer facade (Nu...
     def set_attribute(self, key: str, value: Any) -> None:
         """Set span attribute (no-op)."""
 
-    def set_status(self, status: Any) -> None:
+    def set_status(self, status: Any) -> None:  # Any: OTel Tracer facade (Null Object)
         """Set span status (no-op)."""
 
     def record_exception(self, exception: Exception) -> None:
@@ -75,6 +76,7 @@ class _NoOpOtelTracer:
     transparently when tracing is disabled.
     """
 
+    # Any: OTel Tracer facade (Nu...
     def start_as_current_span(self, *_args: Any, **_kwargs: Any) -> _NoOpSpan:
         """Start a new span (no-op).
 

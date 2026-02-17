@@ -415,7 +415,7 @@ def _create_crossref_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,
+    **kwargs: Any,  # Any: forward arbitrary adap...
 ) -> CrossRefAdapter:
     """Custom creator for CrossRef adapter.
 

@@ -316,6 +316,7 @@ class MetadataCoordinator:
             governance=input_data.governance,
         )
 
+    # Any: Pandera DataFrameModel...
     def _extract_schema_metadata(self, gold_schema: Any | None) -> SchemaMetadata:
         """Extract schema metadata from a Pandera DataFrameModel.
 

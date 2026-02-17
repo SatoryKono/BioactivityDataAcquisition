@@ -231,7 +231,7 @@ class BronzeDQAnalyzer:
             status=status,
         )
 
-    def _infer_type(self, value: Any) -> str:
+    def _infer_type(self, value: Any) -> str:  # Any: infers JSON type from ...
         """Infer JSON type from Python value."""
         if value is None:
             return "null"

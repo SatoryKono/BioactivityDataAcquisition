@@ -254,6 +254,7 @@ class PublicationTransformer(BaseChemblTransformer):
         return data
 
     @staticmethod
+    # Any: accepts any dataclass ...
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord.
 

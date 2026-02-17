@@ -97,7 +97,7 @@ class OpenTelemetryTracer:
         self._tracer = trace.get_tracer(service_name)
         self._closed = False
 
-    def get_tracer(self, name: str) -> Any:
+    def get_tracer(self, name: str) -> Any:  # Any: returns OTel Tracer wh...
         """Get an OpenTelemetry tracer.
 
         Args:

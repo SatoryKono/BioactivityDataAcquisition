@@ -31,7 +31,7 @@ def register_provider(
     requires_logger: bool = True,
     rate_overrides: dict[str, float] | None = None,
     custom_creator: AdapterCreator | None = None,
-    **default_kwargs: Any,
+    **default_kwargs: Any,  # Any: adapter-specific defau...
 ) -> Callable[[type[T]], type[T]]:
     """Декоратор для регистрации провайдера данных.
 

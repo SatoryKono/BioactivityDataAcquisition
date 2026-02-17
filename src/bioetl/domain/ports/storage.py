@@ -122,7 +122,7 @@ class StoragePort(Protocol):
         self,
         table_name: str,
         records: list[dict[str, Any]],
-        schema: Any,
+        schema: Any,  # Any: Pandera DataFrameModel which has no common base type
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
