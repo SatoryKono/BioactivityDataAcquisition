@@ -1,6 +1,6 @@
 # BioETL Pipeline Documentation
 
-*Updated: 2026-02-04 | Aligned with RULES.md v5.20*
+*Updated: 2026-02-17 | Aligned with RULES.md v5.20*
 
 This directory contains documentation for all BioETL pipelines, including composite pipelines.
 
@@ -24,8 +24,8 @@ ______________________________________________________________________
 | 10  | `chembl_target_component`       | ChEMBL           | target_component       | [Spec](chembl/10-target-component-spec.md)       |
 | 11  | `chembl_publication_term`       | ChEMBL           | publication_term       | [Spec](chembl/11-publication-term-spec.md)       |
 | 12  | `chembl_publication_similarity` | ChEMBL           | publication_similarity | [Spec](chembl/12-publication-similarity-spec.md) |
-| 13  | `chembl_subcellular_fraction`   | ChEMBL           | subcellular_fraction   | [Spec](chembl/13-subcellular-fraction-spec.md)   |
-| 14  | `chembl_tissue`                 | ChEMBL           | tissue                 | [Spec](chembl/14-tissue-spec.md)                 |
+| 13  | `chembl_subcellular_fraction`   | ChEMBL           | subcellular_fraction   | [Spec](chembl/14-subcellular-fraction-spec.md)   |
+| 14  | `chembl_tissue`                 | ChEMBL           | tissue                 | *Spec pending*                                   |
 | 15  | `uniprot_protein`               | UniProt          | protein                | [Spec](uniprot/01-protein-spec.md)               |
 | 16  | `uniprot_idmapping`             | UniProt          | idmapping              | [Spec](uniprot/02-idmapping-spec.md)             |
 | 17  | `pubchem_compound`              | PubChem          | compound               | [Spec](pubchem/01-compound-spec.md)              |
@@ -36,13 +36,13 @@ ______________________________________________________________________
 
 ### Composite Pipelines (5)
 
-| #   | Pipeline ID             | Provider  | Entity      | Spec                                     |
-| --- | ----------------------- | --------- | ----------- | ---------------------------------------- |
-| 22  | `composite_activity`    | Composite | activity    | [Spec](composite/01-activity-spec.md)    |
-| 23  | `composite_assay`       | Composite | assay       | [Spec](composite/02-assay-spec.md)       |
-| 24  | `composite_molecule`    | Composite | molecule    | [Spec](composite/03-molecule-spec.md)    |
-| 25  | `composite_publication` | Composite | publication | [Spec](composite/04-publication-spec.md) |
-| 26  | `composite_target`      | Composite | target      | [Spec](composite/05-target-spec.md)      |
+| #   | Pipeline ID             | Provider  | Entity      | Spec                                         |
+| --- | ----------------------- | --------- | ----------- | -------------------------------------------- |
+| 22  | `composite_publication` | Composite | publication | [Spec](composite/01-publication-spec.md)     |
+| 23  | `composite_molecule`    | Composite | molecule    | [Spec](composite/02-molecule-spec.md)        |
+| 24  | `composite_target`      | Composite | target      | [Spec](composite/03-target-spec.md)          |
+| 25  | `composite_activity`    | Composite | activity    | *Spec pending*                               |
+| 26  | `composite_assay`       | Composite | assay       | *Spec pending*                               |
 
 ______________________________________________________________________
 
@@ -140,32 +140,12 @@ configs/pipelines/
 
 ______________________________________________________________________
 
-______________________________________________________________________
-
-## Canonical PK Migration Matrix
-
-| Pipeline                  | Old PK                                                                            | New PK                                                   | Breaking                     | Migration Strategy                                                                                 |
-| ------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------- |
-| `chembl_publication`      | `document_chembl_id`                                                              | `publication_id`                                         | Yes (public contract rename) | Add `publication_id` → backfill from `document_chembl_id` → dual-write → drop legacy in next major |
-| `chembl_publication_term` | `document_chembl_id`                                                              | `publication_id`                                         | Yes                          | Add `publication_id` → backfill from `document_chembl_id` → dual-write → drop legacy in next major |
-| `chembl_target`           | `target_chembl_id`                                                                | `target_id`                                              | Yes                          | Add `target_id` → backfill from `target_chembl_id` → dual-write → drop legacy in next major        |
-| `chembl_target_component` | `target_chembl_id`                                                                | `target_id`                                              | Yes                          | Add `target_id` → backfill from `target_chembl_id` → dual-write → drop legacy in next major        |
-| `chembl_molecule`         | `molecule_chembl_id`                                                              | `molecule_id`                                            | Yes                          | Add `molecule_id` → backfill from `molecule_chembl_id` → dual-write → drop legacy in next major    |
-| `chembl_activity`         | `molecule_chembl_id`, `target_chembl_id`, `assay_chembl_id`, `document_chembl_id` | `molecule_id`, `target_id`, `assay_id`, `publication_id` | Yes                          | Add canonical columns → backfill from legacy IDs → dual-write → drop legacy in next major          |
-| `chembl_assay`            | `assay_chembl_id`, `target_chembl_id`, `document_chembl_id`, `cell_chembl_id`     | `assay_id`, `target_id`, `publication_id`, `cell_id`     | Yes                          | Add canonical columns → backfill from legacy IDs → dual-write → drop legacy in next major          |
-| `chembl_assay_parameters` | `assay_chembl_id`                                                                 | `assay_id`                                               | Yes                          | Add `assay_id` → backfill from `assay_chembl_id` → dual-write → drop legacy in next major          |
-| `chembl_cell_line`        | `cell_chembl_id`                                                                  | `cell_id`                                                | Yes                          | Add `cell_id` → backfill from `cell_chembl_id` → dual-write → drop legacy in next major            |
-| `chembl_compound_record`  | `molecule_chembl_id`, `document_chembl_id`                                        | `molecule_id`, `publication_id`                          | Yes                          | Add canonical columns → backfill from legacy IDs → dual-write → drop legacy in next major          |
-| `uniprot_idmapping`       | `target_chembl_id`                                                                | `target_id`                                              | Yes                          | Add `target_id` → backfill from `target_chembl_id` → dual-write → drop legacy in next major        |
-
 ## Related Documentation
 
-- [RULES.md](../RULES.md) - Project governance
-
-- [CLAUDE.md](../../CLAUDE.md) - Agent instructions
-
-- [ADR Directory](../02-architecture/decisions/) - Architecture Decision Records
-
-- [API Reference](../04-reference/api/) - API documentation
-
-- Composite: activity, assay
+- [RULES.md](../../00-project/RULES.md) - Project governance
+- [ADR-025: Pipeline Config Unification](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md)
+- [ADR-026: Composite Pipeline Pattern](../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
+- [ADR-027: DQ Rules Externalization](../../02-architecture/decisions/ADR-027-dq-rules-externalization.md)
+- [ADR-028: Filter Rules Externalization](../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
+- [Pipeline Configuration Guide](../../03-guides/pipeline-configuration.md)
+- [DQ Configuration Guide](../../03-guides/dq-configuration.md)

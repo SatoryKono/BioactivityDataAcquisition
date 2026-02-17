@@ -292,7 +292,7 @@ def test_domain_does_not_import_infrastructure() -> None:
 
 | Ссылка | Описание | Verification |
 |--------|----------|-------------|
-| [RULES-§4.5] | DQ thresholds: soft=5%, hard=20% | `grep -rn "soft_fail\|hard_fail" configs/dq/` |
+| [RULES-§4.5] | DQ thresholds: soft=5%, hard=20% | `grep -rn "soft_fail\|hard_fail" configs/quality/` |
 | [ADR-027] | DQ rules externalized | `python scripts/config_gap_analysis.py -v` |
 
 ### Пороги PASS/FAIL
