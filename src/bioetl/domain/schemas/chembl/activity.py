@@ -224,7 +224,7 @@ class ActivitySchema(ETLRecordSchema):
     publication_pmc_id: Series[str] | None = pa.Field(
         nullable=True, description="Publication PubMed Central ID."
     )
-    publication_year: Series[pd.Int64Dtype] = pa.Field(
+    publication_year: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
