@@ -216,7 +216,7 @@ Two different ADR-030 files exist in different directories.
 
 | Source | Claimed | Actual (`grep "def test_"`) |
 |--------|---------|----------------------------|
-| RULES.md v5.19 | ~11,985 | **9,438** |
+| RULES.md v5.20 | ~11,985 | **9,438** |
 
 **Delta: -2,547 (21.3% overcount)**
 
@@ -249,7 +249,7 @@ forbidden_modules =
 
 ### 7.8 ai-selfreview-rules.md Sync — IN SYNC
 
-Correctly references RULES.md v5.19 (2026-02-16).
+Correctly references RULES.md v5.20 (2026-02-16).
 
 ---
 

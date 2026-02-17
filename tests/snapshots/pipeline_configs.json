@@ -169,7 +169,7 @@
     },
     "table": {
       "gold_table": "chembl_activity",
-      "gold_write_mode": "overwrite",
+      "gold_write_mode": "append",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
@@ -334,7 +334,7 @@
     },
     "table": {
       "gold_table": "pubchem_compound",
-      "gold_write_mode": "overwrite",
+      "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
@@ -693,7 +693,7 @@
     },
     "table": {
       "gold_table": "pubmed_publication",
-      "gold_write_mode": "overwrite",
+      "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [
@@ -760,7 +760,7 @@
     },
     "table": {
       "gold_table": "uniprot_protein",
-      "gold_write_mode": "overwrite",
+      "gold_write_mode": "scd2",
       "on_schema_mismatch": "evolve",
       "partition_cols": [],
       "primary_keys": [

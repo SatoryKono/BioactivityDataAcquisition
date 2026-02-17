@@ -94,7 +94,7 @@
     },
     "protein_classification_ids": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,

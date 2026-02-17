@@ -182,7 +182,7 @@
     },
     "gene_names": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,

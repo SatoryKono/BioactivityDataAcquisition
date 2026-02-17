@@ -110,7 +110,7 @@
     },
     "component_accessions": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -126,7 +126,7 @@
     },
     "component_ids": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -134,7 +134,7 @@
     },
     "component_types": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -142,7 +142,7 @@
     },
     "component_relationships": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,

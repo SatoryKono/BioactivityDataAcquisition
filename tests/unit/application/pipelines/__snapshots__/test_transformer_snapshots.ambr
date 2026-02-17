@@ -259,20 +259,17 @@
     'authors': '["Smith, John","Doe, Jane"]',
     'authors_with_affiliations': '[{"affiliations":[],"initials":null,"name_hash":"Smith, John"},{"affiliations":[],"initials":null,"name_hash":"Doe, Jane"}]',
     'chemical_count': 0,
-    'chemicals': list([
-    ]),
+    'chemicals': None,
     'citation_subset': None,
     'citations_made': 0,
     'content_hash': '<content_hash>',
     'country': 'United States',
-    'databanks': list([
-    ]),
+    'databanks': None,
     'date_completed': None,
     'date_revised': None,
     'doi': '10.1234/test.2025.001',
     'entity_id': '<entity_id>',
-    'gene_symbols': list([
-    ]),
+    'gene_symbols': None,
     'grant_count': 0,
     'is_oa': None,
     'issn': '1234-5678',
@@ -307,20 +304,12 @@
     'publication_type': 'Journal Article|Research Support',
     'publication_type_list': '["Journal Article","Research Support"]',
     'publication_type_unified': 'Journal Article',
-    'publication_types': list([
-      'Journal Article',
-      'Research Support',
-    ]),
+    'publication_types': '["Journal Article","Research Support"]',
     'publication_year': 2025,
     'publisher': None,
     'publisher_id': None,
-    'subject_keywords': list([
-      'unit testing',
-      'python',
-    ]),
-    'subject_mesh': list([
-      'Software Testing',
-    ]),
+    'subject_keywords': '["unit testing","python"]',
+    'subject_mesh': '["Software Testing"]',
     'title': 'A Comprehensive Study of Unit Testing',
     'volume': '42',
   })
@@ -347,20 +336,17 @@
     'authors': None,
     'authors_with_affiliations': None,
     'chemical_count': 0,
-    'chemicals': list([
-    ]),
+    'chemicals': None,
     'citation_subset': None,
     'citations_made': 0,
     'content_hash': '<content_hash>',
     'country': None,
-    'databanks': list([
-    ]),
+    'databanks': None,
     'date_completed': None,
     'date_revised': None,
     'doi': None,
     'entity_id': '<entity_id>',
-    'gene_symbols': list([
-    ]),
+    'gene_symbols': None,
     'grant_count': 0,
     'is_oa': None,
     'issn': None,
@@ -395,15 +381,12 @@
     'publication_type': None,
     'publication_type_list': None,
     'publication_type_unified': None,
-    'publication_types': list([
-    ]),
+    'publication_types': None,
     'publication_year': None,
     'publisher': None,
     'publisher_id': None,
-    'subject_keywords': list([
-    ]),
-    'subject_mesh': list([
-    ]),
+    'subject_keywords': None,
+    'subject_mesh': None,
     'title': 'Test Article Title',
     'volume': None,
   })
@@ -488,17 +471,11 @@
     '_run_id': '<run_id>',
     '_run_type': 'incremental',
     '_source_batch_id': None,
-    'component_accessions': list([
-      'P35354',
-    ]),
+    'component_accessions': '["P35354"]',
     'component_descriptions': None,
-    'component_ids': list([
-      123,
-    ]),
+    'component_ids': '[123]',
     'component_relationships': None,
-    'component_types': list([
-      'PROTEIN',
-    ]),
+    'component_types': '["PROTEIN"]',
     'content_hash': '<content_hash>',
     'cross_references': '{"xref_id":"P35354","xref_src_db":"UniProt"}',
     'description': 'Prostaglandin G/H synthase 2',
@@ -554,10 +531,7 @@
     'features_json': None,
     'flag': None,
     'function_comment': None,
-    'gene_names': list([
-      'TEST1',
-      'TEST2',
-    ]),
+    'gene_names': '["TEST1","TEST2"]',
     'gene_orf_names': None,
     'gene_primary': 'TEST1',
     'gene_synonyms': None,

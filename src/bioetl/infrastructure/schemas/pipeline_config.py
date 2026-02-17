@@ -453,6 +453,21 @@ class SinkLayerConfig(BaseModel):
         default_factory=SinkDQReportConfig,
         description="DQ report generation settings for this layer",
     )
+    # Deterministic write order (Gold layer)
+    deterministic: bool = Field(
+        default=True,
+        description="Enable deterministic write order for Gold layer output",
+    )
+    # Partitioning (Silver layer)
+    partition_by: list[str] = Field(
+        default_factory=list,
+        description="Columns to partition Delta tables by (Silver layer)",
+    )
+    # SCD Type 2 configuration (Gold layer)
+    scd_config: dict[str, str] | None = Field(
+        default=None,
+        description="SCD Type 2 column mapping (valid_from, valid_to, is_current, version)",
+    )
     # Flat structure mode
     flat_structure: bool = Field(
         default=False,

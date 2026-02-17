@@ -56,7 +56,7 @@ class TestUniProtProteinTransformer:
         assert result["accession"] == "P12345"
         assert result["entry_name"] == "COX2_HUMAN"
         assert result["protein_name"] == "Prostaglandin G/H synthase 2"
-        assert result["gene_names"] == ["PTGS2"]
+        assert result["gene_names"] == '["PTGS2"]'
         assert result["organism_id"] == 9606
         assert result["sequence_length"] == 604
         assert "entity_id" in result
@@ -135,7 +135,7 @@ class TestUniProtProteinTransformer:
         assert result["accession"] == "Q99999"
         assert result["entry_name"] == "MIN_HUMAN"
         assert result["protein_name"] is None
-        assert result["gene_names"] == []
+        assert result["gene_names"] is None
         assert result.get("organism_id") is None
         assert result.get("sequence_length") is None
 
@@ -158,7 +158,7 @@ class TestUniProtProteinTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["gene_names"] == ["GENE1", "GENE2", "GENE3"]
+        assert result["gene_names"] == '["GENE1","GENE2","GENE3"]'
 
     @pytest.mark.asyncio
     async def test_transform_with_empty_genes(self, transformer, mock_context):
@@ -175,7 +175,7 @@ class TestUniProtProteinTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["gene_names"] == []
+        assert result["gene_names"] is None
 
     @pytest.mark.asyncio
     async def test_transform_with_malformed_genes(self, transformer, mock_context):
@@ -197,7 +197,7 @@ class TestUniProtProteinTransformer:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert result["gene_names"] == ["VALID"]
+        assert result["gene_names"] == '["VALID"]'
 
     @pytest.mark.asyncio
     async def test_transform_entity_id_format(self, transformer, mock_context):

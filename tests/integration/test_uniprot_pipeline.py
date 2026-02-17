@@ -160,7 +160,7 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["accession"] == "P12345"
         assert silver_record["entry_name"] == "MYC_HUMAN"
         assert silver_record["protein_name"] == "Myc proto-oncogene protein"
-        assert silver_record["gene_names"] == ["MYC", "BHLHE39"]
+        assert silver_record["gene_names"] == '["MYC","BHLHE39"]'
         assert silver_record["organism_id"] == 9606
         assert silver_record["sequence_length"] == 439
         assert "entity_id" in silver_record
@@ -208,7 +208,7 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record["accession"] == "Q99999"
         assert silver_record["entry_name"] == "TEST_HUMAN"
         assert silver_record["protein_name"] is None
-        assert silver_record["gene_names"] == []
+        assert silver_record["gene_names"] is None
         assert silver_record["organism_id"] is None
         assert silver_record["sequence_length"] is None
         assert "entity_id" in silver_record
@@ -287,7 +287,7 @@ class TestUniProtProteinPipelineTransform:
         assert silver_record is not None
         assert silver_record["accession"] == "A0A000"
         assert silver_record["protein_name"] is None
-        assert silver_record["gene_names"] == ["GENE1"]
+        assert silver_record["gene_names"] == '["GENE1"]'
         assert "entity_id" in silver_record
         assert "_run_id" in silver_record
 
@@ -327,7 +327,7 @@ class TestUniProtProteinPipelineTransform:
         )
 
         assert silver_record is not None
-        assert silver_record["gene_names"] == []
+        assert silver_record["gene_names"] is None
         assert "_run_id" in silver_record
 
     async def test_transform_extracts_new_fields(

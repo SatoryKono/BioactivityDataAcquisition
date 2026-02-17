@@ -86,16 +86,8 @@
       "file": "docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "hierarchy_active_id",
-          "hierarchy_child_id",
-          "hierarchy_parent_id"
-        ],
-        "removed_properties": [
-          "hierarchy_active_chembl_id",
-          "hierarchy_child_chembl_id",
-          "hierarchy_parent_chembl_id"
-        ],
+        "added_properties": [],
+        "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
       }
@@ -114,12 +106,8 @@
       "file": "docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "example_assay_id"
-        ],
-        "removed_properties": [
-          "example_assay_chembl_id"
-        ],
+        "added_properties": [],
+        "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
       }
@@ -148,14 +136,10 @@
       "file": "docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "tissue_id"
-        ],
-        "removed_properties": [
-          "tissue_chembl_id"
-        ],
+        "added_properties": [],
+        "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_molecule": {

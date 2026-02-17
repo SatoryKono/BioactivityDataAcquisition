@@ -283,7 +283,7 @@
     },
     "publication_type": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -291,7 +291,7 @@
     },
     "publication_types": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -299,7 +299,7 @@
     },
     "subject_keywords": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -307,7 +307,7 @@
     },
     "subject_mesh": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -315,7 +315,7 @@
     },
     "chemicals": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -323,7 +323,7 @@
     },
     "databanks": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -331,7 +331,7 @@
     },
     "gene_symbols": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
