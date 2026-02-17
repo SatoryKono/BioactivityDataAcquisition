@@ -164,14 +164,15 @@ jobs:
           node-version: "20"
 
       - name: Run jscpd for duplication detection
-        run: npx jscpd@latest src tests --threshold 5 --reporters "console,html,json" --output reports/jscpd
+        run: npx jscpd@4.0.8 src tests --threshold 5 --reporters "console,html,json" --output reports/jscpd
 
       - name: Upload reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: duplication-complexity-reports
           path: reports
-          if-no-files-found: error
+          if-no-files-found: warn
 
   constructor-args-check:
     name: Constructor Arguments Check
