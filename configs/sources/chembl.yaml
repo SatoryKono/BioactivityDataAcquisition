@@ -6,8 +6,6 @@
 # Data License: CC BY-SA 3.0
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 10
     provider_config:
         provider: chembl

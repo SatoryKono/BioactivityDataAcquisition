@@ -159,8 +159,6 @@ class SourceSectionConfig(BaseModel):
     This represents the 'source' section in configs/sources/*.yaml files.
 
     Attributes:
-        type: Source type (api, file, etc).
-        load_strategy: Loading strategy (full, incremental).
         batch_size: Batch size for data loading.
         provider_config: Provider-specific settings.
         circuit_breaker: Circuit breaker configuration.
@@ -169,8 +167,6 @@ class SourceSectionConfig(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    type: Literal["api", "file"] = "api"
-    load_strategy: Literal["full", "incremental"] = "full"
     batch_size: int = Field(default=100, ge=1, le=10000)
     provider_config: ProviderConfigYaml = Field(
         default_factory=lambda: ProviderConfigYaml()
@@ -190,7 +186,6 @@ class SourceYamlConfig(BaseModel):
 
     Example YAML:
         source:
-            type: api
             batch_size: 100
             provider_config:
                 provider: chembl

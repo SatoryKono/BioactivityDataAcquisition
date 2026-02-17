@@ -40,6 +40,5 @@ gold_table: "chembl_molecule"
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver:
-    partition_by: ["molecule_type"]
+  silver: {}
   gold: {}

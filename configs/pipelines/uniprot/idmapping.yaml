@@ -21,11 +21,6 @@ gold_table: "uniprot_idmapping"
 
 # Entity-specific source overrides for ID Mapping
 source:
-  type: file
-  load_strategy: full
-  # Input CSV file containing ChEMBL target IDs
-  input_path: data/input/target.csv
-
   # ID Mapping API configuration
   api:
     base_url: https://rest.uniprot.org
@@ -60,6 +55,5 @@ sink:
   bronze: {}
     # ID Mapping doesn't write Bronze (data comes from API, not raw files)
     # NOTE: enabled: false is not yet implemented in code, so Bronze is still written
-  silver:
-    partition_by: []  # No partitioning - small dataset
+  silver: {}
   gold: {}
