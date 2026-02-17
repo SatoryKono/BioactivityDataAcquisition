@@ -61,18 +61,25 @@ filter_config_file: ../../filter/entities/chembl/activity.yaml
    - `FilterConfigFile`: Complete schema with to_domain() conversion
 
 2. **Configuration loader**: `src/bioetl/infrastructure/config/filter_config_loader.py`
-   - `FilterConfigLoader.load(provider, entity, inline_overrides)`: Merges configs
+   - `FilterConfigLoader.load(provider, entity, inline_overrides)`: Merges and returns domain objects
+   - `FilterConfigLoader.load_as_dict(provider, entity, inline_overrides)`: Merges and returns raw dict (used by pipeline config loading)
+   - `FilterConfigLoader._merge_hierarchy()`: Shared 4-level merge logic
    - Thread-safe caching for performance
    - Deep merge with list deduplication for required_fields/exclude_if_present
 
-3. **Config files**: `configs/filters/`
+3. **Pipeline config integration**: `src/bioetl/infrastructure/config_loader.py`
+   - `_apply_hierarchical_filter_config()`: Single entry point for filter merge during pipeline loading
+   - Delegates to `FilterConfigLoader.load_as_dict()` for the full hierarchy
+   - Collects inline overrides from pipeline YAML (`input_filter`, `gold_filters`, `silver_filters`, `extraction_params`, `filter_rules`)
+
+4. **Config files**: `configs/filters/`
    - `_defaults.yaml`: Global defaults (batch_size=100)
-   - `providers/{provider}.yaml`: Provider-specific settings (e.g., ChEMBL batch_size=20)
+   - `providers/{provider}.yaml`: Provider-specific settings (e.g., ChEMBL batch_size=1000)
    - `entities/{provider}/{entity}.yaml`: Entity-specific rules
 
-4. **Pipeline schema update**: `src/bioetl/infrastructure/schemas/pipeline_config.py`
-   - Added `filter_config_file` field to `PipelineYamlConfig`
-   - Added `filter_rules` field for inline overrides
+5. **Pipeline schema**: `src/bioetl/infrastructure/schemas/pipeline_config.py`
+   - `filter_config_file` field for convention-based path (informational)
+   - `filter_rules` field for inline overrides
    - Legacy `input_filter`/`gold_filters` fields retained for backward compatibility
 
 ## Consequences
@@ -244,12 +251,15 @@ Define filters in Python code. Rejected because:
 
 | Requirement | Status | Implementation |
 |-------------|--------|----------------|
-| Hierarchical merge | PASS | `FilterConfigLoader._deep_merge()` |
+| Hierarchical merge | PASS | `FilterConfigLoader._merge_hierarchy()` |
+| Single merge mechanism | PASS | Consolidated into `FilterConfigLoader` (no duplication) |
 | Provider defaults | PASS | `providers/{provider}.yaml` |
 | Entity overrides | PASS | `entities/{provider}/{entity}.yaml` |
+| Inline overrides | PASS | `filter_rules` / inline sections in pipeline YAML |
 | Backward compatibility | PASS | Inline `input_filter`/`gold_filters` supported |
 | Domain conversion | PASS | `FilterConfigFile.to_domain()` |
 | Extraction params | PASS | `extraction_params` section in filter YAML |
+| Silver filters | PASS | `silver_filters` section now loaded from hierarchy |
 
 ## References
 
@@ -257,6 +267,7 @@ Define filters in Python code. Rejected because:
 - Domain models: `src/bioetl/domain/filtering/`
 - Schema: `src/bioetl/infrastructure/schemas/filter_config.py`
 - Loader: `src/bioetl/infrastructure/config/filter_config_loader.py`
+- Pipeline integration: `src/bioetl/infrastructure/config_loader.py` (`_apply_hierarchical_filter_config`)
 - Config files: `configs/filters/`
 - Tests: `tests/unit/infrastructure/config/test_filter_config_loader.py`
 
@@ -266,3 +277,4 @@ Define filters in Python code. Rejected because:
 |------|--------|--------|
 | 2026-01-20 | Claude Code | Initial version |
 | 2026-02-09 | Claude Code | Added §3 Extraction-Level Filtering (extraction_params) |
+| 2026-02-17 | Claude Code | Consolidated filter merge: removed legacy `_load_filter_config`/`_merge_filter_config` from `config_loader.py`, unified via `FilterConfigLoader._merge_hierarchy()`. All 4 filter sections (`input_filter`, `silver_filters`, `gold_filters`, `extraction_params`) now load from full hierarchy. |
