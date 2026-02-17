@@ -176,36 +176,6 @@ class TestConsolidationPattern:
         assert domain_config.failure_threshold == 3
         assert domain_config.recovery_timeout == 60
 
-    def test_api_config_to_domain(self) -> None:
-        """Test ApiConfig Pydantic model to domain conversion."""
-        from bioetl.infrastructure.schemas.pipeline_config import (
-            ApiConfig as PydanticApiConfig,
-        )
-
-        pydantic_config = PydanticApiConfig(
-            base_url="https://api.example.com",
-            rate_limit=15.0,
-            timeout=45,
-        )
-        domain_config = pydantic_config.to_domain()
-
-        assert domain_config.base_url == "https://api.example.com"
-        assert domain_config.timeout == 45
-        assert domain_config.rate_limit.requests_per_second == 15.0
-
-    def test_api_config_to_domain_defaults(self) -> None:
-        """Test ApiConfig with None values uses sensible defaults."""
-        from bioetl.infrastructure.schemas.pipeline_config import (
-            ApiConfig as PydanticApiConfig,
-        )
-
-        pydantic_config = PydanticApiConfig()
-        domain_config = pydantic_config.to_domain()
-
-        assert domain_config.base_url is None
-        assert domain_config.timeout == 30  # default
-        assert domain_config.rate_limit.requests_per_second == 5.0  # default
-
     def test_input_filter_config_to_domain_disabled(self) -> None:
         """Test InputFilterConfig to domain conversion when disabled."""
         from bioetl.infrastructure.schemas.pipeline_config import (

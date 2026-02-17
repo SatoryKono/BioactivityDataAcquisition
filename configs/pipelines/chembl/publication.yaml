@@ -55,7 +55,6 @@ sink:
   bronze:
     flat_structure: true  # Files written directly under path/{date}/, without provider/entity subdirs
   silver:
-    partition_by: ["doc_type"]
     flat_structure: true  # Delta directly in path, files named {table}_*.ext
   gold:
     flat_structure: true  # Delta directly in path, files named {table}_*.ext

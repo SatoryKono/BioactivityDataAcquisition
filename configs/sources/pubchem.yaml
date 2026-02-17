@@ -6,8 +6,6 @@
 # Data License: Public Domain
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 50
     provider_config:
         provider: pubchem

@@ -12,8 +12,6 @@
 #   - input_filter: loaded from filter_config_file
 #   - gold_filters: loaded from filter_config_file
 #   - sink paths: data/output/{layer}/chembl/activity
-#   - sink.silver.primary_key: ["activity_id"]
-#   - sink.*.sort_by.columns: ["activity_id"]
 
 pipeline_name: chembl_activity
 provider: chembl
