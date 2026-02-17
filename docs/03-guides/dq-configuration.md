@@ -364,7 +364,7 @@ from pathlib import Path
 import yaml
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
-for f in Path('configs/dq').rglob('*.yaml'):
+for f in Path('configs/quality').rglob('*.yaml'):
     if f.name == 'README.md':
         continue
     with open(f) as fp:
