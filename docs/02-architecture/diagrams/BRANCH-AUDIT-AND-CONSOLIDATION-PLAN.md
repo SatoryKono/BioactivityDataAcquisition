@@ -1,32 +1,35 @@
 # Аудит и план консолидации codex/* веток (документация диаграмм)
 
-*Дата: 2026-02-17 | Автор: claude/audit-doc-branches*
+*Дата: 2026-02-17 (rev.2) | Автор: claude/audit-doc-branches*
 
 ---
 
 ## 1. Общая картина
 
-Все 11 веток (одна дублируется) — **documentation-only**, затрагивают исключительно
-`docs/02-architecture/`. Каждая ветка содержит ровно 1 коммит, создана 2026-02-17.
+Всего 12 веток (одна codex-ветка дублируется в списке) — **documentation-only**,
+затрагивают исключительно `docs/02-architecture/`. Каждая ветка содержит ровно 1 коммит,
+создана 2026-02-17.
 
 | # | Ветка | Файлов | +/- | Суть изменений |
 |---|-------|--------|-----|----------------|
-| 1 | `update-python-script-instructions-in-documentation` | 2 | +137/-68 | Shell-рендерер: CLI-флаги, env bash, уменьшенные размеры |
-| 2 | `update-render_diagrams.sh-script` | 1 | +70/-59 | Shell-рендерер: поддержка .mermaid+.mmd, png/ выход, mapfile |
-| 3 | `update-diagram-overview-table` | 1 | +76/-52 | diagrams-index: добавление #12 (AWS, historical), скрипт валидации |
-| 4 | `update-architecture-documentation-components` | 1 | +53/-52 | diagrams-index: косметическое форматирование, пути к исходникам в Key Params |
-| 5 | `establish-diagram-structure-and-update-documentation` | 48 | +562/-510 | **Структурная**: перенос 25 .mermaid → mermaid/, создание png/, обновление 11 docs |
-| 6 | `update-diagram-catalog-for-500-candidates` | 1 | +555/-0 | Новый файл: diagram-catalog-500.md (формат D-001, ссылки на src/) |
-| 7 | `rename-deployment-file-and-update-references` | 3 | +71/-63 | Переименование #12: AWS → local-deployment, ADR-010 |
-| 8 | `evaluate-and-rank-candidate-diagrams` | 1 | +106/-105 | top-50: новые 5 критериев с взвешенной формулой (0.30*AI+...) |
-| 9 | `create-diagram-catalog-documentation` | 1 | +557/-0 | Новый файл: diagram-catalog-500.md (формат DC-001, дедупликация) |
-| 10 | `update-diagrams-with-new-evaluation-criteria` | 1 | +104/-99 | top-50: новые критерии, равные веса, 7 диаграмм с оценкой 10.0 |
-| 11 | `create-and-update-architecture-diagrams-documentation` | 4 | +702/-162 | Комбинированная: catalog-500 + top-25-report + top-50 ревизия + index |
+| 1 | `codex/update-python-script-instructions-in-documentation` | 2 | +137/-68 | Shell-рендерер: CLI-флаги, env bash, уменьшенные размеры |
+| 2 | `codex/update-render_diagrams.sh-script` | 1 | +70/-59 | Shell-рендерер: поддержка .mermaid+.mmd, png/ выход, mapfile |
+| 3 | `codex/update-diagram-overview-table` | 1 | +76/-52 | diagrams-index: добавление #12 (AWS, historical), скрипт валидации |
+| 4 | `codex/update-architecture-documentation-components` | 1 | +53/-52 | diagrams-index: косметическое форматирование, пути к исходникам в Key Params |
+| 5 | `codex/establish-diagram-structure-and-update-documentation` | 48 | +562/-510 | **Структурная**: перенос 25 .mermaid → mermaid/, создание png/, обновление 11 docs |
+| 6 | `codex/update-diagram-catalog-for-500-candidates` | 1 | +555/-0 | Новый файл: diagram-catalog-500.md (формат D-001, ссылки на src/) |
+| 7 | `codex/rename-deployment-file-and-update-references` | 3 | +71/-63 | Переименование #12: AWS → local-deployment, ADR-010 |
+| 8 | `codex/evaluate-and-rank-candidate-diagrams` | 1 | +106/-105 | top-50: новые 5 критериев с взвешенной формулой (0.30*AI+...) |
+| 9 | `codex/create-diagram-catalog-documentation` | 1 | +557/-0 | Новый файл: diagram-catalog-500.md (формат DC-001, дедупликация) |
+| 10 | `codex/update-diagrams-with-new-evaluation-criteria` | 1 | +104/-99 | top-50: новые критерии, равные веса, 7 диаграмм с оценкой 10.0 |
+| 11 | `codex/create-and-update-architecture-diagrams-documentation` | 4 | +702/-162 | Комбинированная: catalog-500 + top-25-report + top-50 ревизия + index |
+| **12** | **`claude/document-bioetl-architecture-3SljB`** | **1** | **+691/-0** | **Новый файл: 500-diagram-proposals.md (15 категорий, TOP-25, типы диаграмм)** |
 
 ### Группы по merge-base
 
-- **Группа A** (6 веток, merge-base `d23fe5c3`, 2 коммита позади main): ветки 1–5, 11
-- **Группа B** (5 веток, merge-base `b742c985`, актуальны с main): ветки 6–10
+- **Группа A** (6 codex-веток, merge-base `d23fe5c3`, 2 коммита позади main): ветки 1–5, 11
+- **Группа B** (5 codex-веток, merge-base `b742c985`, актуальны с main): ветки 6–10
+- **Группа C** (1 claude-ветка, merge-base `b742c985`, 3 коммита позади main): ветка 12
 
 ---
 
@@ -68,15 +71,26 @@
 
 **Вердикт**: Ветка #5 определяет каноническую структуру (mermaid/ → png/), #1 добавляет CLI-гибкость, #2 — совместимость с .mmd.
 
-### 2.4. `diagram-catalog-500.md` — 3 ветки (НОВЫЙ ФАЙЛ)
+### 2.4. Каталог 500 диаграмм — 4 ветки (НОВЫЙ ФАЙЛ × 2 имени)
 
-| Ветка | ID формат | Колонки | Типы диаграмм | Сущности |
-|-------|-----------|---------|---------------|----------|
-| #6 update-catalog-500 | D-001 | 7 (с названием) | 3 | Пути к src/ файлам |
-| #9 create-catalog-doc | DC-001 | 7 (с названием) | 5 | Названия слоёв |
-| #11 create-and-update | D001 | 6 (без названия) | 10 | Имена классов |
+Четыре ветки создают файл-каталог с предложениями по 500 диаграммам.
+Три используют имя `diagram-catalog-500.md`, одна — `500-diagram-proposals.md`.
 
-**Вердикт**: Три варианта одного файла. Ветка #11 наиболее компактна и разнообразна по типам, но #6 имеет самые точные ссылки на исходный код.
+| Ветка | Файл | ID формат | Колонки | Типы | Категории | Сущности | Особенности |
+|-------|------|-----------|---------|------|-----------|----------|-------------|
+| #6 update-catalog-500 | `diagram-catalog-500.md` | D-001 | 7 (с назв.) | 3 | 10 блоков (рус.) | Пути к src/ файлам | — |
+| #9 create-catalog-doc | `diagram-catalog-500.md` | DC-001 | 7 (с назв.) | 5 | 10 тематических (англ.) | Названия слоёв | Дедупликация 80%+ |
+| #11 create-and-update | `diagram-catalog-500.md` | D001 | 6 (без назв.) | 10 | 2 (плоский список) | Имена классов | Минимальная структура |
+| **#12 document-bioetl** | **`500-diagram-proposals.md`** | **1–500** | **4 (#, Name, Type, Desc)** | **10** | **15 (англ.)** | **Mermaid-типы + описания** | **TOP-25 приоритет, список 34 excluded, стат. распределение** |
+
+**Вердикт**: Ветка #12 значительно качественнее остальных:
+- Явный список 34 существующих диаграмм, исключённых из дубликации
+- 15 категорий (vs 10/10/2) — наиболее гранулярная декомпозиция
+- Статистика распределения типов диаграмм (flowchart 51.6%, classDiagram 18.8%, ...)
+- Встроенный TOP-25 с обоснованием приоритетов
+- 691 строка контента vs 555/557/519
+
+Однако #6 имеет уникальное преимущество — прямые ссылки на `src/bioetl/` файлы.
 
 ### 2.5. `00-overview.md` — 2 ветки (НИЗКИЙ)
 
@@ -99,10 +113,13 @@
   - #8 и #10 (изменения в top-50-diagrams.md)
   - #6 и #9 (создание diagram-catalog-500.md)
   - Однако #11 использует ДРУГОЙ подход к оценке и другой формат каталога
+- **Ветка #12** (`claude/document-bioetl-architecture-3SljB`) концептуально поглощает:
+  - #6, #9, #11 (каталог 500 диаграмм) — но под другим именем файла и с иным форматом
+  - Содержит встроенный TOP-25, частично пересекающийся с функцией top-50-diagrams.md
 
 ### Взаимоисключающие ветки
 - **#8 vs #10 vs #11**: три конкурирующих методологии оценки top-50
-- **#6 vs #9 vs #11**: три конкурирующих формата catalog-500
+- **#6 vs #9 vs #11 vs #12**: четыре конкурирующих каталога 500 диаграмм
 - **#1 vs #2**: два конкурирующих подхода к render_diagrams.sh
 
 ---
@@ -143,15 +160,20 @@ mermaid/ + png/ и обновляет все 11 документов с крос
 - #10 даёт 7 диаграмм с идеальной оценкой 10.0 — явно завышенные баллы
 - Форматирование из #5 можно применить отдельно
 
-### 4.5. diagram-catalog-500.md
-**Winner: Ветка #6** (`update-diagram-catalog-for-500-candidates`)
+### 4.5. Каталог 500 диаграмм
+**Winner: Ветка #12** (`claude/document-bioetl-architecture-3SljB`)
+с дополнением src/-ссылок из **#6**
 
 Обоснование:
-- Содержит ссылки на конкретные файлы `src/bioetl/` — наиболее полезно
-  для разработчиков
-- Формат D-001 удобнее для сортировки, чем DC-001 или D001
-- Имеет колонку "название" — важно для каталога из 500 записей
-- Можно дополнить разнообразием типов диаграмм из #11
+- 15 категорий — наиболее гранулярная и осмысленная декомпозиция
+- Явный exclude-список 34 существующих диаграмм — защита от дубликации
+- Статистика распределения типов — помогает балансировать каталог
+- Встроенный TOP-25 с обоснованием — готовый план реализации
+- 691 строка качественного контента (больше всех вариантов)
+
+Из ветки #6 стоит взять:
+- Ссылки на конкретные файлы `src/bioetl/` в колонке сущностей
+- Формат идентификаторов D-001 (со стабильным дефисным разделителем)
 
 ### 4.6. Переименование deployment-диаграммы
 **Winner: Ветка #7** (`rename-deployment-file-and-update-references`)
@@ -185,9 +207,10 @@ AWS-название — legacy, должно быть deprecated.
          → Ручное разрешение: пути в top-50 могут отличаться после #5
          → Сохранить форматирование из #5
 
-Шаг 2.2: Cherry-pick из #6 (diagram-catalog-500) в main
-         → Новый файл, чистое добавление
-         → Конфликтов нет (файл не существует на main после #5)
+Шаг 2.2: Cherry-pick из #12 (document-bioetl-architecture) в main
+         → Новый файл 500-diagram-proposals.md, чистое добавление
+         → Конфликтов нет (файл не существует на main)
+         → POST-MERGE: обогатить src/bioetl/ ссылками из #6
 
 Шаг 2.3: Cherry-pick из #3 (update-diagram-overview) — только скрипт валидации
          → Добавить в diagrams-index.md секцию проверки актуальности индекса
@@ -207,10 +230,11 @@ AWS-название — legacy, должно быть deprecated.
 
 | Ветка | Решение | Причина |
 |-------|---------|---------|
-| #4 `update-architecture-documentation-components` | **ОТБРОСИТЬ** | Косметика, полностью перезаписана #5 |
-| #9 `create-diagram-catalog-documentation` | **ОТБРОСИТЬ** | Дубль #6 с менее полезным форматом (DC-001, без src/-путей) |
-| #10 `update-diagrams-with-new-evaluation-criteria` | **ОТБРОСИТЬ** | Конкурент #8 с завышенными баллами (7×10.0) |
-| #11 `create-and-update-architecture-diagrams-documentation` | **ОТБРОСИТЬ** | Супер-ветка, но каждая из её частей лучше представлена в специализированных ветках |
+| #4 `update-architecture-documentation-components` | **CLOSE** | Косметика, полностью перезаписана #5 |
+| #6 `update-diagram-catalog-for-500-candidates` | **PARTIAL** | Каталог уступает #12, но src/-ссылки полезны как дополнение |
+| #9 `create-diagram-catalog-documentation` | **CLOSE** | Дубль каталога с менее полезным форматом (DC-001, без src/-путей) |
+| #10 `update-diagrams-with-new-evaluation-criteria` | **CLOSE** | Конкурент #8 с завышенными баллами (7×10.0) |
+| #11 `create-and-update-architecture-diagrams-documentation` | **CLOSE** | Супер-ветка, но каждая из её частей лучше представлена в специализированных ветках |
 
 ---
 
@@ -221,12 +245,13 @@ AWS-название — legacy, должно быть deprecated.
 | #5 establish-diagram-structure | **MERGE** (целиком) | 1.1 |
 | #7 rename-deployment | **MERGE** (с адаптацией путей) | 1.2 |
 | #8 evaluate-and-rank | **CHERRY-PICK** (top-50 обновление) | 2.1 |
-| #6 update-catalog-500 | **CHERRY-PICK** (новый файл) | 2.2 |
+| **#12 document-bioetl-architecture** | **MERGE** (каталог 500 диаграмм) | **2.2** |
+| #6 update-catalog-500 | **PARTIAL PICK** (src/-ссылки → дополнить #12) | 2.2+ |
 | #3 update-diagram-overview | **PARTIAL PICK** (только скрипт валидации) | 2.3 |
 | #1 update-python-script-instructions | **PARTIAL PICK** (CLI-флаги для render_diagrams.sh) | 3.1 |
 | #2 update-render_diagrams.sh | **PARTIAL PICK** (.mmd совместимость) | 3.1 |
 | #4 update-architecture-documentation | **CLOSE** (поглощена #5) | — |
-| #9 create-diagram-catalog-doc | **CLOSE** (дубль #6) | — |
+| #9 create-diagram-catalog-doc | **CLOSE** (дубль, уступает #12) | — |
 | #10 update-eval-criteria | **CLOSE** (конкурент #8, проигрывает) | — |
 | #11 create-and-update-arch-diagrams | **CLOSE** (разобрана на части) | — |
 
@@ -248,8 +273,9 @@ AWS-название — legacy, должно быть deprecated.
 ### При cherry-pick #8 (после #5):
 - `top-50-diagrams.md`: применить новую методологию поверх форматирования #5
 
-### При cherry-pick #6:
-- Конфликтов нет — чистое добавление нового файла
+### При merge #12:
+- Конфликтов нет — добавляет новый файл `500-diagram-proposals.md`
+- POST-MERGE: обогатить сущности ссылками на `src/bioetl/` из #6
 
 ---
 
@@ -259,5 +285,7 @@ AWS-название — legacy, должно быть deprecated.
 |------|-------------|-----------|
 | Битые ссылки после переноса в mermaid/ | Высокая | #5 обновляет 11 docs, но проверить grep-ом |
 | Расхождение top-50 оценок с каталогом-500 | Средняя | Провести cross-check ID |
+| Два файла-каталога (500-diagram-proposals.md + diagram-catalog-500.md) | Низкая | Принять только #12; src/-ссылки из #6 перенести в #12 |
+| TOP-25 в #12 vs top-50-diagrams.md (#8) — дублирование приоритетов | Средняя | Чётко разграничить: top-50 = рейтинг существующих, catalog = roadmap новых |
 | render_diagrams.sh не работает с новыми путями | Средняя | Тестировать на реальных .mermaid файлах |
 | Потеря полезного контента из #5 (удалённые секции) | Низкая | Секции Options 1-4 и Style — устаревшие инструкции |
