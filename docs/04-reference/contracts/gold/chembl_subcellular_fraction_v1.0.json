@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$version": "1.0.0",
+  "title": "ChEMBL Subcellular Fraction Gold Contract",
+  "description": "Gold layer data contract for ChEMBL Subcellular Fraction Gold Contract. Auto-generated from Pandera schema ChEMBLSubcellularFractionGoldSchema.",
+  "type": "object",
+  "properties": {
+    "entity_id": {
+      "type": "string"
+    },
+    "content_hash": {
+      "type": "string"
+    },
+    "subcellular_fraction": {
+      "type": "string"
+    },
+    "assay_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "example_assay_chembl_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_run_id": {
+      "type": "string"
+    },
+    "_run_type": {
+      "type": "string"
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_ingestion_ts": {
+      "type": "string"
+    },
+    "_index": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "_index",
+    "_ingestion_ts",
+    "_run_id",
+    "_run_type",
+    "content_hash",
+    "entity_id",
+    "subcellular_fraction"
+  ]
+}

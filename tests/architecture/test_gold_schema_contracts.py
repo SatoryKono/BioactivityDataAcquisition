@@ -30,6 +30,8 @@ REQUIRED_SCHEMAS = (
     "chembl_protein_class_v1.0.json",
     "chembl_target_v1.0.json",
     "chembl_target_component_v1.0.json",
+    "chembl_tissue_v1.0.json",
+    "chembl_subcellular_fraction_v1.0.json",
     "crossref_publication_v1.0.json",
     "openalex_publication_v1.0.json",
     "pubchem_compound_v1.0.json",
@@ -181,6 +183,26 @@ class TestGoldSchemaContracts:
             f"{schema_name} missing lineage fields:\n"
             + "\n".join(f"  - {f}" for f in sorted(missing_lineage))
             + "\n\nLineage fields are required per RULES.md §2.4."
+        )
+
+    def test_contract_count_matches_gold_schema_exports(
+        self, schema_files: dict[str, Path]
+    ) -> None:
+        """Number of contracts must match number of exported Gold schema classes."""
+        from bioetl.domain.contracts import gold as gold_contracts
+
+        exported_schema_count = sum(
+            1
+            for export_name in gold_contracts.__all__
+            if export_name.endswith("GoldSchema")
+        )
+
+        assert len(schema_files) == exported_schema_count, (
+            "Gold contract completeness mismatch: "
+            f"found {len(schema_files)} JSON contracts in {CONTRACTS_DIR}, "
+            "but "
+            f"{exported_schema_count} schema classes are exported by "
+            "bioetl.domain.contracts.gold.__init__.py."
         )
 
     def test_no_extra_schemas_without_version(
