@@ -107,7 +107,9 @@
       "Bash(git -C \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" mv:*)",
       "Bash(git check-ignore:*)",
       "Bash(git checkout:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(command -v:*)",
+      "Bash(uv:*)"
     ]
   },
   "enabledPlugins": {
