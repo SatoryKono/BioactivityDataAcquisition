@@ -21,6 +21,7 @@ Gold-слой должен гарантировать качество данн�
 @dataclass(frozen=True)
 class PipelineConfig:
     """Конфигурация пайплайна."""
+
     name: str
     provider: str
     entity: str
@@ -30,11 +31,11 @@ class PipelineConfig:
 
 **Правила валидации:**
 
-| Условие | `strict_gold_validation=True` | `strict_gold_validation=False` |
-|---------|-------------------------------|--------------------------------|
-| `gold_schema=None` | `SchemaValidationError` (FAIL) | Warning в лог |
-| Несоответствие типов | `SchemaValidationError` (FAIL) | Warning + пропуск записи |
-| Отсутствующие поля | `SchemaValidationError` (FAIL) | Warning + `None` значение |
+| Условие              | `strict_gold_validation=True`  | `strict_gold_validation=False` |
+| -------------------- | ------------------------------ | ------------------------------ |
+| `gold_schema=None`   | `SchemaValidationError` (FAIL) | Warning в лог                  |
+| Несоответствие типов | `SchemaValidationError` (FAIL) | Warning + пропуск записи       |
+| Отсутствующие поля   | `SchemaValidationError` (FAIL) | Warning + `None` значение      |
 
 ### 2. Иерархия валидации
 
@@ -91,17 +92,17 @@ class BasePipeline:
 Feature flag `strict_gold_validation` позволяет:
 
 1. **Постепенную миграцию**: Существующие пайплайны продолжают работать
-2. **Явный opt-in**: Новые пайплайны включают строгую валидацию
-3. **Тестирование**: Можно включить в staging до production
+1. **Явный opt-in**: Новые пайплайны включают строгую валидацию
+1. **Тестирование**: Можно включить в staging до production
 
 **План миграции:**
 
-| Фаза | Действие | Срок |
-|------|----------|------|
-| 1 | Добавить `strict_gold_validation` flag | Сейчас |
-| 2 | Определить Gold-схемы для всех пайплайнов | - |
-| 3 | Включить `strict_gold_validation=True` поэтапно | - |
-| 4 | Сделать `strict_gold_validation=True` по умолчанию | - |
+| Фаза | Действие                                           | Срок   |
+| ---- | -------------------------------------------------- | ------ |
+| 1    | Добавить `strict_gold_validation` flag             | Сейчас |
+| 2    | Определить Gold-схемы для всех пайплайнов          | -      |
+| 3    | Включить `strict_gold_validation=True` поэтапно    | -      |
+| 4    | Сделать `strict_gold_validation=True` по умолчанию | -      |
 
 ### 5. Конфигурация пайплайна
 
@@ -154,11 +155,22 @@ class SchemaValidationError(BioETLError):
         self.field = field
 ```
 
+### 7. Политика типов JSON-полей (дополнение)
+
+С 2026-02-17 strict validation в Gold синхронизирована с единой политикой типизации JSON-like полей:
+
+- **Канонический стандарт**: JSON-like поля в Silver и Gold представлены как canonical JSON string.
+- **Нормативный источник**: [ADR-035](ADR-035-json-field-typing-policy.md).
+- **Ограничение для strict mode**: при `strict_gold_validation=True` поля, определенные как JSON-like, валидируются как `Series[str]` (не `Series[object]`).
+
+Это устраняет классы ошибок, где Silver передает `pa.list_(...)`, а Gold ожидает `Series[str]` (или наоборот), и делает контракты межслойной валидации детерминированными.
+
 ## Justification
 
 ### 1. Гарантия качества данных
 
 Gold-слой потребляется downstream системами:
+
 - ML pipelines
 - Reporting dashboards
 - API endpoints
@@ -168,6 +180,7 @@ Gold-слой потребляется downstream системами:
 ### 2. Раннее обнаружение проблем
 
 Валидация на этапе трансформации:
+
 - Быстрый feedback loop
 - Проблемы обнаруживаются до записи в хранилище
 - Меньше затрат на исправление
@@ -175,6 +188,7 @@ Gold-слой потребляется downstream системами:
 ### 3. Документирование контракта
 
 Gold-схема служит документацией:
+
 - Явный контракт с consumers
 - Версионирование схемы возможно
 - Self-documenting pipeline configuration
@@ -182,6 +196,7 @@ Gold-схема служит документацией:
 ### 4. Feature Flag минимизирует риск
 
 Постепенное включение:
+
 - Нет breaking changes для существующих пайплайнов
 - Можно откатить на уровне конфигурации
 - Не требует code changes для rollback
@@ -210,6 +225,7 @@ src/bioetl/
 # infrastructure/validation/gold_validator.py
 import pandera as pa
 
+
 class GoldValidator:
     """Валидатор Gold-схем на основе Pandera."""
 
@@ -229,6 +245,7 @@ class GoldValidator:
 
 ```python
 # tests/unit/application/test_gold_validation.py
+
 
 def test_strict_validation_fails_without_schema():
     """strict_gold_validation=True без схемы должен падать."""
@@ -270,6 +287,7 @@ def test_non_strict_validation_warns_without_schema(caplog):
 ### 1. Всегда требовать Gold-схему
 
 Отклонено потому что:
+
 - Breaking change для всех существующих пайплайнов
 - Требует одновременного обновления всех конфигов
 - Высокий риск при деплое
@@ -277,6 +295,7 @@ def test_non_strict_validation_warns_without_schema(caplog):
 ### 2. Валидация только в production
 
 Отклонено потому что:
+
 - Проблемы обнаруживаются слишком поздно
 - Dev/prod parity нарушается
 - Сложнее отлаживать
@@ -284,6 +303,7 @@ def test_non_strict_validation_warns_without_schema(caplog):
 ### 3. Schema inference вместо явной схемы
 
 Отклонено потому что:
+
 - Не гарантирует стабильность
 - Schema drift остаётся незамеченным
 - Нет документации контракта
@@ -291,6 +311,7 @@ def test_non_strict_validation_warns_without_schema(caplog):
 ### 4. Валидация на уровне Delta Lake
 
 Отклонено потому что:
+
 - Delta Lake schema enforcement недостаточно гибкий
 - Нет semantic validation (ranges, patterns)
 - Ошибки обнаруживаются на этапе записи, не трансформации
@@ -315,15 +336,16 @@ def test_non_strict_validation_warns_without_schema(caplog):
 
 Все основные механизмы реализованы:
 
-| Компонент | Статус | Расположение |
-|-----------|--------|--------------|
-| `strict_gold_validation` флаг | ✅ Реализован | `domain/config.py:259` |
-| `GoldValidatorPort` протокол | ✅ Реализован | `domain/ports/validation.py:41-61` |
-| `PanderaGoldValidator` | ✅ Реализован | `infrastructure/validation/pandera_validator.py:97-210` |
-| `GoldWriter._validate_schema_strict()` | ✅ Реализован | `infrastructure/storage/gold_writer.py:226-232` |
-| `NoOpGoldValidator` | ✅ Реализован | `infrastructure/validation/pandera_validator.py:213-230` |
+| Компонент                              | Статус        | Расположение                                             |
+| -------------------------------------- | ------------- | -------------------------------------------------------- |
+| `strict_gold_validation` флаг          | ✅ Реализован | `domain/config.py:259`                                   |
+| `GoldValidatorPort` протокол           | ✅ Реализован | `domain/ports/validation.py:41-61`                       |
+| `PanderaGoldValidator`                 | ✅ Реализован | `infrastructure/validation/pandera_validator.py:97-210`  |
+| `GoldWriter._validate_schema_strict()` | ✅ Реализован | `infrastructure/storage/gold_writer.py:226-232`          |
+| `NoOpGoldValidator`                    | ✅ Реализован | `infrastructure/validation/pandera_validator.py:213-230` |
 
 **Отличия от первоначального предложения:**
+
 - Вместо `SchemaValidationError` используется `ValidationResult` с errors — более гибкий подход
 - Валидация интегрирована в `GoldWriter` через `_validate_schema_strict()` проверку
 - Feature flag находится в `RuntimeConfig` вместо `PipelineConfig` — централизованное управление
