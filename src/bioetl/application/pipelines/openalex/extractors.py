@@ -48,7 +48,7 @@ def _extract_id_from_url(url: str | None) -> str | None:
     return url.rstrip("/").split("/")[-1] if "/" in url else url
 
 
-def _get_nested_display_name(obj: Any) -> str | None:
+def _get_nested_display_name(obj: Any) -> str | None:  # Any: OpenAlex API returns u...
     """Get display_name from nested dict (helper function).
 
     Args:

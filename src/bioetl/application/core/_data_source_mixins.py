@@ -14,7 +14,7 @@ class _SourceMetadataDelegationMixin:
 
     def get_source_metadata(
         self: _HasWrappedDataSource, api_version: str | None = None
-    ) -> Any:
+    ) -> Any:  # Any: SourceMetadata type varies per adapter implementation
         """Delegate get_source_metadata to wrapped data source if supported."""
         get_metadata = getattr(self._data_source, "get_source_metadata", None)
         if get_metadata is not None and callable(get_metadata):

@@ -205,8 +205,8 @@ class PipelineFactoryConfig(NamedTuple):
     provider: str
     transformer_class: type[BaseTransformer]
     silver_schema: pa.Schema | None
-    gold_schema: Any  # Pandera schema class
-    pandera_silver_schema: Any = None  # Pandera DataFrameModel class
+    gold_schema: Any  # Any: Pandera DataFrameModel (no common base type)
+    pandera_silver_schema: Any = None  # Any: Pandera DataFrameModel...
     data_source_provider: str | None = None
 
 

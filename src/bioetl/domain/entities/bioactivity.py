@@ -12,7 +12,7 @@ from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID, RunType
 
 
-def _safe_int(val: Any) -> int | None:
+def _safe_int(val: Any) -> int | None:  # Any: raw API value (str | int | None)
     """Convert value to int, returning None if conversion fails."""
     if val is None:
         return None
@@ -22,7 +22,7 @@ def _safe_int(val: Any) -> int | None:
         return None
 
 
-def _safe_float(val: Any) -> float | None:
+def _safe_float(val: Any) -> float | None:  # Any: raw API value (str | float | None)
     """Convert value to float, returning None if conversion fails."""
     if val is None:
         return None
@@ -32,11 +32,12 @@ def _safe_float(val: Any) -> float | None:
         return None
 
 
-def _safe_str(val: Any) -> str | None:
+def _safe_str(val: Any) -> str | None:  # Any: raw API value (str | int | None)
     """Convert value to str, returning None if val is None."""
     return None if val is None else str(val)
 
 
+# Any: heterogeneous JSON fie...
 def _require_field(raw_data: dict[str, Any], field: str) -> Any:
     """Extract required field, raise ValueError if missing."""
     value = raw_data.get(field)
@@ -45,7 +46,7 @@ def _require_field(raw_data: dict[str, Any], field: str) -> Any:
     return value
 
 
-def _safe_json(val: Any) -> str | None:
+def _safe_json(val: Any) -> str | None:  # Any: raw API value (list | dict | None)
     """Convert to JSON string if not None/empty."""
     from bioetl.domain.serialization import serialize_to_json
 
@@ -196,7 +197,7 @@ class Bioactivity(BaseEntity):
     def from_raw(
         cls,
         *,
-        raw_data: dict[str, Any],
+        raw_data: dict[str, Any],  # Any: heterogeneous API JSON values
         run_id: RunID | UUID,
         run_type: RunType = RunType.INCREMENTAL,
         ingestion_ts: datetime,

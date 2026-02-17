@@ -60,7 +60,7 @@ COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
 FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
 
 
-def _to_id_str(val: Any) -> str:
+def _to_id_str(val: Any) -> str:  # Any: accepts int, float, st...
     """Convert value to ID string, handling float-to-int conversion.
 
     External APIs (like ChEMBL) often expect integer IDs and return 400

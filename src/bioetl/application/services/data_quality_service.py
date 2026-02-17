@@ -237,6 +237,7 @@ class DataQualityService:
                 has_critical = True
         return has_critical
 
+    # Any: DQMonitorPort returns ...
     def _process_single_anomaly(self, anomaly: Any) -> None:
         """Log and track a single anomaly.
 

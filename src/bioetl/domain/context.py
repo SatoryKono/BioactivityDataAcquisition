@@ -305,6 +305,7 @@ class PipelineContext:
             started_at=started_at or datetime.now(UTC),
         )
 
+    # Any: arbitrary structured l...
     def bind_logger(self, **kwargs: Any) -> PipelineContext:
         """Bind additional context to the logger.
 

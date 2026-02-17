@@ -28,7 +28,7 @@ from .types import ContentHash, DriftLevel, EntityID
 
 
 @singledispatch
-def _normalize_value(value: Any) -> Any:
+def _normalize_value(value: Any) -> Any:  # Any: record field type varies
     """Normalize a single value using singledispatch."""
     return value
 
@@ -60,13 +60,13 @@ def _normalize_str(value: str) -> str:
 
 
 @_normalize_value.register(dict)
-def _normalize_dict(value: dict[str, Any]) -> dict[str, Any]:
+def _normalize_dict(value: dict[str, Any]) -> dict[str, Any]:  # Any: record vals vary
     """Normalize dict by recursively normalizing values."""
     return {k: _normalize_value(v) for k, v in value.items()}
 
 
 @_normalize_value.register(list)
-def _normalize_list(value: list[Any]) -> list[Any]:
+def _normalize_list(value: list[Any]) -> list[Any]:  # Any: heterogeneous record values
     """Normalize list by recursively normalizing elements."""
     return [_normalize_value(v) for v in value]
 
@@ -82,6 +82,7 @@ _NORMALIZE_DISPATCH = (
 )
 
 
+# Any: record field type varies
 def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
     """Check if field should be included in hash calculation."""
     if key in META_FIELDS:
@@ -90,8 +91,9 @@ def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
 
 
 def normalize_for_hash(
-    record: dict[str, Any], exclude_none: bool = False
-) -> dict[str, Any]:
+    record: dict[str, Any],
+    exclude_none: bool = False,  # Any: record vals vary
+) -> dict[str, Any]:  # Any: heterogeneous record values
     """Normalize record before hashing to ensure consistency."""
     return {
         key: _normalize_value(value)
@@ -100,7 +102,7 @@ def normalize_for_hash(
     }
 
 
-def canonical_json_dumps(obj: dict[str, Any]) -> str:
+def canonical_json_dumps(obj: dict[str, Any]) -> str:  # Any: JSON-serializable value
     """Convert object to canonical JSON representation.
 
     Delegates to domain.serialization.serialize_to_json_canonical()
@@ -110,7 +112,10 @@ def canonical_json_dumps(obj: dict[str, Any]) -> str:
 
 
 def generate_content_hash(
-    record: dict[str, Any], provider: str, exclude_none: bool = False
+    # Any: record vals vary
+    record: dict[str, Any],
+    provider: str,
+    exclude_none: bool = False,
 ) -> ContentHash:
     """Generate SHA256 content hash for record versioning."""
     normalized = normalize_for_hash(record, exclude_none=exclude_none)
@@ -121,7 +126,7 @@ def generate_content_hash(
 
 
 def generate_entity_id(
-    record: dict[str, Any],
+    record: dict[str, Any],  # Any: heterogeneous record values
     provider: str,
     id_field: str | None = None,
 ) -> EntityID:
@@ -142,7 +147,7 @@ def detect_schema_drift(
     old_schema: set[str],
     new_schema: set[str],
     required_fields: set[str] | None = None,
-) -> tuple[DriftLevel, dict[str, Any]]:
+) -> tuple[DriftLevel, dict[str, Any]]:  # Any: JSON-serializable value
     """Detect schema drift between two schemas."""
     added = sorted(new_schema - old_schema)
     removed = sorted(old_schema - new_schema)
@@ -197,6 +202,7 @@ def detect_hash_collision(
     return existing_source_id is not None and source_record_id != existing_source_id
 
 
+# Any: record field type varies
 def safe_float(value: Any, default: float | None = None) -> float | None:
     """Safely convert value to float.
 
@@ -215,6 +221,7 @@ def safe_float(value: Any, default: float | None = None) -> float | None:
         return default
 
 
+# Any: record field type varies
 def safe_int(value: Any, default: int | None = None) -> int | None:
     """Safely convert value to int.
 
@@ -233,6 +240,7 @@ def safe_int(value: Any, default: int | None = None) -> int | None:
         return default
 
 
+# Any: record field type varies
 def safe_str(value: Any, default: str | None = None) -> str | None:
     """Safely convert value to string.
 

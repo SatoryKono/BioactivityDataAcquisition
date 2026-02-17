@@ -36,7 +36,7 @@ class PipelineFactoryPort(Protocol):
 
     pipeline_name: str
     silver_schema: pa.Schema | None
-    pandera_silver_schema: Any
+    pandera_silver_schema: Any  # Any: Pandera DataFrameModel (no common base type)
 
     def create_with_services(
         self,
@@ -77,10 +77,10 @@ class PipelineDefinition(NamedTuple):
     silver_schema: pa.Schema | None
     """PyArrow schema for Silver layer validation."""
 
-    gold_schema: Any
+    gold_schema: Any  # Any: Pandera DataFrameModel (no common base type)
     """Pandera schema for Gold layer validation (required)."""
 
-    pandera_silver_schema: Any = None
+    pandera_silver_schema: Any = None  # Any: Pandera DataFrameModel...
     """Pandera DataFrameModel class for Silver layer validation."""
 
 

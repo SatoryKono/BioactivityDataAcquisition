@@ -303,6 +303,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         return OpenAlexPublicationEntity
 
     @staticmethod
+    # Any: accepts any dataclass ...
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord.
 
