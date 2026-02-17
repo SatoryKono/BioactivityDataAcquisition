@@ -1,3 +1,8 @@
+%% Title: Pipeline Lifecycle State Machine
+%% Covers: RULES.md §3 (Pipeline Execution), §3.5 (Graceful Shutdown)
+%% Updated: 2026-02-17
+%% Components: PipelineRun, PipelineRunner, PipelineState enum
+
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 stateDiagram-v2
     [*] --> INIT: CLI invokes pipeline
