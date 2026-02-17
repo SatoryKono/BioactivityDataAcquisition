@@ -123,6 +123,20 @@ class DataNormalizationPort(Protocol):
         """
         ...
 
+    def normalize_author_keys(
+        self,
+        authors: list[str] | list[dict[str, Any]] | str | None,
+    ) -> str | None:
+        """Normalize author names to short ``Surname_F`` keys.
+
+        Args:
+            authors: Author data in any supported format.
+
+        Returns:
+            Pipe-delimited string of short keys or None if empty.
+        """
+        ...
+
     def normalize_author_list(
         self,
         authors: list[str] | list[dict[str, Any]] | str | None,
@@ -136,16 +150,6 @@ class DataNormalizationPort(Protocol):
         - None
 
         Returns JSON string of normalized author names or None if empty.
-        """
-        ...
-
-    def normalize_author_keys(
-        self,
-        authors: list[str] | list[dict[str, Any]] | str | None,
-    ) -> str | None:
-        """Normalize author names to short ``Surname_F`` keys.
-
-        Returns pipe-delimited string of short keys or None if empty.
         """
         ...
 
