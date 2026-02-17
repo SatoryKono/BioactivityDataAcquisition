@@ -433,83 +433,63 @@ def load_source_config(provider: str) -> SourceYamlConfig:
     return config
 
 
-def _load_filter_config(
-    config_path: Path, filter_config_file: str
-) -> dict[str, Any] | None:
-    """Load filter configuration from filter_config_file.
-
-    Args:
-        config_path: Path to the pipeline config file (for relative resolution).
-        filter_config_file: Relative path to filter config file.
-
-    Returns:
-        Loaded filter config dict or None if file doesn't exist.
-    """
-    filter_path = config_path.parent / filter_config_file
-    if not filter_path.exists():
-        return None
-
-    with open(filter_path, encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+_FILTER_SECTIONS: tuple[str, ...] = (
+    "input_filter",
+    "silver_filters",
+    "gold_filters",
+    "extraction_params",
+)
 
 
-def _merge_filter_config(
+def _apply_hierarchical_filter_config(
     config: dict[str, Any],
-    filter_config: dict[str, Any],
-    explicit_entity_config: dict[str, Any],
+    entity_config: dict[str, Any],
 ) -> None:
-    """Merge filter config (input_filter, gold_filters, extraction_params) into pipeline config.
+    """Apply filter config from the hierarchical filter system (ADR-028).
 
-    Merge priority (highest to lowest):
-    1. Explicit entity config (from pipeline YAML file)
-    2. Filter config (from filter entity file)
-    3. Base defaults (from _base.yaml)
+    Uses FilterConfigLoader to merge the full 4-level hierarchy:
+    1. _defaults.yaml — global defaults
+    2. providers/{provider}.yaml — provider-specific
+    3. entities/{provider}/{entity}.yaml — entity-specific
+    4. Inline overrides from pipeline config — highest priority
 
-    This allows minimal pipeline configs that inherit from filter configs
-    while still allowing explicit overrides when needed.
+    Replaces the legacy _load_filter_config + _merge_filter_config functions
+    that only loaded the entity file without the full hierarchy.
 
     Args:
-        config: Pipeline config dict (modified in place). Contains merged
-            defaults + entity config.
-        filter_config: Filter config dict from filter entity file.
-        explicit_entity_config: Original entity config dict (before merging
-            with defaults). Used to determine what was explicitly set.
+        config: Pipeline config dict (modified in place).
+        entity_config: Original entity config dict (before base merge).
+            Used to extract inline filter overrides.
     """
-    # Merge input_filter
-    if "input_filter" in filter_config:
-        # Start with filter config as base
-        merged_input_filter = filter_config["input_filter"].copy()
+    from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 
-        # Only override with explicit pipeline values (not defaults from _base.yaml)
-        if "input_filter" in explicit_entity_config:
-            merged_input_filter = _deep_merge(
-                merged_input_filter, explicit_entity_config["input_filter"]
-            )
+    provider = config.get("provider", "")
+    entity_type = config.get("entity_type", "")
 
-        config["input_filter"] = merged_input_filter
+    if not provider or not entity_type:
+        return
 
-    # Merge gold_filters
-    if "gold_filters" in filter_config:
-        # Start with filter config as base
-        merged_gold_filters = filter_config["gold_filters"].copy()
+    # Collect inline filter overrides from pipeline YAML
+    inline_overrides: dict[str, Any] = {}
+    for section in _FILTER_SECTIONS:
+        if section in entity_config:
+            inline_overrides[section] = entity_config[section]
 
-        # Only override with explicit pipeline values (not defaults from _base.yaml)
-        if "gold_filters" in explicit_entity_config:
-            merged_gold_filters = _deep_merge(
-                merged_gold_filters, explicit_entity_config["gold_filters"]
-            )
+    # Also handle filter_rules key (ADR-028 inline override field)
+    filter_rules = entity_config.get("filter_rules")
+    if isinstance(filter_rules, dict):
+        inline_overrides = _deep_merge(inline_overrides, filter_rules)
 
-        config["gold_filters"] = merged_gold_filters
+    # Use FilterConfigLoader for hierarchical merge
+    loader = FilterConfigLoader(Path("configs"))
+    merged_filters = loader.load_as_dict(
+        provider, entity_type, inline_overrides or None
+    )
 
-    # Merge extraction_params (ADR-028 §3)
-    if "extraction_params" in filter_config:
-        merged_extraction_params = dict(filter_config["extraction_params"])
-
-        # Pipeline-level overrides take precedence
-        if "extraction_params" in explicit_entity_config:
-            merged_extraction_params.update(explicit_entity_config["extraction_params"])
-
-        config["extraction_params"] = merged_extraction_params
+    # Apply merged filter sections to pipeline config
+    for section in _FILTER_SECTIONS:
+        if section in merged_filters:
+            config[section] = merged_filters[section]
 
 
 def _load_column_groups_section(
@@ -561,7 +541,7 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     1. Load base config from _base.yaml
     2. Merge with entity-specific config
     3. Apply convention-based defaults (auto-compute paths/references)
-    4. Load and merge filter config from filter_config_file
+    4. Apply hierarchical filter config (ADR-028: defaults → provider → entity → inline)
     5. Load source config from source_file
 
     Convention-based defaults auto-compute:
@@ -569,10 +549,11 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     - Sink paths (bronze/silver/gold paths)
     - Primary key propagation to sink.silver.primary_key and sort_by
 
-    Filter config merging:
-    - input_filter and gold_filters from filter_config_file are merged
-    - Pipeline inline config acts as overrides on top of filter config
-    - This allows minimal pipeline configs with full filter inheritance
+    Filter config merging (ADR-028):
+    - Full 4-level hierarchy via FilterConfigLoader
+    - Merge order: _defaults.yaml → providers/{provider}.yaml →
+      entities/{provider}/{entity}.yaml → inline pipeline overrides
+    - Pipeline inline config acts as highest-priority overrides
 
     Args:
         pipeline_name: Pipeline name (e.g., "chembl_activity").
@@ -600,11 +581,8 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     config = _deep_merge(defaults, entity_config)
     config = _apply_convention_defaults(config)
 
-    # Load and merge filter config from filter_config_file
-    if filter_config_file := config.get("filter_config_file"):
-        filter_config = _load_filter_config(config_path, filter_config_file)
-        if filter_config:
-            _merge_filter_config(config, filter_config, entity_config)
+    # Apply hierarchical filter config (ADR-028)
+    _apply_hierarchical_filter_config(config, entity_config)
 
     _load_column_groups_section(config, entity_config, config_path)
     _load_source_section(config, config_path)
