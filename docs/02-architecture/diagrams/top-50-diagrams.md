@@ -1,119 +1,78 @@
-# TOP-50 Архитектурных Диаграмм BioETL
+# TOP-50 архитектурных диаграмм BioETL (прозрачная приоритизация)
 
-*Версия: 1.0 | Дата: 2026-01-20*
+*Версия: 2.0 | Дата: 2026-02-17*
 
-Таблица 50 наиболее важных диаграмм для понимания архитектуры, логики и кодовой базы проекта BioETL, отсортированных по приоритету.
+Документ фиксирует прозрачную формулу приоритизации и явные оценки по каждому критерию для 50 первоочередных диаграмм.
 
-**Методология приоритизации:**
-- **Arch** (1-10): Архитектурная важность
-- **Doc** (1-10): Документационная ценность
-- **Freq** (1-10): Частота использования
-- **Complex** (1-10): Сложность без диаграммы
-- **Coverage** (1-10): Охват кодовой базы
-- **Приоритет** = (Arch × 2 + Doc × 1.5 + Freq × 1.5 + Complex × 2 + Coverage × 1) / 8
+## Формула приоритета
 
----
+- Шкала всех критериев: **1..10** (10 = максимум ценности).
+- Критерии:
+  - `Arch` — архитектурная критичность (вес `2.0`)
+  - `Doc` — документационная ценность (вес `1.5`)
+  - `Freq` — частота использования в обсуждениях/ревью (вес `1.5`)
+  - `Complex` — сложность понимания без схемы (вес `2.0`)
+  - `Coverage` — охват подсистем/кода (вес `1.0`)
+- **PriorityScore** = `(2*Arch + 1.5*Doc + 1.5*Freq + 2*Complex + 1*Coverage) / 8`
+- Сортировка: по `PriorityScore` по убыванию, затем по `Arch`, затем по `Freq`.
 
-## TOP-50 Диаграммы
+## TOP-50 с явными оценками
 
-| # | Название | Тип | Приоритет | Обоснование | Классы/Компоненты |
-|---|----------|-----|-----------|-------------|-------------------|
-| **1** | **Five Layer Architecture** | Component | **9.69** | Фундаментальная диаграмма для понимания всей архитектуры. Критична для новых разработчиков. Показывает разделение на Domain, Application, Composition, Infrastructure, Interfaces слои. | `domain/*`, `application/*`, `composition/*`, `infrastructure/*`, `interfaces/*` |
-| **2** | **Complete Pipeline Flow** | Flowchart | **9.56** | End-to-end поток данных от API до Gold layer. Самая частая ссылка при обсуждении pipeline. Показывает полный цикл обработки. | `PipelineRunner`, `BatchExecutor`, `RecordProcessor`, `BatchTransformer`, `BatchWriter`, `BronzeWriter`, `SilverWriter`, `GoldWriter` |
-| **3** | **Hexagonal Architecture Overview** | C4 Context | **9.50** | Ports & Adapters — ключевой паттерн проекта. Критично для понимания принципов DI и слоёв. | 24 Ports (все Protocol интерфейсы), Infrastructure Adapters |
-| **4** | **Layer Dependency Matrix** | Matrix | **9.44** | Матрица импортов — enforcement правило. Предотвращает архитектурные нарушения. Часто проверяется при code review. | Все слои проекта, `tests/architecture/test_layer_contracts.py` |
-| **5** | **Medallion Architecture Overview** | Flowchart | **9.38** | Bronze → Silver → Gold — core концепция хранения данных. Критично для понимания data pipeline. | `BronzeWriter`, `SilverWriter`, `GoldWriter`, `MedallionLifecycleService`, `MedallionPolicy` |
-| **6** | **Domain Model Overview** | Class | **9.31** | Полная доменная модель: entities, value objects, aggregates. Показывает business logic структуру. | `PipelineRun`, `Batch`, `QuarantineEntry`, `Activity`, `DQMetrics`, `RunContext`, все entities |
-| **7** | **Ports Architecture** | Interface | **9.25** | 24 порта — контракты между слоями. Критично для понимания DI и тестирования. | `StoragePort`, `DataSourcePort`, `LockPort`, `CheckpointPort`, `QuarantinePort`, `TracingPort`, `MetricsPort`, `LoggerPort` и др. (всего 24) |
-| **8** | **Batch Processing Flow** | Activity | **9.19** | Полный цикл обработки батча — core процесс pipeline. Сложный процесс с множеством шагов. | `Batch`, `RecordProcessor`, `BatchTransformer`, `BatchWriter`, `BatchMetricsRecorder`, `QuarantineManager` |
-| **9** | **DDD Aggregates** | Class | **9.13** | PipelineRun, Batch, QuarantineEntry — bounded contexts с инвариантами. Критично для понимания domain logic. | `PipelineRun` (574 LOC), `Batch` (536 LOC), `QuarantineEntry` (517 LOC), `StageResult`, `BatchRecord` |
-| **10** | **Pipeline Core Components** | Component | **9.06** | PipelineRunner, BatchExecutor, RecordProcessor — сердце application layer. Самые частые изменения. | `PipelineRunner` (189 LOC), `BatchExecutor` (786 LOC), `RecordProcessor` (222 LOC), `RunnerServices` |
-| **11** | **Composition Root** | Component | **9.00** | bootstrap_pipeline() — единственное место сборки DI. Критично для понимания wiring. | `bootstrap_pipeline()`, `bootstrap_observability()`, `bootstrap_storage()`, `bootstrap_checkpoint()`, `bootstrap_quarantine()` |
-| **12** | **Error Classification** | Flowchart | **8.94** | Critical/Recoverable/DQ — основа error handling стратегии. Сложная логика с множеством условий. | `BioETLError`, `CriticalError`, `RecoverableError`, `DataQualityError`, `ErrorService`, `ErrorClassifier` |
-| **13** | **Storage Architecture** | Component | **8.88** | Bronze/Silver/Gold writers — core infrastructure. Сложная Delta Lake интеграция. | `BronzeWriter` (814 LOC), `SilverWriter` (1154 LOC), `GoldWriter` (953 LOC), `BaseDeltaWriter`, `RetentionManager` |
-| **14** | **HTTP Infrastructure** | Component | **8.81** | UnifiedHTTPClient — унифицированная HTTP инфраструктура для всех провайдеров. | `UnifiedHTTPClient`, `RateLimiter`, `CircuitBreaker`, `HealthMonitor`, `Pagination`, `BaseHttpAdapter` |
-| **15** | **Circuit Breaker States** | State | **8.75** | Closed → Open → Half-Open — fault tolerance паттерн. Критично для resilience. | `CircuitBreaker`, `CircuitBreakerPort`, state transitions |
-| **16** | **PipelineRun Aggregate** | Class | **8.69** | Самый сложный aggregate с event sourcing. 574 LOC, множество state transitions. | `PipelineRun` (574 LOC), `StageResult`, `PipelineState` enum, domain events |
-| **17** | **Retry Mechanism** | Activity | **8.63** | Exponential backoff — критичная resilience логика. Сложный алгоритм с jitter. | Retry logic в `UnifiedHTTPClient`, backoff calculation, jitter addition |
-| **18** | **DQ Check Flow** | Sequence | **8.56** | Complete DQ process — критично для data quality. Сложный multi-stage процесс. | `DQMonitorPort`, `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort`, `DQReportService`, `PostrunService` |
-| **19** | **BaseTransformer Template Method** | Activity | **8.50** | Template Method pattern — base для всех transformers. Критично для понимания extension points. | `BaseTransformer` (821 LOC), hook methods: `transform_entity()`, `validate_input()`, `validate_output()` |
-| **20** | **Factory Pattern Usage** | Class | **8.44** | 8 фабрик — object creation strategy. Сложная система зависимостей. | `PipelineFactory`, `RunnerFactory`, `ServicesFactory`, `StorageFactory`, `HTTPClientFactory`, `DataSourceFactory`, `TransformerFactory`, `DQFactory` |
-| **21** | **Lock Acquisition Flow** | Sequence | **8.38** | acquire() → heartbeat → release() — distributed locking. Критично для concurrency. | `LockManager`, `MemoryLock`, `LockPort`, `Heartbeat`, TTL checker |
-| **22** | **Silver Merge Operation** | Sequence | **8.31** | Delta merge by content_hash — ACID операция. Сложная Delta Lake логика. | `SilverWriter` (1154 LOC), Delta merge, content_hash deduplication, ACID transaction |
-| **23** | **Provider Adapters Overview** | Component | **8.25** | 7 провайдеров — все data sources. Критично для понимания integration layer. | `ChemblAdapter`, `PubChemAdapter`, `UniProtAdapter`, `CrossRefAdapter`, `OpenAlexAdapter`, `PubMedAdapter`, `SemanticScholarAdapter` |
-| **24** | **Graceful Shutdown** | Sequence | **8.19** | SIGTERM → Cleanup → Exit — критично для production. Сложная координация ресурсов. | `Shutdown`, `ShutdownPort`, `PipelineRunner.shutdown()`, checkpoint save, lock release, `aclose()` cascade |
-| **25** | **PipelineConfig Structure** | Class | **8.13** | Complete pipeline configuration — core для всех pipelines. 100+ поля. | `PipelineConfig` (969 LOC), `ValidationConfig`, `DQConfig`, `TableConfig`, nested structures |
-| **26** | **Dependency Injection Flow** | Sequence | **8.06** | Как собираются зависимости через конструкторы. Критично для DI понимания. | Composition Root → Factories → Constructor injection chain |
-| **27** | **Bronze Write Operation** | Sequence | **8.00** | JSONL append with metadata — Bronze layer механика. Часто используется. | `BronzeWriter` (814 LOC), JSONL format, zstd compression, metadata YAML |
-| **28** | **Batch Aggregate** | Class | **7.94** | Batch aggregate — второй по сложности aggregate. 536 LOC, state machine. | `Batch` (536 LOC), `BatchRecord`, `BatchState` enum, quarantine logic |
-| **29** | **Rate Limiting** | Activity | **7.88** | Token bucket algorithm — критично для API compliance. Сложная математика. | `RateLimiter`, `RateLimiterPort`, token bucket, provider-specific limits |
-| **30** | **ChEMBL Adapter Architecture** | Component | **7.81** | Самый большой адаптер — 13 pipelines. Критично для ChEMBL integration. | `ChemblAdapter` (1170 LOC), `ChemblEntityMapper`, `CHEMBL_DTO_MODELS`, 13 entity types |
-| **31** | **Pipeline Lifecycle** | State | **7.75** | PENDING → RUNNING → COMPLETED/FAILED — pipeline states. Часто используется. | `PipelineRun` states, `PipelineRunner` lifecycle, state transitions |
-| **32** | **DQ Report Generation** | Sequence | **7.69** | Report creation — критично для DQ visibility. Сложный aggregation процесс. | `DQReportService`, `DQReportWriterPort`, `DQReport` VO, Bronze/Silver/Gold analyzers |
-| **33** | **Gold SCD2 Write** | Sequence | **7.63** | Slowly Changing Dimension Type 2 — сложная аналитическая логика. | `GoldWriter` (953 LOC), SCD2 mode, `valid_from`/`valid_to` timestamps |
-| **34** | **Observability Integration** | Component | **7.56** | PipelineObserver — cross-cutting concerns. Tracing + Metrics + Logging. | `PipelineObserver`, `TracingPort`, `MetricsPort`, `LoggerPort`, span hierarchy |
-| **35** | **System Context Diagram** | C4 Context | **7.50** | BioETL в контексте внешних систем — big picture. | BioETL System, 7 external providers (ChEMBL, PubChem, UniProt, CrossRef, OpenAlex, PubMed, SemanticScholar), Local Storage |
-| **36** | **Domain Services** | Component | **7.44** | Stateless domain logic — часто путают с application services. | `DataNormalizationService`, `IdentityService`, `UnitConverter`, `ActivityAggregator`, `ValueValidator`, `DQSerializer` |
-| **37** | **Checkpoint Lifecycle** | State | **7.38** | Create → Update → Load — state persistence. Критично для incremental runs. | `CheckpointManager`, `CheckpointPort`, `CheckpointAdapter`, checkpoint JSON schema |
-| **38** | **Entity Mapping** | Activity | **7.31** | DTO → Domain Entity — часто выполняется. Критично для transformation. | Entity mappers для всех провайдеров, DTO models, domain entities |
-| **39** | **Gold Write Flow** | Sequence | **7.25** | Filter → Validate → Delta Write — Gold layer механика. | `GoldWriter` (953 LOC), JSON filtering, strict validation, Delta write modes |
-| **40** | **Preflight Checklist** | Activity | **7.19** | Pre-run infrastructure validation — предотвращает ошибки. | `PreflightService` (816 LOC), health checks, storage validation, lock availability |
-| **41** | **Pipeline Services Bundle** | Component | **7.13** | PipelineServices — injected dependencies. Критично для понимания dependencies. | `PipelineServices` (152 LOC): `data_source`, `storage`, `lock`, `checkpoint`, `quarantine`, `metrics`, `logger`, `tracer` |
-| **42** | **Value Objects Hierarchy** | Class | **7.06** | Все value objects — immutable domain concepts. Часто используются. | `Activity`, `ActivityValues`, `DQMetrics`, `DQResult`, `DQReport`, `SilverResult`, `BronzeResult`, `RunContext`, `CompoundIds`, `TaxonomyId`, `Identifiers` |
-| **43** | **Incremental Run Flow** | Flowchart | **7.00** | Resume from checkpoint — самый частый run type. | `RuntimeConfig.run_type=incremental`, `CheckpointManager.load()`, resume logic |
-| **44** | **Configuration Loading Flow** | Sequence | **6.94** | YAML → PipelineConfig — критично для pipeline setup. | `ConfigLoader`, YAML parsing, `PipelineConfig` construction, validation |
-| **45** | **Memory Monitor Lifecycle** | Sequence | **6.88** | Adaptive batch sizing — critical для production stability. | `MemoryMonitor` (310 LOC), `MemoryMonitorPort`, batch size adaptation, memory stats |
-| **46** | **Quarantine Handling** | Activity | **6.81** | Failed record isolation — критично для data quality. | `QuarantineManager`, `QuarantinePort`, `QuarantineAdapter`, `QuarantineEntry` aggregate |
-| **47** | **CLI Flow** | Flowchart | **6.75** | User input → execution — entry point. Критично для user experience. | `cli/main.py`, `cli/commands/*`, 11+ commands, Click CLI routing |
-| **48** | **Data Normalization** | Activity | **6.69** | Text/Value/ID normalization — часто выполняется. | `DataNormalizationService`, `IdentityService`, `UnitConverter`, normalization algorithms |
-| **49** | **Schema Validation Flow** | Sequence | **6.63** | Pandera validation — критично для data integrity. | Pandera schemas для всех entities, validation logic, schema enforcement |
-| **50** | **Architecture Decision Records Map** | Mind Map | **6.56** | 27 ADR и их связи — architecture rationale. Критично для понимания "why". | ADR-001 (Delta Lake), ADR-007 (Circuit Breaker), ADR-008 (Graceful Shutdown), ADR-020 (BasePipeline Decomposition), ADR-021 (DDD Aggregates) и др. (27 total) |
+| Rank | Диаграмма                                  | Тип        | Уровень      | Arch | Doc | Freq | Complex | Coverage | PriorityScore | Source                                          |
+| ---: | ------------------------------------------ | ---------- | ------------ | ---: | --: | ---: | ------: | -------: | ------------: | ----------------------------------------------- |
+|    1 | Error Classification                       | Flowchart  | L2-Component |    9 |   8 |    8 |       9 |        8 |      **8.50** | `04-error-flow.mermaid`                         |
+|    2 | Delta Lake Write Sequence / Focus 22       | Sequence   | L2-Component |    9 |   9 |    9 |       9 |        5 |      **8.50** | `19-delta-lake-write-sequence.mermaid`          |
+|    3 | Lock Acquisition                           | Sequence   | L2-Component |    9 |   7 |    9 |       9 |        7 |      **8.38** | `11-lock-acquisition-sequence.mermaid`          |
+|    4 | Hexagonal Architecture Overview / Focus 03 | C4 Context | L0-Context   |    8 |   8 |   10 |       8 |        8 |      **8.38** | `05-layers-interaction.mermaid`                 |
+|    5 | Delta Lake Write Sequence                  | Sequence   | L2-Component |    9 |   6 |   10 |       9 |        6 |      **8.25** | `19-delta-lake-write-sequence.mermaid`          |
+|    6 | Ports Architecture                         | Interface  | L3-Code      |    9 |   9 |    7 |       9 |        5 |      **8.12** | `04-domain-layer-class-diagram.mermaid`         |
+|    7 | PipelineRun Aggregate                      | State      | L3-Code      |   10 |   8 |   10 |       5 |        8 |      **8.12** | `05-pipeline-lifecycle-states.mermaid`          |
+|    8 | Ports Architecture / Focus 07              | Interface  | L3-Code      |    9 |   8 |    6 |       9 |        8 |      **8.12** | `04-domain-layer-class-diagram.mermaid`         |
+|    9 | Bronze Write Sequence                      | Sequence   | L2-Component |    8 |   9 |    9 |       8 |        5 |      **8.00** | `18-bronze-write-sequence.mermaid`              |
+|   10 | Error Classification / Focus 12            | Flowchart  | L2-Component |    9 |   7 |    7 |       9 |        7 |      **8.00** | `04-error-flow.mermaid`                         |
+|   11 | Bronze Write Sequence / Focus 23           | Sequence   | L2-Component |    8 |   8 |    8 |       8 |        8 |      **8.00** | `18-bronze-write-sequence.mermaid`              |
+|   12 | Layer Dependency Matrix                    | Matrix     | L2-Component |    7 |   8 |   10 |       7 |        8 |      **7.88** | `05-layers-interaction.mermaid`                 |
+|   13 | Lock Acquisition / Focus 17                | Sequence   | L2-Component |    9 |   6 |    8 |       9 |        6 |      **7.88** | `11-lock-acquisition-sequence.mermaid`          |
+|   14 | Composition Root                           | Component  | L2-Component |   10 |   9 |    9 |       5 |        5 |      **7.75** | `01-high-level.mermaid`                         |
+|   15 | Complete Pipeline Flow / Focus 02          | Flowchart  | L2-Component |    9 |   9 |    5 |       9 |        5 |      **7.75** | `03-pipeline-execution-happy-path.mermaid`      |
+|   16 | Composition Root / Focus 11                | Component  | L2-Component |   10 |   8 |    8 |       5 |        8 |      **7.75** | `01-high-level.mermaid`                         |
+|   17 | Batch Processing Flow                      | Activity   | L2-Component |    8 |   8 |    6 |       8 |        8 |      **7.62** | `06-pipeline-execution.mermaid`                 |
+|   18 | PipelineRun Aggregate / Focus 16           | State      | L3-Code      |   10 |   7 |    9 |       5 |        7 |      **7.62** | `05-pipeline-lifecycle-states.mermaid`          |
+|   19 | MemoryLock Class / Focus 18                | Class      | L3-Code      |    8 |   9 |    7 |       8 |        5 |      **7.62** | `16-memory-lock-class.mermaid`                  |
+|   20 | Complete Pipeline Flow                     | Flowchart  | L2-Component |    9 |   6 |    6 |       9 |        6 |      **7.50** | `03-pipeline-execution-happy-path.mermaid`      |
+|   21 | Storage Architecture                       | Component  | L2-Component |    8 |   7 |    7 |       8 |        7 |      **7.50** | `10-infrastructure-layer-class-diagram.mermaid` |
+|   22 | Silver Writer Internals                    | Class      | L3-Code      |    7 |   8 |    8 |       7 |        8 |      **7.50** | `23-silver-writer-class.mermaid`                |
+|   23 | Content Hash Service / Focus 21            | Class      | L3-Code      |   10 |   6 |   10 |       5 |        6 |      **7.50** | `24-hash-service-class.mermaid`                 |
+|   24 | MemoryLock Class                           | Class      | L3-Code      |    8 |   6 |    8 |       8 |        6 |      **7.38** | `16-memory-lock-class.mermaid`                  |
+|   25 | Layer Dependency Matrix / Focus 04         | Matrix     | L2-Component |    7 |   7 |    9 |       7 |        7 |      **7.38** | `05-layers-interaction.mermaid`                 |
+|   26 | Domain Model Overview / Focus 06           | Class      | L3-Code      |   10 |   9 |    7 |       5 |        5 |      **7.38** | `08-domain-ddd.mermaid`                         |
+|   27 | Circuit Breaker States / Focus 15          | State      | L3-Code      |    6 |   8 |   10 |       6 |        8 |      **7.38** | `07-circuit-breaker-states.mermaid`             |
+|   28 | Five Layer Architecture                    | Component  | L1-Container |   10 |   7 |    7 |       5 |        7 |      **7.25** | `01-full-system-component.mermaid`              |
+|   29 | Hexagonal Architecture Overview            | C4 Context | L0-Context   |    8 |   9 |    5 |       8 |        5 |      **7.25** | `05-layers-interaction.mermaid`                 |
+|   30 | DDD Aggregates / Focus 09                  | Class      | L3-Code      |    7 |   6 |   10 |       7 |        6 |      **7.25** | `13-domain-models-relationship.mermaid`         |
+|   31 | Domain Model Overview                      | Class      | L3-Code      |   10 |   6 |    8 |       5 |        6 |      **7.12** | `08-domain-ddd.mermaid`                         |
+|   32 | DQ Workflow                                | Activity   | L2-Component |    7 |   9 |    7 |       7 |        5 |      **7.12** | `15-dq-check-workflow.mermaid`                  |
+|   33 | Batch Processing Flow / Focus 08           | Activity   | L2-Component |    8 |   7 |    5 |       8 |        7 |      **7.12** | `06-pipeline-execution.mermaid`                 |
+|   34 | DQ Workflow / Focus 19                     | Activity   | L2-Component |    7 |   8 |    6 |       7 |        8 |      **7.12** | `15-dq-check-workflow.mermaid`                  |
+|   35 | Pipeline Core Components / Focus 10        | Component  | L2-Component |    6 |   9 |    9 |       6 |        5 |      **7.00** | `06-application-layer-class-diagram.mermaid`    |
+|   36 | Storage Architecture / Focus 13            | Component  | L2-Component |    8 |   6 |    6 |       8 |        6 |      **7.00** | `10-infrastructure-layer-class-diagram.mermaid` |
+|   37 | Silver Writer Internals / Focus 24         | Class      | L3-Code      |    7 |   7 |    7 |       7 |        7 |      **7.00** | `23-silver-writer-class.mermaid`                |
+|   38 | Medallion Architecture Overview            | Flowchart  | L1-Container |    6 |   7 |    9 |       6 |        7 |      **6.88** | `02-full-medallion-data-flow.mermaid`           |
+|   39 | Content Hash Service                       | Class      | L3-Code      |   10 |   7 |    5 |       5 |        7 |      **6.88** | `24-hash-service-class.mermaid`                 |
+|   40 | Pipeline Core Components                   | Component  | L2-Component |    6 |   6 |   10 |       6 |        6 |      **6.75** | `06-application-layer-class-diagram.mermaid`    |
+|   41 | Five Layer Architecture / Focus 01         | Component  | L1-Container |   10 |   6 |    6 |       5 |        6 |      **6.75** | `01-full-system-component.mermaid`              |
+|   42 | HTTP Infrastructure / Focus 14             | Component  | L2-Component |    7 |   9 |    5 |       7 |        5 |      **6.75** | `22-client-api-request-sequence.mermaid`        |
+|   43 | DDD Aggregates                             | Class      | L3-Code      |    7 |   7 |    5 |       7 |        7 |      **6.62** | `13-domain-models-relationship.mermaid`         |
+|   44 | Quarantine States                          | State      | L3-Code      |    6 |   8 |    6 |       6 |        8 |      **6.62** | `20-quarantine-record-states.mermaid`           |
+|   45 | HTTP Infrastructure                        | Component  | L2-Component |    7 |   6 |    6 |       7 |        6 |      **6.50** | `22-client-api-request-sequence.mermaid`        |
+|   46 | CircuitBreaker Internals                   | Class      | L3-Code      |    6 |   7 |    7 |       6 |        7 |      **6.50** | `25-circuit-breaker-observer-class.mermaid`     |
+|   47 | Medallion Architecture Overview / Focus 05 | Flowchart  | L1-Container |    6 |   6 |    8 |       6 |        6 |      **6.38** | `02-full-medallion-data-flow.mermaid`           |
+|   48 | Circuit Breaker States                     | State      | L3-Code      |    6 |   9 |    5 |       6 |        5 |      **6.25** | `07-circuit-breaker-states.mermaid`             |
+|   49 | Quarantine States / Focus 20               | State      | L3-Code      |    6 |   7 |    5 |       6 |        7 |      **6.12** | `20-quarantine-record-states.mermaid`           |
+|   50 | CircuitBreaker Internals / Focus 25        | Class      | L3-Code      |    6 |   6 |    6 |       6 |        6 |      **6.00** | `25-circuit-breaker-observer-class.mermaid`     |
 
----
+## Правила пересмотра оценок
 
-## Статистика по Категориям
-
-| Категория | Количество в TOP-50 |
-|-----------|---------------------|
-| Архитектурные Обзоры | 12 |
-| Потоки Данных | 10 |
-| Паттерны и Механизмы | 14 |
-| Компонентные Диаграммы | 8 |
-| Взаимодействия | 4 |
-| Состояния и Жизненные Циклы | 2 |
-
----
-
-## TOP-25 для Создания (Приоритет ≥ 7.75)
-
-Первые 25 диаграмм из списка выше будут созданы в формате Mermaid и отрендерены в PNG:
-
-1. Five Layer Architecture (9.69)
-2. Complete Pipeline Flow (9.56)
-3. Hexagonal Architecture Overview (9.50)
-4. Layer Dependency Matrix (9.44)
-5. Medallion Architecture Overview (9.38)
-6. Domain Model Overview (9.31)
-7. Ports Architecture (9.25)
-8. Batch Processing Flow (9.19)
-9. DDD Aggregates (9.13)
-10. Pipeline Core Components (9.06)
-11. Composition Root (9.00)
-12. Error Classification (8.94)
-13. Storage Architecture (8.88)
-14. HTTP Infrastructure (8.81)
-15. Circuit Breaker States (8.75)
-16. PipelineRun Aggregate (8.69)
-17. Retry Mechanism (8.63)
-18. DQ Check Flow (8.56)
-19. BaseTransformer Template Method (8.50)
-20. Factory Pattern Usage (8.44)
-21. Lock Acquisition Flow (8.38)
-22. Silver Merge Operation (8.31)
-23. Provider Adapters Overview (8.25)
-24. Graceful Shutdown (8.19)
-25. PipelineConfig Structure (8.13)
-
----
-
-*Следующий шаг: Создание Mermaid диаграмм для TOP-25*
+- Пересчитывать таблицу при изменении архитектурных ограничений (ADR/RULES).
+- Минимум раз в спринт валидировать `Freq` и `Coverage` на основе фактических ревью/инцидентов.
+- Любое ручное изменение баллов сопровождать коротким обоснованием в PR.
