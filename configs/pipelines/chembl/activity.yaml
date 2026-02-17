@@ -25,7 +25,9 @@ primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 batch_size: 1000
-filter_batch_size: 20
+# Pagination: source config is the authority (configs/sources/chembl.yaml).
+# filter_batch_size removed — use source pagination.id_batch_size instead.
+# page_size_override only if this pipeline needs a different page size.
 
 # -----------------------------------------------------------------------------
 # Sink Configuration (ADR-014, ADR-025)

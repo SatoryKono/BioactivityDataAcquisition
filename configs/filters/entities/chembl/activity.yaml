@@ -19,8 +19,10 @@ input_filter:
     column_name: "activity_id"
     filter_field: "activity_id"
 
-batch_size: 1500
-page_size: 1500
+# Pagination params are now defined in configs/sources/chembl.yaml (pagination section).
+# These values are informational only and not consumed by the pipeline.
+# batch_size: 1500
+# page_size: 1500
 
 # ---------------------------------------------------------------------------
 # Extraction-Level Filtering (ADR-028 §3)

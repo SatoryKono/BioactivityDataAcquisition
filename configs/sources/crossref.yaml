@@ -18,8 +18,13 @@ source:
         client:
             timeout_sec: 30.0
             max_retries: 3
-        batch_size: 50  # DOIs per batch
-        cursor_pagination: true  # Uses cursor-based pagination
+        pagination:
+            page_size: 50           # Results per API page
+            id_batch_size: 50       # DOIs per batch
+            strategy: cursor        # CrossRef uses cursor-based pagination
+        # Legacy aliases
+        batch_size: 50
+        cursor_pagination: true
 
     circuit_breaker:
         failure_threshold: 5
