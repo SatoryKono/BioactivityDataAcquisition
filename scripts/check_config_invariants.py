@@ -2,7 +2,7 @@
 """Pre-commit hook: validate CI invariants for configs/** directory.
 
 Checks:
-  INV-CFG-001  No legacy naming (document→publication, dq/→quality/, filter/→filters/)
+  INV-CFG-001  No legacy naming (document->publication, dq/->quality/, filter/->filters/)
   INV-CFG-002  Schema / DQ / filter / source files exist for every pipeline
   INV-CFG-003  loading_strategy is null or 'full_scan_only'
   INV-CFG-004  Providers requiring auth declare API key / mailto env vars
@@ -55,27 +55,66 @@ VALID_LOADING_STRATEGIES = {"full_scan_only"}
 
 # --- Allowed top-level keys ---
 PIPELINE_ALLOWED_KEYS = {
-    "pipeline_name", "provider", "entity_type", "version", "description",
-    "batch_size", "filter_batch_size", "checkpoint_interval",
-    "primary_keys", "silver_table", "gold_table", "loading_strategy",
-    "source", "sink", "dq_config_file", "dq_overrides", "circuit_breaker",
-    "filter_config_file", "filter_rules", "column_groups_file",
-    "data_schema_file", "column_groups", "input_filter", "silver_filters",
-    "gold_filters", "maintenance", "transform", "extraction_params",
+    "pipeline_name",
+    "provider",
+    "entity_type",
+    "version",
+    "description",
+    "batch_size",
+    "filter_batch_size",
+    "checkpoint_interval",
+    "primary_keys",
+    "silver_table",
+    "gold_table",
+    "loading_strategy",
+    "source",
+    "sink",
+    "dq_config_file",
+    "dq_overrides",
+    "circuit_breaker",
+    "filter_config_file",
+    "filter_rules",
+    "column_groups_file",
+    "data_schema_file",
+    "column_groups",
+    "input_filter",
+    "silver_filters",
+    "gold_filters",
+    "maintenance",
+    "transform",
+    "extraction_params",
 }
 COMPOSITE_ALLOWED_KEYS = {
-    "composite", "gold_filters", "silver_filters",
-    "filter_config_file", "filter_rules", "maintenance",
+    "composite",
+    "gold_filters",
+    "silver_filters",
+    "filter_config_file",
+    "filter_rules",
+    "maintenance",
 }
 SOURCE_ALLOWED_KEYS = {"source", "entities", "entity_notes"}
 QUALITY_ALLOWED_KEYS = {
-    "version", "provider", "entity", "thresholds", "strict_validation",
-    "invalid_record_policy", "field_validations", "cross_field_validations",
-    "conditional_validations", "report",
+    "version",
+    "provider",
+    "entity",
+    "thresholds",
+    "strict_validation",
+    "invalid_record_policy",
+    "field_validations",
+    "cross_field_validations",
+    "conditional_validations",
+    "report",
 }
 FILTER_ALLOWED_KEYS = {
-    "version", "provider", "entity", "input_filter", "silver_filters",
-    "gold_filters", "extraction_params", "batch_size", "page_size",
+    "version",
+    "provider",
+    "entity",
+    "input_filter",
+    "silver_filters",
+    "gold_filters",
+    "extraction_params",
+    "batch_size",
+    "page_size",
 }
 
 
@@ -111,9 +150,7 @@ def check_inv_001(verbose: bool) -> list[str]:
         data = _load_yaml(path)
         entity = data.get("entity_type", "")
         if entity in LEGACY_ENTITY_NAMES:
-            errors.append(
-                f"INV-CFG-001 {_rel(path)}: entity_type={entity!r} is legacy"
-            )
+            errors.append(f"INV-CFG-001 {_rel(path)}: entity_type={entity!r} is legacy")
         for legacy, canonical in LEGACY_PATH_FRAGMENTS:
             if _deep_string_search(data, legacy):
                 errors.append(
@@ -121,7 +158,7 @@ def check_inv_001(verbose: bool) -> list[str]:
                     f"-> use {canonical!r}"
                 )
     if verbose and not errors:
-        print("  INV-CFG-001: PASS (no legacy naming)")
+        sys.stdout.write("  INV-CFG-001: PASS (no legacy naming)\n")
     return errors
 
 
@@ -160,7 +197,7 @@ def check_inv_002(verbose: bool) -> list[str]:
                 errors.append(f"INV-CFG-002: missing {_rel(src)}")
 
     if verbose and not errors:
-        print("  INV-CFG-002: PASS (all companion files exist)")
+        sys.stdout.write("  INV-CFG-002: PASS (all companion files exist)\n")
     return errors
 
 
@@ -176,7 +213,7 @@ def check_inv_003(verbose: bool) -> list[str]:
                 f"invalid (allowed: {VALID_LOADING_STRATEGIES})"
             )
     if verbose and not errors:
-        print("  INV-CFG-003: PASS (loading_strategy values valid)")
+        sys.stdout.write("  INV-CFG-003: PASS (loading_strategy values valid)\n")
     return errors
 
 
@@ -195,7 +232,7 @@ def check_inv_004(verbose: bool) -> list[str]:
                 f"must declare at least one of {keys}"
             )
     if verbose and not errors:
-        print("  INV-CFG-004: PASS (auth requirements met)")
+        sys.stdout.write("  INV-CFG-004: PASS (auth requirements met)\n")
     return errors
 
 
@@ -210,18 +247,14 @@ def check_inv_005(verbose: bool) -> list[str]:
         allowed = COMPOSITE_ALLOWED_KEYS if is_composite else PIPELINE_ALLOWED_KEYS
         unknown = set(data.keys()) - allowed
         if unknown:
-            errors.append(
-                f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}"
-            )
+            errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
 
     # Source configs
     for path in sorted(SOURCES_DIR.glob("*.yaml")):
         data = _load_yaml(path)
         unknown = set(data.keys()) - SOURCE_ALLOWED_KEYS
         if unknown:
-            errors.append(
-                f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}"
-            )
+            errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
 
     # Quality configs (skip defaults)
     for path in sorted(QUALITY_DIR.rglob("*.yaml")):
@@ -230,9 +263,7 @@ def check_inv_005(verbose: bool) -> list[str]:
         data = _load_yaml(path)
         unknown = set(data.keys()) - QUALITY_ALLOWED_KEYS
         if unknown:
-            errors.append(
-                f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}"
-            )
+            errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
 
     # Filter configs (skip defaults)
     for path in sorted(FILTERS_DIR.rglob("*.yaml")):
@@ -241,12 +272,10 @@ def check_inv_005(verbose: bool) -> list[str]:
         data = _load_yaml(path)
         unknown = set(data.keys()) - FILTER_ALLOWED_KEYS
         if unknown:
-            errors.append(
-                f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}"
-            )
+            errors.append(f"INV-CFG-005 {_rel(path)}: unknown keys {unknown}")
 
     if verbose and not errors:
-        print("  INV-CFG-005: PASS (no unknown keys)")
+        sys.stdout.write("  INV-CFG-005: PASS (no unknown keys)\n")
     return errors
 
 
@@ -267,7 +296,7 @@ def check_inv_006(verbose: bool) -> list[str]:
                 f"!= expected {expected!r}"
             )
     if verbose and not errors:
-        print("  INV-CFG-006: PASS (pipeline_name convention)")
+        sys.stdout.write("  INV-CFG-006: PASS (pipeline_name convention)\n")
     return errors
 
 
@@ -290,13 +319,13 @@ def main() -> int:
         all_errors.extend(check_fn(args.verbose))
 
     if all_errors:
-        print(f"\n{len(all_errors)} config invariant violation(s):\n")
+        sys.stderr.write(f"\n{len(all_errors)} config invariant violation(s):\n")
         for err in all_errors:
-            print(f"  {err}")
+            sys.stderr.write(f"  {err}\n")
         return 1
 
     count = len(list(_pipeline_configs()))
-    print(f"All config invariants pass ({count} pipeline configs checked)")
+    sys.stdout.write(f"All config invariants pass ({count} pipeline configs checked)\n")
     return 0
 
 
