@@ -21,5 +21,12 @@ gold_table: "uniprot_protein"
 # Sink Overrides (only non-convention values)
 # -----------------------------------------------------------------------------
 sink:
-  silver: {}
-  gold: {}
+  silver:
+    partition_by: ["organism"]
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version

@@ -1,58 +1,210 @@
 #!/usr/bin/env python3
-"""
-Generate JSON Schema contracts from Pandera models.
-Usage: python scripts/generate_contracts.py
+"""Generate Gold JSON contracts from Pandera DataFrameModel schemas.
+
+Usage:
+    python src/tools/scripts/generate_contracts.py
 """
 
+from __future__ import annotations
+
+import inspect
 import json
+import re
 import sys
 from pathlib import Path
+from typing import Any
 
-# Ensure project root is in python path
-project_root = Path(__file__).resolve().parent.parent
-sys.path.append(str(project_root / "src"))
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
-try:
-    from bioetl.domain.contracts.gold import (
-        ChEMBLActivityGoldSchema,
-        PubChemCompoundGoldSchema,
-        PubMedPublicationGoldSchema,
-        UniProtProteinGoldSchema,
+from bioetl.domain.contracts import gold as gold_contracts  # noqa: E402
+
+CONTRACT_VERSION = "1.0.0"
+CONTRACTS_DIR = PROJECT_ROOT / "docs" / "04-reference" / "contracts" / "gold"
+DIFF_REPORT_PATH = (
+    PROJECT_ROOT
+    / "docs"
+    / "05-operations"
+    / "verification"
+    / "gold-contracts-export-diff-2026-02-17.json"
+)
+
+
+def _camel_to_snake(name: str) -> str:
+    first_pass = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", first_pass).lower()
+
+
+def _class_to_entity(schema_name: str) -> str:
+    base = schema_name.removesuffix("GoldSchema")
+    normalized = (
+        base.replace("ChEMBL", "Chembl")
+        .replace("PubChem", "Pubchem")
+        .replace("PubMed", "Pubmed")
+        .replace("UniProt", "Uniprot")
+        .replace("IDMapping", "Idmapping")
+        .replace("OpenAlex", "Openalex")
+        .replace("CrossRef", "Crossref")
+        .replace("SemanticScholar", "Semanticscholar")
     )
-except ImportError as e:
-    print(f"Error importing schemas: {e}")
-    sys.exit(1)
-
-CONTRACTS_DIR = project_root / "docs" / "contracts"
-
-ENTITY_SCHEMA_MAP = {
-    "chembl_activity": ChEMBLActivityGoldSchema,
-    "pubchem_compound": PubChemCompoundGoldSchema,
-    "uniprot_protein": UniProtProteinGoldSchema,
-    "pubmed_publication": PubMedPublicationGoldSchema,
-}
+    return _camel_to_snake(normalized)
 
 
-def generate_contracts():
+def _filename_from_version(entity: str, version: str) -> str:
+    major_minor = ".".join(version.split(".")[:2])
+    return f"{entity}_v{major_minor}.json"
+
+
+def _normalize_export_field_name(column_name: str) -> str:
+    if column_name.endswith("_chembl_id"):
+        return column_name.replace("_chembl_id", "_id")
+    return column_name
+
+
+def _map_dtype_to_json_type(dtype_value: Any) -> str:
+    dtype_str = str(dtype_value).lower()
+    if dtype_str == "str":
+        return "string"
+    if dtype_str == "float64":
+        return "number"
+    if dtype_str == "int64":
+        return "integer"
+    if dtype_str == "bool":
+        return "boolean"
+    return "object"
+
+
+def _build_property_schema(
+    column: Any, json_schema_property: dict[str, Any]
+) -> dict[str, Any]:
+    base_type = _map_dtype_to_json_type(column.dtype)
+    json_type: str | list[str]
+    if column.nullable:
+        json_type = [base_type, "null"]
+    else:
+        json_type = base_type
+
+    return {
+        "type": json_type,
+        "nullable": bool(column.nullable),
+        "description": column.description
+        or json_schema_property.get("description")
+        or "",
+    }
+
+
+def _build_contract(schema_cls: type[Any], entity: str) -> dict[str, Any]:
+    schema = schema_cls.to_schema()
+    json_schema = schema_cls.to_json_schema()
+
+    properties: dict[str, dict[str, Any]] = {}
+    required: list[str] = []
+
+    for column_name, column in schema.columns.items():
+        property_from_json_schema = json_schema.get("properties", {}).get(
+            column_name, {}
+        )
+        export_name = _normalize_export_field_name(column_name)
+        properties[export_name] = _build_property_schema(
+            column, property_from_json_schema
+        )
+        if not column.nullable:
+            required.append(export_name)
+
+    return {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$version": CONTRACT_VERSION,
+        "title": f"{schema_cls.__name__} Contract",
+        "description": (
+            f"Gold layer data contract for {entity}. "
+            f"Auto-generated from Pandera schema {schema_cls.__name__}."
+        ),
+        "type": "object",
+        "properties": properties,
+        "required": sorted(required),
+    }
+
+
+def _load_previous_contract(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    with path.open("r", encoding="utf-8") as file_obj:
+        loaded_contract = json.load(file_obj)
+    if isinstance(loaded_contract, dict):
+        return loaded_contract
+    return {}
+
+
+def _compute_diff(previous: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
+    prev_props = previous.get("properties", {})
+    curr_props = current.get("properties", {})
+
+    prev_names = set(prev_props)
+    curr_names = set(curr_props)
+
+    changed = []
+    for prop_name in sorted(prev_names & curr_names):
+        if prev_props[prop_name] != curr_props[prop_name]:
+            changed.append(
+                {
+                    "property": prop_name,
+                    "before": prev_props[prop_name],
+                    "after": curr_props[prop_name],
+                }
+            )
+
+    return {
+        "added_properties": sorted(curr_names - prev_names),
+        "removed_properties": sorted(prev_names - curr_names),
+        "changed_properties": changed,
+        "required_changed": previous.get("required", []) != current.get("required", []),
+    }
+
+
+def generate_contracts() -> None:
     CONTRACTS_DIR.mkdir(parents=True, exist_ok=True)
+    DIFF_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    for entity, schema_cls in ENTITY_SCHEMA_MAP.items():
-        print(f"Generating contract for {entity}...")
-        try:
-            # Generate JSON Schema
-            json_schema = schema_cls.to_json_schema()
+    schema_classes: list[type[Any]] = []
+    for export_name in gold_contracts.__all__:
+        export_obj = getattr(gold_contracts, export_name)
+        if inspect.isclass(export_obj) and export_name.endswith("GoldSchema"):
+            schema_classes.append(export_obj)
 
-            # Save to file
-            output_file = CONTRACTS_DIR / f"{entity}_gold.json"
-            with output_file.open("w", encoding="utf-8") as f:
-                json.dump(json_schema, f, indent=2)
-            print(f"  -> Saved to {output_file}")
+    schema_classes.sort(key=lambda cls: cls.__name__)
 
-        except Exception as e:
-            print(f"Failed to generate contract for {entity}: {e}")
-            sys.exit(1)
+    diff_report: dict[str, Any] = {
+        "generated_at": "2026-02-17",
+        "version": CONTRACT_VERSION,
+        "entities": {},
+    }
 
-    print("\nAll contracts generated successfully.")
+    for schema_cls in schema_classes:
+        entity = _class_to_entity(schema_cls.__name__)
+        filename = _filename_from_version(entity, CONTRACT_VERSION)
+        output_path = CONTRACTS_DIR / filename
+
+        previous_contract = _load_previous_contract(output_path)
+        current_contract = _build_contract(schema_cls, entity)
+
+        with output_path.open("w", encoding="utf-8") as file_obj:
+            json.dump(current_contract, file_obj, indent=2, ensure_ascii=False)
+            file_obj.write("\n")
+
+        diff_report["entities"][entity] = {
+            "file": str(output_path.relative_to(PROJECT_ROOT)),
+            "status": "created" if not previous_contract else "updated",
+            "diff": _compute_diff(previous_contract, current_contract),
+        }
+        print(f"Generated {output_path}")
+
+    with DIFF_REPORT_PATH.open("w", encoding="utf-8") as file_obj:
+        json.dump(diff_report, file_obj, indent=2, ensure_ascii=False)
+        file_obj.write("\n")
+
+    print(f"Diff report written to {DIFF_REPORT_PATH}")
 
 
 if __name__ == "__main__":

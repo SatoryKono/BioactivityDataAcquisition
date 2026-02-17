@@ -9,13 +9,13 @@ Builds a composite target table by chaining ChEMBL target data with dependent pi
 
 ## Identity
 
-| Field | Value |
-|-------|-------|
-| Pipeline ID | `composite_target` |
-| Provider | `composite` |
-| Entity | `target` |
-| Version | `1.2.0` |
-| Config | `configs/pipelines/composite/target.yaml` |
+| Field       | Value                                     |
+| ----------- | ----------------------------------------- |
+| Pipeline ID | `composite_target`                        |
+| Provider    | `composite`                               |
+| Entity      | `target`                                  |
+| Version     | `1.2.0`                                   |
+| Config      | `configs/pipelines/composite/target.yaml` |
 
 ## Seed and Dependencies
 
@@ -23,16 +23,16 @@ Builds a composite target table by chaining ChEMBL target data with dependent pi
 - **Dependencies**:
   - `chembl_target_component` (join on `component_id`)
   - `chembl_protein_class` (chained via `key_source=chembl_target_component`)
-  - `uniprot_idmapping` (join on `target_chembl_id`)
+  - `uniprot_idmapping` (join on `target_id`)
   - `uniprot_protein` (chained via `key_source=uniprot_idmapping`)
 - **Enrichers**: none
 
 ## Outputs
 
-| Layer | Path |
-|-------|------|
+| Layer  | Path                                  |
+| ------ | ------------------------------------- |
 | Silver | `data/output/silver/composite/target` |
-| Gold | `data/output/gold/composite/target` |
+| Gold   | `data/output/gold/composite/target`   |
 
 ## Related Configs
 

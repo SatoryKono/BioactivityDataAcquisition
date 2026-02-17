@@ -1,6 +1,6 @@
 # ChEMBL Cell Line Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.19*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
 ______________________________________________________________________
 
@@ -42,7 +42,7 @@ Cell Lines represent **biological cell cultures** used in experimental assays. T
 ```
 cell_line
     │
-    └──◄──FK──assay.cell_chembl_id (1:M)
+    └──◄──FK──assay.cell_id (1:M)
               │
               └──◄──activity (via assay)
 ```
@@ -67,15 +67,15 @@ ______________________________________________________________________
 from chembl_webresource_client.new_client import new_client
 
 cell_line = new_client.cell_line
-# Filter by input CSV cell_chembl_ids
-results = cell_line.filter(cell_chembl_id__in=chembl_ids)
+# Filter by input CSV cell_ids
+results = cell_line.filter(cell_id__in=chembl_ids)
 ```
 
 ### 3.2. Complete API Fields
 
 | #   | API Field                 | JSON Type | Nullable | Description              | Example Value               |
 | --- | ------------------------- | --------- | -------- | ------------------------ | --------------------------- |
-| 1   | `cell_chembl_id`          | string    | No       | Primary key (ChEMBL ID)  | `"CHEMBL3307641"`           |
+| 1   | `cell_id`                 | string    | No       | Primary key (ChEMBL ID)  | `"CHEMBL3307641"`           |
 | 2   | `cell_name`               | string    | No       | Cell line name           | `"HeLa"`                    |
 | 3   | `cell_description`        | string    | Yes      | Description              | `"Cervical adenocarcinoma"` |
 | 4   | `cell_source_tissue`      | string    | Yes      | Source tissue            | `"Cervix"`                  |
@@ -101,7 +101,7 @@ ______________________________________________________________________
 
 | Parameter           | Value                    |
 | ------------------- | ------------------------ |
-| **Entity ID Field** | `cell_chembl_id`         |
+| **Entity ID Field** | `cell_id`                |
 | **ID Source**       | `from_api`               |
 | **Format**          | ChEMBL ID (CHEMBL[0-9]+) |
 
@@ -109,7 +109,7 @@ ______________________________________________________________________
 
 | Field                     | Normalization  | Before            | After             |
 | ------------------------- | -------------- | ----------------- | ----------------- |
-| `cell_chembl_id`          | Validate regex | `"CHEMBL3307641"` | `"CHEMBL3307641"` |
+| `cell_id`                 | Validate regex | `"CHEMBL3307641"` | `"CHEMBL3307641"` |
 | `cell_name`               | strip()        | `" HeLa "`        | `"HeLa"`          |
 | `cell_description`        | strip()        | -                 | -                 |
 | `cell_source_tissue`      | strip()        | -                 | -                 |
@@ -126,7 +126,7 @@ ______________________________________________________________________
 ```python
 # Fields included in hash (alphabetical order)
 hash_fields = [
-    "cell_chembl_id",
+    "cell_id",
     "cell_description",
     "cell_name",
     "cell_source_organism",
@@ -152,6 +152,8 @@ ______________________________________________________________________
 
 ### 5.1. Pandera Schema
 
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
+
 ```python
 # src/bioetl/domain/schemas/chembl/cell_line.py
 
@@ -164,7 +166,7 @@ class CellLineSchema(ETLRecordSchema):
     """Cell Line validation schema for Silver layer."""
 
     # === Primary Key ===
-    cell_chembl_id: Series[str] = pa.Field(
+    cell_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
         unique=True,
@@ -233,7 +235,7 @@ class CellLineSchema(ETLRecordSchema):
 
 | Field                     | Type | Nullable | Constraints                 | DQ Level | Failure Action |
 | ------------------------- | ---- | -------- | --------------------------- | -------- | -------------- |
-| `cell_chembl_id`          | str  | No       | regex `^CHEMBL\d+$`, unique | CRITICAL | Quarantine     |
+| `cell_id`                 | str  | No       | regex `^CHEMBL\d+$`, unique | CRITICAL | Quarantine     |
 | `cell_name`               | str  | No       | -                           | CRITICAL | Quarantine     |
 | `cell_description`        | str  | Yes      | -                           | INFO     | Log            |
 | `cell_source_tissue`      | str  | Yes      | -                           | INFO     | Log            |
@@ -253,11 +255,11 @@ class CellLineSchema(ETLRecordSchema):
 
 ### 5.4. DQ Thresholds
 
-| Threshold           | Value                               | Action            |
-| ------------------- | ----------------------------------- | ----------------- |
-| Soft                | 5%                                  | Warning, continue |
-| Hard                | 20%                                 | Fail batch        |
-| Critical field null | cell_chembl_id or cell_name is null | Fail immediately  |
+| Threshold           | Value                        | Action            |
+| ------------------- | ---------------------------- | ----------------- |
+| Soft                | 5%                           | Warning, continue |
+| Hard                | 20%                          | Fail batch        |
+| Critical field null | cell_id or cell_name is null | Fail immediately  |
 
 ______________________________________________________________________
 
@@ -267,7 +269,7 @@ All records contain:
 
 | Field              | Type     | Source          | In Hash |
 | ------------------ | -------- | --------------- | ------- |
-| `entity_id`        | str      | cell_chembl_id  | N/A     |
+| `entity_id`        | str      | cell_id         | N/A     |
 | `content_hash`     | str      | Computed        | N/A     |
 | `_run_id`          | UUID     | Generated       | No      |
 | `_run_type`        | Enum     | Config          | No      |
@@ -295,7 +297,7 @@ Retention: 90 days → Archive
 ```
 Path: silver/chembl/cell_line/
 Format: Delta Lake (delta-rs)
-Mode: Merge on [cell_chembl_id]
+Mode: Merge on [cell_id]
 Partition: None
 Retention: Permanent
 VACUUM: Weekly, 7 days retention
@@ -305,9 +307,9 @@ VACUUM: Weekly, 7 days retention
 
 | #     | Column                    | Type    | Nullable | Description      |
 | ----- | ------------------------- | ------- | -------- | ---------------- |
-| 1     | `entity_id`               | string  | No       | = cell_chembl_id |
+| 1     | `entity_id`               | string  | No       | = cell_id        |
 | 2     | `content_hash`            | string  | No       | SHA256 hash      |
-| 3     | `cell_chembl_id`          | string  | No       | PK               |
+| 3     | `cell_id`                 | string  | No       | PK               |
 | 4     | `cell_name`               | string  | No       | Cell line name   |
 | 5     | `cell_description`        | string  | Yes      | Description      |
 | 6     | `cell_source_tissue`      | string  | Yes      | Source tissue    |
@@ -363,10 +365,10 @@ ______________________________________________________________________
 
 ### 9.2. Downstream
 
-| Consumer                       | Impact                        |
-| ------------------------------ | ----------------------------- |
-| `chembl_assay`                 | FK reference (cell_chembl_id) |
-| Cell line enrichment analytics | Tissue/organism analysis      |
+| Consumer                       | Impact                   |
+| ------------------------------ | ------------------------ |
+| `chembl_assay`                 | FK reference (cell_id)   |
+| Cell line enrichment analytics | Tissue/organism analysis |
 
 ### 9.3. Cross-Provider Mapping
 
@@ -389,7 +391,7 @@ entity_type: cell_line
 version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
-primary_keys: ["cell_chembl_id"]
+primary_keys: ["cell_id"]
 silver_table: "chembl_cell_line"
 gold_table: "chembl_cell_line"
 
@@ -404,17 +406,17 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["cell_chembl_id"]
+    primary_key: ["cell_id"]
     partition_by: []
     sort_by:
-      columns: ["cell_chembl_id"]
+      columns: ["cell_id"]
       ascending: true
     csv_export:
       path: "data/output/csv/silver"
   gold:
     path: "data/output/gold"
     sort_by:
-      columns: ["cell_chembl_id", "cell_name"]
+      columns: ["cell_id", "cell_name"]
       ascending: true
     csv_export:
       path: "data/output/csv/gold"
@@ -422,8 +424,8 @@ sink:
 input_filter:
   enabled: true
   source_path: "data/input/cell.csv"
-  column_name: "cell_chembl_id"
-  filter_field: "cell_chembl_id"
+  column_name: "cell_id"
+  filter_field: "cell_id"
   batch_size: 20
 ```
 

@@ -54,8 +54,8 @@ class TargetComponentSchema(ETLRecordSchema):
         coerce=True,
         description="Primary protein classification ID (first from list).",
     )
-    protein_classification_ids: Series[object] | None = pa.Field(
-        nullable=True, description="List of protein classification IDs."
+    protein_classification_ids: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical JSON array of protein classification IDs."
     )
 
     class Config:

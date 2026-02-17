@@ -224,16 +224,20 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         chemicals = ClassificationExtractor.parse_chemicals(medline)
 
         return {
-            "publication_types": publication_types,
+            "publication_types": self.serialize_json_list(publication_types),
             "publication_type_list": self.serialize_json_list(publication_types),
-            "subject_keywords": subject_keywords,
+            "subject_keywords": self.serialize_json_list(subject_keywords),
             "keyword_count": len(subject_keywords) if subject_keywords else 0,
-            "subject_mesh": subject_mesh,
+            "subject_mesh": self.serialize_json_list(subject_mesh),
             "mesh_heading_count": len(subject_mesh) if subject_mesh else 0,
-            "chemicals": chemicals,
+            "chemicals": self.serialize_json_list(chemicals),
             "chemical_count": len(chemicals) if chemicals else 0,
-            "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
-            "databanks": ClassificationExtractor.parse_databanks(medline),
+            "gene_symbols": self.serialize_json_list(
+                ClassificationExtractor.parse_gene_symbols(medline)
+            ),
+            "databanks": self.serialize_json_list(
+                ClassificationExtractor.parse_databanks(medline)
+            ),
         }
 
     def _extract_author_block(

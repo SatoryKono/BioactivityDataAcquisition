@@ -40,5 +40,12 @@ gold_table: "pubchem_compound"
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver: {}
-  gold: {}
+  silver:
+    partition_by: ["batch_date"]
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version

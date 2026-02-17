@@ -202,7 +202,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "citations_made": rec.get("references-count"),
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
-            "subject_keywords": rec.get("subject", []),
+            "subject_keywords": self.serialize_json_list(rec.get("subject", []) or []),
             "_source": "crossref",
             # is_oa: CrossRef doesn't provide Open Access info
             "is_oa": None,
@@ -210,12 +210,19 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
             # Additional CrossRef fields
-            "alternative_id": rec.get("alternative-id", []) or [],
+            "alternative_id": self.serialize_json_list(
+                rec.get("alternative-id", []) or []
+            ),
             "journal_name_short": extract_first_string(
                 rec.get("short-container-title")
             ),
             "published": published_date,
-            **content_domain,
+            "content_domain_domains": self.serialize_json_list(
+                content_domain.get("content_domain_domains", [])
+            ),
+            "content_domain_crossmark_restriction": content_domain.get(
+                "content_domain_crossmark_restriction"
+            ),
             **issn_by_type,
             # Author and reference data
             "author_orcids": serialized_orcids,
