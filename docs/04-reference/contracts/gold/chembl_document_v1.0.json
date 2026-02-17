@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": "string"
     },
     "pmid": {
@@ -180,7 +180,14 @@
     "_run_id",
     "_run_type",
     "content_hash",
-    "document_chembl_id",
+    "publication_id",
     "entity_id"
-  ]
+  ],
+  "x-migration_aliases": {
+    "status": "temporary",
+    "remove_in": "next_major",
+    "aliases": {
+      "document_chembl_id": "publication_id"
+    }
+  }
 }

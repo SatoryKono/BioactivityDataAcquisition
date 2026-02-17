@@ -14,7 +14,7 @@
     "assay_param_id": {
       "type": "number"
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": "string"
     },
     "type": {
@@ -104,10 +104,17 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "assay_chembl_id",
+    "assay_id",
     "assay_param_id",
     "content_hash",
     "entity_id",
     "type"
-  ]
+  ],
+  "x-migration_aliases": {
+    "status": "temporary",
+    "remove_in": "next_major",
+    "aliases": {
+      "assay_chembl_id": "assay_id"
+    }
+  }
 }

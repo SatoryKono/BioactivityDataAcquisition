@@ -62,7 +62,9 @@
 Интерфейсы определяются в пакете `domain/ports/` через `typing.Protocol`:
 
 - **Design-time**: `mypy --strict` проверяет соответствие типов во время сборки. Основной механизм контроля.
+
 - **Runtime Boundary**: Следующие критические порты **SHOULD** быть `@runtime_checkable` для boundary validation в composition layer:
+
   - `DataSourcePort` — для проверки адаптеров при регистрации
   - `FilterableDataSourcePort` — для проверки расширенных адаптеров
   - `HealthCheckPort` — для проверки health-check capability
@@ -72,6 +74,7 @@
 
   > **Текущее состояние:** Все 38 портов декорированы `@runtime_checkable` (100% coverage).
   > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
+
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
 
 ```python
@@ -164,7 +167,7 @@ class MyAdapter:
 ### 2.2. Политика Дрейфа Схемы (Schema Drift)
 
 | Уровень  | Условие                                  |
-|----------|------------------------------------------|
+| -------- | ---------------------------------------- |
 | Info     | Новые поля (любое количество)            |
 | Critical | Пропавшее обязательное поле / смена типа |
 
@@ -244,19 +247,20 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 Единая таблица `common.quarantine` для всех сущностей.
 
-- `ingestion_ts` (Timestamp): Время инцидента. [Код: `QuarantineEntry._created_at`]
+- `ingestion_ts` (Timestamp): Время инцидента. \[Код: `QuarantineEntry._created_at`\]
 
-- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`). [Код: `QuarantineEntry._pipeline_name`]
+- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`). \[Код: `QuarantineEntry._pipeline_name`\]
 
-- `error_code` (String): Тип ошибки (напр., `SCHEMA_VIOLATION`). [Код: `QuarantineEntry._error_code`]
+- `error_code` (String): Тип ошибки (напр., `SCHEMA_VIOLATION`). \[Код: `QuarantineEntry._error_code`\]
 
-- `payload` (JSON/Text): Сырая запись (**Truncated to 64KB**). [Код: `QuarantineEntry._payload`]
+- `payload` (JSON/Text): Сырая запись (**Truncated to 64KB**). \[Код: `QuarantineEntry._payload`\]
 
-- `payload_hash` (String): Для дедупликации ошибок. [Код: `QuarantineEntry._payload_hash`]
+- `payload_hash` (String): Для дедупликации ошибок. \[Код: `QuarantineEntry._payload_hash`\]
 
-- `bronze_batch_id` (UUID): Ссылка на пакет исходных данных. [Код: `QuarantineEntry._batch_id` (BatchID)]
+- `bronze_batch_id` (UUID): Ссылка на пакет исходных данных. \[Код: `QuarantineEntry._batch_id` (BatchID)\]
 
 - `dq_status` (String): `NEW` | `UNDER_REVIEW` | `IGNORED` | `REPROCESSED` | `EXPIRED`.
+
   - `NEW`: Только что создана, ждёт разбора.
   - `UNDER_REVIEW`: Анализируется оператором.
   - `IGNORED`: Разобрана и признана неактуальной.
@@ -274,6 +278,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 **Причина**: Pandas/Polars исторически не поддерживали nullable integers без специального типа `Int64` (с заглавной I). Float — единственный способ представить `int + NULL` без потери данных для больших значений. `NaN` используется для отсутствующих значений.
 
 <!-- Updated: was ~34, now ~88 (audit 2026-02-14) -->
+
 **Затронутые поля (~88 occurrences)**:
 
 > **Примечание**: Для получения актуального числа occurrences:
@@ -335,6 +340,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 > (`configs/sources/{provider}.yaml`), а не непосредственно в pipeline config.
 > Pipeline config ссылается на источник через convention-based resolution
 > (`source_file: ../../sources/{provider}.yaml`) или явно через поле `data_schema_file`.
+
 - **Hybrid**: Incremental ежедневно + Full еженедельно для обеспечения консистентности.
 
 ### 2.8. Генерация ID Сущности (Entity ID)
@@ -506,6 +512,7 @@ merge:
 | `TRASH`                         | Внутренние, избыточные, low-value       | **Нет**           |
 
 <!-- Updated: was 94, now 106 (audit 2026-02-14) -->
+
 **Конфигурация:** `configs/composite/field_groups/publication.yaml` — 106 базовых полей, маппинг на провайдерские колонки.
 
 **Доменные модели** (`domain/composite/field_groups.py`):
@@ -922,7 +929,9 @@ from __future__ import annotations
 > **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
 > и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
 > они не содержат type annotations, требующих отложенной эвалюации.
+
 <!-- Updated: was 497/534 (93.1%), now 501/534 (93.8%); was 37, now 33 (audit 2026-02-17) -->
+
 > Текущее состояние: 501 из 534 файлов (93.8%) содержат импорт;
 > 33 файла без импорта — все `__init__.py` (re-export only).
 
@@ -1024,11 +1033,11 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 #### 5.5.1. Detailed DR Procedures (Runbook)
 
-| Сценарий                      | Действие                                                                                                                                                                         |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--run-type rebuild` (если затронут Silver). |
+| Сценарий                      | Действие                                                                                                                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Повреждение Bronze/Silver** | 1. Остановить пайплайны. 2. Восстановить локальное хранилище из backup (point-in-time restore). 3. Перезапустить пайплайны с флагом `--run-type rebuild` (если затронут Silver).      |
 | **Потеря чекпоинта**          | Удалить файл чекпоинта: `data/output/checkpoints/{pipeline_name}.json`, затем запустить `--run-type rebuild` (приведет к дубликатам в Bronze, но дедупликация в Silver исправит это). |
-| **Отказ региона AWS**         | Переключение DNS на Failover Region. Развертывание Infrastructure-as-Code (Terraform) в резервном регионе.                                                                       |
+| **Отказ региона AWS**         | Переключение DNS на Failover Region. Развертывание Infrastructure-as-Code (Terraform) в резервном регионе.                                                                            |
 
 ### 5.6. Среды (Environments)
 
@@ -1163,11 +1172,11 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 <!-- Updated: was 527 LOC / 8 методов, now 818 LOC / 21 метод (audit 2026-02-14) -->
 
-| ❌ Неверно                      | ✅ Верно                                                                                                           |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| ❌ Неверно                      | ✅ Верно                                                                                                          |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | "PreflightService — god object" | "PreflightService (`preflight_service.py`, 818 LOC, 21 метод) имеет 4 публичных метода с единой ответственностью" |
-| "Компонент перегружен"          | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам"                                         |
-| "Нет валидации X"               | "Валидация X отсутствует в `file.py` (проверено grep по 'X')"                                                      |
+| "Компонент перегружен"          | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам"                                        |
+| "Нет валидации X"               | "Валидация X отсутствует в `file.py` (проверено grep по 'X')"                                                     |
 
 #### 7.1.4. Типичные Ложные Выводы
 
@@ -1222,6 +1231,7 @@ grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/archived/refactoring-pla
 **Контрпримеры (НЕ монолиты, несмотря на размер):**
 
 <!-- Updated: ChemblAdapter was 517→975; GoldWriter was 593→946; PreflightService was 527→818 (audit 2026-02-14) -->
+
 - `ChemblAdapter` (975 LOC): Делегирует 4 компонентам, когезивная ответственность
 - `GoldWriter` (946 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
 - `PreflightService` (818 LOC): 21 метод с единой ответственностью (preflight validation)
@@ -1276,6 +1286,35 @@ ______________________________________________________________________
   1. CI генерирует diff схемы и постит в Slack-канал `#bioetl-contracts`.
   1. Период депрекации: 2 недели до удаления поля.
 - **Consumer Tests**: Потребители могут подписаться на `contracts/` и запускать свои тесты при изменениях.
+
+#### 8.1.1. Contract Governance: Canonical Naming Policy (PK Strategy)
+
+Для **публичных Gold контрактов** и соответствующих Pandera схем используются только канонические PK-поля:
+
+- `publication_id` (вместо legacy `document_chembl_id`)
+- `target_id` (вместо legacy `target_chembl_id`)
+- `molecule_id` (вместо legacy `molecule_chembl_id`)
+- `parent_molecule_id` (вместо legacy `parent_molecule_chembl_id`)
+- `assay_id` (вместо legacy `assay_chembl_id`)
+- `cell_id` (вместо legacy `cell_chembl_id`)
+
+Правила управления:
+
+1. Public contract **MUST** публиковать только canonical field names.
+1. Legacy-имена **MAY** поддерживаться только как migration alias на переходный период.
+1. Alias-период **MUST** быть ограничен (минимум 1 minor release, удаление в следующем major).
+1. Любой PR с изменением PK-имён **MUST** содержать migration strategy и impact assessment в changelog/ADR.
+
+#### 8.1.2. Delta PK Migration Plan (обязательный порядок)
+
+Для Delta-таблиц при переименовании PK применяется фиксированная последовательность:
+
+1. **add new column** — добавить canonical PK-колонку;
+1. **backfill from old** — заполнить canonical-колонку из legacy;
+1. **dual-write window** — временно писать оба поля (canonical + alias);
+1. **drop old in major release** — удалить legacy-поле только в major релизе.
+
+Нарушение порядка рассматривается как contract governance violation (MUST-level).
 
 ### 8.2. Rollback Strategy
 
@@ -1352,20 +1391,20 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 
 **Маппинг entity → API resource** (`_NON_PUBLICATION_ENTITY_MAPPING`):
 
-| Entity Type        | API Resource             | Primary Key              |
-| ------------------ | ------------------------ | ------------------------ |
-| `activity`         | `activity`               | `activity_id`            |
-| `assay`            | `assay`                  | `assay_chembl_id`        |
-| `assay_parameters` | `assay`                  | *(composite)*            |
-| `cell_line`        | `cell_line`              | `cell_chembl_id`         |
-| `compound`         | `molecule`               | `molecule_chembl_id`     |
-| `compound_record`  | `compound_record`        | `record_id`              |
-| `molecule`         | `molecule`               | `molecule_chembl_id`     |
-| `protein_class`    | `protein_classification` | `protein_class_id`       |
-| `publication`      | `document`               | `document_chembl_id`     |
-| `target`           | `target`                 | `target_chembl_id`       |
-| `target_component` | `target_component`       | `component_id`           |
-| `tissue`           | `tissue`                 | `tissue_chembl_id`       |
+| Entity Type        | API Resource             | Primary Key          |
+| ------------------ | ------------------------ | -------------------- |
+| `activity`         | `activity`               | `activity_id`        |
+| `assay`            | `assay`                  | `assay_chembl_id`    |
+| `assay_parameters` | `assay`                  | *(composite)*        |
+| `cell_line`        | `cell_line`              | `cell_chembl_id`     |
+| `compound`         | `molecule`               | `molecule_chembl_id` |
+| `compound_record`  | `compound_record`        | `record_id`          |
+| `molecule`         | `molecule`               | `molecule_chembl_id` |
+| `protein_class`    | `protein_classification` | `protein_class_id`   |
+| `publication`      | `document`               | `document_chembl_id` |
+| `target`           | `target`                 | `target_chembl_id`   |
+| `target_component` | `target_component`       | `component_id`       |
+| `tissue`           | `tissue`                 | `tissue_chembl_id`   |
 
 **Query parameters** (формируются в `ChemblAdapter._build_params()`):
 
@@ -1397,14 +1436,14 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | **P2** | Падение второстепенного пайплайна                | 8 часов     | 24 часа            |
 | **P3** | Warning / DQ аномалии                            | 24 часа     | Next Sprint        |
 
-| Ошибка                 | Симптом                                        | Действие                                                          |
-| ---------------------- | ---------------------------------------------- | ----------------------------------------------------------------- |
-| Auth failure           | `401 Unauthorized` в логах                     | Проверить/обновить `BIOETL_{PROVIDER}_API_KEY`                    |
-| Rate limit exhausted   | `429` + пик `errors_total{type="recoverable"}` | Уменьшить `requests_per_second` в конфиге                         |
-| Schema mismatch (Gold) | Pipeline fail + `schema_violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR            |
+| Ошибка                 | Симптом                                        | Действие                                                                                                |
+| ---------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Auth failure           | `401 Unauthorized` в логах                     | Проверить/обновить `BIOETL_{PROVIDER}_API_KEY`                                                          |
+| Rate limit exhausted   | `429` + пик `errors_total{type="recoverable"}` | Уменьшить `requests_per_second` в конфиге                                                               |
+| Schema mismatch (Gold) | Pipeline fail + `schema_violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR                                                  |
 | Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или удалить файл `data/output/checkpoints/{pipeline_name}.json` для рестарта |
-| >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа      |
-| Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; `make release-lock PIPELINE=...`        |
+| >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа                                            |
+| Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; `make release-lock PIPELINE=...`                                              |
 
 ## Приложение D: Схема Конфигурации Пайплайна
 
@@ -1535,7 +1574,7 @@ fields:
 | [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization           | Accepted           | 2026-01-26 |
 | [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | Accepted           | 2026-01-28 |
 | [ADR-033](02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Proposed           | 2026-02-06 |
-| [ADR-034](02-architecture/decisions/ADR-034-schema-domain-pairs.md)              | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
+| [ADR-034](02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
 
 ## История Изменений (Changelog)
 

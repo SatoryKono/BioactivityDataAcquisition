@@ -11,22 +11,22 @@
     "content_hash": {
       "type": "string"
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "cell_chembl_id": {
+    "cell_id": {
       "type": [
         "string",
         "null"
@@ -254,8 +254,18 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "assay_chembl_id",
+    "assay_id",
     "content_hash",
     "entity_id"
-  ]
+  ],
+  "x-migration_aliases": {
+    "status": "temporary",
+    "remove_in": "next_major",
+    "aliases": {
+      "document_chembl_id": "publication_id",
+      "target_chembl_id": "target_id",
+      "assay_chembl_id": "assay_id",
+      "cell_chembl_id": "cell_id"
+    }
+  }
 }

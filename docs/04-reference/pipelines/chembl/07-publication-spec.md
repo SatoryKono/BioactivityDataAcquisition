@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.19*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `chembl_publication` |
-| **Provider** | ChEMBL (EBI) |
-| **Entity** | document |
+| Parameter        | Value                                            |
+| ---------------- | ------------------------------------------------ |
+| **Pipeline ID**  | `chembl_publication`                             |
+| **Provider**     | ChEMBL (EBI)                                     |
+| **Entity**       | document                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/document` |
-| **Library** | `chembl_webresource_client` |
-| **Rate Limit** | None |
-| **Health Check** | `/chembl/api/data/status.json` |
-| **Auth Type** | None (public API) |
+| **Library**      | `chembl_webresource_client`                      |
+| **Rate Limit**   | None                                             |
+| **Health Check** | `/chembl/api/data/status.json`                   |
+| **Auth Type**    | None (public API)                                |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -33,58 +33,60 @@ Documents represent **scientific publications** that are sources of ChEMBL data:
 ### 2.2. Use Cases
 
 1. **Citation Analysis**: Track publications with most bioactivity data
-2. **Data Attribution**: Credit original data sources
-3. **Literature Review**: Access abstracts and journal information
-4. **Cross-Provider Enrichment**: Link to PubMed, CrossRef for metadata
+1. **Data Attribution**: Credit original data sources
+1. **Literature Review**: Access abstracts and journal information
+1. **Cross-Provider Enrichment**: Link to PubMed, CrossRef for metadata
 
 ### 2.3. Entity Relationships
 
 ```
 document
     │
-    ├──◄──FK──activity.document_chembl_id (1:M)
+    ├──◄──FK──activity.publication_id (1:M)
     │
-    ├──◄──FK──assay.document_chembl_id (1:M)
+    ├──◄──FK──assay.publication_id (1:M)
     │
-    └──◄──FK──compound_record.document_chembl_id (1:M)
+    └──◄──FK──compound_record.publication_id (1:M)
 ```
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
 ### 3.1. Complete API Fields
 
-| # | API Field | JSON Type | Nullable | Description |
-|---|-----------|-----------|----------|-------------|
-| 1 | `document_chembl_id` | string | No | Primary key |
-| 2 | `doc_type` | string | Yes | PUBLICATION/PATENT/DATASET/BOOK |
-| 3 | `src_id` | integer | Yes | Source ID |
-| 4 | `pubmed_id` | integer | Yes | PubMed ID |
-| 5 | `doi` | string | Yes | DOI |
-| 6 | `patent_id` | string | Yes | Patent ID |
-| 7 | `title` | string | Yes | Title |
-| 8 | `authors` | string | Yes | Authors string |
-| 9 | `abstract` | string | Yes | Abstract |
-| 10 | `journal` | string | Yes | Journal name (canonical field) |
-| 11 | `year` | integer | Yes | Publication year |
-| 13 | `volume` | string | Yes | Volume |
-| 14 | `issue` | string | Yes | Issue |
-| 15 | `first_page` | string | Yes | First page |
-| 16 | `last_page` | string | Yes | Last page |
+| #   | API Field        | JSON Type | Nullable | Description                     |
+| --- | ---------------- | --------- | -------- | ------------------------------- |
+| 1   | `publication_id` | string    | No       | Primary key                     |
+| 2   | `doc_type`       | string    | Yes      | PUBLICATION/PATENT/DATASET/BOOK |
+| 3   | `src_id`         | integer   | Yes      | Source ID                       |
+| 4   | `pubmed_id`      | integer   | Yes      | PubMed ID                       |
+| 5   | `doi`            | string    | Yes      | DOI                             |
+| 6   | `patent_id`      | string    | Yes      | Patent ID                       |
+| 7   | `title`          | string    | Yes      | Title                           |
+| 8   | `authors`        | string    | Yes      | Authors string                  |
+| 9   | `abstract`       | string    | Yes      | Abstract                        |
+| 10  | `journal`        | string    | Yes      | Journal name (canonical field)  |
+| 11  | `year`           | integer   | Yes      | Publication year                |
+| 13  | `volume`         | string    | Yes      | Volume                          |
+| 14  | `issue`          | string    | Yes      | Issue                           |
+| 15  | `first_page`     | string    | Yes      | First page                      |
+| 16  | `last_page`      | string    | Yes      | Last page                       |
 
----
+______________________________________________________________________
 
 ## 4. Validation
 
 ### 4.1. Pandera Schema
+
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
 
 ```python
 class ChemblPublicationSchema(ETLRecordSchema):
     """ChEMBL Publication validation schema for Silver layer."""
 
     # === Primary Key ===
-    document_chembl_id: Series[str] = pa.Field(
+    publication_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
     )
@@ -126,18 +128,18 @@ class ChemblPublicationSchema(ETLRecordSchema):
         coerce = True
 ```
 
----
+______________________________________________________________________
 
 ## 5. Cross-Provider Mapping
 
-| This Entity Field | Maps To | Provider | Field |
-|-------------------|---------|----------|-------|
-| `pubmed_id` | PubMed | PubMed | `pmid` |
-| `doi` | CrossRef | CrossRef | `DOI` |
-| `doi` | OpenAlex | OpenAlex | `doi` |
-| `doi` | Semantic Scholar | S2 | `doi` |
+| This Entity Field | Maps To          | Provider | Field  |
+| ----------------- | ---------------- | -------- | ------ |
+| `pubmed_id`       | PubMed           | PubMed   | `pmid` |
+| `doi`             | CrossRef         | CrossRef | `DOI`  |
+| `doi`             | OpenAlex         | OpenAlex | `doi`  |
+| `doi`             | Semantic Scholar | S2       | `doi`  |
 
----
+______________________________________________________________________
 
 ## 6. Pipeline Configuration
 
@@ -147,7 +149,7 @@ provider: chembl
 entity_type: document
 version: "1.2.0"
 
-primary_keys: ["document_chembl_id"]
+primary_keys: ["publication_id"]
 silver_table: "chembl_publication"
 gold_table: "chembl_publication"
 
@@ -160,7 +162,7 @@ gold_filters:
 input_filter:
   enabled: true
   source_path: "data/input/document.csv"
-  column_name: "document_chembl_id"
-  filter_field: "document_chembl_id"
+  column_name: "publication_id"
+  filter_field: "publication_id"
   batch_size: 20
 ```

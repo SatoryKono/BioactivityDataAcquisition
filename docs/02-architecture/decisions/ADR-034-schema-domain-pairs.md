@@ -27,6 +27,19 @@ Ref: RULES.md §3 (Architecture), ai-selfreview-rules.md §7 (EXC-015).
 1. Infrastructure класс — Pydantic model для YAML десериализации
 1. Infrastructure модель имеет метод `to_domain()` для конвертации
 1. Импорты всегда fully qualified (bioetl.domain.X vs bioetl.infrastructure.X)
+1. Для PK-полей обязательна cross-layer проверка соответствия между:
+   - pipeline config (`primary_keys`),
+   - Silver schema (Pandera),
+   - Gold contract (JSON Schema).
+     Проверка выполняется в CI как contract consistency gate.
+
+### PK Consistency Control (Mandatory)
+
+Для всех pipeline'ов canonical PK имя в конфиге, Silver и Gold **MUST** быть одинаковым
+(`publication_id`, `target_id`, `molecule_id`, и т.д.).
+
+Legacy aliases допускаются только как временный migration слой и **MUST NOT** быть
+единственным публичным PK в Gold контракте.
 
 ## Known Pairs
 

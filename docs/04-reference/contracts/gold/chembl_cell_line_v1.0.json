@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "cell_chembl_id": {
+    "cell_id": {
       "type": "string"
     },
     "cell_name": {
@@ -83,9 +83,16 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "cell_chembl_id",
+    "cell_id",
     "cell_name",
     "content_hash",
     "entity_id"
-  ]
+  ],
+  "x-migration_aliases": {
+    "status": "temporary",
+    "remove_in": "next_major",
+    "aliases": {
+      "cell_chembl_id": "cell_id"
+    }
+  }
 }

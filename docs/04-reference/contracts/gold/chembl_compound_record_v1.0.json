@@ -14,10 +14,10 @@
     "record_id": {
       "type": "number"
     },
-    "molecule_chembl_id": {
+    "molecule_id": {
       "type": "string"
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": "string"
     },
     "compound_key": {
@@ -66,10 +66,18 @@
     "_run_id",
     "_run_type",
     "content_hash",
-    "document_chembl_id",
+    "publication_id",
     "entity_id",
-    "molecule_chembl_id",
+    "molecule_id",
     "record_id",
     "src_id"
-  ]
+  ],
+  "x-migration_aliases": {
+    "status": "temporary",
+    "remove_in": "next_major",
+    "aliases": {
+      "document_chembl_id": "publication_id",
+      "molecule_chembl_id": "molecule_id"
+    }
+  }
 }

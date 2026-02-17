@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "molecule_chembl_id": {
+    "molecule_id": {
       "type": "string"
     },
     "pref_name": {
@@ -346,6 +346,13 @@
     "_run_type",
     "content_hash",
     "entity_id",
-    "molecule_chembl_id"
-  ]
+    "molecule_id"
+  ],
+  "x-migration_aliases": {
+    "status": "temporary",
+    "remove_in": "next_major",
+    "aliases": {
+      "molecule_chembl_id": "molecule_id"
+    }
+  }
 }

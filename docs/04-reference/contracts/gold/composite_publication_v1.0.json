@@ -8,7 +8,7 @@
   "properties": {
     "entity_id": {
       "type": "string",
-      "description": "SHA256 hash of primary key (document_chembl_id)"
+      "description": "SHA256 hash of primary key (publication_id)"
     },
     "content_hash": {
       "type": "string",
@@ -89,7 +89,7 @@
     {
       "entity_id": "sha256:abc123...",
       "content_hash": "sha256:def456...",
-      "chembl.publication.document_chembl_id": "CHEMBL3307465",
+      "chembl.publication.publication_id": "CHEMBL3307465",
       "chembl.publication.doi": "10.1038/nature12373",
       "chembl.publication.pmid": "23873052",
       "chembl.publication.title": "CRISPR-Cas systems for editing",

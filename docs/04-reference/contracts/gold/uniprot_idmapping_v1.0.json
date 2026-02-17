@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": "string"
     },
     "uniprot_accession": {
@@ -54,6 +54,13 @@
     "content_hash",
     "entity_id",
     "mapping_status",
-    "target_chembl_id"
-  ]
+    "target_id"
+  ],
+  "x-migration_aliases": {
+    "status": "temporary",
+    "remove_in": "next_major",
+    "aliases": {
+      "target_chembl_id": "target_id"
+    }
+  }
 }
