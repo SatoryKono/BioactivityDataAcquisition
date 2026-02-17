@@ -427,7 +427,7 @@ def test_convention_based_source_file(setup_configs, tmp_path):
     assert (
         config.filter_config_file == "../../filters/entities/testprovider/entity.yaml"
     )
-    assert config.data_schema_file == "../schemas/testprovider/entity.yaml"
+    assert config.data_schema_file == "../../schemas/testprovider/entity.yaml"
 
 
 def test_convention_based_sink_paths(setup_configs, tmp_path):
