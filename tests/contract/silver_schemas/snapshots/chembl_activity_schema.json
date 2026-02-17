@@ -454,7 +454,7 @@
     ],
     "coerce": false,
     "description": "Publication year.",
-    "dtype": "int64",
+    "dtype": "Int64",
     "nullable": true,
     "required": false,
     "unique": false
