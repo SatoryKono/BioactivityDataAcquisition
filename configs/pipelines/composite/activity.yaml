@@ -254,73 +254,16 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
+  # Thresholds, required_fields, and field_validations externalized to:
+  #   configs/quality/entities/composite/activity.yaml
+  # Only pipeline-specific enricher_overrides remain inline.
   dq_overrides:
-    # Composite-level thresholds (applied to merge result)
-    soft_fail_threshold: 0.10  # 10% errors = warning
-    hard_fail_threshold: 0.30  # 30% errors = failure
-
-    # Per-dependency threshold overrides
+    # Per-dependency threshold overrides (pipeline-specific)
     enricher_overrides:
       # compound_record may not exist for all molecules
       chembl_compound_record:
         soft_fail_threshold: 0.30  # 30% missing is acceptable
         hard_fail_threshold: 0.70  # Only fail if >70% errors
-
-    # Required fields in final Gold output
-    required_fields:
-      - activity_id
-      - molecule_id
-      - assay_id
-
-    # Field-level validation rules
-    field_validations:
-      activity_id:
-        type: string
-        nullable: false
-        description: "ChEMBL activity ID (primary key)"
-
-      molecule_id:
-        type: string
-        nullable: false
-        pattern: "^CHEMBL\\d+$"
-        description: "ChEMBL molecule ID (FK)"
-
-      assay_id:
-        type: string
-        nullable: false
-        pattern: "^CHEMBL\\d+$"
-        description: "ChEMBL assay ID (FK)"
-
-      target_id:
-        type: string
-        nullable: true
-        pattern: "^CHEMBL\\d+$"
-        description: "ChEMBL target ID (FK, optional)"
-
-      publication_id:
-        type: string
-        nullable: true
-        pattern: "^CHEMBL\\d+$"
-        description: "ChEMBL publication ID (FK, optional)"
-
-      standard_value:
-        type: float
-        nullable: true
-        min_value: 0
-        description: "Standardized activity value (non-negative)"
-
-      pchembl_value:
-        type: float
-        nullable: true
-        min_value: 0
-        max_value: 14
-        description: "-log10 molar activity (0-14 range)"
-
-      record_id:
-        type: integer
-        nullable: true
-        min_value: 1
-        description: "Compound record ID (from dependency)"
 
   # ---------------------------------------------------------------------------
   # Execution Options
@@ -363,20 +306,11 @@ composite:
       - src_id
 
 # -----------------------------------------------------------------------------
-# Gold Filters (applied to merged output)
-# -----------------------------------------------------------------------------
-gold_filters:
-  # Only include activities with required keys
-  required_fields:
-    - activity_id
-    - molecule_id
-    - assay_id
-
-# -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
+# Gold filters and filter rules loaded from hierarchical config files:
 #   1. configs/filters/_defaults.yaml (global defaults)
 #   2. configs/filters/providers/composite.yaml (provider-specific)
 #   3. configs/filters/entities/composite/activity.yaml (entity-specific)
+# No inline gold_filters needed — filter entity config is authoritative.
 filter_config_file: ../../filters/entities/composite/activity.yaml
