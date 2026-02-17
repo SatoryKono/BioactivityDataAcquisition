@@ -17,7 +17,11 @@ from bioetl.composition.providers.registration import register_all_providers
 from bioetl.composition.registry import PipelineRegistry, get_default_registry
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.ports import NoOpMetrics, NoOpTracing
-from bioetl.infrastructure.config import get_settings, load_pipeline_config
+from bioetl.infrastructure.config import (
+    get_settings,
+    load_pipeline_config,
+    load_source_config,
+)
 from bioetl.infrastructure.observability import OpenTelemetryTracer, PrometheusMetrics
 from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
@@ -233,8 +237,17 @@ def build_pipeline_runner(
             source="cli" if ctx.input_filter.enabled else "config",
         )
 
-    # Auto-adjust batch_size based on filter presence
+    # Auto-adjust batch_size based on filter presence.
+    # Resolution order for filter batch size:
+    #   1. pipeline filter_batch_size (deprecated, legacy support)
+    #   2. source pagination.id_batch_size (canonical)
     filter_batch_size = getattr(yaml_config, "filter_batch_size", None)
+    if filter_batch_size is None:
+        try:
+            source_cfg = load_source_config(yaml_config.provider)
+            filter_batch_size = source_cfg.pagination.id_batch_size
+        except (ValueError, AttributeError):
+            pass
     if filter_config and filter_batch_size is not None:
         observability.logger.info(
             "batch_size_auto_adjusted",

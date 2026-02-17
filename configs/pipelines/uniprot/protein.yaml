@@ -20,8 +20,6 @@ gold_table: "uniprot_protein"
 # -----------------------------------------------------------------------------
 # Sink Overrides (only non-convention values)
 # -----------------------------------------------------------------------------
-# Note: partition_by is entity-specific and differs from convention
 sink:
-  silver:
-    partition_by: ["organism"]
+  silver: {}
   gold: {}

@@ -1,0 +1,65 @@
+# configs/quality/entities/composite/molecule.yaml
+# Composite Molecule-specific DQ rules
+# Applied to merged output of composite molecule pipeline.
+
+version: "1.0.0"
+provider: composite
+entity: molecule
+
+# =============================================================================
+# Composite Thresholds
+# =============================================================================
+thresholds:
+  soft_fail_threshold: 0.10  # 10% errors = warning
+  hard_fail_threshold: 0.30  # 30% errors = failure
+
+# =============================================================================
+# Required Fields in Gold Output
+# =============================================================================
+required_fields:
+  - molecule_id
+  - entity_id
+
+# =============================================================================
+# Field-Level Validation Rules
+# =============================================================================
+field_validations:
+  # Structural Identifiers
+  inchi_key:
+    type: string
+    nullable: true
+    pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
+    description: "InChIKey (27 characters, XXXXX-YYYYY-Z format)"
+
+  canonical_smiles:
+    type: string
+    nullable: true
+    description: "Canonical SMILES representation"
+
+  # Numeric Properties
+  molecular_weight:
+    type: float
+    nullable: true
+    min_value: 1.0
+    max_value: 50000.0
+    description: "Molecular weight in Daltons"
+
+  logp:
+    type: float
+    nullable: true
+    min_value: -20.0
+    max_value: 30.0
+    description: "LogP (AlogP/XlogP coalesced)"
+
+  polar_surface_area:
+    type: float
+    nullable: true
+    min_value: 0.0
+    max_value: 2000.0
+    description: "Polar Surface Area"
+
+  # Clinical Data
+  max_phase:
+    type: float
+    nullable: true
+    description: "Maximum clinical phase reached (0-4)"

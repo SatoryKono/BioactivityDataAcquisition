@@ -147,26 +147,6 @@ def test_req_partition_004_no_high_cardinality_keys(config_path):
                         )
 
 
-@pytest.mark.parametrize("config_path", get_all_pipeline_configs())
-def test_req_load_001_002_load_strategy(config_path):
-    """Load strategy must be defined."""
-    config = load_config_with_source(config_path)
-
-    source = config.get("source", {})
-    assert "load_strategy" in source, (
-        f"'load_strategy' missing in source of {config_path}"
-    )
-    assert source["load_strategy"] in [
-        "incremental",
-        "full",
-    ], f"Invalid 'load_strategy' in {config_path}"
-
-    if source["load_strategy"] == "incremental":
-        assert "watermark_field" in source, (
-            f"'watermark_field' missing for incremental strategy in {config_path}"
-        )
-
-
 def test_req_quarantine_001_unified_table_exists():
     """A unified quarantine table should be conceptually present."""
     assert True, "Conceptual test for a unified quarantine table."

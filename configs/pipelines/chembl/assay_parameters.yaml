@@ -35,6 +35,5 @@ gold_table: "chembl_assay_parameters"
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver:
-    partition_by: ["type"]
+  silver: {}
   gold: {}

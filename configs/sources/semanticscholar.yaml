@@ -13,8 +13,6 @@
 # Get API key at: https://www.semanticscholar.org/product/api
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 50  # Reduced batch size for rate limit safety
     provider_config:
         provider: semanticscholar
@@ -26,8 +24,13 @@ source:
             max_retries: 5             # More retries for 429 recovery
             retry_base_delay: 30.0     # 30s initial delay for rate limit cooldown
             retry_max_delay: 300.0     # 5 min max delay between retries
-        batch_size: 50  # Reduced for rate limit safety
-        page_size: 100  # Minimum allowed by schema
+        pagination:
+            page_size: 100          # Conservative page size for rate-limited API
+            id_batch_size: 50       # DOIs per batch request
+            strategy: offset        # Semantic Scholar uses offset-based pagination
+        # Legacy aliases
+        batch_size: 50
+        page_size: 100
 
     # More tolerant circuit breaker for S2's rate limit behavior.
     # Extended settings to handle frequent 429 responses.

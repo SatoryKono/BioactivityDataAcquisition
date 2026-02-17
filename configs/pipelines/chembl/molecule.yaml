@@ -32,68 +32,13 @@ gold_table: "chembl_molecule"
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # -----------------------------------------------------------------------------
-# Inline DQ Overrides (applied on top of dq_config_file)
+# DQ Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-# Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
-dq_overrides:
-  field_validations:
-    # Unique: Not in entity config
-    - field: "molecule_type"
-      type: "enum"
-      allowed: ["Small molecule", "Protein", "Antibody", "Oligosaccharide", "Oligonucleotide", "Cell", "Enzyme", "Unknown"]
-      nullable: true
-    # Unique: Not in entity config
-    - field: "structure_type"
-      type: "enum"
-      allowed: ["MOL", "SEQ", "NONE", "BOTH"]
-      nullable: true
-    # Override: Entity has min:0 only, pipeline has stricter range 10-10000
-    - field: "property_full_mwt"
-      type: "range"
-      min: 10
-      max: 10000
-      nullable: true
-      error_message: "Molecular weight must be between 10 and 10000 Da"
-    # Unique: SMILES validation not in entity config
-    - field: "canonical_smiles"
-      type: "custom"
-      validator: "smiles_validator"
-      nullable: true
-    # Override: Entity has min:-15, pipeline uses min:-10 (stricter)
-    - field: "property_alogp"
-      type: "range"
-      min: -10
-      max: 20
-      nullable: true
-    # Unique: Not in entity config
-    - field: "property_hba"
-      type: "range"
-      min: 0
-      max: 50
-      nullable: true
-    # Unique: Not in entity config
-    - field: "property_hbd"
-      type: "range"
-      min: 0
-      max: 30
-      nullable: true
-    # Unique: Not in entity config
-    - field: "property_psa"
-      type: "range"
-      min: 0
-      max: 1000
-      nullable: true
-
-  # Unique cross-field validation (not in entity config)
-  cross_field_validations:
-    - name: "structure_completeness"
-      fields: ["canonical_smiles", "standard_inchi", "inchi_key"]
-      condition: "any_present"
-      error_message: "At least one structure identifier required"
+# All DQ rules externalized to configs/quality/entities/chembl/molecule.yaml.
+# No inline overrides needed — entity config is authoritative.
 
 # Entity-specific sink overrides
 sink:
   bronze: {}
-  silver:
-    partition_by: ["molecule_type"]
+  silver: {}
   gold: {}

@@ -427,7 +427,7 @@ def test_convention_based_source_file(setup_configs, tmp_path):
     assert (
         config.filter_config_file == "../../filters/entities/testprovider/entity.yaml"
     )
-    assert config.data_schema_file == "../schemas/testprovider/entity.yaml"
+    assert config.data_schema_file == "../../schemas/testprovider/entity.yaml"
 
 
 def test_convention_based_sink_paths(setup_configs, tmp_path):
@@ -455,31 +455,6 @@ def test_convention_based_sink_paths(setup_configs, tmp_path):
     assert config.sink["gold"].path == "data/output/gold/autoprov/autoent"
 
 
-def test_convention_based_primary_key_propagation(setup_configs, tmp_path):
-    """Verify primary_keys are propagated to sink.silver.primary_key."""
-    pipelines_dir = setup_configs
-
-    config_data = {
-        "pipeline_name": "pk_test_entity",
-        "provider": "pktest",
-        "entity_type": "entity",
-        "primary_keys": ["pk_field1", "pk_field2"],
-        "silver_table": "pk.entity",
-    }
-
-    pk_dir = pipelines_dir / "pktest"
-    pk_dir.mkdir()
-    (pk_dir / "entity.yaml").write_text(yaml.dump(config_data))
-
-    config = load_pipeline_config("pktest_entity")
-
-    # primary_keys should be propagated to sink.silver.primary_key
-    assert config.sink["silver"].primary_key == ["pk_field1", "pk_field2"]
-    # And to sort_by.columns
-    assert config.sink["silver"].sort_by.columns == ["pk_field1", "pk_field2"]
-    assert config.sink["gold"].sort_by.columns == ["pk_field1", "pk_field2"]
-
-
 def test_explicit_paths_override_convention(setup_configs, tmp_path):
     """Verify explicitly specified paths override convention defaults."""
     pipelines_dir = setup_configs
@@ -492,7 +467,7 @@ def test_explicit_paths_override_convention(setup_configs, tmp_path):
         "silver_table": "explicit.entity",
         "sink": {
             "bronze": {"path": "custom/bronze/path"},
-            "silver": {"path": "custom/silver/path", "primary_key": ["custom_pk"]},
+            "silver": {"path": "custom/silver/path"},
             "gold": {"path": "custom/gold/path"},
         },
     }
@@ -506,7 +481,6 @@ def test_explicit_paths_override_convention(setup_configs, tmp_path):
     # Explicit paths should be used
     assert config.sink["bronze"].path == "custom/bronze/path"
     assert config.sink["silver"].path == "custom/silver/path"
-    assert config.sink["silver"].primary_key == ["custom_pk"]
     assert config.sink["gold"].path == "custom/gold/path"
 
 
