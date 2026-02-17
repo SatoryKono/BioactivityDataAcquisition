@@ -21,7 +21,7 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -112,9 +112,9 @@ class ProviderConfigYaml(BaseModel):
     api_version: str | None = None
     default_email: str | None = None
 
-    @model_validator(mode="before")
+    @model_validator(mode="before")  # type: ignore[untyped-decorator]
     @classmethod
-    def _promote_legacy_pagination(cls, data: dict) -> dict:  # type: ignore[type-arg]
+    def _promote_legacy_pagination(cls, data: dict[str, Any]) -> dict[str, Any]:
         """Promote legacy batch_size/page_size/max_url_length into pagination.
 
         When the ``pagination`` section is absent but legacy fields are set,
