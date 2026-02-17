@@ -100,34 +100,34 @@
 73. **ChEMBL Compound Record Pipeline** - Sequence - Compound records
 74. **UniProt ID Mapping** - Sequence - ID mapping transformation
 75. **ChEMBL Cell Line Pipeline** - Sequence - Cell line data
-74. **ChEMBL Protein Class Pipeline** - Sequence - Protein classification
+76. **ChEMBL Protein Class Pipeline** - Sequence - Protein classification
 
 ### 2.3 Transformation Flows (12)
-75. **BaseTransformer Template Method** - Activity - Template Method pattern
-76. **Entity Mapping** - Activity - DTO → Domain Entity
-77. **Data Normalization** - Activity - Text/Value/ID normalization
-78. **Unit Conversion** - Activity - Unit converter flow
-79. **Activity Aggregation** - Activity - Aggregating multiple activities
-80. **Value Validation** - Activity - Molecular weight, activity validation
-81. **SMILES Validation** - Activity - Chemical structure validation
-82. **Taxonomy ID Resolution** - Activity - NCBI taxonomy lookup
-83. **Date Normalization** - Activity - ISO date formatting
-84. **PII Hashing** - Activity - Email/identifier hashing
-85. **JSON Flattening** - Activity - Nested JSON → Flat schema
-86. **Gold Filtering** - Activity - JSON field exclusion
+77. **BaseTransformer Template Method** - Activity - Template Method pattern
+78. **Entity Mapping** - Activity - DTO → Domain Entity
+79. **Data Normalization** - Activity - Text/Value/ID normalization
+80. **Unit Conversion** - Activity - Unit converter flow
+81. **Activity Aggregation** - Activity - Aggregating multiple activities
+82. **Value Validation** - Activity - Molecular weight, activity validation
+83. **SMILES Validation** - Activity - Chemical structure validation
+84. **Taxonomy ID Resolution** - Activity - NCBI taxonomy lookup
+85. **Date Normalization** - Activity - ISO date formatting
+86. **PII Hashing** - Activity - Email/identifier hashing
+87. **JSON Flattening** - Activity - Nested JSON → Flat schema
+88. **Gold Filtering** - Activity - JSON field exclusion
 
 ### 2.4 Storage Operations (12)
-87. **Bronze Write Operation** - Sequence - JSONL append with metadata
-88. **Silver Merge Operation** - Sequence - Delta merge by content_hash
-89. **Gold SCD2 Write** - Sequence - Slowly Changing Dimension Type 2
-90. **Delta VACUUM** - Activity - Retention и cleanup
-91. **Checkpoint Save** - Sequence - State persistence
-92. **Checkpoint Load** - Sequence - Resume from checkpoint
-93. **Quarantine Write** - Sequence - Failed record isolation
-94. **Metadata Write** - Sequence - _metadata.yaml creation
-95. **Bronze Archive** - Activity - 90d → Archive flow
-96. **Silver Upsert** - Sequence - Insert or Update logic
-97. **Gold Overwrite** - Sequence - Full table replacement
+89. **Bronze Write Operation** - Sequence - JSONL append with metadata
+90. **Silver Merge Operation** - Sequence - Delta merge by content_hash
+91. **Gold SCD2 Write** - Sequence - Slowly Changing Dimension Type 2
+92. **Delta VACUUM** - Activity - Retention и cleanup
+93. **Checkpoint Save** - Sequence - State persistence
+94. **Checkpoint Load** - Sequence - Resume from checkpoint
+95. **Quarantine Write** - Sequence - Failed record isolation
+96. **Metadata Write** - Sequence - _metadata.yaml creation
+97. **Bronze Archive** - Activity - 90d → Archive flow
+98. **Silver Upsert** - Sequence - Insert or Update logic
+99. **Gold Overwrite** - Sequence - Full table replacement
 98. **Delta Read** - Sequence - Query Delta table
 
 ### 2.5 Batch Processing (12)
