@@ -1,4 +1,5 @@
 # System Context
+
 *Aligned with RULES.md v5.19 (Local-Only Deployment)*
 
 ## Overview
@@ -7,7 +8,7 @@ C4 System Context diagram показывает BioETL как центральн�
 
 > **Note**: Текущая реализация — **Local-Only** (ADR-010). Redis и S3 отложены для будущего распределённого развёртывания.
 
----
+______________________________________________________________________
 
 ## System Context Diagram (Local-Only)
 
@@ -56,32 +57,32 @@ flowchart TB
     FS -->|Delta Lake| API
 ```
 
----
+______________________________________________________________________
 
 ## System Boundaries
 
 ### Inside BioETL (§1.1)
 
-| Component | Layer | Responsibility |
-|-----------|-------|----------------|
-| CLI | Interfaces | User commands, scheduling |
-| Pipelines | Application | Orchestration, DAG execution |
-| Domain Services | Domain | Hash, Validation, Normalization |
-| Adapters | Infrastructure | API clients, Storage writers |
+| Component       | Layer          | Responsibility                  |
+| --------------- | -------------- | ------------------------------- |
+| CLI             | Interfaces     | User commands, scheduling       |
+| Pipelines       | Application    | Orchestration, DAG execution    |
+| Domain Services | Domain         | Hash, Validation, Normalization |
+| Adapters        | Infrastructure | API clients, Storage writers    |
 
 ### External Systems
 
-| System | Role | Protocol | Status |
-|--------|------|----------|--------|
-| **ChEMBL** | Bioactivity data source | REST API (EBI) | Active |
-| **PubChem** | Chemical compound data | REST API (NCBI) | Active |
-| **UniProt** | Protein/target data | REST API | Active |
-| **PubMed** | Publication metadata | REST API (NCBI) | Active |
-| **Local FS** | Medallion layers storage | File I/O | Active (Local-Only) |
-| **S3/MinIO** | Object storage | S3 API | Future (Distributed) |
-| **Redis** | Distributed locking | Redis protocol | Future (Distributed) |
+| System       | Role                     | Protocol        | Status               |
+| ------------ | ------------------------ | --------------- | -------------------- |
+| **ChEMBL**   | Bioactivity data source  | REST API (EBI)  | Active               |
+| **PubChem**  | Chemical compound data   | REST API (NCBI) | Active               |
+| **UniProt**  | Protein/target data      | REST API        | Active               |
+| **PubMed**   | Publication metadata     | REST API (NCBI) | Active               |
+| **Local FS** | Medallion layers storage | File I/O        | Active (Local-Only)  |
+| **S3/MinIO** | Object storage           | S3 API          | Future (Distributed) |
+| **Redis**    | Distributed locking      | Redis protocol  | Future (Distributed) |
 
----
+______________________________________________________________________
 
 ## Data Flow Summary (Local-Only)
 
@@ -98,7 +99,7 @@ flowchart TB
                        └─────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ## Architecture Style
 
@@ -110,15 +111,16 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
   - **Distributed (Future)**: `S3Writer`, `RedisLock`
 
 Это обеспечивает:
+
 - Независимость Domain от I/O
 - Тестируемость через mock-адаптеры
 - Расширяемость для новых провайдеров
 - Лёгкий переход между Local-Only и Distributed deployment
 
----
+______________________________________________________________________
 
 ## Related Documents
 
 - **Data Flow**: [data-flow.md](data-flow.md)
-- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/00-diagramming-policy.md)
+- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/mermaid/00-diagramming-policy.md)
 - **Local-Only ADR**: [ADR-010](decisions/ADR-010-local-only-deployment.md)

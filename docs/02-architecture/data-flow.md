@@ -6,7 +6,7 @@
 
 Medallion Architecture — трёхслойная модель хранения данных: Bronze → Silver → Gold.
 
----
+______________________________________________________________________
 
 ## Medallion Architecture Diagram
 
@@ -51,17 +51,17 @@ flowchart LR
   Bronze -.->|batch_id FK| L
 ```
 
----
+______________________________________________________________________
 
 ## Layer Specifications (§2.1)
 
 | Layer      | Format          | Validation       | Retention         | Idempotency            |
-|------------|-----------------|------------------|-------------------|------------------------|
+| ---------- | --------------- | ---------------- | ----------------- | ---------------------- |
 | **Bronze** | JSONL + zstd    | None             | 90 days → Archive | Append-only            |
 | **Silver** | Delta Lake      | Pandera (soft)   | Permanent         | Merge/Upsert           |
 | **Gold**   | Delta / Parquet | Pandera (strict) | Permanent         | SCD Type 2 / Overwrite |
 
----
+______________________________________________________________________
 
 ## Storage Paths
 
@@ -96,7 +96,7 @@ data/output/                       # Local-Only (current)
 Examples: `["year", "month"]`, `["assay_type"]`, `["organism"]`, or `[]` (no partitioning).
 See `configs/pipelines/{provider}/{entity}.yaml` for specific configurations.
 
----
+______________________________________________________________________
 
 ## Pipeline Execution Flow
 
@@ -147,12 +147,12 @@ flowchart TB
   F1 --> F2 --> F3
 ```
 
----
+______________________________________________________________________
 
 ## Required Metadata Fields (§2.4)
 
 | Field              | Type      | Description                            |
-|--------------------|-----------|----------------------------------------|
+| ------------------ | --------- | -------------------------------------- |
 | `_run_id`          | UUID      | Pipeline execution ID                  |
 | `_run_type`        | Enum      | `incremental` / `backfill` / `rebuild` |
 | `_source_batch_id` | UUID      | FK to lineage_log                      |
@@ -160,21 +160,21 @@ flowchart TB
 | `_content_hash`    | String    | SHA256 for deduplication               |
 | `_dq_warn`         | Boolean   | Data quality warning flag              |
 
----
+______________________________________________________________________
 
 ## Silver → Gold Transformation
 
 При записи в Gold слой выполняется трансформация:
 
 1. **Фильтрация записей**: `should_write_gold()` определяет, какие записи попадают в Gold
-2. **Исключение JSON полей**: `transform_for_gold()` удаляет поля из `GOLD_EXCLUDE_FIELDS`:
+1. **Исключение JSON полей**: `transform_for_gold()` удаляет поля из `GOLD_EXCLUDE_FIELDS`:
    - `molecule_hierarchy`, `molecule_properties`, `molecule_structures`
    - `molecule_synonyms`, `cross_references`, `atc_classifications`
-3. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
+1. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
 
 **Code Reference**: `src/bioetl/application/core/base_transformer.py` → `BaseTransformer.transform_for_gold()`
 
----
+______________________________________________________________________
 
 ## Data Quality Flow (§2.6)
 
@@ -194,20 +194,20 @@ flowchart TD
 - `5-20%` errors → Warning in logs
 - `> 20%` errors → Batch fails entirely
 
----
+______________________________________________________________________
 
 ## Error Handling Summary
 
 | Error Type                          | Action                         | Reference |
-|-------------------------------------|--------------------------------|-----------|
+| ----------------------------------- | ------------------------------ | --------- |
 | **Transient** (timeout, rate limit) | Retry with exponential backoff | §3.1.3    |
 | **Circuit Breaker** (5 consecutive) | Open for 5 min, then half-open | §3.1.4    |
 | **Data Quality**                    | Route to Quarantine            | §2.6      |
 | **Lock Lost**                       | Abort to prevent split-brain   | §3.3      |
 
----
+______________________________________________________________________
 
 ## Related Documents
 
 - **System Context**: [system-context.md](system-context.md)
-- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/00-diagramming-policy.md)
+- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/mermaid/00-diagramming-policy.md)
