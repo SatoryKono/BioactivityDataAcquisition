@@ -2,22 +2,28 @@
 
 Implements strict validation for source YAML configurations (configs/sources/*.yaml).
 These configs define provider-specific settings like rate limits, circuit breaker,
-and batch sizes that were previously hardcoded.
+pagination, and batch sizes that were previously hardcoded.
 
 This module uses base classes from `base_schemas` to eliminate duplication
 with `pipeline_config.py`.
+
+Pagination parameters are the single source of truth in source configs.
+Pipeline configs may only override ``page_size`` via ``page_size_override``.
+See ADR-031 for loading strategy formalization.
 
 Usage:
     >>> from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
     >>> config = SourceYamlConfig.model_validate(yaml_data)
     >>> rate_limit = config.source.rate_limit.requests_per_second
+    >>> config.pagination.page_size
+    1000
 """
 
 from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from bioetl.domain.resilience import AdapterConfig as DomainAdapterConfig
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
@@ -54,6 +60,30 @@ ClientYamlConfig = BaseClientConfig
 ClientYamlConfig.__doc__ = """HTTP client configuration from YAML."""
 
 
+class PaginationConfig(BaseModel):
+    """API pagination configuration.
+
+    Single source of truth for all API pagination parameters.
+    Defined per-provider in configs/sources/*.yaml.
+
+    Pipelines may only override ``page_size`` via ``page_size_override``
+    but cannot redefine the pagination strategy.
+
+    Attributes:
+        page_size: Number of records per paginated API page.
+        id_batch_size: Number of IDs per filtered query batch.
+        strategy: Pagination strategy (offset or cursor).
+        max_url_length: Maximum URL length for GET requests.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    page_size: int | None = Field(default=None, ge=1, le=10000)
+    id_batch_size: int | None = Field(default=None, ge=1, le=5000)
+    strategy: Literal["offset", "cursor"] = "offset"
+    max_url_length: int | None = Field(default=None, ge=100, le=10000)
+
+
 class ProviderConfigYaml(BaseModel):
     """Provider-specific configuration from YAML.
 
@@ -61,9 +91,10 @@ class ProviderConfigYaml(BaseModel):
         provider: Provider name (chembl, pubchem, uniprot, pubmed).
         base_url: Base URL for the API.
         client: HTTP client settings.
-        batch_size: Provider-specific batch size for API requests.
-        page_size: Page size for paginated requests (ChEMBL specific).
-        max_url_length: Maximum URL length (ChEMBL specific).
+        pagination: API pagination settings (single source of truth).
+        batch_size: Deprecated — use pagination.id_batch_size.
+        page_size: Deprecated — use pagination.page_size.
+        max_url_length: Deprecated — use pagination.max_url_length.
         default_email: Default email for NCBI APIs (PubMed specific).
     """
 
@@ -72,11 +103,54 @@ class ProviderConfigYaml(BaseModel):
     provider: str = ""
     base_url: str | None = None
     client: ClientYamlConfig = Field(default_factory=ClientYamlConfig)
+    pagination: PaginationConfig = Field(default_factory=PaginationConfig)
+    # Legacy fields — kept for backward compatibility.
+    # When set, they are promoted into ``pagination`` by the model_validator.
     batch_size: int | None = Field(default=None, ge=1, le=10000)
     page_size: int | None = Field(default=None, ge=1, le=10000)
     max_url_length: int | None = Field(default=None, ge=100, le=10000)
     api_version: str | None = None
     default_email: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _promote_legacy_pagination(cls, data: dict) -> dict:  # type: ignore[type-arg]
+        """Promote legacy batch_size/page_size/max_url_length into pagination.
+
+        When the ``pagination`` section is absent but legacy fields are set,
+        this validator builds the ``pagination`` dict from them.
+        Explicit ``pagination`` values always take precedence.
+        """
+        if not isinstance(data, dict):
+            return data
+
+        pagination = data.get("pagination")
+        if isinstance(pagination, dict):
+            # Explicit pagination section — use legacy fields only as fallback
+            if "id_batch_size" not in pagination and data.get("batch_size") is not None:
+                pagination.setdefault("id_batch_size", data["batch_size"])
+            if "page_size" not in pagination and data.get("page_size") is not None:
+                pagination.setdefault("page_size", data["page_size"])
+            if (
+                "max_url_length" not in pagination
+                and data.get("max_url_length") is not None
+            ):
+                pagination.setdefault("max_url_length", data["max_url_length"])
+        else:
+            # No explicit pagination section — build from legacy fields
+            pag: dict[str, object] = {}
+            if data.get("batch_size") is not None:
+                pag["id_batch_size"] = data["batch_size"]
+            if data.get("page_size") is not None:
+                pag["page_size"] = data["page_size"]
+            if data.get("max_url_length") is not None:
+                pag["max_url_length"] = data["max_url_length"]
+            if data.get("cursor_pagination"):
+                pag["strategy"] = "cursor"
+            if pag:
+                data["pagination"] = pag
+
+        return data
 
 
 class SourceSectionConfig(BaseModel):
@@ -157,26 +231,50 @@ class SourceYamlConfig(BaseModel):
         return self.source.circuit_breaker
 
     @property
+    def pagination(self) -> PaginationConfig:
+        """Get pagination config (single source of truth for API pagination)."""
+        return self.source.provider_config.pagination
+
+    @property
     def batch_size(self) -> int:
-        """Get batch size (provider_config takes precedence over source level)."""
+        """Get ID batch size for filtered queries.
+
+        Resolution order:
+        1. pagination.id_batch_size (canonical, if explicitly set)
+        2. provider_config.batch_size (legacy)
+        3. source.batch_size (fallback)
+        """
+        pag = self.source.provider_config.pagination
+        if pag.id_batch_size is not None:
+            return pag.id_batch_size
         if self.source.provider_config.batch_size is not None:
             return self.source.provider_config.batch_size
         return self.source.batch_size
 
     @property
     def page_size(self) -> int | None:
-        """Get page size for paginated APIs (e.g., ChEMBL).
+        """Get page size for paginated APIs.
 
-        Returns None if not specified, allowing adapters to use their defaults.
+        Resolution order:
+        1. pagination.page_size (canonical)
+        2. provider_config.page_size (legacy)
         """
+        pag = self.source.provider_config.pagination
+        if pag.page_size is not None:
+            return pag.page_size
         return self.source.provider_config.page_size
 
     @property
     def max_url_length(self) -> int | None:
-        """Get max URL length for APIs (e.g., ChEMBL).
+        """Get max URL length for APIs.
 
-        Returns None if not specified, allowing adapters to use their defaults.
+        Resolution order:
+        1. pagination.max_url_length (canonical)
+        2. provider_config.max_url_length (legacy)
         """
+        pag = self.source.provider_config.pagination
+        if pag.max_url_length is not None:
+            return pag.max_url_length
         return self.source.provider_config.max_url_length
 
     @property
@@ -204,15 +302,21 @@ class SourceYamlConfig(BaseModel):
         """Get base URL."""
         return self.source.provider_config.base_url
 
-    def to_adapter_config(self, default_page_size: int = 1000) -> DomainAdapterConfig:
+    def to_adapter_config(
+        self,
+        default_page_size: int = 1000,
+        page_size_override: int | None = None,
+    ) -> DomainAdapterConfig:
         """Convert source config to domain AdapterConfig.
 
         Creates an immutable domain configuration object from YAML settings.
-        This is the single source of truth for adapter parameters.
+        Pagination parameters are read from the canonical ``pagination`` section.
 
         Args:
             default_page_size: Default page size if not specified in config.
                 Different providers may have different defaults.
+            page_size_override: Optional pipeline-level page_size override.
+                When set, takes precedence over source pagination config.
 
         Returns:
             DomainAdapterConfig: Immutable adapter configuration.
@@ -223,11 +327,14 @@ class SourceYamlConfig(BaseModel):
             >>> adapter_config.batch_size
             20
         """
+        effective_page_size = (
+            page_size_override
+            if page_size_override is not None
+            else (self.page_size if self.page_size is not None else default_page_size)
+        )
         return DomainAdapterConfig(
             batch_size=self.batch_size,
-            page_size=(
-                self.page_size if self.page_size is not None else default_page_size
-            ),
+            page_size=effective_page_size,
             timeout_sec=self.timeout_sec,
             max_retries=self.max_retries,
         )
@@ -236,6 +343,7 @@ class SourceYamlConfig(BaseModel):
 __all__ = [
     "CircuitBreakerYamlConfig",
     "ClientYamlConfig",
+    "PaginationConfig",
     "ProviderConfigYaml",
     "RateLimitYamlConfig",
     "SourceSectionConfig",
