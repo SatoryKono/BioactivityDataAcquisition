@@ -172,13 +172,13 @@ configs/quality/
 ```
 
 Entity configs могут:
-1. Ссылаться на DQ файл: `dq_config_file: ../../dq/entities/chembl/activity.yaml`
+1. Ссылаться на DQ файл: `dq_config_file: ../../quality/entities/chembl/activity.yaml`
 2. Определять inline правила в `dq_overrides:`
 3. Комбинировать оба подхода (inline overrides поверх файла)
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-dq_config_file: ../../dq/entities/chembl/activity.yaml
+dq_config_file: ../../quality/entities/chembl/activity.yaml
 
 dq_overrides:
   field_validations:

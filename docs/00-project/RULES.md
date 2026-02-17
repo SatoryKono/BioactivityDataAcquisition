@@ -1412,8 +1412,8 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 #
 # Auto-computed by convention:
 #   - source_file: ../../sources/chembl.yaml
-#   - dq_config_file: ../../dq/entities/chembl/activity.yaml
-#   - filter_config_file: ../../filter/entities/chembl/activity.yaml
+#   - dq_config_file: ../../quality/entities/chembl/activity.yaml
+#   - filter_config_file: ../../filters/entities/chembl/activity.yaml
 #   - sink paths: data/output/{layer}/chembl/activity
 #   - sink.silver.primary_key: ["activity_id"]
 

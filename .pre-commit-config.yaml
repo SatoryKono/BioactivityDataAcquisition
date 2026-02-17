@@ -119,6 +119,14 @@ repos:
         language: python
         pass_filenames: false
         stages: [pre-commit]
+      - id: lint-config-paths
+        name: Check for legacy dq/filter config path references
+        entry: python scripts/lint_config_paths.py
+        language: python
+        pass_filenames: false
+        files: ^(configs/|src/|docs/)
+        types_or: [yaml, json, python, markdown]
+
       - id: check-root-vcr-cassettes
         name: Block root-level VCR cassette files
         entry: python scripts/check_root_vcr_cassettes.py
