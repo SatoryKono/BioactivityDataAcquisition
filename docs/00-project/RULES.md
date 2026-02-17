@@ -62,13 +62,16 @@
 Интерфейсы определяются в пакете `domain/ports/` через `typing.Protocol`:
 
 - **Design-time**: `mypy --strict` проверяет соответствие типов во время сборки. Основной механизм контроля.
-- **Runtime Boundary**: Следующие порты **SHOULD** быть `@runtime_checkable` для boundary validation в composition layer:
+- **Runtime Boundary**: Следующие критические порты **SHOULD** быть `@runtime_checkable` для boundary validation в composition layer:
   - `DataSourcePort` — для проверки адаптеров при регистрации
   - `FilterableDataSourcePort` — для проверки расширенных адаптеров
   - `HealthCheckPort` — для проверки health-check capability
   - `StoragePort` — для проверки storage backends
 
-  Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) используют structural subtyping без runtime проверок и **MAY** не иметь `@runtime_checkable`. Семантика поведения в runtime не проверяется типами.
+  Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime_checkable`.
+
+  > **Текущее состояние:** Все 38 портов декорированы `@runtime_checkable` (100% coverage).
+  > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
 
 ```python
@@ -1029,7 +1032,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 ### 5.6. Среды (Environments)
 
-- **Dev**: Локальная разработка (Docker Compose). Данные: фикстуры или сэмпл Bronze.
+- **Dev**: Локальная разработка (Local-Only, см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)). Данные: фикстуры или сэмпл Bronze.
 - **Staging**: Полная копия архитектуры. Данные: Prod-like (обфусцированные). Тест деплоя.
 - **Prod**: Боевая среда. Доступ на запись только у CI/CD.
 
