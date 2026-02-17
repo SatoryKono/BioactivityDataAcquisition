@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.19 (Statistics Update), 2026-02-16*
+*Версия: 5.20 (JSON Field Typing Policy), 2026-02-17*
 
 ## Введение (Quick Reference)
 
@@ -350,18 +350,23 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 - Pandera-контракты типизируют JSON-like поля как `Series[str]` (не `Series[object]`).
 - Трансформеры сериализуют list/dict через каноническую сериализацию до записи в Silver/Gold.
+- **Serialization**: `json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=True)`.
+- **Null semantics**: отсутствие данных хранится как `NULL` (`None`), а не `'[]'`, `'{}'` или sentinel.
 - Пустые коллекции нормализуются в `NULL` (`None`), а не `[]`/`{}` строками.
 
 **MUST NOT:**
 
 - Использовать `Series[object]` для JSON-like полей в Silver/Gold контрактах.
 - Смешивать нативные list/dict и JSON string для одного и того же поля между пайплайнами.
+- Вводить новые поля как native list/object.
 
 **Совместимость и миграция:**
 
+- **MAY (временно)**: legacy native list/object в существующих таблицах до завершения миграции по [ADR-035](02-architecture/decisions/ADR-035-json-field-typing-policy.md).
 - Для breaking-изменений типов применяется окно совместимости 14 дней с dual-read (старый + новый формат).
 - После окна совместимости выполняется Delta backfill и удаление legacy-формата из контрактов.
-- Подробный план и инвентарь: `ADR-035 JSON Field Typing Policy`.
+- Полный реестр JSON-like полей и расхождений типов: [ADR-035](02-architecture/decisions/ADR-035-json-field-typing-policy.md) (Appendix A).
+- Согласование strict validation: [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md).
 
 #### Жизненный цикл Карантина
 
@@ -1584,6 +1589,7 @@ fields:
 | [ADR-016](02-architecture/decisions/ADR-016-error-handling-strategy.md)           | Error Handling Strategy                  | Accepted           | 2025-12-26 |
 | [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md)        | Observability Architecture               | Accepted           | 2025-12-26 |
 | [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md)            | Gold Strict Validation                   | Accepted           | 2025-12-28 |
+| [ADR-035](02-architecture/decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)   | Accepted           | 2026-02-17 |
 | [ADR-019](02-architecture/decisions/ADR-019-observability-port-enforcement.md)    | Observability Port Enforcement           | Accepted           | 2025-12-26 |
 | [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md)        | BasePipeline Decomposition               | Accepted           | 2025-12-16 |
 | [ADR-021](02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md)           | DDD Aggregates Adoption                  | Accepted           | 2025-12-29 |

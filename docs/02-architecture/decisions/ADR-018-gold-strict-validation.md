@@ -193,6 +193,16 @@ sink:
 | high-volume facts (chembl: activity)                                                                                                  | `overwrite` (implicit)                  | `append`               | No (if consumers read latest partitions) | Set explicit `mode: append`, keep Silver merge for idempotency                            |
 | recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | `overwrite` (implicit)                  | `overwrite` (explicit) | No                                       | Keep overwrite, but configure explicitly in pipeline YAML                                 |
 
+### 7. Политика типов JSON-полей (дополнение)
+
+С 2026-02-17 strict validation в Gold синхронизирована с единой политикой типизации JSON-like полей:
+
+- **Канонический стандарт**: JSON-like поля в Silver и Gold представлены как canonical JSON string.
+- **Нормативный источник**: [ADR-035](ADR-035-json-field-typing-policy.md).
+- **Ограничение для strict mode**: при `strict_gold_validation=True` поля, определенные как JSON-like, валидируются как `Series[str]` (не `Series[object]`).
+
+Это устраняет классы ошибок, где Silver передает `pa.list_(...)`, а Gold ожидает `Series[str]` (или наоборот), и делает контракты межслойной валидации детерминированными.
+
 ## Justification
 
 ### 1. Гарантия качества данных
