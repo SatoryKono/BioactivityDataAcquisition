@@ -575,13 +575,13 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     target_components: Series[str] = pa.Field(nullable=True)
     cross_references: Series[str] = pa.Field(nullable=True)
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
-    component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_accessions: Series[str] = pa.Field(nullable=True)  # list[str]
     primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
-    component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
-    component_types: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_relationships: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_ids: Series[str] = pa.Field(nullable=True)  # list[int]
+    component_types: Series[str] = pa.Field(nullable=True)  # list[str]
+    component_relationships: Series[str] = pa.Field(nullable=True)  # list[str]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -617,7 +617,7 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     protein_classification_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
-    protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
+    protein_classification_ids: Series[str] = pa.Field(nullable=True)  # list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")

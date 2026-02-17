@@ -74,27 +74,26 @@ class TargetSchema(ETLRecordSchema):
         nullable=True, description="JSON string of aggregated component synonyms."
     )
 
-    # === Flattened Component Fields (Lists) ===
-    # Note: Pandera Series[object] is used for lists, validation is limited
-    component_accessions: Series[object] | None = pa.Field(
-        nullable=True, description="List of component accessions."
+    # === Flattened Component Fields (JSON Arrays) ===
+    component_accessions: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical JSON array of component accessions."
     )
-    component_descriptions: Series[object] | None = pa.Field(
-        nullable=True, description="List of component descriptions."
+    component_descriptions: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical JSON array of component descriptions."
     )
     primary_component_id: Series[float] | None = pa.Field(
         nullable=True,
         coerce=True,
         description="Primary component ID (first from list).",
     )
-    component_ids: Series[object] | None = pa.Field(
-        nullable=True, description="List of component IDs."
+    component_ids: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical JSON array of component IDs."
     )
-    component_types: Series[object] | None = pa.Field(
-        nullable=True, description="List of component types."
+    component_types: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical JSON array of component types."
     )
-    component_relationships: Series[object] | None = pa.Field(
-        nullable=True, description="List of component relationships."
+    component_relationships: Series[str] | None = pa.Field(
+        nullable=True, description="Canonical JSON array of component relationships."
     )
 
     class Config:

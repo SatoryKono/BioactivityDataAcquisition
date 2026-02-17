@@ -227,8 +227,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "authors": authors_json,
             "author_keys": author_keys,
             "affiliation_list": affiliations_json,
-            "institution_ids": institution_ids,
-            "institution_country_codes": institution_country_codes,
+            "institution_ids": self.serialize_json_list(institution_ids),
+            "institution_country_codes": self.serialize_json_list(
+                institution_country_codes
+            ),
             # ROR IDs (may be empty if not returned by Works API)
             "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
             "author_orcids": (
@@ -263,8 +265,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             else None,
             # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
-            "subject_mesh": subject_mesh,
-            "subject_keywords": subject_keywords,
+            "subject_mesh": self.serialize_json_list(subject_mesh),
+            "subject_keywords": self.serialize_json_list(subject_keywords),
             "language": rec.get("language"),
             # Bibliographic info (from biblio object)
             "volume": biblio_info.get("volume"),
