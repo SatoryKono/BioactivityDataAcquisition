@@ -32,7 +32,8 @@ filter_batch_size: 20
 # -----------------------------------------------------------------------------
 sink:
   silver: {}
-  gold: {}
+  gold:
+    mode: append
 
 # -----------------------------------------------------------------------------
 # DQ Overrides (applied on top of entity DQ config)

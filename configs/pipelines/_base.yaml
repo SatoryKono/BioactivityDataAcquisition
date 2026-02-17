@@ -77,7 +77,7 @@ sink:
   gold:
     enabled: true
     format: delta
-    mode: overwrite
+    mode: append
     deterministic: true
     save_metadata: true
     dq_report:

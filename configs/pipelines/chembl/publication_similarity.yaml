@@ -42,4 +42,5 @@ sink:
   bronze: {}
   silver:
     partition_by: []  # No good partition key
-  gold: {}
+  gold:
+    mode: overwrite

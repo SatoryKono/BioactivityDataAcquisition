@@ -21,6 +21,7 @@ Gold-слой должен гарантировать качество данн�
 @dataclass(frozen=True)
 class PipelineConfig:
     """Конфигурация пайплайна."""
+
     name: str
     provider: str
     entity: str
@@ -30,11 +31,11 @@ class PipelineConfig:
 
 **Правила валидации:**
 
-| Условие | `strict_gold_validation=True` | `strict_gold_validation=False` |
-|---------|-------------------------------|--------------------------------|
-| `gold_schema=None` | `SchemaValidationError` (FAIL) | Warning в лог |
-| Несоответствие типов | `SchemaValidationError` (FAIL) | Warning + пропуск записи |
-| Отсутствующие поля | `SchemaValidationError` (FAIL) | Warning + `None` значение |
+| Условие              | `strict_gold_validation=True`  | `strict_gold_validation=False` |
+| -------------------- | ------------------------------ | ------------------------------ |
+| `gold_schema=None`   | `SchemaValidationError` (FAIL) | Warning в лог                  |
+| Несоответствие типов | `SchemaValidationError` (FAIL) | Warning + пропуск записи       |
+| Отсутствующие поля   | `SchemaValidationError` (FAIL) | Warning + `None` значение      |
 
 ### 2. Иерархия валидации
 
@@ -91,17 +92,17 @@ class BasePipeline:
 Feature flag `strict_gold_validation` позволяет:
 
 1. **Постепенную миграцию**: Существующие пайплайны продолжают работать
-2. **Явный opt-in**: Новые пайплайны включают строгую валидацию
-3. **Тестирование**: Можно включить в staging до production
+1. **Явный opt-in**: Новые пайплайны включают строгую валидацию
+1. **Тестирование**: Можно включить в staging до production
 
 **План миграции:**
 
-| Фаза | Действие | Срок |
-|------|----------|------|
-| 1 | Добавить `strict_gold_validation` flag | Сейчас |
-| 2 | Определить Gold-схемы для всех пайплайнов | - |
-| 3 | Включить `strict_gold_validation=True` поэтапно | - |
-| 4 | Сделать `strict_gold_validation=True` по умолчанию | - |
+| Фаза | Действие                                           | Срок   |
+| ---- | -------------------------------------------------- | ------ |
+| 1    | Добавить `strict_gold_validation` flag             | Сейчас |
+| 2    | Определить Gold-схемы для всех пайплайнов          | -      |
+| 3    | Включить `strict_gold_validation=True` поэтапно    | -      |
+| 4    | Сделать `strict_gold_validation=True` по умолчанию | -      |
 
 ### 5. Конфигурация пайплайна
 
@@ -139,7 +140,7 @@ gold_schema:
 
 Новый тип исключения для валидации схем:
 
-```python
+````python
 class SchemaValidationError(BioETLError):
     """Ошибка валидации схемы Gold-слоя.
 
@@ -152,13 +153,51 @@ class SchemaValidationError(BioETLError):
     def __init__(self, message: str, field: str | None = None):
         super().__init__(message)
         self.field = field
-```
+
+### 7. Политика историчности Gold (SCD2)
+
+Для Gold-слоя вводится явная классификация сущностей по требованиям к хранению истории.
+
+| Класс сущности | Критерии | Рекомендуемый Gold mode |
+|---|---|---|
+| Reference dictionaries | Справочники/таксономии, где коды и названия корректируются со временем (без удаления исторических значений) | `scd2` |
+| Slowly evolving records | Записи с редкими, но бизнес-значимыми изменениями атрибутов (например, аннотации/классификация) | `scd2` |
+| Publication metadata | Метаданные публикаций из внешних API, где поля обогащения могут изменяться ретроспективно | `scd2` |
+| Recomputed aggregates / derived outputs | Полностью пересчитываемые витрины и производные аналитические таблицы | `overwrite` |
+
+Для всех SCD2-кандидатов Gold mode **MUST** задаваться явно в pipeline YAML (не полагаться на базовый дефолт).
+
+**Шаблон `scd_config` (обязательные поля):**
+
+```yaml
+sink:
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
+````
+
+Обязательные ключи `scd_config`: `valid_from`, `valid_to`, `is_current`, `version`.
+
+### 8. Migration table (Gold write mode)
+
+| Entity                                                                                                                                | Current Mode                            | Recommended Mode       | Breaking                                 | Migration                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ---------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| publication (chembl, pubmed, crossref, openalex, semanticscholar)                                                                     | `overwrite` (implicit via base/default) | `scd2`                 | Yes (new SCD2 columns/history semantics) | Full snapshot bootstrap -> enable `mode: scd2` + `scd_config` -> backfill valid intervals |
+| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | `overwrite` (implicit)                  | `scd2`                 | Yes                                      | Rebuild Gold once, then switch to SCD2 with versioned updates                             |
+| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | `overwrite` (implicit)                  | `scd2`                 | Yes                                      | Initialize current snapshot as version=1, future changes produce new versions             |
+| high-volume facts (chembl: activity)                                                                                                  | `overwrite` (implicit)                  | `append`               | No (if consumers read latest partitions) | Set explicit `mode: append`, keep Silver merge for idempotency                            |
+| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | `overwrite` (implicit)                  | `overwrite` (explicit) | No                                       | Keep overwrite, but configure explicitly in pipeline YAML                                 |
 
 ## Justification
 
 ### 1. Гарантия качества данных
 
 Gold-слой потребляется downstream системами:
+
 - ML pipelines
 - Reporting dashboards
 - API endpoints
@@ -168,6 +207,7 @@ Gold-слой потребляется downstream системами:
 ### 2. Раннее обнаружение проблем
 
 Валидация на этапе трансформации:
+
 - Быстрый feedback loop
 - Проблемы обнаруживаются до записи в хранилище
 - Меньше затрат на исправление
@@ -175,6 +215,7 @@ Gold-слой потребляется downstream системами:
 ### 3. Документирование контракта
 
 Gold-схема служит документацией:
+
 - Явный контракт с consumers
 - Версионирование схемы возможно
 - Self-documenting pipeline configuration
@@ -182,6 +223,7 @@ Gold-схема служит документацией:
 ### 4. Feature Flag минимизирует риск
 
 Постепенное включение:
+
 - Нет breaking changes для существующих пайплайнов
 - Можно откатить на уровне конфигурации
 - Не требует code changes для rollback
@@ -210,6 +252,7 @@ src/bioetl/
 # infrastructure/validation/gold_validator.py
 import pandera as pa
 
+
 class GoldValidator:
     """Валидатор Gold-схем на основе Pandera."""
 
@@ -229,6 +272,7 @@ class GoldValidator:
 
 ```python
 # tests/unit/application/test_gold_validation.py
+
 
 def test_strict_validation_fails_without_schema():
     """strict_gold_validation=True без схемы должен падать."""
@@ -270,6 +314,7 @@ def test_non_strict_validation_warns_without_schema(caplog):
 ### 1. Всегда требовать Gold-схему
 
 Отклонено потому что:
+
 - Breaking change для всех существующих пайплайнов
 - Требует одновременного обновления всех конфигов
 - Высокий риск при деплое
@@ -277,6 +322,7 @@ def test_non_strict_validation_warns_without_schema(caplog):
 ### 2. Валидация только в production
 
 Отклонено потому что:
+
 - Проблемы обнаруживаются слишком поздно
 - Dev/prod parity нарушается
 - Сложнее отлаживать
@@ -284,6 +330,7 @@ def test_non_strict_validation_warns_without_schema(caplog):
 ### 3. Schema inference вместо явной схемы
 
 Отклонено потому что:
+
 - Не гарантирует стабильность
 - Schema drift остаётся незамеченным
 - Нет документации контракта
@@ -291,6 +338,7 @@ def test_non_strict_validation_warns_without_schema(caplog):
 ### 4. Валидация на уровне Delta Lake
 
 Отклонено потому что:
+
 - Delta Lake schema enforcement недостаточно гибкий
 - Нет semantic validation (ranges, patterns)
 - Ошибки обнаруживаются на этапе записи, не трансформации
@@ -315,15 +363,16 @@ def test_non_strict_validation_warns_without_schema(caplog):
 
 Все основные механизмы реализованы:
 
-| Компонент | Статус | Расположение |
-|-----------|--------|--------------|
-| `strict_gold_validation` флаг | ✅ Реализован | `domain/config.py:259` |
-| `GoldValidatorPort` протокол | ✅ Реализован | `domain/ports/validation.py:41-61` |
-| `PanderaGoldValidator` | ✅ Реализован | `infrastructure/validation/pandera_validator.py:97-210` |
-| `GoldWriter._validate_schema_strict()` | ✅ Реализован | `infrastructure/storage/gold_writer.py:226-232` |
-| `NoOpGoldValidator` | ✅ Реализован | `infrastructure/validation/pandera_validator.py:213-230` |
+| Компонент                              | Статус        | Расположение                                             |
+| -------------------------------------- | ------------- | -------------------------------------------------------- |
+| `strict_gold_validation` флаг          | ✅ Реализован | `domain/config.py:259`                                   |
+| `GoldValidatorPort` протокол           | ✅ Реализован | `domain/ports/validation.py:41-61`                       |
+| `PanderaGoldValidator`                 | ✅ Реализован | `infrastructure/validation/pandera_validator.py:97-210`  |
+| `GoldWriter._validate_schema_strict()` | ✅ Реализован | `infrastructure/storage/gold_writer.py:226-232`          |
+| `NoOpGoldValidator`                    | ✅ Реализован | `infrastructure/validation/pandera_validator.py:213-230` |
 
 **Отличия от первоначального предложения:**
+
 - Вместо `SchemaValidationError` используется `ValidationResult` с errors — более гибкий подход
 - Валидация интегрирована в `GoldWriter` через `_validate_schema_strict()` проверку
 - Feature flag находится в `RuntimeConfig` вместо `PipelineConfig` — централизованное управление
