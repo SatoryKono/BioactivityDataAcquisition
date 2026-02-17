@@ -31,9 +31,7 @@ source:
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)
 # -----------------------------------------------------------------------------
-# Use data_schema_file for layer-specific column configuration (silver/gold).
-data_schema_file: ../../schemas/pubmed/publication.yaml
-
+# data_schema_file auto-resolved via convention: ../../schemas/pubmed/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
