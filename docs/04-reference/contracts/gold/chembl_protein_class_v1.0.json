@@ -1,99 +1,124 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Protein Class Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Protein Class Gold Contract. Auto-generated from Pandera schema ChEMBLProteinClassGoldSchema.",
+  "title": "ChEMBLProteinClassGoldSchema Contract",
+  "description": "Gold layer data contract for chembl_protein_class. Auto-generated from Pandera schema ChEMBLProteinClassGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "content_hash": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "protein_class_id": {
       "type": "number",
-      "minimum": 1
+      "nullable": false,
+      "description": ""
     },
     "parent_id": {
       "type": [
         "number",
         "null"
       ],
-      "minimum": 1
+      "nullable": true,
+      "description": ""
     },
     "class_level": {
       "type": [
         "number",
         "null"
       ],
-      "minimum": 1,
-      "maximum": 8
+      "nullable": true,
+      "description": ""
     },
     "pref_name": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "short_name": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "protein_class_desc": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "definition": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "sort_order": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "replaced_by": {
       "type": [
         "number",
         "null"
       ],
-      "minimum": 1
+      "nullable": true,
+      "description": ""
     },
     "downgraded": {
       "type": [
         "number",
         "null"
       ],
-      "enum": [
-        0,
-        1
-      ]
+      "nullable": true,
+      "description": ""
     },
     "_run_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_run_type": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_source_batch_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "_ingestion_ts": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_index": {
-      "type": "integer"
+      "type": "integer",
+      "nullable": false,
+      "description": ""
     }
   },
   "required": [

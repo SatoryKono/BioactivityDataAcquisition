@@ -1,77 +1,35 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLCellLineGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_cell_line. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
+  "title": "ChEMBLTissueGoldSchema Contract",
+  "description": "Gold layer data contract for chembl_tissue. Auto-generated from Pandera schema ChEMBLTissueGoldSchema.",
   "type": "object",
   "properties": {
-    "entity_id": {
+    "tissue_id": {
       "type": "string",
       "nullable": false,
-      "description": ""
+      "description": "ChEMBL tissue ID"
     },
-    "content_hash": {
+    "pref_name": {
       "type": "string",
       "nullable": false,
-      "description": ""
+      "description": "Preferred tissue name"
     },
-    "cell_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "cell_name": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "cell_description": {
+    "bto_id": {
       "type": [
         "string",
         "null"
       ],
       "nullable": true,
-      "description": ""
+      "description": "BRENDA Tissue Ontology ID"
     },
-    "cell_source_tissue": {
+    "caloha_id": {
       "type": [
         "string",
         "null"
       ],
       "nullable": true,
-      "description": ""
-    },
-    "cell_source_organism": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "cell_source_taxonomy_id": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "cellosaurus_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "cl_lincs_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
+      "description": "CALIPHO ID"
     },
     "efo_id": {
       "type": [
@@ -79,7 +37,15 @@
         "null"
       ],
       "nullable": true,
-      "description": ""
+      "description": "Experimental Factor Ontology ID"
+    },
+    "uberon_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Uberon Ontology ID"
     },
     "_run_id": {
       "type": "string",
@@ -115,9 +81,7 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "cell_id",
-    "cell_name",
-    "content_hash",
-    "entity_id"
+    "pref_name",
+    "tissue_id"
   ]
 }
