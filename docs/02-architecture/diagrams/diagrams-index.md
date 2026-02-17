@@ -61,6 +61,30 @@
 - [ ] Добавлена строка в этот индекс (`diagrams-index.md`).
 - [ ] На архитектурной странице `docs/02-architecture/*.md` есть контекстный абзац со ссылкой на диаграмму.
 
+## Правило поддержки актуальности индекса
+
+При добавлении/удалении `*.mermaid` файлов в `mermaid/` обязательно обновлять таблицу **Diagram Overview** в том же PR.
+
+Полуавтоматическая проверка:
+
+```bash
+cd docs/02-architecture/diagrams
+python - <<'PY'
+from pathlib import Path
+import re
+
+idx = Path("diagrams-index.md").read_text(encoding="utf-8")
+table_files = sorted(set(re.findall(r"`([^`]+\.mermaid)`", idx)))
+disk_files = sorted(p.name for p in Path("mermaid").glob("*.mermaid"))
+
+missing_in_index = sorted(set(disk_files) - set(table_files))
+missing_on_disk = sorted(set(table_files) - set(disk_files))
+
+print("Missing in index:", missing_in_index or "none")
+print("Missing on disk:", missing_on_disk or "none")
+PY
+```
+
 ## Rendering to PNG
 
 ```bash
