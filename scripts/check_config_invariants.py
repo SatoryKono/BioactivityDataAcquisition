@@ -83,6 +83,7 @@ PIPELINE_ALLOWED_KEYS = {
     "maintenance",
     "transform",
     "extraction_params",
+    "page_size_override",
 }
 COMPOSITE_ALLOWED_KEYS = {
     "composite",
@@ -104,6 +105,7 @@ QUALITY_ALLOWED_KEYS = {
     "cross_field_validations",
     "conditional_validations",
     "report",
+    "required_fields",
 }
 FILTER_ALLOWED_KEYS = {
     "version",
