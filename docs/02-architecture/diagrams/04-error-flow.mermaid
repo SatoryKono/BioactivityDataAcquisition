@@ -1,12 +1,53 @@
+%% Title: Error Handling and Quarantine Flow
+%% Covers: RULES.md §3.1 (Error Classification), §2.3 (Quarantine)
+%% Updated: 2026-02-17
+%% Components: ErrorClassifier, QuarantineManager, RecordProcessor, BatchTransformer
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 flowchart TD
-    A[Start Pipeline] --> B{Data Validation};
-    B -- OK --> C{Transformation};
-    B -- Error --> D[Move to Quarantine];
-    D --> E[Log Error];
-    E --> F[Notify];
+    subgraph Pipeline["Pipeline Execution"]
+        A[RecordProcessor<br/>processes record] --> B{Bronze DQ<br/>Validation}
+        B -->|Pass| C[BatchTransformer<br/>normalize & enrich]
+        B -->|Fail| Classify
 
-    C -- OK --> G{Load to Gold};
-    C -- Error --> D;
+        C --> D{Silver DQ<br/>Validation}
+        D -->|Pass| E[SilverWriter<br/>Delta merge]
+        D -->|Fail| Classify
 
-    G -- OK --> H[End Pipeline];
-    G -- Error --> D;
+        E --> F{Gold DQ<br/>Validation}
+        F -->|Pass| G[GoldWriter<br/>SCD2 write]
+        F -->|Fail| Classify
+
+        G --> H[Record committed]
+    end
+
+    subgraph Classification["Error Classification (§3.1)"]
+        Classify{ErrorClassifier} -->|"CriticalError<br/>(infra failure)"| Critical
+        Classify -->|"RecoverableError<br/>(transient)"| Retry
+        Classify -->|"DataQualityError<br/>(bad data)"| DQ
+    end
+
+    subgraph ErrorHandling["Error Handling"]
+        Critical[Abort pipeline<br/>release lock] --> LogCritical[Log CRITICAL<br/>+ metrics]
+        Retry[Retry with<br/>backoff] --> RetryCheck{Retries<br/>exhausted?}
+        RetryCheck -->|No| A
+        RetryCheck -->|Yes| DQ
+        DQ[Quarantine record] --> QWrite
+    end
+
+    subgraph Quarantine["Quarantine (§2.3)"]
+        QWrite[QuarantineManager<br/>writes entry] --> QMeta[Attach error<br/>metadata]
+        QMeta --> QLog[Log WARNING<br/>+ DQ metrics]
+        QLog --> Continue[Continue<br/>pipeline]
+    end
+
+    %% Styling
+    classDef success fill:#e8f5e9,stroke:#4CAF50,color:#1b5e20
+    classDef error fill:#ffebee,stroke:#FF6B6B,color:#b71c1c
+    classDef quarantine fill:#fff3e0,stroke:#FFA500,color:#e65100
+    classDef classify fill:#e3f2fd,stroke:#2196F3,color:#0d47a1
+
+    class H,G success
+    class Critical,LogCritical error
+    class QWrite,QMeta,QLog,DQ quarantine
+    class Classify classify
