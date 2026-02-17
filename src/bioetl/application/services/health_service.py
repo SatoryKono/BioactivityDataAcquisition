@@ -134,7 +134,7 @@ class HealthService:
     """
 
     logger: LoggerPort
-    _factory: Any  # DataSourceFactoryPort
+    _factory: DataSourceFactoryPort
 
     async def check_providers(
         self,
