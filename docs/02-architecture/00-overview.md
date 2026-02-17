@@ -28,10 +28,10 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 ### Diagrams
 
-- [diagrams/](diagrams/) — 35 Mermaid diagram files
+- [diagrams/mermaid/](diagrams/mermaid/) — Mermaid source files
+- [diagrams/png/](diagrams/png/) — Rendered PNG files
 - [diagrams/diagrams-index.md](diagrams/diagrams-index.md) — Full diagram index
 - [diagrams.md](diagrams.md) — Inline diagram collection
-- [diagrams/mermaid/](diagrams/mermaid/) — Additional 22 diagrams (актуально на 2026-02-11) (includes Composite Pipeline workflow)
 
 ### Architecture Decision Records (ADRs)
 
@@ -74,7 +74,7 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-031](decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization           | -                  |
 | [ADR-032](decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | §3.1               |
 | [ADR-033](decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | -                  |
-| [ADR-034](decisions/ADR-034-schema-domain-pairs.md)              | Schema↔Domain Configuration Pairs        | -                  |
+| [ADR-034](decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | -                  |
 
 ______________________________________________________________________
 
@@ -105,10 +105,10 @@ ______________________________________________________________________
 | Diagram                 | Description                                    | File                                                                                      |
 | ----------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd)         |
-| Layers Interaction      | How layers communicate                         | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                   |
+| Layers Interaction      | How layers communicate                         | [05-layers-interaction.mermaid](diagrams/mermaid/05-layers-interaction.mermaid)           |
 | Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [26_composite_pipeline_workflow.mmd](diagrams/mermaid/26_composite_pipeline_workflow.mmd) |
 | Provider Adapters       | 7 providers with rate limits                   | [23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd)   |
-| Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid)                   |
+| Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mermaid](diagrams/mermaid/17-pipeline-hierarchy.mermaid)           |
 
 ______________________________________________________________________
 

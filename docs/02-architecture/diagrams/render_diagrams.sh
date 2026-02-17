@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # BioETL Diagram Rendering Script
-# Renders Mermaid (.mmd) diagrams to high-resolution PNG images
+# Renders Mermaid (.mermaid) diagrams to high-resolution PNG images
 # Version: 1.0 | Date: 2026-01-20
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MERMAID_DIR="$SCRIPT_DIR/mermaid"
-IMAGES_DIR="$SCRIPT_DIR/images"
+IMAGES_DIR="$SCRIPT_DIR/png"
 
 # Configuration
 WIDTH=2400
@@ -48,7 +48,7 @@ echo -e "${GREEN}✓ mermaid-cli (mmdc) found${NC}"
 echo ""
 
 # Count total diagrams
-total_diagrams=$(find "$MERMAID_DIR" -name "*.mmd" | wc -l)
+total_diagrams=$(find "$MERMAID_DIR" -name "*.mermaid" | wc -l)
 echo "Found $total_diagrams Mermaid diagrams to render"
 echo ""
 
@@ -57,10 +57,10 @@ count=0
 success=0
 failed=0
 
-for file in "$MERMAID_DIR"/*.mmd; do
+for file in "$MERMAID_DIR"/*.mermaid; do
     if [ -f "$file" ]; then
         count=$((count + 1))
-        filename=$(basename "$file" .mmd)
+        filename=$(basename "$file" .mermaid)
         output="$IMAGES_DIR/${filename}.png"
 
         echo -e "${YELLOW}[$count/$total_diagrams]${NC} Rendering: $filename"
