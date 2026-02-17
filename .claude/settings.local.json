@@ -110,7 +110,10 @@
       "Bash(xxd:*)",
       "Bash(command -v:*)",
       "Bash(uv:*)",
-      "Bash(bash -n:*)"
+      "Bash(bash -n:*)",
+      "Bash(mmdc:*)",
+      "Bash(npm --version:*)",
+      "Bash(where:*)"
     ]
   },
   "enabledPlugins": {
