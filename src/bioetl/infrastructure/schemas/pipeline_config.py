@@ -597,7 +597,16 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         ge=1,
         le=5000,
-        description="Batch size when input_filter is active. Overrides batch_size.",
+        description="Deprecated: use source pagination.id_batch_size instead. "
+        "Batch size when input_filter is active. Overrides batch_size.",
+    )
+    page_size_override: int | None = Field(
+        default=None,
+        ge=1,
+        le=10000,
+        description="Override source pagination page_size for this pipeline. "
+        "The only pagination parameter a pipeline may set. "
+        "Source config defines pagination strategy and defaults.",
     )
     checkpoint_interval: int = Field(default=1000, ge=100)
 
