@@ -146,7 +146,8 @@ def _extract_vmax_entry(vmax: dict[str, Any]) -> dict[str, Any]:  # Any: JSON va
 
 
 def _extract_list_entries(
-    data_list: Any, extractor: Any
+    data_list: Any,  # Any: untyped UniProt JSON list
+    extractor: Any,  # Any: dynamic extractor callable
 ) -> list[dict[str, Any]]:  # Any: JSON
     """Extract entries from a list using the provided extractor function."""
     if not isinstance(data_list, list) or not data_list:
@@ -265,7 +266,9 @@ class CommentExtractor:
         return extracted
 
     @classmethod
-    def extract_by_type(cls, comments: Any, comment_type: str) -> str | None:
+    def extract_by_type(
+        cls, comments: Any, comment_type: str
+    ) -> str | None:  # Any: untyped UniProt JSON
         """Extract comments of specific type as JSON string.
 
         Args:
@@ -422,7 +425,9 @@ class CommentExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @staticmethod
-    def extract_biophysicochemical_properties(comments: Any) -> str | None:
+    def extract_biophysicochemical_properties(
+        comments: Any,
+    ) -> str | None:  # Any: untyped UniProt JSON
         """Extract biophysicochemical properties from comments.
 
         Includes pH optima, temperature optima, kinetic parameters (Km, Vmax),
@@ -460,7 +465,9 @@ class CommentExtractor:
         return cls.extract_by_type(comments, "INDUCTION")
 
     @staticmethod
-    def extract_isoform_details(comments: Any) -> dict[str, str | None]:
+    def extract_isoform_details(
+        comments: Any,
+    ) -> dict[str, str | None]:  # Any: untyped UniProt JSON
         """Extract detailed isoform information from ALTERNATIVE PRODUCTS.
 
         Parses isoform data to extract names, IDs, and synonyms separately.

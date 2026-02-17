@@ -174,7 +174,9 @@ def build_pipeline_runner(
     register_all_providers_fn: Callable[[], None] = register_all_providers,
     register_all_pipelines_fn: Callable[..., None] = register_all_pipelines,
     get_settings_fn: Callable[[], Settings] = get_settings,
-    load_pipeline_config_fn: Callable[[str], Any] = load_pipeline_config,
+    load_pipeline_config_fn: Callable[
+        [str], Any
+    ] = load_pipeline_config,  # Any: config type varies per pipeline
     build_observability_bundle_fn: Callable[
         ..., ObservabilityBundle
     ] = _build_observability_bundle,

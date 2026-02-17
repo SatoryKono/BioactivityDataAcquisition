@@ -924,8 +924,9 @@ class SilverWriter(BaseDeltaWriter):
         self,
         table_name: str,
         target_size: int | None = None,
-        partition_filters: list[tuple[str, str, Any]] | None = None,
-    ) -> dict[str, Any]:
+        partition_filters: list[tuple[str, str, Any]]
+        | None = None,  # Any: Delta Lake filter value type varies
+    ) -> dict[str, Any]:  # Any: compaction result metrics
         """Optimize table layout (compaction).
 
         Delegates to RetentionManager for maintenance operations.

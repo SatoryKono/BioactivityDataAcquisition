@@ -171,13 +171,12 @@ class RecordProcessor:
         )
 
     async def _execute_with_span(
-        # Any: callback return type v...
         self,
         name: str,
-        coro: Any,
+        coro: Any,  # Any: coroutine type varies per pipeline stage
         batch_id: BatchID,
         count: int,
-        on_error: Any = None,
+        on_error: Any = None,  # Any: error callback type varies per caller
     ) -> Any:  # Any: callback return type varies
         """Execute coroutine with tracing span."""
         span = self._start_span(name, batch_id, count)

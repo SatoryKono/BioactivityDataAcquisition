@@ -137,7 +137,9 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @classmethod
-    def extract_features_by_type(cls, features: Any, feature_type: str) -> str | None:
+    def extract_features_by_type(
+        cls, features: Any, feature_type: str
+    ) -> str | None:  # Any: untyped UniProt JSON
         """Extract sequence features by type.
 
         Args:
@@ -278,7 +280,9 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_modified_residues(cls, features: Any) -> str | None:
+    def extract_modified_residues(
+        cls, features: Any
+    ) -> str | None:  # Any: untyped UniProt JSON
         """Extract modified residue features.
 
         Args:

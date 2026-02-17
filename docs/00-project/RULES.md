@@ -919,9 +919,9 @@ from __future__ import annotations
 > **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
 > и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
 > они не содержат type annotations, требующих отложенной эвалюации.
-<!-- Updated: was 481/517 (93.0%), now 497/534 (93.1%); was 36, now 37 (audit 2026-02-16) -->
-> Текущее состояние: 497 из 534 файлов (93.1%) содержат импорт;
-> 37 файлов без импорта — 33 `__init__.py` и 4 файла данных/утилит.
+<!-- Updated: was 497/534 (93.1%), now 501/534 (93.8%); was 37, now 33 (audit 2026-02-17) -->
+> Текущее состояние: 501 из 534 файлов (93.8%) содержат импорт;
+> 33 файла без импорта — все `__init__.py` (re-export only).
 
 #### 4.4.2. Type Hints
 
@@ -1534,6 +1534,7 @@ fields:
 
 ## История Изменений (Changelog)
 
+- **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test_`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.
 - **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.
 - **5.18** (2026-02-15): Statistics Update. Обновлены числовые данные по результатам аудита 2026-02-14: файлов кода (499→517), future annotations (468→481), Int→Float coercion occurrences (~34→~88), publication field groups (94→106), LOC для ChemblAdapter (517→975), GoldWriter (593→946), PreflightService (527→818).
 - **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key_source` и `filter_field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
