@@ -791,7 +791,7 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to filter config file relative to pipeline config. "
         "When set, filter config is loaded from the hierarchical filter system. "
-        "Example: ../../filter/entities/chembl/activity.yaml",
+        "Example: ../../filters/entities/chembl/activity.yaml",
     )
     filter_rules: dict[str, Any] | None = Field(
         default=None,

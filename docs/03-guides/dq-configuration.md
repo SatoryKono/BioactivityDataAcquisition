@@ -132,7 +132,7 @@ entity_conditional_validations: []
 ```yaml
 # configs/pipelines/{provider}/{entity}.yaml
 pipeline_name: {provider}_{entity}
-dq_config_file: ../../dq/entities/{provider}/{entity}.yaml
+dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
 ```
 
 ## Validation Types
@@ -319,7 +319,7 @@ For exceptional cases, override DQ rules directly in pipeline config:
 ```yaml
 # configs/pipelines/chembl/activity.yaml
 pipeline_name: chembl_activity
-dq_config_file: ../../dq/entities/chembl/activity.yaml
+dq_config_file: ../../quality/entities/chembl/activity.yaml
 
 # Temporary override for migration period
 dq_overrides:

@@ -50,7 +50,7 @@ configs/filters/
 Pipeline configs reference filter config via `filter_config_file`:
 ```yaml
 pipeline_name: chembl_activity
-filter_config_file: ../../filter/entities/chembl/activity.yaml
+filter_config_file: ../../filters/entities/chembl/activity.yaml
 ```
 
 ### Implementation Components
