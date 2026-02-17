@@ -1,14 +1,15 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.20 | Last updated: 2026-02-16*
+*Synced with RULES.md v5.20 | Last updated: 2026-02-17*
 
-> **Documentation Update:** 2026-02-16
-> - Codebase metrics updated: ~1,114 Python files, ~115,656 LOC, ~11,985 tests
-> - ADR count corrected: 34 ADRs (ADR-001 through ADR-034)
+> **Documentation Update:** 2026-02-17
+> - Codebase metrics updated: 1,120 Python files (534 src + 586 tests), ~116,120 src LOC
+> - ADR count: 34 ADRs (ADR-001 through ADR-034)
 > - Pipeline configs: 26 configurations (21 single-source + 5 composite)
+> - YAML configs total: 121 (26 pipelines + 35 DQ + 34 filters + 26 schemas)
+> - Documentation files: 273 markdown files
 > - Adapter listing completed (all 7 providers)
-> - Gold contract link fixed (chembl_activity_v1.0.json)
-> - ADR-032 duplicate resolved (publication-validation → ADR-033)
+> - Diagrams: 50+ Mermaid source files
 
 ## Quick Links
 
@@ -43,7 +44,7 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v5.19)
+│   ├── RULES.md                 # Canonical rules document (v5.20)
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Tools & Setup
 │   ├── rules-summary.md         # TL;DR of RULES.md
@@ -57,7 +58,7 @@ docs/
 │
 ├── 02-architecture/             # Architecture & Decisions
 │   ├── 00-overview.md           # Architecture overview
-│   ├── decisions/               # ADRs (ADR-001..032)
+│   ├── decisions/               # ADRs (ADR-001..034)
 │   ├── diagrams/                # System diagrams
 │   │   └── mermaid/             # Mermaid source files
 │   └── ... (Layer docs: 01-domain, 02-application, etc.)
@@ -350,19 +351,20 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-02-16   | v5.19 (Statistics Update)   |
+| RULES.md                 | 2026-02-17   | v5.20 (Latest)               |
 | REQUIREMENTS.md          | 2026-02-04   | v1.5 (Local-Only sync)       |
 | glossary.md              | 2026-02-06   | v2.5 (Ubiquitous Language)   |
-| 00-map.md                | 2026-02-08   | v7.2 Doc Audit Sync          |
-| rules-summary.md         | 2026-02-03   | v5.19 Synced                 |
+| 00-map.md                | 2026-02-17   | v7.3 Audit remediation       |
+| rules-summary.md         | 2026-02-17   | v5.20 Synced                 |
+| TOOLS.md                 | 2026-02-17   | v2.1 Synced with RULES v5.20 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
-| ADR-001..034             | 2026-02-16   | All 34 ADRs documented       |
+| ADR-001..034             | 2026-02-17   | All 34 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
-| archived/audits/         | 2026-01-21   | Historical audit files       |
-| 02-architecture/diagrams/| 2025-12-31   | 34 диаграммы Mermaid         |
+| audits/                  | 2026-02-17   | Consolidated (audit/ merged) |
+| 02-architecture/diagrams/| 2025-12-31   | 50+ Mermaid diagrams         |
 
 ---
 
-*Last updated: 2026-02-08. Documentation sync audit completed.*
+*Last updated: 2026-02-17. Audit remediation (P0+P1) applied.*

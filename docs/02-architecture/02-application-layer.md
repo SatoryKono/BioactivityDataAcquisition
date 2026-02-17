@@ -140,8 +140,8 @@ factory = GenericPipelineFactory(
 | Файл                              | Компонент                   | Назначение                                                               |
 | --------------------------------- | --------------------------- | ------------------------------------------------------------------------ |
 | `runner.py`                       | `PipelineRunner`            | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
-| `batch_executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись (786 LOC)    |
-| `services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM                 |
+| `batch_executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись (774 LOC)    |
+| `../services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM (`application/services/`) |
 | `pipeline_services.py`            | `PipelineServices`          | DI bundle сервисов для PipelineRunner                                    |
 
 **`PipelineRunner`** — координатор исполнения:

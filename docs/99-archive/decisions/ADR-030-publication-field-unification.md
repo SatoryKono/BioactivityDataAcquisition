@@ -1,6 +1,6 @@
 # ADR-030: Publication Field Naming Unification
 
-**Status:** Proposed
+**Status:** Superseded (archived; canonical ADR-030: `docs/02-architecture/decisions/ADR-030-publication-pagination-strategy.md`)
 **Date:** 2026-01-29
 **Decision makers:** @BioETL-Team
 **Relates to:** ADR-024 (Entity Naming Unification), configs/composite/field_groups/publication.yaml, configs/schemas/composite/publication.yaml
