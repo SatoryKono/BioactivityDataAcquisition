@@ -1,0 +1,74 @@
+%% Title: Record Processing Pipeline — Single Record Journey
+%% Covers: RULES.md §2.1-§2.6 (Data Flow, DQ), §2.8 (Normalization)
+%% Rank: 7 (Score 8.56) — Best onboarding diagram: follow one record
+%% Updated: 2026-02-17
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    subgraph Source["1. External API"]
+        API["REST API Response\n(e.g., ChEMBL /activity)"]
+    end
+
+    subgraph Bronze["2. Bronze Layer"]
+        BW["BronzeWriter.write_bronze()\n• JSONL serialization\n• zstd compression\n• atomic rename\n• _manifest.json"]
+        BF[("Bronze File\nbronze/chembl/activity/\n2026-02-17/batch_001.jsonl.zst")]
+    end
+
+    subgraph Transform["3. Transform (RecordProcessor)"]
+        BT["BatchTransformer.transform()"]
+        TI["BaseTransformer._transform_impl()\n(e.g., ActivityTransformer)"]
+        NORM["Data Normalization\n• NaN → null\n• strip strings\n• dates → ISO\n• floats → round(10)"]
+        META["Add Metadata\n• _run_id (UUID)\n• _run_type (incremental/backfill)\n• _source_batch_id (FK)\n• _ingestion_ts (UTC now)"]
+        HASH["Compute _content_hash\n• exclude META_FIELDS\n• canonical JSON (sort_keys)\n• sha256 digest"]
+    end
+
+    subgraph Validate["4. Validate"]
+        PSV["PanderaSilverValidator.validate()\nActivitySchema (soft mode)"]
+        DQ{{"DQ Error Rate?"}}
+    end
+
+    subgraph Route["5. Route Decision"]
+        CLEAN["✅ Clean Record\n_dq_warn = false"]
+        WARN["⚠️ Warning Record\n_dq_warn = true\n(error rate < 5%)"]
+        QUAR["❌ Quarantine Record\nQuarantineManager.route()\nQuarantineEntry created"]
+        FAIL["💥 Batch FAIL\n(error rate > 20%)"]
+    end
+
+    subgraph Silver["6. Silver Layer"]
+        SW["SilverWriter.write_silver()\n• merge/upsert by PK\n• content_hash dedup\n• Delta Lake transaction"]
+        ST[("Silver Table\nsilver/chembl/activity/\n_delta_log/")]
+    end
+
+    subgraph GoldLayer["7. Gold Layer"]
+        TFG["transform_for_gold()\n• exclude JSON fields\n  (molecule_properties,\n   molecule_structures, etc.)"]
+        GV["PanderaGoldValidator.validate()\nChEMBLActivityGoldSchema\n(strict mode)"]
+        GW["GoldWriter.write_gold()"]
+        GT[("Gold Table\ngold/chembl/activity/\n_delta_log/")]
+    end
+
+    subgraph QuarDB["Quarantine Storage"]
+        QT[("Quarantine Table\nquarantine/chembl/activity/")]
+    end
+
+    %% Flow
+    API --> BW --> BF
+    BF --> BT --> TI --> NORM --> META --> HASH
+    HASH --> PSV --> DQ
+
+    DQ -->|"0% errors"| CLEAN
+    DQ -->|"< 5% errors"| WARN
+    DQ -->|"per-record error"| QUAR
+    DQ -->|"> 20% errors"| FAIL
+
+    CLEAN --> SW
+    WARN --> SW
+    SW --> ST
+    ST --> TFG --> GV --> GW --> GT
+
+    QUAR --> QT
+
+    %% Styling
+    style Bronze fill:#FFA500,stroke:#cc8400,color:#000
+    style Silver fill:#C0C0C0,stroke:#808080,color:#000
+    style GoldLayer fill:#FFD700,stroke:#ccac00,color:#000
+    style QuarDB fill:#FF6B6B,stroke:#cc4444,color:#000

@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=5&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=5&offset=0&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false
   response:
     body:
       string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
