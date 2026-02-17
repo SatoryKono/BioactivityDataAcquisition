@@ -75,7 +75,7 @@ silver_filters:
         - assay_id
         - assay_type
         - description
-        - target_chembl_id
+        - target_id
 
 # -----------------------------------------------------------------------------
 # Gold Filters
