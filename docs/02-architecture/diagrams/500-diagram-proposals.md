@@ -1,6 +1,6 @@
 # 500 New Mermaid Diagram Proposals for BioETL
 
-*Generated: 2026-02-17 | Based on: RULES.md v5.19, 34 ADRs, 534 Python files*
+*Generated: 2026-02-17 | Based on: RULES.md v5.20, 34 ADRs, 534 Python files*
 
 This document proposes 500 new unique Mermaid diagrams that do not duplicate the 34 existing diagrams in `docs/02-architecture/diagrams/`.
 
@@ -688,4 +688,4 @@ The following 34 diagrams already exist and are explicitly excluded:
 
 ---
 
-*Document generated based on analysis of 534 Python source files, 34 ADRs, RULES.md v5.19, and all architecture documentation.*
+*Document generated based on analysis of 534 Python source files, 34 ADRs, RULES.md v5.20, and all architecture documentation.*

@@ -1,5 +1,5 @@
 # Molecule Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.19*
+*Version: 1.0.0 | Aligned with RULES.md v5.20*
 
 ## Overview
 

@@ -3,7 +3,7 @@
 **Date:** 2026-02-17
 **Mode:** Full Architecture Audit (ARCH + AP + DI + NAME + TYPE + TEST)
 **Scope:** `src/bioetl/` (all layers: domain, application, infrastructure, composition, interfaces)
-**Rules Reference:** RULES.md v5.19, ai-selfreview-rules.md v1.1.0
+**Rules Reference:** RULES.md v5.20, ai-selfreview-rules.md v1.1.0
 
 ---
 
@@ -308,4 +308,4 @@ concern, not a CRITICAL issue.
 
 ---
 
-*Audited against RULES.md v5.19 and ai-selfreview-rules.md v1.1.0*
+*Audited against RULES.md v5.20 and ai-selfreview-rules.md v1.1.0*

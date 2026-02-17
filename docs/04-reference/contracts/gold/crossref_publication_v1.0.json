@@ -174,7 +174,7 @@
     },
     "subject_keywords": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -182,7 +182,7 @@
     },
     "content_domain_domains": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -198,7 +198,7 @@
     },
     "alternative_id": {
       "type": [
-        "object",
+        "string",
         "null"
       ],
       "nullable": true,

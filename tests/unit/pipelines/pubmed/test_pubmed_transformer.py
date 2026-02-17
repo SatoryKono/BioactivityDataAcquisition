@@ -526,9 +526,9 @@ class TestExtractBusinessData:
         assert result["issue"] == "5"
         assert result["pub_date"] == "2023-03-15"
         assert result["publication_year"] == 2023
-        assert result["publication_types"] == ["Journal Article", "Review"]
-        assert result["subject_keywords"] == ["keyword1", "keyword2"]
-        assert result["subject_mesh"] == ["Proteins"]
+        assert result["publication_types"] == '["Journal Article","Review"]'
+        assert result["subject_keywords"] == '["keyword1","keyword2"]'
+        assert result["subject_mesh"] == '["Proteins"]'
         assert result["language"] == "eng"
         assert result["country"] == "United States"
         assert result["pmc_id"] == "PMC123456"
