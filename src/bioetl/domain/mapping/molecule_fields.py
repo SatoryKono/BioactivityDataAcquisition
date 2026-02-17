@@ -1,5 +1,7 @@
 """Mapping for molecule fields across different providers."""
 
+from __future__ import annotations
+
 MOLECULE_FIELD_MAPPING = {
     "chembl": {
         "logp": "logp",
