@@ -95,7 +95,7 @@ check_python_compatibility() {
 }
 
 find_python() {
-    local candidates=("python3.12" "python3.11" "python3" "python")
+    local candidates=("python3.13" "python3.12" "python3.11" "python3" "python")
     local cmd
 
     for cmd in "${candidates[@]}"; do
@@ -164,7 +164,7 @@ install_with_uv() {
         uv sync --no-dev
     else
         log "Installing dev/test/tracing deps with uv"
-        uv sync --extra dev --extra tests --extra tracing
+        uv sync --extra dev --extra tests --extra tracing --extra performance --extra export
     fi
 
     if [[ -x "$VENV_DIR/bin/python" ]]; then
@@ -187,7 +187,7 @@ install_with_pip() {
         "$VENV_PYTHON" -m pip install -e .
     else
         log "Installing package with extras [dev,tests,tracing]"
-        "$VENV_PYTHON" -m pip install -e '.[dev,tests,tracing]'
+        "$VENV_PYTHON" -m pip install -e '.[dev,tests,tracing,performance,export]'
     fi
 }
 
