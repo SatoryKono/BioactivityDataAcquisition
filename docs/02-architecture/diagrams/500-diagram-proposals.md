@@ -238,8 +238,8 @@ The following 34 diagrams already exist and are explicitly excluded:
 | 165 | Column Filter Pattern — Gold Layer Field Exclusion | flowchart | Gold record → check FieldGroupRegistry → TRASH group fields → exclude from output → write only business columns |
 | 166 | Loading Strategy Formalization (ADR-031) | stateDiagram | LoadingStrategy.FULL_SCAN_ONLY → always full load | WATERMARK_BASED → incremental when watermark available, else full |
 | 167 | Publication Pagination Strategy (ADR-030) | flowchart | PubMed: E-utilities retstart/retmax → CrossRef: cursor-based → OpenAlex: per-page → S2: token-based |
-| 168 | DQ Rules Externalization (ADR-027) | flowchart | Inline Python DQ rules → extracted to configs/dq/entities/{provider}/{entity}.yaml → loaded by DQConfigLoader |
-| 169 | Filter Rules Externalization (ADR-028) | flowchart | Inline filter logic → extracted to configs/filter/entities/{provider}/{entity}.yaml → loaded by FilterConfigLoader |
+| 168 | DQ Rules Externalization (ADR-027) | flowchart | Inline Python DQ rules → extracted to configs/quality/entities/{provider}/{entity}.yaml → loaded by DQConfigLoader |
+| 169 | Filter Rules Externalization (ADR-028) | flowchart | Inline filter logic → extracted to configs/filters/entities/{provider}/{entity}.yaml → loaded by FilterConfigLoader |
 | 170 | Pipeline Config Unification (ADR-025) | flowchart | Per-provider configs → unified schema: pipeline_name, provider, entity_type, sink, dq_overrides → validated by Pydantic |
 
 ## Component (171–220)
@@ -459,8 +459,8 @@ The following 34 diagrams already exist and are explicitly excluded:
 | 361 | Pipeline Config YAML Structure | flowchart | pipeline_name, provider, entity_type, version, primary_keys, silver_table, gold_table, sink{silver, gold}, dq_overrides |
 | 362 | _base.yaml Inheritance Mechanism | flowchart | configs/pipelines/_base.yaml → defaults for all pipelines → entity.yaml overrides specific fields → merged config |
 | 363 | Source Config YAML Structure | flowchart | configs/sources/{provider}.yaml: base_url, rate_limit, auth_type, health_check_endpoint, load_strategy |
-| 364 | DQ Config YAML Structure (ADR-027) | flowchart | configs/dq/entities/{provider}/{entity}.yaml: field_validations[{field, type, min, max, nullable}], thresholds |
-| 365 | Filter Config YAML Structure (ADR-028) | flowchart | configs/filter/entities/{provider}/{entity}.yaml: column_filters, row_filters, include/exclude patterns |
+| 364 | DQ Config YAML Structure (ADR-027) | flowchart | configs/quality/entities/{provider}/{entity}.yaml: field_validations[{field, type, min, max, nullable}], thresholds |
+| 365 | Filter Config YAML Structure (ADR-028) | flowchart | configs/filters/entities/{provider}/{entity}.yaml: column_filters, row_filters, include/exclude patterns |
 | 366 | Composite Pipeline Config YAML Structure | flowchart | configs/pipelines/composite/{name}.yaml: seed, dependencies[], enrichers[], merge{strategy, conflict_resolution} |
 | 367 | Data Schema Config YAML Structure (ADR-034) | flowchart | configs/schemas/{provider}/{entity}.yaml: column_groups, silver{include_groups, rename_fields}, gold{include_groups, exclude_fields, rename_fields} |
 | 368 | Field Groups Config YAML Structure | flowchart | configs/composite/field_groups/publication.yaml: groups with name, fields, provider_order — 106 base fields |

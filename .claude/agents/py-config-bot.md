@@ -135,15 +135,17 @@ sink:
       columns: [{entity}_id]
       ascending: true
 
-dq_config_file: configs/dq/entities/{provider}/{entity}.yaml
-gold_filters:
-  required_fields: []
+# Convention-based (ADR-029): dq_config_file and filter_config_file are
+# auto-computed from provider/entity_type. DO NOT set explicitly.
+# Resolved paths:
+#   dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
+#   filter_config_file: ../../filters/entities/{provider}/{entity}.yaml
 ```
 
 ### B. DQ rules (externalized)
 
 ```yaml
-# configs/dq/entities/{provider}/{entity}.yaml
+# configs/quality/entities/{provider}/{entity}.yaml
 entity: {entity}
 provider: {provider}
 version: "1.0.0"
@@ -166,7 +168,7 @@ rules:
 ### C. Filter rules (externalized)
 
 ```yaml
-# configs/filter/entities/{provider}/{entity}.yaml
+# configs/filters/entities/{provider}/{entity}.yaml
 entity: {entity}
 provider: {provider}
 version: "1.0.0"
@@ -230,7 +232,7 @@ grep -A3 "sort_by" configs/pipelines/{provider}/{entity}.yaml
 grep -n "soft_fail_threshold\|hard_fail_threshold" configs/pipelines/{provider}/{entity}.yaml
 
 # DQ externalized config существует
-test -f configs/dq/entities/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
+test -f configs/quality/entities/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
 ```
 
 ---
