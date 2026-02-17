@@ -102,13 +102,14 @@ ______________________________________________________________________
 
 ### Key Diagrams
 
-| Diagram                 | Description                                    | File                                                                                      |
-| ----------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd)         |
-| Layers Interaction      | How layers communicate                         | [05-layers-interaction.mermaid](diagrams/mermaid/05-layers-interaction.mermaid)           |
-| Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [26_composite_pipeline_workflow.mmd](diagrams/mermaid/26_composite_pipeline_workflow.mmd) |
-| Provider Adapters       | 7 providers with rate limits                   | [23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd)   |
-| Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mermaid](diagrams/mermaid/17-pipeline-hierarchy.mermaid)           |
+| Diagram                 | Description                                    | File                                                                                                          |
+| ----------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Five Layer Architecture | Complete system architecture with all 5 layers | [01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd)                             |
+| Layers Interaction      | How layers communicate                         | [05-layers-interaction.mermaid](diagrams/mermaid/05-layers-interaction.mermaid)                                |
+| Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [26_composite_pipeline_workflow.mmd](diagrams/mermaid/26_composite_pipeline_workflow.mmd)                      |
+| Provider Adapters       | 7 providers with rate limits                   | [23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd)                        |
+| Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mermaid](diagrams/mermaid/17-pipeline-hierarchy.mermaid)                                |
+| Local Deployment        | ADR-010 local-only runtime architecture        | [12-local-deployment-architecture.mermaid](diagrams/mermaid/12-local-deployment-architecture.mermaid)          |
 
 ______________________________________________________________________
 
