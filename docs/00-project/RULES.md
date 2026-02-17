@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.19 (Statistics Update), 2026-02-16*
+*Версия: 5.21 (Data Contracts Policy Update), 2026-02-17*
 
 ## Введение (Quick Reference)
 
@@ -1267,12 +1267,19 @@ ______________________________________________________________________
 
 ### 8.1. Контракты Данных (Data Contracts)
 
-- **Реестр Схем**: Gold-схемы публикуются в `docs/contracts/gold/{entity}.json` (JSON Schema).
-- **Версионирование**: Семантическое версионирование схем: `{entity}_v{major}.{minor}`.
-  - Minor: добавление nullable полей.
-  - Major: удаление/переименование полей, изменение типов.
+- **Реестр Схем**: Gold-схемы публикуются в `docs/04-reference/contracts/gold/{entity}_v{semver}.json` (JSON Schema).
+- **Policy генерации**: JSON-контракты в `docs/04-reference/contracts/gold` **MUST** генерироваться автоматически (CI/генератор) и **MUST NOT** редактироваться вручную.
+- **Версионирование**: Семантическое версионирование схем (`MAJOR.MINOR.PATCH`) с классификацией изменений:
+
+| Версия | Тип изменения |
+| --- | --- |
+| **MAJOR** | rename/remove field, type narrowing, nullable `true→false` |
+| **MINOR** | add nullable field, description-only additions |
+| **PATCH** | non-semantic formatting/fixes |
+
 - **Уведомление о Breaking Change**:
-  1. PR с изменением Gold-схемы **MUST** иметь лейбл `breaking-change`.
+  1. MAJOR-изменение Gold-контракта **MUST** иметь PR-label `breaking-change`.
+  1. MAJOR-изменение **MUST** включать `Migration Notes` в описании PR (план перехода, сроки депрекации, действия для consumer-команд).
   1. CI генерирует diff схемы и постит в Slack-канал `#bioetl-contracts`.
   1. Период депрекации: 2 недели до удаления поля.
 - **Consumer Tests**: Потребители могут подписаться на `contracts/` и запускать свои тесты при изменениях.
@@ -1539,6 +1546,7 @@ fields:
 
 ## История Изменений (Changelog)
 
+- **5.21** (2026-02-17): Data Contracts Policy Update. В §8.1 обновлён путь реестра Gold-контрактов на `docs/04-reference/contracts/gold/{entity}_v{semver}.json`, зафиксирована policy автогенерации (manual edits prohibited), добавлена MAJOR/MINOR/PATCH матрица и обязательные PR label + Migration Notes для MAJOR-изменений.
 - **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test_`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.
 - **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.
 - **5.18** (2026-02-15): Statistics Update. Обновлены числовые данные по результатам аудита 2026-02-14: файлов кода (499→517), future annotations (468→481), Int→Float coercion occurrences (~34→~88), publication field groups (94→106), LOC для ChemblAdapter (517→975), GoldWriter (593→946), PreflightService (527→818).
