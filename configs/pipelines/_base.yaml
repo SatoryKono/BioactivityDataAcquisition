@@ -1,6 +1,5 @@
 # Base pipeline config format (defaults only).
 # Full documentation: docs/03-guides/CONFIG-GUIDE.md
-schema_version: "2.0.0"
 
 source:
   type: api
@@ -52,8 +51,6 @@ sink:
     format: delta
     mode: merge
     on_schema_mismatch: evolve
-    classification: public
-    forensic_retention: false
     deterministic: true
     save_metadata: true
     dq_report:
@@ -79,8 +76,6 @@ sink:
 
   gold:
     enabled: true
-    validation:
-      strict: true
     format: delta
     mode: overwrite
     deterministic: true
