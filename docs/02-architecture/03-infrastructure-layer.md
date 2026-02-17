@@ -9,6 +9,7 @@
 Этот слой является "мостом" между чистой бизнес-логикой и реальными технологиями.
 
 **Ключевые характеристики:**
+
 - **Реализация портов:** Классы в этом слое реализуют `Protocol` из `domain.ports`.
 - **Зависимости:** Здесь находятся все "грязные" детали: HTTP-клиенты, коннекторы к БД, специфичные SDK.
 - **Изменчивость:** Этот слой наиболее подвержен изменениям при смене технологий (например, переход с локальной ФС на объектное хранилище в будущем).
@@ -21,9 +22,10 @@
 
 Содержит адаптеры для конкретных источников данных (ChEMBL, PubChem, UniProt и т.д.). Каждый адаптер — это класс, реализующий `DataSourcePort`.
 
-Создание и настройка адаптеров централизованы в [DataSourceRegistry](05-composition-layer.md#22-factories-фабрики-компонентов) слоя Composition.
+Создание и настройка адаптеров централизованы в [DataSourceRegistry](05-composition-layer.md#22-factories-%D1%84%D0%B0%D0%B1%D1%80%D0%B8%D0%BA%D0%B8-%D0%BA%D0%BE%D0%BC%D0%BF%D0%BE%D0%BD%D0%B5%D0%BD%D1%82%D0%BE%D0%B2) слоя Composition.
 
 **Обязанности адаптера:**
+
 - Управление HTTP-соединениями через `UnifiedHTTPClient`.
 - Обработка специфичных для API ошибок (например, `429 Rate Limit`).
 - Преобразование ответа API в стандартизированный формат (словари Python).
@@ -33,15 +35,15 @@
 
 **Все адаптеры используют унифицированную HTTP-инфраструктуру:**
 
-| Адаптер | Базовый класс | HTTP-клиент | Примечание |
-|---------|---------------|-------------|------------|
-| **ChemblAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 14 entities, 3 req/sec. Native pagination and filtering (without mixins) |
-| **UniProtAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 100 req/sec. Mixin: `PaginatedFetcherMixin` |
-| **PubMedAdapter** | `@dataclass` + `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 3 req/sec |
-| **PubChemAdapter** | `BaseSyncAdapter` | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec. Mixin: `NotSupportedMultiFilterMixin` |
-| **CrossRefAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, polite pool. Mixin: `PaginatedFetcherMixin` |
-| **OpenAlexAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 10 req/sec. Mixin: `PaginatedFetcherMixin` |
-| **SemanticScholarAdapter** | `BaseHttpAdapter` | `UnifiedHTTPClient` | Async HTTP, 0.1 req/sec (1.0 with key). Mixin: `PaginatedFetcherMixin` |
+| Адаптер                    | Базовый класс                    | HTTP-клиент              | Примечание                                                                           |
+| -------------------------- | -------------------------------- | ------------------------ | ------------------------------------------------------------------------------------ |
+| **ChemblAdapter**          | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, 14 entities, 3 req/sec. Native pagination and filtering (without mixins) |
+| **UniProtAdapter**         | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, 100 req/sec. Mixin: `PaginatedFetcherMixin`                              |
+| **PubMedAdapter**          | `@dataclass` + `BaseHttpAdapter` | `UnifiedHTTPClient`      | Async HTTP, 3 req/sec                                                                |
+| **PubChemAdapter**         | `BaseSyncAdapter`                | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec. Mixin: `NotSupportedMultiFilterMixin`                        |
+| **CrossRefAdapter**        | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, polite pool. Mixin: `PaginatedFetcherMixin`                              |
+| **OpenAlexAdapter**        | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, 10 req/sec. Mixin: `PaginatedFetcherMixin`                               |
+| **SemanticScholarAdapter** | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, 0.1 req/sec (1.0 with key). Mixin: `PaginatedFetcherMixin`               |
 
 **Архитектура HTTP-адаптеров:**
 
@@ -64,12 +66,14 @@ PubMedAdapter                         (pubchempy)
 ```
 
 **Ключевые компоненты `UnifiedHTTPClient`:**
+
 - **Rate Limiter** (`TokenBucket`): Ограничение частоты запросов
 - **Circuit Breaker**: Защита от каскадных отказов
 - **Retry Logic**: Автоматические повторы с exponential backoff
 - **Metrics**: Интеграция с `MetricsPort` для наблюдаемости
 
 **Для sync-библиотек** (pubchempy, biopython) используется `BaseSyncAdapter`:
+
 - `ThreadPoolExecutor` для изоляции блокирующего I/O
 - Собственные `TokenBucket` и `CircuitBreaker`
 - Async-обёртка через `run_in_executor()`
@@ -87,6 +91,7 @@ PubMedAdapter                         (pubchempy)
 - **`GoldWriter`** (`gold_writer.py`): Запись бизнес-готовых данных с наследованием от `BaseDeltaWriter`, строгой валидацией через Pandera, поддержкой SCD Type 2 и контрактов данных.
 
 Вспомогательные модули:
+
 - **`BaseDeltaWriter`** (`base_delta_writer.py`): Базовый класс для Delta Lake writers (Silver, Gold).
 - **`DeltaReader`** (`delta_reader.py`): Чтение Delta Lake таблиц.
 - **`ArrowDataConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.
@@ -100,6 +105,7 @@ PubMedAdapter                         (pubchempy)
 Содержит реализацию `LockPort` для координации пайплайнов.
 
 **Текущая реализация (Local-Only):**
+
 - **`MemoryLock`**: In-memory блокировка для локального развёртывания
 - Однопроцессная изоляция (не распределённая)
 - Поддержка exclusive-режима для backfill/rebuild
@@ -127,35 +133,35 @@ Redis-адаптер без изменения domain/application слоёв.
 - **Инверсия зависимостей:** Классы из `Infrastructure` зависят от абстракций (`Protocol`) из `Domain`, а не наоборот. Это позволяет подменять реализации без изменения ядра системы.
 - **Конфигурация:** Все необходимые параметры (API-ключи, пути, адреса серверов) адаптеры получают через DI из конфигурационных объектов.
 
----
+______________________________________________________________________
 
 ## 4. Связанные Материалы
 
 ### Навигация по Слоям
 
-| ← Предыдущий | Текущий | Следующий → |
-|--------------|---------|-------------|
+| ← Предыдущий                                 | Текущий            | Следующий →                                |
+| -------------------------------------------- | ------------------ | ------------------------------------------ |
 | [Application Layer](02-application-layer.md) | **Infrastructure** | [Interfaces Layer](04-interfaces-layer.md) |
 
 ### Связанные Диаграммы
 
-| Диаграмма | Файл | Описание |
-|-----------|------|----------|
-| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure |
-| Provider Adapters | [diagrams/mermaid/23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd) | Обзор 7 провайдеров и их rate limits |
-| HTTP Infrastructure | [diagrams/mermaid/14_http_infrastructure.mmd](diagrams/mermaid/14_http_infrastructure.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
-| Circuit Breaker | [07-circuit-breaker-states.mermaid](diagrams/07-circuit-breaker-states.mermaid) | Состояния Circuit Breaker |
-| Storage Architecture | [diagrams/mermaid/13_storage_architecture.mmd](diagrams/mermaid/13_storage_architecture.mmd) | Bronze, Silver, Gold writers |
-| MemoryLock | [16-memory-lock-class.mermaid](diagrams/16-memory-lock-class.mermaid) | Класс MemoryLock |
+| Диаграмма              | Файл                                                                                                            | Описание                                         |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/mermaid/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure                       |
+| Provider Adapters      | [diagrams/mermaid/23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd)        | Обзор 7 провайдеров и их rate limits             |
+| HTTP Infrastructure    | [diagrams/mermaid/14_http_infrastructure.mmd](diagrams/mermaid/14_http_infrastructure.mmd)                      | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Circuit Breaker        | [07-circuit-breaker-states.mermaid](diagrams/mermaid/07-circuit-breaker-states.mermaid)                         | Состояния Circuit Breaker                        |
+| Storage Architecture   | [diagrams/mermaid/13_storage_architecture.mmd](diagrams/mermaid/13_storage_architecture.mmd)                    | Bronze, Silver, Gold writers                     |
+| MemoryLock             | [16-memory-lock-class.mermaid](diagrams/mermaid/16-memory-lock-class.mermaid)                                   | Класс MemoryLock                                 |
 
 ### Связанные ADR
 
-| ADR | Тема |
-|-----|------|
-| [ADR-003](decisions/ADR-003-in-memory-locking-strategy.md) | In-Memory Locking Strategy |
+| ADR                                                            | Тема                           |
+| -------------------------------------------------------------- | ------------------------------ |
+| [ADR-003](decisions/ADR-003-in-memory-locking-strategy.md)     | In-Memory Locking Strategy     |
 | [ADR-007](decisions/ADR-007-circuit-breaker-implementation.md) | Circuit Breaker Implementation |
-| [ADR-010](decisions/ADR-010-local-only-deployment.md) | Local-Only Deployment |
-| [ADR-017](decisions/ADR-017-observability-architecture.md) | Observability Architecture |
+| [ADR-010](decisions/ADR-010-local-only-deployment.md)          | Local-Only Deployment          |
+| [ADR-017](decisions/ADR-017-observability-architecture.md)     | Observability Architecture     |
 
 ### Смежные Разделы Документации
 
