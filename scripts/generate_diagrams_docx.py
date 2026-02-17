@@ -47,7 +47,7 @@ OUTPUT_DOCX = OUTPUT_DIR / "bioetl_full_diagrams_documentation.docx"
 RENDER_DIR = OUTPUT_DIR / "rendered_png"
 
 MERMAID_JS = "/tmp/package/dist/mermaid.min.js"
-CHROMIUM_PATH = "/root/.cache/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell"
+CHROMIUM_PATH = os.environ.get("CHROMIUM_PATH")
 
 RENDER_TIMEOUT_MS = 30_000
 RENDER_WIDTH = 1600
@@ -421,11 +421,14 @@ def render_all_diagrams(diagrams: list[DiagramInfo]) -> None:
         shutil.copy(js_file, render_workspace / js_file.name)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,
-            executable_path=CHROMIUM_PATH,
-            args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
-        )
+        launch_kwargs = {
+            "headless": True,
+            "args": ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"],
+        }
+        if CHROMIUM_PATH:
+            launch_kwargs["executable_path"] = CHROMIUM_PATH
+
+        browser = p.chromium.launch(**launch_kwargs)
 
         for i, diagram in enumerate(diagrams):
             png_path = RENDER_DIR / f"{diagram.stem}.png"
