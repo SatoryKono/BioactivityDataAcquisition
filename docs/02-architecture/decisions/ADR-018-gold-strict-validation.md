@@ -141,7 +141,7 @@ gold_schema:
 
 Новый тип исключения для валидации схем:
 
-```python
+````python
 class SchemaValidationError(BioETLError):
     """Ошибка валидации схемы Gold-слоя.
 
@@ -154,7 +154,44 @@ class SchemaValidationError(BioETLError):
     def __init__(self, message: str, field: str | None = None):
         super().__init__(message)
         self.field = field
-```
+
+### 7. Политика историчности Gold (SCD2)
+
+Для Gold-слоя вводится явная классификация сущностей по требованиям к хранению истории.
+
+| Класс сущности | Критерии | Рекомендуемый Gold mode |
+|---|---|---|
+| Reference dictionaries | Справочники/таксономии, где коды и названия корректируются со временем (без удаления исторических значений) | `scd2` |
+| Slowly evolving records | Записи с редкими, но бизнес-значимыми изменениями атрибутов (например, аннотации/классификация) | `scd2` |
+| Publication metadata | Метаданные публикаций из внешних API, где поля обогащения могут изменяться ретроспективно | `scd2` |
+| Recomputed aggregates / derived outputs | Полностью пересчитываемые витрины и производные аналитические таблицы | `overwrite` |
+
+Для всех SCD2-кандидатов Gold mode **MUST** задаваться явно в pipeline YAML (не полагаться на базовый дефолт).
+
+**Шаблон `scd_config` (обязательные поля):**
+
+```yaml
+sink:
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
+````
+
+Обязательные ключи `scd_config`: `valid_from`, `valid_to`, `is_current`, `version`.
+
+### 8. Migration table (Gold write mode)
+
+| Entity                                                                                                                                | Current Mode                            | Recommended Mode       | Breaking                                 | Migration                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ---------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| publication (chembl, pubmed, crossref, openalex, semanticscholar)                                                                     | `overwrite` (implicit via base/default) | `scd2`                 | Yes (new SCD2 columns/history semantics) | Full snapshot bootstrap -> enable `mode: scd2` + `scd_config` -> backfill valid intervals |
+| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | `overwrite` (implicit)                  | `scd2`                 | Yes                                      | Rebuild Gold once, then switch to SCD2 with versioned updates                             |
+| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | `overwrite` (implicit)                  | `scd2`                 | Yes                                      | Initialize current snapshot as version=1, future changes produce new versions             |
+| high-volume facts (chembl: activity)                                                                                                  | `overwrite` (implicit)                  | `append`               | No (if consumers read latest partitions) | Set explicit `mode: append`, keep Silver merge for idempotency                            |
+| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | `overwrite` (implicit)                  | `overwrite` (explicit) | No                                       | Keep overwrite, but configure explicitly in pipeline YAML                                 |
 
 ## Justification
 

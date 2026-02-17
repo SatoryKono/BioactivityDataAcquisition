@@ -24,6 +24,16 @@ Configuration styles:
 1. **Hybrid**
    - Keep conventions, override only special cases.
 
+Migration table (Gold write mode):
+
+| Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ----------------------------------------------------- |
+| publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем SCD2 + backfill интервалов  |
+| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Rebuild и включить versioned updates                  |
+| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать version=1, далее писать новые версии |
+| high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно указать append                                   |
+| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Явно указать overwrite                                |
+
 Related ADRs:
 
 - [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)
@@ -206,7 +216,7 @@ Defaults:
 - `enabled: true`
 - `validation.strict: true`
 - `format: delta`
-- `mode: overwrite`
+- `mode: append`
 - `deterministic: true`
 - `save_metadata: true`
 - `dq_report.enabled: true`
@@ -214,10 +224,40 @@ Defaults:
 - `sort_by.ascending: true`
 - `flat_structure: true`
 
+History retention criteria for Gold mode selection:
+
+- Reference dictionaries -> `mode: scd2`
+- Slowly evolving records -> `mode: scd2`
+- Publication metadata -> `mode: scd2`
+- Recomputed aggregates -> `mode: overwrite`
+
+For `mode: scd2`, configure mandatory `scd_config` fields:
+
+```yaml
+sink:
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
+```
+
 Entity config should define:
 
 - `path`
 - `sort_by.columns`
+
+Migration table (Gold write mode):
+
+| Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ----------------------------------------------------- |
+| publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем SCD2 + backfill интервалов  |
+| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Rebuild и включить versioned updates                  |
+| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать version=1, далее писать новые версии |
+| high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно указать append                                   |
+| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Явно указать overwrite                                |
 
 Related ADRs:
 

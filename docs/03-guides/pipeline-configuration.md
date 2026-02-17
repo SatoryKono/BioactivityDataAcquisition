@@ -113,14 +113,14 @@ configs/
 
 ### Статистика конфигураций
 
-| Категория                 | Количество | Описание                               |
-| ------------------------- | ---------- | -------------------------------------- |
-| Pipeline configs (entity) | 21         | Regular ETL pipelines                  |
-| Composite configs         | 5          | Multi-provider pipelines (ADR-026)     |
+| Категория                 | Количество | Описание                                          |
+| ------------------------- | ---------- | ------------------------------------------------- |
+| Pipeline configs (entity) | 21         | Regular ETL pipelines                             |
+| Composite configs         | 5          | Multi-provider pipelines (ADR-026)                |
 | DQ configs                | 31         | 1 defaults + 7 providers + 22 entities + 1 schema |
-| Filter configs            | 8          | 1 defaults + 7 providers               |
-| Source configs            | 7          | Один на провайдера                     |
-| **Итого**                 | **71**     | Все конфиги валидированы               |
+| Filter configs            | 8          | 1 defaults + 7 providers                          |
+| Source configs            | 7          | Один на провайдера                                |
+| **Итого**                 | **71**     | Все конфиги валидированы                          |
 
 ______________________________________________________________________
 
@@ -155,7 +155,7 @@ gold_table: "chembl_activity"
 | `batch_size`          | Размер батча (1-5000)              | Нет (default: 100)   |
 | `checkpoint_interval` | Интервал checkpoint                | Нет (default: 10)    |
 | `source`              | Конфиг источника                   | Нет (auto-resolved)  |
-| `dq_overrides`            | Inline DQ переопределения          | Нет                  |
+| `dq_overrides`        | Inline DQ переопределения          | Нет                  |
 | `sink`                | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
 | `circuit_breaker`     | Настройки Circuit Breaker          | Нет (from base)      |
 | `maintenance`         | VACUUM настройки                   | Нет (from base)      |
@@ -245,14 +245,14 @@ composite:
 
 ### Отличия от Regular Pipelines
 
-| Аспект          | Regular Pipeline                           | Composite Pipeline                                      |
-| --------------- | ------------------------------------------ | ------------------------------------------------------- |
-| Корневой ключ   | `pipeline_name`, `provider`, `entity_type` | `composite:`                                            |
-| Source          | Один провайдер                             | Несколько провайдеров через `enrichers`                  |
-| Schema          | `_schema.json`                             | Отдельная схема (ADR-026)                               |
-| Пути            | Auto-computed                              | Определяются в `merge.output`                           |
-| Orchestration   | `PipelineRunner` + `{Entity}Transformer`   | `CompositePipelineRunner` (без отдельных трансформеров) |
-| Реализация      | `application/pipelines/{provider}/`        | `application/composite/` (15 модулей)                   |
+| Аспект        | Regular Pipeline                           | Composite Pipeline                                      |
+| ------------- | ------------------------------------------ | ------------------------------------------------------- |
+| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:`                                            |
+| Source        | Один провайдер                             | Несколько провайдеров через `enrichers`                 |
+| Schema        | `_schema.json`                             | Отдельная схема (ADR-026)                               |
+| Пути          | Auto-computed                              | Определяются в `merge.output`                           |
+| Orchestration | `PipelineRunner` + `{Entity}Transformer`   | `CompositePipelineRunner` (без отдельных трансформеров) |
+| Реализация    | `application/pipelines/{provider}/`        | `application/composite/` (15 модулей)                   |
 
 > **Архитектурная заметка:** Composite pipelines **не используют** классы трансформеров
 > (`*Transformer`). Вместо этого оркестрация выполняется через `CompositePipelineRunner`,
@@ -266,14 +266,14 @@ ______________________________________________________________________
 
 Пути и ссылки вычисляются автоматически из `provider` и `entity_type`:
 
-| Поле                 | Auto-computed значение                                |
-| -------------------- | ----------------------------------------------------- |
-| `source_file`        | `../../sources/{provider}.yaml`                       |
-| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml`     |
+| Поле                 | Auto-computed значение                                 |
+| -------------------- | ------------------------------------------------------ |
+| `source_file`        | `../../sources/{provider}.yaml`                        |
+| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml` |
 | `filter_config_file` | `../../filters/entities/{provider}/{entity_type}.yaml` |
-| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`         |
-| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`         |
-| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`           |
+| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`          |
+| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`          |
+| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`            |
 
 ### Авто-пропагация sort_by (ADR-014 compliance)
 
@@ -521,7 +521,7 @@ sink:
     enabled: true
     format: delta
     path: data/output/silver/chembl/activity
-    mode: merge                    # merge | overwrite
+    mode: merge                    # merge | append | delete
     primary_key: ["activity_id"]
     deterministic: true
     sort_by:
@@ -533,7 +533,12 @@ sink:
     enabled: true
     format: delta                  # delta | parquet
     path: data/output/gold/chembl/activity
-    mode: overwrite
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
     partition_by: ["standard_type"]
     flat_structure: true
     csv_export:
@@ -548,11 +553,30 @@ sink:
 
 ### Write Modes
 
-| Mode        | Bronze        | Silver            | Gold              |
-| ----------- | ------------- | ----------------- | ----------------- |
-| `append`    | Только append | —                 | —                 |
-| `merge`     | —             | Upsert по PK      | —                 |
-| `overwrite` | —             | Полная перезапись | Полная перезапись |
+| Mode        | Bronze        | Silver                      | Gold                                                             |
+| ----------- | ------------- | --------------------------- | ---------------------------------------------------------------- |
+| `append`    | Только append | Вставка без upsert          | Фактовые потоки без ретро-исправлений                            |
+| `merge`     | —             | Upsert по PK                | —                                                                |
+| `delete`    | —             | Полная перезапись (rebuild) | —                                                                |
+| `scd2`      | —             | —                           | Историчность (`valid_from`, `valid_to`, `is_current`, `version`) |
+| `overwrite` | —             | —                           | Полная перезапись пересчитываемых витрин                         |
+
+### Criteria for history retention (Gold)
+
+- **Reference dictionaries** -> `mode: scd2`
+- **Slowly evolving records** -> `mode: scd2`
+- **Publication metadata** -> `mode: scd2`
+- **Recomputed derived outputs** -> `mode: overwrite`
+
+Gold mode must be explicit in each pipeline YAML (`sink.gold.mode`).
+
+| Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ----------------------------------------------------------- |
+| publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, then SCD2 + backfill validity intervals |
+| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Rebuild once and enable versioned updates                   |
+| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Initialize as version=1, future updates create new versions |
+| high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Set explicit append mode                                    |
+| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Keep overwrite but declare explicitly                       |
 
 ### Schema Mismatch Handling
 
