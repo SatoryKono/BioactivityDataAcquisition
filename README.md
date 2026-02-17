@@ -179,13 +179,14 @@ bioetl checkpoint list
 - Keep machine-consumed reference datasets under semantic paths in `data/` (for example, `data/input/reference/`).
 - Keep optional human-facing spreadsheet copies under `docs/reference/`.
 - Unified publication classifier canonical format is CSV at `data/input/reference/unified_classification.csv`; Excel is optional documentation copy at `docs/reference/unified_classification.xlsx`.
+
 ### Local diagnostic artifacts
 
 Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
 
-* Временные диагностические дампы сохраняйте в `tmp/`.
-* Логи локальных запусков сохраняйте в `logs/`.
-* Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
+- Временные диагностические дампы сохраняйте в `tmp/`.
+- Логи локальных запусков сохраняйте в `logs/`.
+- Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
 
 ### Testing
 
@@ -246,6 +247,22 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   ```bash
   make arch-test
   ```
+
+### Contract Snapshot Merge Gate
+
+Silver schema snapshot contracts are protected by CI workflow `Contract Snapshot Diff Check`.
+
+- The workflow regenerates contract JSON from current schema models and compares against tracked files in `tests/contract/silver_schemas/snapshots/`.
+- The merge-blocking status check is **`Contract Snapshot Diff Status`**.
+- Any difference in `name`, `type`, `nullable`, or `description` fails CI.
+
+To refresh snapshots after an intentional schema change:
+
+```bash
+python scripts/verify_silver_contract_snapshots.py --write
+```
+
+Blocking policy details are documented in `docs/05-operations/verification/contract-snapshot-diff-policy.md`.
 
 ### Code Quality
 
