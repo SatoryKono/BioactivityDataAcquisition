@@ -62,4 +62,11 @@ sink:
     # NOTE: enabled: false is not yet implemented in code, so Bronze is still written
   silver:
     partition_by: []  # No partitioning - small dataset
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      business_key: ["target_id"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version

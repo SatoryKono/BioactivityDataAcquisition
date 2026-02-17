@@ -24,4 +24,11 @@ gold_table: "uniprot_protein"
 sink:
   silver:
     partition_by: ["organism"]
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      business_key: ["accession"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version

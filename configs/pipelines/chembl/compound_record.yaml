@@ -38,4 +38,11 @@ gold_table: "chembl_compound_record"
 sink:
   bronze: {}
   silver: {}
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      business_key: ["record_id"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version

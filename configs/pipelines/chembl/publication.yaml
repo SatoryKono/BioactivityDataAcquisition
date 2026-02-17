@@ -57,4 +57,11 @@ sink:
     partition_by: ["doc_type"]
     flat_structure: true  # Delta directly in path, files named {table}_*.ext
   gold:
+    mode: scd2
+    scd_config:
+      business_key: ["publication_id"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version
     flat_structure: true  # Delta directly in path, files named {table}_*.ext

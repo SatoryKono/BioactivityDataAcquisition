@@ -54,4 +54,11 @@ sink:
     partition_by: ["year"]
     flat_structure: true
   gold:
+    mode: scd2
+    scd_config:
+      business_key: ["paper_id"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version
     flat_structure: true

@@ -35,4 +35,11 @@ gold_table: "chembl_cell_line"
 sink:
   bronze: {}
   silver: {}
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      business_key: ["cell_id"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version

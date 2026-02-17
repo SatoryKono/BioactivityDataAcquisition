@@ -45,4 +45,5 @@ sink:
   bronze: {}
   silver:
     partition_by: ["term_type"]
-  gold: {}
+  gold:
+    mode: overwrite

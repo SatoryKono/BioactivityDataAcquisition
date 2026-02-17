@@ -41,4 +41,11 @@ sink:
   bronze: {}
   silver:
     partition_by: ["class_level"]
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      business_key: ["protein_class_id"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version

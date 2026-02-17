@@ -44,4 +44,11 @@ gold_table: "chembl_subcellular_fraction"
 sink:
   bronze: {}
   silver: {}
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      business_key: ["entity_id"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version

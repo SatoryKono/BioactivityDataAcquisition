@@ -37,4 +37,11 @@ sink:
   bronze: {}
   silver:
     partition_by: ["type"]
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      business_key: ["assay_param_id"]
+      valid_from: valid_from
+      valid_to: valid_to
+      is_current: is_current
+      version: version
