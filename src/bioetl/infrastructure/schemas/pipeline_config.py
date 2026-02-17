@@ -412,7 +412,6 @@ class SourceConfig(BaseModel):
     provider_config: ProviderSourceConfig = Field(default_factory=ProviderSourceConfig)
 
 
-
 class SinkDQReportConfig(BaseModel):
     """DQ report configuration for sink layers."""
 
@@ -428,8 +427,6 @@ class SinkDQReportConfig(BaseModel):
         default="json",
         description="Report output format",
     )
-
-
 
 
 class SinkLayerConfig(BaseModel):

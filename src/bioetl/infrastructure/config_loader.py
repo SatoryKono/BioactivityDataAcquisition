@@ -593,11 +593,9 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     _load_column_groups_section(config, entity_config, config_path)
     _load_source_section(config, config_path)
 
-    # Strip intermediate loader keys not in the Pydantic model.
-    # These are consumed during the loading process above but are not
-    # part of PipelineYamlConfig (which uses extra="forbid").
-    config.pop("source_file", None)
-    config.pop("data_schema", None)
+    # Strip intermediate keys consumed above but absent from PipelineYamlConfig.
+    for _key in ("source_file", "data_schema"):
+        config.pop(_key, None)
 
     validated: PipelineYamlConfig = PipelineYamlConfig.model_validate(config)
     return validated
