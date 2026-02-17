@@ -1,14 +1,118 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "PubChem Compound Gold Contract",
-  "description": "Gold layer data contract for PubChem Compound Gold Contract. Auto-generated from Pandera schema PubChemCompoundGoldSchema.",
+  "title": "PubChemCompound Gold Contract",
+  "description": "Gold layer data contract for pubchem_compound. Auto-generated from Pandera schema PubChemCompoundGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "molecule_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "molecular_formula",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecular_weight",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "canonical_smiles",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "isomeric_smiles",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "inchi",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "inchi_key",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "xlogp",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "tpsa",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "iupac_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
     },
-    "cid": {
+    "molecule_id": {
       "type": "string"
     },
     "molecular_formula": {
@@ -41,9 +145,21 @@
         "null"
       ]
     },
-    "inchikey": {
+    "inchi_key": {
       "type": [
         "string",
+        "null"
+      ]
+    },
+    "xlogp": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "tpsa": {
+      "type": [
+        "number",
         "null"
       ]
     },
@@ -80,8 +196,119 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "cid",
     "content_hash",
-    "entity_id"
-  ]
+    "entity_id",
+    "molecule_id"
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "canonical_smiles",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "inchi",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "inchi_key",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "isomeric_smiles",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "iupac_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecular_formula",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecular_weight",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecule_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "tpsa",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "xlogp",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

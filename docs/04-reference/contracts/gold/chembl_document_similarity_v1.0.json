@@ -1,9 +1,107 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Document Similarity Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Document Similarity Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentSimilarityGoldSchema.",
+  "title": "ChEMBLDocumentSimilarity Gold Contract",
+  "description": "Gold layer data contract for chembl_document_similarity. Auto-generated from Pandera schema ChEMBLDocumentSimilarityGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "sim_id",
+      "json_type": "number",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "doc_1",
+      "json_type": "number",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "doc_2",
+      "json_type": "number",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "pubmed_id1",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "pubmed_id2",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "tid_tani",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "mol_tani",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "avg_tani",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "max_tani",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -36,33 +134,25 @@
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "mol_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "avg_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "max_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "_run_id": {
       "type": "string"
@@ -93,5 +183,110 @@
     "doc_2",
     "entity_id",
     "sim_id"
-  ]
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "avg_tani",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "doc_1",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "doc_2",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "max_tani",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "mol_tani",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pubmed_id1",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pubmed_id2",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "sim_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "tid_tani",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

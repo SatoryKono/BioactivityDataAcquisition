@@ -1,9 +1,275 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "Semantic Scholar Publication Gold Contract",
-  "description": "Gold layer data contract for Semantic Scholar Publication Gold Contract. Auto-generated from Pandera schema SemanticScholarPublicationGoldSchema.",
+  "title": "SemanticScholarPublication Gold Contract",
+  "description": "Gold layer data contract for semanticscholar_publication. Auto-generated from Pandera schema SemanticScholarPublicationGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "paper_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "doi",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "pmid",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "corpus_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "title",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "abstract",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "authors",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "tldr",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_year",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_date",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "journal",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "volume",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "issue",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "page_range",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "page_first",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "page_last",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "citations_received",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "citations_made",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "influential_citation_count",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "is_oa",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "open_access_url",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "oa_status",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "subject_fields",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_types",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "citation_contexts",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "affiliation_list",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "author_keys",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "author_s2_ids",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "author_orcids",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "author_h_indices",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "dblp_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_source",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_lookup_method",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_original_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_dq_warn",
+      "json_type": "boolean",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_dq_error",
+      "json_type": "boolean",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -26,18 +292,6 @@
         "null"
       ]
     },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "arxiv_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "corpus_id": {
       "type": [
         "number",
@@ -50,13 +304,25 @@
         "null"
       ]
     },
+    "abstract": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "authors": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "tldr": {
       "type": [
         "string",
         "null"
       ]
     },
-    "year": {
+    "publication_year": {
       "type": [
         "number",
         "null"
@@ -66,8 +332,7 @@
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
     "journal": {
       "type": [
@@ -81,43 +346,47 @@
         "null"
       ]
     },
-    "pages": {
+    "issue": {
       "type": [
         "string",
         "null"
       ]
     },
-    "first_page": {
+    "page_range": {
       "type": [
         "string",
         "null"
       ]
     },
-    "last_page": {
+    "page_first": {
       "type": [
         "string",
         "null"
       ]
     },
-    "venue": {
+    "page_last": {
       "type": [
         "string",
         "null"
       ]
     },
-    "citation_count": {
+    "citations_received": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0
+      ]
     },
-    "reference_count": {
+    "citations_made": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0
+      ]
+    },
+    "influential_citation_count": {
+      "type": [
+        "number",
+        "null"
+      ]
     },
     "is_oa": {
       "type": [
@@ -137,7 +406,13 @@
         "null"
       ]
     },
-    "fields_of_study": {
+    "subject_fields": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_type": {
       "type": [
         "string",
         "null"
@@ -149,17 +424,53 @@
         "null"
       ]
     },
-    "source": {
+    "citation_contexts": {
       "type": [
         "string",
         "null"
       ]
     },
-    "_lookup_method": {
+    "affiliation_list": {
       "type": [
         "string",
         "null"
       ]
+    },
+    "author_keys": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_s2_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_orcids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_h_indices": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dblp_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_source": {
+      "type": "string"
+    },
+    "_lookup_method": {
+      "type": "string"
     },
     "_original_id": {
       "type": [
@@ -197,10 +508,285 @@
     "_dq_warn",
     "_index",
     "_ingestion_ts",
+    "_lookup_method",
     "_run_id",
     "_run_type",
+    "_source",
     "content_hash",
     "entity_id",
     "paper_id"
-  ]
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_dq_error",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_dq_warn",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_lookup_method",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_original_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "abstract",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "affiliation_list",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "author_h_indices",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "author_keys",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "author_orcids",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "author_s2_ids",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "authors",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "citation_contexts",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "citations_made",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "citations_received",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "corpus_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "dblp_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "doi",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "influential_citation_count",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "is_oa",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "issue",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "journal",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "oa_status",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "open_access_url",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "page_first",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "page_last",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "page_range",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "paper_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "pmid",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_date",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_types",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_year",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "subject_fields",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "title",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "tldr",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "volume",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

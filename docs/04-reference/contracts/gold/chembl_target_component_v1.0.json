@@ -1,9 +1,119 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Target Component Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Target Component Gold Contract. Auto-generated from Pandera schema ChEMBLTargetComponentGoldSchema.",
+  "title": "ChEMBLTargetComponent Gold Contract",
+  "description": "Gold layer data contract for chembl_target_component. Auto-generated from Pandera schema ChEMBLTargetComponentGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "component_id",
+      "json_type": "number",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "accession",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "component_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "organism",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "taxonomy_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "target_component_synonyms",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "target_component_xrefs",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "protein_classifications",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "protein_classification_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "protein_classification_ids",
+      "json_type": "array",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -62,9 +172,15 @@
         "null"
       ]
     },
+    "protein_classification_id": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
     "protein_classification_ids": {
       "type": [
-        "string",
+        "array",
         "null"
       ]
     },
@@ -95,5 +211,122 @@
     "component_id",
     "content_hash",
     "entity_id"
-  ]
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "accession",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "component_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "component_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "organism",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "protein_classification_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "protein_classification_ids",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "protein_classifications",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_component_synonyms",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_component_xrefs",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "taxonomy_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

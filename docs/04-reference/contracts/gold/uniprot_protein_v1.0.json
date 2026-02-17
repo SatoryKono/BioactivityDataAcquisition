@@ -1,11 +1,226 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProt Protein Gold Contract",
-  "description": "Gold layer data contract for UniProt Protein Gold Contract. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
+  "title": "UniProtProtein Gold Contract",
+  "description": "Gold layer data contract for uniprot_protein. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "accession",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "entry_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "active_sites",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "binding_sites",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "domains",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "features_json",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "activity_regulation",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "catalytic_activity",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "disease_involvement",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "function_comment",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "pathway",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "similarity_comment",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "subcellular_location",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "tissue_specificity",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "chembl_ids",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "drugbank_ids",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "go_terms",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "interpro_xrefs",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "pdb_xrefs",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "pfam_xrefs",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "reactome_xrefs",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "gene_names",
+      "json_type": "array",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "organism_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "protein_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "sequence_length",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "annotation_score",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "protein_existence",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "reviewed",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
+      "type": "string"
+    },
+    "content_hash": {
       "type": "string"
     },
     "accession": {
@@ -17,7 +232,115 @@
         "null"
       ]
     },
-    "protein_name": {
+    "active_sites": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "binding_sites": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "domains": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "features_json": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "activity_regulation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "catalytic_activity": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "disease_involvement": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "function_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pathway": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "similarity_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "subcellular_location": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tissue_specificity": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "chembl_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "drugbank_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "go_terms": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "interpro_xrefs": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pdb_xrefs": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pfam_xrefs": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reactome_xrefs": {
       "type": [
         "string",
         "null"
@@ -25,7 +348,7 @@
     },
     "gene_names": {
       "type": [
-        "string",
+        "array",
         "null"
       ]
     },
@@ -35,14 +358,35 @@
         "null"
       ]
     },
+    "protein_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "sequence_length": {
       "type": [
         "number",
         "null"
       ]
     },
-    "content_hash": {
-      "type": "string"
+    "annotation_score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "protein_existence": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reviewed": {
+      "type": [
+        "boolean",
+        "null"
+      ]
     },
     "_run_id": {
       "type": "string"
@@ -71,5 +415,224 @@
     "accession",
     "content_hash",
     "entity_id"
-  ]
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "accession",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "active_sites",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "activity_regulation",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "annotation_score",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "binding_sites",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "catalytic_activity",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "chembl_ids",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "disease_involvement",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "domains",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "drugbank_ids",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "entry_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "features_json",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "function_comment",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "gene_names",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "go_terms",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "interpro_xrefs",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "organism_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pathway",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pdb_xrefs",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pfam_xrefs",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "protein_existence",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "protein_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "reactome_xrefs",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "reviewed",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "sequence_length",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "similarity_comment",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "subcellular_location",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "tissue_specificity",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

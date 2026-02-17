@@ -1,9 +1,131 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Assay Parameters Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Assay Parameters Gold Contract. Auto-generated from Pandera schema ChEMBLAssayParametersGoldSchema.",
+  "title": "ChEMBLAssayParameters Gold Contract",
+  "description": "Gold layer data contract for chembl_assay_parameters. Auto-generated from Pandera schema ChEMBLAssayParametersGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "assay_param_id",
+      "json_type": "number",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "assay_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "relation",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "value",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "units",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "text_value",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "comments",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_relation",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_value",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_units",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_text_value",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -14,7 +136,7 @@
     "assay_param_id": {
       "type": "number"
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": "string"
     },
     "type": {
@@ -104,10 +226,139 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "assay_chembl_id",
+    "assay_id",
     "assay_param_id",
     "content_hash",
     "entity_id",
     "type"
-  ]
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "assay_param_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "comments",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "relation",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_relation",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_text_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_units",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "text_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "units",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

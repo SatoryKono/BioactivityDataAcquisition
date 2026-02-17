@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLCellLine Gold Contract",
-  "description": "Gold layer data contract for chembl_cell_line. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
+  "title": "ChEMBLSubcellularFraction Gold Contract",
+  "description": "Gold layer data contract for chembl_subcellular_fraction. Auto-generated from Pandera schema ChEMBLSubcellularFractionGoldSchema.",
   "type": "object",
   "fields": [
     {
@@ -18,58 +18,22 @@
       "description": null
     },
     {
-      "name": "cell_id",
+      "name": "subcellular_fraction",
       "json_type": "string",
       "nullable": false,
-      "description": null
+      "description": "Subcellular fraction name"
     },
     {
-      "name": "cell_name",
-      "json_type": "string",
-      "nullable": false,
-      "description": null
-    },
-    {
-      "name": "cell_description",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cell_source_tissue",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cell_source_organism",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cell_source_taxonomy_id",
+      "name": "assay_count",
       "json_type": "number",
       "nullable": true,
-      "description": null
+      "description": "Number of assays using this fraction"
     },
     {
-      "name": "cellosaurus_id",
+      "name": "example_assay_chembl_id",
       "json_type": "string",
       "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cl_lincs_id",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "efo_id",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
+      "description": "Example assay ChEMBL ID"
     },
     {
       "name": "_run_id",
@@ -109,53 +73,23 @@
     "content_hash": {
       "type": "string"
     },
-    "cell_id": {
-      "type": "string"
+    "subcellular_fraction": {
+      "type": "string",
+      "description": "Subcellular fraction name"
     },
-    "cell_name": {
-      "type": "string"
-    },
-    "cell_description": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_tissue": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_organism": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_taxonomy_id": {
+    "assay_count": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "description": "Number of assays using this fraction"
     },
-    "cellosaurus_id": {
+    "example_assay_chembl_id": {
       "type": [
         "string",
         "null"
-      ]
-    },
-    "cl_lincs_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "efo_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+      ],
+      "description": "Example assay ChEMBL ID"
     },
     "_run_id": {
       "type": "string"
@@ -181,10 +115,9 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "cell_id",
-    "cell_name",
     "content_hash",
-    "entity_id"
+    "entity_id",
+    "subcellular_fraction"
   ],
   "changelog": {
     "generated_at": "2026-02-17T15:53:01+00:00",
@@ -224,49 +157,7 @@
         "details": "New nullable field."
       },
       {
-        "field": "cell_description",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cell_id",
-        "change": "added",
-        "breaking": true,
-        "details": "New required field."
-      },
-      {
-        "field": "cell_name",
-        "change": "added",
-        "breaking": true,
-        "details": "New required field."
-      },
-      {
-        "field": "cell_source_organism",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cell_source_taxonomy_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cell_source_tissue",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cellosaurus_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cl_lincs_id",
+        "field": "assay_count",
         "change": "added",
         "breaking": false,
         "details": "New nullable field."
@@ -278,13 +169,19 @@
         "details": "New required field."
       },
       {
-        "field": "efo_id",
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "example_assay_chembl_id",
         "change": "added",
         "breaking": false,
         "details": "New nullable field."
       },
       {
-        "field": "entity_id",
+        "field": "subcellular_fraction",
         "change": "added",
         "breaking": true,
         "details": "New required field."

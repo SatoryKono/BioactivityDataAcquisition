@@ -1,9 +1,155 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Target Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Target Gold Contract. Auto-generated from Pandera schema ChEMBLTargetGoldSchema.",
+  "title": "ChEMBLTarget Gold Contract",
+  "description": "Gold layer data contract for chembl_target. Auto-generated from Pandera schema ChEMBLTargetGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "target_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "pref_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "target_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "organism",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "taxonomy_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "species_group_flag",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "downgraded",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "pipeline_stages",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "target_components",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "cross_references",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "target_component_synonyms",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "component_accessions",
+      "json_type": "array",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "primary_component_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "component_ids",
+      "json_type": "array",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "component_types",
+      "json_type": "array",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "component_relationships",
+      "json_type": "array",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -11,7 +157,7 @@
     "content_hash": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": "string"
     },
     "pref_name": {
@@ -82,43 +228,31 @@
     },
     "component_accessions": {
       "type": [
-        "string",
+        "array",
+        "null"
+      ]
+    },
+    "primary_component_id": {
+      "type": [
+        "number",
         "null"
       ]
     },
     "component_ids": {
       "type": [
-        "string",
+        "array",
         "null"
       ]
     },
     "component_types": {
       "type": [
-        "string",
+        "array",
         "null"
       ]
     },
     "component_relationships": {
       "type": [
-        "string",
-        "null"
-      ]
-    },
-    "component_descriptions": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "component_organisms": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "component_taxonomy_ids": {
-      "type": [
-        "string",
+        "array",
         "null"
       ]
     },
@@ -148,6 +282,159 @@
     "_run_type",
     "content_hash",
     "entity_id",
-    "target_chembl_id"
-  ]
+    "target_id"
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "component_accessions",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "component_ids",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "component_relationships",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "component_types",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "cross_references",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "downgraded",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "organism",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pipeline_stages",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pref_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "primary_component_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "species_group_flag",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_component_synonyms",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_components",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "target_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "taxonomy_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

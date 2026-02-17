@@ -1,9 +1,275 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Assay Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Assay Gold Contract. Auto-generated from Pandera schema ChEMBLAssayGoldSchema.",
+  "title": "ChEMBLAssay Gold Contract",
+  "description": "Gold layer data contract for chembl_assay. Auto-generated from Pandera schema ChEMBLAssayGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "assay_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "target_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "cell_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "tissue_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "src_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "src_assay_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "aidx",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_type_description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_category",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_test_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_group",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_organism",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_taxonomy_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_cell_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_tissue",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_strain",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_subcellular_fraction",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "bao_format",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "bao_label",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "confidence_score",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "confidence_description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "relationship_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "relationship_description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_pref_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "score",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "variant_accession",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "variant_isoform",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "variant_mutation",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "variant_organism",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "variant_sequence",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "variant_taxonomy_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "variant_sequence_json",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_classifications",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_parameters",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -11,28 +277,28 @@
     "content_hash": {
       "type": "string"
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "cell_chembl_id": {
+    "cell_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "tissue_chembl_id": {
+    "tissue_id": {
       "type": [
         "string",
         "null"
@@ -254,8 +520,281 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "assay_chembl_id",
+    "assay_id",
     "content_hash",
     "entity_id"
-  ]
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "aidx",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_category",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_cell_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_classifications",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_group",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "assay_organism",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_parameters",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_pref_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_strain",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_subcellular_fraction",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_taxonomy_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_test_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_tissue",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_type_description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "bao_format",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "bao_label",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "cell_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "confidence_description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "confidence_score",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "publication_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "relationship_description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "relationship_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "score",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "src_assay_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "src_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "tissue_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "variant_accession",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "variant_isoform",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "variant_mutation",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "variant_organism",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "variant_sequence",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "variant_sequence_json",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "variant_taxonomy_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

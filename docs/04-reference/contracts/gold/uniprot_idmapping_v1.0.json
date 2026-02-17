@@ -1,9 +1,143 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProt ID Mapping Gold Contract",
-  "description": "Gold layer data contract for UniProt ID Mapping Gold Contract. Auto-generated from Pandera schema UniProtIDMappingGoldSchema.",
+  "title": "UniProtIDMapping Gold Contract",
+  "description": "Gold layer data contract for uniprot_idmapping. Auto-generated from Pandera schema UniProtIDMappingGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "target_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "uniprot_accession",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "mapping_status",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "uniprot_entry_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "organism_scientific",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "organism_common",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "taxonomy_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "protein_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "gene_primary",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "sequence_length",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "sequence_mass",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "reviewed",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "annotation_score",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "all_mappings",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_dq_warn",
+      "json_type": "boolean",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -11,7 +145,7 @@
     "content_hash": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": "string"
     },
     "uniprot_accession": {
@@ -22,6 +156,72 @@
     },
     "mapping_status": {
       "type": "string"
+    },
+    "uniprot_entry_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "organism_scientific": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "organism_common": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "taxonomy_id": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "protein_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "gene_primary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sequence_length": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "sequence_mass": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "reviewed": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "annotation_score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "all_mappings": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_dq_warn": {
       "type": "boolean"
@@ -54,6 +254,147 @@
     "content_hash",
     "entity_id",
     "mapping_status",
-    "target_chembl_id"
-  ]
+    "target_id"
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_dq_warn",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "all_mappings",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "annotation_score",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "gene_primary",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "mapping_status",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "organism_common",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "organism_scientific",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "protein_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "reviewed",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "sequence_length",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "sequence_mass",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "taxonomy_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "uniprot_accession",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "uniprot_entry_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

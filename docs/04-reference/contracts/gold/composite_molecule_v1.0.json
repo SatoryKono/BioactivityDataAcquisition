@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLCellLine Gold Contract",
-  "description": "Gold layer data contract for chembl_cell_line. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
+  "title": "CompositeMolecule Gold Contract",
+  "description": "Gold layer data contract for composite_molecule. Auto-generated from Pandera schema CompositeMoleculeGoldSchema.",
   "type": "object",
   "fields": [
     {
@@ -18,57 +18,15 @@
       "description": null
     },
     {
-      "name": "cell_id",
-      "json_type": "string",
+      "name": "_dq_warn",
+      "json_type": "boolean",
       "nullable": false,
       "description": null
     },
     {
-      "name": "cell_name",
-      "json_type": "string",
+      "name": "_dq_error",
+      "json_type": "boolean",
       "nullable": false,
-      "description": null
-    },
-    {
-      "name": "cell_description",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cell_source_tissue",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cell_source_organism",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cell_source_taxonomy_id",
-      "json_type": "number",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cellosaurus_id",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cl_lincs_id",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "efo_id",
-      "json_type": "string",
-      "nullable": true,
       "description": null
     },
     {
@@ -100,6 +58,36 @@
       "json_type": "integer",
       "nullable": false,
       "description": null
+    },
+    {
+      "name": "_source",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_composite_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_providers",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_enrichment_status",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_lineage_created_at",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
     }
   ],
   "properties": {
@@ -109,53 +97,11 @@
     "content_hash": {
       "type": "string"
     },
-    "cell_id": {
-      "type": "string"
+    "_dq_warn": {
+      "type": "boolean"
     },
-    "cell_name": {
-      "type": "string"
-    },
-    "cell_description": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_tissue": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_organism": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_taxonomy_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "cellosaurus_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cl_lincs_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "efo_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_dq_error": {
+      "type": "boolean"
     },
     "_run_id": {
       "type": "string"
@@ -174,15 +120,37 @@
     },
     "_index": {
       "type": "integer"
+    },
+    "_source": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_composite_run_id": {
+      "type": "string"
+    },
+    "_source_providers": {
+      "type": "string"
+    },
+    "_enrichment_status": {
+      "type": "string"
+    },
+    "_lineage_created_at": {
+      "type": "string"
     }
   },
   "required": [
+    "_composite_run_id",
+    "_dq_error",
+    "_dq_warn",
+    "_enrichment_status",
     "_index",
     "_ingestion_ts",
+    "_lineage_created_at",
     "_run_id",
     "_run_type",
-    "cell_id",
-    "cell_name",
+    "_source_providers",
     "content_hash",
     "entity_id"
   ],
@@ -194,6 +162,30 @@
     },
     "changes": [
       {
+        "field": "_composite_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_dq_error",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_dq_warn",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_enrichment_status",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
         "field": "_index",
         "change": "added",
         "breaking": true,
@@ -201,6 +193,12 @@
       },
       {
         "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_lineage_created_at",
         "change": "added",
         "breaking": true,
         "details": "New required field."
@@ -218,70 +216,28 @@
         "details": "New required field."
       },
       {
+        "field": "_source",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
         "field": "_source_batch_id",
         "change": "added",
         "breaking": false,
         "details": "New nullable field."
       },
       {
-        "field": "cell_description",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cell_id",
+        "field": "_source_providers",
         "change": "added",
         "breaking": true,
         "details": "New required field."
-      },
-      {
-        "field": "cell_name",
-        "change": "added",
-        "breaking": true,
-        "details": "New required field."
-      },
-      {
-        "field": "cell_source_organism",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cell_source_taxonomy_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cell_source_tissue",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cellosaurus_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cl_lincs_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
       },
       {
         "field": "content_hash",
         "change": "added",
         "breaking": true,
         "details": "New required field."
-      },
-      {
-        "field": "efo_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
       },
       {
         "field": "entity_id",

@@ -1,9 +1,365 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Molecule Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Molecule Gold Contract. Auto-generated from Pandera schema ChEMBLMoleculeGoldSchema.",
+  "title": "ChEMBLMolecule Gold Contract",
+  "description": "Gold layer data contract for chembl_molecule. Auto-generated from Pandera schema ChEMBLMoleculeGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "molecule_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "pref_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecule_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "structure_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "max_phase",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "first_approval",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "chirality",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "dosed_ingredient",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "availability_type",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "usan_stem",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "usan_stem_definition",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "usan_substem",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "usan_year",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "helm_notation",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecule_species",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "oral",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "parenteral",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "topical",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "black_box_warning",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "natural_product",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "first_in_class",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "prodrug",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "therapeutic_flag",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "withdrawn_flag",
+      "json_type": "boolean",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "inorganic_flag",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "polymer_flag",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecule_hierarchy",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecule_properties",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecule_structures",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecule_synonyms",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "cross_references",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "atc_classifications",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "hierarchy_parent_chembl_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "hierarchy_active_chembl_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "hierarchy_child_chembl_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "logp",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "logp_method",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecular_weight",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "mw_freebase",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "polar_surface_area",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "rotatable_bond_count",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "ro5_violation_count",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "heavy_atom_count",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "aromatic_ring_count",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "hba_count",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "hbd_count",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "qed_score",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecular_formula",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "ro3_pass",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "canonical_smiles",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_inchi",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "inchi_key",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -11,7 +367,7 @@
     "content_hash": {
       "type": "string"
     },
-    "molecule_chembl_id": {
+    "molecule_id": {
       "type": "string"
     },
     "pref_name": {
@@ -230,25 +586,13 @@
         "null"
       ]
     },
-    "mw_freebase": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
     "molecular_weight": {
       "type": [
         "number",
         "null"
       ]
     },
-    "hba_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "hbd_count": {
+    "mw_freebase": {
       "type": [
         "number",
         "null"
@@ -284,6 +628,18 @@
         "null"
       ]
     },
+    "hba_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "hbd_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
     "qed_score": {
       "type": [
         "number",
@@ -314,7 +670,7 @@
         "null"
       ]
     },
-    "inchikey": {
+    "inchi_key": {
       "type": [
         "string",
         "null"
@@ -346,6 +702,369 @@
     "_run_type",
     "content_hash",
     "entity_id",
-    "molecule_chembl_id"
-  ]
+    "molecule_id"
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "aromatic_ring_count",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "atc_classifications",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "availability_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "black_box_warning",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "canonical_smiles",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "chirality",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "cross_references",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "dosed_ingredient",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "first_approval",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "first_in_class",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "hba_count",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "hbd_count",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "heavy_atom_count",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "helm_notation",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "hierarchy_active_chembl_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "hierarchy_child_chembl_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "hierarchy_parent_chembl_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "inchi_key",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "inorganic_flag",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "logp",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "logp_method",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "max_phase",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecular_formula",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecular_weight",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecule_hierarchy",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecule_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "molecule_properties",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecule_species",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecule_structures",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecule_synonyms",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecule_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "mw_freebase",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "natural_product",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "oral",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "parenteral",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "polar_surface_area",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "polymer_flag",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pref_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "prodrug",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "qed_score",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "ro3_pass",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "ro5_violation_count",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "rotatable_bond_count",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_inchi",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "structure_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "therapeutic_flag",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "topical",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "usan_stem",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "usan_stem_definition",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "usan_substem",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "usan_year",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "withdrawn_flag",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

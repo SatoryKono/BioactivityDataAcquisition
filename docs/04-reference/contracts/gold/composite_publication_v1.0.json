@@ -1,116 +1,286 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "Composite Publication Gold Contract",
-  "description": "Gold layer data contract for Composite Publication. Merged multi-source entity combining chembl_publication (seed) with crossref, openalex, pubmed, and semanticscholar enrichers. Uses qualified column names ({provider}.{entity}.{field}) for enricher fields.",
+  "title": "CompositePublication Gold Contract",
+  "description": "Gold layer data contract for composite_publication. Auto-generated from Pandera schema CompositePublicationGoldSchema.",
   "type": "object",
-  "additionalProperties": true,
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_dq_warn",
+      "json_type": "boolean",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_dq_error",
+      "json_type": "boolean",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_lookup_method",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_original_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_composite_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_providers",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_enrichment_status",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_lineage_created_at",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
-      "type": "string",
-      "description": "SHA256 hash of primary key (document_chembl_id)"
+      "type": "string"
     },
     "content_hash": {
-      "type": "string",
-      "description": "SHA256 hash of business fields"
+      "type": "string"
     },
     "_dq_warn": {
-      "type": "boolean",
-      "description": "Data quality warning flag"
+      "type": "boolean"
     },
     "_dq_error": {
-      "type": "boolean",
-      "description": "Data quality error flag"
+      "type": "boolean"
     },
     "_run_id": {
-      "type": "string",
-      "description": "Pipeline run identifier"
+      "type": "string"
     },
     "_run_type": {
-      "type": "string",
-      "description": "Run type (incremental/full)"
+      "type": "string"
     },
     "_source_batch_id": {
-      "type": ["string", "null"],
-      "description": "Source batch identifier"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_ingestion_ts": {
-      "type": "string",
-      "description": "Ingestion timestamp (ISO format)"
+      "type": "string"
     },
     "_index": {
-      "type": "integer",
-      "description": "Record index within batch"
+      "type": "integer"
     },
     "_source": {
-      "type": ["string", "null"],
-      "description": "Original data source (seed provider)"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_lookup_method": {
-      "type": ["string", "null"],
-      "description": "Lookup method used: direct, doi, pmid, title_fallback"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_original_id": {
-      "type": ["string", "null"],
-      "description": "Original identifier used for lookup"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_composite_run_id": {
-      "type": "string",
-      "description": "Composite pipeline run UUID"
+      "type": "string"
     },
     "_source_providers": {
-      "type": "string",
-      "description": "JSON list of providers used in merge"
+      "type": "string"
     },
     "_enrichment_status": {
-      "type": "string",
-      "description": "JSON dict mapping enricher names to status (success/failed/skipped)"
+      "type": "string"
     },
     "_lineage_created_at": {
-      "type": "string",
-      "description": "ISO timestamp when merge was created"
+      "type": "string"
     }
   },
   "required": [
-    "entity_id",
-    "content_hash",
-    "_dq_warn",
+    "_composite_run_id",
     "_dq_error",
+    "_dq_warn",
+    "_enrichment_status",
+    "_index",
+    "_ingestion_ts",
+    "_lineage_created_at",
     "_run_id",
     "_run_type",
-    "_ingestion_ts",
-    "_index",
-    "_composite_run_id",
     "_source_providers",
-    "_enrichment_status",
-    "_lineage_created_at"
+    "content_hash",
+    "entity_id"
   ],
-  "examples": [
-    {
-      "entity_id": "sha256:abc123...",
-      "content_hash": "sha256:def456...",
-      "chembl.publication.document_chembl_id": "CHEMBL3307465",
-      "chembl.publication.doi": "10.1038/nature12373",
-      "chembl.publication.pmid": "23873052",
-      "chembl.publication.title": "CRISPR-Cas systems for editing",
-      "crossref.publication.citation_count": 12500,
-      "pubmed.publication.mesh_terms": "[\"CRISPR-Cas Systems\"]",
-      "openalex.publication.concepts": "[{\"id\": \"C12345\"}]",
-      "semanticscholar.publication.tldr": "This paper reviews CRISPR-Cas systems.",
-      "_source": "chembl",
-      "_lookup_method": "direct",
-      "_original_id": "CHEMBL3307465",
-      "_dq_warn": false,
-      "_dq_error": false,
-      "_run_id": "run-abc123",
-      "_run_type": "full",
-      "_source_batch_id": "batch-001",
-      "_ingestion_ts": "2026-01-27T12:00:00Z",
-      "_index": 0,
-      "_composite_run_id": "composite-run-xyz789",
-      "_source_providers": "[\"seed\", \"crossref_publication\", \"openalex_publication\", \"pubmed_publication\", \"semanticscholar_publication\"]",
-      "_enrichment_status": "{\"crossref_publication\": \"success\", \"openalex_publication\": \"success\", \"pubmed_publication\": \"success\", \"semanticscholar_publication\": \"success\"}",
-      "_lineage_created_at": "2026-01-27T12:05:00Z"
-    }
-  ]
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_composite_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_dq_error",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_dq_warn",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_enrichment_status",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_lineage_created_at",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_lookup_method",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "_original_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "_source_providers",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      }
+    ]
+  }
 }

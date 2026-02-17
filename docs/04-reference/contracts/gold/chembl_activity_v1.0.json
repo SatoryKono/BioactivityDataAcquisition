@@ -1,9 +1,377 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Activity Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Activity Gold Contract. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
+  "title": "ChEMBLActivity Gold Contract",
+  "description": "Gold layer data contract for chembl_activity. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "activity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "molecule_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "target_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "record_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "src_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "canonical_smiles",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "molecule_pref_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "parent_molecule_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "target_pref_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "target_organism",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "target_taxonomy_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_variant_accession",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "assay_variant_mutation",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "bao_endpoint",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "bao_format",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "bao_label",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "value",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "units",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "relation",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "upper_value",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "text_value",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_value",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_units",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_relation",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_upper_value",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_text_value",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "standard_flag",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "pchembl_value",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "ligand_efficiency_bei",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "ligand_efficiency_le",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "ligand_efficiency_lle",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "ligand_efficiency_sei",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "qudt_units",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "uo_units",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "journal",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_year",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_doi",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_pmid",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "publication_pmc_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "activity_comment",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "data_validity_comment",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "data_validity_description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "potential_duplicate",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "action_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "action_type_description",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "action_type_parent_type",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "activity_properties",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "toid",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -14,22 +382,22 @@
     "activity_id": {
       "type": "string"
     },
-    "molecule_chembl_id": {
+    "molecule_id": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": [
         "string",
         "null"
@@ -59,7 +427,7 @@
         "null"
       ]
     },
-    "parent_molecule_chembl_id": {
+    "parent_molecule_id": {
       "type": [
         "string",
         "null"
@@ -79,7 +447,7 @@
     },
     "target_taxonomy_id": {
       "type": [
-        "string",
+        "number",
         "null"
       ]
     },
@@ -245,15 +613,33 @@
         "null"
       ]
     },
-    "document_journal": {
+    "journal": {
       "type": [
         "string",
         "null"
       ]
     },
-    "document_year": {
+    "publication_year": {
       "type": [
         "number",
+        "null"
+      ]
+    },
+    "publication_doi": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_pmid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_pmc_id": {
+      "type": [
+        "string",
         "null"
       ]
     },
@@ -281,7 +667,7 @@
         "null"
       ]
     },
-    "action_type_action_type": {
+    "action_type": {
       "type": [
         "string",
         "null"
@@ -338,6 +724,381 @@
     "activity_id",
     "content_hash",
     "entity_id",
-    "molecule_chembl_id"
-  ]
+    "molecule_id"
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "action_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "action_type_description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "action_type_parent_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "activity_comment",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "activity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "activity_properties",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_variant_accession",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "assay_variant_mutation",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "bao_endpoint",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "bao_format",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "bao_label",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "canonical_smiles",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "data_validity_comment",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "data_validity_description",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "journal",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "ligand_efficiency_bei",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "ligand_efficiency_le",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "ligand_efficiency_lle",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "ligand_efficiency_sei",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "molecule_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "molecule_pref_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "parent_molecule_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pchembl_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "potential_duplicate",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_doi",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_pmc_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_pmid",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "publication_year",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "qudt_units",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "record_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "relation",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "src_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_flag",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_relation",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_text_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_units",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_upper_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "standard_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_organism",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_pref_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "target_taxonomy_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "text_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "toid",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "type",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "units",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "uo_units",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "upper_value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "value",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

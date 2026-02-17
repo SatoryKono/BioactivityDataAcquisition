@@ -1,9 +1,113 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Protein Class Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Protein Class Gold Contract. Auto-generated from Pandera schema ChEMBLProteinClassGoldSchema.",
+  "title": "ChEMBLProteinClass Gold Contract",
+  "description": "Gold layer data contract for chembl_protein_class. Auto-generated from Pandera schema ChEMBLProteinClassGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "protein_class_id",
+      "json_type": "number",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "parent_id",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "class_level",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "pref_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "short_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "protein_class_desc",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "definition",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "sort_order",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "replaced_by",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "downgraded",
+      "json_type": "number",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -12,23 +116,19 @@
       "type": "string"
     },
     "protein_class_id": {
-      "type": "number",
-      "minimum": 1
+      "type": "number"
     },
     "parent_id": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 1
+      ]
     },
     "class_level": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 1,
-      "maximum": 8
+      ]
     },
     "pref_name": {
       "type": [
@@ -64,17 +164,12 @@
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 1
+      ]
     },
     "downgraded": {
       "type": [
         "number",
         "null"
-      ],
-      "enum": [
-        0,
-        1
       ]
     },
     "_run_id": {
@@ -104,5 +199,116 @@
     "content_hash",
     "entity_id",
     "protein_class_id"
-  ]
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "class_level",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "definition",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "downgraded",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "parent_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "pref_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "protein_class_desc",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "protein_class_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "replaced_by",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "short_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "sort_order",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      }
+    ]
+  }
 }

@@ -1,75 +1,45 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLCellLine Gold Contract",
-  "description": "Gold layer data contract for chembl_cell_line. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
+  "title": "ChEMBLTissue Gold Contract",
+  "description": "Gold layer data contract for chembl_tissue. Auto-generated from Pandera schema ChEMBLTissueGoldSchema.",
   "type": "object",
   "fields": [
     {
-      "name": "entity_id",
+      "name": "tissue_chembl_id",
       "json_type": "string",
       "nullable": false,
-      "description": null
+      "description": "ChEMBL tissue ID"
     },
     {
-      "name": "content_hash",
+      "name": "pref_name",
       "json_type": "string",
       "nullable": false,
-      "description": null
+      "description": "Preferred tissue name"
     },
     {
-      "name": "cell_id",
-      "json_type": "string",
-      "nullable": false,
-      "description": null
-    },
-    {
-      "name": "cell_name",
-      "json_type": "string",
-      "nullable": false,
-      "description": null
-    },
-    {
-      "name": "cell_description",
+      "name": "bto_id",
       "json_type": "string",
       "nullable": true,
-      "description": null
+      "description": "BRENDA Tissue Ontology ID"
     },
     {
-      "name": "cell_source_tissue",
+      "name": "caloha_id",
       "json_type": "string",
       "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cell_source_organism",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cell_source_taxonomy_id",
-      "json_type": "number",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cellosaurus_id",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
-    },
-    {
-      "name": "cl_lincs_id",
-      "json_type": "string",
-      "nullable": true,
-      "description": null
+      "description": "CALIPHO ID"
     },
     {
       "name": "efo_id",
       "json_type": "string",
       "nullable": true,
-      "description": null
+      "description": "Experimental Factor Ontology ID"
+    },
+    {
+      "name": "uberon_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": "Uberon Ontology ID"
     },
     {
       "name": "_run_id",
@@ -103,59 +73,41 @@
     }
   ],
   "properties": {
-    "entity_id": {
-      "type": "string"
+    "tissue_chembl_id": {
+      "type": "string",
+      "description": "ChEMBL tissue ID"
     },
-    "content_hash": {
-      "type": "string"
+    "pref_name": {
+      "type": "string",
+      "description": "Preferred tissue name"
     },
-    "cell_id": {
-      "type": "string"
-    },
-    "cell_name": {
-      "type": "string"
-    },
-    "cell_description": {
+    "bto_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "description": "BRENDA Tissue Ontology ID"
     },
-    "cell_source_tissue": {
+    "caloha_id": {
       "type": [
         "string",
         "null"
-      ]
-    },
-    "cell_source_organism": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cell_source_taxonomy_id": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "cellosaurus_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cl_lincs_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+      ],
+      "description": "CALIPHO ID"
     },
     "efo_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "description": "Experimental Factor Ontology ID"
+    },
+    "uberon_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Uberon Ontology ID"
     },
     "_run_id": {
       "type": "string"
@@ -181,10 +133,8 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "cell_id",
-    "cell_name",
-    "content_hash",
-    "entity_id"
+    "pref_name",
+    "tissue_chembl_id"
   ],
   "changelog": {
     "generated_at": "2026-02-17T15:53:01+00:00",
@@ -224,58 +174,16 @@
         "details": "New nullable field."
       },
       {
-        "field": "cell_description",
+        "field": "bto_id",
         "change": "added",
         "breaking": false,
         "details": "New nullable field."
       },
       {
-        "field": "cell_id",
-        "change": "added",
-        "breaking": true,
-        "details": "New required field."
-      },
-      {
-        "field": "cell_name",
-        "change": "added",
-        "breaking": true,
-        "details": "New required field."
-      },
-      {
-        "field": "cell_source_organism",
+        "field": "caloha_id",
         "change": "added",
         "breaking": false,
         "details": "New nullable field."
-      },
-      {
-        "field": "cell_source_taxonomy_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cell_source_tissue",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cellosaurus_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "cl_lincs_id",
-        "change": "added",
-        "breaking": false,
-        "details": "New nullable field."
-      },
-      {
-        "field": "content_hash",
-        "change": "added",
-        "breaking": true,
-        "details": "New required field."
       },
       {
         "field": "efo_id",
@@ -284,10 +192,22 @@
         "details": "New nullable field."
       },
       {
-        "field": "entity_id",
+        "field": "pref_name",
         "change": "added",
         "breaking": true,
         "details": "New required field."
+      },
+      {
+        "field": "tissue_chembl_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "uberon_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
       }
     ]
   }

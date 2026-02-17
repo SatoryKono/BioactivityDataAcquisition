@@ -1,9 +1,95 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Compound Record Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Compound Record Gold Contract. Auto-generated from Pandera schema ChEMBLCompoundRecordGoldSchema.",
+  "title": "ChEMBLCompoundRecord Gold Contract",
+  "description": "Gold layer data contract for chembl_compound_record. Auto-generated from Pandera schema ChEMBLCompoundRecordGoldSchema.",
   "type": "object",
+  "fields": [
+    {
+      "name": "entity_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "content_hash",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "record_id",
+      "json_type": "number",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "molecule_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "publication_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "compound_key",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "compound_name",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "src_id",
+      "json_type": "number",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "src_compound_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_run_id",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_run_type",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_source_batch_id",
+      "json_type": "string",
+      "nullable": true,
+      "description": null
+    },
+    {
+      "name": "_ingestion_ts",
+      "json_type": "string",
+      "nullable": false,
+      "description": null
+    },
+    {
+      "name": "_index",
+      "json_type": "integer",
+      "nullable": false,
+      "description": null
+    }
+  ],
   "properties": {
     "entity_id": {
       "type": "string"
@@ -14,10 +100,10 @@
     "record_id": {
       "type": "number"
     },
-    "molecule_chembl_id": {
+    "molecule_id": {
       "type": "string"
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": "string"
     },
     "compound_key": {
@@ -66,10 +152,103 @@
     "_run_id",
     "_run_type",
     "content_hash",
-    "document_chembl_id",
     "entity_id",
-    "molecule_chembl_id",
+    "molecule_id",
+    "publication_id",
     "record_id",
     "src_id"
-  ]
+  ],
+  "changelog": {
+    "generated_at": "2026-02-17T15:53:01+00:00",
+    "summary": {
+      "breaking": true,
+      "non_breaking": true
+    },
+    "changes": [
+      {
+        "field": "_index",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_ingestion_ts",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_run_type",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "_source_batch_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "compound_key",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "compound_name",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "content_hash",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "entity_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "molecule_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "publication_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "record_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      },
+      {
+        "field": "src_compound_id",
+        "change": "added",
+        "breaking": false,
+        "details": "New nullable field."
+      },
+      {
+        "field": "src_id",
+        "change": "added",
+        "breaking": true,
+        "details": "New required field."
+      }
+    ]
+  }
 }
