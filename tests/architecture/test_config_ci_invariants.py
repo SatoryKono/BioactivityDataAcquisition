@@ -156,9 +156,7 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 def _collect_pipeline_configs() -> list[Path]:
     """Collect all entity-level pipeline YAML configs (skip _base.yaml)."""
     return sorted(
-        p
-        for p in PIPELINES_DIR.rglob("*.yaml")
-        if not p.name.startswith("_")
+        p for p in PIPELINES_DIR.rglob("*.yaml") if not p.name.startswith("_")
     )
 
 
@@ -167,19 +165,11 @@ def _collect_source_configs() -> list[Path]:
 
 
 def _collect_quality_configs() -> list[Path]:
-    return sorted(
-        p
-        for p in QUALITY_DIR.rglob("*.yaml")
-        if not p.name.startswith("_")
-    )
+    return sorted(p for p in QUALITY_DIR.rglob("*.yaml") if not p.name.startswith("_"))
 
 
 def _collect_filter_configs() -> list[Path]:
-    return sorted(
-        p
-        for p in FILTERS_DIR.rglob("*.yaml")
-        if not p.name.startswith("_")
-    )
+    return sorted(p for p in FILTERS_DIR.rglob("*.yaml") if not p.name.startswith("_"))
 
 
 def _rel(path: Path) -> str:
@@ -265,8 +255,7 @@ class TestConfigFilesExist:
             schema_path = SCHEMAS_DIR / provider / f"{entity}.yaml"
             if not schema_path.exists():
                 missing.append(
-                    f"{_rel(pipeline_path)}: missing schema at "
-                    f"{_rel(schema_path)}"
+                    f"{_rel(pipeline_path)}: missing schema at {_rel(schema_path)}"
                 )
         assert not missing, "\n".join(missing)
 
@@ -279,8 +268,7 @@ class TestConfigFilesExist:
             dq_path = QUALITY_DIR / "entities" / provider / f"{entity}.yaml"
             if not dq_path.exists():
                 missing.append(
-                    f"{_rel(pipeline_path)}: missing DQ config at "
-                    f"{_rel(dq_path)}"
+                    f"{_rel(pipeline_path)}: missing DQ config at {_rel(dq_path)}"
                 )
         assert not missing, "\n".join(missing)
 
@@ -320,9 +308,7 @@ class TestConfigFilesExist:
 class TestValidLoadingStrategy:
     """INV-CFG-003: loading_strategy must be null or 'full_scan_only'."""
 
-    @pytest.mark.parametrize(
-        "config_path", _collect_pipeline_configs(), ids=_rel
-    )
+    @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
     def test_loading_strategy_value(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
         strategy = data.get("loading_strategy")
@@ -366,9 +352,7 @@ class TestProviderAuthRequirements:
 class TestNoUnknownKeys:
     """INV-CFG-005: config files must not contain unrecognized top-level keys."""
 
-    @pytest.mark.parametrize(
-        "config_path", _collect_pipeline_configs(), ids=_rel
-    )
+    @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
     def test_pipeline_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
         is_composite = "composite" in config_path.parts
@@ -379,9 +363,7 @@ class TestNoUnknownKeys:
             f"Allowed: {sorted(allowed)}"
         )
 
-    @pytest.mark.parametrize(
-        "config_path", _collect_source_configs(), ids=_rel
-    )
+    @pytest.mark.parametrize("config_path", _collect_source_configs(), ids=_rel)
     def test_source_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
         unknown = set(data.keys()) - SOURCE_ALLOWED_KEYS
@@ -390,9 +372,7 @@ class TestNoUnknownKeys:
             f"Allowed: {sorted(SOURCE_ALLOWED_KEYS)}"
         )
 
-    @pytest.mark.parametrize(
-        "config_path", _collect_quality_configs(), ids=_rel
-    )
+    @pytest.mark.parametrize("config_path", _collect_quality_configs(), ids=_rel)
     def test_quality_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
         unknown = set(data.keys()) - QUALITY_ALLOWED_KEYS
@@ -401,9 +381,7 @@ class TestNoUnknownKeys:
             f"Allowed: {sorted(QUALITY_ALLOWED_KEYS)}"
         )
 
-    @pytest.mark.parametrize(
-        "config_path", _collect_filter_configs(), ids=_rel
-    )
+    @pytest.mark.parametrize("config_path", _collect_filter_configs(), ids=_rel)
     def test_filter_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
         unknown = set(data.keys()) - FILTER_ALLOWED_KEYS
