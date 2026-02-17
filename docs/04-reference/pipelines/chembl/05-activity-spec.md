@@ -43,13 +43,13 @@ Activities are the **core measurement data** in ChEMBL, representing bioactivity
 ```
 activity
     │
-    ├──FK──► assay.assay_chembl_id (M:1, required)
+    ├──FK──► assay.assay_id (M:1, required)
     │
-    ├──FK──► molecule.molecule_chembl_id (M:1, required)
+    ├──FK──► molecule.molecule_id (M:1, required)
     │
-    ├──FK──► target.target_chembl_id (M:1, optional)
+    ├──FK──► target.target_id (M:1, optional)
     │
-    ├──FK──► document.document_chembl_id (M:1, optional)
+    ├──FK──► document.publication_id (M:1, optional)
     │
     └── ligand_efficiency (nested object)
         ├── bei, le, lle, sei
@@ -75,7 +75,7 @@ from chembl_webresource_client.new_client import new_client
 
 activity = new_client.activity
 # Filter by target, molecule, or assay
-results = activity.filter(target_chembl_id__in=target_ids)
+results = activity.filter(target_id__in=target_ids)
 ```
 
 ### 3.2. Complete API Fields
@@ -83,10 +83,10 @@ results = activity.filter(target_chembl_id__in=target_ids)
 | #   | API Field               | JSON Type | Nullable | Description        | Example                    |
 | --- | ----------------------- | --------- | -------- | ------------------ | -------------------------- |
 | 1   | `activity_id`           | integer   | No       | Primary key        | `12345678`                 |
-| 2   | `assay_chembl_id`       | string    | No       | FK to assay        | `"CHEMBL123456"`           |
-| 3   | `molecule_chembl_id`    | string    | No       | FK to molecule     | `"CHEMBL25"`               |
-| 4   | `target_chembl_id`      | string    | Yes      | FK to target       | `"CHEMBL240"`              |
-| 5   | `document_chembl_id`    | string    | Yes      | FK to document     | `"CHEMBL1234"`             |
+| 2   | `assay_id`              | string    | No       | FK to assay        | `"CHEMBL123456"`           |
+| 3   | `molecule_id`           | string    | No       | FK to molecule     | `"CHEMBL25"`               |
+| 4   | `target_id`             | string    | Yes      | FK to target       | `"CHEMBL240"`              |
+| 5   | `publication_id`        | string    | Yes      | FK to document     | `"CHEMBL1234"`             |
 | 6   | `standard_type`         | string    | Yes      | Measurement type   | `"IC50"`                   |
 | 7   | `standard_relation`     | string    | Yes      | Relation           | `"="`                      |
 | 8   | `standard_value`        | number    | Yes      | Standardized value | `50.0`                     |
@@ -126,20 +126,20 @@ results = activity.filter(target_chembl_id__in=target_ids)
 
 The API also returns denormalized fields from related entities:
 
-| Field                       | Source Entity       | Description     |
-| --------------------------- | ------------------- | --------------- |
-| `canonical_smiles`          | molecule.structures | SMILES string   |
-| `molecule_pref_name`        | molecule            | Molecule name   |
-| `parent_molecule_chembl_id` | molecule.hierarchy  | Parent molecule |
-| `target_pref_name`          | target              | Target name     |
-| `target_organism`           | target              | Organism        |
-| `target_tax_id`             | target              | Taxonomy ID     |
-| `assay_type`                | assay               | Assay type      |
-| `assay_description`         | assay               | Description     |
-| `bao_format`                | assay               | BAO format      |
-| `bao_label`                 | assay               | BAO label       |
-| `document_journal`          | document            | Journal         |
-| `document_year`             | document            | Year            |
+| Field                | Source Entity       | Description     |
+| -------------------- | ------------------- | --------------- |
+| `canonical_smiles`   | molecule.structures | SMILES string   |
+| `molecule_pref_name` | molecule            | Molecule name   |
+| `parent_molecule_id` | molecule.hierarchy  | Parent molecule |
+| `target_pref_name`   | target              | Target name     |
+| `target_organism`    | target              | Organism        |
+| `target_tax_id`      | target              | Taxonomy ID     |
+| `assay_type`         | assay               | Assay type      |
+| `assay_description`  | assay               | Description     |
+| `bao_format`         | assay               | BAO format      |
+| `bao_label`          | assay               | BAO label       |
+| `document_journal`   | document            | Journal         |
+| `document_year`      | document            | Year            |
 
 ______________________________________________________________________
 
@@ -179,9 +179,9 @@ ______________________________________________________________________
 # Fields included in hash (primary activity data)
 hash_fields = [
     "activity_id",
-    "assay_chembl_id",
-    "molecule_chembl_id",
-    "target_chembl_id",
+    "assay_id",
+    "molecule_id",
+    "target_id",
     "standard_type",
     "standard_relation",
     "standard_value",
@@ -212,6 +212,8 @@ ______________________________________________________________________
 
 ### 5.1. Pandera Schema
 
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
+
 ```python
 class ActivitySchema(ETLRecordSchema):
     """Activity validation schema for Silver layer."""
@@ -220,19 +222,19 @@ class ActivitySchema(ETLRecordSchema):
     activity_id: Series[str] = pa.Field(nullable=False)
 
     # === Foreign Keys ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
     )
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
     )
-    target_chembl_id: Series[str] | None = pa.Field(
+    target_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^CHEMBL\d+$",
     )
-    document_chembl_id: Series[str] | None = pa.Field(
+    publication_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^CHEMBL\d+$",
     )
@@ -324,16 +326,16 @@ class ActivitySchema(ETLRecordSchema):
 
 ### 5.2. Field Validation Matrix
 
-| Field                | Type  | Nullable | Constraints                    | DQ Level |
-| -------------------- | ----- | -------- | ------------------------------ | -------- |
-| `activity_id`        | str   | No       | unique                         | CRITICAL |
-| `assay_chembl_id`    | str   | No       | regex `^CHEMBL\d+$`            | CRITICAL |
-| `molecule_chembl_id` | str   | No       | regex `^CHEMBL\d+$`            | CRITICAL |
-| `target_chembl_id`   | str   | Yes      | regex `^CHEMBL\d+$`            | WARNING  |
-| `standard_value`     | float | Yes      | >= 0                           | WARNING  |
-| `pchembl_value`      | float | Yes      | [0, 14]                        | WARNING  |
-| `standard_type`      | str   | Yes      | isin [...]                     | WARNING  |
-| `standard_relation`  | str   | Yes      | isin ["=","\<","\<=",">",">="] | WARNING  |
+| Field               | Type  | Nullable | Constraints                    | DQ Level |
+| ------------------- | ----- | -------- | ------------------------------ | -------- |
+| `activity_id`       | str   | No       | unique                         | CRITICAL |
+| `assay_id`          | str   | No       | regex `^CHEMBL\d+$`            | CRITICAL |
+| `molecule_id`       | str   | No       | regex `^CHEMBL\d+$`            | CRITICAL |
+| `target_id`         | str   | Yes      | regex `^CHEMBL\d+$`            | WARNING  |
+| `standard_value`    | float | Yes      | >= 0                           | WARNING  |
+| `pchembl_value`     | float | Yes      | [0, 14]                        | WARNING  |
+| `standard_type`     | str   | Yes      | isin [...]                     | WARNING  |
+| `standard_relation` | str   | Yes      | isin ["=","\<","\<=",">",">="] | WARNING  |
 
 ### 5.3. Cross-Field Validation Rules
 
@@ -344,11 +346,11 @@ class ActivitySchema(ETLRecordSchema):
 
 ### 5.4. DQ Thresholds
 
-| Threshold           | Value                                            | Action            |
-| ------------------- | ------------------------------------------------ | ----------------- |
-| Soft                | 5%                                               | Warning, continue |
-| Hard                | 20%                                              | Fail batch        |
-| Critical field null | activity_id, assay_chembl_id, molecule_chembl_id | Fail immediately  |
+| Threshold           | Value                              | Action            |
+| ------------------- | ---------------------------------- | ----------------- |
+| Soft                | 5%                                 | Warning, continue |
+| Hard                | 20%                                | Fail batch        |
+| Critical field null | activity_id, assay_id, molecule_id | Fail immediately  |
 
 ______________________________________________________________________
 
@@ -386,7 +388,7 @@ Mode: Overwrite
 - `standard_type IN ('IC50', 'Ki')` — Focus on binding data
 - `standard_units IN ('nM', 'uM', 'mM', 'pM', 'M', 'ug.mL-1', 'mg.kg-1')` — 7 standardized units
 - `standard_relation = '='` — Exact measurements
-- `target_chembl_id IS NOT NULL` — Target required
+- `target_id IS NOT NULL` — Target required
 
 ______________________________________________________________________
 
@@ -438,7 +440,7 @@ gold_filters:
     - standard_type
     - standard_value
     - standard_units
-    - target_chembl_id
+    - target_id
 
 sink:
   bronze:
@@ -453,8 +455,8 @@ sink:
 input_filter:
   enabled: true
   source_path: "data/input/target.csv"
-  column_name: "target_chembl_id"
-  filter_field: "target_chembl_id"
+  column_name: "target_id"
+  filter_field: "target_id"
   batch_size: 20
 ```
 

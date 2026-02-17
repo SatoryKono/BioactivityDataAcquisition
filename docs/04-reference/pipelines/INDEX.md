@@ -21,14 +21,14 @@ ______________________________________________________________________
 
 | Pipeline                        | Provider         | Layers       | Primary Key(s)                      | Documentation                                    |
 | ------------------------------- | ---------------- | ------------ | ----------------------------------- | ------------------------------------------------ |
-| `chembl_publication`            | ChEMBL           | Silver, Gold | `document_chembl_id`                | [Spec](chembl/07-publication-spec.md)            |
+| `chembl_publication`            | ChEMBL           | Silver, Gold | `publication_id`                    | [Spec](chembl/07-publication-spec.md)            |
 | `chembl_publication_similarity` | ChEMBL           | Silver, Gold | `doc_id_1`, `doc_id_2`              | [Spec](chembl/12-publication-similarity-spec.md) |
 | `chembl_publication_term`       | ChEMBL           | Silver, Gold | `doc_id`, `term_type`, `term_value` | [Spec](chembl/11-publication-term-spec.md)       |
 | `crossref_publication`          | CrossRef         | Silver, Gold | `doi`                               | [Spec](crossref/01-publication-spec.md)          |
 | `openalex_publication`          | OpenAlex         | Silver, Gold | `openalex_id`                       | [Spec](openalex/01-publication-spec.md)          |
 | `pubmed_publication`            | PubMed           | Silver, Gold | `pmid`                              | [Spec](pubmed/01-publication-spec.md)            |
 | `semanticscholar_publication`   | Semantic Scholar | Silver, Gold | `paper_id`                          | [Spec](semanticscholar/01-publication-spec.md)   |
-| `composite_publication`         | Composite        | Silver, Gold | `document_chembl_id` (seed)         | [Spec](composite/01-publication-spec.md)         |
+| `composite_publication`         | Composite        | Silver, Gold | `publication_id` (seed)             | [Spec](composite/01-publication-spec.md)         |
 
 ______________________________________________________________________
 

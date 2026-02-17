@@ -1346,6 +1346,35 @@ ______________________________________________________________________
   1. Период депрекации: 2 недели до удаления поля.
 - **Consumer Tests**: Потребители могут подписаться на `contracts/` и запускать свои тесты при изменениях.
 
+#### 8.1.1. Contract Governance: Canonical Naming Policy (PK Strategy)
+
+Для **публичных Gold контрактов** и соответствующих Pandera схем используются только канонические PK-поля:
+
+- `publication_id` (вместо legacy `document_chembl_id`)
+- `target_id` (вместо legacy `target_chembl_id`)
+- `molecule_id` (вместо legacy `molecule_chembl_id`)
+- `parent_molecule_id` (вместо legacy `parent_molecule_chembl_id`)
+- `assay_id` (вместо legacy `assay_chembl_id`)
+- `cell_id` (вместо legacy `cell_chembl_id`)
+
+Правила управления:
+
+1. Public contract **MUST** публиковать только canonical field names.
+1. Legacy-имена **MAY** поддерживаться только как migration alias на переходный период.
+1. Alias-период **MUST** быть ограничен (минимум 1 minor release, удаление в следующем major).
+1. Любой PR с изменением PK-имён **MUST** содержать migration strategy и impact assessment в changelog/ADR.
+
+#### 8.1.2. Delta PK Migration Plan (обязательный порядок)
+
+Для Delta-таблиц при переименовании PK применяется фиксированная последовательность:
+
+1. **add new column** — добавить canonical PK-колонку;
+1. **backfill from old** — заполнить canonical-колонку из legacy;
+1. **dual-write window** — временно писать оба поля (canonical + alias);
+1. **drop old in major release** — удалить legacy-поле только в major релизе.
+
+Нарушение порядка рассматривается как contract governance violation (MUST-level).
+
 ### 8.2. Rollback Strategy
 
 - **Scope**:
