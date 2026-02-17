@@ -17,6 +17,15 @@ from bioetl.application.pipelines.pubmed.extractors.identifier_types import (
     RawIdentifiers,
 )
 
+__all__ = [
+    "IdentifierExtractor",
+    "AllArticleIds",
+    "ArticleIdentifiers",
+    "ELocationIds",
+    "NormalizedIdentifiers",
+    "RawIdentifiers",
+]
+
 
 class IdentifierExtractor(BaseFieldExtractor):
     """Extractor for article identifiers from PubMed XML.
@@ -154,9 +163,7 @@ class IdentifierExtractor(BaseFieldExtractor):
         for aid in article_id_list.findall("ArticleId"):
             self._process_article_id(aid, result)
 
-    def _process_article_id(
-        self, aid: Element, result: dict[str, str | None]
-    ) -> None:
+    def _process_article_id(self, aid: Element, result: dict[str, str | None]) -> None:
         """Process a single ArticleId element."""
         id_type = aid.get("IdType")
         if not id_type or not aid.text:
