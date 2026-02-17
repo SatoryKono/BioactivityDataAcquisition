@@ -14,7 +14,12 @@ source:
         client:
             timeout_sec: 30.0
             max_retries: 3
-        batch_size: 50  # PUG REST often limits batch sizes
+        pagination:
+            page_size: 50           # PUG REST response size
+            id_batch_size: 50       # CIDs per batch
+            strategy: offset
+        # Legacy alias
+        batch_size: 50
 
     circuit_breaker:
         failure_threshold: 5

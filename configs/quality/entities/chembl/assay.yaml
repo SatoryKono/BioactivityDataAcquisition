@@ -2,7 +2,7 @@
 # ChEMBL Assay-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
-version: "1.0.0"
+version: "1.1.0"
 provider: chembl
 entity: assay
 
@@ -26,13 +26,39 @@ field_validations:
       - T  # Toxicity
       - P  # Physicochemical
       - U  # Unclassified
+    nullable: false
+    error_message: "assay_type must be one of B, F, A, T, P, U"
+
+  # Confidence score for target assignment (0-9 scale)
+  - field: confidence_score
+    type: range
+    min: 0
+    max: 9
     nullable: true
-    error_message: "Invalid assay_type value"
+
+  # Relationship type between assay and target
+  - field: relationship_type
+    type: enum
+    allowed:
+      - D  # Direct
+      - H  # Homologous
+      - M  # Molecular
+      - N  # Non-molecular
+      - S  # Subcellular
+      - U  # Unclassified
+    nullable: true
 
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-cross_field_validations: []
+cross_field_validations:
+  # Assay must have both ID and description for identifiability
+  - name: assay_identifiable
+    fields:
+      - assay_id
+      - description
+    condition: all_present
+    error_message: "Assay must have ID and description"
 
 # =============================================================================
 # Conditional Validations
