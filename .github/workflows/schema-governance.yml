@@ -1,5 +1,8 @@
 name: Schema Governance
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches: [main, master, develop]
