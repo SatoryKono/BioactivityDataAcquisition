@@ -2,51 +2,81 @@
 
 *Updated: 2026-02-17*
 
-В каталоге `34` исходных диаграмм Mermaid. Принята единая структура:
-
-- `docs/02-architecture/diagrams/mermaid/` — исходники `.mermaid`.
-- `docs/02-architecture/diagrams/png/` — рендеры `.png`.
-
-> Note: Historical AWS terminology removed from active catalog in favor of ADR-010 Local-Only deployment model.
+В каталоге 59 исходных файлов диаграмм Mermaid, документирующих архитектуру BioETL.
+Диаграммы 26–50 созданы на основе TOP-25 из 500 архитектурных предложений (см. `top-50-diagram-selection.md`).
 
 ## Diagram Overview
 
-| #   | Mermaid                                                                                                  | PNG                                                                                          | Description                                          |
-| --- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| 01  | [`01-full-system-component.mermaid`](mermaid/01-full-system-component.mermaid)                           | [`01-full-system-component.png`](png/01-full-system-component.png)                           | Full system component diagram (C4-style)             |
-| 01  | [`01-high-level.mermaid`](mermaid/01-high-level.mermaid)                                                 | [`01-high-level.png`](png/01-high-level.png)                                                 | High-level system overview                           |
-| 02  | [`02-full-medallion-data-flow.mermaid`](mermaid/02-full-medallion-data-flow.mermaid)                     | [`02-full-medallion-data-flow.png`](png/02-full-medallion-data-flow.png)                     | Medallion architecture data flow (detailed)          |
-| 02  | [`02-medallion.mermaid`](mermaid/02-medallion.mermaid)                                                   | [`02-medallion.png`](png/02-medallion.png)                                                   | Medallion architecture (simplified)                  |
-| 03  | [`03-pipeline-execution-happy-path.mermaid`](mermaid/03-pipeline-execution-happy-path.mermaid)           | [`03-pipeline-execution-happy-path.png`](png/03-pipeline-execution-happy-path.png)           | Pipeline execution sequence (happy path)             |
-| 03  | [`03-pipeline-sequence.mermaid`](mermaid/03-pipeline-sequence.mermaid)                                   | [`03-pipeline-sequence.png`](png/03-pipeline-sequence.png)                                   | Pipeline sequence diagram                            |
-| 04  | [`04-domain-layer-class-diagram.mermaid`](mermaid/04-domain-layer-class-diagram.mermaid)                 | [`04-domain-layer-class-diagram.png`](png/04-domain-layer-class-diagram.png)                 | Domain layer ports, entities, config                 |
-| 04  | [`04-error-flow.mermaid`](mermaid/04-error-flow.mermaid)                                                 | [`04-error-flow.png`](png/04-error-flow.png)                                                 | Error handling flow                                  |
-| 05  | [`05-layers-interaction.mermaid`](mermaid/05-layers-interaction.mermaid)                                 | [`05-layers-interaction.png`](png/05-layers-interaction.png)                                 | Layer interaction diagram                            |
-| 05  | [`05-locking.mermaid`](mermaid/05-locking.mermaid)                                                       | [`05-locking.png`](png/05-locking.png)                                                       | Locking mechanism                                    |
-| 05  | [`05-pipeline-lifecycle-states.mermaid`](mermaid/05-pipeline-lifecycle-states.mermaid)                   | [`05-pipeline-lifecycle-states.png`](png/05-pipeline-lifecycle-states.png)                   | Pipeline state machine                               |
-| 06  | [`06-application-layer-class-diagram.mermaid`](mermaid/06-application-layer-class-diagram.mermaid)       | [`06-application-layer-class-diagram.png`](png/06-application-layer-class-diagram.png)       | Application layer classes                            |
-| 06  | [`06-pipeline-execution.mermaid`](mermaid/06-pipeline-execution.mermaid)                                 | [`06-pipeline-execution.png`](png/06-pipeline-execution.png)                                 | Pipeline execution flow                              |
-| 07  | [`07-circuit-breaker-states.mermaid`](mermaid/07-circuit-breaker-states.mermaid)                         | [`07-circuit-breaker-states.png`](png/07-circuit-breaker-states.png)                         | Circuit breaker state machine                        |
-| 07  | [`07-medallion-flow.mermaid`](mermaid/07-medallion-flow.mermaid)                                         | [`07-medallion-flow.png`](png/07-medallion-flow.png)                                         | Medallion data flow                                  |
-| 08  | [`08-complete-etl-workflow.mermaid`](mermaid/08-complete-etl-workflow.mermaid)                           | [`08-complete-etl-workflow.png`](png/08-complete-etl-workflow.png)                           | Complete ETL workflow                                |
-| 08  | [`08-domain-ddd.mermaid`](mermaid/08-domain-ddd.mermaid)                                                 | [`08-domain-ddd.png`](png/08-domain-ddd.png)                                                 | Domain-driven design diagram                         |
-| 09  | [`09-full-er-diagram.mermaid`](mermaid/09-full-er-diagram.mermaid)                                       | [`09-full-er-diagram.png`](png/09-full-er-diagram.png)                                       | Entity-relationship diagram                          |
-| 10  | [`10-infrastructure-layer-class-diagram.mermaid`](mermaid/10-infrastructure-layer-class-diagram.mermaid) | [`10-infrastructure-layer-class-diagram.png`](png/10-infrastructure-layer-class-diagram.png) | Infrastructure layer classes                         |
-| 11  | [`11-lock-acquisition-sequence.mermaid`](mermaid/11-lock-acquisition-sequence.mermaid)                   | [`11-lock-acquisition-sequence.png`](png/11-lock-acquisition-sequence.png)                   | Lock acquisition sequence                            |
-| 12  | [`12-local-deployment-architecture.mermaid`](mermaid/12-local-deployment-architecture.mermaid)           | [`12-local-deployment-architecture.png`](png/12-local-deployment-architecture.png)           | Local deployment architecture (ADR-010 Local-Only)   |
-| 13  | [`13-domain-models-relationship.mermaid`](mermaid/13-domain-models-relationship.mermaid)                 | [`13-domain-models-relationship.png`](png/13-domain-models-relationship.png)                 | Domain model relationships                           |
-| 14  | [`14-provider-health-states.mermaid`](mermaid/14-provider-health-states.mermaid)                         | [`14-provider-health-states.png`](png/14-provider-health-states.png)                         | Provider health states                               |
-| 15  | [`15-dq-check-workflow.mermaid`](mermaid/15-dq-check-workflow.mermaid)                                   | [`15-dq-check-workflow.png`](png/15-dq-check-workflow.png)                                   | Data quality check workflow                          |
-| 16  | [`16-memory-lock-class.mermaid`](mermaid/16-memory-lock-class.mermaid)                                   | [`16-memory-lock-class.png`](png/16-memory-lock-class.png)                                   | MemoryLock class diagram                             |
-| 17  | [`17-pipeline-hierarchy.mermaid`](mermaid/17-pipeline-hierarchy.mermaid)                                 | [`17-pipeline-hierarchy.png`](png/17-pipeline-hierarchy.png)                                 | Pipeline/Transformer hierarchy                       |
-| 18  | [`18-bronze-write-sequence.mermaid`](mermaid/18-bronze-write-sequence.mermaid)                           | [`18-bronze-write-sequence.png`](png/18-bronze-write-sequence.png)                           | Bronze write sequence                                |
-| 19  | [`19-delta-lake-write-sequence.mermaid`](mermaid/19-delta-lake-write-sequence.mermaid)                   | [`19-delta-lake-write-sequence.png`](png/19-delta-lake-write-sequence.png)                   | Delta Lake write sequence                            |
-| 20  | [`20-quarantine-record-states.mermaid`](mermaid/20-quarantine-record-states.mermaid)                     | [`20-quarantine-record-states.png`](png/20-quarantine-record-states.png)                     | Quarantine record states                             |
-| 21  | [`21-activity-entity-data-flow.mermaid`](mermaid/21-activity-entity-data-flow.mermaid)                   | [`21-activity-entity-data-flow.png`](png/21-activity-entity-data-flow.png)                   | Activity entity data flow                            |
-| 22  | [`22-client-api-request-sequence.mermaid`](mermaid/22-client-api-request-sequence.mermaid)               | [`22-client-api-request-sequence.png`](png/22-client-api-request-sequence.png)               | Client API request sequence                          |
-| 23  | [`23-silver-writer-class.mermaid`](mermaid/23-silver-writer-class.mermaid)                               | [`23-silver-writer-class.png`](png/23-silver-writer-class.png)                               | SilverWriter class diagram                           |
-| 24  | [`24-hash-service-class.mermaid`](mermaid/24-hash-service-class.mermaid)                                 | [`24-hash-service-class.png`](png/24-hash-service-class.png)                                 | Hash service class diagram                           |
-| 25  | [`25-circuit-breaker-observer-class.mermaid`](mermaid/25-circuit-breaker-observer-class.mermaid)         | [`25-circuit-breaker-observer-class.png`](png/25-circuit-breaker-observer-class.png)         | CircuitBreaker observer class diagram                |
+### Foundation Diagrams (01–25)
+
+| # | File | Description |
+|---|------|-------------|
+| 01a | `01-full-system-component.mermaid` | Full system component diagram (C4-style) |
+| 01b | `01-high-level.mermaid` | High-level system overview |
+| 02a | `02-full-medallion-data-flow.mermaid` | Medallion architecture data flow (detailed) |
+| 02b | `02-medallion.mermaid` | Medallion architecture (simplified) |
+| 03a | `03-pipeline-execution-happy-path.mermaid` | Pipeline execution sequence (happy path) |
+| 03b | `03-pipeline-sequence.mermaid` | Pipeline sequence diagram |
+| 04a | `04-domain-layer-class-diagram.mermaid` | Domain layer ports, entities, config |
+| 04b | `04-error-flow.mermaid` | Error handling flow |
+| 05a | `05-layers-interaction.mermaid` | Layer interaction diagram |
+| 05b | `05-locking.mermaid` | Locking mechanism |
+| 05c | `05-pipeline-lifecycle-states.mermaid` | Pipeline state machine |
+| 06a | `06-application-layer-class-diagram.mermaid` | Application layer classes |
+| 06b | `06-pipeline-execution.mermaid` | Pipeline execution flow |
+| 07a | `07-circuit-breaker-states.mermaid` | Circuit breaker state machine |
+| 07b | `07-medallion-flow.mermaid` | Medallion data flow |
+| 08a | `08-complete-etl-workflow.mermaid` | Complete ETL workflow |
+| 08b | `08-domain-ddd.mermaid` | Domain-driven design diagram |
+| 09 | `09-full-er-diagram.mermaid` | Entity-relationship diagram |
+| 10 | `10-infrastructure-layer-class-diagram.mermaid` | Infrastructure layer classes |
+| 11 | `11-lock-acquisition-sequence.mermaid` | Lock acquisition sequence |
+| 12 | `12-local-deployment-architecture.mermaid` | Local deployment architecture (ADR-010 Local-Only) |
+| 13 | `13-domain-models-relationship.mermaid` | Domain model relationships |
+| 14 | `14-provider-health-states.mermaid` | Provider health states |
+| 15 | `15-dq-check-workflow.mermaid` | Data quality check workflow |
+| 16 | `16-memory-lock-class.mermaid` | MemoryLock class diagram |
+| 17 | `17-pipeline-hierarchy.mermaid` | Pipeline/Transformer hierarchy |
+| 18 | `18-bronze-write-sequence.mermaid` | Bronze write sequence |
+| 19 | `19-delta-lake-write-sequence.mermaid` | Delta Lake write sequence |
+| 20 | `20-quarantine-record-states.mermaid` | Quarantine record states |
+| 21 | `21-activity-entity-data-flow.mermaid` | Activity entity data flow |
+| 22 | `22-client-api-request-sequence.mermaid` | Client API request sequence |
+| 23 | `23-silver-writer-class.mermaid` | SilverWriter class diagram |
+| 24 | `24-hash-service-class.mermaid` | Hash service class diagram |
+| 25 | `25-circuit-breaker-observer-class.mermaid` | CircuitBreaker class diagram |
+
+### TOP-25 Architecture Diagrams (26–50)
+
+Ranked by architectural importance (Priority score). PNG renderings in `png/` subdirectory.
+
+| # | File | Type | Priority | Description |
+|---|------|------|----------|-------------|
+| 26 | `26-hexagonal-ports-adapters.mermaid` | flowchart | 9.38 | Hexagonal Architecture — all 24 ports mapped to adapter implementations |
+| 27 | `27-import-matrix-enforcement.mermaid` | flowchart | 9.00 | ARCH-001 Import Matrix — 5-layer dependency rules with allowed/forbidden imports |
+| 28 | `28-composition-root-di-graph.mermaid` | flowchart | 9.00 | Composition Root DI Graph — full dependency injection assembly |
+| 29 | `29-composite-pipeline-workflow.mermaid` | sequenceDiagram | 8.94 | Composite Pipeline (ADR-026) — Seed→Deps→FanOut→Merge→Gold |
+| 30 | `30-port-adapter-mapping.mermaid` | flowchart | 8.88 | Port → Adapter Reference — all 24 ports with concrete + NoOp implementations |
+| 31 | `31-pipeline-run-lifecycle.mermaid` | stateDiagram | 8.81 | PipelineRun Aggregate FSM — PENDING→LOCKING→PREFLIGHT→…→COMPLETED/FAILED |
+| 32 | `32-single-record-journey.mermaid` | flowchart | 8.75 | Single Record Journey — API→Bronze→Transform→Validate→Silver/Quarantine→Gold |
+| 33 | `33-cli-run-interaction.mermaid` | sequenceDiagram | 8.69 | CLI → PipelineRunnerService full interaction sequence |
+| 34 | `34-batch-processing-flow.mermaid` | sequenceDiagram | 8.63 | Batch Processing — BatchExecutor extract→transform→validate→write cycle |
+| 35 | `35-bootstrap-sequence.mermaid` | sequenceDiagram | 8.56 | Bootstrap 9-step Sequence — Logger→Config→Obs→Storage→HTTP→DataSource→Services→Runner |
+| 36 | `36-architecture-principles-mindmap.mermaid` | mindmap | 8.50 | Architecture Principles Mindmap — all ADRs and design principles |
+| 37 | `37-cli-entry-full-chain.mermaid` | sequenceDiagram | 8.44 | CLI Entry → Exit Code full chain with error handling |
+| 38 | `38-runtime-assembly-sequence.mermaid` | sequenceDiagram | 8.38 | Runtime Assembly — assembly.py phases 1–8 factory orchestration |
+| 39 | `39-medallion-invariants.mermaid` | flowchart | 8.31 | Medallion Invariants — ARCH-007 RunType clear policy (INCREMENTAL/BACKFILL/REBUILD) |
+| 40 | `40-application-core-collaboration.mermaid` | flowchart | 8.25 | Application Core — PipelineRunner orchestrating all services |
+| 41 | `41-error-classification-tree.mermaid` | flowchart | 8.19 | Error Classification — HTTP errors → Domain errors → Actions (retry/abort/quarantine) |
+| 42 | `42-pipeline-runner-class.mermaid` | classDiagram | 8.13 | PipelineRunner Class — all 14 DI dependencies |
+| 43 | `43-fan-out-fan-in-pattern.mermaid` | sequenceDiagram | 8.06 | Fan-Out/Fan-In — asyncio.gather parallel enrichment |
+| 44 | `44-cross-provider-enrichment.mermaid` | flowchart | 8.00 | Cross-Provider Enrichment — 5-provider publication flow |
+| 45 | `45-template-method-transformer.mermaid` | classDiagram | 7.94 | Template Method Pattern — BaseTransformer hierarchy with 11 concrete transformers |
+| 46 | `46-yaml-config-resolution.mermaid` | flowchart | 7.38 | YAML Config Resolution — hierarchical merge (defaults→provider→entity→inline) |
+| 47 | `47-publication-merge-sources.mermaid` | sequenceDiagram | 7.38 | Publication Composite — multi-source merge with field priority resolution |
+| 48 | `48-composite-phase-lifecycle.mermaid` | stateDiagram | 7.31 | Composite Pipeline FSM — CompositePipelineState 10-state lifecycle |
+| 49 | `49-composite-runner-class.mermaid` | classDiagram | 7.31 | CompositePipelineRunner — component diagram with all services |
+| 50 | `50-exception-hierarchy.mermaid` | flowchart | 7.25 | Exception Hierarchy — BioETLError full tree (Critical/Recoverable/DataQuality) |
 
 ## Deprecated / Historical
 

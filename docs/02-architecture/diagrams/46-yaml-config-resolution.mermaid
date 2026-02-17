@@ -1,0 +1,96 @@
+%% Title: YAML Configuration Resolution Chain
+%% Covers: infrastructure/config_loader.py, infrastructure/config/, domain/config/
+%% Rank: 21 (Score 7.38) — Hierarchical config merge underpins every pipeline
+%% Updated: 2026-02-17
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TD
+    subgraph YAML_FILES["YAML File Hierarchy"]
+        BASE["configs/pipelines/_base.yaml<br/>(global defaults)"]
+        PROVIDER_BASE["configs/pipelines/{provider}/_base.yaml<br/>(provider defaults)"]
+        PIPELINE["configs/pipelines/{provider}/{entity}.yaml<br/>(pipeline config)"]
+        SOURCE["configs/sources/{provider}.yaml<br/>(source config)"]
+    end
+
+    subgraph DQ_HIERARCHY["DQ Config Hierarchy (DQConfigLoader)"]
+        DQ_DEFAULTS["configs/quality/_defaults.yaml<br/>(global DQ defaults)"]
+        DQ_PROVIDER["configs/quality/providers/{provider}.yaml<br/>(provider DQ)"]
+        DQ_ENTITY["configs/quality/entities/{provider}/{entity}.yaml<br/>(entity DQ)"]
+        DQ_INLINE["pipeline.dq_overrides<br/>(inline overrides)"]
+    end
+
+    subgraph FILTER_HIERARCHY["Filter Config Hierarchy (FilterConfigLoader)"]
+        FILTER_DEFAULTS["configs/filters/_defaults.yaml<br/>(global filter defaults)"]
+        FILTER_PROVIDER["configs/filters/providers/{provider}.yaml<br/>(provider filters)"]
+        FILTER_ENTITY["configs/filters/entities/{provider}/{entity}.yaml<br/>(entity filters)"]
+        FILTER_INLINE["pipeline.filter_rules<br/>(inline overrides)"]
+    end
+
+    subgraph LOADERS["Infrastructure Config Loaders"]
+        CONFIG_LOADER["ConfigLoader<br/>load_pipeline_config()"]
+        BASE_CONFIG_LOADER["BaseConfigLoader<br/>_deep_merge_base()<br/>_merge_lists()"]
+        DQ_CONFIG_LOADER["DQConfigLoader<br/>_merge_hierarchy()<br/>_deep_merge()<br/>_merge_validation_lists()"]
+        FILTER_CONFIG_LOADER["FilterConfigLoader<br/>load()<br/>_merge_lists()"]
+        YAML_LOADER["config_loader.py<br/>_load_base_config()<br/>_deep_merge()<br/>load_pipeline_config()"]
+    end
+
+    subgraph DOMAIN_CONFIG["Domain Config Objects (Frozen)"]
+        PIPELINE_CONFIG["PipelineConfig<br/>(frozen dataclass)<br/>pipeline_name, provider,<br/>entity_type, table, dq,<br/>batch_size, fields"]
+        TABLE_CONFIG["TableConfig<br/>(frozen dataclass)<br/>primary_keys, silver_table,<br/>gold_table"]
+        DQ_CONFIG["DQConfig<br/>(frozen dataclass)<br/>soft_fail_threshold=0.05<br/>hard_fail_threshold=0.20<br/>field_validations"]
+        INPUT_FILTER["InputFilterConfig"]
+        SILVER_FILTER["SilverFilterConfig"]
+        GOLD_FILTER["GoldFilterConfig"]
+    end
+
+    subgraph VALIDATION["Pydantic Validation Layer"]
+        PIPELINE_YAML_CFG["PipelineYamlConfig<br/>(Pydantic BaseModel)"]
+        SOURCE_YAML_CFG["SourceYamlConfig<br/>(Pydantic BaseModel)"]
+        DQ_CONFIG_FILE["DQConfigFile<br/>(Pydantic BaseModel)"]
+        FILTER_CONFIG_FILE["FilterConfigFile<br/>(Pydantic BaseModel)"]
+    end
+
+    %% Pipeline config resolution
+    BASE -->|"layer 1"| YAML_LOADER
+    PROVIDER_BASE -->|"layer 2"| YAML_LOADER
+    PIPELINE -->|"layer 3"| YAML_LOADER
+    SOURCE -->|"source merge"| YAML_LOADER
+    YAML_LOADER -->|"_deep_merge(base, override)"| PIPELINE_YAML_CFG
+    PIPELINE_YAML_CFG -->|"to_domain()"| PIPELINE_CONFIG
+    PIPELINE_CONFIG --- TABLE_CONFIG
+
+    %% DQ resolution
+    DQ_DEFAULTS -->|"layer 1"| DQ_CONFIG_LOADER
+    DQ_PROVIDER -->|"layer 2"| DQ_CONFIG_LOADER
+    DQ_ENTITY -->|"layer 3"| DQ_CONFIG_LOADER
+    DQ_INLINE -->|"layer 4"| DQ_CONFIG_LOADER
+    DQ_CONFIG_LOADER -->|"validate"| DQ_CONFIG_FILE
+    DQ_CONFIG_FILE -->|"to_domain()"| DQ_CONFIG
+
+    %% Filter resolution
+    FILTER_DEFAULTS -->|"layer 1"| FILTER_CONFIG_LOADER
+    FILTER_PROVIDER -->|"layer 2"| FILTER_CONFIG_LOADER
+    FILTER_ENTITY -->|"layer 3"| FILTER_CONFIG_LOADER
+    FILTER_INLINE -->|"layer 4"| FILTER_CONFIG_LOADER
+    FILTER_CONFIG_LOADER -->|"validate"| FILTER_CONFIG_FILE
+    FILTER_CONFIG_FILE -->|"to_domain()"| INPUT_FILTER
+    FILTER_CONFIG_FILE -->|"to_domain()"| SILVER_FILTER
+    FILTER_CONFIG_FILE -->|"to_domain()"| GOLD_FILTER
+
+    %% Inheritance
+    BASE_CONFIG_LOADER -.->|"base class"| DQ_CONFIG_LOADER
+    BASE_CONFIG_LOADER -.->|"base class"| FILTER_CONFIG_LOADER
+    CONFIG_LOADER -->|"delegates"| YAML_LOADER
+    CONFIG_LOADER -->|"resolve_dq_config()"| DQ_CONFIG_LOADER
+
+    %% Convention-based auto-resolution (ADR-029)
+    PIPELINE -.->|"ADR-029: auto-resolve<br/>source_file, dq_config_file,<br/>filter_config_file"| SOURCE
+    PIPELINE -.->|"ADR-029: auto-resolve<br/>sink paths from<br/>provider + entity_type"| PIPELINE_CONFIG
+
+    %% Merge rules
+    style YAML_FILES fill:#f5f5f5,stroke:#333
+    style DQ_HIERARCHY fill:#E8F5E9,stroke:#2E7D32
+    style FILTER_HIERARCHY fill:#E3F2FD,stroke:#1565C0
+    style LOADERS fill:#FFF3E0,stroke:#E65100
+    style DOMAIN_CONFIG fill:#FFD700,stroke:#B8860B
+    style VALIDATION fill:#F3E5F5,stroke:#6A1B9A
