@@ -37,46 +37,7 @@ sink:
   gold: {}
 
 # -----------------------------------------------------------------------------
-# DQ Overrides (applied on top of entity DQ config)
+# DQ Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-# Only rules that EXTEND or DIFFER from configs/quality/entities/chembl/activity.yaml
-# Redundant rules (same as entity config) have been removed per ADR-027.
-dq_overrides:
-  field_validations:
-    # Override: Entity has min:0 only, pipeline adds max for extreme outliers
-    - field: "standard_value"
-      type: "range"
-      min: 0
-      max: 1000000000
-      nullable: true
-      error_message: "standard_value must be non-negative and below 1B"
-    # Override: Extended enum with additional types (ED50, MIC, CC50)
-    - field: "standard_type"
-      type: "enum"
-      allowed: ["IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"]
-      nullable: true
-    # Override: Extended enum with additional units (ug.mL-1, mg.kg-1)
-    - field: "standard_units"
-      type: "enum"
-      allowed: ["nM", "uM", "mM", "pM", "M", "ug.mL-1", "mg.kg-1"]
-      nullable: true
-
-  # Unique cross-field validations (different from entity's value_requires_units)
-  cross_field_validations:
-    - name: "activity_completeness"
-      fields: ["standard_value", "standard_units", "standard_type"]
-      condition: "all_present"
-      error_message: "Complete activity data requires value, units, and type"
-
-  # Unique conditional validations (entity has binding_requires_target)
-  conditional_validations:
-    - name: "ic50_range_check"
-      condition_field: "standard_type"
-      condition_value: "IC50"
-      condition_operator: "eq"
-      then_validations:
-        - field: "standard_value"
-          type: "range"
-          min: 0.001
-          max: 100000
-          nullable: false
+# All DQ rules externalized to configs/quality/entities/chembl/activity.yaml.
+# No inline overrides needed — entity config is authoritative.

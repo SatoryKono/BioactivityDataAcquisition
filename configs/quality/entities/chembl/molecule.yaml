@@ -2,7 +2,7 @@
 # ChEMBL Molecule-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
-version: "1.0.0"
+version: "1.1.0"
 provider: chembl
 entity: molecule
 
@@ -17,25 +17,85 @@ field_validations:
     nullable: false
     error_message: "Molecule ChEMBL ID is required"
 
-  # Molecular weight must be positive
+  # Molecular weight must be in physically meaningful range
   - field: property_full_mwt
     type: range
-    min: 0
+    min: 10
+    max: 10000
     nullable: true
-    error_message: "Molecular weight must be non-negative"
+    error_message: "Molecular weight must be between 10 and 10000 Da"
 
-  # ALogP typically between -10 and 10
+  # ALogP partition coefficient
   - field: property_alogp
     type: range
-    min: -15
+    min: -10
     max: 20
     nullable: true
     error_message: "ALogP value out of expected range"
 
+  # Molecule classification
+  - field: molecule_type
+    type: enum
+    allowed:
+      - "Small molecule"
+      - "Protein"
+      - "Antibody"
+      - "Oligosaccharide"
+      - "Oligonucleotide"
+      - "Cell"
+      - "Enzyme"
+      - "Unknown"
+    nullable: true
+
+  # Structure representation type
+  - field: structure_type
+    type: enum
+    allowed:
+      - MOL
+      - SEQ
+      - NONE
+      - BOTH
+    nullable: true
+
+  # SMILES notation validation
+  - field: canonical_smiles
+    type: custom
+    validator: smiles_validator
+    nullable: true
+
+  # Hydrogen bond acceptors
+  - field: property_hba
+    type: range
+    min: 0
+    max: 50
+    nullable: true
+
+  # Hydrogen bond donors
+  - field: property_hbd
+    type: range
+    min: 0
+    max: 30
+    nullable: true
+
+  # Polar surface area
+  - field: property_psa
+    type: range
+    min: 0
+    max: 1000
+    nullable: true
+
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-cross_field_validations: []
+cross_field_validations:
+  # At least one structure identifier must be present
+  - name: structure_completeness
+    fields:
+      - canonical_smiles
+      - standard_inchi
+      - inchi_key
+    condition: any_present
+    error_message: "At least one structure identifier required"
 
 # =============================================================================
 # Conditional Validations
