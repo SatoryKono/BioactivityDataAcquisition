@@ -151,9 +151,42 @@ class MyAdapter:
 
 Режимы записи для Gold слоя строго типизированы (`GoldWriteMode` enum):
 
-- **OVERWRITE**: Полная перезапись витрины. Стандарт для агрегатов.
-- **APPEND**: Добавление новых партиций (для timeseries данных).
-- **SCD2**: Slowly Changing Dimensions Type 2 (историчность). Требует `scd_config` (ключи, valid_from/to).
+- **OVERWRITE**: Полная перезапись витрины. Допустимо для полностью пересчитываемых производных таблиц.
+- **APPEND**: Добавление новых партиций/батчей (фактовые потоки без требований к ретро-исправлению).
+- **SCD2**: Slowly Changing Dimensions Type 2 (историчность).
+
+**Классификация сущностей для историчности (MUST):**
+
+- **Reference dictionaries** -> `mode: scd2`
+- **Slowly evolving records** -> `mode: scd2`
+- **Publication metadata** -> `mode: scd2`
+- **Recomputed aggregates** -> `mode: overwrite`
+
+Для SCD2-кандидатов Gold mode **MUST** быть задан явно в каждом `configs/pipelines/*/*.yaml`.
+Не допускается опора на implicit baseline из `_base.yaml`.
+
+`scd_config` для `mode: scd2` **MUST** содержать все обязательные поля:
+
+```yaml
+sink:
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
+```
+
+**Migration matrix (обязательно для планирования изменений):**
+
+| Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ------------------------------------------------------------------------------------ |
+| publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем включить SCD2 и backfill интервалов валидности             |
+| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                   |
+| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии |
+| high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно зафиксировать append в pipeline YAML                                            |
+| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Оставить overwrite, но задать явно в pipeline YAML                                   |
 
 ### 2.1.3. Инфраструктура Delta Lake
 
