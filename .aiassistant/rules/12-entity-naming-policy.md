@@ -9,6 +9,8 @@ description: USE WHEN naming classes, functions, modules, pipelines, tests, or c
 >
 > - USE WHEN naming classes, functions, modules, pipelines, tests, or configs
 > - Use when editing files matching: `src/**/*.py`, `tests/**/*.py`, `configs/**/*.yaml`
+>
+> Canonical sources: RULES.md §2, `configs/naming_exceptions.yaml`
 
 ## BASIC RULES
 
@@ -20,17 +22,26 @@ description: USE WHEN naming classes, functions, modules, pipelines, tests, or c
 
 ## CLASS SUFFIXES (ROLES)
 
-- `Factory` — general factories
-- `ClientFactory` — client factories
-- `DataClient` — contract implementations
-- `Client` — general clients
-- `Facade` — top-level facades
-- `Registry` — registries
-- `Adapter`/`Transport` — low-level adapters/transports
-- `Protocol`/`ABC` — contracts
-- `Config`/`Model`/`Params` — configuration/model types
-- `Error` — exceptions
-- `Impl` — implementations (e.g., `ChemblDataClientHTTPImpl`)
+| Suffix | Usage | Example |
+|--------|-------|---------|
+| `Factory` | General factories | `PipelineFactory` |
+| `Client` | API/service clients | `ChEMBLClient` |
+| `Port`/`Protocol` | Domain contracts | `DataSourcePort` |
+| `Service` | Application services | `ValidationService` |
+| `Transformer` | Record transformers | `CompoundTransformer` |
+| `Adapter` | Infrastructure adapters | `BaseHttpAdapter` |
+| `Error` | Exceptions | `ValidationError` |
+| `Schema` | Pandera/Pydantic schemas | `CompoundGoldSchema` |
+| `Config` | Configuration objects | `RuntimeConfig` |
+| `Extractor` | Field extractors | `AuthorExtractor` |
+| `Parser` | Parsing utilities | `MedlineDateParser` |
+| `Aggregator` | Composite aggregators | `EnricherAggregator` |
+| `Recorder` | Metrics recorders | `BatchMetricsRecorder` |
+| `Result` | Operation results | `ValidationResult` |
+| `Mixin` | Behavior mixins | `HealthCheckMixin` |
+
+Exceptions to suffix requirements are documented in `configs/naming_exceptions.yaml`
+(domain entities, enums, value objects, TypedDicts, base classes).
 
 ## FUNCTION PREFIXES
 
@@ -46,32 +57,33 @@ description: USE WHEN naming classes, functions, modules, pipelines, tests, or c
 
 ## PIPELINES
 
-- Path: `src/bioetl/pipelines/<provider>/<entity>/<stage>.py`
+- Path: `src/bioetl/application/pipelines/<provider>/<entity>_transformer.py`
 - Provider: `^[a-z0-9_]+$`
 - Entity: `^[a-z0-9_]+$`
-- Stage: `extract`, `transform`, `validate`, `normalize`, `write`, `run`, `errors`, `descriptor`, `metrics`, `backfill`, `cleanup`
 
 ## TESTS
 
 - Unit: `tests/unit/application/pipelines/<provider>/test_<entity>_transformer.py`
-- Pipeline: `tests/unit/application/pipelines/<provider>/test_<entity>_transformer.py`
 - Integration: `tests/integration/` or suffix `_integration.py`
+- Architecture: `tests/architecture/`
 - Golden: `tests/golden/test_<area>_golden.py`
 
 ## CONFIGS
 
 - Files: `^[a-z0-9_]+.ya?ml$` in `configs/`
 - Pipelines: `configs/pipelines/<provider>/<entity>.yaml`
+- DQ rules: `configs/quality/entities/<provider>/<entity>.yaml`
+- Filter rules: `configs/filters/entities/<provider>/<entity>.yaml`
 - Keys inside YAML: lower_snake_case
 
 ## EXAMPLES
 
 Valid:
 
-- Class: `ChemblDataClient`, `DataClientProtocol`, `ChemblDataClientHTTPImpl`
-- Function: `fetch_one()`, `iter_pages()`, `default_chembl_data_client()`
-- Module: `data_client.py`, `factories.py`
-- Pipeline: `src/bioetl/pipelines/chembl/activity/extract.py`
+- Class: `ChemblDataClient`, `DataSourcePort`, `ActivityTransformer`
+- Function: `fetch_one()`, `iter_pages()`, `create_pipeline()`
+- Module: `data_client.py`, `activity_transformer.py`
+- Pipeline: `src/bioetl/application/pipelines/chembl/activity_transformer.py`
 - Test: `tests/unit/application/pipelines/chembl/test_activity_transformer.py`
 
 Invalid:
@@ -82,4 +94,6 @@ Invalid:
 
 ## REFERENCE
 
-See `_docs/styleguide/new/02-new-entity-naming-policy.md` for detailed policy.
+- [RULES.md §2](../../docs/00-project/RULES.md) — Canonical naming conventions
+- [configs/naming_exceptions.yaml](../../configs/naming_exceptions.yaml) — Allowed exceptions
+- [ai-selfreview-rules.md](../../.claude/rules/ai-selfreview-rules.md) §4 — NAME rules for self-review

@@ -116,7 +116,7 @@ grep -rn "_ingestion_ts\|_run_id\|_run_type\|_dq_" src/bioetl/domain/ --include=
 python scripts/config_gap_analysis.py -v
 
 # DQ externalization
-find configs/dq/ -name "*.yaml" | wc -l
+find configs/quality/ -name "*.yaml" | wc -l
 find src/bioetl/ -name "*.py" -exec grep -l "soft_fail_threshold\|hard_fail_threshold" {} \;
 ```
 
@@ -326,8 +326,8 @@ pytest tests/architecture/test_import_boundaries.py -v -k "infrastructure"
 
 | Ссылка | Описание | Verification |
 |--------|----------|-------------|
-| [ADR-027] | DQ Rules Externalization | `find configs/dq/ -name "*.yaml" \| wc -l` |
-| [ADR-028] | Filter Rules Externalization | `find configs/filter/ -name "*.yaml" \| wc -l` |
+| [ADR-027] | DQ Rules Externalization | `find configs/quality/ -name "*.yaml" \| wc -l` |
+| [ADR-028] | Filter Rules Externalization | `find configs/filters/ -name "*.yaml" \| wc -l` |
 
 ### Valid-by-Design (не помечать как нарушение)
 

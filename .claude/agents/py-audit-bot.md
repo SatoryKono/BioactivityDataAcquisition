@@ -198,7 +198,7 @@ grep -rn ": Any\| Any " src/bioetl/<scope>/ --include="*.py"
 
 ```bash
 python scripts/config_gap_analysis.py -v
-find configs/dq/ -name "*.yaml" | wc -l
+find configs/quality/ -name "*.yaml" | wc -l
 find src/bioetl/ -name "*.py" -exec grep -l "soft_fail_threshold\|hard_fail_threshold" {} \;
 ```
 
