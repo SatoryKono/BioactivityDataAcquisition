@@ -18,10 +18,10 @@ from bioetl.application.pipelines.pubmed.extractors.identifier_types import (
 )
 
 __all__ = [
-    "IdentifierExtractor",
     "AllArticleIds",
     "ArticleIdentifiers",
     "ELocationIds",
+    "IdentifierExtractor",
     "NormalizedIdentifiers",
     "RawIdentifiers",
 ]
@@ -183,9 +183,8 @@ class IdentifierExtractor(BaseFieldExtractor):
             "publisher-id": "publisher_id",
         }
 
-        if key := key_map.get(id_type):
-            if result[key] is None:
-                result[key] = normalized
+        if (key := key_map.get(id_type)) and result[key] is None:
+            result[key] = normalized
 
     @classmethod
     def parse_all_article_ids(cls, root: Element) -> AllArticleIds:
