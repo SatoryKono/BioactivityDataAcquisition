@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "cell_chembl_id": {
+    "cell_id": {
       "type": "string"
     },
     "cell_name": {
@@ -79,13 +79,13 @@
     }
   },
   "required": [
-    "_index",
-    "_ingestion_ts",
+    "entity_id",
+    "content_hash",
+    "cell_id",
+    "cell_name",
     "_run_id",
     "_run_type",
-    "cell_chembl_id",
-    "cell_name",
-    "content_hash",
-    "entity_id"
+    "_ingestion_ts",
+    "_index"
   ]
 }

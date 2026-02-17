@@ -62,6 +62,12 @@
         "null"
       ]
     },
+    "protein_classification_id": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
     "protein_classification_ids": {
       "type": [
         "string",
@@ -88,12 +94,12 @@
     }
   },
   "required": [
-    "_index",
-    "_ingestion_ts",
+    "entity_id",
+    "content_hash",
+    "component_id",
     "_run_id",
     "_run_type",
-    "component_id",
-    "content_hash",
-    "entity_id"
+    "_ingestion_ts",
+    "_index"
   ]
 }

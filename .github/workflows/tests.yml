@@ -45,6 +45,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev --extra tracing --extra performance
 
+      - name: Verify Gold schema parity (blocking)
+        run: uv run python src/tools/verify_schema_parity.py
+
       - name: Smoke check (dependencies + core imports)
         run: uv run pytest tests/smoke/ -v --tb=short
 

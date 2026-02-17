@@ -14,18 +14,6 @@
     "doi": {
       "type": "string"
     },
-    "pmid": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "title": {
       "type": [
         "string",
@@ -74,66 +62,59 @@
         "null"
       ]
     },
-    "first_page": {
+    "page_first": {
       "type": [
         "string",
         "null"
       ]
     },
-    "last_page": {
+    "page_last": {
       "type": [
         "string",
         "null"
       ]
     },
-    "year": {
+    "publication_year": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 1900,
-      "maximum": 2100
+      ]
     },
     "publication_date": {
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
     "published_print": {
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
     "published_online": {
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
-    "doc_type": {
+    "publication_type": {
       "type": [
         "string",
         "null"
       ]
     },
-    "citation_count": {
+    "citations_received": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0
+      ]
     },
-    "reference_count": {
+    "citations_made": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0
+      ]
     },
     "language": {
       "type": [
@@ -147,23 +128,83 @@
         "null"
       ]
     },
-    "subjects": {
+    "subject_keywords": {
       "type": [
         "string",
         "null"
       ]
     },
-    "source": {
+    "content_domain_domains": {
       "type": [
         "string",
         "null"
       ]
+    },
+    "content_domain_crossmark_restriction": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "alternative_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "published": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "journal_name_short": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "issn_print": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "issn_electronic": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_keys": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_orcids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_details": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "references": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_source": {
+      "type": "string"
     },
     "_lookup_method": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string"
     },
     "_original_id": {
       "type": [
@@ -197,14 +238,16 @@
     }
   },
   "required": [
-    "_dq_error",
-    "_dq_warn",
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
+    "entity_id",
     "content_hash",
     "doi",
-    "entity_id"
+    "_source",
+    "_lookup_method",
+    "_dq_warn",
+    "_dq_error",
+    "_run_id",
+    "_run_type",
+    "_ingestion_ts",
+    "_index"
   ]
 }

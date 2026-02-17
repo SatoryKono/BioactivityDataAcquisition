@@ -27,10 +27,7 @@
       ]
     },
     "title": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string"
     },
     "abstract": {
       "type": [
@@ -44,25 +41,13 @@
         "null"
       ]
     },
-    "vernacular_title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "journal": {
       "type": [
         "string",
         "null"
       ]
     },
-    "journal_abbrev": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "journal_title": {
+    "journal_name_short": {
       "type": [
         "string",
         "null"
@@ -104,7 +89,7 @@
         "null"
       ]
     },
-    "pages": {
+    "page_range": {
       "type": [
         "string",
         "null"
@@ -116,13 +101,13 @@
         "null"
       ]
     },
-    "first_page": {
+    "page_first": {
       "type": [
         "string",
         "null"
       ]
     },
-    "last_page": {
+    "page_last": {
       "type": [
         "string",
         "null"
@@ -134,7 +119,43 @@
         "null"
       ]
     },
-    "pub_date": {
+    "author_keys": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "affiliation_list": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "authors_with_affiliations": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "affiliation_structured": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pii": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "mid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publisher_id": {
       "type": [
         "string",
         "null"
@@ -156,13 +177,6 @@
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "year": {
-      "type": [
-        "number",
-        "null"
       ]
     },
     "publication_year": {
@@ -171,47 +185,17 @@
         "null"
       ]
     },
-    "accepted_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "received_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "revised_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "epub_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
     "date_completed": {
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
     "date_revised": {
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
     "publication_status": {
       "type": [
@@ -225,19 +209,43 @@
         "null"
       ]
     },
+    "publication_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "publication_types": {
       "type": [
         "string",
         "null"
       ]
     },
-    "keywords": {
+    "subject_keywords": {
       "type": [
         "string",
         "null"
       ]
     },
-    "mesh_terms": {
+    "subject_mesh": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "chemicals": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "databanks": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "gene_symbols": {
       "type": [
         "string",
         "null"
@@ -285,7 +293,7 @@
         "null"
       ]
     },
-    "reference_count": {
+    "citations_made": {
       "type": [
         "number",
         "null"
@@ -297,17 +305,11 @@
         "null"
       ]
     },
-    "source": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_source": {
+      "type": "string"
     },
     "_lookup_method": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string"
     },
     "_original_id": {
       "type": [
@@ -341,14 +343,17 @@
     }
   },
   "required": [
-    "_dq_error",
+    "entity_id",
+    "content_hash",
+    "pmid",
+    "title",
+    "_source",
+    "_lookup_method",
     "_dq_warn",
-    "_index",
-    "_ingestion_ts",
+    "_dq_error",
     "_run_id",
     "_run_type",
-    "content_hash",
-    "entity_id",
-    "pmid"
+    "_ingestion_ts",
+    "_index"
   ]
 }

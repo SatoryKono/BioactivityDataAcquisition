@@ -11,28 +11,28 @@
     "content_hash": {
       "type": "string"
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "cell_chembl_id": {
+    "cell_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "tissue_chembl_id": {
+    "tissue_id": {
       "type": [
         "string",
         "null"
@@ -250,12 +250,12 @@
     }
   },
   "required": [
-    "_index",
-    "_ingestion_ts",
+    "entity_id",
+    "content_hash",
+    "assay_id",
     "_run_id",
     "_run_type",
-    "assay_chembl_id",
-    "content_hash",
-    "entity_id"
+    "_ingestion_ts",
+    "_index"
   ]
 }

@@ -12,23 +12,19 @@
       "type": "string"
     },
     "protein_class_id": {
-      "type": "number",
-      "minimum": 1
+      "type": "number"
     },
     "parent_id": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 1
+      ]
     },
     "class_level": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 1,
-      "maximum": 8
+      ]
     },
     "pref_name": {
       "type": [
@@ -64,17 +60,12 @@
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 1
+      ]
     },
     "downgraded": {
       "type": [
         "number",
         "null"
-      ],
-      "enum": [
-        0,
-        1
       ]
     },
     "_run_id": {
@@ -97,12 +88,12 @@
     }
   },
   "required": [
-    "_index",
-    "_ingestion_ts",
+    "entity_id",
+    "content_hash",
+    "protein_class_id",
     "_run_id",
     "_run_type",
-    "content_hash",
-    "entity_id",
-    "protein_class_id"
+    "_ingestion_ts",
+    "_index"
   ]
 }

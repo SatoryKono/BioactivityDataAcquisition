@@ -179,13 +179,14 @@ bioetl checkpoint list
 - Keep machine-consumed reference datasets under semantic paths in `data/` (for example, `data/input/reference/`).
 - Keep optional human-facing spreadsheet copies under `docs/reference/`.
 - Unified publication classifier canonical format is CSV at `data/input/reference/unified_classification.csv`; Excel is optional documentation copy at `docs/reference/unified_classification.xlsx`.
+
 ### Local diagnostic artifacts
 
 Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
 
-* Временные диагностические дампы сохраняйте в `tmp/`.
-* Логи локальных запусков сохраняйте в `logs/`.
-* Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
+- Временные диагностические дампы сохраняйте в `tmp/`.
+- Логи локальных запусков сохраняйте в `logs/`.
+- Для ad-hoc команд используйте явное перенаправление (`> logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
 
 ### Testing
 
@@ -246,6 +247,23 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   ```bash
   make arch-test
   ```
+
+- **Verify Gold contract parity (blocking CI gate):**
+
+  ```bash
+  uv run python src/tools/verify_schema_parity.py
+  ```
+
+  Gate semantics:
+
+  - **Blocking failures**: parity diff, PK coverage break, nullable break.
+  - **Warnings (non-blocking)**: additive non-breaking nullable fields.
+
+  Changelog classification template for schema changes:
+
+  - **MAJOR**: remove/rename fields, type tightening, non-null tightening.
+  - **MINOR**: additive nullable fields.
+  - **PATCH**: descriptions/examples/docs-only updates.
 
 ### Code Quality
 

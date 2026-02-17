@@ -14,7 +14,7 @@
     "assay_param_id": {
       "type": "number"
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": "string"
     },
     "type": {
@@ -100,14 +100,14 @@
     }
   },
   "required": [
-    "_index",
-    "_ingestion_ts",
+    "entity_id",
+    "content_hash",
+    "assay_param_id",
+    "assay_id",
+    "type",
     "_run_id",
     "_run_type",
-    "assay_chembl_id",
-    "assay_param_id",
-    "content_hash",
-    "entity_id",
-    "type"
+    "_ingestion_ts",
+    "_index"
   ]
 }

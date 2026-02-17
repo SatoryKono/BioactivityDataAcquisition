@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": "string"
     },
     "pmid": {
@@ -20,13 +20,25 @@
         "null"
       ]
     },
-    "pmc_id": {
+    "doi": {
       "type": [
         "string",
         "null"
       ]
     },
-    "doi": {
+    "publication_doi": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_pmid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_pmc_id": {
       "type": [
         "string",
         "null"
@@ -50,7 +62,7 @@
         "null"
       ]
     },
-    "doc_type": {
+    "publication_type": {
       "type": [
         "string",
         "null"
@@ -62,24 +74,11 @@
         "null"
       ]
     },
-    "journal_full_title": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "year": {
+    "publication_year": {
       "type": [
         "number",
         "null"
       ]
-    },
-    "publication_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
     },
     "volume": {
       "type": [
@@ -93,15 +92,27 @@
         "null"
       ]
     },
-    "first_page": {
+    "page_first": {
       "type": [
         "string",
         "null"
       ]
     },
-    "last_page": {
+    "page_last": {
       "type": [
         "string",
+        "null"
+      ]
+    },
+    "citations_received": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "citations_made": {
+      "type": [
+        "number",
         "null"
       ]
     },
@@ -111,19 +122,13 @@
         "null"
       ]
     },
-    "citation_count": {
+    "chembl_release": {
       "type": [
-        "number",
+        "string",
         "null"
       ]
     },
-    "is_oa": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "language": {
+    "creation_date": {
       "type": [
         "string",
         "null"
@@ -173,14 +178,14 @@
     }
   },
   "required": [
-    "_dq_error",
+    "entity_id",
+    "content_hash",
+    "publication_id",
     "_dq_warn",
-    "_index",
-    "_ingestion_ts",
+    "_dq_error",
     "_run_id",
     "_run_type",
-    "content_hash",
-    "document_chembl_id",
-    "entity_id"
+    "_ingestion_ts",
+    "_index"
   ]
 }

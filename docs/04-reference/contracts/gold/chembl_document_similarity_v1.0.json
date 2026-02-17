@@ -36,33 +36,25 @@
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "mol_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "avg_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "max_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "_run_id": {
       "type": "string"
@@ -84,14 +76,14 @@
     }
   },
   "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
+    "entity_id",
     "content_hash",
+    "sim_id",
     "doc_1",
     "doc_2",
-    "entity_id",
-    "sim_id"
+    "_run_id",
+    "_run_type",
+    "_ingestion_ts",
+    "_index"
   ]
 }

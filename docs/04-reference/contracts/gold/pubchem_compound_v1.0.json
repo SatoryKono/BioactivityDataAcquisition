@@ -8,7 +8,7 @@
     "entity_id": {
       "type": "string"
     },
-    "cid": {
+    "molecule_id": {
       "type": "string"
     },
     "molecular_formula": {
@@ -41,9 +41,21 @@
         "null"
       ]
     },
-    "inchikey": {
+    "inchi_key": {
       "type": [
         "string",
+        "null"
+      ]
+    },
+    "xlogp": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "tpsa": {
+      "type": [
+        "number",
         "null"
       ]
     },
@@ -76,12 +88,12 @@
     }
   },
   "required": [
-    "_index",
-    "_ingestion_ts",
+    "entity_id",
+    "molecule_id",
+    "content_hash",
     "_run_id",
     "_run_type",
-    "cid",
-    "content_hash",
-    "entity_id"
+    "_ingestion_ts",
+    "_index"
   ]
 }
