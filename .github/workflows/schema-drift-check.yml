@@ -1,0 +1,40 @@
+name: Schema Drift Check
+
+on:
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - 'docs/05-operations/verification/schema-review.md'
+      - 'docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md'
+      - 'scripts/schema_drift_check.py'
+      - '.github/workflows/schema-drift-check.yml'
+      - 'src/bioetl/**/transformer*.py'
+      - 'src/bioetl/domain/entities/**'
+      - 'src/bioetl/infrastructure/schemas/**'
+      - 'src/bioetl/domain/contracts/**'
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'docs/05-operations/verification/schema-review.md'
+      - 'docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md'
+      - 'scripts/schema_drift_check.py'
+      - '.github/workflows/schema-drift-check.yml'
+      - 'src/bioetl/**/transformer*.py'
+      - 'src/bioetl/domain/entities/**'
+      - 'src/bioetl/infrastructure/schemas/**'
+      - 'src/bioetl/domain/contracts/**'
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run schema drift gate
+        run: python scripts/schema_drift_check.py
