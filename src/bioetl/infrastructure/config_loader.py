@@ -316,10 +316,24 @@ def _normalize_source_pagination(
 ) -> None:
     """Normalize pagination and batch configuration.
 
-    Projects legacy batch keys into the ``batch`` section, then consumes
-    the section back into *provider_config*.
+    Ensures the ``pagination`` section in *provider_config* is populated from
+    legacy batch keys and the ``batch`` section.  The ``pagination`` dict is
+    the canonical location; legacy flat keys are kept for backward compat.
     """
-    # Project legacy batch keys into batch section
+    # --- 1. Build/merge the pagination section ---
+    pagination: dict[str, Any] = _get_dict_or_empty(provider_config, "pagination")
+
+    # Promote legacy flat keys into pagination if not already present
+    if provider_config.get("batch_size") is not None:
+        pagination.setdefault("id_batch_size", provider_config["batch_size"])
+    if provider_config.get("page_size") is not None:
+        pagination.setdefault("page_size", provider_config["page_size"])
+    if provider_config.get("max_url_length") is not None:
+        pagination.setdefault("max_url_length", provider_config["max_url_length"])
+    if provider_config.get("cursor_pagination"):
+        pagination.setdefault("strategy", "cursor")
+
+    # --- 2. Handle legacy ``batch`` section (pre-pagination era) ---
     batch_norm = _get_dict_or_empty(source, "batch")
     _copy_keys(provider_config, batch_norm, _BATCH_KEYS)
     if "batch_size" in provider_config:
@@ -327,18 +341,29 @@ def _normalize_source_pagination(
     if batch_norm:
         source["batch"] = batch_norm
 
-    # Consume batch section back into provider_config
     batch = source.pop("batch", None)
     if isinstance(batch, dict):
         if "batch_size" in batch:
             provider_config.setdefault("batch_size", batch["batch_size"])
+            pagination.setdefault("id_batch_size", batch["batch_size"])
         elif "size" in batch:
             provider_config.setdefault("batch_size", batch["size"])
+            pagination.setdefault("id_batch_size", batch["size"])
         elif "api_batch_size" in batch:
             provider_config.setdefault("batch_size", batch["api_batch_size"])
-        _copy_keys(batch, provider_config, ("page_size", "max_url_length"))
+            pagination.setdefault("id_batch_size", batch["api_batch_size"])
+        if "page_size" in batch:
+            _copy_keys(batch, provider_config, ("page_size", "max_url_length"))
+            pagination.setdefault("page_size", batch["page_size"])
+        if "max_url_length" in batch:
+            pagination.setdefault("max_url_length", batch["max_url_length"])
     elif isinstance(batch, int):
         provider_config.setdefault("batch_size", batch)
+        pagination.setdefault("id_batch_size", batch)
+
+    # --- 3. Write canonical pagination back ---
+    if pagination:
+        provider_config["pagination"] = pagination
 
 
 def _promote_top_level_source_sections(raw: dict[str, Any]) -> dict[str, Any]:
