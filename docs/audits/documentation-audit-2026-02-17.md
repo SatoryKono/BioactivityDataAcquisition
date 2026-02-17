@@ -38,7 +38,7 @@ without a canonical source, (3) missing per-pipeline documentation.
 | Local-Only Deployment | RULES.md §3.3, ADR-010 | MemoryLock only, no Redis | **ALIGNED** |
 | Deterministic Writes | RULES.md §4.3/§6.1, ADR-014 | sort_by in all configs, hash-based jitter | **ALIGNED** |
 | Circuit Breaker | RULES.md §3.1.4, ADR-007 | infrastructure/adapters/http/circuit_breaker.py | **ALIGNED** |
-| DQ Thresholds (5%/20%) | RULES.md §3.1.2, pipeline-configuration.md | configs/dq/_defaults.yaml | **ALIGNED** |
+| DQ Thresholds (5%/20%) | RULES.md §3.1.2, pipeline-configuration.md | configs/quality/_defaults.yaml | **ALIGNED** |
 | MemoryLock TTL/Heartbeat (90s/30s) | RULES.md §3.3 | domain/config.py | **ALIGNED** |
 | Content Hash (SHA256) | RULES.md §2.8 | domain/services/identity_service.py | **ALIGNED** |
 | Gold Strict Validation | RULES.md §2.1, ADR-018 | domain/contracts/gold/ | **ALIGNED** |

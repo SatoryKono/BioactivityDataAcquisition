@@ -121,18 +121,17 @@ sink:
       columns: [{entity}_id]
       ascending: true
 
-# DQ — ссылка на externalized config (ADR-027)
-dq_config_file: configs/dq/entities/{provider}/{entity}.yaml
-
-# Gold filters (ADR-025)
-gold_filters:
-  required_fields: []           # Заполнить бизнес-полями
+# Convention-based (ADR-029): dq_config_file and filter_config_file are
+# auto-computed from provider/entity_type. DO NOT set explicitly.
+# Resolved paths:
+#   dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
+#   filter_config_file: ../../filters/entities/{provider}/{entity}.yaml
 ```
 
 ### B. DQ rules (externalized)
 
 ```yaml
-# configs/dq/entities/{provider}/{entity}.yaml
+# configs/quality/entities/{provider}/{entity}.yaml
 # Reference: ADR-027 DQ Rules Externalization
 
 entity: {entity}
@@ -165,7 +164,7 @@ rules:
 ### C. Filter rules (externalized)
 
 ```yaml
-# configs/filter/entities/{provider}/{entity}.yaml
+# configs/filters/entities/{provider}/{entity}.yaml
 # Reference: ADR-028 Filter Rules Externalization
 
 entity: {entity}
@@ -265,7 +264,7 @@ find configs/ -path "*/{provider}/*" -name "*.yaml" | sort
 
 # 3. Проверить _defaults.yaml
 cat configs/pipelines/_defaults.yaml 2>/dev/null
-cat configs/dq/_defaults.yaml 2>/dev/null
+cat configs/quality/_defaults.yaml 2>/dev/null
 
 # 4. Проверить source config
 cat configs/sources/{provider}.yaml 2>/dev/null
@@ -291,7 +290,7 @@ grep -n "soft_fail_threshold\|hard_fail_threshold" configs/pipelines/{provider}/
 # Expected: пусто
 
 # 5. DQ externalized config существует
-test -f configs/dq/entities/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
+test -f configs/quality/entities/{provider}/{entity}.yaml && echo "OK" || echo "MISSING"
 
 # 6. Для composite — валидация структуры
 python -c "
@@ -375,8 +374,8 @@ field_priorities:
 | Файл | Действие | Описание |
 |------|----------|----------|
 | `configs/pipelines/chembl/activity.yaml` | created | Новый pipeline config |
-| `configs/dq/entities/chembl/activity.yaml` | created | DQ rules externalized |
-| `configs/filter/entities/chembl/activity.yaml` | created | Gold filter rules |
+| `configs/quality/entities/chembl/activity.yaml` | created | DQ rules externalized |
+| `configs/filters/entities/chembl/activity.yaml` | created | Gold filter rules |
 
 #### Верификация
 
