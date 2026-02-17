@@ -40,16 +40,17 @@ def parse_author_names(
     return []
 
 
+def _strip_or_none(value: Any) -> str | None:
+    """Strip string and return None if empty or non-string."""
+    return value.strip() or None if isinstance(value, str) else None
+
+
 def _extract_name_from_item(item: Any) -> str | None:
     """Extract author name from a string or dict item."""
     if isinstance(item, str):
-        stripped = item.strip()
-        return stripped if stripped else None
+        return _strip_or_none(item)
     if isinstance(item, dict):
-        name = item.get("name")
-        if isinstance(name, str):
-            stripped = name.strip()
-            return stripped if stripped else None
+        return _strip_or_none(item.get("name"))
     return None
 
 
@@ -95,16 +96,21 @@ def extract_affiliation_strings(
     return strings
 
 
+def _extract_affiliation_from_dict(aff: dict[str, Any]) -> str | None:
+    """Extract first non-empty affiliation value from known keys."""
+    for key in _AFFILIATION_KEYS:
+        result = _strip_or_none(aff.get(key))
+        if result:
+            return result
+    return None
+
+
 def _extract_single_affiliation(aff: Any) -> str | None:
     """Extract affiliation string from a single item (str or dict)."""
     if isinstance(aff, str):
-        stripped = aff.strip()
-        return stripped if stripped else None
+        return _strip_or_none(aff)
     if isinstance(aff, dict):
-        for key in _AFFILIATION_KEYS:
-            value = aff.get(key)
-            if isinstance(value, str) and value.strip():
-                return value.strip()
+        return _extract_affiliation_from_dict(aff)
     return None
 
 
@@ -205,19 +211,21 @@ def normalize_to_surname_initial(name: str) -> str | None:
     return _surname_initial_from_tokens(tokens)
 
 
+def _collect_affiliation_values(aff_data: Any) -> list[str]:
+    """Extract affiliation strings from a single author's affiliation field."""
+    if isinstance(aff_data, list):
+        return [str(a) for a in aff_data if a]
+    if isinstance(aff_data, str):
+        return [aff_data]
+    return []
+
+
 def collect_affiliations_from_authors(
     authors: list[dict[str, Any]],
 ) -> list[str]:
     """Collect raw affiliation strings from author dicts."""
     result: list[str] = []
     for author in authors:
-        if not isinstance(author, dict):
-            continue
-        aff_data = author.get("affiliations")
-        if not aff_data:
-            continue
-        if isinstance(aff_data, list):
-            result.extend(str(a) for a in aff_data if a)
-        elif isinstance(aff_data, str):
-            result.append(aff_data)
+        if isinstance(author, dict) and author.get("affiliations"):
+            result.extend(_collect_affiliation_values(author["affiliations"]))
     return result

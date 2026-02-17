@@ -158,6 +158,8 @@ class DefaultDataNormalizationService:
         )
 
         # Delegate to AuthorNormalizationService (same parsing logic)
+        if authors is None:
+            return []
         return self._author_service._parse_author_names(authors)
 
     def normalize_partial_date(self, date_str: str | None) -> str | None:

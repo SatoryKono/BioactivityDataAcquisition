@@ -103,6 +103,7 @@ class IDMappingDataSource:
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch ID mapping records.
 
