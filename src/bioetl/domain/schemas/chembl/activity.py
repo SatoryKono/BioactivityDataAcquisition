@@ -5,6 +5,7 @@ Aligned with RULES.md v5.0 and ChEMBL 34 schema.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -223,7 +224,7 @@ class ActivitySchema(ETLRecordSchema):
     publication_pmc_id: Series[str] | None = pa.Field(
         nullable=True, description="Publication PubMed Central ID."
     )
-    publication_year: Series[int] | None = pa.Field(
+    publication_year: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=MIN_PUBLICATION_YEAR,
         le=MAX_PUBLICATION_YEAR,
