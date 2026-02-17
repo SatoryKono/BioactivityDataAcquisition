@@ -45,9 +45,7 @@ def test_pipeline_config_no_unknown_keys(pipeline_name: str) -> None:
         load_pipeline_config(pipeline_name)
     except ValidationError as exc:
         extra_fields = [
-            e["loc"]
-            for e in exc.errors()
-            if e["type"] == "extra_forbidden"
+            e["loc"] for e in exc.errors() if e["type"] == "extra_forbidden"
         ]
         if extra_fields:
             pytest.fail(
