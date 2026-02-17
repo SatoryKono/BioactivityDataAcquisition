@@ -1,11 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProt Protein Gold Contract",
-  "description": "Gold layer data contract for UniProt Protein Gold Contract. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
+  "title": "Uni Prot Protein Gold Contract",
+  "description": "Gold layer data contract for Uni Prot Protein Gold Contract. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
+      "type": "string"
+    },
+    "content_hash": {
       "type": "string"
     },
     "accession": {
@@ -17,7 +20,115 @@
         "null"
       ]
     },
-    "protein_name": {
+    "active_sites": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "binding_sites": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "domains": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "features_json": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "activity_regulation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "catalytic_activity": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "disease_involvement": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "function_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pathway": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "similarity_comment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "subcellular_location": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tissue_specificity": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "chembl_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "drugbank_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "go_terms": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "interpro_xrefs": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pdb_xrefs": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pfam_xrefs": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reactome_xrefs": {
       "type": [
         "string",
         "null"
@@ -25,7 +136,7 @@
     },
     "gene_names": {
       "type": [
-        "string",
+        "object",
         "null"
       ]
     },
@@ -35,14 +146,35 @@
         "null"
       ]
     },
+    "protein_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "sequence_length": {
       "type": [
         "number",
         "null"
       ]
     },
-    "content_hash": {
-      "type": "string"
+    "annotation_score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "protein_existence": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reviewed": {
+      "type": [
+        "boolean",
+        "null"
+      ]
     },
     "_run_id": {
       "type": "string"

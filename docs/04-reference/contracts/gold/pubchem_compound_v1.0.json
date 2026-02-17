@@ -1,14 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "PubChem Compound Gold Contract",
-  "description": "Gold layer data contract for PubChem Compound Gold Contract. Auto-generated from Pandera schema PubChemCompoundGoldSchema.",
+  "title": "Pub Chem Compound Gold Contract",
+  "description": "Gold layer data contract for Pub Chem Compound Gold Contract. Auto-generated from Pandera schema PubChemCompoundGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
       "type": "string"
     },
-    "cid": {
+    "molecule_id": {
       "type": "string"
     },
     "molecular_formula": {
@@ -41,9 +41,21 @@
         "null"
       ]
     },
-    "inchikey": {
+    "inchi_key": {
       "type": [
         "string",
+        "null"
+      ]
+    },
+    "xlogp": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "tpsa": {
+      "type": [
+        "number",
         "null"
       ]
     },
@@ -80,8 +92,8 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "cid",
     "content_hash",
-    "entity_id"
+    "entity_id",
+    "molecule_id"
   ]
 }

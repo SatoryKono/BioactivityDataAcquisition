@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "OpenAlex Publication Gold Contract",
-  "description": "Gold layer data contract for OpenAlex Publication Gold Contract. Auto-generated from Pandera schema OpenAlexPublicationGoldSchema.",
+  "title": "Open Alex Publication Gold Contract",
+  "description": "Gold layer data contract for Open Alex Publication Gold Contract. Auto-generated from Pandera schema OpenAlexPublicationGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -26,12 +26,6 @@
         "null"
       ]
     },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "title": {
       "type": [
         "string",
@@ -50,7 +44,25 @@
         "null"
       ]
     },
-    "concepts": {
+    "affiliation_list": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "subject_mesh": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "subject_keywords": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "mag_id": {
       "type": [
         "string",
         "null"
@@ -74,35 +86,47 @@
         "null"
       ]
     },
-    "first_page": {
+    "volume": {
       "type": [
         "string",
         "null"
       ]
     },
-    "last_page": {
+    "issue": {
       "type": [
         "string",
         "null"
       ]
     },
-    "year": {
+    "page_first": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "page_last": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_year": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 1500,
-      "maximum": 2100
+      ]
     },
     "publication_date": {
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
-    "doc_type": {
-      "type": "string"
+    "publication_type": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "is_oa": {
       "type": [
@@ -116,12 +140,14 @@
         "null"
       ]
     },
-    "citation_count": {
+    "is_retracted": {
+      "type": "boolean"
+    },
+    "citations_received": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0
+      ]
     },
     "language": {
       "type": [
@@ -129,7 +155,73 @@
         "null"
       ]
     },
-    "source": {
+    "fwci": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "citations_made": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "subject_topics": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "primary_topic": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "grants": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "institution_ids": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "institution_country_codes": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "ror_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_keys": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_openalex_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_orcids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_source": {
       "type": "string"
     },
     "_lookup_method": {
@@ -174,10 +266,10 @@
     "_lookup_method",
     "_run_id",
     "_run_type",
+    "_source",
     "content_hash",
-    "doc_type",
     "entity_id",
-    "openalex_id",
-    "source"
+    "is_retracted",
+    "openalex_id"
   ]
 }

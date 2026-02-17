@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "Ch E M B L Compound Record Gold Contract",
-  "description": "Gold layer data contract for Ch E M B L Compound Record Gold Contract. Auto-generated from Pandera schema ChEMBLCompoundRecordGoldSchema.",
+  "title": "Ch E M B L Subcellular Fraction Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Subcellular Fraction Gold Contract. Auto-generated from Pandera schema ChEMBLSubcellularFractionGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -11,31 +11,16 @@
     "content_hash": {
       "type": "string"
     },
-    "record_id": {
-      "type": "number"
-    },
-    "molecule_id": {
+    "subcellular_fraction": {
       "type": "string"
     },
-    "publication_id": {
-      "type": "string"
-    },
-    "compound_key": {
+    "assay_count": {
       "type": [
-        "string",
+        "number",
         "null"
       ]
     },
-    "compound_name": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "src_id": {
-      "type": "number"
-    },
-    "src_compound_id": {
+    "example_assay_chembl_id": {
       "type": [
         "string",
         "null"
@@ -67,9 +52,6 @@
     "_run_type",
     "content_hash",
     "entity_id",
-    "molecule_id",
-    "publication_id",
-    "record_id",
-    "src_id"
+    "subcellular_fraction"
   ]
 }

@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Molecule Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Molecule Gold Contract. Auto-generated from Pandera schema ChEMBLMoleculeGoldSchema.",
+  "title": "Ch E M B L Molecule Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Molecule Gold Contract. Auto-generated from Pandera schema ChEMBLMoleculeGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "molecule_chembl_id": {
+    "molecule_id": {
       "type": "string"
     },
     "pref_name": {
@@ -230,25 +230,13 @@
         "null"
       ]
     },
-    "mw_freebase": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
     "molecular_weight": {
       "type": [
         "number",
         "null"
       ]
     },
-    "hba_count": {
-      "type": [
-        "number",
-        "null"
-      ]
-    },
-    "hbd_count": {
+    "mw_freebase": {
       "type": [
         "number",
         "null"
@@ -284,6 +272,18 @@
         "null"
       ]
     },
+    "hba_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "hbd_count": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
     "qed_score": {
       "type": [
         "number",
@@ -314,7 +314,7 @@
         "null"
       ]
     },
-    "inchikey": {
+    "inchi_key": {
       "type": [
         "string",
         "null"
@@ -346,6 +346,6 @@
     "_run_type",
     "content_hash",
     "entity_id",
-    "molecule_chembl_id"
+    "molecule_id"
   ]
 }

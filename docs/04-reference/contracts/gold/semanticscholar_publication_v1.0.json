@@ -26,18 +26,6 @@
         "null"
       ]
     },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "arxiv_id": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "corpus_id": {
       "type": [
         "number",
@@ -50,13 +38,25 @@
         "null"
       ]
     },
+    "abstract": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "authors": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "tldr": {
       "type": [
         "string",
         "null"
       ]
     },
-    "year": {
+    "publication_year": {
       "type": [
         "number",
         "null"
@@ -66,8 +66,7 @@
       "type": [
         "string",
         "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      ]
     },
     "journal": {
       "type": [
@@ -81,43 +80,47 @@
         "null"
       ]
     },
-    "pages": {
+    "issue": {
       "type": [
         "string",
         "null"
       ]
     },
-    "first_page": {
+    "page_range": {
       "type": [
         "string",
         "null"
       ]
     },
-    "last_page": {
+    "page_first": {
       "type": [
         "string",
         "null"
       ]
     },
-    "venue": {
+    "page_last": {
       "type": [
         "string",
         "null"
       ]
     },
-    "citation_count": {
+    "citations_received": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0
+      ]
     },
-    "reference_count": {
+    "citations_made": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0
+      ]
+    },
+    "influential_citation_count": {
+      "type": [
+        "number",
+        "null"
+      ]
     },
     "is_oa": {
       "type": [
@@ -137,7 +140,13 @@
         "null"
       ]
     },
-    "fields_of_study": {
+    "subject_fields": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_type": {
       "type": [
         "string",
         "null"
@@ -149,17 +158,53 @@
         "null"
       ]
     },
-    "source": {
+    "citation_contexts": {
       "type": [
         "string",
         "null"
       ]
     },
-    "_lookup_method": {
+    "affiliation_list": {
       "type": [
         "string",
         "null"
       ]
+    },
+    "author_keys": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_s2_ids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_orcids": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author_h_indices": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dblp_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "_source": {
+      "type": "string"
+    },
+    "_lookup_method": {
+      "type": "string"
     },
     "_original_id": {
       "type": [
@@ -197,8 +242,10 @@
     "_dq_warn",
     "_index",
     "_ingestion_ts",
+    "_lookup_method",
     "_run_id",
     "_run_type",
+    "_source",
     "content_hash",
     "entity_id",
     "paper_id"

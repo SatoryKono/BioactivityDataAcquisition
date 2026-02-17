@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Assay Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Assay Gold Contract. Auto-generated from Pandera schema ChEMBLAssayGoldSchema.",
+  "title": "Ch E M B L Assay Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Assay Gold Contract. Auto-generated from Pandera schema ChEMBLAssayGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -11,28 +11,28 @@
     "content_hash": {
       "type": "string"
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "cell_chembl_id": {
+    "cell_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "tissue_chembl_id": {
+    "tissue_id": {
       "type": [
         "string",
         "null"
@@ -254,7 +254,7 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "assay_chembl_id",
+    "assay_id",
     "content_hash",
     "entity_id"
   ]

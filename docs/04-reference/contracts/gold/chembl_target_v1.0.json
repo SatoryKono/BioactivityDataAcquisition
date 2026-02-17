@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Target Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Target Gold Contract. Auto-generated from Pandera schema ChEMBLTargetGoldSchema.",
+  "title": "Ch E M B L Target Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Target Gold Contract. Auto-generated from Pandera schema ChEMBLTargetGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": "string"
     },
     "pref_name": {
@@ -82,43 +82,31 @@
     },
     "component_accessions": {
       "type": [
-        "string",
+        "object",
+        "null"
+      ]
+    },
+    "primary_component_id": {
+      "type": [
+        "number",
         "null"
       ]
     },
     "component_ids": {
       "type": [
-        "string",
+        "object",
         "null"
       ]
     },
     "component_types": {
       "type": [
-        "string",
+        "object",
         "null"
       ]
     },
     "component_relationships": {
       "type": [
-        "string",
-        "null"
-      ]
-    },
-    "component_descriptions": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "component_organisms": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "component_taxonomy_ids": {
-      "type": [
-        "string",
+        "object",
         "null"
       ]
     },
@@ -148,6 +136,6 @@
     "_run_type",
     "content_hash",
     "entity_id",
-    "target_chembl_id"
+    "target_id"
   ]
 }

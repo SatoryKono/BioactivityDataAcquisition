@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Assay Parameters Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Assay Parameters Gold Contract. Auto-generated from Pandera schema ChEMBLAssayParametersGoldSchema.",
+  "title": "Ch E M B L Assay Parameters Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Assay Parameters Gold Contract. Auto-generated from Pandera schema ChEMBLAssayParametersGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -14,7 +14,7 @@
     "assay_param_id": {
       "type": "number"
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": "string"
     },
     "type": {
@@ -104,7 +104,7 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "assay_chembl_id",
+    "assay_id",
     "assay_param_id",
     "content_hash",
     "entity_id",

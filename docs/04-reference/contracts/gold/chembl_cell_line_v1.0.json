@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Cell Line Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Cell Line Gold Contract. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
+  "title": "Ch E M B L Cell Line Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Cell Line Gold Contract. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "cell_chembl_id": {
+    "cell_id": {
       "type": "string"
     },
     "cell_name": {
@@ -83,7 +83,7 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "cell_chembl_id",
+    "cell_id",
     "cell_name",
     "content_hash",
     "entity_id"

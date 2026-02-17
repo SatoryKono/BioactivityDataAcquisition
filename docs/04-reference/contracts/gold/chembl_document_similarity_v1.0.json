@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Document Similarity Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Document Similarity Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentSimilarityGoldSchema.",
+  "title": "Ch E M B L Document Similarity Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Document Similarity Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentSimilarityGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -36,33 +36,25 @@
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "mol_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "avg_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "max_tani": {
       "type": [
         "number",
         "null"
-      ],
-      "minimum": 0,
-      "maximum": 1
+      ]
     },
     "_run_id": {
       "type": "string"

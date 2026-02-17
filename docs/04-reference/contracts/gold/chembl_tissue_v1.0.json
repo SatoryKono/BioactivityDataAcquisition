@@ -1,41 +1,35 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "Ch E M B L Compound Record Gold Contract",
-  "description": "Gold layer data contract for Ch E M B L Compound Record Gold Contract. Auto-generated from Pandera schema ChEMBLCompoundRecordGoldSchema.",
+  "title": "Ch E M B L Tissue Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Tissue Gold Contract. Auto-generated from Pandera schema ChEMBLTissueGoldSchema.",
   "type": "object",
   "properties": {
-    "entity_id": {
+    "tissue_chembl_id": {
       "type": "string"
     },
-    "content_hash": {
+    "pref_name": {
       "type": "string"
     },
-    "record_id": {
-      "type": "number"
-    },
-    "molecule_id": {
-      "type": "string"
-    },
-    "publication_id": {
-      "type": "string"
-    },
-    "compound_key": {
+    "bto_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "compound_name": {
+    "caloha_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "src_id": {
-      "type": "number"
+    "efo_id": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
-    "src_compound_id": {
+    "uberon_id": {
       "type": [
         "string",
         "null"
@@ -65,11 +59,7 @@
     "_ingestion_ts",
     "_run_id",
     "_run_type",
-    "content_hash",
-    "entity_id",
-    "molecule_id",
-    "publication_id",
-    "record_id",
-    "src_id"
+    "pref_name",
+    "tissue_chembl_id"
   ]
 }

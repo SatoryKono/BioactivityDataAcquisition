@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Activity Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Activity Gold Contract. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
+  "title": "Ch E M B L Activity Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Activity Gold Contract. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -14,22 +14,22 @@
     "activity_id": {
       "type": "string"
     },
-    "molecule_chembl_id": {
+    "molecule_id": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": [
         "string",
         "null"
       ]
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": [
         "string",
         "null"
@@ -59,7 +59,7 @@
         "null"
       ]
     },
-    "parent_molecule_chembl_id": {
+    "parent_molecule_id": {
       "type": [
         "string",
         "null"
@@ -79,7 +79,7 @@
     },
     "target_taxonomy_id": {
       "type": [
-        "string",
+        "number",
         "null"
       ]
     },
@@ -245,15 +245,33 @@
         "null"
       ]
     },
-    "document_journal": {
+    "journal": {
       "type": [
         "string",
         "null"
       ]
     },
-    "document_year": {
+    "publication_year": {
       "type": [
         "number",
+        "null"
+      ]
+    },
+    "publication_doi": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_pmid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_pmc_id": {
+      "type": [
+        "string",
         "null"
       ]
     },
@@ -281,7 +299,7 @@
         "null"
       ]
     },
-    "action_type_action_type": {
+    "action_type": {
       "type": [
         "string",
         "null"
@@ -338,6 +356,6 @@
     "activity_id",
     "content_hash",
     "entity_id",
-    "molecule_chembl_id"
+    "molecule_id"
   ]
 }

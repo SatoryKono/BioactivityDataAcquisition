@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Document Term Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Document Term Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentTermGoldSchema.",
+  "title": "Ch E M B L Document Term Gold Contract",
+  "description": "Gold layer data contract for Ch E M B L Document Term Gold Contract. Auto-generated from Pandera schema ChEMBLDocumentTermGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": "string"
     },
     "term": {
@@ -57,8 +57,8 @@
     "_run_id",
     "_run_type",
     "content_hash",
-    "document_chembl_id",
     "entity_id",
+    "publication_id",
     "term",
     "term_type"
   ]

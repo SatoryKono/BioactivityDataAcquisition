@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProt ID Mapping Gold Contract",
-  "description": "Gold layer data contract for UniProt ID Mapping Gold Contract. Auto-generated from Pandera schema UniProtIDMappingGoldSchema.",
+  "title": "Uni Prot I D Mapping Gold Contract",
+  "description": "Gold layer data contract for Uni Prot I D Mapping Gold Contract. Auto-generated from Pandera schema UniProtIDMappingGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
@@ -11,7 +11,7 @@
     "content_hash": {
       "type": "string"
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": "string"
     },
     "uniprot_accession": {
@@ -22,6 +22,72 @@
     },
     "mapping_status": {
       "type": "string"
+    },
+    "uniprot_entry_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "organism_scientific": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "organism_common": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "taxonomy_id": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "protein_name": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "gene_primary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sequence_length": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "sequence_mass": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "reviewed": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "annotation_score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "all_mappings": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "_dq_warn": {
       "type": "boolean"
@@ -54,6 +120,6 @@
     "content_hash",
     "entity_id",
     "mapping_status",
-    "target_chembl_id"
+    "target_id"
   ]
 }
