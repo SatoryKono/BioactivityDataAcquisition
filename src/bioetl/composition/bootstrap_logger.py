@@ -100,7 +100,7 @@ class BootstrapLogger:
         """Initialize with the bootstrap logger."""
         self._logger = get_bootstrap_logger()
 
-    def debug(self, event: str, **kwargs: Any) -> None:
+    def debug(self, event: str, **kwargs: Any) -> None:  # Any: structlog context kwargs
         """Log a debug message.
 
         Args:
@@ -109,7 +109,7 @@ class BootstrapLogger:
         """
         self._logger.debug(event, **kwargs)
 
-    def info(self, event: str, **kwargs: Any) -> None:
+    def info(self, event: str, **kwargs: Any) -> None:  # Any: structlog context kwargs
         """Log an informational message.
 
         Args:
@@ -118,6 +118,7 @@ class BootstrapLogger:
         """
         self._logger.info(event, **kwargs)
 
+    # Any: structlog context kwargs
     def warning(self, event: str, **kwargs: Any) -> None:
         """Log a warning message.
 
@@ -127,7 +128,7 @@ class BootstrapLogger:
         """
         self._logger.warning(event, **kwargs)
 
-    def error(self, event: str, **kwargs: Any) -> None:
+    def error(self, event: str, **kwargs: Any) -> None:  # Any: structlog context kwargs
         """Log an error message.
 
         Args:

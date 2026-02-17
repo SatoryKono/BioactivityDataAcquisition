@@ -120,6 +120,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         """Enter async context manager."""
         return self
 
+    # Any: standard __aexit__ sig...
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit async context manager."""
         await self.close()
@@ -132,6 +133,7 @@ class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort):
         """Gracefully close resources."""
         await self.close()
 
+    # Any: generic executor wrapp...
     async def _run_in_executor(self, func: Any, *args: Any) -> Any:
         """Run synchronous function in thread pool."""
         loop = asyncio.get_running_loop()

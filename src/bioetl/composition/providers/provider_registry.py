@@ -170,7 +170,7 @@ class ProviderRegistry:
         http_client: UnifiedHTTPClient | None = None,
         logger: LoggerPort | None = None,
         settings: Settings | None = None,
-        **kwargs: Any,
+        **kwargs: Any,  # Any: forwarded adapter cons...
     ) -> DataSourcePort:
         """Создаёт экземпляр адаптера провайдера.
 

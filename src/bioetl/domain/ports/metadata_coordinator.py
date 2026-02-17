@@ -76,11 +76,11 @@ class SilverMetadataInput:
     """
 
     table_path: str
-    records: list[dict[str, Any]]
+    records: list[dict[str, Any]]  # Any: heterogeneous record values
     primary_keys: list[str]
-    mode: Any  # SilverWriteMode - avoid circular import
-    bronze_refs: Any | None = None  # list[BronzeWriteResult] | None
-    dq_metrics: Any | None = None  # BatchDQMetrics | None
+    mode: Any  # Any: SilverWriteMode - avoid circular import
+    bronze_refs: Any | None = None  # Any: list[BronzeWriteResult...
+    dq_metrics: Any | None = None  # Any: BatchDQMetrics - avoid circular import
     version_before: int | None = None  # ADR-029: Delta version before write
     version_after: int | None = None
     transform_version: str | None = None
@@ -135,15 +135,15 @@ class GoldMetadataInput:
 
     table_path: str
     table_name: str
-    records: list[dict[str, Any]]
-    mode: Any  # GoldWriteMode - avoid circular import
-    scd_config: dict[str, Any] | None = None
+    records: list[dict[str, Any]]  # Any: heterogeneous record values
+    mode: Any  # Any: GoldWriteMode - avoid circular import
+    scd_config: dict[str, Any] | None = None  # Any: SCD2 config values
     started_at: datetime | None = None  # ADR-029: Write start timestamp
     completed_at: datetime | None = None
     silver_refs: list[SilverRef] | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
-    gold_schema: Any | None = None  # Pandera DataFrameModel class
+    gold_schema: Any | None = None  # Any: Pandera DataFrameModel...
     governance: GovernanceMetadata | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
     partition_count: int = 0  # ADR-029: Number of partitions

@@ -128,6 +128,7 @@ class DefaultDataNormalizationService:
         stripped = value.strip()
         return stripped if stripped else None
 
+    # Any: accepts any type for s...
     def normalize_to_string(self, value: Any) -> str | None:
         """Convert value to string, strip whitespace, return None if empty."""
         if value is None:

@@ -238,7 +238,7 @@ def _create_pubmed_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,
+    **kwargs: Any,  # Any: forward arbitrary adap...
 ) -> PubMedAdapter:
     email = kwargs.get("email")
     if not email and settings:

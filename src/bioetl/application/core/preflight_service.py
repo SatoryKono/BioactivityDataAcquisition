@@ -638,7 +638,7 @@ class PreflightService:
 
     def _record_health_check_metrics(
         self,
-        report: Any,
+        report: Any,  # Any: HealthReport accessed ...
         duration: float,
     ) -> None:
         """Record health-check metrics per Unified Observability Contract."""

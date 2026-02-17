@@ -171,7 +171,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         event_name: str,
         phase: LifecyclePhase,
         level: str = "info",
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit a structured lifecycle event through unified observability.
 
@@ -204,7 +204,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
     def emit_phase_started(
         self,
         phase: LifecyclePhase,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> float:
         """Emit phase start event and return start timestamp.
 
@@ -223,7 +223,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         phase: LifecyclePhase,
         start_time: float,
         success: bool = True,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit phase completion event with duration.
 
@@ -261,7 +261,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         component: str,
         healthy: bool,
         duration_ms: float | None = None,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit health check result for a component.
 
@@ -296,7 +296,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         anomaly_type: str,
         current_value: float,
         baseline_mean: float | None = None,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit data quality anomaly detection event.
 
@@ -338,7 +338,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         table: str,
         files_removed: int,
         success: bool = True,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit VACUUM operation result.
 

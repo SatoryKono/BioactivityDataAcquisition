@@ -62,7 +62,7 @@ def get_git_commit() -> str | None:
         return None
 
 
-def _normalize_for_hash(obj: Any) -> Any:
+def _normalize_for_hash(obj: Any) -> Any:  # Any: recursive normalizer a...
     """Normalize object for deterministic hashing.
 
     Converts:

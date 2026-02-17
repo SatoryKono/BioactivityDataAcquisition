@@ -14,6 +14,7 @@ from __future__ import annotations
 from typing import Any
 
 
+# Any: untyped JSON
 def _clean_string(value: Any, lowercase: bool = False) -> str | None:
     """Clean and optionally lowercase a string value."""
     if not value or not isinstance(value, str):
@@ -24,7 +25,7 @@ def _clean_string(value: Any, lowercase: bool = False) -> str | None:
     return cleaned.lower() if lowercase else cleaned
 
 
-def _parse_year(year_raw: Any) -> int | None:
+def _parse_year(year_raw: Any) -> int | None:  # Any: untyped API JSON
     """Parse year from string or int value."""
     if not year_raw:
         return None
@@ -37,6 +38,7 @@ def _parse_year(year_raw: Any) -> int | None:
     return None
 
 
+# Any: raw API JSON
 def extract_references(publication: dict[str, Any]) -> list[dict[str, Any]]:
     """Extract bibliographic references from CrossRef publication.
 
@@ -51,7 +53,7 @@ def extract_references(publication: dict[str, Any]) -> list[dict[str, Any]]:
         Each reference contains available bibliographic metadata.
 
     """
-    references: list[dict[str, Any]] = []
+    references: list[dict[str, Any]] = []  # Any: heterogeneous reference field values
     for ref in publication.get("reference", []):
         if not isinstance(ref, dict):
             continue

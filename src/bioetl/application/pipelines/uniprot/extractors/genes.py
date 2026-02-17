@@ -11,7 +11,7 @@ class GeneExtractor:
     """Extracts gene-related data from UniProt records."""
 
     @staticmethod
-    def extract_gene_names(genes: Any) -> list[str]:
+    def extract_gene_names(genes: Any) -> list[str]:  # Any: untyped API JSON
         """Extract gene names from genes list.
 
         Args:
@@ -35,7 +35,7 @@ class GeneExtractor:
         return names
 
     @staticmethod
-    def extract_primary_gene(genes: Any) -> str | None:
+    def extract_primary_gene(genes: Any) -> str | None:  # Any: untyped API JSON
         """Extract primary gene name.
 
         Args:
@@ -57,7 +57,7 @@ class GeneExtractor:
         return None
 
     @staticmethod
-    def extract_gene_synonyms(genes: Any) -> str | None:
+    def extract_gene_synonyms(genes: Any) -> str | None:  # Any: untyped API JSON
         """Extract gene synonyms.
 
         Args:
@@ -87,7 +87,7 @@ class GeneExtractor:
         )
 
     @staticmethod
-    def extract_gene_orf_names(genes: Any) -> str | None:
+    def extract_gene_orf_names(genes: Any) -> str | None:  # Any: untyped API JSON
         """Extract ORF names from genes.
 
         Args:

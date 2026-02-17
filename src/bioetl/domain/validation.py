@@ -94,7 +94,7 @@ MAX_PUBLICATION_YEAR: int = 2050
 # =============================================================================
 
 
-def validate_positive_int(value: Any) -> int | None:
+def validate_positive_int(value: Any) -> int | None:  # Any: record field value typ...
     """Validate integer is positive (>= 1) or return None.
 
     Used for validating IDs, counts, and other positive integer fields.
@@ -187,7 +187,7 @@ def validate_year_range(
     return min_year <= year <= max_year
 
 
-def validate_non_negative(value: Any) -> float | None:
+def validate_non_negative(value: Any) -> float | None:  # Any: record field value typ...
     """Validate numeric value is non-negative (>= 0) or return None.
 
     Used for validating concentrations, counts, and other non-negative fields.
@@ -236,7 +236,7 @@ MAX_MOLECULAR_WEIGHT: float = 100000.0  # Legacy: 100000.0 (exclusive bound)
 
 
 def validate_molecular_weight(
-    value: Any,
+    value: Any,  # Any: record field value type varies
     config: ValidationConfig | None = None,
 ) -> float | None:
     """Validate and convert molecular weight to float.

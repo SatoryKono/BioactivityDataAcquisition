@@ -153,7 +153,7 @@ class StorageAdapter:
         self,
         table_name: str,
         records: list[dict[str, Any]],
-        schema: Any,
+        schema: Any,  # Any: Pandera DataFrameModel class varies per entity Gold schema
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,

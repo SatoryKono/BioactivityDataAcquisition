@@ -101,8 +101,8 @@ class FieldMismatch:
     """
 
     field_name: str
-    seed_value: Any
-    enricher_value: Any
+    seed_value: Any  # Any: heterogeneous record values (str, int, float, None, etc.)
+    enricher_value: Any  # Any: record vals vary
     method: ComparisonMethod
 
 

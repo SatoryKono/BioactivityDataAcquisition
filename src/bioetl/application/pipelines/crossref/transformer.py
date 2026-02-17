@@ -354,6 +354,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         return True
 
     @staticmethod
+    # Any: accepts any dataclass ...
     def entity_to_silver_record(entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
