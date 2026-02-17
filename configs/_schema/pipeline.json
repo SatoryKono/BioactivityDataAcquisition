@@ -1658,7 +1658,7 @@
         }
       ],
       "default": null,
-      "description": "Path to filter config file relative to pipeline config. When set, filter config is loaded from the hierarchical filter system. Example: ../../filter/entities/chembl/activity.yaml",
+      "description": "Path to filter config file relative to pipeline config. When set, filter config is loaded from the hierarchical filter system. Example: ../../filters/entities/chembl/activity.yaml",
       "title": "Filter Config File"
     },
     "filter_rules": {

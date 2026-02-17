@@ -232,8 +232,8 @@ When `provider` and `entity_type` are set, config loader can auto-compute refere
 Auto-computed file references:
 
 - `source_file` → `../../sources/{provider}.yaml`
-- `dq_config_file` → `../../dq/entities/{provider}/{entity_type}.yaml`
-- `filter_config_file` → `../../filter/entities/{provider}/{entity_type}.yaml`
+- `dq_config_file` → `../../quality/entities/{provider}/{entity_type}.yaml`
+- `filter_config_file` → `../../filters/entities/{provider}/{entity_type}.yaml`
 
 Auto-computed sink paths:
 

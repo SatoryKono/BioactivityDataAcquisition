@@ -40,7 +40,7 @@ source_file: ../../sources/chembl.yaml
 #   1. configs/quality/_defaults.yaml
 #   2. configs/quality/providers/chembl.yaml
 #   3. configs/quality/entities/chembl/target.yaml
-dq_config_file: ../../dq/entities/chembl/target.yaml
+dq_config_file: ../../quality/entities/chembl/target.yaml
 
 # Paths auto-computed by convention (ADR-029),
 # override only when different from default

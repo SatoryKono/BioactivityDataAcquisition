@@ -261,8 +261,8 @@ ______________________________________________________________________
 | Поле                 | Auto-computed значение                                |
 | -------------------- | ----------------------------------------------------- |
 | `source_file`        | `../../sources/{provider}.yaml`                       |
-| `dq_config_file`     | `../../dq/entities/{provider}/{entity_type}.yaml`     |
-| `filter_config_file` | `../../filter/entities/{provider}/{entity_type}.yaml` |
+| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml`     |
+| `filter_config_file` | `../../filters/entities/{provider}/{entity_type}.yaml` |
 | `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`         |
 | `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`         |
 | `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`           |
