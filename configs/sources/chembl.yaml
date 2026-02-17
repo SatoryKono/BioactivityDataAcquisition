@@ -16,9 +16,15 @@ source:
         client:
             timeout_sec: 60.0
             max_retries: 3
+        pagination:
+            page_size: 1000         # Records per page for paginated (non-filtered) queries
+            id_batch_size: 20       # IDs per API request for filtered queries (input_filter)
+            strategy: offset        # ChEMBL uses offset-based pagination
+            max_url_length: 2000    # Maximum GET URL length
+        # Legacy aliases (consumed by model_validator for backward compat)
+        batch_size: 20
+        page_size: 1000
         max_url_length: 2000
-        batch_size: 20  # IDs per API request for filtered queries (input_filter)
-        page_size: 1000  # Records per page for paginated (non-filtered) queries
         api_version: null
 
     circuit_breaker:

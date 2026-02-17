@@ -14,6 +14,10 @@ source:
         base_url: https://rest.uniprot.org
         auth_type: api_key  # Optional API key for higher rate limits
         api_key_env: BIOETL_UNIPROT_API_KEY
+        pagination:
+            page_size: 200          # UniProt handles larger pages well
+            id_batch_size: 200      # Accessions per batch
+            strategy: offset
         client:
             timeout_sec: 30.0
             max_retries: 3

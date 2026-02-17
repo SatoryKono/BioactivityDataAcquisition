@@ -10,8 +10,9 @@ entity_type: publication
 version: "2.1.0"
 description: "Extract scientific publications from ChEMBL API"
 
-source:
-  batch_size: 16
+# Pagination override: smaller page for publication entities (full_scan_only).
+# Source pagination strategy defined in configs/sources/chembl.yaml.
+page_size_override: 16
 
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
