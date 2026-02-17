@@ -209,7 +209,9 @@ class UniProtProteinTransformer(BaseTransformer):
     def _add_gene_data(self, record: BronzeRecord, data: dict[str, Any]) -> None:
         """Add gene-related fields."""
         genes = record.get("genes")
-        data["gene_names"] = GeneExtractor.extract_gene_names(genes)
+        data["gene_names"] = self.serialize_json_list(
+            GeneExtractor.extract_gene_names(genes)
+        )
         data["gene_primary"] = GeneExtractor.extract_primary_gene(genes)
         data["gene_synonyms"] = GeneExtractor.extract_gene_synonyms(genes)
         data["gene_orf_names"] = GeneExtractor.extract_gene_orf_names(genes)
