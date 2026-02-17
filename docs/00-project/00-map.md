@@ -5,7 +5,7 @@
 > **Documentation Update:** 2026-02-16
 > - Codebase metrics updated: ~1,114 Python files, ~115,656 LOC, ~11,985 tests
 > - ADR count corrected: 34 ADRs (ADR-001 through ADR-034)
-> - Pipeline configs: 27 configurations
+> - Pipeline configs: 26 configurations (21 single-source + 5 composite)
 > - Adapter listing completed (all 7 providers)
 > - Gold contract link fixed (chembl_activity_v1.0.json)
 > - ADR-032 duplicate resolved (publication-validation → ADR-033)

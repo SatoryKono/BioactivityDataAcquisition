@@ -245,12 +245,20 @@ composite:
 
 ### Отличия от Regular Pipelines
 
-| Аспект        | Regular Pipeline                           | Composite Pipeline                      |
-| ------------- | ------------------------------------------ | --------------------------------------- |
-| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:`                            |
-| Source        | Один провайдер                             | Несколько провайдеров через `enrichers` |
-| Schema        | `_schema.json`                             | Отдельная схема (ADR-026)               |
-| Пути          | Auto-computed                              | Определяются в `merge.output`           |
+| Аспект          | Regular Pipeline                           | Composite Pipeline                                      |
+| --------------- | ------------------------------------------ | ------------------------------------------------------- |
+| Корневой ключ   | `pipeline_name`, `provider`, `entity_type` | `composite:`                                            |
+| Source          | Один провайдер                             | Несколько провайдеров через `enrichers`                  |
+| Schema          | `_schema.json`                             | Отдельная схема (ADR-026)                               |
+| Пути            | Auto-computed                              | Определяются в `merge.output`                           |
+| Orchestration   | `PipelineRunner` + `{Entity}Transformer`   | `CompositePipelineRunner` (без отдельных трансформеров) |
+| Реализация      | `application/pipelines/{provider}/`        | `application/composite/` (15 модулей)                   |
+
+> **Архитектурная заметка:** Composite pipelines **не используют** классы трансформеров
+> (`*Transformer`). Вместо этого оркестрация выполняется через `CompositePipelineRunner`,
+> `EnrichmentCoordinator`, `MergeService` и другие сервисы в `application/composite/`.
+> Seed и enricher pipelines запускаются как обычные single-source pipelines,
+> а composite layer выполняет агрегацию на уровне Silver-данных.
 
 ______________________________________________________________________
 
