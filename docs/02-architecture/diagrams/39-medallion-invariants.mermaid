@@ -1,0 +1,74 @@
+%% Title: Medallion Architecture Invariants (ARCH-007)
+%% Covers: RULES.md §2.1 (Medallion), ARCH-007 clear policy
+%% Rank: 14 (Score 8.19) — Critical data safety rules
+%% Updated: 2026-02-17
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    subgraph RunTypes["RunType Enum (domain/types.py)"]
+        INC["RunType.INCREMENTAL\n'Fetch new data since last run'"]
+        BF["RunType.BACKFILL\n'Re-fetch a date range'"]
+        RB["RunType.REBUILD\n'Full clean rebuild'"]
+    end
+
+    subgraph Policy["MedallionLifecycleService\n(application/services/medallion_lifecycle.py)"]
+        CHECK{{"Check RunType"}}
+    end
+
+    subgraph IncPath["INCREMENTAL Path"]
+        I1["❌ DO NOT clear Silver"]
+        I2["❌ DO NOT clear Gold"]
+        I3["Silver: merge/upsert\n(content_hash dedup)"]
+        I4["Gold: merge/append"]
+    end
+
+    subgraph BFPath["BACKFILL Path"]
+        B1["✅ MUST clear Silver\nSilverWriter.clear()"]
+        B2["✅ MUST clear Gold\nGoldWriter.clear()"]
+        B3["Silver: full reload"]
+        B4["Gold: full reload"]
+    end
+
+    subgraph RBPath["REBUILD Path"]
+        R1["✅ MUST clear Silver\nSilverWriter.clear()"]
+        R2["✅ MUST clear Gold\nGoldWriter.clear()"]
+        R3["Silver: full rebuild\nfrom Bronze/API"]
+        R4["Gold: full rebuild\nfrom Silver"]
+    end
+
+    subgraph Enforcement["Enforcement"]
+        E1["PipelineRunner checks\nrun_type before execution"]
+        E2["MedallionLifecycleService\nenforces clear policy"]
+        E3["ClearResult tracks\nwhat was cleared"]
+        E4["Tests verify:\nINCREMENTAL never clears"]
+    end
+
+    subgraph Bronze["Bronze Layer (Always Append)"]
+        BZ["BronzeWriter.write_bronze()\n• ALWAYS append-only\n• Never cleared by run_type\n• 90-day retention policy"]
+    end
+
+    %% Flow
+    INC --> CHECK
+    BF --> CHECK
+    RB --> CHECK
+
+    CHECK -->|"INCREMENTAL"| I1
+    I1 --> I2 --> I3 --> I4
+
+    CHECK -->|"BACKFILL"| B1
+    B1 --> B2 --> B3 --> B4
+
+    CHECK -->|"REBUILD"| R1
+    R1 --> R2 --> R3 --> R4
+
+    E1 -.-> CHECK
+    E2 -.-> Policy
+
+    BZ -.->|"unaffected by run_type"| Bronze
+
+    %% Styling
+    style IncPath fill:#e8f5e9,stroke:#2e7d32
+    style BFPath fill:#fff3e0,stroke:#e65100
+    style RBPath fill:#ffebee,stroke:#c62828
+    style Bronze fill:#FFA500,stroke:#cc8400,color:#000
+    style Policy fill:#e3f2fd,stroke:#1565c0

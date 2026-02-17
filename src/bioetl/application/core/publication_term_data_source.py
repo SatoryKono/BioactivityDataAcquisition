@@ -114,6 +114,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records, extracting terms if entity_type is publication_term.
 
@@ -131,6 +132,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
             query: Optional search query.
             filter_ids: Optional filter IDs (passed to wrapped adapter).
             filter_field: Optional filter field (passed to wrapped adapter).
+            offset: Optional starting offset for checkpoint-based resume.
 
         Yields:
             Records from the data source.
@@ -150,6 +152,7 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
                 query=query,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
+                offset=offset,
             ):
                 yield record
 
