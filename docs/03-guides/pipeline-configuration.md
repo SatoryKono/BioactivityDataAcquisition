@@ -233,6 +233,56 @@ composite:
     conflict_resolution: prefer_seed  # При конфликте — seed выигрывает
 ```
 
+### Изменение контракта в v6.0 (breaking)
+
+Начиная с **BioETL 6.0.0** поле `composite.version` снова является обязательным в основном контракте (`configs/_schema/composite.json`).
+
+**Старый формат (legacy, до v6):**
+
+```yaml
+schema_version: "2.0.0"
+composite:
+  name: composite_publication
+  # version отсутствует
+  seed:
+    pipeline: chembl_publication
+    output_keys: [publication_id, doi]
+    silver_table: silver/chembl/publication
+  enrichers:
+    - pipeline: crossref_publication
+      join_keys: [doi]
+  merge:
+    output:
+      silver: silver/composite/publication
+      gold: gold/composite/publication
+```
+
+**Новый формат (v6+):**
+
+```yaml
+schema_version: "2.0.0"
+composite:
+  name: composite_publication
+  version: "1.1.0"
+  seed:
+    pipeline: chembl_publication
+    output_keys: [publication_id, doi]
+    silver_table: silver/chembl/publication
+  enrichers:
+    - pipeline: crossref_publication
+      join_keys: [doi]
+  merge:
+    output:
+      silver: silver/composite/publication
+      gold: gold/composite/publication
+```
+
+**Migration notes**
+
+- Добавьте `composite.version` во все пользовательские composite YAML.
+- Во время перехода runtime сохраняет явную совместимость для legacy-файлов и выдаёт `DeprecationWarning`.
+- **Deprecation window:** поддержка legacy-формата удаляется в **BioETL 6.2.0**.
+
 ### Доступные Composite Pipelines
 
 | Composite               | Seed                 | Enrichers                                                           | Описание                      |
