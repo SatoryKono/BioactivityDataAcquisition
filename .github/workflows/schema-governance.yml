@@ -1,0 +1,108 @@
+name: Schema Governance
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'src/bioetl/domain/contracts/**'
+      - 'src/bioetl/infrastructure/schemas/**'
+      - 'src/tools/verify_schema_parity.py'
+      - 'src/tools/scripts/generate_contracts.py'
+      - 'configs/pipelines/**'
+      - 'docs/04-reference/contracts/gold/**'
+      - '.github/workflows/schema-governance.yml'
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'src/bioetl/domain/contracts/**'
+      - 'src/bioetl/infrastructure/schemas/**'
+      - 'src/tools/verify_schema_parity.py'
+      - 'src/tools/scripts/generate_contracts.py'
+      - 'configs/pipelines/**'
+      - 'docs/04-reference/contracts/gold/**'
+      - '.github/workflows/schema-governance.yml'
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  contracts-export-blocking:
+    name: Contracts Export (blocking)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Install deps
+        run: uv sync --extra tests
+
+      - name: Run export contracts
+        run: uv run python src/tools/scripts/generate_contracts.py
+
+      - name: Validate generated contracts are committed
+        run: git diff --exit-code docs/04-reference/contracts/gold
+
+  schema-parity:
+    name: Schema Parity + PK Coverage (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v1
+
+      - name: Install deps
+        run: uv sync --extra tests
+
+      - name: Run schema parity and PK coverage checks
+        id: parity_checks
+        run: uv run python src/tools/verify_schema_parity.py --mode all
+
+      - name: Mark warning state
+        if: steps.parity_checks.outcome == 'failure'
+        run: echo "::warning::Schema parity or PK coverage issues detected (non-blocking)."
+
+  schema-governance-status:
+    name: Schema Governance Status
+    runs-on: ubuntu-latest
+    needs:
+      - contracts-export-blocking
+      - schema-parity
+    if: always()
+
+    steps:
+      - name: CI report (blocking vs warnings)
+        run: |
+          {
+            echo "## Schema Governance CI Report"
+            echo
+            echo "### Failing checks (blocking)"
+            echo "- Contracts export: ${{ needs.contracts-export-blocking.result }}"
+            echo
+            echo "### Warning checks (non-blocking)"
+            echo "- Schema parity + PK coverage: ${{ needs.schema-parity.result }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "${{ needs.contracts-export-blocking.result }}" != "success" ]]; then
+            echo "::error::Blocking check failed: contracts-export-blocking"
+            exit 1
+          fi
+
+          echo "::notice::All blocking schema governance checks passed"
