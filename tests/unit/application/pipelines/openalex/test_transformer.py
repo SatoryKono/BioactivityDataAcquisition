@@ -96,7 +96,7 @@ class TestOpenAlexPublicationTransformer:
         assert result["title"] == "Example Publication Title"
         assert result["publication_year"] == 2024
         assert result["publication_date"] == "2024-05-15"
-        assert result["publication_type"] == "article"  # Raw OpenAlex type preserved
+        assert result["publication_type"] == "journal-article"  # Normalized canonical
         assert result["abstract"] == "This is an abstract"
         assert result["journal"] == "Nature"
         assert result["issn"] == "0028-0836"
@@ -187,15 +187,21 @@ class TestOpenAlexPublicationTransformer:
         assert result["publication_year"] is None  # Filtered out
 
     @pytest.mark.asyncio
-    async def test_transform_type_preserved(
+    async def test_transform_type_normalized(
         self,
         transformer: OpenAlexPublicationTransformer,
         pipeline_context: PipelineContext,
     ) -> None:
-        """Should preserve raw OpenAlex type without mapping."""
-        test_types = ["article", "preprint", "book-chapter", "dataset", "unknown_type"]
+        """Should normalize OpenAlex type to canonical kebab-case."""
+        test_cases = [
+            ("article", "journal-article"),
+            ("preprint", "preprint"),
+            ("book-chapter", "book-chapter"),
+            ("dataset", "dataset"),
+            ("unknown_type", "unknown_type"),  # Fallback: lowercase
+        ]
 
-        for openalex_type in test_types:
+        for openalex_type, expected in test_cases:
             record = {
                 "id": "https://openalex.org/W1234567890",
                 "title": "Test",
@@ -203,7 +209,7 @@ class TestOpenAlexPublicationTransformer:
             }
             result = await transformer.transform(pipeline_context, record, 0)
             assert result is not None
-            assert result["publication_type"] == openalex_type  # Raw type preserved
+            assert result["publication_type"] == expected
 
     @pytest.mark.asyncio
     async def test_transform_empty_abstract_inverted_index(

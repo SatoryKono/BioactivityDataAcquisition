@@ -21,10 +21,10 @@ field_validations:
   - field: publication_type
     type: enum
     allowed:
-      - PUBLICATION
-      - BOOK
-      - DATASET
-      - PATENT
+      - journal-article
+      - book
+      - dataset
+      - patent
     nullable: true
 
   - field: publication_year
@@ -111,7 +111,7 @@ cross_field_validations:
 conditional_validations:
   - name: publication_requires_title
     condition_field: publication_type
-    condition_value: PUBLICATION
+    condition_value: journal-article
     condition_operator: eq
     then_validations:
       - field: title
