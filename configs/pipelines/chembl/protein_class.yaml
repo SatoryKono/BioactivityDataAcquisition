@@ -10,7 +10,8 @@ entity_type: protein_class
 version: "1.2.0"
 description: "ChEMBL Protein Classification hierarchy (enzyme classes, receptor types, etc.)"
 
-primary_keys: ["protein_class_id"]
+business_primary_keys: ["protein_class_id"]
+technical_primary_key: "entity_id"
 silver_table: chembl_protein_class
 gold_table: chembl_protein_class
 

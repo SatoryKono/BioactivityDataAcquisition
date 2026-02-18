@@ -9,7 +9,8 @@ entity_type: tissue
 version: "1.0.0"
 description: "Extract tissues from ChEMBL API"
 
-primary_keys: ["tissue_id"]
+business_primary_keys: ["tissue_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_tissue"
 gold_table: "chembl_tissue"
 

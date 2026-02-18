@@ -15,7 +15,8 @@ description: "Extract publication similarity data (Tanimoto coefficients) from C
 # Deduplication is handled on Silver layer via content_hash.
 loading_strategy: full_scan_only
 
-primary_keys: ["sim_id"]
+business_primary_keys: ["sim_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_publication_similarity"
 gold_table: "chembl_publication_similarity"
 

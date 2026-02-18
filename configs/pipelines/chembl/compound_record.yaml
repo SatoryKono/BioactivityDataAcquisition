@@ -12,7 +12,8 @@ entity_type: compound_record
 version: "1.2.0"
 description: "Extract compound records from ChEMBL API"
 
-primary_keys: ["record_id"]
+business_primary_keys: ["record_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_compound_record"
 gold_table: "chembl_compound_record"
 

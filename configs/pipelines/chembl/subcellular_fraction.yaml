@@ -19,7 +19,8 @@ loading_strategy: full_scan_only
 
 # Primary key is the normalized subcellular_fraction name
 # entity_id is generated as SHA256 hash of normalized name
-primary_keys: ["entity_id"]
+business_primary_keys: ["entity_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_subcellular_fraction"
 gold_table: "chembl_subcellular_fraction"
 

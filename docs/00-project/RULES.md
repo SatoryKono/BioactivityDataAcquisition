@@ -1526,7 +1526,7 @@ entity_type: activity
 version: "1.2.0"
 description: "Extract biological activity records from ChEMBL API"
 
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 

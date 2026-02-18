@@ -10,7 +10,8 @@ entity_type: assay_parameters
 version: "1.2.0"
 description: "Extract experimental assay parameters from ChEMBL API"
 
-primary_keys: ["assay_param_id"]
+business_primary_keys: ["assay_param_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_assay_parameters"
 gold_table: "chembl_assay_parameters"
 

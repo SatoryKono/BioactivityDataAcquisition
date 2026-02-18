@@ -1701,13 +1701,36 @@
       "description": "Path to data schema file with layer-specific columns (silver/gold).",
       "title": "Data Schema File"
     },
-    "primary_keys": {
+    "business_primary_keys": {
       "items": {
         "type": "string"
       },
       "minItems": 1,
-      "title": "Primary Keys",
+      "title": "Business Primary Keys",
       "type": "array"
+    },
+    "technical_primary_key": {
+      "default": "entity_id",
+      "minLength": 1,
+      "title": "Technical Primary Key",
+      "type": "string"
+    },
+    "primary_keys": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Deprecated alias for business_primary_keys.",
+      "title": "Primary Keys"
     },
     "silver_table": {
       "minLength": 1,
@@ -1797,7 +1820,7 @@
     "pipeline_name",
     "provider",
     "entity_type",
-    "primary_keys",
+    "business_primary_keys",
     "silver_table"
   ],
   "title": "PipelineYamlConfig",

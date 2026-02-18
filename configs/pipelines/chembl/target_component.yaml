@@ -9,7 +9,8 @@ entity_type: target_component
 version: "1.2.0"
 description: "ChEMBL Target Components (protein sequences, etc.)"
 
-primary_keys: ["component_id"]
+business_primary_keys: ["component_id"]
+technical_primary_key: "entity_id"
 silver_table: chembl_target_component
 gold_table: chembl_target_component
 
