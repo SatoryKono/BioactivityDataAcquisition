@@ -688,6 +688,30 @@ class TestExtractExternalIds:
         result = extract_external_ids({})
         assert result == {"pmid": None, "pmmolecule_id": None, "mag_id": None}
 
+    def test_extract_external_ids_pmid_leading_zeros(self) -> None:
+        """Should strip leading zeros from PMID via PubMedId normalization."""
+        ids = {"pmid": "0012345"}
+        result = extract_external_ids(ids)
+        assert result["pmid"] == "12345"
+
+    def test_extract_external_ids_pmid_leading_zeros_url(self) -> None:
+        """Should strip leading zeros from PMID extracted from URL."""
+        ids = {"pmid": "https://pubmed.ncbi.nlm.nih.gov/0012345"}
+        result = extract_external_ids(ids)
+        assert result["pmid"] == "12345"
+
+    def test_extract_external_ids_pmid_exceeds_upper_bound(self) -> None:
+        """Should return None for PMID exceeding 10^10 upper bound."""
+        ids = {"pmid": "10000000000"}
+        result = extract_external_ids(ids)
+        assert result["pmid"] is None
+
+    def test_extract_external_ids_pmid_zero(self) -> None:
+        """Should return None for zero PMID."""
+        ids = {"pmid": "0"}
+        result = extract_external_ids(ids)
+        assert result["pmid"] is None
+
 
 class TestExtractMeshTerms:
     """Tests for extract_mesh_terms function."""
