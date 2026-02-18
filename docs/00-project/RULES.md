@@ -51,7 +51,7 @@
 
 ### 1.1. Слои и Контракты
 
-См. также [ADR-005](02-architecture/decisions/ADR-005-composition-layer-separation.md) для Composition Layer, [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md) для BasePipeline, [ADR-021](02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) для DDD Aggregates и [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для Composite Pipeline.
+См. также [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md) для Composition Layer, [ADR-020](../02-architecture/decisions/ADR-020-basepipeline-decomposition.md) для BasePipeline, [ADR-021](../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md) для DDD Aggregates и [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для Composite Pipeline.
 
 - **Infrastructure (Инфраструктура/Адаптеры)**: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система).
 - **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты.
@@ -124,7 +124,7 @@ class MyAdapter:
 
 Пайплайны реализуются как направленные ациклические графы (**DAG**).
 
-См. [ADR-002](02-architecture/decisions/ADR-002-medallion-architecture.md).
+См. [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md).
 
 ### 2.1. Архитектура Medallion
 
@@ -190,7 +190,7 @@ sink:
 
 ### 2.1.3. Инфраструктура Delta Lake
 
-См. [ADR-001](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md).
+См. [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md).
 
 - **Engine**: Использовать `delta-rs` (Rust core) для Python-воркеров для производительности.
 - **Protocol**: Writer Version 2 (поддержка Column Mapping), Reader Version 1.
@@ -234,7 +234,7 @@ Lock key включает тип запуска:
 
 #### 2.4.2. Medallion Clear Policy by Run Type
 
-См. [ADR-012](02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) и [ADR-013](02-architecture/decisions/ADR-013-async-storage-cleanup.md).
+См. [ADR-012](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) и [ADR-013](../02-architecture/decisions/ADR-013-async-storage-cleanup.md).
 
 | Run Type      | Clear Silver | Clear Gold  | Rationale                       |
 | ------------- | ------------ | ----------- | ------------------------------- |
@@ -362,11 +362,11 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 **Совместимость и миграция:**
 
-- **MAY (временно)**: legacy native list/object в существующих таблицах до завершения миграции по [ADR-035](02-architecture/decisions/ADR-035-json-field-typing-policy.md).
+- **MAY (временно)**: legacy native list/object в существующих таблицах до завершения миграции по [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md).
 - Для breaking-изменений типов применяется окно совместимости 14 дней с dual-read (старый + новый формат).
 - После окна совместимости выполняется Delta backfill и удаление legacy-формата из контрактов.
-- Полный реестр JSON-like полей и расхождений типов: [ADR-035](02-architecture/decisions/ADR-035-json-field-typing-policy.md) (Appendix A).
-- Согласование strict validation: [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md).
+- Полный реестр JSON-like полей и расхождений типов: [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md) (Appendix A).
+- Согласование strict validation: [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md).
 
 #### Жизненный цикл Карантина
 
@@ -404,7 +404,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 ### 2.8. Генерация ID Сущности (Entity ID)
 
-См. [ADR-023](02-architecture/decisions/ADR-023-entity-type-patterns.md) и [ADR-024](02-architecture/decisions/ADR-024-entity-naming-unification.md) для паттернов типов и именования сущностей.
+См. [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md) и [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md) для паттернов типов и именования сущностей.
 
 | Сценарий                             | Стратегия ID                                                        |
 | ------------------------------------ | ------------------------------------------------------------------- |
@@ -430,7 +430,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 ### 2.9. Composite Pipelines
 
-См. [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для архитектуры композитных пайплайнов.
+См. [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) для архитектуры композитных пайплайнов.
 
 Composite Pipeline объединяет данные из нескольких источников в единую обогащённую сущность:
 
@@ -635,7 +635,7 @@ _run_id → _run_id → pipeline_run_id
 
 ### 3.1. Стратегия Обработки Ошибок
 
-См. [ADR-016](02-architecture/decisions/ADR-016-error-handling-strategy.md).
+См. [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md).
 
 Вместо тотального подхода "Fail Fast" используем дифференцированный подход.
 
@@ -660,11 +660,11 @@ _run_id → _run_id → pipeline_run_id
 - **Max Attempts**: 3
 - **Multiplier**: 2.0 (wait 1s, 2s, 4s...)
 - **Jitter**: Random(0.1s, 0.5s). Jitter **SHOULD** применяться для избежания thundering herd.
-- **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться через hash вместо random для воспроизводимости. См. [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md).
+- **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться через hash вместо random для воспроизводимости. См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md).
 
 ### 3.1.4. Circuit Breaker (Размыкатель цепи)
 
-Паттерн защиты от каскадных сбоев. См. [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
+Паттерн защиты от каскадных сбоев. См. [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md).
 
 - **Trigger**: 5 последовательных ошибок соединения/таймаута.
 - **Open Duration**: 5 минут (configurable: `circuit_breaker.recovery_timeout`).
@@ -673,7 +673,7 @@ _run_id → _run_id → pipeline_run_id
 
 ### 3.2. Наблюдаемость (Observability)
 
-См. [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md) и [ADR-022](02-architecture/decisions/ADR-022-tracing-noop.md) для NoOp Tracing.
+См. [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md) и [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md) для NoOp Tracing.
 
 - **TracingPort = OTel facade**: `TracingPort` сознательно моделирует OpenTelemetry Tracing API (`get_tracer → start_as_current_span → Span`). Это обеспечивает единый calling convention для NoOp и реального OTel бэкенда. См. ADR-022.
 - **Correlation ID**: `run_id` обязателен во всех логах, метриках и блокировках.
@@ -720,7 +720,7 @@ _run_id → _run_id → pipeline_run_id
 ### 3.3. Конкурентность и Блокировки
 
 > **CRITICAL: Local-Only Deployment & Redis Lock REJECTION**
-> См. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)
+> См. [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)
 
 #### Strict Single Instance Policy (Local-Only)
 
@@ -741,7 +741,7 @@ _run_id → _run_id → pipeline_run_id
 
 #### Распределённое развёртывание (REJECTED)
 
-> **Status: REJECTED** — см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)
+> **Status: REJECTED** — см. [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)
 
 **ОТКАЗ ОТ REDIS LOCK**: Использование `RedisLockAdapter` и распределенных блокировок **ЗАПРЕЩЕНО**.
 Архитектура проекта строго ограничена Local-Only Deployment. Любые попытки внедрить распределенные блокировки
@@ -792,7 +792,7 @@ _run_id → _run_id → pipeline_run_id
 
 ### 4.1. Стек и Матрица Решений
 
-См. также [ADR-004](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) для решения Pydantic vs Dataclasses.
+См. также [ADR-004](../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md) для решения Pydantic vs Dataclasses.
 
 | Задача          | Инструмент                        | Альтернатива       | Критерий выбора                                                                                                                                                                                        |
 | --------------- | --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -815,7 +815,7 @@ _run_id → _run_id → pipeline_run_id
 **Компоненты `UnifiedHTTPClient`:**
 
 - **Rate Limiter** (`TokenBucket`): Ограничение частоты запросов по провайдеру
-- **Circuit Breaker**: Защита от каскадных отказов (см. [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
+- **Circuit Breaker**: Защита от каскадных отказов (см. [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 - **Retry Logic**: Exponential backoff с configurable jitter
 - **Metrics Integration**: Автоматический сбор метрик через `MetricsPort`
 
@@ -910,7 +910,7 @@ pip install -e ".[tests]"
 
 ### 4.3. Детерминизм и Воспроизводимость
 
-См. [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md).
+См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md).
 
 #### MUST (Обязательно)
 
@@ -1015,7 +1015,7 @@ from __future__ import annotations
 
 ### 5.3. Graceful Shutdown (Штатное завершение)
 
-См. [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
+См. [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md).
 При получении SIGTERM/SIGINT:
 
 1. Прекратить извлечение (fetch) новых записей.
@@ -1039,7 +1039,7 @@ from __future__ import annotations
 
 ### 5.3.2. Async Resource Cleanup
 
-См. [ADR-013](02-architecture/decisions/ADR-013-async-storage-cleanup.md) и [ADR-015](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md).
+См. [ADR-013](../02-architecture/decisions/ADR-013-async-storage-cleanup.md) и [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md).
 
 **Контракт `aclose()`:**
 Все адаптеры и сервисы **MUST** реализовывать асинхронный метод `aclose()` для освобождения ресурсов:
@@ -1100,7 +1100,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 ### 5.6. Среды (Environments)
 
-- **Dev**: Локальная разработка (Local-Only, см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)). Данные: фикстуры или сэмпл Bronze.
+- **Dev**: Локальная разработка (Local-Only, см. [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)). Данные: фикстуры или сэмпл Bronze.
 - **Staging**: Полная копия архитектуры. Данные: Prod-like (обфусцированные). Тест деплоя.
 - **Prod**: Боевая среда. Доступ на запись только у CI/CD.
 
@@ -1108,7 +1108,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 Изоляция ресурсов для предотвращения "Cross-Env Pollution".
 
-> **Note**: Текущая архитектура — Local-Only (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)).
+> **Note**: Текущая архитектура — Local-Only (см. [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)).
 > Нижеследующие примеры относятся к будущему распределённому развёртыванию.
 
 - **Storage**: Разные директории или бакеты (`data/dev`, `data/staging`, `data/prod` или `bioetl-dev`, `bioetl-staging`, `bioetl-prod`).
@@ -1121,7 +1121,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 
 ## 6.1. Детерминизм и Воспроизводимость
 
-> См. [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md) для полного обоснования.
+> См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) для полного обоснования.
 
 **Детерминизм** — это гарантия того, что при одинаковых входных данных (source data, config) пайплайн всегда произведет идентичные выходные данные и побочные эффекты.
 
@@ -1395,7 +1395,7 @@ make run-local    # запуск сэмплового пайплайна на ф
 
 ### 9.2. Окружение
 
-> **Note: Local-Only Deployment** (см. [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md))
+> **Note: Local-Only Deployment** (см. [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md))
 
 **Текущая реализация (Local-Only):**
 
@@ -1506,7 +1506,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 
 ## Приложение D: Схема Конфигурации Пайплайна
 
-См. [ADR-025](02-architecture/decisions/ADR-025-pipeline-config-unification.md) для унификации конфигурации, [ADR-027](02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
+См. [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) для унификации конфигурации, [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
@@ -1600,41 +1600,42 @@ fields:
 
 | ADR                                                                               | Название                                 | Статус             | Дата       |
 | --------------------------------------------------------------------------------- | ---------------------------------------- | ------------------ | ---------- |
-| [ADR-001](02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)             | Delta Lake vs Parquet                    | Accepted           | 2025-05    |
-| [ADR-002](02-architecture/decisions/ADR-002-medallion-architecture.md)            | Medallion Architecture                   | Accepted           | 2025-05    |
-| [ADR-003](02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)        | In-Memory Locking (MemoryLock)           | Accepted (Revised) | 2025-12    |
-| [ADR-004](02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)           | Pydantic vs Dataclasses                  | Accepted           | 2025-05    |
-| [ADR-005](02-architecture/decisions/ADR-005-composition-layer-separation.md)      | Composition Layer Separation             | Accepted           | 2025-12    |
-| [ADR-006](02-architecture/decisions/ADR-006-logger-metrics-ports.md)              | Logger and Metrics Ports                 | Accepted           | 2025-12-18 |
-| [ADR-007](02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)    | Circuit Breaker Implementation           | Accepted           | 2025-12-22 |
-| [ADR-008](02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy               | Accepted           | 2025-12-22 |
-| [ADR-009](02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)           | PaginatedFetcherMixin Design             | Accepted           | 2025-12-22 |
-| [ADR-010](02-architecture/decisions/ADR-010-local-only-deployment.md)             | Local-Only Deployment                    | Accepted           | 2025-12-23 |
-| [ADR-011](02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)        | Remove Watermark Mechanism               | Accepted           | 2025-12-23 |
-| [ADR-012](02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage Clear Contract and Run ID        | Accepted           | 2025-12-23 |
-| [ADR-013](02-architecture/decisions/ADR-013-async-storage-cleanup.md)             | Async Storage Cleanup                    | Accepted           | 2025-12-24 |
-| [ADR-014](02-architecture/decisions/ADR-014-deterministic-writes.md)              | Deterministic Writes and Retries         | Accepted           | 2025-12-24 |
-| [ADR-015](02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)       | Pipeline Services Lifecycle              | Accepted           | 2025-12-24 |
-| [ADR-016](02-architecture/decisions/ADR-016-error-handling-strategy.md)           | Error Handling Strategy                  | Accepted           | 2025-12-26 |
-| [ADR-017](02-architecture/decisions/ADR-017-observability-architecture.md)        | Observability Architecture               | Accepted           | 2025-12-26 |
-| [ADR-018](02-architecture/decisions/ADR-018-gold-strict-validation.md)            | Gold Strict Validation                   | Accepted           | 2025-12-28 |
-| [ADR-035](02-architecture/decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)   | Accepted           | 2026-02-17 |
-| [ADR-019](02-architecture/decisions/ADR-019-observability-port-enforcement.md)    | Observability Port Enforcement           | Accepted           | 2025-12-26 |
-| [ADR-020](02-architecture/decisions/ADR-020-basepipeline-decomposition.md)        | BasePipeline Decomposition               | Accepted           | 2025-12-16 |
-| [ADR-021](02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md)           | DDD Aggregates Adoption                  | Accepted           | 2025-12-29 |
-| [ADR-022](02-architecture/decisions/ADR-022-tracing-noop.md)                      | NoOp Tracing for Local-Only              | Accepted           | 2025-12-30 |
-| [ADR-023](02-architecture/decisions/ADR-023-entity-type-patterns.md)              | Entity Type Patterns                     | Accepted           | 2026-01-06 |
-| [ADR-024](02-architecture/decisions/ADR-024-entity-naming-unification.md)         | Entity Naming Unification                | Accepted           | 2026-01-06 |
-| [ADR-025](02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification              | Accepted           | 2026-01-19 |
-| [ADR-026](02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline Pattern               | Accepted           | 2026-01-15 |
-| [ADR-027](02-architecture/decisions/ADR-027-dq-rules-externalization.md)          | DQ Rules Externalization                 | Accepted           | 2026-01-19 |
-| [ADR-028](02-architecture/decisions/ADR-028-filter-rules-externalization.md)      | Filter Rules Externalization             | Accepted           | 2026-01-20 |
-| [ADR-029](02-architecture/decisions/ADR-029-output-metadata-unification.md)       | Output Metadata Unification              | Accepted           | 2026-01-23 |
-| [ADR-030](02-architecture/decisions/ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy          | Accepted           | 2026-01-26 |
-| [ADR-031](02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization           | Accepted           | 2026-01-26 |
-| [ADR-032](02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | Accepted           | 2026-01-28 |
-| [ADR-033](02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Proposed           | 2026-02-06 |
-| [ADR-034](02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
+| [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)             | Delta Lake vs Parquet                    | Accepted           | 2025-05    |
+| [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md)            | Medallion Architecture                   | Accepted           | 2025-05    |
+| [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)        | In-Memory Locking (MemoryLock)           | Accepted (Revised) | 2025-12    |
+| [ADR-004](../02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md)           | Pydantic vs Dataclasses                  | Accepted           | 2025-05    |
+| [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md)      | Composition Layer Separation             | Accepted           | 2025-12    |
+| [ADR-006](../02-architecture/decisions/ADR-006-logger-metrics-ports.md)              | Logger and Metrics Ports                 | Accepted           | 2025-12-18 |
+| [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)    | Circuit Breaker Implementation           | Accepted           | 2025-12-22 |
+| [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy               | Accepted           | 2025-12-22 |
+| [ADR-009](../02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)           | PaginatedFetcherMixin Design             | Accepted           | 2025-12-22 |
+| [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)             | Local-Only Deployment                    | Accepted           | 2025-12-23 |
+| [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)        | Remove Watermark Mechanism               | Accepted           | 2025-12-23 |
+| [ADR-012](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage Clear Contract and Run ID        | Accepted           | 2025-12-23 |
+| [ADR-013](../02-architecture/decisions/ADR-013-async-storage-cleanup.md)             | Async Storage Cleanup                    | Accepted           | 2025-12-24 |
+| [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md)              | Deterministic Writes and Retries         | Accepted           | 2025-12-24 |
+| [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)       | Pipeline Services Lifecycle              | Accepted           | 2025-12-24 |
+| [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)           | Error Handling Strategy                  | Accepted           | 2025-12-26 |
+| [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md)        | Observability Architecture               | Accepted           | 2025-12-26 |
+| [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md)            | Gold Strict Validation                   | Accepted           | 2025-12-28 |
+| [ADR-019](../02-architecture/decisions/ADR-019-observability-port-enforcement.md)    | Observability Port Enforcement           | Accepted           | 2025-12-26 |
+| [ADR-020](../02-architecture/decisions/ADR-020-basepipeline-decomposition.md)        | BasePipeline Decomposition               | Accepted           | 2025-12-16 |
+| [ADR-021](../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md)           | DDD Aggregates Adoption                  | Accepted           | 2025-12-29 |
+| [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md)                      | NoOp Tracing for Local-Only              | Accepted           | 2025-12-30 |
+| [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md)              | Entity Type Patterns                     | Accepted           | 2026-01-06 |
+| [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md)         | Entity Naming Unification                | Accepted           | 2026-01-06 |
+| [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification              | Accepted           | 2026-01-19 |
+| [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline Pattern               | Accepted           | 2026-01-15 |
+| [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)          | DQ Rules Externalization                 | Accepted           | 2026-01-19 |
+| [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)      | Filter Rules Externalization             | Accepted           | 2026-01-20 |
+| [ADR-029](../02-architecture/decisions/ADR-029-output-metadata-unification.md)       | Output Metadata Unification              | Accepted           | 2026-01-23 |
+| [ADR-030](../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy          | Accepted           | 2026-01-26 |
+| [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization           | Accepted           | 2026-01-26 |
+| [ADR-032](../02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | Accepted           | 2026-01-28 |
+| [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Proposed           | 2026-02-06 |
+| [ADR-034](../02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
+| [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)   | Accepted           | 2026-02-17 |
+| [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy           | Accepted           | 2026-02-18 |
 
 ## История Изменений (Changelog)
 

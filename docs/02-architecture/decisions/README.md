@@ -234,6 +234,6 @@ ADR files follow the pattern: `ADR-NNN-kebab-case-title.md`
 
 ## References
 
-- [RULES.md](../../RULES.md) — Project rules referencing these ADRs
-- [CLAUDE.md](../../../CLAUDE.md) — Developer guide with ADR context
+- [RULES.md](../../00-project/RULES.md) — Project rules referencing these ADRs
+- [CLAUDE.md](../../00-project/agents/CLAUDE.md) — Developer guide with ADR context
 - [Michael Nygard's ADR format](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)
